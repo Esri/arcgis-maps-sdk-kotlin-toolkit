@@ -4,7 +4,8 @@
 ## Toolkit Components
 
 ## Requirements
-* ArcGIS Maps SDK for Kotlin
+* ArcGIS Maps SDK for Kotlin    
+       
 See [this guide](https://developers.arcgis.com/kotlin/install-and-set-up/) for complete instructions and
 other options for installing the SDK.
 
