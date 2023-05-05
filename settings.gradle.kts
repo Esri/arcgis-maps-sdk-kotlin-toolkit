@@ -14,5 +14,7 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "arcgis-maps-sdk-kotlin-toolkit"
-include(":authentication")
+include(
+    "toolkit:template",
+    "microapps:template"
+)
