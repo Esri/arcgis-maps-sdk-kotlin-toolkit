@@ -15,6 +15,9 @@ dependencyResolutionManagement {
     }
 }
 include(
-    "toolkit:template",
-    "microapps:template"
+    ":template",
+    ":template-app"
 )
+
+project(":template").projectDir = File(rootDir, "toolkit/template")
+project(":template-app").projectDir = File(rootDir, "microapps/TemplateApp/app")

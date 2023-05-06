@@ -1,23 +1,29 @@
 plugins {
-    id("com.android.library")
+    id("com.android.application")
     id("org.jetbrains.kotlin.android")
 }
 
 android {
-    namespace = "com.arcgismaps.toolkit.template"
+    namespace = "com.arcgismaps.toolkit.templateapp"
     compileSdk = 33
 
     defaultConfig {
-        minSdk = 26
+        applicationId ="com.arcgismaps.toolkit.templateapp"
+        minSdk = 27
+        targetSdk = 33
+        versionCode = 1
+        versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
+        testInstrumentationRunner ="androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary = true
+        }
     }
 
     buildTypes {
         release {
-            @Suppress("UnstableApiUsage")
             isMinifyEnabled = false
+            //proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"),("proguard-rules.pro"
         }
     }
     compileOptions {
@@ -25,7 +31,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = "1.8"
     }
     buildFeatures {
         compose = true
@@ -33,9 +39,15 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.3.2"
     }
+    packagingOptions {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
 }
 
 dependencies {
+    implementation(project(":template"))
     implementation("androidx.core:core-ktx:1.8.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.3.1")
     implementation("androidx.activity:activity-compose:1.5.1")
