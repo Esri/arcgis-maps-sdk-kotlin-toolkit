@@ -1,4 +1,4 @@
-package com.arcgismaps.toolkit.authentication
+package com.arcgismaps.toolkit.template
 
 import org.junit.Test
 
