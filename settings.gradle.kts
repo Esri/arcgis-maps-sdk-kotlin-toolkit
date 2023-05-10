@@ -20,6 +20,7 @@ dependencyResolutionManagement {
         }
     }
 }
+
 include(
     ":template",
     ":template-app",

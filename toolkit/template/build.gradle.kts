@@ -65,7 +65,6 @@ dependencies {
     debugImplementation(libs.bundles.debug)
 }
 
-
 afterEvaluate {
     
     /**
