@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "com.arcgismaps.toolkit.templateapp"
-    compileSdk = 33
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
         applicationId ="com.arcgismaps.toolkit.templateapp"
-        minSdk = 27
-        targetSdk = 33
+        minSdk = libs.versions.minSdk.get().toInt()
+        targetSdk = libs.versions.compileSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
 
@@ -38,7 +38,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.3.2"
+        kotlinCompilerExtensionVersion = libs.versions.androidxComposeCompiler.get()
     }
     packaging {
         resources {
@@ -49,19 +49,11 @@ android {
 
 dependencies {
     implementation(project(":template"))
-    implementation("androidx.core:core-ktx:1.8.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.3.1")
-    implementation("androidx.activity:activity-compose:1.5.1")
-    implementation (platform("androidx.compose:compose-bom:2022.10.00"))
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2022.10.00"))
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    implementation(libs.bundles.composeCore)
+    implementation(libs.bundles.core)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.activity.compose)
+    testImplementation(libs.bundles.unitTest)
+    androidTestImplementation(libs.bundles.composeTest)
+    debugImplementation(libs.bundles.debug)
 }

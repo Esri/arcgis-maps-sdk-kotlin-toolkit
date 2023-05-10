@@ -3,6 +3,7 @@ pluginManagement {
         gradlePluginPortal()
         google()
         mavenCentral()
+        
     }
 }
 dependencyResolutionManagement {
@@ -12,6 +13,11 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven {
+            url = java.net.URI(
+                "https://olympus.esri.com/artifactory/arcgisruntime-repo/"
+            )
+        }
     }
 }
 include(
