@@ -17,7 +17,7 @@ val artifactVersion: String = "xx.xx"
 dependencies {
      constraints {
           project.rootProject.subprojects.forEach {subproject ->
-               if (!subproject.name.endsWith("-app") && subproject.name != "bom") {
+               if (!subproject.name.endsWith("-app") && subproject.name != "composable-map" && subproject.name != "bom") {
                     // add all the library projects as api dependencies.
                     api(subproject)
                }

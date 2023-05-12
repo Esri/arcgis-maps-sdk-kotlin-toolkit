@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
 android {
@@ -36,7 +37,9 @@ android {
     @Suppress("UnstableApiUsage")
     buildFeatures {
         compose = true
+        buildConfig = true
     }
+
     composeOptions {
         kotlinCompilerExtensionVersion = libs.versions.androidxComposeCompiler.get()
     }
@@ -49,6 +52,8 @@ android {
 
 dependencies {
     implementation(project(":template"))
+    implementation(project(":composable-map"))
+    implementation(libs.arcgis)
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)
