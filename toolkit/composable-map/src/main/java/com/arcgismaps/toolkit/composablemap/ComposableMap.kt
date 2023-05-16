@@ -29,9 +29,7 @@ public fun ArcGISMap(
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    val mapView = remember {
-        MapView(context)
-    }
+    val mapView = MapView(context)
 
     DisposableEffect(lifecycleOwner) {
         lifecycleOwner.lifecycle.addObserver(mapView)
