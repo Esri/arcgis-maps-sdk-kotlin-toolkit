@@ -14,7 +14,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.lifecycle.coroutineScope
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.Viewpoint
@@ -25,13 +24,13 @@ import kotlinx.coroutines.launch
 public fun ArcGISMap(
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap,
-    viewpoint: Viewpoint,
+    initialViewPoint: Viewpoint?,
     insets: MapInsets = MapInsets(),
     onSingleTap: (mapPoint: Point?) -> Unit = {},
     content: @Composable () -> Unit = {}
 ) {
     val context = LocalContext.current
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    val lifecycleOwner = LocalLifecycleOwner.current
     val mapView = remember {
         MapView(context)
     }
@@ -39,10 +38,10 @@ public fun ArcGISMap(
         mutableStateOf(insets)
     }
 
-    DisposableEffect(key1 = context, key2 = lifecycle, key3 = mapView) {
-        lifecycle.addObserver(mapView)
+    DisposableEffect(lifecycleOwner) {
+        lifecycleOwner.lifecycle.addObserver(mapView)
         onDispose {
-            lifecycle.removeObserver(mapView)
+            lifecycleOwner.lifecycle.removeObserver(mapView)
         }
     }
 
@@ -58,24 +57,25 @@ public fun ArcGISMap(
                 )
             })
         Box(modifier = Modifier
-                .fillMaxSize()
-                .padding(start = mapSafeAreaPadding.start.dp,
-                    end = mapSafeAreaPadding.end.dp,
-                    top = mapSafeAreaPadding.top.dp,
-                    bottom = mapSafeAreaPadding.bottom.dp
-                )
+            .fillMaxSize()
+            .padding(
+                start = mapSafeAreaPadding.start.dp,
+                end = mapSafeAreaPadding.end.dp,
+                top = mapSafeAreaPadding.top.dp,
+                bottom = mapSafeAreaPadding.bottom.dp
+            )
         ) {
             content()
         }
     }
 
-    LaunchedEffect(true) {
-        lifecycle.coroutineScope.launch {
-            mapView.setViewpointAnimated(viewpoint)
-            launch {
-                mapView.onSingleTapConfirmed.collect {
-                    onSingleTap(it.mapPoint)
-                }
+    LaunchedEffect(Unit) {
+        launch {
+            initialViewPoint?.let {
+                mapView.setViewpointAnimated(it)
+            }
+            mapView.onSingleTapConfirmed.collect {
+                onSingleTap(it.mapPoint)
             }
         }
     }

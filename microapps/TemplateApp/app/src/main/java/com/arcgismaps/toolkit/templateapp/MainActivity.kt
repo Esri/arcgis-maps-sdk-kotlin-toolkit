@@ -39,7 +39,7 @@ fun App() {
     val viewpoint = Viewpoint(39.8, -98.6, 10e7)
     ArcGISMap(
         arcGISMap = map,
-        viewpoint = viewpoint,
+        initialViewPoint = viewpoint,
         modifier = Modifier.fillMaxSize()
     )
 }
