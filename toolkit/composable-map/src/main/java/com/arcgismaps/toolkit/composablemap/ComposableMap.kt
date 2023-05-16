@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -34,9 +32,6 @@ public fun ArcGISMap(
     val mapView = remember {
         MapView(context)
     }
-    val mapSafeAreaPadding by remember {
-        mutableStateOf(insets)
-    }
 
     DisposableEffect(lifecycleOwner) {
         lifecycleOwner.lifecycle.addObserver(mapView)
@@ -50,19 +45,20 @@ public fun ArcGISMap(
             factory = { mapView },
             update = {
                 it.map = arcGISMap
-                it.setViewInsets(left = mapSafeAreaPadding.start,
-                    right = mapSafeAreaPadding.end,
-                    top = mapSafeAreaPadding.top,
-                    bottom = mapSafeAreaPadding.bottom
+                it.setViewInsets(
+                    left = insets.start,
+                    right = insets.end,
+                    top = insets.top,
+                    bottom = insets.bottom
                 )
             })
         Box(modifier = Modifier
             .fillMaxSize()
             .padding(
-                start = mapSafeAreaPadding.start.dp,
-                end = mapSafeAreaPadding.end.dp,
-                top = mapSafeAreaPadding.top.dp,
-                bottom = mapSafeAreaPadding.bottom.dp
+                start = insets.start.dp,
+                end = insets.end.dp,
+                top = insets.top.dp,
+                bottom = insets.bottom.dp
             )
         ) {
             content()
