@@ -35,6 +35,7 @@
     function copyTemplate {
 	pushd toolkit > /dev/null
 	if [ -d "${componentName}" ]; then
+	    echo toolkit/${componentName} directory already exists
 	    exit -1
 	else
 	    cp -R template "$componentName"	    
@@ -44,9 +45,13 @@
 
     function convertTemplate {
 	pushd toolkit > /dev/null
-	find "${componentName}" -type d -exec rename -s template $componentName {} \; > /dev/null 2>&1	
+	# replace the string "template" in any directory names
+	find "${componentName}" -type d -exec rename -s template $componentName {} \; > /dev/null 2>&1
+	# replace the string "Template" in any file names
 	find "${componentName}" -type f -exec rename -s Template $composableFunctionName {} \; > /dev/null 2>&1
+	# replace the string "template" in the contents of any file
 	find "${componentName}" -type f -exec perl -i -pe s/template/$componentName/ {} \; > /dev/null 2>&1
+	# replace the string "Template" in the contents of any file	
 	find "${componentName}" -type f -exec perl -i -pe s/Template/$composableFunctionName/ {} \; > /dev/null 2>&1	
 	
 	popd > /dev/null
@@ -55,6 +60,7 @@
     function copyTemplateApp {
 	pushd microapps > /dev/null
 	if [ -d "${appDirName}" ]; then
+	    echo microapps/${appDirName} directory already exists	    
 	    exit -1
 	else
 	    cp -R TemplateApp "${appDirName}"	    
@@ -64,14 +70,20 @@
 
     function convertTemplateApp {
 	pushd microapps > /dev/null
-	find "${appDirName}" -type d -exec rename -s template $componentName {} \; > /dev/null 2>&1	
+	# replace the string "template" in any directory names	
+	find "${appDirName}" -type d -exec rename -s template $componentName {} \; > /dev/null 2>&1
+	# replace the string "Template" in any file names	
 	find "${appDirName}" -type f -exec rename -s Template $composableFunctionName {} \; > /dev/null 2>&1
+	# replace the string "template" in the contents of any file	
 	find "${appDirName}" -type f -exec perl -i -pe s/template/$componentName/ {} \; > /dev/null 2>&1
+	# replace the string "Template" in the contents of any file		
 	find "${appDirName}" -type f -exec perl -i -pe s/Template/$composableFunctionName/ {} \; > /dev/null 2>&1	
 	
 	popd > /dev/null
     }    
 
+    # appends a new project to the list of projects in settings.gradle.kts.
+    # this is additive, and will add the same name each time it is run.
     function updateSettings {
 	perl -i -pe "s/val projects = listOf\(([a-z\", ]+)\"\)/val projects = listOf\(\1\", \"$componentName\"\)/g" settings.gradle.kts 
     }
