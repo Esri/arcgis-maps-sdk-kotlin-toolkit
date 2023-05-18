@@ -1,16 +1,13 @@
 #!/usr/bin/env bash
 {
-    source ${HOME}/git/devtopia/runtimecore/runtimecore_scripts/scripts/platform_helper.sh
-
     # Helper functions to use
     function _display_help_dialog {
 	echo "================================================================================"
-	echo "Usage: generate.sh [OPTION] ..."
-	echo " Must use forward slash / for path separation."
+	echo "Usage: new-component-starter.sh -n component-name"
 	echo
-	echo "Description: generates java and optionally copies files to their location in the java monorepo"
+	echo "Description: generates a new toolkit component and microapp with the given name"
 	echo " -n     the name of the new toolkit component"
-	echo " ./script.sh -n FloorFilter"
+	echo " ./new-component-starter.sh -n FloorFilter"
 	echo "================================================================================"
 	exit 0
     }
@@ -36,43 +33,43 @@
     }
 
     function copyTemplate {
-	pushd toolkit
+	pushd toolkit > /dev/null
 	if [ -d "${componentName}" ]; then
 	    exit -1
 	else
 	    cp -R template "$componentName"	    
 	fi
-	popd
+	popd > /dev/null
     }
 
     function convertTemplate {
-	pushd toolkit
-	find "${componentName}" -type d -exec rename -s template $componentName {} \;	
-	find "${componentName}" -type f -exec rename -s Template $composableFunctionName {} \;
-	find "${componentName}" -type f -exec perl -i -pe s/template/$componentName/ {} \;
-	find "${componentName}" -type f -exec perl -i -pe s/Template/$composableFunctionName/ {} \;	
+	pushd toolkit > /dev/null
+	find "${componentName}" -type d -exec rename -s template $componentName {} \; > /dev/null 2>&1	
+	find "${componentName}" -type f -exec rename -s Template $composableFunctionName {} \; > /dev/null 2>&1
+	find "${componentName}" -type f -exec perl -i -pe s/template/$componentName/ {} \; > /dev/null 2>&1
+	find "${componentName}" -type f -exec perl -i -pe s/Template/$composableFunctionName/ {} \; > /dev/null 2>&1	
 	
-	popd
+	popd > /dev/null
     }
 
     function copyTemplateApp {
-	pushd microapps
+	pushd microapps > /dev/null
 	if [ -d "${appDirName}" ]; then
 	    exit -1
 	else
 	    cp -R TemplateApp "${appDirName}"	    
 	fi
-	popd
+	popd > /dev/null
     }
 
     function convertTemplateApp {
-	pushd microapps
-	find "${appDirName}" -type d -exec rename -s template $componentName {} \;	
-	find "${appDirName}" -type f -exec rename -s Template $composableFunctionName {} \;
-	find "${appDirName}" -type f -exec perl -i -pe s/template/$componentName/ {} \;
-	find "${appDirName}" -type f -exec perl -i -pe s/Template/$composableFunctionName/ {} \;	
+	pushd microapps > /dev/null
+	find "${appDirName}" -type d -exec rename -s template $componentName {} \; > /dev/null 2>&1	
+	find "${appDirName}" -type f -exec rename -s Template $composableFunctionName {} \; > /dev/null 2>&1
+	find "${appDirName}" -type f -exec perl -i -pe s/template/$componentName/ {} \; > /dev/null 2>&1
+	find "${appDirName}" -type f -exec perl -i -pe s/Template/$composableFunctionName/ {} \; > /dev/null 2>&1	
 	
-	popd
+	popd > /dev/null
     }    
 
     function updateSettings {
@@ -108,8 +105,9 @@
     fi
 
     _check_options_and_set_variables
+    echo copying and converting files, estimated time 1 minute.
     cd "${toolkitDir}"
-    rm -rf "./toolkit/template/build" > /dev/null
+    rm -rf "./toolkit/template/build" > /dev/null 2>&1
     copyTemplate
     convertTemplate
     copyTemplateApp
