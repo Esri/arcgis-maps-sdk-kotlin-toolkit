@@ -9,7 +9,11 @@
 	echo " -n     the name of the new toolkit component"
 	echo " ./new-component-starter.sh -n FloorFilter"
 	echo "================================================================================"
-	exit 0
+	if [ -z $1 ]; then
+	    exit 0
+	else
+	    exit $1
+	fi
     }
 
     toolkitDir="$(dirname ${BASH_SOURCE})"
@@ -23,8 +27,8 @@
 
     function _check_options_and_set_variables {
 	if [ -z "${name}" ]; then
-	    echo "error: runtimecore tag must be specified at the command line with -t"
-	    exit 1
+	    echo "error: the name of the new toolkit component must be specified at the command line"
+	    _display_help_dialog 1
 	fi
 
 	componentName="${name,,}"
