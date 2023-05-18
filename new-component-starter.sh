@@ -6,7 +6,8 @@
 	echo "Usage: new-component-starter.sh -n component-name"
 	echo
 	echo "Description: generates a new toolkit component and microapp with the given name"
-	echo " -n     the name of the new toolkit component"
+	echo " -n <name> the name of the new toolkit component"
+	echo " -h        this help message"	
 	echo " ./new-component-starter.sh -n FloorFilter"
 	echo "================================================================================"
 	if [ -z $1 ]; then
