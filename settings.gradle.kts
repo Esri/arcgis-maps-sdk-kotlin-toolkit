@@ -1,3 +1,7 @@
+import org.gradle.configurationcache.extensions.capitalized
+
+val projects = listOf("template")
+
 pluginManagement {
     repositories {
         gradlePluginPortal()
@@ -21,12 +25,13 @@ dependencyResolutionManagement {
     }
 }
 
-include(
-    ":template",
-    ":template-app",
-    ":bom"
-)
+var includedProjects = projects.flatMap { listOf(":$it", ":$it-app") }.toTypedArray()
+include(*includedProjects)
+include (":bom")
 
-project(":template").projectDir = File(rootDir, "toolkit/template")
-project(":template-app").projectDir = File(rootDir, "microapps/TemplateApp/app")
+projects.forEach {
+    project(":$it").projectDir = File(rootDir, "toolkit/$it")
+    project(":$it-app").projectDir = File(rootDir, "microapps/${it.capitalized()}App/app")
+}
+
 project(":bom").projectDir = File(rootDir, "bom")
