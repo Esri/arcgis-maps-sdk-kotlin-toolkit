@@ -23,10 +23,12 @@ dependencyResolutionManagement {
 
 include(
     ":template",
+    ":composable-map",
     ":template-app",
     ":bom"
 )
 
 project(":template").projectDir = File(rootDir, "toolkit/template")
+project(":composable-map").projectDir = File(rootDir, "toolkit/composable-map")
 project(":template-app").projectDir = File(rootDir, "microapps/TemplateApp/app")
 project(":bom").projectDir = File(rootDir, "bom")
