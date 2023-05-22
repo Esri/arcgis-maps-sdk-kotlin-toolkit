@@ -27,6 +27,11 @@
     appDirName=
 
     function _check_options_and_set_variables {
+	if [ "${BASH_VERSINFO}" -lt "4" ]; then
+	    echo "error: BASH 4.0 required, please run homebrew update bash"
+	    exit 1
+	fi
+	
 	if [ -z "${name}" ]; then
 	    echo "error: the name of the new toolkit component must be specified at the command line"
 	    _display_help_dialog 1
