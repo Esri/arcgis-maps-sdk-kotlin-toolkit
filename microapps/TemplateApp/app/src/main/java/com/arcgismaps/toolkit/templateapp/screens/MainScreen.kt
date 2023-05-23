@@ -14,10 +14,11 @@ import com.arcgismaps.toolkit.composablemap.MapData
 @Composable
 fun MainScreen() {
     val map = ArcGISMap(BasemapStyle.ArcGISTopographic)
-    val mapData = MapData(map).apply {
-        viewPoint = Viewpoint(39.8, -98.6, 10e7)
+    val mapData = MapData(
+        map = map,
+        viewPoint = Viewpoint(39.8, -98.6, 10e7),
         insets = MapInsets(bottom = 25.0)
-    }
+    )
     val mapViewModel = viewModel<MapViewModel>(factory = MapViewModelFactory(mapData))
     ComposableMap(
         modifier = Modifier.fillMaxSize(),

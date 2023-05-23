@@ -6,11 +6,10 @@ import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import kotlinx.coroutines.flow.StateFlow
 
 public data class MapData(
-    public var map: ArcGISMap
-) {
-    public var viewPoint: Viewpoint? = null
+    public var map: ArcGISMap,
+    public var viewPoint: Viewpoint? = null,
     public var insets: MapInsets = MapInsets()
-}
+)
 
 public data class MapInsets(
     var start: Double = 0.0,
