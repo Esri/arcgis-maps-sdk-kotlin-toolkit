@@ -28,7 +28,7 @@
 
     function _check_options_and_set_variables {
 	if [ "${BASH_VERSINFO}" -lt "4" ]; then
-	    echo "error: BASH 4.0 required, please run homebrew update bash"
+	    echo "error: BASH 4.0 required, please run brew install bash"
 	    exit 1
 	fi
 	
