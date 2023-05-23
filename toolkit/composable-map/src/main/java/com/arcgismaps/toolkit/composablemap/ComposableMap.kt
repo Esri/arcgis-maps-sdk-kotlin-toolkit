@@ -13,7 +13,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.view.MapView
 import kotlinx.coroutines.launch
 
