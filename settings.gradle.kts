@@ -27,6 +27,7 @@ dependencyResolutionManagement {
 var includedProjects = projects.flatMap { listOf(":$it", ":$it-app") }.toTypedArray()
 include(*includedProjects)
 include (":bom")
+include (":composable-map")
 
 projects.forEach {
     project(":$it").projectDir = File(rootDir, "toolkit/$it")
@@ -34,3 +35,4 @@ projects.forEach {
 }
 
 project(":bom").projectDir = File(rootDir, "bom")
+project(":composable-map").projectDir = File(rootDir, "toolkit/composable-map")

@@ -37,6 +37,7 @@ junit = { group = "junit", name = "junit", version.ref = "junit" }
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
 android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+gradle-secrets = { id = 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin', version = '2.0.1'}
 
 [bundles]
 core = [
