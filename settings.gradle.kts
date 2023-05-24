@@ -1,9 +1,12 @@
+import org.gradle.configurationcache.extensions.capitalized
+
+val projects = listOf("template")
+
 pluginManagement {
     repositories {
         gradlePluginPortal()
         google()
         mavenCentral()
-        
     }
 }
 dependencyResolutionManagement {
@@ -21,14 +24,15 @@ dependencyResolutionManagement {
     }
 }
 
-include(
-    ":template",
-    ":composable-map",
-    ":template-app",
-    ":bom"
-)
+var includedProjects = projects.flatMap { listOf(":$it", ":$it-app") }.toTypedArray()
+include(*includedProjects)
+include (":bom")
+include (":composable-map")
 
-project(":template").projectDir = File(rootDir, "toolkit/template")
-project(":composable-map").projectDir = File(rootDir, "toolkit/composable-map")
-project(":template-app").projectDir = File(rootDir, "microapps/TemplateApp/app")
+projects.forEach {
+    project(":$it").projectDir = File(rootDir, "toolkit/$it")
+    project(":$it-app").projectDir = File(rootDir, "microapps/${it.capitalized()}App/app")
+}
+
 project(":bom").projectDir = File(rootDir, "bom")
+project(":composable-map").projectDir = File(rootDir, "toolkit/composable-map")
