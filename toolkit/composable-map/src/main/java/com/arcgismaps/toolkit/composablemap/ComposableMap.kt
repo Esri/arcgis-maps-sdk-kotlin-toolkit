@@ -49,7 +49,8 @@ public fun ComposableMap(
                     mapView.setViewpoint(it)
                 }
             })
-        Box(modifier = Modifier
+        Box(
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(
                     start = mapState.insets.start.dp,
