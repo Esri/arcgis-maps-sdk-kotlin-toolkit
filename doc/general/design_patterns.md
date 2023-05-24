@@ -1,6 +1,6 @@
 ## Design patterns and best practices
 
-This document outlines guidelines for best practices and design patterns in the writing and development of Jetpack Compose APIs as part of the Kotlin maps SDK toolkit.
+This document outlines guidelines for best practices and design patterns in the writing and development of Jetpack Compose APIs as part of the ArcGIS Maps SDK for Kotlin toolkit.
 
 ## Naming conventions
 
@@ -8,7 +8,7 @@ This document outlines guidelines for best practices and design patterns in the 
 
 ## Architectural Patterns
 
-The architectural, pattern and design recommendations are intended to improve the usability, robustness and scalability of the toolkit. The suggested principle is a layered architecture embodying separation of concerns. This should include at least two layers:
+The architecture, pattern and design recommendations are intended to improve the usability, robustness and scalability of the toolkit. The suggested principle is a layered architecture embodying separation of concerns. This should include at least two layers:
 - UI Layer
   - The UI layer is only responsible for interaction and presenting the data onto the screen. UI Elements such as composables and state holders like ViewModels make up this layer.
 - Data Layer
@@ -16,20 +16,20 @@ The architectural, pattern and design recommendations are intended to improve th
 
 ### ViewModel
 
-ViewModels are the primary way to expose UI states to composables. They allow the application to adhere to this architectural principle of basing the UI on the model by transforming application data into UI states. 
-- [Lifecycle of a ViewModel](https://developer.android.com/topic/libraries/architecture/viewmodel#lifecycle).
+ViewModels are the primary way to expose UI states to composables. They allow the application to adhere to the architectural principle of basing the UI on the model by transforming application data into UI states. 
+- [Lifecycle of a ViewModel](https://developer.android.com/topic/libraries/architecture/viewmodel#lifecycle)
 - [Benefits of a ViewModel](https://developer.android.com/topic/libraries/architecture/viewmodel#viewmodel-benefits)
 
 #### Best practices
 
-- In Jetpack Compose, ViewModel instances should be created and accessed close to their root composables. This is because any composable accessing a ViewModel under its [ViewModelStoreOwner](https://developer.android.com/reference/kotlin/androidx/lifecycle/ViewModelStoreOwner) will receive the same instance.
-- ViewModels must not be passed down to lower level composables and instead only the pass the data and logic required.
+- In Jetpack Compose, ViewModel instances should be created and accessed close to their root composable. This is because any composable accessing a ViewModel under its [ViewModelStoreOwner](https://developer.android.com/reference/kotlin/androidx/lifecycle/ViewModelStoreOwner) will receive the same instance.
+- ViewModels must not be passed down to lower level composables and instead only pass the data and logic required.
 - To avoid memory leaks, ViewModels should avoid having any references to lifecycle-related APIs like `Context` or `Resources`.
-- ViewModel method names must be generic in nature that accommodates any type of UI.
+- ViewModel method names must be generic in nature that can accommodate any type of UI.
 
 #### Creating ViewModels
 
-A ViewModel can be created and accessed inside a Composable using [viewModel()](https://developer.android.com/reference/kotlin/androidx/lifecycle/viewmodel/compose/package-summary#viewmodel).
+A ViewModel can be created and accessed inside a Composable using [viewModel()](https://developer.android.com/reference/kotlin/androidx/lifecycle/viewmodel/compose/package-summary#viewmodel).=
 
 ```
 @Composable
@@ -75,7 +75,7 @@ fun MainScreen() {
 ### Reusable Composables
 
 ### Events in Compose
-this is how to introduce unidirectional data fdlow
+this is how to introduce unidirectional data flow
 
 ### Composable Map
 
