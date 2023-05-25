@@ -100,8 +100,6 @@ The `ComposableMap` component offers a Composable `MapView` by wrapping it withi
 
 ## Flows
 
-## remember state
-
 # Side Effects
 
 Side effects are any changes or operations that need to occur outside the scope of a composable. The Effect APIs offer a controlled environment that is tied to the lifecycle of the composable. These effects are composable functions themselves but do not emit any UI.
