@@ -10,6 +10,7 @@ import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.composablemap.ComposableMap
 import com.arcgismaps.toolkit.composablemap.MapInsets
 import com.arcgismaps.toolkit.composablemap.MapData
+import com.arcgismaps.toolkit.composablemap.MapInterface
 
 @Composable
 fun MainScreen() {
@@ -22,6 +23,6 @@ fun MainScreen() {
     val mapViewModel = viewModel<MapViewModel>(factory = MapViewModelFactory(mapData))
     ComposableMap(
         modifier = Modifier.fillMaxSize(),
-        mapInterface = mapViewModel
+        mapInterface = mapViewModel as MapInterface
     )
 }
