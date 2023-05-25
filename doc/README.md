@@ -1,6 +1,7 @@
 # Table of Contents
 
 ## General
+
 - [Design Patterns and Best Practices](./general/design_patterns.md)
 - [Developer Setup](./general/developer_setup.md)
 - [Composable Map](./general/design_patterns.md#composable-map)
@@ -31,3 +32,5 @@ number will trail the released version number by a couple days, or weeks, and wi
 Like the SDK, when we have nominated a release candidate, we scrub the build number from its version by hand, leaving the major, minor, and micro versions.
 
 ## Testing
+
+- [Testing Strategy](./testing/testing_strategy.md)

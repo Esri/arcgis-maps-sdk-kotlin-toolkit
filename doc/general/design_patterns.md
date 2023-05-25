@@ -141,4 +141,3 @@ Similarly, any code that needs a clean up if the keys change or the composition 
             lifecycleOwner.lifecycle.removeObserver(mapView)
         }
     }
-

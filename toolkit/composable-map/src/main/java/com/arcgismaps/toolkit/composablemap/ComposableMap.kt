@@ -11,6 +11,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.mapping.view.MapView
@@ -34,8 +36,14 @@ public fun ComposableMap(
         }
     }
 
-    Box(modifier = modifier) {
-        AndroidView(modifier = Modifier.fillMaxSize(),
+    Box(modifier = modifier.semantics {
+        contentDescription = "MapContainer"
+    }) {
+        AndroidView(modifier = Modifier
+            .fillMaxSize()
+            .semantics {
+                contentDescription = "MapView"
+            },
             factory = { mapView },
             update = { mapView ->
                 mapView.map = mapState.map
@@ -52,6 +60,9 @@ public fun ComposableMap(
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .semantics {
+                    contentDescription = "Content"
+                }
                 .padding(
                     start = mapState.insets.start.dp,
                     end = mapState.insets.end.dp,
