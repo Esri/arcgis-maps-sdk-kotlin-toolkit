@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class MapViewModel(
+class FeatureFormsMapViewModel(
     mapData: MapData
 ) : ViewModel(), MapInterface {
     private val _mapData: MutableStateFlow<MapData> = MutableStateFlow(mapData)
@@ -22,7 +22,6 @@ class MapViewModel(
     private fun editFeature(feature: ArcGISFeature) {}
     
     private fun onIdentifyLayers(results: List<IdentifyLayerResult>) {
-        println("onIdentifyLayers")
         val popup = results.firstOrNull { result ->
             result.popups.isNotEmpty()
         }?.popups?.firstOrNull() ?: return
@@ -43,9 +42,6 @@ class MapViewModel(
                     -1
                 ).onSuccess { results ->
                     onIdentifyLayers(results)
-                }.onFailure {
-                    // remove me. for debugging
-                    println("failed to identify layers with error ${it.message}")
                 }
             }
         }
@@ -55,6 +51,6 @@ class MapViewModel(
 class MapViewModelFactory(private val mapData: MapData) : ViewModelProvider.NewInstanceFactory() {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return MapViewModel(mapData) as T
+        return FeatureFormsMapViewModel(mapData) as T
     }
 }

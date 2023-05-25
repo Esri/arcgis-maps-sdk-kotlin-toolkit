@@ -20,6 +20,25 @@ public data class MapInsets(
 )
 
 public interface MapInterface {
+    /**
+     * A container which contains rememberable state needed to recompose a [ComposableMap]
+     */
     public val mapData: StateFlow<MapData>
+    
+    /**
+     * A function to interact with [MapView] business logic. This function cannot directly update the
+     * composable state of the [ComposableMap].
+     *
+     * This function runs in a `LaunchedEffect` and therefore is run in  the context of a CoroutineScope receiver.
+     * This CoroutineScope is explicitly listed as a context receiver here, so that access to its Coroutine context
+     * may be written into the body of this function's implementations.
+     *
+     * In addition, this function runs in a `LaunchedEffect` inside a call to `@Composable AndroidView` function
+     * which wraps a [MapView], and access to the MapView is provided as a context receiver.
+     * see https://github.com/Kotlin/KEEP/blob/master/proposals/context-receivers.md
+     *
+     * @receiver MapView
+     * @receiver CoroutineScope
+     */
     context(MapView, CoroutineScope) public suspend fun viewLogic()
 }

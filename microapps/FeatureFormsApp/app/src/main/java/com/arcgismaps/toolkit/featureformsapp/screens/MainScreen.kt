@@ -19,7 +19,7 @@ fun MainScreen() {
         viewPoint = Viewpoint(39.8, -98.6, 10e7),
         insets = MapInsets(bottom = 25.0)
     )
-    val mapViewModel = viewModel<MapViewModel>(factory = MapViewModelFactory(mapData))
+    val mapViewModel = viewModel<FeatureFormsMapViewModel>(factory = MapViewModelFactory(mapData))
     ComposableMap(
         modifier = Modifier.fillMaxSize(),
         mapInterface = mapViewModel
