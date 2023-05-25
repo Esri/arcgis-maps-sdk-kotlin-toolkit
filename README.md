@@ -48,6 +48,16 @@ Find a bug or want to request a new feature enhancement? Please let us know by [
 
 Esri welcomes contributions from anyone and everyone. Please see our [guidelines for contributing](https://github.com/esri/contributing).
 
+## Creating a new toolkit component
+
+A new toolkit component can be added to this project by running the bash script at the top level
+`./new-component-starter.sh -n NameOfNewComponent"`
+
+This will create a new library module for the new component, and a new app module which depends on the library.
+Capitalization isn't necessary, but it won't capitalize anything but the first letter if none is specified.
+
+This script requires bash 4.0 or higher.
+
 ## Licensing
 
 Copyright 2019-2022 Esri
