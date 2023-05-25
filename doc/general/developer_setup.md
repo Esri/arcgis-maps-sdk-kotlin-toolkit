@@ -11,7 +11,7 @@ and an internet connection to download dependencies expressed in gradle.
 For production use, an API Key or valid ArcGIS Identity is required to use the ArcGIS Maps SDK for Kotlin, which is a dependency of all toolkit components.
 Sign up for an ArcGIS developer account [here](https://developers.arcgis.com/sign-up).
 
-# Get Started
+### Get Started
 
 Clone this project from github, and open it in Android Studio. Choose any of the templates, build and run it on a device or in an emulator.
 
