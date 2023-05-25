@@ -67,3 +67,5 @@ Description: generates a new toolkit component and microapp with the given name
 This script will 
 * copy the `template` toolkit component module, and the `TemplateApp` microapp into new modules with the name provided to the script.
 * update `settings.gradle.kts` to add these two new modules.
+
+This script requires bash 4.0.
