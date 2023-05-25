@@ -2,7 +2,8 @@ package com.arcgismaps.toolkit.composablemap
 
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.Viewpoint
-import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
+import com.arcgismaps.mapping.view.MapView
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
 public data class MapData(
@@ -18,10 +19,7 @@ public data class MapInsets(
     var bottom: Double = 0.0
 )
 
-public interface MapEvents {
-    public fun onSingleTapConfirmed(event: SingleTapConfirmedEvent)
-}
-
-public interface MapInterface : MapEvents {
+public interface MapInterface {
     public val mapData: StateFlow<MapData>
+    context(MapView, CoroutineScope) public suspend fun viewLogic()
 }

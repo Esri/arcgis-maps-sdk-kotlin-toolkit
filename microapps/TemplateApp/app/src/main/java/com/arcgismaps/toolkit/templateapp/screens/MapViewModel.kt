@@ -14,7 +14,7 @@ class MapViewModel (
     private val _mapData: MutableStateFlow<MapData> = MutableStateFlow(mapData)
     override val mapData = _mapData.asStateFlow()
 
-    override fun onSingleTapConfirmed(event: SingleTapConfirmedEvent) {}
+    override suspend fun onSingleTapConfirmed(event: SingleTapConfirmedEvent) {}
 }
 
 class MapViewModelFactory(private val mapData: MapData) : ViewModelProvider.NewInstanceFactory() {

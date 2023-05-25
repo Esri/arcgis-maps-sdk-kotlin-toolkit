@@ -14,7 +14,6 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.mapping.view.MapView
-import kotlinx.coroutines.launch
 
 @Composable
 public fun ComposableMap(
@@ -64,9 +63,11 @@ public fun ComposableMap(
     }
 
     LaunchedEffect(Unit) {
-        launch {
-            mapView.onSingleTapConfirmed.collect {
-                mapInterface.onSingleTapConfirmed(it)
+        with (mapView) {
+            with (this) {
+                // call any MapView methods that do not affect the screen in this function.
+                // e.g. identifyLayers, setBookmark, etc.
+                mapInterface.viewLogic()
             }
         }
     }
