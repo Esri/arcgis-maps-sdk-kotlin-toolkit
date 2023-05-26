@@ -9,19 +9,16 @@ import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.composablemap.ComposableMap
 import com.arcgismaps.toolkit.composablemap.MapInsets
-import com.arcgismaps.toolkit.composablemap.MapData
+import com.arcgismaps.toolkit.composablemap.MapInterface
 
 @Composable
 fun MainScreen() {
     val map = ArcGISMap(BasemapStyle.ArcGISTopographic)
-    val mapData = MapData(
-        map = map,
-        viewPoint = Viewpoint(39.8, -98.6, 10e7),
-        insets = MapInsets(bottom = 25.0)
-    )
-    val mapViewModel = viewModel<MapViewModel>(factory = MapViewModelFactory(mapData))
+    val insets = MapInsets(bottom = 25.0)
+    val mapViewModel = viewModel<MapViewModel>(factory = MapViewModelFactory(map, insets))
     ComposableMap(
         modifier = Modifier.fillMaxSize(),
         mapInterface = mapViewModel
     )
+    mapViewModel.setViewpoint(Viewpoint(39.8, -98.6, 10e7))
 }
