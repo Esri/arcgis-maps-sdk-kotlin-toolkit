@@ -9,6 +9,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -29,19 +30,30 @@ public fun ComposableMap(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
-    val mapView = MapView(context).also {
-        with(it) {
-            with(coroutineScope) {
-                
-                // call any MapView methods that do not affect the screen in this function.
-                // e.g. identifyLayers, setBookmark, etc.
-                mapInterface.viewLogic()
+    
+    val map by mapInterface.map.collectAsState()
+    val insets by mapInterface.insets.collectAsState()
+    val currentViewpoint by mapInterface.currentViewpoint.collectAsState()
+
+    val mapView = remember {
+        MapView(context).also {
+            with(it) {
+                with(coroutineScope) {
+                    mapInterface.viewLogic()
+                }
             }
         }
     }
-    
-    val mapState by mapInterface.mapData.collectAsState()
-    
+
+    mapView.map = map
+    mapView.setViewInsets(
+        left = insets.start,
+        right = insets.end,
+        top = insets.top,
+        bottom = insets.bottom
+    )
+    currentViewpoint?.let { mapView.setViewpoint(it) }
+
     DisposableEffect(lifecycleOwner) {
         lifecycleOwner.lifecycle.addObserver(mapView)
         onDispose {
@@ -53,27 +65,15 @@ public fun ComposableMap(
         contentDescription = "MapContainer"
     }) {
         AndroidView(modifier = Modifier.fillMaxSize(),
-            factory = { mapView },
-            update = { mapView ->
-                mapView.map = mapState.map
-                mapView.setViewInsets(
-                    left = mapState.insets.start,
-                    right = mapState.insets.end,
-                    top = mapState.insets.top,
-                    bottom = mapState.insets.bottom
-                )
-                mapState.viewPoint?.let {
-                    mapView.setViewpoint(it)
-                }
-            })
+            factory = { mapView })
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(
-                    start = mapState.insets.start.dp,
-                    end = mapState.insets.end.dp,
-                    top = mapState.insets.top.dp,
-                    bottom = mapState.insets.bottom.dp
+                    start = insets.start.dp,
+                    end = insets.end.dp,
+                    top = insets.top.dp,
+                    bottom = insets.bottom.dp
                 )
         ) {
             content()
