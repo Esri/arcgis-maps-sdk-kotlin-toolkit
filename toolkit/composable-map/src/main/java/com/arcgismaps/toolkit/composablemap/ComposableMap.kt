@@ -26,7 +26,6 @@ public fun ComposableMap(
     mapInterface: MapInterface,
     content: @Composable () -> Unit = {}
 ) {
-    println("sroth HIII")
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -34,17 +33,51 @@ public fun ComposableMap(
     val map by mapInterface.map.collectAsState()
     val insets by mapInterface.insets.collectAsState()
     val currentViewpoint by mapInterface.currentViewpoint.collectAsState()
-
+    
     val mapView = remember {
-        MapView(context).also {
-            with(it) {
+        MapView(context).also { view ->
+            with(view) {
                 with(coroutineScope) {
-                    mapInterface.viewLogic()
+                    launch {
+                        view.onDown.collect {
+                            mapInterface.onDown(it)
+                        }
+                    }
+                    launch {
+                        view.onUp.collect {
+                            mapInterface.onUp(it)
+                        }
+                    }
+                    launch {
+                        view.onSingleTapConfirmed.collect {
+                            mapInterface.onSingleTapConfirmed(it)
+                        }
+                    }
+                    launch {
+                        view.onDoubleTap.collect {
+                            mapInterface.onDoubleTap(it)
+                        }
+                    }
+                    launch {
+                        view.onLongPress.collect {
+                            mapInterface.onLongPress(it)
+                        }
+                    }
+                    launch {
+                        view.onTwoPointerTap.collect {
+                            mapInterface.onTwoPointerTap(it)
+                        }
+                    }
+                    launch {
+                        view.onPan.collect {
+                            mapInterface.onPan(it)
+                        }
+                    }
                 }
             }
         }
     }
-
+    
     mapView.map = map
     mapView.setViewInsets(
         left = insets.start,
@@ -53,7 +86,7 @@ public fun ComposableMap(
         bottom = insets.bottom
     )
     currentViewpoint?.let { mapView.setViewpoint(it) }
-
+    
     DisposableEffect(lifecycleOwner) {
         lifecycleOwner.lifecycle.addObserver(mapView)
         onDispose {

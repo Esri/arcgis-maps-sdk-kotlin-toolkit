@@ -11,7 +11,9 @@ import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 public data class MapInsets(
     var start: Double = 0.0,

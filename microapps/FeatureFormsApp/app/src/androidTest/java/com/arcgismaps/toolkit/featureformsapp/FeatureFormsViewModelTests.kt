@@ -7,9 +7,11 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.performClick
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.view.MapView
+import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.toolkit.composablemap.ComposableMap
-import com.arcgismaps.toolkit.composablemap.MapData
+import com.arcgismaps.toolkit.composablemap.MapInsets
 import com.arcgismaps.toolkit.composablemap.MapInterface
 import junit.framework.TestCase.assertNotNull
 import kotlinx.coroutines.CoroutineScope
@@ -35,7 +37,7 @@ class FeatureFormsViewModelTests {
      */
     @Test
     fun testSingleTapIsConsumed() = runTest {
-        val map = MapData(ArcGISMap())
+        val map = ArcGISMap()
         val mockMapInterface = MockMapInterface(map)
         composeTestRule.setContent {
             ComposableMap(mapInterface = mockMapInterface) {
@@ -51,15 +53,18 @@ class FeatureFormsViewModelTests {
     }
 }
 
-class MockMapInterface(map : MapData) : MapInterface {
+class MockMapInterface(map : ArcGISMap) : MapInterface {
     private val _mapData = MutableStateFlow(map)
-    override val mapData: StateFlow<MapData> = _mapData.asStateFlow()
+    override val map: StateFlow<ArcGISMap> = _mapData.asStateFlow()
+    
+    override val insets: StateFlow<MapInsets> = MutableStateFlow(MapInsets()).asStateFlow()
+
+    override val currentViewpoint: StateFlow<Viewpoint?> = MutableStateFlow(null).asStateFlow()
+
     val onClick: MutableStateFlow<Unit?> = MutableStateFlow(null)
-    context(MapView, CoroutineScope) override fun viewLogic() {
+    context(MapView, CoroutineScope) override fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {
         launch {
-            onSingleTapConfirmed.collect {
-                onClick.emit(Unit)
-            }
+            onClick.emit(Unit)
         }
     }
 }

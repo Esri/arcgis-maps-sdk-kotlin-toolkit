@@ -15,7 +15,7 @@ import com.arcgismaps.toolkit.composablemap.MapInterface
 fun MainScreen() {
     val map = ArcGISMap(BasemapStyle.ArcGISTopographic)
     val insets = MapInsets(bottom = 25.0)
-    val mapViewModel = viewModel<MapViewModel>(factory = MapViewModelFactory(map, insets))
+    val mapViewModel = viewModel<TemplateMapViewModel>(factory = MapViewModelFactory(map, insets))
     ComposableMap(
         modifier = Modifier.fillMaxSize(),
         mapInterface = mapViewModel as MapInterface
