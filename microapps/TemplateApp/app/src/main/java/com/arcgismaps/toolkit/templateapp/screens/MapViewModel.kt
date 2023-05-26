@@ -10,6 +10,7 @@ import com.arcgismaps.toolkit.composablemap.MapInterface
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 class MapViewModel(
     arcGISMap: ArcGISMap,
@@ -27,7 +28,7 @@ class MapViewModel(
     override fun onSingleTapConfirmed(event: SingleTapConfirmedEvent) { }
 
     fun setViewpoint(viewpoint: Viewpoint) {
-        _currentViewpoint.value = viewpoint
+        _currentViewpoint.update { viewpoint }
     }
 }
 
