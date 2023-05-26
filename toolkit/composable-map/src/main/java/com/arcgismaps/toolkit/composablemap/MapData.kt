@@ -2,7 +2,14 @@ package com.arcgismaps.toolkit.composablemap
 
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.mapping.view.DoubleTapEvent
+import com.arcgismaps.mapping.view.DownEvent
+import com.arcgismaps.mapping.view.LongPressEvent
 import com.arcgismaps.mapping.view.MapView
+import com.arcgismaps.mapping.view.PanChangeEvent
+import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
+import com.arcgismaps.mapping.view.TwoPointerTapEvent
+import com.arcgismaps.mapping.view.UpEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
@@ -29,16 +36,22 @@ public interface MapInterface {
      * A function to interact with [MapView] business logic. This function cannot directly update the
      * composable state of the [ComposableMap].
      *
-     * This function runs in a `LaunchedEffect` and therefore is run in  the context of a CoroutineScope receiver.
-     * This CoroutineScope is explicitly listed as a context receiver here, so that access to its Coroutine context
-     * may be written into the body of this function's implementations.
-     *
-     * In addition, this function runs in a `LaunchedEffect` inside a call to `@Composable AndroidView` function
-     * which wraps a [MapView], and access to the MapView is provided as a context receiver.
+     * This function runs in in the context of a [MapView]. Specifically, it runs in a call to
+     * `@Composable AndroidView` which wraps and manages a MapView. Access to this MapView
+     * is provided in this function `viewLogic` by listing MapView as a context receiver.
      * see https://github.com/Kotlin/KEEP/blob/master/proposals/context-receivers.md
      *
      * @receiver MapView
      * @receiver CoroutineScope
      */
-    context(MapView, CoroutineScope) public suspend fun viewLogic()
+    context(MapView, CoroutineScope) public fun onDown(downEvent: DownEvent) {}
+    context(MapView, CoroutineScope) public fun onUp(upEvent: UpEvent) {}
+    context(MapView, CoroutineScope) public fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {}
+    context(MapView, CoroutineScope) public fun onDoubleTap(doubleTapEvent: DoubleTapEvent) {}
+    context(MapView, CoroutineScope) public fun onLongPress(longPressEvent: LongPressEvent) {}
+    context(MapView, CoroutineScope) public fun onTwoPointerTap(twoPointerTapEvent: TwoPointerTapEvent) {}
+    context(MapView, CoroutineScope) public fun onPan(panEvent: PanChangeEvent) {}
+    
+    
+    
 }

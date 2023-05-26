@@ -32,7 +32,7 @@ class FeatureFormsMapViewModel(
         }
     }
     
-    context(MapView, CoroutineScope) override suspend fun viewLogic() {
+    context(MapView, CoroutineScope) override fun viewLogic() {
         launch {
             onSingleTapConfirmed.collect {
                 identifyLayers(
