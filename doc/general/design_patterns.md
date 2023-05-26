@@ -31,7 +31,7 @@ ViewModels are the primary way to expose UI states to composables. They allow th
 
 A ViewModel can be created and accessed inside a Composable using [viewModel()](https://developer.android.com/reference/kotlin/androidx/lifecycle/viewmodel/compose/package-summary#viewmodel)
 
-```
+```kotlin
 @Composable
 fun MainScreen() {
     ...
@@ -43,7 +43,7 @@ fun MainScreen() {
 For a ViewModel with dependencies, a `Factory` can be used.
 
 
-```
+```kotlin
 class MapViewModelFactory(private val mapData: MapData) 
     : ViewModelProvider.NewInstanceFactory() {
 
@@ -53,7 +53,7 @@ class MapViewModelFactory(private val mapData: MapData)
 }
 ```
 
-```
+```kotlin
 @Composable
 fun MainScreen() {
     val mapData = MapData(
@@ -72,18 +72,46 @@ fun MainScreen() {
 
 All data must flow from a single source of truth and only its owner can mutate the data. Often ViewModels host this source of data or in case of UI state holders, they should be hosted at the root composable level.
 
-```
-  class MapViewModel (mapData: MapData) : ViewModel() {
+```kotlin
+class MapViewModel (mapData: MapData) : ViewModel() {
     private val _mapData: MutableStateFlow<MapData> = MutableStateFlow(mapData)
     // exposed as immutable type and hoisted at the ViewModel
     val mapData = _mapData.asStateFlow()
- 
-  }
+}
 ```
 
 ## Unidirectional Data Flow
 
-With a unidirectional data flow design, all data and states must flow down the hierarchy from the data sources to the ViewModels to the composable UI. All Events and actions must flow up the same hierarchy.
+With a unidirectional data flow design, all data and states must flow down the hierarchy from the data sources to the ViewModels to the composable UI. All events and UI actions must flow up the same hierarchy.
+
+#### Events
+
+```kotlin
+@Composable 
+fun LoadingScreen(modifier: Modifier = Modifier, onTimeout: () -> Unit) {
+    val currentTimeout by rememberUpdatedState(onTimeout)
+    ...
+    LaunchedEffect(Unit) { 
+        delay(waitTime)
+        currentTimeout() 
+    }
+}
+```
+
+#### UI actions
+
+```kotlin
+@Composable
+fun MyScreen(modifier: Modifier = Modifier, onBackPressed: () -> Unit) {
+    ...
+    Button(onClick = {
+        onBackPressed()
+        }) {
+        Icon( ... )
+    }
+}
+```
+
 
 ## Composable Map
 
@@ -112,30 +140,38 @@ Any suspend functions or coroutines that need to run within a composable's scope
 
 Using `Unit` or `true` for the keys will only run the `LaunchedEffect` once.
 
-    LaunchedEffect(Unit) {
-        launch {
-            mapView.onSingleTapConfirmed.collect {
-                // do something
-            }
+```kotlin
+LaunchedEffect(Unit) {
+    launch {
+        mapView.onSingleTapConfirmed.collect {
+            // do something
         }
     }
+}
+```
+
 
 Providing a key will ensure the `LaunchedEffect` runs on every recomposition if the key changes.
 
-    LaunchedEffect(mapState) {
-        launch {
-          // this will run on every recomposition when mapState changes
-        }
+```kotlin
+LaunchedEffect(mapState) {
+    launch {
+        // this will run on every recomposition when mapState changes
     }
+}
+```
+
 
 ## DisposableEffect
 
 Similarly, any code that needs a clean up if the keys change or the composition ends should use a `DisposableEffect`. Event subscriptions, lifecycle callbacks are good examples for this.
 
-    DisposableEffect(lifecycleOwner) {
-        lifecycleOwner.lifecycle.addObserver(mapView)
-        // called when the composition ends or lifecycleOwner changes
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(mapView)
-        }
+```kotlin
+DisposableEffect(lifecycleOwner) {
+    lifecycleOwner.lifecycle.addObserver(mapView)
+    // called when the composition ends or lifecycleOwner changes
+    onDispose {
+        lifecycleOwner.lifecycle.removeObserver(mapView)
     }
+}
+```
