@@ -28,7 +28,8 @@ public data class MapInsets(
  *
  * ```
  * context(MapView, CoroutineScope) override fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {
- *     // launch will be called on the CoroutineScope provided by context.
+ *     // launch will be called on the CoroutineScope provided by context. This CoroutineScope will be cancelled
+ *     // when the ComposableMap leaves the composition.
  *     launch {
  *         // setBookmark will be called on the MapView provided by context.
  *         setBookmark(null)
