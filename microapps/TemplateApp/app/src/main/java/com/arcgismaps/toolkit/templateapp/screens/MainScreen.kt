@@ -18,7 +18,7 @@ fun MainScreen() {
     val mapViewModel = viewModel<TemplateMapViewModel>(factory = MapViewModelFactory(map, insets))
     ComposableMap(
         modifier = Modifier.fillMaxSize(),
-        mapInterface = mapViewModel as MapInterface
+        mapInterface = mapViewModel
     )
     mapViewModel.setViewpoint(Viewpoint(39.8, -98.6, 10e7))
 }
