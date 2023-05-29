@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.toolkit.authentication.Authenticator
 import com.arcgismaps.toolkit.authenticationapp.screens.MainScreen
 import com.arcgismaps.toolkit.authenticationapp.ui.theme.AuthenticationAppTheme
 
@@ -26,6 +27,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AuthenticationApp() {
     MainScreen()
+    Authenticator()
 }
 
 @Preview(showBackground = true)
