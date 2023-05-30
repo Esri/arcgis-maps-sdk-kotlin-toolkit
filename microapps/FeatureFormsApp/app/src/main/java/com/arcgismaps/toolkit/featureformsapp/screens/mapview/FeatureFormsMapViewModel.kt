@@ -1,8 +1,7 @@
-package com.arcgismaps.toolkit.featureformsapp.screens
+package com.arcgismaps.toolkit.featureformsapp.screens.mapview
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.Viewpoint
@@ -17,6 +16,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * A view model for the FeatureForms MapView UI
+ */
 class FeatureFormsMapViewModel(
     arcGISMap: ArcGISMap,
     mapInsets: MapInsets = MapInsets()
@@ -29,36 +31,36 @@ class FeatureFormsMapViewModel(
     
     private val _currentViewpoint: MutableStateFlow<Viewpoint?> = MutableStateFlow(null)
     override val currentViewpoint: StateFlow<Viewpoint?> = _currentViewpoint.asStateFlow()
-    private fun editFeature(feature: ArcGISFeature) {}
     
-    private fun onIdentifyLayers(results: List<IdentifyLayerResult>) {
+    private fun editFeature() {
+        println("editFeature")
+        // to be fleshed out with its own view model and navigation to the bottom sheet or side panel.
+    }
+    
+    private suspend fun onIdentifyLayers(results: List<IdentifyLayerResult>) {
         val popup = results.firstOrNull { result ->
             result.popups.isNotEmpty()
         }?.popups?.firstOrNull() ?: return
-    
+        
         val feature = popup.geoElement as? ArcGISFeature ?: return
-        viewModelScope.launch {
-            feature.load().onSuccess { editFeature(feature) }
-        }
+        feature.load().onSuccess { editFeature() }
     }
 
     context(MapView, CoroutineScope) override fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {
         launch {
-            onSingleTapConfirmed.collect {
-                identifyLayers(
-                    it.screenCoordinate,
-                    22.0,
-                    true,
-                    -1
-                ).onSuccess { results ->
-                    onIdentifyLayers(results)
-                }
+            this@MapView.identifyLayers(
+                singleTapEvent.screenCoordinate,
+                22.0,
+                true,
+                -1
+            ).onSuccess { results ->
+                onIdentifyLayers(results)
             }
         }
     }
 }
 
-class MapViewModelFactory(
+class FeatureFormsMapViewModelFactory(
     private val arcGISMap: ArcGISMap,
     private val mapInsets: MapInsets = MapInsets()
 ) : ViewModelProvider.NewInstanceFactory() {

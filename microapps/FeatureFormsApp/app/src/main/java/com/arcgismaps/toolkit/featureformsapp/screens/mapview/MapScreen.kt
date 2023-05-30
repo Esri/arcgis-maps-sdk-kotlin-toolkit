@@ -9,15 +9,17 @@ import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.composablemap.ComposableMap
 import com.arcgismaps.toolkit.composablemap.MapInsets
+import com.arcgismaps.toolkit.featureformsapp.screens.mapview.FeatureFormsMapViewModel
+import com.arcgismaps.toolkit.featureformsapp.screens.mapview.FeatureFormsMapViewModelFactory
 
 @Composable
-fun MainScreen() {
+fun MapScreen() {
     val map = ArcGISMap(BasemapStyle.ArcGISTopographic).also {
         it.initialViewpoint = Viewpoint(39.8, -98.6, 10e7)
     }
     
     val mapViewModel = viewModel<FeatureFormsMapViewModel>(
-        factory = MapViewModelFactory(
+        factory = FeatureFormsMapViewModelFactory(
             map,
             MapInsets(bottom = 25.0)
         )
