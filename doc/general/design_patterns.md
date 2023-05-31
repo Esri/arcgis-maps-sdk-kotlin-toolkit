@@ -29,9 +29,9 @@ ViewModels are the primary way to expose UI states to composables. They allow th
     - Example - Signature of `fun showFeatureFormEditor` is generic and the UI component implementation details will display appropriate UI for a phone or a tablet.
     ```kotlin
     class FeatureFormViewModel() : ViewModel() {
-    ..
-    fun showFeatureFormEditor() { .. }
-    ..
+        ..
+        fun showFeatureFormEditor() { .. }
+        ..
     }
     ```
 
