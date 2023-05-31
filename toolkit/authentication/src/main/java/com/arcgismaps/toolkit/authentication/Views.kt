@@ -6,7 +6,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arcgismaps.ArcGISEnvironment
 
+/**
+ * Displays authentication UI when an authentication challenge is issued. Ensure that [authenticatorViewModel]
+ * is set as the [ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler] and
+ * [ArcGISEnvironment.authenticationManager.networkAuthenticationChallengeHandler].
+ *
+ * @since 200.2.0
+ */
 @Composable
 public fun Authenticator(authenticatorViewModel: AuthenticatorViewModel = viewModel()) {
     val shouldShowDialog = authenticatorViewModel.shouldShowDialog.collectAsState().value
