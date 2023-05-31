@@ -25,7 +25,15 @@ ViewModels are the primary way to expose UI states to composables. They allow th
 - In Jetpack Compose, ViewModel instances should be created and accessed close to their root composable. This is because any composable accessing a ViewModel under its [ViewModelStoreOwner](https://developer.android.com/reference/kotlin/androidx/lifecycle/ViewModelStoreOwner) will receive the same instance.
 - ViewModels must not be passed down to lower level composables and instead only pass the data and logic required.
 - To avoid memory leaks, ViewModels should avoid having any references to lifecycle components like `Context` or `Resources`.
-- ViewModel method names must be generic in nature that can accommodate any type of UI.
+- Method names and state fields on the ViewModel must be generic in nature since ViewModels should not know about specific UI implementation details.
+    - Example - Signature of `fun showFeatureFormEditor` is generic and the UI component implementation details will display appropriate UI for a phone or a tablet.
+    ```kotlin
+    class FeatureFormViewModel() : ViewModel() {
+    ..
+    fun showFeatureFormEditor() { .. }
+    ..
+    }
+    ```
 
 ### Creating ViewModels
 
@@ -138,7 +146,8 @@ Side effects are any changes or operations that need to occur outside the scope 
 
 Any suspend functions or coroutines that need to run within a composable's scope must be done so within a `LaunchedEffect`.
 
-Using `Unit` or `true` for the keys will only run the `LaunchedEffect` once.
+Using `Unit` or `true` for the keys will only run the `LaunchedEffect` once. These should be used with careful consideration. MapView gesture events are `SharedFlow`s which will be continously collected until cancelled.
+We expect them to be cancelled only when the containing Composable leaves the composition and collection should not be tied to state, so they are a good example of a use case for `LaunchedEffect(Unit)`.mselv
 
 ```kotlin
 LaunchedEffect(Unit) {
