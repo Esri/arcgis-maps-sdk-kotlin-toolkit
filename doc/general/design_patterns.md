@@ -90,7 +90,7 @@ class MapViewModel (mapData: MapData) : ViewModel() {
 }
 ```
 
-As to where to hoist these UI states, ViewModels are themselves the state holders in this scenario, and hence should be hoisted at the root level composable, ex - Screen level composables are root for all UI that it creates. (see [ViewModels creation](#creating-viewmodels)). If you are not using a ViewModel then it just a plain class that holds the UI state. Either way it would be hoisted at the root level composable.
+As to where to hoist these UI states, ViewModels are themselves the state holders in this scenario, and hence should be hoisted at the root level composable, ex - Screen level composables are root for all UI that it creates. (see [ViewModels creation](#creating-viewmodels)). If you are not using a ViewModel then it can be a plain class that holds the UI state. Either way it should be hoisted at the root level composable.
 
 Then there are UI elements as state, which effect the UI itself (hide/show/expand a card, etc.,) which can be internal to each child composable within a tree. These can be as close or hoisted up the hierarchy depending on where they are read/written.
 
