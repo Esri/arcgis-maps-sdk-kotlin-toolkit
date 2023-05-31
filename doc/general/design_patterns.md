@@ -76,9 +76,11 @@ fun MainScreen() {
 
 [Use Kotlin coroutines with lifecycle-aware components](https://developer.android.com/topic/libraries/architecture/coroutines)
 
-## State Hoisting
+## Data sources and State Hoisting
 
-All data must flow from a single source of truth and only its owner can mutate the data. Often ViewModels host this source of data or in case of UI state holders, they should be hosted at the root composable level.
+[States](https://developer.android.com/topic/architecture/ui-layer/stateholders#elements-ui) in compose can be produced from data as state (UI State) and UI elements as state.
+
+In a ViewModel architecture, the source of data (ex - list of maps) is the ViewModel which generates UI states from that data. Furthermore, these UI states should be passed as immutable types for the actual composable UI to consume. This is the basis for the single source of truth principle.
 
 ```kotlin
 class MapViewModel (mapData: MapData) : ViewModel() {
@@ -88,11 +90,23 @@ class MapViewModel (mapData: MapData) : ViewModel() {
 }
 ```
 
+As to where to hoist these UI states, ViewModels are themselves the state holders in this scenario, and hence should be hoisted at the root level composable, ex - Screen level composables are root for all UI that it creates. (see [ViewModels creation](#creating-viewmodels)). If you are not using a ViewModel then it just a plain class that holds the UI state. Either way it would be hoisted at the root level composable.
+
+Then there are UI elements as state, which effect the UI itself (hide/show/expand a card, etc.,) which can be internal to each child composable within a tree. These can be as close or hoisted up the hierarchy depending on where they are read/written.
+
+This [snippet](https://developer.android.com/jetpack/compose/state#state-hoisting) of rules encompasses these principles of hoisting -
+
+* State should be hoisted to at least the lowest common parent of all composables that use the state (read).
+* State should be hoisted to at least the highest level it may be changed (write).
+* If two states change in response to the same events they should be hoisted together.
+
 ## Unidirectional Data Flow
 
 With a unidirectional data flow design, all data and states must flow down the hierarchy from the data sources to the ViewModels to the composable UI. All events and UI actions must flow up the same hierarchy.
 
 #### Events
+
+State which is used by a side effect (for example, calling a lambda parameter in response to events) should be stored in a val using `rememberUpdatedState` to ensure that if the component is recomposed the correct lambda is called.
 
 ```kotlin
 @Composable 
@@ -173,7 +187,7 @@ LaunchedEffect(mapState) {
 
 ## DisposableEffect
 
-Similarly, any code that needs a clean up if the keys change or the composition ends should use a `DisposableEffect`. Event subscriptions, lifecycle callbacks are good examples for this.
+Similarly, any code that needs a clean up if the keys change or the composition ends should use a `DisposableEffect`. Unsubscribing from callback events (for example, lifecycle callbacks) is a good use case for this.
 
 ```kotlin
 DisposableEffect(lifecycleOwner) {
