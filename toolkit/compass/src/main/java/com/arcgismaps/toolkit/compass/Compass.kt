@@ -5,12 +5,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
-public fun HelloToolkit() {
+public fun Compass() {
     Text(text = "hello toolkit")
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 internal fun HelloToolkitPreview() {
-    HelloToolkit()
+    Compass()
 }
