@@ -1,6 +1,6 @@
 import org.gradle.configurationcache.extensions.capitalized
 
-val projects = listOf("template")
+val projects = listOf("template", "compass")
 
 pluginManagement {
     repositories {
