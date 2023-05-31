@@ -8,11 +8,10 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.mapping.view.MapView
@@ -26,8 +25,21 @@ public fun ComposableMap(
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    val mapView = MapView(context)
-    val mapState by mapInterface.mapData.collectAsState()
+    val map by mapInterface.map.collectAsState()
+    val insets by mapInterface.insets.collectAsState()
+    val currentViewpoint by mapInterface.currentViewpoint.collectAsState()
+
+    val mapView = remember {
+        MapView(context)
+    }
+    mapView.map = map
+    mapView.setViewInsets(
+        left = insets.start,
+        right = insets.end,
+        top = insets.top,
+        bottom = insets.bottom
+    )
+    currentViewpoint?.let { mapView.setViewpoint(it) }
 
     DisposableEffect(lifecycleOwner) {
         lifecycleOwner.lifecycle.addObserver(mapView)
@@ -36,38 +48,17 @@ public fun ComposableMap(
         }
     }
 
-    Box(modifier = modifier.semantics {
-        contentDescription = "MapContainer"
-    }) {
-        AndroidView(modifier = Modifier
-            .fillMaxSize()
-            .semantics {
-                contentDescription = "MapView"
-            },
-            factory = { mapView },
-            update = { mapView ->
-                mapView.map = mapState.map
-                mapView.setViewInsets(
-                    left = mapState.insets.start,
-                    right = mapState.insets.end,
-                    top = mapState.insets.top,
-                    bottom = mapState.insets.bottom
-                )
-                mapState.viewPoint?.let {
-                    mapView.setViewpoint(it)
-                }
-            })
+    Box(modifier = modifier) {
+        AndroidView(modifier = Modifier.fillMaxSize(),
+            factory = { mapView })
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .semantics {
-                    contentDescription = "Content"
-                }
                 .padding(
-                    start = mapState.insets.start.dp,
-                    end = mapState.insets.end.dp,
-                    top = mapState.insets.top.dp,
-                    bottom = mapState.insets.bottom.dp
+                    start = insets.start.dp,
+                    end = insets.end.dp,
+                    top = insets.top.dp,
+                    bottom = insets.bottom.dp
                 )
         ) {
             content()
