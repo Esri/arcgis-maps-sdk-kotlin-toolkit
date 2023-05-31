@@ -14,10 +14,13 @@ public data class MapInsets(
 
 public interface MapEvents {
     public fun onSingleTapConfirmed(event: SingleTapConfirmedEvent)
+    public fun onMapRotationChanged(rotation: Double)
+    public fun onMapRotationReset()
 }
 
 public interface MapInterface : MapEvents {
     public val map: StateFlow<ArcGISMap>
     public val insets: StateFlow<MapInsets>
     public val currentViewpoint : StateFlow<Viewpoint?>
+    public val resetMapRotation : StateFlow<Boolean>
 }

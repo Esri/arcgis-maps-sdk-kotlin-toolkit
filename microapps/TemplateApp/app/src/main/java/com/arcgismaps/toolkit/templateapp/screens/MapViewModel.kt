@@ -25,7 +25,14 @@ class MapViewModel(
     private val _currentViewpoint: MutableStateFlow<Viewpoint?> = MutableStateFlow(null)
     override val currentViewpoint: StateFlow<Viewpoint?> = _currentViewpoint.asStateFlow()
 
+    private val _mapRotation: MutableStateFlow<Double> = MutableStateFlow(0.0)
+    override val mapRotation: StateFlow<Double> = _mapRotation.asStateFlow()
+
     override fun onSingleTapConfirmed(event: SingleTapConfirmedEvent) { }
+
+    override fun onMapRotationChanged(rotation: Double) {
+        _mapRotation.value = rotation
+    }
 
     fun setViewpoint(viewpoint: Viewpoint) {
         _currentViewpoint.update { viewpoint }

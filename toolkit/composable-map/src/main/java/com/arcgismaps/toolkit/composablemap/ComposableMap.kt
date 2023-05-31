@@ -1,5 +1,6 @@
 package com.arcgismaps.toolkit.composablemap
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -28,6 +29,7 @@ public fun ComposableMap(
     val map by mapInterface.map.collectAsState()
     val insets by mapInterface.insets.collectAsState()
     val currentViewpoint by mapInterface.currentViewpoint.collectAsState()
+    val resetMapRotation by mapInterface.resetMapRotation.collectAsState()
 
     val mapView = remember {
         MapView(context)
@@ -40,6 +42,14 @@ public fun ComposableMap(
         bottom = insets.bottom
     )
     currentViewpoint?.let { mapView.setViewpoint(it) }
+
+    if (resetMapRotation) {
+        LaunchedEffect(Unit) {
+            mapView.setViewpointRotation(0.0).onSuccess {
+                mapInterface.onMapRotationReset()
+            }
+        }
+    }
 
     DisposableEffect(lifecycleOwner) {
         lifecycleOwner.lifecycle.addObserver(mapView)
@@ -69,6 +79,11 @@ public fun ComposableMap(
         launch {
             mapView.onSingleTapConfirmed.collect {
                 mapInterface.onSingleTapConfirmed(it)
+            }
+        }
+        launch {
+            mapView.mapRotation.collect {
+                mapInterface.onMapRotationChanged(it)
             }
         }
     }
