@@ -147,7 +147,7 @@ Side effects are any changes or operations that need to occur outside the scope 
 Any suspend functions or coroutines that need to run within a composable's scope must be done so within a `LaunchedEffect`.
 
 Using `Unit` or `true` for the keys will only run the `LaunchedEffect` once. These should be used with careful consideration. MapView gesture events are `SharedFlow`s which will be continously collected until cancelled.
-We expect them to be cancelled only when the containing Composable leaves the composition and collection should not be tied to state, so they are a good example of a use case for `LaunchedEffect(Unit)`.mselv
+We expect them to be cancelled only when the containing Composable leaves the composition and collection should not be tied to state, so they are a good example of a use case for `LaunchedEffect(Unit)`.
 
 ```kotlin
 LaunchedEffect(Unit) {
