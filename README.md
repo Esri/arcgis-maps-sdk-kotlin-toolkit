@@ -33,12 +33,18 @@ implementation('com.esri:arcgis-maps-kotlin-toolkit-compass')
 
 Only the bom is versioned above. The components versions are defined in the bom's pom file.
 
-The template and TemplateApp modules are for bootstrapping new modules and will be removed when there are more modules.
+The template and TemplateApp modules are for bootstrapping new modules.
+
+Please see the [package structure](doc/general/developer_setup.md#package-structure) documentation for more details.
 
 ## Requirements
+
+Please see the [developer setup](doc/general/developer_setup.md) for a complete description of requirements
 * ArcGIS Maps SDK for Kotlin    
   See [this guide](https://developers.arcgis.com/kotlin/install-and-set-up/) for complete instructions and
 other options for installing the SDK.
+* Android SDK 33
+* JDK 17
 
 ## Issues
 
