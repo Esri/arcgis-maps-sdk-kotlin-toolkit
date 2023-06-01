@@ -7,7 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.toolkit.featureformsapp.screens.MapScreen
+import com.arcgismaps.toolkit.featureformsapp.screens.mapview.MapScreen
 import com.arcgismaps.toolkit.featureformsapp.ui.theme.FeatureFormsAppTheme
 
 class MainActivity : ComponentActivity() {
