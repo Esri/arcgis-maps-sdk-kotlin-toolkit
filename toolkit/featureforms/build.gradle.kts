@@ -16,7 +16,7 @@ val artifactoryPassword: String by project
 val artifactVersion: String = "xx.xx"
 
 android {
-    namespace = "com.arcgismaps.toolkit.composablemap"
+    namespace = "com.arcgismaps.toolkit.featureforms"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
@@ -55,13 +55,7 @@ android {
     }
 }
 
-//https://youtrack.jetbrains.com/issue/KTIJ-21063
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class).all {
-    kotlinOptions.freeCompilerArgs += "-Xcontext-receivers"
-}
-
 dependencies {
-    implementation(libs.arcgis)
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)

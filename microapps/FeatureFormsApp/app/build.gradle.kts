@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.arcgismaps.toolkit.templateapp"
+    namespace = "com.arcgismaps.toolkit.featureformsapp"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId ="com.arcgismaps.toolkit.templateapp"
+        applicationId ="com.arcgismaps.toolkit.featureformsapp"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.compileSdk.get().toInt()
         versionCode = 1
@@ -50,14 +50,13 @@ android {
     }
 }
 
-// context receivers are not experimental anymore, but AS thinks they are.
 //https://youtrack.jetbrains.com/issue/KTIJ-21063
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class).all {
     kotlinOptions.freeCompilerArgs += "-Xcontext-receivers"
 }
 
 dependencies {
-    implementation(project(":template"))
+    implementation(project(":featureforms"))
     implementation(project(":composable-map"))
     implementation(libs.arcgis)
     implementation(libs.bundles.composeCore)
