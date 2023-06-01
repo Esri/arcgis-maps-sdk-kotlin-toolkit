@@ -92,22 +92,26 @@ public fun ComposableMap(
             lifecycleOwner.lifecycle.removeObserver(mapView)
         }
     }
-    
+
     Box(modifier = modifier.semantics {
         contentDescription = "MapContainer"
     }) {
-        AndroidView(modifier = Modifier.fillMaxSize(),
-            factory = { mapView })
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(
-                    start = insets.start.dp,
-                    end = insets.end.dp,
-                    top = insets.top.dp,
-                    bottom = insets.bottom.dp
-                )
-        ) {
+        AndroidView(modifier = Modifier
+            .fillMaxSize()
+            .semantics {
+                contentDescription = "MapView"
+            }, factory = { mapView })
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .padding(
+                start = insets.start.dp,
+                end = insets.end.dp,
+                top = insets.top.dp,
+                bottom = insets.bottom.dp
+            )
+            .semantics {
+                contentDescription = "Content"
+            }) {
             content()
         }
     }
