@@ -1,4 +1,4 @@
-package com.arcgismaps.toolkit.templateapp.screens
+package com.arcgismaps.toolkit.featureformsapp.screens.mapview
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -9,16 +9,21 @@ import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.composablemap.ComposableMap
 import com.arcgismaps.toolkit.composablemap.MapInsets
-import com.arcgismaps.toolkit.composablemap.MapInterface
 
 @Composable
-fun MainScreen() {
-    val map = ArcGISMap(BasemapStyle.ArcGISTopographic)
-    val insets = MapInsets(bottom = 25.0)
-    val mapViewModel = viewModel<TemplateMapViewModel>(factory = MapViewModelFactory(map, insets))
+fun MapScreen() {
+    val map = ArcGISMap(BasemapStyle.ArcGISTopographic).also {
+        it.initialViewpoint = Viewpoint(39.8, -98.6, 10e7)
+    }
+    
+    val mapViewModel = viewModel<FeatureFormsMapViewModel>(
+        factory = FeatureFormsMapViewModelFactory(
+            map,
+            MapInsets(bottom = 25.0)
+        )
+    )
     ComposableMap(
         modifier = Modifier.fillMaxSize(),
         mapInterface = mapViewModel
     )
-    mapViewModel.setViewpoint(Viewpoint(39.8, -98.6, 10e7))
 }
