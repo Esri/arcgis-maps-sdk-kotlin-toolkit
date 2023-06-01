@@ -9,13 +9,18 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.mapping.ViewpointType
 import com.arcgismaps.mapping.view.MapView
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @Composable
@@ -29,26 +34,21 @@ public fun ComposableMap(
     val map by mapInterface.map.collectAsState()
     val insets by mapInterface.insets.collectAsState()
     val currentViewpoint by mapInterface.currentViewpoint.collectAsState()
-    val resetMapRotation by mapInterface.resetMapRotation.collectAsState()
 
     val mapView = remember {
         MapView(context)
     }
-    mapView.map = map
+
     mapView.setViewInsets(
         left = insets.start,
         right = insets.end,
         top = insets.top,
         bottom = insets.bottom
     )
-    currentViewpoint?.let { mapView.setViewpoint(it) }
 
-    if (resetMapRotation) {
-        LaunchedEffect(Unit) {
-            mapView.setViewpointRotation(0.0).onSuccess {
-                mapInterface.onMapRotationReset()
-            }
-        }
+    LaunchedEffect(map, currentViewpoint) {
+        mapView.map = map
+        currentViewpoint?.let { mapView.setViewpoint(it) }
     }
 
     DisposableEffect(lifecycleOwner) {
@@ -84,6 +84,11 @@ public fun ComposableMap(
         launch {
             mapView.mapRotation.collect {
                 mapInterface.onMapRotationChanged(it)
+            }
+        }
+        launch {
+            mapInterface.resetMapRotation.collect {
+                mapView.setViewpointRotation(0.0)
             }
         }
     }

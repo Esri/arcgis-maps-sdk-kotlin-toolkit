@@ -2,15 +2,20 @@ package com.arcgismaps.toolkit.compassapp.screens
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.toolkit.composablemap.MapInsets
 import com.arcgismaps.toolkit.composablemap.MapInterface
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class MapViewModel(
     arcGISMap: ArcGISMap,
@@ -25,8 +30,8 @@ class MapViewModel(
     private val _currentViewpoint: MutableStateFlow<Viewpoint?> = MutableStateFlow(null)
     override val currentViewpoint: StateFlow<Viewpoint?> = _currentViewpoint.asStateFlow()
 
-    private val _resetMapRotation: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    override val resetMapRotation: StateFlow<Boolean> = _resetMapRotation.asStateFlow()
+    private val _resetMapRotation: MutableSharedFlow<Unit> = MutableSharedFlow()
+    override val resetMapRotation: SharedFlow<Unit> = _resetMapRotation.asSharedFlow()
 
     private val _currentMapRotation: MutableStateFlow<Double> = MutableStateFlow(0.0)
     val currentMapRotation: StateFlow<Double> = _currentMapRotation.asStateFlow()
@@ -37,16 +42,14 @@ class MapViewModel(
         _currentMapRotation.value = rotation
     }
 
-    override fun onMapRotationReset() {
-        _resetMapRotation.update { false }
-    }
-
     fun setViewpoint(viewpoint: Viewpoint) {
-        _currentViewpoint.update { viewpoint }
+        _currentViewpoint.value = viewpoint
     }
 
     fun resetMapRotation() {
-        _resetMapRotation.update { true }
+        viewModelScope.launch {
+            _resetMapRotation.emit(Unit)
+        }
     }
 }
 

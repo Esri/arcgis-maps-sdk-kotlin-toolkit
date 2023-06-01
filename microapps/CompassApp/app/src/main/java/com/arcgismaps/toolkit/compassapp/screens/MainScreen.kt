@@ -26,5 +26,5 @@ fun MainScreen() {
             mapViewModel.resetMapRotation()
         }
     }
-    mapViewModel.setViewpoint(Viewpoint(39.8, -98.6, 10e7))
+    mapViewModel.setViewpoint(Viewpoint(39.8, -98.6, 10e4))
 }
