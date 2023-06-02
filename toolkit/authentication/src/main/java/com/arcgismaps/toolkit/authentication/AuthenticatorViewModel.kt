@@ -2,6 +2,7 @@ package com.arcgismaps.toolkit.authentication
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeHandler
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
@@ -17,11 +18,50 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-public class AuthenticatorViewModel : ViewModel(), NetworkAuthenticationChallengeHandler,
+/**
+ * Handles authentication challenges and exposes state for the [Authenticator] to display to the user.
+ * This should be set as the [ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler]
+ * and [ArcGISEnvironment.authenticationManager.networkAuthenticationChallengeHandler].
+ *
+ * @since 200.2.0
+ */
+public interface AuthenticatorViewModel : NetworkAuthenticationChallengeHandler,
     ArcGISAuthenticationChallengeHandler {
+    /**
+     * Whether an alert dialog should be displayed to the user. For initial testing purposes only,
+     * this will be removed later.
+     *
+     * @since 200.2.0
+     */
+    public val shouldShowDialog: StateFlow<Boolean>
+
+    /**
+     * Instructs the viewModel to dismiss the alert dialog. For initial testing purposes only,
+     * this will be removed later.
+     *
+     * @since 200.2.0
+     */
+    public fun dismissDialog(): Boolean
+
+    override suspend fun handleArcGISAuthenticationChallenge(challenge: ArcGISAuthenticationChallenge): ArcGISAuthenticationChallengeResponse {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun handleNetworkAuthenticationChallenge(challenge: NetworkAuthenticationChallenge): NetworkAuthenticationChallengeResponse {
+        TODO("Not yet implemented")
+    }
+}
+
+/**
+ * Default implementation for [AuthenticatorViewModel].
+ *
+ * @since 200.2.0
+ */
+public class AuthenticatorViewModelImpl : AuthenticatorViewModel, ViewModel() {
 
     private val _shouldShowDialog: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    public val shouldShowDialog: StateFlow<Boolean> = _shouldShowDialog.asStateFlow()
+
+    public override val shouldShowDialog: StateFlow<Boolean> = _shouldShowDialog.asStateFlow()
 
     private val oAuthConfiguration = OAuthUserConfiguration(
         "https://www.arcgis.com/home/item.html?id=e5039444ef3c48b8a8fdc9227f9be7c1",
@@ -39,7 +79,7 @@ public class AuthenticatorViewModel : ViewModel(), NetworkAuthenticationChalleng
         }
     }
 
-    public fun dismissDialog(): Boolean = _shouldShowDialog.tryEmit(false)
+    public override fun dismissDialog(): Boolean = _shouldShowDialog.tryEmit(false)
 
     private suspend fun onOauthChallenge(challenge: ArcGISAuthenticationChallenge) {
         if (oAuthConfiguration == null) { throw TODO() } else {

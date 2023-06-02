@@ -23,6 +23,21 @@ import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
 @Composable
+public fun Authenticator(authenticatorViewModel: AuthenticatorViewModel = viewModel<AuthenticatorViewModelImpl>()) {
+    val shouldShowDialog = authenticatorViewModel.shouldShowDialog.collectAsState().value
+    if (shouldShowDialog) {
+        AlertDialog(
+            onDismissRequest = authenticatorViewModel::dismissDialog,
+            confirmButton = {
+                Button(onClick = authenticatorViewModel::dismissDialog) {
+                    Text(text = "Confirm")
+                }
+            },
+            text = {
+                Text(text = "This is just a demo. " +
+                        "If you confirm or dismiss this dialog, it will not be displayed again.")
+            }
+        )
 public fun Authenticator(authenticatorViewModel: AuthenticatorViewModel = viewModel()) {
     ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler = authenticatorViewModel
     val oAuthPendingSignIn = authenticatorViewModel.pendingOAuthUserSignIn.collectAsState().value
