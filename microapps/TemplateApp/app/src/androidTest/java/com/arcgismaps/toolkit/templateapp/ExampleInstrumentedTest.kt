@@ -22,3 +22,4 @@ class ExampleInstrumentedTest {
         assertEquals("com.arcgismaps.toolkit.templateapp", appContext.packageName)
     }
 }
+
