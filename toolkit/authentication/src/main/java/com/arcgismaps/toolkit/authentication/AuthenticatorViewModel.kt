@@ -34,6 +34,9 @@ public interface AuthenticatorViewModel : NetworkAuthenticationChallengeHandler,
      * @since 200.2.0
      */
     public val shouldShowDialog: StateFlow<Boolean>
+    public val pendingOAuthUserSignIn: StateFlow<OAuthUserSignIn?>
+
+    public fun onOAuthActivityResult(redirectUrl: String?)
 
     /**
      * Instructs the viewModel to dismiss the alert dialog. For initial testing purposes only,
@@ -70,7 +73,7 @@ public class AuthenticatorViewModelImpl : AuthenticatorViewModel, ViewModel() {
     )
 
     private val _pendingOAuthUserSignIn: MutableStateFlow<OAuthUserSignIn?> = MutableStateFlow(null)
-    public val pendingOAuthUserSignIn: StateFlow<OAuthUserSignIn?> = _pendingOAuthUserSignIn.asStateFlow()
+    public override val pendingOAuthUserSignIn: StateFlow<OAuthUserSignIn?> = _pendingOAuthUserSignIn.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -98,7 +101,7 @@ public class AuthenticatorViewModelImpl : AuthenticatorViewModel, ViewModel() {
         _pendingOAuthUserSignIn.value = oAuthUserSignIn
     }
 
-    public fun onOAuthActivityResult(redirectUrl: String?) {
+    public override fun onOAuthActivityResult(redirectUrl: String?) {
         pendingOAuthUserSignIn.value?.let { oAuthPendingSignIn ->
             redirectUrl?.let { redirectUrl ->
                 oAuthPendingSignIn.complete(redirectUrl)

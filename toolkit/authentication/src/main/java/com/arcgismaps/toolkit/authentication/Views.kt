@@ -10,42 +10,25 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.browser.customtabs.CustomTabsIntent
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
 @Composable
 public fun Authenticator(authenticatorViewModel: AuthenticatorViewModel = viewModel<AuthenticatorViewModelImpl>()) {
-    val shouldShowDialog = authenticatorViewModel.shouldShowDialog.collectAsState().value
-    if (shouldShowDialog) {
-        AlertDialog(
-            onDismissRequest = authenticatorViewModel::dismissDialog,
-            confirmButton = {
-                Button(onClick = authenticatorViewModel::dismissDialog) {
-                    Text(text = "Confirm")
-                }
-            },
-            text = {
-                Text(text = "This is just a demo. " +
-                        "If you confirm or dismiss this dialog, it will not be displayed again.")
-            }
-        )
-public fun Authenticator(authenticatorViewModel: AuthenticatorViewModel = viewModel()) {
-    ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler = authenticatorViewModel
+
+    ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler =
+        authenticatorViewModel
     val oAuthPendingSignIn = authenticatorViewModel.pendingOAuthUserSignIn.collectAsState().value
-    val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) { activityResult ->
-        if (activityResult.resultCode == Activity.RESULT_OK) {
-            authenticatorViewModel.onOAuthActivityResult(redirectUrl = activityResult.data?.toString())
+    val launcher =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) { activityResult ->
+            if (activityResult.resultCode == Activity.RESULT_OK) {
+                authenticatorViewModel.onOAuthActivityResult(redirectUrl = activityResult.data?.toString())
+            }
         }
-    }
     authenticatorViewModel.pendingOAuthUserSignIn.collectAsState().value?.let {
         OAuthCCT(launcher, oAuthPendingSignIn)
     }
@@ -67,7 +50,10 @@ public fun Authenticator(authenticatorViewModel: AuthenticatorViewModel = viewMo
 }
 
 @Composable
-private fun OAuthCCT(launcher: ManagedActivityResultLauncher<Intent, ActivityResult>, oAuthPendingSignIn: OAuthUserSignIn?) {
+private fun OAuthCCT(
+    launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
+    oAuthPendingSignIn: OAuthUserSignIn?
+) {
     LaunchedEffect(oAuthPendingSignIn) {
         oAuthPendingSignIn?.let {
             launcher.launch(CustomTabsIntent.Builder().build().apply {
