@@ -1,4 +1,4 @@
-package com.arcgismaps.toolkit.composablemap
+package com.arcgismaps.toolkit.featureforms
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

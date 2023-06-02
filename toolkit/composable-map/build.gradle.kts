@@ -12,8 +12,9 @@ val artifactoryArtifactId: String = "$artifactoryArtifactBaseId-${project.name}"
 val artifactoryUrl: String by project
 val artifactoryUsername: String by project
 val artifactoryPassword: String by project
-// TODO: figure out versioning
-val artifactVersion: String = "xx.xx"
+val versionNumber: String by project
+val buildNumber: String by project
+val artifactVersion: String = "$versionNumber-$buildNumber"
 
 android {
     namespace = "com.arcgismaps.toolkit.composablemap"
@@ -53,6 +54,11 @@ android {
             kotlinOptions.freeCompilerArgs += "-Xexplicit-api=strict"
         }
     }
+}
+
+//https://youtrack.jetbrains.com/issue/KTIJ-21063
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class).all {
+    kotlinOptions.freeCompilerArgs += "-Xcontext-receivers"
 }
 
 dependencies {
