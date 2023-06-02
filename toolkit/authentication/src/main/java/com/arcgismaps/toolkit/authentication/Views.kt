@@ -16,7 +16,7 @@ import com.arcgismaps.ArcGISEnvironment
  * @since 200.2.0
  */
 @Composable
-public fun Authenticator(authenticatorViewModel: AuthenticatorViewModel = viewModel()) {
+public fun Authenticator(authenticatorViewModel: AuthenticatorViewModel = viewModel<AuthenticatorViewModelImpl>()) {
     val shouldShowDialog = authenticatorViewModel.shouldShowDialog.collectAsState().value
     if (shouldShowDialog) {
         AlertDialog(

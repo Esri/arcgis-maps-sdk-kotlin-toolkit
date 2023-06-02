@@ -22,17 +22,43 @@ import kotlinx.coroutines.launch
  *
  * @since 200.2.0
  */
-public class AuthenticatorViewModel : ViewModel(), NetworkAuthenticationChallengeHandler,
+public interface AuthenticatorViewModel : NetworkAuthenticationChallengeHandler,
     ArcGISAuthenticationChallengeHandler {
-
-    private val _shouldShowDialog: MutableStateFlow<Boolean> = MutableStateFlow(false)
     /**
      * Whether an alert dialog should be displayed to the user. For initial testing purposes only,
      * this will be removed later.
      *
      * @since 200.2.0
      */
-    public val shouldShowDialog: StateFlow<Boolean> = _shouldShowDialog.asStateFlow()
+    public val shouldShowDialog: StateFlow<Boolean>
+
+    /**
+     * Instructs the viewModel to dismiss the alert dialog. For initial testing purposes only,
+     * this will be removed later.
+     *
+     * @since 200.2.0
+     */
+    public fun dismissDialog(): Boolean
+
+    override suspend fun handleArcGISAuthenticationChallenge(challenge: ArcGISAuthenticationChallenge): ArcGISAuthenticationChallengeResponse {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun handleNetworkAuthenticationChallenge(challenge: NetworkAuthenticationChallenge): NetworkAuthenticationChallengeResponse {
+        TODO("Not yet implemented")
+    }
+}
+
+/**
+ * Default implementation for [AuthenticatorViewModel].
+ *
+ * @since 200.2.0
+ */
+public class AuthenticatorViewModelImpl : AuthenticatorViewModel, ViewModel() {
+
+    private val _shouldShowDialog: MutableStateFlow<Boolean> = MutableStateFlow(false)
+
+    public override val shouldShowDialog: StateFlow<Boolean> = _shouldShowDialog.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -41,13 +67,7 @@ public class AuthenticatorViewModel : ViewModel(), NetworkAuthenticationChalleng
         }
     }
 
-    /**
-     * Instructs the viewModel to dismiss the alert dialog. For initial testing purposes only,
-     * this will be removed later.
-     *
-     * @since 200.2.0
-     */
-    public fun dismissDialog(): Boolean = _shouldShowDialog.tryEmit(false)
+    public override fun dismissDialog(): Boolean = _shouldShowDialog.tryEmit(false)
 
     override suspend fun handleArcGISAuthenticationChallenge(challenge: ArcGISAuthenticationChallenge): ArcGISAuthenticationChallengeResponse {
         TODO("Not yet implemented")
