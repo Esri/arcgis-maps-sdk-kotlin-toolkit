@@ -35,3 +35,4 @@ fun AppPreview() {
         TemplateApp()
     }
 }
+
