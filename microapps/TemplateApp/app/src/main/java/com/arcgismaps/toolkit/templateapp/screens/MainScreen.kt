@@ -22,3 +22,4 @@ fun MainScreen() {
     )
     mapViewModel.setViewpoint(Viewpoint(39.8, -98.6, 10e7))
 }
+
