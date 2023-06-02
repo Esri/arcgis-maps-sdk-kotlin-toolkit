@@ -38,4 +38,3 @@ class MapViewModelFactory(
         return TemplateMapViewModel(arcGISMap, mapInsets) as T
     }
 }
-

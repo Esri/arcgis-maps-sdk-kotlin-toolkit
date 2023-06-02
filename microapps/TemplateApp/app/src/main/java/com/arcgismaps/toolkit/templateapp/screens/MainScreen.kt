@@ -9,7 +9,6 @@ import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.composablemap.ComposableMap
 import com.arcgismaps.toolkit.composablemap.MapInsets
-import com.arcgismaps.toolkit.composablemap.MapInterface
 
 @Composable
 fun MainScreen() {
@@ -22,4 +21,3 @@ fun MainScreen() {
     )
     mapViewModel.setViewpoint(Viewpoint(39.8, -98.6, 10e7))
 }
-
