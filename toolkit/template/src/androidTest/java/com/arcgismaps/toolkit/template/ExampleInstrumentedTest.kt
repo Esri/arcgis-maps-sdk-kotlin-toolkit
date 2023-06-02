@@ -22,3 +22,4 @@ class ExampleInstrumentedTest {
         assertEquals("com.arcgismaps.toolkit.authentication.test", appContext.packageName)
     }
 }
+
