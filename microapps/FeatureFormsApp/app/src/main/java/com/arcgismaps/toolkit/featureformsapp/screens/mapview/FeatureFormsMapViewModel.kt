@@ -11,8 +11,11 @@ import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.toolkit.composablemap.MapInsets
 import com.arcgismaps.toolkit.composablemap.MapInterface
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
@@ -31,6 +34,9 @@ class FeatureFormsMapViewModel(
     
     private val _currentViewpoint: MutableStateFlow<Viewpoint?> = MutableStateFlow(null)
     override val currentViewpoint: StateFlow<Viewpoint?> = _currentViewpoint.asStateFlow()
+
+    private val _resetMapRotation: MutableSharedFlow<Unit> = MutableSharedFlow()
+    override val resetMapRotation: SharedFlow<Unit> = _resetMapRotation.asSharedFlow()
     
     private fun editFeature() {
         println("editFeature")
