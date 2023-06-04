@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.mapping.view.MapView
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
 
 @Composable
 public fun ComposableMap(
@@ -32,14 +33,16 @@ public fun ComposableMap(
     val map by mapInterface.map.collectAsState()
     val insets by mapInterface.insets.collectAsState()
     val currentViewpoint by mapInterface.currentViewpoint.collectAsState()
-    
+    val lock = Mutex()
     val mapView = remember {
         MapView(context).also { view ->
             with(view) {
                 with(coroutineScope) {
                     launch {
-                        view.onDown.collect {
-                            mapInterface.onDown(it)
+                        if (lock.tryLock()) {
+                            view.onDown.collect {
+                                mapInterface.onDown(it)
+                            }
                         }
                     }
                     launch {
@@ -92,7 +95,7 @@ public fun ComposableMap(
             lifecycleOwner.lifecycle.removeObserver(mapView)
         }
     }
-
+    
     Box(modifier = modifier.semantics {
         contentDescription = "MapContainer"
     }) {

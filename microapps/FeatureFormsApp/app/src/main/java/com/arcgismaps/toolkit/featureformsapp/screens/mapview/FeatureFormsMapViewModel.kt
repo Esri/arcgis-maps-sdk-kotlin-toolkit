@@ -16,13 +16,18 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+interface FeatureFormsMapViewModelInterface: MapInterface {
+    val onFeatureIdentified: (ArcGISFeature)-> Unit
+}
+
 /**
  * A view model for the FeatureForms MapView UI
  */
-class FeatureFormsMapViewModel(
+class FeatureFormsMapViewModelImpl(
     arcGISMap: ArcGISMap,
-    mapInsets: MapInsets = MapInsets()
-) : ViewModel(), MapInterface {
+    mapInsets: MapInsets = MapInsets(),
+    override val onFeatureIdentified: (ArcGISFeature) -> Unit
+) : ViewModel(), FeatureFormsMapViewModelInterface {
     private val _map: MutableStateFlow<ArcGISMap> = MutableStateFlow(arcGISMap)
     override val map: StateFlow<ArcGISMap> = _map.asStateFlow()
     
@@ -32,18 +37,14 @@ class FeatureFormsMapViewModel(
     private val _currentViewpoint: MutableStateFlow<Viewpoint?> = MutableStateFlow(null)
     override val currentViewpoint: StateFlow<Viewpoint?> = _currentViewpoint.asStateFlow()
     
-    private fun editFeature() {
-        println("editFeature")
-        // to be fleshed out with its own view model and navigation to the bottom sheet or side panel.
-    }
-    
     private suspend fun onIdentifyLayers(results: List<IdentifyLayerResult>) {
+        println("onIdentifyLayer")
         val popup = results.firstOrNull { result ->
             result.popups.isNotEmpty()
         }?.popups?.firstOrNull() ?: return
         
         val feature = popup.geoElement as? ArcGISFeature ?: return
-        feature.load().onSuccess { editFeature() }
+        feature.load().onSuccess { onFeatureIdentified(feature) }
     }
 
     context(MapView, CoroutineScope) override fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {
@@ -62,10 +63,11 @@ class FeatureFormsMapViewModel(
 
 class FeatureFormsMapViewModelFactory(
     private val arcGISMap: ArcGISMap,
-    private val mapInsets: MapInsets = MapInsets()
+    private val mapInsets: MapInsets = MapInsets(),
+    private val onFeatureIdentified: (ArcGISFeature) -> Unit = {}
 ) : ViewModelProvider.NewInstanceFactory() {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return FeatureFormsMapViewModel(arcGISMap, mapInsets) as T
+        return FeatureFormsMapViewModelImpl(arcGISMap, mapInsets, onFeatureIdentified) as T
     }
 }
