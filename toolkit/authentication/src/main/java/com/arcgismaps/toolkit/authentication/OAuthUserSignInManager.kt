@@ -9,13 +9,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 public interface OAuthUserSignInManager {
+    public var oAuthUserConfiguration: OAuthUserConfiguration?
     public val pendingOAuthUserSignIn: StateFlow<OAuthUserSignIn?>
     public suspend fun handleOAuthChallenge(challenge: ArcGISAuthenticationChallenge, oAuthUserConfiguration: OAuthUserConfiguration): OAuthUserCredential
     public fun completeOAuthPendingSignIn(redirectUrl: String?)
 }
 
-public class OAuthUserSignInManagerImpl :
-    OAuthUserSignInManager {
+public class OAuthUserSignInManagerImpl : OAuthUserSignInManager {
+
+    public override var oAuthUserConfiguration: OAuthUserConfiguration? = null
 
     private val _pendingOAuthUserSignIn: MutableStateFlow<OAuthUserSignIn?> = MutableStateFlow(null)
     override val pendingOAuthUserSignIn: StateFlow<OAuthUserSignIn?> =
