@@ -12,17 +12,11 @@ import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 // TODO: Make the vm not default
 // TODO: make oAuthUserConfiguration a nullable prop on vm
 @Composable
-public fun Authenticator(authenticatorViewModel: AuthenticatorViewModel = viewModel<AuthenticatorViewModelImpl>(factory = AuthenticatorViewModel.Factory)) {
+public fun Authenticator(authenticatorViewModel: AuthenticatorViewModel) {
 
     ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler =
         authenticatorViewModel
-    authenticatorViewModel.setOAuthUserConfiguration(
-        OAuthUserConfiguration(
-            "https://www.arcgis.com",
-            "lgAdHkYZYlwwfAhC",
-            "my-ags-app://auth"
-        )
-    )
+    ArcGISEnvironment.authenticationManager.networkAuthenticationChallengeHandler = authenticatorViewModel
     val oAuthPendingSignIn = authenticatorViewModel.pendingOAuthUserSignIn.collectAsState().value
 
     oAuthPendingSignIn?.let { oAuthPendingSignIn ->

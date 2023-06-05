@@ -14,8 +14,8 @@ import com.arcgismaps.toolkit.composablemap.MapInsets
 import com.arcgismaps.toolkit.composablemap.MapInterface
 
 @Composable
-fun MainScreen(portalItemUrl: String) {
-    val map = ArcGISMap(PortalItem(portalItemUrl))
+fun MainScreen(portalItem: PortalItem) {
+    val map = ArcGISMap(portalItem)
     val insets = MapInsets(bottom = 25.0)
     val mapViewModel = viewModel<MapViewModel>(factory = MapViewModelFactory(map, insets))
     ComposableMap(

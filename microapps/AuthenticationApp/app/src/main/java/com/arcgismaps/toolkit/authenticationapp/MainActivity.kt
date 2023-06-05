@@ -8,11 +8,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.LoadStatus
+import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
+import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.authentication.Authenticator
+import com.arcgismaps.toolkit.authentication.AuthenticatorViewModel
 import com.arcgismaps.toolkit.authenticationapp.screens.MainScreen
 import com.arcgismaps.toolkit.authenticationapp.ui.theme.AuthenticationAppTheme
 
@@ -29,9 +33,17 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AuthenticationApp() {
-    val portal = remember { Portal("https://www.arcgis.com/home/item.html?id=e5039444ef3c48b8a8fdc9227f9be7c1", Portal.Connection.Authenticated) }
-    MainScreen(portalItemUrl = portal.url)
-    Authenticator()
+    val portal = remember { Portal("https://www.arcgis.com", Portal.Connection.Authenticated) }
+    MainScreen(portalItem = PortalItem(portal = portal, itemId = "e5039444ef3c48b8a8fdc9227f9be7c1"))
+    val authenticatorViewModel: AuthenticatorViewModel = viewModel(factory = AuthenticatorViewModel.Factory)
+    authenticatorViewModel.setOAuthUserConfiguration(
+        OAuthUserConfiguration(
+            "https://www.arcgis.com",
+            BuildConfig.OAUTH_CLIENT_ID,
+            "my-ags-app://auth"
+        )
+    )
+    Authenticator(authenticatorViewModel)
 }
 
 @Preview(showBackground = true)
