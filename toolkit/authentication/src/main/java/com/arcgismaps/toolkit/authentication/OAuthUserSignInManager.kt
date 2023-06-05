@@ -11,23 +11,36 @@ import kotlinx.coroutines.flow.asStateFlow
 public interface OAuthUserSignInManager {
     public var oAuthUserConfiguration: OAuthUserConfiguration?
     public val pendingOAuthUserSignIn: StateFlow<OAuthUserSignIn?>
-    public suspend fun handleOAuthChallenge(challenge: ArcGISAuthenticationChallenge, oAuthUserConfiguration: OAuthUserConfiguration): OAuthUserCredential
+    public suspend fun handleOAuthChallenge(
+        challenge: ArcGISAuthenticationChallenge,
+        oAuthUserConfiguration: OAuthUserConfiguration
+    ): OAuthUserCredential
+
     public fun completeOAuthPendingSignIn(redirectUrl: String?)
+
+    public companion object {
+        public fun create(oAuthUserConfiguration: OAuthUserConfiguration? = null): OAuthUserSignInManager {
+            return OAuthUserSignInManagerImpl(oAuthUserConfiguration)
+        }
+    }
 }
 
-public class OAuthUserSignInManagerImpl : OAuthUserSignInManager {
-
-    public override var oAuthUserConfiguration: OAuthUserConfiguration? = null
+private class OAuthUserSignInManagerImpl constructor(override var oAuthUserConfiguration: OAuthUserConfiguration?) :
+    OAuthUserSignInManager {
 
     private val _pendingOAuthUserSignIn: MutableStateFlow<OAuthUserSignIn?> = MutableStateFlow(null)
     override val pendingOAuthUserSignIn: StateFlow<OAuthUserSignIn?> =
         _pendingOAuthUserSignIn.asStateFlow()
 
-    override suspend fun handleOAuthChallenge(challenge: ArcGISAuthenticationChallenge, oAuthUserConfiguration: OAuthUserConfiguration): OAuthUserCredential {
-        val oAuthUserCredential = OAuthUserCredential.create(oAuthUserConfiguration) { oAuthUserSignIn ->
-            // A composable observing [pendingOAuthUserSignIn] can launch the cct when this value changes.
-            _pendingOAuthUserSignIn.value = oAuthUserSignIn
-        }.getOrThrow()
+    override suspend fun handleOAuthChallenge(
+        challenge: ArcGISAuthenticationChallenge,
+        oAuthUserConfiguration: OAuthUserConfiguration
+    ): OAuthUserCredential {
+        val oAuthUserCredential =
+            OAuthUserCredential.create(oAuthUserConfiguration) { oAuthUserSignIn ->
+                // A composable observing [pendingOAuthUserSignIn] can launch the cct when this value changes.
+                _pendingOAuthUserSignIn.value = oAuthUserSignIn
+            }.getOrThrow()
         // At this point we have suspended until the OAuth workflow is complete, so we can get rid of the pending sign in
         // Composables observing this can know to remove the cct when this value changes.
         _pendingOAuthUserSignIn.value = null
