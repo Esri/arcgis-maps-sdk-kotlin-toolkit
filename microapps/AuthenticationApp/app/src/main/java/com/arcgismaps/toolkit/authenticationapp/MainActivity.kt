@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
@@ -28,14 +29,8 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AuthenticationApp() {
-    val portal = Portal("https://www.arcgis.com/home/item.html?id=e5039444ef3c48b8a8fdc9227f9be7c1", Portal.Connection.Authenticated)
-    LaunchedEffect(Unit) {
-        portal.load()
-    }
-    val loadStatus = portal.loadStatus.collectAsState()
-    if (loadStatus.value == LoadStatus.Loaded) {
-        MainScreen(portal.url)
-    }
+    val portal = remember { Portal("https://www.arcgis.com/home/item.html?id=e5039444ef3c48b8a8fdc9227f9be7c1", Portal.Connection.Authenticated) }
+    MainScreen(portalItemUrl = portal.url)
     Authenticator()
 }
 
