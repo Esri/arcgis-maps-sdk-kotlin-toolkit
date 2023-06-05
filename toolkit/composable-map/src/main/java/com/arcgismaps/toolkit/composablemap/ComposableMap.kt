@@ -38,8 +38,8 @@ public fun ComposableMap(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
-    val lock = remember {
-        Mutex()
+    val flowProducer = remember {
+        UUID.randomUUID()
     }
 
     val map by mapInterface.map.collectAsState()
@@ -86,15 +86,13 @@ public fun ComposableMap(
                     }
                     launch {
                         view.mapRotation.collect {
-                            lock.withLock {
-                                mapInterface.onMapRotationChanged(it)
-                            }
+                            mapInterface.onMapRotationChanged(it, flowProducer)
                         }
                     }
                     launch {
                         view.viewpointChanged.collect {
                             view.getCurrentViewpoint(ViewpointType.CenterAndScale)?.let {
-                                mapInterface.onMapViewpointChanged(it)
+                                mapInterface.onMapViewpointChanged(it, flowProducer)
                             }
                         }
                     }
@@ -114,19 +112,16 @@ public fun ComposableMap(
     LaunchedEffect(Unit) {
         launch {
             mapInterface.mapRotation.collect {
-                if (lock.tryLock()) {
-                    Log.d("TAG", "ComposableMap: setting rot")
-                    mapView.setViewpointRotation(it)
-                } else {
-                    Log.d("TAG", "ComposableMap: no lock")
-                }
+                if (it.producer != flowProducer)
+                    mapView.setViewpointRotation(it.data)
             }
         }
         launch {
-            mapInterface.viewpoint.collect {
-                it?.let {
-                    //mapView.setViewpoint(it)
-                }
+            mapInterface.viewpoint.collect { flowData ->
+                if (flowData.producer != flowProducer)
+                    flowData.data?.let {
+                        mapView.setViewpoint(it)
+                    }
             }
         }
     }
@@ -161,8 +156,3 @@ public fun ComposableMap(
         }
     }
 }
-
-@Composable
-public fun <T> rememberFlowProducer(newValue: T): State<T> = remember {
-    mutableStateOf(newValue)
-}.apply { value = newValue }

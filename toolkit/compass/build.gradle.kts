@@ -56,6 +56,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":composable-map"))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)
