@@ -29,8 +29,7 @@ public interface AuthenticatorViewModel : NetworkAuthenticationChallengeHandler,
     public companion object {
         public val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(
-                modelClass: Class<T>,
-                extras: CreationExtras
+                modelClass: Class<T>, extras: CreationExtras
             ): T {
                 return AuthenticatorViewModelImpl() as T
             }
@@ -43,10 +42,9 @@ public interface AuthenticatorViewModel : NetworkAuthenticationChallengeHandler,
  *
  * @since 200.2.0
  */
-public class AuthenticatorViewModelImpl : AuthenticatorViewModel, ViewModel() {
+private class AuthenticatorViewModelImpl : AuthenticatorViewModel, ViewModel() {
 
-    public override val oAuthUserSignInManager: OAuthUserSignInManager =
-        OAuthUserSignInManagerImpl()
+    override val oAuthUserSignInManager: OAuthUserSignInManager = OAuthUserSignInManager.create()
 
     override suspend fun handleArcGISAuthenticationChallenge(challenge: ArcGISAuthenticationChallenge): ArcGISAuthenticationChallengeResponse {
         oAuthUserSignInManager.oAuthUserConfiguration?.let { oAuthUserConfiguration ->
@@ -54,11 +52,13 @@ public class AuthenticatorViewModelImpl : AuthenticatorViewModel, ViewModel() {
                 val oAuthUserCredential =
                     oAuthUserSignInManager.handleOAuthChallenge(challenge, oAuthUserConfiguration)
 
-                return ArcGISAuthenticationChallengeResponse
-                    .ContinueWithCredential(oAuthUserCredential)
+                return ArcGISAuthenticationChallengeResponse.ContinueWithCredential(
+                        oAuthUserCredential
+                    )
             } else {
-                return ArcGISAuthenticationChallengeResponse
-                    .ContinueAndFailWithError(UnsupportedOperationException())
+                return ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError(
+                        UnsupportedOperationException()
+                    )
             }
         } ?: return TODO()
     }

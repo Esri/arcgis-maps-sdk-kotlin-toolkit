@@ -13,7 +13,8 @@ public fun Authenticator(authenticatorViewModel: AuthenticatorViewModel) {
         authenticatorViewModel
     ArcGISEnvironment.authenticationManager.networkAuthenticationChallengeHandler =
         authenticatorViewModel
-    val oAuthPendingSignIn = authenticatorViewModel.oAuthUserSignInManager.pendingOAuthUserSignIn.collectAsState().value
+    val oAuthPendingSignIn =
+        authenticatorViewModel.oAuthUserSignInManager.pendingOAuthUserSignIn.collectAsState().value
 
     oAuthPendingSignIn?.let { oAuthPendingSignIn ->
         OAuthAuthenticator(oAuthPendingSignIn) { redirectUrl ->
