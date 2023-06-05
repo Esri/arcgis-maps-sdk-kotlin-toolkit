@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-class TemplateMapViewModel(
+class MapViewModel(
     arcGISMap: ArcGISMap,
     mapInsets: MapInsets = MapInsets()
 ) : ViewModel(), MapInterface {
@@ -35,6 +35,6 @@ class MapViewModelFactory(
 ) : ViewModelProvider.NewInstanceFactory() {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return TemplateMapViewModel(arcGISMap, mapInsets) as T
+        return MapViewModel(arcGISMap, mapInsets) as T
     }
 }
