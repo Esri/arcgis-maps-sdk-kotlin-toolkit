@@ -2,7 +2,7 @@ package com.arcgismaps.toolkit.authentication
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
@@ -25,17 +25,17 @@ public fun Authenticator(authenticatorViewModel: AuthenticatorViewModel) {
 
 @Composable
 private fun OAuthAuthenticator(
-    oAuthPendingSignIn: OAuthUserSignIn?,
+    oAuthPendingSignIn: OAuthUserSignIn,
     onActivityResult: (String?) -> Unit
 ) {
     val launcher =
         rememberLauncherForActivityResult(contract = OAuthUserSignInActivity.Contract()) { redirectUrl ->
             onActivityResult(redirectUrl)
         }
-    // TODO: Do we need this?
-    LaunchedEffect(oAuthPendingSignIn) {
-        oAuthPendingSignIn?.let {
-            launcher.launch(it)
-        }
+    // Launching an activity is a side effect. We don't need `LaunchedEffect` because this is not suspending
+    // and there's nothing that needs to keep running if it gets recomposed. In reality, we also don't
+    // expect `oAuthPendingSignIn` to change while this composable is displayed.
+    SideEffect {
+        launcher.launch(oAuthPendingSignIn)
     }
 }
