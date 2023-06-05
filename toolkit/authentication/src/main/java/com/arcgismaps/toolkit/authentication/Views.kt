@@ -5,10 +5,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
+/**
+ * Displays appropriate Authentication UI when issued a challenge. For example, if an OAuth challenge
+ * is issued and the [AuthenticatorViewModel.oAuthUserSignInManager] has a corresponding [OAuthUserConfiguration],
+ * then a Custom Chrome Tab will be launched to complete the OAuth sign in.
+ *
+ * @param authenticatorViewModel an [AuthenticatorViewModel]. See [AuthenticatorViewModel.Companion.Factory].
+ * @param setAsDefaultChallengeHandler whether to set this [authenticatorViewModel] as the
+ * [ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler] and
+ * [ArcGISEnvironment.authenticationManager.networkAuthenticationChallengeHandler]. True by default.
+ * @since 200.2.0
+ */
 @Composable
-public fun Authenticator(authenticatorViewModel: AuthenticatorViewModel, setAsDefaultChallengeHandler: Boolean = true) {
+public fun Authenticator(
+    authenticatorViewModel: AuthenticatorViewModel,
+    setAsDefaultChallengeHandler: Boolean = true
+) {
     if (setAsDefaultChallengeHandler) {
         ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler =
             authenticatorViewModel
@@ -26,6 +41,14 @@ public fun Authenticator(authenticatorViewModel: AuthenticatorViewModel, setAsDe
     }
 }
 
+/**
+ * Launches a Custom Chrome Tab using the url in [oAuthPendingSignIn] and calls [onActivityResult] on completion.
+ *
+ * @see OAuthUserSignInActivity
+ * @param oAuthPendingSignIn the [OAuthUserSignIn] pending completion.
+ * @param onActivityResult called with the redirect url on completion of the OAuth sign in.
+ * @since 200.2.0
+ */
 @Composable
 private fun OAuthAuthenticator(
     oAuthPendingSignIn: OAuthUserSignIn,

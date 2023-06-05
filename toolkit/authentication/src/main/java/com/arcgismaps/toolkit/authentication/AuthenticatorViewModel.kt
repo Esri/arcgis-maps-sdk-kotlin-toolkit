@@ -21,6 +21,9 @@ import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeResp
 public interface AuthenticatorViewModel : NetworkAuthenticationChallengeHandler,
     ArcGISAuthenticationChallengeHandler {
 
+    /**
+     * The [OAuthUserSignInManager] to handle incoming OAuth challenges.
+     */
     public val oAuthUserSignInManager: OAuthUserSignInManager
 
     override suspend fun handleArcGISAuthenticationChallenge(challenge: ArcGISAuthenticationChallenge): ArcGISAuthenticationChallengeResponse
