@@ -1,6 +1,10 @@
 package com.arcgismaps.toolkit.compass
 
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,24 +19,36 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
  *
  */
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 public fun Compass(
-    degrees: Double,
+    rotation: Double,
     modifier: Modifier = Modifier,
+    autoHide: Boolean = true,
+    size: Dp = 50.dp,
     onClick: () -> Unit = {}
 ) {
-    CompassButtonIcon(
-        modifier = modifier
-            .size(50.dp)
-            .rotate(-degrees.toFloat()),
-        icon = R.drawable.ic_compass,
-        onClick = onClick
-    )
+    val heading = -rotation.toFloat()
+    val visible = if (autoHide) heading != 0f else true
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn(),
+        exit = fadeOut()
+    ) {
+        CompassButtonIcon(
+            modifier = modifier
+                .size(size)
+                .rotate(heading),
+            icon = R.drawable.ic_compass,
+            onClick = onClick
+        )
+    }
 }
 
 @Composable
@@ -43,7 +59,7 @@ internal fun CompassButtonIcon(
 ) {
     Button(
         modifier = modifier
-        .clip(CircleShape),
+            .clip(CircleShape),
         colors = ButtonDefaults.buttonColors(containerColor = Color.White),
         contentPadding = PaddingValues(10.dp),
         onClick = onClick

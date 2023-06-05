@@ -7,8 +7,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -18,19 +20,27 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.arcgismaps.mapping.ViewpointType
 import com.arcgismaps.mapping.view.MapView
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import java.util.UUID
+import kotlin.math.log
 
 @Composable
 public fun ComposableMap(
-    modifier: Modifier = Modifier,
     mapInterface: MapInterface,
-    content: @Composable () -> Unit = {}
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit = {},
 ) {
-    Log.d("TAG", "ComposableMap: composing")
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
+    val lock = remember {
+        Mutex()
+    }
 
     val map by mapInterface.map.collectAsState()
     val insets by mapInterface.insets.collectAsState()
@@ -74,6 +84,20 @@ public fun ComposableMap(
                             mapInterface.onPan(it)
                         }
                     }
+                    launch {
+                        view.mapRotation.collect {
+                            lock.withLock {
+                                mapInterface.onMapRotationChanged(it)
+                            }
+                        }
+                    }
+                    launch {
+                        view.viewpointChanged.collect {
+                            view.getCurrentViewpoint(ViewpointType.CenterAndScale)?.let {
+                                mapInterface.onMapViewpointChanged(it)
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -89,19 +113,19 @@ public fun ComposableMap(
 
     LaunchedEffect(Unit) {
         launch {
-            mapView.mapRotation.collect {
-                mapInterface.onMapRotationChanged(it)
+            mapInterface.mapRotation.collect {
+                if (lock.tryLock()) {
+                    Log.d("TAG", "ComposableMap: setting rot")
+                    mapView.setViewpointRotation(it)
+                } else {
+                    Log.d("TAG", "ComposableMap: no lock")
+                }
             }
         }
         launch {
-            mapInterface.resetMapRotation.collect {
-                mapView.setViewpointRotation(0.0)
-            }
-        }
-        launch {
-            mapInterface.currentViewpoint.collect {
+            mapInterface.viewpoint.collect {
                 it?.let {
-                    mapView.setViewpoint(it)
+                    //mapView.setViewpoint(it)
                 }
             }
         }
@@ -137,3 +161,8 @@ public fun ComposableMap(
         }
     }
 }
+
+@Composable
+public fun <T> rememberFlowProducer(newValue: T): State<T> = remember {
+    mutableStateOf(newValue)
+}.apply { value = newValue }

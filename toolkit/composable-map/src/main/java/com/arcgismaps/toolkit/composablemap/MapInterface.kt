@@ -1,5 +1,6 @@
 package com.arcgismaps.toolkit.composablemap
 
+import android.view.View
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.view.DoubleTapEvent
@@ -76,7 +77,13 @@ public interface MapEvents {
      */
     context(MapView, CoroutineScope) public fun onPan(panEvent: PanChangeEvent) {}
 
-    public fun onMapRotationChanged(rotation: Double) {}
+    public suspend fun onMapRotationChanged(rotation: Double) {}
+
+    public fun setViewpointRotation(angleDegrees: Double) {}
+
+    public suspend fun onMapViewpointChanged(viewpoint: Viewpoint) {}
+
+    public fun setViewpoint(viewpoint: Viewpoint) {}
 }
 
 /**
@@ -97,6 +104,7 @@ public interface MapInterface : MapEvents {
     /**
      * The [Viewpoint] from which the [ComposableMap] is drawn.
      */
-    public val currentViewpoint : StateFlow<Viewpoint?>
-    public val resetMapRotation : SharedFlow<Unit>
+    public val viewpoint : StateFlow<Viewpoint?>
+
+    public val mapRotation : SharedFlow<Double>
 }
