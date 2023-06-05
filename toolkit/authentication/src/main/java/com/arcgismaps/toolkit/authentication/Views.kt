@@ -4,24 +4,20 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
-// TODO: Make the vm not default
-// TODO: make oAuthUserConfiguration a nullable prop on vm
 @Composable
 public fun Authenticator(authenticatorViewModel: AuthenticatorViewModel) {
-
     ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler =
         authenticatorViewModel
-    ArcGISEnvironment.authenticationManager.networkAuthenticationChallengeHandler = authenticatorViewModel
-    val oAuthPendingSignIn = authenticatorViewModel.pendingOAuthUserSignIn.collectAsState().value
+    ArcGISEnvironment.authenticationManager.networkAuthenticationChallengeHandler =
+        authenticatorViewModel
+    val oAuthPendingSignIn = authenticatorViewModel.oAuthUserSignInManager.pendingOAuthUserSignIn.collectAsState().value
 
     oAuthPendingSignIn?.let { oAuthPendingSignIn ->
         OAuthAuthenticator(oAuthPendingSignIn) { redirectUrl ->
-            authenticatorViewModel.completeOAuthPendingSignIn(redirectUrl = redirectUrl)
+            authenticatorViewModel.oAuthUserSignInManager.completeOAuthPendingSignIn(redirectUrl = redirectUrl)
         }
     }
 }
