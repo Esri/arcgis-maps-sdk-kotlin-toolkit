@@ -8,11 +8,14 @@ import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
 @Composable
-public fun Authenticator(authenticatorViewModel: AuthenticatorViewModel) {
-    ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler =
-        authenticatorViewModel
-    ArcGISEnvironment.authenticationManager.networkAuthenticationChallengeHandler =
-        authenticatorViewModel
+public fun Authenticator(authenticatorViewModel: AuthenticatorViewModel, setAsDefaultChallengeHandler: Boolean = true) {
+    if (setAsDefaultChallengeHandler) {
+        ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler =
+            authenticatorViewModel
+        ArcGISEnvironment.authenticationManager.networkAuthenticationChallengeHandler =
+            authenticatorViewModel
+    }
+
     val oAuthPendingSignIn =
         authenticatorViewModel.oAuthUserSignInManager.pendingOAuthUserSignIn.collectAsState().value
 
