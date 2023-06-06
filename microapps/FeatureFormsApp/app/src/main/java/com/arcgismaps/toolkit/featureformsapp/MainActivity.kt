@@ -9,13 +9,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.data.ArcGISFeature
-import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
-import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeHandler
-import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
-import com.arcgismaps.httpcore.authentication.TokenCredential
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
-import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.composablemap.MapInsets
 import com.arcgismaps.toolkit.featureforms.FeatureFormViewModelFactory
 import com.arcgismaps.toolkit.featureforms.FeatureFormViewModelImpl
@@ -26,7 +21,6 @@ import com.arcgismaps.toolkit.featureformsapp.screens.mapview.FeatureFormsMapVie
 import com.arcgismaps.toolkit.featureformsapp.screens.mapview.MapScreen
 import com.arcgismaps.toolkit.featureformsapp.ui.theme.FeatureFormsAppTheme
 import kotlinx.coroutines.launch
-import java.util.concurrent.atomic.AtomicInteger
 
 
 class MainActivity : ComponentActivity() {
