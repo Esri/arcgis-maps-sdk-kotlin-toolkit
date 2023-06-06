@@ -8,6 +8,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -21,6 +22,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -51,7 +54,8 @@ public fun Compass(
             icon = R.drawable.ic_compass,
             modifier = modifier
                 .size(size)
-                .rotate(heading),
+                .rotate(heading)
+                .semantics { contentDescription = "CompassButtonIcon" },
             color = color,
             onClick = onClick
         )
@@ -83,7 +87,7 @@ internal fun CompassButtonIcon(
         onClick = onClick
     ) {
         Image(
-            modifier = modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize(),
             painter = painterResource(icon),
             contentDescription = "CompassIcon"
         )

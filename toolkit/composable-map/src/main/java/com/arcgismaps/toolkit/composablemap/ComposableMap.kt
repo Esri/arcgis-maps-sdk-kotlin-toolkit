@@ -45,6 +45,10 @@ public fun ComposableMap(
     val map by mapInterface.map.collectAsState()
     val insets by mapInterface.insets.collectAsState()
 
+    val lock = remember {
+        Mutex()
+    }
+
     val mapView = remember {
         MapView(context).also { view ->
             with(view) {

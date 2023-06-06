@@ -13,22 +13,37 @@ import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithContentDescription
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.Viewpoint
-import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import org.junit.After
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.util.UUID
 
 class ComposableMapTests {
+
+    lateinit var scope: CoroutineScope
+
+    @Before
+    fun setUp() {
+        scope = CoroutineScope(Dispatchers.Default)
+    }
+
+    @After
+    fun tearDown() {
+        scope.cancel()
+    }
 
     @get:Rule
     val composeTestRule = createComposeRule()
 
     @Test
     fun testComposableMapLayout() {
-        val mockMapInterface = MockMapInterface(ArcGISMap())
+        val mockMapInterface = MockMapInterface(ArcGISMap(), scope = scope)
 
         composeTestRule.setContent {
             ComposableMap(mapInterface = mockMapInterface) {
@@ -51,20 +66,30 @@ class ComposableMapTests {
 
 class MockMapInterface(
     map: ArcGISMap,
-    insets: MapInsets = MapInsets()
+    insets: MapInsets = MapInsets(),
+    private val scope: CoroutineScope
 ) : MapInterface {
-    private val _map: MutableStateFlow<ArcGISMap> = MutableStateFlow(map)
-    override val map: StateFlow<ArcGISMap> = _map.asStateFlow()
+    private val flowProducer = UUID.randomUUID()
 
-    private val _insets: MutableStateFlow<MapInsets> = MutableStateFlow(insets)
-    override val insets: StateFlow<MapInsets> = _insets.asStateFlow()
+    override val map: MutableStateFlow<ArcGISMap> = MutableStateFlow(map)
+    override val insets: MutableStateFlow<MapInsets> = MutableStateFlow(insets)
 
-    private val _currentViewpoint: MutableStateFlow<Viewpoint?> = MutableStateFlow(null)
-    override val currentViewpoint: StateFlow<Viewpoint?> = _currentViewpoint.asStateFlow()
+    override val viewpoint: MutableStateFlow<FlowData<Viewpoint?>> =  MutableStateFlow(FlowData(null, flowProducer))
+    override val mapRotation: MutableStateFlow<FlowData<Double>> =  MutableStateFlow(FlowData(0.0, flowProducer))
 
-    override fun onSingleTapConfirmed(event: SingleTapConfirmedEvent) {}
+    override suspend fun onMapRotationChanged(rotation: Double, flowProducer: UUID?) {
+        mapRotation.emit(FlowData(rotation, flowProducer))
+    }
 
-    fun setViewpoint(viewpoint: Viewpoint) {
-        _currentViewpoint.update { viewpoint }
+    override suspend fun onMapViewpointChanged(viewpoint: Viewpoint, flowProducer: UUID?) {
+        scope.launch {
+            this@MockMapInterface.viewpoint.emit(FlowData(viewpoint, flowProducer))
+        }
+    }
+
+    override fun setViewpoint(viewpoint: Viewpoint) {
+        scope.launch {
+            this@MockMapInterface.viewpoint.emit(FlowData(viewpoint, flowProducer))
+        }
     }
 }

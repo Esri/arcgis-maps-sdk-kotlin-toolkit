@@ -11,6 +11,7 @@ import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.toolkit.composablemap.ComposableMap
+import com.arcgismaps.toolkit.composablemap.FlowData
 import com.arcgismaps.toolkit.composablemap.MapInsets
 import com.arcgismaps.toolkit.composablemap.MapInterface
 import kotlinx.coroutines.CoroutineScope
@@ -62,7 +63,9 @@ class MockMapInterface(map : ArcGISMap) : MapInterface {
     
     override val insets: StateFlow<MapInsets> = MutableStateFlow(MapInsets()).asStateFlow()
 
-    override val currentViewpoint: StateFlow<Viewpoint?> = MutableStateFlow(null).asStateFlow()
+    override val viewpoint: StateFlow<FlowData<Viewpoint?>> = MutableStateFlow(FlowData<Viewpoint?>(null)).asStateFlow()
+
+    override val mapRotation: StateFlow<FlowData<Double>> = MutableStateFlow(FlowData(0.0)).asStateFlow()
 
     val onClick: MutableStateFlow<Unit?> = MutableStateFlow(null)
     context(MapView, CoroutineScope) override fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {

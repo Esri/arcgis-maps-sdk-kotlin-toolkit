@@ -1,5 +1,6 @@
 package com.arcgismaps.toolkit.compassapp.screens
 
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,11 +32,11 @@ fun MainScreen() {
         mapInterface = mapViewModel
     ) {
         Row(modifier = Modifier
-            .height(100.dp)
+            .height(IntrinsicSize.Max)
             .fillMaxWidth()
             .padding(25.dp)) {
             // show the compass and pass the mapRotation state data
-            Compass(rotation = mapRotation.data) {
+            Compass(rotation = mapRotation.data, size = 50.dp, autoHide = false) {
                 // reset the ComposableMap viewpoint rotation to point north using the mapViewModel
                 mapViewModel.setViewpointRotation(0.0)
             }
