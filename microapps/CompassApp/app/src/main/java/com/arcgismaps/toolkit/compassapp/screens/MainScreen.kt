@@ -36,7 +36,7 @@ fun MainScreen() {
             .fillMaxWidth()
             .padding(25.dp)) {
             // show the compass and pass the mapRotation state data
-            Compass(rotation = mapRotation.data, size = 50.dp, autoHide = false) {
+            Compass(rotation = mapRotation.data) {
                 // reset the ComposableMap viewpoint rotation to point north using the mapViewModel
                 mapViewModel.setViewpointRotation(0.0)
             }

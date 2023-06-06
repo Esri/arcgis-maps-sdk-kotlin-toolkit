@@ -8,16 +8,15 @@ import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.view.IdentifyLayerResult
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
+import com.arcgismaps.toolkit.composablemap.FlowData
 import com.arcgismaps.toolkit.composablemap.MapInsets
 import com.arcgismaps.toolkit.composablemap.MapInterface
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 /**
  * A view model for the FeatureForms MapView UI
@@ -26,17 +25,22 @@ class FeatureFormsMapViewModel(
     arcGISMap: ArcGISMap,
     mapInsets: MapInsets = MapInsets()
 ) : ViewModel(), MapInterface {
+    // unique id for this class when emitting flows
+    private val flowProducer : UUID = UUID.randomUUID()
+
     private val _map: MutableStateFlow<ArcGISMap> = MutableStateFlow(arcGISMap)
     override val map: StateFlow<ArcGISMap> = _map.asStateFlow()
     
     private val _insets: MutableStateFlow<MapInsets> = MutableStateFlow(mapInsets)
     override val insets: StateFlow<MapInsets> = _insets.asStateFlow()
-    
-    private val _currentViewpoint: MutableStateFlow<Viewpoint?> = MutableStateFlow(null)
-    override val currentViewpoint: StateFlow<Viewpoint?> = _currentViewpoint.asStateFlow()
 
-    private val _resetMapRotation: MutableSharedFlow<Unit> = MutableSharedFlow()
-    override val resetMapRotation: SharedFlow<Unit> = _resetMapRotation.asSharedFlow()
+    // StateFlow for the map viewpoint
+    private val _viewpoint: MutableStateFlow<FlowData<Viewpoint?>> = MutableStateFlow(FlowData(null, flowProducer))
+    override val viewpoint = _viewpoint.asStateFlow()
+
+    // StateFlow for the map rotation
+    private val _mapRotation: MutableStateFlow<FlowData<Double>> = MutableStateFlow(FlowData(0.0, flowProducer))
+    override val mapRotation = _mapRotation.asStateFlow()
     
     private fun editFeature() {
         println("editFeature")

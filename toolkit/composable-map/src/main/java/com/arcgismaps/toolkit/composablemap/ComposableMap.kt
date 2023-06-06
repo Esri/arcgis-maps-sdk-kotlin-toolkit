@@ -38,16 +38,10 @@ public fun ComposableMap(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
-    val flowProducer = remember {
-        UUID.randomUUID()
-    }
+    val flowProducer = rememberFlowProducer()
 
     val map by mapInterface.map.collectAsState()
     val insets by mapInterface.insets.collectAsState()
-
-    val lock = remember {
-        Mutex()
-    }
 
     val mapView = remember {
         MapView(context).also { view ->
@@ -122,10 +116,11 @@ public fun ComposableMap(
         }
         launch {
             mapInterface.viewpoint.collect { flowData ->
-                if (flowData.producer != flowProducer)
+                if (flowData.producer != flowProducer) {
                     flowData.data?.let {
                         mapView.setViewpoint(it)
                     }
+                }
             }
         }
     }
@@ -160,3 +155,6 @@ public fun ComposableMap(
         }
     }
 }
+
+@Composable
+public fun rememberFlowProducer() : UUID = remember { UUID.randomUUID() }

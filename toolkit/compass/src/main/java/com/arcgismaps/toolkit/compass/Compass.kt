@@ -8,7 +8,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -28,9 +27,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
- * Creates a Compass that shows a geographic orientation of an [ArcGISMap] using the
- * [rotation] property. By default the compass hides when the map is pointing to it's default
- * North orientation. The auto hide behavior can be changed by the [autoHide] property.
+ * Creates a Compass that shows the geographic orientation of a [ComposableMap] using the
+ * [rotation] property. By default, the compass hides when the map is pointing to it's default
+ * North orientation. This auto hide behavior can be changed using the [autoHide] property.
  * Size and color of the icon can be customized using [size] and [color]. Resetting behavior can
  * be implemented using the [onClick] callback which is raised when the Compass is tapped.
  */
@@ -63,8 +62,8 @@ public fun Compass(
 }
 
 /**
- * A composable ButtonIcon for the Compass with the [icon] and [color] for container color. OnClick
- * events can be handled to using the [onClick] callback.
+ * A composable ButtonIcon for the Compass with the [icon] and [color] for container color.
+ * Tap events can be handled using the [onClick] callback.
  */
 @Composable
 internal fun CompassButtonIcon(

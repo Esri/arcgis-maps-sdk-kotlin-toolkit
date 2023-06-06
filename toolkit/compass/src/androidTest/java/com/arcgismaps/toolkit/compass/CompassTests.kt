@@ -42,6 +42,7 @@ class CompassTests {
         rotation = 0.0
         // advance the fadeout animation of the compass
         composeTestRule.mainClock.advanceTimeBy(500)
+        // the node is removed from the compose tree
         compass.assertDoesNotExist()
         rotation = 90.0
         compass.assertIsDisplayed()
