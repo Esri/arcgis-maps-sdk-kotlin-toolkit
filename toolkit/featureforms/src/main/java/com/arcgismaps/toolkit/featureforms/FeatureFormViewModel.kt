@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms
 
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.arcgismaps.data.ArcGISFeature
@@ -30,7 +29,6 @@ public interface FeatureFormViewModelInterface {
 /**
  * A view model for the FeatureForms MapView UI
  */
-@OptIn(ExperimentalMaterial3Api::class)
 public class FeatureFormViewModelImpl() : ViewModel(), FeatureFormViewModelInterface {
     override val feature: MutableStateFlow<ArcGISFeature?> = MutableStateFlow(null)
     override val visible: MutableStateFlow<Boolean> = MutableStateFlow(false)
