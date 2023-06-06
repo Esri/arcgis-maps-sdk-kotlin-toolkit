@@ -10,6 +10,8 @@ import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeRespo
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeHandler
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeResponse
+import com.arcgismaps.httpcore.authentication.NetworkAuthenticationType
+import com.arcgismaps.httpcore.authentication.ServerTrust
 
 /**
  * Handles authentication challenges and exposes state for the [Authenticator] to display to the user.
@@ -67,7 +69,11 @@ private class AuthenticatorViewModelImpl : AuthenticatorViewModel, ViewModel() {
     }
 
     override suspend fun handleNetworkAuthenticationChallenge(challenge: NetworkAuthenticationChallenge): NetworkAuthenticationChallengeResponse {
-        TODO("Not yet implemented")
+        return if (challenge.networkAuthenticationType == NetworkAuthenticationType.ServerTrust) {
+            NetworkAuthenticationChallengeResponse.ContinueWithCredential(ServerTrust)
+        } else {
+            NetworkAuthenticationChallengeResponse.ContinueAndFailWithError(UnsupportedOperationException("Not yet implemented"))
+        }
     }
 
 }
