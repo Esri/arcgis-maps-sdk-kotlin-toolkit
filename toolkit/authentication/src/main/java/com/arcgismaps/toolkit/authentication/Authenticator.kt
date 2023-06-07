@@ -9,9 +9,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.ArcGISEnvironment
 
 /**
- * Displays authentication UI when an authentication challenge is issued. Ensure that [authenticatorViewModel]
- * is set as the [ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler] and
- * [ArcGISEnvironment.authenticationManager.networkAuthenticationChallengeHandler].
+ * Displays authentication UI when an authentication challenge is issued.
  *
  * @since 200.2.0
  */
