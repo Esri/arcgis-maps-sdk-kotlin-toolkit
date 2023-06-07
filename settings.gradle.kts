@@ -1,6 +1,6 @@
 import org.gradle.configurationcache.extensions.capitalized
 
-val projects = listOf("template", "featureforms")
+val projects = listOf("template", "featureforms", "authentication")
 
 pluginManagement {
     repositories {
