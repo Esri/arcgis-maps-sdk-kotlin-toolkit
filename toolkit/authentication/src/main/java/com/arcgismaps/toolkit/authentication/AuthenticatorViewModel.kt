@@ -15,8 +15,6 @@ import com.arcgismaps.httpcore.authentication.ServerTrust
 
 /**
  * Handles authentication challenges and exposes state for the [Authenticator] to display to the user.
- * This should be set as the [ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler]
- * and [ArcGISEnvironment.authenticationManager.networkAuthenticationChallengeHandler].
  *
  * @since 200.2.0
  */
