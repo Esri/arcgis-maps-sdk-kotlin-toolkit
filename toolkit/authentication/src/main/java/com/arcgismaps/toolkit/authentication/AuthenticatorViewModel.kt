@@ -12,6 +12,7 @@ import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeHand
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeResponse
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationType
 import com.arcgismaps.httpcore.authentication.ServerTrust
+import com.arcgismaps.mapping.ArcGISMap
 
 /**
  * Handles authentication challenges and exposes state for the [Authenticator] to display to the user.
@@ -30,13 +31,7 @@ public interface AuthenticatorViewModel : NetworkAuthenticationChallengeHandler,
     override suspend fun handleNetworkAuthenticationChallenge(challenge: NetworkAuthenticationChallenge): NetworkAuthenticationChallengeResponse
 
     public companion object {
-        public val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(
-                modelClass: Class<T>, extras: CreationExtras
-            ): T {
-                return AuthenticatorViewModelImpl() as T
-            }
-        }
+        public val Factory: AuthenticatorViewModelFactory = AuthenticatorViewModelFactory()
     }
 }
 
@@ -45,9 +40,18 @@ public interface AuthenticatorViewModel : NetworkAuthenticationChallengeHandler,
  *
  * @since 200.2.0
  */
-private class AuthenticatorViewModelImpl : AuthenticatorViewModel, ViewModel() {
+private class AuthenticatorViewModelImpl(setAsArcGISAuthenticationChallengeHandler: Boolean, setAsNetworkAuthenticationChallengeHandler: Boolean) : AuthenticatorViewModel, ViewModel() {
 
     override val oAuthUserSignInManager: OAuthUserSignInManager = OAuthUserSignInManager.create()
+
+    init {
+        if (setAsArcGISAuthenticationChallengeHandler) {
+            ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler = this
+        }
+        if (setAsNetworkAuthenticationChallengeHandler) {
+            ArcGISEnvironment.authenticationManager.networkAuthenticationChallengeHandler = this
+        }
+    }
 
     override suspend fun handleArcGISAuthenticationChallenge(challenge: ArcGISAuthenticationChallenge): ArcGISAuthenticationChallengeResponse {
         oAuthUserSignInManager.oAuthUserConfiguration?.let { oAuthUserConfiguration ->
@@ -73,5 +77,14 @@ private class AuthenticatorViewModelImpl : AuthenticatorViewModel, ViewModel() {
             NetworkAuthenticationChallengeResponse.ContinueAndFailWithError(UnsupportedOperationException("Not yet implemented"))
         }
     }
+}
 
+public class AuthenticatorViewModelFactory(
+    public val setAsArcGISAuthenticationChallengeHandler: Boolean = true,
+    public val setAsNetworkAuthenticationChallengeHandler: Boolean = true
+) : ViewModelProvider.NewInstanceFactory() {
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        return AuthenticatorViewModelImpl(setAsArcGISAuthenticationChallengeHandler, setAsNetworkAuthenticationChallengeHandler) as T
+    }
 }

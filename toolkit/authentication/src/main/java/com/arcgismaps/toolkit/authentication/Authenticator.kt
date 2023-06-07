@@ -18,16 +18,8 @@ import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
  */
 @Composable
 public fun Authenticator(
-    authenticatorViewModel: AuthenticatorViewModel,
-    setAsDefaultChallengeHandler: Boolean = true
+    authenticatorViewModel: AuthenticatorViewModel
 ) {
-    if (setAsDefaultChallengeHandler) {
-        ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler =
-            authenticatorViewModel
-        ArcGISEnvironment.authenticationManager.networkAuthenticationChallengeHandler =
-            authenticatorViewModel
-    }
-
     val oAuthPendingSignIn =
         authenticatorViewModel.oAuthUserSignInManager.pendingOAuthUserSignIn.collectAsState().value
 
