@@ -95,8 +95,8 @@ private class AuthenticatorViewModelImpl(
  * as the [ArcGISEnvironment.authenticationManager.networkAuthenticationChallengeHandler].
  */
 public class AuthenticatorViewModelFactory(
-    public val setAsArcGISAuthenticationChallengeHandler: Boolean = true,
-    public val setAsNetworkAuthenticationChallengeHandler: Boolean = true
+    public var setAsArcGISAuthenticationChallengeHandler: Boolean = true,
+    public var setAsNetworkAuthenticationChallengeHandler: Boolean = true
 ) : ViewModelProvider.NewInstanceFactory() {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
