@@ -2,7 +2,6 @@ package com.arcgismaps.toolkit.authentication
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.CreationExtras
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeHandler
@@ -12,7 +11,6 @@ import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeHand
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeResponse
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationType
 import com.arcgismaps.httpcore.authentication.ServerTrust
-import com.arcgismaps.mapping.ArcGISMap
 
 /**
  * Handles authentication challenges and exposes state for the [Authenticator] to display to the user.
@@ -31,6 +29,9 @@ public interface AuthenticatorViewModel : NetworkAuthenticationChallengeHandler,
     override suspend fun handleNetworkAuthenticationChallenge(challenge: NetworkAuthenticationChallenge): NetworkAuthenticationChallengeResponse
 
     public companion object {
+        /**
+         * The [ViewModelProvider.Factory] for creating a default implementation of this interface.
+         */
         public val Factory: AuthenticatorViewModelFactory = AuthenticatorViewModelFactory()
     }
 }
@@ -40,7 +41,10 @@ public interface AuthenticatorViewModel : NetworkAuthenticationChallengeHandler,
  *
  * @since 200.2.0
  */
-private class AuthenticatorViewModelImpl(setAsArcGISAuthenticationChallengeHandler: Boolean, setAsNetworkAuthenticationChallengeHandler: Boolean) : AuthenticatorViewModel, ViewModel() {
+private class AuthenticatorViewModelImpl(
+    setAsArcGISAuthenticationChallengeHandler: Boolean,
+    setAsNetworkAuthenticationChallengeHandler: Boolean
+) : AuthenticatorViewModel, ViewModel() {
 
     override val oAuthUserSignInManager: OAuthUserSignInManager = OAuthUserSignInManager.create()
 
@@ -60,12 +64,12 @@ private class AuthenticatorViewModelImpl(setAsArcGISAuthenticationChallengeHandl
                     oAuthUserSignInManager.handleOAuthChallenge(challenge, oAuthUserConfiguration)
 
                 return ArcGISAuthenticationChallengeResponse.ContinueWithCredential(
-                        oAuthUserCredential
-                    )
+                    oAuthUserCredential
+                )
             } else {
                 return ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError(
-                        UnsupportedOperationException()
-                    )
+                    UnsupportedOperationException()
+                )
             }
         } ?: return TODO()
     }
@@ -74,17 +78,31 @@ private class AuthenticatorViewModelImpl(setAsArcGISAuthenticationChallengeHandl
         return if (challenge.networkAuthenticationType == NetworkAuthenticationType.ServerTrust) {
             NetworkAuthenticationChallengeResponse.ContinueWithCredential(ServerTrust)
         } else {
-            NetworkAuthenticationChallengeResponse.ContinueAndFailWithError(UnsupportedOperationException("Not yet implemented"))
+            NetworkAuthenticationChallengeResponse.ContinueAndFailWithError(
+                UnsupportedOperationException("Not yet implemented")
+            )
         }
     }
 }
 
+/**
+ * Provides a [ViewModelProvider.Factory] for creating a default implementation of the [AuthenticatorViewModel]
+ * inteface.
+ *
+ * @property setAsArcGISAuthenticationChallengeHandler whether to set the created [AuthenticatorViewModel]
+ * as the [ArcGISEnvironment.authenticationManager.arcGisAuthenticationChallengeHandler].
+ * @property setAsNetworkAuthenticationChallengeHandler whether to set the created [AuthenticatorViewModel]
+ * as the [ArcGISEnvironment.authenticationManager.networkAuthenticationChallengeHandler].
+ */
 public class AuthenticatorViewModelFactory(
     public val setAsArcGISAuthenticationChallengeHandler: Boolean = true,
     public val setAsNetworkAuthenticationChallengeHandler: Boolean = true
 ) : ViewModelProvider.NewInstanceFactory() {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return AuthenticatorViewModelImpl(setAsArcGISAuthenticationChallengeHandler, setAsNetworkAuthenticationChallengeHandler) as T
+        return AuthenticatorViewModelImpl(
+            setAsArcGISAuthenticationChallengeHandler,
+            setAsNetworkAuthenticationChallengeHandler
+        ) as T
     }
 }
