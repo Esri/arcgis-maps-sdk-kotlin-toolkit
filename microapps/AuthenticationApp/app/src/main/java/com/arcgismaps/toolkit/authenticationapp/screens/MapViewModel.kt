@@ -27,8 +27,6 @@ class MapViewModel(
     private val _currentViewpoint: MutableStateFlow<Viewpoint?> = MutableStateFlow(null)
     override val currentViewpoint: StateFlow<Viewpoint?> = _currentViewpoint.asStateFlow()
 
-    context(MapView, CoroutineScope) override fun onSingleTapConfirmed(event: SingleTapConfirmedEvent) { }
-
     fun setViewpoint(viewpoint: Viewpoint) {
         _currentViewpoint.update { viewpoint }
     }
