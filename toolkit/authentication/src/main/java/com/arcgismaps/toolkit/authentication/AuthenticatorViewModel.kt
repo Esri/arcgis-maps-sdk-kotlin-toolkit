@@ -47,6 +47,10 @@ public interface AuthenticatorViewModel : NetworkAuthenticationChallengeHandler,
     override suspend fun handleNetworkAuthenticationChallenge(challenge: NetworkAuthenticationChallenge): NetworkAuthenticationChallengeResponse {
         TODO("Not yet implemented")
     }
+
+    public companion object {
+
+    }
 }
 
 /**
