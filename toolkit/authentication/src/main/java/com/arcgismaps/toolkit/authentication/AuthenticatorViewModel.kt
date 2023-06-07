@@ -1,7 +1,9 @@
 package com.arcgismaps.toolkit.authentication
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeHandler
@@ -49,7 +51,13 @@ public interface AuthenticatorViewModel : NetworkAuthenticationChallengeHandler,
     }
 
     public companion object {
-
+        public val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(
+                modelClass: Class<T>, extras: CreationExtras
+            ): T {
+                return AuthenticatorViewModelImpl() as T
+            }
+        }
     }
 }
 

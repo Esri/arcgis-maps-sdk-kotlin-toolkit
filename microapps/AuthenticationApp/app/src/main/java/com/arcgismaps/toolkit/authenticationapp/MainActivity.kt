@@ -5,9 +5,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.toolkit.authentication.Authenticator
+import com.arcgismaps.toolkit.authentication.AuthenticatorViewModel
 import com.arcgismaps.toolkit.authenticationapp.screens.MainScreen
 import com.arcgismaps.toolkit.authenticationapp.ui.theme.AuthenticationAppTheme
 
@@ -27,7 +29,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AuthenticationApp() {
     MainScreen()
-    Authenticator()
+    val authenticatorViewModel: AuthenticatorViewModel = viewModel(factory = AuthenticatorViewModel.Factory)
+    Authenticator(authenticatorViewModel)
 }
 
 @Preview(showBackground = true)
