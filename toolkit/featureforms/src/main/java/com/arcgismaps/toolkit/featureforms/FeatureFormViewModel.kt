@@ -29,12 +29,12 @@ public interface FeatureFormViewModelInterface {
 /**
  * A view model for the FeatureForms MapView UI
  */
-public class FeatureFormViewModelImpl() : ViewModel(), FeatureFormViewModelInterface {
+public class FeatureFormViewModelImpl : ViewModel(), FeatureFormViewModelInterface {
     override val feature: MutableStateFlow<ArcGISFeature?> = MutableStateFlow(null)
     override val visible: MutableStateFlow<Boolean> = MutableStateFlow(false)
 }
 
-public class FeatureFormViewModelFactory() : ViewModelProvider.NewInstanceFactory() {
+public class FeatureFormViewModelFactory : ViewModelProvider.NewInstanceFactory() {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return FeatureFormViewModelImpl() as T
