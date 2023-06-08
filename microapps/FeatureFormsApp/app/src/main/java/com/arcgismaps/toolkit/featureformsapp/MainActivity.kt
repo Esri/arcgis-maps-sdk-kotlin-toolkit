@@ -1,5 +1,7 @@
 package com.arcgismaps.toolkit.featureformsapp
 
+import FeatureFormViewModelFactory
+import FeatureFormViewModelImpl
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -12,8 +14,6 @@ import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.toolkit.composablemap.MapInsets
-import com.arcgismaps.toolkit.featureforms.FeatureFormViewModelFactory
-import com.arcgismaps.toolkit.featureforms.FeatureFormViewModelImpl
 import com.arcgismaps.toolkit.featureforms.FeatureFormViewModelInterface
 import com.arcgismaps.toolkit.featureformsapp.screens.mapview.FeatureFormsMapViewModelFactory
 import com.arcgismaps.toolkit.featureformsapp.screens.mapview.FeatureFormsMapViewModelImpl

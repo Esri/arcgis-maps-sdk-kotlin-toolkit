@@ -16,27 +16,10 @@
 
 package com.arcgismaps.toolkit.featureforms
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import com.arcgismaps.data.ArcGISFeature
 import kotlinx.coroutines.flow.MutableStateFlow
 
 public interface FeatureFormViewModelInterface {
     public val feature: MutableStateFlow<ArcGISFeature?>
     public val visible: MutableStateFlow<Boolean>
-}
-
-/**
- * A view model for the FeatureForms MapView UI
- */
-public class FeatureFormViewModelImpl : ViewModel(), FeatureFormViewModelInterface {
-    override val feature: MutableStateFlow<ArcGISFeature?> = MutableStateFlow(null)
-    override val visible: MutableStateFlow<Boolean> = MutableStateFlow(false)
-}
-
-public class FeatureFormViewModelFactory : ViewModelProvider.NewInstanceFactory() {
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return FeatureFormViewModelImpl() as T
-    }
 }
