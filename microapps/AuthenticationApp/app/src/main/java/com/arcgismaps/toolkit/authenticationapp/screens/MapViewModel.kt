@@ -5,12 +5,12 @@ import androidx.lifecycle.ViewModelProvider
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
+import com.arcgismaps.toolkit.composablemap.FlowData
 import com.arcgismaps.toolkit.composablemap.MapInsets
 import com.arcgismaps.toolkit.composablemap.MapInterface
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 
 class MapViewModel(
     arcGISMap: ArcGISMap,
@@ -22,13 +22,16 @@ class MapViewModel(
     private val _insets: MutableStateFlow<MapInsets> = MutableStateFlow(mapInsets)
     override val insets: StateFlow<MapInsets> = _insets.asStateFlow()
 
-    private val _currentViewpoint: MutableStateFlow<Viewpoint?> = MutableStateFlow(null)
-    override val currentViewpoint: StateFlow<Viewpoint?> = _currentViewpoint.asStateFlow()
+    private val _viewpoint: MutableStateFlow<FlowData<Viewpoint?>> = MutableStateFlow(FlowData<Viewpoint?>(null))
+    override val viewpoint: StateFlow<FlowData<Viewpoint?>> = _viewpoint.asStateFlow()
+
+    private val _mapRotation: MutableStateFlow<FlowData<Double>> = MutableStateFlow(FlowData(0.0))
+    override val mapRotation: StateFlow<FlowData<Double>> = _mapRotation.asStateFlow()
 
     override fun onSingleTapConfirmed(event: SingleTapConfirmedEvent) { }
 
-    fun setViewpoint(viewpoint: Viewpoint) {
-        _currentViewpoint.update { viewpoint }
+    override fun setViewpoint(viewpoint: Viewpoint) {
+        _viewpoint.value = FlowData(viewpoint)
     }
 }
 
