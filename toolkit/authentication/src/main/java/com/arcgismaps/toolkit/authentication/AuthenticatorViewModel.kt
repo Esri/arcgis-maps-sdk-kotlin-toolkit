@@ -25,9 +25,6 @@ public interface AuthenticatorViewModel : NetworkAuthenticationChallengeHandler,
      */
     public val oAuthUserSignInManager: OAuthUserSignInManager
 
-    override suspend fun handleArcGISAuthenticationChallenge(challenge: ArcGISAuthenticationChallenge): ArcGISAuthenticationChallengeResponse
-    override suspend fun handleNetworkAuthenticationChallenge(challenge: NetworkAuthenticationChallenge): NetworkAuthenticationChallengeResponse
-
     public companion object {
         /**
          * The [ViewModelProvider.Factory] for creating a default implementation of this interface.
