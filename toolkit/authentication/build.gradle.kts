@@ -17,7 +17,7 @@ val buildNumber: String by project
 val artifactVersion: String = "$versionNumber-$buildNumber"
 
 android {
-    namespace = "com.arcgismaps.toolkit.template"
+    namespace = "com.arcgismaps.toolkit.authentication"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
@@ -60,6 +60,7 @@ dependencies {
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.activity.compose)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
