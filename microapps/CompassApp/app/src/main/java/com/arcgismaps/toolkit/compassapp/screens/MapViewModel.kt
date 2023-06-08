@@ -2,7 +2,6 @@ package com.arcgismaps.toolkit.compassapp.screens
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.composablemap.FlowData
@@ -10,7 +9,6 @@ import com.arcgismaps.toolkit.composablemap.MapInsets
 import com.arcgismaps.toolkit.composablemap.MapInterface
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import java.util.UUID
 
 class MapViewModel(
@@ -18,7 +16,7 @@ class MapViewModel(
     mapInsets: MapInsets = MapInsets()
 ) : ViewModel(), MapInterface {
     // unique id for this class when emitting flows
-    private val flowProducer : UUID = UUID.randomUUID()
+    private val flowProducer: UUID = UUID.randomUUID()
 
     // StateFlow for the map property
     private val _map: MutableStateFlow<ArcGISMap> = MutableStateFlow(arcGISMap)
@@ -29,31 +27,29 @@ class MapViewModel(
     override val insets = _insets.asStateFlow()
 
     // StateFlow for the map viewpoint
-    private val _viewpoint: MutableStateFlow<FlowData<Viewpoint?>> = MutableStateFlow(FlowData(null, flowProducer))
+    private val _viewpoint: MutableStateFlow<FlowData<Viewpoint?>> =
+        MutableStateFlow(FlowData(null, flowProducer))
     override val viewpoint = _viewpoint.asStateFlow()
 
     // StateFlow for the map rotation
-    private val _mapRotation: MutableStateFlow<FlowData<Double>> = MutableStateFlow(FlowData(0.0, flowProducer))
+    private val _mapRotation: MutableStateFlow<FlowData<Double>> =
+        MutableStateFlow(FlowData(0.0, flowProducer))
     override val mapRotation = _mapRotation.asStateFlow()
 
-    override suspend fun onMapViewpointChanged(viewpoint: Viewpoint, flowProducer: UUID?) {
-        _viewpoint.emit(FlowData(viewpoint, flowProducer))
+    override fun onMapViewpointChanged(viewpoint: Viewpoint, flowProducer: UUID?) {
+        _viewpoint.value = FlowData(viewpoint, flowProducer)
     }
 
-    override suspend fun onMapRotationChanged(rotation: Double, flowProducer: UUID?) {
-        _mapRotation.emit(FlowData(rotation, flowProducer))
+    override fun onMapRotationChanged(rotation: Double, flowProducer: UUID?) {
+        _mapRotation.value = FlowData(rotation, flowProducer)
     }
 
     override fun setViewpoint(viewpoint: Viewpoint) {
-        viewModelScope.launch {
-            _viewpoint.emit(FlowData(viewpoint, flowProducer))
-        }
+        _viewpoint.value = FlowData(viewpoint, flowProducer)
     }
 
     override fun setViewpointRotation(angleDegrees: Double) {
-        viewModelScope.launch {
-            _mapRotation.emit(FlowData(angleDegrees, flowProducer))
-        }
+        _mapRotation.value = FlowData(angleDegrees, flowProducer)
     }
 }
 

@@ -26,24 +26,12 @@ import java.util.UUID
 
 class ComposableMapTests {
 
-    lateinit var scope: CoroutineScope
-
-    @Before
-    fun setUp() {
-        scope = CoroutineScope(Dispatchers.Default)
-    }
-
-    @After
-    fun tearDown() {
-        scope.cancel()
-    }
-
     @get:Rule
     val composeTestRule = createComposeRule()
 
     @Test
     fun testComposableMapLayout() {
-        val mockMapInterface = MockMapInterface(ArcGISMap(), scope = scope)
+        val mockMapInterface = MockMapInterface(ArcGISMap())
 
         composeTestRule.setContent {
             ComposableMap(mapInterface = mockMapInterface) {
@@ -66,8 +54,7 @@ class ComposableMapTests {
 
 class MockMapInterface(
     map: ArcGISMap,
-    insets: MapInsets = MapInsets(),
-    private val scope: CoroutineScope
+    insets: MapInsets = MapInsets()
 ) : MapInterface {
     private val flowProducer = UUID.randomUUID()
 
@@ -77,19 +64,15 @@ class MockMapInterface(
     override val viewpoint: MutableStateFlow<FlowData<Viewpoint?>> =  MutableStateFlow(FlowData(null, flowProducer))
     override val mapRotation: MutableStateFlow<FlowData<Double>> =  MutableStateFlow(FlowData(0.0, flowProducer))
 
-    override suspend fun onMapRotationChanged(rotation: Double, flowProducer: UUID?) {
-        mapRotation.emit(FlowData(rotation, flowProducer))
+    override fun onMapRotationChanged(rotation: Double, flowProducer: UUID?) {
+        mapRotation.value = FlowData(rotation, flowProducer)
     }
 
-    override suspend fun onMapViewpointChanged(viewpoint: Viewpoint, flowProducer: UUID?) {
-        scope.launch {
-            this@MockMapInterface.viewpoint.emit(FlowData(viewpoint, flowProducer))
-        }
+    override fun onMapViewpointChanged(viewpoint: Viewpoint, flowProducer: UUID?) {
+        this.viewpoint.value = FlowData(viewpoint, flowProducer)
     }
 
     override fun setViewpoint(viewpoint: Viewpoint) {
-        scope.launch {
-            this@MockMapInterface.viewpoint.emit(FlowData(viewpoint, flowProducer))
-        }
+        this.viewpoint.value = FlowData(viewpoint, flowProducer)
     }
 }

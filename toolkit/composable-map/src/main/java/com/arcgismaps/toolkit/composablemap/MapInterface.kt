@@ -80,7 +80,7 @@ public interface MapEvents {
      * Callback event for when the orientation of the [ComposableMap] changes with the given
      * [rotation] and called by the [flowProducer]
      */
-    public suspend fun onMapRotationChanged(rotation: Double, flowProducer: UUID? = null) {}
+    public fun onMapRotationChanged(rotation: Double, flowProducer: UUID? = null) {}
 
     /**
      * Sets the [ComposableMap] current viewpoint's rotation to the given [angleDegrees]
@@ -91,7 +91,7 @@ public interface MapEvents {
      * Callback event for the when the viewpoint of the [ComposableMap] changes with the given
      * [viewpoint] and called by the [flowProducer]
      */
-    public suspend fun onMapViewpointChanged(viewpoint: Viewpoint, flowProducer: UUID? = null) {}
+    public fun onMapViewpointChanged(viewpoint: Viewpoint, flowProducer: UUID? = null) {}
 
     /**
      * Sets the [ComposableMap] current viewpoint to the given [viewpoint]

@@ -33,24 +33,20 @@ class TemplateMapViewModel(
     private val _mapRotation: MutableStateFlow<FlowData<Double>> = MutableStateFlow(FlowData(0.0, flowProducer))
     override val mapRotation = _mapRotation.asStateFlow()
 
-    override suspend fun onMapViewpointChanged(viewpoint: Viewpoint, flowProducer: UUID?) {
-        _viewpoint.emit(FlowData(viewpoint, flowProducer))
+    override fun onMapViewpointChanged(viewpoint: Viewpoint, flowProducer: UUID?) {
+        _viewpoint.value = FlowData(viewpoint, flowProducer)
     }
 
-    override suspend fun onMapRotationChanged(rotation: Double, flowProducer: UUID?) {
-        _mapRotation.emit(FlowData(rotation, flowProducer))
+    override fun onMapRotationChanged(rotation: Double, flowProducer: UUID?) {
+        _mapRotation.value = FlowData(rotation, flowProducer)
     }
 
     override fun setViewpoint(viewpoint: Viewpoint) {
-        viewModelScope.launch {
-            _viewpoint.emit(FlowData(viewpoint, flowProducer))
-        }
+        _viewpoint.value = FlowData(viewpoint, flowProducer)
     }
 
     override fun setViewpointRotation(angleDegrees: Double) {
-        viewModelScope.launch {
-            _mapRotation.emit(FlowData(angleDegrees, flowProducer))
-        }
+        _mapRotation.value = FlowData(angleDegrees, flowProducer)
     }
 }
 
