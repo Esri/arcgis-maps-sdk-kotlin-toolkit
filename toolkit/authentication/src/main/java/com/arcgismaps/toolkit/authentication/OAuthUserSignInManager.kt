@@ -83,10 +83,11 @@ private class OAuthUserSignInManagerImpl constructor(override var oAuthUserConfi
                 OAuthUserCredential.create(oAuthUserConfiguration) { oAuthUserSignIn ->
                     // A composable observing [pendingOAuthUserSignIn] can launch the cct when this value changes.
                     _pendingOAuthUserSignIn.value = oAuthUserSignIn
+                }.also {
+                    // At this point we have suspended until the OAuth workflow is complete, so we can get rid of the pending sign in
+                    // Composables observing this can know to remove the cct when this value changes.
+                    _pendingOAuthUserSignIn.value = null
                 }.getOrThrow()
-            // At this point we have suspended until the OAuth workflow is complete, so we can get rid of the pending sign in
-            // Composables observing this can know to remove the cct when this value changes.
-            _pendingOAuthUserSignIn.value = null
             return oAuthUserCredential
         } ?: throw IllegalStateException("OAuthUserConfiguration must not be null to handle OAuth challenges.")
     }
