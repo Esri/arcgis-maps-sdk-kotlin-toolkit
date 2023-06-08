@@ -72,12 +72,15 @@ private class AuthenticatorViewModelImpl(
     }
 
     override suspend fun handleNetworkAuthenticationChallenge(challenge: NetworkAuthenticationChallenge): NetworkAuthenticationChallengeResponse {
-        return if (challenge.networkAuthenticationType == NetworkAuthenticationType.ServerTrust) {
-            NetworkAuthenticationChallengeResponse.ContinueWithCredential(ServerTrust)
-        } else {
-            NetworkAuthenticationChallengeResponse.ContinueAndFailWithError(
-                UnsupportedOperationException("Not yet implemented")
-            )
+        return when (challenge.networkAuthenticationType) {
+            NetworkAuthenticationType.ServerTrust -> {
+                NetworkAuthenticationChallengeResponse.ContinueWithCredential(ServerTrust)
+            }
+            else -> {
+                NetworkAuthenticationChallengeResponse.ContinueAndFailWithError(
+                    UnsupportedOperationException("Not yet implemented")
+                )
+            }
         }
     }
 }
