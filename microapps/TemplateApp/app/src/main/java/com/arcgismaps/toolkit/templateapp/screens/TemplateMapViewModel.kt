@@ -18,8 +18,6 @@ class TemplateMapViewModel(
     arcGISMap: ArcGISMap,
     mapInsets: MapInsets = MapInsets()
 ) : ViewModel(), MapInterface {
-    // unique id for this class when emitting flows
-    private val flowProducer : UUID = UUID.randomUUID()
 
     private val _map: MutableStateFlow<ArcGISMap> = MutableStateFlow(arcGISMap)
     override val map: StateFlow<ArcGISMap> = _map.asStateFlow()
@@ -27,10 +25,10 @@ class TemplateMapViewModel(
     private val _insets: MutableStateFlow<MapInsets> = MutableStateFlow(mapInsets)
     override val insets: StateFlow<MapInsets> = _insets.asStateFlow()
 
-    private val _viewpoint: MutableStateFlow<FlowData<Viewpoint?>> = MutableStateFlow(FlowData(null, flowProducer))
+    private val _viewpoint: MutableStateFlow<FlowData<Viewpoint?>> = MutableStateFlow(FlowData(null))
     override val viewpoint = _viewpoint.asStateFlow()
 
-    private val _mapRotation: MutableStateFlow<FlowData<Double>> = MutableStateFlow(FlowData(0.0, flowProducer))
+    private val _mapRotation: MutableStateFlow<FlowData<Double>> = MutableStateFlow(FlowData(0.0))
     override val mapRotation = _mapRotation.asStateFlow()
 
     override fun onMapViewpointChanged(viewpoint: Viewpoint, flowProducer: UUID?) {
@@ -42,11 +40,11 @@ class TemplateMapViewModel(
     }
 
     override fun setViewpoint(viewpoint: Viewpoint) {
-        _viewpoint.value = FlowData(viewpoint, flowProducer)
+        _viewpoint.value = FlowData(viewpoint)
     }
 
     override fun setViewpointRotation(angleDegrees: Double) {
-        _mapRotation.value = FlowData(angleDegrees, flowProducer)
+        _mapRotation.value = FlowData(angleDegrees)
     }
 }
 

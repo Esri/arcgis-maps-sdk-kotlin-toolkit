@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.util.UUID
 
 /**
  * A view model for the FeatureForms MapView UI
@@ -25,9 +24,6 @@ class FeatureFormsMapViewModel(
     arcGISMap: ArcGISMap,
     mapInsets: MapInsets = MapInsets()
 ) : ViewModel(), MapInterface {
-    // unique id for this class when emitting flows
-    private val flowProducer : UUID = UUID.randomUUID()
-
     private val _map: MutableStateFlow<ArcGISMap> = MutableStateFlow(arcGISMap)
     override val map: StateFlow<ArcGISMap> = _map.asStateFlow()
     
@@ -35,11 +31,11 @@ class FeatureFormsMapViewModel(
     override val insets: StateFlow<MapInsets> = _insets.asStateFlow()
 
     // StateFlow for the map viewpoint
-    private val _viewpoint: MutableStateFlow<FlowData<Viewpoint?>> = MutableStateFlow(FlowData(null, flowProducer))
+    private val _viewpoint: MutableStateFlow<FlowData<Viewpoint?>> = MutableStateFlow(FlowData(null))
     override val viewpoint = _viewpoint.asStateFlow()
 
     // StateFlow for the map rotation
-    private val _mapRotation: MutableStateFlow<FlowData<Double>> = MutableStateFlow(FlowData(0.0, flowProducer))
+    private val _mapRotation: MutableStateFlow<FlowData<Double>> = MutableStateFlow(FlowData(0.0))
     override val mapRotation = _mapRotation.asStateFlow()
     
     private fun editFeature() {
