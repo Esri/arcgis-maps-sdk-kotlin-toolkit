@@ -58,7 +58,7 @@ private class AuthenticatorViewModelImpl(
         oAuthUserSignInManager.oAuthUserConfiguration?.let { oAuthUserConfiguration ->
             if (oAuthUserConfiguration.canBeUsedForUrl(challenge.requestUrl)) {
                 val oAuthUserCredential =
-                    oAuthUserSignInManager.handleOAuthChallenge(challenge, oAuthUserConfiguration)
+                    oAuthUserSignInManager.handleOAuthChallenge(challenge)
 
                 return ArcGISAuthenticationChallengeResponse.ContinueWithCredential(
                     oAuthUserCredential
