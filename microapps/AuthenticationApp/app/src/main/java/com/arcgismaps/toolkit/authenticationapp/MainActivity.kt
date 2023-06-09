@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -49,7 +50,7 @@ fun OAuthMap() {
     val authenticatorViewModel: AuthenticatorViewModel =
         viewModel(factory = AuthenticatorViewModel.Factory)
     authenticatorViewModel.oAuthUserSignInManager.oAuthUserConfiguration = OAuthUserConfiguration(
-        "https://www.arcgis.com",
+        portal.url,
         // This client ID is for demo purposes only. For use of the Authenticator in your own app,
         // create your own client ID. For more info see: https://developers.arcgis.com/documentation/mapping-apis-and-services/security/tutorials/register-your-application/
         "lgAdHkYZYlwwfAhC",
