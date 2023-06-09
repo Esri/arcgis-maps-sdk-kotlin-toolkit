@@ -11,6 +11,7 @@ import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeHand
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeResponse
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationType
 import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
+import com.arcgismaps.httpcore.authentication.OAuthUserCredential
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 import com.arcgismaps.httpcore.authentication.ServerTrust
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -72,8 +73,15 @@ private class AuthenticatorViewModelImpl(
             if (oAuthUserConfiguration.canBeUsedForUrl(challenge.requestUrl)) {
                 val oAuthUserCredential =
                     oAuthUserConfiguration.handleOAuthChallenge {
+                        // A composable observing [pendingOAuthUserSignIn] can launch the cct when
+                        // this value changes.
                         _pendingOAuthUserSignIn.value = it
-                    }
+                    }.also {
+                        // At this point we have suspended until the OAuth workflow is complete, so
+                        // we can get rid of the pending sign in. Composables observing this can know
+                        // to remove the cct when this value changes.
+                        _pendingOAuthUserSignIn.value = null
+                    }.getOrThrow()
 
                 return ArcGISAuthenticationChallengeResponse.ContinueWithCredential(
                     oAuthUserCredential
@@ -122,3 +130,16 @@ public class AuthenticatorViewModelFactory(
         ) as T
     }
 }
+
+/**
+ * Creates an [OAuthUserCredential] for this [oAuthUserConfiguration]. Suspends
+ * while the credential is being created, ie. until the user has signed in or cancelled the sign in.
+ *
+ * @since 200.2.0
+ */
+private suspend fun OAuthUserConfiguration.handleOAuthChallenge(
+    onPendingSignIn: (OAuthUserSignIn?) -> Unit
+): Result<OAuthUserCredential> =
+    OAuthUserCredential.create(this) { oAuthUserSignIn ->
+        onPendingSignIn(oAuthUserSignIn)
+    }
