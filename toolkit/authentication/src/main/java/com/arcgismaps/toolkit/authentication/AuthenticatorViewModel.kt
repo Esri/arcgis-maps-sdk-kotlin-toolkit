@@ -73,8 +73,8 @@ private class AuthenticatorViewModelImpl(
             if (oAuthUserConfiguration.canBeUsedForUrl(challenge.requestUrl)) {
                 val oAuthUserCredential =
                     oAuthUserConfiguration.handleOAuthChallenge {
-                        // A composable observing [pendingOAuthUserSignIn] can launch the cct when
-                        // this value changes.
+                        // A composable observing [pendingOAuthUserSignIn] can launch the OAuth prompt
+                        // when this value changes.
                         _pendingOAuthUserSignIn.value = it
                     }.also {
                         // At this point we have suspended until the OAuth workflow is complete, so
