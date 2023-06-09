@@ -12,10 +12,10 @@ import kotlinx.coroutines.flow.asStateFlow
  * Interface for handling OAuth challenges. Observe [pendingOAuthUserSignIn] for access to any current
  * pending OAuth sign ins.
  *
- * @see OAuthUserSignInManagerImpl
+ * @see OAuthUserSignInHandlerImpl
  * @since 200.2.0
  */
-public interface OAuthUserSignInManager {
+public interface OAuthUserSignInHandler {
     /**
      * The [OAuthUserConfiguration] to use for any sign ins. If null, OAuth will not be used for any
      * [ArcGISAuthenticationChallenge].
@@ -52,17 +52,17 @@ public interface OAuthUserSignInManager {
          * Returns a default implementation for this interface.
          *
          * @param oAuthUserConfiguration the initial [OAuthUserConfiguration] to use. This may be changed later
-         * with [OAuthUserSignInManager.oAuthUserConfiguration].
+         * with [OAuthUserSignInHandler.oAuthUserConfiguration].
          * @since 200.2.0
          */
-        public fun create(oAuthUserConfiguration: OAuthUserConfiguration? = null): OAuthUserSignInManager {
-            return OAuthUserSignInManagerImpl(oAuthUserConfiguration)
+        public fun create(oAuthUserConfiguration: OAuthUserConfiguration? = null): OAuthUserSignInHandler {
+            return OAuthUserSignInHandlerImpl(oAuthUserConfiguration)
         }
     }
 }
 
 /**
- * The default [OAuthUserSignInManager]. Emits a pending sign in to [pendingOAuthUserSignIn] and awaits
+ * The default [OAuthUserSignInHandler]. Emits a pending sign in to [pendingOAuthUserSignIn] and awaits
  * a call to [completeOAuthPendingSignIn] to create the credential.
  *
  * @property oAuthUserConfiguration the initial [OAuthUserConfiguration] to use. [handleOAuthChallenge]
@@ -70,8 +70,8 @@ public interface OAuthUserSignInManager {
  * issued to the user.
  * @since 200.2.0
  */
-private class OAuthUserSignInManagerImpl constructor(override var oAuthUserConfiguration: OAuthUserConfiguration?) :
-    OAuthUserSignInManager {
+private class OAuthUserSignInHandlerImpl constructor(override var oAuthUserConfiguration: OAuthUserConfiguration?) :
+    OAuthUserSignInHandler {
 
     private val _pendingOAuthUserSignIn: MutableStateFlow<OAuthUserSignIn?> = MutableStateFlow(null)
     override val pendingOAuthUserSignIn: StateFlow<OAuthUserSignIn?> =

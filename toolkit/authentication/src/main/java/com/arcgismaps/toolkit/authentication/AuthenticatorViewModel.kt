@@ -21,9 +21,9 @@ public interface AuthenticatorViewModel : NetworkAuthenticationChallengeHandler,
     ArcGISAuthenticationChallengeHandler {
 
     /**
-     * The [OAuthUserSignInManager] to handle incoming OAuth challenges.
+     * The [OAuthUserSignInHandler] to handle incoming OAuth challenges.
      */
-    public val oAuthUserSignInManager: OAuthUserSignInManager
+    public val oAuthUserSignInHandler: OAuthUserSignInHandler
 
     public companion object {
         /**
@@ -43,7 +43,7 @@ private class AuthenticatorViewModelImpl(
     setAsNetworkAuthenticationChallengeHandler: Boolean
 ) : AuthenticatorViewModel, ViewModel() {
 
-    override val oAuthUserSignInManager: OAuthUserSignInManager = OAuthUserSignInManager.create()
+    override val oAuthUserSignInHandler: OAuthUserSignInHandler = OAuthUserSignInHandler.create()
 
     init {
         if (setAsArcGISAuthenticationChallengeHandler) {
@@ -55,10 +55,10 @@ private class AuthenticatorViewModelImpl(
     }
 
     override suspend fun handleArcGISAuthenticationChallenge(challenge: ArcGISAuthenticationChallenge): ArcGISAuthenticationChallengeResponse {
-        oAuthUserSignInManager.oAuthUserConfiguration?.let { oAuthUserConfiguration ->
+        oAuthUserSignInHandler.oAuthUserConfiguration?.let { oAuthUserConfiguration ->
             if (oAuthUserConfiguration.canBeUsedForUrl(challenge.requestUrl)) {
                 val oAuthUserCredential =
-                    oAuthUserSignInManager.handleOAuthChallenge(challenge)
+                    oAuthUserSignInHandler.handleOAuthChallenge(challenge)
 
                 return ArcGISAuthenticationChallengeResponse.ContinueWithCredential(
                     oAuthUserCredential
