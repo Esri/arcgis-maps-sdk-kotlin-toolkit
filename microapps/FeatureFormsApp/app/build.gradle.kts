@@ -4,6 +4,10 @@ plugins {
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
+secrets {
+    defaultPropertiesFileName = File(project.projectDir, "/../../../secrets.defaults.properties").canonicalPath
+}
+
 android {
     namespace = "com.arcgismaps.toolkit.featureformsapp"
     compileSdk = libs.versions.compileSdk.get().toInt()
