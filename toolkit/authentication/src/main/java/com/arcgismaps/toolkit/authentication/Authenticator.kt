@@ -7,7 +7,7 @@ import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 
 /**
  * Displays appropriate Authentication UI when issued a challenge. For example, if an [ArcGISAuthenticationChallenge]
- * is issued and the [AuthenticatorViewModel.oAuthUserSignInHandler] has a corresponding [OAuthUserConfiguration],
+ * is issued and the [AuthenticatorViewModel] has a corresponding [OAuthUserConfiguration],
  * then a Custom Chrome Tab will be launched to complete the OAuth sign in.
  *
  * @param authenticatorViewModel an [AuthenticatorViewModel]. See [AuthenticatorViewModel.Companion.Factory].
@@ -18,11 +18,13 @@ public fun Authenticator(
     authenticatorViewModel: AuthenticatorViewModel
 ) {
     val oAuthPendingSignIn =
-        authenticatorViewModel.oAuthUserSignInHandler.pendingOAuthUserSignIn.collectAsStateWithLifecycle().value
+        authenticatorViewModel.pendingOAuthUserSignIn.collectAsStateWithLifecycle().value
 
     oAuthPendingSignIn?.let { oAuthPendingSignIn ->
         OAuthAuthenticator(oAuthPendingSignIn) { redirectUrl ->
-            authenticatorViewModel.oAuthUserSignInHandler.completeOAuthPendingSignIn(redirectUrl = redirectUrl)
+            redirectUrl?.let {
+                oAuthPendingSignIn.complete(redirectUrl)
+            } ?: oAuthPendingSignIn.cancel()
         }
     }
 }

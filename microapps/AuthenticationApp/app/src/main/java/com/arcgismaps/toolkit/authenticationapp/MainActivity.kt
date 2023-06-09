@@ -37,7 +37,7 @@ fun AuthenticationApp() {
     )
     val authenticatorViewModel: AuthenticatorViewModel =
         viewModel(factory = AuthenticatorViewModel.Factory)
-    authenticatorViewModel.oAuthUserSignInHandler.oAuthUserConfiguration = OAuthUserConfiguration(
+    authenticatorViewModel.oAuthUserConfiguration = OAuthUserConfiguration(
         "https://www.arcgis.com",
         // This client ID is for demo purposes only. For use of the Authenticator in your own app,
         // create your own client ID. For more info see: https://developers.arcgis.com/documentation/mapping-apis-and-services/security/tutorials/register-your-application/
