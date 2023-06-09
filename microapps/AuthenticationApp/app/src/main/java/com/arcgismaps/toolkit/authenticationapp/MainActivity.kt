@@ -12,6 +12,7 @@ import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.authentication.Authenticator
 import com.arcgismaps.toolkit.authentication.AuthenticatorViewModel
+import com.arcgismaps.toolkit.authentication.AuthenticatorViewModelFactory
 import com.arcgismaps.toolkit.authenticationapp.screens.MainScreen
 import com.arcgismaps.toolkit.authenticationapp.ui.theme.AuthenticationAppTheme
 
@@ -36,7 +37,7 @@ fun AuthenticationApp() {
         )
     )
     val authenticatorViewModel: AuthenticatorViewModel =
-        viewModel(factory = AuthenticatorViewModel.Factory)
+        viewModel(factory = AuthenticatorViewModelFactory())
     authenticatorViewModel.oAuthUserConfiguration = OAuthUserConfiguration(
         "https://www.arcgis.com",
         // This client ID is for demo purposes only. For use of the Authenticator in your own app,

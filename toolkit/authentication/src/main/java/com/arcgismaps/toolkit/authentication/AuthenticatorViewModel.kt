@@ -40,13 +40,6 @@ public interface AuthenticatorViewModel : NetworkAuthenticationChallengeHandler,
      * @since 200.2.0
      */
     public val pendingOAuthUserSignIn: StateFlow<OAuthUserSignIn?>
-
-    public companion object {
-        /**
-         * The [ViewModelProvider.Factory] for creating a default implementation of this interface.
-         */
-        public val Factory: AuthenticatorViewModelFactory = AuthenticatorViewModelFactory()
-    }
 }
 
 /**
