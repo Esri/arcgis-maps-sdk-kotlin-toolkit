@@ -10,6 +10,7 @@ import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.toolkit.composablemap.MapInsets
 import com.arcgismaps.toolkit.composablemap.MapInterface
+import com.arcgismaps.toolkit.composablemap.MapInterfaceImpl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,16 +23,8 @@ import kotlinx.coroutines.launch
 class FeatureFormsMapViewModel(
     arcGISMap: ArcGISMap,
     mapInsets: MapInsets = MapInsets()
-) : ViewModel(), MapInterface {
-    private val _map: MutableStateFlow<ArcGISMap> = MutableStateFlow(arcGISMap)
-    override val map: StateFlow<ArcGISMap> = _map.asStateFlow()
-    
-    private val _insets: MutableStateFlow<MapInsets> = MutableStateFlow(mapInsets)
-    override val insets: StateFlow<MapInsets> = _insets.asStateFlow()
-    
-    private val _currentViewpoint: MutableStateFlow<Viewpoint?> = MutableStateFlow(null)
-    override val currentViewpoint: StateFlow<Viewpoint?> = _currentViewpoint.asStateFlow()
-    
+) : ViewModel(), MapInterface by MapInterfaceImpl(arcGISMap, mapInsets) {
+
     private fun editFeature() {
         println("editFeature")
         // to be fleshed out with its own view model and navigation to the bottom sheet or side panel.

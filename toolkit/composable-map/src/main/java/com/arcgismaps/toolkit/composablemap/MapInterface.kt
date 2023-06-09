@@ -11,7 +11,9 @@ import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 public data class MapInsets(
     var start: Double = 0.0,
@@ -74,6 +76,10 @@ public interface MapEvents {
      * Support for pan events on [ComposableMap]
      */
     context(MapView, CoroutineScope) public fun onPan(panEvent: PanChangeEvent) {}
+
+    public fun setViewpoint(viewpoint: Viewpoint) {}
+
+    public fun setInsets(mapInsets: MapInsets) {}
 }
 
 /**
@@ -95,4 +101,27 @@ public interface MapInterface : MapEvents {
      * The [Viewpoint] from which the [ComposableMap] is drawn.
      */
     public val currentViewpoint : StateFlow<Viewpoint?>
+}
+
+public open class MapInterfaceImpl(
+    arcGISMap: ArcGISMap,
+    mapInsets: MapInsets = MapInsets()
+) : MapInterface {
+
+    private val _map : MutableStateFlow<ArcGISMap> = MutableStateFlow(arcGISMap)
+    override val map : StateFlow<ArcGISMap> = _map.asStateFlow()
+
+    private val _insets : MutableStateFlow<MapInsets> = MutableStateFlow(mapInsets)
+    override val insets: StateFlow<MapInsets> = _insets.asStateFlow()
+
+    private val _currentViewpoint : MutableStateFlow<Viewpoint?> = MutableStateFlow(null)
+    override val currentViewpoint: StateFlow<Viewpoint?> = _currentViewpoint.asStateFlow()
+
+    override fun setViewpoint(viewpoint: Viewpoint) {
+        _currentViewpoint.value = viewpoint
+    }
+
+    override fun setInsets(mapInsets: MapInsets) {
+        _insets.value = mapInsets
+    }
 }
