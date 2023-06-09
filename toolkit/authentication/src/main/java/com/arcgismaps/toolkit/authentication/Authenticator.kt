@@ -1,7 +1,11 @@
 package com.arcgismaps.toolkit.authentication
 
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 
 /**
@@ -23,5 +27,26 @@ public fun Authenticator(
         OAuthAuthenticator(oAuthPendingSignIn) { redirectUrl ->
             authenticatorViewModel.oAuthUserSignInManager.completeOAuthPendingSignIn(redirectUrl = redirectUrl)
         }
+    }
+
+    val serverTrustChallenge = authenticatorViewModel.serverTrustManager.challenge.collectAsStateWithLifecycle().value
+
+    serverTrustChallenge?.let { serverTrustChallenge ->
+        AlertDialog(
+            onDismissRequest = serverTrustChallenge::distrust,
+            confirmButton = {
+                Button(onClick = serverTrustChallenge::trust) {
+                    Text(text = "Trust")
+                }
+            },
+            dismissButton = {
+                Button(onClick = serverTrustChallenge::distrust) {
+                    Text(text = "Don't trust")
+                }
+            },
+            text = {
+                Text(text = "Trust server?")
+            }
+        )
     }
 }

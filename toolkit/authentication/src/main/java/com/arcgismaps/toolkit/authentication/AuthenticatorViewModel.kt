@@ -25,6 +25,8 @@ public interface AuthenticatorViewModel : NetworkAuthenticationChallengeHandler,
      */
     public val oAuthUserSignInManager: OAuthUserSignInManager
 
+    public val serverTrustManager: ServerTrustManager
+
     override suspend fun handleArcGISAuthenticationChallenge(challenge: ArcGISAuthenticationChallenge): ArcGISAuthenticationChallengeResponse
     override suspend fun handleNetworkAuthenticationChallenge(challenge: NetworkAuthenticationChallenge): NetworkAuthenticationChallengeResponse
 
@@ -47,6 +49,7 @@ private class AuthenticatorViewModelImpl(
 ) : AuthenticatorViewModel, ViewModel() {
 
     override val oAuthUserSignInManager: OAuthUserSignInManager = OAuthUserSignInManager.create()
+    override val serverTrustManager: ServerTrustManager = ServerTrustManager.create()
 
     init {
         if (setAsArcGISAuthenticationChallengeHandler) {
@@ -76,7 +79,7 @@ private class AuthenticatorViewModelImpl(
 
     override suspend fun handleNetworkAuthenticationChallenge(challenge: NetworkAuthenticationChallenge): NetworkAuthenticationChallengeResponse {
         return if (challenge.networkAuthenticationType == NetworkAuthenticationType.ServerTrust) {
-            NetworkAuthenticationChallengeResponse.ContinueWithCredential(ServerTrust)
+            return serverTrustManager.awaitChallengeResponse()
         } else {
             NetworkAuthenticationChallengeResponse.ContinueAndFailWithError(
                 UnsupportedOperationException("Not yet implemented")
