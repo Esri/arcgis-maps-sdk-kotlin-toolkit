@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    id("kotlinx-serialization")
 }
 
 android {
@@ -60,6 +61,7 @@ dependencies {
     implementation(project(":composable-map"))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
+    implementation(libs.bundles.serialization)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
