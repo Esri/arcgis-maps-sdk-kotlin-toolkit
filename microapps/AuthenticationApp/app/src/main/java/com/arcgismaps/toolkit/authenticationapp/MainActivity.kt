@@ -12,7 +12,6 @@ import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.authentication.Authenticator
 import com.arcgismaps.toolkit.authentication.AuthenticatorViewModel
-import com.arcgismaps.toolkit.authentication.AuthenticatorViewModelFactory
 import com.arcgismaps.toolkit.authenticationapp.screens.MainScreen
 import com.arcgismaps.toolkit.authenticationapp.ui.theme.AuthenticationAppTheme
 
@@ -21,14 +20,25 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             AuthenticationAppTheme {
-                AuthenticationApp()
+                ServerTrustMap()
             }
         }
     }
 }
 
 @Composable
-fun AuthenticationApp() {
+fun ServerTrustMap() {
+    val portal = remember { Portal("host.com", Portal.Connection.Authenticated) }
+    val portalItem = remember {
+        PortalItem(portal = portal, itemId = "12345")
+    }
+    MainScreen(portalItem = portalItem)
+    val authenticatorViewModel: AuthenticatorViewModel = viewModel(factory = AuthenticatorViewModel.Factory)
+    Authenticator(authenticatorViewModel = authenticatorViewModel)
+}
+
+@Composable
+fun OAuthMap() {
     val portal = remember { Portal("https://www.arcgis.com", Portal.Connection.Authenticated) }
     MainScreen(
         portalItem = PortalItem(
@@ -50,6 +60,6 @@ fun AuthenticationApp() {
 @Composable
 fun AppPreview() {
     AuthenticationAppTheme {
-        AuthenticationApp()
+        OAuthMap()
     }
 }
