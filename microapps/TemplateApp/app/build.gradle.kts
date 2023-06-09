@@ -4,6 +4,12 @@ plugins {
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
+secrets {
+    // this file doesn't contain secrets, it just provides defaults which can be committed into git.
+    defaultPropertiesFileName = File(project.projectDir, "/../../../secrets.defaults.properties").canonicalPath
+}
+
+
 android {
     namespace = "com.arcgismaps.toolkit.templateapp"
     compileSdk = libs.versions.compileSdk.get().toInt()

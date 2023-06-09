@@ -5,6 +5,10 @@ plugins {
     id("kotlinx-serialization")
 }
 
+secrets {
+    defaultPropertiesFileName = File(project.projectDir, "/../../../secrets.defaults.properties").canonicalPath
+}
+
 android {
     namespace = "com.arcgismaps.toolkit.featureformsapp"
     compileSdk = libs.versions.compileSdk.get().toInt()
