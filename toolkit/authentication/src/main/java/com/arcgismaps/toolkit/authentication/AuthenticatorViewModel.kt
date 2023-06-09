@@ -132,9 +132,11 @@ public class AuthenticatorViewModelFactory(
 }
 
 /**
- * Creates an [OAuthUserCredential] for this [oAuthUserConfiguration]. Suspends
+ * Creates an [OAuthUserCredential] for this [OAuthUserConfiguration]. Suspends
  * while the credential is being created, ie. until the user has signed in or cancelled the sign in.
  *
+ * @param onPendingSignIn Called when an [OAuthUserSignIn] is available. Use this to display UI to the user.
+ * @return A [Result] containing the [OAuthUserCredential] if successful.
  * @since 200.2.0
  */
 private suspend fun OAuthUserConfiguration.handleOAuthChallenge(
