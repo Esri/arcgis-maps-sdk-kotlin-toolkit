@@ -50,7 +50,9 @@ fun OAuthMap() {
         viewModel(factory = AuthenticatorViewModel.Factory)
     authenticatorViewModel.oAuthUserSignInManager.oAuthUserConfiguration = OAuthUserConfiguration(
         "https://www.arcgis.com",
-        BuildConfig.OAUTH_CLIENT_ID,
+        // This client ID is for demo purposes only. For use of the Authenticator in your own app,
+        // create your own client ID. For more info see: https://developers.arcgis.com/documentation/mapping-apis-and-services/security/tutorials/register-your-application/
+        "lgAdHkYZYlwwfAhC",
         "my-ags-app://auth"
     )
     Authenticator(authenticatorViewModel)

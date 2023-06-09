@@ -27,9 +27,6 @@ public interface AuthenticatorViewModel : NetworkAuthenticationChallengeHandler,
 
     public val serverTrustManager: ServerTrustManager
 
-    override suspend fun handleArcGISAuthenticationChallenge(challenge: ArcGISAuthenticationChallenge): ArcGISAuthenticationChallengeResponse
-    override suspend fun handleNetworkAuthenticationChallenge(challenge: NetworkAuthenticationChallenge): NetworkAuthenticationChallengeResponse
-
     public companion object {
         /**
          * The [ViewModelProvider.Factory] for creating a default implementation of this interface.
@@ -64,7 +61,7 @@ private class AuthenticatorViewModelImpl(
         oAuthUserSignInManager.oAuthUserConfiguration?.let { oAuthUserConfiguration ->
             if (oAuthUserConfiguration.canBeUsedForUrl(challenge.requestUrl)) {
                 val oAuthUserCredential =
-                    oAuthUserSignInManager.handleOAuthChallenge(challenge, oAuthUserConfiguration)
+                    oAuthUserSignInManager.handleOAuthChallenge(challenge)
 
                 return ArcGISAuthenticationChallengeResponse.ContinueWithCredential(
                     oAuthUserCredential
@@ -78,12 +75,15 @@ private class AuthenticatorViewModelImpl(
     }
 
     override suspend fun handleNetworkAuthenticationChallenge(challenge: NetworkAuthenticationChallenge): NetworkAuthenticationChallengeResponse {
-        return if (challenge.networkAuthenticationType == NetworkAuthenticationType.ServerTrust) {
-            return serverTrustManager.awaitChallengeResponse()
-        } else {
-            NetworkAuthenticationChallengeResponse.ContinueAndFailWithError(
-                UnsupportedOperationException("Not yet implemented")
-            )
+        return when (challenge.networkAuthenticationType) {
+            NetworkAuthenticationType.ServerTrust -> {
+                serverTrustManager.awaitChallengeResponse()
+            }
+            else -> {
+                NetworkAuthenticationChallengeResponse.ContinueAndFailWithError(
+                    UnsupportedOperationException("Not yet implemented")
+                )
+            }
         }
     }
 }
