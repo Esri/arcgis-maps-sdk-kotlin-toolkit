@@ -23,7 +23,7 @@ public fun FeatureForm(viewModel: FeatureFormViewModelInterface) {
         Row {
             Text(text = "Row 2")
         }
-        Button(onClick = { viewModel.visible.value = false }) {
+        Button(onClick = { viewModel.setFormVisibility(false) }) {
             Text("Close")
         }
     }
