@@ -16,8 +16,7 @@ import com.arcgismaps.toolkit.composablemap.MapInterface
 @Composable
 fun MainScreen(portalItem: PortalItem) {
     val map = ArcGISMap(portalItem)
-    val insets = MapInsets(bottom = 25.0)
-    val mapViewModel = viewModel<MapViewModel>(factory = MapViewModelFactory(map, insets))
+    val mapViewModel = viewModel<MapViewModel>(factory = MapViewModelFactory(map))
     ComposableMap(
         modifier = Modifier.fillMaxSize(),
         mapInterface = mapViewModel
