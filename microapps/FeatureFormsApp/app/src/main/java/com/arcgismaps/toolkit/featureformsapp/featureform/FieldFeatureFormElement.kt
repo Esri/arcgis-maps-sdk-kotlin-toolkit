@@ -43,6 +43,7 @@ public class FieldFeatureFormElement internal constructor(
     override var description: String,
     override var label: String,
     override var visibilityExpressionName: String = "",
+    // No way to construct a Domain without core.
 //    @Serializable(with = DomainSerializer::class)
 //    var domain: Domain,
     var editableExpressionName: String ="",
