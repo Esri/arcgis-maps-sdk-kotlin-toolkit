@@ -1,9 +1,16 @@
 package com.arcgismaps.toolkit.featureformsapp.screens.mapview
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.SheetValue
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
@@ -11,6 +18,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.mapping.ArcGISMap
@@ -64,7 +72,37 @@ fun MapScreen() {
             FeatureForm(formViewModel)
         },
         scaffoldState = bottomSheetScaffoldState,
-        sheetPeekHeight = 40.dp
+        sheetPeekHeight = 40.dp,
+        topBar = if (sheetVisibility.value) {
+            {
+                TopAppBar(
+                    title = { Text(text = "Edit Feature") },
+                    actions = {
+                        IconButton(onClick = {
+                            /* FUTURE: save feature here */
+                            formViewModel.setFormVisibility(false)
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Save Feature",
+                                tint = Color.Black
+                            )
+                        }
+                        IconButton(onClick = {
+                            formViewModel.setFormVisibility(false)
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Close Feature Editor",
+                                tint = Color.Black
+                            )
+                        }
+                    }
+                )
+            }
+        } else {
+            null
+        }
     ) {
         ComposableMap(
             modifier = Modifier.fillMaxSize(),
@@ -72,3 +110,4 @@ fun MapScreen() {
         )
     }
 }
+

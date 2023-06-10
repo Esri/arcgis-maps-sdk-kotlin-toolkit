@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -22,9 +21,6 @@ public fun FeatureForm(viewModel: FeatureFormViewModelInterface) {
         Spacer(modifier = Modifier)
         Row {
             Text(text = "Row 2")
-        }
-        Button(onClick = { viewModel.setFormVisibility(false) }) {
-            Text("Close")
         }
     }
 }
