@@ -1,4 +1,4 @@
-package com.arcgismaps.toolkit.templateapp.screens
+package com.arcgismaps.toolkit.authenticationapp.screens
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -9,7 +9,7 @@ import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.composablemap.ComposableMap
 import com.arcgismaps.toolkit.composablemap.MapInsets
-import com.arcgismaps.toolkit.template.Template
+import com.arcgismaps.toolkit.composablemap.MapInterface
 
 @Composable
 fun MainScreen() {
@@ -20,10 +20,5 @@ fun MainScreen() {
         modifier = Modifier.fillMaxSize(),
         mapInterface = mapViewModel
     )
-    
-    val templateViewModel = viewModel<TemplateViewModel>(
-        factory = TemplateViewModelFactory("Hello Template!!")
-    )
-    Template(templateViewModel)
     mapViewModel.setViewpoint(Viewpoint(39.8, -98.6, 10e7))
 }
