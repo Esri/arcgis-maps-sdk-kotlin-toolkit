@@ -35,8 +35,7 @@ public interface AuthenticatorViewModel : NetworkAuthenticationChallengeHandler,
     public var oAuthUserConfiguration: OAuthUserConfiguration?
 
     /**
-     * The current [OAuthUserSignIn] awaiting completion. Use this to determine whether to launch
-     * a Custom Chrome Tab for user authentication.
+     * The current [OAuthUserSignIn] awaiting completion. Use this to complete or cancel the OAuth authentication challenge.
      *
      * @since 200.2.0
      */
