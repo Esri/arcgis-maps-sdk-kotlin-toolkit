@@ -77,9 +77,20 @@ public interface MapEvents {
      */
     context(MapView, CoroutineScope) public fun onPan(panEvent: PanChangeEvent) {}
 
-    public fun setViewpoint(viewpoint: Viewpoint) {}
+    /**
+     * Sets the [ComposableMap] current viewpoint to the given [viewpoint]
+     */
+    public fun setViewpoint(viewpoint: Viewpoint)
 
-    public fun setInsets(mapInsets: MapInsets) {}
+    /**
+     * Sets the [ComposableMap] insets to the given [mapInsets]
+     */
+    public fun setInsets(mapInsets: MapInsets)
+
+    /**
+     * Sets the given [map] on the [ComposableMap]
+     */
+    public fun setMap(map: ArcGISMap)
 }
 
 /**
@@ -103,7 +114,7 @@ public interface MapInterface : MapEvents {
     public val currentViewpoint : StateFlow<Viewpoint?>
 }
 
-public open class MapInterfaceImpl(
+public class MapInterfaceImpl(
     arcGISMap: ArcGISMap,
     mapInsets: MapInsets = MapInsets()
 ) : MapInterface {
@@ -123,5 +134,9 @@ public open class MapInterfaceImpl(
 
     override fun setInsets(mapInsets: MapInsets) {
         _insets.value = mapInsets
+    }
+
+    override fun setMap(map: ArcGISMap) {
+        _map.value = map
     }
 }

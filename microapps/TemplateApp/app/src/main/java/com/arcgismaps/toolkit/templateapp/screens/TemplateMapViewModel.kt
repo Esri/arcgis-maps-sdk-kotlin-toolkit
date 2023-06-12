@@ -7,7 +7,6 @@ import com.arcgismaps.toolkit.composablemap.MapInsets
 import com.arcgismaps.toolkit.composablemap.MapInterface
 import com.arcgismaps.toolkit.composablemap.MapInterfaceImpl
 
-
 class TemplateMapViewModel(
     arcGISMap: ArcGISMap,
     mapInsets: MapInsets = MapInsets()
