@@ -16,18 +16,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-interface FeatureFormsMapViewModelInterface: MapInterface {
-    val onFeatureIdentified: (ArcGISFeature)-> Unit
-}
-
 /**
  * A view model for the FeatureForms MapView UI
  */
 class FeatureFormsMapViewModelImpl(
     arcGISMap: ArcGISMap,
     mapInsets: MapInsets = MapInsets(),
-    override val onFeatureIdentified: (ArcGISFeature) -> Unit
-) : ViewModel(), FeatureFormsMapViewModelInterface {
+    val onFeatureIdentified: (ArcGISFeature) -> Unit
+) : ViewModel(), MapInterface {
     private val _map: MutableStateFlow<ArcGISMap> = MutableStateFlow(arcGISMap)
     override val map: StateFlow<ArcGISMap> = _map.asStateFlow()
     

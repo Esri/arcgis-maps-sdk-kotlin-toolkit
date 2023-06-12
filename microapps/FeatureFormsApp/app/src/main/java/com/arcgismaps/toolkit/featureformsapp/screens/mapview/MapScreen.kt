@@ -16,6 +16,7 @@ import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.toolkit.composablemap.ComposableMap
-import com.arcgismaps.toolkit.composablemap.MapInsets
 import com.arcgismaps.toolkit.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureforms.FeatureFormViewModelFactory
 import com.arcgismaps.toolkit.featureforms.FeatureFormViewModelImpl
@@ -40,7 +40,6 @@ fun MapScreen() {
     val mapViewModel = viewModel<FeatureFormsMapViewModelImpl>(
         factory = FeatureFormsMapViewModelFactory(
             arcGISMap = ArcGISMap("https://runtimecoretest.maps.arcgis.com/home/item.html?id=df0f27f83eee41b0afe4b6216f80b541"),
-            mapInsets = MapInsets(bottom = 25.0),
             onFeatureIdentified = { feature ->
                 coroutineScope.launch {
                     formViewModel.setFeature(feature)
@@ -50,7 +49,7 @@ fun MapScreen() {
         )
     )
     
-    val sheetVisibility = formViewModel.visible.collectAsState()
+    val sheetVisibility by formViewModel.visible.collectAsState()
     
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
@@ -59,8 +58,8 @@ fun MapScreen() {
         )
     )
     
-    LaunchedEffect(sheetVisibility.value) {
-        if (sheetVisibility.value) {
+    LaunchedEffect(sheetVisibility) {
+        if (sheetVisibility) {
             bottomSheetScaffoldState.bottomSheetState.expand()
         } else {
             bottomSheetScaffoldState.bottomSheetState.hide()
@@ -73,7 +72,7 @@ fun MapScreen() {
         },
         scaffoldState = bottomSheetScaffoldState,
         sheetPeekHeight = 40.dp,
-        topBar = if (sheetVisibility.value) {
+        topBar = if (sheetVisibility) {
             {
                 TopAppBar(
                     title = { Text(text = "Edit Feature") },

@@ -6,7 +6,7 @@ plugins {
 
 secrets {
     // this file doesn't contain secrets, it just provides defaults which can be committed into git.
-    defaultPropertiesFileName = File(project.projectDir, "/../../../secrets.defaults.properties").canonicalPath
+    defaultPropertiesFileName = "secrets.defaults.properties"
 }
 
 

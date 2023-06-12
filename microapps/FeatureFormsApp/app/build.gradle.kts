@@ -5,7 +5,7 @@ plugins {
 }
 
 secrets {
-    defaultPropertiesFileName = File(project.projectDir, "/../../../secrets.defaults.properties").canonicalPath
+    defaultPropertiesFileName = "secrets.defaults.properties"
 }
 
 android {
