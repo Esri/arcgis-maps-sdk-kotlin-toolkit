@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">FeatureFormsApp</string>
+    <string name="edit_feature">Edit Feature</string>
 </resources>
