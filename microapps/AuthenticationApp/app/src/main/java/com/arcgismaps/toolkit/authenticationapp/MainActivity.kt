@@ -13,6 +13,7 @@ import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.authentication.Authenticator
 import com.arcgismaps.toolkit.authentication.AuthenticatorViewModel
+import com.arcgismaps.toolkit.authentication.AuthenticatorViewModelFactory
 import com.arcgismaps.toolkit.authenticationapp.screens.MainScreen
 import com.arcgismaps.toolkit.authenticationapp.ui.theme.AuthenticationAppTheme
 
@@ -34,7 +35,7 @@ fun ServerTrustMap() {
         PortalItem(portal = portal, itemId = "12345")
     }
     MainScreen(portalItem = portalItem)
-    val authenticatorViewModel: AuthenticatorViewModel = viewModel(factory = AuthenticatorViewModel.Factory)
+    val authenticatorViewModel: AuthenticatorViewModel = viewModel(factory = AuthenticatorViewModelFactory())
     Authenticator(authenticatorViewModel = authenticatorViewModel)
 }
 
@@ -48,8 +49,8 @@ fun OAuthMap() {
         )
     )
     val authenticatorViewModel: AuthenticatorViewModel =
-        viewModel(factory = AuthenticatorViewModel.Factory)
-    authenticatorViewModel.oAuthUserSignInManager.oAuthUserConfiguration = OAuthUserConfiguration(
+        viewModel(factory = AuthenticatorViewModelFactory())
+    authenticatorViewModel.oAuthUserConfiguration = OAuthUserConfiguration(
         portal.url,
         // This client ID is for demo purposes only. For use of the Authenticator in your own app,
         // create your own client ID. For more info see: https://developers.arcgis.com/documentation/mapping-apis-and-services/security/tutorials/register-your-application/

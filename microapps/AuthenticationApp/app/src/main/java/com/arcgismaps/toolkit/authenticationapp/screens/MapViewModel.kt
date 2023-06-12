@@ -15,13 +15,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 class MapViewModel(
-    arcGISMap: ArcGISMap,
-    mapInsets: MapInsets = MapInsets()
+    arcGISMap: ArcGISMap
 ) : ViewModel(), MapInterface {
     private val _map: MutableStateFlow<ArcGISMap> = MutableStateFlow(arcGISMap)
     override val map: StateFlow<ArcGISMap> = _map.asStateFlow()
 
-    private val _insets: MutableStateFlow<MapInsets> = MutableStateFlow(mapInsets)
+    private val _insets: MutableStateFlow<MapInsets> = MutableStateFlow(MapInsets())
     override val insets: StateFlow<MapInsets> = _insets.asStateFlow()
 
     private val _currentViewpoint: MutableStateFlow<Viewpoint?> = MutableStateFlow(null)
@@ -33,11 +32,10 @@ class MapViewModel(
 }
 
 class MapViewModelFactory(
-    private val arcGISMap: ArcGISMap,
-    private val mapInsets: MapInsets = MapInsets()
+    private val arcGISMap: ArcGISMap
 ) : ViewModelProvider.NewInstanceFactory() {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return MapViewModel(arcGISMap, mapInsets) as T
+        return MapViewModel(arcGISMap) as T
     }
 }

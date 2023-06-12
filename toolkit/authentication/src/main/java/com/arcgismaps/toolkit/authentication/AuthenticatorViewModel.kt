@@ -10,7 +10,12 @@ import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeHandler
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeResponse
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationType
-import com.arcgismaps.httpcore.authentication.ServerTrust
+import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
+import com.arcgismaps.httpcore.authentication.OAuthUserCredential
+import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * Handles authentication challenges and exposes state for the [Authenticator] to display to the user.
@@ -21,18 +26,21 @@ public interface AuthenticatorViewModel : NetworkAuthenticationChallengeHandler,
     ArcGISAuthenticationChallengeHandler {
 
     /**
-     * The [OAuthUserSignInManager] to handle incoming OAuth challenges.
+     * The [OAuthUserConfiguration] to use for any sign ins. If null, OAuth will not be used for any
+     * [ArcGISAuthenticationChallenge].
+     *
+     * @since 200.2.0
      */
-    public val oAuthUserSignInManager: OAuthUserSignInManager
+    public var oAuthUserConfiguration: OAuthUserConfiguration?
 
     public val serverTrustManager: ServerTrustManager
 
-    public companion object {
-        /**
-         * The [ViewModelProvider.Factory] for creating a default implementation of this interface.
-         */
-        public val Factory: AuthenticatorViewModelFactory = AuthenticatorViewModelFactory()
-    }
+    /**
+     * The current [OAuthUserSignIn] awaiting completion. Use this to complete or cancel the OAuth authentication challenge.
+     *
+     * @since 200.2.0
+     */
+    public val pendingOAuthUserSignIn: StateFlow<OAuthUserSignIn?>
 }
 
 /**
@@ -45,8 +53,12 @@ private class AuthenticatorViewModelImpl(
     setAsNetworkAuthenticationChallengeHandler: Boolean
 ) : AuthenticatorViewModel, ViewModel() {
 
-    override val oAuthUserSignInManager: OAuthUserSignInManager = OAuthUserSignInManager.create()
     override val serverTrustManager: ServerTrustManager = ServerTrustManager.create()
+    override var oAuthUserConfiguration: OAuthUserConfiguration? = null
+
+    private val _pendingOAuthUserSignIn = MutableStateFlow<OAuthUserSignIn?>(null)
+    override val pendingOAuthUserSignIn: StateFlow<OAuthUserSignIn?> =
+        _pendingOAuthUserSignIn.asStateFlow()
 
     init {
         if (setAsArcGISAuthenticationChallengeHandler) {
@@ -58,10 +70,19 @@ private class AuthenticatorViewModelImpl(
     }
 
     override suspend fun handleArcGISAuthenticationChallenge(challenge: ArcGISAuthenticationChallenge): ArcGISAuthenticationChallengeResponse {
-        oAuthUserSignInManager.oAuthUserConfiguration?.let { oAuthUserConfiguration ->
+        oAuthUserConfiguration?.let { oAuthUserConfiguration ->
             if (oAuthUserConfiguration.canBeUsedForUrl(challenge.requestUrl)) {
                 val oAuthUserCredential =
-                    oAuthUserSignInManager.handleOAuthChallenge(challenge)
+                    oAuthUserConfiguration.handleOAuthChallenge {
+                        // A composable observing [pendingOAuthUserSignIn] can launch the OAuth prompt
+                        // when this value changes.
+                        _pendingOAuthUserSignIn.value = it
+                    }.also {
+                        // At this point we have suspended until the OAuth workflow is complete, so
+                        // we can get rid of the pending sign in. Composables observing this can know
+                        // to remove the OAuth prompt when this value changes.
+                        _pendingOAuthUserSignIn.value = null
+                    }.getOrThrow()
 
                 return ArcGISAuthenticationChallengeResponse.ContinueWithCredential(
                     oAuthUserCredential
@@ -90,7 +111,7 @@ private class AuthenticatorViewModelImpl(
 
 /**
  * Provides a [ViewModelProvider.Factory] for creating a default implementation of the [AuthenticatorViewModel]
- * inteface.
+ * interface.
  *
  * @property setAsArcGISAuthenticationChallengeHandler whether to set the created [AuthenticatorViewModel]
  * as the [ArcGISEnvironment.authenticationManager.arcGisAuthenticationChallengeHandler].
@@ -109,3 +130,18 @@ public class AuthenticatorViewModelFactory(
         ) as T
     }
 }
+
+/**
+ * Creates an [OAuthUserCredential] for this [OAuthUserConfiguration]. Suspends
+ * while the credential is being created, ie. until the user has signed in or cancelled the sign in.
+ *
+ * @param onPendingSignIn Called when an [OAuthUserSignIn] is available. Use this to display UI to the user.
+ * @return A [Result] containing the [OAuthUserCredential] if successful.
+ * @since 200.2.0
+ */
+private suspend fun OAuthUserConfiguration.handleOAuthChallenge(
+    onPendingSignIn: (OAuthUserSignIn?) -> Unit
+): Result<OAuthUserCredential> =
+    OAuthUserCredential.create(this) { oAuthUserSignIn ->
+        onPendingSignIn(oAuthUserSignIn)
+    }
