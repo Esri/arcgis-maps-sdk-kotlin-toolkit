@@ -78,7 +78,7 @@ private class AuthenticatorViewModelImpl(
                     }.also {
                         // At this point we have suspended until the OAuth workflow is complete, so
                         // we can get rid of the pending sign in. Composables observing this can know
-                        // to remove the cct when this value changes.
+                        // to remove the OAuth prompt when this value changes.
                         _pendingOAuthUserSignIn.value = null
                     }.getOrThrow()
 
