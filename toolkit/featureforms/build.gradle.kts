@@ -19,14 +19,14 @@ val artifactVersion: String = "$versionNumber-$buildNumber"
 android {
     namespace = "com.arcgismaps.toolkit.featureforms"
     compileSdk = libs.versions.compileSdk.get().toInt()
-
+    
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
-
+        
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
-
+    
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -98,6 +98,6 @@ afterEvaluate {
         }
     }
     
-   tasks.findByName("publishAarPublicationToMavenRepository")?.dependsOn("assembleRelease")
+    tasks.findByName("publishAarPublicationToMavenRepository")?.dependsOn("assembleRelease")
     tasks.findByName("publishToMavenLocal")?.dependsOn("assembleRelease")
 }
