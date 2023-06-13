@@ -13,9 +13,11 @@ import com.arcgismaps.httpcore.authentication.NetworkAuthenticationType
 import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 import com.arcgismaps.httpcore.authentication.OAuthUserCredential
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
+import com.arcgismaps.httpcore.authentication.ServerTrust
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.suspendCancellableCoroutine
 
 /**
  * Handles authentication challenges and exposes state for the [Authenticator] to display to the user.
@@ -33,14 +35,13 @@ public interface AuthenticatorViewModel : NetworkAuthenticationChallengeHandler,
      */
     public var oAuthUserConfiguration: OAuthUserConfiguration?
 
-    public val serverTrustManager: ServerTrustManager
-
     /**
      * The current [OAuthUserSignIn] awaiting completion. Use this to complete or cancel the OAuth authentication challenge.
      *
      * @since 200.2.0
      */
     public val pendingOAuthUserSignIn: StateFlow<OAuthUserSignIn?>
+    public val pendingServerTrustChallenge: StateFlow<ServerTrustChallenge?>
 }
 
 /**
@@ -53,12 +54,14 @@ private class AuthenticatorViewModelImpl(
     setAsNetworkAuthenticationChallengeHandler: Boolean
 ) : AuthenticatorViewModel, ViewModel() {
 
-    override val serverTrustManager: ServerTrustManager = ServerTrustManager.create()
     override var oAuthUserConfiguration: OAuthUserConfiguration? = null
 
     private val _pendingOAuthUserSignIn = MutableStateFlow<OAuthUserSignIn?>(null)
     override val pendingOAuthUserSignIn: StateFlow<OAuthUserSignIn?> =
         _pendingOAuthUserSignIn.asStateFlow()
+
+    private val _pendingServerTrustChallenge = MutableStateFlow<ServerTrustChallenge?>(null)
+    override val pendingServerTrustChallenge: StateFlow<ServerTrustChallenge?> = _pendingServerTrustChallenge.asStateFlow()
 
     init {
         if (setAsArcGISAuthenticationChallengeHandler) {
@@ -98,7 +101,7 @@ private class AuthenticatorViewModelImpl(
     override suspend fun handleNetworkAuthenticationChallenge(challenge: NetworkAuthenticationChallenge): NetworkAuthenticationChallengeResponse {
         return when (challenge.networkAuthenticationType) {
             NetworkAuthenticationType.ServerTrust -> {
-                serverTrustManager.awaitChallengeResponse()
+                awaitServerTrustChallengeResponse(challenge)
             }
             else -> {
                 NetworkAuthenticationChallengeResponse.ContinueAndFailWithError(
@@ -107,6 +110,31 @@ private class AuthenticatorViewModelImpl(
             }
         }
     }
+
+    private suspend fun awaitServerTrustChallengeResponse(networkAuthenticationChallenge: NetworkAuthenticationChallenge): NetworkAuthenticationChallengeResponse =
+        suspendCancellableCoroutine { continuation ->
+            _pendingServerTrustChallenge.value = ServerTrustChallenge(networkAuthenticationChallenge.hostname) { shouldTrustServer ->
+                _pendingServerTrustChallenge.value = null
+                when (shouldTrustServer) {
+                    true -> continuation.resumeWith(
+                        Result.success(
+                            NetworkAuthenticationChallengeResponse.ContinueWithCredential(
+                                ServerTrust
+                            )
+                        )
+                    )
+
+                    false -> continuation.resumeWith(
+                        Result.success(
+                            NetworkAuthenticationChallengeResponse.Cancel
+                        )
+                    )
+                }
+            }
+            continuation.invokeOnCancellation {
+                continuation.resumeWith(Result.success(NetworkAuthenticationChallengeResponse.Cancel))
+            }
+        }
 }
 
 /**

@@ -1,8 +1,5 @@
 package com.arcgismaps.toolkit.authentication
 
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
@@ -31,24 +28,9 @@ public fun Authenticator(
         }
     }
 
-    val serverTrustChallenge = authenticatorViewModel.serverTrustManager.challenge.collectAsStateWithLifecycle().value
+    val serverTrustChallenge = authenticatorViewModel.pendingServerTrustChallenge.collectAsStateWithLifecycle().value
 
     serverTrustChallenge?.let { serverTrustChallenge ->
-        AlertDialog(
-            onDismissRequest = serverTrustChallenge::distrust,
-            confirmButton = {
-                Button(onClick = serverTrustChallenge::trust) {
-                    Text(text = "Trust")
-                }
-            },
-            dismissButton = {
-                Button(onClick = serverTrustChallenge::distrust) {
-                    Text(text = "Don't trust")
-                }
-            },
-            text = {
-                Text(text = "Trust server?")
-            }
-        )
+        ServerTrustAuthenticator(onTrust = serverTrustChallenge::trust, onDistrust = serverTrustChallenge::distrust, serverTrustChallenge.hostname)
     }
 }
