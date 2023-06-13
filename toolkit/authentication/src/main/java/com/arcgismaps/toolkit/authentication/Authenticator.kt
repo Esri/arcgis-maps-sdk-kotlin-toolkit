@@ -21,11 +21,7 @@ public fun Authenticator(
         authenticatorViewModel.pendingOAuthUserSignIn.collectAsStateWithLifecycle().value
 
     oAuthPendingSignIn?.let { oAuthPendingSignIn ->
-        OAuthAuthenticator(oAuthPendingSignIn) { redirectUrl ->
-            redirectUrl?.let {
-                oAuthPendingSignIn.complete(redirectUrl)
-            } ?: oAuthPendingSignIn.cancel()
-        }
+        OAuthAuthenticator(oAuthPendingSignIn)
     }
 
     val serverTrustChallenge = authenticatorViewModel.pendingServerTrustChallenge.collectAsStateWithLifecycle().value
