@@ -97,4 +97,7 @@ afterEvaluate {
             }
         }
     }
+    
+   tasks.findByName("publishAarPublicationToMavenRepository")?.dependsOn("assembleRelease")
+    tasks.findByName("publishToMavenLocal")?.dependsOn("assembleRelease")
 }
