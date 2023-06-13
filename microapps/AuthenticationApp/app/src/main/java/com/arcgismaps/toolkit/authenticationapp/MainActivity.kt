@@ -42,7 +42,8 @@ fun ServerTrustMap() {
         PortalItem(portal = portal, itemId = "12345")
     }
     MainScreen(portalItem = portalItem)
-    val authenticatorViewModel: AuthenticatorViewModel = viewModel(factory = AuthenticatorViewModelFactory())
+    val authenticatorViewModel: AuthenticatorViewModel =
+        viewModel(factory = AuthenticatorViewModelFactory())
     Authenticator(authenticatorViewModel = authenticatorViewModel)
 }
 

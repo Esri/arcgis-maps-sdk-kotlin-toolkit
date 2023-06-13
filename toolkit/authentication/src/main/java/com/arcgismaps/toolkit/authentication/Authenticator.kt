@@ -24,9 +24,14 @@ public fun Authenticator(
         OAuthAuthenticator(oAuthPendingSignIn)
     }
 
-    val serverTrustChallenge = authenticatorViewModel.pendingServerTrustChallenge.collectAsStateWithLifecycle().value
+    val serverTrustChallenge =
+        authenticatorViewModel.pendingServerTrustChallenge.collectAsStateWithLifecycle().value
 
     serverTrustChallenge?.let { serverTrustChallenge ->
-        ServerTrustAuthenticator(onTrust = serverTrustChallenge::trust, onDistrust = serverTrustChallenge::distrust, serverTrustChallenge.hostname)
+        ServerTrustAuthenticator(
+            onTrust = serverTrustChallenge::trust,
+            onDistrust = serverTrustChallenge::distrust,
+            serverTrustChallenge.hostname
+        )
     }
 }

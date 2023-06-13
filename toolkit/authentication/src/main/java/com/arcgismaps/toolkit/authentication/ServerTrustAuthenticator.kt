@@ -17,6 +17,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+/**
+ * Displays a trust or distrust server prompt to the user.
+ *
+ * @param onTrust called when the trust button is clicked.
+ * @param onDistrust called when the cancel button is clicked.
+ * @param challengeHostname the hostname of the challenge this prompt is associated with.
+ * @since 200.2.0
+ */
 @Composable
 internal fun ServerTrustAuthenticator(
     onTrust: () -> Unit,

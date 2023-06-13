@@ -43,7 +43,9 @@ public interface AuthenticatorViewModel : NetworkAuthenticationChallengeHandler,
     public val pendingOAuthUserSignIn: StateFlow<OAuthUserSignIn?>
 
     /**
-     * The current server trust challenge awaiting completion. Use this to complete
+     * The current [ServerTrustChallenge] awaiting completion. Use this to trust or distrust a server trust challenge.
+     *
+     * @since 200.2.0
      */
     public val pendingServerTrustChallenge: StateFlow<ServerTrustChallenge?>
 }
@@ -65,7 +67,8 @@ private class AuthenticatorViewModelImpl(
         _pendingOAuthUserSignIn.asStateFlow()
 
     private val _pendingServerTrustChallenge = MutableStateFlow<ServerTrustChallenge?>(null)
-    override val pendingServerTrustChallenge: StateFlow<ServerTrustChallenge?> = _pendingServerTrustChallenge.asStateFlow()
+    override val pendingServerTrustChallenge: StateFlow<ServerTrustChallenge?> =
+        _pendingServerTrustChallenge.asStateFlow()
 
     init {
         if (setAsArcGISAuthenticationChallengeHandler) {
@@ -107,6 +110,7 @@ private class AuthenticatorViewModelImpl(
             NetworkAuthenticationType.ServerTrust -> {
                 awaitServerTrustChallengeResponse(challenge)
             }
+
             else -> {
                 NetworkAuthenticationChallengeResponse.ContinueAndFailWithError(
                     UnsupportedOperationException("Not yet implemented")
@@ -115,26 +119,35 @@ private class AuthenticatorViewModelImpl(
         }
     }
 
+    /**
+     * Emits a new [ServerTrustChallenge] to [pendingServerTrustChallenge] and awaits a trust or distrust
+     * response.
+     *
+     * @param networkAuthenticationChallenge the [NetworkAuthenticationChallenge] awaiting a response.
+     * @return [NetworkAuthenticationChallengeResponse] based on user response.
+     * @since 200.2.0
+     */
     private suspend fun awaitServerTrustChallengeResponse(networkAuthenticationChallenge: NetworkAuthenticationChallenge): NetworkAuthenticationChallengeResponse =
         suspendCancellableCoroutine { continuation ->
-            _pendingServerTrustChallenge.value = ServerTrustChallenge(networkAuthenticationChallenge.hostname) { shouldTrustServer ->
-                _pendingServerTrustChallenge.value = null
-                when (shouldTrustServer) {
-                    true -> continuation.resumeWith(
-                        Result.success(
-                            NetworkAuthenticationChallengeResponse.ContinueWithCredential(
-                                ServerTrust
+            _pendingServerTrustChallenge.value =
+                ServerTrustChallenge(networkAuthenticationChallenge.hostname) { shouldTrustServer ->
+                    _pendingServerTrustChallenge.value = null
+                    when (shouldTrustServer) {
+                        true -> continuation.resumeWith(
+                            Result.success(
+                                NetworkAuthenticationChallengeResponse.ContinueWithCredential(
+                                    ServerTrust
+                                )
                             )
                         )
-                    )
 
-                    false -> continuation.resumeWith(
-                        Result.success(
-                            NetworkAuthenticationChallengeResponse.Cancel
+                        false -> continuation.resumeWith(
+                            Result.success(
+                                NetworkAuthenticationChallengeResponse.Cancel
+                            )
                         )
-                    )
+                    }
                 }
-            }
             continuation.invokeOnCancellation {
                 continuation.resumeWith(Result.success(NetworkAuthenticationChallengeResponse.Cancel))
             }

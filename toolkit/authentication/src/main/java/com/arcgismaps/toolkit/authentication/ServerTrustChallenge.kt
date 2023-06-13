@@ -1,14 +1,42 @@
 package com.arcgismaps.toolkit.authentication
 
+import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallenge
+import com.arcgismaps.httpcore.authentication.NetworkAuthenticationType
+
+
+/**
+ * Represents a [NetworkAuthenticationChallenge] of type [NetworkAuthenticationType.ServerTrust].
+ *
+ * @property hostname the hostname of the server to trust.
+ * @property onUserResponseReceived a callback invoked with `true` if the server should be trusted.
+ * @since 200.2.0
+ */
 public class ServerTrustChallenge(
     public val hostname: String = "this server",
-    private val onUserResponseReceived: (Boolean) -> Unit = {}
+    private var onUserResponseReceived: ((Boolean) -> Unit)? = {}
 ) {
+
+    /**
+     * Trusts the server. Note that [trust] or [distrust] can only be called once on a single [ServerTrustChallenge]
+     * object. After either function has been called once, further calls will have no effect.
+     *
+     * @since 200.2.0
+     */
     public fun trust() {
-        onUserResponseReceived(true)
+        onUserResponseReceived?.invoke(true)
+        // ensure only a single challenge response is sent.
+        onUserResponseReceived = null
     }
 
+    /**
+     * Distrusts the server. Note that [trust] or [distrust] can only be called once on a single [ServerTrustChallenge]
+     * object. After either function has been called once, further calls will have no effect.
+     *
+     * @since 200.2.0
+     */
     public fun distrust() {
-        onUserResponseReceived(false)
+        onUserResponseReceived?.invoke(false)
+        // ensure only a single challenge response is sent.
+        onUserResponseReceived = null
     }
 }
