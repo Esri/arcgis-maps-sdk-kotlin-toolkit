@@ -11,8 +11,9 @@ import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import java.util.UUID
+import kotlinx.coroutines.flow.asStateFlow
 
 public data class MapInsets(
     var start: Double = 0.0,
@@ -78,25 +79,35 @@ public interface MapEvents {
 
     /**
      * Callback event for when the orientation of the [ComposableMap] changes with the given
-     * [rotation] and called by the [flowProducer]
+     * [rotation]
      */
-    public fun onMapRotationChanged(rotation: Double, flowProducer: UUID? = null) {}
-
-    /**
-     * Sets the [ComposableMap] current viewpoint's rotation to the given [angleDegrees]
-     */
-    public fun setViewpointRotation(angleDegrees: Double) {}
+    public fun onMapRotationChanged(rotation: Double)
 
     /**
      * Callback event for the when the viewpoint of the [ComposableMap] changes with the given
-     * [viewpoint] and called by the [flowProducer]
+     * [viewpoint]
      */
-    public fun onMapViewpointChanged(viewpoint: Viewpoint, flowProducer: UUID? = null) {}
+    public fun onMapViewpointChanged(viewpoint: Viewpoint)
 
     /**
      * Sets the [ComposableMap] current viewpoint to the given [viewpoint]
      */
-    public fun setViewpoint(viewpoint: Viewpoint) {}
+    public fun setViewpoint(viewpoint: Viewpoint)
+
+    /**
+     * Sets the [ComposableMap] current viewpoint's rotation to the given [angleDegrees]
+     */
+    public fun setViewpointRotation(angleDegrees: Double)
+
+    /**
+     * Sets the [ComposableMap] insets to the given [mapInsets]
+     */
+    public fun setInsets(mapInsets: MapInsets)
+
+    /**
+     * Sets the given [map] on the [ComposableMap]
+     */
+    public fun setMap(map: ArcGISMap)
 }
 
 /**
@@ -117,17 +128,52 @@ public interface MapInterface : MapEvents {
     /**
      * The [Viewpoint] from which the [ComposableMap] is drawn.
      */
-    public val viewpoint: StateFlow<FlowData<Viewpoint?>>
+    public val viewpoint: StateFlow<Viewpoint?>
 
     /**
      * The current rotation value of the [ComposableMap].
      */
-    public val mapRotation: StateFlow<FlowData<Double>>
+    public val mapRotation: StateFlow<Double>
 }
 
-/**
- * Data holder class for [data] for use with flows where the producer needs to uniquely identified.
- * In cases where an instance is both emitting and collecting on a flow, the [producer] property
- * can be used to match and drop collects to avoid introducing a feedback loop.
- */
-public data class FlowData<T>(val data: T, val producer: UUID? = null)
+public class MapInterfaceImpl(
+    arcGISMap: ArcGISMap,
+    mapInsets: MapInsets = MapInsets()
+) : MapInterface {
+
+    private val _map : MutableStateFlow<ArcGISMap> = MutableStateFlow(arcGISMap)
+    override val map : StateFlow<ArcGISMap> = _map.asStateFlow()
+
+    private val _insets : MutableStateFlow<MapInsets> = MutableStateFlow(mapInsets)
+    override val insets: StateFlow<MapInsets> = _insets.asStateFlow()
+
+    private val _viewpoint : MutableStateFlow<Viewpoint?> = MutableStateFlow(null)
+    override val viewpoint: StateFlow<Viewpoint?> = _viewpoint.asStateFlow()
+
+    private val _mapRotation: MutableStateFlow<Double> = MutableStateFlow(0.0)
+    override val mapRotation: StateFlow<Double> = _mapRotation.asStateFlow()
+
+    override fun onMapRotationChanged(rotation: Double) {
+        //TODO("Not yet implemented")
+    }
+
+    override fun onMapViewpointChanged(viewpoint: Viewpoint) {
+        //TODO("Not yet implemented")
+    }
+
+    override fun setViewpoint(viewpoint: Viewpoint) {
+        _viewpoint.value = viewpoint
+    }
+
+    override fun setViewpointRotation(angleDegrees: Double) {
+        _mapRotation.value = angleDegrees
+    }
+
+    override fun setInsets(mapInsets: MapInsets) {
+        _insets.value = mapInsets
+    }
+
+    override fun setMap(map: ArcGISMap) {
+        _map.value = map
+    }
+}
