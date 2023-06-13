@@ -41,6 +41,10 @@ public interface AuthenticatorViewModel : NetworkAuthenticationChallengeHandler,
      * @since 200.2.0
      */
     public val pendingOAuthUserSignIn: StateFlow<OAuthUserSignIn?>
+
+    /**
+     * The current server trust challenge awaiting completion. Use this to complete
+     */
     public val pendingServerTrustChallenge: StateFlow<ServerTrustChallenge?>
 }
 

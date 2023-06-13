@@ -18,7 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-public fun ServerTrustAuthenticator(
+internal fun ServerTrustAuthenticator(
     onTrust: () -> Unit,
     onDistrust: () -> Unit,
     challengeHostname: String
