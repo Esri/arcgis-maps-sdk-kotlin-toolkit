@@ -26,7 +26,7 @@ private const val RESULT_CODE_CANCELED = 2
  *
  * @since 200.2.0
  */
-public class OAuthUserSignInActivity : ComponentActivity() {
+internal class OAuthUserSignInActivity : ComponentActivity() {
 
     private var customTabsWasLaunched = false
     private lateinit var redirectUrl: String

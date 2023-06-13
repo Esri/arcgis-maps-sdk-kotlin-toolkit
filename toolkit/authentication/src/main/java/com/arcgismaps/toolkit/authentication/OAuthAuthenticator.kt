@@ -14,13 +14,14 @@ import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
  * @since 200.2.0
  */
 @Composable
-public fun OAuthAuthenticator(
-    oAuthPendingSignIn: OAuthUserSignIn,
-    onActivityResult: (String?) -> Unit
+internal fun OAuthAuthenticator(
+    oAuthPendingSignIn: OAuthUserSignIn
 ) {
     val launcher =
         rememberLauncherForActivityResult(contract = OAuthUserSignInActivity.Contract()) { redirectUrl ->
-            onActivityResult(redirectUrl)
+            redirectUrl?.let {
+                oAuthPendingSignIn.complete(redirectUrl)
+            } ?: oAuthPendingSignIn.cancel()
         }
     // Launching an activity is a side effect. We don't need `LaunchedEffect` because this is not suspending
     // and there's nothing that needs to keep running if it gets recomposed. In reality, we also don't
