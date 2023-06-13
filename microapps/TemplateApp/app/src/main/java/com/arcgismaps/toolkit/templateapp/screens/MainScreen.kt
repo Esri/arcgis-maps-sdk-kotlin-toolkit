@@ -8,14 +8,20 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.composablemap.ComposableMap
+import com.arcgismaps.toolkit.template.Template
 
 @Composable
 fun MainScreen() {
     val map = ArcGISMap(BasemapStyle.ArcGISTopographic)
-    val mapViewModel = viewModel<TemplateMapViewModel>(factory = MapViewModelFactory(map))
+    val mapViewModel = viewModel<MapViewModel>(factory = MapViewModelFactory(map))
     ComposableMap(
         modifier = Modifier.fillMaxSize(),
         mapInterface = mapViewModel
     )
+    
+    val templateViewModel = viewModel<TemplateViewModel>(
+        factory = TemplateViewModelFactory("Hello Template!!")
+    )
+    Template(templateViewModel)
     mapViewModel.setViewpoint(Viewpoint(39.8, -98.6, 10e7))
 }
