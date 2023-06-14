@@ -9,7 +9,6 @@ secrets {
     defaultPropertiesFileName = "secrets.defaults.properties"
 }
 
-
 android {
     namespace = "com.arcgismaps.toolkit.templateapp"
     compileSdk = libs.versions.compileSdk.get().toInt()

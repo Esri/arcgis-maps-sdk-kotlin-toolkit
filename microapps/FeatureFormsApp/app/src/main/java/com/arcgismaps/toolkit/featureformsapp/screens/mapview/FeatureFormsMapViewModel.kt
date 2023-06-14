@@ -4,16 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.view.IdentifyLayerResult
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.toolkit.composablemap.MapInsets
 import com.arcgismaps.toolkit.composablemap.MapInterface
+import com.arcgismaps.toolkit.composablemap.MapInterfaceImpl
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 /**
@@ -22,8 +19,8 @@ import kotlinx.coroutines.launch
 class FeatureFormsMapViewModelImpl(
     arcGISMap: ArcGISMap,
     mapInsets: MapInsets = MapInsets(),
-    val onFeatureIdentified: (ArcGISFeature) -> Unit
-) : ViewModel(), MapInterface {
+    onFeatureIdentified: (ArcGISFeature) -> Unit
+) : ViewModel(), MapInterface by MapInterfaceImpl(arcGISMap, mapInsets) {
     private val _map: MutableStateFlow<ArcGISMap> = MutableStateFlow(arcGISMap)
     override val map: StateFlow<ArcGISMap> = _map.asStateFlow()
     
