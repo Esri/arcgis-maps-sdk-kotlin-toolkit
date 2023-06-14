@@ -1,4 +1,4 @@
-///*
+package com.arcgismaps.toolkit.featureforms.api///*
 // COPYRIGHT 1995-2023 ESRI
 //
 // TRADE SECRETS: ESRI PROPRIETARY AND CONFIDENTIAL

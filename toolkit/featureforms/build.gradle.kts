@@ -2,6 +2,7 @@ plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("maven-publish")
+    id("kotlinx-serialization")
 }
 
 // Find these in properties passed through command line or read from GRADLE_HOME/gradle.properties
@@ -63,6 +64,7 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
+    implementation(libs.bundles.serialization)
     debugImplementation(libs.bundles.debug)
 }
 

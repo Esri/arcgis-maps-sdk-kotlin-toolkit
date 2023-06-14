@@ -16,19 +16,17 @@
  email: contracts@esri.com
  */
 
-package com.arcgismaps.toolkit.featureformsapp.featureform
+package com.arcgismaps.toolkit.featureforms.api
 
 import com.arcgismaps.data.Domain
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import kotlinx.serialization.json.JsonClassDiscriminator
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.JsonTransformingSerializer
@@ -46,12 +44,12 @@ public class FieldFeatureFormElement internal constructor(
     // No way to construct a Domain without core.
 //    @Serializable(with = DomainSerializer::class)
 //    var domain: Domain,
-    var editableExpressionName: String ="",
-    var fieldName: String,
-    val inputType: FeatureFormInput,
-    val value: String = "",
-    var requiredExpressionName: String = "",
-    var valueExpressionName: String = ""
+    public var editableExpressionName: String ="",
+    public var fieldName: String,
+    public val inputType: FeatureFormInput,
+    public val value: String = "",
+    public var requiredExpressionName: String = "",
+    public var valueExpressionName: String = ""
     ) : FeatureFormElement {
     //region Properties
     

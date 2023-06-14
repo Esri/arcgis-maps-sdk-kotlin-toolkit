@@ -16,7 +16,7 @@
  email: contracts@esri.com
  */
 
-package com.arcgismaps.toolkit.featureformsapp.featureform
+package com.arcgismaps.toolkit.featureforms.api
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -31,8 +31,8 @@ public data class FeatureFormDefinition(
     val formElements: List<FeatureFormElement>,
     var preserveFieldValuesWhenHidden: Boolean = true,
     var title: String,
-    
-) {
+
+    ) {
 
     
     //region Companion Object

@@ -16,7 +16,7 @@
  email: contracts@esri.com
  */
 
-package com.arcgismaps.toolkit.featureformsapp.featureform
+package com.arcgismaps.toolkit.featureforms.api
 
 import kotlinx.serialization.Serializable
 
@@ -26,10 +26,10 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 public class FeatureFormExpressionInfo (
-    var expression: String,
-    var name: String,
-    var returnType: String,
-    var title: String
+    public var expression: String,
+    public var name: String,
+    public var returnType: String,
+    public var title: String
 ) {
     //region Properties
     

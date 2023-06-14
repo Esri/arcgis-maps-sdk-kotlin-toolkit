@@ -1,4 +1,4 @@
-///*
+package com.arcgismaps.toolkit.featureforms.api///*
 // COPYRIGHT 1995-2023 ESRI
 //
 // TRADE SECRETS: ESRI PROPRIETARY AND CONFIDENTIAL
@@ -21,7 +21,7 @@
 //import com.arcgismaps.toolkit.featureformsapp.featureform.FeatureFormInputImpl
 //import com.arcgismaps.internal.wrapping.WrappingFactory
 //import com.arcgismaps.internal.jni.CoreBarcodeScannerFeatureFormInput
-//import com.arcgismaps.toolkit.featureformsapp.featureform.FeatureFormInput
+//import com.arcgismaps.toolkit.featureforms.api.FeatureFormInput
 //
 ///**
 // * A user interface for a barcode or QR code scanner. If the client

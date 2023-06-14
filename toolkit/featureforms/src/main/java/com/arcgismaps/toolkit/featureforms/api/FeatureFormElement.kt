@@ -16,7 +16,7 @@
  email: contracts@esri.com
  */
 
-package com.arcgismaps.toolkit.featureformsapp.featureform
+package com.arcgismaps.toolkit.featureforms.api
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

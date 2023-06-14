@@ -16,7 +16,7 @@
  email: contracts@esri.com
  */
 
-package com.arcgismaps.toolkit.featureformsapp.featureform
+package com.arcgismaps.toolkit.featureforms.api
 
 import kotlinx.serialization.Serializable
 
@@ -24,6 +24,5 @@ import kotlinx.serialization.Serializable
  * Represents an input user interface for a FieldFeatureFormElement.
  */
 @Serializable
-public sealed interface FeatureFormInput {
-}
+public sealed interface FeatureFormInput
 

@@ -7,7 +7,6 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.view.IdentifyLayerResult
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
-import com.arcgismaps.toolkit.composablemap.MapInsets
 import com.arcgismaps.toolkit.composablemap.MapInterface
 import com.arcgismaps.toolkit.composablemap.MapInterfaceImpl
 import kotlinx.coroutines.CoroutineScope

@@ -16,7 +16,7 @@
  email: contracts@esri.com
  */
 
-package com.arcgismaps.toolkit.featureformsapp.featureform
+package com.arcgismaps.toolkit.featureforms.api
 
 import com.arcgismaps.data.ArcGISFeature
 
@@ -24,13 +24,13 @@ import com.arcgismaps.data.ArcGISFeature
  * Defines the form configuration when a user edits a feature.
  */
 public class FeatureForm(
-    val description: String,
-    val expressionInfos: List<FeatureFormExpressionInfo>,
-    val feature: ArcGISFeature,
-    val featureFormDefinition: FeatureFormDefinition,
-    val formElements: List<FeatureFormElement>,
-    val preserveFieldValuesWhenHidden: Boolean,
-    val title: String
+    public val description: String,
+    public val expressionInfos: List<FeatureFormExpressionInfo>,
+    public val feature: ArcGISFeature,
+    public val featureFormDefinition: FeatureFormDefinition,
+    public val formElements: List<FeatureFormElement>,
+    public val preserveFieldValuesWhenHidden: Boolean,
+    public val title: String
 ) {
     //region Properties
 

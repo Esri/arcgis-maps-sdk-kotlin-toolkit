@@ -1,7 +1,7 @@
 package com.arcgismaps.toolkit.featureformsapp
 
-import com.arcgismaps.toolkit.featureformsapp.featureform.FeatureFormDefinition
-import com.arcgismaps.toolkit.featureformsapp.featureform.FieldFeatureFormElement
+import com.arcgismaps.toolkit.featureforms.api.FeatureFormDefinition
+import com.arcgismaps.toolkit.featureforms.api.FieldFeatureFormElement
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest

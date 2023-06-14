@@ -16,7 +16,7 @@
  email: contracts@esri.com
  */
 
-package com.arcgismaps.toolkit.featureformsapp.featureform
+package com.arcgismaps.toolkit.featureforms.api
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -28,8 +28,8 @@ import kotlinx.serialization.Serializable
 @SerialName("text-area")
 @Serializable
 public class TextAreaFeatureFormInput (
-    var maxLength: Int,
-    var minLength: Int
+    public var maxLength: Int,
+    public var minLength: Int
 ) : FeatureFormInput {
     //region Properties
 
