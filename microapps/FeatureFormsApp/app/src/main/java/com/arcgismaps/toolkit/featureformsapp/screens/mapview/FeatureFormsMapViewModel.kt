@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.view.IdentifyLayerResult
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
@@ -11,15 +12,21 @@ import com.arcgismaps.toolkit.composablemap.MapInsets
 import com.arcgismaps.toolkit.composablemap.MapInterface
 import com.arcgismaps.toolkit.composablemap.MapInterfaceImpl
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 /**
  * A view model for the FeatureForms MapView UI
+ * @constructor to be invoked by the ViewModel factory
+ *
+ * @since 200.2.0
  */
 class FeatureFormsMapViewModelImpl(
     arcGISMap: ArcGISMap,
     mapInsets: MapInsets = MapInsets(),
-    onFeatureIdentified: (ArcGISFeature) -> Unit
+    val onFeatureIdentified: (ArcGISFeature) -> Unit
 ) : ViewModel(), MapInterface by MapInterfaceImpl(arcGISMap, mapInsets) {
     private val _map: MutableStateFlow<ArcGISMap> = MutableStateFlow(arcGISMap)
     override val map: StateFlow<ArcGISMap> = _map.asStateFlow()
@@ -31,7 +38,6 @@ class FeatureFormsMapViewModelImpl(
     override val currentViewpoint: StateFlow<Viewpoint?> = _currentViewpoint.asStateFlow()
     
     private suspend fun onIdentifyLayers(results: List<IdentifyLayerResult>) {
-        println("onIdentifyLayer")
         val popup = results.firstOrNull { result ->
             result.popups.isNotEmpty()
         }?.popups?.firstOrNull() ?: return
