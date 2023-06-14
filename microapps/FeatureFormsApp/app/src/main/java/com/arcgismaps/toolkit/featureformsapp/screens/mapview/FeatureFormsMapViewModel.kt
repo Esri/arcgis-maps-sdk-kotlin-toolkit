@@ -52,7 +52,6 @@ class FeatureFormsMapViewModelImpl(
 
 class FeatureFormsMapViewModelFactory(
     private val arcGISMap: ArcGISMap,
-    private val mapInsets: MapInsets = MapInsets(),
     private val onFeatureIdentified: (ArcGISFeature) -> Unit = {}
 ) : ViewModelProvider.NewInstanceFactory() {
     @Suppress("UNCHECKED_CAST")
