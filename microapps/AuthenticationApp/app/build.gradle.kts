@@ -34,7 +34,7 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
         // context receivers are used by the MapInterface for gesture events
-        freeCompilerArgs = listOf("-Xcontext-receivers")
+        freeCompilerArgs += "-Xcontext-receivers"
     }
     @Suppress("UnstableApiUsage")
     buildFeatures {
