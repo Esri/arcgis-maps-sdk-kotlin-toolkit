@@ -9,6 +9,10 @@ secrets {
     defaultPropertiesFileName = File(project.projectDir, "/../../../secrets.defaults.properties").canonicalPath
 }
 
+secrets {
+    defaultPropertiesFileName = "secrets.defaults.properties"
+}
+
 android {
     namespace = "com.arcgismaps.toolkit.featureformsapp"
     compileSdk = libs.versions.compileSdk.get().toInt()
