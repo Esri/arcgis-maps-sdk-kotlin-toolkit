@@ -20,7 +20,7 @@ public fun Authenticator(
     val oAuthPendingSignIn =
         authenticatorViewModel.pendingOAuthUserSignIn.collectAsStateWithLifecycle().value
 
-    oAuthPendingSignIn?.let { oAuthPendingSignIn ->
-        OAuthAuthenticator(oAuthPendingSignIn)
+    oAuthPendingSignIn?.let { 
+        OAuthAuthenticator(it)
     }
 }
