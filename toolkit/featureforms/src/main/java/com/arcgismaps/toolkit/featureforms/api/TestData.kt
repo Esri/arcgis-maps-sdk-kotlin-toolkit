@@ -1,24 +1,12 @@
-package com.arcgismaps.toolkit.featureformsapp
+package com.arcgismaps.toolkit.featureforms.api
 
-import com.arcgismaps.toolkit.featureforms.api.FeatureFormDefinition
-import com.arcgismaps.toolkit.featureforms.api.FieldFeatureFormElement
-import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runTest
-import org.junit.Assert.fail
-import org.junit.Test
+import com.arcgismaps.data.ArcGISFeatureTable
+import com.arcgismaps.mapping.layers.FeatureLayer
 
-
-
-/**
- * Example local unit test, which will execute on the development machine (host).
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
-class ExampleUnitTest {
-    
-    val formInfo = """
-        {
+public class TestData {
+    public companion object {
+        public val formInfo: String = """
+            {
                 "formElements": [
                     {
                         "description": "Description TextBox",
@@ -64,24 +52,15 @@ class ExampleUnitTest {
                 "title": "PointFeature"
             }
     """.trimIndent()
-    
-    @OptIn(ExperimentalCoroutinesApi::class)
-    @Test
-    fun testFormInfoFromJson() = runTest {
-        val featureFormInfo = FeatureFormDefinition.fromJsonOrNull(formInfo)
-        assertThat(featureFormInfo).isNotNull()
-        
-        assertThat(featureFormInfo?.formElements).isNotNull()
-        val formElements = featureFormInfo?.let {
-            it.formElements
-        } ?: run {
-            fail("formInfo should not be null")
-            listOf()
-        }
-        assertThat(formElements.isNotEmpty()).isTrue()
-        assertThat(formElements.size).isEqualTo(2)
-        val element = formElements.first()
-        assertThat(element).isInstanceOf(FieldFeatureFormElement::class.java)
     }
-    
 }
+
+public val ArcGISFeatureTable.formInfoJson: String
+    get() {
+        return unsupportedJson["formInfo"].toString()
+    }
+
+public val FeatureLayer.formInfoJson: String
+    get() {
+        return unsupportedJson["formInfo"].toString()
+    }

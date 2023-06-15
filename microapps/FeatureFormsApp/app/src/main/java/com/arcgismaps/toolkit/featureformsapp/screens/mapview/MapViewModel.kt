@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 /**
  * A view model for the FeatureForms MapView UI
  */
-class FeatureFormsMapViewModelImpl(
+class MapViewModel(
     arcGISMap: ArcGISMap,
     val onFeatureIdentified: (ArcGISFeature) -> Unit
 ) : ViewModel(), MapInterface by MapInterfaceImpl(arcGISMap) {
@@ -49,12 +49,12 @@ class FeatureFormsMapViewModelImpl(
     }
 }
 
-class FeatureFormsMapViewModelFactory(
+class MapViewModelFactory(
     private val arcGISMap: ArcGISMap,
     private val onFeatureIdentified: (ArcGISFeature) -> Unit = {}
 ) : ViewModelProvider.NewInstanceFactory() {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return FeatureFormsMapViewModelImpl(arcGISMap, onFeatureIdentified) as T
+        return MapViewModel(arcGISMap, onFeatureIdentified) as T
     }
 }

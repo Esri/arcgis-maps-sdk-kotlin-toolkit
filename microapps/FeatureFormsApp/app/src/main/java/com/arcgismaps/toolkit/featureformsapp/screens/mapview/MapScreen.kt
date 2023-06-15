@@ -29,8 +29,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.toolkit.composablemap.ComposableMap
 import com.arcgismaps.toolkit.featureforms.FeatureForm
-import com.arcgismaps.toolkit.featureforms.FeatureFormViewModelFactory
-import com.arcgismaps.toolkit.featureforms.FeatureFormViewModelImpl
 import com.arcgismaps.toolkit.featureformsapp.R
 import kotlinx.coroutines.launch
 
@@ -38,12 +36,12 @@ import kotlinx.coroutines.launch
 @Composable
 fun MapScreen() {
     val coroutineScope = rememberCoroutineScope()
-    val formViewModel = viewModel<FeatureFormViewModelImpl>(
-        factory = FeatureFormViewModelFactory()
+    val formViewModel = viewModel<FormViewModel>(
+        factory = FormViewModelFactory()
     )
     
-    val mapViewModel = viewModel<FeatureFormsMapViewModelImpl>(
-        factory = FeatureFormsMapViewModelFactory(
+    val mapViewModel = viewModel<MapViewModel>(
+        factory = MapViewModelFactory(
             arcGISMap = ArcGISMap("https://runtimecoretest.maps.arcgis.com/home/item.html?id=df0f27f83eee41b0afe4b6216f80b541"),
             onFeatureIdentified = { feature ->
                 coroutineScope.launch {
