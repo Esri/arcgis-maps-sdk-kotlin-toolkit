@@ -24,7 +24,6 @@ function _display_help_dialog() {
 
 # global variables
 task="assembleDebug"
-skip_code_generation=
 verbose=
 extra_gradle_args=
 
