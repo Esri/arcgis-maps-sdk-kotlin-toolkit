@@ -4,6 +4,10 @@ plugins {
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
+secrets {
+    defaultPropertiesFileName = "secrets.defaults.properties"
+}
+
 android {
     namespace = "com.arcgismaps.toolkit.authenticationapp"
     compileSdk = libs.versions.compileSdk.get().toInt()
@@ -34,7 +38,7 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
         // context receivers are used by the MapInterface for gesture events
-        freeCompilerArgs = listOf("-Xcontext-receivers")
+        freeCompilerArgs += "-Xcontext-receivers"
     }
     @Suppress("UnstableApiUsage")
     buildFeatures {

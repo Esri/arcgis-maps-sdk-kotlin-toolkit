@@ -57,6 +57,7 @@ android {
 }
 
 dependencies {
+    api(libs.arcgis)
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)

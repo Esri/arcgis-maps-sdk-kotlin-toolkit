@@ -12,8 +12,9 @@ val artifactoryArtifactId: String = "$artifactoryArtifactBaseId-${project.name}"
 val artifactoryUrl: String by project
 val artifactoryUsername: String by project
 val artifactoryPassword: String by project
-// TODO: figure out versioning
-val artifactVersion: String = "xx.xx"
+val versionNumber: String by project
+val buildNumber: String by project
+val artifactVersion: String = "$versionNumber-$buildNumber"
 
 android {
     namespace = "com.arcgismaps.toolkit.featureforms"

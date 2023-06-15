@@ -80,7 +80,7 @@ private class AuthenticatorViewModelImpl(
     }
 
     override suspend fun handleArcGISAuthenticationChallenge(challenge: ArcGISAuthenticationChallenge): ArcGISAuthenticationChallengeResponse {
-        oAuthUserConfiguration?.let { oAuthUserConfiguration ->
+        return oAuthUserConfiguration?.let { oAuthUserConfiguration ->
             if (oAuthUserConfiguration.canBeUsedForUrl(challenge.requestUrl)) {
                 val oAuthUserCredential =
                     oAuthUserConfiguration.handleOAuthChallenge {
@@ -94,15 +94,15 @@ private class AuthenticatorViewModelImpl(
                         _pendingOAuthUserSignIn.value = null
                     }.getOrThrow()
 
-                return ArcGISAuthenticationChallengeResponse.ContinueWithCredential(
+                ArcGISAuthenticationChallengeResponse.ContinueWithCredential(
                     oAuthUserCredential
                 )
             } else {
-                return ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError(
+                ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError(
                     UnsupportedOperationException()
                 )
             }
-        } ?: return TODO()
+        } ?: TODO()
     }
 
     override suspend fun handleNetworkAuthenticationChallenge(challenge: NetworkAuthenticationChallenge): NetworkAuthenticationChallengeResponse {
