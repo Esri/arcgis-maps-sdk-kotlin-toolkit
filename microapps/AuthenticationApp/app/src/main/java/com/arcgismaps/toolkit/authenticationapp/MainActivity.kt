@@ -78,7 +78,7 @@ fun AuthenticationApp() {
     val portalInfo by produceState<String?>(initialValue = null, key1 = portal) {
         value = null
         withContext(Dispatchers.IO) {
-            portal.retryLoad().getOrElse { value = null }
+            portal.retryLoad().onFailure { value = null }
         }
         // format the json string output for display
         portal.portalInfo?.let { portalInfo ->
