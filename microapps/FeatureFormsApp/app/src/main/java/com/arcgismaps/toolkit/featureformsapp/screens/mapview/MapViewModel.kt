@@ -14,19 +14,15 @@ import kotlinx.coroutines.launch
 
 /**
  * A view model for the FeatureForms MapView UI
+ * @constructor to be invoked by the ViewModel factory
+ *
+ * @since 200.2.0
  */
 class MapViewModel(
     arcGISMap: ArcGISMap,
     val onFeatureIdentified: (ArcGISFeature) -> Unit
 ) : ViewModel(), MapInterface by MapInterfaceImpl(arcGISMap) {
-
-    private fun editFeature() {
-        println("editFeature")
-        // to be fleshed out with its own view model and navigation to the bottom sheet or side panel.
-    }
-    
     private suspend fun onIdentifyLayers(results: List<IdentifyLayerResult>) {
-        println("onIdentifyLayer")
         val popup = results.firstOrNull { result ->
             result.popups.isNotEmpty()
         }?.popups?.firstOrNull() ?: return

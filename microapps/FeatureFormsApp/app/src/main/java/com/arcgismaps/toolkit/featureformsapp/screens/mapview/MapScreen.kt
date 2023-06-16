@@ -47,23 +47,24 @@ fun MapScreen() {
             onFeatureIdentified = { feature ->
                 coroutineScope.launch {
                     formViewModel.setFeature(feature)
-                    formViewModel.setFormVisibility(true)
+                    formViewModel.setEditingActive(true)
                 }
             }
         )
     )
     
-    val sheetVisibility by formViewModel.visible.collectAsState()
+    val inEditingMode by formViewModel.inEditingMode.collectAsState()
     
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
             initialValue = SheetValue.Hidden,
+            confirmValueChange = { it != SheetValue.Hidden },
             skipHiddenState = false
         )
     )
     
-    LaunchedEffect(sheetVisibility) {
-        if (sheetVisibility) {
+    LaunchedEffect(inEditingMode) {
+        if (inEditingMode) {
             bottomSheetScaffoldState.bottomSheetState.expand()
         } else {
             bottomSheetScaffoldState.bottomSheetState.hide()
@@ -76,13 +77,13 @@ fun MapScreen() {
         },
         scaffoldState = bottomSheetScaffoldState,
         sheetPeekHeight = 40.dp,
-        topBar = if (sheetVisibility) {
+        topBar = if (inEditingMode) {
             {
                 TopAppBar(
                     title = { Text(text = stringResource(R.string.edit_feature), color = Color.White) },
                     navigationIcon = {
                         IconButton(onClick = {
-                            formViewModel.setFormVisibility(false)
+                            formViewModel.setEditingActive(false)
                         }) {
                             Icon(
                                 imageVector = Icons.Default.Close,
@@ -94,7 +95,7 @@ fun MapScreen() {
                     actions = {
                         IconButton(onClick = {
                             /* FUTURE: save feature here */
-                            formViewModel.setFormVisibility(false)
+                            formViewModel.setEditingActive(false)
                         }) {
                             Icon(
                                 imageVector = Icons.Default.Check,

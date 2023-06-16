@@ -31,10 +31,10 @@ import com.arcgismaps.toolkit.featureforms.components.FieldElement
 
 @Composable
 public fun FeatureForm(
-    formInterface: FormInterface,
+    featureFormInterface: FeatureFormInterface,
     modifier: Modifier = Modifier
 ) {
-    val feature by formInterface.feature.collectAsState()
+    val feature by featureFormInterface.feature.collectAsState()
     val featureTable = feature?.featureTable as ArcGISFeatureTable?
     featureTable?.formInfoJson?.let {
         FeatureFormDefinition.fromJsonOrNull(it)?.let { formDefinition ->

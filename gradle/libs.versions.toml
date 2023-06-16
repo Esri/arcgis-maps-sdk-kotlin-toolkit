@@ -1,12 +1,14 @@
 [versions]
 androidGradlePlugin = "8.0.0"
 androidxActivity = "1.5.1"
+androidXBrowser = "1.5.0"
 androidxCompose = "1.3.0"
 androidxComposeCompiler = "1.4.6"
 androidxCore = "1.9.0"
 androidxCoreTesting = "2.1.0"
 androidxEspresso = "3.4.0"
 androidxLifecycle = "2.3.1"
+androidxLifecycleRuntimeCompose = "2.6.0-beta01"
 androidxTestExt = "1.1.2"
 androidxViewmodelCompose = "2.6.1"
 arcGIS = "200.2.0-3869"
@@ -22,6 +24,7 @@ truth = "1.1.3"
 [libraries]
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidxActivity" }
+androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "androidXBrowser"}
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidxCore" }
 androidx-compose-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "androidxCompose" }
 androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime", version.ref = "androidxCompose" }
@@ -33,6 +36,7 @@ androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "u
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest", version.ref = "androidxCompose" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidxLifecycle" }
 androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "androidxViewmodelCompose" }
+androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidxLifecycleRuntimeCompose"}
 androidx-test-ext = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "androidxTestExt" }
 androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidxEspresso" }
 arcgis = { group = "com.esri", name = "arcgis-maps-kotlin", version.ref = "arcGIS" }

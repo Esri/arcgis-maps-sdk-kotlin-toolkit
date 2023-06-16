@@ -8,10 +8,6 @@ secrets {
     defaultPropertiesFileName = "secrets.defaults.properties"
 }
 
-secrets {
-    defaultPropertiesFileName = "secrets.defaults.properties"
-}
-
 android {
     namespace = "com.arcgismaps.toolkit.featureformsapp"
     compileSdk = libs.versions.compileSdk.get().toInt()
