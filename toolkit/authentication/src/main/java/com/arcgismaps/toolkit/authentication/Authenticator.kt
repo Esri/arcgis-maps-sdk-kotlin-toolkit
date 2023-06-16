@@ -20,7 +20,7 @@ public fun Authenticator(
     val oAuthPendingSignIn =
         authenticatorViewModel.pendingOAuthUserSignIn.collectAsStateWithLifecycle().value
 
-    oAuthPendingSignIn?.let { 
+    oAuthPendingSignIn?.let {
         OAuthAuthenticator(it)
     }
 
@@ -32,6 +32,20 @@ public fun Authenticator(
             onTrust = serverTrustChallenge::trust,
             onDistrust = serverTrustChallenge::distrust,
             serverTrustChallenge.hostname
+        )
+    }
+
+    val usernamePasswordChallenge =
+        authenticatorViewModel.pendingUsernamePasswordChallenge.collectAsStateWithLifecycle().value
+    usernamePasswordChallenge?.let { usernamePasswordChallenge ->
+        UsernamePasswordAuthenticator(
+            hostname = usernamePasswordChallenge.hostname,
+            onSubmit = { username, password ->
+                usernamePasswordChallenge.continueWithCredentials(username, password)
+            },
+            onCancel = {
+                usernamePasswordChallenge.cancel()
+            }
         )
     }
 }

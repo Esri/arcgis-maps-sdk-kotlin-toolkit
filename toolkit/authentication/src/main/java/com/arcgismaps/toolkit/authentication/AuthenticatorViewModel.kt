@@ -3,6 +3,7 @@ package com.arcgismaps.toolkit.authentication
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.exceptions.ArcGISAuthenticationException
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeHandler
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
@@ -13,11 +14,14 @@ import com.arcgismaps.httpcore.authentication.NetworkAuthenticationType
 import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 import com.arcgismaps.httpcore.authentication.OAuthUserCredential
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
+import com.arcgismaps.httpcore.authentication.PasswordCredential
 import com.arcgismaps.httpcore.authentication.ServerTrust
+import com.arcgismaps.httpcore.authentication.TokenCredential
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resumeWithException
 
 /**
  * Handles authentication challenges and exposes state for the [Authenticator] to display to the user.
@@ -48,6 +52,8 @@ public interface AuthenticatorViewModel : NetworkAuthenticationChallengeHandler,
      * @since 200.2.0
      */
     public val pendingServerTrustChallenge: StateFlow<ServerTrustChallenge?>
+
+    public val pendingUsernamePasswordChallenge: StateFlow<UsernamePasswordChallenge?>
 }
 
 /**
@@ -69,6 +75,10 @@ private class AuthenticatorViewModelImpl(
     private val _pendingServerTrustChallenge = MutableStateFlow<ServerTrustChallenge?>(null)
     override val pendingServerTrustChallenge: StateFlow<ServerTrustChallenge?> =
         _pendingServerTrustChallenge.asStateFlow()
+
+    private val _pendingUsernamePasswordChallenge = MutableStateFlow<UsernamePasswordChallenge?>(null)
+    override val pendingUsernamePasswordChallenge: StateFlow<UsernamePasswordChallenge?> =
+        _pendingUsernamePasswordChallenge.asStateFlow()
 
     init {
         if (setAsArcGISAuthenticationChallengeHandler) {
@@ -109,6 +119,10 @@ private class AuthenticatorViewModelImpl(
         return when (challenge.networkAuthenticationType) {
             NetworkAuthenticationType.ServerTrust -> {
                 awaitServerTrustChallengeResponse(challenge)
+            }
+
+            NetworkAuthenticationType.UsernamePassword -> {
+                awaitUsernamePasswordChallengeResponse(challenge)
             }
 
             else -> {
@@ -152,6 +166,24 @@ private class AuthenticatorViewModelImpl(
                 continuation.resumeWith(Result.success(NetworkAuthenticationChallengeResponse.Cancel))
             }
         }
+
+    private suspend fun awaitUsernamePasswordChallengeResponse(challenge: NetworkAuthenticationChallenge) = suspendCancellableCoroutine { continuation ->
+        _pendingUsernamePasswordChallenge.value = UsernamePasswordChallenge(
+            hostname = challenge.hostname,
+            onUserResponseReceived = { username, password ->
+                _pendingUsernamePasswordChallenge.value = null
+                continuation.resumeWith(Result.success(NetworkAuthenticationChallengeResponse.ContinueWithCredential(PasswordCredential(username, password))))
+            },
+            onCancel = {
+                _pendingUsernamePasswordChallenge.value = null
+                continuation.resumeWith(Result.success(NetworkAuthenticationChallengeResponse.Cancel))
+            }
+        )
+
+        continuation.invokeOnCancellation {
+            continuation.resumeWith(Result.success(NetworkAuthenticationChallengeResponse.Cancel))
+        }
+    }
 }
 
 /**
