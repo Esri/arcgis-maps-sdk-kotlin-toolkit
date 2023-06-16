@@ -132,21 +132,18 @@ private class AuthenticatorViewModelImpl(
             _pendingServerTrustChallenge.value =
                 ServerTrustChallenge(networkAuthenticationChallenge) { shouldTrustServer ->
                     _pendingServerTrustChallenge.value = null
-                    when (shouldTrustServer) {
-                        true -> continuation.resumeWith(
-                            Result.success(
-                                NetworkAuthenticationChallengeResponse.ContinueWithCredential(
-                                    ServerTrust
-                                )
+                    if (shouldTrustServer) continuation.resumeWith(
+                        Result.success(
+                            NetworkAuthenticationChallengeResponse.ContinueWithCredential(
+                                ServerTrust
                             )
                         )
-
-                        false -> continuation.resumeWith(
-                            Result.success(
-                                NetworkAuthenticationChallengeResponse.Cancel
-                            )
+                    )
+                    else continuation.resumeWith(
+                        Result.success(
+                            NetworkAuthenticationChallengeResponse.Cancel
                         )
-                    }
+                    )
                 }
             continuation.invokeOnCancellation {
                 continuation.resumeWith(Result.success(NetworkAuthenticationChallengeResponse.Cancel))
