@@ -8,6 +8,7 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.composablemap.ComposableMap
+import com.arcgismaps.toolkit.composablemap.MapFlow
 
 @Composable
 fun MainScreen() {
@@ -17,5 +18,12 @@ fun MainScreen() {
         modifier = Modifier.fillMaxSize(),
         mapInterface = mapViewModel
     )
-    mapViewModel.setViewpoint(Viewpoint(39.8, -98.6, 10e7))
+    mapViewModel.setViewpoint(
+        viewpoint = Viewpoint(
+            latitude = 39.8,
+            longitude = -98.6,
+            scale = 10e7
+        ),
+        channel = MapFlow.Channel.Write
+    )
 }
