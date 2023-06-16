@@ -43,13 +43,13 @@ fun MapScreen() {
             onFeatureIdentified = { feature ->
                 coroutineScope.launch {
                     formViewModel.setFeature(feature)
-                    formViewModel.setFormVisibility(true)
+                    formViewModel.setEditingActive(true)
                 }
             }
         )
     )
     
-    val inEditingMode by formViewModel.visible.collectAsState()
+    val inEditingMode by formViewModel.inEditingMode.collectAsState()
     
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
@@ -80,7 +80,7 @@ fun MapScreen() {
                     actions = {
                         IconButton(onClick = {
                             /* FUTURE: save feature here */
-                            formViewModel.setFormVisibility(false)
+                            formViewModel.setEditingActive(false)
                         }) {
                             Icon(
                                 imageVector = Icons.Default.Check,
@@ -89,7 +89,7 @@ fun MapScreen() {
                             )
                         }
                         IconButton(onClick = {
-                            formViewModel.setFormVisibility(false)
+                            formViewModel.setEditingActive(false)
                         }) {
                             Icon(
                                 imageVector = Icons.Default.Close,
