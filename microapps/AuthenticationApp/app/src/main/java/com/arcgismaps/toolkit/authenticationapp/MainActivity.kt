@@ -116,8 +116,10 @@ private fun PortalInfoScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(key1 = portal) {
         portal.loadStatus.collect {
-            snackbarHostState.currentSnackbarData?.dismiss()
-            snackbarHostState.showSnackbar(it.toString(), duration = SnackbarDuration.Short)
+            if (it.isTerminal) {
+                snackbarHostState.currentSnackbarData?.dismiss()
+                snackbarHostState.showSnackbar(it.toString(), duration = SnackbarDuration.Short)
+            }
         }
     }
     Scaffold(
