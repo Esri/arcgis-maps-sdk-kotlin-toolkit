@@ -34,45 +34,6 @@ public class TestData {
                             "minLength": 0
                         }
                     },
-                                        {
-                                            "description": "Description for TextArea",
-                                            "label": "TextArea - Multiline",
-                                            "type": "field",
-                                            "editableExpression": "expr/system/true",
-                                            "fieldName": "TextArea_Multiline",
-                                            "hint": "Placeholder Text",
-                                            "inputType": {
-                                                "type": "text-area",
-                                                "maxLength": 1000,
-                                                "minLength": 0
-                                            }
-                                        },
-                                                            {
-                                                                "description": "Description for TextArea",
-                                                                "label": "TextArea - Multiline",
-                                                                "type": "field",
-                                                                "editableExpression": "expr/system/true",
-                                                                "fieldName": "TextArea_Multiline",
-                                                                "hint": "Placeholder Text",
-                                                                "inputType": {
-                                                                    "type": "text-area",
-                                                                    "maxLength": 1000,
-                                                                    "minLength": 0
-                                                                }
-                                                            },
-                                                                                {
-                                                                                    "description": "Description for TextArea",
-                                                                                    "label": "TextArea - Multiline",
-                                                                                    "type": "field",
-                                                                                    "editableExpression": "expr/system/true",
-                                                                                    "fieldName": "TextArea_Multiline",
-                                                                                    "hint": "Placeholder Text",
-                                                                                    "inputType": {
-                                                                                        "type": "text-area",
-                                                                                        "maxLength": 1000,
-                                                                                        "minLength": 0
-                                                                                    }
-                                                                                }
                 ],
                 "expressionInfos": [
                     {
