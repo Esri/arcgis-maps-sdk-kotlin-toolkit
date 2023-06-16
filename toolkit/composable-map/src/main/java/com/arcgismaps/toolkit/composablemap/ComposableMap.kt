@@ -1,5 +1,6 @@
 package com.arcgismaps.toolkit.composablemap
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -20,7 +21,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.mapping.ViewpointType
 import com.arcgismaps.mapping.view.MapView
 import kotlinx.coroutines.launch
-import java.util.UUID
 
 @Composable
 public fun ComposableMap(
@@ -31,7 +31,6 @@ public fun ComposableMap(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
-    val flowProducer = rememberFlowProducer()
 
     val map by mapInterface.map.collectAsState()
     val insets by mapInterface.insets.collectAsState()
@@ -77,13 +76,13 @@ public fun ComposableMap(
                     }
                     launch {
                         view.mapRotation.collect {
-                            mapInterface.onMapRotationChanged(it)
+                            mapInterface.setViewpointRotation(it, MapFlow.Channel.Read)
                         }
                     }
                     launch {
                         view.viewpointChanged.collect {
                             view.getCurrentViewpoint(ViewpointType.CenterAndScale)?.let {
-                                mapInterface.onMapViewpointChanged(it)
+                                mapInterface.setViewpoint(it, MapFlow.Channel.Read)
                             }
                         }
                     }
@@ -102,14 +101,15 @@ public fun ComposableMap(
 
     LaunchedEffect(Unit) {
         launch {
-            mapInterface.mapRotation.collect {
+            mapInterface.mapRotation.collect(MapFlow.Channel.Write) {
+                Log.d("TAG", "ComposableMap target rotation: $it")
                 mapView.setViewpointRotation(it)
             }
         }
         launch {
-            mapInterface.viewpoint.collect {
+            mapInterface.viewpoint.collect(MapFlow.Channel.Write) {
                 it?.let {
-                        mapView.setViewpoint(it)
+                    mapView.setViewpoint(it)
                 }
             }
         }
@@ -145,6 +145,3 @@ public fun ComposableMap(
         }
     }
 }
-
-@Composable
-public fun rememberFlowProducer() : UUID = remember { UUID.randomUUID() }

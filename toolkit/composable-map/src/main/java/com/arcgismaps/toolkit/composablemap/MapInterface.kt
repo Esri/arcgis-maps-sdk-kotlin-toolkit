@@ -78,26 +78,14 @@ public interface MapEvents {
     context(MapView, CoroutineScope) public fun onPan(panEvent: PanChangeEvent) {}
 
     /**
-     * Callback event for when the orientation of the [ComposableMap] changes with the given
-     * [rotation]
-     */
-    public fun onMapRotationChanged(rotation: Double)
-
-    /**
-     * Callback event for the when the viewpoint of the [ComposableMap] changes with the given
-     * [viewpoint]
-     */
-    public fun onMapViewpointChanged(viewpoint: Viewpoint)
-
-    /**
      * Sets the [ComposableMap] current viewpoint to the given [viewpoint]
      */
-    public fun setViewpoint(viewpoint: Viewpoint)
+    public fun setViewpoint(viewpoint: Viewpoint, channel: MapFlow.Channel)
 
     /**
      * Sets the [ComposableMap] current viewpoint's rotation to the given [angleDegrees]
      */
-    public fun setViewpointRotation(angleDegrees: Double)
+    public fun setViewpointRotation(angleDegrees: Double, channel: MapFlow.Channel)
 
     /**
      * Sets the [ComposableMap] insets to the given [mapInsets]
@@ -128,12 +116,12 @@ public interface MapInterface : MapEvents {
     /**
      * The [Viewpoint] from which the [ComposableMap] is drawn.
      */
-    public val viewpoint: StateFlow<Viewpoint?>
+    public val viewpoint: MapFlow<Viewpoint?>
 
     /**
      * The current rotation value of the [ComposableMap].
      */
-    public val mapRotation: StateFlow<Double>
+    public val mapRotation: MapFlow<Double>
 }
 
 public class MapInterfaceImpl(
@@ -141,32 +129,24 @@ public class MapInterfaceImpl(
     mapInsets: MapInsets = MapInsets()
 ) : MapInterface {
 
-    private val _map : MutableStateFlow<ArcGISMap> = MutableStateFlow(arcGISMap)
-    override val map : StateFlow<ArcGISMap> = _map.asStateFlow()
+    private val _map: MutableStateFlow<ArcGISMap> = MutableStateFlow(arcGISMap)
+    override val map: StateFlow<ArcGISMap> = _map.asStateFlow()
 
-    private val _insets : MutableStateFlow<MapInsets> = MutableStateFlow(mapInsets)
+    private val _insets: MutableStateFlow<MapInsets> = MutableStateFlow(mapInsets)
     override val insets: StateFlow<MapInsets> = _insets.asStateFlow()
 
-    private val _viewpoint : MutableStateFlow<Viewpoint?> = MutableStateFlow(null)
-    override val viewpoint: StateFlow<Viewpoint?> = _viewpoint.asStateFlow()
+    private val _viewpoint: MutableMapFlow<Viewpoint?> = MutableMapFlow(null)
+    override val viewpoint: MapFlow<Viewpoint?> = _viewpoint
 
-    private val _mapRotation: MutableStateFlow<Double> = MutableStateFlow(0.0)
-    override val mapRotation: StateFlow<Double> = _mapRotation.asStateFlow()
+    private val _mapRotation: MutableMapFlow<Double> = MutableMapFlow(0.0)
+    override val mapRotation: MapFlow<Double> = _mapRotation
 
-    override fun onMapRotationChanged(rotation: Double) {
-        //TODO("Not yet implemented")
+    override fun setViewpoint(viewpoint: Viewpoint, channel: MapFlow.Channel) {
+        _viewpoint.setValue(viewpoint, channel)
     }
 
-    override fun onMapViewpointChanged(viewpoint: Viewpoint) {
-        //TODO("Not yet implemented")
-    }
-
-    override fun setViewpoint(viewpoint: Viewpoint) {
-        _viewpoint.value = viewpoint
-    }
-
-    override fun setViewpointRotation(angleDegrees: Double) {
-        _mapRotation.value = angleDegrees
+    override fun setViewpointRotation(angleDegrees: Double, channel: MapFlow.Channel) {
+        _mapRotation.setValue(angleDegrees, channel)
     }
 
     override fun setInsets(mapInsets: MapInsets) {
