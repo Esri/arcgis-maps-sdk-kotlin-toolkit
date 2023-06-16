@@ -38,6 +38,7 @@ androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espres
 arcgis = { group = "com.esri", name = "arcgis-maps-kotlin", version.ref = "arcGIS" }
 truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin"}
 kotlinx-serialization-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core", version.ref = "kotlinxSerializationJson" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
@@ -76,7 +77,8 @@ debug = [
 
 serialization = [
     "kotlinx-serialization-core",
-    "kotlinx-serialization-json"
+    "kotlinx-serialization-json",
+    "kotlin-reflect"
 ]
 
 unitTest = [
