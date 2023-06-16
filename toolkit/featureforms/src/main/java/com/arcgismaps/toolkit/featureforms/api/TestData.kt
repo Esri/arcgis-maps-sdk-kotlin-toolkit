@@ -43,7 +43,7 @@ public class TestData {
                             "maxLength": 1000,
                             "minLength": 0
                         }
-                    }
+                    },
                 ],
                 "expressionInfos": [
                     {
