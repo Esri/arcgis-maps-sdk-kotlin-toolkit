@@ -7,8 +7,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.toolkit.composablemap.Channel
 import com.arcgismaps.toolkit.composablemap.ComposableMap
-import com.arcgismaps.toolkit.composablemap.MapFlow
 
 @Composable
 fun MainScreen() {
@@ -24,6 +24,6 @@ fun MainScreen() {
             longitude = -98.6,
             scale = 10e7
         ),
-        channel = MapFlow.Channel.Write
+        channel = Channel.Write
     )
 }

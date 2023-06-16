@@ -76,13 +76,13 @@ public fun ComposableMap(
                     }
                     launch {
                         view.mapRotation.collect {
-                            mapInterface.setViewpointRotation(it, MapFlow.Channel.Read)
+                            mapInterface.setViewpointRotation(it, Channel.Read)
                         }
                     }
                     launch {
                         view.viewpointChanged.collect {
                             view.getCurrentViewpoint(ViewpointType.CenterAndScale)?.let {
-                                mapInterface.setViewpoint(it, MapFlow.Channel.Read)
+                                mapInterface.setViewpoint(it, Channel.Read)
                             }
                         }
                     }
@@ -101,13 +101,13 @@ public fun ComposableMap(
 
     LaunchedEffect(Unit) {
         launch {
-            mapInterface.mapRotation.collect(MapFlow.Channel.Write) {
+            mapInterface.mapRotation.collect(Channel.Write) {
                 Log.d("TAG", "ComposableMap target rotation: $it")
                 mapView.setViewpointRotation(it)
             }
         }
         launch {
-            mapInterface.viewpoint.collect(MapFlow.Channel.Write) {
+            mapInterface.viewpoint.collect(Channel.Write) {
                 it?.let {
                     mapView.setViewpoint(it)
                 }

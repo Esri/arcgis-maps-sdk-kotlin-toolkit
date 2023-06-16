@@ -8,19 +8,29 @@ import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 
-public open class MapFlow<T>(
-    private val initialValue: T
-) {
+public enum class Channel {
+    Read,
+    Write
+}
 
-    public enum class Channel {
-        Read,
-        Write
-    }
+public interface MapFlow<T> {
+    public suspend fun collect(channel: Channel, collector: FlowCollector<T>)
+    @Composable
+    public fun collectAsState(channel: Channel): State<T>
+}
 
-    protected val readerFlow: MutableStateFlow<T> = MutableStateFlow(initialValue)
-    protected val writerFlow: MutableSharedFlow<T> = MutableSharedFlow(replay = 1)
+public interface MutableMapFlow<T> : MapFlow<T> {
+    public fun setValue(value: T, channel: Channel)
+}
 
-    public suspend fun collect(channel: Channel, collector: FlowCollector<T>): Nothing =
+public fun <T> MutableMapFlow(initialValue: T) : MutableMapFlow<T> = MapFlowImpl(initialValue)
+
+internal open class MapFlowImpl<T>(private val initialValue: T) : MutableMapFlow<T> {
+
+    private val readerFlow: MutableStateFlow<T> = MutableStateFlow(initialValue)
+    private val writerFlow: MutableSharedFlow<T> = MutableSharedFlow(replay = 1)
+
+    override suspend fun collect(channel: Channel, collector: FlowCollector<T>): Nothing =
         if (channel == Channel.Read) {
             coroutineScope { readerFlow.collect(collector) }
         } else {
@@ -28,18 +38,14 @@ public open class MapFlow<T>(
         }
 
     @Composable
-    public fun collectAsState(channel: Channel): State<T> =
+    override fun collectAsState(channel: Channel): State<T> =
         if (channel == Channel.Read) {
             readerFlow.collectAsState()
         } else {
             writerFlow.collectAsState(initial = initialValue)
         }
-}
 
-public class MutableMapFlow<T>(
-    initialValue: T
-) : MapFlow<T>(initialValue) {
-    public fun setValue(value: T, channel: Channel) {
+    override  fun setValue(value: T, channel: Channel) {
         if (channel == Channel.Read) {
             readerFlow.value = value
         } else {
