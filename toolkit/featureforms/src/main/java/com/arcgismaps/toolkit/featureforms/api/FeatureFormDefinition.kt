@@ -20,6 +20,8 @@ package com.arcgismaps.toolkit.featureforms.api
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.decodeFromJsonElement
 
 /**
  * Defines the form configuration when a user edits a feature.
@@ -38,12 +40,22 @@ public data class FeatureFormDefinition(
     //region Companion Object
     
     public companion object {
-        private val json = Json {
+        private val jsonDecoder = Json {
             ignoreUnknownKeys = true
+            isLenient = true
+        }
+    
+        public fun fromJsonOrNull(json: JsonObject): FeatureFormDefinition? {
+            return try {
+                jsonDecoder.decodeFromJsonElement(json)
+            } catch (exception: Exception) {
+                exception.printStackTrace()
+                null
+            }
         }
         
         public fun fromJsonOrNull(jsonString: String): FeatureFormDefinition? = try {
-            json.decodeFromString(serializer(), jsonString)
+            jsonDecoder.decodeFromString(serializer(), jsonString)
         } catch (t: Throwable) {
             t.printStackTrace()
             null

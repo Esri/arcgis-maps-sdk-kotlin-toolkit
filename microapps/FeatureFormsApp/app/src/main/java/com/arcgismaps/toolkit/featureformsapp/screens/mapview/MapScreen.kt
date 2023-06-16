@@ -29,6 +29,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.toolkit.composablemap.ComposableMap
 import com.arcgismaps.toolkit.featureforms.FeatureForm
+import com.arcgismaps.toolkit.featureforms.api.featureFormDefinition
 import com.arcgismaps.toolkit.featureformsapp.R
 import kotlinx.coroutines.launch
 

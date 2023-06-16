@@ -28,8 +28,8 @@ import kotlinx.serialization.Serializable
 @SerialName("text-area")
 @Serializable
 public class TextAreaFeatureFormInput (
-    public var maxLength: Int,
-    public var minLength: Int
+    public var maxLength: Float = 0.0f,
+    public var minLength: Float = 0.0f
 ) : FeatureFormInput {
     //region Properties
 
