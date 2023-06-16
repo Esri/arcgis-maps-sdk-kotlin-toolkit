@@ -18,5 +18,8 @@ public fun FieldElement(field: FieldFeatureFormElement) {
         is TextBoxFeatureFormInput -> {
             TextBox(field = field, modifier = Modifier.fillMaxSize().padding(10.dp))
         }
+        else -> {
+        
+        }
     }
 }

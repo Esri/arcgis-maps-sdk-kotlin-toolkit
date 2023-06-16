@@ -37,8 +37,8 @@ public fun TextArea(
         label = field.label,
         modifier = modifier,
         description = field.description,
-        minLength = textBoxInput.minLength,
-        maxLength = textBoxInput.maxLength,
+        minLength = textBoxInput.minLength.toInt(),
+        maxLength = textBoxInput.maxLength.toInt(),
         singleLine = false
     )
 }

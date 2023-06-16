@@ -36,26 +36,28 @@ public fun FeatureForm(
 ) {
     val feature by formInterface.feature.collectAsState()
     val featureTable = feature?.featureTable as ArcGISFeatureTable?
-    val formInfo = featureTable?.formInfoJson ?: ""
-
-    FeatureFormDefinition.fromJsonOrNull(TestData.formInfo)?.let { formDefinition ->
-        Column(
-            modifier = modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.6f),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(text = formDefinition.title, style = TextStyle(fontWeight = FontWeight.Bold))
-            Spacer(modifier = Modifier.fillMaxWidth().height(15.dp))
-            Divider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(start = 20.dp, end = 20.dp, bottom = 20.dp)
+    featureTable?.formInfoJson?.let {
+        FeatureFormDefinition.fromJsonOrNull(it)?.let { formDefinition ->
+            Column(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.6f),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                items(formDefinition.formElements) { formElement ->
-                    if (formElement is FieldFeatureFormElement) {
-                        FieldElement(field = formElement)
+                Text(text = formDefinition.title, style = TextStyle(fontWeight = FontWeight.Bold))
+                Spacer(modifier = Modifier
+                    .fillMaxWidth()
+                    .height(15.dp))
+                Divider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(start = 20.dp, end = 20.dp, bottom = 20.dp)
+                ) {
+                    items(formDefinition.formElements) { formElement ->
+                        if (formElement is FieldFeatureFormElement) {
+                            FieldElement(field = formElement)
+                        }
                     }
                 }
             }
