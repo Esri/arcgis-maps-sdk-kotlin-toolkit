@@ -12,8 +12,8 @@ import com.arcgismaps.httpcore.authentication.NetworkAuthenticationType
  * @since 200.2.0
  */
 public class ServerTrustChallenge(
-    public val hostname: String = "this server",
-    private var onUserResponseReceived: ((Boolean) -> Unit)? = {}
+    public val challenge: NetworkAuthenticationChallenge,
+    private var onUserResponseReceived: ((Boolean) -> Unit)?
 ) {
 
     /**

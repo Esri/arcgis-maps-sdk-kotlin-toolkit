@@ -130,7 +130,7 @@ private class AuthenticatorViewModelImpl(
     private suspend fun awaitServerTrustChallengeResponse(networkAuthenticationChallenge: NetworkAuthenticationChallenge): NetworkAuthenticationChallengeResponse =
         suspendCancellableCoroutine { continuation ->
             _pendingServerTrustChallenge.value =
-                ServerTrustChallenge(networkAuthenticationChallenge.hostname) { shouldTrustServer ->
+                ServerTrustChallenge(networkAuthenticationChallenge) { shouldTrustServer ->
                     _pendingServerTrustChallenge.value = null
                     when (shouldTrustServer) {
                         true -> continuation.resumeWith(
