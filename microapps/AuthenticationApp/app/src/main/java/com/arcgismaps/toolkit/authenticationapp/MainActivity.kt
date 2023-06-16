@@ -88,9 +88,6 @@ fun AuthenticationApp() {
         } ?: run {
             value = loadStatus.toString()
         }
-        awaitDispose {
-            portal.cancelLoad()
-        }
     }
 
     PortalInfoScreen(portal, portalInfo, isLoading) {
