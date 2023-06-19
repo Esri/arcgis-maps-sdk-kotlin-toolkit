@@ -31,7 +31,7 @@ public fun Authenticator(
         ServerTrustAuthenticator(
             onTrust = serverTrustChallenge::trust,
             onDistrust = serverTrustChallenge::distrust,
-            serverTrustChallenge.hostname
+            serverTrustChallenge.challenge
         )
     }
 

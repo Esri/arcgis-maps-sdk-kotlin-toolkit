@@ -79,7 +79,7 @@ fun AuthenticationApp() {
     val portalInfo by produceState<String?>(initialValue = null, key1 = portal) {
         value = null
         withContext(Dispatchers.IO) {
-            portal.retryLoad().getOrElse { value = null }
+            portal.retryLoad().onFailure { value = null }
         }
         // format the json string output for display
         portal.portalInfo?.let { portalInfo ->
@@ -88,9 +88,6 @@ fun AuthenticationApp() {
             value = jsonObject.toString(4)
         } ?: run {
             value = loadStatus.toString()
-        }
-        awaitDispose {
-            portal.cancelLoad()
         }
     }
 
@@ -120,8 +117,10 @@ private fun PortalInfoScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(key1 = portal) {
         portal.loadStatus.collect {
-            snackbarHostState.currentSnackbarData?.dismiss()
-            snackbarHostState.showSnackbar(it.toString(), duration = SnackbarDuration.Short)
+            if (it.isTerminal) {
+                snackbarHostState.currentSnackbarData?.dismiss()
+                snackbarHostState.showSnackbar(it.toString(), duration = SnackbarDuration.Short)
+            }
         }
     }
     Scaffold(

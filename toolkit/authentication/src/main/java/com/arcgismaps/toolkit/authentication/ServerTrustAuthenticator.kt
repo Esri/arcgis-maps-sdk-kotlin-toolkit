@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallenge
 
 /**
  * Displays a trust or distrust server prompt to the user.
@@ -29,7 +30,7 @@ import androidx.compose.ui.unit.dp
 internal fun ServerTrustAuthenticator(
     onTrust: () -> Unit,
     onDistrust: () -> Unit,
-    challengeHostname: String
+    challenge: NetworkAuthenticationChallenge
 ) {
     Column(
         modifier = Modifier
@@ -40,7 +41,7 @@ internal fun ServerTrustAuthenticator(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "The certificate provided by $challengeHostname is not signed by a trusted authority.",
+            text = "The certificate provided by ${challenge.hostname} is not signed by a trusted authority.",
             style = MaterialTheme.typography.headlineMedium
         )
         Spacer(modifier = Modifier.height(32.dp))
