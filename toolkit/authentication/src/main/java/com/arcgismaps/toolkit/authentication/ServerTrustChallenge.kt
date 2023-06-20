@@ -7,7 +7,7 @@ import com.arcgismaps.httpcore.authentication.NetworkAuthenticationType
 /**
  * Represents a [NetworkAuthenticationChallenge] of type [NetworkAuthenticationType.ServerTrust].
  *
- * @property hostname the hostname of the server to trust.
+ * @property challenge the [NetworkAuthenticationChallenge] that initiated this challenge.
  * @property onUserResponseReceived a callback invoked with `true` if the server should be trusted.
  * @since 200.2.0
  */

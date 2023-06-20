@@ -27,11 +27,7 @@ public fun Authenticator(
     val serverTrustChallenge =
         authenticatorViewModel.pendingServerTrustChallenge.collectAsStateWithLifecycle().value
 
-    serverTrustChallenge?.let { serverTrustChallenge ->
-        ServerTrustAuthenticator(
-            onTrust = serverTrustChallenge::trust,
-            onDistrust = serverTrustChallenge::distrust,
-            serverTrustChallenge.challenge
-        )
+    serverTrustChallenge?.let {
+        ServerTrustAuthenticator(it)
     }
 }
