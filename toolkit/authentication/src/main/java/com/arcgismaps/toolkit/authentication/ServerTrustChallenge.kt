@@ -13,8 +13,10 @@ import com.arcgismaps.httpcore.authentication.NetworkAuthenticationType
  */
 public class ServerTrustChallenge(
     public val challenge: NetworkAuthenticationChallenge,
-    private var onUserResponseReceived: ((Boolean) -> Unit)?
+    onUserResponseReceived: ((Boolean) -> Unit)
 ) {
+
+    private var onUserResponseReceived: ((Boolean) -> Unit)? = onUserResponseReceived
 
     /**
      * Trusts the server. Note that [trust] or [distrust] can only be called once on a single [ServerTrustChallenge]
