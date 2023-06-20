@@ -1,18 +1,16 @@
 package com.arcgismaps.toolkit.featureforms
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import com.arcgismaps.data.ArcGISFeature
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * An interface to provide the feature form state and control.
+ * A state holder to provide the feature form state and control.
  *
  * @since 200.2.0
  */
-public interface FeatureFormInterface {
+public interface FeatureFormState {
     /**
      * The feature for which form data is editable
      *
@@ -44,9 +42,9 @@ public interface FeatureFormInterface {
 }
 
 /**
- * A view model for the FeatureForms MapView UI
+ * Default implementation for the [FeatureFormState]
  */
-public class FeatureFormImpl : FeatureFormInterface {
+public class FeatureFormStateImpl : FeatureFormState {
     private val _feature: MutableStateFlow<ArcGISFeature?> = MutableStateFlow(null)
     override val feature: StateFlow<ArcGISFeature?> = _feature.asStateFlow()
     private val _inEditingMode: MutableStateFlow<Boolean> = MutableStateFlow(false)

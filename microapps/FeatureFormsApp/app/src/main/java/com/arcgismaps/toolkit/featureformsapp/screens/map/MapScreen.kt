@@ -1,4 +1,4 @@
-package com.arcgismaps.toolkit.featureformsapp.screens.mapview
+package com.arcgismaps.toolkit.featureformsapp.screens.map
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
@@ -29,8 +29,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.toolkit.composablemap.ComposableMap
 import com.arcgismaps.toolkit.featureforms.FeatureForm
-import com.arcgismaps.toolkit.featureforms.api.featureFormDefinition
 import com.arcgismaps.toolkit.featureformsapp.R
+import com.arcgismaps.toolkit.featureformsapp.screens.form.FormViewModel
+import com.arcgismaps.toolkit.featureformsapp.screens.form.FormViewModelFactory
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
