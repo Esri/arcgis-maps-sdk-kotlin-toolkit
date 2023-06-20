@@ -32,7 +32,6 @@ public fun ComposableMap(
     val map by mapInterface.map.collectAsState()
     val insets by mapInterface.insets.collectAsState()
     val currentViewpoint by mapInterface.currentViewpoint.collectAsState()
-    
     val mapView = remember {
         MapView(context).also { view ->
             with(view) {
@@ -92,7 +91,7 @@ public fun ComposableMap(
             lifecycleOwner.lifecycle.removeObserver(mapView)
         }
     }
-
+    
     Box(modifier = modifier.semantics {
         contentDescription = "MapContainer"
     }) {
