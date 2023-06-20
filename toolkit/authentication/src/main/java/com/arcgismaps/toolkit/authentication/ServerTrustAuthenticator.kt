@@ -16,21 +16,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallenge
 
 /**
  * Displays a trust or distrust server prompt to the user.
  *
- * @param onTrust called when the trust button is clicked.
- * @param onDistrust called when the cancel button is clicked.
- * @param challengeHostname the hostname of the challenge this prompt is associated with.
+ * @param serverTrustChallenge the pending [ServerTrustChallenge] that initiated this prompt.
  * @since 200.2.0
  */
 @Composable
 internal fun ServerTrustAuthenticator(
-    onTrust: () -> Unit,
-    onDistrust: () -> Unit,
-    challenge: NetworkAuthenticationChallenge
+    serverTrustChallenge: ServerTrustChallenge
 ) {
     Column(
         modifier = Modifier
@@ -41,7 +36,7 @@ internal fun ServerTrustAuthenticator(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "The certificate provided by ${challenge.hostname} is not signed by a trusted authority.",
+            text = "The certificate provided by ${serverTrustChallenge.challenge.hostname} is not signed by a trusted authority.",
             style = MaterialTheme.typography.headlineMedium
         )
         Spacer(modifier = Modifier.height(32.dp))
@@ -52,12 +47,12 @@ internal fun ServerTrustAuthenticator(
         ) {
             Text(
                 text = "Cancel",
-                modifier = Modifier.clickable { onDistrust() },
+                modifier = Modifier.clickable { serverTrustChallenge.distrust() },
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
                 text = "Dangerous: Allow Connection",
-                modifier = Modifier.clickable { onTrust() },
+                modifier = Modifier.clickable { serverTrustChallenge.trust() },
                 style = MaterialTheme.typography.titleMedium
             )
         }
