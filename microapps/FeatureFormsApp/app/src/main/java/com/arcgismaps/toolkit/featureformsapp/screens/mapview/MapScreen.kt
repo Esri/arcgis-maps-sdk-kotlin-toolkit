@@ -81,17 +81,6 @@ fun MapScreen() {
             {
                 TopAppBar(
                     title = { Text(text = stringResource(R.string.edit_feature), color = Color.White) },
-                    navigationIcon = {
-                        IconButton(onClick = {
-                            formViewModel.setEditingActive(false)
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Close Feature Editor",
-                                tint = Color.White
-                            )
-                        }
-                    },
                     actions = {
                         IconButton(onClick = {
                             /* FUTURE: save feature here */
@@ -100,10 +89,18 @@ fun MapScreen() {
                             Icon(
                                 imageVector = Icons.Default.Check,
                                 contentDescription = "Save Feature",
-                                tint = Color.White
+                                tint = Color.Black
                             )
                         }
-                        
+                        IconButton(onClick = {
+                            formViewModel.setEditingActive(false)
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Close Feature Editor",
+                                tint = Color.Black
+                            )
+                        }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.primary

@@ -34,6 +34,7 @@ public interface FeatureFormInterface {
      */
     public fun setFeature(feature: ArcGISFeature)
 
+
     /**
      * Sets the editing mode of the form
      *
@@ -58,5 +59,3 @@ public class FeatureFormImpl : FeatureFormInterface {
         _inEditingMode.value = active
     }
 }
-
-
