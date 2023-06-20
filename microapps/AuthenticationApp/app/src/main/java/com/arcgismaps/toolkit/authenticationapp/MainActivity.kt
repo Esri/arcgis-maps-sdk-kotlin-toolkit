@@ -59,8 +59,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private val selfSignedPortal =
-    Portal("https://self-signed.badssl.com/", Portal.Connection.Authenticated)
 private val oAuthPortal = Portal("https://www.arcgis.com", Portal.Connection.Authenticated)
 private val usernamePasswordPortal = Portal("https://rt-iwa1.esri.com/portal", Portal.Connection.Authenticated)
 
@@ -131,10 +129,6 @@ private fun PortalInfoScreen(
                 Row {
                     Button(onClick = { setPortal(oAuthPortal) }) {
                         Text("OAuth")
-                    }
-
-                    Button(onClick = { setPortal(selfSignedPortal) }) {
-                        Text("Self-Signed")
                     }
 
                     Button(onClick = { setPortal(usernamePasswordPortal) }) {
