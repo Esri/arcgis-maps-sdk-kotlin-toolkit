@@ -29,11 +29,15 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
+/**
+ * Displays a username and password prompt to the user.
+ *
+ * @param usernamePasswordChallenge the pending [UsernamePasswordChallenge] that initiated this prompt.
+ * @since 200.2.0
+ */
 @Composable
 public fun UsernamePasswordAuthenticator(
-    hostname: String,
-    onSubmit: (username: String, password: String) -> Unit = { _, _ -> Unit },
-    onCancel: () -> Unit = {}
+    usernamePasswordChallenge: UsernamePasswordChallenge
 ) {
     Column(
         modifier = Modifier
@@ -44,7 +48,7 @@ public fun UsernamePasswordAuthenticator(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Please log in to $hostname",
+            text = "Please log in to ${usernamePasswordChallenge.hostname}",
             style = MaterialTheme.typography.headlineMedium,
             textAlign = TextAlign.Center
         )
@@ -58,7 +62,7 @@ public fun UsernamePasswordAuthenticator(
             var passwordFieldText by rememberSaveable { mutableStateOf("") }
             val keyboardActions = remember {
                 KeyboardActions(
-                    onSend = { onSubmit(usernameFieldText, passwordFieldText) }
+                    onSend = { usernamePasswordChallenge.continueWithCredentials(usernameFieldText, passwordFieldText) }
                 )
             }
             TextField(
@@ -82,10 +86,10 @@ public fun UsernamePasswordAuthenticator(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Button(onClick = { onCancel() }) {
+                Button(onClick = { usernamePasswordChallenge.cancel() }) {
                     Text("Cancel")
                 }
-                Button(onClick = { onSubmit(usernameFieldText, passwordFieldText) }) {
+                Button(onClick = { usernamePasswordChallenge.continueWithCredentials(usernameFieldText, passwordFieldText) }) {
                     Text("Login")
                 }
             }

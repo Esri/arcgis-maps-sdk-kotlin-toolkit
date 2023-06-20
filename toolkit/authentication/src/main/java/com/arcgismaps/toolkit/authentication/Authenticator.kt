@@ -33,15 +33,8 @@ public fun Authenticator(
 
     val usernamePasswordChallenge =
         authenticatorViewModel.pendingUsernamePasswordChallenge.collectAsStateWithLifecycle().value
-    usernamePasswordChallenge?.let { usernamePasswordChallenge ->
-        UsernamePasswordAuthenticator(
-            hostname = usernamePasswordChallenge.hostname,
-            onSubmit = { username, password ->
-                usernamePasswordChallenge.continueWithCredentials(username, password)
-            },
-            onCancel = {
-                usernamePasswordChallenge.cancel()
-            }
-        )
+
+    usernamePasswordChallenge?.let {
+        UsernamePasswordAuthenticator(it)
     }
 }
