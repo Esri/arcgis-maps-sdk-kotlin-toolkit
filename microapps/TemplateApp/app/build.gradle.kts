@@ -5,6 +5,7 @@ plugins {
 }
 
 secrets {
+    // this file doesn't contain secrets, it just provides defaults which can be committed into git.
     defaultPropertiesFileName = "secrets.defaults.properties"
 }
 

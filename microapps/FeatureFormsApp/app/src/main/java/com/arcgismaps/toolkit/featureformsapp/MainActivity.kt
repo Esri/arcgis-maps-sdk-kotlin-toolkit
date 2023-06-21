@@ -3,35 +3,48 @@ package com.arcgismaps.toolkit.featureformsapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
-import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
+import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeHandler
+import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
+import com.arcgismaps.httpcore.authentication.TokenCredential
 import com.arcgismaps.toolkit.featureformsapp.screens.mapview.MapScreen
 import com.arcgismaps.toolkit.featureformsapp.ui.theme.FeatureFormsAppTheme
 
-class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        ArcGISEnvironment.apiKey =
-            ApiKey.create(BuildConfig.API_KEY)
-        setContent {
-            FeatureFormsAppTheme {
-                FeatureFormsApp()
+class FormsArcGISAuthenticationChallengeHandler(
+    private val username: String,
+    private val password: String
+) : ArcGISAuthenticationChallengeHandler {
+    override suspend fun handleArcGISAuthenticationChallenge(
+        challenge: ArcGISAuthenticationChallenge
+    ): ArcGISAuthenticationChallengeResponse {
+        val result: Result<TokenCredential> =
+            TokenCredential.create(
+                challenge.requestUrl,
+                username,
+                password,
+                tokenExpirationInterval = 0
+            )
+        return result.let {
+            if (it.isSuccess) {
+                ArcGISAuthenticationChallengeResponse.ContinueWithCredential(it.getOrThrow())
+            } else {
+                ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError(it.exceptionOrNull()!!)
             }
         }
     }
 }
 
-@Composable
-fun FeatureFormsApp() {
-    MapScreen()
-}
-
-@Preview(showBackground = true)
-@Composable
-fun AppPreview() {
-    FeatureFormsAppTheme {
-        FeatureFormsApp()
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler =
+            FormsArcGISAuthenticationChallengeHandler(BuildConfig.webMapUser, BuildConfig.webMapPassword)
+        setContent {
+            FeatureFormsAppTheme {
+                MapScreen()
+            }
+        }
     }
 }
