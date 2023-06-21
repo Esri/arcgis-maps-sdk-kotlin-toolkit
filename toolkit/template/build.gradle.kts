@@ -1,20 +1,7 @@
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
-    id("artifactory-deploy")
 }
-
-// Find these in properties passed through command line or read from GRADLE_HOME/gradle.properties
-// or local gradle.properties
-val artifactoryGroupId: String by project
-val artifactoryArtifactBaseId: String by project
-val artifactoryArtifactId: String = "$artifactoryArtifactBaseId-${project.name}"
-val artifactoryUrl: String by project
-val artifactoryUsername: String by project
-val artifactoryPassword: String by project
-val versionNumber: String by project
-val buildNumber: String by project
-val artifactVersion: String = "$versionNumber-$buildNumber"
 
 android {
     namespace = "com.arcgismaps.toolkit.template"

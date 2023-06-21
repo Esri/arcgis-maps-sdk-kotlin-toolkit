@@ -15,7 +15,6 @@
  *  limitations under the License.
  *
  */
-import org.gradle.api.publish.PublishingExtension
 
 repositories {
     google()
@@ -31,9 +30,9 @@ version = "1.0"
 
 gradlePlugin {
     plugins {
-        create("artifactoryDeploy") {
+        create("artifactDeploy") {
             group = "internal"
-            id = "artifactory-deploy"
+            id = "artifact-deploy"
             implementationClass = "deploy.ArtifactPublisher"
         }
     }
