@@ -124,6 +124,15 @@ public interface MapInterface : MapEvents {
     public val mapRotation: MapFlow<Double>
 }
 
+/**
+ * Factory function for the default implementation of [MapInterface]
+ */
+public fun MapInterface(arcGISMap: ArcGISMap) : MapInterface = MapInterfaceImpl(arcGISMap)
+
+/**
+ * A default implementation for the [MapInterface]
+ */
+
 public class MapInterfaceImpl(
     arcGISMap: ArcGISMap,
     mapInsets: MapInsets = MapInsets()
