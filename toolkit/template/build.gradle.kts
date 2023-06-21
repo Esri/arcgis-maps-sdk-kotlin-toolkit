@@ -1,7 +1,7 @@
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
-    id("maven-publish")
+    id("artifactory-deploy")
 }
 
 // Find these in properties passed through command line or read from GRADLE_HOME/gradle.properties
@@ -65,40 +65,4 @@ dependencies {
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
     debugImplementation(libs.bundles.debug)
-}
-
-afterEvaluate {
-    
-    /**
-     * Maven publication configuration for aar and pom file. Run as follows:
-     * ./gradlew publishAarPublicationToMavenRepository -PartifactoryUsername=<username> -PartifactoryPassword=<password>
-     *
-     * More details:
-     * https://docs.gradle.org/current/userguide/publishing_maven.html
-     */
-    publishing {
-        publications {
-            create<MavenPublication>("aar") {
-                groupId = artifactoryGroupId
-                artifactId = artifactoryArtifactId
-                version = artifactVersion
-                
-                from(components["release"])
-                
-            }
-        }
-        
-        repositories {
-            maven {
-                url = uri(artifactoryUrl)
-                credentials {
-                    username = artifactoryUsername
-                    password = artifactoryPassword
-                }
-            }
-        }
-    }
-    
-    tasks.findByName("publishAarPublicationToMavenRepository")?.dependsOn("assembleRelease")
-    tasks.findByName("publishToMavenLocal")?.dependsOn("assembleRelease")
 }
