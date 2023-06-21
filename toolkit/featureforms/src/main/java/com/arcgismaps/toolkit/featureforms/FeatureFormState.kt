@@ -55,3 +55,8 @@ public class FeatureFormStateImpl : FeatureFormState {
         _inEditingMode.value = active
     }
 }
+
+/**
+ * Factory function for the default implementation of [FeatureFormState]
+ */
+public fun FeatureFormState() : FeatureFormState = FeatureFormStateImpl()
