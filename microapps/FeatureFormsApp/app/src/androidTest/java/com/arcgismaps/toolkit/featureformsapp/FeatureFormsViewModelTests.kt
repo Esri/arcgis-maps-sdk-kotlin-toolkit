@@ -7,18 +7,13 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.performClick
 import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.toolkit.composablemap.ComposableMap
-import com.arcgismaps.toolkit.composablemap.FlowData
-import com.arcgismaps.toolkit.composablemap.MapInsets
 import com.arcgismaps.toolkit.composablemap.MapInterface
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
@@ -29,10 +24,10 @@ import org.junit.Test
  * Tests for the FeatureForms ViewModel's correctness.
  */
 class FeatureFormsViewModelTests {
-    
+
     @get:Rule
     val composeTestRule = createComposeRule()
-    
+
     /**
      * Given a ComposableMap
      * When it is tapped
@@ -45,7 +40,7 @@ class FeatureFormsViewModelTests {
         val mockMapInterface = MockMapInterface(map)
         composeTestRule.setContent {
             ComposableMap(mapInterface = mockMapInterface) {
-                Card(modifier = Modifier.semantics {  }) {}
+                Card(modifier = Modifier.semantics { }) {}
             }
         }
 
@@ -57,15 +52,7 @@ class FeatureFormsViewModelTests {
     }
 }
 
-class MockMapInterface(map : ArcGISMap) : MapInterface {
-    private val _mapData = MutableStateFlow(map)
-    override val map: StateFlow<ArcGISMap> = _mapData.asStateFlow()
-    
-    override val insets: StateFlow<MapInsets> = MutableStateFlow(MapInsets()).asStateFlow()
-
-    override val viewpoint: StateFlow<FlowData<Viewpoint?>> = MutableStateFlow(FlowData<Viewpoint?>(null)).asStateFlow()
-
-    override val mapRotation: StateFlow<FlowData<Double>> = MutableStateFlow(FlowData(0.0)).asStateFlow()
+class MockMapInterface(map: ArcGISMap) : MapInterface by MapInterface(map) {
 
     val onClick: MutableStateFlow<Unit?> = MutableStateFlow(null)
     context(MapView, CoroutineScope) override fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {

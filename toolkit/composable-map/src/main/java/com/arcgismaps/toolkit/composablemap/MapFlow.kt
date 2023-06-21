@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
- * Defines the channel type for a [MapFlow]
+ * Defines the channel type for a [MapFlow].
  */
 public enum class Channel {
     Read,
@@ -33,7 +33,12 @@ public enum class Channel {
 public interface MapFlow<T> {
 
     /**
-     * Accepts the given [collector] and emits values into it on the [channel] provided
+     * Returns the current value of the [channel].
+     */
+    public fun getValue(channel: Channel) : T?
+
+    /**
+     * Accepts the given [collector] and emits values into it on the [channel] provided.
      */
     public suspend fun collect(channel: Channel, collector: FlowCollector<T>)
 
@@ -51,24 +56,37 @@ public interface MapFlow<T> {
 public interface MutableMapFlow<T> : MapFlow<T> {
 
     /**
-     * Sets the current value for the [channel]
+     * Sets the current value for the [channel].
      */
     public fun setValue(value: T, channel: Channel)
 }
 
 /**
- * Creates a [MutableMapFlow] with the given [initialValue]
+ * Creates a [MutableMapFlow] with the given [initialValue]. The [initialValue] is set for
+ * both channels.
  */
 @Suppress("FunctionName")
 public fun <T> MutableMapFlow(initialValue: T): MutableMapFlow<T> = MapFlowImpl(initialValue)
 
 /**
- * Implementation for a [MutableMapFlow]
+ * Implementation for a [MutableMapFlow].
  */
 internal class MapFlowImpl<T>(private val initialValue: T) : MutableMapFlow<T> {
 
     private val readerFlow: MutableStateFlow<T> = MutableStateFlow(initialValue)
     private val writerFlow: MutableSharedFlow<T> = MutableSharedFlow(replay = 1)
+
+    init {
+        writerFlow.tryEmit(initialValue)
+    }
+
+    override fun getValue(channel: Channel): T? {
+        return if (channel == Channel.Read) {
+            readerFlow.value
+        } else {
+            writerFlow.replayCache.firstOrNull()
+        }
+    }
 
     override suspend fun collect(channel: Channel, collector: FlowCollector<T>): Nothing =
         if (channel == Channel.Read) {
