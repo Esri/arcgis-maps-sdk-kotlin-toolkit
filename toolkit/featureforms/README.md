@@ -6,11 +6,11 @@ The Forms toolkit component enables users to edit field values of features in a 
 
 ## Behavior
 
-To see it in action, check out the [microapp]()
+To see it in action, check out the [microapp](../../microapps/FeatureFormsApp).
 
 ## Usage
 
-The `FeatureForm` composable is provided with its `FeatureFormState` and its default implementation `FeatureFormStateImpl`.
+The `FeatureForm` composable is provided with its `FeatureFormState` and its default implementation `FeatureFormStateImpl` which is also available through the Factory function `FeatureFormState()`.
 They can be used either as a simple state class or within a ViewModel.
 
 
