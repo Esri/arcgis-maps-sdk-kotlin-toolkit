@@ -1,46 +1,48 @@
 package com.arcgismaps.toolkit.featureforms.components
 
-import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Clear
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-public fun FormTextField(
+internal fun FormTextField(
     label: String,
-    modifier: Modifier = Modifier,
-    description: String = "",
-    minLength: Int = 0,
-    maxLength: Int = 0,
-    singleLine: Boolean = true,
+    description: String,
+    minLength: Int,
+    maxLength: Int,
+    singleLine: Boolean,
+    modifier: Modifier = Modifier
 ) {
     val helperText = remember {
         buildString {
-            if (minLength > 0) {
+            if (minLength > 0)
                 append("Enter $minLength to ")
-            } else {
-                append("Maximum ")
-            }
-            append("$maxLength characters")
+            if (maxLength > 0)
+                append("Maximum $maxLength characters")
         }
     }
 
@@ -49,6 +51,7 @@ public fun FormTextField(
     var isFocused by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     val supportingText = if (isError) {
         errorMessage
@@ -64,9 +67,14 @@ public fun FormTextField(
 
     Column(modifier = modifier
         .fillMaxSize()
-        .onFocusChanged {
-            isFocused = it.hasFocus
+        .onFocusChanged { isFocused = it.hasFocus }
+        .pointerInput(Unit) {
+            detectTapGestures {
+                keyboardController?.hide()
+                focusManager.clearFocus()
+            }
         }
+        .padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 10.dp)
     ) {
         OutlinedTextField(
             value = text,
@@ -88,19 +96,31 @@ public fun FormTextField(
                 // TO DO - add placeholder
                 //Text(text = "Hint")
             },
-            singleLine = singleLine,
+            trailingIcon = {
+                if (text.isNotEmpty()) {
+                    IconButton(onClick = { text = "" }) {
+                        Icon(
+                            imageVector = Icons.Rounded.Clear,
+                            contentDescription = "Clear Text"
+                        )
+                    }
+                }
+            },
             supportingText = {
-                Text(
-                    text = supportingText,
-                    color = if (isError) Color.Red else Color.Unspecified
-                )
+                if (supportingText.isNotEmpty()) {
+                    Text(
+                        text = supportingText,
+                        color = if (isError) Color.Red else Color.Unspecified
+                    )
+                }
             },
             keyboardActions = KeyboardActions(
                 onDone = { focusManager.clearFocus() }
             ),
             keyboardOptions = KeyboardOptions.Default.copy(
-                imeAction = if (!singleLine) ImeAction.Done else ImeAction.Default
-            )
+                imeAction = if (singleLine) ImeAction.Done else ImeAction.None
+            ),
+            singleLine = singleLine
         )
     }
 }

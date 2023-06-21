@@ -19,7 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -32,30 +31,29 @@ import com.arcgismaps.toolkit.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureformsapp.R
 import com.arcgismaps.toolkit.featureformsapp.screens.form.FormViewModel
 import com.arcgismaps.toolkit.featureformsapp.screens.form.FormViewModelFactory
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen() {
-    val coroutineScope = rememberCoroutineScope()
+    // instantiate a FormViewModel using its factory
     val formViewModel = viewModel<FormViewModel>(
         factory = FormViewModelFactory()
     )
-    
+    // instantiate a MapViewModel using its factory
     val mapViewModel = viewModel<MapViewModel>(
         factory = MapViewModelFactory(
-            arcGISMap = ArcGISMap("https://runtimecoretest.maps.arcgis.com/home/item.html?id=df0f27f83eee41b0afe4b6216f80b541"),
+            arcGISMap = ArcGISMap(stringResource(R.string.map_url)),
             onFeatureIdentified = { feature ->
-                coroutineScope.launch {
-                    formViewModel.setFeature(feature)
-                    formViewModel.setEditingActive(true)
-                }
+                // update the formViewModel's feature
+                formViewModel.setFeature(feature)
+                // set formViewModel to editing state
+                formViewModel.setEditingActive(true)
             }
         )
     )
-    
+    // hoist state for the formViewModel editing mode
     val inEditingMode by formViewModel.inEditingMode.collectAsState()
-    
+    // create a BottomSheetScaffoldState
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
             initialValue = SheetValue.Hidden,
@@ -63,7 +61,8 @@ fun MapScreen() {
             skipHiddenState = false
         )
     )
-    
+    // launch a side effect whenever inEditingMode changes to expand or hide the
+    // bottom sheet
     LaunchedEffect(inEditingMode) {
         if (inEditingMode) {
             bottomSheetScaffoldState.bottomSheetState.expand()
@@ -71,17 +70,24 @@ fun MapScreen() {
             bottomSheetScaffoldState.bottomSheetState.hide()
         }
     }
-    
+    // create a bottom sheet scaffold
     BottomSheetScaffold(
         sheetContent = {
+            // set its content to the FeatureForm
             FeatureForm(formViewModel)
         },
         scaffoldState = bottomSheetScaffoldState,
         sheetPeekHeight = 40.dp,
-        topBar = if (inEditingMode) {
-            {
+        // top bar is only when the FeatureForm is being shown and is in edit mode
+        topBar = {
+            if (inEditingMode) {
                 TopAppBar(
-                    title = { Text(text = stringResource(R.string.edit_feature), color = Color.White) },
+                    title = {
+                        Text(
+                            text = stringResource(R.string.edit_feature),
+                            color = Color.White
+                        )
+                    },
                     actions = {
                         IconButton(onClick = {
                             /* FUTURE: save feature here */
@@ -108,10 +114,9 @@ fun MapScreen() {
                     )
                 )
             }
-        } else {
-            null
         }
     ) {
+        // show the composable map using the mapViewModel
         ComposableMap(
             modifier = Modifier.fillMaxSize(),
             mapInterface = mapViewModel
