@@ -40,6 +40,7 @@ public fun Compass(
     autoHide: Boolean = true,
     size: Dp = 50.dp,
     color: Color = Color.White,
+    borderColor: Color = Color.Gray,
     onClick: () -> Unit = {}
 ) {
     val heading = -rotation.toFloat()
@@ -51,11 +52,12 @@ public fun Compass(
     ) {
         CompassButtonIcon(
             icon = R.drawable.ic_compass,
+            color = color,
+            borderColor = borderColor,
             modifier = modifier
                 .size(size)
                 .rotate(heading)
                 .semantics { contentDescription = "CompassButtonIcon" },
-            color = color,
             onClick = onClick
         )
     }
@@ -68,15 +70,16 @@ public fun Compass(
 @Composable
 internal fun CompassButtonIcon(
     @DrawableRes icon: Int,
+    color: Color,
+    borderColor: Color,
     modifier: Modifier = Modifier,
-    color: Color = Color.White,
     onClick: () -> Unit = {}
 ) {
     val borderWidth = 2.dp
     Button(
         modifier = modifier
             .border(
-                BorderStroke(borderWidth, Color.Gray),
+                BorderStroke(borderWidth, borderColor),
                 CircleShape
             )
             .padding(borderWidth)
