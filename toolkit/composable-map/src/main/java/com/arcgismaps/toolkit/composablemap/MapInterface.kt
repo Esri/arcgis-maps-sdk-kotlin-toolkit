@@ -127,7 +127,8 @@ public interface MapInterface : MapEvents {
 /**
  * Factory function for the default implementation of [MapInterface]
  */
-public fun MapInterface(arcGISMap: ArcGISMap) : MapInterface = MapInterfaceImpl(arcGISMap)
+public fun MapInterface(arcGISMap: ArcGISMap, mapInsets: MapInsets): MapInterface =
+    MapInterfaceImpl(arcGISMap, mapInsets)
 
 /**
  * A default implementation for the [MapInterface]

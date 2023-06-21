@@ -10,7 +10,7 @@ import com.arcgismaps.toolkit.composablemap.MapInterfaceImpl
 class MapViewModel(
     arcGISMap: ArcGISMap,
     mapInsets: MapInsets = MapInsets()
-) : ViewModel(), MapInterface by MapInterfaceImpl(arcGISMap, mapInsets)
+) : ViewModel(), MapInterface by MapInterface(arcGISMap, mapInsets)
 
 class MapViewModelFactory(
     private val arcGISMap: ArcGISMap,
