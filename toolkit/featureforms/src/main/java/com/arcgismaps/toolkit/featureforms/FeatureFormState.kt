@@ -32,7 +32,6 @@ public interface FeatureFormState {
      */
     public fun setFeature(feature: ArcGISFeature)
 
-
     /**
      * Sets the editing mode of the form
      *
@@ -52,7 +51,6 @@ public class FeatureFormStateImpl : FeatureFormState {
     override fun setFeature(feature: ArcGISFeature) {
         _feature.value = feature
     }
-
     override fun setEditingActive(active: Boolean) {
         _inEditingMode.value = active
     }

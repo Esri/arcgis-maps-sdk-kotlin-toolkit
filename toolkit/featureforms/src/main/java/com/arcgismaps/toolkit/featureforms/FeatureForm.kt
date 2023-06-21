@@ -45,9 +45,7 @@ public fun FeatureForm(
         FeatureFormContent(formDefinition = featureFormDefinition, modifier = modifier)
     } else {
         Column(
-            modifier = modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.6f)
+            modifier = modifier.fillMaxSize()
         ) {
             Text(text = "No information to display.")
         }
@@ -60,9 +58,7 @@ internal fun FeatureFormContent(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .fillMaxHeight(0.6f),
+        modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // title

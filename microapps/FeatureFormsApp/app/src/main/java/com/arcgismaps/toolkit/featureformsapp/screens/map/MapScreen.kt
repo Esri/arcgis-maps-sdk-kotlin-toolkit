@@ -1,6 +1,8 @@
 package com.arcgismaps.toolkit.featureformsapp.screens.map
 
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -73,14 +75,20 @@ fun MapScreen() {
     // create a bottom sheet scaffold
     BottomSheetScaffold(
         sheetContent = {
-            // set its content to the FeatureForm
-            FeatureForm(formViewModel)
+            // set bottom sheet content to the FeatureForm
+            FeatureForm(
+                featureFormState = formViewModel,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    // set max sheet height to occupy to 60% of the total height
+                    .fillMaxHeight(0.6f)
+            )
         },
         scaffoldState = bottomSheetScaffoldState,
         sheetPeekHeight = 40.dp,
         // top bar is only when the FeatureForm is being shown and is in edit mode
-        topBar = {
-            if (inEditingMode) {
+        topBar = if (inEditingMode) {
+            {
                 TopAppBar(
                     title = {
                         Text(
@@ -114,6 +122,8 @@ fun MapScreen() {
                     )
                 )
             }
+        } else {
+            null
         }
     ) {
         // show the composable map using the mapViewModel

@@ -66,7 +66,6 @@ dependencies {
     implementation(libs.bundles.serialization)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
-    
     debugImplementation(libs.bundles.debug)
 }
 

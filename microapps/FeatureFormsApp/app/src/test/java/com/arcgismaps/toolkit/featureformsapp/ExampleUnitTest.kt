@@ -84,36 +84,5 @@ class ExampleUnitTest {
         val element = formElements.first()
         assertThat(element).isInstanceOf(FieldFeatureFormElement::class.java)
     }
-
-    @Test
-    fun testNullable() {
-        val formDef = FormDef()
-        val table = Table("table")
-        val feature = Feature("feature")
-        val test = Test(feature)
-
-        val form : FormDef? = feature.table?.let { ftable->
-            ftable.formInfoJson?.let {
-                ftable.formDef
-            }
-        }
-
-        assertThat(form).isNull()
-    }
 }
 
-class Test(val feature : Feature? = null) {
-
-}
-
-class Feature(val name : String, val table: Table? = null) {
-
-}
-
-class Table(val name: String, val formDef: FormDef? = null) {
-    val formInfoJson : String? = null
-}
-
-class FormDef() {
-
-}
