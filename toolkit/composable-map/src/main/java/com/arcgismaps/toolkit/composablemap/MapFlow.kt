@@ -23,7 +23,7 @@ public enum class Channel {
  * Only values that are intended to be set should be pushed to the WRITE channel. There is no piping
  * mechanism that feeds across the channels, hence each flow is distinct.
  *
- * This provides a single data structure to be used with the [ComposableMap] and it's [MapInterface]
+ * This provides a single data structure to be used with the [ComposableMap] and its [MapInterface]
  * to read property values using the READ channel and write property values using the WRITE channel.
  *
  * A [MapFlow] is read-only. See [MutableMapFlow] that provides a setter.

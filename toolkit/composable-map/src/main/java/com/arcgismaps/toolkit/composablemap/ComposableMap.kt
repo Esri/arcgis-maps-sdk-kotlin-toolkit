@@ -101,7 +101,6 @@ public fun ComposableMap(
     LaunchedEffect(Unit) {
         launch {
             mapInterface.mapRotation.collect(Channel.Write) {
-                Log.d("TAG", "ComposableMap target rotation: $it")
                 mapView.setViewpointRotation(it)
             }
         }
