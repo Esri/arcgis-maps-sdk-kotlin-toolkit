@@ -9,6 +9,10 @@ pluginManagement {
         mavenCentral()
     }
 }
+
+val versionNumber: String by settings
+val buildNumber: String by settings
+
 dependencyResolutionManagement {
     @Suppress("UnstableApiUsage")
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
@@ -20,6 +24,13 @@ dependencyResolutionManagement {
             url = java.net.URI(
                 "https://olympus.esri.com/artifactory/arcgisruntime-repo/"
             )
+        }
+    }
+    
+    versionCatalogs {
+        create("arcgis") {
+            version("mapsSdk", "$versionNumber-$buildNumber")
+            library("mapsSdk", "com.esri", "arcgis-maps-sdk").versionRef("mapsSdk")
         }
     }
 }
