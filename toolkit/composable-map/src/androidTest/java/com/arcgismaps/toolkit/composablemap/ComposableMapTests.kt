@@ -28,7 +28,7 @@ class ComposableMapTests {
 
     @Test
     fun testComposableMapLayout() {
-        val mockMapInterface = MockMapInterface(ArcGISMap())
+        val mockMapInterface = MapInterfaceImpl(ArcGISMap())
 
         composeTestRule.setContent {
             ComposableMap(mapInterface = mockMapInterface) {
@@ -46,25 +46,5 @@ class ComposableMapTests {
 
         composeTestRule.onNodeWithContentDescription("Card")
             .assert(hasParent(hasContentDescription(contentSemanticLabel)))
-    }
-}
-
-class MockMapInterface(
-    map: ArcGISMap,
-    insets: MapInsets = MapInsets()
-) : MapInterface {
-    private val _map: MutableStateFlow<ArcGISMap> = MutableStateFlow(map)
-    override val map: StateFlow<ArcGISMap> = _map.asStateFlow()
-
-    private val _insets: MutableStateFlow<MapInsets> = MutableStateFlow(insets)
-    override val insets: StateFlow<MapInsets> = _insets.asStateFlow()
-
-    private val _currentViewpoint: MutableStateFlow<Viewpoint?> = MutableStateFlow(null)
-    override val currentViewpoint: StateFlow<Viewpoint?> = _currentViewpoint.asStateFlow()
-
-    override fun onSingleTapConfirmed(event: SingleTapConfirmedEvent) {}
-
-    fun setViewpoint(viewpoint: Viewpoint) {
-        _currentViewpoint.update { viewpoint }
     }
 }
