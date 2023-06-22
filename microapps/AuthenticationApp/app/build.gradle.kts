@@ -59,7 +59,7 @@ android {
 dependencies {
     implementation(project(":authentication"))
     implementation(project(":composable-map"))
-    implementation(libs.arcgis)
+    implementation(arcgis.mapsSdk)
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)

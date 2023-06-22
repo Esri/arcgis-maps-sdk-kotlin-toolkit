@@ -30,7 +30,7 @@ dependencyResolutionManagement {
     versionCatalogs {
         create("arcgis") {
             version("mapsSdk", "$versionNumber-$buildNumber")
-            library("mapsSdk", "com.esri", "arcgis-maps-sdk").versionRef("mapsSdk")
+            library("mapsSdk", "com.esri", "arcgis-maps-kotlin").versionRef("mapsSdk")
         }
     }
 }

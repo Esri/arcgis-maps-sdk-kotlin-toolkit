@@ -7,7 +7,7 @@
 	echo
 	echo "Description: generates a new toolkit component and microapp with the given name"
 	echo " -n <name> the name of the new toolkit component"
-	echo " -p        make the new module publishable with maven, defaults to false"
+	echo " -d        do not make the new component publishable. optional. defaults to publishable."
 	echo " -h        this help message"	
 	echo " ./new-component-starter.sh -n FloorFilter"
 	echo "================================================================================"
@@ -20,7 +20,7 @@
 
     toolkitDir="$(dirname ${BASH_SOURCE})"
     name=
-    publish=
+    publish="yes"
     #lowercase name (the library dir name and project name)
     componentName=
     #first letter uppercased
@@ -126,13 +126,13 @@ EOM
     # ---------------------------------------------
     
     # parse options
-    while getopts :n:ph opt; do
+    while getopts :n:dh opt; do
 	case ${opt} in
 	    n)
 		name="${OPTARG}"
 		;;
-	    p)
-		publish="yes"
+	    d)
+		publish=
 		;;
 	    h)
 		_display_help_dialog
