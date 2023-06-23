@@ -64,6 +64,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.browser)
+    implementation(project(":support"))
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
     debugImplementation(libs.bundles.debug)
