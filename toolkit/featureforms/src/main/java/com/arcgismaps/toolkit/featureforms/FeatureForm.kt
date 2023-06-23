@@ -2,7 +2,6 @@ package com.arcgismaps.toolkit.featureforms
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.data.ArcGISFeatureTable
 import com.arcgismaps.toolkit.featureforms.api.FeatureFormDefinition
 import com.arcgismaps.toolkit.featureforms.api.FieldFeatureFormElement
-import com.arcgismaps.toolkit.featureforms.api.TestData
 import com.arcgismaps.toolkit.featureforms.api.formInfoJson
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
 
