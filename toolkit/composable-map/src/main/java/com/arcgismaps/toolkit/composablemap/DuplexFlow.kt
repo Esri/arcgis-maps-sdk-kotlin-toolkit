@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
- * Defines the duplex channel type for a [MapFlow].
+ * Defines the duplex channel type for a [DuplexFlow].
  */
 public enum class Duplex {
     Read,
@@ -17,20 +17,21 @@ public enum class Duplex {
 }
 
 /**
- * A flow data structure that encapsulates two distinct flows. The READ flow channel is backed by
- * a [MutableStateFlow]. Only values that are intended to be read should be emitted/pushed to the
- * READ channel. The WRITE flow channel is backed by a [MutableSharedFlow] with a replay cache of 1.
- * Only values that are intended to be set should be pushed to the WRITE channel. There is no piping
- * mechanism that feeds across the channels, hence each flow is distinct.
+ * A flow data structure that encapsulates two distinct flows. This provides a single structure
+ * that can be used to read property values using the [Duplex.Read] channel and write property
+ * values using the [Duplex.Write] channel.
  *
- * This provides a single data structure to be used with the [ComposableMap] and its [MapInterface]
- * to read property values using the READ channel and write property values using the WRITE channel.
+ * The [Duplex.Read] flow is backed by a [MutableStateFlow]. Only values that are intended to be
+ * read should be emitted/pushed to the READ duplex channel. The [Duplex.Write] flow is backed by
+ * a [MutableSharedFlow] with a replay cache of 1. Only values that are intended to be set should
+ * be pushed to the WRITE duplex channel. There is no piping mechanism that feeds across the duplex,
+ * hence each flow is distinct.
  *
- * A [MapFlow] is read-only. See [MutableMapFlow] that provides a setter.
+ * A [DuplexFlow] is read-only. See [MutableDuplexFlow] that provides a setter.
  *
- * Use the factory function MutableMapFlow(initialValue: T) to create an instance.
+ * Use the factory function MutableDuplexFlow(initialValue: T) to create an instance.
  */
-public interface MapFlow<T> {
+public interface DuplexFlow<T> {
 
     /**
      * Returns the current value of the [duplex].
@@ -51,9 +52,9 @@ public interface MapFlow<T> {
 }
 
 /**
- * A mutable [MapFlow] that provides a setter for the value of each channel.
+ * A mutable [DuplexFlow] that provides a setter for the value of each channel.
  */
-public interface MutableMapFlow<T> : MapFlow<T> {
+public interface MutableDuplexFlow<T> : DuplexFlow<T> {
 
     /**
      * Sets the current value for the [duplex].
@@ -62,16 +63,16 @@ public interface MutableMapFlow<T> : MapFlow<T> {
 }
 
 /**
- * Creates a [MutableMapFlow] with the given [initialValue]. The [initialValue] is set for
- * both channels.
+ * Creates a [MutableDuplexFlow] with the given [initialValue]. The [initialValue] is set for
+ * both duplex channels.
  */
 @Suppress("FunctionName")
-public fun <T> MutableMapFlow(initialValue: T): MutableMapFlow<T> = MapFlowImpl(initialValue)
+public fun <T> MutableDuplexFlow(initialValue: T): MutableDuplexFlow<T> = DuplexFlowImpl(initialValue)
 
 /**
- * Implementation for a [MutableMapFlow].
+ * Implementation for a [MutableDuplexFlow].
  */
-internal class MapFlowImpl<T>(private val initialValue: T) : MutableMapFlow<T> {
+internal class DuplexFlowImpl<T>(private val initialValue: T) : MutableDuplexFlow<T> {
 
     private val readerFlow: MutableStateFlow<T> = MutableStateFlow(initialValue)
     private val writerFlow: MutableSharedFlow<T> = MutableSharedFlow(replay = 1)

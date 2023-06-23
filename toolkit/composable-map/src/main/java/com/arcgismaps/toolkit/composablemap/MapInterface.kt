@@ -116,12 +116,12 @@ public interface MapInterface : MapEvents {
     /**
      * The [Viewpoint] from which the [ComposableMap] is drawn.
      */
-    public val viewpoint: MapFlow<Viewpoint?>
+    public val viewpoint: DuplexFlow<Viewpoint?>
 
     /**
      * The current rotation value of the [ComposableMap].
      */
-    public val mapRotation: MapFlow<Double>
+    public val mapRotation: DuplexFlow<Double>
 }
 
 /**
@@ -145,11 +145,11 @@ public class MapInterfaceImpl(
     private val _insets: MutableStateFlow<MapInsets> = MutableStateFlow(mapInsets)
     override val insets: StateFlow<MapInsets> = _insets.asStateFlow()
 
-    private val _viewpoint: MutableMapFlow<Viewpoint?> = MutableMapFlow(null)
-    override val viewpoint: MapFlow<Viewpoint?> = _viewpoint
+    private val _viewpoint: MutableDuplexFlow<Viewpoint?> = MutableDuplexFlow(null)
+    override val viewpoint: DuplexFlow<Viewpoint?> = _viewpoint
 
-    private val _mapRotation: MutableMapFlow<Double> = MutableMapFlow(0.0)
-    override val mapRotation: MapFlow<Double> = _mapRotation
+    private val _mapRotation: MutableDuplexFlow<Double> = MutableDuplexFlow(0.0)
+    override val mapRotation: DuplexFlow<Double> = _mapRotation
 
     override fun setViewpoint(viewpoint: Viewpoint, duplex: Duplex) {
         _viewpoint.setValue(viewpoint, duplex)

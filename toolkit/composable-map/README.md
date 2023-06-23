@@ -1,13 +1,13 @@
 # Composable Map
 
-## MapFlow
+## DuplexFlow
 
-Some properties on the `ComposableMap` that need to be observed and updated are exposed via a `MapFlow`.
+Some properties on the `ComposableMap` that need to be observed and updated are exposed via a `DuplexFlow`.
 This section provides its proper usage.
 
 When it becomes necessary to both read and set a property such as `Map`'s rotation using `MapView.mapRotation` to read and `MapView.setViewpointRotation`
 to set the value, it would result in a feedback loop if a single State is used to achieve this behavior.
-The `MapFlow` is designed to solve this problem by encapsulating two distinct `Flow`'s who are individually responsible for Reading a property value from the `MapView` and setting a property value on the `MapView`. 
+The `DuplexFlow` is designed to solve this problem by encapsulating two distinct `Flow`'s who are individually responsible for Reading a property value and setting a property value. 
 
 You should only emit/push to the READ duplex channel values that you intend to read. 
 Similarly, only push values to the WRITE duplex channel that are intended to be set on the MapView. 
@@ -16,10 +16,10 @@ There is no piping mechanism that feeds across the duplex. Hence the setter is u
 ### Usage
 
 ```kotlin
-// create a private mutable backing property using the Factory MutableMapFlow()
-private val _property: MutableMapFlow<Type?> = MutableMapFlow(null)
-// cast it to an immutable MapFlow
-public val property: MapFlow<Type> = _property
+// create a private mutable backing property using the Factory MutableDuplexFlow()
+private val _property: MutableDuplexFlow<Type?> = MutableDuplexFlow(null)
+// cast it to an immutable DuplexFlow
+public val property: DuplexFlow<Type> = _property
 
 // to set value on the READ duplex channel
 _property.setValue(value = newValue, duplex = Duplex.Read)
@@ -28,14 +28,14 @@ _property.setValue(value = newValue, duplex = Duplex.Write)
 
 // to collect from the READ duplex channel
 suspend fun Foo() {
-    property..collect(Duplex.Read) { value ->
+    property.collect(Duplex.Read) { value ->
         ....
     }
 }
 
 // to collect from the WRITE duplex channel
 suspend fun Bar() {
-    property..collect(Duplex.Write) { value ->
+    property.collect(Duplex.Write) { value ->
         ....
     }
 }

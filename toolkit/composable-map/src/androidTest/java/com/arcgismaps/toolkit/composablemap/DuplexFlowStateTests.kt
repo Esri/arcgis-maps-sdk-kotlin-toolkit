@@ -7,39 +7,39 @@ import androidx.compose.ui.test.onNodeWithText
 import org.junit.Rule
 import org.junit.Test
 
-class MapFlowStateTests {
+class DuplexFlowStateTests {
 
     @get:Rule
     val composeTestRule = createComposeRule()
 
     @Test
     fun testStateInReadChannel() {
-        val mapFlow = MutableMapFlow(0)
+        val duplexFlow = MutableDuplexFlow(0)
         val duplex = Duplex.Read
 
         composeTestRule.setContent {
-            val state by mapFlow.collectAsState(duplex = duplex)
+            val state by duplexFlow.collectAsState(duplex = duplex)
             Text(state.toString())
         }
 
         composeTestRule.onNodeWithText("0").assertExists()
-        mapFlow.setValue(100, duplex)
+        duplexFlow.setValue(100, duplex)
         // assertion triggers a recomposition
         composeTestRule.onNodeWithText("100").assertExists()
     }
 
     @Test
     fun testStateInWriteChannel() {
-        val mapFlow = MutableMapFlow(0)
+        val duplexFlow = MutableDuplexFlow(0)
         val duplex = Duplex.Write
 
         composeTestRule.setContent {
-            val state by mapFlow.collectAsState(duplex = duplex)
+            val state by duplexFlow.collectAsState(duplex = duplex)
             Text(state.toString())
         }
 
         composeTestRule.onNodeWithText("0").assertExists()
-        mapFlow.setValue(100, duplex)
+        duplexFlow.setValue(100, duplex)
         // assertion triggers a recomposition
         composeTestRule.onNodeWithText("100").assertExists()
     }
