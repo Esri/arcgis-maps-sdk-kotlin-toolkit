@@ -13,7 +13,7 @@ class DuplexFlowStateTests {
     val composeTestRule = createComposeRule()
 
     @Test
-    fun testStateInReadChannel() {
+    fun testStateInReadFlow() {
         val duplexFlow = MutableDuplexFlow(0)
         val flowType = DuplexFlow.Type.Read
 
@@ -29,7 +29,7 @@ class DuplexFlowStateTests {
     }
 
     @Test
-    fun testStateInWriteChannel() {
+    fun testStateInWriteFlow() {
         val duplexFlow = MutableDuplexFlow(0)
         val flowType = DuplexFlow.Type.Write
 
