@@ -10,8 +10,10 @@ pluginManagement {
     }
 }
 
-val versionNumber: String by settings
-val buildNumber: String by settings
+// The version of the ArcGIS Maps SDK for Kotlin dependency
+val sdkVersionNumber: String by settings
+// The build number of the ArcGIS Maps SDK for Kotlin dependency
+val sdkBuildNumber: String by settings
 
 dependencyResolutionManagement {
     @Suppress("UnstableApiUsage")
@@ -29,7 +31,7 @@ dependencyResolutionManagement {
     
     versionCatalogs {
         create("arcgis") {
-            version("mapsSdk", "$versionNumber-$buildNumber")
+            version("mapsSdk", "$sdkVersionNumber-$sdkBuildNumber")
             library("mapsSdk", "com.esri", "arcgis-maps-kotlin").versionRef("mapsSdk")
         }
     }
