@@ -19,7 +19,8 @@ internal fun TextArea(
         minLength = textBoxInput.minLength.toInt(),
         maxLength = textBoxInput.maxLength.toInt(),
         singleLine = false,
-        modifier = modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize(),
+        placeholder = field.hint
     )
 }
 
@@ -35,6 +36,7 @@ internal fun TextBox(
         minLength = textBoxInput.minLength.toInt(),
         maxLength = textBoxInput.maxLength.toInt(),
         singleLine = true,
-        modifier = modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize(),
+        placeholder = field.hint
     )
 }

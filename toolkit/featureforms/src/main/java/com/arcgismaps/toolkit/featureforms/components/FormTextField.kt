@@ -1,5 +1,6 @@
 package com.arcgismaps.toolkit.featureforms.components
 
+import android.util.Log
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,7 +25,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -35,7 +41,8 @@ internal fun FormTextField(
     minLength: Int,
     maxLength: Int,
     singleLine: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    placeholder: String = "",
 ) {
     val helperText = remember {
         buildString {
@@ -92,10 +99,6 @@ internal fun FormTextField(
             label = {
                 Text(text = label)
             },
-            placeholder = {
-                // TO DO - add placeholder
-                //Text(text = "Hint")
-            },
             trailingIcon = {
                 if (text.isNotEmpty()) {
                     IconButton(onClick = { text = "" }) {
@@ -120,7 +123,23 @@ internal fun FormTextField(
             keyboardOptions = KeyboardOptions.Default.copy(
                 imeAction = if (singleLine) ImeAction.Done else ImeAction.None
             ),
-            singleLine = singleLine
+            singleLine = singleLine,
+            visualTransformation = PlaceholderTransformation(placeholder)
         )
     }
 }
+
+internal class PlaceholderTransformation(private val placeholder: String) : VisualTransformation {
+
+    private val mapping = object : OffsetMapping {
+        override fun originalToTransformed(offset: Int): Int = 0
+        override fun transformedToOriginal(offset: Int): Int = 0
+    }
+
+    override fun filter(text: AnnotatedString): TransformedText {
+        // add a blank space if place holder is empty so that the label always stays above
+        return TransformedText(AnnotatedString(placeholder.ifEmpty { " " }), mapping)
+    }
+}
+
+

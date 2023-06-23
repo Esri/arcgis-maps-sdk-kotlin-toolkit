@@ -19,31 +19,51 @@ public class TestData {
             {
                 "formElements": [
                     {
-                        "description": "Description TextBox",
-                        "label": "TextBox - Single Line",
+                        "label": "Number Double",
                         "type": "field",
                         "editableExpression": "expr/system/true",
-                        "fieldName": "TextBox_Single_Line",
-                        "hint": "Placeholder Text",
+                        "fieldName": "Number_Double",
                         "inputType": {
                             "type": "text-box",
-                            "maxLength": 256,
                             "minLength": 0
                         }
                     },
                     {
-                        "description": "Description for TextArea",
-                        "label": "TextArea - Multiline",
+                        "label": "Number Integer",
                         "type": "field",
                         "editableExpression": "expr/system/true",
-                        "fieldName": "TextArea_Multiline",
-                        "hint": "Placeholder Text",
+                        "fieldName": "Number_Integer",
+                        "inputType": {
+                            "type": "text-box",
+                            "minLength": 0
+                        }
+                    },
+                    {
+                        "description": "enter any information",
+                        "label": "Multiline Text",
+                        "type": "field",
+                        "editableExpression": "expr/system/true",
+                        "fieldName": "Multiline_Text",
                         "inputType": {
                             "type": "text-area",
                             "maxLength": 1000,
                             "minLength": 0
-                        }
+                        },
+                        "hint": "enter here.."
                     },
+                    {
+                        "description": "enter some information",
+                        "label": "Singleline Text",
+                        "type": "field",
+                        "editableExpression": "expr/system/true",
+                        "fieldName": "Singleline_Text",
+                        "inputType": {
+                            "type": "text-box",
+                            "maxLength": 256,
+                            "minLength": 0
+                        },
+                        "hint": "enter here.."
+                    }
                 ],
                 "expressionInfos": [
                     {
@@ -59,7 +79,7 @@ public class TestData {
                         "title": "True"
                     }
                 ],
-                "title": "PointFeature"
+                "title": "simpleFeatureForm"
             }
     """.trimIndent()
     }
