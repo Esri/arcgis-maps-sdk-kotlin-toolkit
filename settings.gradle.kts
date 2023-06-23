@@ -28,6 +28,7 @@ var includedProjects = projects.flatMap { listOf(":$it", ":$it-app") }.toTypedAr
 include(*includedProjects)
 include (":bom")
 include (":composable-map")
+include(":support")
 
 projects.forEach {
     project(":$it").projectDir = File(rootDir, "toolkit/$it")
@@ -36,3 +37,4 @@ projects.forEach {
 
 project(":bom").projectDir = File(rootDir, "bom")
 project(":composable-map").projectDir = File(rootDir, "toolkit/composable-map")
+project(":support").projectDir = File(rootDir, "toolkit/support")
