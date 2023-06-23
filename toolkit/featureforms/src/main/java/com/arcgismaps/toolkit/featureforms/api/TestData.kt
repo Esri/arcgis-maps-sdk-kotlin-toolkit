@@ -16,71 +16,72 @@ import kotlinx.serialization.json.JsonPrimitive
 public class TestData {
     public companion object {
         public val formInfo: String = """
+        {
+          "formElements": [
             {
-                "formElements": [
-                    {
-                        "label": "Number Double",
-                        "type": "field",
-                        "editableExpression": "expr/system/true",
-                        "fieldName": "Number_Double",
-                        "inputType": {
-                            "type": "text-box",
-                            "minLength": 0
-                        }
-                    },
-                    {
-                        "label": "Number Integer",
-                        "type": "field",
-                        "editableExpression": "expr/system/true",
-                        "fieldName": "Number_Integer",
-                        "inputType": {
-                            "type": "text-box",
-                            "minLength": 0
-                        }
-                    },
-                    {
-                        "description": "enter any information",
-                        "label": "Multiline Text",
-                        "type": "field",
-                        "editableExpression": "expr/system/true",
-                        "fieldName": "Multiline_Text",
-                        "inputType": {
-                            "type": "text-area",
-                            "maxLength": 1000,
-                            "minLength": 0
-                        },
-                        "hint": "enter here.."
-                    },
-                    {
-                        "description": "enter some information",
-                        "label": "Singleline Text",
-                        "type": "field",
-                        "editableExpression": "expr/system/true",
-                        "fieldName": "Singleline_Text",
-                        "inputType": {
-                            "type": "text-box",
-                            "maxLength": 256,
-                            "minLength": 0
-                        },
-                        "hint": "enter here.."
-                    }
-                ],
-                "expressionInfos": [
-                    {
-                        "expression": "false",
-                        "name": "expr/system/false",
-                        "returnType": "boolean",
-                        "title": "False"
-                    },
-                    {
-                        "expression": "true",
-                        "name": "expr/system/true",
-                        "returnType": "boolean",
-                        "title": "True"
-                    }
-                ],
-                "title": "simpleFeatureForm"
+              "label": "Height of the tree",
+              "description": "The height of the tree in feet",
+              "type": "field",
+              "editableExpression": "expr/system/true",
+              "fieldName": "height",
+              "inputType": {
+                "type": "text-box",
+                "minLength": 0
+              }
+            },
+            {
+              "label": "Number Integer",
+              "type": "field",
+              "editableExpression": "expr/system/true",
+              "fieldName": "Number_Integer",
+              "inputType": {
+                "type": "text-box",
+                "minLength": 0
+              }
+            },
+            {
+              "description": "enter some information",
+              "label": "Singleline Text",
+              "type": "field",
+              "editableExpression": "expr/system/true",
+              "fieldName": "Singleline_Text",
+              "inputType": {
+                "type": "text-box",
+                "maxLength": 256,
+                "minLength": 0
+              },
+              "hint": "enter here.."
+            },
+            {
+              "description": "Describe the tree condition including any signs of disease",
+              "label": "Notes",
+              "type": "field",
+              "editableExpression": "expr/system/true",
+              "fieldName": "Notes",
+              "inputType": {
+                "type": "text-area",
+                "maxLength": 200,
+                "minLength": 20
+              },
+              "hint": "Enter a brief comment"
             }
+          ],
+          "expressionInfos": [
+            {
+              "expression": "false",
+              "name": "expr/system/false",
+              "returnType": "boolean",
+              "title": "False"
+            },
+            {
+              "expression": "true",
+              "name": "expr/system/true",
+              "returnType": "boolean",
+              "title": "True"
+            }
+          ],
+          "title": "simpleFeatureForm"
+        }
     """.trimIndent()
     }
 }
