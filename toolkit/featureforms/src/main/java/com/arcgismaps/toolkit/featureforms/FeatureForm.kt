@@ -40,7 +40,7 @@ public fun FeatureForm(
     val feature by featureFormState.feature.collectAsState()
     val featureTable = feature?.featureTable as ArcGISFeatureTable?
     val featureFormDefinition = featureTable?.formInfoJson?.let {
-        FeatureFormDefinition.fromJsonOrNull(TestData.formInfo)
+        FeatureFormDefinition.fromJsonOrNull(it)
     }
 
     if (featureFormDefinition != null) {
