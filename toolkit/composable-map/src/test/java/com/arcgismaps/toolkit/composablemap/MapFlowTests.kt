@@ -11,47 +11,47 @@ import org.junit.Test
 class MapFlowTests {
 
     @Test
-    fun `test READ channel`() {
+    fun `test READ duplex`() {
         val mapFlow = MutableMapFlow(0)
-        assertThat(mapFlow.getValue(Channel.Read)).isNotNull()
-        assertThat(mapFlow.getValue(Channel.Read)).isEqualTo(0)
+        assertThat(mapFlow.getValue(Duplex.Read)).isNotNull()
+        assertThat(mapFlow.getValue(Duplex.Read)).isEqualTo(0)
 
-        mapFlow.setValue(1, Channel.Read)
-        assertThat(mapFlow.getValue(Channel.Read)).isEqualTo(1)
+        mapFlow.setValue(1, Duplex.Read)
+        assertThat(mapFlow.getValue(Duplex.Read)).isEqualTo(1)
 
-        mapFlow.setValue(2, Channel.Read)
-        mapFlow.setValue(3, Channel.Read)
-        assertThat(mapFlow.getValue(Channel.Read)).isEqualTo(3)
+        mapFlow.setValue(2, Duplex.Read)
+        mapFlow.setValue(3, Duplex.Read)
+        assertThat(mapFlow.getValue(Duplex.Read)).isEqualTo(3)
     }
 
     @Test
-    fun `test WRITE channel`() {
+    fun `test WRITE duplex`() {
         val mapFlow = MutableMapFlow(0)
-        assertThat(mapFlow.getValue(Channel.Write)).isNotNull()
-        assertThat(mapFlow.getValue(Channel.Write)).isEqualTo(0)
+        assertThat(mapFlow.getValue(Duplex.Write)).isNotNull()
+        assertThat(mapFlow.getValue(Duplex.Write)).isEqualTo(0)
 
-        mapFlow.setValue(1, Channel.Write)
-        assertThat(mapFlow.getValue(Channel.Write)).isEqualTo(1)
+        mapFlow.setValue(1, Duplex.Write)
+        assertThat(mapFlow.getValue(Duplex.Write)).isEqualTo(1)
 
-        mapFlow.setValue(2, Channel.Write)
-        mapFlow.setValue(3, Channel.Write)
-        assertThat(mapFlow.getValue(Channel.Write)).isEqualTo(3)
+        mapFlow.setValue(2, Duplex.Write)
+        mapFlow.setValue(3, Duplex.Write)
+        assertThat(mapFlow.getValue(Duplex.Write)).isEqualTo(3)
     }
 
     @Test
-    fun `test collect on READ channel`() = runBlocking {
+    fun `test collect on READ duplex`() = runBlocking {
         val mapFlow = MutableMapFlow(0)
-        val channel = Channel.Read
+        val duplex = Duplex.Read
         val list = mutableListOf<Int>()
         val job = launch(start = CoroutineStart.UNDISPATCHED) {
-            mapFlow.collect(channel) {
+            mapFlow.collect(duplex) {
                 list.add(it)
             }
         }
 
         val range = 1..10
         for (i in range) {
-            mapFlow.setValue(i, channel)
+            mapFlow.setValue(i, duplex)
             delay(100)
         }
 
@@ -61,19 +61,19 @@ class MapFlowTests {
     }
 
     @Test
-    fun `test collect on WRITE channel`() = runBlocking {
+    fun `test collect on WRITE duplex`() = runBlocking {
         val mapFlow = MutableMapFlow(0)
-        val channel = Channel.Write
+        val duplex = Duplex.Write
         val list = mutableListOf<Int>()
         val job = launch(start = CoroutineStart.UNDISPATCHED) {
-            mapFlow.collect(channel) {
+            mapFlow.collect(duplex) {
                 list.add(it)
             }
         }
 
         val range = 1..10
         for (i in range) {
-            mapFlow.setValue(i, channel)
+            mapFlow.setValue(i, duplex)
             delay(100)
         }
 

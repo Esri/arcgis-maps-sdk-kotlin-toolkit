@@ -15,15 +15,15 @@ class MapFlowStateTests {
     @Test
     fun testStateInReadChannel() {
         val mapFlow = MutableMapFlow(0)
-        val channel = Channel.Read
+        val duplex = Duplex.Read
 
         composeTestRule.setContent {
-            val state by mapFlow.collectAsState(channel = channel)
+            val state by mapFlow.collectAsState(duplex = duplex)
             Text(state.toString())
         }
 
         composeTestRule.onNodeWithText("0").assertExists()
-        mapFlow.setValue(100, channel)
+        mapFlow.setValue(100, duplex)
         // assertion triggers a recomposition
         composeTestRule.onNodeWithText("100").assertExists()
     }
@@ -31,15 +31,15 @@ class MapFlowStateTests {
     @Test
     fun testStateInWriteChannel() {
         val mapFlow = MutableMapFlow(0)
-        val channel = Channel.Write
+        val duplex = Duplex.Write
 
         composeTestRule.setContent {
-            val state by mapFlow.collectAsState(channel = channel)
+            val state by mapFlow.collectAsState(duplex = duplex)
             Text(state.toString())
         }
 
         composeTestRule.onNodeWithText("0").assertExists()
-        mapFlow.setValue(100, channel)
+        mapFlow.setValue(100, duplex)
         // assertion triggers a recomposition
         composeTestRule.onNodeWithText("100").assertExists()
     }

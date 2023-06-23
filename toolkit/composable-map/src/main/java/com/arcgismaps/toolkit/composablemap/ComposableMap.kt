@@ -1,6 +1,5 @@
 package com.arcgismaps.toolkit.composablemap
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -75,13 +74,13 @@ public fun ComposableMap(
                     }
                     launch {
                         view.mapRotation.collect {
-                            mapInterface.setViewpointRotation(it, Channel.Read)
+                            mapInterface.setViewpointRotation(it, Duplex.Read)
                         }
                     }
                     launch {
                         view.viewpointChanged.collect {
                             view.getCurrentViewpoint(ViewpointType.CenterAndScale)?.let {
-                                mapInterface.setViewpoint(it, Channel.Read)
+                                mapInterface.setViewpoint(it, Duplex.Read)
                             }
                         }
                     }
@@ -100,12 +99,12 @@ public fun ComposableMap(
 
     LaunchedEffect(Unit) {
         launch {
-            mapInterface.mapRotation.collect(Channel.Write) {
+            mapInterface.mapRotation.collect(Duplex.Write) {
                 mapView.setViewpointRotation(it)
             }
         }
         launch {
-            mapInterface.viewpoint.collect(Channel.Write) {
+            mapInterface.viewpoint.collect(Duplex.Write) {
                 it?.let {
                     mapView.setViewpoint(it)
                 }

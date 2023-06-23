@@ -80,12 +80,12 @@ public interface MapEvents {
     /**
      * Sets the [ComposableMap] current viewpoint to the given [viewpoint]
      */
-    public fun setViewpoint(viewpoint: Viewpoint, channel: Channel)
+    public fun setViewpoint(viewpoint: Viewpoint, duplex: Duplex)
 
     /**
      * Sets the [ComposableMap] current viewpoint's rotation to the given [angleDegrees]
      */
-    public fun setViewpointRotation(angleDegrees: Double, channel: Channel)
+    public fun setViewpointRotation(angleDegrees: Double, duplex: Duplex)
 
     /**
      * Sets the [ComposableMap] insets to the given [mapInsets]
@@ -151,12 +151,12 @@ public class MapInterfaceImpl(
     private val _mapRotation: MutableMapFlow<Double> = MutableMapFlow(0.0)
     override val mapRotation: MapFlow<Double> = _mapRotation
 
-    override fun setViewpoint(viewpoint: Viewpoint, channel: Channel) {
-        _viewpoint.setValue(viewpoint, channel)
+    override fun setViewpoint(viewpoint: Viewpoint, duplex: Duplex) {
+        _viewpoint.setValue(viewpoint, duplex)
     }
 
-    override fun setViewpointRotation(angleDegrees: Double, channel: Channel) {
-        _mapRotation.setValue(angleDegrees, channel)
+    override fun setViewpointRotation(angleDegrees: Double, duplex: Duplex) {
+        _mapRotation.setValue(angleDegrees, duplex)
     }
 
     override fun setInsets(mapInsets: MapInsets) {

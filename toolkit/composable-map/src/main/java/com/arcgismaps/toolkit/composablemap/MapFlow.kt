@@ -9,9 +9,9 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
- * Defines the channel type for a [MapFlow].
+ * Defines the duplex channel type for a [MapFlow].
  */
-public enum class Channel {
+public enum class Duplex {
     Read,
     Write
 }
@@ -33,21 +33,21 @@ public enum class Channel {
 public interface MapFlow<T> {
 
     /**
-     * Returns the current value of the [channel].
+     * Returns the current value of the [duplex].
      */
-    public fun getValue(channel: Channel) : T?
+    public fun getValue(duplex: Duplex) : T?
 
     /**
-     * Accepts the given [collector] and emits values into it on the [channel] provided.
+     * Accepts the given [collector] and emits values into it on the [duplex] provided.
      */
-    public suspend fun collect(channel: Channel, collector: FlowCollector<T>)
+    public suspend fun collect(duplex: Duplex, collector: FlowCollector<T>)
 
     /**
-     * Collects values from the [channel] and its underlying flow and represents its latest value
+     * Collects values from the [duplex] and its underlying flow and represents its latest value
      * via State.
      */
     @Composable
-    public fun collectAsState(channel: Channel): State<T>
+    public fun collectAsState(duplex: Duplex): State<T>
 }
 
 /**
@@ -56,9 +56,9 @@ public interface MapFlow<T> {
 public interface MutableMapFlow<T> : MapFlow<T> {
 
     /**
-     * Sets the current value for the [channel].
+     * Sets the current value for the [duplex].
      */
-    public fun setValue(value: T, channel: Channel)
+    public fun setValue(value: T, duplex: Duplex)
 }
 
 /**
@@ -80,24 +80,24 @@ internal class MapFlowImpl<T>(private val initialValue: T) : MutableMapFlow<T> {
         writerFlow.tryEmit(initialValue)
     }
 
-    override fun getValue(channel: Channel): T? {
-        return if (channel == Channel.Read) {
+    override fun getValue(duplex: Duplex): T? {
+        return if (duplex == Duplex.Read) {
             readerFlow.value
         } else {
             writerFlow.replayCache.firstOrNull()
         }
     }
 
-    override suspend fun collect(channel: Channel, collector: FlowCollector<T>): Nothing =
-        if (channel == Channel.Read) {
+    override suspend fun collect(duplex: Duplex, collector: FlowCollector<T>): Nothing =
+        if (duplex == Duplex.Read) {
             coroutineScope { readerFlow.collect(collector) }
         } else {
             coroutineScope { writerFlow.collect(collector) }
         }
 
     @Composable
-    override fun collectAsState(channel: Channel): State<T> =
-        if (channel == Channel.Read) {
+    override fun collectAsState(duplex: Duplex): State<T> =
+        if (duplex == Duplex.Read) {
             readerFlow.collectAsState()
         } else {
             writerFlow.collectAsState(
@@ -105,8 +105,8 @@ internal class MapFlowImpl<T>(private val initialValue: T) : MutableMapFlow<T> {
             )
         }
 
-    override fun setValue(value: T, channel: Channel) {
-        if (channel == Channel.Read) {
+    override fun setValue(value: T, duplex: Duplex) {
+        if (duplex == Duplex.Read) {
             readerFlow.value = value
         } else {
             writerFlow.tryEmit(value)

@@ -15,7 +15,7 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.compass.Compass
-import com.arcgismaps.toolkit.composablemap.Channel
+import com.arcgismaps.toolkit.composablemap.Duplex
 import com.arcgismaps.toolkit.composablemap.ComposableMap
 
 @Composable
@@ -25,7 +25,7 @@ fun MainScreen() {
     // instantiate a MapViewModel using the factory
     val mapViewModel = viewModel<MapViewModel>(factory = MapViewModelFactory(map))
     // hoist the mapRotation state
-    val mapRotation by mapViewModel.mapRotation.collectAsState(Channel.Read)
+    val mapRotation by mapViewModel.mapRotation.collectAsState(Duplex.Read)
     // show a composable map using the mapViewModel
     ComposableMap(
         modifier = Modifier.fillMaxSize(),
@@ -38,10 +38,10 @@ fun MainScreen() {
             // show the compass and pass the mapRotation state data
             Compass(rotation = mapRotation) {
                 // reset the ComposableMap viewpoint rotation to point north using the mapViewModel
-                mapViewModel.setViewpointRotation(0.0, Channel.Write)
+                mapViewModel.setViewpointRotation(0.0, Duplex.Write)
             }
         }
     }
     // set the composable map's viewpoint to North America
-    mapViewModel.setViewpoint(Viewpoint(39.8, -98.6, 10e7), Channel.Write)
+    mapViewModel.setViewpoint(Viewpoint(39.8, -98.6, 10e7), Duplex.Write)
 }
