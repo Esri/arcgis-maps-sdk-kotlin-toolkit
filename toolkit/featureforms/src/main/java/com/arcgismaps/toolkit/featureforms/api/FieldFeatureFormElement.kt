@@ -49,7 +49,8 @@ public class FieldFeatureFormElement internal constructor(
     public val inputType: FeatureFormInput,
     public val value: String = "",
     public var requiredExpressionName: String = "",
-    public var valueExpressionName: String = ""
+    public var valueExpressionName: String = "",
+    public var hint: String = ""
     ) : FeatureFormElement {
     //region Properties
     

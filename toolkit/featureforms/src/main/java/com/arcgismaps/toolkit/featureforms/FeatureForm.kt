@@ -2,7 +2,6 @@ package com.arcgismaps.toolkit.featureforms
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -41,6 +40,7 @@ public fun FeatureForm(
     val featureFormDefinition = featureTable?.formInfoJson?.let {
         FeatureFormDefinition.fromJsonOrNull(it)
     }
+
     if (featureFormDefinition != null) {
         FeatureFormContent(formDefinition = featureFormDefinition, modifier = modifier)
     } else {
