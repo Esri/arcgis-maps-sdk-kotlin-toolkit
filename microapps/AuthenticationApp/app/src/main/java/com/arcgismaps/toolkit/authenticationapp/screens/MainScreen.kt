@@ -7,7 +7,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.mapping.Viewpoint
-import com.arcgismaps.toolkit.composablemap.Duplex
 import com.arcgismaps.toolkit.composablemap.ComposableMap
 
 @Composable
@@ -23,7 +22,6 @@ fun MainScreen(portalItem: PortalItem) {
             latitude = 39.8,
             longitude = -98.6,
             scale = 10e7
-        ),
-        duplex = Duplex.Write
+        )
     )
 }

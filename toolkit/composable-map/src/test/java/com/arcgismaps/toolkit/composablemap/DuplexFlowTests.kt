@@ -13,45 +13,49 @@ class DuplexFlowTests {
     @Test
     fun `test READ duplex`() {
         val duplexFlow = MutableDuplexFlow(0)
-        assertThat(duplexFlow.getValue(Duplex.Read)).isNotNull()
-        assertThat(duplexFlow.getValue(Duplex.Read)).isEqualTo(0)
+        val flowType = DuplexFlow.Type.Read
 
-        duplexFlow.setValue(1, Duplex.Read)
-        assertThat(duplexFlow.getValue(Duplex.Read)).isEqualTo(1)
+        assertThat(duplexFlow.getValue(flowType)).isNotNull()
+        assertThat(duplexFlow.getValue(flowType)).isEqualTo(0)
 
-        duplexFlow.setValue(2, Duplex.Read)
-        duplexFlow.setValue(3, Duplex.Read)
-        assertThat(duplexFlow.getValue(Duplex.Read)).isEqualTo(3)
+        duplexFlow.setValue(1, flowType)
+        assertThat(duplexFlow.getValue(flowType)).isEqualTo(1)
+
+        duplexFlow.setValue(2, flowType)
+        duplexFlow.setValue(3, flowType)
+        assertThat(duplexFlow.getValue(flowType)).isEqualTo(3)
     }
 
     @Test
     fun `test WRITE duplex`() {
         val duplexFlow = MutableDuplexFlow(0)
-        assertThat(duplexFlow.getValue(Duplex.Write)).isNotNull()
-        assertThat(duplexFlow.getValue(Duplex.Write)).isEqualTo(0)
+        val flowType = DuplexFlow.Type.Write
 
-        duplexFlow.setValue(1, Duplex.Write)
-        assertThat(duplexFlow.getValue(Duplex.Write)).isEqualTo(1)
+        assertThat(duplexFlow.getValue(flowType)).isNotNull()
+        assertThat(duplexFlow.getValue(flowType)).isEqualTo(0)
 
-        duplexFlow.setValue(2, Duplex.Write)
-        duplexFlow.setValue(3, Duplex.Write)
-        assertThat(duplexFlow.getValue(Duplex.Write)).isEqualTo(3)
+        duplexFlow.setValue(1, flowType)
+        assertThat(duplexFlow.getValue(flowType)).isEqualTo(1)
+
+        duplexFlow.setValue(2, flowType)
+        duplexFlow.setValue(3, flowType)
+        assertThat(duplexFlow.getValue(flowType)).isEqualTo(3)
     }
 
     @Test
     fun `test collect on READ duplex`() = runBlocking {
         val duplexFlow = MutableDuplexFlow(0)
-        val duplex = Duplex.Read
+        val flowType = DuplexFlow.Type.Read
         val list = mutableListOf<Int>()
         val job = launch(start = CoroutineStart.UNDISPATCHED) {
-            duplexFlow.collect(duplex) {
+            duplexFlow.collect(flowType) {
                 list.add(it)
             }
         }
 
         val range = 1..10
         for (i in range) {
-            duplexFlow.setValue(i, duplex)
+            duplexFlow.setValue(i, flowType)
             delay(100)
         }
 
@@ -63,17 +67,17 @@ class DuplexFlowTests {
     @Test
     fun `test collect on WRITE duplex`() = runBlocking {
         val duplexFlow = MutableDuplexFlow(0)
-        val duplex = Duplex.Write
+        val flowType = DuplexFlow.Type.Write
         val list = mutableListOf<Int>()
         val job = launch(start = CoroutineStart.UNDISPATCHED) {
-            duplexFlow.collect(duplex) {
+            duplexFlow.collect(flowType) {
                 list.add(it)
             }
         }
 
         val range = 1..10
         for (i in range) {
-            duplexFlow.setValue(i, duplex)
+            duplexFlow.setValue(i, flowType)
             delay(100)
         }
 

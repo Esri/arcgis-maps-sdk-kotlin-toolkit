@@ -9,23 +9,15 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
- * Defines the duplex channel type for a [DuplexFlow].
- */
-public enum class Duplex {
-    Read,
-    Write
-}
-
-/**
  * A flow data structure that encapsulates two distinct flows. This provides a single structure
- * that can be used to read property values using the [Duplex.Read] channel and write property
- * values using the [Duplex.Write] channel.
+ * that can be used to read property values using the [DuplexFlow.Type.Read] flow and write
+ * property values using the [DuplexFlow.Type.Write] flow.
  *
- * The [Duplex.Read] flow is backed by a [MutableStateFlow]. Only values that are intended to be
- * read should be emitted/pushed to the READ duplex channel. The [Duplex.Write] flow is backed by
- * a [MutableSharedFlow] with a replay cache of 1. Only values that are intended to be set should
- * be pushed to the WRITE duplex channel. There is no piping mechanism that feeds across the duplex,
- * hence each flow is distinct.
+ * The [DuplexFlow.Type.Read] flow is backed by a [MutableStateFlow]. Only values that are intended
+ * to be read should be pushed to the READ flow. The [DuplexFlow.Type.Write] flow is
+ * backed by a [MutableSharedFlow] with a replay cache of 1. Only values that are intended to be set
+ * should be pushed to the WRITE flow. There is no piping mechanism that feeds across the
+ * duplex, hence each flow is distinct.
  *
  * A [DuplexFlow] is read-only. See [MutableDuplexFlow] that provides a setter.
  *
@@ -34,37 +26,45 @@ public enum class Duplex {
 public interface DuplexFlow<T> {
 
     /**
-     * Returns the current value of the [duplex].
+     * The duplex flow type for a [DuplexFlow].
      */
-    public fun getValue(duplex: Duplex) : T?
+    public enum class Type {
+        Read,
+        Write
+    }
 
     /**
-     * Accepts the given [collector] and emits values into it on the [duplex] provided.
+     * Returns the current value of the [flowType].
      */
-    public suspend fun collect(duplex: Duplex, collector: FlowCollector<T>)
+    public fun getValue(flowType: Type) : T?
 
     /**
-     * Collects values from the [duplex] and its underlying flow and represents its latest value
+     * Accepts the given [collector] and emits values into it on the [flowType] provided.
+     */
+    public suspend fun collect(flowType: Type, collector: FlowCollector<T>)
+
+    /**
+     * Collects values from the [flowType] and its underlying flow and represents its latest value
      * via State.
      */
     @Composable
-    public fun collectAsState(duplex: Duplex): State<T>
+    public fun collectAsState(flowType: Type): State<T>
 }
 
 /**
- * A mutable [DuplexFlow] that provides a setter for the value of each channel.
+ * A mutable [DuplexFlow] that provides a setter for the value of each [DuplexFlow.Type].
  */
 public interface MutableDuplexFlow<T> : DuplexFlow<T> {
 
     /**
-     * Sets the current value for the [duplex].
+     * Sets the current value for the [flowType].
      */
-    public fun setValue(value: T, duplex: Duplex)
+    public fun setValue(value: T, flowType: DuplexFlow.Type)
 }
 
 /**
  * Creates a [MutableDuplexFlow] with the given [initialValue]. The [initialValue] is set for
- * both duplex channels.
+ * both the [DuplexFlow.Type]'s.
  */
 @Suppress("FunctionName")
 public fun <T> MutableDuplexFlow(initialValue: T): MutableDuplexFlow<T> = DuplexFlowImpl(initialValue)
@@ -81,24 +81,24 @@ internal class DuplexFlowImpl<T>(private val initialValue: T) : MutableDuplexFlo
         writerFlow.tryEmit(initialValue)
     }
 
-    override fun getValue(duplex: Duplex): T? {
-        return if (duplex == Duplex.Read) {
+    override fun getValue(flowType: DuplexFlow.Type): T? {
+        return if (flowType == DuplexFlow.Type.Read) {
             readerFlow.value
         } else {
             writerFlow.replayCache.firstOrNull()
         }
     }
 
-    override suspend fun collect(duplex: Duplex, collector: FlowCollector<T>): Nothing =
-        if (duplex == Duplex.Read) {
+    override suspend fun collect(flowType: DuplexFlow.Type, collector: FlowCollector<T>): Nothing =
+        if (flowType == DuplexFlow.Type.Read) {
             coroutineScope { readerFlow.collect(collector) }
         } else {
             coroutineScope { writerFlow.collect(collector) }
         }
 
     @Composable
-    override fun collectAsState(duplex: Duplex): State<T> =
-        if (duplex == Duplex.Read) {
+    override fun collectAsState(flowType: DuplexFlow.Type): State<T> =
+        if (flowType == DuplexFlow.Type.Read) {
             readerFlow.collectAsState()
         } else {
             writerFlow.collectAsState(
@@ -106,8 +106,8 @@ internal class DuplexFlowImpl<T>(private val initialValue: T) : MutableDuplexFlo
             )
         }
 
-    override fun setValue(value: T, duplex: Duplex) {
-        if (duplex == Duplex.Read) {
+    override fun setValue(value: T, flowType: DuplexFlow.Type) {
+        if (flowType == DuplexFlow.Type.Read) {
             readerFlow.value = value
         } else {
             writerFlow.tryEmit(value)

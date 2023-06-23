@@ -15,15 +15,15 @@ class DuplexFlowStateTests {
     @Test
     fun testStateInReadChannel() {
         val duplexFlow = MutableDuplexFlow(0)
-        val duplex = Duplex.Read
+        val flowType = DuplexFlow.Type.Read
 
         composeTestRule.setContent {
-            val state by duplexFlow.collectAsState(duplex = duplex)
+            val state by duplexFlow.collectAsState(flowType = flowType)
             Text(state.toString())
         }
 
         composeTestRule.onNodeWithText("0").assertExists()
-        duplexFlow.setValue(100, duplex)
+        duplexFlow.setValue(100, flowType)
         // assertion triggers a recomposition
         composeTestRule.onNodeWithText("100").assertExists()
     }
@@ -31,15 +31,15 @@ class DuplexFlowStateTests {
     @Test
     fun testStateInWriteChannel() {
         val duplexFlow = MutableDuplexFlow(0)
-        val duplex = Duplex.Write
+        val flowType = DuplexFlow.Type.Write
 
         composeTestRule.setContent {
-            val state by duplexFlow.collectAsState(duplex = duplex)
+            val state by duplexFlow.collectAsState(flowType = flowType)
             Text(state.toString())
         }
 
         composeTestRule.onNodeWithText("0").assertExists()
-        duplexFlow.setValue(100, duplex)
+        duplexFlow.setValue(100, flowType)
         // assertion triggers a recomposition
         composeTestRule.onNodeWithText("100").assertExists()
     }

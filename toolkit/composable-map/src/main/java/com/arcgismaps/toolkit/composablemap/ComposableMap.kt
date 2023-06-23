@@ -74,13 +74,13 @@ public fun ComposableMap(
                     }
                     launch {
                         view.mapRotation.collect {
-                            mapInterface.setViewpointRotation(it, Duplex.Read)
+                            mapInterface.onViewpointRotationChanged(it)
                         }
                     }
                     launch {
                         view.viewpointChanged.collect {
                             view.getCurrentViewpoint(ViewpointType.CenterAndScale)?.let {
-                                mapInterface.setViewpoint(it, Duplex.Read)
+                                mapInterface.onViewpointChanged(it)
                             }
                         }
                     }
@@ -99,12 +99,12 @@ public fun ComposableMap(
 
     LaunchedEffect(Unit) {
         launch {
-            mapInterface.mapRotation.collect(Duplex.Write) {
+            mapInterface.mapRotation.collect(DuplexFlow.Type.Write) {
                 mapView.setViewpointRotation(it)
             }
         }
         launch {
-            mapInterface.viewpoint.collect(Duplex.Write) {
+            mapInterface.viewpoint.collect(DuplexFlow.Type.Write) {
                 it?.let {
                     mapView.setViewpoint(it)
                 }

@@ -80,12 +80,23 @@ public interface MapEvents {
     /**
      * Sets the [ComposableMap] current viewpoint to the given [viewpoint]
      */
-    public fun setViewpoint(viewpoint: Viewpoint, duplex: Duplex)
+    public fun setViewpoint(viewpoint: Viewpoint)
+
+    /**
+     * Callback for when the current [viewpoint] of a [ComposableMap] has changed
+     */
+    public fun onViewpointChanged(viewpoint: Viewpoint)
 
     /**
      * Sets the [ComposableMap] current viewpoint's rotation to the given [angleDegrees]
      */
-    public fun setViewpointRotation(angleDegrees: Double, duplex: Duplex)
+    public fun setViewpointRotation(angleDegrees: Double)
+
+    /**
+     * Callback for when the current viewpoint rotation of a [ComposableMap] has changed to
+     * [angleDegrees]
+     */
+    public fun onViewpointRotationChanged(angleDegrees: Double)
 
     /**
      * Sets the [ComposableMap] insets to the given [mapInsets]
@@ -151,12 +162,24 @@ public class MapInterfaceImpl(
     private val _mapRotation: MutableDuplexFlow<Double> = MutableDuplexFlow(0.0)
     override val mapRotation: DuplexFlow<Double> = _mapRotation
 
-    override fun setViewpoint(viewpoint: Viewpoint, duplex: Duplex) {
-        _viewpoint.setValue(viewpoint, duplex)
+    override fun setViewpoint(viewpoint: Viewpoint) {
+        // set the property value using the WRITE flow type
+        _viewpoint.setValue(viewpoint, DuplexFlow.Type.Write)
     }
 
-    override fun setViewpointRotation(angleDegrees: Double, duplex: Duplex) {
-        _mapRotation.setValue(angleDegrees, duplex)
+    override fun onViewpointChanged(viewpoint: Viewpoint) {
+        // update the property value on the READ flow type
+        _viewpoint.setValue(viewpoint, DuplexFlow.Type.Read)
+    }
+
+    override fun setViewpointRotation(angleDegrees: Double) {
+        // set the property value using the WRITE flow type
+        _mapRotation.setValue(angleDegrees, DuplexFlow.Type.Write)
+    }
+
+    override fun onViewpointRotationChanged(angleDegrees: Double) {
+        // update the property value on the READ flow type
+        _mapRotation.setValue(angleDegrees, DuplexFlow.Type.Read)
     }
 
     override fun setInsets(mapInsets: MapInsets) {
