@@ -37,30 +37,32 @@ dependencies {
     }
 }
 
-/**
- * Maven publication configuration for aar and pom file. Run as follows:
- * ./gradlew publishAarPublicationToMavenRepository -PartifactoryUsername=<username> -PartifactoryPassword=<password>
- *
- * More details:
- * https://docs.gradle.org/current/userguide/publishing_maven.html
- */
-publishing {
-    publications {
-        create<MavenPublication>("bom") {
-            groupId = artifactoryGroupId
-            artifactId = artifactoryArtifactId
-            version = artifactVersion
-            
-            from(components["javaPlatform"])
+afterEvaluate {
+    /**
+     * Maven publication configuration for aar and pom file. Run as follows:
+     * ./gradlew publishAarPublicationToMavenRepository -PartifactoryUsername=<username> -PartifactoryPassword=<password>
+     *
+     * More details:
+     * https://docs.gradle.org/current/userguide/publishing_maven.html
+     */
+    publishing {
+        publications {
+            create<MavenPublication>("bom") {
+                groupId = artifactoryGroupId
+                artifactId = artifactoryArtifactId
+                version = artifactVersion
+                
+                from(components["javaPlatform"])
+            }
         }
-    }
-    
-    repositories {
-        maven {
-            url = uri(artifactoryUrl)
-            credentials {
-                username = artifactoryUsername
-                password = artifactoryPassword
+        
+        repositories {
+            maven {
+                url = uri(artifactoryUrl)
+                credentials {
+                    username = artifactoryUsername
+                    password = artifactoryPassword
+                }
             }
         }
     }
