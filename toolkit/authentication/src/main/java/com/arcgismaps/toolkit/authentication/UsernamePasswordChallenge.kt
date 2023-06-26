@@ -13,6 +13,8 @@ public class UsernamePasswordChallenge(
     private var onUserResponseReceived: ((username: String, password: String) -> Unit),
     private var onCancel: () -> Unit
 ) {
-    public fun continueWithCredentials(username: String, password: String): Unit = onUserResponseReceived(username, password)
+    public fun continueWithCredentials(username: String, password: String): Unit =
+        onUserResponseReceived(username, password)
+
     public fun cancel(): Unit = onCancel()
 }

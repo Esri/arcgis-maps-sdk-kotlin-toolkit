@@ -145,9 +145,15 @@ private class AuthenticatorViewModelImpl(
             NetworkAuthenticationType.UsernamePassword -> {
                 val usernamePassword = awaitUsernamePassword(challenge.hostname)
                 usernamePassword?.let {
-                    NetworkAuthenticationChallengeResponse.ContinueWithCredential(PasswordCredential(it.username, it.password))
+                    NetworkAuthenticationChallengeResponse.ContinueWithCredential(
+                        PasswordCredential(
+                            it.username,
+                            it.password
+                        )
+                    )
                 } ?: NetworkAuthenticationChallengeResponse.Cancel
             }
+
             else -> {
                 NetworkAuthenticationChallengeResponse.ContinueAndFailWithError(
                     UnsupportedOperationException("Not yet implemented")

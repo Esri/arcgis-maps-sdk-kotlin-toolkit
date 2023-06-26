@@ -64,13 +64,19 @@ public fun UsernamePasswordAuthenticator(
             var passwordFieldText by rememberSaveable { mutableStateOf("") }
             val keyboardActions = remember {
                 KeyboardActions(
-                    onSend = { usernamePasswordChallenge.continueWithCredentials(usernameFieldText, passwordFieldText) }
+                    onSend = {
+                        usernamePasswordChallenge.continueWithCredentials(
+                            usernameFieldText,
+                            passwordFieldText
+                        )
+                    }
                 )
             }
             OutlinedTextField(
                 value = usernameFieldText,
                 onValueChange = { it: String -> usernameFieldText = it },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Email,
                     imeAction = ImeAction.Next
                 ),
                 keyboardActions = keyboardActions,
@@ -80,7 +86,8 @@ public fun UsernamePasswordAuthenticator(
             OutlinedTextField(
                 value = passwordFieldText,
                 onValueChange = { it: String -> passwordFieldText = it },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password,
                     imeAction = ImeAction.Send
                 ),
                 keyboardActions = keyboardActions,
@@ -96,7 +103,12 @@ public fun UsernamePasswordAuthenticator(
                 Button(onClick = { usernamePasswordChallenge.cancel() }) {
                     Text("Cancel")
                 }
-                Button(onClick = { usernamePasswordChallenge.continueWithCredentials(usernameFieldText, passwordFieldText) }) {
+                Button(onClick = {
+                    usernamePasswordChallenge.continueWithCredentials(
+                        usernameFieldText,
+                        passwordFieldText
+                    )
+                }) {
                     Text("Login")
                 }
             }
