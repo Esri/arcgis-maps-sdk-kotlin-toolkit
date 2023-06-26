@@ -1,4 +1,4 @@
-package com.arcgismaps.toolkit.composablemap
+package com.arcgismaps.toolkit.compass
 
 import org.junit.Test
 

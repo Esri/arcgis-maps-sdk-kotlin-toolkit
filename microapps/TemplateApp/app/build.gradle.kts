@@ -5,6 +5,7 @@ plugins {
 }
 
 secrets {
+    // this file doesn't contain secrets, it just provides defaults which can be committed into git.
     defaultPropertiesFileName = "secrets.defaults.properties"
 }
 
@@ -63,7 +64,7 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class).all {
 dependencies {
     implementation(project(":template"))
     implementation(project(":composable-map"))
-    implementation(libs.arcgis)
+    implementation(arcgis.mapsSdk)
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)

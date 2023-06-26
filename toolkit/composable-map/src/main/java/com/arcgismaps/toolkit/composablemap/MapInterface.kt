@@ -51,27 +51,27 @@ public interface MapEvents {
      * Support for up events on [ComposableMap]
      */
     context(MapView, CoroutineScope) public fun onUp(upEvent: UpEvent) {}
-    
+
     /**
      * Support for single tap events on [ComposableMap]
      */
     context(MapView, CoroutineScope) public fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {}
-    
+
     /**
      * Support for double tap events on [ComposableMap]
      */
     context(MapView, CoroutineScope) public fun onDoubleTap(doubleTapEvent: DoubleTapEvent) {}
-    
+
     /**
      * Support for long press events on [ComposableMap]
      */
     context(MapView, CoroutineScope) public fun onLongPress(longPressEvent: LongPressEvent) {}
-    
+
     /**
      * Support for two pointer tap events on [ComposableMap]
      */
     context(MapView, CoroutineScope) public fun onTwoPointerTap(twoPointerTapEvent: TwoPointerTapEvent) {}
-    
+
     /**
      * Support for pan events on [ComposableMap]
      */
@@ -81,6 +81,22 @@ public interface MapEvents {
      * Sets the [ComposableMap] current viewpoint to the given [viewpoint]
      */
     public fun setViewpoint(viewpoint: Viewpoint)
+
+    /**
+     * Callback for when the current [viewpoint] of a [ComposableMap] has changed
+     */
+    public fun onViewpointChanged(viewpoint: Viewpoint)
+
+    /**
+     * Sets the [ComposableMap] current viewpoint's rotation to the given [angleDegrees]
+     */
+    public fun setViewpointRotation(angleDegrees: Double)
+
+    /**
+     * Callback for when the current viewpoint rotation of a [ComposableMap] has changed to
+     * [angleDegrees]
+     */
+    public fun onViewpointRotationChanged(angleDegrees: Double)
 
     /**
      * Sets the [ComposableMap] insets to the given [mapInsets]
@@ -102,34 +118,68 @@ public interface MapInterface : MapEvents {
      * The model for [ComposableMap]
      */
     public val map: StateFlow<ArcGISMap>
-    
+
     /**
      * Insets to apply to the Box which contains the [ComposableMap]
      */
     public val insets: StateFlow<MapInsets>
-    
+
     /**
      * The [Viewpoint] from which the [ComposableMap] is drawn.
      */
-    public val currentViewpoint : StateFlow<Viewpoint?>
+    public val viewpoint: DuplexFlow<Viewpoint?>
+
+    /**
+     * The current rotation value of the [ComposableMap].
+     */
+    public val mapRotation: DuplexFlow<Double>
 }
+
+/**
+ * Factory function for the default implementation of [MapInterface]
+ */
+public fun MapInterface(arcGISMap: ArcGISMap, mapInsets: MapInsets = MapInsets()): MapInterface =
+    MapInterfaceImpl(arcGISMap, mapInsets)
+
+/**
+ * A default implementation for the [MapInterface]
+ */
 
 public class MapInterfaceImpl(
     arcGISMap: ArcGISMap,
     mapInsets: MapInsets = MapInsets()
 ) : MapInterface {
 
-    private val _map : MutableStateFlow<ArcGISMap> = MutableStateFlow(arcGISMap)
-    override val map : StateFlow<ArcGISMap> = _map.asStateFlow()
+    private val _map: MutableStateFlow<ArcGISMap> = MutableStateFlow(arcGISMap)
+    override val map: StateFlow<ArcGISMap> = _map.asStateFlow()
 
-    private val _insets : MutableStateFlow<MapInsets> = MutableStateFlow(mapInsets)
+    private val _insets: MutableStateFlow<MapInsets> = MutableStateFlow(mapInsets)
     override val insets: StateFlow<MapInsets> = _insets.asStateFlow()
 
-    private val _currentViewpoint : MutableStateFlow<Viewpoint?> = MutableStateFlow(null)
-    override val currentViewpoint: StateFlow<Viewpoint?> = _currentViewpoint.asStateFlow()
+    private val _viewpoint: MutableDuplexFlow<Viewpoint?> = MutableDuplexFlow(null)
+    override val viewpoint: DuplexFlow<Viewpoint?> = _viewpoint
+
+    private val _mapRotation: MutableDuplexFlow<Double> = MutableDuplexFlow(0.0)
+    override val mapRotation: DuplexFlow<Double> = _mapRotation
 
     override fun setViewpoint(viewpoint: Viewpoint) {
-        _currentViewpoint.value = viewpoint
+        // set the property value using the WRITE flow type
+        _viewpoint.setValue(viewpoint, DuplexFlow.Type.Write)
+    }
+
+    override fun onViewpointChanged(viewpoint: Viewpoint) {
+        // update the property value on the READ flow type
+        _viewpoint.setValue(viewpoint, DuplexFlow.Type.Read)
+    }
+
+    override fun setViewpointRotation(angleDegrees: Double) {
+        // set the property value using the WRITE flow type
+        _mapRotation.setValue(angleDegrees, DuplexFlow.Type.Write)
+    }
+
+    override fun onViewpointRotationChanged(angleDegrees: Double) {
+        // update the property value on the READ flow type
+        _mapRotation.setValue(angleDegrees, DuplexFlow.Type.Read)
     }
 
     override fun setInsets(mapInsets: MapInsets) {

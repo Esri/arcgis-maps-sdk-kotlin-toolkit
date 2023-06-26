@@ -12,12 +12,6 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithContentDescription
 import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.Viewpoint
-import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import org.junit.Rule
 import org.junit.Test
 
@@ -28,7 +22,7 @@ class ComposableMapTests {
 
     @Test
     fun testComposableMapLayout() {
-        val mockMapInterface = MockMapInterface(ArcGISMap())
+        val mockMapInterface = MapInterface(ArcGISMap())
 
         composeTestRule.setContent {
             ComposableMap(mapInterface = mockMapInterface) {
@@ -46,25 +40,5 @@ class ComposableMapTests {
 
         composeTestRule.onNodeWithContentDescription("Card")
             .assert(hasParent(hasContentDescription(contentSemanticLabel)))
-    }
-}
-
-class MockMapInterface(
-    map: ArcGISMap,
-    insets: MapInsets = MapInsets()
-) : MapInterface {
-    private val _map: MutableStateFlow<ArcGISMap> = MutableStateFlow(map)
-    override val map: StateFlow<ArcGISMap> = _map.asStateFlow()
-
-    private val _insets: MutableStateFlow<MapInsets> = MutableStateFlow(insets)
-    override val insets: StateFlow<MapInsets> = _insets.asStateFlow()
-
-    private val _currentViewpoint: MutableStateFlow<Viewpoint?> = MutableStateFlow(null)
-    override val currentViewpoint: StateFlow<Viewpoint?> = _currentViewpoint.asStateFlow()
-
-    override fun onSingleTapConfirmed(event: SingleTapConfirmedEvent) {}
-
-    fun setViewpoint(viewpoint: Viewpoint) {
-        _currentViewpoint.update { viewpoint }
     }
 }

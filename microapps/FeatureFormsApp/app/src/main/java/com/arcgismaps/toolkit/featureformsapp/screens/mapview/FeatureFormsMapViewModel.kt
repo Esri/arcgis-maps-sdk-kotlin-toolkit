@@ -7,7 +7,6 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.view.IdentifyLayerResult
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
-import com.arcgismaps.toolkit.composablemap.MapInsets
 import com.arcgismaps.toolkit.composablemap.MapInterface
 import com.arcgismaps.toolkit.composablemap.MapInterfaceImpl
 import kotlinx.coroutines.CoroutineScope
@@ -15,24 +14,21 @@ import kotlinx.coroutines.launch
 
 /**
  * A view model for the FeatureForms MapView UI
+ * @constructor to be invoked by the ViewModel factory
+ *
+ * @since 200.2.0
  */
-class FeatureFormsMapViewModel(
+class FeatureFormsMapViewModelImpl(
     arcGISMap: ArcGISMap,
-    mapInsets: MapInsets = MapInsets()
-) : ViewModel(), MapInterface by MapInterfaceImpl(arcGISMap, mapInsets) {
-
-    private fun editFeature() {
-        println("editFeature")
-        // to be fleshed out with its own view model and navigation to the bottom sheet or side panel.
-    }
-    
+    val onFeatureIdentified: (ArcGISFeature) -> Unit
+) : ViewModel(), MapInterface by MapInterfaceImpl(arcGISMap) {
     private suspend fun onIdentifyLayers(results: List<IdentifyLayerResult>) {
         val popup = results.firstOrNull { result ->
             result.popups.isNotEmpty()
         }?.popups?.firstOrNull() ?: return
         
         val feature = popup.geoElement as? ArcGISFeature ?: return
-        feature.load().onSuccess { editFeature() }
+        feature.load().onSuccess { onFeatureIdentified(feature) }
     }
 
     context(MapView, CoroutineScope) override fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {
@@ -51,10 +47,10 @@ class FeatureFormsMapViewModel(
 
 class FeatureFormsMapViewModelFactory(
     private val arcGISMap: ArcGISMap,
-    private val mapInsets: MapInsets = MapInsets()
+    private val onFeatureIdentified: (ArcGISFeature) -> Unit = {}
 ) : ViewModelProvider.NewInstanceFactory() {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return FeatureFormsMapViewModel(arcGISMap, mapInsets) as T
+        return FeatureFormsMapViewModelImpl(arcGISMap, onFeatureIdentified) as T
     }
 }
