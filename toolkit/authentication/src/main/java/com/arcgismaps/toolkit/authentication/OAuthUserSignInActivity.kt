@@ -5,6 +5,11 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.webkit.HttpAuthHandler
+import android.webkit.WebResourceRequest
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import android.widget.FrameLayout
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.browser.customtabs.CustomTabsIntent
@@ -16,6 +21,7 @@ private const val KEY_INTENT_EXTRA_CUSTOM_TABS_WAS_LAUNCHED =
     "KEY_INTENT_EXTRA_CUSTOM_TABS_WAS_LAUNCHED"
 private const val KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL = "KEY_INTENT_EXTRA_OAUTH_RESPONSE_URI"
 private const val KEY_INTENT_EXTRA_REDIRECT_URL = "KEY_INTENT_EXTRA_REDIRECT_URL"
+private const val DEFAULT_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob"
 
 private const val RESULT_CODE_SUCCESS = 1
 private const val RESULT_CODE_CANCELED = 2
@@ -30,6 +36,7 @@ internal class OAuthUserSignInActivity : ComponentActivity() {
 
     private var customTabsWasLaunched = false
     private lateinit var redirectUrl: String
+    private lateinit var webView: WebView
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,7 +49,11 @@ internal class OAuthUserSignInActivity : ComponentActivity() {
         if (!customTabsWasLaunched) {
             val authorizeUrl = intent.getStringExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL)
             authorizeUrl?.let {
-                launchCustomTabs(it)
+                if (redirectUrl == DEFAULT_REDIRECT_URI) {
+                    launchOAuthPageInWebView(it)
+                } else {
+                    launchCustomTabs(it)
+                }
             }
         }
     }
@@ -82,7 +93,7 @@ internal class OAuthUserSignInActivity : ComponentActivity() {
         // - When the browser window is launched this triggers a focus changed event with hasFocus true but at this point
         //   we do not want to finish this activity -> at this point the activity is in paused state (isResumed == false) so
         //   we can use this to ignore this "rogue" focus changed event.
-        if (hasFocus && lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+        if (hasFocus && lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) && !(::webView.isInitialized)) {
             // if we got here the user must have pressed the back button or the x button while the
             // custom tab was visible - finish by cancelling OAuth sign in
             setResult(RESULT_CODE_CANCELED, Intent())
@@ -101,6 +112,23 @@ internal class OAuthUserSignInActivity : ComponentActivity() {
     private fun launchCustomTabs(authorizeUrl: String) {
         customTabsWasLaunched = true
         CustomTabsIntent.Builder().build().launchUrl(this, Uri.parse(authorizeUrl))
+    }
+
+    private fun launchOAuthPageInWebView(authorizeUrl: String) {
+        title = authorizeUrl
+        webView = WebView(this)
+        setContentView(
+            webView,
+            FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
+        )
+
+        webView.settings.apply {
+            displayZoomControls = false
+            javaScriptEnabled = true
+        }
+
+        webView.webViewClient = OAuthWebViewClient(this)
+        webView.loadUrl(authorizeUrl)
     }
 
     /**
@@ -129,6 +157,35 @@ internal class OAuthUserSignInActivity : ComponentActivity() {
             } else {
                 null
             }
+        }
+    }
+
+    /**
+     *
+     */
+    public class OAuthWebViewClient(val activity: OAuthUserSignInActivity) : WebViewClient() {
+        override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+            request?.url?.let {
+                if (it.toString().contains("/oauth2/approval", true)) {
+                    val newIntent = Intent().apply {
+                        putExtra(KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL, it.toString())
+                    }
+                    activity.setResult(RESULT_CODE_SUCCESS, newIntent)
+                    activity.finish()
+                    return true
+                } else {
+                }
+            }
+            return false
+        }
+
+        override fun onReceivedHttpAuthRequest(
+            view: WebView?,
+            handler: HttpAuthHandler?,
+            host: String?,
+            realm: String?
+        ) {
+            super.onReceivedHttpAuthRequest(view, handler, host, realm)
         }
     }
 }

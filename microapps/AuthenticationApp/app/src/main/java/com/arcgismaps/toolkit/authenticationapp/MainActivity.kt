@@ -16,6 +16,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeHandler
 import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.authentication.Authenticator
@@ -76,8 +78,11 @@ fun AuthenticationApp() {
             "https://www.arcgis.com",
             // This client ID is for demo purposes only. For use of the Authenticator in your own app,
             // create your own client ID. For more info see: https://developers.arcgis.com/documentation/mapping-apis-and-services/security/tutorials/register-your-application/
-            "lgAdHkYZYlwwfAhC",
-            "my-ags-app://auth"
+//            "QrpBAoS7KccFerE3",
+//            "my-ags-app://auth"
+
+            "6PnYQvX84eqjCwz1",
+            "urn:ietf:wg:oauth:2.0:oob"
         )
         Authenticator(authenticatorViewModel)
     }
