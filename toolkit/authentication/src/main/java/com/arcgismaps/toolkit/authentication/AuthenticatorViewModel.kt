@@ -3,7 +3,6 @@ package com.arcgismaps.toolkit.authentication
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.exceptions.ArcGISAuthenticationException
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeHandler
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
@@ -21,7 +20,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resumeWithException
 
 /**
  * Handles authentication challenges and exposes state for the [Authenticator] to display to the user.
@@ -80,7 +78,8 @@ private class AuthenticatorViewModelImpl(
     override val pendingServerTrustChallenge: StateFlow<ServerTrustChallenge?> =
         _pendingServerTrustChallenge.asStateFlow()
 
-    private val _pendingUsernamePasswordChallenge = MutableStateFlow<UsernamePasswordChallenge?>(null)
+    private val _pendingUsernamePasswordChallenge =
+        MutableStateFlow<UsernamePasswordChallenge?>(null)
     override val pendingUsernamePasswordChallenge: StateFlow<UsernamePasswordChallenge?> =
         _pendingUsernamePasswordChallenge.asStateFlow()
 
@@ -112,11 +111,29 @@ private class AuthenticatorViewModelImpl(
                     oAuthUserCredential
                 )
             } else {
-                ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError(
-                    UnsupportedOperationException()
-                )
+                handleArcGISTokenChallenge(challenge)
             }
-        } ?: TODO()
+        } ?: handleArcGISTokenChallenge(challenge)
+    }
+
+    /**
+     * Issues a username/password challenge and uses the returned username and password to create a
+     * [TokenCredential].
+     *
+     * @param challenge the [ArcGISAuthenticationChallenge] that requires authentication.
+     * @return [TokenCredential] with the username and password or [ArcGISAuthenticationChallengeResponse.Cancel] if the user cancelled.
+     * @since 200.2.0
+     */
+    private suspend fun handleArcGISTokenChallenge(
+        challenge: ArcGISAuthenticationChallenge
+    ): ArcGISAuthenticationChallengeResponse {
+        val usernamePassword = awaitUsernamePassword(challenge.requestUrl)
+        return usernamePassword?.let {
+            ArcGISAuthenticationChallengeResponse.ContinueWithCredential(
+                TokenCredential.createWithChallenge(challenge, it.username, it.password)
+                    .getOrThrow()
+            )
+        } ?: ArcGISAuthenticationChallengeResponse.Cancel
     }
 
     override suspend fun handleNetworkAuthenticationChallenge(challenge: NetworkAuthenticationChallenge): NetworkAuthenticationChallengeResponse {
@@ -124,11 +141,13 @@ private class AuthenticatorViewModelImpl(
             NetworkAuthenticationType.ServerTrust -> {
                 awaitServerTrustChallengeResponse(challenge)
             }
-
+            // Issue a challenge for an IWA username/password
             NetworkAuthenticationType.UsernamePassword -> {
-                awaitUsernamePasswordChallengeResponse(challenge)
+                val usernamePassword = awaitUsernamePassword(challenge.hostname)
+                usernamePassword?.let {
+                    NetworkAuthenticationChallengeResponse.ContinueWithCredential(PasswordCredential(it.username, it.password))
+                } ?: NetworkAuthenticationChallengeResponse.Cancel
             }
-
             else -> {
                 NetworkAuthenticationChallengeResponse.ContinueAndFailWithError(
                     UnsupportedOperationException("Not yet implemented")
@@ -168,23 +187,35 @@ private class AuthenticatorViewModelImpl(
             }
         }
 
-    private suspend fun awaitUsernamePasswordChallengeResponse(challenge: NetworkAuthenticationChallenge) = suspendCancellableCoroutine { continuation ->
-        _pendingUsernamePasswordChallenge.value = UsernamePasswordChallenge(
-            hostname = challenge.hostname,
-            onUserResponseReceived = { username, password ->
-                _pendingUsernamePasswordChallenge.value = null
-                continuation.resumeWith(Result.success(NetworkAuthenticationChallengeResponse.ContinueWithCredential(PasswordCredential(username, password))))
-            },
-            onCancel = {
-                _pendingUsernamePasswordChallenge.value = null
-                continuation.resumeWith(Result.success(NetworkAuthenticationChallengeResponse.Cancel))
-            }
-        )
+    /**
+     * Emits a [UsernamePasswordChallenge] to [pendingUsernamePasswordChallenge] and awaits the response.
+     *
+     * @param url the url of the server that issued the challenge.
+     * @return a [UsernamePassword] provided by the user, or null if the user cancelled.
+     * @since 200.2.0
+     */
+    private suspend fun awaitUsernamePassword(url: String) =
+        suspendCancellableCoroutine { continuation ->
+            _pendingUsernamePasswordChallenge.value = UsernamePasswordChallenge(
+                hostname = url,
+                onUserResponseReceived = { username, password ->
+                    _pendingUsernamePasswordChallenge.value = null
+                    continuation.resumeWith(
+                        Result.success(
+                            UsernamePassword(username, password)
+                        )
+                    )
+                },
+                onCancel = {
+                    _pendingUsernamePasswordChallenge.value = null
+                    continuation.resumeWith(Result.success(null))
+                }
+            )
 
-        continuation.invokeOnCancellation {
-            continuation.resumeWith(Result.success(NetworkAuthenticationChallengeResponse.Cancel))
+            continuation.invokeOnCancellation {
+                continuation.resumeWith(Result.success(null))
+            }
         }
-    }
 }
 
 /**
@@ -223,3 +254,10 @@ private suspend fun OAuthUserConfiguration.handleOAuthChallenge(
     OAuthUserCredential.create(this) { oAuthUserSignIn ->
         onPendingSignIn(oAuthUserSignIn)
     }
+
+/**
+ * Represents a username and password pair.
+ *
+ * @since 200.2.0
+ */
+private data class UsernamePassword(val username: String, val password: String)
