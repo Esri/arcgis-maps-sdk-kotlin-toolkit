@@ -141,7 +141,7 @@ internal class OAuthUserSignInActivity : ComponentActivity() {
      *
      * @since 200.2.0
      */
-    public class Contract : ActivityResultContract<OAuthUserSignIn, String?>() {
+    class Contract : ActivityResultContract<OAuthUserSignIn, String?>() {
         override fun createIntent(context: Context, input: OAuthUserSignIn): Intent =
             Intent(context, OAuthUserSignInActivity::class.java).apply {
                 putExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL, input.authorizeUrl)

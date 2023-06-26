@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -16,22 +17,22 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.arcgismaps.mapping.ViewpointType
 import com.arcgismaps.mapping.view.MapView
 import kotlinx.coroutines.launch
 
 @Composable
 public fun ComposableMap(
-    modifier: Modifier = Modifier,
     mapInterface: MapInterface,
-    content: @Composable () -> Unit = {}
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit = {},
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
-    
+
     val map by mapInterface.map.collectAsState()
     val insets by mapInterface.insets.collectAsState()
-    val currentViewpoint by mapInterface.currentViewpoint.collectAsState()
     val mapView = remember {
         MapView(context).also { view ->
             with(view) {
@@ -71,11 +72,23 @@ public fun ComposableMap(
                             mapInterface.onPan(it)
                         }
                     }
+                    launch {
+                        view.mapRotation.collect {
+                            mapInterface.onViewpointRotationChanged(it)
+                        }
+                    }
+                    launch {
+                        view.viewpointChanged.collect {
+                            view.getCurrentViewpoint(ViewpointType.CenterAndScale)?.let {
+                                mapInterface.onViewpointChanged(it)
+                            }
+                        }
+                    }
                 }
             }
         }
     }
-    
+
     mapView.map = map
     mapView.setViewInsets(
         left = insets.start,
@@ -83,8 +96,22 @@ public fun ComposableMap(
         top = insets.top,
         bottom = insets.bottom
     )
-    currentViewpoint?.let { mapView.setViewpoint(it) }
-    
+
+    LaunchedEffect(Unit) {
+        launch {
+            mapInterface.mapRotation.collect(DuplexFlow.Type.Write) {
+                mapView.setViewpointRotation(it)
+            }
+        }
+        launch {
+            mapInterface.viewpoint.collect(DuplexFlow.Type.Write) {
+                it?.let {
+                    mapView.setViewpoint(it)
+                }
+            }
+        }
+    }
+
     DisposableEffect(lifecycleOwner) {
         lifecycleOwner.lifecycle.addObserver(mapView)
         onDispose {

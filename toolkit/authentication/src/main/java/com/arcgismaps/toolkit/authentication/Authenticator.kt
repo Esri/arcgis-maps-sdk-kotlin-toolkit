@@ -17,10 +17,17 @@ import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 public fun Authenticator(
     authenticatorViewModel: AuthenticatorViewModel
 ) {
-    val oAuthPendingSignIn =
+    val pendingOAuthUserSignIn =
         authenticatorViewModel.pendingOAuthUserSignIn.collectAsStateWithLifecycle().value
 
-    oAuthPendingSignIn?.let { 
+    pendingOAuthUserSignIn?.let {
         OAuthAuthenticator(it)
+    }
+
+    val pendingServerTrustChallenge =
+        authenticatorViewModel.pendingServerTrustChallenge.collectAsStateWithLifecycle().value
+
+    pendingServerTrustChallenge?.let {
+        ServerTrustAuthenticator(it)
     }
 }

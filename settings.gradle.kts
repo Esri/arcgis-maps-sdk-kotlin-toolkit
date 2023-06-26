@@ -1,6 +1,6 @@
 import org.gradle.configurationcache.extensions.capitalized
 
-val projects = listOf("template", "featureforms", "authentication")
+val projects = listOf("template", "authentication", "compass")
 
 pluginManagement {
     repositories {
@@ -9,6 +9,12 @@ pluginManagement {
         mavenCentral()
     }
 }
+
+// The version of the ArcGIS Maps SDK for Kotlin dependency
+val sdkVersionNumber: String by settings
+// The build number of the ArcGIS Maps SDK for Kotlin dependency
+val sdkBuildNumber: String by settings
+
 dependencyResolutionManagement {
     @Suppress("UnstableApiUsage")
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
@@ -20,6 +26,13 @@ dependencyResolutionManagement {
             url = java.net.URI(
                 "https://olympus.esri.com/artifactory/arcgisruntime-repo/"
             )
+        }
+    }
+    
+    versionCatalogs {
+        create("arcgis") {
+            version("mapsSdk", "$sdkVersionNumber-$sdkBuildNumber")
+            library("mapsSdk", "com.esri", "arcgis-maps-kotlin").versionRef("mapsSdk")
         }
     }
 }
