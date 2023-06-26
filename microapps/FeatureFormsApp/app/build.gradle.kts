@@ -65,7 +65,6 @@ dependencies {
     implementation(arcgis.mapsSdk)
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
-    implementation(libs.bundles.serialization)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
