@@ -23,5 +23,11 @@ fun MainScreen() {
         factory = TemplateViewModelFactory("Hello Template!!")
     )
     Template(templateViewModel)
-    mapViewModel.setViewpoint(Viewpoint(39.8, -98.6, 10e7))
+    mapViewModel.setViewpoint(
+        viewpoint = Viewpoint(
+            latitude = 39.8,
+            longitude = -98.6,
+            scale = 10e7
+        )
+    )
 }

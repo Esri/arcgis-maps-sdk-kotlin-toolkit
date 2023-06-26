@@ -12,12 +12,6 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithContentDescription
 import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.Viewpoint
-import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import org.junit.Rule
 import org.junit.Test
 
@@ -28,7 +22,7 @@ class ComposableMapTests {
 
     @Test
     fun testComposableMapLayout() {
-        val mockMapInterface = MapInterfaceImpl(ArcGISMap())
+        val mockMapInterface = MapInterface(ArcGISMap())
 
         composeTestRule.setContent {
             ComposableMap(mapInterface = mockMapInterface) {

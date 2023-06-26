@@ -7,6 +7,7 @@
 	echo
 	echo "Description: generates a new toolkit component and microapp with the given name"
 	echo " -n <name> the name of the new toolkit component"
+	echo " -d        do not make the new component publishable. optional. defaults to publishable."
 	echo " -h        this help message"	
 	echo " ./new-component-starter.sh -n FloorFilter"
 	echo "================================================================================"
@@ -19,6 +20,7 @@
 
     toolkitDir="$(dirname ${BASH_SOURCE})"
     name=
+    publish="yes"
     #lowercase name (the library dir name and project name)
     componentName=
     #first letter uppercased
@@ -98,16 +100,39 @@
 	perl -i -pe "s/val projects = listOf\(([a-z\", ]+)\"\)/val projects = listOf\(\1\", \"$componentName\"\)/g" settings.gradle.kts 
     }
 
+    # removes the default plugin block from the toolkit component's build.gradle.kts
+    # and adds one back that has publishing capabilities.
+    function makeProjectPublishable {
+	pushd toolkit > /dev/null
+	local gradleFile="${componentName}/build.gradle.kts"
+	read -r -d '' pluginsBlock <<-EOM
+plugins {
+    id("com.android.library")
+    id("org.jetbrains.kotlin.android")
+    id("artifact-deploy")
+}
+EOM
+	local lines=$(wc -l "${gradleFile}" | awk '{print $1}')
+	local pluginLines=4
+	local linesLessPlugins=$(($lines-$pluginLines))
+	local tail=$(tail -${linesLessPlugins} "${gradleFile}")
+	echo -e "${pluginsBlock}\n${tail}" >  "${gradleFile}"
+	popd > /dev/null
+    }
+
     
     # ---------------------------------------------
     # start script
     # ---------------------------------------------
     
     # parse options
-    while getopts :n:h opt; do
+    while getopts :n:dh opt; do
 	case ${opt} in
 	    n)
 		name="${OPTARG}"
+		;;
+	    d)
+		publish=
 		;;
 	    h)
 		_display_help_dialog
@@ -135,5 +160,8 @@
     copyTemplateApp
     convertTemplateApp
     updateSettings
+    if [ ! -z $publish ]; then
+	makeProjectPublishable
+    fi
     echo "Done"
 }
