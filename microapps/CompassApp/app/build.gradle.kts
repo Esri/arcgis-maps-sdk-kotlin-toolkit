@@ -4,6 +4,10 @@ plugins {
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
+secrets {
+    defaultPropertiesFileName = "secrets.defaults.properties"
+}
+
 android {
     namespace = "com.arcgismaps.toolkit.compassapp"
     compileSdk = libs.versions.compileSdk.get().toInt()
