@@ -88,6 +88,15 @@ private fun AuthenticationApp() {
     Authenticator(authenticatorViewModel)
 }
 
+/**
+ * Allows the user to enter a url and load a portal.
+ * Also displays a checkbox for using OAuth, and a button to clear credentials.
+ *
+ * @param setInfoText called when the info text should be changed
+ * @param setIsLoading called when an operation is ongoing
+ * @param setOAuthUserConfiguration called when the [AuthenticatorViewModel.oAuthUserConfiguration] should be changed
+ * @since 200.2.0
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PortalDetails(
@@ -102,32 +111,35 @@ private fun PortalDetails(
         mutableStateOf(true)
     }
     val scope = LocalLifecycleOwner.current.lifecycleScope
-    val onLoad = {
-        scope.launch {
-            setIsLoading(true)
-            setOAuthUserConfiguration(
-                if (useOAuth)
-                    OAuthUserConfiguration(
-                        url,
-                        // This client ID is for demo purposes only. For use of the Authenticator in your own app,
-                        // create your own client ID. For more info see: https://developers.arcgis.com/documentation/mapping-apis-and-services/security/tutorials/register-your-application/
-                        "lgAdHkYZYlwwfAhC",
-                        "my-ags-app://auth"
-                    )
-                else null
-            )
-            val portal = Portal(url, Portal.Connection.Authenticated)
-            portal.load().also {
-                setIsLoading(false)
-            }.onFailure {
-                setInfoText(it.toString())
-            }.onSuccess {
-                val text = portal.portalInfo?.let {
-                    val json = it.toJson()
-                    val jsonObject = JSONObject(json)
-                    jsonObject.toString(4)
-                } ?: "Portal loaded successfully but no portal info was found."
-                setInfoText(text)
+    // a lambda that will be called when the user presses "Go" on the keyboard or presses the "Load" button.
+    val loadPortalAction = remember {
+        {
+            scope.launch {
+                setIsLoading(true)
+                setOAuthUserConfiguration(
+                    if (useOAuth)
+                        OAuthUserConfiguration(
+                            url,
+                            // This client ID is for demo purposes only. For use of the Authenticator in your own app,
+                            // create your own client ID. For more info see: https://developers.arcgis.com/documentation/mapping-apis-and-services/security/tutorials/register-your-application/
+                            "lgAdHkYZYlwwfAhC",
+                            "my-ags-app://auth"
+                        )
+                    else null
+                )
+                val portal = Portal(url, Portal.Connection.Authenticated)
+                portal.load().also {
+                    setIsLoading(false)
+                }.onFailure {
+                    setInfoText(it.toString())
+                }.onSuccess {
+                    val text = portal.portalInfo?.let {
+                        val json = it.toJson()
+                        val jsonObject = JSONObject(json)
+                        jsonObject.toString(4)
+                    } ?: "Portal loaded successfully but no portal info was found."
+                    setInfoText(text)
+                }
             }
         }
     }
@@ -139,6 +151,7 @@ private fun PortalDetails(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        // The Url text field
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = url,
@@ -148,7 +161,7 @@ private fun PortalDetails(
                 keyboardType = KeyboardType.Uri,
                 imeAction = ImeAction.Go
             ),
-            keyboardActions = KeyboardActions(onAny = { onLoad() }),
+            keyboardActions = KeyboardActions(onAny = { loadPortalAction() }),
             singleLine = true
         )
         Row(
@@ -156,6 +169,7 @@ private fun PortalDetails(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // OAuth checkbox and label
             Row(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
@@ -163,6 +177,7 @@ private fun PortalDetails(
                 Checkbox(checked = useOAuth, onCheckedChange = { useOAuth = it })
                 Text("Use OAuth", style = MaterialTheme.typography.labelMedium)
             }
+            // Clear credential button
             Button(
                 onClick = {
                     scope.launch {
@@ -178,8 +193,9 @@ private fun PortalDetails(
             ) {
                 Text(text = "Clear credentials")
             }
+            // Load button
             Button(
-                onClick = { onLoad() },
+                onClick = { loadPortalAction() },
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Text(text = "Load")
@@ -188,6 +204,13 @@ private fun PortalDetails(
     }
 }
 
+/**
+ * Displays messages to the user. This may be used to display instructions, portal info, or error messages.
+ *
+ * @param text the text to display
+ * @param isLoading whether a progress indicator should be displayed
+ * @since 200.20
+ */
 @Composable
 private fun InfoScreen(
     text: String,
