@@ -8,7 +8,7 @@ import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeHandler
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
 import com.arcgismaps.httpcore.authentication.TokenCredential
-import com.arcgismaps.toolkit.featureformsapp.screens.mapview.MapScreen
+import com.arcgismaps.toolkit.featureformsapp.screens.map.MapScreen
 import com.arcgismaps.toolkit.featureformsapp.ui.theme.FeatureFormsAppTheme
 
 class FormsArcGISAuthenticationChallengeHandler(

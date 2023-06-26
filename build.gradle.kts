@@ -8,4 +8,6 @@ plugins {
     alias(libs.plugins.kotlin.android) apply false
     @Suppress("DSL_SCOPE_VIOLATION")
     alias(libs.plugins.gradle.secrets) apply false
+    @Suppress("DSL_SCOPE_VIOLATION")
+    alias(libs.plugins.kotlin.serialization) apply false
 }
