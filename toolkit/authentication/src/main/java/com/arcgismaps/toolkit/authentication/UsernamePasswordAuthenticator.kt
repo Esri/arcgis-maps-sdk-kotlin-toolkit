@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
@@ -35,6 +36,7 @@ import androidx.compose.ui.unit.dp
  * @param usernamePasswordChallenge the pending [UsernamePasswordChallenge] that initiated this prompt.
  * @since 200.2.0
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 public fun UsernamePasswordAuthenticator(
     usernamePasswordChallenge: UsernamePasswordChallenge
@@ -65,21 +67,26 @@ public fun UsernamePasswordAuthenticator(
                     onSend = { usernamePasswordChallenge.continueWithCredentials(usernameFieldText, passwordFieldText) }
                 )
             }
-            TextField(
-                fieldText = usernameFieldText,
-                onValueChange = { usernameFieldText = it },
-                label = "Username",
-                keyboardType = KeyboardType.Email,
-                imeAction = ImeAction.Next,
-                keyboardActions = keyboardActions
+            OutlinedTextField(
+                value = usernameFieldText,
+                onValueChange = { it: String -> usernameFieldText = it },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email,
+                    imeAction = ImeAction.Next
+                ),
+                keyboardActions = keyboardActions,
+                label = { Text(text = "Username") },
+                singleLine = true
             )
-            TextField(
-                fieldText = passwordFieldText,
-                onValueChange = { passwordFieldText = it },
-                label = "Password",
-                keyboardType = KeyboardType.Password,
-                imeAction = ImeAction.Send,
-                keyboardActions = keyboardActions
+            OutlinedTextField(
+                value = passwordFieldText,
+                onValueChange = { it: String -> passwordFieldText = it },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Send
+                ),
+                keyboardActions = keyboardActions,
+                label = { Text(text = "Password") },
+                singleLine = true,
+                visualTransformation = PasswordVisualTransformation()
             )
             Spacer(modifier = Modifier.height(32.dp))
             Row(
@@ -96,24 +103,4 @@ public fun UsernamePasswordAuthenticator(
 
         }
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun TextField(
-    fieldText: String,
-    onValueChange: (String) -> Unit,
-    label: String,
-    keyboardType: KeyboardType,
-    imeAction: ImeAction,
-    keyboardActions: KeyboardActions
-) {
-    OutlinedTextField(
-        value = fieldText,
-        onValueChange = onValueChange,
-        keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = imeAction),
-        keyboardActions = keyboardActions,
-        label = { Text(text = label) },
-        singleLine = true
-    )
 }
