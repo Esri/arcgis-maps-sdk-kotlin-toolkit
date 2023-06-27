@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -62,10 +63,10 @@ private fun AuthenticationApp() {
         viewModel(factory = AuthenticatorViewModelFactory())
     val startInfoText = stringResource(id = R.string.start_info_text)
     Column {
-        var infoText by remember {
+        var infoText by rememberSaveable {
             mutableStateOf(startInfoText)
         }
-        var isLoading by remember {
+        var isLoading by rememberSaveable {
             mutableStateOf(false)
         }
         PortalDetails(
@@ -100,10 +101,10 @@ private fun PortalDetails(
     onLoadStatusChanged: (Boolean) -> Unit,
     onOAuthUserConfigurationChanged: (OAuthUserConfiguration?) -> Unit
 ) {
-    var url by remember {
+    var url by rememberSaveable {
         mutableStateOf("https://www.arcgis.com")
     }
-    var useOAuth by remember {
+    var useOAuth by rememberSaveable {
         mutableStateOf(true)
     }
     val scope = LocalLifecycleOwner.current.lifecycleScope
