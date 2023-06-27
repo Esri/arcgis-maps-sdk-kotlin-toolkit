@@ -58,6 +58,13 @@ public interface AuthenticatorViewModel : NetworkAuthenticationChallengeHandler,
      * @since 200.2.0
      */
     public val pendingUsernamePasswordChallenge: StateFlow<UsernamePasswordChallenge?>
+
+    /**
+     * Clears the credential stores.
+     *
+     * @since 200.2.0
+     */
+    public suspend fun signOut() : Unit
 }
 
 /**
@@ -223,6 +230,12 @@ private class AuthenticatorViewModelImpl(
                 continuation.resumeWith(Result.success(null))
             }
         }
+
+    override suspend fun signOut() {
+        ArcGISEnvironment.authenticationManager.arcGISCredentialStore.removeAll()
+        ArcGISEnvironment.authenticationManager.networkCredentialStore.removeAll()
+        TODO()
+    }
 }
 
 /**

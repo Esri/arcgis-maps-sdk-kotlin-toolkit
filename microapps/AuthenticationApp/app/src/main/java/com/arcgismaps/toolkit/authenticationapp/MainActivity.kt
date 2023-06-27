@@ -24,19 +24,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.authentication.Authenticator
@@ -62,6 +59,7 @@ private fun AuthenticationApp() {
     val authenticatorViewModel: AuthenticatorViewModel =
         viewModel(factory = AuthenticatorViewModelFactory())
     val startInfoText = stringResource(id = R.string.start_info_text)
+    val scope = rememberCoroutineScope()
     Column {
         var infoText by rememberSaveable {
             mutableStateOf(startInfoText)
@@ -78,6 +76,15 @@ private fun AuthenticationApp() {
             },
             onOAuthUserConfigurationChanged = {
                 authenticatorViewModel.oAuthUserConfiguration = it
+            },
+            onSignout = {
+                scope.launch {
+                    isLoading = true
+                    authenticatorViewModel.oAuthUserConfiguration = null
+                    authenticatorViewModel.signOut()
+                    infoText = startInfoText
+                    isLoading = false
+                }
             }
         )
         InfoScreen(text = infoText, isLoading = isLoading)
@@ -99,7 +106,8 @@ private fun AuthenticationApp() {
 private fun PortalDetails(
     onInfoTextChanged: (String) -> Unit,
     onLoadStatusChanged: (Boolean) -> Unit,
-    onOAuthUserConfigurationChanged: (OAuthUserConfiguration?) -> Unit
+    onOAuthUserConfigurationChanged: (OAuthUserConfiguration?) -> Unit,
+    onSignout: () -> Unit
 ) {
     var url by rememberSaveable {
         mutableStateOf("https://www.arcgis.com")
@@ -107,10 +115,10 @@ private fun PortalDetails(
     var useOAuth by rememberSaveable {
         mutableStateOf(true)
     }
-    val scope = LocalLifecycleOwner.current.lifecycleScope
+    val scope = rememberCoroutineScope()
     val noPortalInfoText = stringResource(id = R.string.no_portal_info)
     // a lambda that will be called when the user presses "Go" on the keyboard or presses the "Load" button.
-    val loadPortalAction = remember {
+    val loadPortalAction =
         {
             scope.launch {
                 onLoadStatusChanged(true)
@@ -140,7 +148,6 @@ private fun PortalDetails(
                 }
             }
         }
-    }
 
     Column(
         modifier = Modifier
@@ -176,18 +183,8 @@ private fun PortalDetails(
                 Text("Use OAuth", style = MaterialTheme.typography.labelMedium)
             }
             // Clear credential button
-            val startInfoText = stringResource(id = R.string.start_info_text)
             Button(
-                onClick = {
-                    scope.launch {
-                        onLoadStatusChanged(true)
-                        onOAuthUserConfigurationChanged(null)
-                        ArcGISEnvironment.authenticationManager.arcGISCredentialStore.removeAll()
-                        ArcGISEnvironment.authenticationManager.networkCredentialStore.removeAll()
-                        onInfoTextChanged(startInfoText)
-                        onLoadStatusChanged(false)
-                    }
-                },
+                onClick = onSignout,
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
             ) {
                 Text(text = "Clear credentials")
