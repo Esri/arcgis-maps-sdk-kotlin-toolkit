@@ -4,16 +4,22 @@ package com.arcgismaps.toolkit.authentication
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.net.http.SslError
 import android.os.Bundle
+import android.webkit.ClientCertRequest
+import android.webkit.HttpAuthHandler
+import android.webkit.SslErrorHandler
 import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.widget.FrameLayout
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.lifecycle.Lifecycle
+import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
+import kotlinx.coroutines.runBlocking
 
 private const val KEY_INTENT_EXTRA_AUTHORIZE_URL = "INTENT_EXTRA_KEY_AUTHORIZE_URL"
 private const val KEY_INTENT_EXTRA_CUSTOM_TABS_WAS_LAUNCHED =
@@ -88,6 +94,7 @@ internal class OAuthUserSignInActivity : ComponentActivity() {
         // We only want to respond to focus changed events when this activity is in "resumed" state.
         // On some devices (Oreo) we get unexpected focus changed events with hasFocus true which cause this Activity
         // to be finished (destroyed) prematurely, for example:
+        // - On Oreo log in to portal with OAuth
         // - When the browser window is launched this triggers a focus changed event with hasFocus true but at this point
         //   we do not want to finish this activity -> at this point the activity is in paused state (isResumed == false) so
         //   we can use this to ignore this "rogue" focus changed event.
@@ -131,33 +138,6 @@ internal class OAuthUserSignInActivity : ComponentActivity() {
     }
 
     /**
-     * WebView Client that is in charge of managing the OAuth sign-in workflow.
-     *
-     * @since 200.2.0
-     */
-    private class OAuthWebViewClient(val activity: OAuthUserSignInActivity) : WebViewClient() {
-        /**
-         * Takes control of the page loading if the URL contains the approval code and forwards it to the
-         * [OAuthUserSignInActivity] by setting it in the result contract.
-         *
-         * @since 200.2.0
-         */
-        override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-            request?.url?.let {
-                if (it.toString().contains("/oauth2/approval", true)) {
-                    val newIntent = Intent().apply {
-                        putExtra(KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL, it.toString())
-                    }
-                    activity.setResult(RESULT_CODE_SUCCESS, newIntent)
-                    activity.finish()
-                    return true
-                }
-            }
-            return false
-        }
-    }
-
-    /**
      * An ActivityResultContract that takes a [OAuthUserSignIn] as input and returns a nullable
      * string as output. The output string represents a redirect URI as the result of an OAuth user
      * sign in prompt, or null if OAuth user sign in failed. This contract can be used to launch the
@@ -184,5 +164,100 @@ internal class OAuthUserSignInActivity : ComponentActivity() {
                 null
             }
         }
+    }
+
+    /**
+     * WebView Client that is in charge of managing the OAuth sign-in workflow.
+     *
+     * @since 200.2.0
+     */
+    private class OAuthWebViewClient(val activity: OAuthUserSignInActivity) : WebViewClient() {
+        /**
+         * Takes control of the page loading if the URL contains the approval code and forwards it to the
+         * [OAuthUserSignInActivity] by setting it in the result contract.
+         *
+         * @since 200.2.0
+         */
+        override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+            request?.url?.let {
+                if (it.toString().contains("/oauth2/approval", true)) {
+                    val newIntent = Intent().apply {
+                        putExtra(KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL, it.toString())
+                    }
+                    activity.setResult(RESULT_CODE_SUCCESS, newIntent)
+                    activity.finish()
+                    return true
+                }
+            }
+            return false
+        }
+
+        /**
+         * TODO will handle User Credential Challenge
+         *
+         * @since 200.2.0
+         */
+        override fun onReceivedHttpAuthRequest(
+            view: WebView?,
+            handler: HttpAuthHandler?,
+            host: String?,
+            realm: String?
+        ) {
+            super.onReceivedHttpAuthRequest(view, handler, host, realm)
+        }
+
+        /**
+         * TODO will handle Client Certificate Authentication (PKI)
+         *
+         * @since 200.2.0
+         */
+        override fun onReceivedClientCertRequest(view: WebView?, request: ClientCertRequest?) {
+            super.onReceivedClientCertRequest(view, request)
+        }
+
+        /**
+         * TODO: Will handle Self Signed Server Certificates
+         * TODO: Handle possible SSL Errors from class [SslError]
+         *
+         * @since 200.2.0
+         */
+        override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
+            runBlocking {
+                val host = view?.url
+                val trustedHost =
+                    ArcGISEnvironment.authenticationManager.networkCredentialStore.getCredentials("rt-server107a.esri.com")
+                        .getOrThrow().isNotEmpty()
+
+                if (trustedHost) {
+                    handler?.proceed()
+                } else {
+                    handler?.cancel()
+                }
+            }
+        }
+
+        /**
+         * TODO will handle errors that are displayed in the custom webViews, such as Invalid_client_id
+         *
+         * @since 200.2.0
+         */
+        override fun onReceivedHttpError(
+            view: WebView?,
+            request: WebResourceRequest?,
+            errorResponse: WebResourceResponse?
+        ) {
+            super.onReceivedHttpError(view, request, errorResponse)
+        }
+
+        /**
+         * TODO: Used in conjunction with onReceivedHttpError to finish the page when an error occurs
+         *
+         * @since 200.2.0
+         */
+        override fun onPageFinished(view: WebView?, url: String?) {
+            super.onPageFinished(view, url)
+        }
+
+        // TODO: Test pressing back on the webPage, what happens?
     }
 }
