@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.data.ArcGISFeatureTable
 import com.arcgismaps.toolkit.featureforms.api.FeatureFormDefinition
 import com.arcgismaps.toolkit.featureforms.api.FieldFeatureFormElement
 import com.arcgismaps.toolkit.featureforms.api.formInfoJson
@@ -36,10 +35,11 @@ public fun FeatureForm(
     modifier: Modifier = Modifier
 ) {
     val feature by featureFormState.feature.collectAsState()
-    val featureTable = feature?.featureTable as ArcGISFeatureTable?
-    val featureFormDefinition = featureTable?.formInfoJson?.let {
+    val layer by featureFormState.layer.collectAsState()
+    val featureFormDefinition = layer?.formInfoJson?.let {
         FeatureFormDefinition.fromJsonOrNull(it)
     }
+
 
     if (featureFormDefinition != null) {
         FeatureFormContent(formDefinition = featureFormDefinition, modifier = modifier)

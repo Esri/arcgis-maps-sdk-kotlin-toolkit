@@ -97,14 +97,40 @@ private val jsonDecoder = Json { ignoreUnknownKeys = true }
 public val ArcGISMap.featureFormDefinition: FeatureFormDefinition
     get() {
         val json = toJson()
+        println("map json")
+        println(json)
+        
+        println("unsupported json")
+        operationalLayers.filterIsInstance<FeatureLayer>().forEach {
+            it.unsupportedJson.forEach { pair ->
+                println("${pair.key} -> ${pair.value}")
+            }
+        }
         val mapInfo = jsonDecoder.decodeFromString<MapInfo>(json)
         return mapInfo.operationalLayers.first().featureFormDefinition
     }
 
 internal val ArcGISFeatureTable.formInfoJson: JsonObject?
     get() {
-        val jsonMap = unsupportedJson["formInfo"] as? Map<*, *> ?: return null
-        return jsonMap.toJsonObject()
+        if (unsupportedJson["formInfo"] != null) {
+            val jsonMap = unsupportedJson["formInfo"] as? Map<*, *>
+                ?: throw IllegalStateException("form info is not a JsonObject in tbl unsupported json")
+            return jsonMap.toJsonObject()
+        } else {
+            throw IllegalStateException("no form info in tbl unsupported json")
+        }
+    }
+
+
+internal val FeatureLayer.formInfoJson: JsonObject?
+    get() {
+        if (unsupportedJson["formInfo"] != null) {
+            val jsonMap = unsupportedJson["formInfo"] as? Map<*, *>
+                ?: throw IllegalStateException("form info is not a JsonObject in tbl unsupported json")
+            return jsonMap.toJsonObject()
+        } else {
+            throw IllegalStateException("no form info in tbl unsupported json")
+        }
     }
 
 // Currently Kotlin Serialization does not support Map<String, Any> so they suggest we use

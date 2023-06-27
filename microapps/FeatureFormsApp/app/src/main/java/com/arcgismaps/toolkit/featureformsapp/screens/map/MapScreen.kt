@@ -44,10 +44,12 @@ fun MapScreen() {
     // instantiate a MapViewModel using its factory
     val mapViewModel = viewModel<MapViewModel>(
         factory = MapViewModelFactory(
-            arcGISMap = ArcGISMap(stringResource(R.string.map_url)),
-            onFeatureIdentified = { feature ->
+            arcGISMap = ArcGISMap(stringResource(R.string.map_url_range_domain_combo)),
+            onFeatureIdentified = { layer, feature ->
                 // update the formViewModel's feature
                 formViewModel.setFeature(feature)
+                // update the formViewModel's Layer
+                formViewModel.setLayer(layer)
                 // set formViewModel to editing state
                 formViewModel.setEditingActive(true)
             }
