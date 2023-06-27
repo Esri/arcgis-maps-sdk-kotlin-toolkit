@@ -34,11 +34,13 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.authentication.Authenticator
 import com.arcgismaps.toolkit.authentication.AuthenticatorViewModel
 import com.arcgismaps.toolkit.authentication.AuthenticatorViewModelFactory
+import com.arcgismaps.toolkit.authentication.signOut
 import com.arcgismaps.toolkit.authenticationapp.ui.theme.AuthenticationAppTheme
 import kotlinx.coroutines.launch
 import org.json.JSONObject
@@ -81,7 +83,7 @@ private fun AuthenticationApp() {
                 scope.launch {
                     isLoading = true
                     authenticatorViewModel.oAuthUserConfiguration = null
-                    authenticatorViewModel.signOut()
+                    ArcGISEnvironment.authenticationManager.signOut()
                     infoText = startInfoText
                     isLoading = false
                 }
