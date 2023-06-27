@@ -112,6 +112,11 @@ internal class OAuthUserSignInActivity : ComponentActivity() {
         CustomTabsIntent.Builder().build().launchUrl(this, Uri.parse(authorizeUrl))
     }
 
+    /**
+     * Launches the [authorizeUrl] to prompt for OAuth sign-in in a custom WebView. 
+     *
+     * @since 200.2.0
+     */
     private fun launchOAuthPageInWebView(authorizeUrl: String) {
         title = authorizeUrl
         webView = WebView(this)
@@ -127,6 +132,33 @@ internal class OAuthUserSignInActivity : ComponentActivity() {
 
         webView.webViewClient = OAuthWebViewClient(this)
         webView.loadUrl(authorizeUrl)
+    }
+
+    /**
+     * WebView Client that is in charge of managing the OAuth sign-in workflow.
+     *
+     * @since 200.2.0
+     */
+    private class OAuthWebViewClient(val activity: OAuthUserSignInActivity) : WebViewClient() {
+        /**
+         * Takes control of the page loading if the URL contains the approval code and forwards it to the
+         * [OAuthUserSignInActivity] by setting it in the result contract.
+         *
+         * @since 200.2.0
+         */
+        override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+            request?.url?.let {
+                if (it.toString().contains("/oauth2/approval", true)) {
+                    val newIntent = Intent().apply {
+                        putExtra(KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL, it.toString())
+                    }
+                    activity.setResult(RESULT_CODE_SUCCESS, newIntent)
+                    activity.finish()
+                    return true
+                }
+            }
+            return false
+        }
     }
 
     /**
@@ -155,33 +187,6 @@ internal class OAuthUserSignInActivity : ComponentActivity() {
             } else {
                 null
             }
-        }
-    }
-
-    /**
-     * WebView Client that is in charge of managing the OAuth sign-in workflow.
-     *
-     * @since 200.2.0
-     */
-    private class OAuthWebViewClient(val activity: OAuthUserSignInActivity) : WebViewClient() {
-        /**
-         * Takes control of the page loading if the URL contains the approval code and forwards it to the
-         * [OAuthUserSignInActivity] by setting it in the result contract.
-         *
-         * @since 200.2.0
-         */
-        override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-            request?.url?.let {
-                if (it.toString().contains("/oauth2/approval", true)) {
-                    val newIntent = Intent().apply {
-                        putExtra(KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL, it.toString())
-                    }
-                    activity.setResult(RESULT_CODE_SUCCESS, newIntent)
-                    activity.finish()
-                    return true
-                }
-            }
-            return false
         }
     }
 }
