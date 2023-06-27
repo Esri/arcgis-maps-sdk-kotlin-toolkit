@@ -54,6 +54,8 @@ public interface AuthenticatorViewModel : NetworkAuthenticationChallengeHandler,
     /**
      * The current [UsernamePasswordChallenge] awaiting completion. Use this to complete or cancel any
      * challenge requiring username and password authentication.
+     *
+     * @since 200.2.0
      */
     public val pendingUsernamePasswordChallenge: StateFlow<UsernamePasswordChallenge?>
 }
