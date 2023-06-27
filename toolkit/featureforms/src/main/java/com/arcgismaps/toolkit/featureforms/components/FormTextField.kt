@@ -13,9 +13,7 @@ import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -30,7 +28,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
@@ -46,8 +43,6 @@ internal fun FormTextField(
     singleLine: Boolean,
     modifier: Modifier = Modifier,
     placeholder: String = "",
-    textStyle: TextStyle = TextStyle(),
-    textFieldColors: TextFieldColors = OutlinedTextFieldDefaults.colors()
 ) {
     var text by remember { mutableStateOf("") }
     var isFocused by remember { mutableStateOf(false) }
