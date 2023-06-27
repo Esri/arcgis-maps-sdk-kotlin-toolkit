@@ -119,11 +119,12 @@ private class AuthenticatorViewModelImpl(
     }
 
     /**
-     * Issues a username/password challenge and uses the returned username and password to create a
-     * [TokenCredential].
+     * Issues a username/password challenge and returns an [ArcGISAuthenticationChallengeResponse] from
+     * the data returned by the challenge.
      *
      * @param challenge the [ArcGISAuthenticationChallenge] that requires authentication.
-     * @return [TokenCredential] with the username and password or [ArcGISAuthenticationChallengeResponse.Cancel] if the user cancelled.
+     * @return an ArcGISAuthenticationChallengeResponse with a [TokenCredential] or [ArcGISAuthenticationChallengeResponse.Cancel]
+     * if the user cancelled.
      * @since 200.2.0
      */
     private suspend fun handleArcGISTokenChallenge(
