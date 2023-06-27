@@ -205,7 +205,7 @@ private class AuthenticatorViewModelImpl(
         suspendCancellableCoroutine { continuation ->
             _pendingUsernamePasswordChallenge.value = UsernamePasswordChallenge(
                 url = url,
-                onUserResponseReceived = { username, password ->
+                onUsernamePasswordReceived = { username, password ->
                     _pendingUsernamePasswordChallenge.value = null
                     continuation.resumeWith(
                         Result.success(
