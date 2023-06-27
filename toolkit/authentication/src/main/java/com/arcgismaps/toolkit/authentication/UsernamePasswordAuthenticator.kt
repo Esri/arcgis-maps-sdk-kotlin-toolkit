@@ -50,7 +50,7 @@ public fun UsernamePasswordAuthenticator(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Please log in to ${usernamePasswordChallenge.hostname}",
+            text = "Please log in to ${usernamePasswordChallenge.url}",
             style = MaterialTheme.typography.headlineMedium,
             textAlign = TextAlign.Center
         )
