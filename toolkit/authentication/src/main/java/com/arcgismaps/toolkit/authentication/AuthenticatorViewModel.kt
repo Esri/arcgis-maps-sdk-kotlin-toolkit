@@ -129,15 +129,13 @@ private class AuthenticatorViewModelImpl(
      */
     private suspend fun handleArcGISTokenChallenge(
         challenge: ArcGISAuthenticationChallenge
-    ): ArcGISAuthenticationChallengeResponse {
-        val usernamePassword = awaitUsernamePassword(challenge.requestUrl)
-        return usernamePassword?.let {
+    ): ArcGISAuthenticationChallengeResponse =
+        awaitUsernamePassword(challenge.requestUrl)?.let {
             ArcGISAuthenticationChallengeResponse.ContinueWithCredential(
                 TokenCredential.createWithChallenge(challenge, it.username, it.password)
                     .getOrThrow()
             )
         } ?: ArcGISAuthenticationChallengeResponse.Cancel
-    }
 
     override suspend fun handleNetworkAuthenticationChallenge(challenge: NetworkAuthenticationChallenge): NetworkAuthenticationChallengeResponse {
         return when (challenge.networkAuthenticationType) {
