@@ -113,24 +113,20 @@ internal class OAuthUserSignInActivity : ComponentActivity() {
     }
 
     /**
-     * Launches the [authorizeUrl] to prompt for OAuth sign-in in a custom WebView. 
+     * Launches the [authorizeUrl] to prompt for OAuth sign-in in a custom WebView.
      *
      * @since 200.2.0
      */
     private fun launchOAuthPageInWebView(authorizeUrl: String) {
         title = authorizeUrl
-        webView = WebView(this)
-        setContentView(
-            webView,
-            FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
-        )
-
-        webView.settings.apply {
-            displayZoomControls = false
-            javaScriptEnabled = true
+        webView = WebView(this).apply {
+            settings.apply {
+                displayZoomControls = false
+                javaScriptEnabled = true
+            }
+            webViewClient = OAuthWebViewClient(this@OAuthUserSignInActivity)
         }
-
-        webView.webViewClient = OAuthWebViewClient(this)
+        setContentView(webView)
         webView.loadUrl(authorizeUrl)
     }
 
