@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.data.ArcGISFeatureTable
 import com.arcgismaps.toolkit.featureforms.api.FeatureFormDefinition
 import com.arcgismaps.toolkit.featureforms.api.FieldFeatureFormElement
+import com.arcgismaps.toolkit.featureforms.api.TestData
 import com.arcgismaps.toolkit.featureforms.api.formInfoJson
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
 
@@ -38,7 +39,7 @@ public fun FeatureForm(
     val feature by featureFormState.feature.collectAsState()
     val featureTable = feature?.featureTable as ArcGISFeatureTable?
     val featureFormDefinition = featureTable?.formInfoJson?.let {
-        FeatureFormDefinition.fromJsonOrNull(it)
+        FeatureFormDefinition.fromJsonOrNull(TestData.formInfo)
     }
 
     if (featureFormDefinition != null) {

@@ -30,13 +30,14 @@ public class TestData {
               }
             },
             {
-              "label": "Number Integer",
+              "label": "Name of the tree",
               "type": "field",
               "editableExpression": "expr/system/true",
-              "fieldName": "Number_Integer",
+              "fieldName": "Name",
               "inputType": {
                 "type": "text-box",
-                "minLength": 0
+                "minLength": 0,
+                "maxLength": 20
               }
             },
             {
@@ -64,6 +65,30 @@ public class TestData {
                 "minLength": 20
               },
               "hint": "Enter a brief comment"
+            },
+            {
+              "description": "Default Value is 'TEXT', only shows when new feature is created.",
+              "label": "Default Value",
+              "type": "field",
+              "editableExpression": "expr/system/true",
+              "fieldName": "Default_Value",
+              "inputType": {
+                "type": "text-box",
+                "maxLength": 256,
+                "minLength": 0
+                }
+            },
+            {
+              "description": "Minimum length of 5, Maximum length of 10",
+              "label": "Min Length Max Length",
+              "type": "field",
+              "editableExpression": "expr/system/true",
+              "fieldName": "Min_Length_Max_Length",
+              "inputType": {
+                "type": "text-box",
+                "maxLength": 10,
+                "minLength": 5
+              }
             }
           ],
           "expressionInfos": [
