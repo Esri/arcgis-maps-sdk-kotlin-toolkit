@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.webkit.HttpAuthHandler
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -89,7 +88,6 @@ internal class OAuthUserSignInActivity : ComponentActivity() {
         // We only want to respond to focus changed events when this activity is in "resumed" state.
         // On some devices (Oreo) we get unexpected focus changed events with hasFocus true which cause this Activity
         // to be finished (destroyed) prematurely, for example:
-        // - On Oreo log in to portal with OAuth
         // - When the browser window is launched this triggers a focus changed event with hasFocus true but at this point
         //   we do not want to finish this activity -> at this point the activity is in paused state (isResumed == false) so
         //   we can use this to ignore this "rogue" focus changed event.
@@ -161,9 +159,17 @@ internal class OAuthUserSignInActivity : ComponentActivity() {
     }
 
     /**
+     * WebView Client that is in charge of managing the OAuth sign-in workflow.
      *
+     * @since 200.2.0
      */
-    public class OAuthWebViewClient(val activity: OAuthUserSignInActivity) : WebViewClient() {
+    private class OAuthWebViewClient(val activity: OAuthUserSignInActivity) : WebViewClient() {
+        /**
+         * Takes control of the page loading if the URL contains the approval code and forwards it to the
+         * [OAuthUserSignInActivity] by setting it in the result contract.
+         *
+         * @since 200.2.0
+         */
         override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
             request?.url?.let {
                 if (it.toString().contains("/oauth2/approval", true)) {
@@ -173,19 +179,9 @@ internal class OAuthUserSignInActivity : ComponentActivity() {
                     activity.setResult(RESULT_CODE_SUCCESS, newIntent)
                     activity.finish()
                     return true
-                } else {
                 }
             }
             return false
-        }
-
-        override fun onReceivedHttpAuthRequest(
-            view: WebView?,
-            handler: HttpAuthHandler?,
-            host: String?,
-            realm: String?
-        ) {
-            super.onReceivedHttpAuthRequest(view, handler, host, realm)
         }
     }
 }
