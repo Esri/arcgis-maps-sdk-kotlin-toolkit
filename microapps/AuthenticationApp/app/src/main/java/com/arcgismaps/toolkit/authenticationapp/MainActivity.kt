@@ -29,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -55,19 +56,14 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private val startText = """
-    Enter a valid portal url to load it and see the portal details displayed here.
-    
-    "Use OAuth" will set an OAuth configuration on the Authenticator and force OAuth challenges to be issued where available.
-""".trimIndent()
-
 @Composable
 private fun AuthenticationApp() {
     val authenticatorViewModel: AuthenticatorViewModel =
         viewModel(factory = AuthenticatorViewModelFactory())
+    val startInfoText = stringResource(id = R.string.start_info_text)
     Column {
         var infoText by remember {
-            mutableStateOf(startText)
+            mutableStateOf(startInfoText)
         }
         var isLoading by remember {
             mutableStateOf(false)
@@ -111,6 +107,7 @@ private fun PortalDetails(
         mutableStateOf(true)
     }
     val scope = LocalLifecycleOwner.current.lifecycleScope
+    val noPortalInfoText = stringResource(id = R.string.no_portal_info)
     // a lambda that will be called when the user presses "Go" on the keyboard or presses the "Load" button.
     val loadPortalAction = remember {
         {
@@ -137,7 +134,7 @@ private fun PortalDetails(
                         val json = it.toJson()
                         val jsonObject = JSONObject(json)
                         jsonObject.toString(4)
-                    } ?: "Portal loaded successfully but no portal info was found."
+                    } ?: noPortalInfoText
                     onInfoTextChanged(text)
                 }
             }
@@ -178,6 +175,7 @@ private fun PortalDetails(
                 Text("Use OAuth", style = MaterialTheme.typography.labelMedium)
             }
             // Clear credential button
+            val startInfoText = stringResource(id = R.string.start_info_text)
             Button(
                 onClick = {
                     scope.launch {
@@ -185,7 +183,7 @@ private fun PortalDetails(
                         onOAuthUserConfigurationChanged(null)
                         ArcGISEnvironment.authenticationManager.arcGISCredentialStore.removeAll()
                         ArcGISEnvironment.authenticationManager.networkCredentialStore.removeAll()
-                        onInfoTextChanged(startText)
+                        onInfoTextChanged(startInfoText)
                         onLoadStatusChanged(false)
                     }
                 },
