@@ -20,6 +20,8 @@ import androidx.lifecycle.Lifecycle
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 import kotlinx.coroutines.runBlocking
+import java.net.URL
+import javax.net.ssl.SSLException
 
 private const val KEY_INTENT_EXTRA_AUTHORIZE_URL = "INTENT_EXTRA_KEY_AUTHORIZE_URL"
 private const val KEY_INTENT_EXTRA_CUSTOM_TABS_WAS_LAUNCHED =
@@ -173,9 +175,11 @@ internal class OAuthUserSignInActivity : ComponentActivity() {
      */
     private class OAuthWebViewClient(val activity: OAuthUserSignInActivity) : WebViewClient() {
         /**
-         * Takes control of the page loading if the URL contains the approval code and forwards it to the
-         * [OAuthUserSignInActivity] by setting it in the result contract.
+         * Takes control of the page loading in the [webView] if the URL in the [request] contains the approval code
+         * and forwards it to the [OAuthUserSignInActivity] by setting it in the result contract.
          *
+         * @param view the WebView that is initiating this callback
+         * @param request the request that the WebView is processing
          * @since 200.2.0
          */
         override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
@@ -216,22 +220,27 @@ internal class OAuthUserSignInActivity : ComponentActivity() {
         }
 
         /**
-         * TODO: Will handle Self Signed Server Certificates
-         * TODO: Handle possible SSL Errors from class [SslError]
+         * Callback will be invoked when an SSL error occurs while loading the OAuth sign-in page.
+         * The the OAuth sign-in page is loaded only if user chooses to trust the certificate authority,
+         * otherwise the connection will get cancelled and an error will get thrown to the caller.
          *
+         * @param view the WebView that is initiating the callback
+         * @param handler an SslErrorHandler that will handle the user's response
+         * @param error the SSL error object
          * @since 200.2.0
          */
         override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
+            val host = URL(view?.url).host
             runBlocking {
-                val host = view?.url
                 val trustedHost =
-                    ArcGISEnvironment.authenticationManager.networkCredentialStore.getCredentials("rt-server107a.esri.com")
+                    ArcGISEnvironment.authenticationManager.networkCredentialStore.getCredentials(host)
                         .getOrThrow().isNotEmpty()
 
                 if (trustedHost) {
                     handler?.proceed()
                 } else {
                     handler?.cancel()
+                    throw SSLException("Connection to $host failed, ${error?.toString()}")
                 }
             }
         }
