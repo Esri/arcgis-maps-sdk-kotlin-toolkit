@@ -73,13 +73,13 @@ private fun AuthenticationApp() {
             mutableStateOf(false)
         }
         PortalDetails(
-            setInfoText = {
+            onInfoTextChanged = {
                 infoText = it
             },
-            setIsLoading = {
+            onLoadStatusChanged = {
                 isLoading = it
             },
-            setOAuthUserConfiguration = {
+            onOAuthUserConfigurationChanged = {
                 authenticatorViewModel.oAuthUserConfiguration = it
             }
         )
@@ -92,17 +92,17 @@ private fun AuthenticationApp() {
  * Allows the user to enter a url and load a portal.
  * Also displays a checkbox for using OAuth, and a button to clear credentials.
  *
- * @param setInfoText called when the info text should be changed
- * @param setIsLoading called when an operation is ongoing
- * @param setOAuthUserConfiguration called when the [AuthenticatorViewModel.oAuthUserConfiguration] should be changed
+ * @param onInfoTextChanged called when the info text should be changed
+ * @param onLoadStatusChanged called when an operation is ongoing
+ * @param onOAuthUserConfigurationChanged called when the [AuthenticatorViewModel.oAuthUserConfiguration] should be changed
  * @since 200.2.0
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PortalDetails(
-    setInfoText: (String) -> Unit,
-    setIsLoading: (Boolean) -> Unit,
-    setOAuthUserConfiguration: (OAuthUserConfiguration?) -> Unit
+    onInfoTextChanged: (String) -> Unit,
+    onLoadStatusChanged: (Boolean) -> Unit,
+    onOAuthUserConfigurationChanged: (OAuthUserConfiguration?) -> Unit
 ) {
     var url by remember {
         mutableStateOf("https://www.arcgis.com")
@@ -115,8 +115,8 @@ private fun PortalDetails(
     val loadPortalAction = remember {
         {
             scope.launch {
-                setIsLoading(true)
-                setOAuthUserConfiguration(
+                onLoadStatusChanged(true)
+                onOAuthUserConfigurationChanged(
                     if (useOAuth)
                         OAuthUserConfiguration(
                             url,
@@ -129,16 +129,16 @@ private fun PortalDetails(
                 )
                 val portal = Portal(url, Portal.Connection.Authenticated)
                 portal.load().also {
-                    setIsLoading(false)
+                    onLoadStatusChanged(false)
                 }.onFailure {
-                    setInfoText(it.toString())
+                    onInfoTextChanged(it.toString())
                 }.onSuccess {
                     val text = portal.portalInfo?.let {
                         val json = it.toJson()
                         val jsonObject = JSONObject(json)
                         jsonObject.toString(4)
                     } ?: "Portal loaded successfully but no portal info was found."
-                    setInfoText(text)
+                    onInfoTextChanged(text)
                 }
             }
         }
@@ -181,12 +181,12 @@ private fun PortalDetails(
             Button(
                 onClick = {
                     scope.launch {
-                        setIsLoading(true)
-                        setOAuthUserConfiguration(null)
+                        onLoadStatusChanged(true)
+                        onOAuthUserConfigurationChanged(null)
                         ArcGISEnvironment.authenticationManager.arcGISCredentialStore.removeAll()
                         ArcGISEnvironment.authenticationManager.networkCredentialStore.removeAll()
-                        setInfoText(startText)
-                        setIsLoading(false)
+                        onInfoTextChanged(startText)
+                        onLoadStatusChanged(false)
                     }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
