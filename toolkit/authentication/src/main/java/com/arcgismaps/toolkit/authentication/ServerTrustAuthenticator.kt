@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 
 /**
@@ -36,7 +37,10 @@ internal fun ServerTrustAuthenticator(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "The certificate provided by ${serverTrustChallenge.challenge.hostname} is not signed by a trusted authority.",
+            text = stringResource(
+                id = R.string.server_trust_message,
+                serverTrustChallenge.challenge.hostname
+            ),
             style = MaterialTheme.typography.headlineMedium
         )
         Spacer(modifier = Modifier.height(32.dp))
@@ -46,12 +50,12 @@ internal fun ServerTrustAuthenticator(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Cancel",
+                text = stringResource(id = R.string.cancel),
                 modifier = Modifier.clickable { serverTrustChallenge.distrust() },
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
-                text = "Dangerous: Allow Connection",
+                text = stringResource(id = R.string.allow_connection),
                 modifier = Modifier.clickable { serverTrustChallenge.trust() },
                 style = MaterialTheme.typography.titleMedium
             )

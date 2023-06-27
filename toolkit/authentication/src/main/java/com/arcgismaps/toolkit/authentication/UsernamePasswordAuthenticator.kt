@@ -24,6 +24,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -50,7 +51,7 @@ public fun UsernamePasswordAuthenticator(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Please log in to ${usernamePasswordChallenge.url}",
+            text = stringResource(id = R.string.username_password_login_message, usernamePasswordChallenge.url),
             style = MaterialTheme.typography.headlineMedium,
             textAlign = TextAlign.Center
         )
@@ -80,7 +81,7 @@ public fun UsernamePasswordAuthenticator(
                     imeAction = ImeAction.Next
                 ),
                 keyboardActions = keyboardActions,
-                label = { Text(text = "Username") },
+                label = { Text(text = stringResource(id = R.string.username_label)) },
                 singleLine = true
             )
             OutlinedTextField(
@@ -91,7 +92,7 @@ public fun UsernamePasswordAuthenticator(
                     imeAction = ImeAction.Send
                 ),
                 keyboardActions = keyboardActions,
-                label = { Text(text = "Password") },
+                label = { Text(text = stringResource(id = R.string.password_label)) },
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation()
             )
@@ -101,7 +102,7 @@ public fun UsernamePasswordAuthenticator(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Button(onClick = { usernamePasswordChallenge.cancel() }) {
-                    Text("Cancel")
+                    Text(stringResource(id = R.string.cancel))
                 }
                 Button(onClick = {
                     usernamePasswordChallenge.continueWithCredentials(
@@ -109,7 +110,7 @@ public fun UsernamePasswordAuthenticator(
                         passwordFieldText
                     )
                 }) {
-                    Text("Login")
+                    Text(stringResource(id = R.string.login))
                 }
             }
 
