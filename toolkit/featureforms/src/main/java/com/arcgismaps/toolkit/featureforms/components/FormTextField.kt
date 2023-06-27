@@ -1,6 +1,5 @@
 package com.arcgismaps.toolkit.featureforms.components
 
-import android.util.Log
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,8 +14,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,8 +42,6 @@ internal fun FormTextField(
     modifier: Modifier = Modifier,
     placeholder: String = "",
 ) {
-    Log.d("TAG", "FormTextField: Composing")
-
     var text by remember { mutableStateOf("") }
     var isFocused by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
@@ -60,17 +55,17 @@ internal fun FormTextField(
         }
     }
 
+    // if the keyboard is gone clear focus from the field as a side-effect
+    ClearFocus(shouldClearFocus) {
+        shouldClearFocus = false
+    }
+
     val validateInputLength = {
         errorMessage = if (text.length !in minLength..maxLength) {
             helperText
         } else {
             ""
         }
-    }
-
-    // if the keyboard is gone clear focus from the field as a side-effect
-    ClearFocus(shouldClearFocus) {
-        shouldClearFocus = false
     }
 
     val supportingText = errorMessage.ifEmpty {
@@ -131,7 +126,6 @@ internal fun FormTextField(
             else VisualTransformation.None,
             keyboardActions = KeyboardActions(
                 onDone = {
-                    Log.d("TAG", "FormTextField: Done")
                     shouldClearFocus = true
                 }
             ),
@@ -154,7 +148,6 @@ internal fun ClearFocus(key: Boolean, onComplete: () -> Unit = {}) {
             // hides the keyboard only if visible
             keyboardController?.hide()
             focusManager.clearFocus()
-            Log.d("TAG", "FormTextField: Clearing focus")
         }
         onDispose {
             onComplete()
