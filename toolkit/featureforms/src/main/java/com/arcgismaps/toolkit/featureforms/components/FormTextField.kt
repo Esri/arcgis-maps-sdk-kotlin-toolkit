@@ -2,6 +2,8 @@ package com.arcgismaps.toolkit.featureforms.components
 
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
@@ -11,7 +13,9 @@ import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -26,6 +30,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
@@ -41,6 +46,8 @@ internal fun FormTextField(
     singleLine: Boolean,
     modifier: Modifier = Modifier,
     placeholder: String = "",
+    textStyle: TextStyle = TextStyle(),
+    textFieldColors: TextFieldColors = OutlinedTextFieldDefaults.colors()
 ) {
     var text by remember { mutableStateOf("") }
     var isFocused by remember { mutableStateOf(false) }
@@ -63,18 +70,12 @@ internal fun FormTextField(
     val validateInputLength = {
         errorMessage = if (text.length !in minLength..maxLength) {
             helperText
-        } else {
-            ""
-        }
+        } else ""
     }
 
     val supportingText = errorMessage.ifEmpty {
         description.ifEmpty {
-            if (isFocused) {
-                helperText
-            } else {
-                ""
-            }
+            if (isFocused) helperText else ""
         }
     }
 
@@ -102,10 +103,12 @@ internal fun FormTextField(
             },
             trailingIcon = {
                 if (text.isNotEmpty()) {
-                    IconButton(onClick = {
-                        text = ""
-                        validateInputLength()
-                    }) {
+                    IconButton(
+                        onClick = {
+                            text = ""
+                            validateInputLength()
+                        }
+                    ) {
                         Icon(
                             imageVector = Icons.Rounded.Clear,
                             contentDescription = "Clear Text"
@@ -114,20 +117,22 @@ internal fun FormTextField(
                 }
             },
             supportingText = {
-                if (supportingText.isNotEmpty()) {
-                    Text(
-                        text = supportingText,
-                        color = if (errorMessage.isNotEmpty()) Color.Red else Color.Unspecified
-                    )
+                val textColor = if (errorMessage.isEmpty()) Color.Unspecified else Color.Red
+                Row {
+                    if (supportingText.isNotEmpty()) {
+                        Text(text = supportingText, color = textColor)
+                    }
+                    if (isFocused && helperText.isNotEmpty()) {
+                        Spacer(modifier = Modifier.weight(1f))
+                        Text(text = "${text.length}", color = textColor)
+                    }
                 }
             },
             visualTransformation = if (text.isEmpty())
                 PlaceholderTransformation(placeholder)
             else VisualTransformation.None,
             keyboardActions = KeyboardActions(
-                onDone = {
-                    shouldClearFocus = true
-                }
+                onDone = { shouldClearFocus = true }
             ),
             keyboardOptions = KeyboardOptions.Default.copy(
                 imeAction = if (singleLine) ImeAction.Done else ImeAction.None
@@ -142,7 +147,6 @@ internal fun FormTextField(
 internal fun ClearFocus(key: Boolean, onComplete: () -> Unit = {}) {
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
-
     DisposableEffect(key) {
         if (key) {
             // hides the keyboard only if visible
