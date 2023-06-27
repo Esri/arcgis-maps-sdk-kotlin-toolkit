@@ -10,8 +10,8 @@ package com.arcgismaps.toolkit.authentication
  */
 public class UsernamePasswordChallenge(
     public val url: String,
-    private var onUserResponseReceived: ((username: String, password: String) -> Unit),
-    private var onCancel: () -> Unit
+    private val onUserResponseReceived: ((username: String, password: String) -> Unit),
+    private val onCancel: () -> Unit
 ) {
     public fun continueWithCredentials(username: String, password: String): Unit =
         onUserResponseReceived(username, password)
