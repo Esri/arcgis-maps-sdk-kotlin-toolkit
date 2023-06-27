@@ -201,7 +201,7 @@ private class AuthenticatorViewModelImpl(
      * @return a [UsernamePassword] provided by the user, or null if the user cancelled.
      * @since 200.2.0
      */
-    private suspend fun awaitUsernamePassword(url: String) =
+    private suspend fun awaitUsernamePassword(url: String): UsernamePassword? =
         suspendCancellableCoroutine { continuation ->
             _pendingUsernamePasswordChallenge.value = UsernamePasswordChallenge(
                 hostname = url,
