@@ -42,9 +42,10 @@ internal fun FormTextField(
     maxLength: Int,
     singleLine: Boolean,
     modifier: Modifier = Modifier,
+    value: String = "",
     placeholder: String = "",
 ) {
-    var text by remember { mutableStateOf("") }
+    var text by remember { mutableStateOf(value) }
     var isFocused by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
     var shouldClearFocus by remember { mutableStateOf(false) }

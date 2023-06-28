@@ -53,10 +53,9 @@ fun MapScreen() {
             onFeatureIdentified = { layer, feature ->
                 try {
                     FeatureFormDefinition.fromJsonOrNull(layer.formInfoJson!!)?.let { featureFormDefinition ->
+                        featureFormDefinition.feature = feature
                         // update the formViewModel's form definition
                         formViewModel.setFormDefinition(featureFormDefinition)
-                        // update the formViewModel's feature
-                        formViewModel.setFeature(feature)
                         // set formViewModel to editing state
                         formViewModel.setEditingActive(true)
                     }

@@ -47,7 +47,7 @@ public class FieldFeatureFormElement internal constructor(
     public var editableExpressionName: String ="",
     public var fieldName: String,
     public val inputType: FeatureFormInput,
-    public val value: String = "",
+    public var value: String = "",
     public var requiredExpressionName: String = "",
     public var valueExpressionName: String = "",
     public var hint: String = ""
