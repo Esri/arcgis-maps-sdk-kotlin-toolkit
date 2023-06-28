@@ -30,6 +30,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.toolkit.composablemap.ComposableMap
 import com.arcgismaps.toolkit.featureforms.FeatureForm
+import com.arcgismaps.toolkit.featureforms.api.FeatureFormDefinition
+import com.arcgismaps.toolkit.featureforms.api.formInfoJson
 import com.arcgismaps.toolkit.featureformsapp.R
 import com.arcgismaps.toolkit.featureformsapp.screens.form.FormViewModel
 import com.arcgismaps.toolkit.featureformsapp.screens.form.FormViewModelFactory
@@ -46,10 +48,13 @@ fun MapScreen() {
         factory = MapViewModelFactory(
             arcGISMap = ArcGISMap(stringResource(R.string.map_url_range_domain_combo)),
             onFeatureIdentified = { layer, feature ->
+                val featureFormDefinition = layer.formInfoJson?.let {
+                    FeatureFormDefinition.fromJsonOrNull(it)
+                } ?: throw IllegalStateException("could not get the form definition from unsupported JSON.")
+                // update the formViewModel's form definition
+                formViewModel.setFormDefinition(featureFormDefinition)
                 // update the formViewModel's feature
                 formViewModel.setFeature(feature)
-                // update the formViewModel's Layer
-                formViewModel.setLayer(layer)
                 // set formViewModel to editing state
                 formViewModel.setEditingActive(true)
             }

@@ -110,6 +110,7 @@ public val ArcGISMap.featureFormDefinition: FeatureFormDefinition
         return mapInfo.operationalLayers.first().featureFormDefinition
     }
 
+@Suppress("unused", "RedundantNullableReturnType")
 internal val ArcGISFeatureTable.formInfoJson: JsonObject?
     get() {
         if (unsupportedJson["formInfo"] != null) {
@@ -121,8 +122,8 @@ internal val ArcGISFeatureTable.formInfoJson: JsonObject?
         }
     }
 
-
-internal val FeatureLayer.formInfoJson: JsonObject?
+@Suppress("RedundantNullableReturnType")
+public val FeatureLayer.formInfoJson: JsonObject?
     get() {
         if (unsupportedJson["formInfo"] != null) {
             val jsonMap = unsupportedJson["formInfo"] as? Map<*, *>

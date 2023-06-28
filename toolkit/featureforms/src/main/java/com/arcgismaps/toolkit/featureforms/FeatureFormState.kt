@@ -1,7 +1,7 @@
 package com.arcgismaps.toolkit.featureforms
 
 import com.arcgismaps.data.ArcGISFeature
-import com.arcgismaps.mapping.layers.FeatureLayer
+import com.arcgismaps.toolkit.featureforms.api.FeatureFormDefinition
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,11 +20,11 @@ public interface FeatureFormState {
     public val feature: StateFlow<ArcGISFeature?>
     
     /**
-     * The feature for which form data is editable
+     * The FormDefinition that defines the Form
      *
      * @since 200.2.0
      */
-    public val layer: StateFlow<FeatureLayer?>
+    public val formDefinition: StateFlow<FeatureFormDefinition?>
 
     /**
      * Indicates that the form UI is available to the user for editing
@@ -45,7 +45,7 @@ public interface FeatureFormState {
      *
      * @since 200.2.0
      */
-    public fun setLayer(layer: FeatureLayer)
+    public fun setFormDefinition(definition: FeatureFormDefinition)
 
     /**
      * Sets the editing mode of the form
@@ -61,8 +61,8 @@ public interface FeatureFormState {
 public class FeatureFormStateImpl : FeatureFormState {
     private val _feature: MutableStateFlow<ArcGISFeature?> = MutableStateFlow(null)
     override val feature: StateFlow<ArcGISFeature?> = _feature.asStateFlow()
-    private val _layer: MutableStateFlow<FeatureLayer?> = MutableStateFlow(null)
-    override val layer: StateFlow<FeatureLayer?> = _layer.asStateFlow()
+    private val _formDefinition: MutableStateFlow<FeatureFormDefinition?> = MutableStateFlow(null)
+    override val formDefinition: StateFlow<FeatureFormDefinition?> = _formDefinition.asStateFlow()
     private val _inEditingMode: MutableStateFlow<Boolean> = MutableStateFlow(false)
     override val inEditingMode: StateFlow<Boolean> = _inEditingMode.asStateFlow()
     override fun setFeature(feature: ArcGISFeature) {
@@ -71,8 +71,8 @@ public class FeatureFormStateImpl : FeatureFormState {
     override fun setEditingActive(active: Boolean) {
         _inEditingMode.value = active
     }
-    override fun setLayer(layer: FeatureLayer) {
-        _layer.value = layer
+    override fun setFormDefinition(definition: FeatureFormDefinition) {
+        _formDefinition.value = definition
     }
 }
 

@@ -63,6 +63,7 @@ dependencies {
     implementation(project(":featureforms"))
     implementation(project(":composable-map"))
     implementation(arcgis.mapsSdk)
+    implementation(libs.bundles.serialization)
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)

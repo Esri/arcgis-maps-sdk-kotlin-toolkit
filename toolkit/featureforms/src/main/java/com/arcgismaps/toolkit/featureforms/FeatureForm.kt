@@ -19,7 +19,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.api.FeatureFormDefinition
 import com.arcgismaps.toolkit.featureforms.api.FieldFeatureFormElement
-import com.arcgismaps.toolkit.featureforms.api.formInfoJson
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
 
 /**
@@ -34,16 +33,13 @@ public fun FeatureForm(
     featureFormState: FeatureFormState,
     modifier: Modifier = Modifier
 ) {
+    @Suppress("UNUSED_VARIABLE")
     val feature by featureFormState.feature.collectAsState()
-    val layer by featureFormState.layer.collectAsState()
-    val featureFormDefinition = layer?.formInfoJson?.let {
-        FeatureFormDefinition.fromJsonOrNull(it)
-    }
-
-
-    if (featureFormDefinition != null) {
-        FeatureFormContent(formDefinition = featureFormDefinition, modifier = modifier)
-    } else {
+    val featureFormDefinition by featureFormState.formDefinition.collectAsState()
+    
+    featureFormDefinition?.let {
+        FeatureFormContent(formDefinition = it, modifier = modifier)
+    } ?: run {
         Column(
             modifier = modifier.fillMaxSize()
         ) {
