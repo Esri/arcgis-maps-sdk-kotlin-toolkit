@@ -5,8 +5,6 @@ import androidx.lifecycle.ViewModelProvider
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.layers.FeatureLayer
-import com.arcgismaps.mapping.layers.Layer
-import com.arcgismaps.mapping.view.IdentifyLayerResult
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.toolkit.composablemap.MapInterface
@@ -24,8 +22,7 @@ class MapViewModel(
 ) : ViewModel(), MapInterface by MapInterfaceImpl(arcGISMap) {
     context(MapView, CoroutineScope) override fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {
         launch {
-            val layer = this@MapView.map?.operationalLayers?.filterIsInstance<FeatureLayer>()?.first()
-                ?: throw IllegalStateException("map should have layers")
+            val layer = map.value.operationalLayers.filterIsInstance<FeatureLayer>().first()
             this@MapView.identifyLayer(
                 layer = layer,
                 screenCoordinate = singleTapEvent.screenCoordinate,
