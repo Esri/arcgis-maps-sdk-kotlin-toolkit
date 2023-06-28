@@ -24,6 +24,7 @@ class MapViewModel(
 ) : ViewModel(),
     MapInterface by MapInterface(arcGISMap),
     FeatureFormState by FeatureFormState() {
+
     context(MapView, CoroutineScope) override fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {
         launch {
             val layer = map.value.operationalLayers.filterIsInstance<FeatureLayer>().first()
@@ -32,29 +33,30 @@ class MapViewModel(
                 screenCoordinate = singleTapEvent.screenCoordinate,
                 tolerance = 22.0,
                 returnPopupsOnly = false
-            )
-                .onSuccess { results ->
-                    results.geoElements.firstOrNull { it is ArcGISFeature }?.let {
-                        val feature = it as ArcGISFeature
-                        feature
-                            .load()
-                            .onSuccess {
-                                try {
-                                    FeatureFormDefinition.fromJsonOrNull(layer.formInfoJson!!)?.let { featureFormDefinition ->
-                                        // update the formViewModel's form definition
-                                        setFormDefinition(featureFormDefinition)
-                                        // update the formViewModel's feature
-                                        setFeature(feature)
-                                        // set formViewModel to editing state
-                                        setEditingActive(true)
-                                    }
-                                }  catch (e: Exception) {
-                                    Toast.makeText(context,"could not get the form definition from unsupported JSON.", Toast.LENGTH_LONG).show()
+            ).onSuccess { results ->
+                results.geoElements.firstOrNull { it is ArcGISFeature }?.let {
+                    val feature = it as ArcGISFeature
+                    feature.load().onSuccess {
+                        try {
+                            FeatureFormDefinition.fromJsonOrNull(layer.formInfoJson!!)
+                                ?.let { featureFormDefinition ->
+                                    // update the formViewModel's form definition
+                                    setFormDefinition(featureFormDefinition)
+                                    // update the formViewModel's feature
+                                    setFeature(feature)
+                                    // set formViewModel to editing state
+                                    setEditingActive(true)
                                 }
-                            }
-                            .onFailure { println("failed to load tapped Feature") }
-                    } ?: println("tap was not on a feature")
-                }
+                        } catch (e: Exception) {
+                            Toast.makeText(
+                                context,
+                                "could not get the form definition from unsupported JSON.",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    }.onFailure { println("failed to load tapped Feature") }
+                } ?: println("tap was not on a feature")
+            }
         }
     }
 }
