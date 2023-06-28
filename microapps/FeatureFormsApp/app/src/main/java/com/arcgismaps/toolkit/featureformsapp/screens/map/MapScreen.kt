@@ -1,5 +1,6 @@
 package com.arcgismaps.toolkit.featureformsapp.screens.map
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,6 +24,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -30,6 +32,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.toolkit.composablemap.ComposableMap
 import com.arcgismaps.toolkit.featureforms.FeatureForm
+import com.arcgismaps.toolkit.featureforms.api.FeatureFormDefinition
+import com.arcgismaps.toolkit.featureforms.api.formInfoJson
 import com.arcgismaps.toolkit.featureformsapp.R
 import com.arcgismaps.toolkit.featureformsapp.screens.form.FormViewModel
 import com.arcgismaps.toolkit.featureformsapp.screens.form.FormViewModelFactory
@@ -41,15 +45,24 @@ fun MapScreen() {
     val formViewModel = viewModel<FormViewModel>(
         factory = FormViewModelFactory()
     )
+    val context = LocalContext.current
     // instantiate a MapViewModel using its factory
     val mapViewModel = viewModel<MapViewModel>(
         factory = MapViewModelFactory(
-            arcGISMap = ArcGISMap(stringResource(R.string.map_url)),
-            onFeatureIdentified = { feature ->
-                // update the formViewModel's feature
-                formViewModel.setFeature(feature)
-                // set formViewModel to editing state
-                formViewModel.setEditingActive(true)
+            arcGISMap = ArcGISMap(stringResource(R.string.map_url_all_text_state)),
+            onFeatureIdentified = { layer, feature ->
+                try {
+                    FeatureFormDefinition.fromJsonOrNull(layer.formInfoJson!!)?.let { featureFormDefinition ->
+                        // update the formViewModel's form definition
+                        formViewModel.setFormDefinition(featureFormDefinition)
+                        // update the formViewModel's feature
+                        formViewModel.setFeature(feature)
+                        // set formViewModel to editing state
+                        formViewModel.setEditingActive(true)
+                    }
+                }  catch (e: Exception) {
+                    Toast.makeText(context,"could not get the form definition from unsupported JSON.", Toast.LENGTH_LONG).show()
+                }
             }
         )
     )
