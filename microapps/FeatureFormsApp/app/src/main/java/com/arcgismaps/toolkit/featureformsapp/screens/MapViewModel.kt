@@ -1,5 +1,6 @@
-package com.arcgismaps.toolkit.featureformsapp.screens.map
+package com.arcgismaps.toolkit.featureformsapp.screens
 
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.arcgismaps.data.ArcGISFeature
@@ -8,7 +9,9 @@ import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.toolkit.composablemap.MapInterface
-import com.arcgismaps.toolkit.composablemap.MapInterfaceImpl
+import com.arcgismaps.toolkit.featureforms.FeatureFormState
+import com.arcgismaps.toolkit.featureforms.api.FeatureFormDefinition
+import com.arcgismaps.toolkit.featureforms.api.formInfoJson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -17,9 +20,10 @@ import kotlinx.coroutines.launch
  * @constructor to be invoked by the [MapViewModelFactory]
  */
 class MapViewModel(
-    arcGISMap: ArcGISMap,
-    val onFeatureIdentified: (FeatureLayer, ArcGISFeature) -> Unit
-) : ViewModel(), MapInterface by MapInterfaceImpl(arcGISMap) {
+    arcGISMap: ArcGISMap
+) : ViewModel(),
+    MapInterface by MapInterface(arcGISMap),
+    FeatureFormState by FeatureFormState() {
     context(MapView, CoroutineScope) override fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {
         launch {
             val layer = map.value.operationalLayers.filterIsInstance<FeatureLayer>().first()
@@ -34,7 +38,20 @@ class MapViewModel(
                         val feature = it as ArcGISFeature
                         feature
                             .load()
-                            .onSuccess { onFeatureIdentified(layer, feature) }
+                            .onSuccess {
+                                try {
+                                    FeatureFormDefinition.fromJsonOrNull(layer.formInfoJson!!)?.let { featureFormDefinition ->
+                                        // update the formViewModel's form definition
+                                        setFormDefinition(featureFormDefinition)
+                                        // update the formViewModel's feature
+                                        setFeature(feature)
+                                        // set formViewModel to editing state
+                                        setEditingActive(true)
+                                    }
+                                }  catch (e: Exception) {
+                                    Toast.makeText(context,"could not get the form definition from unsupported JSON.", Toast.LENGTH_LONG).show()
+                                }
+                            }
                             .onFailure { println("failed to load tapped Feature") }
                     } ?: println("tap was not on a feature")
                 }
@@ -46,11 +63,10 @@ class MapViewModel(
  * Factory for the [MapViewModel]
  */
 class MapViewModelFactory(
-    private val arcGISMap: ArcGISMap,
-    private val onFeatureIdentified: (FeatureLayer, ArcGISFeature) -> Unit = { _, _ -> }
+    private val arcGISMap: ArcGISMap
 ) : ViewModelProvider.NewInstanceFactory() {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return MapViewModel(arcGISMap, onFeatureIdentified) as T
+        return MapViewModel(arcGISMap) as T
     }
 }
