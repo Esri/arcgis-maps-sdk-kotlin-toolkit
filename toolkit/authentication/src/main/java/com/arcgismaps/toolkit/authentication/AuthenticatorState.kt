@@ -1,7 +1,6 @@
 package com.arcgismaps.toolkit.authentication
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeHandler
@@ -26,7 +25,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
  *
  * @since 200.2.0
  */
-public interface AuthenticatorViewModel : NetworkAuthenticationChallengeHandler,
+public interface AuthenticatorState : NetworkAuthenticationChallengeHandler,
     ArcGISAuthenticationChallengeHandler {
 
     /**
@@ -58,17 +57,27 @@ public interface AuthenticatorViewModel : NetworkAuthenticationChallengeHandler,
      * @since 200.2.0
      */
     public val pendingUsernamePasswordChallenge: StateFlow<UsernamePasswordChallenge?>
+
+    public companion object {
+        public fun create(
+            setAsArcGISAuthenticationChallengeHandler: Boolean = true,
+            setAsNetworkAuthenticationChallengeHandler: Boolean = true
+        ): AuthenticatorState = AuthenticatorStateImpl(
+            setAsArcGISAuthenticationChallengeHandler,
+            setAsNetworkAuthenticationChallengeHandler
+        )
+    }
 }
 
 /**
- * Default implementation for [AuthenticatorViewModel].
+ * Default implementation for [AuthenticatorState].
  *
  * @since 200.2.0
  */
-private class AuthenticatorViewModelImpl(
+private class AuthenticatorStateImpl(
     setAsArcGISAuthenticationChallengeHandler: Boolean,
     setAsNetworkAuthenticationChallengeHandler: Boolean
-) : AuthenticatorViewModel, ViewModel() {
+) : AuthenticatorState, ViewModel() {
 
     override var oAuthUserConfiguration: OAuthUserConfiguration? = null
 
@@ -223,28 +232,6 @@ private class AuthenticatorViewModelImpl(
                 continuation.resumeWith(Result.success(null))
             }
         }
-}
-
-/**
- * Provides a [ViewModelProvider.Factory] for creating a default implementation of the [AuthenticatorViewModel]
- * interface.
- *
- * @property setAsArcGISAuthenticationChallengeHandler whether to set the created [AuthenticatorViewModel]
- * as the [ArcGISEnvironment.authenticationManager.arcGisAuthenticationChallengeHandler].
- * @property setAsNetworkAuthenticationChallengeHandler whether to set the created [AuthenticatorViewModel]
- * as the [ArcGISEnvironment.authenticationManager.networkAuthenticationChallengeHandler].
- */
-public class AuthenticatorViewModelFactory(
-    public var setAsArcGISAuthenticationChallengeHandler: Boolean = true,
-    public var setAsNetworkAuthenticationChallengeHandler: Boolean = true
-) : ViewModelProvider.NewInstanceFactory() {
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return AuthenticatorViewModelImpl(
-            setAsArcGISAuthenticationChallengeHandler,
-            setAsNetworkAuthenticationChallengeHandler
-        ) as T
-    }
 }
 
 /**
