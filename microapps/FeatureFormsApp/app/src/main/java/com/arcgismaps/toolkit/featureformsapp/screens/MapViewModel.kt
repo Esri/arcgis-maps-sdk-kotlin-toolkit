@@ -40,11 +40,12 @@ class MapViewModel(
                         try {
                             FeatureFormDefinition.fromJsonOrNull(layer.formInfoJson!!)
                                 ?.let { featureFormDefinition ->
-                                    // update the formViewModel's form definition
+                                    // update the feature on the featureFormDefinition
+                                    featureFormDefinition.feature = feature
+                                    // update the FeatureFormState's FormDefinition
                                     setFormDefinition(featureFormDefinition)
-                                    // update the formViewModel's feature
-                                    setFeature(feature)
-                                    // set formViewModel to editing state
+                                    // set the FeatureFormState to an editing state to bring up the
+                                    // FeatureForm UI
                                     setEditingActive(true)
                                 }
                         } catch (e: Exception) {
