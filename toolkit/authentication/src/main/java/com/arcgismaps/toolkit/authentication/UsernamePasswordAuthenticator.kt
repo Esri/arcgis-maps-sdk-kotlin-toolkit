@@ -136,15 +136,21 @@ public fun UsernamePasswordAuthenticator(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Button(onClick = { usernamePasswordChallenge.cancel() }) {
+                Button(
+                    modifier = Modifier.padding(16.dp),
+                    onClick = { usernamePasswordChallenge.cancel() }
+                ) {
                     Text(stringResource(id = R.string.cancel))
                 }
-                Button(onClick = {
-                    usernamePasswordChallenge.continueWithCredentials(
-                        usernameFieldText,
-                        passwordFieldText
-                    )
-                }) {
+                Button(
+                    modifier = Modifier.padding(16.dp),
+                    onClick = {
+                        usernamePasswordChallenge.continueWithCredentials(
+                            usernameFieldText,
+                            passwordFieldText
+                        )
+                    }
+                ) {
                     Text(stringResource(id = R.string.login))
                 }
             }
