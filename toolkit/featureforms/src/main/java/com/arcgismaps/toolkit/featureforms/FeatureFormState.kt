@@ -13,13 +13,6 @@ import kotlinx.coroutines.flow.asStateFlow
  */
 public interface FeatureFormState {
     /**
-     * The feature for which form data is editable
-     *
-     * @since 200.2.0
-     */
-    public val feature: StateFlow<ArcGISFeature?>
-    
-    /**
      * The FormDefinition that defines the Form
      *
      * @since 200.2.0
@@ -32,13 +25,6 @@ public interface FeatureFormState {
      * @since 200.2.0
      */
     public val inEditingMode: StateFlow<Boolean>
-
-    /**
-     * Sets the feature to which edits will be applied.
-     *
-     * @since 200.2.0
-     */
-    public fun setFeature(feature: ArcGISFeature)
     
     /**
      * Sets the feature to which edits will be applied.
@@ -59,15 +45,10 @@ public interface FeatureFormState {
  * Default implementation for the [FeatureFormState]
  */
 public class FeatureFormStateImpl : FeatureFormState {
-    private val _feature: MutableStateFlow<ArcGISFeature?> = MutableStateFlow(null)
-    override val feature: StateFlow<ArcGISFeature?> = _feature.asStateFlow()
     private val _formDefinition: MutableStateFlow<FeatureFormDefinition?> = MutableStateFlow(null)
     override val formDefinition: StateFlow<FeatureFormDefinition?> = _formDefinition.asStateFlow()
     private val _inEditingMode: MutableStateFlow<Boolean> = MutableStateFlow(false)
     override val inEditingMode: StateFlow<Boolean> = _inEditingMode.asStateFlow()
-    override fun setFeature(feature: ArcGISFeature) {
-        _feature.value = feature
-    }
     override fun setEditingActive(active: Boolean) {
         _inEditingMode.value = active
     }
