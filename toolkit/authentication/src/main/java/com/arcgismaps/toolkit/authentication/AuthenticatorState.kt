@@ -57,16 +57,6 @@ public sealed interface AuthenticatorState : NetworkAuthenticationChallengeHandl
      * @since 200.2.0
      */
     public val pendingUsernamePasswordChallenge: StateFlow<UsernamePasswordChallenge?>
-
-    public companion object {
-        public fun create(
-            setAsArcGISAuthenticationChallengeHandler: Boolean = true,
-            setAsNetworkAuthenticationChallengeHandler: Boolean = true
-        ): AuthenticatorState = AuthenticatorStateImpl(
-            setAsArcGISAuthenticationChallengeHandler,
-            setAsNetworkAuthenticationChallengeHandler
-        )
-    }
 }
 
 /**
@@ -233,6 +223,14 @@ private class AuthenticatorStateImpl(
             }
         }
 }
+
+public fun AuthenticatorState(
+    setAsArcGISAuthenticationChallengeHandler: Boolean = true,
+    setAsNetworkAuthenticationChallengeHandler: Boolean = true
+) : AuthenticatorState = AuthenticatorStateImpl(
+    setAsArcGISAuthenticationChallengeHandler,
+    setAsNetworkAuthenticationChallengeHandler
+)
 
 /**
  * Creates an [OAuthUserCredential] for this [OAuthUserConfiguration]. Suspends
