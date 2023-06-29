@@ -126,7 +126,7 @@ private fun PortalDetails(
                 onClick = onSignOut,
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
             ) {
-                Text(text = "Clear credentials")
+                Text(text = "Sign out")
             }
             // Load button
             Button(

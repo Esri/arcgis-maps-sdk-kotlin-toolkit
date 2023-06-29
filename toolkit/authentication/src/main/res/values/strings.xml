@@ -2,7 +2,7 @@
     <string name="server_trust_message">The certificate provided by %1$s is not signed by a trusted authority.</string>
     <string name="cancel">Cancel</string>
     <string name="allow_connection">Dangerous: Allow Connection</string>
-    <string name="username_password_login_message">Please log in to %1$s</string>
+    <string name="username_password_login_message">Please login to</string>
     <string name="username_label">Username</string>
     <string name="password_label">Password</string>
     <string name="login">Login</string>

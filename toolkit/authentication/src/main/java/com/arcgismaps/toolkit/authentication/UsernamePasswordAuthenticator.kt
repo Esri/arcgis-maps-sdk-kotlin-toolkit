@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -23,12 +22,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 
 /**
@@ -37,7 +49,6 @@ import androidx.compose.ui.unit.dp
  * @param usernamePasswordChallenge the pending [UsernamePasswordChallenge] that initiated this prompt.
  * @since 200.2.0
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 public fun UsernamePasswordAuthenticator(
     usernamePasswordChallenge: UsernamePasswordChallenge
@@ -51,7 +62,18 @@ public fun UsernamePasswordAuthenticator(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = stringResource(id = R.string.username_password_login_message, usernamePasswordChallenge.url),
+            text = buildAnnotatedString {
+                append(stringResource(id = R.string.username_password_login_message))
+                append(" ")
+                withStyle(
+                    style = SpanStyle(
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = MaterialTheme.typography.headlineSmall.fontSize
+                    )
+                ) {
+                    append(usernamePasswordChallenge.url)
+                }
+            },
             style = MaterialTheme.typography.headlineMedium,
             textAlign = TextAlign.Center
         )
@@ -73,7 +95,14 @@ public fun UsernamePasswordAuthenticator(
                     }
                 )
             }
+            val focusManager = LocalFocusManager.current
             OutlinedTextField(
+                modifier = Modifier.moveFocusOnTabEvent(focusManager, {
+                    usernamePasswordChallenge.continueWithCredentials(
+                        usernameFieldText, passwordFieldText
+                    )
+                }
+                ),
                 value = usernameFieldText,
                 onValueChange = { it: String -> usernameFieldText = it },
                 keyboardOptions = KeyboardOptions(
@@ -85,6 +114,12 @@ public fun UsernamePasswordAuthenticator(
                 singleLine = true
             )
             OutlinedTextField(
+                modifier = Modifier.moveFocusOnTabEvent(focusManager, {
+                    usernamePasswordChallenge.continueWithCredentials(
+                        usernameFieldText, passwordFieldText
+                    )
+                }
+                ),
                 value = passwordFieldText,
                 onValueChange = { it: String -> passwordFieldText = it },
                 keyboardOptions = KeyboardOptions(
@@ -101,19 +136,42 @@ public fun UsernamePasswordAuthenticator(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Button(onClick = { usernamePasswordChallenge.cancel() }) {
+                Button(
+                    modifier = Modifier.padding(16.dp),
+                    onClick = { usernamePasswordChallenge.cancel() }
+                ) {
                     Text(stringResource(id = R.string.cancel))
                 }
-                Button(onClick = {
-                    usernamePasswordChallenge.continueWithCredentials(
-                        usernameFieldText,
-                        passwordFieldText
-                    )
-                }) {
+                Button(
+                    modifier = Modifier.padding(16.dp),
+                    onClick = {
+                        usernamePasswordChallenge.continueWithCredentials(
+                            usernameFieldText,
+                            passwordFieldText
+                        )
+                    }
+                ) {
                     Text(stringResource(id = R.string.login))
                 }
             }
-
         }
     }
 }
+
+@OptIn(ExperimentalComposeUiApi::class)
+private fun Modifier.moveFocusOnTabEvent(focusManager: FocusManager, onEnter: () -> Unit) =
+    onPreviewKeyEvent {
+        if (it.type == KeyEventType.KeyDown) {
+            when (it.key.keyCode) {
+                Key.Tab.keyCode -> {
+                    focusManager.moveFocus(FocusDirection.Down); true
+                }
+
+                Key.Enter.keyCode -> {
+                    onEnter(); true
+                }
+
+                else -> false
+            }
+        } else false
+    }
