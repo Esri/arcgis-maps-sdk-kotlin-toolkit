@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -25,10 +24,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 
 /**
@@ -37,7 +40,6 @@ import androidx.compose.ui.unit.dp
  * @param usernamePasswordChallenge the pending [UsernamePasswordChallenge] that initiated this prompt.
  * @since 200.2.0
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 public fun UsernamePasswordAuthenticator(
     usernamePasswordChallenge: UsernamePasswordChallenge
@@ -51,7 +53,13 @@ public fun UsernamePasswordAuthenticator(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = stringResource(id = R.string.username_password_login_message, usernamePasswordChallenge.url),
+            text = buildAnnotatedString {
+                append(stringResource(id = R.string.username_password_login_message))
+                append(" ")
+                withStyle(style = SpanStyle(fontFamily = FontFamily.Monospace, fontSize = MaterialTheme.typography.headlineSmall.fontSize)) {
+                    append(usernamePasswordChallenge.url)
+                }
+            },
             style = MaterialTheme.typography.headlineMedium,
             textAlign = TextAlign.Center
         )
