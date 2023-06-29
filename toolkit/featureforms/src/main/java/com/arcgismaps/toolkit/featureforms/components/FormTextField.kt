@@ -45,7 +45,7 @@ internal fun FormTextField(
     value: String = "",
     placeholder: String = "",
 ) {
-    var text by remember { mutableStateOf(value) }
+    var text by remember(value) { mutableStateOf(value) }
     var isFocused by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
     var shouldClearFocus by remember { mutableStateOf(false) }

@@ -49,7 +49,7 @@ fun MapScreen() {
     // instantiate a MapViewModel using its factory
     val mapViewModel = viewModel<MapViewModel>(
         factory = MapViewModelFactory(
-            arcGISMap = ArcGISMap(stringResource(R.string.map_url_all_text_state)),
+            arcGISMap = ArcGISMap(stringResource(R.string.map_url_text_box_area)),
             onFeatureIdentified = { layer, feature ->
                 try {
                     FeatureFormDefinition.fromJsonOrNull(layer.formInfoJson!!)?.let { featureFormDefinition ->
