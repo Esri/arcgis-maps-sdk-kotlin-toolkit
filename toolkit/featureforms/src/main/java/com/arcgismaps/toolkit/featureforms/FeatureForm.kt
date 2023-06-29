@@ -34,7 +34,6 @@ public fun FeatureForm(
     featureFormState: FeatureFormState,
     modifier: Modifier = Modifier
 ) {
-    Log.d("TAG", "FeatureForm: Composing")
     @Suppress("UNUSED_VARIABLE")
     val feature by featureFormState.feature.collectAsState()
     val featureFormDefinition by featureFormState.formDefinition.collectAsState()
@@ -55,7 +54,6 @@ internal fun FeatureFormContent(
     formDefinition: FeatureFormDefinition,
     modifier: Modifier = Modifier
 ) {
-    Log.d("TAG", "FeatureFormContent: Recomp")
     Column(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
