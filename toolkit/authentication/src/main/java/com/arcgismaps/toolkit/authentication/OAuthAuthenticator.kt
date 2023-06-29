@@ -18,7 +18,7 @@ internal fun OAuthAuthenticator(
     oAuthPendingSignIn: OAuthUserSignIn
 ) {
     val launcher =
-        rememberLauncherForActivityResult(contract = OAuthUserSignInActivity.Contract()) { redirectUrl ->
+        rememberLauncherForActivityResult(OAuthActivityResultContract(OAuthWebViewActivity())) { redirectUrl ->
             redirectUrl?.let {
                 oAuthPendingSignIn.complete(redirectUrl)
             } ?: oAuthPendingSignIn.cancel()

@@ -4,31 +4,18 @@ package com.arcgismaps.toolkit.authentication
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.net.http.SslError
 import android.os.Bundle
-import android.webkit.ClientCertRequest
-import android.webkit.HttpAuthHandler
-import android.webkit.SslErrorHandler
-import android.webkit.WebResourceRequest
-import android.webkit.WebResourceResponse
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.lifecycle.Lifecycle
-import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
-import kotlinx.coroutines.runBlocking
-import java.net.URL
-import javax.net.ssl.SSLException
 
 private const val KEY_INTENT_EXTRA_AUTHORIZE_URL = "INTENT_EXTRA_KEY_AUTHORIZE_URL"
 private const val KEY_INTENT_EXTRA_CUSTOM_TABS_WAS_LAUNCHED =
     "KEY_INTENT_EXTRA_CUSTOM_TABS_WAS_LAUNCHED"
 private const val KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL = "KEY_INTENT_EXTRA_OAUTH_RESPONSE_URI"
 private const val KEY_INTENT_EXTRA_REDIRECT_URL = "KEY_INTENT_EXTRA_REDIRECT_URL"
-private const val DEFAULT_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob"
 
 private const val RESULT_CODE_SUCCESS = 1
 private const val RESULT_CODE_CANCELED = 2
@@ -43,7 +30,6 @@ internal class OAuthUserSignInActivity : ComponentActivity() {
 
     private var customTabsWasLaunched = false
     private lateinit var redirectUrl: String
-    private lateinit var webView: WebView
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,11 +42,7 @@ internal class OAuthUserSignInActivity : ComponentActivity() {
         if (!customTabsWasLaunched) {
             val authorizeUrl = intent.getStringExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL)
             authorizeUrl?.let {
-                if (redirectUrl == DEFAULT_REDIRECT_URI) {
-                    launchOAuthPageInWebView(it)
-                } else {
-                    launchCustomTabs(it)
-                }
+                launchCustomTabs(it)
             }
         }
     }
@@ -100,7 +82,7 @@ internal class OAuthUserSignInActivity : ComponentActivity() {
         // - When the browser window is launched this triggers a focus changed event with hasFocus true but at this point
         //   we do not want to finish this activity -> at this point the activity is in paused state (isResumed == false) so
         //   we can use this to ignore this "rogue" focus changed event.
-        if (hasFocus && lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) && !(::webView.isInitialized)) {
+        if (hasFocus && lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
             // if we got here the user must have pressed the back button or the x button while the
             // custom tab was visible - finish by cancelling OAuth sign in
             setResult(RESULT_CODE_CANCELED, Intent())
@@ -120,153 +102,34 @@ internal class OAuthUserSignInActivity : ComponentActivity() {
         customTabsWasLaunched = true
         CustomTabsIntent.Builder().build().launchUrl(this, Uri.parse(authorizeUrl))
     }
+}
 
-    /**
-     * Launches the [authorizeUrl] to prompt for OAuth sign-in in a custom WebView.
-     *
-     * @since 200.2.0
-     */
-    private fun launchOAuthPageInWebView(authorizeUrl: String) {
-        title = authorizeUrl
-        webView = WebView(this).apply {
-            settings.apply {
-                displayZoomControls = false
-                javaScriptEnabled = true
-            }
-            webViewClient = OAuthWebViewClient(this@OAuthUserSignInActivity)
-        }
-        setContentView(webView)
-        webView.loadUrl(authorizeUrl)
-    }
-
-    /**
-     * An ActivityResultContract that takes a [OAuthUserSignIn] as input and returns a nullable
-     * string as output. The output string represents a redirect URI as the result of an OAuth user
-     * sign in prompt, or null if OAuth user sign in failed. This contract can be used to launch the
-     * [OAuthUserSignInActivity] for a result.
-     * See [Getting a result from an activity](https://developer.android.com/training/basics/intents/result)
-     * for more details.
-     *
-     * @since 200.2.0
-     */
-    class Contract : ActivityResultContract<OAuthUserSignIn, String?>() {
-        override fun createIntent(context: Context, input: OAuthUserSignIn): Intent =
-            Intent(context, OAuthUserSignInActivity::class.java).apply {
-                putExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL, input.authorizeUrl)
-                putExtra(
-                    KEY_INTENT_EXTRA_REDIRECT_URL,
-                    input.oAuthUserConfiguration.redirectUrl
-                )
-            }
-
-        override fun parseResult(resultCode: Int, intent: Intent?): String? {
-            return if (resultCode == RESULT_CODE_SUCCESS) {
-                intent?.getStringExtra(KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL)
-            } else {
-                null
-            }
-        }
-    }
-
-    /**
-     * WebView Client that is in charge of managing the OAuth sign-in workflow.
-     *
-     * @since 200.2.0
-     */
-    private class OAuthWebViewClient(val activity: OAuthUserSignInActivity) : WebViewClient() {
-        /**
-         * Takes control of the page loading in the [webView] if the URL in the [request] contains the approval code
-         * and forwards it to the [OAuthUserSignInActivity] by setting it in the result contract.
-         *
-         * @param view the WebView that is initiating this callback
-         * @param request the request that the WebView is processing
-         * @since 200.2.0
-         */
-        override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-            request?.url?.let {
-                if (it.toString().contains("/oauth2/approval", true)) {
-                    val newIntent = Intent().apply {
-                        putExtra(KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL, it.toString())
-                    }
-                    activity.setResult(RESULT_CODE_SUCCESS, newIntent)
-                    activity.finish()
-                    return true
-                }
-            }
-            return false
+/**
+ * An ActivityResultContract that takes a [OAuthUserSignIn] as input and returns a nullable
+ * string as output. The output string represents a redirect URI as the result of an OAuth user
+ * sign in prompt, or null if OAuth user sign in failed. This contract can be used to launch the
+ * [OAuthUserSignInActivity] for a result.
+ * See [Getting a result from an activity](https://developer.android.com/training/basics/intents/result)
+ * for more details.
+ *
+ * @since 200.2.0
+ */
+public class OAuthActivityResultContract(private val activity: ComponentActivity) :
+    ActivityResultContract<OAuthUserSignIn, String?>() {
+    override fun createIntent(context: Context, input: OAuthUserSignIn): Intent =
+        Intent(context, activity::class.java).apply {
+            putExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL, input.authorizeUrl)
+            putExtra(
+                KEY_INTENT_EXTRA_REDIRECT_URL,
+                input.oAuthUserConfiguration.redirectUrl
+            )
         }
 
-        /**
-         * TODO will handle User Credential Challenge
-         *
-         * @since 200.2.0
-         */
-        override fun onReceivedHttpAuthRequest(
-            view: WebView?,
-            handler: HttpAuthHandler?,
-            host: String?,
-            realm: String?
-        ) {
-            super.onReceivedHttpAuthRequest(view, handler, host, realm)
+    override fun parseResult(resultCode: Int, intent: Intent?): String? {
+        return if (resultCode == RESULT_CODE_SUCCESS) {
+            intent?.getStringExtra(KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL)
+        } else {
+            null
         }
-
-        /**
-         * TODO will handle Client Certificate Authentication (PKI)
-         *
-         * @since 200.2.0
-         */
-        override fun onReceivedClientCertRequest(view: WebView?, request: ClientCertRequest?) {
-            super.onReceivedClientCertRequest(view, request)
-        }
-
-        /**
-         * Callback will be invoked when an SSL error occurs while loading the OAuth sign-in page.
-         * The the OAuth sign-in page is loaded only if user chooses to trust the certificate authority,
-         * otherwise the connection will get cancelled and an error will get thrown to the caller.
-         *
-         * @param view the WebView that is initiating the callback
-         * @param handler an SslErrorHandler that will handle the user's response
-         * @param error the SSL error object
-         * @since 200.2.0
-         */
-        override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
-            val host = URL(view?.url).host
-            runBlocking {
-                val trustedHost =
-                    ArcGISEnvironment.authenticationManager.networkCredentialStore.getCredentials(host)
-                        .getOrThrow().isNotEmpty()
-
-                if (trustedHost) {
-                    handler?.proceed()
-                } else {
-                    handler?.cancel()
-                    throw SSLException("Connection to $host failed, ${error?.toString()}")
-                }
-            }
-        }
-
-        /**
-         * TODO will handle errors that are displayed in the custom webViews, such as Invalid_client_id
-         *
-         * @since 200.2.0
-         */
-        override fun onReceivedHttpError(
-            view: WebView?,
-            request: WebResourceRequest?,
-            errorResponse: WebResourceResponse?
-        ) {
-            super.onReceivedHttpError(view, request, errorResponse)
-        }
-
-        /**
-         * TODO: Used in conjunction with onReceivedHttpError to finish the page when an error occurs
-         *
-         * @since 200.2.0
-         */
-        override fun onPageFinished(view: WebView?, url: String?) {
-            super.onPageFinished(view, url)
-        }
-
-        // TODO: Test pressing back on the webPage, what happens?
     }
 }

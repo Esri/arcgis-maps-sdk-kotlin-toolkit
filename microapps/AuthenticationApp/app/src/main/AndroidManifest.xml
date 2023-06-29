@@ -39,6 +39,21 @@
                 <data
                     android:host="auth"
                     android:scheme="my-ags-app" />
+                <data
+                    android:host ="auth"
+                    android:scheme="my-android-app"
+                    />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="com.arcgismaps.toolkit.authentication.OAuthWebViewActivity"
+            android:exported="true"
+            android:theme="@style/Theme.AuthenticationApp">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
     </application>

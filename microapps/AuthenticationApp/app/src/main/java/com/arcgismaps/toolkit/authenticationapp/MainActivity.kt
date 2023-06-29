@@ -5,7 +5,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -24,6 +23,15 @@ import com.arcgismaps.toolkit.authentication.AuthenticatorViewModelFactory
 import com.arcgismaps.toolkit.authenticationapp.ui.theme.AuthenticationAppTheme
 import org.json.JSONObject
 
+// Temp Test Data
+private const val DEFAULT_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob"
+const val portalArcgis = "https://www.arcgis.com"
+val arcgisConf = OAuthUserConfiguration(portalArcgis, "QrpBAoS7KccFerE3", DEFAULT_REDIRECT_URI/*"my-ags-app://auth"*/)
+const val portalSAML = "https://rt-saml1.esri.com/portal"
+val samlConfig = OAuthUserConfiguration(portalSAML, "Ttj5gUYkSXxJVNjv", DEFAULT_REDIRECT_URI)
+const val selfSignedPortal = "https://rt-server107a.esri.com/portal"
+val selfSignedConfig = OAuthUserConfiguration(selfSignedPortal, "1BADxtERjogAQG4u", "my-android-app://auth")
+
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,11 +45,10 @@ class MainActivity : ComponentActivity() {
 }
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AuthenticationApp() {
     // This portal is accessible with any valid arcgis.com account.
-    val portal = remember { Portal("https://www.arcgis.com", Portal.Connection.Authenticated) }
+    val portal = remember { Portal(portalArcgis, Portal.Connection.Authenticated) }
 
     val portalInfo = produceState<String?>(initialValue = null) {
         portal.load().getOrElse { value = null }
@@ -72,13 +79,7 @@ fun AuthenticationApp() {
         }
         val authenticatorViewModel: AuthenticatorViewModel =
             viewModel(factory = AuthenticatorViewModelFactory())
-        authenticatorViewModel.oAuthUserConfiguration = OAuthUserConfiguration(
-            "https://www.arcgis.com",
-            // This client ID is for demo purposes only. For use of the Authenticator in your own app,
-            // create your own client ID. For more info see: https://developers.arcgis.com/documentation/mapping-apis-and-services/security/tutorials/register-your-application/
-            "lgAdHkYZYlwwfAhC",
-            "my-ags-app://auth"
-        )
+        authenticatorViewModel.oAuthUserConfiguration = arcgisConf
         Authenticator(authenticatorViewModel)
     }
 }
