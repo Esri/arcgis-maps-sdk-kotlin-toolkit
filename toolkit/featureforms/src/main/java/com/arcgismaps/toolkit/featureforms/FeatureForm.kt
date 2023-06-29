@@ -36,7 +36,6 @@ public fun FeatureForm(
     @Suppress("UNUSED_VARIABLE")
     val feature by featureFormState.feature.collectAsState()
     val featureFormDefinition by featureFormState.formDefinition.collectAsState()
-
     featureFormDefinition?.let {
         FeatureFormContent(formDefinition = it, modifier = modifier)
     } ?: run {
@@ -60,8 +59,8 @@ internal fun FeatureFormContent(
         // title
         Text(text = formDefinition.title, style = TextStyle(fontWeight = FontWeight.Bold))
         Spacer(modifier = Modifier
-                .fillMaxWidth()
-                .height(15.dp)
+            .fillMaxWidth()
+            .height(15.dp)
         )
         Divider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
         // form content
