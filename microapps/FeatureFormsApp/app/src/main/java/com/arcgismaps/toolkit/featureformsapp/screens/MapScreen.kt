@@ -38,7 +38,7 @@ fun MapScreen() {
     // instantiate a MapViewModel using its factory
     val mapViewModel = viewModel<MapViewModel>(
         factory = MapViewModelFactory(
-            arcGISMap = ArcGISMap(stringResource(R.string.map_url_text_box_area))
+            arcGISMap = ArcGISMap(stringResource(R.string.map_url_length_default_value))
         )
     )
     // hoist state for the formViewModel editing mode
