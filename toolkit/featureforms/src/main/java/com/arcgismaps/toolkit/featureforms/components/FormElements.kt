@@ -10,11 +10,13 @@ import com.arcgismaps.toolkit.featureforms.api.TextBoxFeatureFormInput
 @Composable
 internal fun FieldElement(field: FieldFeatureFormElement) {
     when (field.inputType) {
-        is TextAreaFeatureFormInput -> {
-            TextArea(field = field)
+        is TextAreaFeatureFormInput  -> {
+            // TextArea(field = field)
+            FormTextField(formTextFieldState = FormTextFieldState(field), field.inputType)
         }
         is TextBoxFeatureFormInput -> {
-            TextBox(field = field)
+            // TextBox(field = field)
+            FormTextField(formTextFieldState = FormTextFieldState(field), field.inputType)
         }
         else -> { /* TO-DO: add support for other input types */}
     }

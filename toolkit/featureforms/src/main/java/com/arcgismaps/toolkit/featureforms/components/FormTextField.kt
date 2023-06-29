@@ -33,9 +33,67 @@ import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.featureforms.api.FieldFeatureFormElement
+import com.arcgismaps.toolkit.featureforms.api.TextAreaFeatureFormInput
+import com.arcgismaps.toolkit.featureforms.api.TextBoxFeatureFormInput
+
+internal class FormTextFieldState(
+    featureFormElement: FieldFeatureFormElement
+) {
+    var value by mutableStateOf(featureFormElement.value)
+        private set
+    val label = featureFormElement.label
+    val description = featureFormElement.description
+    val hint = featureFormElement.hint
+
+    fun onValueChanged(value: String) {
+        this.value = value
+    }
+}
 
 @Composable
 internal fun FormTextField(
+    formTextFieldState: FormTextFieldState,
+    inputType: TextAreaFeatureFormInput,
+    modifier: Modifier = Modifier
+) {
+    FormTextField(
+        value = formTextFieldState.value,
+        label = formTextFieldState.label,
+        description = formTextFieldState.description,
+        minLength = inputType.minLength.toInt(),
+        maxLength = inputType.maxLength.toInt(),
+        singleLine = false,
+        modifier = modifier.fillMaxSize(),
+        placeholder = formTextFieldState.hint
+    ) {
+        formTextFieldState.onValueChanged(it)
+    }
+}
+
+@Composable
+internal fun FormTextField(
+    formTextFieldState: FormTextFieldState,
+    inputType: TextBoxFeatureFormInput,
+    modifier: Modifier = Modifier
+) {
+    FormTextField(
+        value = formTextFieldState.value,
+        label = formTextFieldState.label,
+        description = formTextFieldState.description,
+        minLength = inputType.minLength.toInt(),
+        maxLength = inputType.maxLength.toInt(),
+        singleLine = true,
+        modifier = modifier.fillMaxSize(),
+        placeholder = formTextFieldState.hint
+    ) {
+        formTextFieldState.onValueChanged(it)
+    }
+}
+
+@Composable
+internal fun FormTextField(
+    value: String,
     label: String,
     description: String,
     minLength: Int,
@@ -43,8 +101,8 @@ internal fun FormTextField(
     singleLine: Boolean,
     modifier: Modifier = Modifier,
     placeholder: String = "",
+    onValueChanged: (String) -> Unit = {}
 ) {
-    var text by remember { mutableStateOf("") }
     var isFocused by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
     var shouldClearFocus by remember { mutableStateOf(false) }
@@ -63,7 +121,7 @@ internal fun FormTextField(
     }
 
     val validateInputLength = {
-        errorMessage = if (text.length !in minLength..maxLength) {
+        errorMessage = if (value.length !in minLength..maxLength) {
             helperText
         } else ""
     }
@@ -87,9 +145,9 @@ internal fun FormTextField(
         .padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 10.dp)
     ) {
         OutlinedTextField(
-            value = text,
+            value = value,
             onValueChange = {
-                text = it
+                onValueChanged(it)
                 validateInputLength()
             },
             modifier = Modifier.fillMaxSize(),
@@ -97,10 +155,10 @@ internal fun FormTextField(
                 Text(text = label)
             },
             trailingIcon = {
-                if (text.isNotEmpty()) {
+                if (value.isNotEmpty()) {
                     IconButton(
                         onClick = {
-                            text = ""
+                            onValueChanged("")
                             validateInputLength()
                         }
                     ) {
@@ -119,11 +177,11 @@ internal fun FormTextField(
                     }
                     if (isFocused && helperText.isNotEmpty()) {
                         Spacer(modifier = Modifier.weight(1f))
-                        Text(text = "${text.length}", color = textColor)
+                        Text(text = "${value.length}", color = textColor)
                     }
                 }
             },
-            visualTransformation = if (text.isEmpty())
+            visualTransformation = if (value.isEmpty())
                 PlaceholderTransformation(placeholder)
             else VisualTransformation.None,
             keyboardActions = KeyboardActions(

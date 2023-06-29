@@ -20,6 +20,7 @@ internal fun TextArea(
         maxLength = textBoxInput.maxLength.toInt(),
         singleLine = false,
         modifier = modifier.fillMaxSize(),
+        value = field.value,
         placeholder = field.hint
     )
 }
@@ -37,6 +38,7 @@ internal fun TextBox(
         maxLength = textBoxInput.maxLength.toInt(),
         singleLine = true,
         modifier = modifier.fillMaxSize(),
+        value = field.value,
         placeholder = field.hint
     )
 }
