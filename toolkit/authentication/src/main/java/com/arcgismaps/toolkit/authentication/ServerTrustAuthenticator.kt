@@ -16,6 +16,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 
 /**
@@ -37,10 +40,18 @@ internal fun ServerTrustAuthenticator(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = stringResource(
-                id = R.string.server_trust_message,
-                serverTrustChallenge.challenge.hostname
-            ),
+            text = buildAnnotatedString {
+                val hostname = serverTrustChallenge.challenge.hostname
+                val string = stringResource(
+                    id = R.string.server_trust_message,
+                    hostname
+                )
+                val startIdx = string.indexOf(hostname)
+                val endIdx = startIdx + hostname.length
+                append(string)
+                addStyle(SpanStyle(fontFamily = FontFamily.Monospace, fontSize = MaterialTheme.typography.headlineSmall.fontSize), startIdx, endIdx)
+
+            } ,
             style = MaterialTheme.typography.headlineMedium
         )
         Spacer(modifier = Modifier.height(32.dp))
