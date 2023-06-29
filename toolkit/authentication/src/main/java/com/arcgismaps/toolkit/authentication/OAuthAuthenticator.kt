@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
+private const val DEFAULT_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob"
 /**
  * Launches a Custom Chrome Tab using the url in [oAuthPendingSignIn] and calls [onActivityResult] on completion.
  *
@@ -15,10 +16,16 @@ import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
  */
 @Composable
 internal fun OAuthAuthenticator(
-    oAuthPendingSignIn: OAuthUserSignIn
+    oAuthPendingSignIn: OAuthUserSignIn,
+    authenticatorViewModel: AuthenticatorViewModel
 ) {
+    val oAuthActivityToLaunch =
+        if (oAuthPendingSignIn.oAuthUserConfiguration.redirectUrl == DEFAULT_REDIRECT_URI)
+            OAuthWebViewActivity()
+        else
+            OAuthUserSignInActivity()
     val launcher =
-        rememberLauncherForActivityResult(OAuthActivityResultContract(OAuthWebViewActivity())) { redirectUrl ->
+        rememberLauncherForActivityResult(OAuthActivityResultContract(oAuthActivityToLaunch)) { redirectUrl ->
             redirectUrl?.let {
                 oAuthPendingSignIn.complete(redirectUrl)
             } ?: oAuthPendingSignIn.cancel()

@@ -15,19 +15,25 @@ import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallenge
+import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeResponse
+import com.arcgismaps.httpcore.authentication.NetworkAuthenticationType
 import kotlinx.coroutines.runBlocking
 import java.net.URL
 import javax.net.ssl.SSLException
 
 private const val KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL = "KEY_INTENT_EXTRA_OAUTH_RESPONSE_URI"
+private const val KEY_INTENT_EXTRA_AUTHORIZE_URL = "INTENT_EXTRA_KEY_AUTHORIZE_URL"
 private const val RESULT_CODE_SUCCESS = 1
 
 
-internal class OAuthWebViewActivity: ComponentActivity() {
+internal class OAuthWebViewActivity : ComponentActivity() {
+    private lateinit var _authenticatorViewModel: AuthenticatorViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val authorizeUrl = intent.getStringExtra("INTENT_EXTRA_KEY_AUTHORIZE_URL")
+            val authorizeUrl = intent.getStringExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL)
             authorizeUrl?.let {
                 LoadOauthInWebView(it)
             }
@@ -43,7 +49,7 @@ internal class OAuthWebViewActivity: ComponentActivity() {
                     javaScriptEnabled = true
                 }
 
-                webViewClient = OAuthWebViewClient(this@OAuthWebViewActivity)
+                webViewClient = OAuthWebViewClient(this@OAuthWebViewActivity, _authenticatorViewModel)
                 loadUrl(url)
             }
         })
@@ -54,7 +60,11 @@ internal class OAuthWebViewActivity: ComponentActivity() {
      *
      * @since 200.2.0
      */
-    private class OAuthWebViewClient(val activity: ComponentActivity) : WebViewClient() {
+    private class OAuthWebViewClient(
+        val activity: ComponentActivity,
+        val authenticatorViewModel: AuthenticatorViewModel
+    ) :
+        WebViewClient() {
         /**
          * Takes control of the page loading in the [webView] if the URL in the [request] contains the approval code
          * and forwards it to the [OAuthUserSignInActivity] by setting it in the result contract.
@@ -113,9 +123,19 @@ internal class OAuthWebViewActivity: ComponentActivity() {
         override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
             val host = URL(view?.url).host
             runBlocking {
-                val trustedHost =
+                var trustedHost =
                     ArcGISEnvironment.authenticationManager.networkCredentialStore.getCredentials(host)
                         .getOrThrow().isNotEmpty()
+
+                if (!trustedHost) {
+                    val serverTrustChallenge = NetworkAuthenticationChallenge(
+                        host,
+                        NetworkAuthenticationType.ServerTrust, Throwable("Server Certificate Required")
+                    )
+                    val response = authenticatorViewModel.handleNetworkAuthenticationChallenge(serverTrustChallenge)
+                    trustedHost = response is NetworkAuthenticationChallengeResponse.ContinueWithCredential
+                }
+                // TODO: propagate cancellation if the user chooses not to continue
 
                 if (trustedHost) {
                     handler?.proceed()

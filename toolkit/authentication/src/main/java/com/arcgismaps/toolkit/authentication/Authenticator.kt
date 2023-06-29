@@ -21,7 +21,7 @@ public fun Authenticator(
         authenticatorViewModel.pendingOAuthUserSignIn.collectAsStateWithLifecycle().value
 
     pendingOAuthUserSignIn?.let {
-        OAuthAuthenticator(it)
+        OAuthAuthenticator(it, authenticatorViewModel)
     }
 
     val pendingServerTrustChallenge =
