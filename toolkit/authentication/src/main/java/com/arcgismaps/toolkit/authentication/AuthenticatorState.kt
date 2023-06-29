@@ -25,7 +25,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
  *
  * @since 200.2.0
  */
-public interface AuthenticatorState : NetworkAuthenticationChallengeHandler,
+public sealed interface AuthenticatorState : NetworkAuthenticationChallengeHandler,
     ArcGISAuthenticationChallengeHandler {
 
     /**
