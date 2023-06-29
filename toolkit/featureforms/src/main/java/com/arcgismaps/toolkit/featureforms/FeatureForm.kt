@@ -59,8 +59,7 @@ internal fun FeatureFormContent(
     ) {
         // title
         Text(text = formDefinition.title, style = TextStyle(fontWeight = FontWeight.Bold))
-        Spacer(
-            modifier = Modifier
+        Spacer(modifier = Modifier
                 .fillMaxWidth()
                 .height(15.dp)
         )
