@@ -35,13 +35,13 @@ internal class OAuthWebViewActivity : ComponentActivity() {
         setContent {
             val authorizeUrl = intent.getStringExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL)
             authorizeUrl?.let {
-                LoadOauthInWebView(it)
+                OAuthWebView(it)
             }
         }
     }
 
     @Composable
-    internal fun LoadOauthInWebView(url: String) {
+    internal fun OAuthWebView(url: String) {
         AndroidView(factory = {
             WebView(this).apply {
                 settings.apply {
