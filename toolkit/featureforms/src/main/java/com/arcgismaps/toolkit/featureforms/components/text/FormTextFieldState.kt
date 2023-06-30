@@ -44,7 +44,7 @@ internal interface FormTextFieldState {
     /**
      * Current value state for the [FormTextField].
      */
-    var value: State<String>
+    val value: State<String>
 
     /**
      * State for the supporting text that gets displayed under the [FormTextField].
@@ -52,26 +52,26 @@ internal interface FormTextFieldState {
     val supportingText: State<String>
 
     /**
-     * The current content length based on the [value] state. This is only available when the
-     * [minLength] or [maxLength] properties are non-zero.
+     * The current content length based on the [value] state and expressed as a string. This is
+     * only available when the [minLength] or [maxLength] properties are non-zero.
      */
     val contentLength: State<String>
 
     /**
      * State that indicates if the [FormTextField] is currently focused.
      */
-    var isFocused: State<Boolean>
+    val isFocused: State<Boolean>
 
     /**
      * State that indicates if there input validation on the [FormTextField] caused an error. Check
      * [errorMessage] for the actual error information.
      */
-    var hasError: State<Boolean>
+    val hasError: State<Boolean>
 
     /**
      * State that indicates the current error message if there is any error.
      */
-    var errorMessage: State<String>
+    val errorMessage: State<String>
 
     /**
      * Callback to update the current value of the FormTextFieldState to the given [input].
@@ -97,16 +97,16 @@ private class FormTextFieldStateImpl(
     featureFormElement: FieldFeatureFormElement
 ) : FormTextFieldState {
     private val _value = mutableStateOf(featureFormElement.value)
-    override var value: State<String> = _value
+    override val value: State<String> = _value
 
     private val _isFocused = mutableStateOf(false)
-    override var isFocused: State<Boolean> = _isFocused
+    override val isFocused: State<Boolean> = _isFocused
 
     private val _errorMessage = mutableStateOf("")
-    override var errorMessage: State<String> = _errorMessage
+    override val errorMessage: State<String> = _errorMessage
 
     private val _hasError = mutableStateOf(false)
-    override var hasError: State<Boolean> = _hasError
+    override val hasError: State<Boolean> = _hasError
 
     // set the label from the FieldFeatureFormElement
     override val label = featureFormElement.label
@@ -136,9 +136,12 @@ private class FormTextFieldStateImpl(
 
     // build helper text
     val helperText = buildString {
-        if (minLength > 0)
-            append("Enter $minLength to ")
-        if (maxLength > 0)
+        if (minLength > 0 && maxLength > 0) {
+            if (minLength == maxLength)
+                append("Enter $minLength characters")
+            else
+                append("Enter $minLength to $maxLength characters")
+        } else if (maxLength > 0)
             append("Maximum $maxLength characters")
     }
 
@@ -153,9 +156,9 @@ private class FormTextFieldStateImpl(
         }
     }
 
-    // derive the content length from the current value only if the length constraints are set
+    // derive the content length from the current value only if any length constraint is set
     override val contentLength = derivedStateOf {
-        if (helperText.isNotEmpty()) {
+        if (minLength > 0 || maxLength > 0) {
             _value.value.length.toString()
         } else ""
     }
