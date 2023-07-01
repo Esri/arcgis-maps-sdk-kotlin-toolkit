@@ -52,7 +52,7 @@ private class OAuthWebViewClient(
 ) : WebViewClient() {
     /**
      * Takes control of the page loading in the [webView] if the URL in the [request] contains the approval code
-     * and forwards it to the [OAuthUserSignInActivity] by setting it in the result contract.
+     * and calls complete on the oAuthUserSignIn
      *
      * @param view the WebView that is initiating this callback
      * @param request the request that the WebView is processing
