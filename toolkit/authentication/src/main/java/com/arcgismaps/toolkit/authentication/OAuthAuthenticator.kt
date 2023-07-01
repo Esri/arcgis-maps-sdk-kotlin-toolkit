@@ -1,5 +1,6 @@
 package com.arcgismaps.toolkit.authentication
 
+import android.content.Context
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
@@ -17,23 +18,24 @@ private const val DEFAULT_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob"
 @Composable
 internal fun OAuthAuthenticator(
     oAuthPendingSignIn: OAuthUserSignIn,
-    authenticatorViewModel: AuthenticatorViewModel
+    authenticatorViewModel: AuthenticatorViewModel,
+    activityContext: Context
 ) {
-    val oAuthActivityToLaunch =
-        if (oAuthPendingSignIn.oAuthUserConfiguration.redirectUrl == DEFAULT_REDIRECT_URI)
-            OAuthWebViewActivity()
-        else
-            OAuthUserSignInActivity()
-    val launcher =
-        rememberLauncherForActivityResult(OAuthActivityResultContract(oAuthActivityToLaunch)) { redirectUrl ->
-            redirectUrl?.let {
-                oAuthPendingSignIn.complete(redirectUrl)
-            } ?: oAuthPendingSignIn.cancel()
+    if (authenticatorViewModel.oAuthUserConfiguration?.redirectUrl == DEFAULT_REDIRECT_URI) {
+        OAuthWebView(oAuthPendingSignIn, activityContext = activityContext, authenticatorViewModel = authenticatorViewModel)
+    } else {
+        val launcher =
+            rememberLauncherForActivityResult(contract = OAuthUserSignInActivity.Contract()) { redirectUrl ->
+                redirectUrl?.let {
+                    oAuthPendingSignIn.complete(redirectUrl)
+                } ?: oAuthPendingSignIn.cancel()
+            }
+
+        // Launching an activity is a side effect. We don't need `LaunchedEffect` because this is not suspending
+        // and there's nothing that needs to keep running if it gets recomposed. In reality, we also don't
+        // expect `oAuthPendingSignIn` to change while this composable is displayed.
+        SideEffect {
+            launcher.launch(oAuthPendingSignIn)
         }
-    // Launching an activity is a side effect. We don't need `LaunchedEffect` because this is not suspending
-    // and there's nothing that needs to keep running if it gets recomposed. In reality, we also don't
-    // expect `oAuthPendingSignIn` to change while this composable is displayed.
-    SideEffect {
-        launcher.launch(oAuthPendingSignIn)
     }
 }

@@ -10,6 +10,9 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.lifecycle.Lifecycle
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
 private const val KEY_INTENT_EXTRA_AUTHORIZE_URL = "INTENT_EXTRA_KEY_AUTHORIZE_URL"
 private const val KEY_INTENT_EXTRA_CUSTOM_TABS_WAS_LAUNCHED =
@@ -102,34 +105,33 @@ internal class OAuthUserSignInActivity : ComponentActivity() {
         customTabsWasLaunched = true
         CustomTabsIntent.Builder().build().launchUrl(this, Uri.parse(authorizeUrl))
     }
-}
 
-/**
- * An ActivityResultContract that takes a [OAuthUserSignIn] as input and returns a nullable
- * string as output. The output string represents a redirect URI as the result of an OAuth user
- * sign in prompt, or null if OAuth user sign in failed. This contract can be used to launch the
- * [OAuthUserSignInActivity] for a result.
- * See [Getting a result from an activity](https://developer.android.com/training/basics/intents/result)
- * for more details.
- *
- * @since 200.2.0
- */
-public class OAuthActivityResultContract(private val activity: ComponentActivity) :
-    ActivityResultContract<OAuthUserSignIn, String?>() {
-    override fun createIntent(context: Context, input: OAuthUserSignIn): Intent =
-        Intent(context, activity::class.java).apply {
-            putExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL, input.authorizeUrl)
-            putExtra(
-                KEY_INTENT_EXTRA_REDIRECT_URL,
-                input.oAuthUserConfiguration.redirectUrl
-            )
-        }
+    /**
+     * An ActivityResultContract that takes a [OAuthUserSignIn] as input and returns a nullable
+     * string as output. The output string represents a redirect URI as the result of an OAuth user
+     * sign in prompt, or null if OAuth user sign in failed. This contract can be used to launch the
+     * [OAuthUserSignInActivity] for a result.
+     * See [Getting a result from an activity](https://developer.android.com/training/basics/intents/result)
+     * for more details.
+     *
+     * @since 200.2.0
+     */
+    class Contract : ActivityResultContract<OAuthUserSignIn, String?>() {
+        override fun createIntent(context: Context, input: OAuthUserSignIn): Intent =
+            Intent(context, OAuthUserSignInActivity::class.java).apply {
+                putExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL, input.authorizeUrl)
+                putExtra(
+                    KEY_INTENT_EXTRA_REDIRECT_URL,
+                    input.oAuthUserConfiguration.redirectUrl
+                )
+            }
 
-    override fun parseResult(resultCode: Int, intent: Intent?): String? {
-        return if (resultCode == RESULT_CODE_SUCCESS) {
-            intent?.getStringExtra(KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL)
-        } else {
-            null
+        override fun parseResult(resultCode: Int, intent: Intent?): String? {
+            return if (resultCode == RESULT_CODE_SUCCESS) {
+                intent?.getStringExtra(KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL)
+            } else {
+                null
+            }
         }
     }
 }

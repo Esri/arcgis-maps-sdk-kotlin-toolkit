@@ -1,5 +1,6 @@
 package com.arcgismaps.toolkit.authentication
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
@@ -15,13 +16,14 @@ import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
  */
 @Composable
 public fun Authenticator(
-    authenticatorViewModel: AuthenticatorViewModel
+    authenticatorViewModel: AuthenticatorViewModel,
+    activityContext: Context
 ) {
     val pendingOAuthUserSignIn =
         authenticatorViewModel.pendingOAuthUserSignIn.collectAsStateWithLifecycle().value
 
     pendingOAuthUserSignIn?.let {
-        OAuthAuthenticator(it, authenticatorViewModel)
+        OAuthAuthenticator(it, authenticatorViewModel, activityContext)
     }
 
     val pendingServerTrustChallenge =

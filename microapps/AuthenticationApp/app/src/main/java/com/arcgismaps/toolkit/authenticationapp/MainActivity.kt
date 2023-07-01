@@ -1,6 +1,7 @@
 package com.arcgismaps.toolkit.authenticationapp
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -25,12 +26,12 @@ import org.json.JSONObject
 
 // Temp Test Data
 private const val DEFAULT_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob"
-const val portalArcgis = "https://www.arcgis.com"
-val arcgisConf = OAuthUserConfiguration(portalArcgis, "QrpBAoS7KccFerE3", DEFAULT_REDIRECT_URI/*"my-ags-app://auth"*/)
-const val portalSAML = "https://rt-saml1.esri.com/portal"
-val samlConfig = OAuthUserConfiguration(portalSAML, "Ttj5gUYkSXxJVNjv", DEFAULT_REDIRECT_URI)
+const val arcgisPortal = "https://www.arcgis.com"
+val arcgisConf = OAuthUserConfiguration(arcgisPortal, "QrpBAoS7KccFerE3", DEFAULT_REDIRECT_URI/*"my-ags-app://auth"*/)
+const val samlPortal = "https://rt-saml1.esri.com/portal"
+val samlConfig = OAuthUserConfiguration(samlPortal, "Ttj5gUYkSXxJVNjv", DEFAULT_REDIRECT_URI)
 const val selfSignedPortal = "https://rt-server107a.esri.com/portal"
-val selfSignedConfig = OAuthUserConfiguration(selfSignedPortal, "1BADxtERjogAQG4u", "my-android-app://auth")
+val selfSignedConfig = OAuthUserConfiguration(selfSignedPortal, "1BADxtERjogAQG4u", DEFAULT_REDIRECT_URI)
 
 class MainActivity : ComponentActivity() {
 
@@ -38,7 +39,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             AuthenticationAppTheme {
-                AuthenticationApp()
+                AuthenticationApp(this)
             }
         }
     }
@@ -46,9 +47,9 @@ class MainActivity : ComponentActivity() {
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun AuthenticationApp() {
+fun AuthenticationApp(activityContext: Context) {
     // This portal is accessible with any valid arcgis.com account.
-    val portal = remember { Portal(portalArcgis, Portal.Connection.Authenticated) }
+    val portal = remember { Portal(samlPortal, Portal.Connection.Authenticated) }
 
     val portalInfo = produceState<String?>(initialValue = null) {
         portal.load().getOrElse { value = null }
@@ -79,7 +80,7 @@ fun AuthenticationApp() {
         }
         val authenticatorViewModel: AuthenticatorViewModel =
             viewModel(factory = AuthenticatorViewModelFactory())
-        authenticatorViewModel.oAuthUserConfiguration = arcgisConf
-        Authenticator(authenticatorViewModel)
+        authenticatorViewModel.oAuthUserConfiguration = samlConfig
+        Authenticator(authenticatorViewModel, activityContext)
     }
 }
