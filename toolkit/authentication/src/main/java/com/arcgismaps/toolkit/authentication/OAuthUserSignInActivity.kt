@@ -10,9 +10,6 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.lifecycle.Lifecycle
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 
 private const val KEY_INTENT_EXTRA_AUTHORIZE_URL = "INTENT_EXTRA_KEY_AUTHORIZE_URL"
 private const val KEY_INTENT_EXTRA_CUSTOM_TABS_WAS_LAUNCHED =
