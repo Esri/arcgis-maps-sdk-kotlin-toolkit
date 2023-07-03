@@ -1,6 +1,5 @@
 package com.arcgismaps.toolkit.authentication
 
-import androidx.lifecycle.ViewModel
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeHandler
@@ -67,7 +66,7 @@ public sealed interface AuthenticatorState : NetworkAuthenticationChallengeHandl
 private class AuthenticatorStateImpl(
     setAsArcGISAuthenticationChallengeHandler: Boolean,
     setAsNetworkAuthenticationChallengeHandler: Boolean
-) : AuthenticatorState, ViewModel() {
+) : AuthenticatorState {
 
     override var oAuthUserConfiguration: OAuthUserConfiguration? = null
 
