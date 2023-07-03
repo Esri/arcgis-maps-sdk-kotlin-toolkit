@@ -2,13 +2,12 @@ package com.arcgismaps.toolkit.authentication
 
 import android.content.Context
 import android.net.http.SslError
-import android.util.Log
+import android.view.ViewGroup
 import android.webkit.SslErrorHandler
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallenge
@@ -27,18 +26,21 @@ internal fun OAuthWebView(
     activityContext: Context,
     authenticatorViewModel: AuthenticatorViewModel
 ) {
-    val webView = remember {
+    AndroidView(factory = {
         WebView(activityContext).apply {
             settings.apply {
                 displayZoomControls = false
                 javaScriptEnabled = true
             }
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
 
             webViewClient = OAuthWebViewClient(authenticatorViewModel, oAuthUserSignIn)
             loadUrl(oAuthUserSignIn.authorizeUrl)
         }
-    }
-    AndroidView(factory = { webView })
+    })
 }
 
 /**
@@ -61,7 +63,6 @@ private class OAuthWebViewClient(
     override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
         request?.url?.let {
             if (it.toString().contains("/oauth2/approval", true)) {
-                Log.d("ArcGIS-Main", "shouldOverrideUrlLoading: Approval code")
                 oAuthUserSignIn.complete(it.toString())
                 return true
             }
@@ -93,7 +94,6 @@ private class OAuthWebViewClient(
                         NetworkAuthenticationType.ServerTrust, Throwable("Server Certificate Required")
                     )
                     val response = authenticatorViewModel.handleNetworkAuthenticationChallenge(serverTrustChallenge)
-                    Log.d("ArcGIS-Main", "onReceivedSslError: ")
                     trustedHost = response is NetworkAuthenticationChallengeResponse.ContinueWithCredential
                 }
                 // TODO: propagate cancellation if the user chooses not to continue

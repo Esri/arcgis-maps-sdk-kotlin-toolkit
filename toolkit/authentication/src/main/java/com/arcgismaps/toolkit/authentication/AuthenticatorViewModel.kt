@@ -194,6 +194,22 @@ private class AuthenticatorViewModelImpl(
             }
         }
 
+
+
+    // WORKS
+//    private fun awaitServerTrustChallengeResponse(networkAuthenticationChallenge: NetworkAuthenticationChallenge):
+//            NetworkAuthenticationChallengeResponse {
+//        _pendingServerTrustChallenge.value =
+//            ServerTrustChallenge(networkAuthenticationChallenge) { shouldTrustServer ->
+//                _pendingServerTrustChallenge.value = null
+//                Log.d("ArcGIS-Main", "awaitServerTrustChallengeResponse: Creating a new SeverTrust")
+//            }
+//        Log.d("ArcGIS-Main", "awaitServerTrustChallengeResponse: ServerTrust OK ")
+//        return NetworkAuthenticationChallengeResponse.ContinueWithCredential(
+//            ServerTrust
+//        )
+//    }
+
     /**
      * Emits a [UsernamePasswordChallenge] to [pendingUsernamePasswordChallenge] and awaits the response.
      *

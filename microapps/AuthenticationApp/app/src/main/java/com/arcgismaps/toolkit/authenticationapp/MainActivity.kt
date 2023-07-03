@@ -1,7 +1,5 @@
 package com.arcgismaps.toolkit.authenticationapp
 
-import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -50,9 +48,9 @@ import org.json.JSONObject
 // Temp Test Data
 private const val DEFAULT_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob"
 const val arcgisPortal = "https://www.arcgis.com"
-val arcgisConf = OAuthUserConfiguration(arcgisPortal, "QrpBAoS7KccFerE3", DEFAULT_REDIRECT_URI/*"my-ags-app://auth"*/)
+val arcgisConf = OAuthUserConfiguration(arcgisPortal, "QrpBAoS7KccFerE3","my-ags-app://auth")
 const val samlPortal = "https://rt-saml1.esri.com/portal"
-val samlConfig = OAuthUserConfiguration(samlPortal, "Ttj5gUYkSXxJVNjv", DEFAULT_REDIRECT_URI)
+val samlConfig = OAuthUserConfiguration(samlPortal, "Ttj5gUYkSXxJVNjv", /*"samlapp://auth"*/DEFAULT_REDIRECT_URI)
 const val selfSignedPortal = "https://rt-server107a.esri.com/portal"
 val selfSignedConfig = OAuthUserConfiguration(selfSignedPortal, "1BADxtERjogAQG4u", DEFAULT_REDIRECT_URI)
 
@@ -61,7 +59,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             AuthenticationAppTheme {
-                AuthenticationApp(this)
+                AuthenticationApp()
             }
         }
     }
@@ -123,7 +121,7 @@ private fun PortalDetails(
     onSignout: () -> Unit
 ) {
     var url by rememberSaveable {
-        mutableStateOf("https://www.arcgis.com")
+        mutableStateOf(samlPortal)
     }
     var useOAuth by rememberSaveable {
         mutableStateOf(true)
@@ -137,13 +135,14 @@ private fun PortalDetails(
                 onLoadStatusChanged(true)
                 onOAuthUserConfigurationChanged(
                     if (useOAuth)
-                        OAuthUserConfiguration(
-                            url,
-                            // This client ID is for demo purposes only. For use of the Authenticator in your own app,
-                            // create your own client ID. For more info see: https://developers.arcgis.com/documentation/mapping-apis-and-services/security/tutorials/register-your-application/
-                            "lgAdHkYZYlwwfAhC",
-                            "my-ags-app://auth"
-                        )
+                        samlConfig
+//                        OAuthUserConfiguration(
+//                            url,
+//                            // This client ID is for demo purposes only. For use of the Authenticator in your own app,
+//                            // create your own client ID. For more info see: https://developers.arcgis.com/documentation/mapping-apis-and-services/security/tutorials/register-your-application/
+//                            "lgAdHkYZYlwwfAhC",
+//                            "my-ags-app://auth"
+//                        )
                     else null
                 )
                 val portal = Portal(url, Portal.Connection.Authenticated)
