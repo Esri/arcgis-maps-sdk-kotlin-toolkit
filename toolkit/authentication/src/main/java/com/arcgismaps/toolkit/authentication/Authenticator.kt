@@ -32,4 +32,11 @@ public fun Authenticator(
     pendingServerTrustChallenge?.let {
         ServerTrustAuthenticator(it)
     }
+
+    val pendingUsernamePasswordChallenge =
+        authenticatorViewModel.pendingUsernamePasswordChallenge.collectAsStateWithLifecycle().value
+
+    pendingUsernamePasswordChallenge?.let {
+        UsernamePasswordAuthenticator(it)
+    }
 }
