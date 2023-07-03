@@ -32,14 +32,14 @@ class AuthenticationAppViewModel(application: Application) : AndroidViewModel(ap
     val infoText: StateFlow<String> = _infoText
 
     private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     private val _useOAuth: MutableStateFlow<Boolean> = MutableStateFlow(true)
-    val useOAuth: StateFlow<Boolean> = _useOAuth
+    val useOAuth: StateFlow<Boolean> = _useOAuth.asStateFlow()
     fun setUseOAuth(shouldUseOAuth: Boolean) { _useOAuth.value = shouldUseOAuth }
 
     private val _url: MutableStateFlow<String> = MutableStateFlow(arcGISUrl)
-    val url: StateFlow<String> = _url
+    val url: StateFlow<String> = _url.asStateFlow()
     fun setUrl(newUrl: String) { _url.value = newUrl }
 
     fun signOut() = viewModelScope.launch {
