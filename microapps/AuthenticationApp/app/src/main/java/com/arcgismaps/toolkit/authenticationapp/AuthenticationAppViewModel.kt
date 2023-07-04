@@ -10,6 +10,7 @@ import com.arcgismaps.toolkit.authentication.AuthenticatorState
 import com.arcgismaps.toolkit.authentication.signOut
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 
@@ -29,7 +30,7 @@ class AuthenticationAppViewModel(application: Application) : AndroidViewModel(ap
     )
 
     private val _infoText: MutableStateFlow<String> = MutableStateFlow(startInfoText)
-    val infoText: StateFlow<String> = _infoText
+    val infoText: StateFlow<String> = _infoText.asStateFlow()
 
     private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
