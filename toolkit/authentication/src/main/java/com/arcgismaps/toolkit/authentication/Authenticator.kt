@@ -1,6 +1,11 @@
 package com.arcgismaps.toolkit.authentication
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import android.security.KeyChain
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
@@ -37,4 +42,21 @@ public fun Authenticator(
     pendingUsernamePasswordChallenge?.let {
         UsernamePasswordAuthenticator(it)
     }
+
+    val pendingClientCertificateChallenge =
+        authenticatorState.pendingClientCertificateChallenge.collectAsStateWithLifecycle().value
+    pendingClientCertificateChallenge?.let { pendingCertificateChallenge ->
+            KeyChain.choosePrivateKeyAlias(
+                LocalContext.current.getActivity(), pendingCertificateChallenge.keyChainAliasCallback, null, null, null, null
+            )
+    }
+}
+
+private fun Context.getActivity(): Activity {
+    var context = this
+    while (context is ContextWrapper) {
+        if (context is Activity) return context
+        context = context.baseContext
+    }
+    throw IllegalStateException("no activity")
 }
