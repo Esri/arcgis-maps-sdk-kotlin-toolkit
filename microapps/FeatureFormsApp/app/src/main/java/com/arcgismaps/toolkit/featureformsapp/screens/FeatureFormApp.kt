@@ -1,9 +1,6 @@
 package com.arcgismaps.toolkit.featureformsapp.screens
 
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavController
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -20,7 +17,7 @@ fun FeatureFormApp() {
             MapListScreen { uri ->
                 val encodedUri = URLEncoder.encode(uri, StandardCharsets.UTF_8.toString())
                 val route = "mapview/$encodedUri"
-                navController.popUpTo(route)
+                navController.navigate(route)
             }
         }
         composable(route = "mapview/{uri}") { backStackEntry ->
@@ -30,12 +27,4 @@ fun FeatureFormApp() {
             }
         }
     }
-}
-
-fun NavController.popUpTo(destination: String) = navigate(destination) {
-    popUpTo(graph.findStartDestination().id) {
-        saveState = true
-    }
-    // Restore state when reselecting a previously selected item
-    restoreState = true
 }

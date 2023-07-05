@@ -30,7 +30,6 @@ class FormsArcGISAuthenticationChallengeHandler(
             if (it.isSuccess) {
                 ArcGISAuthenticationChallengeResponse.ContinueWithCredential(it.getOrThrow())
             } else {
-                Log.d("TAG", "handleArcGISAuthenticationChallenge: ${it.exceptionOrNull()}")
                 ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError(it.exceptionOrNull()!!)
             }
         }
