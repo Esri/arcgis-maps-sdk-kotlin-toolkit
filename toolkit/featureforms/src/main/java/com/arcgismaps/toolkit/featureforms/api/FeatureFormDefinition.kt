@@ -18,7 +18,9 @@
 
 package com.arcgismaps.toolkit.featureforms.api
 
+import com.arcgismaps.data.ArcGISFeature
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
@@ -36,6 +38,8 @@ public data class FeatureFormDefinition(
 
     ) {
 
+    @Transient
+    var feature: ArcGISFeature? = null
     
     //region Companion Object
     

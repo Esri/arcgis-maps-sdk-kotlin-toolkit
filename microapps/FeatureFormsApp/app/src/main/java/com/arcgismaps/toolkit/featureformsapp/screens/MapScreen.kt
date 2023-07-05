@@ -1,6 +1,5 @@
-package com.arcgismaps.toolkit.featureformsapp.screens.map
+package com.arcgismaps.toolkit.featureformsapp.screens
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,7 +23,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -32,42 +30,19 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.toolkit.composablemap.ComposableMap
 import com.arcgismaps.toolkit.featureforms.FeatureForm
-import com.arcgismaps.toolkit.featureforms.api.FeatureFormDefinition
-import com.arcgismaps.toolkit.featureforms.api.formInfoJson
 import com.arcgismaps.toolkit.featureformsapp.R
-import com.arcgismaps.toolkit.featureformsapp.screens.form.FormViewModel
-import com.arcgismaps.toolkit.featureformsapp.screens.form.FormViewModelFactory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen() {
-    // instantiate a FormViewModel using its factory
-    val formViewModel = viewModel<FormViewModel>(
-        factory = FormViewModelFactory()
-    )
-    val context = LocalContext.current
     // instantiate a MapViewModel using its factory
     val mapViewModel = viewModel<MapViewModel>(
         factory = MapViewModelFactory(
-            arcGISMap = ArcGISMap(stringResource(R.string.map_url_all_text_state)),
-            onFeatureIdentified = { layer, feature ->
-                try {
-                    FeatureFormDefinition.fromJsonOrNull(layer.formInfoJson!!)?.let { featureFormDefinition ->
-                        // update the formViewModel's form definition
-                        formViewModel.setFormDefinition(featureFormDefinition)
-                        // update the formViewModel's feature
-                        formViewModel.setFeature(feature)
-                        // set formViewModel to editing state
-                        formViewModel.setEditingActive(true)
-                    }
-                }  catch (e: Exception) {
-                    Toast.makeText(context,"could not get the form definition from unsupported JSON.", Toast.LENGTH_LONG).show()
-                }
-            }
+            arcGISMap = ArcGISMap(stringResource(R.string.map_url_text_box_area))
         )
     )
     // hoist state for the formViewModel editing mode
-    val inEditingMode by formViewModel.inEditingMode.collectAsState()
+    val inEditingMode by mapViewModel.inEditingMode.collectAsState()
     // create a BottomSheetScaffoldState
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
@@ -90,7 +65,7 @@ fun MapScreen() {
         sheetContent = {
             // set bottom sheet content to the FeatureForm
             FeatureForm(
-                featureFormState = formViewModel,
+                featureFormState = mapViewModel,
                 modifier = Modifier
                     .fillMaxWidth()
                     // set max sheet height to occupy to 60% of the total height
@@ -106,7 +81,7 @@ fun MapScreen() {
                     title = { Text(text = stringResource(R.string.edit_feature), color = Color.White) },
                     navigationIcon = {
                         IconButton(onClick = {
-                            formViewModel.setEditingActive(false)
+                            mapViewModel.setEditingActive(false)
                         }) {
                             Icon(
                                 imageVector = Icons.Default.Close,
@@ -118,7 +93,7 @@ fun MapScreen() {
                     actions = {
                         IconButton(onClick = {
                             /* FUTURE: save feature here */
-                            formViewModel.setEditingActive(false)
+                            mapViewModel.setEditingActive(false)
                         }) {
                             Icon(
                                 imageVector = Icons.Default.Check,
