@@ -1,4 +1,4 @@
-package com.arcgismaps.toolkit.featureformsapp.screens
+package com.arcgismaps.toolkit.featureformsapp.screens.map
 
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,14 +31,17 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.toolkit.composablemap.ComposableMap
 import com.arcgismaps.toolkit.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureformsapp.R
+import java.net.URLDecoder
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MapScreen() {
+fun MapScreen(uri: String) {
     // instantiate a MapViewModel using its factory
     val mapViewModel = viewModel<MapViewModel>(
         factory = MapViewModelFactory(
-            arcGISMap = ArcGISMap(stringResource(R.string.map_url_text_box_area))
+            arcGISMap = ArcGISMap(uri)
         )
     )
     // hoist state for the formViewModel editing mode

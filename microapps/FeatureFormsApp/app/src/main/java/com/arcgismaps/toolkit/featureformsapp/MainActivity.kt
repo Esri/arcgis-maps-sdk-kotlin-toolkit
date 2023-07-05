@@ -1,6 +1,7 @@
 package com.arcgismaps.toolkit.featureformsapp
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.arcgismaps.ArcGISEnvironment
@@ -8,7 +9,7 @@ import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeHandler
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
 import com.arcgismaps.httpcore.authentication.TokenCredential
-import com.arcgismaps.toolkit.featureformsapp.screens.MapScreen
+import com.arcgismaps.toolkit.featureformsapp.screens.FeatureFormApp
 import com.arcgismaps.toolkit.featureformsapp.ui.theme.FeatureFormsAppTheme
 
 class FormsArcGISAuthenticationChallengeHandler(
@@ -29,6 +30,7 @@ class FormsArcGISAuthenticationChallengeHandler(
             if (it.isSuccess) {
                 ArcGISAuthenticationChallengeResponse.ContinueWithCredential(it.getOrThrow())
             } else {
+                Log.d("TAG", "handleArcGISAuthenticationChallenge: ${it.exceptionOrNull()}")
                 ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError(it.exceptionOrNull()!!)
             }
         }
@@ -38,13 +40,17 @@ class FormsArcGISAuthenticationChallengeHandler(
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler =
-            FormsArcGISAuthenticationChallengeHandler(BuildConfig.webMapUser, BuildConfig.webMapPassword)
+            FormsArcGISAuthenticationChallengeHandler(
+                BuildConfig.webMapUser,
+                BuildConfig.webMapPassword
+            )
         setContent {
             FeatureFormsAppTheme {
-                MapScreen()
+                FeatureFormApp()
             }
         }
     }
 }
+
