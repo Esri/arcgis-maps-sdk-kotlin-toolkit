@@ -1,6 +1,5 @@
 package com.arcgismaps.toolkit.authentication
 
-import android.content.Context
 import android.net.http.SslError
 import android.view.ViewGroup
 import android.webkit.SslErrorHandler
@@ -8,6 +7,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallenge
@@ -23,11 +23,11 @@ import javax.net.ssl.SSLException
 @Composable
 internal fun OAuthWebView(
     oAuthUserSignIn: OAuthUserSignIn,
-    activityContext: Context,
     authenticatorViewModel: AuthenticatorViewModel
 ) {
+    val context = LocalContext.current
     AndroidView(factory = {
-        WebView(activityContext).apply {
+        WebView(context).apply {
             settings.apply {
                 displayZoomControls = false
                 javaScriptEnabled = true

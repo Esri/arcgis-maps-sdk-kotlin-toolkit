@@ -21,7 +21,7 @@ internal fun OAuthAuthenticator(
     authenticatorViewModel: AuthenticatorViewModel,
 ) {
     if (authenticatorViewModel.oAuthUserConfiguration?.redirectUrl == DEFAULT_REDIRECT_URI) {
-        OAuthWebView(oAuthPendingSignIn, LocalContext.current, authenticatorViewModel)
+        OAuthWebView(oAuthPendingSignIn, authenticatorViewModel)
     } else {
         val launcher =
             rememberLauncherForActivityResult(contract = OAuthUserSignInActivity.Contract()) { redirectUrl ->
