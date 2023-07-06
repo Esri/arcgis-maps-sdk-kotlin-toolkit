@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">AuthenticationApp</string>
+    <string name="start_info_text">
+        Enter a valid portal url to load it and see the portal details displayed here.
+        \n\n
+        \"Use OAuth\" will set an OAuth configuration on the Authenticator and force OAuth challenges to be issued where available.
+    </string>
+    <string name="no_portal_info">Portal loaded successfully but no portal info was found.</string>
 </resources>
