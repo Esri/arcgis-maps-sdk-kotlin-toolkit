@@ -45,9 +45,9 @@ public fun Authenticator(
 
     val pendingClientCertificateChallenge =
         authenticatorState.pendingClientCertificateChallenge.collectAsStateWithLifecycle().value
-    pendingClientCertificateChallenge?.let { pendingCertificateChallenge ->
+    pendingClientCertificateChallenge?.let {
             KeyChain.choosePrivateKeyAlias(
-                LocalContext.current.getActivity(), pendingCertificateChallenge.keyChainAliasCallback, null, null, null, null
+                LocalContext.current.getActivity(), it.keyChainAliasCallback, null, null, null, null
             )
     }
 }
