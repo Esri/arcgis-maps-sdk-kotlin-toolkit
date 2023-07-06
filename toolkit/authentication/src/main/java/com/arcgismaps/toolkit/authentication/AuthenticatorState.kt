@@ -59,6 +59,12 @@ public sealed interface AuthenticatorState : NetworkAuthenticationChallengeHandl
      */
     public val pendingUsernamePasswordChallenge: StateFlow<UsernamePasswordChallenge?>
 
+    /**
+     * The current [ClientCertificateChallenge] awaiting completion. Use this to complete or cancel
+     * any challenge requiring a client certificate.
+     *
+     * @since 200.2.0
+     */
     public val pendingClientCertificateChallenge: StateFlow<ClientCertificateChallenge?>
 }
 
@@ -167,6 +173,13 @@ private class AuthenticatorStateImpl(
         }
     }
 
+    /**
+     * Emits a new [ClientCertificateChallenge] to [pendingClientCertificateChallenge] and awaits a
+     * chosen certificate to proceed with.
+     *
+     * @return [NetworkAuthenticationChallengeResponse] based on the user choice.
+     * @since 200.2.0
+     */
     private suspend fun awaitCertificateChallengeResponse(): NetworkAuthenticationChallengeResponse {
         val selectedAlias = suspendCancellableCoroutine { continuation ->
             val aliasCallback = KeyChainAliasCallback { alias ->
