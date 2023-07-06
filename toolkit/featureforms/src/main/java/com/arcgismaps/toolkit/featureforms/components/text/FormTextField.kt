@@ -13,8 +13,8 @@ import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -107,7 +107,10 @@ internal fun FormTextField(
                 imeAction = if (state.singleLine) ImeAction.Done else ImeAction.None
             ),
             singleLine = state.singleLine,
-            colors = if (text == state.placeholder) TextFieldDefaults.colors(focusedTextColor = Color.LightGray) else TextFieldDefaults.colors()
+            colors = if (text.isEmpty() && state.placeholder.isNotEmpty())
+                OutlinedTextFieldDefaults.colors(unfocusedTextColor = Color.Gray, focusedTextColor = Color.Gray)
+            else
+                OutlinedTextFieldDefaults.colors()
         )
     }
 }
