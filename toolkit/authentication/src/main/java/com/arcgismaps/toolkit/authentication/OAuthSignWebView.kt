@@ -23,7 +23,7 @@ import javax.net.ssl.SSLException
 @Composable
 internal fun OAuthWebView(
     oAuthUserSignIn: OAuthUserSignIn,
-    authenticatorViewModel: AuthenticatorViewModel
+    authenticatorState: AuthenticatorState
 ) {
     val context = LocalContext.current
     AndroidView(factory = {
@@ -37,7 +37,7 @@ internal fun OAuthWebView(
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
 
-            webViewClient = OAuthWebViewClient(authenticatorViewModel, oAuthUserSignIn)
+            webViewClient = OAuthWebViewClient(authenticatorState, oAuthUserSignIn)
             loadUrl(oAuthUserSignIn.authorizeUrl)
         }
     })
@@ -49,7 +49,7 @@ internal fun OAuthWebView(
  * @since 200.2.0
  */
 private class OAuthWebViewClient(
-    val authenticatorViewModel: AuthenticatorViewModel,
+    val authenticatorState: AuthenticatorState,
     val oAuthUserSignIn: OAuthUserSignIn
 ) : WebViewClient() {
     /**
@@ -93,7 +93,7 @@ private class OAuthWebViewClient(
                         host,
                         NetworkAuthenticationType.ServerTrust, Throwable("Server Certificate Required")
                     )
-                    val response = authenticatorViewModel.handleNetworkAuthenticationChallenge(serverTrustChallenge)
+                    val response = authenticatorState.handleNetworkAuthenticationChallenge(serverTrustChallenge)
                     trustedHost = response is NetworkAuthenticationChallengeResponse.ContinueWithCredential
                 }
                 // TODO: propagate cancellation if the user chooses not to continue

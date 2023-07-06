@@ -36,15 +36,6 @@ import com.arcgismaps.toolkit.authentication.Authenticator
 import com.arcgismaps.toolkit.authentication.AuthenticatorState
 import com.arcgismaps.toolkit.authenticationapp.ui.theme.AuthenticationAppTheme
 
-// Temp Test Data
-private const val DEFAULT_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob"
-const val arcgisPortal = "https://www.arcgis.com"
-val arcgisConf = OAuthUserConfiguration(arcgisPortal, "QrpBAoS7KccFerE3","my-ags-app://auth")
-const val samlPortal = "https://rt-saml1.esri.com/portal"
-val samlConfig = OAuthUserConfiguration(samlPortal, "Ttj5gUYkSXxJVNjv", /*"samlapp://auth"*/DEFAULT_REDIRECT_URI)
-const val selfSignedPortal = "https://rt-server107a.esri.com/portal"
-val selfSignedConfig = OAuthUserConfiguration(selfSignedPortal, "1BADxtERjogAQG4u", DEFAULT_REDIRECT_URI)
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -18,7 +18,7 @@ private const val DEFAULT_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob"
 @Composable
 internal fun OAuthAuthenticator(
     oAuthPendingSignIn: OAuthUserSignIn,
-    authenticatorViewModel: AuthenticatorViewModel,
+    authenticatorViewModel: AuthenticatorState,
 ) {
     if (authenticatorViewModel.oAuthUserConfiguration?.redirectUrl == DEFAULT_REDIRECT_URI) {
         OAuthWebView(oAuthPendingSignIn, authenticatorViewModel)
