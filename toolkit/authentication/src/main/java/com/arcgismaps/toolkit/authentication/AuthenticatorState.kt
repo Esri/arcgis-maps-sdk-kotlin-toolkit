@@ -173,6 +173,9 @@ private class AuthenticatorStateImpl(
                 continuation.resume(alias) {}
             }
             _pendingClientCertificateChallenge.value = ClientCertificateChallenge(aliasCallback)
+            continuation.invokeOnCancellation {
+                continuation.resume(null) {}
+            }
         }
         _pendingClientCertificateChallenge.value = null
         return if (selectedAlias != null) {
