@@ -88,7 +88,8 @@ private class AuthenticatorStateImpl(
         _pendingUsernamePasswordChallenge.asStateFlow()
 
     private val _pendingClientCertificateChallenge = MutableStateFlow<ClientCertificateChallenge?>(null)
-    override val pendingClientCertificateChallenge: StateFlow<ClientCertificateChallenge?> = _pendingClientCertificateChallenge.asStateFlow()
+    override val pendingClientCertificateChallenge: StateFlow<ClientCertificateChallenge?> =
+        _pendingClientCertificateChallenge.asStateFlow()
 
     init {
         if (setAsArcGISAuthenticationChallengeHandler) {
