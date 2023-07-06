@@ -14,6 +14,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -105,7 +106,8 @@ internal fun FormTextField(
             keyboardOptions = KeyboardOptions.Default.copy(
                 imeAction = if (state.singleLine) ImeAction.Done else ImeAction.None
             ),
-            singleLine = state.singleLine
+            singleLine = state.singleLine,
+            colors = if (text == state.placeholder) TextFieldDefaults.colors(focusedTextColor = Color.LightGray) else TextFieldDefaults.colors()
         )
     }
 }
