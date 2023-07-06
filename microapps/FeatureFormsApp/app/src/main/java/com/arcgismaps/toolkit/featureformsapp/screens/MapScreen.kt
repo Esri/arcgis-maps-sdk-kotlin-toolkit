@@ -38,7 +38,7 @@ fun MapScreen() {
     // instantiate a MapViewModel using its factory
     val mapViewModel = viewModel<MapViewModel>(
         factory = MapViewModelFactory(
-            arcGISMap = ArcGISMap(stringResource(R.string.map_url_redlands_hydrants))
+            arcGISMap = ArcGISMap(stringResource(R.string.map_url_text_box_area))
         )
     )
     // hoist state for the formViewModel editing mode
@@ -68,8 +68,8 @@ fun MapScreen() {
                 featureFormState = mapViewModel,
                 modifier = Modifier
                     .fillMaxWidth()
-                    // set max sheet height to occupy to 80% of the total height
-                    .fillMaxHeight(0.8f)
+                    // set max sheet height to occupy to 60% of the total height
+                    .fillMaxHeight(0.6f)
             )
         },
         scaffoldState = bottomSheetScaffoldState,
