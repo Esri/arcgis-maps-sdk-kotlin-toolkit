@@ -24,9 +24,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -84,7 +82,8 @@ fun MapScreen(uri: String, onBackPressed: () -> Unit = {}) {
                 modifier = Modifier.fillMaxSize(),
                 mapInterface = mapViewModel
             )
-            // top bar is only when the FeatureForm is being shown and is in edit mode
+            // show the top bar which changes available actions based on if the FeatureForm is
+            // being shown and is in edit mode
             TopFormBar(
                 editingMode = inEditingMode,
                 onClose = { mapViewModel.setEditingActive(false) },
@@ -131,6 +130,7 @@ fun TopFormBar(
                 }
             }
         },
+        // set the top app bar to 70% opacity
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
         )

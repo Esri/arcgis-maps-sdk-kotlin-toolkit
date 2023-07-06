@@ -6,30 +6,45 @@ import com.arcgismaps.mapping.PortalItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel class which acts as the data source of PortalItems to load.
+ */
 class MapListViewModel : ViewModel() {
 
+    // private backing property for portalItems as a mutable list
     private val _portalItems : MutableList<PortalItem> = mutableListOf()
+    // the list of loaded portal items
     val portalItems: List<PortalItem> = _portalItems
-
+    // state flow that indicates if the data is being loaded
     val isLoading = MutableStateFlow(true)
 
     init {
         viewModelScope.launch {
+            // load the portal items
             loadPortalItems()
+            // emit false to indicate loading is done
             isLoading.value = false
         }
     }
 
+    /**
+     * Loads portal items from [getListOfMaps].
+     */
     private suspend fun loadPortalItems() {
         for (map in getListOfMaps()) {
             val portalItem = PortalItem(map)
+            // load the actual portalItem
             portalItem.load()
+            // load its thumbnail
             portalItem.thumbnail?.load()
             _portalItems.add(portalItem)
         }
     }
 }
 
+/**
+ * Data source of a list of portal urls
+ */
 fun getListOfMaps(): List<String> {
     return listOf(
         "https://runtimecoretest.maps.arcgis.com/home/item.html?id=df0f27f83eee41b0afe4b6216f80b541",

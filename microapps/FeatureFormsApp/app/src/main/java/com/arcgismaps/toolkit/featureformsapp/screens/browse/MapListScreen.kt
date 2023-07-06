@@ -1,13 +1,11 @@
 package com.arcgismaps.toolkit.featureformsapp.screens.browse
 
-import android.graphics.Bitmap
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -42,12 +40,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.toolkit.featureformsapp.R
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+/**
+ * Displays a list of PortalItems using the [mapListViewModel]. Provides a callback [onItemClick]
+ * when an item is tapped.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapListScreen(
@@ -69,6 +70,8 @@ fun MapListScreen(
             },
         )
     }) { padding ->
+        // use a cross fade animation to show a loading indicator when the data is loading
+        // and transition to the list of portalItems once loaded
         Crossfade(
             targetState = isLoading,
             modifier = Modifier.padding(padding)
@@ -107,6 +110,10 @@ fun MapListScreen(
     }
 }
 
+/**
+ * A list item row for a PortalItem that shows the [title], [lastModified] and [thumbnail]. Provides
+ * an [onClick] callback when the item is tapped.
+ */
 @Composable
 fun MapListItem(
     title: String,
@@ -127,7 +134,7 @@ fun MapListItem(
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxHeight(0.8f)
-                    .aspectRatio(16/9f)
+                    .aspectRatio(16 / 9f)
                     .clip(RoundedCornerShape(15.dp)),
                 contentScale = ContentScale.Crop
             )
@@ -138,11 +145,10 @@ fun MapListItem(
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxHeight(0.8f)
-                    .aspectRatio(16/9f)
+                    .aspectRatio(16 / 9f)
                     .clip(RoundedCornerShape(15.dp)),
                 contentScale = ContentScale.Crop
             )
-
         Spacer(modifier = Modifier.width(20.dp))
         Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
             Text(text = title, style = MaterialTheme.typography.bodyLarge)
