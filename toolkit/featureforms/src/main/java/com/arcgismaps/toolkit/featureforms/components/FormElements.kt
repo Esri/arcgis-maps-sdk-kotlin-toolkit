@@ -1,20 +1,21 @@
 package com.arcgismaps.toolkit.featureforms.components
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import com.arcgismaps.toolkit.featureforms.api.FieldFeatureFormElement
 import com.arcgismaps.toolkit.featureforms.api.GroupFeatureFormElement
 import com.arcgismaps.toolkit.featureforms.api.TextAreaFeatureFormInput
 import com.arcgismaps.toolkit.featureforms.api.TextBoxFeatureFormInput
+import com.arcgismaps.toolkit.featureforms.components.text.FormTextField
+import com.arcgismaps.toolkit.featureforms.components.text.FormTextFieldState
 
 @Composable
 internal fun FieldElement(field: FieldFeatureFormElement) {
     when (field.inputType) {
-        is TextAreaFeatureFormInput -> {
-            TextArea(field = field)
+        is TextAreaFeatureFormInput  -> {
+            FormTextField(state = FormTextFieldState(field))
         }
         is TextBoxFeatureFormInput -> {
-            TextBox(field = field)
+            FormTextField(state = FormTextFieldState(field))
         }
         else -> { /* TO-DO: add support for other input types */}
     }
@@ -22,5 +23,5 @@ internal fun FieldElement(field: FieldFeatureFormElement) {
 
 @Composable
 internal fun GroupElement(group: GroupFeatureFormElement) {
-    Text("TO-DO")
+    // To-do
 }

@@ -1,4 +1,4 @@
-package com.arcgismaps.toolkit.featureforms.components
+package com.arcgismaps.toolkit.featureforms.components.text
 
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Column
@@ -36,49 +36,24 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 internal fun FormTextField(
-    label: String,
-    description: String,
-    minLength: Int,
-    maxLength: Int,
-    singleLine: Boolean,
-    modifier: Modifier = Modifier,
-    placeholder: String = "",
+    state: FormTextFieldState,
+    modifier: Modifier = Modifier
 ) {
-    var text by remember { mutableStateOf("") }
-    var isFocused by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf("") }
+    val text by state.value
+    val hasError by state.hasError
+    val isFocused by state.isFocused
+    val supportingText by state.supportingText
+    val contentLength by state.contentLength
     var shouldClearFocus by remember { mutableStateOf(false) }
-    val helperText = remember {
-        buildString {
-            if (minLength > 0)
-                append("Enter $minLength to ")
-            if (maxLength > 0)
-                append("Maximum $maxLength characters")
-        }
-    }
 
     // if the keyboard is gone clear focus from the field as a side-effect
     ClearFocus(shouldClearFocus) {
         shouldClearFocus = false
     }
 
-    val validateInputLength = {
-        errorMessage = if (text.length !in minLength..maxLength) {
-            helperText
-        } else ""
-    }
-
-    val supportingText = errorMessage.ifEmpty {
-        description.ifEmpty {
-            if (isFocused) helperText else ""
-        }
-    }
-
     Column(modifier = modifier
         .fillMaxSize()
-        .onFocusChanged {
-            isFocused = it.hasFocus
-        }
+        .onFocusChanged { state.onFocusChanged(it.hasFocus) }
         .pointerInput(Unit) {
             // any tap on a blank space outside the text field will also dismiss the keyboard
             // and clear focus
@@ -89,19 +64,17 @@ internal fun FormTextField(
         OutlinedTextField(
             value = text,
             onValueChange = {
-                text = it
-                validateInputLength()
+                state.onValueChanged(it)
             },
             modifier = Modifier.fillMaxSize(),
             label = {
-                Text(text = label)
+                Text(text = state.label)
             },
             trailingIcon = {
                 if (text.isNotEmpty()) {
                     IconButton(
                         onClick = {
-                            text = ""
-                            validateInputLength()
+                            state.onValueChanged("")
                         }
                     ) {
                         Icon(
@@ -112,27 +85,27 @@ internal fun FormTextField(
                 }
             },
             supportingText = {
-                val textColor = if (errorMessage.isEmpty()) Color.Unspecified else Color.Red
+                val textColor = if (hasError) Color.Red else Color.Unspecified
                 Row {
                     if (supportingText.isNotEmpty()) {
                         Text(text = supportingText, color = textColor)
                     }
-                    if (isFocused && helperText.isNotEmpty()) {
+                    if (isFocused) {
                         Spacer(modifier = Modifier.weight(1f))
-                        Text(text = "${text.length}", color = textColor)
+                        Text(text = contentLength, color = textColor)
                     }
                 }
             },
             visualTransformation = if (text.isEmpty())
-                PlaceholderTransformation(placeholder)
+                PlaceholderTransformation(state.placeholder)
             else VisualTransformation.None,
             keyboardActions = KeyboardActions(
                 onDone = { shouldClearFocus = true }
             ),
             keyboardOptions = KeyboardOptions.Default.copy(
-                imeAction = if (singleLine) ImeAction.Done else ImeAction.None
+                imeAction = if (state.singleLine) ImeAction.Done else ImeAction.None
             ),
-            singleLine = singleLine
+            singleLine = state.singleLine
         )
     }
 }
