@@ -11,7 +11,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallenge
-import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeResponse
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationType
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 import kotlinx.coroutines.Dispatchers
@@ -93,17 +92,20 @@ private class OAuthWebViewClient(
                         host,
                         NetworkAuthenticationType.ServerTrust, Throwable("Server Certificate Required")
                     )
-                    val response = authenticatorViewModel.handleNetworkAuthenticationChallenge(serverTrustChallenge)
-                    trustedHost = response is NetworkAuthenticationChallengeResponse.ContinueWithCredential
+                    (authenticatorViewModel as AuthenticatorViewModelImpl)._pendingServerTrustChallenge.value = ServerTrustChallenge(serverTrustChallenge) {
+                        authenticatorViewModel._pendingServerTrustChallenge.value = null
+                        if (it) {
+                            handler?.proceed()
+                        } else {
+                            handler?.cancel()
+                            throw SSLException("Connection to $host failed, ${error?.toString()}")
+                        }
+                    }
+//                    val response = authenticatorViewModel as AuthenticatorViewModelImpl
+//                    trustedHost = response is NetworkAuthenticationChallengeResponse.ContinueWithCredential
                 }
                 // TODO: propagate cancellation if the user chooses not to continue
 
-                if (trustedHost) {
-                    handler?.proceed()
-                } else {
-                    handler?.cancel()
-                    throw SSLException("Connection to $host failed, ${error?.toString()}")
-                }
             }
         }
     }

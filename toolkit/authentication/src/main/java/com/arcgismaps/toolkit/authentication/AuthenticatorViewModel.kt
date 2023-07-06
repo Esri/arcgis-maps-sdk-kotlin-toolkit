@@ -65,7 +65,7 @@ public interface AuthenticatorViewModel : NetworkAuthenticationChallengeHandler,
  *
  * @since 200.2.0
  */
-private class AuthenticatorViewModelImpl(
+public class AuthenticatorViewModelImpl(
     setAsArcGISAuthenticationChallengeHandler: Boolean,
     setAsNetworkAuthenticationChallengeHandler: Boolean
 ) : AuthenticatorViewModel, ViewModel() {
@@ -76,7 +76,7 @@ private class AuthenticatorViewModelImpl(
     override val pendingOAuthUserSignIn: StateFlow<OAuthUserSignIn?> =
         _pendingOAuthUserSignIn.asStateFlow()
 
-    private val _pendingServerTrustChallenge = MutableStateFlow<ServerTrustChallenge?>(null)
+    public val _pendingServerTrustChallenge: MutableStateFlow<ServerTrustChallenge?> = MutableStateFlow<ServerTrustChallenge?>(null)
     override val pendingServerTrustChallenge: StateFlow<ServerTrustChallenge?> =
         _pendingServerTrustChallenge.asStateFlow()
 
