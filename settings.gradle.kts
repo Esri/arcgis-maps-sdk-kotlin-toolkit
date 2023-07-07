@@ -1,6 +1,6 @@
 import org.gradle.configurationcache.extensions.capitalized
 
-val projects = listOf("template", "authentication", "compass", "indoors")
+val projects = listOf("template", "authentication", "compass")
 
 pluginManagement {
     repositories {
@@ -41,6 +41,8 @@ var includedProjects = projects.flatMap { listOf(":$it", ":$it-app") }.toTypedAr
 include(*includedProjects)
 include (":bom")
 include (":composable-map")
+include (":indoors")
+include (":floor-filter-app")
 
 projects.forEach {
     project(":$it").projectDir = File(rootDir, "toolkit/$it")
@@ -49,3 +51,5 @@ projects.forEach {
 
 project(":bom").projectDir = File(rootDir, "bom")
 project(":composable-map").projectDir = File(rootDir, "toolkit/composable-map")
+project(":indoors").projectDir = File(rootDir, "toolkit/indoors")
+project(":floor-filter-app").projectDir = File(rootDir, "microapps/FloorFilterApp/app")
