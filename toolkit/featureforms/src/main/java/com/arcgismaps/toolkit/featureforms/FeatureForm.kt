@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.api.FeatureFormDefinition
 import com.arcgismaps.toolkit.featureforms.api.FieldFeatureFormElement
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
+import com.arcgismaps.toolkit.featureforms.utils.ClearFocus
 
 /**
  * A composable Form toolkit component that enables users to edit field values of features in a
@@ -34,7 +35,8 @@ public fun FeatureForm(
     modifier: Modifier = Modifier
 ) {
     val featureFormDefinition by featureFormState.formDefinition.collectAsState()
-
+    val inEditingMode by featureFormState.inEditingMode.collectAsState()
+    ClearFocus(inEditingMode)
     featureFormDefinition?.let {
         FeatureFormContent(formDefinition = it, modifier = modifier)
     } ?: run {
@@ -52,16 +54,18 @@ internal fun FeatureFormContent(
     modifier: Modifier = Modifier
 ) {
     val attributes = formDefinition.feature!!.attributes
-    
+
     Column(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // title
         Text(text = formDefinition.title, style = TextStyle(fontWeight = FontWeight.Bold))
-        Spacer(modifier = Modifier
-            .fillMaxWidth()
-            .height(15.dp))
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(15.dp)
+        )
         Divider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
         // form content
         LazyColumn(modifier = Modifier.fillMaxSize()) {
