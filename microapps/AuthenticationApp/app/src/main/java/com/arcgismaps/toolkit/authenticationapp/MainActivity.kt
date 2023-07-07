@@ -18,7 +18,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -77,7 +76,6 @@ private fun AuthenticationApp() {
  * @param onOAuthUserConfigurationChanged called when the [AuthenticatorState.oAuthUserConfiguration] should be changed
  * @since 200.2.0
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PortalDetails(
     url: String,
