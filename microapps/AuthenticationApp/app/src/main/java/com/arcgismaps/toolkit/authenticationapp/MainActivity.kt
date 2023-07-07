@@ -49,7 +49,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun AuthenticationApp() {
     val application = LocalContext.current.applicationContext as Application
-    val authenticationAppViewModel = viewModel(initializer = { AuthenticationAppViewModel(application) })
+    val authenticationAppViewModel = viewModel { AuthenticationAppViewModel(application) }
     val authenticatorState: AuthenticatorState = authenticationAppViewModel.authenticatorState
     Column {
         val infoText = authenticationAppViewModel.infoText.collectAsState().value
