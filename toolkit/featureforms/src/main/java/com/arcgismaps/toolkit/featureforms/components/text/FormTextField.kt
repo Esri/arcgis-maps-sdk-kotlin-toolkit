@@ -25,14 +25,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.featureforms.utils.ClearFocus
 
 @Composable
 internal fun FormTextField(
@@ -107,23 +106,6 @@ internal fun FormTextField(
             ),
             singleLine = state.singleLine
         )
-    }
-}
-
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-internal fun ClearFocus(key: Boolean, onComplete: () -> Unit = {}) {
-    val focusManager = LocalFocusManager.current
-    val keyboardController = LocalSoftwareKeyboardController.current
-    DisposableEffect(key) {
-        if (key) {
-            // hides the keyboard only if visible
-            keyboardController?.hide()
-            focusManager.clearFocus()
-        }
-        onDispose {
-            onComplete()
-        }
     }
 }
 

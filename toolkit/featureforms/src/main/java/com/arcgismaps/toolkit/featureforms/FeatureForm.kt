@@ -34,14 +34,16 @@ public fun FeatureForm(
     modifier: Modifier = Modifier
 ) {
     val featureFormDefinition by featureFormState.formDefinition.collectAsState()
-
-    featureFormDefinition?.let {
-        FeatureFormContent(formDefinition = it, modifier = modifier)
-    } ?: run {
-        Column(
-            modifier = modifier.fillMaxSize()
-        ) {
-            Text(text = "No information to display.")
+    val inEditingMode by featureFormState.inEditingMode.collectAsState()
+    if (inEditingMode) {
+        featureFormDefinition?.let {
+            FeatureFormContent(formDefinition = it, modifier = modifier)
+        } ?: run {
+            Column(
+                modifier = modifier.fillMaxSize()
+            ) {
+                Text(text = "No information to display.")
+            }
         }
     }
 }
