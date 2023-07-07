@@ -7,6 +7,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.ArcGISEnvironment
@@ -14,9 +15,8 @@ import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeResponse
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationType
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import java.net.URL
 import javax.net.ssl.SSLException
 
@@ -26,6 +26,7 @@ internal fun OAuthWebView(
     authenticatorState: AuthenticatorState
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     AndroidView(factory = {
         WebView(context).apply {
             settings.apply {
@@ -37,7 +38,7 @@ internal fun OAuthWebView(
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
 
-            webViewClient = OAuthWebViewClient(authenticatorState, oAuthUserSignIn)
+            webViewClient = OAuthWebViewClient(authenticatorState, oAuthUserSignIn, scope)
             loadUrl(oAuthUserSignIn.authorizeUrl)
         }
     })
@@ -50,7 +51,8 @@ internal fun OAuthWebView(
  */
 private class OAuthWebViewClient(
     val authenticatorState: AuthenticatorState,
-    val oAuthUserSignIn: OAuthUserSignIn
+    val oAuthUserSignIn: OAuthUserSignIn,
+    val coroutineScope: CoroutineScope
 ) : WebViewClient() {
     /**
      * Takes control of the page loading in the [webView] if the URL in the [request] contains the approval code
@@ -82,28 +84,30 @@ private class OAuthWebViewClient(
      */
     override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
         val host = URL(view?.url).host
-        runBlocking {
-            withContext(Dispatchers.IO) {
-                var trustedHost =
-                    ArcGISEnvironment.authenticationManager.networkCredentialStore.getCredentials(host)
-                        .getOrThrow().isNotEmpty()
+        coroutineScope.launch {
+            var trustedHost =
+                ArcGISEnvironment.authenticationManager.networkCredentialStore.getCredentials(host)
+                    .getOrThrow().isNotEmpty()
 
-                if (!trustedHost) {
-                    val serverTrustChallenge = NetworkAuthenticationChallenge(
-                        host,
-                        NetworkAuthenticationType.ServerTrust, Throwable("Server Certificate Required")
-                    )
-                    val response = authenticatorState.handleNetworkAuthenticationChallenge(serverTrustChallenge)
-                    trustedHost = response is NetworkAuthenticationChallengeResponse.ContinueWithCredential
-                }
-                // TODO: propagate cancellation if the user chooses not to continue
+            if (!trustedHost) {
+                val serverTrustChallenge = NetworkAuthenticationChallenge(
+                    host,
+                    NetworkAuthenticationType.ServerTrust,
+                    Throwable("Server Certificate Required")
+                )
+                val response = authenticatorState.handleNetworkAuthenticationChallenge(
+                    serverTrustChallenge
+                )
+                trustedHost =
+                    response is NetworkAuthenticationChallengeResponse.ContinueWithCredential
 
-                if (trustedHost) {
-                    handler?.proceed()
-                } else {
-                    handler?.cancel()
-                    throw SSLException("Connection to $host failed, ${error?.toString()}")
-                }
+            }
+            // TODO: propagate cancellation if the user chooses not to continue
+            if (trustedHost) {
+                handler?.proceed()
+            } else {
+                handler?.cancel()
+                throw SSLException("Connection to $host failed, ${error?.toString()}")
             }
         }
     }
