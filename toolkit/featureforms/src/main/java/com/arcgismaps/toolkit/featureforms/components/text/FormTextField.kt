@@ -140,7 +140,6 @@ internal class PlaceholderTransformation(private val placeholder: String) : Visu
     }
 
     override fun filter(text: AnnotatedString): TransformedText {
-        // add a blank space if place holder is empty so that the label always stays above
-        return TransformedText(AnnotatedString(placeholder.ifEmpty { " " }), mapping)
+        return TransformedText(AnnotatedString(placeholder), mapping)
     }
 }
