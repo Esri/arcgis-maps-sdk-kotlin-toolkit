@@ -1,9 +1,11 @@
-package com.arcgismaps.toolkit.featureformsapp.screens
+package com.arcgismaps.toolkit.featureformsapp.screens.map
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.BottomSheetScaffold
@@ -22,7 +24,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -34,11 +35,11 @@ import com.arcgismaps.toolkit.featureformsapp.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MapScreen() {
+fun MapScreen(uri: String, onBackPressed: () -> Unit = {}) {
     // instantiate a MapViewModel using its factory
     val mapViewModel = viewModel<MapViewModel>(
         factory = MapViewModelFactory(
-            arcGISMap = ArcGISMap(stringResource(R.string.map_url_text_box_area))
+            arcGISMap = ArcGISMap(uri)
         )
     )
     // hoist state for the formViewModel editing mode
@@ -74,79 +75,70 @@ fun MapScreen() {
         },
         scaffoldState = bottomSheetScaffoldState,
         sheetPeekHeight = 40.dp,
-        // top bar is only when the FeatureForm is being shown and is in edit mode
-        topBar = if (inEditingMode) {
-            {
-                TopAppBar(
-                    title = { Text(text = stringResource(R.string.edit_feature), color = Color.White) },
-                    navigationIcon = {
-                        IconButton(onClick = {
-                            mapViewModel.setEditingActive(false)
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Close Feature Editor",
-                                tint = Color.White
-                            )
-                        }
-                    },
-                    actions = {
-                        IconButton(onClick = {
-                            /* FUTURE: save feature here */
-                            mapViewModel.setEditingActive(false)
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = "Save Feature",
-                                tint = Color.White
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primary
-                    )
-                )
-            }
-        } else {
-            null
-        }
     ) {
-        // show the composable map using the mapViewModel
-        ComposableMap(
-            modifier = Modifier.fillMaxSize(),
-            mapInterface = mapViewModel
-        )
+        Box {
+            // show the composable map using the mapViewModel
+            ComposableMap(
+                modifier = Modifier.fillMaxSize(),
+                mapInterface = mapViewModel
+            )
+            // show the top bar which changes available actions based on if the FeatureForm is
+            // being shown and is in edit mode
+            TopFormBar(
+                editingMode = inEditingMode,
+                onClose = { mapViewModel.setEditingActive(false) },
+                onSave = { mapViewModel.setEditingActive(false) }) {
+                onBackPressed()
+            }
+        }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview
 @Composable
-fun TopFormBarPreview() {
+fun TopFormBar(
+    editingMode: Boolean,
+    onClose: () -> Unit = {},
+    onSave: () -> Unit = {},
+    onBackPressed: () -> Unit = {}
+) {
     TopAppBar(
-        title = { Text(text = "Edit Feature", color = Color.White) },
+        title = {
+            if (editingMode) Text(
+                text = stringResource(R.string.edit_feature),
+                style = MaterialTheme.typography.titleLarge
+            )
+        },
         navigationIcon = {
-            IconButton(onClick = {
-            }) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Close Feature Editor",
-                    tint = Color.White
-                )
+            if (editingMode) {
+                IconButton(onClick = onClose) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Close Feature Editor"
+                    )
+                }
+            } else {
+                IconButton(onClick = onBackPressed) {
+                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                }
             }
         },
         actions = {
-            IconButton(onClick = {
-            }) {
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = "Save Feature",
-                    tint = Color.White
-                )
+            if (editingMode) {
+                IconButton(onClick = onSave) {
+                    Icon(imageVector = Icons.Default.Check, contentDescription = "Save Feature")
+                }
             }
         },
+        // set the top app bar to 70% opacity
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
         )
     )
+}
+
+@Preview
+@Composable
+fun TopFormBarPreview() {
+    TopFormBar(true)
 }

@@ -1,4 +1,4 @@
-package com.arcgismaps.toolkit.featureformsapp.screens
+package com.arcgismaps.toolkit.featureformsapp.screens.map
 
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
