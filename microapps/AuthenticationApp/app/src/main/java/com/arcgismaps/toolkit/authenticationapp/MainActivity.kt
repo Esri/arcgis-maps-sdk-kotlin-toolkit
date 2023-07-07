@@ -70,9 +70,12 @@ private fun AuthenticationApp() {
  * Allows the user to enter a url and load a portal.
  * Also displays a checkbox for using OAuth, and a button to clear credentials.
  *
- * @param onInfoTextChanged called when the info text should be changed
- * @param onLoadStatusChanged called when an operation is ongoing
- * @param onOAuthUserConfigurationChanged called when the [AuthenticatorState.oAuthUserConfiguration] should be changed
+ * @param url the string url to display in the text field
+ * @param onSetUrl called when the url should be changed
+ * @param useOAuth whether oAuth should be used to load the portal
+ * @param onSetUseOAuth called when [useOAuth] should be changed
+ * @param onSignOut called when any stored credentials should be cleared
+ * @param onLoadPortal called when the [url] should be loaded
  * @since 200.2.0
  */
 @Composable
