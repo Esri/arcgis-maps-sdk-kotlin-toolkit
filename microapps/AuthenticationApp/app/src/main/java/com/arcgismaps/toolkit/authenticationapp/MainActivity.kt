@@ -101,7 +101,7 @@ private fun PortalDetails(
                 keyboardType = KeyboardType.Uri,
                 imeAction = ImeAction.Go
             ),
-            keyboardActions = KeyboardActions(onAny = { onLoadPortal }),
+            keyboardActions = KeyboardActions(onAny = { onLoadPortal() }),
             singleLine = true
         )
         Row(
