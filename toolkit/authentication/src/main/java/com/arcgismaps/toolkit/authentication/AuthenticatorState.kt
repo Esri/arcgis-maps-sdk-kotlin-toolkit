@@ -1,5 +1,6 @@
 package com.arcgismaps.toolkit.authentication
 
+import android.util.Log
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeHandler
@@ -63,7 +64,7 @@ public sealed interface AuthenticatorState : NetworkAuthenticationChallengeHandl
  *
  * @since 200.2.0
  */
-private class AuthenticatorStateImpl(
+public class AuthenticatorStateImpl(
     setAsArcGISAuthenticationChallengeHandler: Boolean,
     setAsNetworkAuthenticationChallengeHandler: Boolean
 ) : AuthenticatorState {
@@ -74,12 +75,10 @@ private class AuthenticatorStateImpl(
     override val pendingOAuthUserSignIn: StateFlow<OAuthUserSignIn?> =
         _pendingOAuthUserSignIn.asStateFlow()
 
-    private val _pendingServerTrustChallenge = MutableStateFlow<ServerTrustChallenge?>(null)
-    override val pendingServerTrustChallenge: StateFlow<ServerTrustChallenge?> =
-        _pendingServerTrustChallenge.asStateFlow()
+    public val _pendingServerTrustChallenge: MutableStateFlow<ServerTrustChallenge?> = MutableStateFlow(null)
+    override val pendingServerTrustChallenge: StateFlow<ServerTrustChallenge?> = _pendingServerTrustChallenge.asStateFlow()
 
-    private val _pendingUsernamePasswordChallenge =
-        MutableStateFlow<UsernamePasswordChallenge?>(null)
+    public val _pendingUsernamePasswordChallenge: MutableStateFlow<UsernamePasswordChallenge?> = MutableStateFlow<UsernamePasswordChallenge?>(null)
     override val pendingUsernamePasswordChallenge: StateFlow<UsernamePasswordChallenge?> =
         _pendingUsernamePasswordChallenge.asStateFlow()
 
@@ -192,21 +191,6 @@ private class AuthenticatorStateImpl(
             }
         }
 
-
-
-    // WORKS
-//    private fun awaitServerTrustChallengeResponse(networkAuthenticationChallenge: NetworkAuthenticationChallenge):
-//            NetworkAuthenticationChallengeResponse {
-//        _pendingServerTrustChallenge.value =
-//            ServerTrustChallenge(networkAuthenticationChallenge) { shouldTrustServer ->
-//                _pendingServerTrustChallenge.value = null
-//                Log.d("ArcGIS-Main", "awaitServerTrustChallengeResponse: Creating a new SeverTrust")
-//            }
-//        Log.d("ArcGIS-Main", "awaitServerTrustChallengeResponse: ServerTrust OK ")
-//        return NetworkAuthenticationChallengeResponse.ContinueWithCredential(
-//            ServerTrust
-//        )
-//    }
 
     /**
      * Emits a [UsernamePasswordChallenge] to [pendingUsernamePasswordChallenge] and awaits the response.

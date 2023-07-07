@@ -2,6 +2,8 @@ package com.arcgismaps.toolkit.authentication
 
 import android.net.http.SslError
 import android.view.ViewGroup
+import android.webkit.ClientCertRequest
+import android.webkit.HttpAuthHandler
 import android.webkit.SslErrorHandler
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -11,7 +13,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallenge
-import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeResponse
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationType
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 import kotlinx.coroutines.Dispatchers
@@ -71,6 +72,49 @@ private class OAuthWebViewClient(
     }
 
     /**
+     * Will handle UsernamePassword challenge.
+     *
+     * @since 200.2.0
+     */
+    override fun onReceivedHttpAuthRequest(
+        view: WebView?,
+        handler: HttpAuthHandler?,
+        host: String?,
+        realm: String?
+    ) {
+        runBlocking {
+            if (host != null) {
+                val passwordCredentialList = ArcGISEnvironment.authenticationManager.networkCredentialStore.getCredentials(host)
+                    .getOrThrow()
+                if (passwordCredentialList.isEmpty()) {
+                    (authenticatorState as AuthenticatorStateImpl)._pendingUsernamePasswordChallenge.value =
+                        UsernamePasswordChallenge(url = host,
+                            onUsernamePasswordReceived = { username, password ->
+                                authenticatorState._pendingUsernamePasswordChallenge.value = null
+                                handler?.proceed(username, password)
+                            },
+                            onCancel = {
+                                oAuthUserSignIn.cancel()
+                                handler?.cancel()
+                            }
+                        )
+                }
+            }
+            oAuthUserSignIn.cancel()
+            handler?.cancel()
+        }
+
+    }
+
+    /**
+     * TODO
+     */
+    override fun onReceivedClientCertRequest(view: WebView?, request: ClientCertRequest?) {
+        super.onReceivedClientCertRequest(view, request)
+    }
+
+
+    /**
      * Callback will be invoked when an SSL error occurs while loading the OAuth sign-in page.
      * The the OAuth sign-in page is loaded only if user chooses to trust the certificate authority,
      * otherwise the connection will get cancelled and an error will get thrown to the caller.
@@ -93,18 +137,38 @@ private class OAuthWebViewClient(
                         host,
                         NetworkAuthenticationType.ServerTrust, Throwable("Server Certificate Required")
                     )
-                    val response = authenticatorState.handleNetworkAuthenticationChallenge(serverTrustChallenge)
-                    trustedHost = response is NetworkAuthenticationChallengeResponse.ContinueWithCredential
-                }
-                // TODO: propagate cancellation if the user chooses not to continue
+                    (authenticatorState as AuthenticatorStateImpl)._pendingServerTrustChallenge.value =
+                        ServerTrustChallenge(serverTrustChallenge) {
+                            authenticatorState._pendingServerTrustChallenge.value = null
+                            if (it) {
+                                //TODO: add it to cache
+                                handler?.proceed()
+                            } else {
 
-                if (trustedHost) {
-                    handler?.proceed()
-                } else {
-                    handler?.cancel()
-                    throw SSLException("Connection to $host failed, ${error?.toString()}")
+                                handler?.cancel()
+                                //TODO: Ideally, the error should be propagated through
+                                // NetworkAuthenticationChallengeResponse.ContinueAndFailWithError
+                                // or use OAuthUserSignIn.cancel(error) when exposed
+                                oAuthUserSignIn.cancel()
+//                                handler?.cancel()
+                                throw SSLException("Connection to $host failed, ${error?.toString()}")
+
+                            }
+                        }
                 }
             }
+        }
+    }
+
+    /**
+     * Checks if the page has an `Invalid client_id` error and finishes the [oAuthUserSignIn] if it does.
+     *
+     * @since 200.2.0
+     */
+    override fun onPageFinished(view: WebView?, url: String?) {
+        if (view?.title == "Error: Invalid client_id") {
+            // TODO: Pass the `invalid client_id` error in the Cancellation exception
+            oAuthUserSignIn.cancel()
         }
     }
 }
