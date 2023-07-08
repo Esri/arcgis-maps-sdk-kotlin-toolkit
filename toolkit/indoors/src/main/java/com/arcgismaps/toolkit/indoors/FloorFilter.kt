@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 @Composable
-public fun Indoors(viewModel: IndoorsInterface) {
+public fun Indoors(viewModel: FloorFilterInterface) {
     val text = viewModel.someProperty.collectAsState()
     Text(text = text.value)
 }
@@ -17,7 +17,7 @@ public fun Indoors(viewModel: IndoorsInterface) {
 @Preview
 @Composable
 internal fun IndoorsPreview() {
-    val viewModel = object: IndoorsInterface {
+    val viewModel = object: FloorFilterInterface {
         private val _someProperty: MutableStateFlow<String> = MutableStateFlow("Hello Indoors Preview")
         override val someProperty: StateFlow<String> = _someProperty.asStateFlow()
     }

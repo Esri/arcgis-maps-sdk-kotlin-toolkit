@@ -19,8 +19,8 @@ package com.arcgismaps.toolkit.indoors
 import kotlinx.coroutines.flow.StateFlow
 
 /**
- * An interface to pass into the Indoors composable function.
+ * An interface to pass into the FloorFilter composable function.
  */
-public interface IndoorsInterface {
+public interface FloorFilterInterface {
     public val someProperty: StateFlow<String>
 }

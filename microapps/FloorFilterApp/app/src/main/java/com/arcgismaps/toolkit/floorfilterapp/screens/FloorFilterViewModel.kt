@@ -18,14 +18,14 @@ package com.arcgismaps.toolkit.floorfilterapp.screens
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.arcgismaps.toolkit.indoors.IndoorsInterface
+import com.arcgismaps.toolkit.indoors.FloorFilterInterface
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class FloorFilterViewModel(
     initialValue: String
-) : ViewModel(), IndoorsInterface {
+) : ViewModel(), FloorFilterInterface {
     private val _someProperty: MutableStateFlow<String> = MutableStateFlow(initialValue)
     override val someProperty: StateFlow<String> = _someProperty.asStateFlow()
 }
