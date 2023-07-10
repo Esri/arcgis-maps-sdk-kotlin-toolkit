@@ -21,6 +21,9 @@ import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 internal fun OAuthAuthenticator(
     oAuthPendingSignIn: OAuthUserSignIn
 ) {
+    // If a configuration change happens while the OAuth activity is active, then when the activity
+    // returns, this composable would launch the activity again due to the `SideEffect` below. This
+    // flag prevents a relaunch.
     var didLaunch by rememberSaveable{ mutableStateOf(false) }
     val launcher =
         rememberLauncherForActivityResult(contract = OAuthUserSignInActivity.Contract()) { redirectUrl ->
