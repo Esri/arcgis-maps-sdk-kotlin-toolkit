@@ -7,9 +7,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.BuildConfig
 import com.arcgismaps.toolkit.floorfilterapp.screens.MainScreen
-import com.arcgismaps.toolkit.floorfilterapp.ui.theme.floorFilterAppTheme
+import com.arcgismaps.toolkit.floorfilterapp.ui.theme.FloorFilterAppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -17,22 +16,22 @@ class MainActivity : ComponentActivity() {
         ArcGISEnvironment.apiKey =
             ApiKey.create(BuildConfig.API_KEY)
         setContent {
-            floorFilterAppTheme {
-                floorFilterApp()
+            FloorFilterAppTheme {
+                FloorFilterApp()
             }
         }
     }
 }
 
 @Composable
-fun floorFilterApp() {
+fun FloorFilterApp() {
     MainScreen()
 }
 
 @Preview(showBackground = true)
 @Composable
-fun appPreview() {
-    floorFilterAppTheme {
-        floorFilterApp()
+fun AppPreview() {
+    FloorFilterAppTheme {
+        FloorFilterApp()
     }
 }
