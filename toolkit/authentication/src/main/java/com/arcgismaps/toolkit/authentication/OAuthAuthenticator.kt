@@ -3,6 +3,10 @@ package com.arcgismaps.toolkit.authentication
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
 /**
@@ -17,6 +21,7 @@ import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 internal fun OAuthAuthenticator(
     oAuthPendingSignIn: OAuthUserSignIn
 ) {
+    var didLaunch by rememberSaveable{ mutableStateOf(false) }
     val launcher =
         rememberLauncherForActivityResult(contract = OAuthUserSignInActivity.Contract()) { redirectUrl ->
             redirectUrl?.let {
@@ -27,6 +32,9 @@ internal fun OAuthAuthenticator(
     // and there's nothing that needs to keep running if it gets recomposed. In reality, we also don't
     // expect `oAuthPendingSignIn` to change while this composable is displayed.
     SideEffect {
-        launcher.launch(oAuthPendingSignIn)
+        if (!didLaunch) {
+            didLaunch = true
+            launcher.launch(oAuthPendingSignIn)
+        }
     }
 }
