@@ -57,10 +57,6 @@
                 <data
                     android:host="auth"
                     android:scheme="my-ags-app" />
-                <data
-                    android:host ="auth"
-                    android:scheme="my-android-app"
-                    />
             </intent-filter>
         </activity>
     </application>
