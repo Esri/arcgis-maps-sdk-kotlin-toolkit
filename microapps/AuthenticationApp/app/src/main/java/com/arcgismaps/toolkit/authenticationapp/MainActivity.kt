@@ -48,6 +48,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.toolkit.authentication.Authenticator
 import com.arcgismaps.toolkit.authentication.AuthenticatorState
 import com.arcgismaps.toolkit.authenticationapp.ui.theme.AuthenticationAppTheme
@@ -55,6 +56,8 @@ import com.arcgismaps.toolkit.authenticationapp.ui.theme.AuthenticationAppTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Application context must be set for client certificate authentication.
+        ArcGISEnvironment.applicationContext = applicationContext
         setContent {
             AuthenticationAppTheme {
                 AuthenticationApp()

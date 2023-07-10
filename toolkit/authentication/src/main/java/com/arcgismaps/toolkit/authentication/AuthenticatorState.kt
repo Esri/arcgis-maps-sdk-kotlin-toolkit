@@ -18,11 +18,12 @@
 
 package com.arcgismaps.toolkit.authentication
 
-import android.util.Log
+import android.security.KeyChainAliasCallback
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeHandler
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
+import com.arcgismaps.httpcore.authentication.CertificateCredential
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeHandler
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeResponse
@@ -75,6 +76,14 @@ public sealed interface AuthenticatorState : NetworkAuthenticationChallengeHandl
      * @since 200.2.0
      */
     public val pendingUsernamePasswordChallenge: StateFlow<UsernamePasswordChallenge?>
+
+    /**
+     * The current [ClientCertificateChallenge] awaiting completion. Use this to complete or cancel
+     * any challenge requiring a client certificate.
+     *
+     * @since 200.2.0
+     */
+    public val pendingClientCertificateChallenge: StateFlow<ClientCertificateChallenge?>
 }
 
 /**
@@ -82,7 +91,7 @@ public sealed interface AuthenticatorState : NetworkAuthenticationChallengeHandl
  *
  * @since 200.2.0
  */
-public class AuthenticatorStateImpl(
+private class AuthenticatorStateImpl(
     setAsArcGISAuthenticationChallengeHandler: Boolean,
     setAsNetworkAuthenticationChallengeHandler: Boolean
 ) : AuthenticatorState {
@@ -93,12 +102,18 @@ public class AuthenticatorStateImpl(
     override val pendingOAuthUserSignIn: StateFlow<OAuthUserSignIn?> =
         _pendingOAuthUserSignIn.asStateFlow()
 
-    public val _pendingServerTrustChallenge: MutableStateFlow<ServerTrustChallenge?> = MutableStateFlow(null)
-    override val pendingServerTrustChallenge: StateFlow<ServerTrustChallenge?> = _pendingServerTrustChallenge.asStateFlow()
+    private val _pendingServerTrustChallenge = MutableStateFlow<ServerTrustChallenge?>(null)
+    override val pendingServerTrustChallenge: StateFlow<ServerTrustChallenge?> =
+        _pendingServerTrustChallenge.asStateFlow()
 
-    public val _pendingUsernamePasswordChallenge: MutableStateFlow<UsernamePasswordChallenge?> = MutableStateFlow<UsernamePasswordChallenge?>(null)
+    private val _pendingUsernamePasswordChallenge =
+        MutableStateFlow<UsernamePasswordChallenge?>(null)
     override val pendingUsernamePasswordChallenge: StateFlow<UsernamePasswordChallenge?> =
         _pendingUsernamePasswordChallenge.asStateFlow()
+
+    private val _pendingClientCertificateChallenge = MutableStateFlow<ClientCertificateChallenge?>(null)
+    override val pendingClientCertificateChallenge: StateFlow<ClientCertificateChallenge?> =
+        _pendingClientCertificateChallenge.asStateFlow()
 
     init {
         if (setAsArcGISAuthenticationChallengeHandler) {
@@ -170,11 +185,38 @@ public class AuthenticatorStateImpl(
                 } ?: NetworkAuthenticationChallengeResponse.Cancel
             }
 
-            else -> {
-                NetworkAuthenticationChallengeResponse.ContinueAndFailWithError(
-                    UnsupportedOperationException("Not yet implemented")
-                )
+            NetworkAuthenticationType.ClientCertificate -> {
+                return awaitCertificateChallengeResponse()
             }
+        }
+    }
+
+    /**
+     * Emits a new [ClientCertificateChallenge] to [pendingClientCertificateChallenge] and awaits a
+     * chosen certificate to proceed with.
+     *
+     * @return [NetworkAuthenticationChallengeResponse] based on the user choice.
+     * @since 200.2.0
+     */
+    private suspend fun awaitCertificateChallengeResponse(): NetworkAuthenticationChallengeResponse {
+        val selectedAlias = suspendCancellableCoroutine { continuation ->
+            val aliasCallback = KeyChainAliasCallback { alias ->
+                continuation.resume(alias) {}
+            }
+            _pendingClientCertificateChallenge.value = ClientCertificateChallenge(aliasCallback)
+            continuation.invokeOnCancellation {
+                continuation.resume(null) {}
+            }
+        }
+        _pendingClientCertificateChallenge.value = null
+        return if (selectedAlias != null) {
+            NetworkAuthenticationChallengeResponse.ContinueWithCredential(
+                CertificateCredential(
+                    selectedAlias
+                )
+            )
+        } else {
+            NetworkAuthenticationChallengeResponse.Cancel
         }
     }
 
@@ -208,7 +250,6 @@ public class AuthenticatorStateImpl(
                 continuation.resumeWith(Result.success(NetworkAuthenticationChallengeResponse.Cancel))
             }
         }
-
 
     /**
      * Emits a [UsernamePasswordChallenge] to [pendingUsernamePasswordChallenge] and awaits the response.
