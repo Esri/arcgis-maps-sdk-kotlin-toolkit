@@ -94,14 +94,14 @@ fun MapListScreen(
                 ) {
                     items(portalItems) {
                         MapListItem(
-                            title = it.title,
-                            lastModified = it.modified?.format("MMM dd yyyy") ?: "",
-                            thumbnail = it.thumbnail?.image?.bitmap?.asImageBitmap(),
+                            title = it.portalItem.title,
+                            lastModified = it.portalItem.modified?.format("MMM dd yyyy") ?: "",
+                            thumbnail = it.portalItem.thumbnail?.image?.bitmap?.asImageBitmap(),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(100.dp)
                         ) {
-                            onItemClick(it.url)
+                            onItemClick(it.portalItem.url)
                         }
                     }
                 }
