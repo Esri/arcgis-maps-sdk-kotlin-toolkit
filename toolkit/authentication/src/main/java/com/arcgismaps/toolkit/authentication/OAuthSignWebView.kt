@@ -1,6 +1,7 @@
 package com.arcgismaps.toolkit.authentication
 
 import android.net.http.SslError
+import android.security.KeyChain
 import android.view.ViewGroup
 import android.webkit.ClientCertRequest
 import android.webkit.HttpAuthHandler
@@ -12,13 +13,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.httpcore.authentication.CertificateCredential
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeResponse
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationType
+import com.arcgismaps.httpcore.authentication.NetworkCredential
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 import com.arcgismaps.httpcore.authentication.PasswordCredential
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.net.URL
 import javax.net.ssl.SSLException
 
@@ -91,24 +96,10 @@ private class OAuthWebViewClient(
         scope.launch {
             host?.let { host ->
                 val exception = Exception("Http Unauthorized")
-                val passwordCredentialList =
-                    ArcGISEnvironment.authenticationManager.networkCredentialStore.getCredentials(host)
-                        .getOrThrow()
-                val credential: PasswordCredential? = if (passwordCredentialList.isNotEmpty()) {
-                    passwordCredentialList.first() as PasswordCredential
-                } else {
-                    val usernamePasswordChallenge = NetworkAuthenticationChallenge(
-                        host,
-                        NetworkAuthenticationType.UsernamePassword,
-                        exception
-                    )
-                    val response = authenticatorState.handleNetworkAuthenticationChallenge(usernamePasswordChallenge)
-                    if (response is NetworkAuthenticationChallengeResponse.ContinueWithCredential)
-                        (response.credential as PasswordCredential)
-                    else null
-                }
-                credential?.let {
-                    handler?.proceed(it.username, it.password)
+
+                getCredentialOrPrompt(host, exception, NetworkAuthenticationType.UsernamePassword)?.let {credential ->
+                    val passwordCredential = credential as PasswordCredential
+                    handler?.proceed(passwordCredential.username, passwordCredential.password)
                 } ?: {
                     oAuthUserSignIn.completeWithError(exception)
                     handler?.cancel()
@@ -117,11 +108,28 @@ private class OAuthWebViewClient(
         }
     }
 
-    /**
-     * TODO
-     */
+    //    /**
+//     * TODO
+//     */
     override fun onReceivedClientCertRequest(view: WebView?, request: ClientCertRequest?) {
-        super.onReceivedClientCertRequest(view, request)
+        scope.launch {
+            view?.url?.let {
+                val host = URL(it).host
+                val exception = Exception("Certificate Required")
+                getCredentialOrPrompt(host, exception, NetworkAuthenticationType.ClientCertificate)?.let { credential ->
+                    val certificateCredential = credential as CertificateCredential
+                    withContext(Dispatchers.IO) {
+                        request?.proceed(
+                            KeyChain.getPrivateKey(view.context, certificateCredential.alias),
+                            KeyChain.getCertificateChain(view.context, certificateCredential.alias)
+                        )
+                    }
+                } ?: {
+                    oAuthUserSignIn.completeWithError(exception)
+                    request?.cancel()
+                }
+            } ?: throw IllegalStateException("Host is not known")
+        }
     }
 
 
@@ -139,28 +147,16 @@ private class OAuthWebViewClient(
      */
     override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
         scope.launch {
-            val host = URL(view?.url).host
-            var trustedHost =
-                ArcGISEnvironment.authenticationManager.networkCredentialStore.getCredentials(host)
-                    .getOrThrow().isNotEmpty()
-            val sslException = SSLException("Connection to $host failed, ${error?.toString()}")
-
-            if (!trustedHost) {
-                val serverTrustChallenge = NetworkAuthenticationChallenge(
-                    host,
-                    NetworkAuthenticationType.ServerTrust,
-                    sslException
-                )
-                val response = authenticatorState.handleNetworkAuthenticationChallenge(serverTrustChallenge)
-                trustedHost = response is NetworkAuthenticationChallengeResponse.ContinueWithCredential
-
-            }
-            if (trustedHost) {
-                handler?.proceed()
-            } else {
-                handler?.cancel()
-                oAuthUserSignIn.completeWithError(sslException)
-            }
+            view?.url?.let {
+                val host = URL(view?.url).host
+                val sslException = SSLException("Connection to $host failed, ${error?.toString()}")
+                getCredentialOrPrompt(host, sslException, NetworkAuthenticationType.ServerTrust)?.let {
+                    handler?.proceed()
+                } ?: {
+                    oAuthUserSignIn.completeWithError(sslException)
+                    handler?.cancel()
+                }
+            } ?: throw IllegalStateException("Host is not known")
         }
     }
 
@@ -175,6 +171,31 @@ private class OAuthWebViewClient(
             val redirectUrl = oAuthUserSignIn.oAuthUserConfiguration.redirectUrl
             oAuthUserSignIn.complete("$redirectUrl?$internalError")
         }
+    }
+
+    private suspend fun getCredentialOrPrompt(
+        host: String,
+        exception: Exception,
+        networkAuthenticationType: NetworkAuthenticationType
+    ): NetworkCredential? {
+        val credentialList =
+            ArcGISEnvironment.authenticationManager.networkCredentialStore.getCredentials(host)
+                .getOrThrow()
+        val credential: NetworkCredential? = if (credentialList.isNotEmpty()) {
+            credentialList.first() as CertificateCredential
+        } else {
+            val credentialChallenge = NetworkAuthenticationChallenge(
+                host,
+                networkAuthenticationType,
+                exception
+            )
+            when(val response = authenticatorState.handleNetworkAuthenticationChallenge(credentialChallenge)) {
+                is NetworkAuthenticationChallengeResponse.ContinueWithCredential -> response.credential
+                else -> null
+            }
+        }
+
+        return credential
     }
 
     /**
