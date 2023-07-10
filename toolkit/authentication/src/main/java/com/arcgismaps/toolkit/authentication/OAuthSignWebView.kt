@@ -13,18 +13,20 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallenge
+import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeResponse
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationType
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
+import com.arcgismaps.httpcore.authentication.PasswordCredential
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import java.net.URL
 import javax.net.ssl.SSLException
 
 @Composable
 internal fun OAuthWebView(
     oAuthUserSignIn: OAuthUserSignIn,
-    authenticatorState: AuthenticatorState
+    authenticatorState: AuthenticatorState,
+    scope: CoroutineScope
 ) {
     val context = LocalContext.current
     AndroidView(factory = {
@@ -38,7 +40,7 @@ internal fun OAuthWebView(
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
 
-            webViewClient = OAuthWebViewClient(authenticatorState, oAuthUserSignIn)
+            webViewClient = OAuthWebViewClient(authenticatorState, oAuthUserSignIn, scope)
             loadUrl(oAuthUserSignIn.authorizeUrl)
         }
     })
@@ -51,7 +53,8 @@ internal fun OAuthWebView(
  */
 private class OAuthWebViewClient(
     val authenticatorState: AuthenticatorState,
-    val oAuthUserSignIn: OAuthUserSignIn
+    val oAuthUserSignIn: OAuthUserSignIn,
+    val scope: CoroutineScope
 ) : WebViewClient() {
     /**
      * Takes control of the page loading in the [webView] if the URL in the [request] contains the approval code
@@ -72,7 +75,10 @@ private class OAuthWebViewClient(
     }
 
     /**
-     * Will handle UsernamePassword challenge.
+     * This method is invoked when the WebView receives an HTTP authentication request.
+     * A [UsernamePasswordChallenge] is raised to the [AuthenticatorState] so that the UI is displayed to
+     * enter credentials.
+     * This credential is passed to the WebView and will be used to authenticate the user.
      *
      * @since 200.2.0
      */
@@ -82,28 +88,33 @@ private class OAuthWebViewClient(
         host: String?,
         realm: String?
     ) {
-        runBlocking {
-            if (host != null) {
-                val passwordCredentialList = ArcGISEnvironment.authenticationManager.networkCredentialStore.getCredentials(host)
-                    .getOrThrow()
-                if (passwordCredentialList.isEmpty()) {
-                    (authenticatorState as AuthenticatorStateImpl)._pendingUsernamePasswordChallenge.value =
-                        UsernamePasswordChallenge(url = host,
-                            onUsernamePasswordReceived = { username, password ->
-                                authenticatorState._pendingUsernamePasswordChallenge.value = null
-                                handler?.proceed(username, password)
-                            },
-                            onCancel = {
-                                oAuthUserSignIn.cancel()
-                                handler?.cancel()
-                            }
-                        )
+        scope.launch {
+            host?.let { host ->
+                val exception = Exception("Http Unauthorized")
+                val passwordCredentialList =
+                    ArcGISEnvironment.authenticationManager.networkCredentialStore.getCredentials(host)
+                        .getOrThrow()
+                val credential: PasswordCredential? = if (passwordCredentialList.isNotEmpty()) {
+                    passwordCredentialList.first() as PasswordCredential
+                } else {
+                    val usernamePasswordChallenge = NetworkAuthenticationChallenge(
+                        host,
+                        NetworkAuthenticationType.UsernamePassword,
+                        exception
+                    )
+                    val response = authenticatorState.handleNetworkAuthenticationChallenge(usernamePasswordChallenge)
+                    if (response is NetworkAuthenticationChallengeResponse.ContinueWithCredential)
+                        (response.credential as PasswordCredential)
+                    else null
                 }
-            }
-            oAuthUserSignIn.cancel()
-            handler?.cancel()
+                credential?.let {
+                    handler?.proceed(it.username, it.password)
+                } ?: {
+                    oAuthUserSignIn.completeWithError(exception)
+                    handler?.cancel()
+                }
+            } ?: throw IllegalStateException("Host is not known.")
         }
-
     }
 
     /**
@@ -116,8 +127,10 @@ private class OAuthWebViewClient(
 
     /**
      * Callback will be invoked when an SSL error occurs while loading the OAuth sign-in page.
-     * The the OAuth sign-in page is loaded only if user chooses to trust the certificate authority,
-     * otherwise the connection will get cancelled and an error will get thrown to the caller.
+     * A [ServerTrustChallenge] will be raised to the [AuthenticatorState] and the server trust
+     * UI will be displayed to the user.
+     * The the OAuth sign-in page is loaded only if user chooses to trust the certificate
+     * authority, otherwise the connection will get cancelled and an error will be passed to the caller.
      *
      * @param view the WebView that is initiating the callback
      * @param handler an SslErrorHandler that will handle the user's response
@@ -125,51 +138,67 @@ private class OAuthWebViewClient(
      * @since 200.2.0
      */
     override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
-        val host = URL(view?.url).host
-        runBlocking {
-            withContext(Dispatchers.IO) {
-                var trustedHost =
-                    ArcGISEnvironment.authenticationManager.networkCredentialStore.getCredentials(host)
-                        .getOrThrow().isNotEmpty()
+        scope.launch {
+            val host = URL(view?.url).host
+            var trustedHost =
+                ArcGISEnvironment.authenticationManager.networkCredentialStore.getCredentials(host)
+                    .getOrThrow().isNotEmpty()
+            val sslException = SSLException("Connection to $host failed, ${error?.toString()}")
 
-                if (!trustedHost) {
-                    val serverTrustChallenge = NetworkAuthenticationChallenge(
-                        host,
-                        NetworkAuthenticationType.ServerTrust, Throwable("Server Certificate Required")
-                    )
-                    (authenticatorState as AuthenticatorStateImpl)._pendingServerTrustChallenge.value =
-                        ServerTrustChallenge(serverTrustChallenge) {
-                            authenticatorState._pendingServerTrustChallenge.value = null
-                            if (it) {
-                                //TODO: add it to cache
-                                handler?.proceed()
-                            } else {
+            if (!trustedHost) {
+                val serverTrustChallenge = NetworkAuthenticationChallenge(
+                    host,
+                    NetworkAuthenticationType.ServerTrust,
+                    sslException
+                )
+                val response = authenticatorState.handleNetworkAuthenticationChallenge(serverTrustChallenge)
+                trustedHost = response is NetworkAuthenticationChallengeResponse.ContinueWithCredential
 
-                                handler?.cancel()
-                                //TODO: Ideally, the error should be propagated through
-                                // NetworkAuthenticationChallengeResponse.ContinueAndFailWithError
-                                // or use OAuthUserSignIn.cancel(error) when exposed
-                                oAuthUserSignIn.cancel()
-//                                handler?.cancel()
-                                throw SSLException("Connection to $host failed, ${error?.toString()}")
-
-                            }
-                        }
-                }
+            }
+            if (trustedHost) {
+                handler?.proceed()
+            } else {
+                handler?.cancel()
+                oAuthUserSignIn.completeWithError(sslException)
             }
         }
     }
 
     /**
-     * Checks if the page has an `Invalid client_id` error and finishes the [oAuthUserSignIn] if it does.
+     * This callback is invoked whenever the page has finished loading and it checks if the page has an internal error.
+     * If there is an error, it passes it through [OAuthUserSignIn.complete].
      *
      * @since 200.2.0
      */
     override fun onPageFinished(view: WebView?, url: String?) {
-        if (view?.title == "Error: Invalid client_id") {
-            // TODO: Pass the `invalid client_id` error in the Cancellation exception
-            oAuthUserSignIn.cancel()
+        view?.internalError?.let { internalError ->
+            val redirectUrl = oAuthUserSignIn.oAuthUserConfiguration.redirectUrl
+            oAuthUserSignIn.complete("$redirectUrl?$internalError")
         }
     }
+
+    /**
+     * Returns the WebView's internal error, if there's one.
+     *
+     * @since 200.2.0
+     */
+    private val WebView.internalError: String?
+        get() {
+            val invalidClientId = "Invalid client_id"
+            val errorEqual = "error="
+            val notFound = "File or directory not found"
+            val signInGoogle = "Sign in - Google Accounts"
+            val accessBlocked = "Access blocked: Authorization Error"
+            return this.title?.let {
+                when {
+                    it.contains(errorEqual, true) -> it
+                    it.contains(invalidClientId, true) -> "$errorEqual$invalidClientId"
+                    it.contains(notFound, true) -> "$errorEqual$notFound"
+                    it.contains(signInGoogle, true) -> "$errorEqual$signInGoogle"
+                    it.contains(accessBlocked, true) -> "$errorEqual$accessBlocked"
+                    else -> null
+                }
+            }
+        }
 }
 

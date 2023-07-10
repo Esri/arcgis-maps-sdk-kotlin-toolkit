@@ -3,7 +3,7 @@ package com.arcgismaps.toolkit.authentication
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.rememberCoroutineScope
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
 private const val DEFAULT_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob"
@@ -20,8 +20,9 @@ internal fun OAuthAuthenticator(
     oAuthPendingSignIn: OAuthUserSignIn,
     authenticatorViewModel: AuthenticatorState,
 ) {
+    val scope = rememberCoroutineScope()
     if (authenticatorViewModel.oAuthUserConfiguration?.redirectUrl == DEFAULT_REDIRECT_URI) {
-        OAuthWebView(oAuthPendingSignIn, authenticatorViewModel)
+        OAuthWebView(oAuthPendingSignIn, authenticatorViewModel, scope)
     } else {
         val launcher =
             rememberLauncherForActivityResult(contract = OAuthUserSignInActivity.Contract()) { redirectUrl ->
