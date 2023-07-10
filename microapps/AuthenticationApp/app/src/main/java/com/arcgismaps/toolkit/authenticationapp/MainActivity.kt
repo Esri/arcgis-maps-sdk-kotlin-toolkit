@@ -18,13 +18,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -53,7 +51,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun AuthenticationApp() {
     val application = LocalContext.current.applicationContext as Application
-    val authenticationAppViewModel = viewModel(initializer = { AuthenticationAppViewModel(application) })
+    val authenticationAppViewModel = viewModel { AuthenticationAppViewModel(application) }
     val authenticatorState: AuthenticatorState = authenticationAppViewModel.authenticatorState
     Column {
         val infoText = authenticationAppViewModel.infoText.collectAsState().value
@@ -75,12 +73,14 @@ private fun AuthenticationApp() {
  * Allows the user to enter a url and load a portal.
  * Also displays a checkbox for using OAuth, and a button to clear credentials.
  *
- * @param onInfoTextChanged called when the info text should be changed
- * @param onLoadStatusChanged called when an operation is ongoing
- * @param onOAuthUserConfigurationChanged called when the [AuthenticatorState.oAuthUserConfiguration] should be changed
+ * @param url the string url to display in the text field
+ * @param onSetUrl called when the url should be changed
+ * @param useOAuth whether oAuth should be used to load the portal
+ * @param onSetUseOAuth called when [useOAuth] should be changed
+ * @param onSignOut called when any stored credentials should be cleared
+ * @param onLoadPortal called when the [url] should be loaded
  * @since 200.2.0
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PortalDetails(
     url: String,
@@ -90,7 +90,6 @@ private fun PortalDetails(
     onSignOut: () -> Unit,
     onLoadPortal: () -> Unit
 ) {
-    val scope = rememberCoroutineScope()
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -108,7 +107,7 @@ private fun PortalDetails(
                 keyboardType = KeyboardType.Uri,
                 imeAction = ImeAction.Go
             ),
-            keyboardActions = KeyboardActions(onAny = { onLoadPortal }),
+            keyboardActions = KeyboardActions(onAny = { onLoadPortal() }),
             singleLine = true
         )
         Row(
