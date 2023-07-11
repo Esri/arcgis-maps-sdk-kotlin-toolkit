@@ -189,14 +189,15 @@ private class AuthenticatorStateImpl(
     private suspend fun awaitCertificateChallengeResponse(): NetworkAuthenticationChallengeResponse {
         val selectedAlias = suspendCancellableCoroutine { continuation ->
             val aliasCallback = KeyChainAliasCallback { alias ->
+                _pendingClientCertificateChallenge.value = null
                 continuation.resume(alias) {}
             }
             _pendingClientCertificateChallenge.value = ClientCertificateChallenge(aliasCallback)
             continuation.invokeOnCancellation {
+                _pendingClientCertificateChallenge.value = null
                 continuation.resume(null) {}
             }
         }
-        _pendingClientCertificateChallenge.value = null
         return if (selectedAlias != null) {
             NetworkAuthenticationChallengeResponse.ContinueWithCredential(
                 CertificateCredential(
