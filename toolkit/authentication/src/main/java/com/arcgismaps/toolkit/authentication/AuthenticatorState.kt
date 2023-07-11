@@ -153,7 +153,7 @@ private class AuthenticatorStateImpl(
      * the data returned by the challenge.
      *
      * @param challenge the [ArcGISAuthenticationChallenge] that requires authentication.
-     * @return an ArcGISAuthenticationChallengeResponse with a [TokenCredential] or [ArcGISAuthenticationChallengeResponse.Cancel]
+     * @return an [ArcGISAuthenticationChallengeResponse] with a [TokenCredential] or [ArcGISAuthenticationChallengeResponse.Cancel]
      * if the user cancelled.
      * @since 200.2.0
      */
@@ -183,6 +183,15 @@ private class AuthenticatorStateImpl(
         }
     }
 
+    /**
+     * Issues a username/password challenge and returns a [NetworkAuthenticationChallengeResponse] from
+     * the data returned by the challenge.
+     *
+     * @param challenge the [NetworkAuthenticationChallenge] that requires authentication.
+     * @return a [NetworkAuthenticationChallengeResponse] with a [PasswordCredential] or [NetworkAuthenticationChallengeResponse.Cancel]
+     * if the user cancelled.
+     * @since 200.2.0
+     */
     private suspend fun handleUsernamePasswordChallenge(
         challenge: NetworkAuthenticationChallenge
     ): NetworkAuthenticationChallengeResponse {
