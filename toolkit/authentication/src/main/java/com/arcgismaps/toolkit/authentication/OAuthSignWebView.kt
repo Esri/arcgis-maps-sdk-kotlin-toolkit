@@ -1,3 +1,19 @@
+/*
+ *  Copyright 2023 Esri
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 package com.arcgismaps.toolkit.authentication
 
 import android.net.http.SslError
@@ -9,6 +25,7 @@ import android.webkit.SslErrorHandler
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
@@ -27,6 +44,15 @@ import kotlinx.coroutines.withContext
 import java.net.URL
 import javax.net.ssl.SSLException
 
+/**
+ * Launches a WebView using the url in [oAuthUserSignIn] and calls [OAuthUserSignIn.complete] or [OAuthUserSignIn.cancel]
+ * on completion.
+ *
+ * @param oAuthUserSignIn the [OAuthUserSignIn] pending completion.
+ * @param authenticatorState used to raise other [NetworkAuthenticationChallenge]s that occur while in WebView.
+ * @param scope the coroutineScope to launch the suspendable methods to display UI.
+ * @since 200.2.0
+ */
 @Composable
 internal fun OAuthWebView(
     oAuthUserSignIn: OAuthUserSignIn,
@@ -34,25 +60,28 @@ internal fun OAuthWebView(
     scope: CoroutineScope
 ) {
     val context = LocalContext.current
-    AndroidView(factory = {
-        WebView(context).apply {
-            settings.apply {
-                displayZoomControls = false
-                javaScriptEnabled = true
-            }
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-
-            webViewClient = OAuthWebViewClient(authenticatorState, oAuthUserSignIn, scope)
-            loadUrl(oAuthUserSignIn.authorizeUrl)
+    var webView = WebView(context).apply {
+        settings.apply {
+            displayZoomControls = false
+            javaScriptEnabled = true
         }
-    })
+        layoutParams = ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        )
+
+        webViewClient = OAuthWebViewClient(authenticatorState, oAuthUserSignIn, scope)
+        loadUrl(oAuthUserSignIn.authorizeUrl)
+    }
+    AndroidView(factory = { webView }, update = { webView = it })
+
+    BackHandler(enabled = true) {
+        oAuthUserSignIn.cancel()
+    }
 }
 
 /**
- * WebView Client that is in charge of managing the OAuth sign-in workflow.
+ * WebViewClient that manages the OAuth sign-in workflow.
  *
  * @since 200.2.0
  */
@@ -61,12 +90,13 @@ private class OAuthWebViewClient(
     val oAuthUserSignIn: OAuthUserSignIn,
     val scope: CoroutineScope
 ) : WebViewClient() {
+
     /**
      * Takes control of the page loading in the [webView] if the URL in the [request] contains the approval code
-     * and calls complete on the oAuthUserSignIn
+     * and calls [OAuthUserSignIn.complete] with the redirect URL.
      *
-     * @param view the WebView that is initiating this callback
-     * @param request the request that the WebView is processing
+     * @param view the WebView that is initiating this callback.
+     * @param request the request that the WebView is processing.
      * @since 200.2.0
      */
     override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
@@ -83,8 +113,12 @@ private class OAuthWebViewClient(
      * This method is invoked when the WebView receives an HTTP authentication request.
      * A [UsernamePasswordChallenge] is raised to the [AuthenticatorState] so that the UI is displayed to
      * enter credentials.
-     * This credential is passed to the WebView and will be used to authenticate the user.
+     * This credential is passed to the [handler] and will be used to authenticate the user.
      *
+     * @param view the WebView that is initiating this callback
+     * @param handler the handler used to pass the credential or fail the request
+     * @param host the host requiring authentication
+     * @param realm the realm for which authentication is required.
      * @since 200.2.0
      */
     override fun onReceivedHttpAuthRequest(
@@ -97,7 +131,7 @@ private class OAuthWebViewClient(
             host?.let { host ->
                 val exception = Exception("Http Unauthorized")
 
-                getCredentialOrPrompt(host, exception, NetworkAuthenticationType.UsernamePassword)?.let {credential ->
+                getCredentialOrPrompt(host, exception, NetworkAuthenticationType.UsernamePassword)?.let { credential ->
                     val passwordCredential = credential as PasswordCredential
                     handler?.proceed(passwordCredential.username, passwordCredential.password)
                 } ?: {
@@ -108,9 +142,16 @@ private class OAuthWebViewClient(
         }
     }
 
-    //    /**
-//     * TODO
-//     */
+    /**
+     * This method is invoked when the WebView receives an SSL Client Certificate request.
+     * a [ClientCertificateChallenge] is raised to the [AuthenticatorState] so that the Certificate picker is displayed
+     * to select the desired Certificate.
+     * The certificate alias is used to apply the PrivateKey & CertificateChain on the [request].
+     *
+     * @param view the WebView that is initiating this callback.
+     * @param request the request to apply the Certificate Private Key & Chain or cancel.
+     * @since 200.2.0
+     */
     override fun onReceivedClientCertRequest(view: WebView?, request: ClientCertRequest?) {
         scope.launch {
             view?.url?.let {
@@ -118,6 +159,7 @@ private class OAuthWebViewClient(
                 val exception = Exception("Certificate Required")
                 getCredentialOrPrompt(host, exception, NetworkAuthenticationType.ClientCertificate)?.let { credential ->
                     val certificateCredential = credential as CertificateCredential
+                    // add a comment why we do this
                     withContext(Dispatchers.IO) {
                         request?.proceed(
                             KeyChain.getPrivateKey(view.context, certificateCredential.alias),
@@ -140,9 +182,9 @@ private class OAuthWebViewClient(
      * The the OAuth sign-in page is loaded only if user chooses to trust the certificate
      * authority, otherwise the connection will get cancelled and an error will be passed to the caller.
      *
-     * @param view the WebView that is initiating the callback
-     * @param handler an SslErrorHandler that will handle the user's response
-     * @param error the SSL error object
+     * @param view the WebView that is initiating the callback.
+     * @param handler an SslErrorHandler that will handle the user's response.
+     * @param error the SSL error object.
      * @since 200.2.0
      */
     override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
@@ -164,6 +206,8 @@ private class OAuthWebViewClient(
      * This callback is invoked whenever the page has finished loading and it checks if the page has an internal error.
      * If there is an error, it passes it through [OAuthUserSignIn.complete].
      *
+     * @param view the WebView that initiated this callback.
+     * @param url the url of the page.
      * @since 200.2.0
      */
     override fun onPageFinished(view: WebView?, url: String?) {
@@ -173,28 +217,35 @@ private class OAuthWebViewClient(
         }
     }
 
+    /**
+     * Helper function to retrieve a [NetworkCredential] from the `NetworkCredentialStore` or prompt for one.
+     *
+     * @param host the host that requires this credential.
+     * @param exception the exception that the credential relates to.
+     * @param networkAuthenticationType the network authentication type that the credential relates to.
+     * @since 200.2.0
+     */
     private suspend fun getCredentialOrPrompt(
         host: String,
         exception: Exception,
         networkAuthenticationType: NetworkAuthenticationType
     ): NetworkCredential? {
         val credentialList =
-            ArcGISEnvironment.authenticationManager.networkCredentialStore.getCredentials(host)
-                .getOrThrow()
-        val credential: NetworkCredential? = if (credentialList.isNotEmpty()) {
-            credentialList.first() as CertificateCredential
-        } else {
-            val credentialChallenge = NetworkAuthenticationChallenge(
-                host,
-                networkAuthenticationType,
-                exception
-            )
-            when(val response = authenticatorState.handleNetworkAuthenticationChallenge(credentialChallenge)) {
-                is NetworkAuthenticationChallengeResponse.ContinueWithCredential -> response.credential
-                else -> null
-            }
+            ArcGISEnvironment.authenticationManager.networkCredentialStore.getCredentials(host).getOrThrow()
+        val credential: NetworkCredential? =
+            if (credentialList.isNotEmpty()) {
+                credentialList.first() as CertificateCredential
+            } else {
+                val credentialChallenge = NetworkAuthenticationChallenge(
+                    host,
+                    networkAuthenticationType,
+                    exception
+                )
+                when (val response = authenticatorState.handleNetworkAuthenticationChallenge(credentialChallenge)) {
+                    is NetworkAuthenticationChallengeResponse.ContinueWithCredential -> response.credential
+                    else -> null
+                }
         }
-
         return credential
     }
 
