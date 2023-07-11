@@ -18,10 +18,12 @@
 
 package com.arcgismaps.toolkit.authentication
 
+import android.security.KeyChainAliasCallback
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeHandler
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
+import com.arcgismaps.httpcore.authentication.CertificateCredential
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeHandler
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeResponse
@@ -74,6 +76,14 @@ public sealed interface AuthenticatorState : NetworkAuthenticationChallengeHandl
      * @since 200.2.0
      */
     public val pendingUsernamePasswordChallenge: StateFlow<UsernamePasswordChallenge?>
+
+    /**
+     * The current [ClientCertificateChallenge] awaiting completion. Use this to complete or cancel
+     * any challenge requiring a client certificate.
+     *
+     * @since 200.2.0
+     */
+    public val pendingClientCertificateChallenge: StateFlow<ClientCertificateChallenge?>
 }
 
 /**
@@ -100,6 +110,10 @@ private class AuthenticatorStateImpl(
         MutableStateFlow<UsernamePasswordChallenge?>(null)
     override val pendingUsernamePasswordChallenge: StateFlow<UsernamePasswordChallenge?> =
         _pendingUsernamePasswordChallenge.asStateFlow()
+
+    private val _pendingClientCertificateChallenge = MutableStateFlow<ClientCertificateChallenge?>(null)
+    override val pendingClientCertificateChallenge: StateFlow<ClientCertificateChallenge?> =
+        _pendingClientCertificateChallenge.asStateFlow()
 
     init {
         if (setAsArcGISAuthenticationChallengeHandler) {
@@ -139,7 +153,7 @@ private class AuthenticatorStateImpl(
      * the data returned by the challenge.
      *
      * @param challenge the [ArcGISAuthenticationChallenge] that requires authentication.
-     * @return an ArcGISAuthenticationChallengeResponse with a [TokenCredential] or [ArcGISAuthenticationChallengeResponse.Cancel]
+     * @return an [ArcGISAuthenticationChallengeResponse] with a [TokenCredential] or [ArcGISAuthenticationChallengeResponse.Cancel]
      * if the user cancelled.
      * @since 200.2.0
      */
@@ -160,22 +174,65 @@ private class AuthenticatorStateImpl(
             }
             // Issue a challenge for an IWA username/password
             NetworkAuthenticationType.UsernamePassword -> {
-                val usernamePassword = awaitUsernamePassword(challenge.hostname)
-                usernamePassword?.let {
-                    NetworkAuthenticationChallengeResponse.ContinueWithCredential(
-                        PasswordCredential(
-                            it.username,
-                            it.password
-                        )
-                    )
-                } ?: NetworkAuthenticationChallengeResponse.Cancel
+                handleUsernamePasswordChallenge(challenge)
             }
 
-            else -> {
-                NetworkAuthenticationChallengeResponse.ContinueAndFailWithError(
-                    UnsupportedOperationException("Not yet implemented")
-                )
+            NetworkAuthenticationType.ClientCertificate -> {
+                awaitCertificateChallengeResponse()
             }
+        }
+    }
+
+    /**
+     * Issues a username/password challenge and returns a [NetworkAuthenticationChallengeResponse] from
+     * the data returned by the challenge.
+     *
+     * @param challenge the [NetworkAuthenticationChallenge] that requires authentication.
+     * @return a [NetworkAuthenticationChallengeResponse] with a [PasswordCredential] or [NetworkAuthenticationChallengeResponse.Cancel]
+     * if the user cancelled.
+     * @since 200.2.0
+     */
+    private suspend fun handleUsernamePasswordChallenge(
+        challenge: NetworkAuthenticationChallenge
+    ): NetworkAuthenticationChallengeResponse {
+        val usernamePassword = awaitUsernamePassword(challenge.hostname)
+        return usernamePassword?.let {
+            NetworkAuthenticationChallengeResponse.ContinueWithCredential(
+                PasswordCredential(
+                    it.username,
+                    it.password
+                )
+            )
+        } ?: NetworkAuthenticationChallengeResponse.Cancel
+    }
+
+    /**
+     * Emits a new [ClientCertificateChallenge] to [pendingClientCertificateChallenge] and awaits a
+     * chosen certificate to proceed with.
+     *
+     * @return [NetworkAuthenticationChallengeResponse] based on the user choice.
+     * @since 200.2.0
+     */
+    private suspend fun awaitCertificateChallengeResponse(): NetworkAuthenticationChallengeResponse {
+        val selectedAlias = suspendCancellableCoroutine { continuation ->
+            val aliasCallback = KeyChainAliasCallback { alias ->
+                _pendingClientCertificateChallenge.value = null
+                continuation.resume(alias) {}
+            }
+            _pendingClientCertificateChallenge.value = ClientCertificateChallenge(aliasCallback)
+            continuation.invokeOnCancellation {
+                _pendingClientCertificateChallenge.value = null
+                continuation.resume(null) {}
+            }
+        }
+        return if (selectedAlias != null) {
+            NetworkAuthenticationChallengeResponse.ContinueWithCredential(
+                CertificateCredential(
+                    selectedAlias
+                )
+            )
+        } else {
+            NetworkAuthenticationChallengeResponse.Cancel
         }
     }
 
