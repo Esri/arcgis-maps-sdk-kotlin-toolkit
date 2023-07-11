@@ -45,7 +45,8 @@ import java.net.URL
 import javax.net.ssl.SSLException
 
 /**
- * Launches a WebView using the url in [oAuthUserSignIn] and calls [OAuthUserSignIn.complete] or [OAuthUserSignIn.cancel]
+ * Launches a WebView using the url in [oAuthUserSignIn] and calls [OAuthUserSignIn.complete],
+ * [OAuthUserSignIn.completeWithException] or [OAuthUserSignIn.cancel]
  * on completion.
  *
  * @param oAuthUserSignIn the [OAuthUserSignIn] pending completion.
@@ -224,7 +225,7 @@ private class OAuthWebViewClient(
      * @param exception the exception that the credential relates to.
      * @param networkAuthenticationType the network authentication type that the credential relates to.
      * @return the credential retrieved from the `NetworkCredentialStore`, the [NetworkAuthenticationChallenge] or null
-     * if no credential was given. 
+     * if no credential was given.
      * @since 200.2.0
      */
     private suspend fun getCredentialOrPrompt(
