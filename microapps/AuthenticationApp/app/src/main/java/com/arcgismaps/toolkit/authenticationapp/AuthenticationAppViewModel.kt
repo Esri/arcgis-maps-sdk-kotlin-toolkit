@@ -57,7 +57,7 @@ class AuthenticationAppViewModel(application: Application) : AndroidViewModel(ap
     val useOAuth: StateFlow<Boolean> = _useOAuth.asStateFlow()
     fun setUseOAuth(shouldUseOAuth: Boolean) { _useOAuth.value = shouldUseOAuth }
 
-    private val _url: MutableStateFlow<String> = MutableStateFlow(oAuthUserConfiguration.portalUrl)
+    private val _url: MutableStateFlow<String> = MutableStateFlow(arcGISUrl)
     val url: StateFlow<String> = _url.asStateFlow()
     fun setUrl(newUrl: String) { _url.value = newUrl }
 

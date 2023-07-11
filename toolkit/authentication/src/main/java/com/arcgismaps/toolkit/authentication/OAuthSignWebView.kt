@@ -223,6 +223,8 @@ private class OAuthWebViewClient(
      * @param host the host that requires this credential.
      * @param exception the exception that the credential relates to.
      * @param networkAuthenticationType the network authentication type that the credential relates to.
+     * @return the credential retrieved from the `NetworkCredentialStore`, the [NetworkAuthenticationChallenge] or null
+     * if no credential was given. 
      * @since 200.2.0
      */
     private suspend fun getCredentialOrPrompt(

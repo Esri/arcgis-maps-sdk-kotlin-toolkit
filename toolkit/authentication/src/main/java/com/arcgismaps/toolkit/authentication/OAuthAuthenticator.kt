@@ -30,17 +30,17 @@ private const val DEFAULT_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob"
  *
  * @see OAuthUserSignInActivity
  * @param oAuthPendingSignIn the [OAuthUserSignIn] pending completion.
- * @param onActivityResult called with the redirect url on completion of the OAuth sign in.
+ * @param authenticatorState an [AuthenticatorState]. See [AuthenticatorState.Companion.Factory].
  * @since 200.2.0
  */
 @Composable
 internal fun OAuthAuthenticator(
     oAuthPendingSignIn: OAuthUserSignIn,
-    authenticatorViewModel: AuthenticatorState,
+    authenticatorState: AuthenticatorState,
 ) {
     val scope = rememberCoroutineScope()
-    if (authenticatorViewModel.oAuthUserConfiguration?.redirectUrl == DEFAULT_REDIRECT_URI) {
-        OAuthWebView(oAuthPendingSignIn, authenticatorViewModel, scope)
+    if (authenticatorState.oAuthUserConfiguration?.redirectUrl == DEFAULT_REDIRECT_URI) {
+        OAuthWebView(oAuthPendingSignIn, authenticatorState, scope)
     } else {
         val launcher =
             rememberLauncherForActivityResult(contract = OAuthUserSignInActivity.Contract()) { redirectUrl ->
