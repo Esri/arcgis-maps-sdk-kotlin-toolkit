@@ -153,7 +153,7 @@ private class AuthenticatorStateImpl(
      * the data returned by the challenge.
      *
      * @param challenge the [ArcGISAuthenticationChallenge] that requires authentication.
-     * @return an ArcGISAuthenticationChallengeResponse with a [TokenCredential] or [ArcGISAuthenticationChallengeResponse.Cancel]
+     * @return an [ArcGISAuthenticationChallengeResponse] with a [TokenCredential] or [ArcGISAuthenticationChallengeResponse.Cancel]
      * if the user cancelled.
      * @since 200.2.0
      */
@@ -174,21 +174,36 @@ private class AuthenticatorStateImpl(
             }
             // Issue a challenge for an IWA username/password
             NetworkAuthenticationType.UsernamePassword -> {
-                val usernamePassword = awaitUsernamePassword(challenge.hostname)
-                usernamePassword?.let {
-                    NetworkAuthenticationChallengeResponse.ContinueWithCredential(
-                        PasswordCredential(
-                            it.username,
-                            it.password
-                        )
-                    )
-                } ?: NetworkAuthenticationChallengeResponse.Cancel
+                handleUsernamePasswordChallenge(challenge)
             }
 
             NetworkAuthenticationType.ClientCertificate -> {
-                return awaitCertificateChallengeResponse()
+                awaitCertificateChallengeResponse()
             }
         }
+    }
+
+    /**
+     * Issues a username/password challenge and returns a [NetworkAuthenticationChallengeResponse] from
+     * the data returned by the challenge.
+     *
+     * @param challenge the [NetworkAuthenticationChallenge] that requires authentication.
+     * @return a [NetworkAuthenticationChallengeResponse] with a [PasswordCredential] or [NetworkAuthenticationChallengeResponse.Cancel]
+     * if the user cancelled.
+     * @since 200.2.0
+     */
+    private suspend fun handleUsernamePasswordChallenge(
+        challenge: NetworkAuthenticationChallenge
+    ): NetworkAuthenticationChallengeResponse {
+        val usernamePassword = awaitUsernamePassword(challenge.hostname)
+        return usernamePassword?.let {
+            NetworkAuthenticationChallengeResponse.ContinueWithCredential(
+                PasswordCredential(
+                    it.username,
+                    it.password
+                )
+            )
+        } ?: NetworkAuthenticationChallengeResponse.Cancel
     }
 
     /**
@@ -201,14 +216,15 @@ private class AuthenticatorStateImpl(
     private suspend fun awaitCertificateChallengeResponse(): NetworkAuthenticationChallengeResponse {
         val selectedAlias = suspendCancellableCoroutine { continuation ->
             val aliasCallback = KeyChainAliasCallback { alias ->
+                _pendingClientCertificateChallenge.value = null
                 continuation.resume(alias) {}
             }
             _pendingClientCertificateChallenge.value = ClientCertificateChallenge(aliasCallback)
             continuation.invokeOnCancellation {
+                _pendingClientCertificateChallenge.value = null
                 continuation.resume(null) {}
             }
         }
-        _pendingClientCertificateChallenge.value = null
         return if (selectedAlias != null) {
             NetworkAuthenticationChallengeResponse.ContinueWithCredential(
                 CertificateCredential(
