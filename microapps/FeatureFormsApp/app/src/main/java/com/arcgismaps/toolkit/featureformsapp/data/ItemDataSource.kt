@@ -26,9 +26,6 @@ class ItemDataSource(
         override fun fetchItems(): List<ItemData> =
             getListOfMaps()
                 .map {
-                    it.substringAfter("=")
-                }
-                .map {
                     ItemData(it, "")
                 }
     }

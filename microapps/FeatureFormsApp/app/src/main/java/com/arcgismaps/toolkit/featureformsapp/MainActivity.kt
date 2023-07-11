@@ -10,6 +10,7 @@ import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeRespo
 import com.arcgismaps.httpcore.authentication.TokenCredential
 import com.arcgismaps.toolkit.featureformsapp.screens.FeatureFormApp
 import com.arcgismaps.toolkit.featureformsapp.ui.theme.FeatureFormsAppTheme
+import dagger.hilt.android.AndroidEntryPoint
 
 class FormsArcGISAuthenticationChallengeHandler(
     private val username: String,
@@ -35,6 +36,7 @@ class FormsArcGISAuthenticationChallengeHandler(
     }
 }
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

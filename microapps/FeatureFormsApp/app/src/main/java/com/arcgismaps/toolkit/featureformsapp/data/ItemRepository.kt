@@ -23,7 +23,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
-class ItemRepository(private val itemDataSource: ItemDataSource, private val scope: CoroutineScope) {
+class ItemRepository(private val scope: CoroutineScope, private val itemDataSource: ItemDataSource) {
     private val mutex = Mutex()
     
     private var itemData: List<ItemData> = emptyList()

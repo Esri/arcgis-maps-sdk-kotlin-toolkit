@@ -16,7 +16,7 @@
  *
  */
 
-package com.arcgismaps.toolkit.featureformsapp.domain;
+package com.arcgismaps.toolkit.featureformsapp.domain
 
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.toolkit.featureformsapp.data.ItemRepository
@@ -27,7 +27,7 @@ import kotlinx.coroutines.withContext
 
 data class PortalItemData(val portalItem: PortalItem, val formLayerName: String)
 
-class PortalItemUseCase(private val itemRepository: ItemRepository, private val scope: CoroutineScope) {
+class PortalItemUseCase(private val scope: CoroutineScope, private val itemRepository: ItemRepository) {
     private val mutex = Mutex()
     
     private var items: List<PortalItemData> = emptyList()

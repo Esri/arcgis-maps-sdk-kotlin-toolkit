@@ -28,4 +28,10 @@ plugins {
     alias(libs.plugins.gradle.secrets) apply false
     @Suppress("DSL_SCOPE_VIOLATION")
     alias(libs.plugins.kotlin.serialization) apply false
+    @Suppress("DSL_SCOPE_VIOLATION")
+    alias(libs.plugins.kapt) apply false
+    @Suppress("DSL_SCOPE_VIOLATION")
+    alias(libs.plugins.ksp) apply false
+    @Suppress("DSL_SCOPE_VIOLATION")
+    alias(libs.plugins.hilt) apply false
 }
