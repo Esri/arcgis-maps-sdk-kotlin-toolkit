@@ -135,7 +135,7 @@ private class OAuthWebViewClient(
                 getCredentialOrPrompt(host, exception, NetworkAuthenticationType.UsernamePassword)?.let { credential ->
                     val passwordCredential = credential as PasswordCredential
                     handler?.proceed(passwordCredential.username, passwordCredential.password)
-                } ?: {
+                } ?: run {
                     oAuthUserSignIn.completeWithException(exception)
                     handler?.cancel()
                 }
@@ -167,7 +167,7 @@ private class OAuthWebViewClient(
                             KeyChain.getCertificateChain(view.context, certificateCredential.alias)
                         )
                     }
-                } ?: {
+                } ?: run {
                     oAuthUserSignIn.completeWithException(exception)
                     request?.cancel()
                 }
@@ -191,11 +191,11 @@ private class OAuthWebViewClient(
     override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
         scope.launch {
             view?.url?.let {
-                val host = URL(view?.url).host
+                val host = URL(view.url).host
                 val sslException = SSLException("Connection to $host failed, ${error?.toString()}")
                 getCredentialOrPrompt(host, sslException, NetworkAuthenticationType.ServerTrust)?.let {
                     handler?.proceed()
-                } ?: {
+                } ?: run {
                     oAuthUserSignIn.completeWithException(sslException)
                     handler?.cancel()
                 }
