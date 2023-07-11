@@ -19,6 +19,7 @@ fun MainScreen() {
     val portal = Portal("https://arcgis.com/")
     val portalItem = PortalItem(portal, "f133a698536f44c8884ad81f80b6cfc7")
     val floorAwareWebMap = ArcGISMap(portalItem)
+
     val mapViewModel = viewModel<MapViewModel>(factory = MapViewModelFactory(floorAwareWebMap))
 
     val floorFilterViewModel = viewModel<FloorFilterViewModel>(
@@ -31,10 +32,8 @@ fun MainScreen() {
     ) {
         Row(modifier = Modifier.wrapContentSize().padding(25.dp)) {
             // TBD: Need to work if we should get an instance of the GeoView/Map/Scene
-            FloorFilter(
-                levels = listOf("L1", "L2", "L3"),
-                map = floorAwareWebMap
-            )
+            FloorFilter(arcGISMap = floorAwareWebMap)
+
         }
     }
 }
