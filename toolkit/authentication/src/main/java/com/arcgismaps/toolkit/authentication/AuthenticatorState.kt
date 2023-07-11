@@ -156,21 +156,27 @@ private class AuthenticatorStateImpl(
             }
             // Issue a challenge for an IWA username/password
             NetworkAuthenticationType.UsernamePassword -> {
-                val usernamePassword = awaitUsernamePassword(challenge.hostname)
-                usernamePassword?.let {
-                    NetworkAuthenticationChallengeResponse.ContinueWithCredential(
-                        PasswordCredential(
-                            it.username,
-                            it.password
-                        )
-                    )
-                } ?: NetworkAuthenticationChallengeResponse.Cancel
+                handleUsernamePasswordChallenge(challenge)
             }
 
             NetworkAuthenticationType.ClientCertificate -> {
-                return awaitCertificateChallengeResponse()
+                awaitCertificateChallengeResponse()
             }
         }
+    }
+
+    private suspend fun handleUsernamePasswordChallenge(
+        challenge: NetworkAuthenticationChallenge
+    ): NetworkAuthenticationChallengeResponse {
+        val usernamePassword = awaitUsernamePassword(challenge.hostname)
+        return usernamePassword?.let {
+            NetworkAuthenticationChallengeResponse.ContinueWithCredential(
+                PasswordCredential(
+                    it.username,
+                    it.password
+                )
+            )
+        } ?: NetworkAuthenticationChallengeResponse.Cancel
     }
 
     /**
