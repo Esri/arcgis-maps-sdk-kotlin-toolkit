@@ -21,12 +21,15 @@ package com.arcgismaps.toolkit.featureformsapp.data
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
+/**
+ * The data source for portal data
+ */
 class ItemDataSource(
     private val dispatcher: CoroutineDispatcher, private val itemApi: ItemApi = object : ItemApi {
         override fun fetchItems(): List<ItemData> =
             getListOfMaps()
                 .map {
-                    ItemData(it, "")
+                    ItemData(it)
                 }
     }
 ) {
@@ -35,8 +38,14 @@ class ItemDataSource(
     }
 }
 
-data class ItemData(val itemId: String, val formLayerName: String)
+/**
+ * the data for the item. Just an URL, but abstracted away
+ */
+data class ItemData(val url: String)
 
+/**
+ * The API to use to get the items
+ */
 interface ItemApi {
     fun fetchItems(): List<ItemData>
 }
@@ -52,6 +61,7 @@ fun getListOfMaps(): List<String> {
         "https://runtimecoretest.maps.arcgis.com/home/item.html?id=622c4674d6f64114a1de2e0b8382fcf3",
         "https://runtimecoretest.maps.arcgis.com/home/item.html?id=a81d90609e4549479d1f214f28335af2",
         "https://runtimecoretest.maps.arcgis.com/home/item.html?id=bb4c5e81740e4e7296943988c78a7ea6",
-        "https://runtimecoretest.maps.arcgis.com/home/item.html?id=5d69e2301ad14ec8a73b568dfc29450a"
+        "https://runtimecoretest.maps.arcgis.com/home/item.html?id=5d69e2301ad14ec8a73b568dfc29450a",
+        "https://runtimecoretest.maps.arcgis.com/home/item.html?id=0f6864ddc35241649e5ad2ee61a3abe4"
     )
 }

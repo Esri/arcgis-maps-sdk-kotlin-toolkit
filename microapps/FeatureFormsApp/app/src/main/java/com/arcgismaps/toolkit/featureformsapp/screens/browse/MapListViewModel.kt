@@ -3,7 +3,7 @@ package com.arcgismaps.toolkit.featureformsapp.screens.browse
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arcgismaps.toolkit.featureformsapp.domain.PortalItemData
+import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.toolkit.featureformsapp.domain.PortalItemUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,15 +17,17 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class MapListViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
+    @Suppress("UNUSED_PARAMETER") savedStateHandle: SavedStateHandle,
     private val portalItemUseCase: PortalItemUseCase
 ) : ViewModel() {
-    private val _portalItems: MutableStateFlow<List<PortalItemData>> = MutableStateFlow(emptyList())
-    val portalItems: StateFlow<List<PortalItemData>> = _portalItems.asStateFlow()
+    private val _portalItems: MutableStateFlow<List<PortalItem>> = MutableStateFlow(emptyList())
+    val portalItems: StateFlow<List<PortalItem>> = _portalItems.asStateFlow()
     
     init {
         viewModelScope.launch {
-            _portalItems.value = portalItemUseCase.fetchPortalItemData()
+            _portalItems.value = portalItemUseCase.fetchPortalItemData().map {
+                it.portalItem
+            }
         }
     }
 }

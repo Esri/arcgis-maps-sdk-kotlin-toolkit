@@ -1,33 +1,53 @@
 package com.arcgismaps.toolkit.featureformsapp.screens.map
 
 import android.widget.Toast
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
-import com.arcgismaps.toolkit.composablemap.MapInterface
+import com.arcgismaps.toolkit.composablemap.MapState
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
 import com.arcgismaps.toolkit.featureforms.api.FeatureFormDefinition
 import com.arcgismaps.toolkit.featureforms.api.formInfoJson
+import com.arcgismaps.toolkit.featureformsapp.domain.PortalItemData
+import com.arcgismaps.toolkit.featureformsapp.domain.PortalItemUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * A view model for the FeatureForms MapView UI
- * @constructor to be invoked by the [MapViewModelFactory]
+ * @constructor to be invoked by injection
  */
-class MapViewModel(
-    arcGISMap: ArcGISMap
+@HiltViewModel
+class MapViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
+    val portalItemUseCase: PortalItemUseCase
 ) : ViewModel(),
-    MapInterface by MapInterface(arcGISMap),
+    MapState by MapState(),
     FeatureFormState by FeatureFormState() {
-
+    private val url: String = savedStateHandle["uri"]!!
+    lateinit var portalItemData: PortalItemData
+    
+    init {
+        viewModelScope.launch {
+            portalItemData = portalItemUseCase(url)
+            setMap(ArcGISMap(portalItemData.portalItem))
+        }
+    }
+    
     context(MapView, CoroutineScope) override fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {
         launch {
-            val layer = map.value.operationalLayers.filterIsInstance<FeatureLayer>().first()
+            val layer = map.value?.operationalLayers?.filterIsInstance<FeatureLayer>()?.firstOrNull { layer ->
+                portalItemData.formLayerName?.let {
+                    layer.name == it
+                } ?: true
+            } ?: return@launch
             this@MapView.identifyLayer(
                 layer = layer,
                 screenCoordinate = singleTapEvent.screenCoordinate,
@@ -59,17 +79,5 @@ class MapViewModel(
                 } ?: println("tap was not on a feature")
             }
         }
-    }
-}
-
-/**
- * Factory for the [MapViewModel]
- */
-class MapViewModelFactory(
-    private val arcGISMap: ArcGISMap
-) : ViewModelProvider.NewInstanceFactory() {
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return MapViewModel(arcGISMap) as T
     }
 }

@@ -19,27 +19,48 @@
 package com.arcgismaps.toolkit.featureformsapp.domain
 
 import com.arcgismaps.mapping.PortalItem
+import com.arcgismaps.toolkit.featureformsapp.data.ItemData
 import com.arcgismaps.toolkit.featureformsapp.data.ItemRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
-data class PortalItemData(val portalItem: PortalItem, val formLayerName: String)
+data class PortalItemData(val portalItem: PortalItem, val formLayerName: String? = null)
 
+/**
+ * A domain layer to transform item data into loaded PortalItems, along with some domain knowledge of what layer
+ * in each item is of interest.
+ */
 class PortalItemUseCase(private val scope: CoroutineScope, private val itemRepository: ItemRepository) {
     private val mutex = Mutex()
     
     private var items: List<PortalItemData> = emptyList()
     
+    /**
+     * Provide the name of the layer with forms that we would like to use to identify features. If not needed, because
+     * the map has one layer for example, then return null.
+     */
+    private fun formLayerName(itemData: ItemData): String? =
+        if (itemData.url == "https://runtimecoretest.maps.arcgis.com/home/item.html?id=0f6864ddc35241649e5ad2ee61a3abe4") {
+            "CityworksDynamic - Water Hydrants"
+        } else {
+            null
+        }
+    
+    /**
+     * Fetch item data, transform it into loaded PortalItems, and cache them.
+     */
     suspend fun fetchPortalItemData(): List<PortalItemData> {
         return if (items.isEmpty()) {
             withContext(scope.coroutineContext) {
-                itemRepository.fetchItems().map {
-                    PortalItemData(PortalItem(it.itemId), it.formLayerName).also { itemData ->
-                        itemData.portalItem.load()
+                itemRepository.fetchItems().map { itemData ->
+                    PortalItemData(PortalItem(itemData.url), formLayerName(itemData)).also { portalItemData ->
+                        portalItemData.portalItem.load()
                             .onSuccess {
-                                itemData.portalItem.thumbnail?.load()
+                                val portalItem = portalItemData.portalItem
+                                portalItem.load()
+                                portalItem.thumbnail?.load()
                             }
                     }
                 }.also {
@@ -51,8 +72,11 @@ class PortalItemUseCase(private val scope: CoroutineScope, private val itemRepos
         }
     }
     
-    suspend operator fun invoke(itemId: String): PortalItemData =
+    /**
+     * Used by the UI to get a specific PortalItem by url
+     */
+    suspend operator fun invoke(url: String): PortalItemData =
         fetchPortalItemData().first {
-            it.portalItem.itemId == itemId
+            url == it.portalItem.url
         }
 }

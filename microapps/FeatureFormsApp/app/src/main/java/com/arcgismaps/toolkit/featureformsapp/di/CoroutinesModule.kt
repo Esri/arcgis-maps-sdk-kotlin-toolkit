@@ -30,18 +30,31 @@ import javax.inject.Qualifier
 import javax.inject.Singleton
 
 
+/**
+ * Provide an annotation to inject the IO dispatcher
+ */
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
 annotation class IoDispatcher
 
+
+/**
+ * Provide an annotation to inject the default dispatcher
+ */
 @Retention(AnnotationRetention.RUNTIME)
 @Qualifier
 annotation class DefaultDispatcher
 
+/**
+ * Provide an injectable supervisor scope
+ */
 @Retention(AnnotationRetention.RUNTIME)
 @Qualifier
 annotation class ApplicationScope
 
+/**
+ * The providers of the scope and dispatchers
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 object CoroutinesModule {

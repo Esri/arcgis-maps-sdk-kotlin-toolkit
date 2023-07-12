@@ -23,11 +23,17 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
+/**
+ * A repository to sit between the data source and the UI/domain layer.
+ */
 class ItemRepository(private val scope: CoroutineScope, private val itemDataSource: ItemDataSource) {
     private val mutex = Mutex()
     
     private var itemData: List<ItemData> = emptyList()
     
+    /**
+     * Fetch and cache the items
+     */
     suspend fun fetchItems(): List<ItemData> {
         return if (itemData.isEmpty()) {
             withContext(scope.coroutineContext) {

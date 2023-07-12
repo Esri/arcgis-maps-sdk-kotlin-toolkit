@@ -30,30 +30,49 @@ import kotlinx.coroutines.CoroutineScope
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
+/**
+ * Provide an annotation to inject the PortalItem data source
+ */
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
 annotation class PortalItemDataSource
 
+/**
+ * Provide an annotation to inject the PortalItem repository
+ */
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
 annotation class PortalItemRepository
 
+/**
+ * The singleton portal item use case provider
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 class DataModule() {
+    /**
+     * The provider of the PortalItem data source. Only used below.
+     */
     @Provides
     @PortalItemDataSource
-    fun provideItemDataSource(@IoDispatcher dispatcher: CoroutineDispatcher): ItemDataSource =
+    internal fun provideItemDataSource(@IoDispatcher dispatcher: CoroutineDispatcher): ItemDataSource =
         ItemDataSource(dispatcher)
     
+    /**
+     * The provider of the PortalItem data source. Only used below.
+     */
     @Provides
     @PortalItemRepository
-    fun provideItemRepository(
+    internal fun provideItemRepository(
         @ApplicationScope applicationScope: CoroutineScope,
         @PortalItemDataSource itemDataSource: ItemDataSource
     ): ItemRepository =
         ItemRepository(applicationScope, itemDataSource)
     
+    /**
+     * The provider of the PortalItem use case, scoped to the navigation graph lifetime by means of the
+     * `@Singleton` annotation.
+     */
     @Singleton
     @Provides
     fun providePortalItemUseCase(
