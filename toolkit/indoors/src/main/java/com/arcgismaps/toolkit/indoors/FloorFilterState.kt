@@ -29,11 +29,14 @@ import kotlinx.coroutines.launch
  * An interface to pass into the FloorFilter composable function.
  */
 public sealed interface FloorFilterState {
-   public val floorManager: StateFlow<FloorManager?>
-   public suspend fun loadFloorManager()
+    public val floorManager: StateFlow<FloorManager?>
+    public suspend fun loadFloorManager()
 }
 
-private class FloorFilterStateImpl(var geoModel: GeoModel, coroutineScope: CoroutineScope) : FloorFilterState {
+private class FloorFilterStateImpl(
+    var geoModel: GeoModel,
+    coroutineScope: CoroutineScope
+) : FloorFilterState {
 
     private val _floorManager: MutableStateFlow<FloorManager?> = MutableStateFlow(null)
     override val floorManager: StateFlow<FloorManager?> = _floorManager.asStateFlow()

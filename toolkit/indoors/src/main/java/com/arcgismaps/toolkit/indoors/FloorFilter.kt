@@ -37,6 +37,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -86,7 +87,7 @@ public fun FloorFilter(
                 .background(color = buttonBackgroundColor, shape = RoundedCornerShape(5.dp))
         ) {
             // collapse list box
-            if (closeButtonVisibility == View.VISIBLE){
+            if (closeButtonVisibility == View.VISIBLE) {
                 Box(modifier.fillMaxWidth()) {
                     Icon(
                         modifier = modifier.padding(5.dp).align(Alignment.Center),
@@ -99,7 +100,7 @@ public fun FloorFilter(
             // set the floor index
             var selectedIndex by remember { mutableStateOf(selectedFloorIndex) }
             val onItemClick = { index: Int -> selectedIndex = index }
-            LazyColumn(modifier.fillMaxWidth(),) {
+            LazyColumn(modifier.fillMaxWidth()) {
                 items(floorManager.levels.size) { index ->
                     FloorItemView(
                         index = index,
@@ -117,7 +118,7 @@ public fun FloorFilter(
             }
 
             // facilities box
-            if(siteFacilityButtonVisibility == View.VISIBLE){
+            if (siteFacilityButtonVisibility == View.VISIBLE) {
                 Box() {
                     Icon(
                         modifier = modifier.fillMaxWidth().padding(5.dp),
@@ -162,15 +163,13 @@ public fun FloorItemView(
 @Preview(showBackground = true)
 @Composable
 internal fun FloorFilterPreview() {
-//    val viewModel = object : FloorFilterState {
-//        private val _someProperty: MutableStateFlow<String> =
-//            MutableStateFlow("Hello Indoors Preview")
-////        override val someProperty: StateFlow<String> = _someProperty.asStateFlow()
-//    }
-
     val portal = Portal("https://arcgis.com/")
     val portalItem = PortalItem(portal, "f133a698536f44c8884ad81f80b6cfc7")
     val floorAwareWebMap = ArcGISMap(portalItem)
 
-//    FloorFilter(geoModel = floorAwareWebMap)
+    val floorFilterState = FloorFilterState(
+        geoModel = floorAwareWebMap,
+        coroutineScope = rememberCoroutineScope()
+    )
+    FloorFilter(floorFilterState = floorFilterState)
 }
