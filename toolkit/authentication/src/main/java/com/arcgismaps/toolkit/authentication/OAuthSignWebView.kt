@@ -45,13 +45,12 @@ import java.net.URL
 import javax.net.ssl.SSLException
 
 /**
- * Launches a WebView using the url in [oAuthUserSignIn] and calls [OAuthUserSignIn.complete],
- * [OAuthUserSignIn.completeWithException] or [OAuthUserSignIn.cancel]
- * on completion.
+ * Launches a WebView using the url in [oAuthUserSignIn] and calls [OAuthUserSignIn.complete] or
+ * [OAuthUserSignIn.cancel] on completion.
  *
  * @param oAuthUserSignIn the [OAuthUserSignIn] pending completion.
  * @param authenticatorState used to raise other [NetworkAuthenticationChallenge]s that occur while in WebView.
- * @param scope the coroutineScope to launch the suspendable methods to display UI.
+ * @param scope coroutineScope to launch [NetworkAuthenticationChallenge]s that occur while in WebView.
  * @since 200.2.0
  */
 @Composable

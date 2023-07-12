@@ -30,7 +30,7 @@ private const val DEFAULT_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob"
  *
  * @see OAuthUserSignInActivity
  * @param oAuthPendingSignIn the [OAuthUserSignIn] pending completion.
- * @param authenticatorState an [AuthenticatorState]. See [AuthenticatorState.Companion.Factory].
+ * @param authenticatorState an [AuthenticatorState].
  * @since 200.2.0
  */
 @Composable
