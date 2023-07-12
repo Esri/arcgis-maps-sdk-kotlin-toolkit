@@ -22,6 +22,10 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
 private const val DEFAULT_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob"
@@ -48,12 +52,21 @@ internal fun OAuthAuthenticator(
                     oAuthPendingSignIn.complete(redirectUrl)
                 } ?: oAuthPendingSignIn.cancel()
             }
-
+        // If a configuration change happens while the OAuth activity is active, then when the activity
+        // returns, this composable would launch the activity again due to being recomposed. This flag
+        // prevents a relaunch. Note that this flag does not need to be reset to false, because after the
+        // OAuth prompt completes, the OAuthAuthenticator will leave the composition, thus on a subsequent
+        // OAuth challenge the OAuthAuthenticator will re-enter the composition and a new `didLaunch` state
+        // variable will be initialized again here to false.
+        var didLaunch by rememberSaveable { mutableStateOf(false) }
         // Launching an activity is a side effect. We don't need `LaunchedEffect` because this is not suspending
         // and there's nothing that needs to keep running if it gets recomposed. In reality, we also don't
         // expect `oAuthPendingSignIn` to change while this composable is displayed.
-        SideEffect {
-            launcher.launch(oAuthPendingSignIn)
+        if (!didLaunch) {
+            didLaunch = true
+            SideEffect {
+                launcher.launch(oAuthPendingSignIn)
+            }
         }
     }
 }
