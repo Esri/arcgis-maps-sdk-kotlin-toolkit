@@ -136,7 +136,7 @@ private class OAuthWebViewClient(
                     val passwordCredential = credential as PasswordCredential
                     handler?.proceed(passwordCredential.username, passwordCredential.password)
                 } ?: run {
-                    oAuthUserSignIn.completeWithException(exception)
+                    oAuthUserSignIn.cancel(exception)
                     handler?.cancel()
                 }
             } ?: throw IllegalStateException("Host is not known.")
@@ -168,7 +168,7 @@ private class OAuthWebViewClient(
                         )
                     }
                 } ?: run {
-                    oAuthUserSignIn.completeWithException(exception)
+                    oAuthUserSignIn.cancel(exception)
                     request?.cancel()
                 }
             } ?: throw IllegalStateException("Host is not known")
@@ -196,7 +196,7 @@ private class OAuthWebViewClient(
                 getCredentialOrPrompt(host, sslException, NetworkAuthenticationType.ServerTrust)?.let {
                     handler?.proceed()
                 } ?: run {
-                    oAuthUserSignIn.completeWithException(sslException)
+                    oAuthUserSignIn.cancel(sslException)
                     handler?.cancel()
                 }
             } ?: throw IllegalStateException("Host is not known")
