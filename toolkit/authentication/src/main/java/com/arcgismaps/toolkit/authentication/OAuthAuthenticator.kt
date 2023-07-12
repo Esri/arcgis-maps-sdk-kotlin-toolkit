@@ -46,18 +46,18 @@ internal fun OAuthAuthenticator(
             } ?: oAuthPendingSignIn.cancel()
         }
     // If a configuration change happens while the OAuth activity is active, then when the activity
-    // returns, this composable would launch the activity again due to being recomposed. This
-    // flag prevents a relaunch. Note that this flag does not need to be reset to false, because after
-    // the OAuth prompt completes, the OAuthAuthenticator will leave the composition, thus on a subsequent
+    // returns, this composable would launch the activity again due to being recomposed. This flag
+    // prevents a relaunch. Note that this flag does not need to be reset to false, because after the
+    // OAuth prompt completes, the OAuthAuthenticator will leave the composition, thus on a subsequent
     // OAuth challenge the OAuthAuthenticator will re-enter the composition and a new `didLaunch` state
     // variable will be initialized again here to false.
     var didLaunch by rememberSaveable { mutableStateOf(false) }
     // Launching an activity is a side effect. We don't need `LaunchedEffect` because this is not suspending
     // and there's nothing that needs to keep running if it gets recomposed. In reality, we also don't
     // expect `oAuthPendingSignIn` to change while this composable is displayed.
-    SideEffect {
-        if (!didLaunch) {
-            didLaunch = true
+    if (!didLaunch) {
+        didLaunch = true
+        SideEffect {
             launcher.launch(oAuthPendingSignIn)
         }
     }
