@@ -53,7 +53,8 @@ internal fun FeatureFormContent(
     formDefinition: FeatureFormDefinition,
     modifier: Modifier = Modifier
 ) {
-    val attributes = formDefinition.feature!!.attributes
+    val feature = formDefinition.feature!!
+    val attributes = feature.attributes
 
     Column(
         modifier = modifier.fillMaxSize(),
@@ -71,6 +72,7 @@ internal fun FeatureFormContent(
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             items(formDefinition.formElements) { formElement ->
                 if (formElement is FieldFeatureFormElement) {
+                    formElement.feature = feature
                     attributes[formElement.fieldName]?.let {
                         formElement.value = it as String
                     }
