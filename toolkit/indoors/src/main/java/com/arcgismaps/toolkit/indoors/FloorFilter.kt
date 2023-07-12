@@ -1,3 +1,20 @@
+/*
+ *  Copyright 2023 Esri
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
 package com.arcgismaps.toolkit.indoors
 
 import android.view.View
@@ -16,7 +33,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,13 +49,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.arcgismaps.LoadStatus
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.PortalItem
+import com.arcgismaps.mapping.floor.FloorManager
 import com.arcgismaps.portal.Portal
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
 @Composable
 // TBD: Floor filter properties need to be defined
@@ -58,27 +71,9 @@ public fun FloorFilter(
     siteSearchVisibility: Int = View.VISIBLE,
     closeButtonPosition: Int = 0,
     maxDisplayLevels: Int = 0,
-    arcGISMap: ArcGISMap,
+    floorFilterState: FloorFilterState
 ) {
-    // check if the map is loaded
-    if (arcGISMap.loadStatus.collectAsState().value != LoadStatus.Loaded) {
-        return
-    }
-
-    // get the floor manager
-    val floorManager = arcGISMap.floorManager ?: throw Throwable("Map does not contain floors")
-
-    // load the floor manager
-    LaunchedEffect(Unit) {
-        floorManager.load().getOrElse {
-            throw Throwable("Error loading the floor manager")
-        }
-    }
-
-    // check if floor manager is loaded
-    if(floorManager.loadStatus.collectAsState().value != LoadStatus.Loaded){
-        return
-    }
+    val floorManager: FloorManager = floorFilterState.floorManager.collectAsState().value ?: return
 
     Surface(
         shadowElevation = 10.dp,
@@ -167,15 +162,15 @@ public fun FloorItemView(
 @Preview(showBackground = true)
 @Composable
 internal fun FloorFilterPreview() {
-    val viewModel = object : FloorFilterInterface {
-        private val _someProperty: MutableStateFlow<String> =
-            MutableStateFlow("Hello Indoors Preview")
-        override val someProperty: StateFlow<String> = _someProperty.asStateFlow()
-    }
+//    val viewModel = object : FloorFilterState {
+//        private val _someProperty: MutableStateFlow<String> =
+//            MutableStateFlow("Hello Indoors Preview")
+////        override val someProperty: StateFlow<String> = _someProperty.asStateFlow()
+//    }
 
     val portal = Portal("https://arcgis.com/")
     val portalItem = PortalItem(portal, "f133a698536f44c8884ad81f80b6cfc7")
     val floorAwareWebMap = ArcGISMap(portalItem)
 
-    FloorFilter(arcGISMap = floorAwareWebMap)
+//    FloorFilter(geoModel = floorAwareWebMap)
 }
