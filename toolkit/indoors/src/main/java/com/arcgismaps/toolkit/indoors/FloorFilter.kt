@@ -54,6 +54,7 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.mapping.floor.FloorManager
 import com.arcgismaps.portal.Portal
+import com.arcgismaps.toolkit.composablemap.MapInterface
 
 @Composable
 // TBD: Floor filter properties need to be defined
@@ -166,9 +167,10 @@ internal fun FloorFilterPreview() {
     val portal = Portal("https://arcgis.com/")
     val portalItem = PortalItem(portal, "f133a698536f44c8884ad81f80b6cfc7")
     val floorAwareWebMap = ArcGISMap(portalItem)
+    val mapInterface = MapInterface(floorAwareWebMap)
 
     val floorFilterState = FloorFilterState(
-        geoModel = floorAwareWebMap,
+        mapInterface = mapInterface,
         coroutineScope = rememberCoroutineScope()
     )
     FloorFilter(floorFilterState = floorFilterState)
