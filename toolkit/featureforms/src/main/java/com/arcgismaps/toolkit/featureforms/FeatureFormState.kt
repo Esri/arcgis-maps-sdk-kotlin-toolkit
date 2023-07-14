@@ -24,7 +24,7 @@ public interface FeatureFormState {
      *
      * @since 200.2.0
      */
-    public val inEditingMode: StateFlow<Boolean>
+    public val inEditingTransaction: StateFlow<Boolean>
     
     /**
      * Sets the feature to which edits will be applied.
@@ -38,21 +38,21 @@ public interface FeatureFormState {
      *
      * @since 200.2.0
      */
-    public fun setEditingActive(active: Boolean)
+    public fun setTransactionState(active: Boolean)
     
     /**
      * Save form edits to the Feature
      *
      * @since 200.2.0
      */
-    public suspend fun saveFeatureEdits(): Result<Unit>
+    public suspend fun commitEdits(): Result<Unit>
     
     /**
      * Discard form edits to the Feature
      *
      * @since 200.2.0
      */
-    public suspend fun discardFeatureEdits(): Result<Unit>
+    public suspend fun rollbackEdits(): Result<Unit>
 }
 
 /**
@@ -61,13 +61,13 @@ public interface FeatureFormState {
 public class FeatureFormStateImpl : FeatureFormState {
     private val _formDefinition: MutableStateFlow<FeatureFormDefinition?> = MutableStateFlow(null)
     override val formDefinition: StateFlow<FeatureFormDefinition?> = _formDefinition.asStateFlow()
-    private val _inEditingMode: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    override val inEditingMode: StateFlow<Boolean> = _inEditingMode.asStateFlow()
-    override fun setEditingActive(active: Boolean) {
-        _inEditingMode.value = active
+    private val _inEditingTransaction: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    override val inEditingTransaction: StateFlow<Boolean> = _inEditingTransaction.asStateFlow()
+    override fun setTransactionState(active: Boolean) {
+        _inEditingTransaction.value = active
     }
     
-    public override suspend fun saveFeatureEdits(): Result<Unit> {
+    public override suspend fun commitEdits(): Result<Unit> {
         val feature = formDefinition.value?.feature
             ?: return Result.failure(IllegalStateException("cannot save feature edit without a Feature"))
         val serviceFeatureTable =
@@ -75,19 +75,24 @@ public class FeatureFormStateImpl : FeatureFormState {
                 IllegalStateException("cannot save feature edit without a ServiceFeatureTable")
             )
         
-        return serviceFeatureTable.updateFeature(feature)
+        val result = serviceFeatureTable.updateFeature(feature)
             .map {
                 serviceFeatureTable.serviceGeodatabase?.applyEdits()
                     ?: throw IllegalStateException("cannot apply feature edit without a ServiceGeodatabase")
                 feature.refresh()
                 Unit
             }
+        
+        // note: this will silently fail and close the form.
+        setTransactionState(false)
+        return result
     }
     
-    override suspend fun discardFeatureEdits(): Result<Unit> {
+    override suspend fun rollbackEdits(): Result<Unit> {
         val feature = formDefinition.value?.feature
         (feature?.featureTable as? ServiceFeatureTable)?.undoLocalEdits()
         feature?.refresh()
+        setTransactionState(false)
         return Result.success(Unit)
     }
     

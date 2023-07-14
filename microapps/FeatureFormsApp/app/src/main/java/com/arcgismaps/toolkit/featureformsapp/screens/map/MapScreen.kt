@@ -46,7 +46,7 @@ fun MapScreen(uri: String, onBackPressed: () -> Unit = {}) {
         )
     )
     // hoist state for the formViewModel editing mode
-    val inEditingMode by mapViewModel.inEditingMode.collectAsState()
+    val inEditingMode by mapViewModel.inEditingTransaction.collectAsState()
     // create a BottomSheetScaffoldState
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
@@ -92,13 +92,11 @@ fun MapScreen(uri: String, onBackPressed: () -> Unit = {}) {
                 editingMode = inEditingMode,
                 onClose = {
                     val formState = mapViewModel as FeatureFormState
-                    scope.launch { formState.discardFeatureEdits() }
-                    mapViewModel.setEditingActive(false)
+                    scope.launch { formState.rollbackEdits() }
                 },
                 onSave = {
                     val formState = mapViewModel as FeatureFormState
-                    scope.launch { formState.saveFeatureEdits() }
-                    mapViewModel.setEditingActive(false)
+                    scope.launch { formState.commitEdits() }
                 }) {
                 onBackPressed()
             }

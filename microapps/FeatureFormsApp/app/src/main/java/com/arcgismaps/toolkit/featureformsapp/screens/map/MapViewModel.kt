@@ -54,7 +54,7 @@ class MapViewModel(
                                     setFormDefinition(featureFormDefinition)
                                     // set the FeatureFormState to an editing state to bring up the
                                     // FeatureForm UI
-                                    setEditingActive(true)
+                                    setTransactionState(true)
                                 }
                         } catch (e: Exception) {
                             Toast.makeText(
