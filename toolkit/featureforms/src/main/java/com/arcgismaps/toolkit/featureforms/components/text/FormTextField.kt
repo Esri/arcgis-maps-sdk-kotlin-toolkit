@@ -76,7 +76,8 @@ internal fun FormTextField(
                     IconButton(
                         onClick = {
                             state.onValueChanged("")
-                        }
+                        },
+                        modifier = Modifier.semantics { contentDescription = "Clear text button" }
                     ) {
                         Icon(
                             imageVector = Icons.Rounded.Clear,
