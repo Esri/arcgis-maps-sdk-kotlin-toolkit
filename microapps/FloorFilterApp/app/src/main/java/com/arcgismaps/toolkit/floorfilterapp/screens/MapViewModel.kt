@@ -33,7 +33,7 @@ class MapViewModel(
     arcGISMap: ArcGISMap
 ) : ViewModel(), MapInterface by MapInterfaceImpl(arcGISMap) {
 
-    val floorFilterState: FloorFilterState = FloorFilterState(arcGISMap, viewModelScope)
+    val floorFilterState: FloorFilterState = FloorFilterState(this, viewModelScope)
 
 }
 
