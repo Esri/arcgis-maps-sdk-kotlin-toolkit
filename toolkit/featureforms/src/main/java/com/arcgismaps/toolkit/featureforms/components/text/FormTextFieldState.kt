@@ -137,12 +137,14 @@ private class FormTextFieldStateImpl(
     // build helper text
     val helperText = buildString {
         if (minLength > 0 && maxLength > 0) {
-            if (minLength == maxLength)
+            if (minLength == maxLength) {
                 append("Enter $minLength characters")
-            else
+            } else {
                 append("Enter $minLength to $maxLength characters")
-        } else if (maxLength > 0)
+            }
+        } else if (maxLength > 0) {
             append("Maximum $maxLength characters")
+        }
     }
 
     // supporting text will depend on multiple other states. If there is an error, it will display
