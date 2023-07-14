@@ -27,7 +27,15 @@ class MapViewModel(
 
     context(MapView, CoroutineScope) override fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {
         launch {
-            val layer = map.value.operationalLayers.filterIsInstance<FeatureLayer>().first()
+            val layer = if (this@MapView.map?.item?.itemId == "0f6864ddc35241649e5ad2ee61a3abe4") {
+                
+                map.value.operationalLayers.filterIsInstance<FeatureLayer>().first {
+                    it.name == "CityworksDynamic - Water Hydrants"
+                }
+            } else{
+                map.value.operationalLayers.filterIsInstance<FeatureLayer>().first()
+            }
+            
             this@MapView.identifyLayer(
                 layer = layer,
                 screenCoordinate = singleTapEvent.screenCoordinate,
