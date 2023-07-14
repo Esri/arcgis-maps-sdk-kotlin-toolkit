@@ -160,7 +160,6 @@ private class FormTextFieldStateImpl(
             //throw IllegalStateException("invalid form data or attribute: text field must have a nonzero max length")
         }
     
-    
     // supporting text will depend on multiple other states. If there is an error, it will display
     // error message. Otherwise description is displayed, unless it is empty in which case
     // the helper text is displayed when the field is focused.
