@@ -29,6 +29,7 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.composablemap.ComposableMap
+import com.arcgismaps.toolkit.indoors.ButtonPosition
 import com.arcgismaps.toolkit.indoors.FloorFilter
 
 @Composable
@@ -49,6 +50,8 @@ fun MainScreen() {
         ) {
             FloorFilter(
                 floorFilterState = mapViewModel.floorFilterState,
+                maxDisplayLevels = 2,
+                closeButtonPosition = ButtonPosition.Bottom
             )
         }
     }

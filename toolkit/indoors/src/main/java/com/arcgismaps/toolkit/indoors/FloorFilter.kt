@@ -39,7 +39,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.Center
@@ -51,33 +50,45 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.mapping.floor.FloorManager
-import com.arcgismaps.portal.Portal
-import com.arcgismaps.toolkit.composablemap.MapInterface
 
+// Constants
+internal val SelectedBackgroundColor: Color = Color(0xFFE2F1FB) // light blue
+internal val SelectedForegroundColor: Color = Color(0xFF005E95) // dark blue
+internal const val DefaultMaxDisplayLevels = -1 // less than 1 will show all of the levels.
+internal val DefaultButtonWidth: Float = 60.dp.value
+internal val DefaultButtonHeight: Float = 40.dp.value
+internal val DefaultTextColor: Color = Color.Black
+internal val DefaultBackgroundColor: Color = Color.White
+internal const val DefaultButtonVisibility: Int = View.VISIBLE
+internal val DefaultCloseButtonPosition = ButtonPosition.Top
+
+/**
+ * Displays a control for the user to pick which level of a floor aware [floorFilterState] to display.
+ *
+ * @since 200.2.0
+ */
 @Composable
 public fun FloorFilter(
     modifier: Modifier = Modifier,
+    floorFilterState: FloorFilterState,
     textSize: TextUnit = 15.sp,
-    buttonSize: Size = Size(width = 60.dp.value, height = 40.dp.value),
-    textColor: Color = Color.Black,
-    buttonBackgroundColor: Color = Color.White,
+    buttonSize: Size = Size(width = DefaultButtonWidth, height = DefaultButtonHeight),
+    textColor: Color = DefaultTextColor,
+    buttonBackgroundColor: Color = DefaultBackgroundColor,
     selectedTextColor: Color = SelectedForegroundColor,
     selectedButtonBackgroundColor: Color = SelectedBackgroundColor,
     typography: Typography = MaterialTheme.typography,
-    closeButtonVisibility: Int = View.VISIBLE,
-    siteFacilityButtonVisibility: Int = View.VISIBLE,
-    searchBackgroundColor: Color = Color.White,
-    siteSearchVisibility: Int = View.VISIBLE,
-    closeButtonPosition: Int = 0,
-    maxDisplayLevels: Int = 0,
-    floorFilterState: FloorFilterState
+    closeButtonVisibility: Int = DefaultButtonVisibility,
+    siteFacilityButtonVisibility: Int = DefaultButtonVisibility,
+    closeButtonPosition: ButtonPosition = DefaultCloseButtonPosition,
+    maxDisplayLevels: Int = DefaultMaxDisplayLevels,
+    searchBackgroundColor: Color = DefaultBackgroundColor,
+    siteSearchVisibility: Int = DefaultButtonVisibility
 ) {
     val floorManager: FloorManager = floorFilterState.floorManager.collectAsState().value ?: return
 
@@ -99,19 +110,15 @@ public fun FloorFilter(
             // displays only the selected floor when enabled
             var isFloorsCollapsed by rememberSaveable { mutableStateOf(false) }
 
-            // collapse list box
-            if (closeButtonVisibility == View.VISIBLE && !isFloorsCollapsed) {
-                Box(modifier
-                    .fillMaxWidth()
-                    .height(buttonSize.height.dp)
-                    .clickable {
-                        isFloorsCollapsed = true
-                    }) {
-                    Icon(
-                        modifier = modifier.align(Center),
-                        painter = painterResource(id = R.drawable.ic_x_24),
-                        contentDescription = "Close icon"
-                    )
+            // display close button if set to top, if not display facilities button
+            if (closeButtonPosition == ButtonPosition.Top) {
+                // check if close button is set to visible and not collapsed
+                if (closeButtonVisibility == View.VISIBLE && !isFloorsCollapsed) {
+                    CloseButton(modifier, buttonSize, onClick = { isFloorsCollapsed = true })
+                }
+            } else {
+                if (siteFacilityButtonVisibility == View.VISIBLE) {
+                    FacilitiesDialogButton(modifier, buttonSize)
                 }
             }
 
@@ -124,9 +131,17 @@ public fun FloorFilter(
                 ?: return@Surface
 
             if (!isFloorsCollapsed) {
+                // calculate the height of the list of floors if maxDisplayLevels is defined
+                val measureHeight: Dp = if (maxDisplayLevels > 0)
+                    buttonSize.height.dp.times(maxDisplayLevels)
+                else
+                    buttonSize.height.dp.times(currentFacility.levels.size)
+
+                // display a list of floor levels in the selected facility
                 LazyColumn(
-                    modifier = modifier.fillMaxWidth(),
+                    modifier = modifier.fillMaxWidth().height(measureHeight),
                     reverseLayout = true,
+                    userScrollEnabled = maxDisplayLevels > 0
                 ) {
                     // update the selected level ID on click
                     val onItemClick = { index: Int ->
@@ -170,27 +185,75 @@ public fun FloorFilter(
                 )
             }
 
-            // facilities box
-            if (siteFacilityButtonVisibility == View.VISIBLE) {
-                Box(modifier.height(buttonSize.height.dp)) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_site_facility_24),
-                        tint = SelectedForegroundColor,
-                        contentDescription = "Facilities icon",
-                        modifier = modifier
-                            .height(buttonSize.height.dp)
-                            .width(buttonSize.width.dp)
-                            .wrapContentSize(Center)
-                            .clickable {
-                                // TODO: Implement facility search dialog
-                            }
-                    )
+            // display close button if set to bottom, if not display facilities button
+            if (closeButtonPosition == ButtonPosition.Bottom) {
+                // check if close button is set to visible and not collapsed
+                if (closeButtonVisibility == View.VISIBLE && !isFloorsCollapsed) {
+                    CloseButton(modifier, buttonSize, onClick = {
+                        isFloorsCollapsed = true
+                    })
+                }
+            } else {
+                if (siteFacilityButtonVisibility == View.VISIBLE) {
+                    FacilitiesDialogButton(modifier, buttonSize)
                 }
             }
         }
     }
 }
 
+/**
+ * Button to show the popup dialog to choose a FloorSite and FloorFacility.
+ *
+ * @since 200.2.0
+ */
+@Composable
+internal fun FacilitiesDialogButton(modifier: Modifier, buttonSize: Size) {
+    Box(modifier.height(buttonSize.height.dp)) {
+        Icon(
+            painter = painterResource(id = R.drawable.ic_site_facility_24),
+            tint = SelectedForegroundColor,
+            contentDescription = "Facilities icon",
+            modifier = modifier
+                .height(buttonSize.height.dp)
+                .width(buttonSize.width.dp)
+                .wrapContentSize(Center)
+                .clickable {
+                    // TODO: Implement facility search dialog
+                }
+        )
+    }
+}
+
+/**
+ * Button to collapse the list of floor levels and only display the selected floor level.
+ *
+ * @since 200.2.0
+ */
+@Composable
+internal fun CloseButton(
+    modifier: Modifier,
+    buttonSize: Size,
+    onClick: (Unit) -> Unit
+) {
+    Box(modifier
+        .fillMaxWidth()
+        .height(buttonSize.height.dp)
+        .clickable { onClick.invoke(Unit) }) {
+        Icon(
+            modifier = modifier.align(Center),
+            painter = painterResource(id = R.drawable.ic_x_24),
+            contentDescription = "Close icon"
+        )
+    }
+}
+
+/**
+ * Displays the floor item view for each given [floorText], and implements a [onClick]
+ * to then highlight the [selected] floor level.
+ *
+ * @since 200.2.0
+ */
 @Composable
 internal fun FloorItemView(
     index: Int,
@@ -218,23 +281,5 @@ internal fun FloorItemView(
             .height(buttonSize.height.dp)
             .fillMaxWidth()
             .wrapContentHeight(align = CenterVertically),
-        )
-}
-
-public val SelectedBackgroundColor: Color = Color(0xFFE2F1FB)
-public val SelectedForegroundColor: Color = Color(0xFF005E95)
-
-@Preview(showBackground = true)
-@Composable
-internal fun FloorFilterPreview() {
-    val portal = Portal("https://arcgis.com/")
-    val portalItem = PortalItem(portal, "f133a698536f44c8884ad81f80b6cfc7")
-    val floorAwareWebMap = ArcGISMap(portalItem)
-    val mapInterface = MapInterface(floorAwareWebMap)
-
-    val floorFilterState = FloorFilterState(
-        mapInterface = mapInterface,
-        coroutineScope = rememberCoroutineScope()
     )
-    FloorFilter(floorFilterState = floorFilterState)
 }
