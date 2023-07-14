@@ -1,5 +1,24 @@
+/*
+ *
+ *  Copyright 2023 Esri
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
 package com.arcgismaps.toolkit.authenticationapp
 
+import android.app.Application
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -17,33 +36,21 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
-import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.authentication.Authenticator
-import com.arcgismaps.toolkit.authentication.AuthenticatorViewModel
-import com.arcgismaps.toolkit.authentication.AuthenticatorViewModelFactory
-import com.arcgismaps.toolkit.authentication.signOut
+import com.arcgismaps.toolkit.authentication.AuthenticatorState
 import com.arcgismaps.toolkit.authenticationapp.ui.theme.AuthenticationAppTheme
-import kotlinx.coroutines.launch
-import org.json.JSONObject
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,99 +65,46 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 private fun AuthenticationApp() {
-    val authenticatorViewModel: AuthenticatorViewModel =
-        viewModel(factory = AuthenticatorViewModelFactory())
-    val startInfoText = stringResource(id = R.string.start_info_text)
-    val scope = rememberCoroutineScope()
+    val application = LocalContext.current.applicationContext as Application
+    val authenticationAppViewModel = viewModel { AuthenticationAppViewModel(application) }
+    val authenticatorState: AuthenticatorState = authenticationAppViewModel.authenticatorState
     Column {
-        var infoText by rememberSaveable {
-            mutableStateOf(startInfoText)
-        }
-        var isLoading by rememberSaveable {
-            mutableStateOf(false)
-        }
+        val infoText = authenticationAppViewModel.infoText.collectAsState().value
+        val isLoading = authenticationAppViewModel.isLoading.collectAsState().value
         PortalDetails(
-            onInfoTextChanged = {
-                infoText = it
-            },
-            onLoadStatusChanged = {
-                isLoading = it
-            },
-            onOAuthUserConfigurationChanged = {
-                authenticatorViewModel.oAuthUserConfiguration = it
-            },
-            onSignout = {
-                scope.launch {
-                    isLoading = true
-                    authenticatorViewModel.oAuthUserConfiguration = null
-                    ArcGISEnvironment.authenticationManager.signOut()
-                    infoText = startInfoText
-                    isLoading = false
-                }
-            }
+            url = authenticationAppViewModel.url.collectAsState().value,
+            onSetUrl = authenticationAppViewModel::setUrl,
+            useOAuth = authenticationAppViewModel.useOAuth.collectAsState().value,
+            onSetUseOAuth = authenticationAppViewModel::setUseOAuth,
+            onSignOut = authenticationAppViewModel::signOut,
+            onLoadPortal = authenticationAppViewModel::loadPortal
         )
         InfoScreen(text = infoText, isLoading = isLoading)
     }
-    Authenticator(authenticatorViewModel)
+    Authenticator(authenticatorState)
 }
 
 /**
  * Allows the user to enter a url and load a portal.
  * Also displays a checkbox for using OAuth, and a button to clear credentials.
  *
- * @param onInfoTextChanged called when the info text should be changed
- * @param onLoadStatusChanged called when an operation is ongoing
- * @param onOAuthUserConfigurationChanged called when the [AuthenticatorViewModel.oAuthUserConfiguration] should be changed
+ * @param url the string url to display in the text field
+ * @param onSetUrl called when the url should be changed
+ * @param useOAuth whether oAuth should be used to load the portal
+ * @param onSetUseOAuth called when [useOAuth] should be changed
+ * @param onSignOut called when any stored credentials should be cleared
+ * @param onLoadPortal called when the [url] should be loaded
  * @since 200.2.0
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PortalDetails(
-    onInfoTextChanged: (String) -> Unit,
-    onLoadStatusChanged: (Boolean) -> Unit,
-    onOAuthUserConfigurationChanged: (OAuthUserConfiguration?) -> Unit,
-    onSignout: () -> Unit
+    url: String,
+    onSetUrl: (String) -> Unit,
+    useOAuth: Boolean,
+    onSetUseOAuth: (Boolean) -> Unit,
+    onSignOut: () -> Unit,
+    onLoadPortal: () -> Unit
 ) {
-    var url by rememberSaveable {
-        mutableStateOf("https://www.arcgis.com")
-    }
-    var useOAuth by rememberSaveable {
-        mutableStateOf(true)
-    }
-    val scope = rememberCoroutineScope()
-    val noPortalInfoText = stringResource(id = R.string.no_portal_info)
-    // a lambda that will be called when the user presses "Go" on the keyboard or presses the "Load" button.
-    val loadPortalAction =
-        {
-            scope.launch {
-                onLoadStatusChanged(true)
-                onOAuthUserConfigurationChanged(
-                    if (useOAuth)
-                        OAuthUserConfiguration(
-                            url,
-                            // This client ID is for demo purposes only. For use of the Authenticator in your own app,
-                            // create your own client ID. For more info see: https://developers.arcgis.com/documentation/mapping-apis-and-services/security/tutorials/register-your-application/
-                            "lgAdHkYZYlwwfAhC",
-                            "my-ags-app://auth"
-                        )
-                    else null
-                )
-                val portal = Portal(url, Portal.Connection.Authenticated)
-                portal.load().also {
-                    onLoadStatusChanged(false)
-                }.onFailure {
-                    onInfoTextChanged(it.toString())
-                }.onSuccess {
-                    val text = portal.portalInfo?.let {
-                        val json = it.toJson()
-                        val jsonObject = JSONObject(json)
-                        jsonObject.toString(4)
-                    } ?: noPortalInfoText
-                    onInfoTextChanged(text)
-                }
-            }
-        }
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -162,13 +116,13 @@ private fun PortalDetails(
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = url,
-            onValueChange = { url = it },
+            onValueChange = onSetUrl,
             label = { Text("Url") },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Uri,
                 imeAction = ImeAction.Go
             ),
-            keyboardActions = KeyboardActions(onAny = { loadPortalAction() }),
+            keyboardActions = KeyboardActions(onAny = { onLoadPortal() }),
             singleLine = true
         )
         Row(
@@ -181,19 +135,19 @@ private fun PortalDetails(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Checkbox(checked = useOAuth, onCheckedChange = { useOAuth = it })
+                Checkbox(checked = useOAuth, onCheckedChange = onSetUseOAuth)
                 Text("Use OAuth", style = MaterialTheme.typography.labelMedium)
             }
             // Clear credential button
             Button(
-                onClick = onSignout,
+                onClick = onSignOut,
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
             ) {
                 Text(text = "Sign out")
             }
             // Load button
             Button(
-                onClick = { loadPortalAction() },
+                onClick = onLoadPortal,
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Text(text = "Load")

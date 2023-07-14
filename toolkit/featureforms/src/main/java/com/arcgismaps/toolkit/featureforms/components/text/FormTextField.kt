@@ -25,14 +25,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.featureforms.utils.ClearFocus
 
 @Composable
 internal fun FormTextField(
@@ -110,23 +109,6 @@ internal fun FormTextField(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-internal fun ClearFocus(key: Boolean, onComplete: () -> Unit = {}) {
-    val focusManager = LocalFocusManager.current
-    val keyboardController = LocalSoftwareKeyboardController.current
-    DisposableEffect(key) {
-        if (key) {
-            // hides the keyboard only if visible
-            keyboardController?.hide()
-            focusManager.clearFocus()
-        }
-        onDispose {
-            onComplete()
-        }
-    }
-}
-
 /**
  * Changes the visual output of the placeholder and label properties of a TextField. Using this
  * transformation, the placeholder is always visible even if empty and puts the label above the
@@ -140,7 +122,6 @@ internal class PlaceholderTransformation(private val placeholder: String) : Visu
     }
 
     override fun filter(text: AnnotatedString): TransformedText {
-        // add a blank space if place holder is empty so that the label always stays above
-        return TransformedText(AnnotatedString(placeholder.ifEmpty { " " }), mapping)
+        return TransformedText(AnnotatedString(placeholder), mapping)
     }
 }

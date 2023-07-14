@@ -8,7 +8,7 @@ import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeHandler
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
 import com.arcgismaps.httpcore.authentication.TokenCredential
-import com.arcgismaps.toolkit.featureformsapp.screens.MapScreen
+import com.arcgismaps.toolkit.featureformsapp.screens.FeatureFormApp
 import com.arcgismaps.toolkit.featureformsapp.ui.theme.FeatureFormsAppTheme
 
 class FormsArcGISAuthenticationChallengeHandler(
@@ -38,13 +38,17 @@ class FormsArcGISAuthenticationChallengeHandler(
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler =
-            FormsArcGISAuthenticationChallengeHandler(BuildConfig.webMapUser, BuildConfig.webMapPassword)
+            FormsArcGISAuthenticationChallengeHandler(
+                BuildConfig.webMapUser,
+                BuildConfig.webMapPassword
+            )
         setContent {
             FeatureFormsAppTheme {
-                MapScreen()
+                FeatureFormApp()
             }
         }
     }
 }
+
