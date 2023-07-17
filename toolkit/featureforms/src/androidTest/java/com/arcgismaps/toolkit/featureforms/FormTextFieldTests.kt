@@ -19,6 +19,7 @@
 package com.arcgismaps.toolkit.featureforms
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
@@ -124,7 +125,7 @@ class FormTextFieldTests {
             }
         
         composeTestRule.setContent {
-            FormTextField(state = FormTextFieldState(fieldFeatureFormElement))
+            FormTextField(state = FormTextFieldState(fieldFeatureFormElement, LocalContext.current))
         }
         
         val label = composeTestRule.onNodeWithContentDescription(labelSemanticLabel)
@@ -150,7 +151,7 @@ class FormTextFieldTests {
             }
         
         composeTestRule.setContent {
-            FormTextField(state = FormTextFieldState(fieldFeatureFormElement))
+            FormTextField(state = FormTextFieldState(fieldFeatureFormElement, LocalContext.current))
         }
         
         val outlinedTextField = composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
@@ -181,7 +182,7 @@ class FormTextFieldTests {
             }
         
         composeTestRule.setContent {
-            FormTextField(state = FormTextFieldState(fieldFeatureFormElement))
+            FormTextField(state = FormTextFieldState(fieldFeatureFormElement, LocalContext.current))
         }
         
         val outlinedTextField = composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
@@ -221,7 +222,7 @@ class FormTextFieldTests {
             }
         
         composeTestRule.setContent {
-            FormTextField(state = FormTextFieldState(fieldFeatureFormElement))
+            FormTextField(state = FormTextFieldState(fieldFeatureFormElement, LocalContext.current))
         }
         
         val outlinedTextField = composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
@@ -263,7 +264,7 @@ class FormTextFieldTests {
             }
         
         composeTestRule.setContent {
-            FormTextField(state = FormTextFieldState(fieldFeatureFormElement))
+            FormTextField(state = FormTextFieldState(fieldFeatureFormElement, LocalContext.current))
         }
     
         val maxLength = (fieldFeatureFormElement.inputType as TextBoxFeatureFormInput).maxLength.toInt()
@@ -310,7 +311,7 @@ class FormTextFieldTests {
             }
         
         composeTestRule.setContent {
-            FormTextField(state = FormTextFieldState(fieldFeatureFormElement))
+            FormTextField(state = FormTextFieldState(fieldFeatureFormElement, LocalContext.current))
         }
         
         val outlinedTextField = composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
