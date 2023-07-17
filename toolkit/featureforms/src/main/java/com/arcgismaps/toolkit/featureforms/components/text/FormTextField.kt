@@ -9,10 +9,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,6 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.OffsetMapping
@@ -34,27 +38,24 @@ import com.arcgismaps.toolkit.featureforms.utils.ClearFocus
 @Composable
 internal fun FormTextField(
     state: FormTextFieldState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val text by state.value
     val hasError by state.hasError
     val isFocused by state.isFocused
     val supportingText by state.supportingText
     val contentLength by state.contentLength
-    var shouldClearFocus by remember { mutableStateOf(false) }
+    var clearFocus by remember { mutableStateOf(false) }
 
     // if the keyboard is gone clear focus from the field as a side-effect
-    ClearFocus(shouldClearFocus) {
-        shouldClearFocus = false
-    }
+    ClearFocus(clearFocus) { clearFocus = false }
 
     Column(modifier = modifier
         .fillMaxSize()
         .onFocusChanged { state.onFocusChanged(it.hasFocus) }
         .pointerInput(Unit) {
-            // any tap on a blank space outside the text field will also dismiss the keyboard
-            // and clear focus
-            detectTapGestures { shouldClearFocus = true }
+            // any tap on a blank space will also dismiss the keyboard and clear focus
+            detectTapGestures { clearFocus = true }
         }
         .padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 10.dp)
     ) {
@@ -63,17 +64,28 @@ internal fun FormTextField(
             onValueChange = {
                 state.onValueChanged(it)
             },
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .semantics { contentDescription = "outlined text field" },
             label = {
-                Text(text = state.label)
+                Text(text = state.label, modifier = Modifier.semantics { contentDescription = "label" })
             },
             trailingIcon = {
-                if (text.isNotEmpty()) {
+                if (isFocused && !state.singleLine && text.isNotEmpty()) {
                     IconButton(
-                        onClick = {
-                            state.onValueChanged("")
-                        }
+                        onClick = { clearFocus = true },
+                        modifier = Modifier.semantics { contentDescription = "Save local edit" }
                     ) {
+                        Icon(
+                            imageVector = Icons.Rounded.CheckCircle,
+                            contentDescription = "Done"
+                        )
+                    }
+                } else if (text.isNotEmpty()) {
+                    IconButton(
+                        onClick = { state.onValueChanged("") },
+                        modifier = Modifier.semantics { contentDescription = "Clear text button" }
+                        ) {
                         Icon(
                             imageVector = Icons.Rounded.Clear,
                             contentDescription = "Clear Text"
@@ -85,11 +97,19 @@ internal fun FormTextField(
                 val textColor = if (hasError) Color.Red else Color.Unspecified
                 Row {
                     if (supportingText.isNotEmpty()) {
-                        Text(text = supportingText, color = textColor)
+                        Text(
+                            text = supportingText,
+                            modifier = Modifier.semantics { contentDescription = "helper" },
+                            color = textColor
+                        )
                     }
                     if (isFocused) {
                         Spacer(modifier = Modifier.weight(1f))
-                        Text(text = contentLength, color = textColor)
+                        Text(
+                            text = contentLength,
+                            modifier = Modifier.semantics { contentDescription = "char count" },
+                            color = textColor
+                        )
                     }
                 }
             },
@@ -97,12 +117,16 @@ internal fun FormTextField(
                 PlaceholderTransformation(state.placeholder)
             else VisualTransformation.None,
             keyboardActions = KeyboardActions(
-                onDone = { shouldClearFocus = true }
+                onDone = { clearFocus = true }
             ),
             keyboardOptions = KeyboardOptions.Default.copy(
                 imeAction = if (state.singleLine) ImeAction.Done else ImeAction.None
             ),
-            singleLine = state.singleLine
+            singleLine = state.singleLine,
+            colors = if (text.isEmpty() && state.placeholder.isNotEmpty())
+                OutlinedTextFieldDefaults.colors(unfocusedTextColor = Color.Gray, focusedTextColor = Color.Gray)
+            else
+                OutlinedTextFieldDefaults.colors()
         )
     }
 }
@@ -113,12 +137,12 @@ internal fun FormTextField(
  * TextField as it's default position.
  */
 internal class PlaceholderTransformation(private val placeholder: String) : VisualTransformation {
-
+    
     private val mapping = object : OffsetMapping {
         override fun originalToTransformed(offset: Int): Int = 0
         override fun transformedToOriginal(offset: Int): Int = 0
     }
-
+    
     override fun filter(text: AnnotatedString): TransformedText {
         return TransformedText(AnnotatedString(placeholder), mapping)
     }
