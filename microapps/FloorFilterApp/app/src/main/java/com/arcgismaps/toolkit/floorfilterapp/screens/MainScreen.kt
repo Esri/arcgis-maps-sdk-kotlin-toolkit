@@ -48,11 +48,7 @@ fun MainScreen() {
             modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 40.dp),
             contentAlignment = Alignment.BottomStart
         ) {
-            FloorFilter(
-                floorFilterState = mapViewModel.floorFilterState,
-                maxDisplayLevels = 2,
-                closeButtonPosition = ButtonPosition.Bottom
-            )
+            FloorFilter(floorFilterState = mapViewModel.floorFilterState)
         }
     }
 }
