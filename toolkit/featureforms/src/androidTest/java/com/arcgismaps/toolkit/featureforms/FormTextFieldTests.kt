@@ -137,7 +137,7 @@ class FormTextFieldTests {
     /**
      * Given a FormTextField with no value, placeholder, description, but with a max length.
      * When it is focused
-     * Then the label is displayed and the helper text is displayed in red, indicating the max length of the form field text.
+     * Then the label is displayed and the helper text is displayed, indicating the max length of the form field text.
      * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-11-unfocused-and-focused-state-no-value
      */
     @Test
@@ -209,7 +209,7 @@ class FormTextFieldTests {
     /**
      * Given a FormTextField with no value, placeholder, or description
      * When a value is entered, but the focus is elsewhere
-     * Then the label, the helper text, and the char count are displayed.
+     * Then the label is displayed. bue the helper text, and the char count are not displayed.
      * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-12-focused-and-unfocused-state-with-value-populated
      */
     @Test
@@ -299,7 +299,7 @@ class FormTextFieldTests {
      * Given a FormTextField with no value, placeholder, or description
      * When a value is entered, but the focus is elsewhere
      * Then the label is displayed, the helper text is displayed in red, and the char count is not displayed.
-     * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-12-focused-and-unfocused-state-with-value-populated
+     * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-13-unfocused-and-focused-state-with-error-value--254-char
      */
     @Test
     fun testErrorValueUnfocusedState() = runTest {
