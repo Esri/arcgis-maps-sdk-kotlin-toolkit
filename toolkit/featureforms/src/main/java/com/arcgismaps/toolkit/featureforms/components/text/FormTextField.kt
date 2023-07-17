@@ -9,10 +9,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,27 +38,24 @@ import com.arcgismaps.toolkit.featureforms.utils.ClearFocus
 @Composable
 internal fun FormTextField(
     state: FormTextFieldState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val text by state.value
     val hasError by state.hasError
     val isFocused by state.isFocused
     val supportingText by state.supportingText
     val contentLength by state.contentLength
-    var shouldClearFocus by remember { mutableStateOf(false) }
-    
+    var clearFocus by remember { mutableStateOf(false) }
+
     // if the keyboard is gone clear focus from the field as a side-effect
-    ClearFocus(shouldClearFocus) {
-        shouldClearFocus = false
-    }
-    
+    ClearFocus(clearFocus) { clearFocus = false }
+
     Column(modifier = modifier
         .fillMaxSize()
         .onFocusChanged { state.onFocusChanged(it.hasFocus) }
         .pointerInput(Unit) {
-            // any tap on a blank space outside the text field will also dismiss the keyboard
-            // and clear focus
-            detectTapGestures { shouldClearFocus = true }
+            // any tap on a blank space will also dismiss the keyboard and clear focus
+            detectTapGestures { clearFocus = true }
         }
         .padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 10.dp)
     ) {
@@ -72,13 +71,21 @@ internal fun FormTextField(
                 Text(text = state.label, modifier = Modifier.semantics { contentDescription = "label" })
             },
             trailingIcon = {
-                if (text.isNotEmpty()) {
+                if (isFocused && !state.singleLine && text.isNotEmpty()) {
                     IconButton(
-                        onClick = {
-                            state.onValueChanged("")
-                        },
-                        modifier = Modifier.semantics { contentDescription = "Clear text button" }
+                        onClick = { clearFocus = true },
+                        modifier = Modifier.semantics { contentDescription = "Save local edit" }
                     ) {
+                        Icon(
+                            imageVector = Icons.Rounded.CheckCircle,
+                            contentDescription = "Done"
+                        )
+                    }
+                } else if (text.isNotEmpty()) {
+                    IconButton(
+                        onClick = { state.onValueChanged("") },
+                        modifier = Modifier.semantics { contentDescription = "Clear text button" }
+                        ) {
                         Icon(
                             imageVector = Icons.Rounded.Clear,
                             contentDescription = "Clear Text"
@@ -110,12 +117,16 @@ internal fun FormTextField(
                 PlaceholderTransformation(state.placeholder)
             else VisualTransformation.None,
             keyboardActions = KeyboardActions(
-                onDone = { shouldClearFocus = true }
+                onDone = { clearFocus = true }
             ),
             keyboardOptions = KeyboardOptions.Default.copy(
                 imeAction = if (state.singleLine) ImeAction.Done else ImeAction.None
             ),
-            singleLine = state.singleLine
+            singleLine = state.singleLine,
+            colors = if (text.isEmpty() && state.placeholder.isNotEmpty())
+                OutlinedTextFieldDefaults.colors(unfocusedTextColor = Color.Gray, focusedTextColor = Color.Gray)
+            else
+                OutlinedTextFieldDefaults.colors()
         )
     }
 }
