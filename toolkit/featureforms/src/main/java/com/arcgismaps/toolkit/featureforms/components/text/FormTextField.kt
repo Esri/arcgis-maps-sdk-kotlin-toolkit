@@ -25,6 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.OffsetMapping
@@ -62,20 +64,28 @@ internal fun FormTextField(
             onValueChange = {
                 state.onValueChanged(it)
             },
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .semantics { contentDescription = "outlined text field" },
             label = {
-                Text(text = state.label)
+                Text(text = state.label, modifier = Modifier.semantics { contentDescription = "label" })
             },
             trailingIcon = {
                 if (isFocused && !state.singleLine && text.isNotEmpty()) {
-                    IconButton(onClick = { clearFocus = true }) {
+                    IconButton(
+                        onClick = { clearFocus = true },
+                        modifier = Modifier.semantics { contentDescription = "Save local edit" }
+                    ) {
                         Icon(
                             imageVector = Icons.Rounded.CheckCircle,
                             contentDescription = "Done"
                         )
                     }
                 } else if (text.isNotEmpty()) {
-                    IconButton(onClick = { state.onValueChanged("") }) {
+                    IconButton(
+                        onClick = { state.onValueChanged("") },
+                        modifier = Modifier.semantics { contentDescription = "Clear text button" }
+                        ) {
                         Icon(
                             imageVector = Icons.Rounded.Clear,
                             contentDescription = "Clear Text"
@@ -87,11 +97,19 @@ internal fun FormTextField(
                 val textColor = if (hasError) Color.Red else Color.Unspecified
                 Row {
                     if (supportingText.isNotEmpty()) {
-                        Text(text = supportingText, color = textColor)
+                        Text(
+                            text = supportingText,
+                            modifier = Modifier.semantics { contentDescription = "helper" },
+                            color = textColor
+                        )
                     }
                     if (isFocused) {
                         Spacer(modifier = Modifier.weight(1f))
-                        Text(text = contentLength, color = textColor)
+                        Text(
+                            text = contentLength,
+                            modifier = Modifier.semantics { contentDescription = "char count" },
+                            color = textColor
+                        )
                     }
                 }
             },
@@ -119,12 +137,12 @@ internal fun FormTextField(
  * TextField as it's default position.
  */
 internal class PlaceholderTransformation(private val placeholder: String) : VisualTransformation {
-
+    
     private val mapping = object : OffsetMapping {
         override fun originalToTransformed(offset: Int): Int = 0
         override fun transformedToOriginal(offset: Int): Int = 0
     }
-
+    
     override fun filter(text: AnnotatedString): TransformedText {
         return TransformedText(AnnotatedString(placeholder), mapping)
     }

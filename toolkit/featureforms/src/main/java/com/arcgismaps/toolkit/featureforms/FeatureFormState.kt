@@ -1,6 +1,5 @@
 package com.arcgismaps.toolkit.featureforms
 
-import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.toolkit.featureforms.api.FeatureFormDefinition
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
