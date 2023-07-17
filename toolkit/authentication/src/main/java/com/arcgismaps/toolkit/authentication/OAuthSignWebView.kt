@@ -27,6 +27,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.ArcGISEnvironment
@@ -42,22 +43,21 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.net.URL
+import java.security.cert.CertificateException
 import javax.net.ssl.SSLException
 
 /**
- * Launches a WebView using the url in [oAuthUserSignIn] and calls [OAuthUserSignIn.complete] or
+ * Launches a WebView using the [OAuthUserSignIn.authorizeUrl] and calls [OAuthUserSignIn.complete] or
  * [OAuthUserSignIn.cancel] on completion.
  *
  * @param oAuthUserSignIn the [OAuthUserSignIn] pending completion.
  * @param authenticatorState used to raise other [NetworkAuthenticationChallenge]s that occur while in WebView.
- * @param scope coroutineScope to launch [NetworkAuthenticationChallenge]s that occur while in WebView.
  * @since 200.2.0
  */
 @Composable
 internal fun OAuthWebView(
     oAuthUserSignIn: OAuthUserSignIn,
     authenticatorState: AuthenticatorState,
-    scope: CoroutineScope
 ) {
     val context = LocalContext.current
     var webView = WebView(context).apply {
@@ -69,7 +69,7 @@ internal fun OAuthWebView(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
         )
-
+        val scope = rememberCoroutineScope()
         webViewClient = OAuthWebViewClient(authenticatorState, oAuthUserSignIn, scope)
         loadUrl(oAuthUserSignIn.authorizeUrl)
     }
@@ -138,7 +138,10 @@ private class OAuthWebViewClient(
                     oAuthUserSignIn.cancel(exception)
                     handler?.cancel()
                 }
-            } ?: throw IllegalStateException("Host is not known.")
+            } ?: run {
+                oAuthUserSignIn.cancel(IllegalStateException("Host is not known."))
+                handler?.cancel()
+            }
         }
     }
 
@@ -159,7 +162,8 @@ private class OAuthWebViewClient(
                 val exception = Exception("Certificate Required")
                 getCredentialOrPrompt(host, exception, NetworkAuthenticationType.ClientCertificate)?.let { credential ->
                     val certificateCredential = credential as CertificateCredential
-                    // add a comment why we do this
+                    // `KeyChain.getPrivateKey()` & `KeyChain.getCertificateChain()` may block while waiting for a
+                    // connection to another process, and must never be called from the main thread
                     withContext(Dispatchers.IO) {
                         request?.proceed(
                             KeyChain.getPrivateKey(view.context, certificateCredential.alias),
@@ -170,7 +174,10 @@ private class OAuthWebViewClient(
                     oAuthUserSignIn.cancel(exception)
                     request?.cancel()
                 }
-            } ?: throw IllegalStateException("Host is not known")
+            } ?: run {
+                oAuthUserSignIn.cancel(IllegalStateException("Host is not known."))
+                request?.cancel()
+            }
         }
     }
 
@@ -198,7 +205,10 @@ private class OAuthWebViewClient(
                     oAuthUserSignIn.cancel(sslException)
                     handler?.cancel()
                 }
-            } ?: throw IllegalStateException("Host is not known")
+            } ?: run {
+                oAuthUserSignIn.cancel(IllegalStateException("Host is not known."))
+                handler?.cancel()
+            }
         }
     }
 
@@ -233,9 +243,9 @@ private class OAuthWebViewClient(
         networkAuthenticationType: NetworkAuthenticationType
     ): NetworkCredential? {
         val credentialList =
-            ArcGISEnvironment.authenticationManager.networkCredentialStore.getCredentials(host).getOrThrow()
+            ArcGISEnvironment.authenticationManager.networkCredentialStore.getCredentials(host).getOrNull()
         val credential: NetworkCredential? =
-            if (credentialList.isNotEmpty()) {
+            if (!credentialList.isNullOrEmpty()) {
                 credentialList.first() as CertificateCredential
             } else {
                 val credentialChallenge = NetworkAuthenticationChallenge(
@@ -247,7 +257,7 @@ private class OAuthWebViewClient(
                     is NetworkAuthenticationChallengeResponse.ContinueWithCredential -> response.credential
                     else -> null
                 }
-        }
+            }
         return credential
     }
 
