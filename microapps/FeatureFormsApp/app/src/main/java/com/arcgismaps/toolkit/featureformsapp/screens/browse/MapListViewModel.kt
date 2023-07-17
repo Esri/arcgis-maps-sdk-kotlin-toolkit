@@ -31,3 +31,4 @@ class MapListViewModel @Inject constructor(
         }
     }
 }
+

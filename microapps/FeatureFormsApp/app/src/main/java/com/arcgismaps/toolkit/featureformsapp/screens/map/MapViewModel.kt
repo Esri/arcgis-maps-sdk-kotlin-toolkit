@@ -48,6 +48,7 @@ class MapViewModel @Inject constructor(
                     layer.name == it
                 } ?: true
             } ?: return@launch
+
             this@MapView.identifyLayer(
                 layer = layer,
                 screenCoordinate = singleTapEvent.screenCoordinate,
@@ -66,7 +67,7 @@ class MapViewModel @Inject constructor(
                                     setFormDefinition(featureFormDefinition)
                                     // set the FeatureFormState to an editing state to bring up the
                                     // FeatureForm UI
-                                    setEditingActive(true)
+                                    setTransactionState(true)
                                 }
                         } catch (e: Exception) {
                             Toast.makeText(

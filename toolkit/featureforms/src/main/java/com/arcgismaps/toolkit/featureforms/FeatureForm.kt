@@ -35,7 +35,7 @@ public fun FeatureForm(
     modifier: Modifier = Modifier
 ) {
     val featureFormDefinition by featureFormState.formDefinition.collectAsState()
-    val inEditingMode by featureFormState.inEditingMode.collectAsState()
+    val inEditingMode by featureFormState.inEditingTransaction.collectAsState()
     ClearFocus(inEditingMode)
     featureFormDefinition?.let {
         FeatureFormContent(formDefinition = it, modifier = modifier)
@@ -53,8 +53,6 @@ internal fun FeatureFormContent(
     formDefinition: FeatureFormDefinition,
     modifier: Modifier = Modifier
 ) {
-    val attributes = formDefinition.feature!!.attributes
-
     Column(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -71,10 +69,7 @@ internal fun FeatureFormContent(
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             items(formDefinition.formElements) { formElement ->
                 if (formElement is FieldFeatureFormElement) {
-                    attributes[formElement.fieldName]?.let {
-                        formElement.value = it as String
-                    }
-                    FieldElement(field = formElement)
+                    FieldElement(field = formElement, formDefinition)
                 }
             }
         }
