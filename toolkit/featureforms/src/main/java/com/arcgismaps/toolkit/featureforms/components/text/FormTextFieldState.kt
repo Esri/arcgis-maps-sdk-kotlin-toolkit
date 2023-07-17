@@ -12,6 +12,7 @@ import com.arcgismaps.toolkit.featureforms.api.TextBoxFeatureFormInput
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 import com.arcgismaps.toolkit.featureforms.R
+import com.arcgismaps.toolkit.featureforms.api.FeatureFormDefinition
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
 
 /**
@@ -97,8 +98,10 @@ internal interface FormTextFieldState {
  * @param featureFormElement the form element.
  * @param context a Context scoped to the lifetime of a call to the [FieldElement] composable function.
  */
-internal fun FormTextFieldState(featureFormElement: FieldFeatureFormElement, context: Context): FormTextFieldState =
-    FormTextFieldStateImpl(featureFormElement, context)
+internal fun FormTextFieldState(featureFormElement: FieldFeatureFormElement,
+                                formDefinition: FeatureFormDefinition,
+                                context: Context): FormTextFieldState =
+    FormTextFieldStateImpl(featureFormElement, formDefinition, context)
 
 /**
  * Default implementation for the [FormTextFieldState]. See [FormTextFieldState()] for the factory.
@@ -108,6 +111,7 @@ internal fun FormTextFieldState(featureFormElement: FieldFeatureFormElement, con
  */
 private class FormTextFieldStateImpl(
     private val featureFormElement: FieldFeatureFormElement,
+    private val featureFormDefinition: FeatureFormDefinition,
     private val context: Context
 ) : FormTextFieldState {
     private val _value = mutableStateOf(featureFormElement.value)
@@ -183,7 +187,7 @@ private class FormTextFieldStateImpl(
     }
     
     override fun onValueChanged(input: String) {
-       featureFormElement.feature?.castAndSetAttributeValue(input, featureFormElement.fieldName)
+       editValue(input)
         _value.value = input
         validateLength()
     }
@@ -203,6 +207,26 @@ private class FormTextFieldStateImpl(
             }
         }
     }
+    
+    /**
+     * Set the value in the feature's attribute map.
+     * Committing the transaction will either discard this edit or persist it in the associated geodatabase,
+     * and refresh the feature.
+     */
+    private fun editValue(value: Any?) {
+        featureFormDefinition.editValue(featureFormElement, value)
+    }
+}
+
+/**
+ * Set the value in the feature's attribute map. This call can only be made when a transaction is open.
+ * Committing the transaction will either discard this edit or persist it in the associated geodatabase,
+ * and refresh the feature.
+ *
+ * This call is likely to be pushed into core.
+ */
+private fun FeatureFormDefinition.editValue(formElement: FieldFeatureFormElement, value: Any?) {
+    feature?.castAndSetAttributeValue(value, formElement.fieldName)
 }
 
 private fun Feature.castAndSetAttributeValue(value: Any?, key: String) {
