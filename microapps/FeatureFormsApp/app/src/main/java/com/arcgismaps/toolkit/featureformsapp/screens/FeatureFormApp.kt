@@ -26,7 +26,7 @@ fun FeatureFormApp() {
             }
         }
         // MapView Screen - shows the map and the FeatureForms
-        composable(route = "mapview/{uri}") { backStackEntry ->
+        composable(route = "mapview/{uri}") {
             MapScreen {
                 // navigate back on back pressed
                 navController.navigateUp()
