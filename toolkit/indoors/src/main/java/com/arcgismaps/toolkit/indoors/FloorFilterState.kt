@@ -46,6 +46,7 @@ public sealed interface FloorFilterState {
 
     public val onFacilityChanged: StateFlow<FloorFacility?>
     public val onLevelChanged: StateFlow<FloorLevel?>
+    public var onSelectionChangeListener: (Viewpoint) -> Unit
 }
 
 /**
@@ -56,7 +57,6 @@ public sealed interface FloorFilterState {
 private class FloorFilterStateImpl(
     var geoModel: GeoModel,
     var coroutineScope: CoroutineScope,
-    var setViewPoint: (Viewpoint) -> Unit = {}
 ) : FloorFilterState {
 
     private val _floorManager: MutableStateFlow<FloorManager?> = MutableStateFlow(null)
@@ -67,6 +67,8 @@ private class FloorFilterStateImpl(
 
     private val _onLevelChanged: MutableStateFlow<FloorLevel?> = MutableStateFlow(null)
     override val onLevelChanged: StateFlow<FloorLevel?> = _onLevelChanged.asStateFlow()
+
+    override var onSelectionChangeListener: (Viewpoint) -> Unit = {}
 
     /**
      * The list of [FloorLevel]s from the [FloorManager].
@@ -217,7 +219,7 @@ private class FloorFilterStateImpl(
                 height = envelope.height * bufferFactor
             )
             if (!envelopeWithBuffer.isEmpty) {
-                setViewPoint.invoke(Viewpoint(envelopeWithBuffer))
+                onSelectionChangeListener(Viewpoint(envelopeWithBuffer))
             }
         }
     }
@@ -366,8 +368,7 @@ public enum class ButtonPosition {
  */
 public fun FloorFilterState(
     geoModel: GeoModel,
-    coroutineScope: CoroutineScope,
-    setViewPoint: (Viewpoint) -> Unit = {}
+    coroutineScope: CoroutineScope
 ): FloorFilterState =
-    FloorFilterStateImpl(geoModel, coroutineScope, setViewPoint)
+    FloorFilterStateImpl(geoModel, coroutineScope)
 

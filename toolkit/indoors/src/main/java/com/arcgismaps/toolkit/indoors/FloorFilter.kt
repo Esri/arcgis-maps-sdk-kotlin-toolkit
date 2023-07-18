@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.floor.FloorFacility
 import com.arcgismaps.mapping.floor.FloorManager
 
@@ -115,6 +116,7 @@ private val DEFAULT_CLOSE_BUTTON_POSITION = ButtonPosition.Top
 public fun FloorFilter(
     modifier: Modifier = Modifier,
     floorFilterState: FloorFilterState,
+    onSelectionChanged: ((Viewpoint) -> Unit),
     textSize: TextUnit = 15.sp,
     buttonSize: Size = Size(width = DEFAULT_BUTTON_WIDTH, height = DEFAULT_BUTTON_HEIGHT),
     textColor: Color = DEFAULT_TEXT_COLOR,
@@ -131,6 +133,7 @@ public fun FloorFilter(
 ) {
     val floorManager: FloorManager = floorFilterState.floorManager.collectAsState().value ?: return
 
+    floorFilterState.onSelectionChangeListener = onSelectionChanged
     // select the first facility by default
     floorFilterState.selectedFacilityId = floorFilterState.facilities.first().id
 
