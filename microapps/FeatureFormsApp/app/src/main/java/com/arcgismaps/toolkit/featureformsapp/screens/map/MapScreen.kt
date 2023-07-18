@@ -1,6 +1,5 @@
 package com.arcgismaps.toolkit.featureformsapp.screens.map
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,17 +8,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.BottomSheetScaffold
+import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberBottomSheetScaffoldState
-import androidx.compose.material3.rememberStandardBottomSheetState
+import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.rememberBottomSheetScaffoldState
+import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.rememberStandardBottomSheetState
+import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -36,6 +35,7 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.toolkit.composablemap.ComposableMap
 import com.arcgismaps.toolkit.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureformsapp.R
+import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetExpansionHeight
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,7 +51,7 @@ fun MapScreen(uri: String, onBackPressed: () -> Unit = {}) {
     // create a BottomSheetScaffoldState
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
-            initialValue = SheetValue.Hidden,
+            initialValue = SheetValue.PartiallyExpanded,
             confirmValueChange = { it != SheetValue.Hidden },
             skipHiddenState = false
         )
@@ -60,7 +60,7 @@ fun MapScreen(uri: String, onBackPressed: () -> Unit = {}) {
     // bottom sheet
     LaunchedEffect(inEditingMode) {
         if (inEditingMode) {
-            bottomSheetScaffoldState.bottomSheetState.expand()
+            bottomSheetScaffoldState.bottomSheetState.partialExpand()
         } else {
             bottomSheetScaffoldState.bottomSheetState.hide()
         }
@@ -74,11 +74,12 @@ fun MapScreen(uri: String, onBackPressed: () -> Unit = {}) {
                 modifier = Modifier
                     .fillMaxWidth()
                     // set max sheet height to occupy to 60% of the total height
-                    .fillMaxHeight(0.6f)
+                    .fillMaxHeight()
             )
         },
         scaffoldState = bottomSheetScaffoldState,
         sheetPeekHeight = 40.dp,
+        sheetExpansionHeight = SheetExpansionHeight(0.5f, 0.9f)
     ) {
         Box {
             // show the composable map using the mapViewModel
@@ -97,7 +98,10 @@ fun MapScreen(uri: String, onBackPressed: () -> Unit = {}) {
         }
     }
     // clear focus and hide the keyboard when the bottom sheet is hidden and the keyboard is visible
-    ClearFocus(bottomSheetScaffoldState.bottomSheetState.currentValue)
+    ClearFocus(
+        bottomSheetScaffoldState.bottomSheetState.currentValue == SheetValue.Hidden ||
+            bottomSheetScaffoldState.bottomSheetState.currentValue == SheetValue.Minimized
+    )
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
