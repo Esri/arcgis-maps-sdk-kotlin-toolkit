@@ -265,7 +265,7 @@ private fun StandardBottomSheet(
                 anchorChangeHandler = anchorChangeHandler
             ) { value, sheetSize ->
                 when (value) {
-                    SheetValue.PartiallyExpanded -> (layoutHeight - (sheetSize.height * expansionHeight.partialHeightFraction))
+                    SheetValue.PartiallyExpanded -> (layoutHeight - peekHeightPx - (sheetSize.height * expansionHeight.partialHeightFraction))
                     SheetValue.Expanded -> if (sheetSize.height == peekHeightPx.roundToInt()) {
                         null
                     } else {
