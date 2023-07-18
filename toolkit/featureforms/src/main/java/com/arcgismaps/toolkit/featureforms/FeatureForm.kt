@@ -69,7 +69,10 @@ internal fun FeatureFormContent(
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             items(formDefinition.formElements) { formElement ->
                 if (formElement is FieldFeatureFormElement) {
-                    FieldElement(field = formElement, formDefinition)
+                    FieldElement(
+                        field = formElement,
+                        formDefinition = formDefinition
+                    )
                 }
             }
         }

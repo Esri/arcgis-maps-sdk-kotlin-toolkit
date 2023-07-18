@@ -18,14 +18,23 @@ internal fun FieldElement(field: FieldFeatureFormElement, formDefinition: Featur
             formDefinition.getElementValue(field)?.let {
                 field.value = it as String
             }
-            FormTextField(state = FormTextFieldState(field, formDefinition, context))
+            FormTextField(state = FormTextFieldState(
+                featureFormElement = field,
+                formDefinition = formDefinition,
+                context = context))
         }
         
         is TextBoxFeatureFormInput -> {
             formDefinition.getElementValue(field)?.let {
                 field.value = it as String
             }
-            FormTextField(state = FormTextFieldState(field, formDefinition, context))
+            FormTextField(
+                state = FormTextFieldState(
+                    featureFormElement = field,
+                    formDefinition = formDefinition,
+                    context = context
+                )
+            )
         }
         
         else -> { /* TO-DO: add support for other input types */
