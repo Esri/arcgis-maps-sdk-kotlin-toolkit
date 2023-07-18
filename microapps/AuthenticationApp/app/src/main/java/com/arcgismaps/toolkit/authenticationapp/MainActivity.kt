@@ -164,7 +164,7 @@ private fun PortalDetails(
  *
  * @param text the text to display
  * @param isLoading whether a progress indicator should be displayed
- * @since 200.20
+ * @since 200.2.0
  */
 @Composable
 private fun InfoScreen(

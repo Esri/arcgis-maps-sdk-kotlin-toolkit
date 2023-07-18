@@ -34,9 +34,15 @@ import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 import com.arcgismaps.httpcore.authentication.PasswordCredential
 import com.arcgismaps.httpcore.authentication.ServerTrust
 import com.arcgismaps.httpcore.authentication.TokenCredential
+import kotlinx.coroutines.channels.trySendBlocking
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.suspendCancellableCoroutine
 
 /**
@@ -160,12 +166,22 @@ private class AuthenticatorStateImpl(
     private suspend fun handleArcGISTokenChallenge(
         challenge: ArcGISAuthenticationChallenge
     ): ArcGISAuthenticationChallengeResponse =
-        awaitUsernamePassword(challenge.requestUrl)?.let {
-            ArcGISAuthenticationChallengeResponse.ContinueWithCredential(
-                TokenCredential.createWithChallenge(challenge, it.username, it.password)
-                    .getOrThrow()
-            )
-        } ?: ArcGISAuthenticationChallengeResponse.Cancel
+        awaitUsernamePassword(challenge.requestUrl).map {
+            val credential = TokenCredential.createWithChallenge(challenge, it.username, it.password).getOrNull()
+            if (credential != null) {
+                _pendingUsernamePasswordChallenge.value = null
+                ArcGISAuthenticationChallengeResponse.ContinueWithCredential(credential)
+            } else null
+        }.filterNotNull().take(1)
+//        awaitUsernamePassword(challenge.requestUrl)?.let {
+//            val credential = TokenCredential.createWithChallenge(challenge, it.username, it.password).getOrNull()
+//            return if (credential != null) {
+//                _pendingUsernamePasswordChallenge.value = null
+//                ArcGISAuthenticationChallengeResponse.ContinueWithCredential(credential)
+//            } else {
+//                handleArcGISTokenChallenge(challenge)
+//            }
+//        } ?: ArcGISAuthenticationChallengeResponse.Cancel
 
     override suspend fun handleNetworkAuthenticationChallenge(challenge: NetworkAuthenticationChallenge): NetworkAuthenticationChallengeResponse {
         return when (challenge.networkAuthenticationType) {
@@ -195,15 +211,17 @@ private class AuthenticatorStateImpl(
     private suspend fun handleUsernamePasswordChallenge(
         challenge: NetworkAuthenticationChallenge
     ): NetworkAuthenticationChallengeResponse {
-        val usernamePassword = awaitUsernamePassword(challenge.hostname)
-        return usernamePassword?.let {
-            NetworkAuthenticationChallengeResponse.ContinueWithCredential(
-                PasswordCredential(
-                    it.username,
-                    it.password
-                )
-            )
-        } ?: NetworkAuthenticationChallengeResponse.Cancel
+        TODO()
+//        val usernamePassword = awaitUsernamePassword(challenge.hostname)
+//        _pendingUsernamePasswordChallenge.value = null
+//        return usernamePassword?.let {
+//            NetworkAuthenticationChallengeResponse.ContinueWithCredential(
+//                PasswordCredential(
+//                    it.username,
+//                    it.password
+//                )
+//            )
+//        } ?: NetworkAuthenticationChallengeResponse.Cancel
     }
 
     /**
@@ -263,6 +281,7 @@ private class AuthenticatorStateImpl(
                     )
                 }
             continuation.invokeOnCancellation {
+                _pendingServerTrustChallenge.value = null
                 continuation.resumeWith(Result.success(NetworkAuthenticationChallengeResponse.Cancel))
             }
         }
@@ -274,28 +293,37 @@ private class AuthenticatorStateImpl(
      * @return a [UsernamePassword] provided by the user, or null if the user cancelled.
      * @since 200.2.0
      */
-    private suspend fun awaitUsernamePassword(url: String): UsernamePassword? =
-        suspendCancellableCoroutine { continuation ->
+    private suspend fun awaitUsernamePassword(url: String): Flow<UsernamePassword?> =
+        callbackFlow<UsernamePassword?> {
             _pendingUsernamePasswordChallenge.value = UsernamePasswordChallenge(
                 url = url,
                 onUsernamePasswordReceived = { username, password ->
-                    _pendingUsernamePasswordChallenge.value = null
-                    continuation.resumeWith(
-                        Result.success(
-                            UsernamePassword(username, password)
-                        )
-                    )
+                    trySendBlocking(UsernamePassword(username, password))
                 },
                 onCancel = {
-                    _pendingUsernamePasswordChallenge.value = null
-                    continuation.resumeWith(Result.success(null))
+                    trySend(null)
                 }
             )
-
-            continuation.invokeOnCancellation {
-                continuation.resumeWith(Result.success(null))
-            }
         }
+//        suspendCancellableCoroutine { continuation ->
+//            _pendingUsernamePasswordChallenge.value = UsernamePasswordChallenge(
+//                url = url,
+//                onUsernamePasswordReceived = { username, password ->
+//                    continuation.resumeWith(
+//                        Result.success(
+//                            UsernamePassword(username, password)
+//                        )
+//                    )
+//                },
+//                onCancel = {
+//                    continuation.resumeWith(Result.success(null))
+//                }
+//            )
+//
+//            continuation.invokeOnCancellation {
+//                continuation.resumeWith(Result.success(null))
+//            }
+//        }
 }
 
 public fun AuthenticatorState(

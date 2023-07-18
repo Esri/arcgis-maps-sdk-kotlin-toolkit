@@ -28,11 +28,10 @@ package com.arcgismaps.toolkit.authentication
  */
 public class UsernamePasswordChallenge(
     public val url: String,
-    onUsernamePasswordReceived: ((username: String, password: String) -> Unit),
+    private val onUsernamePasswordReceived: ((username: String, password: String) -> Unit),
     onCancel: () -> Unit
 ) {
 
-    private var onUsernamePasswordReceived: ((username: String, password: String) -> Unit)? = onUsernamePasswordReceived
     private var onCancel: (() -> Unit)? = onCancel
 
     /**
@@ -42,8 +41,7 @@ public class UsernamePasswordChallenge(
      * @since 200.2.0
      */
     public fun continueWithCredentials(username: String, password: String): Unit {
-        onUsernamePasswordReceived?.invoke(username, password)
-        onUsernamePasswordReceived = null
+        onUsernamePasswordReceived(username, password)
     }
 
     /**
