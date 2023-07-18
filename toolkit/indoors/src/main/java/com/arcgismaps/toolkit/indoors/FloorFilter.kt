@@ -56,7 +56,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arcgismaps.mapping.floor.FloorFacility
-import com.arcgismaps.mapping.floor.FloorManager
+import com.arcgismaps.mapping.GeoModel
 
 // Constants
 private val SELECTED_BACKGROUND_COLOR: Color = Color(0xFFE2F1FB) // light blue
@@ -70,7 +70,7 @@ private const val DEFAULT_BUTTON_VISIBILITY: Int = View.VISIBLE
 private val DEFAULT_CLOSE_BUTTON_POSITION = ButtonPosition.Top
 
 /**
- * Displays a control for the user to pick which level of a floor aware [FloorFilterState] to display.
+ * Displays a control for the user to pick which level of a floor aware [GeoModel] to display.
  *
  * The simplest workflow is for the app to instantiate a [FloorFilter] using an instance of
  * the [FloorFilterState] to display it within the GeoView. Optionally, the function parameters
@@ -129,7 +129,7 @@ public fun FloorFilter(
     searchBackgroundColor: Color = DEFAULT_BACKGROUND_COLOR,
     siteSearchVisibility: Int = DEFAULT_BUTTON_VISIBILITY
 ) {
-    val floorManager: FloorManager = floorFilterState.floorManager.collectAsState().value ?: return
+    if (floorFilterState.floorManager.collectAsState().value == null) return
 
     // select the first facility by default
     floorFilterState.selectedFacilityId = floorFilterState.facilities.first().id
