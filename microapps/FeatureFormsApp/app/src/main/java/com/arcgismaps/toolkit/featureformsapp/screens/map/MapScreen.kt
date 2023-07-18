@@ -1,5 +1,6 @@
 package com.arcgismaps.toolkit.featureformsapp.screens.map
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,7 +24,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -91,6 +95,19 @@ fun MapScreen(uri: String, onBackPressed: () -> Unit = {}) {
                 onBackPressed()
             }
         }
+    }
+    // clear focus and hide the keyboard when the bottom sheet is hidden and the keyboard is visible
+    ClearFocus(bottomSheetScaffoldState.bottomSheetState.currentValue)
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun ClearFocus(key: Any) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+    LaunchedEffect(key) {
+        focusManager.clearFocus()
+        keyboardController?.hide()
     }
 }
 
