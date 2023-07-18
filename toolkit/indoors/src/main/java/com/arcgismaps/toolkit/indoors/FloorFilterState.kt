@@ -24,7 +24,6 @@ import com.arcgismaps.mapping.floor.FloorFacility
 import com.arcgismaps.mapping.floor.FloorLevel
 import com.arcgismaps.mapping.floor.FloorManager
 import com.arcgismaps.mapping.floor.FloorSite
-import com.arcgismaps.toolkit.composablemap.MapInterface
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -55,8 +54,9 @@ public sealed interface FloorFilterState {
  * @since 200.2.0
  */
 private class FloorFilterStateImpl(
-    var mapInterface: MapInterface,
-    var coroutineScope: CoroutineScope
+    var geoModel: GeoModel,
+    var coroutineScope: CoroutineScope,
+    var setViewPoint: (Viewpoint) -> Unit = {}
 ) : FloorFilterState {
 
     private val _floorManager: MutableStateFlow<FloorManager?> = MutableStateFlow(null)
@@ -173,8 +173,8 @@ private class FloorFilterStateImpl(
      * @since 200.2.0
      */
     private suspend fun loadFloorManager() {
-        mapInterface.map.value.load().onSuccess {
-            val floorManager: FloorManager = mapInterface.map.value.floorManager
+        geoModel.load().onSuccess {
+            val floorManager: FloorManager = geoModel.floorManager
                 ?: throw IllegalStateException("The map is not configured to be floor aware")
             floorManager.load().onSuccess {
                 _floorManager.value = floorManager
@@ -217,7 +217,7 @@ private class FloorFilterStateImpl(
                 height = envelope.height * bufferFactor
             )
             if (!envelopeWithBuffer.isEmpty) {
-                mapInterface.setViewpoint(Viewpoint(envelopeWithBuffer))
+                setViewPoint.invoke(Viewpoint(envelopeWithBuffer))
             }
         }
     }
@@ -365,7 +365,9 @@ public enum class ButtonPosition {
  * @since 200.2.0
  */
 public fun FloorFilterState(
-    mapInterface: MapInterface,
-    coroutineScope: CoroutineScope
+    geoModel: GeoModel,
+    coroutineScope: CoroutineScope,
+    setViewPoint: (Viewpoint) -> Unit = {}
 ): FloorFilterState =
-    FloorFilterStateImpl(mapInterface, coroutineScope)
+    FloorFilterStateImpl(geoModel, coroutineScope, setViewPoint)
+
