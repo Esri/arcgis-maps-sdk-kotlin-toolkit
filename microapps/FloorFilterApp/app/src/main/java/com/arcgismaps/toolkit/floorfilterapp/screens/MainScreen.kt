@@ -17,11 +17,11 @@
 
 package com.arcgismaps.toolkit.floorfilterapp.screens
 
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -43,8 +43,10 @@ fun MainScreen() {
         modifier = Modifier.fillMaxSize(),
         mapInterface = mapViewModel
     ) {
-        Row(modifier = Modifier.wrapContentSize().padding(25.dp)) {
-            // TBD: Need to work if we should get an instance of the GeoView/Map/Scene
+        Box(
+            modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 40.dp),
+            contentAlignment = Alignment.BottomStart
+        ) {
             FloorFilter(floorFilterState = mapViewModel.floorFilterState)
         }
     }

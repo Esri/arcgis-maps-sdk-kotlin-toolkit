@@ -211,7 +211,11 @@ private class FloorFilterStateImpl(
      */
     private fun zoomToExtent(envelope: Envelope?, bufferFactor: Double = 1.25) {
         if (envelope != null && !envelope.isEmpty) {
-            val envelopeWithBuffer = Envelope(envelope.center, envelope.width * bufferFactor, envelope.height * bufferFactor)
+            val envelopeWithBuffer = Envelope(
+                center = envelope.center,
+                width = envelope.width * bufferFactor,
+                height = envelope.height * bufferFactor
+            )
             if (!envelopeWithBuffer.isEmpty) {
                 mapInterface.setViewpoint(Viewpoint(envelopeWithBuffer))
             }
@@ -310,7 +314,9 @@ private class FloorFilterStateImpl(
      */
     private fun getDefaultLevelIdForFacility(facilityId: String?): String? {
         val candidateLevels = levels.filter { it.facility?.id == facilityId }
-        return (candidateLevels.firstOrNull{ it.verticalOrder == 0 } ?: getLowestLevel(candidateLevels))?.id
+        return (candidateLevels.firstOrNull { it.verticalOrder == 0 } ?: getLowestLevel(
+            candidateLevels
+        ))?.id
     }
 
     /**
@@ -333,9 +339,33 @@ private class FloorFilterStateImpl(
 }
 
 /**
+ * Represents the position of the level list close button.
+ *
+ * @since 200.2.0
+ */
+public enum class ButtonPosition {
+    /**
+     * The button will be above the level list.
+     *
+     * @since 200.2.0
+     */
+    Top,
+
+    /**
+     * The button will be below the level list.
+     *
+     * @since 200.2.0
+     */
+    Bottom
+}
+
+/**
  * Factory function for the creating FloorFilterState.
  *
  * @since 200.2.0
  */
-public fun FloorFilterState(mapInterface: MapInterface, coroutineScope: CoroutineScope): FloorFilterState =
+public fun FloorFilterState(
+    mapInterface: MapInterface,
+    coroutineScope: CoroutineScope
+): FloorFilterState =
     FloorFilterStateImpl(mapInterface, coroutineScope)
