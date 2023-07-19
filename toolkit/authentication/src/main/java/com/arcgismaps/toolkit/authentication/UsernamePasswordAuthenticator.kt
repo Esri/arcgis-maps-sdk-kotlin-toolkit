@@ -101,6 +101,7 @@ public fun UsernamePasswordAuthenticator(
             verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            val focusManager = LocalFocusManager.current
             var usernameFieldText by rememberSaveable { mutableStateOf("") }
             var passwordFieldText by rememberSaveable { mutableStateOf("") }
             val keyboardActions = remember {
@@ -110,17 +111,22 @@ public fun UsernamePasswordAuthenticator(
                             usernameFieldText,
                             passwordFieldText
                         )
+                        usernameFieldText = ""
+                        passwordFieldText = ""
+                        focusManager.moveFocus(FocusDirection.Previous)
                     }
                 )
             }
-            val focusManager = LocalFocusManager.current
             OutlinedTextField(
-                modifier = Modifier.moveFocusOnTabEvent(focusManager, {
+                modifier = Modifier.moveFocusOnTabEvent(focusManager
+                ) {
                     usernamePasswordChallenge.continueWithCredentials(
                         usernameFieldText, passwordFieldText
                     )
-                }
-                ),
+                    usernameFieldText = ""
+                    passwordFieldText = ""
+                    focusManager.moveFocus(FocusDirection.Previous)
+                },
                 value = usernameFieldText,
                 onValueChange = { it: String -> usernameFieldText = it },
                 keyboardOptions = KeyboardOptions(
@@ -132,12 +138,15 @@ public fun UsernamePasswordAuthenticator(
                 singleLine = true
             )
             OutlinedTextField(
-                modifier = Modifier.moveFocusOnTabEvent(focusManager, {
+                modifier = Modifier.moveFocusOnTabEvent(focusManager
+                ) {
                     usernamePasswordChallenge.continueWithCredentials(
                         usernameFieldText, passwordFieldText
                     )
-                }
-                ),
+                    usernameFieldText = ""
+                    passwordFieldText = ""
+                    focusManager.moveFocus(FocusDirection.Previous)
+                },
                 value = passwordFieldText,
                 onValueChange = { it: String -> passwordFieldText = it },
                 keyboardOptions = KeyboardOptions(
@@ -156,7 +165,12 @@ public fun UsernamePasswordAuthenticator(
             ) {
                 Button(
                     modifier = Modifier.padding(16.dp),
-                    onClick = { usernamePasswordChallenge.cancel() }
+                    onClick = {
+                        usernamePasswordChallenge.cancel()
+                        usernameFieldText = ""
+                        passwordFieldText = ""
+                        focusManager.moveFocus(FocusDirection.Previous)
+                    }
                 ) {
                     Text(stringResource(id = R.string.cancel))
                 }
@@ -167,6 +181,9 @@ public fun UsernamePasswordAuthenticator(
                             usernameFieldText,
                             passwordFieldText
                         )
+                        usernameFieldText = ""
+                        passwordFieldText = ""
+                        focusManager.moveFocus(FocusDirection.Previous)
                     }
                 ) {
                     Text(stringResource(id = R.string.login))
@@ -186,7 +203,9 @@ private fun Modifier.moveFocusOnTabEvent(focusManager: FocusManager, onEnter: ()
                 }
 
                 Key.Enter.keyCode -> {
-                    onEnter(); true
+                    onEnter()
+                    focusManager.moveFocus(FocusDirection.Previous)
+                    true
                 }
 
                 else -> false

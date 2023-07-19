@@ -34,6 +34,7 @@ import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 import com.arcgismaps.httpcore.authentication.PasswordCredential
 import com.arcgismaps.httpcore.authentication.ServerTrust
 import com.arcgismaps.httpcore.authentication.TokenCredential
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,6 +42,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -165,14 +167,17 @@ private class AuthenticatorStateImpl(
      */
     private suspend fun handleArcGISTokenChallenge(
         challenge: ArcGISAuthenticationChallenge
-    ): ArcGISAuthenticationChallengeResponse =
-        awaitUsernamePassword(challenge.requestUrl).map {
-            val credential = TokenCredential.createWithChallenge(challenge, it.username, it.password).getOrNull()
+    ): ArcGISAuthenticationChallengeResponse {
+        return awaitUsernamePassword(challenge.requestUrl).map { usernamePassword ->
+            if (usernamePassword == null) return@map ArcGISAuthenticationChallengeResponse.Cancel
+            val credential =
+                TokenCredential.createWithChallenge(challenge, usernamePassword.username, usernamePassword.password).getOrNull()
             if (credential != null) {
                 _pendingUsernamePasswordChallenge.value = null
                 ArcGISAuthenticationChallengeResponse.ContinueWithCredential(credential)
             } else null
-        }.filterNotNull().take(1)
+        }.take(5).filterNotNull().firstOrNull() ?: ArcGISAuthenticationChallengeResponse.Cancel
+    }
 //        awaitUsernamePassword(challenge.requestUrl)?.let {
 //            val credential = TokenCredential.createWithChallenge(challenge, it.username, it.password).getOrNull()
 //            return if (credential != null) {
@@ -301,9 +306,12 @@ private class AuthenticatorStateImpl(
                     trySendBlocking(UsernamePassword(username, password))
                 },
                 onCancel = {
-                    trySend(null)
+                    trySendBlocking(null)
                 }
             )
+            awaitClose {
+                _pendingUsernamePasswordChallenge.value = null
+            }
         }
 //        suspendCancellableCoroutine { continuation ->
 //            _pendingUsernamePasswordChallenge.value = UsernamePasswordChallenge(
