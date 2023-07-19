@@ -18,6 +18,10 @@
 
 package com.arcgismaps.toolkit.authentication
 
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+
 /**
  * Represents an authentication challenge requiring a username and password.
  *
@@ -33,6 +37,10 @@ public class UsernamePasswordChallenge(
 ) {
 
     private var onCancel: (() -> Unit)? = onCancel
+
+
+    private val _additionalMessage: MutableStateFlow<String?> = MutableStateFlow(null)
+    public val additionalMessage: StateFlow<String?> = _additionalMessage.asStateFlow()
 
     /**
      * Completes the challenge with the credentials. Note that either [continueWithCredentials] or [cancel]
@@ -53,5 +61,9 @@ public class UsernamePasswordChallenge(
     public fun cancel(): Unit {
         onCancel?.invoke()
         onCancel = null
+    }
+
+    public fun setAdditionalMessage(message: String?) {
+        _additionalMessage.value = message
     }
 }
