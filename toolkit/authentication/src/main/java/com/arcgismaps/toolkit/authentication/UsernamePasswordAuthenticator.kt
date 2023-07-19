@@ -59,7 +59,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
@@ -85,16 +84,19 @@ public fun UsernamePasswordAuthenticator(
         val additionalInfo = usernamePasswordChallenge.additionalMessage.collectAsStateWithLifecycle().value
         Text(
             text = buildAnnotatedString {
-                append(stringResource(id = R.string.username_password_login_message))
-                append(" ")
-                withStyle(
+                val url = usernamePasswordChallenge.url
+                val loginMessage = stringResource(id = R.string.username_password_login_message, url)
+                val urlStart = loginMessage.indexOf(url)
+                val urlEnd = urlStart + url.length
+                append(loginMessage)
+                addStyle(
                     style = SpanStyle(
                         fontFamily = FontFamily.Monospace,
                         fontSize = MaterialTheme.typography.headlineSmall.fontSize
-                    )
-                ) {
-                    append(usernamePasswordChallenge.url)
-                }
+                    ),
+                    urlStart,
+                    urlEnd
+                )
             },
             style = MaterialTheme.typography.headlineMedium,
             textAlign = TextAlign.Center
