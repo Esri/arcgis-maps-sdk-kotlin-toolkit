@@ -49,6 +49,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -135,6 +137,7 @@ public fun FloorFilter(
     floorFilterState.selectedFacilityId = floorFilterState.facilities.first().id
 
     Surface(
+        modifier = modifier.semantics { contentDescription = "FloorFilterComponent" },
         shadowElevation = 10.dp,
         color = Color.Transparent
     ) {
