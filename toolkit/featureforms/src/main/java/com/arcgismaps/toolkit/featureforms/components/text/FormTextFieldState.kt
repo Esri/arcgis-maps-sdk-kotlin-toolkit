@@ -4,15 +4,11 @@ import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
-import com.arcgismaps.data.Feature
-import com.arcgismaps.data.FieldType
+import com.arcgismaps.toolkit.featureforms.R
+import com.arcgismaps.toolkit.featureforms.api.FeatureFormDefinition
 import com.arcgismaps.toolkit.featureforms.api.FieldFeatureFormElement
 import com.arcgismaps.toolkit.featureforms.api.TextAreaFeatureFormInput
 import com.arcgismaps.toolkit.featureforms.api.TextBoxFeatureFormInput
-import kotlin.math.roundToInt
-import kotlin.math.roundToLong
-import com.arcgismaps.toolkit.featureforms.R
-import com.arcgismaps.toolkit.featureforms.api.FeatureFormDefinition
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
 
 /**
@@ -216,68 +212,4 @@ private class FormTextFieldStateImpl(
     private fun editValue(value: Any?) {
         featureFormDefinition.editValue(featureFormElement, value)
     }
-}
-
-/**
- * Set the value in the feature's attribute map. This call can only be made when a transaction is open.
- * Committing the transaction will either discard this edit or persist it in the associated geodatabase,
- * and refresh the feature.
- *
- * This call is likely to be pushed into core.
- */
-private fun FeatureFormDefinition.editValue(formElement: FieldFeatureFormElement, value: Any?) {
-    feature?.castAndSetAttributeValue(value, formElement.fieldName)
-}
-
-private fun Feature.castAndSetAttributeValue(value: Any?, key: String) {
-    val field = featureTable?.getField(key) ?: run {
-        attributes[key] = value
-        return
-    }
-    
-    var finalValue = value
-    when (field.fieldType) {
-        FieldType.Int16 -> {
-            finalValue = when (value) {
-                is String -> value.toIntOrNull()?.toShort()
-                is Int -> value.toShort()
-                is Double -> value.roundToInt().toShort()
-                else -> null
-            }
-        }
-        FieldType.Int32 -> {
-            finalValue = when (value) {
-                is String -> value.toIntOrNull()
-                is Int -> value
-                is Double -> value.roundToInt()
-                else -> null
-            }
-        }
-        FieldType.Int64 -> {
-            finalValue = when (value) {
-                is String -> value.toLongOrNull()
-                is Int -> value.toLong()
-                is Double -> value.roundToLong()
-                else -> null
-            }
-        }
-        FieldType.Float32 -> {
-            finalValue = when (value) {
-                is String -> value.toFloatOrNull()
-                is Int -> value.toFloat()
-                is Double -> value.toFloat()
-                else -> null
-            }
-        }
-        FieldType.Float64 -> {
-            finalValue = when (value) {
-                is String -> value.toDoubleOrNull()
-                is Int -> value.toDouble()
-                is Float -> value.toDouble()
-                else -> null
-            }
-        }
-        else -> Unit
-    }
-    attributes[key] = finalValue
 }

@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -31,9 +32,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.toolkit.composablemap.ComposableMap
+import com.arcgismaps.toolkit.featureforms.EditingTransactionState
 import com.arcgismaps.toolkit.featureforms.FeatureForm
-import com.arcgismaps.toolkit.featureforms.FeatureFormState
 import com.arcgismaps.toolkit.featureformsapp.R
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,8 +47,10 @@ fun MapScreen(uri: String, onBackPressed: () -> Unit = {}) {
             arcGISMap = ArcGISMap(uri)
         )
     )
-    // hoist state for the formViewModel editing mode
-    val inEditingMode by mapViewModel.inEditingTransaction.collectAsState()
+    
+    // only recompose when showing or hiding the bottom sheet
+    val editingFlow = remember { mapViewModel.transactionState.map { it is EditingTransactionState.Editing } }
+    val inEditingMode by editingFlow.collectAsState(initial = false)
     // create a BottomSheetScaffoldState
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
@@ -91,12 +95,10 @@ fun MapScreen(uri: String, onBackPressed: () -> Unit = {}) {
             TopFormBar(
                 editingMode = inEditingMode,
                 onClose = {
-                    val formState = mapViewModel as FeatureFormState
-                    scope.launch { formState.rollbackEdits() }
+                    scope.launch { mapViewModel.rollbackEdits(EditingTransactionState.NotEditing) }
                 },
                 onSave = {
-                    val formState = mapViewModel as FeatureFormState
-                    scope.launch { formState.commitEdits() }
+                    scope.launch { mapViewModel.commitEdits(EditingTransactionState.NotEditing) }
                 }) {
                 onBackPressed()
             }

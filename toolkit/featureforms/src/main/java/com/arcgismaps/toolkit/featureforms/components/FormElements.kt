@@ -16,7 +16,7 @@ internal fun FieldElement(field: FieldFeatureFormElement, formDefinition: Featur
     when (field.inputType) {
         is TextAreaFeatureFormInput -> {
             formDefinition.getElementValue(field)?.let {
-                field.value = it as String
+                field.value = it.toString()
             }
             FormTextField(state = FormTextFieldState(
                 featureFormElement = field,
@@ -26,7 +26,7 @@ internal fun FieldElement(field: FieldFeatureFormElement, formDefinition: Featur
         
         is TextBoxFeatureFormInput -> {
             formDefinition.getElementValue(field)?.let {
-                field.value = it as String
+                field.value = it.toString()
             }
             FormTextField(
                 state = FormTextFieldState(
@@ -47,12 +47,3 @@ internal fun FieldElement(field: FieldFeatureFormElement, formDefinition: Featur
 internal fun GroupElement(group: GroupFeatureFormElement, formDefinition: FeatureFormDefinition) {
     // To-do
 }
-
-/**
- * Retrieve the value of a [FieldFeatureFormElement] from the [FeatureFormDefinition].
- * This call is likely to be pushed into core.
- */
-private fun FeatureFormDefinition.getElementValue(formElement: FieldFeatureFormElement): Any? {
-    return feature?.attributes?.get(formElement.fieldName)
-}
-
