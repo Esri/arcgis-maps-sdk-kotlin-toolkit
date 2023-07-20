@@ -98,10 +98,10 @@ public interface FeatureFormState {
 public class FeatureFormStateImpl : FeatureFormState {
     private val _formDefinition: MutableStateFlow<FeatureFormDefinition?> = MutableStateFlow(null)
     override val formDefinition: StateFlow<FeatureFormDefinition?> = _formDefinition.asStateFlow()
-    private val _inEditingTransaction: MutableStateFlow<EditingTransactionState> = MutableStateFlow(EditingTransactionState.NotEditing)
-    override val transactionState: StateFlow<EditingTransactionState> = _inEditingTransaction.asStateFlow()
+    private val _transactionState: MutableStateFlow<EditingTransactionState> = MutableStateFlow(EditingTransactionState.NotEditing)
+    override val transactionState: StateFlow<EditingTransactionState> = _transactionState.asStateFlow()
     override fun setTransactionState(state: EditingTransactionState) {
-        _inEditingTransaction.value = state
+        _transactionState.value = state
     }
     
     public override suspend fun commitEdits(stateAfterCommit: EditingTransactionState): Result<Unit> {
