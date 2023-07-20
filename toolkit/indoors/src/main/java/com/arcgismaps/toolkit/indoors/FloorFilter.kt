@@ -26,22 +26,29 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
@@ -55,15 +62,16 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import com.arcgismaps.mapping.floor.FloorFacility
 import com.arcgismaps.mapping.GeoModel
 
 // Constants
 private val SELECTED_BACKGROUND_COLOR: Color = Color(0xFFE2F1FB) // light blue
-private val SELECTED_FOREGROUND_COLOR: Color = Color(0xFF005E95) // dark blue
+internal val SELECTED_FOREGROUND_COLOR: Color = Color(0xFF005E95) // dark blue
 private const val DEFAULT_MAX_DISPLAY_LEVELS = -1 // less than 1 will show all of the levels.
-private val DEFAULT_BUTTON_WIDTH: Float = 60.dp.value
-private val DEFAULT_BUTTON_HEIGHT: Float = 40.dp.value
+internal val DEFAULT_BUTTON_WIDTH: Float = 60.dp.value
+internal val DEFAULT_BUTTON_HEIGHT: Float = 40.dp.value
 private val DEFAULT_TEXT_COLOR: Color = Color.Black
 private val DEFAULT_BACKGROUND_COLOR: Color = Color.White
 private const val DEFAULT_BUTTON_VISIBILITY: Int = View.VISIBLE
@@ -160,7 +168,7 @@ public fun FloorFilter(
                 }
             } else {
                 if (siteFacilityButtonVisibility == View.VISIBLE) {
-                    SiteFacilityButton(modifier, buttonSize)
+                    SiteFacilityButton(modifier, floorFilterState, buttonSize)
                 }
             }
 
@@ -222,7 +230,7 @@ public fun FloorFilter(
                 }
             } else {
                 if (siteFacilityButtonVisibility == View.VISIBLE) {
-                    SiteFacilityButton(modifier, buttonSize)
+                    SiteFacilityButton(modifier, floorFilterState, buttonSize)
                 }
             }
         }
@@ -285,7 +293,8 @@ internal fun FloorListColumn(
  * @since 200.2.0
  */
 @Composable
-internal fun SiteFacilityButton(modifier: Modifier, buttonSize: Size) {
+internal fun SiteFacilityButton(modifier: Modifier, floorFilterState: FloorFilterState, buttonSize: Size) {
+    val showSiteAndFacilitySelector = remember { mutableStateOf(false) }
     Box(modifier.height(buttonSize.height.dp)) {
         Icon(
             painter = painterResource(id = R.drawable.ic_site_facility_24),
@@ -296,9 +305,12 @@ internal fun SiteFacilityButton(modifier: Modifier, buttonSize: Size) {
                 .width(buttonSize.width.dp)
                 .wrapContentSize(Center)
                 .clickable {
-                    // TODO: Implement facility search dialog
+                    showSiteAndFacilitySelector.value = true
                 }
         )
+    }
+    if (showSiteAndFacilitySelector.value) {
+        SiteAndFacilitySelector(floorFilterState, showSiteAndFacilitySelector)
     }
 }
 

@@ -47,6 +47,9 @@ public sealed interface FloorFilterState {
 
     public val onFacilityChanged: StateFlow<FloorFacility?>
     public val onLevelChanged: StateFlow<FloorLevel?>
+
+    public fun getSelectedSite(): FloorSite?
+    public fun getSelectedFacility(): FloorFacility?
 }
 
 /**
@@ -236,7 +239,7 @@ private class FloorFilterStateImpl(
      *
      * @since 200.2.0
      */
-    fun getSelectedFacility(): FloorFacility? {
+    override fun getSelectedFacility(): FloorFacility? {
         return facilities.firstOrNull { isFacilitySelected(it) }
     }
 
@@ -245,7 +248,7 @@ private class FloorFilterStateImpl(
      *
      * @since 200.2.0
      */
-    fun getSelectedSite(): FloorSite? {
+    override fun getSelectedSite(): FloorSite? {
         return sites.firstOrNull { isSiteSelected(it) }
     }
 
