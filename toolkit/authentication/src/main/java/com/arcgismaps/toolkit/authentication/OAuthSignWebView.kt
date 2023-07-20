@@ -246,7 +246,7 @@ private class OAuthWebViewClient(
             ArcGISEnvironment.authenticationManager.networkCredentialStore.getCredentials(host).getOrNull()
         val credential: NetworkCredential? =
             if (!credentialList.isNullOrEmpty()) {
-                credentialList.first() as CertificateCredential
+                credentialList.first()
             } else {
                 val credentialChallenge = NetworkAuthenticationChallenge(
                     host,
