@@ -255,6 +255,9 @@ enum class SheetValue {
      */
     PartiallyExpanded,
 
+    /**
+     * The sheet is visible only up to its peek height.
+     */
     Minimized
 }
 

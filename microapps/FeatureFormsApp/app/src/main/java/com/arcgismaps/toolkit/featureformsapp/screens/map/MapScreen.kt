@@ -51,7 +51,7 @@ fun MapScreen(uri: String, onBackPressed: () -> Unit = {}) {
     // create a BottomSheetScaffoldState
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
-            initialValue = SheetValue.PartiallyExpanded,
+            initialValue = SheetValue.Hidden,
             confirmValueChange = { it != SheetValue.Hidden },
             skipHiddenState = false
         )
@@ -71,10 +71,7 @@ fun MapScreen(uri: String, onBackPressed: () -> Unit = {}) {
             // set bottom sheet content to the FeatureForm
             FeatureForm(
                 featureFormState = mapViewModel,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    // set max sheet height to occupy to 60% of the total height
-                    .fillMaxHeight()
+                modifier = Modifier.fillMaxSize()
             )
         },
         scaffoldState = bottomSheetScaffoldState,
@@ -106,7 +103,7 @@ fun MapScreen(uri: String, onBackPressed: () -> Unit = {}) {
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun ClearFocus(key: Any) {
+fun ClearFocus(key: Boolean) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
     LaunchedEffect(key) {

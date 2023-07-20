@@ -78,6 +78,8 @@ import kotlinx.coroutines.launch
  * @param scaffoldState the state of the bottom sheet scaffold
  * @param sheetPeekHeight the height of the bottom sheet when it is collapsed
  * @param sheetShape the shape of the bottom sheet
+ * @param sheetExpansionHeight the height for the bottom sheet when it is partially expanded and
+ * expanded
  * @param sheetContainerColor the background color of the bottom sheet
  * @param sheetContentColor the preferred content color provided by the bottom sheet to its
  * children. Defaults to the matching content color for [sheetContainerColor], or if that is
@@ -417,6 +419,13 @@ private fun BottomSheetScaffoldAnchorChangeHandler(
 
 private enum class BottomSheetScaffoldLayoutSlot { TopBar, Body, Sheet, Snackbar }
 
+/**
+ * Defines the height values as fractions for the PartiallyExpanded and Expanded Sheet Values
+ * of the bottom sheet
+ *
+ * @param partialHeightFraction fractional for the PartiallyExpanded height between [0,1]
+ * @param fullHeightFraction fractional for the Expanded height between [0,1]
+ */
 class SheetExpansionHeight(
     val partialHeightFraction: Float = 0.5f,
     val fullHeightFraction: Float = 1f
