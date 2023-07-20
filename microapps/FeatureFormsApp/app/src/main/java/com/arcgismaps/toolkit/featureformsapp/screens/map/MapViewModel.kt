@@ -10,6 +10,7 @@ import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.toolkit.composablemap.MapState
+import com.arcgismaps.toolkit.featureforms.EditingTransactionState
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
 import com.arcgismaps.toolkit.featureforms.api.FeatureFormDefinition
 import com.arcgismaps.toolkit.featureforms.api.formInfoJson
@@ -67,7 +68,7 @@ class MapViewModel @Inject constructor(
                                     setFormDefinition(featureFormDefinition)
                                     // set the FeatureFormState to an editing state to bring up the
                                     // FeatureForm UI
-                                    setTransactionState(true)
+                                    setTransactionState(EditingTransactionState.Editing)
                                 }
                         } catch (e: Exception) {
                             Toast.makeText(

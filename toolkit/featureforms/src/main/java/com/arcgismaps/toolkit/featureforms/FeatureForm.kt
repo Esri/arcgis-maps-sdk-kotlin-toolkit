@@ -35,8 +35,8 @@ public fun FeatureForm(
     modifier: Modifier = Modifier
 ) {
     val featureFormDefinition by featureFormState.formDefinition.collectAsState()
-    val inEditingMode by featureFormState.inEditingTransaction.collectAsState()
-    ClearFocus(inEditingMode)
+    val inEditingMode by featureFormState.transactionState.collectAsState()
+    ClearFocus(inEditingMode is EditingTransactionState.Editing)
     featureFormDefinition?.let {
         FeatureFormContent(formDefinition = it, modifier = modifier)
     } ?: run {
