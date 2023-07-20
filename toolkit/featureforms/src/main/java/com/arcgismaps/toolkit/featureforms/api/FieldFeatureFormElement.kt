@@ -18,10 +18,12 @@
 
 package com.arcgismaps.toolkit.featureforms.api
 
+import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.data.Domain
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -54,6 +56,11 @@ public class FieldFeatureFormElement internal constructor(
     ) : FeatureFormElement {
     //region Properties
     
+    @Transient
+    public val isEditable: Boolean = true
+    
+    @Transient
+    public var feature: ArcGISFeature? = null
     /**
      * The domain to apply to this field. If defined, it takes precedence over domains
      * defined in field, type, or subtype.

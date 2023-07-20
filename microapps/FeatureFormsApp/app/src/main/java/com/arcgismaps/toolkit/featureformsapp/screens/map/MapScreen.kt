@@ -1,9 +1,7 @@
 package com.arcgismaps.toolkit.featureformsapp.screens.map
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
@@ -24,6 +22,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -33,9 +33,12 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.toolkit.composablemap.ComposableMap
+import com.arcgismaps.toolkit.featureforms.EditingTransactionState
 import com.arcgismaps.toolkit.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureformsapp.R
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetExpansionHeight
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,8 +49,11 @@ fun MapScreen(uri: String, onBackPressed: () -> Unit = {}) {
             arcGISMap = ArcGISMap(uri)
         )
     )
-    // hoist state for the formViewModel editing mode
-    val inEditingMode by mapViewModel.inEditingMode.collectAsState()
+
+    // only recompose when showing or hiding the bottom sheet
+    val editingFlow =
+        remember { mapViewModel.transactionState.map { it is EditingTransactionState.Editing } }
+    val inEditingMode by editingFlow.collectAsState(initial = false)
     // create a BottomSheetScaffoldState
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
@@ -79,6 +85,7 @@ fun MapScreen(uri: String, onBackPressed: () -> Unit = {}) {
         sheetExpansionHeight = SheetExpansionHeight(0.5f, 0.9f)
     ) {
         Box {
+            val scope = rememberCoroutineScope()
             // show the composable map using the mapViewModel
             ComposableMap(
                 modifier = Modifier.fillMaxSize(),
@@ -88,8 +95,12 @@ fun MapScreen(uri: String, onBackPressed: () -> Unit = {}) {
             // being shown and is in edit mode
             TopFormBar(
                 editingMode = inEditingMode,
-                onClose = { mapViewModel.setEditingActive(false) },
-                onSave = { mapViewModel.setEditingActive(false) }) {
+                onClose = {
+                    scope.launch { mapViewModel.rollbackEdits(EditingTransactionState.NotEditing) }
+                },
+                onSave = {
+                    scope.launch { mapViewModel.commitEdits(EditingTransactionState.NotEditing) }
+                }) {
                 onBackPressed()
             }
         }
