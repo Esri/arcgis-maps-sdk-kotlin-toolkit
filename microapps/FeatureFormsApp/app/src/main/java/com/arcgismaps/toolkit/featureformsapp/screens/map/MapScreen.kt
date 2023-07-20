@@ -23,6 +23,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,8 +32,11 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.toolkit.composablemap.ComposableMap
+import com.arcgismaps.toolkit.featureforms.EditingTransactionState
 import com.arcgismaps.toolkit.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureformsapp.R
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,8 +47,10 @@ fun MapScreen(uri: String, onBackPressed: () -> Unit = {}) {
             arcGISMap = ArcGISMap(uri)
         )
     )
-    // hoist state for the formViewModel editing mode
-    val inEditingMode by mapViewModel.inEditingMode.collectAsState()
+    
+    // only recompose when showing or hiding the bottom sheet
+    val editingFlow = remember { mapViewModel.transactionState.map { it is EditingTransactionState.Editing } }
+    val inEditingMode by editingFlow.collectAsState(initial = false)
     // create a BottomSheetScaffoldState
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
@@ -77,6 +84,7 @@ fun MapScreen(uri: String, onBackPressed: () -> Unit = {}) {
         sheetPeekHeight = 40.dp,
     ) {
         Box {
+            val scope = rememberCoroutineScope()
             // show the composable map using the mapViewModel
             ComposableMap(
                 modifier = Modifier.fillMaxSize(),
@@ -86,8 +94,12 @@ fun MapScreen(uri: String, onBackPressed: () -> Unit = {}) {
             // being shown and is in edit mode
             TopFormBar(
                 editingMode = inEditingMode,
-                onClose = { mapViewModel.setEditingActive(false) },
-                onSave = { mapViewModel.setEditingActive(false) }) {
+                onClose = {
+                    scope.launch { mapViewModel.rollbackEdits(EditingTransactionState.NotEditing) }
+                },
+                onSave = {
+                    scope.launch { mapViewModel.commitEdits(EditingTransactionState.NotEditing) }
+                }) {
                 onBackPressed()
             }
         }

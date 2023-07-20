@@ -5,6 +5,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import com.arcgismaps.toolkit.featureforms.R
+import com.arcgismaps.toolkit.featureforms.api.FeatureFormDefinition
 import com.arcgismaps.toolkit.featureforms.api.FieldFeatureFormElement
 import com.arcgismaps.toolkit.featureforms.api.TextAreaFeatureFormInput
 import com.arcgismaps.toolkit.featureforms.api.TextBoxFeatureFormInput
@@ -93,8 +94,10 @@ internal interface FormTextFieldState {
  * @param featureFormElement the form element.
  * @param context a Context scoped to the lifetime of a call to the [FieldElement] composable function.
  */
-internal fun FormTextFieldState(featureFormElement: FieldFeatureFormElement, context: Context): FormTextFieldState =
-    FormTextFieldStateImpl(featureFormElement, context)
+internal fun FormTextFieldState(featureFormElement: FieldFeatureFormElement,
+                                formDefinition: FeatureFormDefinition,
+                                context: Context): FormTextFieldState =
+    FormTextFieldStateImpl(featureFormElement, formDefinition, context)
 
 /**
  * Default implementation for the [FormTextFieldState]. See [FormTextFieldState()] for the factory.
@@ -103,7 +106,8 @@ internal fun FormTextFieldState(featureFormElement: FieldFeatureFormElement, con
  * @property context a Context scoped to the lifetime of a call to the [FieldElement] composable function.
  */
 private class FormTextFieldStateImpl(
-    featureFormElement: FieldFeatureFormElement,
+    private val featureFormElement: FieldFeatureFormElement,
+    private val featureFormDefinition: FeatureFormDefinition,
     private val context: Context
 ) : FormTextFieldState {
     private val _value = mutableStateOf(featureFormElement.value)
@@ -179,6 +183,7 @@ private class FormTextFieldStateImpl(
     }
     
     override fun onValueChanged(input: String) {
+       editValue(input)
         _value.value = input
         validateLength()
     }
@@ -197,5 +202,14 @@ private class FormTextFieldStateImpl(
                 _errorMessage.value = helperText
             }
         }
+    }
+    
+    /**
+     * Set the value in the feature's attribute map.
+     * Committing the transaction will either discard this edit or persist it in the associated geodatabase,
+     * and refresh the feature.
+     */
+    private fun editValue(value: Any?) {
+        featureFormDefinition.editValue(featureFormElement, value)
     }
 }

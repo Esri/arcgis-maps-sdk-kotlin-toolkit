@@ -46,10 +46,10 @@ internal fun FormTextField(
     val supportingText by state.supportingText
     val contentLength by state.contentLength
     var clearFocus by remember { mutableStateOf(false) }
-
+    
     // if the keyboard is gone clear focus from the field as a side-effect
     ClearFocus(clearFocus) { clearFocus = false }
-
+    
     Column(modifier = modifier
         .fillMaxSize()
         .onFocusChanged { state.onFocusChanged(it.hasFocus) }
@@ -74,7 +74,7 @@ internal fun FormTextField(
                 if (isFocused && !state.singleLine && text.isNotEmpty()) {
                     IconButton(
                         onClick = { clearFocus = true },
-                        modifier = Modifier.semantics { contentDescription = "Save local edit" }
+                        modifier = Modifier.semantics { contentDescription = "Save local edit button" }
                     ) {
                         Icon(
                             imageVector = Icons.Rounded.CheckCircle,
@@ -85,7 +85,7 @@ internal fun FormTextField(
                     IconButton(
                         onClick = { state.onValueChanged("") },
                         modifier = Modifier.semantics { contentDescription = "Clear text button" }
-                        ) {
+                    ) {
                         Icon(
                             imageVector = Icons.Rounded.Clear,
                             contentDescription = "Clear Text"
