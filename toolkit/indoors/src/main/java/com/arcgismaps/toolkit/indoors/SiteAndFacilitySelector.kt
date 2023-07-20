@@ -196,6 +196,4 @@ internal fun SearchBar(floorFilterState: FloorFilterState) {
     }
 }
 
-internal fun filterData(filterBy: String?) {
 
-}
