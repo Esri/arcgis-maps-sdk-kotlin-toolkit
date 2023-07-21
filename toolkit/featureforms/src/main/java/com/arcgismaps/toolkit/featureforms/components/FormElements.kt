@@ -2,13 +2,17 @@ package com.arcgismaps.toolkit.featureforms.components
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import com.arcgismaps.toolkit.featureforms.api.DateTimePickerFeatureFormInput
 import com.arcgismaps.toolkit.featureforms.api.FeatureFormDefinition
 import com.arcgismaps.toolkit.featureforms.api.FieldFeatureFormElement
 import com.arcgismaps.toolkit.featureforms.api.GroupFeatureFormElement
 import com.arcgismaps.toolkit.featureforms.api.TextAreaFeatureFormInput
 import com.arcgismaps.toolkit.featureforms.api.TextBoxFeatureFormInput
+import com.arcgismaps.toolkit.featureforms.components.date.FormDatePicker
 import com.arcgismaps.toolkit.featureforms.components.text.FormTextField
 import com.arcgismaps.toolkit.featureforms.components.text.FormTextFieldState
+import java.time.Instant
+import java.util.TimeZone
 
 @Composable
 internal fun FieldElement(field: FieldFeatureFormElement, formDefinition: FeatureFormDefinition) {
@@ -36,7 +40,15 @@ internal fun FieldElement(field: FieldFeatureFormElement, formDefinition: Featur
                 )
             )
         }
-        
+
+        is DateTimePickerFeatureFormInput -> {
+            val instant = formDefinition.getElementValue(field) as Instant?
+            instant?.let {
+                val localDateTime = instant.atZone(TimeZone.getDefault().toZoneId())
+                field.value = localDateTime.toString()
+            }
+            FormDatePicker(instant?.toEpochMilli())
+        }
         else -> { /* TO-DO: add support for other input types */
         }
     }
