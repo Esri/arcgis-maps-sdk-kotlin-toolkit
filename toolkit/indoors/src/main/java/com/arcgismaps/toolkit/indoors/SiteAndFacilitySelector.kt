@@ -312,7 +312,7 @@ internal fun SearchBar(
                                 filteredNames = siteNames
                             },
                             painter = painterResource(id = R.drawable.ic_x_24),
-                            contentDescription = "Search Icon"
+                            contentDescription = "Clear Search Icon"
                         )
                     }
                 },
