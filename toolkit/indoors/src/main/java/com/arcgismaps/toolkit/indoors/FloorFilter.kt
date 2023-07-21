@@ -26,29 +26,23 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
@@ -62,7 +56,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import com.arcgismaps.mapping.floor.FloorFacility
 import com.arcgismaps.mapping.GeoModel
 
@@ -74,6 +67,7 @@ internal val DEFAULT_BUTTON_WIDTH: Float = 60.dp.value
 internal val DEFAULT_BUTTON_HEIGHT: Float = 40.dp.value
 private val DEFAULT_TEXT_COLOR: Color = Color.Black
 private val DEFAULT_BACKGROUND_COLOR: Color = Color.White
+private val DEFAULT_SEARCH_BACKGROUND_COLOR = Color(0xFFEBEBEB) // light gray
 private const val DEFAULT_BUTTON_VISIBILITY: Int = View.VISIBLE
 private val DEFAULT_CLOSE_BUTTON_POSITION = ButtonPosition.Top
 
@@ -112,8 +106,7 @@ private val DEFAULT_CLOSE_BUTTON_POSITION = ButtonPosition.Top
  *      typography = MaterialTheme.typography,
  *      selectedTextColor = Color.Red,
  *      maxDisplayLevels = 2,
- *      closeButtonPosition = ButtonPosition.Bottom,
- *      siteFacilityButtonVisibility = View.GONE
+ *      closeButtonPosition = ButtonPosition.Bottom
  * )
  * ```
  *
@@ -134,13 +127,9 @@ public fun FloorFilter(
     siteFacilityButtonVisibility: Int = DEFAULT_BUTTON_VISIBILITY,
     closeButtonPosition: ButtonPosition = DEFAULT_CLOSE_BUTTON_POSITION,
     maxDisplayLevels: Int = DEFAULT_MAX_DISPLAY_LEVELS,
-    searchBackgroundColor: Color = DEFAULT_BACKGROUND_COLOR,
-    siteSearchVisibility: Int = DEFAULT_BUTTON_VISIBILITY
+    searchBackgroundColor: Color = DEFAULT_SEARCH_BACKGROUND_COLOR
 ) {
     if (floorFilterState.floorManager.collectAsState().value == null) return
-
-    // select the first facility by default
-    floorFilterState.selectedFacilityId = floorFilterState.facilities.first().id
 
     Surface(
         shadowElevation = 10.dp,
@@ -154,6 +143,22 @@ public fun FloorFilter(
                 .background(color = buttonBackgroundColor),
             verticalArrangement = Arrangement.Center
         ) {
+
+            // if no facility is selected, only display site-facility selector button
+            if (floorFilterState.selectedFacilityId == null){
+                SiteFacilityButton(
+                    modifier,
+                    floorFilterState,
+                    buttonSize,
+                    searchBackgroundColor,
+                    buttonBackgroundColor,
+                    textColor,
+                    selectedTextColor,
+                    selectedButtonBackgroundColor,
+                )
+                return@Surface
+            }
+
             // displays only the selected floor when enabled
             var isFloorsCollapsed by rememberSaveable { mutableStateOf(false) }
 
@@ -168,7 +173,16 @@ public fun FloorFilter(
                 }
             } else {
                 if (siteFacilityButtonVisibility == View.VISIBLE) {
-                    SiteFacilityButton(modifier, floorFilterState, buttonSize)
+                    SiteFacilityButton(
+                        modifier,
+                        floorFilterState,
+                        buttonSize,
+                        searchBackgroundColor,
+                        buttonBackgroundColor,
+                        textColor,
+                        selectedTextColor,
+                        selectedButtonBackgroundColor,
+                    )
                 }
             }
 
@@ -230,7 +244,16 @@ public fun FloorFilter(
                 }
             } else {
                 if (siteFacilityButtonVisibility == View.VISIBLE) {
-                    SiteFacilityButton(modifier, floorFilterState, buttonSize)
+                    SiteFacilityButton(
+                        modifier,
+                        floorFilterState,
+                        buttonSize,
+                        searchBackgroundColor,
+                        buttonBackgroundColor,
+                        textColor,
+                        selectedTextColor,
+                        selectedButtonBackgroundColor,
+                    )
                 }
             }
         }
@@ -293,7 +316,16 @@ internal fun FloorListColumn(
  * @since 200.2.0
  */
 @Composable
-internal fun SiteFacilityButton(modifier: Modifier, floorFilterState: FloorFilterState, buttonSize: Size) {
+internal fun SiteFacilityButton(
+    modifier: Modifier,
+    floorFilterState: FloorFilterState,
+    buttonSize: Size,
+    searchBackgroundColor: Color,
+    buttonBackgroundColor: Color,
+    textColor: Color,
+    selectedTextColor: Color,
+    selectedButtonBackgroundColor: Color
+) {
     val showSiteAndFacilitySelector = remember { mutableStateOf(false) }
     Box(modifier.height(buttonSize.height.dp)) {
         Icon(
@@ -310,7 +342,15 @@ internal fun SiteFacilityButton(modifier: Modifier, floorFilterState: FloorFilte
         )
     }
     if (showSiteAndFacilitySelector.value) {
-        SiteAndFacilitySelector(floorFilterState, showSiteAndFacilitySelector)
+        SiteAndFacilitySelector(
+            floorFilterState = floorFilterState,
+            isSelectorShowing = showSiteAndFacilitySelector,
+            searchBackgroundColor = searchBackgroundColor,
+            buttonBackgroundColor = buttonBackgroundColor,
+            textColor = textColor,
+            selectedTextColor = selectedTextColor,
+            selectedButtonBackgroundColor = selectedButtonBackgroundColor
+        )
     }
 }
 
