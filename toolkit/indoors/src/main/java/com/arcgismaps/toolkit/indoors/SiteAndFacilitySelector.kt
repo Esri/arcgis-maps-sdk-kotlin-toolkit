@@ -30,10 +30,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -69,24 +65,25 @@ import androidx.compose.ui.window.Dialog
 @Composable
 internal fun SiteAndFacilitySelector(
     floorFilterState: FloorFilterState,
-    isSelectorOpened: MutableState<Boolean>,
+    isSelectorShowing: MutableState<Boolean>,
     searchBackgroundColor: Color,
     buttonBackgroundColor: Color,
     textColor: Color,
     selectedTextColor: Color,
     selectedButtonBackgroundColor: Color
 ) {
-    // show sites by default
-    val isShowingFacilities = remember { mutableStateOf(false) }
+    // boolean toggle to display either the sites selector or the facilities selector,
+    // display sites selector by default when set to false, and sites selector when set to true.
+    val isFacilitiesSelectorShowing = remember { mutableStateOf(false) }
     // set to show facilities, if there is one selected
     if (floorFilterState.selectedFacilityId != null) {
-        isShowingFacilities.value = true
+        isFacilitiesSelectorShowing.value = true
     }
 
-    if (isSelectorOpened.value) {
+    if (isSelectorShowing.value) {
         Dialog(
             onDismissRequest = {
-                isSelectorOpened.value = false
+                isSelectorShowing.value = false
             }
         ) {
             Surface(
@@ -99,14 +96,14 @@ internal fun SiteAndFacilitySelector(
                         .background(color = buttonBackgroundColor)
                 )
                 {
-                    if (isShowingFacilities.value) {
+                    if (isFacilitiesSelectorShowing.value) {
                         Column {
                             Row(
                                 modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 IconButton(
-                                    onClick = { isShowingFacilities.value = false },
+                                    onClick = { isFacilitiesSelectorShowing.value = false },
                                     modifier = Modifier.size(24.dp).align(CenterVertically)
                                 ) {
                                     Icon(
@@ -135,13 +132,13 @@ internal fun SiteAndFacilitySelector(
                                 }
 
                                 IconButton(
-                                    onClick = { isSelectorOpened.value = false },
+                                    onClick = { isSelectorShowing.value = false },
                                     modifier = Modifier.padding(horizontal = 10.dp).size(24.dp)
                                         .align(CenterVertically)
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Default.Close,
-                                        contentDescription = "Site And Facility Icon"
+                                        painter = painterResource(id = R.drawable.ic_x_24),
+                                        contentDescription = "Close Icon"
                                     )
                                 }
                             }
@@ -153,7 +150,7 @@ internal fun SiteAndFacilitySelector(
                                 selectedTextColor,
                                 selectedButtonBackgroundColor,
                                 buttonBackgroundColor,
-                                isShowingFacilities
+                                isFacilitiesSelectorShowing
                             ) { index ->
                                 // on facility selected ...
                             }
@@ -175,13 +172,13 @@ internal fun SiteAndFacilitySelector(
                                 )
 
                                 IconButton(
-                                    onClick = { isSelectorOpened.value = false },
+                                    onClick = { isSelectorShowing.value = false },
                                     modifier = Modifier.padding(horizontal = 10.dp).size(24.dp)
                                         .align(CenterVertically)
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Default.Close,
-                                        contentDescription = "Site And Facility Icon"
+                                        painter = painterResource(id = R.drawable.ic_x_24),
+                                        contentDescription = "Close Icon"
                                     )
                                 }
                             }
@@ -193,11 +190,11 @@ internal fun SiteAndFacilitySelector(
                                 selectedTextColor,
                                 selectedButtonBackgroundColor,
                                 buttonBackgroundColor,
-                                isShowingFacilities,
+                                isFacilitiesSelectorShowing,
                             ) { index ->
                                 floorFilterState.selectedSiteId =
                                     floorFilterState.sites[index].id
-                                isShowingFacilities.value = true
+                                isFacilitiesSelectorShowing.value = true
                             }
                         }
                     }
@@ -251,13 +248,14 @@ internal fun FacilityOrSiteItem(
                 })
         }
         Text(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).align(CenterVertically),
             text = name,
             color = Color.DarkGray,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
         )
         Icon(
-            imageVector = Icons.Default.KeyboardArrowRight,
+            modifier = Modifier.size(24.dp),
+            painter = painterResource(id = R.drawable.ic_chevron_right_32),
             contentDescription = "SelectSiteButton"
         )
     }
@@ -301,9 +299,22 @@ internal fun SearchBar(
                     },
                 leadingIcon = {
                     Icon(
-                        Icons.Filled.Search,
+                        painter = painterResource(id = R.drawable.ic_search_32),
                         contentDescription = "Search Icon"
                     )
+                },
+                trailingIcon = {
+                    if (text.isNotEmpty()) {
+                        Icon(
+                            modifier = Modifier.clickable {
+                                text = ""
+                                focusManager.clearFocus()
+                                filteredNames = siteNames
+                            },
+                            painter = painterResource(id = R.drawable.ic_x_24),
+                            contentDescription = "Search Icon"
+                        )
+                    }
                 },
                 value = text,
                 maxLines = 1,

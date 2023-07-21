@@ -106,8 +106,7 @@ private val DEFAULT_CLOSE_BUTTON_POSITION = ButtonPosition.Top
  *      typography = MaterialTheme.typography,
  *      selectedTextColor = Color.Red,
  *      maxDisplayLevels = 2,
- *      closeButtonPosition = ButtonPosition.Bottom,
- *      siteFacilityButtonVisibility = View.GONE
+ *      closeButtonPosition = ButtonPosition.Bottom
  * )
  * ```
  *
@@ -128,8 +127,7 @@ public fun FloorFilter(
     siteFacilityButtonVisibility: Int = DEFAULT_BUTTON_VISIBILITY,
     closeButtonPosition: ButtonPosition = DEFAULT_CLOSE_BUTTON_POSITION,
     maxDisplayLevels: Int = DEFAULT_MAX_DISPLAY_LEVELS,
-    searchBackgroundColor: Color = DEFAULT_SEARCH_BACKGROUND_COLOR,
-    siteSearchVisibility: Int = DEFAULT_BUTTON_VISIBILITY
+    searchBackgroundColor: Color = DEFAULT_SEARCH_BACKGROUND_COLOR
 ) {
     if (floorFilterState.floorManager.collectAsState().value == null) return
 
@@ -147,7 +145,7 @@ public fun FloorFilter(
         ) {
 
             // if no facility is selected, only display site-facility selector button
-            if (siteSearchVisibility == View.VISIBLE && floorFilterState.selectedFacilityId == null){
+            if (floorFilterState.selectedFacilityId == null){
                 SiteFacilityButton(
                     modifier,
                     floorFilterState,
@@ -346,7 +344,7 @@ internal fun SiteFacilityButton(
     if (showSiteAndFacilitySelector.value) {
         SiteAndFacilitySelector(
             floorFilterState = floorFilterState,
-            isSelectorOpened = showSiteAndFacilitySelector,
+            isSelectorShowing = showSiteAndFacilitySelector,
             searchBackgroundColor = searchBackgroundColor,
             buttonBackgroundColor = buttonBackgroundColor,
             textColor = textColor,
