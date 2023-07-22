@@ -24,8 +24,6 @@ import androidx.compose.runtime.mutableStateOf
 import com.arcgismaps.toolkit.featureforms.api.DateTimePickerFeatureFormInput
 import com.arcgismaps.toolkit.featureforms.api.FeatureFormDefinition
 import com.arcgismaps.toolkit.featureforms.api.FieldFeatureFormElement
-import java.time.Instant
-import java.util.TimeZone
 
 /**
  * State for the [FormDateTimeField].
@@ -59,7 +57,7 @@ internal interface DateTimeFieldState {
      *
      * @since 200.2.0
      */
-    val label: State<String>
+    val label: String
     
     /**
      * The placeholder text.
@@ -80,7 +78,7 @@ internal interface DateTimeFieldState {
      *
      * @since 200.2.0
      */
-    val value: State<String>
+    val value: State<Long>
     
     /**
      * `true` if the date time may be edited.
@@ -92,67 +90,42 @@ internal interface DateTimeFieldState {
     /**
      * Updates the attribute.
      *
-     * @param date the date portion of the date time
-     * @param time the time portion of the date time
+     * @param dateTime the date time expressed epoch milliseconds
      * @since 200.2.0
      */
-    fun setValue(date: Long, time: Long = 0L)
+    fun setValue(dateTime: Long)
 }
 
 private class DateTimeFieldStateImpl(
     private val element: FieldFeatureFormElement,
-    private val formDefinition: FeatureFormDefinition
+    private val formDefinition: FeatureFormDefinition,
+    input: DateTimePickerFeatureFormInput = element.inputType as DateTimePickerFeatureFormInput
 ) : DateTimeFieldState {
-    private val _label: MutableState<String> = mutableStateOf(element.label)
-    override val minEpochMillis: Long
+    override val minEpochMillis: Long = input.min.toLong()
     
-    override val maxEpochMillis: Long
+    override val maxEpochMillis: Long = input.max.toLong()
     
-    override val shouldShowTime: Boolean
+    override val shouldShowTime: Boolean = input.includeTime
     
-    override val label: State<String> = _label
+    override val label: String = element.label
     
-    override val placeholderText: String = element.description
+    override val placeholderText: String = element.hint
     
     private val _isEditable: MutableState<Boolean> = mutableStateOf(element.isEditable)
     override val isEditable: State<Boolean> = _isEditable
     
     override val description: String = element.description
     
-    /**
-     * The value displayed in the form
-     *
-     * @since 200.2.0
-     */
-    private var currentValue: Long = 0L
-    private val _value: MutableState<String> = mutableStateOf(element.value)
-    override val value: State<String> = _value
+    private val _value: MutableState<Long> = mutableStateOf(minEpochMillis)
+    override val value: State<Long> = _value
     
     init {
-        val dateTimePickerFeatureFormInput = element.inputType as DateTimePickerFeatureFormInput
-        maxEpochMillis = dateTimePickerFeatureFormInput.max.toLong()
-        minEpochMillis = dateTimePickerFeatureFormInput.min.toLong()
-        shouldShowTime = dateTimePickerFeatureFormInput.includeTime
-        
         setValue(minEpochMillis)
     }
     
-    /**
-     * Update state of the current date time
-     *
-     * @since 200.2.0
-     */
-    private fun setValue(newValue: Long) {
-        currentValue = newValue
-        val instant = Instant.ofEpochMilli(minEpochMillis)
-        val localDateTime = instant.atZone(TimeZone.getDefault().toZoneId())
-        _value.value = localDateTime.toString()
-    }
-    
-    override fun setValue(date: Long, time: Long) {
-        val dateTime = date + time
+    override fun setValue(dateTime: Long) {
         formDefinition.editValue(element, dateTime)
-        setValue(dateTime)
+        _value.value = dateTime
     }
 }
 
