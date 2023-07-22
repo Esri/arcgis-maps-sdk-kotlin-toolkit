@@ -30,6 +30,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -60,8 +62,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun SiteAndFacilitySelector(
     floorFilterState: FloorFilterState,
@@ -81,10 +84,12 @@ internal fun SiteAndFacilitySelector(
     }
 
     if (isSelectorShowing.value) {
-        Dialog(
+        AlertDialog(
+            modifier = Modifier.padding(horizontal = 24.dp),
             onDismissRequest = {
                 isSelectorShowing.value = false
-            }
+            },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
         ) {
             Surface(
                 shadowElevation = 10.dp,
@@ -98,50 +103,16 @@ internal fun SiteAndFacilitySelector(
                 {
                     if (isFacilitiesSelectorShowing.value) {
                         Column {
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                IconButton(
-                                    onClick = { isFacilitiesSelectorShowing.value = false },
-                                    modifier = Modifier.size(24.dp).align(CenterVertically)
-                                ) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.ic_chevron_left_32),
-                                        contentDescription = "Go Back to Site Selector",
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                }
-                                Column(Modifier.weight(1f).padding(horizontal = 10.dp)) {
-                                    Text(
-                                        modifier = Modifier.align(Start),
-                                        text = stringResource(R.string.floor_filter_select_facility),
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 18.sp,
-                                        textAlign = TextAlign.Start
-                                    )
 
-                                    floorFilterState.getSelectedSite()?.let {
-                                        floorFilterState.getSelectedSite()?.name?.let { it1 ->
-                                            Text(
-                                                text = "Site - $it1",
-                                                fontSize = 15.sp
-                                            )
-                                        }
-                                    }
+                            FacilitySelectorTopBar(
+                                floorFilterState = floorFilterState,
+                                backToSiteButtonClicked = {
+                                    isFacilitiesSelectorShowing.value = false
+                                },
+                                closeButtonClicked = {
+                                    isSelectorShowing.value = false
                                 }
-
-                                IconButton(
-                                    onClick = { isSelectorShowing.value = false },
-                                    modifier = Modifier.padding(horizontal = 10.dp).size(24.dp)
-                                        .align(CenterVertically)
-                                ) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.ic_x_24),
-                                        contentDescription = "Close Icon"
-                                    )
-                                }
-                            }
+                            )
 
                             SearchBar(
                                 floorFilterState,
@@ -158,30 +129,11 @@ internal fun SiteAndFacilitySelector(
                     } else {
 
                         Column {
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text(
-                                    modifier = Modifier.padding(20.dp, 10.dp)
-                                        .align(CenterVertically),
-                                    text = stringResource(R.string.floor_filter_select_site),
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.DarkGray,
-                                    fontSize = 18.sp
-                                )
-
-                                IconButton(
-                                    onClick = { isSelectorShowing.value = false },
-                                    modifier = Modifier.padding(horizontal = 10.dp).size(24.dp)
-                                        .align(CenterVertically)
-                                ) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.ic_x_24),
-                                        contentDescription = "Close Icon"
-                                    )
+                            SiteSelectorTopBar(
+                                closeButtonClicked = {
+                                    isSelectorShowing.value = false
                                 }
-                            }
+                            )
 
                             SearchBar(
                                 floorFilterState,
@@ -205,9 +157,211 @@ internal fun SiteAndFacilitySelector(
 }
 
 @Composable
+internal fun SiteSelectorTopBar(
+    closeButtonClicked: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            modifier = Modifier.padding(20.dp, 10.dp)
+                .align(CenterVertically),
+            text = stringResource(R.string.floor_filter_select_site),
+            fontWeight = FontWeight.Bold,
+            color = Color.DarkGray,
+            fontSize = 18.sp
+        )
+
+        IconButton(
+            onClick = closeButtonClicked,
+            modifier = Modifier.padding(horizontal = 10.dp).size(24.dp)
+                .align(CenterVertically)
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_x_24),
+                contentDescription = "Close Icon"
+            )
+        }
+    }
+}
+
+@Composable
+internal fun FacilitySelectorTopBar(
+    floorFilterState: FloorFilterState,
+    backToSiteButtonClicked: () -> Unit,
+    closeButtonClicked: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        IconButton(
+            onClick = backToSiteButtonClicked,
+            modifier = Modifier.size(24.dp).align(CenterVertically)
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_chevron_left_32),
+                contentDescription = "Go Back to Site Selector",
+                modifier = Modifier.size(24.dp)
+            )
+        }
+        Column(Modifier.weight(1f).padding(horizontal = 10.dp)) {
+            Text(
+                modifier = Modifier.align(Start),
+                text = stringResource(R.string.floor_filter_select_facility),
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                textAlign = TextAlign.Start
+            )
+
+            floorFilterState.getSelectedSite()?.let {
+                floorFilterState.getSelectedSite()?.name?.let { it1 ->
+                    Text(
+                        text = "Site - $it1",
+                        fontSize = 15.sp
+                    )
+                }
+            }
+        }
+
+        IconButton(
+            onClick = closeButtonClicked,
+            modifier = Modifier.padding(horizontal = 10.dp).size(24.dp)
+                .align(CenterVertically)
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_x_24),
+                contentDescription = "Close Icon"
+            )
+        }
+    }
+
+}
+
+@Composable
+internal fun SearchBar(
+    floorFilterState: FloorFilterState,
+    searchBackgroundColor: Color,
+    textColor: Color,
+    selectedTextColor: Color,
+    selectedButtonBackgroundColor: Color,
+    buttonBackgroundColor: Color,
+    isShowingFacilities: MutableState<Boolean>,
+    onSiteSelected: (Int) -> Unit
+) {
+    // query text typed in OutlinedTextField
+    var text by rememberSaveable { mutableStateOf("") }
+    // remember the OutlinedTextField's focus requester to change focus on search
+    val focusRequester = remember { FocusRequester() }
+    // focus manager is used to clear focus from OutlinedTextField on search
+    val focusManager = LocalFocusManager.current
+
+    val siteNames = floorFilterState.sites.map { it.name }
+    var filteredNames by rememberSaveable { mutableStateOf(siteNames) }
+    Column {
+        Row(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            TextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(color = Color.White)
+                    .focusRequester(focusRequester).onKeyEvent {
+                        // submit query when enter is tapped
+                        if (it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_ENTER) {
+                            //                    onQuerySubmit(text)
+                            focusManager.clearFocus()
+                        }
+                        false
+                    },
+                leadingIcon = {
+                    Icon(
+                        modifier = Modifier.size(24.dp),
+                        painter = painterResource(id = R.drawable.ic_search_32),
+                        tint = Color.Gray,
+                        contentDescription = "Search Icon"
+                    )
+                },
+                trailingIcon = {
+                    if (text.isNotEmpty()) {
+                        Icon(
+                            modifier = Modifier.clickable {
+                                text = ""
+                                focusManager.clearFocus()
+                                filteredNames = siteNames
+                            },
+                            painter = painterResource(id = R.drawable.ic_x_24),
+                            tint = Color.Gray,
+                            contentDescription = "Clear Search Icon"
+                        )
+                    }
+                },
+                value = text,
+                maxLines = 1,
+                singleLine = true,
+                onValueChange = { textInput ->
+                    text = textInput.lines()[0]
+                    filteredNames = siteNames.filter {
+                        it.lowercase().contains(text.lowercase())
+                    }.toMutableList()
+                },
+                label = { Text(text = stringResource(R.string.floor_filter_view_filter_hint)) },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Search
+                ),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = searchBackgroundColor,
+                    unfocusedContainerColor = searchBackgroundColor,
+                    unfocusedTextColor = textColor,
+                    focusedTextColor = textColor,
+                    focusedLabelColor = selectedTextColor,
+                    cursorColor = selectedTextColor,
+                    unfocusedIndicatorColor = textColor,
+                    focusedIndicatorColor = selectedTextColor,
+                    unfocusedLabelColor = Color.Gray,
+                ),
+                keyboardActions = KeyboardActions(
+                    onSearch = {
+                        //                    onQuerySubmit(text)
+                        focusManager.clearFocus()
+                    },
+                ),
+            )
+        }
+
+        // if site/facility names found using search prompt, display message
+        if (filteredNames.isEmpty()) {
+            Text(
+                modifier = Modifier.padding(20.dp).fillMaxWidth(),
+                text = "No results found",
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Light
+            )
+        } else {
+            // displays a list of facilities
+            if (!isShowingFacilities.value) {
+                val selectedSiteName = floorFilterState.sites.find {
+                    floorFilterState.selectedSiteId == it.id
+                }?.name
+
+                ListOfFacilitiesOrSites(
+                    filteredNames,
+                    selectedSiteName,
+                    selectedTextColor,
+                    onListItemSelected = onSiteSelected
+                )
+            }
+
+        }
+    }
+}
+
+@Composable
 internal fun ListOfFacilitiesOrSites(
     names: List<String>,
-    selectedIndex: Int,
+    selectedName: String?,
     selectedTextColor: Color,
     onListItemSelected: (Int) -> Unit
 ) {
@@ -216,7 +370,7 @@ internal fun ListOfFacilitiesOrSites(
             FacilityOrSiteItem(
                 name = names[index],
                 index = index,
-                isSelected = index == selectedIndex,
+                isSelected = names[index] == selectedName,
                 selectedTextColor = selectedTextColor,
                 onSelected = onListItemSelected
             )
@@ -258,110 +412,6 @@ internal fun FacilityOrSiteItem(
             painter = painterResource(id = R.drawable.ic_chevron_right_32),
             contentDescription = "SelectSiteButton"
         )
-    }
-}
-
-@Composable
-internal fun SearchBar(
-    floorFilterState: FloorFilterState,
-    searchBackgroundColor: Color,
-    textColor: Color,
-    selectedTextColor: Color,
-    selectedButtonBackgroundColor: Color,
-    buttonBackgroundColor: Color,
-    isShowingFacilities: MutableState<Boolean>,
-    onSiteSelected: (Int) -> Unit
-) {
-    // query text typed in OutlinedTextField
-    var text by rememberSaveable { mutableStateOf("") }
-    // remember the OutlinedTextField's focus requester to change focus on search
-    val focusRequester = remember { FocusRequester() }
-    // focus manager is used to clear focus from OutlinedTextField on search
-    val focusManager = LocalFocusManager.current
-
-    val siteNames = floorFilterState.sites.map { it.name }
-    var filteredNames by rememberSaveable { mutableStateOf(siteNames) }
-    Column {
-        Row(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            TextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(color = Color.White)
-                    .focusRequester(focusRequester).onKeyEvent {
-                        // submit query when enter is tapped
-                        if (it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_ENTER) {
-                            //                    onQuerySubmit(text)
-                            focusManager.clearFocus()
-                        }
-                        false
-                    },
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_search_32),
-                        contentDescription = "Search Icon"
-                    )
-                },
-                trailingIcon = {
-                    if (text.isNotEmpty()) {
-                        Icon(
-                            modifier = Modifier.clickable {
-                                text = ""
-                                focusManager.clearFocus()
-                                filteredNames = siteNames
-                            },
-                            painter = painterResource(id = R.drawable.ic_x_24),
-                            contentDescription = "Clear Search Icon"
-                        )
-                    }
-                },
-                value = text,
-                maxLines = 1,
-                singleLine = true,
-                onValueChange = { textInput ->
-                    text = textInput.lines()[0]
-                    filteredNames = siteNames.filter {
-                        it.lowercase().contains(text.lowercase())
-                    }.toMutableList()
-                },
-                label = { Text(text = stringResource(R.string.floor_filter_view_filter_hint)) },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Text,
-                    imeAction = ImeAction.Search
-                ),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = searchBackgroundColor,
-                    unfocusedContainerColor = searchBackgroundColor,
-                    unfocusedTextColor = textColor,
-                    focusedTextColor = textColor,
-                    focusedLeadingIconColor = selectedTextColor,
-                    unfocusedLabelColor = textColor,
-                    focusedLabelColor = selectedTextColor,
-                    cursorColor = selectedTextColor,
-                    unfocusedLeadingIconColor = textColor,
-                    unfocusedIndicatorColor = textColor,
-                    focusedIndicatorColor = selectedTextColor
-                ),
-                keyboardActions = KeyboardActions(
-                    onSearch = {
-                        //                    onQuerySubmit(text)
-                        focusManager.clearFocus()
-                    },
-                ),
-            )
-        }
-
-        if (!isShowingFacilities.value) {
-            val selectedIndex: Int =
-                floorFilterState.sites.indexOfFirst { floorFilterState.selectedSiteId == it.id }
-            ListOfFacilitiesOrSites(
-                filteredNames,
-                selectedIndex,
-                selectedTextColor,
-                onListItemSelected = onSiteSelected
-            )
-        }
     }
 }
 

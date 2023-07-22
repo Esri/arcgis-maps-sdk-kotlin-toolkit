@@ -67,7 +67,7 @@ internal val DEFAULT_BUTTON_WIDTH: Float = 60.dp.value
 internal val DEFAULT_BUTTON_HEIGHT: Float = 40.dp.value
 private val DEFAULT_TEXT_COLOR: Color = Color.Black
 private val DEFAULT_BACKGROUND_COLOR: Color = Color.White
-private val DEFAULT_SEARCH_BACKGROUND_COLOR = Color(0xFFEBEBEB) // light gray
+private val DEFAULT_SEARCH_BACKGROUND_COLOR = Color(0xFFEEEEEE) // light gray
 private const val DEFAULT_BUTTON_VISIBILITY: Int = View.VISIBLE
 private val DEFAULT_CLOSE_BUTTON_POSITION = ButtonPosition.Top
 
