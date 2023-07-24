@@ -63,6 +63,12 @@ public class UsernamePasswordChallenge(
         onCancel = null
     }
 
+    /**
+     * Emits an additional message to [additionalMessage] to be displayed in the prompt as an error.
+     * A null value is intended to remove the error message.
+     *
+     * @since 200.2.0
+     */
     public fun setAdditionalMessage(message: String?) {
         _additionalMessage.value = message
     }
