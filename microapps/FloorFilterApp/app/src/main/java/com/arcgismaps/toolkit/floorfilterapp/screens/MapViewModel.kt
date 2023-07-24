@@ -21,10 +21,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.toolkit.composablemap.MapInterface
 import com.arcgismaps.toolkit.composablemap.MapInterfaceImpl
+import com.arcgismaps.toolkit.indoors.FloorFilterSelection
 import com.arcgismaps.toolkit.indoors.FloorFilterState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -33,7 +35,25 @@ class MapViewModel(
     arcGISMap: ArcGISMap
 ) : ViewModel(), MapInterface by MapInterfaceImpl(arcGISMap) {
 
-    val floorFilterState: FloorFilterState = FloorFilterState(this, viewModelScope)
+    val floorFilterState: FloorFilterState = FloorFilterState(this.map.value, viewModelScope) { floorFilterSelection ->
+        when (floorFilterSelection.type) {
+            is FloorFilterSelection.Type.FloorSite -> {
+                val floorFilterSelectionType =
+                    floorFilterSelection.type as FloorFilterSelection.Type.FloorSite
+                floorFilterSelectionType.site.geometry?.let {
+                    this.setViewpoint(Viewpoint(it))
+                }
+            }
+            is FloorFilterSelection.Type.FloorFacility -> {
+                val floorFilterSelectionType =
+                    floorFilterSelection.type as FloorFilterSelection.Type.FloorFacility
+                floorFilterSelectionType.facility.geometry?.let {
+                    this.setViewpoint(Viewpoint(it))
+                }
+            }
+            else -> {}
+        }
+    }
 
 }
 
