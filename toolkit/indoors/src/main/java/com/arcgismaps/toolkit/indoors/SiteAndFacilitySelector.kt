@@ -22,15 +22,20 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -211,12 +216,12 @@ internal fun FacilitySelectorTopBar(
     closeButtonClicked: () -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+        modifier = Modifier.height(IntrinsicSize.Min).fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         IconButton(
             onClick = backToSiteButtonClicked,
-            modifier = Modifier.size(24.dp).align(CenterVertically)
+            modifier = Modifier.align(CenterVertically).padding(horizontal = 12.dp).size(24.dp)
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_chevron_left_32),
@@ -224,7 +229,13 @@ internal fun FacilitySelectorTopBar(
                 modifier = Modifier.size(24.dp)
             )
         }
-        Column(Modifier.weight(1f).padding(horizontal = 10.dp)) {
+        Divider(
+            color = Color.LightGray,
+            modifier = Modifier
+                .fillMaxHeight()
+                .width(1.dp)
+        )
+        Column(Modifier.weight(1f).padding(12.dp)) {
             Text(
                 modifier = Modifier.align(Start),
                 text = stringResource(R.string.floor_filter_select_facility),
