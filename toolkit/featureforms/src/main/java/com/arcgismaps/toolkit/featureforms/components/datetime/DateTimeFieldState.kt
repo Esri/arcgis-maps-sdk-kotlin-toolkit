@@ -1,0 +1,141 @@
+/*
+ *
+ *  Copyright 2023 Esri
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
+package com.arcgismaps.toolkit.featureforms.components.datetime
+
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
+import com.arcgismaps.toolkit.featureforms.api.DateTimePickerFeatureFormInput
+import com.arcgismaps.toolkit.featureforms.api.FeatureFormDefinition
+import com.arcgismaps.toolkit.featureforms.api.FieldFeatureFormElement
+
+/**
+ * State for the [FormDateTimeField].
+ *
+ * @since 200.2.0
+ */
+internal interface DateTimeFieldState {
+    /**
+     * The minimum allowable date and time.
+     *
+     * @since 200.2.0
+     */
+    val minEpochMillis: Long
+    
+    /**
+     * The maximum allowable date and time.
+     *
+     * @since 200.2.0
+     */
+    val maxEpochMillis: Long
+    
+    /**
+     * `true` if the field should show time or allow time to be set on the field.
+     *
+     * @since 200.2.0
+     */
+    val shouldShowTime: Boolean
+    
+    /**
+     * The label used on the Field.
+     *
+     * @since 200.2.0
+     */
+    val label: String
+    
+    /**
+     * The placeholder text.
+     *
+     * @since 200.2.0
+     */
+    val placeholderText: String
+    
+    /**
+     * The name of the field.
+     *
+     * @since 200.2.0
+     */
+    val description: String
+    
+    /**
+     * The text representation of the date time.
+     *
+     * @since 200.2.0
+     */
+    val value: State<Long>
+    
+    /**
+     * `true` if the date time may be edited.
+     *
+     * @since 200.2.0
+     */
+    val isEditable: State<Boolean>
+    
+    /**
+     * Updates the attribute.
+     *
+     * @param dateTime the date time expressed epoch milliseconds
+     * @since 200.2.0
+     */
+    fun setValue(dateTime: Long)
+}
+
+private class DateTimeFieldStateImpl(
+    private val element: FieldFeatureFormElement,
+    private val formDefinition: FeatureFormDefinition,
+    input: DateTimePickerFeatureFormInput = element.inputType as DateTimePickerFeatureFormInput
+) : DateTimeFieldState {
+    override val minEpochMillis: Long = input.min.toLong()
+    
+    override val maxEpochMillis: Long = input.max.toLong()
+    
+    override val shouldShowTime: Boolean = input.includeTime
+    
+    override val label: String = element.label
+    
+    override val placeholderText: String = element.hint
+    
+    private val _isEditable: MutableState<Boolean> = mutableStateOf(element.isEditable)
+    override val isEditable: State<Boolean> = _isEditable
+    
+    override val description: String = element.description
+    
+    private val _value: MutableState<Long> = mutableStateOf(minEpochMillis)
+    override val value: State<Long> = _value
+    
+    init {
+        setValue(minEpochMillis)
+    }
+    
+    override fun setValue(dateTime: Long) {
+        formDefinition.editValue(element, dateTime)
+        _value.value = dateTime
+    }
+}
+
+/**
+ * Factory function to create a [DateTimeFieldState] using the [featureFormElement].
+ *
+ * @param featureFormElement the form element.
+ * @param formDefinition the FeatureFormDefinition which provides access to the Feature (for now).
+ */
+internal fun DateTimeFieldState(
+    featureFormElement: FieldFeatureFormElement,
+    formDefinition: FeatureFormDefinition
+): DateTimeFieldState = DateTimeFieldStateImpl(featureFormElement, formDefinition)
