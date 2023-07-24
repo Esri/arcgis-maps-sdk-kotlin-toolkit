@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -50,6 +51,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Alignment.Companion.Start
 import androidx.compose.ui.Modifier
@@ -110,7 +112,7 @@ internal fun SiteAndFacilitySelector(
             ) {
                 Column(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(10.dp))
+                        .clip(RoundedCornerShape(5.dp))
                         .background(color = buttonBackgroundColor)
                 )
                 {
@@ -178,18 +180,18 @@ internal fun SiteSelectorTopBar(
     closeButtonClicked: () -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+        modifier = Modifier.fillMaxWidth().height(65.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
-            modifier = Modifier.padding(20.dp, 10.dp)
+            modifier = Modifier
+                .padding(horizontal = 20.dp)
                 .align(CenterVertically),
             text = stringResource(R.string.floor_filter_select_site),
             fontWeight = FontWeight.Bold,
             color = Color.DarkGray,
             fontSize = 18.sp
         )
-
         IconButton(
             onClick = closeButtonClicked,
             modifier = Modifier.padding(horizontal = 10.dp).size(24.dp)
@@ -216,12 +218,12 @@ internal fun FacilitySelectorTopBar(
     closeButtonClicked: () -> Unit
 ) {
     Row(
-        modifier = Modifier.height(IntrinsicSize.Min).fillMaxWidth(),
+        modifier = Modifier.height(65.dp).fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         IconButton(
             onClick = backToSiteButtonClicked,
-            modifier = Modifier.align(CenterVertically).padding(horizontal = 12.dp).size(24.dp)
+            modifier = Modifier.align(CenterVertically).padding(horizontal = 6.dp).size(24.dp)
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_chevron_left_32),
@@ -235,7 +237,13 @@ internal fun FacilitySelectorTopBar(
                 .fillMaxHeight()
                 .width(1.dp)
         )
-        Column(Modifier.weight(1f).padding(12.dp)) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+                .wrapContentHeight(CenterVertically)
+                .padding(horizontal = 20.dp)
+        ) {
             Text(
                 modifier = Modifier.align(Start),
                 text = stringResource(R.string.floor_filter_select_facility),
@@ -248,7 +256,8 @@ internal fun FacilitySelectorTopBar(
                 floorFilterState.getSelectedSite()?.name?.let { it1 ->
                     Text(
                         text = "Site - $it1",
-                        fontSize = 15.sp
+                        fontSize = 15.sp,
+                        color = Color.Gray
                     )
                 }
             }
@@ -317,7 +326,10 @@ internal fun SearchAndFilter(
         mutableStateOf(allSitesOrFacilities)
     }
 
-    Column {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         // handle search text field interaction
         Row(
             modifier = Modifier.fillMaxWidth()
@@ -325,6 +337,8 @@ internal fun SearchAndFilter(
             TextField(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .height(65.dp)
+                    .padding(0.dp)
                     .background(color = Color.White)
                     .focusRequester(focusRequester).onKeyEvent {
                         // submit query when enter is tapped
@@ -336,7 +350,15 @@ internal fun SearchAndFilter(
                 value = text,
                 maxLines = 1,
                 singleLine = true,
-                label = { Text(text = stringResource(R.string.floor_filter_view_filter_hint)) },
+                label = {
+                    Text(
+                        text =
+                        if (isShowingFacilities.value)
+                            stringResource(R.string.floor_filter_view_filter_hint_facilities)
+                        else
+                            stringResource(R.string.floor_filter_view_filter_hint_sites)
+                    )
+                },
                 leadingIcon = {
                     Icon(
                         modifier = Modifier.size(24.dp),
@@ -391,7 +413,10 @@ internal fun SearchAndFilter(
         // if site/facility names found using search prompt, display message
         if (filteredSitesOrFacilities.isEmpty()) {
             Text(
-                modifier = Modifier.padding(20.dp).fillMaxWidth(),
+                modifier = Modifier
+                    .height(65.dp)
+                    .fillMaxWidth()
+                    .wrapContentHeight(align = CenterVertically),
                 text = "No results found",
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Light
@@ -451,7 +476,8 @@ internal fun SiteOrFacilityItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(20.dp, 15.dp)
+            .height(65.dp)
+            .padding(horizontal = 20.dp)
             .clickable { onSelected.invoke(index) }) {
         if (isSelected) {
             Canvas(
@@ -470,7 +496,7 @@ internal fun SiteOrFacilityItem(
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
         )
         Icon(
-            modifier = Modifier.size(24.dp),
+            modifier = Modifier.size(24.dp).align(CenterVertically),
             painter = painterResource(id = R.drawable.ic_chevron_right_32),
             contentDescription = "SelectSiteButton"
         )
