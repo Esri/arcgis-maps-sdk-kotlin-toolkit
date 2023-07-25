@@ -14,6 +14,7 @@
  *  limitations under the License.
  *
  */
+
 package com.arcgismaps.toolkit.indoors
 
 import android.view.KeyEvent
@@ -22,7 +23,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -87,13 +87,14 @@ internal fun SiteAndFacilitySelector(
     buttonBackgroundColor: Color,
     textColor: Color,
     selectedTextColor: Color,
-    selectedButtonBackgroundColor: Color
+    selectedButtonBackgroundColor: Color,
+    onSiteFacilitySelectorShowingChanged: (Boolean) -> Unit
 ) {
     // boolean toggle to display either the sites selector or the facilities selector,
     // display sites selector by default when set to false, and sites selector when set to true.
     val isFacilitiesSelectorShowing = remember { mutableStateOf(false) }
     // set to show facilities, if there is one selected
-    if (floorFilterState.selectedFacilityId != null) {
+    if (floorFilterState.selectedSiteId != null) {
         isFacilitiesSelectorShowing.value = true
     }
 
@@ -102,7 +103,7 @@ internal fun SiteAndFacilitySelector(
         AlertDialog(
             modifier = Modifier.padding(horizontal = 24.dp),
             onDismissRequest = {
-                isSelectorShowing.value = false
+                onSiteFacilitySelectorShowingChanged(false)
             },
             properties = DialogProperties(usePlatformDefaultWidth = false)
         ) {
@@ -121,7 +122,7 @@ internal fun SiteAndFacilitySelector(
                             // display the sites top bar
                             SiteSelectorTopBar(
                                 closeButtonClicked = {
-                                    isSelectorShowing.value = false
+                                    onSiteFacilitySelectorShowingChanged(false)
                                 }
                             )
                             // display search list for all sites
@@ -146,7 +147,7 @@ internal fun SiteAndFacilitySelector(
                                     isFacilitiesSelectorShowing.value = false
                                 },
                                 closeButtonClicked = {
-                                    isSelectorShowing.value = false
+                                    onSiteFacilitySelectorShowingChanged(false)
                                 }
                             )
                             // display search list for all facilities
@@ -160,7 +161,7 @@ internal fun SiteAndFacilitySelector(
                                 isFacilitiesSelectorShowing
                             ) { selectedFacility ->
                                 floorFilterState.selectedFacilityId = selectedFacility.facility?.id
-                                isSelectorShowing.value = false
+                                onSiteFacilitySelectorShowingChanged(false)
                             }
                         }
                     }
@@ -450,6 +451,7 @@ internal fun ListOfSitesOrFacilities(
                 name = siteFacilityList[index].name,
                 index = index,
                 isSelected = siteFacilityList[index].isSelected,
+                isSiteItem = siteFacilityList[0].site != null,
                 selectedTextColor = selectedTextColor,
                 onSelected = {
                     onListItemSelected.invoke(siteFacilityList[it])
@@ -471,7 +473,8 @@ internal fun SiteOrFacilityItem(
     isSelected: Boolean,
     onSelected: (Int) -> Unit,
     index: Int,
-    selectedTextColor: Color
+    selectedTextColor: Color,
+    isSiteItem: Boolean
 ) {
     Row(
         modifier = Modifier
@@ -495,11 +498,13 @@ internal fun SiteOrFacilityItem(
             color = Color.DarkGray,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
         )
-        Icon(
-            modifier = Modifier.size(24.dp).align(CenterVertically),
-            painter = painterResource(id = R.drawable.ic_chevron_right_32),
-            contentDescription = "SelectSiteButton"
-        )
+        if (isSiteItem){
+            Icon(
+                modifier = Modifier.size(24.dp).align(CenterVertically),
+                painter = painterResource(id = R.drawable.ic_chevron_right_32),
+                contentDescription = "Select site icon"
+            )
+        }
     }
 }
 

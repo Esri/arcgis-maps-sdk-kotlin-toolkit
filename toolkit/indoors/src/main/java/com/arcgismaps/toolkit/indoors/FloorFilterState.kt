@@ -191,6 +191,8 @@ private class FloorFilterStateImpl(
                 ?: throw IllegalStateException("The map is not configured to be floor aware")
             floorManager.load().onSuccess {
                 _floorManager.value = floorManager
+                // no FloorLevel is selected at this point, so clear the FloorFilter from the selected GeoModel
+                filterMap()
             }.onFailure {
                 throw it
             }
