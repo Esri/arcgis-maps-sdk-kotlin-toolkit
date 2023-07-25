@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.R
 
 
+@Suppress("unused")
 internal enum class DateTimePickerStyle {
     Date,
     Time,
@@ -66,53 +67,6 @@ internal fun DateTimeField(
     val isEditable by state.isEditable
     val isRequired by state.isRequired
     val epochMillis by state.value
-    
-    val textFieldColors = if (epochMillis == null) {
-        OutlinedTextFieldDefaults.colors(
-            disabledLabelColor = MaterialTheme.colorScheme.onSurface,
-            disabledTextColor = Color.Gray,
-            disabledBorderColor = MaterialTheme.colorScheme.onSurface,
-            focusedTextColor = Color.Gray,
-            unfocusedTextColor = Color.Gray,
-            focusedSupportingTextColor = if (isRequired) {
-                Color.Red
-            } else {
-                Color.Unspecified
-            },
-            unfocusedSupportingTextColor = if (isRequired) {
-                Color.Red
-            } else {
-                Color.Unspecified
-            },
-            disabledSupportingTextColor = if (isRequired) {
-                Color.Red
-            } else {
-                MaterialTheme.colorScheme.onSurface
-            }
-        )
-    } else {
-        OutlinedTextFieldDefaults.colors(
-            disabledLabelColor = MaterialTheme.colorScheme.onSurface,
-            disabledTextColor = MaterialTheme.colorScheme.onSurface,
-            disabledBorderColor = MaterialTheme.colorScheme.onSurface,
-            focusedSupportingTextColor = if (isRequired) {
-                Color.Red
-            } else {
-                Color.Unspecified
-            },
-            unfocusedSupportingTextColor = if (isRequired) {
-                Color.Red
-            } else {
-                Color.Unspecified
-            },
-            disabledSupportingTextColor = if (isRequired) {
-                Color.Red
-            } else {
-                MaterialTheme.colorScheme.onSurface
-            }
-        )
-    }
-    
     val pickerStyle = if (state.shouldShowTime) {
         DateTimePickerStyle.DateTime
     } else {
@@ -129,8 +83,58 @@ internal fun DateTimeField(
         state.setValue(it)
     }
     
+    // the picker dialog
     DateTimePicker(pickerState)
+    
+    // the field
     if (isEditable) {
+        val textFieldColors = if (epochMillis == null) {
+            OutlinedTextFieldDefaults.colors(
+                disabledLabelColor = MaterialTheme.colorScheme.onSurface,
+                disabledTextColor = Color.Gray,
+                disabledBorderColor = MaterialTheme.colorScheme.onSurface,
+                focusedTextColor = Color.Gray,
+                unfocusedTextColor = Color.Gray,
+                focusedSupportingTextColor = if (isRequired) {
+                    Color.Red
+                } else {
+                    Color.Unspecified
+                },
+                unfocusedSupportingTextColor = if (isRequired) {
+                    Color.Red
+                } else {
+                    Color.Unspecified
+                },
+                disabledSupportingTextColor = if (isRequired) {
+                    Color.Red
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                }
+            )
+        } else {
+            OutlinedTextFieldDefaults.colors(
+                disabledLabelColor = MaterialTheme.colorScheme.onSurface,
+                disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                disabledBorderColor = MaterialTheme.colorScheme.onSurface,
+                disabledTrailingIconColor = MaterialTheme.colorScheme.onSurface,
+                focusedSupportingTextColor = if (isRequired) {
+                    Color.Red
+                } else {
+                    Color.Unspecified
+                },
+                unfocusedSupportingTextColor = if (isRequired) {
+                    Color.Red
+                } else {
+                    Color.Unspecified
+                },
+                disabledSupportingTextColor = if (isRequired) {
+                    Color.Red
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                }
+            )
+        }
+    
         Column(
             modifier = modifier
                 .fillMaxSize()
@@ -146,7 +150,7 @@ internal fun DateTimeField(
                         pickerState.setVisibility(true)
                     },
                 readOnly = true,
-                enabled = false,
+                enabled = false, // disabled to support clickability
                 label = {
                     val text = if (isRequired) {
                         "${state.label} *"
@@ -193,8 +197,7 @@ internal fun DateTimeField(
         ImmutableDate(
             valueString = epochMillis?.formattedDateTime() ?: stringResource(id = R.string.novalue),
             label = state.label,
-            supportingText = state.description,
-            colors = textFieldColors
+            supportingText = state.description
         )
     }
 }
@@ -202,7 +205,6 @@ internal fun DateTimeField(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun DateTimePicker(state: DateTimePickerState) {
-    
     val initialValue = state.value
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = initialValue
@@ -233,14 +235,18 @@ internal fun DateTimePicker(state: DateTimePickerState) {
     }
 }
 
-
 @Stable
 @Composable
 private fun ImmutableDate(
     valueString: String,
     label: String,
     supportingText: String,
-    colors: TextFieldColors = OutlinedTextFieldDefaults.colors()
+    colors: TextFieldColors = OutlinedTextFieldDefaults.colors(
+        disabledLabelColor = MaterialTheme.colorScheme.onSurface,
+        disabledTextColor = MaterialTheme.colorScheme.onSurface,
+        disabledBorderColor = MaterialTheme.colorScheme.onSurface,
+        disabledSupportingTextColor = MaterialTheme.colorScheme.onSurface
+    )
 ) {
     Column(
         modifier = Modifier
@@ -251,9 +257,8 @@ private fun ImmutableDate(
             value = valueString,
             onValueChange = {},
             modifier = Modifier
-                .fillMaxWidth()
-                .focusable(true),
-            //enabled = false,
+                .fillMaxWidth(),
+            enabled = false,
             readOnly = true,
             label = { Text(text = label) },
             supportingText = { Text(text = supportingText) },
