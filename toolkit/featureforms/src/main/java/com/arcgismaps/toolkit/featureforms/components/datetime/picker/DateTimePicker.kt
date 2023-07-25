@@ -16,8 +16,9 @@
  *
  */
 
-package com.arcgismaps.toolkit.featureforms.components.datetime
+package com.arcgismaps.toolkit.featureforms.components.datetime.picker
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -54,18 +55,25 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
+import com.arcgismaps.toolkit.featureforms.components.datetime.toZonedDateTime
+import java.sql.Time
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZoneOffset
+import java.time.ZonedDateTime
 import java.util.TimeZone
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun DateTimePicker(state: DateTimePickerState) {
+    // time instant in UTC
     val instant = state.value?.let { Instant.ofEpochMilli(it) } ?: Instant.now()
+    // time in current time zone
     val zonedDateTime = instant.atZone(TimeZone.getDefault().toZoneId())
+    // current time zone offset compared to UTC
+    val offset = TimeZone.getDefault().getOffset(instant.toEpochMilli())
     val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = zonedDateTime.toInstant().toEpochMilli()
+        initialSelectedDateMillis = state.value?.plus(offset)
     )
     val timePickerState = rememberTimePickerState(
         initialHour = zonedDateTime.hour,
@@ -137,7 +145,7 @@ internal fun DateTimePicker(state: DateTimePickerState) {
                 TextButton(
                     onClick = {
                         state.setVisibility(false)
-                              },
+                    },
                     enabled = confirmEnabled
                 ) {
                     Text("OK")
@@ -206,51 +214,3 @@ internal enum class DateTimePickerStyle {
     Time,
     DateTime
 }
-
-internal interface DateTimePickerState {
-    val minDateTime: Long?
-    val maxDateTime: Long?
-    val value: Long?
-    val pickerStyle: DateTimePickerStyle
-    val label: String
-    val description: String
-    val visible: State<Boolean>
-    val onValueSet: (Long) -> Unit
-    fun setVisibility(visible: Boolean)
-}
-
-private class DateTimePickerStateImpl(
-    override val pickerStyle: DateTimePickerStyle,
-    override val minDateTime: Long?,
-    override val maxDateTime: Long?,
-    override val value: Long?,
-    override val label: String,
-    override val description: String = "",
-    override val onValueSet: (Long) -> Unit = {}
-) : DateTimePickerState {
-
-    override var visible = mutableStateOf(false)
-        private set
-
-    override fun setVisibility(visible: Boolean) {
-        this.visible.value = visible
-    }
-}
-
-internal fun DateTimePickerState(
-    type: DateTimePickerStyle,
-    minDateTime: Long? = null,
-    maxDateTime: Long? = null,
-    value: Long? = null,
-    label: String,
-    description: String = "",
-    onValueSet: (Long) -> Unit = {}
-): DateTimePickerState = DateTimePickerStateImpl(
-    type,
-    minDateTime,
-    maxDateTime,
-    value,
-    label,
-    description,
-    onValueSet
-)

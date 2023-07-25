@@ -27,9 +27,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material.icons.rounded.EditCalendar
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -37,11 +34,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldColors
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -50,14 +45,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.R
-
-
-@Suppress("unused")
-internal enum class DateTimePickerStyle {
-    Date,
-    Time,
-    DateTime
-}
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.DateTimePicker
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.DateTimePickerState
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.DateTimePickerStyle
 
 @Composable
 internal fun DateTimeField(
@@ -76,7 +66,7 @@ internal fun DateTimeField(
         pickerStyle,
         state.minEpochMillis,
         state.maxEpochMillis,
-        state.value.value,
+        epochMillis,
         state.label,
         state.description
     ) {
@@ -199,39 +189,6 @@ internal fun DateTimeField(
             label = state.label,
             supportingText = state.description
         )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-internal fun DateTimePicker(state: DateTimePickerState) {
-    val initialValue = state.value
-    val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = initialValue
-    )
-    if (state.visible.value) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            DatePickerDialog(
-                onDismissRequest = {},
-                dismissButton = {
-                    Text(text = "Dismiss", modifier = Modifier.clickable {
-                        state.setVisibility(false)
-                    })
-                },
-                confirmButton = {
-                    Text(text = "Confirm", modifier = Modifier.clickable {
-                        datePickerState.selectedDateMillis?.let {
-                            state.onValueSet(it)
-                        }
-                    })
-                },
-            ) {
-                DatePicker(
-                    state = datePickerState
-                )
-                
-            }
-        }
     }
 }
 
