@@ -32,16 +32,15 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -52,6 +51,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.R
 
+
+internal enum class DateTimePickerStyle {
+    Date,
+    Time,
+    DateTime
+}
+
 @Composable
 internal fun DateTimeField(
     state: DateTimeFieldState,
@@ -60,13 +66,14 @@ internal fun DateTimeField(
     val isEditable by state.isEditable
     val isRequired by state.isRequired
     val epochMillis by state.value
-    var showDatePickerDialog by remember { mutableStateOf(false) }
     
     val textFieldColors = if (epochMillis == null) {
         OutlinedTextFieldDefaults.colors(
+            disabledLabelColor = MaterialTheme.colorScheme.onSurface,
+            disabledTextColor = Color.Gray,
+            disabledBorderColor = MaterialTheme.colorScheme.onSurface,
             focusedTextColor = Color.Gray,
             unfocusedTextColor = Color.Gray,
-            disabledTextColor = Color.Gray,
             focusedSupportingTextColor = if (isRequired) {
                 Color.Red
             } else {
@@ -80,11 +87,14 @@ internal fun DateTimeField(
             disabledSupportingTextColor = if (isRequired) {
                 Color.Red
             } else {
-                Color.Unspecified
+                MaterialTheme.colorScheme.onSurface
             }
         )
     } else {
         OutlinedTextFieldDefaults.colors(
+            disabledLabelColor = MaterialTheme.colorScheme.onSurface,
+            disabledTextColor = MaterialTheme.colorScheme.onSurface,
+            disabledBorderColor = MaterialTheme.colorScheme.onSurface,
             focusedSupportingTextColor = if (isRequired) {
                 Color.Red
             } else {
@@ -98,14 +108,29 @@ internal fun DateTimeField(
             disabledSupportingTextColor = if (isRequired) {
                 Color.Red
             } else {
-                Color.Unspecified
+                MaterialTheme.colorScheme.onSurface
             }
         )
     }
     
-    if (showDatePickerDialog) {
-        DateTimePicker(state)
-    } else if (isEditable) {
+    val pickerStyle = if (state.shouldShowTime) {
+        DateTimePickerStyle.DateTime
+    } else {
+        DateTimePickerStyle.Date
+    }
+    val pickerState = DateTimePickerState(
+        pickerStyle,
+        state.minEpochMillis,
+        state.maxEpochMillis,
+        state.value.value,
+        state.label,
+        state.description
+    ) {
+        state.setValue(it)
+    }
+    
+    DateTimePicker(pickerState)
+    if (isEditable) {
         Column(
             modifier = modifier
                 .fillMaxSize()
@@ -117,8 +142,11 @@ internal fun DateTimeField(
                 modifier = Modifier
                     .fillMaxSize()
                     .focusable(false)
-                    .clickable { showDatePickerDialog = true },
+                    .clickable {
+                        pickerState.setVisibility(true)
+                    },
                 readOnly = true,
+                enabled = false,
                 label = {
                     val text = if (isRequired) {
                         "${state.label} *"
@@ -127,19 +155,10 @@ internal fun DateTimeField(
                     }
                     Text(text = text)
                 },
-                placeholder = {
-                    Text(
-                        text = if (epochMillis == null) {
-                            stringResource(id = R.string.novalue)
-                        } else {
-                            state.placeholderText
-                        }
-                    )
-                },
                 trailingIcon = {
                     if (epochMillis != null) {
                         IconButton(
-                            onClick = { state.resetValue() },
+                            onClick = { state.clearValue() },
                             modifier = Modifier.semantics { contentDescription = "Clear text button" }
                         ) {
                             Icon(
@@ -149,7 +168,7 @@ internal fun DateTimeField(
                         }
                     } else {
                         IconButton(
-                            onClick = { showDatePickerDialog = true },
+                            onClick = { pickerState.setVisibility(true) },
                             modifier = Modifier.semantics { contentDescription = "Show datetime picker" }
                         ) {
                             Icon(
@@ -171,33 +190,45 @@ internal fun DateTimeField(
             )
         }
     } else {
-        println("${state.label} is immutable")
         ImmutableDate(
             valueString = epochMillis?.formattedDateTime() ?: stringResource(id = R.string.novalue),
             label = state.label,
-            supportingText = state.description
+            supportingText = state.description,
+            colors = textFieldColors
         )
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun DateTimePicker(state: DateTimeFieldState) {
+internal fun DateTimePicker(state: DateTimePickerState) {
     
-    val initialValue by state.value
+    val initialValue = state.value
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = initialValue
     )
-    
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        DatePickerDialog(
-            onDismissRequest = {},
-            confirmButton = {},
-        ) {
-            DatePicker(
-                state = datePickerState
-            )
-            
+    if (state.visible.value) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            DatePickerDialog(
+                onDismissRequest = {},
+                dismissButton = {
+                    Text(text = "Dismiss", modifier = Modifier.clickable {
+                        state.setVisibility(false)
+                    })
+                },
+                confirmButton = {
+                    Text(text = "Confirm", modifier = Modifier.clickable {
+                        datePickerState.selectedDateMillis?.let {
+                            state.onValueSet(it)
+                        }
+                    })
+                },
+            ) {
+                DatePicker(
+                    state = datePickerState
+                )
+                
+            }
         }
     }
 }
@@ -208,7 +239,8 @@ internal fun DateTimePicker(state: DateTimeFieldState) {
 private fun ImmutableDate(
     valueString: String,
     label: String,
-    supportingText: String
+    supportingText: String,
+    colors: TextFieldColors = OutlinedTextFieldDefaults.colors()
 ) {
     Column(
         modifier = Modifier
@@ -219,11 +251,13 @@ private fun ImmutableDate(
             value = valueString,
             onValueChange = {},
             modifier = Modifier
-                .fillMaxWidth(),
-            enabled = false,
+                .fillMaxWidth()
+                .focusable(true),
+            //enabled = false,
             readOnly = true,
             label = { Text(text = label) },
             supportingText = { Text(text = supportingText) },
+            colors = colors
         )
     }
 }
