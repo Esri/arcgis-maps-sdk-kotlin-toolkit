@@ -51,6 +51,7 @@ dependencies {
     implementation(libs.bundles.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.material.icons)
     // TODO: remove this, only for serialization before core has support
     implementation(libs.bundles.serialization)
     testImplementation(libs.bundles.unitTest)
