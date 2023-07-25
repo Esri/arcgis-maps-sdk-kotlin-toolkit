@@ -125,7 +125,7 @@ class FormTextFieldTests {
             }
         
         composeTestRule.setContent {
-            FormTextField(state = FormTextFieldState(fieldFeatureFormElement, LocalContext.current))
+            FormTextField(state = FormTextFieldState(fieldFeatureFormElement, featureFormDefinition, LocalContext.current))
         }
         
         val label = composeTestRule.onNodeWithContentDescription(labelSemanticLabel)
@@ -151,7 +151,7 @@ class FormTextFieldTests {
             }
         
         composeTestRule.setContent {
-            FormTextField(state = FormTextFieldState(fieldFeatureFormElement, LocalContext.current))
+            FormTextField(state = FormTextFieldState(fieldFeatureFormElement, featureFormDefinition, LocalContext.current))
         }
         
         val outlinedTextField = composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
@@ -182,7 +182,7 @@ class FormTextFieldTests {
             }
         
         composeTestRule.setContent {
-            FormTextField(state = FormTextFieldState(fieldFeatureFormElement, LocalContext.current))
+            FormTextField(state = FormTextFieldState(fieldFeatureFormElement, featureFormDefinition, LocalContext.current))
         }
         
         val outlinedTextField = composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
@@ -222,7 +222,7 @@ class FormTextFieldTests {
             }
         
         composeTestRule.setContent {
-            FormTextField(state = FormTextFieldState(fieldFeatureFormElement, LocalContext.current))
+            FormTextField(state = FormTextFieldState(fieldFeatureFormElement, featureFormDefinition, LocalContext.current))
         }
         
         val outlinedTextField = composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
@@ -264,7 +264,7 @@ class FormTextFieldTests {
             }
         
         composeTestRule.setContent {
-            FormTextField(state = FormTextFieldState(fieldFeatureFormElement, LocalContext.current))
+            FormTextField(state = FormTextFieldState(fieldFeatureFormElement, featureFormDefinition, LocalContext.current))
         }
     
         val maxLength = (fieldFeatureFormElement.inputType as TextBoxFeatureFormInput).maxLength.toInt()
@@ -311,7 +311,7 @@ class FormTextFieldTests {
             }
         
         composeTestRule.setContent {
-            FormTextField(state = FormTextFieldState(fieldFeatureFormElement, LocalContext.current))
+            FormTextField(state = FormTextFieldState(fieldFeatureFormElement, featureFormDefinition, LocalContext.current))
         }
         
         val outlinedTextField = composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)

@@ -46,18 +46,18 @@ public class FieldFeatureFormElement internal constructor(
     // No way to construct a Domain without core.
 //    @Serializable(with = DomainSerializer::class)
 //    var domain: Domain,
-    public var editableExpressionName: String ="",
+    public var editableExpression: String ="",
+    @SerialName("editable")
+    public var isEditable: Boolean = editableExpression.isNotEmpty(),
     public var fieldName: String,
     public val inputType: FeatureFormInput,
     public var value: String = "",
-    public var requiredExpressionName: String = "",
+    public var requiredExpression: String = "",
     public var valueExpressionName: String = "",
     public var hint: String = ""
     ) : FeatureFormElement {
     //region Properties
     
-    @Transient
-    public val isEditable: Boolean = true
     
     @Transient
     public var feature: ArcGISFeature? = null
