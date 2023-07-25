@@ -26,8 +26,6 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.TimeZone
 
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun FormDateTimeField(value: Long?) {
     val datePattern = "MMM d, y HH:mm a"
@@ -38,8 +36,8 @@ internal fun FormDateTimeField(value: Long?) {
             } else "Pick a date"
         )
     }
-    var openDialog by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
+    val dateTimePickerState = remember { DateTimePickerState(PickerType.DateTime) }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -55,12 +53,10 @@ internal fun FormDateTimeField(value: Long?) {
     }
 
     if (interactionSource.collectIsPressedAsState().value) {
-        openDialog = true
+        dateTimePickerState.setVisibility(true)
     }
 
-    if (openDialog) {
-        DateTimePicker(dateTimePickerState = DateTimePickerState(DateTimePickerState.PickerType.DateTime))
-    }
+    DateTimePicker(dateTimePickerState = dateTimePickerState)
 }
 
 private fun Instant.format(pattern: String): String {
