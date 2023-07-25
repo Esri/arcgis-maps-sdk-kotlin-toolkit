@@ -39,6 +39,58 @@ private const val RESULT_CODE_CANCELED = 2
  * An activity that is responsible for launching a CustomTabs activity and to receive and process
  * the redirect intent as a result of a user completing the CustomTabs prompt.
  *
+ * This activity must be registered in your application's manifest. There are two ways to configure
+ * the manifest entry for [OAuthUserSignInActivity]:
+ *
+ * The most common use case is that completing an OAuth challenge by signing in using the CustomTabs
+ * browser should redirect back to this activity immediately and allow the `OAuthAuthenticator` to
+ * immediately handle the completion of the challenge. In this case, the activity should be declared
+ * in the manifest using `launchMode="singleTop"` and an `intent-filter` should be specified:
+ *
+ * ```
+ * <activity
+ * android:name="com.arcgismaps.toolkit.authentication.OAuthUserSignInActivity"
+ * android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+ * android:exported="true"
+ * android:launchMode="singleTop" >
+ *   <intent-filter>
+ *     <action android:name="android.intent.action.VIEW" />
+ *
+ *     <category android:name="android.intent.category.DEFAULT" />
+ *     <category android:name="android.intent.category.BROWSABLE" />
+ *
+ *     <data
+ *       android:host="auth"
+ *       android:scheme="my-ags-app" />
+ *     </intent-filter>
+ * </activity>
+ * ```
+ *
+ * Should your app require that the redirect intent from the browser is handled by another activity,
+ * then you should remove the intent filter from the `OAuthUserSignInActivity` and put it in the activity
+ * that you want the browser to redirect to. Depending on your app's configuration, you may need to
+ * change the launch mode to `singleInstance`, but be aware that this will expose the browser as a
+ * separate task in the recent tasks list.
+ *
+ * ```
+ * <activity
+ * android:name="com.arcgismaps.toolkit.authentication.OAuthUserSignInActivity"
+ * android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+ * android:exported="true"
+ * android:launchMode="singleTop" >
+ * </activity>
+ * ```
+ *
+ * Then, in the app that receives the intent, you can pass that on to the `OAuthUserSignInActivity`
+ * by copying the `intent.data` and starting the activity directly:
+ *
+ * ```
+ * val newIntent = Intent(this, OAuthUserSignInActivity::class.java).apply {
+ *   data = uri
+ * }
+ * startActivity(newIntent)
+ * ```
+ *
  * @since 200.2.0
  */
 public class OAuthUserSignInActivity : ComponentActivity() {
@@ -51,8 +103,7 @@ public class OAuthUserSignInActivity : ComponentActivity() {
             authorizeUrl?.let {
                 launchCustomTabs(it)
             }
-        }
-        else {
+        } else {
             handleRedirectIntent(intent)
         }
     }
