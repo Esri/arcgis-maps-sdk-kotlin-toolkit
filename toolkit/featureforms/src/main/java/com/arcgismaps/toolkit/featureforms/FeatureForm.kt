@@ -17,8 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.toolkit.featureforms.api.FeatureFormDefinition
-import com.arcgismaps.toolkit.featureforms.api.FieldFeatureFormElement
+import com.arcgismaps.mapping.featureforms.FeatureForm
+import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
 
 /**
@@ -33,9 +33,9 @@ public fun FeatureForm(
     featureFormState: FeatureFormState,
     modifier: Modifier = Modifier
 ) {
-    val featureFormDefinition by featureFormState.formDefinition.collectAsState()
-    featureFormDefinition?.let {
-        FeatureFormContent(formDefinition = it, modifier = modifier)
+    val featureForm by featureFormState.featureForm.collectAsState()
+    featureForm?.let {
+        FeatureFormContent(form = it, modifier = modifier)
     } ?: run {
         Column(
             modifier = modifier.fillMaxSize()
@@ -47,7 +47,7 @@ public fun FeatureForm(
 
 @Composable
 internal fun FeatureFormContent(
-    formDefinition: FeatureFormDefinition,
+    form: FeatureForm,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -55,7 +55,7 @@ internal fun FeatureFormContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // title
-        Text(text = formDefinition.title, style = TextStyle(fontWeight = FontWeight.Bold))
+        Text(text = form.title, style = TextStyle(fontWeight = FontWeight.Bold))
         Spacer(
             modifier = Modifier
                 .fillMaxWidth()
@@ -64,11 +64,11 @@ internal fun FeatureFormContent(
         Divider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
         // form content
         LazyColumn(modifier = Modifier.fillMaxSize()) {
-            items(formDefinition.formElements) { formElement ->
-                if (formElement is FieldFeatureFormElement) {
+            items(form.elements) { formElement ->
+                if (formElement is FieldFormElement) {
                     FieldElement(
                         field = formElement,
-                        formDefinition = formDefinition
+                        form = form
                     )
                 }
             }

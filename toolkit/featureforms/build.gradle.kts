@@ -51,8 +51,6 @@ dependencies {
     implementation(libs.bundles.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
-    // TODO: remove this, only for serialization before core has support
-    implementation(libs.bundles.serialization)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
     debugImplementation(libs.bundles.debug)

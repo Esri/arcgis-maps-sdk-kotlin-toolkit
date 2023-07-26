@@ -4,12 +4,16 @@ import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
+import com.arcgismaps.data.Feature
+import com.arcgismaps.data.FieldType
+import com.arcgismaps.mapping.featureforms.FeatureForm
+import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.mapping.featureforms.TextAreaFormInput
+import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.R
-import com.arcgismaps.toolkit.featureforms.api.FeatureFormDefinition
-import com.arcgismaps.toolkit.featureforms.api.FieldFeatureFormElement
-import com.arcgismaps.toolkit.featureforms.api.TextAreaFeatureFormInput
-import com.arcgismaps.toolkit.featureforms.api.TextBoxFeatureFormInput
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
+import kotlin.math.roundToInt
+import kotlin.math.roundToLong
 
 /**
  * State for the [FormTextField]
@@ -94,23 +98,23 @@ internal interface FormTextFieldState {
  * @param featureFormElement the form element.
  * @param context a Context scoped to the lifetime of a call to the [FieldElement] composable function.
  */
-internal fun FormTextFieldState(featureFormElement: FieldFeatureFormElement,
-                                formDefinition: FeatureFormDefinition,
+internal fun FormTextFieldState(featureFormElement: FieldFormElement,
+                                form: FeatureForm,
                                 context: Context): FormTextFieldState =
-    FormTextFieldStateImpl(featureFormElement, formDefinition, context)
+    FormTextFieldStateImpl(featureFormElement, form, context)
 
 /**
  * Default implementation for the [FormTextFieldState]. See [FormTextFieldState()] for the factory.
  *
- * @param featureFormElement the form element.
+ * @param formElement the form element.
  * @property context a Context scoped to the lifetime of a call to the [FieldElement] composable function.
  */
 private class FormTextFieldStateImpl(
-    private val featureFormElement: FieldFeatureFormElement,
-    private val featureFormDefinition: FeatureFormDefinition,
+    private val formElement: FieldFormElement,
+    private val featureForm: FeatureForm,
     private val context: Context
 ) : FormTextFieldState {
-    private val _value = mutableStateOf(featureFormElement.value)
+    private val _value = mutableStateOf(formElement.value)
     override val value: State<String> = _value
     
     private val _isFocused = mutableStateOf(false)
@@ -123,28 +127,28 @@ private class FormTextFieldStateImpl(
     override val hasError: State<Boolean> = _hasError
     
     // set the label from the FieldFeatureFormElement
-    override val label = featureFormElement.label
+    override val label = formElement.label
     
     // set the description from the FieldFeatureFormElement
-    override val description = featureFormElement.description
+    override val description = formElement.description
     
     // set the placeholder from the FieldFeatureFormElement
-    override val placeholder = featureFormElement.hint
+    override val placeholder = formElement.hint
     
     // indicates singleLine only if TextBoxFeatureFormInput
-    override val singleLine = featureFormElement.inputType is TextBoxFeatureFormInput
+    override val singleLine = formElement.input is TextBoxFormInput
     
     // fetch the minLength based on the featureFormElement.inputType
-    override val minLength = when (featureFormElement.inputType) {
-        is TextAreaFeatureFormInput -> featureFormElement.inputType.minLength
-        is TextBoxFeatureFormInput -> featureFormElement.inputType.minLength
+    override val minLength = when (formElement.input) {
+        is TextAreaFormInput -> (formElement.input as TextAreaFormInput).minLength
+        is TextBoxFormInput -> (formElement.input as TextBoxFormInput).minLength
         else -> throw IllegalArgumentException()
     }.toInt()
     
     // fetch the maxLength based on the featureFormElement.inputType
-    override val maxLength = when (featureFormElement.inputType) {
-        is TextAreaFeatureFormInput -> featureFormElement.inputType.maxLength
-        is TextBoxFeatureFormInput -> featureFormElement.inputType.maxLength
+    override val maxLength = when (formElement.input) {
+        is TextAreaFormInput -> (formElement.input as TextAreaFormInput).maxLength
+        is TextBoxFormInput -> (formElement.input as TextBoxFormInput).maxLength
         else -> throw IllegalArgumentException()
     }.toInt()
     
@@ -210,6 +214,71 @@ private class FormTextFieldStateImpl(
      * and refresh the feature.
      */
     private fun editValue(value: Any?) {
-        featureFormDefinition.editValue(featureFormElement, value)
+        featureForm.editValue(formElement, value)
     }
+}
+
+/**
+ * Set the value in the feature's attribute map. This call can only be made when a transaction is open.
+ * Committing the transaction will either discard this edit or persist it in the associated geodatabase,
+ * and refresh the feature.
+ *
+ * This call is likely to be pushed into core.
+ */
+internal fun FeatureForm.editValue(formElement: FieldFormElement, value: Any?) {
+    feature.castAndSetAttributeValue(value, formElement.fieldName)
+}
+
+
+private fun Feature.castAndSetAttributeValue(value: Any?, key: String) {
+    val field = featureTable?.getField(key) ?: run {
+        attributes[key] = value
+        return
+    }
+    
+    var finalValue = value
+    when (field.fieldType) {
+        FieldType.Int16 -> {
+            finalValue = when (value) {
+                is String -> value.toIntOrNull()?.toShort()
+                is Int -> value.toShort()
+                is Double -> value.roundToInt().toShort()
+                else -> null
+            }
+        }
+        FieldType.Int32 -> {
+            finalValue = when (value) {
+                is String -> value.toIntOrNull()
+                is Int -> value
+                is Double -> value.roundToInt()
+                else -> null
+            }
+        }
+        FieldType.Int64 -> {
+            finalValue = when (value) {
+                is String -> value.toLongOrNull()
+                is Int -> value.toLong()
+                is Double -> value.roundToLong()
+                else -> null
+            }
+        }
+        FieldType.Float32 -> {
+            finalValue = when (value) {
+                is String -> value.toFloatOrNull()
+                is Int -> value.toFloat()
+                is Double -> value.toFloat()
+                else -> null
+            }
+        }
+        FieldType.Float64 -> {
+            finalValue = when (value) {
+                is String -> value.toDoubleOrNull()
+                is Int -> value.toDouble()
+                is Float -> value.toDouble()
+                else -> null
+            }
+        }
+        else -> Unit
+    }
+    attributes[key] = finalValue
 }
