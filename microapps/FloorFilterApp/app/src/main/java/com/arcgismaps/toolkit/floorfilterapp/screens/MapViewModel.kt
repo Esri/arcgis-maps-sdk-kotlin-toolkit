@@ -20,6 +20,8 @@ package com.arcgismaps.toolkit.floorfilterapp.screens
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.arcgismaps.geometry.Envelope
+import com.arcgismaps.geometry.Geometry
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.view.MapView
@@ -41,20 +43,30 @@ class MapViewModel(
                 val floorFilterSelectionType =
                     floorFilterSelection.type as FloorFilterSelection.Type.FloorSite
                 floorFilterSelectionType.site.geometry?.let {
-                    this.setViewpoint(Viewpoint(it))
+                    this.setViewpoint(Viewpoint(getEnvelopeWithBuffer(it)))
                 }
             }
             is FloorFilterSelection.Type.FloorFacility -> {
                 val floorFilterSelectionType =
                     floorFilterSelection.type as FloorFilterSelection.Type.FloorFacility
                 floorFilterSelectionType.facility.geometry?.let {
-                    this.setViewpoint(Viewpoint(it))
+                    this.setViewpoint(Viewpoint(getEnvelopeWithBuffer(it)))
                 }
             }
             else -> {}
         }
     }
 
+    /**
+     * Returns the envelope that has a buffer factor applied to the given Geometry's extent.
+     *
+     * @since 200.2.0
+     */
+    private fun getEnvelopeWithBuffer(geometry: Geometry): Envelope {
+        val bufferFactor = 1.25
+        val envelope = geometry.extent
+        return Envelope(envelope.center, envelope.width * bufferFactor, envelope.height * bufferFactor)
+    }
 }
 
 class MapViewModelFactory(
