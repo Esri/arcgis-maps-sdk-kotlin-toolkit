@@ -47,6 +47,9 @@ public sealed interface FloorFilterState {
 
     public val onFacilityChanged: StateFlow<FloorFacility?>
     public val onLevelChanged: StateFlow<FloorLevel?>
+
+    public fun getSelectedSite(): FloorSite?
+    public fun getSelectedFacility(): FloorFacility?
 }
 
 /**
@@ -55,8 +58,9 @@ public sealed interface FloorFilterState {
  * @since 200.2.0
  */
 private class FloorFilterStateImpl(
-    var mapInterface: MapInterface,
-    var coroutineScope: CoroutineScope
+    var geoModel: GeoModel,
+    var coroutineScope: CoroutineScope,
+    var onSelectionChangeListener: (FloorFilterSelection) -> Unit
 ) : FloorFilterState {
 
     private val _floorManager: MutableStateFlow<FloorManager?> = MutableStateFlow(null)
@@ -111,7 +115,11 @@ private class FloorFilterStateImpl(
         set(value) {
             _selectedSiteId = value
             selectedFacilityId = null
-            zoomToSite()
+            coroutineScope.launch {
+                getSelectedSite()?.let {
+                    onSelectionChangeListener.invoke(FloorFilterSelection(FloorFilterSelection.Type.FloorSite(it)))
+                }
+            }
         }
 
     /**
@@ -130,9 +138,11 @@ private class FloorFilterStateImpl(
                 _selectedSiteId = getSelectedFacility()?.site?.id
             }
             selectedLevelId = getDefaultLevelIdForFacility(value)
-            zoomToFacility()
             coroutineScope.launch {
                 _onFacilityChanged.emit(getSelectedFacility())
+                getSelectedFacility()?.let {
+                    onSelectionChangeListener.invoke(FloorFilterSelection(FloorFilterSelection.Type.FloorFacility(it)))
+                }
             }
         }
 
@@ -158,6 +168,9 @@ private class FloorFilterStateImpl(
             }
             coroutineScope.launch {
                 _onLevelChanged.emit(getSelectedLevel())
+                getSelectedLevel()?.let {
+                    onSelectionChangeListener.invoke(FloorFilterSelection(FloorFilterSelection.Type.FloorLevel(it)))
+                }
             }
         }
 
@@ -173,52 +186,18 @@ private class FloorFilterStateImpl(
      * @since 200.2.0
      */
     private suspend fun loadFloorManager() {
-        mapInterface.map.value.load().onSuccess {
-            val floorManager: FloorManager = mapInterface.map.value.floorManager
+        geoModel.load().onSuccess {
+            val floorManager: FloorManager = geoModel.floorManager
                 ?: throw IllegalStateException("The map is not configured to be floor aware")
             floorManager.load().onSuccess {
                 _floorManager.value = floorManager
+                // no FloorLevel is selected at this point, so clear the FloorFilter from the selected GeoModel
+                filterMap()
             }.onFailure {
                 throw it
             }
         }.onFailure {
             throw it
-        }
-    }
-
-    /**
-     * Zooms to the selected [FloorSite].
-     *
-     * @since 200.2.0
-     */
-    private fun zoomToSite() {
-        zoomToExtent(getSelectedSite()?.geometry?.extent)
-    }
-
-    /**
-     * Zooms to the selected [FloorFacility].
-     *
-     * @since 200.2.0
-     */
-    private fun zoomToFacility() {
-        zoomToExtent(getSelectedFacility()?.geometry?.extent)
-    }
-
-    /**
-     * Zooms the mapview to the [envelope].
-     *
-     * @since 200.2.0
-     */
-    private fun zoomToExtent(envelope: Envelope?, bufferFactor: Double = 1.25) {
-        if (envelope != null && !envelope.isEmpty) {
-            val envelopeWithBuffer = Envelope(
-                center = envelope.center,
-                width = envelope.width * bufferFactor,
-                height = envelope.height * bufferFactor
-            )
-            if (!envelopeWithBuffer.isEmpty) {
-                mapInterface.setViewpoint(Viewpoint(envelopeWithBuffer))
-            }
         }
     }
 
@@ -236,7 +215,7 @@ private class FloorFilterStateImpl(
      *
      * @since 200.2.0
      */
-    fun getSelectedFacility(): FloorFacility? {
+    override fun getSelectedFacility(): FloorFacility? {
         return facilities.firstOrNull { isFacilitySelected(it) }
     }
 
@@ -245,7 +224,7 @@ private class FloorFilterStateImpl(
      *
      * @since 200.2.0
      */
-    fun getSelectedSite(): FloorSite? {
+    override fun getSelectedSite(): FloorSite? {
         return sites.firstOrNull { isSiteSelected(it) }
     }
 
@@ -365,7 +344,42 @@ public enum class ButtonPosition {
  * @since 200.2.0
  */
 public fun FloorFilterState(
-    mapInterface: MapInterface,
-    coroutineScope: CoroutineScope
+    geoModel: GeoModel,
+    coroutineScope: CoroutineScope,
+    onSelectionChangeListener : (FloorFilterSelection) -> Unit
 ): FloorFilterState =
-    FloorFilterStateImpl(mapInterface, coroutineScope)
+    FloorFilterStateImpl(geoModel, coroutineScope, onSelectionChangeListener)
+
+/**
+ * The selection that was made by the user
+ *
+ * @since 200.2.0
+ */
+public data class FloorFilterSelection(public val type: Type) {
+    /**
+     * The type of Selection
+     *
+     * @since 200.2.0
+     */
+    public sealed class Type {
+        /**
+         * The FloorSite
+         *
+         * @since 200.2.0
+         */
+        public data class FloorSite(public val site: com.arcgismaps.mapping.floor.FloorSite): Type()
+        /**
+         * The FloorFacility
+         *
+         * @since 200.2.0
+         */
+        public data class FloorFacility(public val facility: com.arcgismaps.mapping.floor.FloorFacility): Type()
+        /**
+         * The FloorLevel
+         *
+         * @since 200.2.0
+         */
+        public data class FloorLevel(public val level: com.arcgismaps.mapping.floor.FloorLevel): Type()
+    }
+
+}

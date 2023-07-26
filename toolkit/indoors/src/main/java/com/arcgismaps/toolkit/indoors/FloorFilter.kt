@@ -37,9 +37,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.Center
@@ -62,12 +64,13 @@ import com.arcgismaps.mapping.GeoModel
 
 // Constants
 private val SELECTED_BACKGROUND_COLOR: Color = Color(0xFFE2F1FB) // light blue
-private val SELECTED_FOREGROUND_COLOR: Color = Color(0xFF005E95) // dark blue
+internal val SELECTED_FOREGROUND_COLOR: Color = Color(0xFF005E95) // dark blue
 private const val DEFAULT_MAX_DISPLAY_LEVELS = -1 // less than 1 will show all of the levels.
-private val DEFAULT_BUTTON_WIDTH: Float = 60.dp.value
-private val DEFAULT_BUTTON_HEIGHT: Float = 40.dp.value
+internal val DEFAULT_BUTTON_WIDTH: Float = 60.dp.value
+internal val DEFAULT_BUTTON_HEIGHT: Float = 40.dp.value
 private val DEFAULT_TEXT_COLOR: Color = Color.Black
 private val DEFAULT_BACKGROUND_COLOR: Color = Color.White
+private val DEFAULT_SEARCH_BACKGROUND_COLOR = Color(0xFFEEEEEE) // light gray
 private const val DEFAULT_BUTTON_VISIBILITY: Int = View.VISIBLE
 private val DEFAULT_CLOSE_BUTTON_POSITION = ButtonPosition.Top
 
@@ -106,8 +109,7 @@ private val DEFAULT_CLOSE_BUTTON_POSITION = ButtonPosition.Top
  *      typography = MaterialTheme.typography,
  *      selectedTextColor = Color.Red,
  *      maxDisplayLevels = 2,
- *      closeButtonPosition = ButtonPosition.Bottom,
- *      siteFacilityButtonVisibility = View.GONE
+ *      closeButtonPosition = ButtonPosition.Bottom
  * )
  * ```
  *
@@ -128,13 +130,9 @@ public fun FloorFilter(
     siteFacilityButtonVisibility: Int = DEFAULT_BUTTON_VISIBILITY,
     closeButtonPosition: ButtonPosition = DEFAULT_CLOSE_BUTTON_POSITION,
     maxDisplayLevels: Int = DEFAULT_MAX_DISPLAY_LEVELS,
-    searchBackgroundColor: Color = DEFAULT_BACKGROUND_COLOR,
-    siteSearchVisibility: Int = DEFAULT_BUTTON_VISIBILITY
+    searchBackgroundColor: Color = DEFAULT_SEARCH_BACKGROUND_COLOR
 ) {
     if (floorFilterState.floorManager.collectAsState().value == null) return
-
-    // select the first facility by default
-    floorFilterState.selectedFacilityId = floorFilterState.facilities.first().id
 
     Surface(
         modifier = modifier.semantics { contentDescription = "FloorFilterComponent" },
@@ -149,13 +147,41 @@ public fun FloorFilter(
                 .background(color = buttonBackgroundColor),
             verticalArrangement = Arrangement.Center
         ) {
+
             // displays only the selected floor when enabled
             var isFloorsCollapsed by rememberSaveable { mutableStateOf(false) }
+
+            val showSiteAndFacilitySelector = remember { mutableStateOf(false) }
+
+            // get the current selected facility
+            val selectedFacility = floorFilterState.onFacilityChanged.collectAsState().value
+
+            // get the selected level ID
+            val selectedLevelID = floorFilterState.onLevelChanged.collectAsState().value?.id
+
+            // if no facility is selected, only display site-facility selector button
+            if (selectedFacility == null) {
+                SiteFacilityButton(
+                    modifier,
+                    floorFilterState,
+                    showSiteAndFacilitySelector,
+                    buttonSize,
+                    searchBackgroundColor,
+                    buttonBackgroundColor,
+                    textColor,
+                    selectedTextColor,
+                    selectedButtonBackgroundColor,
+                    onSiteFacilitySelectorShowingChanged = { isVisible ->
+                        showSiteAndFacilitySelector.value = isVisible
+                    }
+                )
+                return@Surface
+            }
 
             // display close button if set to top, if not display facilities button
             if (closeButtonPosition == ButtonPosition.Top) {
                 // check if close button is set to visible and not collapsed
-                if (closeButtonVisibility == View.VISIBLE && !isFloorsCollapsed) {
+                if (closeButtonVisibility == View.VISIBLE && !isFloorsCollapsed && selectedFacility.levels.isNotEmpty()) {
                     FloorListCloseButton(
                         modifier,
                         buttonSize,
@@ -163,56 +189,63 @@ public fun FloorFilter(
                 }
             } else {
                 if (siteFacilityButtonVisibility == View.VISIBLE) {
-                    SiteFacilityButton(modifier, buttonSize)
+                    SiteFacilityButton(
+                        modifier,
+                        floorFilterState,
+                        showSiteAndFacilitySelector,
+                        buttonSize,
+                        searchBackgroundColor,
+                        buttonBackgroundColor,
+                        textColor,
+                        selectedTextColor,
+                        selectedButtonBackgroundColor,
+                        onSiteFacilitySelectorShowingChanged = { isVisible ->
+                            showSiteAndFacilitySelector.value = isVisible
+                        }
+                    )
                 }
             }
 
-            // get the current selected facility
-            val currentFacility = floorFilterState.onFacilityChanged.collectAsState().value
-                ?: return@Surface
+            if (selectedLevelID != null) {
+                if (!isFloorsCollapsed) {
+                    // display a list of floor levels in the selected facility
+                    FloorListColumn(
+                        modifier = modifier,
+                        maxDisplayLevels = maxDisplayLevels,
+                        currentFacility = selectedFacility,
+                        selectedLevelID = selectedLevelID,
+                        selectedTextColor = selectedTextColor,
+                        selectedButtonBackgroundColor = selectedButtonBackgroundColor,
+                        buttonBackgroundColor = buttonBackgroundColor,
+                        typography = typography,
+                        textColor = textColor,
+                        textSize = textSize,
+                        buttonSize = buttonSize,
+                        onFloorLevelSelected = { index: Int ->
+                            // update the selected level ID on click
+                            floorFilterState.selectedLevelId = selectedFacility.levels[index].id
+                        }
+                    )
 
-            // get the selected level ID
-            val selectedLevelID = floorFilterState.onLevelChanged.collectAsState().value?.id
-                ?: return@Surface
-
-            if (!isFloorsCollapsed) {
-                // display a list of floor levels in the selected facility
-                FloorListColumn(
-                    modifier = modifier,
-                    maxDisplayLevels = maxDisplayLevels,
-                    currentFacility = currentFacility,
-                    selectedLevelID = selectedLevelID,
-                    selectedTextColor = selectedTextColor,
-                    selectedButtonBackgroundColor = selectedButtonBackgroundColor,
-                    buttonBackgroundColor = buttonBackgroundColor,
-                    typography = typography,
-                    textColor = textColor,
-                    textSize = textSize,
-                    buttonSize = buttonSize,
-                    onFloorLevelSelected = { index: Int ->
-                        // update the selected level ID on click
-                        floorFilterState.selectedLevelId = currentFacility.levels[index].id
-                    }
-                )
-
-            } else {
-                // display only the selected floor level
-                FloorLevelSelectButton(
-                    index = 0,
-                    selected = true,
-                    floorText = currentFacility.levels.find { it.id == selectedLevelID }?.shortName.toString(),
-                    textSize = textSize,
-                    textColor = textColor,
-                    selectedTextColor = selectedTextColor,
-                    buttonBackgroundColor = buttonBackgroundColor,
-                    selectedButtonBackgroundColor = selectedButtonBackgroundColor,
-                    typography = typography,
-                    buttonSize = buttonSize,
-                    onFloorLevelSelected = {
-                        // display all floor levels when clicked
-                        isFloorsCollapsed = false
-                    }
-                )
+                } else {
+                    // display only the selected floor level
+                    FloorLevelSelectButton(
+                        index = 0,
+                        selected = true,
+                        floorText = selectedFacility.levels.find { it.id == selectedLevelID }?.shortName.toString(),
+                        textSize = textSize,
+                        textColor = textColor,
+                        selectedTextColor = selectedTextColor,
+                        buttonBackgroundColor = buttonBackgroundColor,
+                        selectedButtonBackgroundColor = selectedButtonBackgroundColor,
+                        typography = typography,
+                        buttonSize = buttonSize,
+                        onFloorLevelSelected = {
+                            // display all floor levels when clicked
+                            isFloorsCollapsed = false
+                        }
+                    )
+                }
             }
 
             // display close button if set to bottom, if not display facilities button
@@ -225,7 +258,20 @@ public fun FloorFilter(
                 }
             } else {
                 if (siteFacilityButtonVisibility == View.VISIBLE) {
-                    SiteFacilityButton(modifier, buttonSize)
+                    SiteFacilityButton(
+                        modifier,
+                        floorFilterState,
+                        showSiteAndFacilitySelector,
+                        buttonSize,
+                        searchBackgroundColor,
+                        buttonBackgroundColor,
+                        textColor,
+                        selectedTextColor,
+                        selectedButtonBackgroundColor,
+                        onSiteFacilitySelectorShowingChanged = { isVisible ->
+                            showSiteAndFacilitySelector.value = isVisible
+                        }
+                    )
                 }
             }
         }
@@ -288,7 +334,19 @@ internal fun FloorListColumn(
  * @since 200.2.0
  */
 @Composable
-internal fun SiteFacilityButton(modifier: Modifier, buttonSize: Size) {
+internal fun SiteFacilityButton(
+    modifier: Modifier,
+    floorFilterState: FloorFilterState,
+    showSiteAndFacilitySelector: MutableState<Boolean>,
+    buttonSize: Size,
+    searchBackgroundColor: Color,
+    buttonBackgroundColor: Color,
+    textColor: Color,
+    selectedTextColor: Color,
+    selectedButtonBackgroundColor: Color,
+    onSiteFacilitySelectorShowingChanged: (Boolean) -> Unit
+) {
+
     Box(modifier.height(buttonSize.height.dp)) {
         Icon(
             painter = painterResource(id = R.drawable.ic_site_facility_24),
@@ -299,8 +357,20 @@ internal fun SiteFacilityButton(modifier: Modifier, buttonSize: Size) {
                 .width(buttonSize.width.dp)
                 .wrapContentSize(Center)
                 .clickable {
-                    // TODO: Implement facility search dialog
+                    showSiteAndFacilitySelector.value = true
                 }
+        )
+    }
+    if (showSiteAndFacilitySelector.value) {
+        SiteAndFacilitySelector(
+            floorFilterState = floorFilterState,
+            isSelectorShowing = showSiteAndFacilitySelector,
+            searchBackgroundColor = searchBackgroundColor,
+            buttonBackgroundColor = buttonBackgroundColor,
+            textColor = textColor,
+            selectedTextColor = selectedTextColor,
+            selectedButtonBackgroundColor = selectedButtonBackgroundColor,
+            onSiteFacilitySelectorShowingChanged = onSiteFacilitySelectorShowingChanged
         )
     }
 }
