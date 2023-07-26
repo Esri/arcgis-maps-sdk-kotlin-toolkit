@@ -18,7 +18,6 @@
 
 package com.arcgismaps.toolkit.featureforms.components.datetime.picker
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -33,6 +32,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerState
+import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -48,6 +48,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -67,18 +68,36 @@ import java.util.TimeZone
 @Composable
 internal fun DateTimePicker(state: DateTimePickerState) {
     // time instant in UTC
-    val instant = state.value?.let { Instant.ofEpochMilli(it) } ?: Instant.now()
-    // time in current time zone
-    val zonedDateTime = instant.atZone(TimeZone.getDefault().toZoneId())
+    val instant = state.value.value?.let { Instant.ofEpochMilli(it) } ?: Instant.now()
+    // current time zone
+    val timeZone = TimeZone.getDefault()
     // current time zone offset compared to UTC
-    val offset = TimeZone.getDefault().getOffset(instant.toEpochMilli())
-    val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = state.value?.plus(offset)
-    )
-    val timePickerState = rememberTimePickerState(
-        initialHour = zonedDateTime.hour,
-        initialMinute = zonedDateTime.minute
-    )
+    val offset = timeZone.getOffset(instant.toEpochMilli())
+    // time in current time zone
+    val zonedDateTime = instant.atZone(timeZone.toZoneId())
+
+    val datePickerState = rememberSaveable(
+        instant,
+        saver = DatePickerState.Saver()
+    ) {
+        DatePickerState(
+            initialSelectedDateMillis = state.value.value?.plus(offset),
+            null,
+            DatePickerDefaults.YearRange,
+            DisplayMode.Picker
+        )
+    }
+
+    val timePickerState = rememberSaveable(
+        instant,
+        saver = TimePickerState.Saver()
+    ) {
+        TimePickerState(
+            initialHour = zonedDateTime.hour,
+            initialMinute = zonedDateTime.minute,
+            is24Hour = false,
+        )
+    }
     // calculate which picker to show by default
     val calculateActivePicker = {
         if (state.pickerStyle == DateTimePickerStyle.DateTime
@@ -122,7 +141,12 @@ internal fun DateTimePicker(state: DateTimePickerState) {
                 if (activePicker == DateTimePickerStyle.Date) {
                     TextButton(
                         onClick = {
-
+                            // only reset the date
+                            val today = Instant.now().atZone(timeZone.toZoneId())
+                                .withHour(zonedDateTime.hour)
+                                .withMinute(zonedDateTime.minute)
+                                .withSecond(zonedDateTime.second)
+                            state.setValue(today.toInstant().toEpochMilli())
                         }
                     ) {
                         Text("Today")
@@ -130,7 +154,13 @@ internal fun DateTimePicker(state: DateTimePickerState) {
                 } else {
                     TextButton(
                         onClick = {
-
+                            // only reset the time
+                            val today = Instant.now().atZone(timeZone.toZoneId())
+                                .withDayOfYear(zonedDateTime.dayOfYear)
+                                .withDayOfMonth(zonedDateTime.dayOfMonth)
+                                .withMonth(zonedDateTime.monthValue)
+                                .withYear(zonedDateTime.year)
+                            state.setValue(today.toInstant().toEpochMilli())
                         }
                     ) {
                         Text("Now")
@@ -145,6 +175,11 @@ internal fun DateTimePicker(state: DateTimePickerState) {
                 TextButton(
                     onClick = {
                         state.setVisibility(false)
+                        // remove offset before sending
+                        val pickedDate = datePickerState.selectedDateMillis
+                        val pickedTime = (timePickerState.hour*60*60*1000) + (timePickerState.minute*60*1000)
+                        val pickedMilli = (pickedDate ?: 0) + pickedTime
+                        state.onValueSet(pickedMilli)
                     },
                     enabled = confirmEnabled
                 ) {
