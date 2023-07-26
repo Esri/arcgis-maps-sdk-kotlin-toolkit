@@ -57,10 +57,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
+import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.datetime.toZonedDateTime
 import java.time.Instant
 import java.util.TimeZone
@@ -283,19 +285,19 @@ private fun PickerFooter(
     ) {
         if (picker == PickerInput.Date) {
             TextButton(onClick = onToday) {
-                Text("Today")
+                Text(stringResource(R.string.today))
             }
         } else {
             TextButton(onClick = onNow) {
-                Text("Now")
+                Text(stringResource(R.string.now))
             }
         }
         Spacer(modifier = Modifier.weight(1f))
         TextButton(onClick = onCancelled) {
-            Text("Cancel")
+            Text(stringResource(R.string.cancel))
         }
         TextButton(onClick = onConfirmed, enabled = confirmEnabled) {
-            Text("OK")
+            Text(stringResource(R.string.ok))
         }
     }
 }
