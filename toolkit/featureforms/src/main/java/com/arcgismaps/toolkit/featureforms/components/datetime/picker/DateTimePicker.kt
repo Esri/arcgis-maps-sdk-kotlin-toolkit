@@ -65,6 +65,32 @@ import androidx.compose.ui.window.DialogProperties
 import java.time.Instant
 import java.util.TimeZone
 
+/**
+ * Defines the style of [DateTimePicker]
+ */
+internal enum class DateTimePickerStyle {
+    /**
+     * Date only picker style.
+     */
+    Date,
+
+    /**
+     * Time only picker style.
+     */
+    Time,
+
+    /**
+     * Date and Time picker style.
+     */
+    DateTime
+}
+
+/**
+ * A material3 date and time picker presented as an [AlertDialog]
+ *
+ * @param state a state of the DateTimePicker. see [DateTimePickerState]
+ *
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun DateTimePicker(state: DateTimePickerState) {
@@ -78,7 +104,7 @@ internal fun DateTimePicker(state: DateTimePickerState) {
     val timeZoneOffset = timeZone.getOffset(instant.toEpochMilli())
     // time in current time zone
     val zonedDateTime = instant.atZone(timeZone.toZoneId())
-    Log.e("TAG", "DateTimePicker: $zonedDateTime", )
+    Log.e("TAG", "DateTimePicker: $zonedDateTime")
     // create and remember a DatePickerState that resets when instant changes
     val datePickerState = rememberSaveable(instant, saver = DatePickerState.Saver()) {
         DatePickerState(
@@ -122,9 +148,11 @@ internal fun DateTimePicker(state: DateTimePickerState) {
                 style = state.pickerStyle,
                 picker = activePickerInput,
             ) {
-                activePickerInput = if (activePickerInput == PickerInput.Date)
+                activePickerInput = if (activePickerInput == PickerInput.Date) {
                     PickerInput.Time
-                else PickerInput.Date
+                } else {
+                    PickerInput.Date
+                }
             }
             PickerFooter(
                 picker = activePickerInput,
@@ -140,11 +168,9 @@ internal fun DateTimePicker(state: DateTimePickerState) {
                 onNow = {
                     // only reset the time
                     val zonedNow = Instant.now().atZone(timeZone.toZoneId())
-                        .withDayOfYear(zonedDateTime.dayOfYear)
-                        .withDayOfMonth(zonedDateTime.dayOfMonth)
-                        .withMonth(zonedDateTime.monthValue)
                         .withYear(zonedDateTime.year)
-                    Log.e("TAG", "DateTimePicker: $zonedNow", )
+                        .withMonth(zonedDateTime.monthValue)
+                        .withDayOfMonth(zonedDateTime.dayOfMonth)
                     instant = zonedNow.toInstant()
                 },
                 onCancelled = {
@@ -175,29 +201,25 @@ private fun (ColumnScope).PickerContent(
     timePickerState: TimePickerState,
     style: DateTimePickerStyle,
     picker: PickerInput,
-    onSwitchTap: () -> Unit
+    onPickerSwitch: () -> Unit
 ) {
-    if (picker == PickerInput.Time) {
+    val title: @Composable (ImageVector?) -> Unit = {
         PickerTitle(
             label = label,
             description = description,
-            icon = if (style == DateTimePickerStyle.Time) null else Icons.Rounded.CalendarMonth,
-            onIconTap = onSwitchTap
+            icon = it,
+            onIconTap = onPickerSwitch
         )
+    }
+    if (picker == PickerInput.Time) {
+        title(if (style == DateTimePickerStyle.Time) null else Icons.Rounded.CalendarMonth)
         Spacer(modifier = Modifier.height(10.dp))
         TimePicker(state = timePickerState, modifier = Modifier.weight(1f, fill = false))
     } else {
         DatePicker(
             state = datePickerState,
             modifier = Modifier.weight(1f, fill = false),
-            title = {
-                PickerTitle(
-                    label = label,
-                    description = description,
-                    icon = if (style == DateTimePickerStyle.Date) null else Icons.Rounded.AccessTime,
-                    onIconTap = onSwitchTap
-                )
-            }
+            title = { title(if (style == DateTimePickerStyle.Date) null else Icons.Rounded.AccessTime) }
         )
     }
 }
@@ -302,12 +324,6 @@ private fun DateTimePickerDialog(
 private object DateTimePickerDialogTokens {
     val containerHeight = 568.0.dp
     val containerWidth = 360.0.dp
-}
-
-internal enum class DateTimePickerStyle {
-    Date,
-    Time,
-    DateTime
 }
 
 private enum class PickerInput {
