@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import com.arcgismaps.data.Feature
 import com.arcgismaps.data.FieldType
 import com.arcgismaps.mapping.featureforms.FeatureForm
+import com.arcgismaps.mapping.featureforms.FeatureFormDefinition
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
@@ -114,7 +115,11 @@ private class FormTextFieldStateImpl(
     private val featureForm: FeatureForm,
     private val context: Context
 ) : FormTextFieldState {
-    private val _value = mutableStateOf(formElement.value)
+    private val _value = mutableStateOf(formElement.value.ifEmpty {
+        // "prime" the value until expressions can be evaluated to populate the value.
+        // TODO: remove this when the value is provided by expression evaluation.
+        featureForm.getElementValue(formElement)?.toString() ?: ""
+    })
     override val value: State<String> = _value
     
     private val _isFocused = mutableStateOf(false)
@@ -216,6 +221,15 @@ private class FormTextFieldStateImpl(
     private fun editValue(value: Any?) {
         featureForm.editValue(formElement, value)
     }
+}
+
+/**
+ * Retrieve the value of a [FieldFormElement] from the [FeatureFormDefinition].
+ * This call is likely to be pushed into core.
+ */
+@Suppress("unused")
+internal fun FeatureForm.getElementValue(formElement: FieldFormElement): Any? {
+    return feature.attributes[formElement.fieldName]
 }
 
 /**
