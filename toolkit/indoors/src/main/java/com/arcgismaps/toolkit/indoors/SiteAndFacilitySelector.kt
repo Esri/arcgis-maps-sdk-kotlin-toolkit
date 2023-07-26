@@ -82,28 +82,28 @@ import com.arcgismaps.mapping.floor.FloorSite
 @Composable
 internal fun SiteAndFacilitySelector(
     floorFilterState: FloorFilterState,
-    isSelectorShowing: MutableState<Boolean>,
+    isSiteFacilitySelectorVisible: Boolean,
     searchBackgroundColor: Color,
     buttonBackgroundColor: Color,
     textColor: Color,
     selectedTextColor: Color,
     selectedButtonBackgroundColor: Color,
-    onSiteFacilitySelectorShowingChanged: (Boolean) -> Unit
+    onSiteFacilitySelectorVisibilityChanged: (Boolean) -> Unit
 ) {
     // boolean toggle to display either the sites selector or the facilities selector,
     // display sites selector by default when set to false, and sites selector when set to true.
-    val isFacilitiesSelectorShowing = remember { mutableStateOf(false) }
+    val isFacilitiesSelectorVisible = remember { mutableStateOf(false) }
     // set to show facilities, if there is one selected
     if (floorFilterState.selectedSiteId != null) {
-        isFacilitiesSelectorShowing.value = true
+        isFacilitiesSelectorVisible.value = true
     }
 
     // display alert dialog when set to true
-    if (isSelectorShowing.value) {
+    if (isSiteFacilitySelectorVisible) {
         AlertDialog(
             modifier = Modifier.padding(horizontal = 24.dp),
             onDismissRequest = {
-                onSiteFacilitySelectorShowingChanged(false)
+                onSiteFacilitySelectorVisibilityChanged(false)
             },
             properties = DialogProperties(usePlatformDefaultWidth = false)
         ) {
@@ -118,11 +118,11 @@ internal fun SiteAndFacilitySelector(
                 )
                 {
                     Column {
-                        if (!isFacilitiesSelectorShowing.value) {
+                        if (!isFacilitiesSelectorVisible.value) {
                             // display the sites top bar
                             SiteSelectorTopBar(
                                 closeButtonClicked = {
-                                    onSiteFacilitySelectorShowingChanged(false)
+                                    onSiteFacilitySelectorVisibilityChanged(false)
                                 }
                             )
                             // display search list for all sites
@@ -133,10 +133,10 @@ internal fun SiteAndFacilitySelector(
                                 selectedTextColor,
                                 selectedButtonBackgroundColor,
                                 buttonBackgroundColor,
-                                isFacilitiesSelectorShowing
+                                isFacilitiesSelectorVisible
                             ) { selectedSite ->
                                 floorFilterState.selectedSiteId = selectedSite.site?.id
-                                isFacilitiesSelectorShowing.value = true
+                                isFacilitiesSelectorVisible.value = true
 
                             }
                         } else {
@@ -144,10 +144,10 @@ internal fun SiteAndFacilitySelector(
                             FacilitySelectorTopBar(
                                 floorFilterState = floorFilterState,
                                 backToSiteButtonClicked = {
-                                    isFacilitiesSelectorShowing.value = false
+                                    isFacilitiesSelectorVisible.value = false
                                 },
                                 closeButtonClicked = {
-                                    onSiteFacilitySelectorShowingChanged(false)
+                                    onSiteFacilitySelectorVisibilityChanged(false)
                                 }
                             )
                             // display search list for all facilities
@@ -158,10 +158,10 @@ internal fun SiteAndFacilitySelector(
                                 selectedTextColor,
                                 selectedButtonBackgroundColor,
                                 buttonBackgroundColor,
-                                isFacilitiesSelectorShowing
+                                isFacilitiesSelectorVisible
                             ) { selectedFacility ->
                                 floorFilterState.selectedFacilityId = selectedFacility.facility?.id
-                                onSiteFacilitySelectorShowingChanged(false)
+                                onSiteFacilitySelectorVisibilityChanged(false)
                             }
                         }
                     }
@@ -278,7 +278,7 @@ internal fun FacilitySelectorTopBar(
 }
 
 /**
- * Displays a searchable text input with a list of facilities if [isShowingFacilities] or else sites.
+ * Displays a searchable text input with a list of facilities if [isFacilitiesSelectorVisible] or else sites.
  * The search input filters sites/facilities to display relevant results,
  * and updates the [floorFilterState] when a site or facility is selected.
  *
@@ -292,7 +292,7 @@ internal fun SearchAndFilter(
     selectedTextColor: Color,
     selectedButtonBackgroundColor: Color,
     buttonBackgroundColor: Color,
-    isShowingFacilities: MutableState<Boolean>,
+    isFacilitiesSelectorVisible: MutableState<Boolean>,
     onSiteOrFacilitySelected: (SiteFacilityWrapper) -> Unit
 ) {
     // query text typed in OutlinedTextField
@@ -304,7 +304,7 @@ internal fun SearchAndFilter(
 
     // list of all the site/facility names to display when no search prompt is used
     val allSitesOrFacilities: List<SiteFacilityWrapper> =
-        if (!isShowingFacilities.value)
+        if (!isFacilitiesSelectorVisible.value)
             floorFilterState.sites.map { floorSite ->
                 SiteFacilityWrapper(
                     site = floorSite,
@@ -354,7 +354,7 @@ internal fun SearchAndFilter(
                 label = {
                     Text(
                         text =
-                        if (isShowingFacilities.value)
+                        if (isFacilitiesSelectorVisible.value)
                             stringResource(R.string.floor_filter_view_filter_hint_facilities)
                         else
                             stringResource(R.string.floor_filter_view_filter_hint_sites)
