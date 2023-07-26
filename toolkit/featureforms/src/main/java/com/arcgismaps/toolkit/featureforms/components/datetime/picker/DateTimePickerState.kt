@@ -21,18 +21,61 @@ package com.arcgismaps.toolkit.featureforms.components.datetime.picker
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 
+/**
+ * State for [DateTimePicker]. Use factory [DateTimePicker()] to create an instance.
+ */
 internal interface DateTimePickerState {
+
+    /**
+     * Minimum date time allowed in milliseconds. This should be null if no range restriction is needed.
+     */
     val minDateTime: Long?
+
+    /**
+     * Maximum date time allowed in milliseconds. This should be null if no range restriction is needed.
+     */
     val maxDateTime: Long?
+
+    /**
+     * The initial date time value to display in milliseconds.
+     */
     val value: Long?
+
+    /**
+     * The picker style to use.
+     */
     val pickerStyle: DateTimePickerStyle
+
+    /**
+     * The label for the DateTimePicker.
+     */
     val label: String
+
+    /**
+     * The description for the DateTimePicker.
+     */
     val description: String
+
+    /**
+     * Controls the visibility of the DateTimePicker. If true is shown, else hidden. Set this
+     * property via [setVisibility].
+     */
     val visible: State<Boolean>
+
+    /**
+     * Callback for when a value is selected on the DateTimePicker.
+     */
     val onValueSet: (Long) -> Unit
+
+    /**
+     * Sets the [visible] property.
+     */
     fun setVisibility(visible: Boolean)
 }
 
+/**
+ * Default implementation for [DateTimePickerState]
+ */
 private class DateTimePickerStateImpl(
     override val pickerStyle: DateTimePickerStyle,
     override val minDateTime: Long?,
@@ -51,8 +94,21 @@ private class DateTimePickerStateImpl(
     }
 }
 
+/**
+ * Factory function to create a [DateTimePickerState].
+ *
+ * @param style The picker style to use.
+ * @param minDateTime Minimum date time allowed in milliseconds. This should be null if no range
+ * restriction is needed.
+ * @param maxDateTime Maximum date time allowed in milliseconds. This should be null if no range
+ * restriction is needed.
+ * @param initialValue The initial date time value to display in milliseconds.
+ * @param label The label for the DateTimePicker.
+ * @param description The description for the DateTimePicker.
+ * @param onValueSet Callback for when a value is selected on the DateTimePicker.
+ */
 internal fun DateTimePickerState(
-    type: DateTimePickerStyle,
+    style: DateTimePickerStyle,
     minDateTime: Long? = null,
     maxDateTime: Long? = null,
     initialValue: Long? = null,
@@ -60,7 +116,7 @@ internal fun DateTimePickerState(
     description: String = "",
     onValueSet: (Long) -> Unit = {}
 ): DateTimePickerState = DateTimePickerStateImpl(
-    type,
+    style,
     minDateTime,
     maxDateTime,
     initialValue,

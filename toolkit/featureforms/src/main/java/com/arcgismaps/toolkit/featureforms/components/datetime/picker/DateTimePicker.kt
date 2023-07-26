@@ -18,7 +18,6 @@
 
 package com.arcgismaps.toolkit.featureforms.components.datetime.picker
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -348,7 +347,7 @@ private enum class PickerInput {
 @Composable
 private fun DateTimePickerPreview() {
     val state = DateTimePickerState(
-        type = DateTimePickerStyle.DateTime,
+        style = DateTimePickerStyle.DateTime,
         label = "Next Inspection Date",
         description = "Enter a date in the next six months"
     )
