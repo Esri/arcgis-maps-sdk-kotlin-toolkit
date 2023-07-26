@@ -42,8 +42,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -99,6 +102,7 @@ private fun AuthenticationApp() {
  * @param onLoadPortal called when the [url] should be loaded
  * @since 200.2.0
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun PortalDetails(
     url: String,
@@ -141,16 +145,26 @@ private fun PortalDetails(
                 Checkbox(checked = useOAuth, onCheckedChange = onSetUseOAuth)
                 Text("Use OAuth", style = MaterialTheme.typography.labelMedium)
             }
+            val keyboardController = LocalSoftwareKeyboardController.current
+            val focusManager = LocalFocusManager.current
             // Clear credential button
             Button(
-                onClick = onSignOut,
+                onClick = {
+                    onSignOut()
+                    keyboardController?.hide()
+                    focusManager.clearFocus()
+                },
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
             ) {
                 Text(text = "Sign out")
             }
             // Load button
             Button(
-                onClick = onLoadPortal,
+                onClick = {
+                    onLoadPortal()
+                    keyboardController?.hide()
+                    focusManager.clearFocus()
+                },
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Text(text = "Load")
@@ -164,7 +178,7 @@ private fun PortalDetails(
  *
  * @param text the text to display
  * @param isLoading whether a progress indicator should be displayed
- * @since 200.20
+ * @since 200.2.0
  */
 @Composable
 private fun InfoScreen(

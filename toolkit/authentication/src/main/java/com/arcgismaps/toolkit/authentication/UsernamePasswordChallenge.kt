@@ -18,6 +18,10 @@
 
 package com.arcgismaps.toolkit.authentication
 
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+
 /**
  * Represents an authentication challenge requiring a username and password.
  *
@@ -28,12 +32,13 @@ package com.arcgismaps.toolkit.authentication
  */
 public class UsernamePasswordChallenge(
     public val url: String,
-    onUsernamePasswordReceived: ((username: String, password: String) -> Unit),
+    private val onUsernamePasswordReceived: ((username: String, password: String) -> Unit),
     onCancel: () -> Unit
 ) {
 
-    private var onUsernamePasswordReceived: ((username: String, password: String) -> Unit)? = onUsernamePasswordReceived
     private var onCancel: (() -> Unit)? = onCancel
+    private val _additionalMessage: MutableStateFlow<String?> = MutableStateFlow(null)
+    public val additionalMessage: StateFlow<String?> = _additionalMessage.asStateFlow()
 
     /**
      * Completes the challenge with the credentials. Note that either [continueWithCredentials] or [cancel]
@@ -42,8 +47,7 @@ public class UsernamePasswordChallenge(
      * @since 200.2.0
      */
     public fun continueWithCredentials(username: String, password: String): Unit {
-        onUsernamePasswordReceived?.invoke(username, password)
-        onUsernamePasswordReceived = null
+        onUsernamePasswordReceived(username, password)
     }
 
     /**
@@ -55,5 +59,15 @@ public class UsernamePasswordChallenge(
     public fun cancel(): Unit {
         onCancel?.invoke()
         onCancel = null
+    }
+
+    /**
+     * Emits an additional message to [additionalMessage] to be displayed in the prompt as an error.
+     * A null value is intended to remove the error message.
+     *
+     * @since 200.2.0
+     */
+    public fun setAdditionalMessage(message: String?) {
+        _additionalMessage.value = message
     }
 }
