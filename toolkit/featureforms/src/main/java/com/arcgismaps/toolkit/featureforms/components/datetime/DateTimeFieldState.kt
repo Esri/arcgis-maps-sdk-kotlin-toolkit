@@ -36,14 +36,14 @@ internal interface DateTimeFieldState {
      *
      * @since 200.2.0
      */
-    val minEpochMillis: Long
+    val minEpochMillis: Long?
     
     /**
      * The maximum allowable date and time.
      *
      * @since 200.2.0
      */
-    val maxEpochMillis: Long
+    val maxEpochMillis: Long?
     
     /**
      * `true` if the field should show time or allow time to be set on the field.
@@ -122,9 +122,9 @@ internal class DateTimeFieldStateImpl(
     private val formDefinition: FeatureFormDefinition,
     input: DateTimePickerFeatureFormInput = element.inputType as DateTimePickerFeatureFormInput
 ) : DateTimeFieldState {
-    override val minEpochMillis: Long = input.min.toLong()
+    override val minEpochMillis: Long? = input.min?.toLong()
     
-    override val maxEpochMillis: Long = input.max.toLong()
+    override val maxEpochMillis: Long? = input.max?.toLong()
     
     override val shouldShowTime: Boolean = input.includeTime
     
