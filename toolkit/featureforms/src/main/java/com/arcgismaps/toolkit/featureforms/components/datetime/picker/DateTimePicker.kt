@@ -111,9 +111,9 @@ internal fun DateTimePicker(
         endInclusive = state.maxDateTime?.toZonedDateTime()?.year
             ?: DatePickerDefaults.YearRange.last
     )
-    // time instant in UTC from the state's value
+    // DateTime from the state's value
     val dateTime by state.dateTime
-    // create and remember a DatePickerState that resets when instant changes
+    // create and remember a DatePickerState that resets when dateTime changes
     val datePickerState = rememberSaveable(dateTime, saver = DatePickerState.Saver()) {
         DatePickerState(
             initialSelectedDateMillis = dateTime.date?.plus(state.timeZoneOffset),
@@ -123,7 +123,7 @@ internal fun DateTimePicker(
             DisplayMode.Picker
         )
     }
-    // create and remember a TimePickerState that resets when instant changes
+    // create and remember a TimePickerState that resets when dateTime changes
     val timePickerState = rememberSaveable(dateTime, saver = TimePickerState.Saver()) {
         TimePickerState(
             initialHour = dateTime.hour,
@@ -131,9 +131,11 @@ internal fun DateTimePicker(
             is24Hour = false,
         )
     }
+    // confirm button is only active when a date has been selected
     val confirmEnabled by remember(dateTime) {
         derivedStateOf { datePickerState.selectedDateMillis != null }
     }
+    // create a DateTimePickerDialog
     DateTimePickerDialog(
         onDismissRequest = onDismissRequest
     ) {
@@ -256,6 +258,7 @@ private fun PickerFooter(
         if (state.activePickerInput.value == DateTimePickerInput.Date) {
             TextButton(
                 onClick = onToday,
+                // only enable Today button if today is within the range if provided
                 enabled = state.dateTimeValidator(Instant.now().toEpochMilli())
             ) {
                 Text(stringResource(R.string.today))
