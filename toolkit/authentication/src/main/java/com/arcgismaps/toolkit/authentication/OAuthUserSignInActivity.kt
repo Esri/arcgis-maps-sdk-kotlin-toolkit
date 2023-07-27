@@ -77,7 +77,7 @@ private const val RESULT_CODE_CANCELED = 2
  * android:name="com.arcgismaps.toolkit.authentication.OAuthUserSignInActivity"
  * android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
  * android:exported="true"
- * android:launchMode="singleTop" >
+ * android:launchMode="singleInstance" >
  * </activity>
  * ```
  *
