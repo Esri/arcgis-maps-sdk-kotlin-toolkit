@@ -126,7 +126,8 @@ internal fun DateTimePicker(state: DateTimePickerState) {
         val datePickerState = rememberSaveable(instant, saver = DatePickerState.Saver()) {
             DatePickerState(
                 initialSelectedDateMillis = instant?.toEpochMilli()?.plus(timeZoneOffset),
-                initialDisplayedMonthMillis = instant?.toEpochMilli()?.plus(timeZoneOffset),
+                initialDisplayedMonthMillis = instant?.toEpochMilli()?.plus(timeZoneOffset)
+                    ?: (state.minDateTime ?: state.maxDateTime),
                 datePickerRange,
                 DisplayMode.Picker
             )
@@ -150,6 +151,7 @@ internal fun DateTimePicker(state: DateTimePickerState) {
             PickerContent(
                 label = state.label,
                 description = state.description,
+                state = state,
                 datePickerState = datePickerState,
                 timePickerState = timePickerState,
                 style = state.pickerStyle,
@@ -211,6 +213,7 @@ internal fun DateTimePicker(state: DateTimePickerState) {
 private fun (ColumnScope).PickerContent(
     label: String,
     description: String,
+    state: DateTimePickerState,
     datePickerState: DatePickerState,
     timePickerState: TimePickerState,
     style: DateTimePickerStyle,
@@ -233,6 +236,14 @@ private fun (ColumnScope).PickerContent(
         DatePicker(
             state = datePickerState,
             modifier = Modifier.weight(1f, fill = false),
+            dateValidator = { timeStamp ->
+                // validate selectable dates if a range is provided
+                state.minDateTime?.let { min ->
+                    state.maxDateTime?.let { max ->
+                        timeStamp in min..max
+                    } ?: (timeStamp >= min)
+                } ?: true
+            },
             title = { title(if (style == DateTimePickerStyle.Date) null else Icons.Rounded.AccessTime) }
         )
     }
