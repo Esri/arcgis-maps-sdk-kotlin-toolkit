@@ -35,9 +35,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -69,6 +67,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.arcgismaps.mapping.floor.FloorFacility
 import com.arcgismaps.mapping.floor.FloorSite
@@ -78,36 +77,37 @@ import com.arcgismaps.mapping.floor.FloorSite
  *
  * @since 200.2.0
  */
-@OptIn(ExperimentalMaterial3Api::class) // Experimental API needed for Composable AlertDialog class
 @Composable
 internal fun SiteAndFacilitySelector(
     floorFilterState: FloorFilterState,
-    isSelectorShowing: MutableState<Boolean>,
+    isSiteFacilitySelectorVisible: Boolean,
     searchBackgroundColor: Color,
     buttonBackgroundColor: Color,
     textColor: Color,
     selectedTextColor: Color,
     selectedButtonBackgroundColor: Color,
-    onSiteFacilitySelectorShowingChanged: (Boolean) -> Unit
+    onSiteFacilitySelectorVisibilityChanged: (Boolean) -> Unit
 ) {
     // boolean toggle to display either the sites selector or the facilities selector,
     // display sites selector by default when set to false, and sites selector when set to true.
-    val isFacilitiesSelectorShowing = remember { mutableStateOf(false) }
+    val isFacilitiesSelectorVisible = remember { mutableStateOf(false) }
     // set to show facilities, if there is one selected
     if (floorFilterState.selectedSiteId != null) {
-        isFacilitiesSelectorShowing.value = true
+        isFacilitiesSelectorVisible.value = true
     }
 
     // display alert dialog when set to true
-    if (isSelectorShowing.value) {
-        AlertDialog(
-            modifier = Modifier.padding(horizontal = 24.dp),
+    if (isSiteFacilitySelectorVisible) {
+        Dialog(
             onDismissRequest = {
-                onSiteFacilitySelectorShowingChanged(false)
+                onSiteFacilitySelectorVisibilityChanged(false)
             },
             properties = DialogProperties(usePlatformDefaultWidth = false)
         ) {
             Surface(
+                modifier = Modifier
+                    .width(500.dp)
+                    .padding(horizontal = 25.dp),
                 shadowElevation = 10.dp,
                 color = Color.Transparent
             ) {
@@ -118,25 +118,25 @@ internal fun SiteAndFacilitySelector(
                 )
                 {
                     Column {
-                        if (!isFacilitiesSelectorShowing.value) {
+                        if (!isFacilitiesSelectorVisible.value) {
                             // display the sites top bar
                             SiteSelectorTopBar(
                                 closeButtonClicked = {
-                                    onSiteFacilitySelectorShowingChanged(false)
+                                    onSiteFacilitySelectorVisibilityChanged(false)
                                 }
                             )
                             // display search list for all sites
-                            SearchAndFilter(
+                            SitesAndFacilitiesFilter(
                                 floorFilterState,
                                 searchBackgroundColor,
                                 textColor,
                                 selectedTextColor,
                                 selectedButtonBackgroundColor,
                                 buttonBackgroundColor,
-                                isFacilitiesSelectorShowing
+                                isFacilitiesSelectorVisible
                             ) { selectedSite ->
                                 floorFilterState.selectedSiteId = selectedSite.site?.id
-                                isFacilitiesSelectorShowing.value = true
+                                isFacilitiesSelectorVisible.value = true
 
                             }
                         } else {
@@ -144,24 +144,24 @@ internal fun SiteAndFacilitySelector(
                             FacilitySelectorTopBar(
                                 floorFilterState = floorFilterState,
                                 backToSiteButtonClicked = {
-                                    isFacilitiesSelectorShowing.value = false
+                                    isFacilitiesSelectorVisible.value = false
                                 },
                                 closeButtonClicked = {
-                                    onSiteFacilitySelectorShowingChanged(false)
+                                    onSiteFacilitySelectorVisibilityChanged(false)
                                 }
                             )
                             // display search list for all facilities
-                            SearchAndFilter(
+                            SitesAndFacilitiesFilter(
                                 floorFilterState,
                                 searchBackgroundColor,
                                 textColor,
                                 selectedTextColor,
                                 selectedButtonBackgroundColor,
                                 buttonBackgroundColor,
-                                isFacilitiesSelectorShowing
+                                isFacilitiesSelectorVisible
                             ) { selectedFacility ->
                                 floorFilterState.selectedFacilityId = selectedFacility.facility?.id
-                                onSiteFacilitySelectorShowingChanged(false)
+                                onSiteFacilitySelectorVisibilityChanged(false)
                             }
                         }
                     }
@@ -172,7 +172,8 @@ internal fun SiteAndFacilitySelector(
 }
 
 /**
- * Display a top bar to select a site with a close button which invokes [closeButtonClicked]
+ * Displays the top bar section in the site selector dialog, which displays the
+ * text "Select a site" with a close button which invokes [closeButtonClicked]
  *
  * @since 200.2.0
  */
@@ -278,21 +279,20 @@ internal fun FacilitySelectorTopBar(
 }
 
 /**
- * Displays a searchable text input with a list of facilities if [isShowingFacilities] or else sites.
- * The search input filters sites/facilities to display relevant results,
- * and updates the [floorFilterState] when a site or facility is selected.
+ * Displays a text input which is used to filter the list of facilities if
+ * [isFacilitiesSelectorVisible] or else filter the list of sites.
  *
  * @since 200.2.0
  */
 @Composable
-internal fun SearchAndFilter(
+internal fun SitesAndFacilitiesFilter(
     floorFilterState: FloorFilterState,
     searchBackgroundColor: Color,
     textColor: Color,
     selectedTextColor: Color,
     selectedButtonBackgroundColor: Color,
     buttonBackgroundColor: Color,
-    isShowingFacilities: MutableState<Boolean>,
+    isFacilitiesSelectorVisible: MutableState<Boolean>,
     onSiteOrFacilitySelected: (SiteFacilityWrapper) -> Unit
 ) {
     // query text typed in OutlinedTextField
@@ -304,7 +304,7 @@ internal fun SearchAndFilter(
 
     // list of all the site/facility names to display when no search prompt is used
     val allSitesOrFacilities: List<SiteFacilityWrapper> =
-        if (!isShowingFacilities.value)
+        if (!isFacilitiesSelectorVisible.value)
             floorFilterState.sites.map { floorSite ->
                 SiteFacilityWrapper(
                     site = floorSite,
@@ -354,7 +354,7 @@ internal fun SearchAndFilter(
                 label = {
                     Text(
                         text =
-                        if (isShowingFacilities.value)
+                        if (isFacilitiesSelectorVisible.value)
                             stringResource(R.string.floor_filter_view_filter_hint_facilities)
                         else
                             stringResource(R.string.floor_filter_view_filter_hint_sites)
@@ -411,7 +411,7 @@ internal fun SearchAndFilter(
             )
         }
 
-        // if site/facility names found using search prompt, display message
+        // if site/facility names found using search prompt, display error message
         if (filteredSitesOrFacilities.isEmpty()) {
             Text(
                 modifier = Modifier
@@ -434,7 +434,7 @@ internal fun SearchAndFilter(
 }
 
 /**
- * Displays a lit of sites/facilities using the [SiteFacilityWrapper] and
+ * Displays a list of sites/facilities using the [SiteFacilityWrapper] and
  * invokes [onListItemSelected] when list item is selected.
  *
  * @since 200.2.0
@@ -454,7 +454,7 @@ internal fun ListOfSitesOrFacilities(
                 isSiteItem = siteFacilityList[0].site != null,
                 selectedTextColor = selectedTextColor,
                 onSelected = {
-                    onListItemSelected.invoke(siteFacilityList[it])
+                    onListItemSelected(siteFacilityList[it])
                 }
             )
         }
@@ -481,7 +481,7 @@ internal fun SiteOrFacilityItem(
             .fillMaxWidth()
             .height(65.dp)
             .padding(horizontal = 20.dp)
-            .clickable { onSelected.invoke(index) }) {
+            .clickable { onSelected(index) }) {
         if (isSelected) {
             Canvas(
                 modifier = Modifier
@@ -498,7 +498,7 @@ internal fun SiteOrFacilityItem(
             color = Color.DarkGray,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
         )
-        if (isSiteItem){
+        if (isSiteItem) {
             Icon(
                 modifier = Modifier.size(24.dp).align(CenterVertically),
                 painter = painterResource(id = R.drawable.ic_chevron_right_32),
@@ -507,7 +507,6 @@ internal fun SiteOrFacilityItem(
         }
     }
 }
-
 
 /**
  * A wrapper to give [FloorSite] and [FloorFacility] a common API so that only one LazyColumn is
@@ -529,4 +528,3 @@ internal data class SiteFacilityWrapper(
             }
         }
 }
-
