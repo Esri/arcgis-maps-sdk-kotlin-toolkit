@@ -65,7 +65,7 @@ import com.arcgismaps.toolkit.featureforms.components.datetime.toZonedDateTime
 import java.time.Instant
 
 /**
- * Defines the style of [DateTimePicker]
+ * Defines the style of [DateTimePicker].
  */
 internal enum class DateTimePickerStyle {
     /**
@@ -84,16 +84,19 @@ internal enum class DateTimePickerStyle {
     DateTime
 }
 
+/**
+ * Input type for the [DateTimePicker].
+ */
 internal enum class DateTimePickerInput {
     Date,
     Time
 }
 
 /**
- * A material3 date and time picker presented as an [AlertDialog]
+ * A material3 date and time picker presented as an [AlertDialog].
  *
- * @param state a state of the DateTimePicker. see [DateTimePickerState]
- * @param onDismissRequest Dismiss the dialog when the user clicks outside the dialog or on the back button
+ * @param state a state of the DateTimePicker. see [DateTimePickerState].
+ * @param onDismissRequest Dismiss the dialog when the user clicks outside the dialog or on the back button.
  *
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -311,6 +314,9 @@ private fun DateTimePickerDialog(
     }
 }
 
+/**
+ * Properties for the [DateTimePickerDialog].
+ */
 private object DateTimePickerDialogTokens {
     val containerHeight = 568.0.dp
     val containerWidth = 360.0.dp
