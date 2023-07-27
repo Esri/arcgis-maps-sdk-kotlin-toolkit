@@ -20,6 +20,7 @@ package com.arcgismaps.toolkit.featureforms.components.datetime.picker
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import java.time.Instant
 
 /**
  * State for [DateTimePicker]. Use factory [DateTimePicker()] to create an instance.
@@ -37,14 +38,16 @@ internal interface DateTimePickerState {
     val maxDateTime: Long?
 
     /**
-     * The initial date time value to display in milliseconds.
+     * The set date time value in milliseconds.
      */
-    val value: Long?
+    val value: State<Instant?>
 
     /**
      * The picker style to use.
      */
     val pickerStyle: DateTimePickerStyle
+
+    val activePickerInput: State<DateTimePickerInput>
 
     /**
      * The label for the DateTimePicker.
@@ -57,20 +60,13 @@ internal interface DateTimePickerState {
     val description: String
 
     /**
-     * Controls the visibility of the DateTimePicker. If true is shown, else hidden. Set this
-     * property via [setVisibility].
-     */
-    val visible: State<Boolean>
-
-    /**
      * Callback for when a value is selected on the DateTimePicker.
      */
     val onValueSet: (Long) -> Unit
 
-    /**
-     * Sets the [visible] property.
-     */
-    fun setVisibility(visible: Boolean)
+    fun setValue(value: Instant)
+
+    fun togglePickerInput()
 }
 
 /**
@@ -80,17 +76,32 @@ private class DateTimePickerStateImpl(
     override val pickerStyle: DateTimePickerStyle,
     override val minDateTime: Long?,
     override val maxDateTime: Long?,
-    override val value: Long?,
+    initialValue: Long?,
     override val label: String,
     override val description: String = "",
     override val onValueSet: (Long) -> Unit = {}
 ) : DateTimePickerState {
 
-    override var visible = mutableStateOf(false)
-        private set
+    override var value = mutableStateOf(initialValue?.let { Instant.ofEpochMilli(it) })
 
-    override fun setVisibility(visible: Boolean) {
-        this.visible.value = visible
+    // calculate which picker to show by default
+    override var activePickerInput = mutableStateOf(
+        if (pickerStyle == DateTimePickerStyle.DateTime
+            || pickerStyle == DateTimePickerStyle.Date
+        ) DateTimePickerInput.Date
+        else DateTimePickerInput.Time
+    )
+
+    override fun setValue(value: Instant) {
+        this.value.value = value
+    }
+
+    override fun togglePickerInput() {
+        activePickerInput.value = if (activePickerInput.value == DateTimePickerInput.Date) {
+            DateTimePickerInput.Time
+        } else {
+            DateTimePickerInput.Date
+        }
     }
 }
 

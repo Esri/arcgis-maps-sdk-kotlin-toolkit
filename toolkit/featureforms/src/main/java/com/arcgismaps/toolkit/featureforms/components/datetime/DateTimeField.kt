@@ -37,6 +37,9 @@ import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -62,20 +65,27 @@ internal fun DateTimeField(
     } else {
         DateTimePickerStyle.Date
     }
-    val pickerState = DateTimePickerState(
-        pickerStyle,
-        state.minEpochMillis,
-        state.maxEpochMillis,
-        epochMillis,
-        state.label,
-        state.description
-    ) {
-        state.setValue(it)
+    var openDialog by remember { mutableStateOf(false) }
+    if (openDialog) {
+        val pickerState = DateTimePickerState(
+            pickerStyle,
+            state.minEpochMillis,
+            state.maxEpochMillis,
+            epochMillis,
+            state.label,
+            state.description
+        ) {
+            state.setValue(it)
+        }
+        // the picker dialog
+        DateTimePicker(
+            state = pickerState,
+            onDismissRequest = { openDialog = false },
+            onCancelled = { openDialog = false },
+            onConfirmed = { openDialog = false })
     }
-    
-    // the picker dialog
-    DateTimePicker(pickerState)
-    
+
+
     // the field
     if (isEditable) {
         val textFieldColors = if (epochMillis == null) {
@@ -124,7 +134,7 @@ internal fun DateTimeField(
                 }
             )
         }
-    
+
         Column(
             modifier = modifier
                 .fillMaxSize()
@@ -137,7 +147,7 @@ internal fun DateTimeField(
                     .fillMaxSize()
                     .focusable(false)
                     .clickable {
-                        pickerState.setVisibility(true)
+                        openDialog = true
                     },
                 readOnly = true,
                 enabled = false, // disabled to support clickability
@@ -153,7 +163,9 @@ internal fun DateTimeField(
                     if (epochMillis != null) {
                         IconButton(
                             onClick = { state.clearValue() },
-                            modifier = Modifier.semantics { contentDescription = "Clear text button" }
+                            modifier = Modifier.semantics {
+                                contentDescription = "Clear text button"
+                            }
                         ) {
                             Icon(
                                 imageVector = Icons.Rounded.Clear,
@@ -162,8 +174,10 @@ internal fun DateTimeField(
                         }
                     } else {
                         IconButton(
-                            onClick = { pickerState.setVisibility(true) },
-                            modifier = Modifier.semantics { contentDescription = "Show datetime picker" }
+                            onClick = { openDialog = true },
+                            modifier = Modifier.semantics {
+                                contentDescription = "Show datetime picker"
+                            }
                         ) {
                             Icon(
                                 imageVector = Icons.Rounded.EditCalendar,
