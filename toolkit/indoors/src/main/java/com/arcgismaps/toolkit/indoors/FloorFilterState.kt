@@ -17,14 +17,11 @@
 
 package com.arcgismaps.toolkit.indoors
 
-import com.arcgismaps.geometry.Envelope
 import com.arcgismaps.mapping.GeoModel
-import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.floor.FloorFacility
 import com.arcgismaps.mapping.floor.FloorLevel
 import com.arcgismaps.mapping.floor.FloorManager
 import com.arcgismaps.mapping.floor.FloorSite
-import com.arcgismaps.toolkit.composablemap.MapInterface
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -60,7 +57,7 @@ public sealed interface FloorFilterState {
 private class FloorFilterStateImpl(
     var geoModel: GeoModel,
     var coroutineScope: CoroutineScope,
-    var onSelectionChangeListener: (FloorFilterSelection) -> Unit
+    var onSelectionChangedListener: (FloorFilterSelection) -> Unit
 ) : FloorFilterState {
 
     private val _floorManager: MutableStateFlow<FloorManager?> = MutableStateFlow(null)
@@ -117,7 +114,7 @@ private class FloorFilterStateImpl(
             selectedFacilityId = null
             coroutineScope.launch {
                 getSelectedSite()?.let {
-                    onSelectionChangeListener.invoke(FloorFilterSelection(FloorFilterSelection.Type.FloorSite(it)))
+                    onSelectionChangedListener.invoke(FloorFilterSelection(FloorFilterSelection.Type.FloorSite(it)))
                 }
             }
         }
@@ -141,7 +138,7 @@ private class FloorFilterStateImpl(
             coroutineScope.launch {
                 _onFacilityChanged.emit(getSelectedFacility())
                 getSelectedFacility()?.let {
-                    onSelectionChangeListener.invoke(FloorFilterSelection(FloorFilterSelection.Type.FloorFacility(it)))
+                    onSelectionChangedListener.invoke(FloorFilterSelection(FloorFilterSelection.Type.FloorFacility(it)))
                 }
             }
         }
@@ -169,7 +166,7 @@ private class FloorFilterStateImpl(
             coroutineScope.launch {
                 _onLevelChanged.emit(getSelectedLevel())
                 getSelectedLevel()?.let {
-                    onSelectionChangeListener.invoke(FloorFilterSelection(FloorFilterSelection.Type.FloorLevel(it)))
+                    onSelectionChangedListener.invoke(FloorFilterSelection(FloorFilterSelection.Type.FloorLevel(it)))
                 }
             }
         }
@@ -191,6 +188,8 @@ private class FloorFilterStateImpl(
                 ?: throw IllegalStateException("The map is not configured to be floor aware")
             floorManager.load().onSuccess {
                 _floorManager.value = floorManager
+                // no FloorLevel is selected at this point, so clear the FloorFilter from the selected GeoModel
+                filterMap()
             }.onFailure {
                 throw it
             }
@@ -344,9 +343,9 @@ public enum class ButtonPosition {
 public fun FloorFilterState(
     geoModel: GeoModel,
     coroutineScope: CoroutineScope,
-    onSelectionChangeListener : (FloorFilterSelection) -> Unit
+    onSelectionChangedListener : (FloorFilterSelection) -> Unit
 ): FloorFilterState =
-    FloorFilterStateImpl(geoModel, coroutineScope, onSelectionChangeListener)
+    FloorFilterStateImpl(geoModel, coroutineScope, onSelectionChangedListener)
 
 /**
  * The selection that was made by the user

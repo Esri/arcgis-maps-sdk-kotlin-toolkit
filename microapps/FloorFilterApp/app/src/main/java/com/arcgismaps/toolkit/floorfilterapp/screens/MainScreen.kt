@@ -34,7 +34,7 @@ import com.arcgismaps.toolkit.indoors.FloorFilter
 @Composable
 fun MainScreen() {
     val portal = Portal("https://arcgis.com/")
-    val portalItem = PortalItem(portal, "f133a698536f44c8884ad81f80b6cfc7")
+    val portalItem = PortalItem(portal, "b4b599a43a474d33946cf0df526426f5")
     val floorAwareWebMap = ArcGISMap(portalItem)
 
     val mapViewModel = viewModel<MapViewModel>(factory = MapViewModelFactory(floorAwareWebMap))

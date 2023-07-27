@@ -21,9 +21,9 @@ import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
@@ -40,7 +40,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.Center
@@ -56,8 +55,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.arcgismaps.mapping.floor.FloorFacility
 import com.arcgismaps.mapping.GeoModel
+import com.arcgismaps.mapping.floor.FloorFacility
 
 // Constants
 private val SELECTED_BACKGROUND_COLOR: Color = Color(0xFFE2F1FB) // light blue
@@ -67,7 +66,7 @@ internal val DEFAULT_BUTTON_WIDTH: Float = 60.dp.value
 internal val DEFAULT_BUTTON_HEIGHT: Float = 40.dp.value
 private val DEFAULT_TEXT_COLOR: Color = Color.Black
 private val DEFAULT_BACKGROUND_COLOR: Color = Color.White
-private val DEFAULT_SEARCH_BACKGROUND_COLOR = Color(0xFFEBEBEB) // light gray
+private val DEFAULT_SEARCH_BACKGROUND_COLOR = Color(0xFFEEEEEE) // light gray
 private const val DEFAULT_BUTTON_VISIBILITY: Int = View.VISIBLE
 private val DEFAULT_CLOSE_BUTTON_POSITION = ButtonPosition.Top
 
@@ -144,28 +143,41 @@ public fun FloorFilter(
             verticalArrangement = Arrangement.Center
         ) {
 
+            // displays only the selected floor when enabled
+            var isFloorsCollapsed by rememberSaveable { mutableStateOf(false) }
+
+            // boolean toggle to display the site facility selector dialog
+            var isSiteAndFacilitySelectorVisible by rememberSaveable { mutableStateOf(false) }
+
+            // get the current selected facility
+            val selectedFacility = floorFilterState.onFacilityChanged.collectAsState().value
+
+            // get the selected level ID
+            val selectedLevelID = floorFilterState.onLevelChanged.collectAsState().value?.id
+
             // if no facility is selected, only display site-facility selector button
-            if (floorFilterState.selectedFacilityId == null){
+            if (selectedFacility == null) {
                 SiteFacilityButton(
                     modifier,
                     floorFilterState,
+                    isSiteAndFacilitySelectorVisible,
                     buttonSize,
                     searchBackgroundColor,
                     buttonBackgroundColor,
                     textColor,
                     selectedTextColor,
                     selectedButtonBackgroundColor,
+                    onSiteFacilitySelectorVisibilityChanged = { isVisible ->
+                        isSiteAndFacilitySelectorVisible = isVisible
+                    }
                 )
                 return@Surface
             }
 
-            // displays only the selected floor when enabled
-            var isFloorsCollapsed by rememberSaveable { mutableStateOf(false) }
-
             // display close button if set to top, if not display facilities button
             if (closeButtonPosition == ButtonPosition.Top) {
                 // check if close button is set to visible and not collapsed
-                if (closeButtonVisibility == View.VISIBLE && !isFloorsCollapsed) {
+                if (closeButtonVisibility == View.VISIBLE && !isFloorsCollapsed && selectedFacility.levels.isNotEmpty()) {
                     FloorListCloseButton(
                         modifier,
                         buttonSize,
@@ -176,62 +188,60 @@ public fun FloorFilter(
                     SiteFacilityButton(
                         modifier,
                         floorFilterState,
+                        isSiteAndFacilitySelectorVisible,
                         buttonSize,
                         searchBackgroundColor,
                         buttonBackgroundColor,
                         textColor,
                         selectedTextColor,
                         selectedButtonBackgroundColor,
+                        onSiteFacilitySelectorVisibilityChanged = { isVisible ->
+                            isSiteAndFacilitySelectorVisible = isVisible
+                        }
                     )
                 }
             }
 
-            // get the current selected facility
-            val currentFacility = floorFilterState.onFacilityChanged.collectAsState().value
-                ?: return@Surface
+            if (selectedLevelID != null) {
+                if (!isFloorsCollapsed) {
+                    // display a list of floor levels in the selected facility
+                    FloorListColumn(
+                        modifier = modifier,
+                        maxDisplayLevels = maxDisplayLevels,
+                        currentFacility = selectedFacility,
+                        selectedLevelID = selectedLevelID,
+                        selectedTextColor = selectedTextColor,
+                        selectedButtonBackgroundColor = selectedButtonBackgroundColor,
+                        buttonBackgroundColor = buttonBackgroundColor,
+                        typography = typography,
+                        textColor = textColor,
+                        textSize = textSize,
+                        buttonSize = buttonSize,
+                        onFloorLevelSelected = { index: Int ->
+                            // update the selected level ID on click
+                            floorFilterState.selectedLevelId = selectedFacility.levels[index].id
+                        }
+                    )
 
-            // get the selected level ID
-            val selectedLevelID = floorFilterState.onLevelChanged.collectAsState().value?.id
-                ?: return@Surface
-
-            if (!isFloorsCollapsed) {
-                // display a list of floor levels in the selected facility
-                FloorListColumn(
-                    modifier = modifier,
-                    maxDisplayLevels = maxDisplayLevels,
-                    currentFacility = currentFacility,
-                    selectedLevelID = selectedLevelID,
-                    selectedTextColor = selectedTextColor,
-                    selectedButtonBackgroundColor = selectedButtonBackgroundColor,
-                    buttonBackgroundColor = buttonBackgroundColor,
-                    typography = typography,
-                    textColor = textColor,
-                    textSize = textSize,
-                    buttonSize = buttonSize,
-                    onFloorLevelSelected = { index: Int ->
-                        // update the selected level ID on click
-                        floorFilterState.selectedLevelId = currentFacility.levels[index].id
-                    }
-                )
-
-            } else {
-                // display only the selected floor level
-                FloorLevelSelectButton(
-                    index = 0,
-                    selected = true,
-                    floorText = currentFacility.levels.find { it.id == selectedLevelID }?.shortName.toString(),
-                    textSize = textSize,
-                    textColor = textColor,
-                    selectedTextColor = selectedTextColor,
-                    buttonBackgroundColor = buttonBackgroundColor,
-                    selectedButtonBackgroundColor = selectedButtonBackgroundColor,
-                    typography = typography,
-                    buttonSize = buttonSize,
-                    onFloorLevelSelected = {
-                        // display all floor levels when clicked
-                        isFloorsCollapsed = false
-                    }
-                )
+                } else {
+                    // display only the selected floor level
+                    FloorLevelSelectButton(
+                        index = 0,
+                        selected = true,
+                        floorText = selectedFacility.levels.find { it.id == selectedLevelID }?.shortName.toString(),
+                        textSize = textSize,
+                        textColor = textColor,
+                        selectedTextColor = selectedTextColor,
+                        buttonBackgroundColor = buttonBackgroundColor,
+                        selectedButtonBackgroundColor = selectedButtonBackgroundColor,
+                        typography = typography,
+                        buttonSize = buttonSize,
+                        onFloorLevelSelected = {
+                            // display all floor levels when clicked
+                            isFloorsCollapsed = false
+                        }
+                    )
+                }
             }
 
             // display close button if set to bottom, if not display facilities button
@@ -247,12 +257,16 @@ public fun FloorFilter(
                     SiteFacilityButton(
                         modifier,
                         floorFilterState,
+                        isSiteAndFacilitySelectorVisible,
                         buttonSize,
                         searchBackgroundColor,
                         buttonBackgroundColor,
                         textColor,
                         selectedTextColor,
                         selectedButtonBackgroundColor,
+                        onSiteFacilitySelectorVisibilityChanged = { isVisible ->
+                            isSiteAndFacilitySelectorVisible = isVisible
+                        }
                     )
                 }
             }
@@ -319,14 +333,16 @@ internal fun FloorListColumn(
 internal fun SiteFacilityButton(
     modifier: Modifier,
     floorFilterState: FloorFilterState,
+    isSiteAndFacilitySelectorVisible: Boolean,
     buttonSize: Size,
     searchBackgroundColor: Color,
     buttonBackgroundColor: Color,
     textColor: Color,
     selectedTextColor: Color,
-    selectedButtonBackgroundColor: Color
+    selectedButtonBackgroundColor: Color,
+    onSiteFacilitySelectorVisibilityChanged: (Boolean) -> Unit
 ) {
-    val showSiteAndFacilitySelector = remember { mutableStateOf(false) }
+
     Box(modifier.height(buttonSize.height.dp)) {
         Icon(
             painter = painterResource(id = R.drawable.ic_site_facility_24),
@@ -337,19 +353,20 @@ internal fun SiteFacilityButton(
                 .width(buttonSize.width.dp)
                 .wrapContentSize(Center)
                 .clickable {
-                    showSiteAndFacilitySelector.value = true
+                    onSiteFacilitySelectorVisibilityChanged(true)
                 }
         )
     }
-    if (showSiteAndFacilitySelector.value) {
+    if (isSiteAndFacilitySelectorVisible) {
         SiteAndFacilitySelector(
             floorFilterState = floorFilterState,
-            isSelectorShowing = showSiteAndFacilitySelector,
+            isSiteFacilitySelectorVisible = isSiteAndFacilitySelectorVisible,
             searchBackgroundColor = searchBackgroundColor,
             buttonBackgroundColor = buttonBackgroundColor,
             textColor = textColor,
             selectedTextColor = selectedTextColor,
-            selectedButtonBackgroundColor = selectedButtonBackgroundColor
+            selectedButtonBackgroundColor = selectedButtonBackgroundColor,
+            onSiteFacilitySelectorVisibilityChanged = onSiteFacilitySelectorVisibilityChanged
         )
     }
 }
@@ -368,7 +385,7 @@ internal fun FloorListCloseButton(
     Box(modifier
         .fillMaxWidth()
         .height(buttonSize.height.dp)
-        .clickable { onClick.invoke(Unit) }) {
+        .clickable { onClick(Unit) }) {
         Icon(
             modifier = modifier.align(Center),
             painter = painterResource(id = R.drawable.ic_x_24),
@@ -405,7 +422,7 @@ internal fun FloorLevelSelectButton(
         fontSize = textSize,
         color = if (selected) selectedTextColor else textColor,
         modifier = Modifier
-            .clickable { onFloorLevelSelected.invoke(index) }
+            .clickable { onFloorLevelSelected(index) }
             .background(if (selected) selectedButtonBackgroundColor else buttonBackgroundColor)
             .height(buttonSize.height.dp)
             .fillMaxWidth()
