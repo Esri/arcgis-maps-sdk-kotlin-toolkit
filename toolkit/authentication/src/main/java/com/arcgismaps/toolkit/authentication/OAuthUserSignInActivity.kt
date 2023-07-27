@@ -81,7 +81,7 @@ private const val RESULT_CODE_CANCELED = 2
  * </activity>
  * ```
  *
- * Then, in the app that receives the intent, you can pass that on to the `OAuthUserSignInActivity`
+ * Then, in the app that receives the intent as a result of completing the CustomTab, you can pass that on to the `OAuthUserSignInActivity`
  * by copying the `intent.data` and starting the activity directly:
  *
  * ```
