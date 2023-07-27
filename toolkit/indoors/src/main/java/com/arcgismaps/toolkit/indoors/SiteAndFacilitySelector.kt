@@ -87,7 +87,7 @@ internal fun SiteAndFacilitySelector(
 ) {
     // boolean toggle to display either the sites selector or the facilities selector,
     // display sites selector by default when set to false, and sites selector when set to true.
-    val isFacilitiesSelectorVisible = remember { mutableStateOf(false) }
+    val isFacilitiesSelectorVisible = rememberSaveable { mutableStateOf(false) }
     // set to show facilities, if there is one selected
     if (floorFilterState.selectedSiteId != null) {
         isFacilitiesSelectorVisible.value = true
@@ -217,14 +217,13 @@ internal fun FacilitySelectorTopBar(
         modifier = Modifier.height(65.dp).fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        IconButton(
-            onClick = backToSiteButtonClicked,
-            modifier = Modifier.align(CenterVertically).padding(0.dp)
+        Box(
+            modifier = Modifier.clickable { backToSiteButtonClicked() }
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_chevron_left_32),
                 contentDescription = "Go Back to Site Selector",
-                modifier = Modifier.size(18.dp).padding(0.dp)
+                modifier = Modifier.fillMaxHeight().padding(horizontal = 6.dp).size(24.dp)
             )
         }
         Divider(
@@ -261,10 +260,10 @@ internal fun FacilitySelectorTopBar(
         }
         IconButton(
             onClick = closeButtonClicked,
-            modifier = Modifier.padding(horizontal = 10.dp).size(24.dp)
-                .align(CenterVertically)
+            modifier = Modifier.align(CenterVertically)
         ) {
             Icon(
+                modifier = Modifier.padding(horizontal = 10.dp).size(24.dp),
                 painter = painterResource(id = R.drawable.ic_x_24),
                 contentDescription = "Close Icon"
             )
@@ -435,7 +434,7 @@ internal fun ListOfSitesOrFacilities(
     uiProperties: UIProperties,
     onListItemSelected: (SiteFacilityWrapper) -> Unit
 ) {
-    LazyColumn() {
+    LazyColumn {
         items(count = siteFacilityList.size) { index ->
             SiteOrFacilityItem(
                 name = siteFacilityList[index].name,

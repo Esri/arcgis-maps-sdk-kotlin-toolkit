@@ -91,8 +91,10 @@ import com.arcgismaps.mapping.floor.FloorFacility
  *      maxDisplayLevels = 2
  *      closeButtonPosition = ButtonPosition.Bottom
  * }
+ * // create the floor filter state
+ * val floorFilterState = FloorFilterState(geoModel, coroutineScope, uiProperties)
  *
- * // in the compose layout
+ * // pass the floor filter state in the compose layout
  * FloorFilter(
  *      floorFilterState = mapViewModel.floorFilterState
  * )
@@ -294,13 +296,13 @@ internal fun SiteFacilityButton(
                 }
         )
     }
-    if (isSiteAndFacilitySelectorVisible) {
-        SiteAndFacilitySelector(
-            floorFilterState = floorFilterState,
-            isSiteFacilitySelectorVisible = isSiteAndFacilitySelectorVisible,
-            onSiteFacilitySelectorVisibilityChanged = onSiteFacilitySelectorVisibilityChanged
-        )
-    }
+
+    SiteAndFacilitySelector(
+        floorFilterState = floorFilterState,
+        isSiteFacilitySelectorVisible = isSiteAndFacilitySelectorVisible,
+        onSiteFacilitySelectorVisibilityChanged = onSiteFacilitySelectorVisibilityChanged
+    )
+
 }
 
 /**
