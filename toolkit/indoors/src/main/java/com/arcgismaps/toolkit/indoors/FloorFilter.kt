@@ -58,9 +58,8 @@ import com.arcgismaps.mapping.floor.FloorFacility
  * Displays a control for the user to pick which level of a floor aware [GeoModel] to display.
  *
  * The simplest workflow is for the app to instantiate a [FloorFilter] using an instance of
- * the [FloorFilterState] to display it within the GeoView. Optionally, the function parameters
- * may be called to override some of the default settings. A [Modifier] could be used to position
- * the [FloorFilter] inside of a [Box],[Column] or [Row].
+ * the [FloorFilterState] to ideally display it within the GeoView. The [Modifier] properties of
+ * [Box],[Column] or [Row] could be used to position the [FloorFilter] inside of a Composable Map.
  *
  * _Workflow example:_
  *
@@ -78,8 +77,9 @@ import com.arcgismaps.mapping.floor.FloorFacility
  *      }
  * }
  *```
- *
- * The [FloorFilter] has optional parameters to customize the colors, visibility, typography, and more.
+ * Optionally, the default UI settings of the [FloorFilter] may be overridden by modifying [UIProperties]
+ * defined in the [FloorFilterState]. The [UIProperties] enable the customization of the colors,
+ * visibility, typography, and more.
  *
  * _Workflow example:_
  *
@@ -95,9 +95,7 @@ import com.arcgismaps.mapping.floor.FloorFacility
  * val floorFilterState = FloorFilterState(geoModel, coroutineScope, uiProperties)
  *
  * // pass the floor filter state in the compose layout
- * FloorFilter(
- *      floorFilterState = mapViewModel.floorFilterState
- * )
+ * FloorFilter(floorFilterState = mapViewModel.floorFilterState)
  * ```
  *
  * @since 200.2.0
