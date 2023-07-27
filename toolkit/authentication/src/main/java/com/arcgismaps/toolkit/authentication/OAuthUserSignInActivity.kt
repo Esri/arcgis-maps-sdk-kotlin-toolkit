@@ -113,6 +113,12 @@ public class OAuthUserSignInActivity : ComponentActivity() {
         handleRedirectIntent(intent)
     }
 
+    /**
+     * Finishes this activity with a response containing a success code and the redirect intent's uri
+     * or a canceled code if no uri can be found.
+     *
+     * @since 200.2.0
+     */
     public fun handleRedirectIntent(intent: Intent?) {
         intent?.data?.let { uri ->
             val uriString = uri.toString()
