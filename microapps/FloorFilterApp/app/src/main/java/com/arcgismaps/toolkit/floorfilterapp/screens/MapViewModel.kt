@@ -24,20 +24,20 @@ import com.arcgismaps.geometry.Envelope
 import com.arcgismaps.geometry.Geometry
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.Viewpoint
-import com.arcgismaps.mapping.view.MapView
-import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.toolkit.composablemap.MapInterface
 import com.arcgismaps.toolkit.composablemap.MapInterfaceImpl
 import com.arcgismaps.toolkit.indoors.FloorFilterSelection
 import com.arcgismaps.toolkit.indoors.FloorFilterState
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.arcgismaps.toolkit.indoors.UIProperties
 
 class MapViewModel(
     arcGISMap: ArcGISMap
 ) : ViewModel(), MapInterface by MapInterfaceImpl(arcGISMap) {
 
-    val floorFilterState: FloorFilterState = FloorFilterState(this.map.value, viewModelScope) { floorFilterSelection ->
+    // use default UI properties, or set custom properties
+    private val uiProperties = UIProperties()
+
+    val floorFilterState: FloorFilterState = FloorFilterState(this.map.value, viewModelScope, uiProperties) { floorFilterSelection ->
         when (floorFilterSelection.type) {
             is FloorFilterSelection.Type.FloorSite -> {
                 val floorFilterSelectionType =

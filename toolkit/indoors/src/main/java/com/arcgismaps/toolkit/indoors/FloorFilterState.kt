@@ -17,6 +17,11 @@
 
 package com.arcgismaps.toolkit.indoors
 
+import android.view.View
+import androidx.compose.material3.Typography
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.GeoModel
 import com.arcgismaps.mapping.floor.FloorFacility
 import com.arcgismaps.mapping.floor.FloorLevel
@@ -45,6 +50,8 @@ public sealed interface FloorFilterState {
     public val onFacilityChanged: StateFlow<FloorFacility?>
     public val onLevelChanged: StateFlow<FloorLevel?>
 
+    public val uiProperties: UIProperties
+
     public fun getSelectedSite(): FloorSite?
     public fun getSelectedFacility(): FloorFacility?
 }
@@ -57,6 +64,7 @@ public sealed interface FloorFilterState {
 private class FloorFilterStateImpl(
     var geoModel: GeoModel,
     var coroutineScope: CoroutineScope,
+    override var uiProperties: UIProperties,
     var onSelectionChangedListener: (FloorFilterSelection) -> Unit
 ) : FloorFilterState {
 
@@ -343,9 +351,10 @@ public enum class ButtonPosition {
 public fun FloorFilterState(
     geoModel: GeoModel,
     coroutineScope: CoroutineScope,
-    onSelectionChangedListener : (FloorFilterSelection) -> Unit
+    uiProperties: UIProperties = UIProperties(),
+    onSelectionChangedListener: (FloorFilterSelection) -> Unit
 ): FloorFilterState =
-    FloorFilterStateImpl(geoModel, coroutineScope, onSelectionChangedListener)
+    FloorFilterStateImpl(geoModel, coroutineScope, uiProperties, onSelectionChangedListener)
 
 /**
  * The selection that was made by the user
@@ -380,3 +389,22 @@ public data class FloorFilterSelection(public val type: Type) {
     }
 
 }
+
+/**
+ * UI properties used by the [FloorFilter] component which can be set or else use default values.
+ *
+ * @since 200.2.0
+ */
+public data class UIProperties(
+    var selectedBackgroundColor: Color = Color(0xFFE2F1FB), // light blue
+    var selectedForegroundColor: Color = Color(0xFF005E95), // dark blue
+    var searchBackgroundColor: Color = Color(0xFFEEEEEE), // light gray
+    var textColor: Color = Color.Black,
+    var backgroundColor: Color = Color.White,
+    var maxDisplayLevels: Int = -1, // less than 1 will show all of the levels.
+    var siteFacilityButtonVisibility: Int = View.VISIBLE,
+    var closeButtonVisibility: Int = View.VISIBLE,
+    var closeButtonPosition: ButtonPosition = ButtonPosition.Top,
+    var buttonSize: Size = Size(60.dp.value, 40.dp.value),
+    var typography: Typography = Typography()
+)

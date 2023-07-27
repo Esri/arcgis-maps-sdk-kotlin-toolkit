@@ -81,11 +81,6 @@ import com.arcgismaps.mapping.floor.FloorSite
 internal fun SiteAndFacilitySelector(
     floorFilterState: FloorFilterState,
     isSiteFacilitySelectorVisible: Boolean,
-    searchBackgroundColor: Color,
-    buttonBackgroundColor: Color,
-    textColor: Color,
-    selectedTextColor: Color,
-    selectedButtonBackgroundColor: Color,
     onSiteFacilitySelectorVisibilityChanged: (Boolean) -> Unit
 ) {
     // boolean toggle to display either the sites selector or the facilities selector,
@@ -95,6 +90,8 @@ internal fun SiteAndFacilitySelector(
     if (floorFilterState.selectedSiteId != null) {
         isFacilitiesSelectorVisible.value = true
     }
+    // keep an instance of the colors used
+    val uiProperties = floorFilterState.uiProperties
 
     // display alert dialog when set to true
     if (isSiteFacilitySelectorVisible) {
@@ -114,7 +111,7 @@ internal fun SiteAndFacilitySelector(
                 Column(
                     modifier = Modifier
                         .clip(RoundedCornerShape(5.dp))
-                        .background(color = buttonBackgroundColor)
+                        .background(color = uiProperties.backgroundColor)
                 )
                 {
                     Column {
@@ -128,12 +125,8 @@ internal fun SiteAndFacilitySelector(
                             // display search list for all sites
                             SitesAndFacilitiesFilter(
                                 floorFilterState,
-                                searchBackgroundColor,
-                                textColor,
-                                selectedTextColor,
-                                selectedButtonBackgroundColor,
-                                buttonBackgroundColor,
-                                isFacilitiesSelectorVisible
+                                isFacilitiesSelectorVisible,
+                                uiProperties
                             ) { selectedSite ->
                                 floorFilterState.selectedSiteId = selectedSite.site?.id
                                 isFacilitiesSelectorVisible.value = true
@@ -153,12 +146,8 @@ internal fun SiteAndFacilitySelector(
                             // display search list for all facilities
                             SitesAndFacilitiesFilter(
                                 floorFilterState,
-                                searchBackgroundColor,
-                                textColor,
-                                selectedTextColor,
-                                selectedButtonBackgroundColor,
-                                buttonBackgroundColor,
-                                isFacilitiesSelectorVisible
+                                isFacilitiesSelectorVisible,
+                                uiProperties
                             ) { selectedFacility ->
                                 floorFilterState.selectedFacilityId = selectedFacility.facility?.id
                                 onSiteFacilitySelectorVisibilityChanged(false)
@@ -287,12 +276,8 @@ internal fun FacilitySelectorTopBar(
 @Composable
 internal fun SitesAndFacilitiesFilter(
     floorFilterState: FloorFilterState,
-    searchBackgroundColor: Color,
-    textColor: Color,
-    selectedTextColor: Color,
-    selectedButtonBackgroundColor: Color,
-    buttonBackgroundColor: Color,
     isFacilitiesSelectorVisible: MutableState<Boolean>,
+    uiProperties: UIProperties,
     onSiteOrFacilitySelected: (SiteFacilityWrapper) -> Unit
 ) {
     // query text typed in OutlinedTextField
@@ -398,14 +383,14 @@ internal fun SitesAndFacilitiesFilter(
                     },
                 ),
                 colors = TextFieldDefaults.colors(
-                    focusedContainerColor = searchBackgroundColor,
-                    unfocusedContainerColor = searchBackgroundColor,
-                    unfocusedTextColor = textColor,
-                    focusedTextColor = textColor,
-                    focusedLabelColor = selectedTextColor,
-                    cursorColor = selectedTextColor,
-                    unfocusedIndicatorColor = textColor,
-                    focusedIndicatorColor = selectedTextColor,
+                    focusedContainerColor = uiProperties.searchBackgroundColor,
+                    unfocusedContainerColor = uiProperties.searchBackgroundColor,
+                    unfocusedTextColor = uiProperties.textColor,
+                    focusedTextColor = uiProperties.textColor,
+                    focusedLabelColor = uiProperties.selectedForegroundColor,
+                    cursorColor = uiProperties.selectedForegroundColor,
+                    unfocusedIndicatorColor = uiProperties.textColor,
+                    focusedIndicatorColor = uiProperties.selectedForegroundColor,
                     unfocusedLabelColor = Color.Gray,
                 ),
             )
@@ -426,7 +411,7 @@ internal fun SitesAndFacilitiesFilter(
             // display a list of sites/facilities
             ListOfSitesOrFacilities(
                 filteredSitesOrFacilities,
-                selectedTextColor,
+                uiProperties.selectedForegroundColor,
                 onSiteOrFacilitySelected
             )
         }
