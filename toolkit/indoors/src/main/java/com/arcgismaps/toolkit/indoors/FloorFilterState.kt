@@ -22,6 +22,7 @@ import com.arcgismaps.mapping.floor.FloorFacility
 import com.arcgismaps.mapping.floor.FloorLevel
 import com.arcgismaps.mapping.floor.FloorManager
 import com.arcgismaps.mapping.floor.FloorSite
+import com.arcgismaps.mapping.view.GeoView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -357,7 +358,7 @@ public enum class ButtonPosition {
 /**
  * Factory function for the creating FloorFilterState.
  *
- * @param geoModel the floor aware geoModel that drives the FloorFilter
+ * @param geoModel the floor aware geoModel that drives the [FloorFilter]
  * @param coroutineScope scope for [FloorFilterState] that it can use to launch jobs in response
  *        to events that change the selectedSiteId, selectedFacilityId or selectedLevelId
  * @param onSelectionChangedListener a lambda to facilitate setting of new ViewPoint on the [GeoView]
