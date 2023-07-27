@@ -152,17 +152,16 @@ internal fun DateTimePicker(
             state = state,
             confirmEnabled = confirmEnabled,
             onToday = {
-                state.today(timePickerState.hour, timePickerState.minute)
+                state.today()
             },
             onNow = {
-                state.now(datePickerState.selectedDateMillis)
+                state.now()
             },
             onCancelled = onCancelled,
             onConfirmed = {
                 // remove time zone offset before setting value
-                val pickedDate = datePickerState.selectedDateMillis?.minus(state.timeZoneOffset)
-                state.setValue(
-                    date = pickedDate,
+                state.setDateTime(
+                    date = datePickerState.selectedDateMillis?.minus(state.timeZoneOffset),
                     hour = timePickerState.hour,
                     minute = timePickerState.minute
                 )

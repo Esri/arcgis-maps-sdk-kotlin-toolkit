@@ -24,16 +24,45 @@ import com.arcgismaps.toolkit.featureforms.components.datetime.toZonedDateTime
 import java.time.Instant
 import java.util.TimeZone
 
+/**
+ * A class to hold a DateTime. [date] represents the number of milliseconds since epoch
+ * (January 1, 1970) in UTC. While [hour], [minute] and [second] represent time in local time zone.
+ */
 internal data class DateTime(
     val date: Long?,
     val hour: Int = 0,
     val minute: Int = 0,
     val second: Int = 0
 ) {
+
+    /**
+     * Converts and returns the current DateTime in number of milliseconds since epoch
+     * (January 1, 1970) in UTC.
+     */
     fun getDateTimeInMillis(): Long? {
         return date?.let {
-            val timeInMillis = (hour * 60 * 60 * 1000) + (minute * 60 * 1000)
-            return date + timeInMillis
+            val instant = Instant.ofEpochMilli(it)
+            val zonedDateTime =
+                instant.atZone(TimeZone.getDefault().toZoneId()).withHour(hour).withMinute(minute)
+            return zonedDateTime.toInstant().toEpochMilli()
+        }
+    }
+
+    companion object {
+        /**
+         * Creates an instance of [DateTime] using [dateTime] with the [hour], [minute] and [second]
+         * representing time in the local zone.
+         *
+         * @param dateTime The number of milliseconds since epoch (January 1, 1970) in UTC.
+         */
+        fun createWithLocalTime(dateTime: Long?): DateTime {
+            val zonedDateTime = dateTime?.toZonedDateTime()
+            return DateTime(
+                dateTime,
+                zonedDateTime?.hour ?: 0,
+                zonedDateTime?.minute ?: 0,
+                zonedDateTime?.second ?: 0
+            )
         }
     }
 }
@@ -54,10 +83,14 @@ internal interface DateTimePickerState {
     val maxDateTime: Long?
 
     /**
-     * The set date time value in milliseconds.
+     * The current date time value. Use [setDateTime] to set this state.
      */
     val dateTime: State<DateTime>
 
+    /**
+     * A timestamp that represents the the selected date and time in UTC milliseconds from the epoch.
+     * In case no date was selected or provided, this will hold a null value.
+     */
     val selectedDateTimeMillis: Long?
 
     /**
@@ -75,6 +108,9 @@ internal interface DateTimePickerState {
      */
     val pickerStyle: DateTimePickerStyle
 
+    /**
+     * Current picker input type.
+     */
     val activePickerInput: State<DateTimePickerInput>
 
     /**
@@ -87,15 +123,35 @@ internal interface DateTimePickerState {
      */
     val description: String
 
-    fun setValue(date: Long?, hour: Int, minute: Int)
+    /**
+     * Sets the [dateTime].
+     */
+    fun setDateTime(date: Long?, hour: Int, minute: Int)
 
+    /**
+     * Toggles the current picker input between [DateTimePickerInput.Date] and
+     * [DateTimePickerInput.Time].
+     */
     fun togglePickerInput()
 
+    /**
+     * Validates if the [timeStamp] is between the given ranges of [minDateTime] and [maxDateTime]
+     * if they were provided and returns true if the validation was successful, otherwise false
+     * is returned.
+     */
     fun dateTimeValidator(timeStamp: Long): Boolean
 
-    fun today(selectedHour: Int, selectedMinute: Int)
+    /**
+     * Sets the current [dateTime]'s date value to today's date while preserving the time, if any
+     * time was previously set.
+     */
+    fun today()
 
-    fun now(selectedDate: Long?)
+    /**
+     * Sets the current [dateTime]'s hour, minute and second values to the current local time while
+     * preserving the date, if any date was previously set.
+     */
+    fun now()
 }
 
 /**
@@ -111,23 +167,16 @@ private class DateTimePickerStateImpl(
 ) : DateTimePickerState {
 
     override var dateTime = mutableStateOf(
-        DateTime(
-            date = initialValue,
-            hour = initialValue?.toZonedDateTime()?.hour ?: 0,
-            minute = initialValue?.toZonedDateTime()?.minute ?: 0,
-        )
+        DateTime.createWithLocalTime(initialValue)
     )
 
     override val selectedDateTimeMillis: Long?
         get() = dateTime.value.getDateTimeInMillis()
 
-    // current time zone
     override val timeZone: TimeZone = TimeZone.getDefault()
 
-    // current time zone offset compared to UTC
     override val timeZoneOffset = initialValue?.let { timeZone.getOffset(it) } ?: 0
 
-    // calculate which picker to show by default
     override var activePickerInput = mutableStateOf(
         if (pickerStyle == DateTimePickerStyle.DateTime
             || pickerStyle == DateTimePickerStyle.Date
@@ -135,7 +184,7 @@ private class DateTimePickerStateImpl(
         else DateTimePickerInput.Time
     )
 
-    override fun setValue(date: Long?, hour: Int, minute: Int) {
+    override fun setDateTime(date: Long?, hour: Int, minute: Int) {
         dateTime.value = DateTime(date, hour, minute)
     }
 
@@ -157,7 +206,7 @@ private class DateTimePickerStateImpl(
         } ?: true
     }
 
-    override fun today(selectedHour: Int, selectedMinute: Int) {
+    override fun today() {
         // only reset the date in UTC and persist the time information
         dateTime.value = DateTime(
             date = Instant.now().toEpochMilli(),
@@ -166,12 +215,12 @@ private class DateTimePickerStateImpl(
         )
     }
 
-    override fun now(selectedDate: Long?) {
+    override fun now() {
         // only reset the time in local time zone
         val zonedTime = Instant.now().atZone(timeZone.toZoneId())
         // persist the date information
         dateTime.value = DateTime(
-            date = selectedDate,
+            date = dateTime.value.date,
             hour = zonedTime.hour,
             minute = zonedTime.minute
         )
