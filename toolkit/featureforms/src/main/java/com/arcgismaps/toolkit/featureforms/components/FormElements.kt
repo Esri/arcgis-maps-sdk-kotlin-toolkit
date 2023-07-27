@@ -30,7 +30,7 @@ internal fun FieldElement(field: FieldFeatureFormElement, formDefinition: Featur
                 )
             )
         }
-        
+
         is TextBoxFeatureFormInput -> {
             formDefinition.getElementValue(field)?.let {
                 field.value = it.toString()
@@ -43,7 +43,7 @@ internal fun FieldElement(field: FieldFeatureFormElement, formDefinition: Featur
                 )
             )
         }
-        
+
         is DateTimePickerFeatureFormInput -> {
             formDefinition.getElementValue(field)?.let {
                 if (it is Instant) {
@@ -53,9 +53,14 @@ internal fun FieldElement(field: FieldFeatureFormElement, formDefinition: Featur
                     field.value = it.toString()
                 }
             }
-            DateTimeField(state = DateTimeFieldState(featureFormElement = field, formDefinition = formDefinition))
+            DateTimeField(
+                state = DateTimeFieldState(
+                    featureFormElement = field,
+                    formDefinition = formDefinition
+                )
+            )
         }
-        
+
         else -> { /* TO-DO: add support for other input types */
         }
     }

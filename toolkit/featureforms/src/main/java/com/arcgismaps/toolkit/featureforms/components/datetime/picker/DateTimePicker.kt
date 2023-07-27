@@ -112,28 +112,26 @@ internal fun DateTimePicker(
             ?: DatePickerDefaults.YearRange.last
     )
     // time instant in UTC from the state's value
-    val instant by state.value
-    // time in current time zone
-    val zonedDateTime = instant?.atZone(state.timeZone.toZoneId())
+    val dateTime by state.dateTime
     // create and remember a DatePickerState that resets when instant changes
-    val datePickerState = rememberSaveable(instant, saver = DatePickerState.Saver()) {
+    val datePickerState = rememberSaveable(dateTime, saver = DatePickerState.Saver()) {
         DatePickerState(
-            initialSelectedDateMillis = instant?.toEpochMilli()?.plus(state.timeZoneOffset),
-            initialDisplayedMonthMillis = instant?.toEpochMilli()?.plus(state.timeZoneOffset)
+            initialSelectedDateMillis = dateTime.date?.plus(state.timeZoneOffset),
+            initialDisplayedMonthMillis = dateTime.date?.plus(state.timeZoneOffset)
                 ?: (state.minDateTime ?: state.maxDateTime),
             datePickerRange,
             DisplayMode.Picker
         )
     }
     // create and remember a TimePickerState that resets when instant changes
-    val timePickerState = rememberSaveable(instant, saver = TimePickerState.Saver()) {
+    val timePickerState = rememberSaveable(dateTime, saver = TimePickerState.Saver()) {
         TimePickerState(
-            initialHour = zonedDateTime?.hour ?: 0,
-            initialMinute = zonedDateTime?.minute ?: 0,
+            initialHour = dateTime.hour,
+            initialMinute = dateTime.minute,
             is24Hour = false,
         )
     }
-    val confirmEnabled by remember(instant) {
+    val confirmEnabled by remember(dateTime) {
         derivedStateOf { datePickerState.selectedDateMillis != null }
     }
     DateTimePickerDialog(

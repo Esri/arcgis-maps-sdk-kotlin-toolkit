@@ -83,11 +83,10 @@ internal fun DateTimeField(
             onDismissRequest = { openDialog = false },
             onCancelled = { openDialog = false },
             onConfirmed = {
-                state.setValue(pickerState.value.value?.toEpochMilli())
+                state.setValue(pickerState.selectedDateTimeMillis)
                 openDialog = false
             })
     }
-
 
     // the field
     if (isEditable) {
