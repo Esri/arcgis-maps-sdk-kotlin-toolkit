@@ -84,12 +84,17 @@ import com.arcgismaps.mapping.floor.FloorFacility
  * _Workflow example:_
  *
  * ```
- * FloorFilter(
- *      floorFilterState = mapViewModel.floorFilterState,
- *      typography = MaterialTheme.typography,
- *      selectedTextColor = Color.Red,
- *      maxDisplayLevels = 2,
+ * // in the MapViewModel
+ * private val uiProperties = UIProperties().apply {
+ *      selectedForegroundColor = Color.Red
+ *      typography = MaterialTheme.typography
+ *      maxDisplayLevels = 2
  *      closeButtonPosition = ButtonPosition.Bottom
+ * }
+ *
+ * // in the compose layout
+ * FloorFilter(
+ *      floorFilterState = mapViewModel.floorFilterState
  * )
  * ```
  *

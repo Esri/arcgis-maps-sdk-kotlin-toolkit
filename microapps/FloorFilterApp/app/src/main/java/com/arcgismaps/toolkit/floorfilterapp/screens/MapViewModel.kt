@@ -37,7 +37,11 @@ class MapViewModel(
     // use default UI properties, or set custom properties
     private val uiProperties = UIProperties()
 
-    val floorFilterState: FloorFilterState = FloorFilterState(this.map.value, viewModelScope, uiProperties) { floorFilterSelection ->
+    val floorFilterState: FloorFilterState = FloorFilterState(
+        geoModel = this.map.value,
+        coroutineScope = viewModelScope,
+        uiProperties = uiProperties
+    ) { floorFilterSelection ->
         when (floorFilterSelection.type) {
             is FloorFilterSelection.Type.FloorSite -> {
                 val floorFilterSelectionType =

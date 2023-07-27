@@ -22,6 +22,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -50,6 +51,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Alignment.Companion.Start
 import androidx.compose.ui.Modifier
@@ -118,6 +120,7 @@ internal fun SiteAndFacilitySelector(
                         if (!isFacilitiesSelectorVisible.value) {
                             // display the sites top bar
                             SiteSelectorTopBar(
+                                uiProperties = uiProperties,
                                 closeButtonClicked = {
                                     onSiteFacilitySelectorVisibilityChanged(false)
                                 }
@@ -126,7 +129,7 @@ internal fun SiteAndFacilitySelector(
                             SitesAndFacilitiesFilter(
                                 floorFilterState,
                                 isFacilitiesSelectorVisible,
-                                uiProperties
+                                uiProperties,
                             ) { selectedSite ->
                                 floorFilterState.selectedSiteId = selectedSite.site?.id
                                 isFacilitiesSelectorVisible.value = true
@@ -136,10 +139,10 @@ internal fun SiteAndFacilitySelector(
                             // display the facilities top bar
                             FacilitySelectorTopBar(
                                 floorFilterState = floorFilterState,
+                                uiProperties = uiProperties,
                                 backToSiteButtonClicked = {
                                     isFacilitiesSelectorVisible.value = false
-                                },
-                                closeButtonClicked = {
+                                }, closeButtonClicked = {
                                     onSiteFacilitySelectorVisibilityChanged(false)
                                 }
                             )
@@ -168,6 +171,7 @@ internal fun SiteAndFacilitySelector(
  */
 @Composable
 internal fun SiteSelectorTopBar(
+    uiProperties: UIProperties,
     closeButtonClicked: () -> Unit
 ) {
     Row(
@@ -180,15 +184,15 @@ internal fun SiteSelectorTopBar(
                 .align(CenterVertically),
             text = stringResource(R.string.floor_filter_select_site),
             fontWeight = FontWeight.Bold,
-            color = Color.DarkGray,
+            color = uiProperties.textColor,
             fontSize = 18.sp
         )
         IconButton(
             onClick = closeButtonClicked,
-            modifier = Modifier.padding(horizontal = 10.dp).size(24.dp)
-                .align(CenterVertically)
+            modifier = Modifier.align(CenterVertically)
         ) {
             Icon(
+                modifier = Modifier.padding(horizontal = 10.dp).size(24.dp),
                 painter = painterResource(id = R.drawable.ic_x_24),
                 contentDescription = "Close Icon"
             )
@@ -205,8 +209,9 @@ internal fun SiteSelectorTopBar(
 @Composable
 internal fun FacilitySelectorTopBar(
     floorFilterState: FloorFilterState,
+    uiProperties: UIProperties,
     backToSiteButtonClicked: () -> Unit,
-    closeButtonClicked: () -> Unit
+    closeButtonClicked: () -> Unit,
 ) {
     Row(
         modifier = Modifier.height(65.dp).fillMaxWidth(),
@@ -214,12 +219,12 @@ internal fun FacilitySelectorTopBar(
     ) {
         IconButton(
             onClick = backToSiteButtonClicked,
-            modifier = Modifier.align(CenterVertically).padding(horizontal = 6.dp).size(24.dp)
+            modifier = Modifier.align(CenterVertically).padding(0.dp)
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_chevron_left_32),
                 contentDescription = "Go Back to Site Selector",
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(18.dp).padding(0.dp)
             )
         }
         Divider(
@@ -238,6 +243,7 @@ internal fun FacilitySelectorTopBar(
             Text(
                 modifier = Modifier.align(Start),
                 text = stringResource(R.string.floor_filter_select_facility),
+                color = uiProperties.textColor,
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp,
                 textAlign = TextAlign.Start
@@ -324,8 +330,6 @@ internal fun SitesAndFacilitiesFilter(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(65.dp)
-                    .padding(0.dp)
-                    .background(color = Color.White)
                     .focusRequester(focusRequester).onKeyEvent {
                         // submit query when enter is tapped
                         if (it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_ENTER) {
@@ -405,13 +409,14 @@ internal fun SitesAndFacilitiesFilter(
                     .wrapContentHeight(align = CenterVertically),
                 text = "No results found",
                 textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Light
+                fontWeight = FontWeight.ExtraLight,
+                color = uiProperties.textColor
             )
         } else {
             // display a list of sites/facilities
             ListOfSitesOrFacilities(
                 filteredSitesOrFacilities,
-                uiProperties.selectedForegroundColor,
+                uiProperties,
                 onSiteOrFacilitySelected
             )
         }
@@ -427,7 +432,7 @@ internal fun SitesAndFacilitiesFilter(
 @Composable
 internal fun ListOfSitesOrFacilities(
     siteFacilityList: List<SiteFacilityWrapper>,
-    selectedTextColor: Color,
+    uiProperties: UIProperties,
     onListItemSelected: (SiteFacilityWrapper) -> Unit
 ) {
     LazyColumn() {
@@ -437,7 +442,7 @@ internal fun ListOfSitesOrFacilities(
                 index = index,
                 isSelected = siteFacilityList[index].isSelected,
                 isSiteItem = siteFacilityList[0].site != null,
-                selectedTextColor = selectedTextColor,
+                uiProperties = uiProperties,
                 onSelected = {
                     onListItemSelected(siteFacilityList[it])
                 }
@@ -458,37 +463,37 @@ internal fun SiteOrFacilityItem(
     isSelected: Boolean,
     onSelected: (Int) -> Unit,
     index: Int,
-    selectedTextColor: Color,
+    uiProperties: UIProperties,
     isSiteItem: Boolean
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(65.dp)
-            .padding(horizontal = 20.dp)
-            .clickable { onSelected(index) }) {
-        if (isSelected) {
-            Canvas(
-                modifier = Modifier
-                    .padding(0.dp, 0.dp, 10.dp, 0.dp)
-                    .size(5.dp)
-                    .align(CenterVertically),
-                onDraw = {
-                    drawCircle(color = selectedTextColor)
-                })
-        }
-        Text(
-            modifier = Modifier.weight(1f).align(CenterVertically),
-            text = name,
-            color = Color.DarkGray,
-            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-        )
-        if (isSiteItem) {
-            Icon(
-                modifier = Modifier.size(24.dp).align(CenterVertically),
-                painter = painterResource(id = R.drawable.ic_chevron_right_32),
-                contentDescription = "Select site icon"
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .height(65.dp)
+        .clickable { onSelected(index) }) {
+        Row(modifier = Modifier.padding(horizontal = 20.dp).align(Center)) {
+            if (isSelected) {
+                Canvas(
+                    modifier = Modifier
+                        .padding(0.dp, 0.dp, 10.dp, 0.dp)
+                        .size(5.dp)
+                        .align(CenterVertically),
+                    onDraw = {
+                        drawCircle(color = uiProperties.selectedForegroundColor)
+                    })
+            }
+            Text(
+                modifier = Modifier.weight(1f).align(CenterVertically),
+                text = name,
+                color = uiProperties.textColor,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
             )
+            if (isSiteItem) {
+                Icon(
+                    modifier = Modifier.size(24.dp).align(CenterVertically),
+                    painter = painterResource(id = R.drawable.ic_chevron_right_32),
+                    contentDescription = "Select site icon"
+                )
+            }
         }
     }
 }

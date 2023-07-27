@@ -399,7 +399,7 @@ public data class UIProperties(
     var selectedBackgroundColor: Color = Color(0xFFE2F1FB), // light blue
     var selectedForegroundColor: Color = Color(0xFF005E95), // dark blue
     var searchBackgroundColor: Color = Color(0xFFEEEEEE), // light gray
-    var textColor: Color = Color.Black,
+    var textColor: Color = Color.DarkGray,
     var backgroundColor: Color = Color.White,
     var maxDisplayLevels: Int = -1, // less than 1 will show all of the levels.
     var siteFacilityButtonVisibility: Int = View.VISIBLE,
