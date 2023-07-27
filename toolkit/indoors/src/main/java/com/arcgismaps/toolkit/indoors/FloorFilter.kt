@@ -146,6 +146,7 @@ public fun FloorFilter(
             // displays only the selected floor when enabled
             var isFloorsCollapsed by rememberSaveable { mutableStateOf(false) }
 
+            // boolean toggle to display the site facility selector dialog
             var isSiteAndFacilitySelectorVisible by rememberSaveable { mutableStateOf(false) }
 
             // get the current selected facility
@@ -352,7 +353,7 @@ internal fun SiteFacilityButton(
                 .width(buttonSize.width.dp)
                 .wrapContentSize(Center)
                 .clickable {
-                    onSiteFacilitySelectorVisibilityChanged.invoke(true)
+                    onSiteFacilitySelectorVisibilityChanged(true)
                 }
         )
     }
@@ -384,7 +385,7 @@ internal fun FloorListCloseButton(
     Box(modifier
         .fillMaxWidth()
         .height(buttonSize.height.dp)
-        .clickable { onClick.invoke(Unit) }) {
+        .clickable { onClick(Unit) }) {
         Icon(
             modifier = modifier.align(Center),
             painter = painterResource(id = R.drawable.ic_x_24),
@@ -421,7 +422,7 @@ internal fun FloorLevelSelectButton(
         fontSize = textSize,
         color = if (selected) selectedTextColor else textColor,
         modifier = Modifier
-            .clickable { onFloorLevelSelected.invoke(index) }
+            .clickable { onFloorLevelSelected(index) }
             .background(if (selected) selectedButtonBackgroundColor else buttonBackgroundColor)
             .height(buttonSize.height.dp)
             .fillMaxWidth()
