@@ -34,6 +34,7 @@ private const val KEY_INTENT_EXTRA_CUSTOM_TABS_WAS_LAUNCHED =
     "KEY_INTENT_EXTRA_CUSTOM_TABS_WAS_LAUNCHED"
 private const val KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL = "KEY_INTENT_EXTRA_OAUTH_RESPONSE_URI"
 private const val KEY_INTENT_EXTRA_REDIRECT_URL = "KEY_INTENT_EXTRA_REDIRECT_URL"
+private const val KEY_INTENT_EXTRA_PRIVATE_BROWSING = "KEY_INTENT_EXTRA_PRIVATE_BROWSING"
 
 private const val RESULT_CODE_SUCCESS = 1
 private const val RESULT_CODE_CANCELED = 2
@@ -59,8 +60,9 @@ internal class OAuthUserSignInActivity : ComponentActivity() {
 
         if (!customTabsWasLaunched) {
             val authorizeUrl = intent.getStringExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL)
+            val useIncognito = intent.getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false)
             authorizeUrl?.let {
-                launchCustomTabs(it)
+                launchCustomTabs(it, useIncognito)
             }
         }
     }
@@ -116,9 +118,13 @@ internal class OAuthUserSignInActivity : ComponentActivity() {
      *
      * @since 200.2.0
      */
-    private fun launchCustomTabs(authorizeUrl: String) {
+    private fun launchCustomTabs(authorizeUrl: String, useIncognito: Boolean) {
         customTabsWasLaunched = true
-        CustomTabsIntent.Builder().build().launchUrl(this, Uri.parse(authorizeUrl))
+        CustomTabsIntent.Builder().build().apply {
+            if (useIncognito) {
+                intent.putExtra("com.google.android.apps.chrome.EXTRA_OPEN_NEW_INCOGNITO_TAB", true)
+            }
+        }.launchUrl(this, Uri.parse(authorizeUrl))
     }
 
     /**
@@ -139,6 +145,7 @@ internal class OAuthUserSignInActivity : ComponentActivity() {
                     KEY_INTENT_EXTRA_REDIRECT_URL,
                     input.oAuthUserConfiguration.redirectUrl
                 )
+                putExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, input.oAuthUserConfiguration.preferPrivateWebBrowserSession)
             }
 
         override fun parseResult(resultCode: Int, intent: Intent?): String? {
