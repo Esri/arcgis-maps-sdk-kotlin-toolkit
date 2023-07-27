@@ -63,7 +63,6 @@ import androidx.compose.ui.window.DialogProperties
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.datetime.toZonedDateTime
 import java.time.Instant
-import java.util.TimeZone
 
 /**
  * Defines the style of [DateTimePicker]
@@ -114,17 +113,13 @@ internal fun DateTimePicker(
     )
     // time instant in UTC from the state's value
     val instant by state.value
-    // current time zone
-    val timeZone = TimeZone.getDefault()
     // time in current time zone
-    val zonedDateTime = instant?.atZone(timeZone.toZoneId())
-    // current time zone offset compared to UTC
-    val timeZoneOffset = instant?.toEpochMilli()?.let { timeZone.getOffset(it) } ?: 0
+    val zonedDateTime = instant?.atZone(state.timeZone.toZoneId())
     // create and remember a DatePickerState that resets when instant changes
     val datePickerState = rememberSaveable(instant, saver = DatePickerState.Saver()) {
         DatePickerState(
-            initialSelectedDateMillis = instant?.toEpochMilli()?.plus(timeZoneOffset),
-            initialDisplayedMonthMillis = instant?.toEpochMilli()?.plus(timeZoneOffset)
+            initialSelectedDateMillis = instant?.toEpochMilli()?.plus(state.timeZoneOffset),
+            initialDisplayedMonthMillis = instant?.toEpochMilli()?.plus(state.timeZoneOffset)
                 ?: (state.minDateTime ?: state.maxDateTime),
             datePickerRange,
             DisplayMode.Picker
@@ -156,38 +151,23 @@ internal fun DateTimePicker(
             state.togglePickerInput()
         }
         PickerFooter(
-            picker = state.activePickerInput.value,
+            state = state,
             confirmEnabled = confirmEnabled,
             onToday = {
-                // only reset the date
-                var zonedToday = Instant.now().atZone(timeZone.toZoneId())
-                // persist the time information
-                zonedDateTime?.let {
-                    zonedToday = zonedToday.withHour(it.hour)
-                        .withMinute(it.minute)
-                        .withSecond(it.second)
-                }
-                state.setValue(zonedToday.toInstant())
+                state.today(timePickerState.hour, timePickerState.minute)
             },
             onNow = {
-                // only reset the time
-                var zonedNow = Instant.now().atZone(timeZone.toZoneId())
-                // persist the date information
-                zonedDateTime?.let {
-                    zonedNow = zonedNow.withYear(it.year)
-                        .withMonth(it.monthValue)
-                        .withDayOfMonth(it.dayOfMonth)
-                }
-                state.setValue(zonedNow.toInstant())
+                state.now(datePickerState.selectedDateMillis)
             },
             onCancelled = onCancelled,
             onConfirmed = {
-                // remove time zone offset before raising callback
-                val pickedDate = datePickerState.selectedDateMillis?.minus(timeZoneOffset)
-                val pickedTime =
-                    (timePickerState.hour * 60 * 60 * 1000) + (timePickerState.minute * 60 * 1000)
-                val pickedMilli = (pickedDate ?: 0) + pickedTime
-                state.onValueSet(pickedMilli)
+                // remove time zone offset before setting value
+                val pickedDate = datePickerState.selectedDateMillis?.minus(state.timeZoneOffset)
+                state.setValue(
+                    date = pickedDate,
+                    hour = timePickerState.hour,
+                    minute = timePickerState.minute
+                )
                 onConfirmed()
             }
         )
@@ -224,11 +204,7 @@ private fun (ColumnScope).PickerContent(
             modifier = Modifier.weight(1f, fill = false),
             dateValidator = { timeStamp ->
                 // validate selectable dates if a range is provided
-                state.minDateTime?.let { min ->
-                    state.maxDateTime?.let { max ->
-                        timeStamp in min..max
-                    } ?: (timeStamp >= min)
-                } ?: true
+                state.dateTimeValidator(timeStamp)
             },
             title = { title(if (style == DateTimePickerStyle.Date) null else Icons.Rounded.AccessTime) }
         )
@@ -267,7 +243,7 @@ private fun PickerTitle(
 
 @Composable
 private fun PickerFooter(
-    picker: DateTimePickerInput,
+    state: DateTimePickerState,
     confirmEnabled: Boolean,
     onToday: () -> Unit = {},
     onNow: () -> Unit = {},
@@ -280,8 +256,11 @@ private fun PickerFooter(
             .padding(10.dp)
             .fillMaxWidth()
     ) {
-        if (picker == DateTimePickerInput.Date) {
-            TextButton(onClick = onToday) {
+        if (state.activePickerInput.value == DateTimePickerInput.Date) {
+            TextButton(
+                onClick = onToday,
+                enabled = state.dateTimeValidator(Instant.now().toEpochMilli())
+            ) {
                 Text(stringResource(R.string.today))
             }
         } else {
@@ -345,5 +324,5 @@ private fun DateTimePickerPreview() {
         label = "Next Inspection Date",
         description = "Enter a date in the next six months"
     )
-    DateTimePicker(state = state,{}, {}, {})
+    DateTimePicker(state = state, {}, {}, {})
 }

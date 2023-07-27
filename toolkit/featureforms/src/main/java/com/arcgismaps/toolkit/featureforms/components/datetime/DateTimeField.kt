@@ -67,22 +67,25 @@ internal fun DateTimeField(
     }
     var openDialog by remember { mutableStateOf(false) }
     if (openDialog) {
-        val pickerState = DateTimePickerState(
-            pickerStyle,
-            state.minEpochMillis,
-            state.maxEpochMillis,
-            epochMillis,
-            state.label,
-            state.description
-        ) {
-            state.setValue(it)
+        val pickerState = remember {
+            DateTimePickerState(
+                pickerStyle,
+                state.minEpochMillis,
+                state.maxEpochMillis,
+                epochMillis,
+                state.label,
+                state.description
+            )
         }
         // the picker dialog
         DateTimePicker(
             state = pickerState,
             onDismissRequest = { openDialog = false },
             onCancelled = { openDialog = false },
-            onConfirmed = { openDialog = false })
+            onConfirmed = {
+                state.setValue(pickerState.value.value?.toEpochMilli())
+                openDialog = false
+            })
     }
 
 
