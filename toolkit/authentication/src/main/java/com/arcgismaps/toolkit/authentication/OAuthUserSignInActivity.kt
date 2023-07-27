@@ -97,8 +97,8 @@ public class OAuthUserSignInActivity : ComponentActivity() {
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // redirect URL should be a valid string since we are adding it in the ActivityResultContract
         if (intent.hasExtra(KEY_INTENT_EXTRA_PROMPT_SIGN_IN)) {
+            // authorize URL should be a valid string since we are adding it in the ActivityResultContract
             val authorizeUrl = intent.getStringExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL)
             authorizeUrl?.let {
                 launchCustomTabs(it)
