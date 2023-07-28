@@ -28,19 +28,15 @@ import com.arcgismaps.toolkit.composablemap.MapInterface
 import com.arcgismaps.toolkit.composablemap.MapInterfaceImpl
 import com.arcgismaps.toolkit.indoors.FloorFilterSelection
 import com.arcgismaps.toolkit.indoors.FloorFilterState
-import com.arcgismaps.toolkit.indoors.UIProperties
 
 class MapViewModel(
     arcGISMap: ArcGISMap
 ) : ViewModel(), MapInterface by MapInterfaceImpl(arcGISMap) {
-
-    // use default UI properties, or set custom properties
-    private val uiProperties = UIProperties()
-
+    
+    // use default UI properties
     val floorFilterState: FloorFilterState = FloorFilterState(
         geoModel = this.map.value,
-        coroutineScope = viewModelScope,
-        uiProperties = uiProperties
+        coroutineScope = viewModelScope
     ) { floorFilterSelection ->
         when (floorFilterSelection.type) {
             is FloorFilterSelection.Type.FloorSite -> {

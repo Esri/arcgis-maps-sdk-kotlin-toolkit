@@ -417,7 +417,7 @@ public data class FloorFilterSelection(public val type: Type) {
 }
 
 /**
- * UI properties used by the [FloorFilter] component which can be set or else use default values.
+ * UI properties used by the [FloorFilter] component.
  *
  * @since 200.2.0
  */
