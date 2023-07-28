@@ -250,7 +250,7 @@ internal fun FacilitySelectorTopBar(
             )
 
             Text(
-                text = stringResource(R.string.floor_filter_site_selected_top_bar) +
+                text = stringResource(R.string.floor_filter_site_selector_top_bar) +
                         floorFilterState.getSelectedSite()?.name.toString(),
                 fontSize = 15.sp,
                 color = Color.Gray
