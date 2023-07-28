@@ -130,7 +130,7 @@ public fun FloorFilter(
             // boolean toggle to display the site facility selector dialog
             var isSiteAndFacilitySelectorVisible by rememberSaveable { mutableStateOf(false) }
 
-            // boolean toggle to display either the sites selector or the facilities selector,
+            // boolean toggle to display either the sites selector or the facilities selector in the site facility selector dialog,
             // display sites selector by default when set to false, and sites selector when set to true.
             var isFacilitiesSelectorVisible by rememberSaveable { mutableStateOf(false) }
 
