@@ -26,14 +26,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.browser.customtabs.CustomTabsIntent
-import androidx.lifecycle.Lifecycle
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
 private const val KEY_INTENT_EXTRA_AUTHORIZE_URL = "INTENT_EXTRA_KEY_AUTHORIZE_URL"
-private const val KEY_INTENT_EXTRA_CUSTOM_TABS_WAS_LAUNCHED =
-    "KEY_INTENT_EXTRA_CUSTOM_TABS_WAS_LAUNCHED"
 private const val KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL = "KEY_INTENT_EXTRA_OAUTH_RESPONSE_URI"
-private const val KEY_INTENT_EXTRA_REDIRECT_URL = "KEY_INTENT_EXTRA_REDIRECT_URL"
+private const val KEY_INTENT_EXTRA_PROMPT_SIGN_IN = "KEY_INTENT_EXTRA_PROMPT_SIGN_IN"
 private const val KEY_INTENT_EXTRA_PRIVATE_BROWSING = "KEY_INTENT_EXTRA_PRIVATE_BROWSING"
 
 private const val RESULT_CODE_SUCCESS = 1
@@ -43,22 +40,66 @@ private const val RESULT_CODE_CANCELED = 2
  * An activity that is responsible for launching a CustomTabs activity and to receive and process
  * the redirect intent as a result of a user completing the CustomTabs prompt.
  *
+ * This activity must be registered in your application's manifest. There are two ways to configure
+ * the manifest entry for [OAuthUserSignInActivity]:
+ *
+ * The most common use case is that completing an OAuth challenge by signing in using the CustomTabs
+ * browser should redirect back to this activity immediately and allow the `OAuthAuthenticator` to
+ * immediately handle the completion of the challenge. In this case, the activity should be declared
+ * in the manifest using `launchMode="singleTop"` and an `intent-filter` should be specified:
+ *
+ * ```
+ * <activity
+ * android:name="com.arcgismaps.toolkit.authentication.OAuthUserSignInActivity"
+ * android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+ * android:exported="true"
+ * android:launchMode="singleTop" >
+ *   <intent-filter>
+ *     <action android:name="android.intent.action.VIEW" />
+ *
+ *     <category android:name="android.intent.category.DEFAULT" />
+ *     <category android:name="android.intent.category.BROWSABLE" />
+ *
+ *     <data
+ *       android:host="auth"
+ *       android:scheme="my-ags-app" />
+ *     </intent-filter>
+ * </activity>
+ * ```
+ *
+ * Should your app require that the redirect intent from the browser is handled by another activity,
+ * then you should remove the intent filter from the `OAuthUserSignInActivity` and put it in the activity
+ * that you want the browser to redirect to. Depending on your app's configuration, you may need to
+ * change the launch mode to `singleInstance`, but be aware that this will expose the browser as a
+ * separate task in the recent tasks list.
+ *
+ * ```
+ * <activity
+ * android:name="com.arcgismaps.toolkit.authentication.OAuthUserSignInActivity"
+ * android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+ * android:exported="true"
+ * android:launchMode="singleInstance" >
+ * </activity>
+ * ```
+ *
+ * Then, in the activity that receives the intent as a result of completing the CustomTab, you can pass that on to the `OAuthUserSignInActivity`
+ * by copying the `intent.data` and starting the activity directly:
+ *
+ * ```
+ * val newIntent = Intent(this, OAuthUserSignInActivity::class.java).apply {
+ *   data = uri
+ * }
+ * startActivity(newIntent)
+ * ```
+ *
  * @since 200.2.0
  */
-internal class OAuthUserSignInActivity : ComponentActivity() {
-
-    private var customTabsWasLaunched = false
-    private lateinit var redirectUrl: String
+public class OAuthUserSignInActivity : ComponentActivity() {
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // redirect URL should be a valid string since we are adding it in the ActivityResultContract
-        redirectUrl = intent.getStringExtra(KEY_INTENT_EXTRA_REDIRECT_URL).toString()
-
-        customTabsWasLaunched =
-            savedInstanceState?.getBoolean(KEY_INTENT_EXTRA_CUSTOM_TABS_WAS_LAUNCHED) ?: false
-
-        if (!customTabsWasLaunched) {
+        if (intent.hasExtra(KEY_INTENT_EXTRA_PROMPT_SIGN_IN)) {
+            // authorize URL should be a valid string since we are adding it in the ActivityResultContract
             val authorizeUrl = intent.getStringExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL)
             val useIncognito = intent.getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false)
             authorizeUrl?.let {
@@ -67,45 +108,29 @@ internal class OAuthUserSignInActivity : ComponentActivity() {
         }
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-
-        outState.putBoolean(KEY_INTENT_EXTRA_CUSTOM_TABS_WAS_LAUNCHED, customTabsWasLaunched)
-    }
-
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-
-        intent?.data?.let { uri ->
-            val uriString = uri.toString()
-            if (uriString.startsWith(redirectUrl)) {
-                val newIntent = Intent().apply {
-                    putExtra(KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL, uri.toString())
-                }
-                setResult(RESULT_CODE_SUCCESS, newIntent)
-            } else {
-                // the uri likely contains an error, for example if the user hits the cancel button
-                // on the custom tab prompt
-                setResult(RESULT_CODE_CANCELED, Intent())
-            }
-            finish()
-        }
+        // if we enter onNewIntent, that means that we have redirected from the custom tab (or an
+        // intermediary activity) with the response uri.
+        handleRedirectIntent(intent)
     }
 
-    override fun onWindowFocusChanged(hasFocus: Boolean) {
-        super.onWindowFocusChanged(hasFocus)
-
-        // We only want to respond to focus changed events when this activity is in "resumed" state.
-        // On some devices (Oreo) we get unexpected focus changed events with hasFocus true which cause this Activity
-        // to be finished (destroyed) prematurely, for example:
-        // - On Oreo log in to portal with OAuth
-        // - When the browser window is launched this triggers a focus changed event with hasFocus true but at this point
-        //   we do not want to finish this activity -> at this point the activity is in paused state (isResumed == false) so
-        //   we can use this to ignore this "rogue" focus changed event.
-        if (hasFocus && lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
-            // if we got here the user must have pressed the back button or the x button while the
-            // custom tab was visible - finish by cancelling OAuth sign in
-            setResult(RESULT_CODE_CANCELED, Intent())
+    /**
+     * Finishes this activity with a response containing a success code and the redirect intent's uri
+     * or a canceled code if no uri can be found.
+     *
+     * @since 200.2.0
+     */
+    public fun handleRedirectIntent(intent: Intent?) {
+        intent?.data?.let { uri ->
+            val uriString = uri.toString()
+            val newIntent = Intent().apply {
+                putExtra(KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL, uriString)
+            }
+            setResult(RESULT_CODE_SUCCESS, newIntent)
+            finish()
+        } ?: {
+            setResult(RESULT_CODE_CANCELED)
             finish()
         }
     }
@@ -119,7 +144,6 @@ internal class OAuthUserSignInActivity : ComponentActivity() {
      * @since 200.2.0
      */
     private fun launchCustomTabs(authorizeUrl: String, useIncognito: Boolean) {
-        customTabsWasLaunched = true
         CustomTabsIntent.Builder().build().apply {
             if (useIncognito) {
                 intent.putExtra("com.google.android.apps.chrome.EXTRA_OPEN_NEW_INCOGNITO_TAB", true)
@@ -137,14 +161,11 @@ internal class OAuthUserSignInActivity : ComponentActivity() {
      *
      * @since 200.2.0
      */
-    class Contract : ActivityResultContract<OAuthUserSignIn, String?>() {
+    public class Contract : ActivityResultContract<OAuthUserSignIn, String?>() {
         override fun createIntent(context: Context, input: OAuthUserSignIn): Intent =
             Intent(context, OAuthUserSignInActivity::class.java).apply {
                 putExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL, input.authorizeUrl)
-                putExtra(
-                    KEY_INTENT_EXTRA_REDIRECT_URL,
-                    input.oAuthUserConfiguration.redirectUrl
-                )
+                putExtra(KEY_INTENT_EXTRA_PROMPT_SIGN_IN, true)
                 putExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, input.oAuthUserConfiguration.preferPrivateWebBrowserSession)
             }
 
