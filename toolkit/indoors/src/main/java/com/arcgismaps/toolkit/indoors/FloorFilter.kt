@@ -130,6 +130,10 @@ public fun FloorFilter(
             // boolean toggle to display the site facility selector dialog
             var isSiteAndFacilitySelectorVisible by rememberSaveable { mutableStateOf(false) }
 
+            // boolean toggle to display either the sites selector or the facilities selector,
+            // display sites selector by default when set to false, and sites selector when set to true.
+            var isFacilitiesSelectorVisible by rememberSaveable { mutableStateOf(false) }
+
             // get the current selected facility
             val selectedFacility = floorFilterState.onFacilityChanged.collectAsState().value
 
@@ -142,9 +146,13 @@ public fun FloorFilter(
                     modifier,
                     floorFilterState,
                     isSiteAndFacilitySelectorVisible,
+                    isFacilitiesSelectorVisible,
                     uiProperties,
                     onSiteFacilitySelectorVisibilityChanged = { isVisible ->
                         isSiteAndFacilitySelectorVisible = isVisible
+                    },
+                    onFacilitiesSelectorVisible = { isVisible ->
+                        isFacilitiesSelectorVisible = isVisible
                     }
                 )
                 return@Surface
@@ -168,9 +176,13 @@ public fun FloorFilter(
                         modifier,
                         floorFilterState,
                         isSiteAndFacilitySelectorVisible,
+                        isFacilitiesSelectorVisible,
                         uiProperties,
                         onSiteFacilitySelectorVisibilityChanged = { isVisible ->
                             isSiteAndFacilitySelectorVisible = isVisible
+                        },
+                        onFacilitiesSelectorVisible = { isVisible ->
+                            isFacilitiesSelectorVisible = isVisible
                         }
                     )
                 }
@@ -219,9 +231,13 @@ public fun FloorFilter(
                         modifier,
                         floorFilterState,
                         isSiteAndFacilitySelectorVisible,
+                        isFacilitiesSelectorVisible,
                         uiProperties,
                         onSiteFacilitySelectorVisibilityChanged = { isVisible ->
                             isSiteAndFacilitySelectorVisible = isVisible
+                        },
+                        onFacilitiesSelectorVisible = { isVisible ->
+                            isFacilitiesSelectorVisible = isVisible
                         }
                     )
                 }
@@ -277,8 +293,10 @@ internal fun SiteFacilityButton(
     modifier: Modifier,
     floorFilterState: FloorFilterState,
     isSiteAndFacilitySelectorVisible: Boolean,
+    isFacilitiesSelectorVisible: Boolean,
     uiProperties: UIProperties,
-    onSiteFacilitySelectorVisibilityChanged: (Boolean) -> Unit
+    onSiteFacilitySelectorVisibilityChanged: (Boolean) -> Unit,
+    onFacilitiesSelectorVisible: (Boolean) -> Unit
 ) {
     Box(
         modifier = modifier
@@ -298,9 +316,11 @@ internal fun SiteFacilityButton(
     }
 
     SiteAndFacilitySelector(
-        floorFilterState = floorFilterState,
-        isSiteFacilitySelectorVisible = isSiteAndFacilitySelectorVisible,
-        onSiteFacilitySelectorVisibilityChanged = onSiteFacilitySelectorVisibilityChanged
+        floorFilterState,
+        isSiteAndFacilitySelectorVisible,
+        isFacilitiesSelectorVisible,
+        onSiteFacilitySelectorVisibilityChanged,
+        onFacilitiesSelectorVisible,
     )
 
 }
