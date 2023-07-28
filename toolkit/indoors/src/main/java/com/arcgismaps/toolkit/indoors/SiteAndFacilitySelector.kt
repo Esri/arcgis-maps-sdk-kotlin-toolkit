@@ -250,7 +250,8 @@ internal fun FacilitySelectorTopBar(
             )
 
             Text(
-                text = "Site - ${floorFilterState.getSelectedSite()?.name.toString()}",
+                text = stringResource(R.string.floor_filter_site_selector_top_bar) +
+                        floorFilterState.getSelectedSite()?.name.toString(),
                 fontSize = 15.sp,
                 color = Color.Gray
             )
@@ -403,7 +404,7 @@ internal fun SitesAndFacilitiesFilter(
                     .height(65.dp)
                     .fillMaxWidth()
                     .wrapContentHeight(align = CenterVertically),
-                text = "No results found",
+                text = stringResource(R.string.floor_filter_no_results),
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.ExtraLight,
                 color = uiProperties.textColor
