@@ -192,7 +192,7 @@ public fun FloorFilter(
                 if (!isFloorsCollapsed) {
                     // display a list of floor levels in the selected facility
                     FloorListColumn(
-                        modifier = modifier,
+                        modifier = modifier.weight(1f,false),
                         currentFacility = selectedFacility,
                         selectedLevelID = selectedLevelID,
                         uiProperties = uiProperties,
@@ -260,15 +260,19 @@ internal fun FloorListColumn(
     onFloorLevelSelected: (Int) -> Unit,
 ) {
     // calculate the height of the list of floors if maxDisplayLevels is defined
-    val measureHeight: Dp = if (uiProperties.maxDisplayLevels > 0)
+    val measureHeight: Dp? = if (uiProperties.maxDisplayLevels > 0)
         uiProperties.buttonSize.height.dp.times(uiProperties.maxDisplayLevels)
     else
-        uiProperties.buttonSize.height.dp.times(currentFacility.levels.size)
+        null
 
     LazyColumn(
-        modifier = modifier.fillMaxWidth().height(measureHeight),
+        modifier =
+        if (measureHeight == null)
+            modifier.fillMaxWidth()
+        else
+            modifier.fillMaxWidth().height(measureHeight),
         reverseLayout = true,
-        userScrollEnabled = uiProperties.maxDisplayLevels > 0
+        userScrollEnabled = true
     ) {
         // display the list of floor levels
         items(currentFacility.levels.size) { index ->
