@@ -44,7 +44,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -123,7 +122,7 @@ internal fun SiteAndFacilitySelector(
                             // display search list for all sites
                             SitesAndFacilitiesFilter(
                                 floorFilterState,
-                                isFacilitiesSelectorVisible,
+                                false,
                                 uiProperties
                             ) { selectedSite ->
                                 floorFilterState.selectedSiteId = selectedSite.site?.id
@@ -144,7 +143,7 @@ internal fun SiteAndFacilitySelector(
                             // display search list for all facilities
                             SitesAndFacilitiesFilter(
                                 floorFilterState,
-                                isFacilitiesSelectorVisible,
+                                true,
                                 uiProperties
                             ) { selectedFacility ->
                                 floorFilterState.selectedFacilityId = selectedFacility.facility?.id
@@ -306,7 +305,7 @@ internal fun SitesAndFacilitiesFilter(
     allSitesOrFacilities.sortedBy { it.name }
 
     // list of site/facility names to display when search prompt is used
-    var filteredSitesOrFacilities: List<SiteFacilityWrapper> by rememberSaveable {
+    var filteredSitesOrFacilities: List<SiteFacilityWrapper> by remember {
         mutableStateOf(allSitesOrFacilities)
     }
 
