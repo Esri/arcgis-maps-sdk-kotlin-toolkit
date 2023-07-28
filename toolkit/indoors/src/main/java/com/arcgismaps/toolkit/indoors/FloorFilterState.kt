@@ -40,7 +40,7 @@ import kotlinx.coroutines.launch
  * _Workflow example:_
  *
  * ```
- *  val floorFilterState: FloorFilterState = FloorFilterState(this.map.value, viewModelScope) { floorFilterSelection ->
+ *  val floorFilterState: FloorFilterState = FloorFilterState(this.map.value, viewModelScope, uiProperties) { floorFilterSelection ->
  *      when (floorFilterSelection.type) {
  *          is FloorFilterSelection.Type.FloorSite -> {
  *              val floorFilterSelectionType =
