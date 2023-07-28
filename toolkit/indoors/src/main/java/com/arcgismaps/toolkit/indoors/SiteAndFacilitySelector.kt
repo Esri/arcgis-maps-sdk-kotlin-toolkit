@@ -353,7 +353,6 @@ internal fun SitesAndFacilitiesFilter(
                         Icon(
                             modifier = Modifier.clickable {
                                 text = ""
-                                focusManager.clearFocus()
                                 filteredSitesOrFacilities = allSitesOrFacilities
                             },
                             painter = painterResource(id = R.drawable.ic_x_24),
