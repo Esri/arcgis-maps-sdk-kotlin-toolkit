@@ -23,12 +23,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScopeInstance.weight
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScopeInstance.weight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
@@ -270,10 +267,10 @@ internal fun FloorListColumn(
 
     LazyColumn(
         modifier =
-        if (measureHeight != null)
-            modifier.fillMaxWidth().height(measureHeight)
+        if (measureHeight == null)
+            modifier.fillMaxWidth()
         else
-            modifier.fillMaxWidth(),
+            modifier.fillMaxWidth().height(measureHeight),
         reverseLayout = true,
         userScrollEnabled = true
     ) {
