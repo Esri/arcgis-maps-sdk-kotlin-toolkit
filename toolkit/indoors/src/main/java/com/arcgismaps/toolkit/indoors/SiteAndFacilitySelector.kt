@@ -84,7 +84,7 @@ internal fun SiteAndFacilitySelector(
     isSiteFacilitySelectorVisible: Boolean,
     isFacilitiesSelectorVisible: Boolean,
     onSiteFacilitySelectorVisibilityChanged: (Boolean) -> Unit,
-    onFacilitiesSelectorVisible: (Boolean) -> Unit,
+    onFacilitiesSelectorVisible: (Boolean) -> Unit
 ) {
     // keep an instance of the colors used
     val uiProperties = floorFilterState.uiProperties
