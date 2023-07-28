@@ -129,7 +129,7 @@ internal fun SiteAndFacilitySelector(
                             SitesAndFacilitiesFilter(
                                 floorFilterState,
                                 isFacilitiesSelectorVisible,
-                                uiProperties,
+                                uiProperties
                             ) { selectedSite ->
                                 floorFilterState.selectedSiteId = selectedSite.site?.id
                                 isFacilitiesSelectorVisible.value = true
@@ -211,7 +211,7 @@ internal fun FacilitySelectorTopBar(
     floorFilterState: FloorFilterState,
     uiProperties: UIProperties,
     backToSiteButtonClicked: () -> Unit,
-    closeButtonClicked: () -> Unit,
+    closeButtonClicked: () -> Unit
 ) {
     Row(
         modifier = Modifier.height(65.dp).fillMaxWidth(),
@@ -221,9 +221,9 @@ internal fun FacilitySelectorTopBar(
             modifier = Modifier.clickable { backToSiteButtonClicked() }
         ) {
             Icon(
+                modifier = Modifier.fillMaxHeight().padding(horizontal = 6.dp).size(24.dp),
                 painter = painterResource(id = R.drawable.ic_chevron_left_32),
-                contentDescription = "Go Back to Site Selector",
-                modifier = Modifier.fillMaxHeight().padding(horizontal = 6.dp).size(24.dp)
+                contentDescription = "Go Back to Site Selector"
             )
         }
         Divider(
@@ -248,19 +248,15 @@ internal fun FacilitySelectorTopBar(
                 textAlign = TextAlign.Start
             )
 
-            floorFilterState.getSelectedSite()?.let {
-                floorFilterState.getSelectedSite()?.name?.let { it1 ->
-                    Text(
-                        text = "Site - $it1",
-                        fontSize = 15.sp,
-                        color = Color.Gray
-                    )
-                }
-            }
+            Text(
+                text = "Site - ${floorFilterState.getSelectedSite()?.name.toString()}",
+                fontSize = 15.sp,
+                color = Color.Gray
+            )
         }
         IconButton(
-            onClick = closeButtonClicked,
-            modifier = Modifier.align(CenterVertically)
+            modifier = Modifier.align(CenterVertically),
+            onClick = closeButtonClicked
         ) {
             Icon(
                 modifier = Modifier.padding(horizontal = 10.dp).size(24.dp),
@@ -395,7 +391,7 @@ internal fun SitesAndFacilitiesFilter(
                     unfocusedIndicatorColor = uiProperties.textColor,
                     focusedIndicatorColor = uiProperties.selectedForegroundColor,
                     unfocusedLabelColor = Color.Gray,
-                ),
+                )
             )
         }
 

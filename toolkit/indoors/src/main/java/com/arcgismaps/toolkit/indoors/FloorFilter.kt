@@ -64,18 +64,18 @@ import com.arcgismaps.mapping.floor.FloorFacility
  * _Workflow example:_
  *
  * ```
- * val mapViewModel = viewModel<MapViewModel>(factory = MapViewModelFactory(floorAwareWebMap))
- * ComposableMap(
+ *  val mapViewModel = viewModel<MapViewModel>(factory = MapViewModelFactory(floorAwareWebMap))
+ *  ComposableMap(
  *      modifier = Modifier.fillMaxSize(),
  *      mapInterface = mapViewModel
- * ) {
+ *  ) {
  *      Box(
  *          modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 40.dp),
  *          contentAlignment = Alignment.BottomStart
  *      ) {
  *          FloorFilter(floorFilterState = mapViewModel.floorFilterState)
  *      }
- * }
+ *  }
  *```
  * Optionally, the default UI settings of the [FloorFilter] may be overridden by modifying [UIProperties]
  * defined in the [FloorFilterState]. The [UIProperties] enable the customization of the colors,
@@ -84,18 +84,18 @@ import com.arcgismaps.mapping.floor.FloorFacility
  * _Workflow example:_
  *
  * ```
- * // in the MapViewModel
- * private val uiProperties = UIProperties().apply {
+ *  // in the MapViewModel
+ *  private val uiProperties = UIProperties().apply {
  *      selectedForegroundColor = Color.Red
  *      typography = MaterialTheme.typography
  *      maxDisplayLevels = 2
  *      closeButtonPosition = ButtonPosition.Bottom
- * }
- * // create the floor filter state
- * val floorFilterState = FloorFilterState(geoModel, coroutineScope, uiProperties)
+ *  }
+ *  // create the floor filter state
+ *  val floorFilterState = FloorFilterState(geoModel, coroutineScope, uiProperties)
  *
- * // pass the floor filter state in the compose layout
- * FloorFilter(floorFilterState = mapViewModel.floorFilterState)
+ *  // pass the floor filter state in the compose layout
+ *  FloorFilter(floorFilterState = mapViewModel.floorFilterState)
  * ```
  *
  * @since 200.2.0
@@ -280,7 +280,12 @@ internal fun SiteFacilityButton(
     uiProperties: UIProperties,
     onSiteFacilitySelectorVisibilityChanged: (Boolean) -> Unit
 ) {
-    Box(modifier.height(uiProperties.buttonSize.height.dp)) {
+    Box(
+        modifier = modifier
+            .height(uiProperties.buttonSize.height.dp)
+            .clickable {
+                onSiteFacilitySelectorVisibilityChanged(true)
+            }) {
         Icon(
             painter = painterResource(id = R.drawable.ic_site_facility_24),
             tint = uiProperties.selectedForegroundColor,
@@ -289,9 +294,6 @@ internal fun SiteFacilityButton(
                 .height(uiProperties.buttonSize.height.dp)
                 .width(uiProperties.buttonSize.width.dp)
                 .wrapContentSize(Center)
-                .clickable {
-                    onSiteFacilitySelectorVisibilityChanged(true)
-                }
         )
     }
 
