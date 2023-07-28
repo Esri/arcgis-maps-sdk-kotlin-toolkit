@@ -5,4 +5,5 @@
     <string name="floor_filter_select_site">Select a site</string>
     <string name="floor_filter_select_facility">Select a facility</string>
     <string name="floor_filter_no_results">No results found.</string>
+    <string name="floor_filter_site_selected_top_bar">Site - </string>
 </resources>
