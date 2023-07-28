@@ -44,7 +44,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -83,15 +82,10 @@ import com.arcgismaps.mapping.floor.FloorSite
 internal fun SiteAndFacilitySelector(
     floorFilterState: FloorFilterState,
     isSiteFacilitySelectorVisible: Boolean,
-    onSiteFacilitySelectorVisibilityChanged: (Boolean) -> Unit
+    isFacilitiesSelectorVisible: Boolean,
+    onSiteFacilitySelectorVisibilityChanged: (Boolean) -> Unit,
+    onFacilitiesSelectorVisible: (Boolean) -> Unit
 ) {
-    // boolean toggle to display either the sites selector or the facilities selector,
-    // display sites selector by default when set to false, and sites selector when set to true.
-    val isFacilitiesSelectorVisible = rememberSaveable { mutableStateOf(false) }
-    // set to show facilities, if there is one selected
-    if (floorFilterState.selectedSiteId != null) {
-        isFacilitiesSelectorVisible.value = true
-    }
     // keep an instance of the colors used
     val uiProperties = floorFilterState.uiProperties
 
@@ -117,7 +111,7 @@ internal fun SiteAndFacilitySelector(
                 )
                 {
                     Column {
-                        if (!isFacilitiesSelectorVisible.value) {
+                        if (!isFacilitiesSelectorVisible) {
                             // display the sites top bar
                             SiteSelectorTopBar(
                                 uiProperties = uiProperties,
@@ -128,11 +122,11 @@ internal fun SiteAndFacilitySelector(
                             // display search list for all sites
                             SitesAndFacilitiesFilter(
                                 floorFilterState,
-                                isFacilitiesSelectorVisible,
+                                false,
                                 uiProperties
                             ) { selectedSite ->
                                 floorFilterState.selectedSiteId = selectedSite.site?.id
-                                isFacilitiesSelectorVisible.value = true
+                                onFacilitiesSelectorVisible(true)
 
                             }
                         } else {
@@ -141,7 +135,7 @@ internal fun SiteAndFacilitySelector(
                                 floorFilterState = floorFilterState,
                                 uiProperties = uiProperties,
                                 backToSiteButtonClicked = {
-                                    isFacilitiesSelectorVisible.value = false
+                                    onFacilitiesSelectorVisible(false)
                                 }, closeButtonClicked = {
                                     onSiteFacilitySelectorVisibilityChanged(false)
                                 }
@@ -149,7 +143,7 @@ internal fun SiteAndFacilitySelector(
                             // display search list for all facilities
                             SitesAndFacilitiesFilter(
                                 floorFilterState,
-                                isFacilitiesSelectorVisible,
+                                true,
                                 uiProperties
                             ) { selectedFacility ->
                                 floorFilterState.selectedFacilityId = selectedFacility.facility?.id
@@ -279,7 +273,7 @@ internal fun FacilitySelectorTopBar(
 @Composable
 internal fun SitesAndFacilitiesFilter(
     floorFilterState: FloorFilterState,
-    isFacilitiesSelectorVisible: MutableState<Boolean>,
+    isFacilitiesSelectorVisible: Boolean,
     uiProperties: UIProperties,
     onSiteOrFacilitySelected: (SiteFacilityWrapper) -> Unit
 ) {
@@ -292,7 +286,7 @@ internal fun SitesAndFacilitiesFilter(
 
     // list of all the site/facility names to display when no search prompt is used
     val allSitesOrFacilities: List<SiteFacilityWrapper> =
-        if (!isFacilitiesSelectorVisible.value)
+        if (!isFacilitiesSelectorVisible)
             floorFilterState.sites.map { floorSite ->
                 SiteFacilityWrapper(
                     site = floorSite,
@@ -311,7 +305,7 @@ internal fun SitesAndFacilitiesFilter(
     allSitesOrFacilities.sortedBy { it.name }
 
     // list of site/facility names to display when search prompt is used
-    var filteredSitesOrFacilities: List<SiteFacilityWrapper> by rememberSaveable {
+    var filteredSitesOrFacilities: List<SiteFacilityWrapper> by remember {
         mutableStateOf(allSitesOrFacilities)
     }
 
@@ -340,7 +334,7 @@ internal fun SitesAndFacilitiesFilter(
                 label = {
                     Text(
                         text =
-                        if (isFacilitiesSelectorVisible.value)
+                        if (isFacilitiesSelectorVisible)
                             stringResource(R.string.floor_filter_view_filter_hint_facilities)
                         else
                             stringResource(R.string.floor_filter_view_filter_hint_sites)
