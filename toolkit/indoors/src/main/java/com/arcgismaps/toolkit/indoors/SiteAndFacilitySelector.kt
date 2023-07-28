@@ -217,6 +217,7 @@ internal fun FacilitySelectorTopBar(
         modifier = Modifier.height(65.dp).fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
+        // a box is helpful to use a consistent clickable animation
         Box(
             modifier = Modifier.clickable { backToSiteButtonClicked() }
         ) {
@@ -461,6 +462,7 @@ internal fun SiteOrFacilityItem(
     uiProperties: UIProperties,
     isSiteItem: Boolean
 ) {
+    // a box is helpful to use a consistent clickable animation
     Box(modifier = Modifier
         .fillMaxWidth()
         .height(65.dp)

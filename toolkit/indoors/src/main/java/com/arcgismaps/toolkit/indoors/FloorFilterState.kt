@@ -369,6 +369,7 @@ public enum class ButtonPosition {
  * @param geoModel the floor aware geoModel that drives the [FloorFilter]
  * @param coroutineScope scope for [FloorFilterState] that it can use to launch jobs in response
  *        to events that change the selectedSiteId, selectedFacilityId or selectedLevelId
+ * @param uiProperties set of properties to customize the UI used in the [FloorFilter]
  * @param onSelectionChangedListener a lambda to facilitate setting of new ViewPoint on the [GeoView]
  *        with the Site or Facilities extent whenever a new Site or Facility is selected
  * @since 200.2.0
