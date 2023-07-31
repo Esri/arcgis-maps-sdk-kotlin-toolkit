@@ -28,7 +28,7 @@ import java.util.TimeZone
  * A class to hold a DateTime. [date] represents the number of milliseconds since epoch
  * (January 1, 1970) in UTC. While [hour], [minute] and [second] represent time in local time zone.
  */
-internal data class DateTime(
+internal class DateTime(
     val date: Long?,
     val hour: Int = 0,
     val minute: Int = 0,
@@ -51,7 +51,8 @@ internal data class DateTime(
     companion object {
         /**
          * Creates an instance of [DateTime] using [dateTime] with the [hour], [minute] and [second]
-         * representing time in the local zone.
+         * representing time in the local zone. If the [dateTime] value is null then the returned
+         * DateTime will have no date with time set to 0:00 hrs.
          *
          * @param dateTime The number of milliseconds since epoch (January 1, 1970) in UTC.
          */
