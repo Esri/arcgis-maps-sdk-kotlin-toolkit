@@ -43,7 +43,8 @@ import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
  */
 @Composable
 public fun Authenticator(
-    authenticatorState: AuthenticatorState
+    authenticatorState: AuthenticatorState,
+    fillMaxHeight: Boolean = true
 ) {
     val pendingOAuthUserSignIn =
         authenticatorState.pendingOAuthUserSignIn.collectAsStateWithLifecycle().value
@@ -56,14 +57,14 @@ public fun Authenticator(
         authenticatorState.pendingServerTrustChallenge.collectAsStateWithLifecycle().value
 
     pendingServerTrustChallenge?.let {
-        ServerTrustAuthenticator(it)
+        ServerTrustAuthenticator(it, fillMaxHeight)
     }
 
     val pendingUsernamePasswordChallenge =
         authenticatorState.pendingUsernamePasswordChallenge.collectAsStateWithLifecycle().value
 
     pendingUsernamePasswordChallenge?.let {
-        UsernamePasswordAuthenticator(it)
+        UsernamePasswordAuthenticator(it, fillMaxHeight)
     }
 
     val pendingClientCertificateChallenge =
@@ -106,7 +107,7 @@ public fun DialogAuthenticator(authenticatorState: AuthenticatorState) {
             onDismissRequest = { authenticatorState.dismissAll() },
             modifier = Modifier.clip(MaterialTheme.shapes.extraLarge),
         ) {
-            Authenticator(authenticatorState = authenticatorState)
+            Authenticator(authenticatorState = authenticatorState, fillMaxHeight = false)
         }
     }
 }
