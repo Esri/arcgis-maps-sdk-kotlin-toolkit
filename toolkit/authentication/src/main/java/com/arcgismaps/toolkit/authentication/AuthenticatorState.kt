@@ -41,6 +41,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
@@ -92,6 +93,21 @@ public sealed interface AuthenticatorState : NetworkAuthenticationChallengeHandl
      * @since 200.2.0
      */
     public val pendingClientCertificateChallenge: StateFlow<ClientCertificateChallenge?>
+
+    /**
+     * Indicates if the authenticator should be displayed, ie. if any challenges are pending.
+     * This can be used to determine whether to display UI on the screen.
+     *
+     * @since 200.2.0
+     */
+    public val isDisplayed: Flow<Boolean>
+
+    /**
+     * Dismisses any currently pending challenges.
+     *
+     * @since 200.2.0
+     */
+    public fun dismissAll()
 }
 
 /**
@@ -123,6 +139,21 @@ private class AuthenticatorStateImpl(
         MutableStateFlow<ClientCertificateChallenge?>(null)
     override val pendingClientCertificateChallenge: StateFlow<ClientCertificateChallenge?> =
         _pendingClientCertificateChallenge.asStateFlow()
+
+    override val isDisplayed: Flow<Boolean> = combine(
+        pendingOAuthUserSignIn,
+        pendingUsernamePasswordChallenge,
+        pendingClientCertificateChallenge,
+        pendingServerTrustChallenge) { a, b, c, d ->
+            a != null || b != null || c != null || d != null
+    }
+
+    override fun dismissAll() {
+        pendingOAuthUserSignIn.value?.cancel()
+        pendingUsernamePasswordChallenge.value?.cancel()
+        pendingClientCertificateChallenge.value?.onCancel?.invoke()
+        pendingServerTrustChallenge.value?.distrust()
+    }
 
     init {
         if (setAsArcGISAuthenticationChallengeHandler) {
@@ -260,7 +291,10 @@ private class AuthenticatorStateImpl(
                 _pendingClientCertificateChallenge.value = null
                 continuation.resume(alias) {}
             }
-            _pendingClientCertificateChallenge.value = ClientCertificateChallenge(aliasCallback)
+            _pendingClientCertificateChallenge.value = ClientCertificateChallenge(aliasCallback) {
+                _pendingClientCertificateChallenge.value = null
+                continuation.resume(null) {}
+            }
             continuation.invokeOnCancellation {
                 _pendingClientCertificateChallenge.value = null
                 continuation.resume(null) {}
