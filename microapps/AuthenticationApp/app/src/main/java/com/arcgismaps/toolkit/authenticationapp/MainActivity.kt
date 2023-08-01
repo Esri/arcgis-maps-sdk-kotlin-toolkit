@@ -52,8 +52,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.toolkit.authentication.Authenticator
 import com.arcgismaps.toolkit.authentication.AuthenticatorState
+import com.arcgismaps.toolkit.authentication.DialogAuthenticator
 import com.arcgismaps.toolkit.authenticationapp.ui.theme.AuthenticationAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -87,7 +87,7 @@ private fun AuthenticationApp() {
         )
         InfoScreen(text = infoText, isLoading = isLoading)
     }
-    Authenticator(authenticatorState)
+    DialogAuthenticator(authenticatorState)
 }
 
 /**
