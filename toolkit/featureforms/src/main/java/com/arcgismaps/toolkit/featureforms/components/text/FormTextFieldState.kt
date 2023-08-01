@@ -78,6 +78,11 @@ internal interface FormTextFieldState {
     val errorMessage: State<String>
     
     /**
+     * State that indicates if the field is editable.
+     */
+    val isEditable: Boolean
+    
+    /**
      * Callback to update the current value of the FormTextFieldState to the given [input].
      */
     fun onValueChanged(input: String)
@@ -181,6 +186,8 @@ private class FormTextFieldStateImpl(
             _value.value.length.toString()
         } else ""
     }
+    
+    override val isEditable: Boolean = featureFormElement.isEditable
     
     override fun onValueChanged(input: String) {
        editValue(input)

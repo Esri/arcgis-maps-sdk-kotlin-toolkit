@@ -1,5 +1,6 @@
 package com.arcgismaps.toolkit.featureforms.components.text
 
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -66,12 +67,15 @@ internal fun FormTextField(
             },
             modifier = Modifier
                 .fillMaxSize()
+                .focusable(!state.isEditable)
                 .semantics { contentDescription = "outlined text field" },
+            readOnly = !state.isEditable,
+            enabled = state.isEditable,
             label = {
                 Text(text = state.label, modifier = Modifier.semantics { contentDescription = "label" })
             },
             trailingIcon = {
-                if (isFocused && !state.singleLine && text.isNotEmpty()) {
+                if (state.isEditable && isFocused && !state.singleLine && text.isNotEmpty()) {
                     IconButton(
                         onClick = { clearFocus = true },
                         modifier = Modifier.semantics { contentDescription = "Save local edit button" }
@@ -81,7 +85,7 @@ internal fun FormTextField(
                             contentDescription = "Done"
                         )
                     }
-                } else if (text.isNotEmpty()) {
+                } else if (state.isEditable && text.isNotEmpty()) {
                     IconButton(
                         onClick = { state.onValueChanged("") },
                         modifier = Modifier.semantics { contentDescription = "Clear text button" }
@@ -114,7 +118,7 @@ internal fun FormTextField(
                 }
             },
             visualTransformation = if (text.isEmpty())
-                PlaceholderTransformation(state.placeholder)
+                PlaceholderTransformation(" ")
             else VisualTransformation.None,
             keyboardActions = KeyboardActions(
                 onDone = { clearFocus = true }
@@ -124,7 +128,11 @@ internal fun FormTextField(
             ),
             singleLine = state.singleLine,
             colors = if (text.isEmpty() && state.placeholder.isNotEmpty())
-                OutlinedTextFieldDefaults.colors(unfocusedTextColor = Color.Gray, focusedTextColor = Color.Gray)
+                OutlinedTextFieldDefaults.colors(
+                    unfocusedTextColor = Color.Gray,
+                    focusedSupportingTextColor = Color.LightGray,
+                    focusedTextColor = Color.Gray
+                )
             else
                 OutlinedTextFieldDefaults.colors()
         )
