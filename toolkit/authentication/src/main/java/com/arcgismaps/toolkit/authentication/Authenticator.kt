@@ -22,7 +22,12 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.security.KeyChain
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
@@ -85,4 +90,23 @@ private fun Context.findActivity(): Activity {
         context = context.baseContext
     }
     throw IllegalStateException("Could not find an activity from which to launch client certificate picker.")
+}
+
+/**
+ * Displays the [Authenticator] in an [AlertDialog]. See the Authenticator component for more details.
+ *
+ * @since 200.2.0
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+public fun DialogAuthenticator(authenticatorState: AuthenticatorState) {
+    val showDialog = authenticatorState.isDisplayed.collectAsStateWithLifecycle(initialValue = false).value
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { authenticatorState.dismissAll() },
+            modifier = Modifier.clip(MaterialTheme.shapes.extraLarge),
+        ) {
+            Authenticator(authenticatorState = authenticatorState)
+        }
+    }
 }
