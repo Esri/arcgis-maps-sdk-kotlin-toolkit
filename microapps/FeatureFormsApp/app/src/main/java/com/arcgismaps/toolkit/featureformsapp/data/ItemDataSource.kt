@@ -55,6 +55,7 @@ interface ItemApi {
  */
 fun getListOfMaps(): List<String> {
     return listOf(
+        "https://runtimecoretest.maps.arcgis.com/home/item.html?id=ec09090060664cbda8d814e017337837",
         "https://runtimecoretest.maps.arcgis.com/home/item.html?id=df0f27f83eee41b0afe4b6216f80b541",
         "https://runtimecoretest.maps.arcgis.com/home/item.html?id=454422bdf7e24fb0ba4ffe0a22f6bf37",
         "https://runtimecoretest.maps.arcgis.com/home/item.html?id=c606b1f345044d71881f99d00583f8f7",
