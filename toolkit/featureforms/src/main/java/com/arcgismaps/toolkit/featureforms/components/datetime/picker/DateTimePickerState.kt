@@ -25,11 +25,11 @@ import java.time.Instant
 import java.util.TimeZone
 
 /**
- * A class to hold a DateTime. [date] represents the number of milliseconds since epoch
+ * A class to hold a DateTime. [dateTime] represents the number of milliseconds since epoch
  * (January 1, 1970) in UTC. While [hour], [minute] and [second] represent time in local time zone.
  */
-internal data class DateTime(
-    val date: Long?,
+internal class DateTime(
+    val dateTime: Long?,
     val hour: Int = 0,
     val minute: Int = 0,
     val second: Int = 0
@@ -40,7 +40,7 @@ internal data class DateTime(
      * (January 1, 1970) in UTC.
      */
     fun getDateTimeInMillis(): Long? {
-        return date?.let {
+        return dateTime?.let {
             val instant = Instant.ofEpochMilli(it)
             val zonedDateTime =
                 instant.atZone(TimeZone.getDefault().toZoneId()).withHour(hour).withMinute(minute)
@@ -51,7 +51,8 @@ internal data class DateTime(
     companion object {
         /**
          * Creates an instance of [DateTime] using [dateTime] with the [hour], [minute] and [second]
-         * representing time in the local zone.
+         * representing time in the local zone. If the [dateTime] value is null then the returned
+         * DateTime will have no date with time set to 0:00 hrs.
          *
          * @param dateTime The number of milliseconds since epoch (January 1, 1970) in UTC.
          */
@@ -88,7 +89,7 @@ internal interface DateTimePickerState {
     val dateTime: State<DateTime>
 
     /**
-     * A timestamp that represents the the selected date and time in UTC milliseconds from the epoch.
+     * A timestamp that represents the selected date and time in UTC milliseconds from the epoch.
      * In case no date was selected or provided, this will hold a null value.
      */
     val selectedDateTimeMillis: Long?
@@ -137,7 +138,7 @@ internal interface DateTimePickerState {
     /**
      * Validates if the [timeStamp] is between the given ranges of [minDateTime] and [maxDateTime]
      * if they were provided and returns true if the validation was successful, otherwise false
-     * is returned.
+     * is returned. Both the [minDateTime] and [maxDateTime] are included in the range.
      */
     fun dateTimeValidator(timeStamp: Long): Boolean
 
@@ -209,7 +210,7 @@ private class DateTimePickerStateImpl(
     override fun today() {
         // only reset the date in UTC and persist the time information
         dateTime.value = DateTime(
-            date = Instant.now().toEpochMilli(),
+            dateTime = Instant.now().toEpochMilli(),
             hour = dateTime.value.hour,
             minute = dateTime.value.minute
         )
@@ -220,7 +221,7 @@ private class DateTimePickerStateImpl(
         val zonedTime = Instant.now().atZone(timeZone.toZoneId())
         // persist the date information
         dateTime.value = DateTime(
-            date = dateTime.value.date,
+            dateTime = dateTime.value.dateTime,
             hour = zonedTime.hour,
             minute = zonedTime.minute
         )

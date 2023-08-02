@@ -18,8 +18,9 @@
 
 package com.arcgismaps.toolkit.featureforms.components.datetime
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,6 +36,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -66,28 +68,7 @@ internal fun DateTimeField(
         DateTimePickerStyle.Date
     }
     var openDialog by remember { mutableStateOf(false) }
-    if (openDialog) {
-        val pickerState = remember {
-            DateTimePickerState(
-                pickerStyle,
-                state.minEpochMillis,
-                state.maxEpochMillis,
-                epochMillis,
-                state.label,
-                state.description
-            )
-        }
-        // the picker dialog
-        DateTimePicker(
-            state = pickerState,
-            onDismissRequest = { openDialog = false },
-            onCancelled = { openDialog = false },
-            onConfirmed = {
-                state.setValue(pickerState.selectedDateTimeMillis)
-                openDialog = false
-            })
-    }
-
+    val interactionSource = remember { MutableInteractionSource() }
     // the field
     if (isEditable) {
         val textFieldColors = if (epochMillis == null) {
@@ -147,12 +128,9 @@ internal fun DateTimeField(
                 onValueChange = {},
                 modifier = Modifier
                     .fillMaxSize()
-                    .focusable(false)
-                    .clickable {
-                        openDialog = true
-                    },
+                    .focusable(true, interactionSource),
                 readOnly = true,
-                enabled = false, // disabled to support clickability
+                enabled = true,
                 label = {
                     val text = if (isRequired) {
                         "${state.label} *"
@@ -196,7 +174,8 @@ internal fun DateTimeField(
                     }
                 },
                 singleLine = true,
-                colors = textFieldColors
+                colors = textFieldColors,
+                interactionSource = interactionSource
             )
         }
     } else {
@@ -206,6 +185,37 @@ internal fun DateTimeField(
             supportingText = state.description
         )
     }
+
+    if (openDialog) {
+        val pickerState = remember {
+            DateTimePickerState(
+                pickerStyle,
+                state.minEpochMillis,
+                state.maxEpochMillis,
+                epochMillis,
+                state.label,
+                state.description
+            )
+        }
+        // the picker dialog
+        DateTimePicker(
+            state = pickerState,
+            onDismissRequest = { openDialog = false },
+            onCancelled = { openDialog = false },
+            onConfirmed = {
+                state.setValue(pickerState.selectedDateTimeMillis)
+                openDialog = false
+            })
+    }
+
+    LaunchedEffect(interactionSource) {
+        interactionSource.interactions.collect {
+            if (it is PressInteraction.Release) {
+                // open the date picker dialog only when the touch is released
+                openDialog = true
+            }
+        }
+    }
 }
 
 @Stable
@@ -214,12 +224,7 @@ private fun ImmutableDate(
     valueString: String,
     label: String,
     supportingText: String,
-    colors: TextFieldColors = OutlinedTextFieldDefaults.colors(
-        disabledLabelColor = MaterialTheme.colorScheme.onSurface,
-        disabledTextColor = MaterialTheme.colorScheme.onSurface,
-        disabledBorderColor = MaterialTheme.colorScheme.onSurface,
-        disabledSupportingTextColor = MaterialTheme.colorScheme.onSurface
-    )
+    colors: TextFieldColors = OutlinedTextFieldDefaults.colors()
 ) {
     Column(
         modifier = Modifier
@@ -247,6 +252,3 @@ private fun ImmutableDatePreview() {
         ImmutableDate(label = "Date", valueString = "1234", supportingText = "supporting text")
     }
 }
-
-
-

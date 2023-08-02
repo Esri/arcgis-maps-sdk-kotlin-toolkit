@@ -30,8 +30,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.arcgismaps.mapping.ArcGISMap
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.arcgismaps.toolkit.composablemap.ComposableMap
 import com.arcgismaps.toolkit.featureforms.EditingTransactionState
 import com.arcgismaps.toolkit.featureforms.FeatureForm
@@ -42,14 +41,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MapScreen(uri: String, onBackPressed: () -> Unit = {}) {
-    // instantiate a MapViewModel using its factory
-    val mapViewModel = viewModel<MapViewModel>(
-        factory = MapViewModelFactory(
-            arcGISMap = ArcGISMap(uri)
-        )
-    )
-
+fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () -> Unit = {}) {
     // only recompose when showing or hiding the bottom sheet
     val editingFlow =
         remember { mapViewModel.transactionState.map { it is EditingTransactionState.Editing } }
@@ -89,7 +81,7 @@ fun MapScreen(uri: String, onBackPressed: () -> Unit = {}) {
             // show the composable map using the mapViewModel
             ComposableMap(
                 modifier = Modifier.fillMaxSize(),
-                mapInterface = mapViewModel
+                mapState = mapViewModel
             )
             // show the top bar which changes available actions based on if the FeatureForm is
             // being shown and is in edit mode
