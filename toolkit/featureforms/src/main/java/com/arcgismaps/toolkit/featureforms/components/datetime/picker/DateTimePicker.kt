@@ -120,7 +120,8 @@ internal fun DateTimePicker(
     val datePickerState = rememberSaveable(dateTime, saver = DatePickerState.Saver()) {
         DatePickerState(
             initialSelectedDateMillis = dateTime.dateTime?.plus(state.timeZoneOffset),
-            initialDisplayedMonthMillis = dateTime.dateTime ?: (state.minDateTime ?: state.maxDateTime),
+            initialDisplayedMonthMillis = dateTime.dateTime?.plus(state.timeZoneOffset)
+                ?: (state.minDateTime ?: state.maxDateTime),
             datePickerRange,
             DisplayMode.Picker
         )

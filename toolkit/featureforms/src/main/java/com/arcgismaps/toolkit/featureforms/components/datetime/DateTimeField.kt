@@ -124,13 +124,13 @@ internal fun DateTimeField(
                 .padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 10.dp)
         ) {
             OutlinedTextField(
-                value = epochMillis?.formattedDateTime() ?: stringResource(id = R.string.novalue),
+                value = epochMillis?.formattedDateTime(state.shouldShowTime) ?: stringResource(id = R.string.novalue),
                 onValueChange = {},
                 modifier = Modifier
                     .fillMaxSize()
                     .focusable(true, interactionSource),
                 readOnly = true,
-                enabled = true, // disabled to support clickability
+                enabled = true,
                 label = {
                     val text = if (isRequired) {
                         "${state.label} *"
@@ -180,7 +180,7 @@ internal fun DateTimeField(
         }
     } else {
         ImmutableDate(
-            valueString = epochMillis?.formattedDateTime() ?: stringResource(id = R.string.novalue),
+            valueString = epochMillis?.formattedDateTime(state.shouldShowTime) ?: stringResource(id = R.string.novalue),
             label = state.label,
             supportingText = state.description
         )
