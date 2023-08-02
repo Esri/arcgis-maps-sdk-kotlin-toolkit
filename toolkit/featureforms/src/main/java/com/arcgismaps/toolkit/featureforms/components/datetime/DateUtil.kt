@@ -28,7 +28,12 @@ internal fun Long.toZonedDateTime(): ZonedDateTime {
     return instant.atZone(TimeZone.getDefault().toZoneId())
 }
 
-internal fun Long.formattedDateTime(): String {
-    val formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy h:mm a")
+internal fun Long.formattedDateTime(includeTime: Boolean): String {
+    
+    val formatter = if (includeTime) {
+        DateTimeFormatter.ofPattern("MMM dd, yyyy h:mm a")
+    } else {
+        DateTimeFormatter.ofPattern("MMM dd, yyyy")
+    }
     return this.toZonedDateTime().format(formatter)
 }
