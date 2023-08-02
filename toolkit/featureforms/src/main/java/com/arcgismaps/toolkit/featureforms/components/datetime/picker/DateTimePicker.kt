@@ -119,8 +119,8 @@ internal fun DateTimePicker(
     // create and remember a DatePickerState that resets when dateTime changes
     val datePickerState = rememberSaveable(dateTime, saver = DatePickerState.Saver()) {
         DatePickerState(
-            initialSelectedDateMillis = dateTime.date?.plus(state.timeZoneOffset),
-            initialDisplayedMonthMillis = dateTime.date ?: (state.minDateTime ?: state.maxDateTime),
+            initialSelectedDateMillis = dateTime.dateTime?.plus(state.timeZoneOffset),
+            initialDisplayedMonthMillis = dateTime.dateTime ?: (state.minDateTime ?: state.maxDateTime),
             datePickerRange,
             DisplayMode.Picker
         )
