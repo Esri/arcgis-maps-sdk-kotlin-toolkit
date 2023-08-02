@@ -10,6 +10,7 @@ androidxEspresso = "3.4.0"
 androidxHiltNavigationCompose = "1.0.0"
 androidxLifecycle = "2.3.1"
 androidxLifecycleRuntimeCompose = "2.6.0-beta01"
+androidxMaterialIcons = "1.4.3"
 androidxTestExt = "1.1.2"
 androidxViewmodelCompose = "2.6.1"
 compileSdk = "33"
@@ -54,6 +55,7 @@ kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", vers
 kotlinx-serialization-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core", version.ref = "kotlinxSerializationJson" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
+androidx-material-icons = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "androidxMaterialIcons"}
 truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 
 [plugins]

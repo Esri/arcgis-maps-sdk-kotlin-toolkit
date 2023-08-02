@@ -28,8 +28,8 @@ import kotlinx.serialization.Serializable
 @SerialName("datetime-picker")
 public class DateTimePickerFeatureFormInput constructor(
     public var includeTime: Boolean = false,
-    public var max: Float = 0.0f,
-    public var min: Float = 0.0f
+    public var max: Float? = null,
+    public var min: Float? = null
     
 ) : FeatureFormInput {
     //region Properties
