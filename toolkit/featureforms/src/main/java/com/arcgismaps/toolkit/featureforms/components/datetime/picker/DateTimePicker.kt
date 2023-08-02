@@ -18,17 +18,21 @@
 
 package com.arcgismaps.toolkit.featureforms.components.datetime.picker
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.CalendarMonth
@@ -53,8 +57,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -63,6 +70,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.datetime.toZonedDateTime
 import java.time.Instant
+import kotlin.math.roundToInt
 
 /**
  * Defines the style of [DateTimePicker].
@@ -201,15 +209,18 @@ private fun (ColumnScope).PickerContent(
         Spacer(modifier = Modifier.height(10.dp))
         TimePicker(state = timePickerState, modifier = Modifier.weight(1f, fill = false))
     } else {
-        DatePicker(
-            state = datePickerState,
-            modifier = Modifier.weight(1f, fill = false),
-            dateValidator = { timeStamp ->
-                // validate selectable dates if a range is provided
-                state.dateTimeValidator(timeStamp)
-            },
-            title = { title(if (style == DateTimePickerStyle.Date) null else Icons.Rounded.AccessTime) }
-        )
+        LazyColumn(modifier = Modifier.weight(1f, fill = false)) {
+            item {
+                DatePicker(
+                    state = datePickerState,
+                    dateValidator = { timeStamp ->
+                        // validate selectable dates if a range is provided
+                        state.dateTimeValidator(timeStamp)
+                    },
+                    title = { title(if (style == DateTimePickerStyle.Date) null else Icons.Rounded.AccessTime) }
+                )
+            }
+        }
     }
 }
 
@@ -222,7 +233,7 @@ private fun PickerTitle(
 ) {
     Row(
         Modifier
-            .padding(start = 25.dp, top = 25.dp, end = 15.dp, bottom = 15.dp)
+            .padding(bottom = 15.dp)
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically
@@ -255,7 +266,6 @@ private fun PickerFooter(
     Row(
         Modifier
             .wrapContentHeight()
-            .padding(10.dp)
             .fillMaxWidth()
     ) {
         if (state.activePickerInput.value == DateTimePickerInput.Date) {
@@ -291,6 +301,10 @@ private fun DateTimePickerDialog(
     properties: DialogProperties = DialogProperties(usePlatformDefaultWidth = false),
     content: @Composable ColumnScope.() -> Unit
 ) {
+    val configuration = LocalConfiguration.current
+    val containerWidth = (configuration.screenWidthDp * 0.8).roundToInt().dp
+    val containerHeight = (configuration.screenHeightDp * 0.8).roundToInt().dp
+    Log.e("TAG", "DateTimePickerDialog: $containerWidth x $containerHeight")
     AlertDialog(
         onDismissRequest = onDismissRequest,
         modifier = modifier.wrapContentHeight(),
@@ -305,6 +319,7 @@ private fun DateTimePickerDialog(
             tonalElevation = tonalElevation,
         ) {
             Column(
+                modifier = modifier.padding(top = 20.dp, bottom = 20.dp),
                 verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
