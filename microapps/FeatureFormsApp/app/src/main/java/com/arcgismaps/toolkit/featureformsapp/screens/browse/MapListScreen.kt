@@ -39,7 +39,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.arcgismaps.toolkit.featureformsapp.R
 import java.time.Instant
 import java.time.ZoneId
@@ -53,11 +53,10 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun MapListScreen(
     modifier: Modifier = Modifier,
-    mapListViewModel: MapListViewModel = viewModel(),
+    mapListViewModel: MapListViewModel = hiltViewModel(),
     onItemClick: (String) -> Unit = {}
 ) {
-    val isLoading by mapListViewModel.isLoading.collectAsState()
-    val portalItems = mapListViewModel.portalItems
+    val portalItems by mapListViewModel.portalItems.collectAsState()
     val lazyListState = rememberLazyListState()
 
     Scaffold(topBar = {
@@ -73,7 +72,7 @@ fun MapListScreen(
         // use a cross fade animation to show a loading indicator when the data is loading
         // and transition to the list of portalItems once loaded
         Crossfade(
-            targetState = isLoading,
+            targetState = portalItems.isEmpty(),
             modifier = Modifier.padding(padding)
         ) { state ->
             when (state) {

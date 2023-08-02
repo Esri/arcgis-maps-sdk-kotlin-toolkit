@@ -10,8 +10,7 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.toolkit.composablemap.ComposableMap
-import com.arcgismaps.toolkit.composablemap.MapInterface
-import com.arcgismaps.toolkit.composablemap.MapInterfaceImpl
+import com.arcgismaps.toolkit.composablemap.MapState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,7 +38,7 @@ class FeatureFormViewModelTests {
         val map = ArcGISMap()
         val mockMapInterface = MockMapInterface(map)
         composeTestRule.setContent {
-            ComposableMap(mapInterface = mockMapInterface) {
+            ComposableMap(mapState = mockMapInterface) {
                 Card(modifier = Modifier.semantics { }) {}
             }
         }
@@ -52,7 +51,7 @@ class FeatureFormViewModelTests {
     }
 }
 
-class MockMapInterface(map: ArcGISMap) : MapInterface by MapInterface(map) {
+class MockMapInterface(map: ArcGISMap) : MapState by MapState(map) {
     val onClick: MutableStateFlow<Unit?> = MutableStateFlow(null)
     context(MapView, CoroutineScope) override fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {
         launch {

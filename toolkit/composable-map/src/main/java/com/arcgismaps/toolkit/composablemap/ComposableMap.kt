@@ -41,7 +41,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 public fun ComposableMap(
-    mapInterface: MapInterface,
+    mapState: MapState,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit = {},
 ) {
@@ -49,56 +49,56 @@ public fun ComposableMap(
     val coroutineScope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    val map by mapInterface.map.collectAsState()
-    val insets by mapInterface.insets.collectAsState()
+    val map by mapState.map.collectAsState()
+    val insets by mapState.insets.collectAsState()
     val mapView = remember {
         MapView(context).also { view ->
             with(view) {
                 with(coroutineScope) {
                     launch {
                         view.onDown.collect {
-                            mapInterface.onDown(it)
+                            mapState.onDown(it)
                         }
                     }
                     launch {
                         view.onUp.collect {
-                            mapInterface.onUp(it)
+                            mapState.onUp(it)
                         }
                     }
                     launch {
                         view.onSingleTapConfirmed.collect {
-                            mapInterface.onSingleTapConfirmed(it)
+                            mapState.onSingleTapConfirmed(it)
                         }
                     }
                     launch {
                         view.onDoubleTap.collect {
-                            mapInterface.onDoubleTap(it)
+                            mapState.onDoubleTap(it)
                         }
                     }
                     launch {
                         view.onLongPress.collect {
-                            mapInterface.onLongPress(it)
+                            mapState.onLongPress(it)
                         }
                     }
                     launch {
                         view.onTwoPointerTap.collect {
-                            mapInterface.onTwoPointerTap(it)
+                            mapState.onTwoPointerTap(it)
                         }
                     }
                     launch {
                         view.onPan.collect {
-                            mapInterface.onPan(it)
+                            mapState.onPan(it)
                         }
                     }
                     launch {
                         view.mapRotation.collect {
-                            mapInterface.onViewpointRotationChanged(it)
+                            mapState.onViewpointRotationChanged(it)
                         }
                     }
                     launch {
                         view.viewpointChanged.collect {
                             view.getCurrentViewpoint(ViewpointType.CenterAndScale)?.let {
-                                mapInterface.onViewpointChanged(it)
+                                mapState.onViewpointChanged(it)
                             }
                         }
                     }
@@ -117,12 +117,12 @@ public fun ComposableMap(
 
     LaunchedEffect(Unit) {
         launch {
-            mapInterface.mapRotation.collect(DuplexFlow.Type.Write) {
+            mapState.mapRotation.collect(DuplexFlow.Type.Write) {
                 mapView.setViewpointRotation(it)
             }
         }
         launch {
-            mapInterface.viewpoint.collect(DuplexFlow.Type.Write) {
+            mapState.viewpoint.collect(DuplexFlow.Type.Write) {
                 it?.let {
                     mapView.setViewpoint(it)
                 }

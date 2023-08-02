@@ -2,6 +2,9 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    id("org.jetbrains.kotlin.kapt")
+    id("com.google.devtools.ksp")
+    id("com.google.dagger.hilt.android")
 }
 
 secrets {
@@ -63,6 +66,9 @@ dependencies {
     implementation(project(":featureforms"))
     implementation(project(":composable-map"))
     implementation(arcgis.mapsSdk)
+    implementation(libs.hilt.android.core)
+    implementation(libs.androidx.hilt.navigation.compose)
+    kapt(libs.hilt.compiler)
     implementation(libs.bundles.serialization)
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
