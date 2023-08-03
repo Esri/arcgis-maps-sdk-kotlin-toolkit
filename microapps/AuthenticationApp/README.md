@@ -1,6 +1,6 @@
 # Authentication Microapp
 
-The Authentication Microapp demonstrates the use of the `Authenticator` component. The app also provides a testbed for testing different authentication challenges. For more information on the `Authenticator` component, see the [Readme]().
+The Authentication Microapp demonstrates the use of the `Authenticator` component. The app also provides a testbed for testing different authentication challenges. For more information on the `Authenticator` component and how it works, see the [Readme](../../toolkit/authentication/README.md).
 
 ![](screenshot.png)
 
