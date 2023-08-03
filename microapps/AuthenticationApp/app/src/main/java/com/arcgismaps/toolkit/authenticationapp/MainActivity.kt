@@ -87,7 +87,7 @@ private fun AuthenticationApp() {
         )
         InfoScreen(text = infoText, isLoading = isLoading)
     }
-    DialogAuthenticator(authenticatorState)
+    DialogAuthenticator(authenticatorState = authenticatorState)
 }
 
 /**
