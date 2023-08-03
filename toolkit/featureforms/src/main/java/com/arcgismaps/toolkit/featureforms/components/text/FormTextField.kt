@@ -118,7 +118,7 @@ internal fun FormTextField(
                 }
             },
             visualTransformation = if (text.isEmpty())
-                PlaceholderTransformation(" ")
+                PlaceholderTransformation(state.placeholder.ifEmpty { " " })
             else VisualTransformation.None,
             keyboardActions = KeyboardActions(
                 onDone = { clearFocus = true }
@@ -130,7 +130,6 @@ internal fun FormTextField(
             colors = if (text.isEmpty() && state.placeholder.isNotEmpty())
                 OutlinedTextFieldDefaults.colors(
                     unfocusedTextColor = Color.Gray,
-                    focusedSupportingTextColor = Color.LightGray,
                     focusedTextColor = Color.Gray
                 )
             else
