@@ -89,12 +89,33 @@ internal interface DateTimeFieldState {
     val isEditable: State<Boolean>
     
     /**
+     * `true` if the field must have a datetime value
+     *
+     * @since 200.2.0
+     */
+    val isRequired: State<Boolean>
+    
+    /**
      * Updates the attribute.
      *
-     * @param dateTime the date time expressed epoch milliseconds
+     * @param dateTime the date time expressed as epoch milliseconds
      * @since 200.2.0
      */
     fun setValue(dateTime: Long?)
+    
+    /**
+     * Reset to the original value of the Feature attribute
+     *
+     * @since 200.2.0
+     */
+    fun resetValue()
+    
+    /**
+     * Clear the value of the Feature
+     *
+     * @since 200.2.0
+     */
+    fun clearValue()
 }
 
 private class DateTimeFieldStateImpl(
@@ -115,18 +136,34 @@ private class DateTimeFieldStateImpl(
     private val _isEditable: MutableState<Boolean> = mutableStateOf(element.editableExpressionName.isNotEmpty())
     override val isEditable: State<Boolean> = _isEditable
     
+    private val _isRequired: MutableState<Boolean> = mutableStateOf(element.requiredExpression.isNotBlank())
+    override val isRequired: State<Boolean> = _isRequired
+    
     override val description: String = element.description
     
-    private val _value: MutableState<Long?> = mutableStateOf(element.value.toLong())
+    private val _value: MutableState<Long?> = mutableStateOf(if (element.value.isNotEmpty() element.value.toLong() else null)
     override val value: State<Long?> = _value
     
     init {
-        setValue(minEpochMillis)
+        setValue(element.value)
+    }
+    
+    private fun setValue(value: String) {
+        if (value.isNotEmpty()) {
+            val asLong = value.toLong()
+            setValue(asLong)
+        }
     }
     
     override fun setValue(dateTime: Long?) {
         form.editValue(element, dateTime)
         _value.value = dateTime
+    }
+    
+    override fun resetValue() = setValue(element.value)
+    
+    override fun clearValue() {
+        setValue(null)
     }
 }
 
