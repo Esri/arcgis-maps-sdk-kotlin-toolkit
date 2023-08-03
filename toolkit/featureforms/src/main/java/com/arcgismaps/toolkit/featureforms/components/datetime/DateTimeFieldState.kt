@@ -138,7 +138,7 @@ private class DateTimeFieldStateImpl(
     private val _isEditable: MutableState<Boolean> = mutableStateOf(element.editableExpressionName.isNotEmpty())
     override val isEditable: State<Boolean> = _isEditable
     
-    private val _isRequired: MutableState<Boolean> = mutableStateOf(element.requiredExpressionName.isNotBlank())
+    private val _isRequired: MutableState<Boolean> = mutableStateOf(true)// TODO: fix core dump here: element.requiredExpressionName.isNotBlank())
     override val isRequired: State<Boolean> = _isRequired
     
     override val description: String = element.description

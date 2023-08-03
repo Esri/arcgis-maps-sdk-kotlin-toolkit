@@ -69,7 +69,7 @@ class MapViewModel @Inject constructor(
                             e.printStackTrace() // for debugging core issues
                             Toast.makeText(
                                 context,
-                                "failed to create a FeatureForm for the feature and layer",
+                                "failed to create a FeatureForm for the feature and layer ${e.me}",
                                 Toast.LENGTH_LONG
                             ).show()
                         }
