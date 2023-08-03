@@ -25,6 +25,8 @@ import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.toolkit.featureforms.components.text.editValue
+import com.arcgismaps.toolkit.featureforms.components.text.getElementValue
+import java.time.Instant
 
 /**
  * State for the [DateTimeField].
@@ -136,16 +138,32 @@ private class DateTimeFieldStateImpl(
     private val _isEditable: MutableState<Boolean> = mutableStateOf(element.editableExpressionName.isNotEmpty())
     override val isEditable: State<Boolean> = _isEditable
     
-    private val _isRequired: MutableState<Boolean> = mutableStateOf(element.requiredExpression.isNotBlank())
+    private val _isRequired: MutableState<Boolean> = mutableStateOf(element.requiredExpressionName.isNotBlank())
     override val isRequired: State<Boolean> = _isRequired
     
     override val description: String = element.description
     
-    private val _value: MutableState<Long?> = mutableStateOf(if (element.value.isNotEmpty() element.value.toLong() else null)
+    private val _value: MutableState<Long?> = mutableStateOf(null)
     override val value: State<Long?> = _value
     
     init {
-        setValue(element.value)
+        val initialValue = form.getElementValue(element)?.let {
+            when (it) {
+                is Instant -> {
+                    it.toEpochMilli()
+                }
+        
+                is Long -> {
+                    it
+                }
+        
+                else -> {
+                    null
+                }
+            }
+        }
+        
+        setValue(initialValue)
     }
     
     private fun setValue(value: String) {
