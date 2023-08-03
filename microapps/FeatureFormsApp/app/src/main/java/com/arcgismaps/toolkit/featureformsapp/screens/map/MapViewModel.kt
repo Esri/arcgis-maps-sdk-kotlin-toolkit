@@ -66,6 +66,7 @@ class MapViewModel @Inject constructor(
                             // FeatureForm UI
                             setTransactionState(EditingTransactionState.Editing)
                         } catch (e: Exception) {
+                            e.printStackTrace() // for debugging core issues
                             Toast.makeText(
                                 context,
                                 "failed to create a FeatureForm for the feature and layer",
