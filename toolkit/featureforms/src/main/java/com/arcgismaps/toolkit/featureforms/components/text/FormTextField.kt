@@ -27,13 +27,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.OffsetMapping
-import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.utils.ClearFocus
+import com.arcgismaps.toolkit.featureforms.utils.PlaceholderTransformation
 
 @Composable
 internal fun FormTextField(
@@ -128,22 +126,5 @@ internal fun FormTextField(
             else
                 OutlinedTextFieldDefaults.colors()
         )
-    }
-}
-
-/**
- * Changes the visual output of the placeholder and label properties of a TextField. Using this
- * transformation, the placeholder is always visible even if empty and puts the label above the
- * TextField as it's default position.
- */
-internal class PlaceholderTransformation(private val placeholder: String) : VisualTransformation {
-    
-    private val mapping = object : OffsetMapping {
-        override fun originalToTransformed(offset: Int): Int = 0
-        override fun transformedToOriginal(offset: Int): Int = 0
-    }
-    
-    override fun filter(text: AnnotatedString): TransformedText {
-        return TransformedText(AnnotatedString(placeholder), mapping)
     }
 }
