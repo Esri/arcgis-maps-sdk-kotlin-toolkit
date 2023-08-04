@@ -22,6 +22,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -43,13 +44,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Alignment.Companion.Start
 import androidx.compose.ui.Modifier
@@ -81,20 +82,12 @@ import com.arcgismaps.mapping.floor.FloorSite
 internal fun SiteAndFacilitySelector(
     floorFilterState: FloorFilterState,
     isSiteFacilitySelectorVisible: Boolean,
-    searchBackgroundColor: Color,
-    buttonBackgroundColor: Color,
-    textColor: Color,
-    selectedTextColor: Color,
-    selectedButtonBackgroundColor: Color,
-    onSiteFacilitySelectorVisibilityChanged: (Boolean) -> Unit
+    isFacilitiesSelectorVisible: Boolean,
+    onSiteFacilitySelectorVisibilityChanged: (Boolean) -> Unit,
+    onFacilitiesSelectorVisible: (Boolean) -> Unit
 ) {
-    // boolean toggle to display either the sites selector or the facilities selector,
-    // display sites selector by default when set to false, and sites selector when set to true.
-    val isFacilitiesSelectorVisible = remember { mutableStateOf(false) }
-    // set to show facilities, if there is one selected
-    if (floorFilterState.selectedSiteId != null) {
-        isFacilitiesSelectorVisible.value = true
-    }
+    // keep an instance of the colors used
+    val uiProperties = floorFilterState.uiProperties
 
     // display alert dialog when set to true
     if (isSiteFacilitySelectorVisible) {
@@ -114,13 +107,14 @@ internal fun SiteAndFacilitySelector(
                 Column(
                     modifier = Modifier
                         .clip(RoundedCornerShape(5.dp))
-                        .background(color = buttonBackgroundColor)
+                        .background(color = uiProperties.backgroundColor)
                 )
                 {
                     Column {
-                        if (!isFacilitiesSelectorVisible.value) {
+                        if (!isFacilitiesSelectorVisible) {
                             // display the sites top bar
                             SiteSelectorTopBar(
+                                uiProperties = uiProperties,
                                 closeButtonClicked = {
                                     onSiteFacilitySelectorVisibilityChanged(false)
                                 }
@@ -128,37 +122,29 @@ internal fun SiteAndFacilitySelector(
                             // display search list for all sites
                             SitesAndFacilitiesFilter(
                                 floorFilterState,
-                                searchBackgroundColor,
-                                textColor,
-                                selectedTextColor,
-                                selectedButtonBackgroundColor,
-                                buttonBackgroundColor,
-                                isFacilitiesSelectorVisible
+                                false,
+                                uiProperties
                             ) { selectedSite ->
                                 floorFilterState.selectedSiteId = selectedSite.site?.id
-                                isFacilitiesSelectorVisible.value = true
+                                onFacilitiesSelectorVisible(true)
 
                             }
                         } else {
                             // display the facilities top bar
                             FacilitySelectorTopBar(
                                 floorFilterState = floorFilterState,
+                                uiProperties = uiProperties,
                                 backToSiteButtonClicked = {
-                                    isFacilitiesSelectorVisible.value = false
-                                },
-                                closeButtonClicked = {
+                                    onFacilitiesSelectorVisible(false)
+                                }, closeButtonClicked = {
                                     onSiteFacilitySelectorVisibilityChanged(false)
                                 }
                             )
                             // display search list for all facilities
                             SitesAndFacilitiesFilter(
                                 floorFilterState,
-                                searchBackgroundColor,
-                                textColor,
-                                selectedTextColor,
-                                selectedButtonBackgroundColor,
-                                buttonBackgroundColor,
-                                isFacilitiesSelectorVisible
+                                true,
+                                uiProperties
                             ) { selectedFacility ->
                                 floorFilterState.selectedFacilityId = selectedFacility.facility?.id
                                 onSiteFacilitySelectorVisibilityChanged(false)
@@ -179,6 +165,7 @@ internal fun SiteAndFacilitySelector(
  */
 @Composable
 internal fun SiteSelectorTopBar(
+    uiProperties: UIProperties,
     closeButtonClicked: () -> Unit
 ) {
     Row(
@@ -191,15 +178,15 @@ internal fun SiteSelectorTopBar(
                 .align(CenterVertically),
             text = stringResource(R.string.floor_filter_select_site),
             fontWeight = FontWeight.Bold,
-            color = Color.DarkGray,
+            color = uiProperties.textColor,
             fontSize = 18.sp
         )
         IconButton(
             onClick = closeButtonClicked,
-            modifier = Modifier.padding(horizontal = 10.dp).size(24.dp)
-                .align(CenterVertically)
+            modifier = Modifier.align(CenterVertically)
         ) {
             Icon(
+                modifier = Modifier.padding(horizontal = 10.dp).size(24.dp),
                 painter = painterResource(id = R.drawable.ic_x_24),
                 contentDescription = "Close Icon"
             )
@@ -216,6 +203,7 @@ internal fun SiteSelectorTopBar(
 @Composable
 internal fun FacilitySelectorTopBar(
     floorFilterState: FloorFilterState,
+    uiProperties: UIProperties,
     backToSiteButtonClicked: () -> Unit,
     closeButtonClicked: () -> Unit
 ) {
@@ -223,14 +211,14 @@ internal fun FacilitySelectorTopBar(
         modifier = Modifier.height(65.dp).fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        IconButton(
-            onClick = backToSiteButtonClicked,
-            modifier = Modifier.align(CenterVertically).padding(horizontal = 6.dp).size(24.dp)
+        // a box is helpful to use a consistent clickable animation
+        Box(
+            modifier = Modifier.clickable { backToSiteButtonClicked() }
         ) {
             Icon(
+                modifier = Modifier.fillMaxHeight().padding(horizontal = 6.dp).size(24.dp),
                 painter = painterResource(id = R.drawable.ic_chevron_left_32),
-                contentDescription = "Go Back to Site Selector",
-                modifier = Modifier.size(24.dp)
+                contentDescription = "Go Back to Site Selector"
             )
         }
         Divider(
@@ -249,27 +237,25 @@ internal fun FacilitySelectorTopBar(
             Text(
                 modifier = Modifier.align(Start),
                 text = stringResource(R.string.floor_filter_select_facility),
+                color = uiProperties.textColor,
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp,
                 textAlign = TextAlign.Start
             )
 
-            floorFilterState.getSelectedSite()?.let {
-                floorFilterState.getSelectedSite()?.name?.let { it1 ->
-                    Text(
-                        text = "Site - $it1",
-                        fontSize = 15.sp,
-                        color = Color.Gray
-                    )
-                }
-            }
+            Text(
+                text = stringResource(R.string.floor_filter_site_selector_top_bar) +
+                        floorFilterState.getSelectedSite()?.name.toString(),
+                fontSize = 15.sp,
+                color = Color.Gray
+            )
         }
         IconButton(
-            onClick = closeButtonClicked,
-            modifier = Modifier.padding(horizontal = 10.dp).size(24.dp)
-                .align(CenterVertically)
+            modifier = Modifier.align(CenterVertically),
+            onClick = closeButtonClicked
         ) {
             Icon(
+                modifier = Modifier.padding(horizontal = 10.dp).size(24.dp),
                 painter = painterResource(id = R.drawable.ic_x_24),
                 contentDescription = "Close Icon"
             )
@@ -287,12 +273,8 @@ internal fun FacilitySelectorTopBar(
 @Composable
 internal fun SitesAndFacilitiesFilter(
     floorFilterState: FloorFilterState,
-    searchBackgroundColor: Color,
-    textColor: Color,
-    selectedTextColor: Color,
-    selectedButtonBackgroundColor: Color,
-    buttonBackgroundColor: Color,
-    isFacilitiesSelectorVisible: MutableState<Boolean>,
+    isFacilitiesSelectorVisible: Boolean,
+    uiProperties: UIProperties,
     onSiteOrFacilitySelected: (SiteFacilityWrapper) -> Unit
 ) {
     // query text typed in OutlinedTextField
@@ -304,7 +286,7 @@ internal fun SitesAndFacilitiesFilter(
 
     // list of all the site/facility names to display when no search prompt is used
     val allSitesOrFacilities: List<SiteFacilityWrapper> =
-        if (!isFacilitiesSelectorVisible.value)
+        if (!isFacilitiesSelectorVisible)
             floorFilterState.sites.map { floorSite ->
                 SiteFacilityWrapper(
                     site = floorSite,
@@ -323,7 +305,7 @@ internal fun SitesAndFacilitiesFilter(
     allSitesOrFacilities.sortedBy { it.name }
 
     // list of site/facility names to display when search prompt is used
-    var filteredSitesOrFacilities: List<SiteFacilityWrapper> by rememberSaveable {
+    var filteredSitesOrFacilities: List<SiteFacilityWrapper> by remember {
         mutableStateOf(allSitesOrFacilities)
     }
 
@@ -339,8 +321,6 @@ internal fun SitesAndFacilitiesFilter(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(65.dp)
-                    .padding(0.dp)
-                    .background(color = Color.White)
                     .focusRequester(focusRequester).onKeyEvent {
                         // submit query when enter is tapped
                         if (it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_ENTER) {
@@ -354,7 +334,7 @@ internal fun SitesAndFacilitiesFilter(
                 label = {
                     Text(
                         text =
-                        if (isFacilitiesSelectorVisible.value)
+                        if (isFacilitiesSelectorVisible)
                             stringResource(R.string.floor_filter_view_filter_hint_facilities)
                         else
                             stringResource(R.string.floor_filter_view_filter_hint_sites)
@@ -373,7 +353,6 @@ internal fun SitesAndFacilitiesFilter(
                         Icon(
                             modifier = Modifier.clickable {
                                 text = ""
-                                focusManager.clearFocus()
                                 filteredSitesOrFacilities = allSitesOrFacilities
                             },
                             painter = painterResource(id = R.drawable.ic_x_24),
@@ -398,16 +377,16 @@ internal fun SitesAndFacilitiesFilter(
                     },
                 ),
                 colors = TextFieldDefaults.colors(
-                    focusedContainerColor = searchBackgroundColor,
-                    unfocusedContainerColor = searchBackgroundColor,
-                    unfocusedTextColor = textColor,
-                    focusedTextColor = textColor,
-                    focusedLabelColor = selectedTextColor,
-                    cursorColor = selectedTextColor,
-                    unfocusedIndicatorColor = textColor,
-                    focusedIndicatorColor = selectedTextColor,
+                    focusedContainerColor = uiProperties.searchBackgroundColor,
+                    unfocusedContainerColor = uiProperties.searchBackgroundColor,
+                    unfocusedTextColor = uiProperties.textColor,
+                    focusedTextColor = uiProperties.textColor,
+                    focusedLabelColor = uiProperties.selectedForegroundColor,
+                    cursorColor = uiProperties.selectedForegroundColor,
+                    unfocusedIndicatorColor = uiProperties.textColor,
+                    focusedIndicatorColor = uiProperties.selectedForegroundColor,
                     unfocusedLabelColor = Color.Gray,
-                ),
+                )
             )
         }
 
@@ -418,15 +397,16 @@ internal fun SitesAndFacilitiesFilter(
                     .height(65.dp)
                     .fillMaxWidth()
                     .wrapContentHeight(align = CenterVertically),
-                text = "No results found",
+                text = stringResource(R.string.floor_filter_no_results),
                 textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Light
+                fontWeight = FontWeight.ExtraLight,
+                color = uiProperties.textColor
             )
         } else {
             // display a list of sites/facilities
             ListOfSitesOrFacilities(
                 filteredSitesOrFacilities,
-                selectedTextColor,
+                uiProperties,
                 onSiteOrFacilitySelected
             )
         }
@@ -442,17 +422,17 @@ internal fun SitesAndFacilitiesFilter(
 @Composable
 internal fun ListOfSitesOrFacilities(
     siteFacilityList: List<SiteFacilityWrapper>,
-    selectedTextColor: Color,
+    uiProperties: UIProperties,
     onListItemSelected: (SiteFacilityWrapper) -> Unit
 ) {
-    LazyColumn() {
+    LazyColumn {
         items(count = siteFacilityList.size) { index ->
             SiteOrFacilityItem(
                 name = siteFacilityList[index].name,
                 index = index,
                 isSelected = siteFacilityList[index].isSelected,
                 isSiteItem = siteFacilityList[0].site != null,
-                selectedTextColor = selectedTextColor,
+                uiProperties = uiProperties,
                 onSelected = {
                     onListItemSelected(siteFacilityList[it])
                 }
@@ -473,37 +453,38 @@ internal fun SiteOrFacilityItem(
     isSelected: Boolean,
     onSelected: (Int) -> Unit,
     index: Int,
-    selectedTextColor: Color,
+    uiProperties: UIProperties,
     isSiteItem: Boolean
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(65.dp)
-            .padding(horizontal = 20.dp)
-            .clickable { onSelected(index) }) {
-        if (isSelected) {
-            Canvas(
-                modifier = Modifier
-                    .padding(0.dp, 0.dp, 10.dp, 0.dp)
-                    .size(5.dp)
-                    .align(CenterVertically),
-                onDraw = {
-                    drawCircle(color = selectedTextColor)
-                })
-        }
-        Text(
-            modifier = Modifier.weight(1f).align(CenterVertically),
-            text = name,
-            color = Color.DarkGray,
-            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-        )
-        if (isSiteItem) {
-            Icon(
-                modifier = Modifier.size(24.dp).align(CenterVertically),
-                painter = painterResource(id = R.drawable.ic_chevron_right_32),
-                contentDescription = "Select site icon"
+    // a box is helpful to use a consistent clickable animation
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .height(65.dp)
+        .clickable { onSelected(index) }) {
+        Row(modifier = Modifier.padding(horizontal = 20.dp).align(Center)) {
+            if (isSelected) {
+                Canvas(
+                    modifier = Modifier
+                        .padding(0.dp, 0.dp, 10.dp, 0.dp)
+                        .size(5.dp)
+                        .align(CenterVertically),
+                    onDraw = {
+                        drawCircle(color = uiProperties.selectedForegroundColor)
+                    })
+            }
+            Text(
+                modifier = Modifier.weight(1f).align(CenterVertically),
+                text = name,
+                color = uiProperties.textColor,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
             )
+            if (isSiteItem) {
+                Icon(
+                    modifier = Modifier.size(24.dp).align(CenterVertically),
+                    painter = painterResource(id = R.drawable.ic_chevron_right_32),
+                    contentDescription = "Select site icon"
+                )
+            }
         }
     }
 }
