@@ -121,7 +121,9 @@ internal fun FormTextField(
                             text = supportingText,
                             modifier = Modifier
                                 .semantics { contentDescription = "helper" }
-                                .clickable(enabled = false) {},
+                                .clickable {
+                                    clearFocus = true
+                                },
                             color = textColor
                         )
                     }
@@ -130,8 +132,7 @@ internal fun FormTextField(
                         Text(
                             text = contentLength,
                             modifier = Modifier
-                                .semantics { contentDescription = "char count" }
-                                .clickable(enabled = false) {},
+                                .semantics { contentDescription = "char count" },
                             color = textColor
                         )
                     }
