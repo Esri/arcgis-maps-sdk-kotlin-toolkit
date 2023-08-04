@@ -16,7 +16,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Clear
-import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -131,8 +130,7 @@ internal fun FormTextField(
                         Spacer(modifier = Modifier.weight(1f))
                         Text(
                             text = contentLength,
-                            modifier = Modifier
-                                .semantics { contentDescription = "char count" },
+                            modifier = Modifier.semantics { contentDescription = "char count" },
                             color = textColor
                         )
                     }
