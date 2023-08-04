@@ -37,17 +37,9 @@ import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
-import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
-import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeHandler
-import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
-import com.arcgismaps.httpcore.authentication.TokenCredential
-import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.toolkit.featureforms.api.FeatureFormDefinition
 import com.arcgismaps.toolkit.featureforms.api.FieldFeatureFormElement
 import com.arcgismaps.toolkit.featureforms.api.TextBoxFeatureFormInput
-import com.arcgismaps.toolkit.featureforms.api.formInfoJson
 import com.arcgismaps.toolkit.featureforms.components.text.FormTextField
 import com.arcgismaps.toolkit.featureforms.components.text.FormTextFieldState
 import junit.framework.TestCase.assertEquals
@@ -56,31 +48,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-
-
-class FormsArcGISAuthenticationChallengeHandler(
-    private val username: String,
-    private val password: String
-) : ArcGISAuthenticationChallengeHandler {
-    override suspend fun handleArcGISAuthenticationChallenge(
-        challenge: ArcGISAuthenticationChallenge
-    ): ArcGISAuthenticationChallengeResponse {
-        val result: Result<TokenCredential> =
-            TokenCredential.create(
-                challenge.requestUrl,
-                username,
-                password,
-                tokenExpirationInterval = 0
-            )
-        return result.let {
-            if (it.isSuccess) {
-                ArcGISAuthenticationChallengeResponse.ContinueWithCredential(it.getOrThrow())
-            } else {
-                ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError(it.exceptionOrNull()!!)
-            }
-        }
-    }
-}
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class FormTextFieldTests {
@@ -93,17 +60,7 @@ class FormTextFieldTests {
     
     @Before
     fun setUp() = runTest {
-        ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler =
-            FormsArcGISAuthenticationChallengeHandler(
-                //TODO: run these tests from json in a file.
-                "c_api_publisher",
-                "c_api_pub1"
-            )
-        val map =
-            ArcGISMap("https://runtimecoretest.maps.arcgis.com/home/item.html?id=5d69e2301ad14ec8a73b568dfc29450a")
-        map.load()
-        val layer = map.operationalLayers.first() as FeatureLayer
-        featureFormDefinition = FeatureFormDefinition.fromJsonOrNull(layer.formInfoJson!!)!!
+        featureFormDefinition = FeatureFormDefinition.fromJsonOrNull(TestData.inputValidationFeatureFormJson)!!
     }
     
     @get:Rule
@@ -117,7 +74,6 @@ class FormTextFieldTests {
      */
     @Test
     fun testNoValueUnfocusedState() = runTest {
-        
         val fieldFeatureFormElement = featureFormDefinition.formElements
             .filterIsInstance<FieldFeatureFormElement>()
             .first {
