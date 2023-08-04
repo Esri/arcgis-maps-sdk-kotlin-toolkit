@@ -62,6 +62,8 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -460,7 +462,8 @@ internal fun SiteOrFacilityItem(
     Box(modifier = Modifier
         .fillMaxWidth()
         .height(65.dp)
-        .clickable { onSelected(index) }) {
+        .clickable { onSelected(index) }
+        .semantics { contentDescription = "SiteOrFacilityItem" }) {
         Row(modifier = Modifier.padding(horizontal = 20.dp).align(Center)) {
             if (isSelected) {
                 Canvas(

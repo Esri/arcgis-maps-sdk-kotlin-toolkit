@@ -306,7 +306,7 @@ internal fun SiteFacilityButton(
     onFacilitiesSelectorVisible: (Boolean) -> Unit
 ) {
     Box(
-        modifier = modifier
+        modifier = modifier.semantics { contentDescription = "SiteFacilityButton" }
             .height(uiProperties.buttonSize.height.dp)
             .clickable {
                 onSiteFacilitySelectorVisibilityChanged(true)
@@ -346,7 +346,8 @@ internal fun FloorListCloseButton(
     Box(modifier
         .fillMaxWidth()
         .height(buttonSize.height.dp)
-        .clickable { onClick(Unit) }) {
+        .clickable { onClick(Unit) }
+        .semantics { contentDescription = "FloorListCloseButton" }) {
         Icon(
             modifier = modifier.align(Center),
             painter = painterResource(id = R.drawable.ic_x_24),
@@ -381,6 +382,7 @@ internal fun FloorLevelSelectButton(
             .background(if (selected) uiProperties.selectedBackgroundColor else uiProperties.backgroundColor)
             .height(uiProperties.buttonSize.height.dp)
             .fillMaxWidth()
-            .wrapContentHeight(align = CenterVertically),
+            .wrapContentHeight(align = CenterVertically)
+            .semantics { contentDescription = "FloorLevelSelectButton" },
     )
 }
