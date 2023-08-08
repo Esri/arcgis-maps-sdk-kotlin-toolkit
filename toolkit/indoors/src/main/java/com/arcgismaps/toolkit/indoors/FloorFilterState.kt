@@ -293,8 +293,24 @@ private class FloorFilterStateImpl(
             clearMapFilter()
         } else {
             floorManager.value?.levels?.forEach {
-                it.isVisible = it.verticalOrder == selectedLevel.verticalOrder
+                it.isVisible = isVisibleWithSelectedLevel(it, selectedLevel)
             }
+        }
+    }
+
+    /**
+     * Returns whether level to check should be visible by checking if it is the selected level
+     * (when in the same facility) or if it is the ground floor (vertical order 0) level for
+     * all other facilities.
+     *
+     * @since 200.2.0
+     */
+    private fun isVisibleWithSelectedLevel(levelToCheck: FloorLevel?, selectedLevel: FloorLevel?): Boolean {
+        return when {
+            levelToCheck == null -> true
+            selectedLevel == null -> levelToCheck.verticalOrder == 0
+            levelToCheck.facility == selectedLevel.facility -> levelToCheck == selectedLevel
+            else -> levelToCheck.verticalOrder == 0
         }
     }
 

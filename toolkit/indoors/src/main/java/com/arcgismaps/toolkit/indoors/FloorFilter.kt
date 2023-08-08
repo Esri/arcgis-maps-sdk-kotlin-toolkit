@@ -262,11 +262,13 @@ internal fun FloorListColumn(
     uiProperties: UIProperties,
     onFloorLevelSelected: (Int) -> Unit,
 ) {
-    // calculate the height of the list of floors if maxDisplayLevels is defined
-    val measureHeight: Dp? = if (uiProperties.maxDisplayLevels > 0)
-        uiProperties.buttonSize.height.dp.times(uiProperties.maxDisplayLevels)
-    else
-        null
+    // calculate the height of the list of floors if maxDisplayLevels is defined and is less than the
+    // number of levels in the current facility.
+    val measureHeight: Dp? =
+        if (uiProperties.maxDisplayLevels > 0 && uiProperties.maxDisplayLevels < currentFacility.levels.size)
+            uiProperties.buttonSize.height.dp.times(uiProperties.maxDisplayLevels)
+        else
+            null
 
     LazyColumn(
         modifier =
