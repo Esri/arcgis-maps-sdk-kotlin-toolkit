@@ -1,27 +1,27 @@
 # Authenticator
 
-The `Authenticator` component is a plug-and-play solution to handling authentication challenges with the ArcGIS Maps SDK for Kotlin. It will display a user interface when network and ArcGIS authentication challenges occur.
+The `Authenticator` component is a plug-and-play solution to handling authentication challenges with the ArcGIS Maps SDK for Kotlin. It will display a user interface when Network and ArcGIS authentication challenges occur.
 
 ![](screenshot.png)
 
 ## Features
 
-The `Authenticator` is a Composable function that will display a prompt when it is asked to handle an authentication challenge. It can handle many different types of authentication, for example:
+The `Authenticator` is a Composable function that will display a prompt when it is asked to handle an authentication challenge. It can handle the following types of authentication:
 
 - ArcGIS Authentication (token and OAuth)
 - Integrated Windows Authentication (IWA)
 - Client Certificate (PKI)
 - Server Trust challenges
 
-The `Authenticator` works directly with the `ArcGISEnvironment.authenticationManager`, so any configuration set on the authentication manager (for example, credential persistence, interceptors, and the http cache) will persist in the `Authenticator`'s behavior.
+The `Authenticator` works directly with the `ArcGISEnvironment.authenticationManager`, so any configuration set on the `AuthenticationManager` (for example, credential persistence, interceptors, and the http cache) will be reflected in the `Authenticator`'s behavior.
 
-A second Composable component, the `DialogAuthenticator` performs the same functionality as the `Authenticator` but presents IWA prompts and Server Trust prompts in an `AlertDialog`. In any of the explanations below, it is sufficient to replace `Authenticator` with `DialogAuthenticator` and the behavior should be identical.
+A second Composable component, the `DialogAuthenticator` performs the same functionality as the `Authenticator` but presents IWA prompts and Server Trust prompts in an `AlertDialog`. In any of the code samples below, it is sufficient to replace `Authenticator` with `DialogAuthenticator` and the behavior should be identical.
 
 ## Usage
 
 To see an example of how to use the `Authenticator`, try out the microapp [here](../../microapps/AuthenticationApp/README.md).
 
-The `Authenticator` is designed to be displayed over the top of your app's UI. As such, it should be called at a near-root level, for example, at the same level as a `NavHost`; and it should be called at the bottom of the function, so it draws over other content. If you call other content after you call `Authenticator()`, that content will be displayed over the top of it.
+The `Authenticator` is designed to be displayed over the top of your app's UI. As such, it should be called at a near-root level, for example, at the same level as a `NavHost`; and it should be called at the bottom of the function, so it draws over other content. If you call other content after you call `Authenticator()`, that content will be displayed on top of it.
 
 ```kotlin
 @Composable
@@ -86,7 +86,7 @@ class MyAppViewModel(application: Application) : AndroidViewModel(application), 
 
 ### Intercepting OAuth Sign-in Redirects
 
-The `Authenticator` launches a Custom Tab when an OAuth challenge is issued. When the Custom Tab completes with a redirect url, this is picked up by the `OAuthUserSignInActivity` that is declared in your app's manifest via its intent filter.
+The `Authenticator` launches a Custom Tab when an OAuth challenge is issued. When the Custom Tab completes with a redirect url, it is received by the `OAuthUserSignInActivity` that is declared in your app's manifest via its intent filter.
 
 If you want to intercept this redirect before allowing the sign-in to complete, you can do that with the following steps:
 
