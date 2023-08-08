@@ -22,6 +22,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.security.KeyChain
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
@@ -48,6 +49,11 @@ public fun Authenticator(
     authenticatorState: AuthenticatorState,
     modifier: Modifier = Modifier.fillMaxSize()
 ) {
+    // If the back button is pressed, this ensures that any prompts get dismissed.
+    BackHandler {
+        authenticatorState.dismissAll()
+    }
+
     val pendingOAuthUserSignIn =
         authenticatorState.pendingOAuthUserSignIn.collectAsStateWithLifecycle().value
 
