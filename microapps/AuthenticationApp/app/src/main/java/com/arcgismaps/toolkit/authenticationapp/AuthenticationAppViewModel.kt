@@ -48,7 +48,7 @@ class AuthenticationAppViewModel(application: Application) : AndroidViewModel(ap
     )
 
     private val _infoText: MutableStateFlow<String> = MutableStateFlow(startInfoText)
-    val infoText: StateFlow<String> = _infoText
+    val infoText: StateFlow<String> = _infoText.asStateFlow()
 
     private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()

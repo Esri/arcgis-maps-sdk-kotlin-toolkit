@@ -1,11 +1,16 @@
 package com.arcgismaps.toolkit.featureforms.components.text
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -13,6 +18,7 @@ import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -27,13 +33,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.OffsetMapping
-import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.featureforms.api.FeatureFormDefinition
+import com.arcgismaps.toolkit.featureforms.api.FieldFeatureFormElement
+import com.arcgismaps.toolkit.featureforms.api.TestData
+import com.arcgismaps.toolkit.featureforms.api.TextAreaFeatureFormInput
+import com.arcgismaps.toolkit.featureforms.api.TextBoxFeatureFormInput
+import com.arcgismaps.toolkit.featureforms.components.FieldElement
 import com.arcgismaps.toolkit.featureforms.utils.ClearFocus
+import com.arcgismaps.toolkit.featureforms.utils.PlaceholderTransformation
 
 @Composable
 internal fun FormTextField(
@@ -46,10 +57,10 @@ internal fun FormTextField(
     val supportingText by state.supportingText
     val contentLength by state.contentLength
     var clearFocus by remember { mutableStateOf(false) }
-    
+
     // if the keyboard is gone clear focus from the field as a side-effect
     ClearFocus(clearFocus) { clearFocus = false }
-    
+
     Column(modifier = modifier
         .fillMaxSize()
         .onFocusChanged { state.onFocusChanged(it.hasFocus) }
@@ -66,22 +77,29 @@ internal fun FormTextField(
             },
             modifier = Modifier
                 .fillMaxSize()
+                .focusable(!state.isEditable)
                 .semantics { contentDescription = "outlined text field" },
+            readOnly = !state.isEditable,
+            enabled = state.isEditable,
             label = {
-                Text(text = state.label, modifier = Modifier.semantics { contentDescription = "label" })
+                Text(
+                    text = state.label,
+                    modifier = Modifier.semantics { contentDescription = "label" })
             },
             trailingIcon = {
-                if (isFocused && !state.singleLine && text.isNotEmpty()) {
+                if (state.isEditable && isFocused && !state.singleLine && text.isNotEmpty()) {
                     IconButton(
                         onClick = { clearFocus = true },
-                        modifier = Modifier.semantics { contentDescription = "Save local edit button" }
+                        modifier = Modifier.semantics {
+                            contentDescription = "Save local edit button"
+                        }
                     ) {
                         Icon(
                             imageVector = Icons.Rounded.CheckCircle,
                             contentDescription = "Done"
                         )
                     }
-                } else if (text.isNotEmpty()) {
+                } else if (state.isEditable && text.isNotEmpty()) {
                     IconButton(
                         onClick = { state.onValueChanged("") },
                         modifier = Modifier.semantics { contentDescription = "Clear text button" }
@@ -94,12 +112,17 @@ internal fun FormTextField(
                 }
             },
             supportingText = {
-                val textColor = if (hasError) Color.Red else Color.Unspecified
+                val textColor = if (hasError) MaterialTheme.colorScheme.error
+                else MaterialTheme.colorScheme.onSurfaceVariant
                 Row {
                     if (supportingText.isNotEmpty()) {
                         Text(
                             text = supportingText,
-                            modifier = Modifier.semantics { contentDescription = "helper" },
+                            modifier = Modifier
+                                .semantics { contentDescription = "helper" }
+                                .clickable {
+                                    clearFocus = true
+                                },
                             color = textColor
                         )
                     }
@@ -114,7 +137,7 @@ internal fun FormTextField(
                 }
             },
             visualTransformation = if (text.isEmpty())
-                PlaceholderTransformation(state.placeholder)
+                PlaceholderTransformation(state.placeholder.ifEmpty { " " })
             else VisualTransformation.None,
             keyboardActions = KeyboardActions(
                 onDone = { clearFocus = true }
@@ -124,26 +147,33 @@ internal fun FormTextField(
             ),
             singleLine = state.singleLine,
             colors = if (text.isEmpty() && state.placeholder.isNotEmpty())
-                OutlinedTextFieldDefaults.colors(unfocusedTextColor = Color.Gray, focusedTextColor = Color.Gray)
+                OutlinedTextFieldDefaults.colors(
+                    unfocusedTextColor = Color.Gray,
+                    focusedTextColor = Color.Gray
+                )
             else
                 OutlinedTextFieldDefaults.colors()
         )
     }
 }
 
-/**
- * Changes the visual output of the placeholder and label properties of a TextField. Using this
- * transformation, the placeholder is always visible even if empty and puts the label above the
- * TextField as it's default position.
- */
-internal class PlaceholderTransformation(private val placeholder: String) : VisualTransformation {
-    
-    private val mapping = object : OffsetMapping {
-        override fun originalToTransformed(offset: Int): Int = 0
-        override fun transformedToOriginal(offset: Int): Int = 0
-    }
-    
-    override fun filter(text: AnnotatedString): TransformedText {
-        return TransformedText(AnnotatedString(placeholder), mapping)
+@Preview(
+    showBackground = true,
+    backgroundColor = 16777215L
+)
+@Composable
+private fun FormTextFieldPreview() {
+    val formDefinition = FeatureFormDefinition.fromJsonOrNull(TestData.formInfo)!!
+    LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(20.dp)) {
+        items(formDefinition.formElements) { formElement ->
+            if (((formElement as FieldFeatureFormElement).inputType is TextBoxFeatureFormInput)
+                || (formElement.inputType is TextAreaFeatureFormInput)
+            ) {
+                FieldElement(
+                    field = formElement,
+                    formDefinition = formDefinition
+                )
+            }
+        }
     }
 }

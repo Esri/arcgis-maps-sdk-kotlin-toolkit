@@ -27,8 +27,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.CalendarMonth
@@ -196,20 +197,29 @@ private fun (ColumnScope).PickerContent(
             onIconTap = onPickerToggle
         )
     }
-    if (picker == DateTimePickerInput.Time) {
-        title(if (style == DateTimePickerStyle.Time) null else Icons.Rounded.CalendarMonth)
-        Spacer(modifier = Modifier.height(10.dp))
-        TimePicker(state = timePickerState, modifier = Modifier.weight(1f, fill = false))
-    } else {
-        DatePicker(
-            state = datePickerState,
-            modifier = Modifier.weight(1f, fill = false),
-            dateValidator = { timeStamp ->
-                // validate selectable dates if a range is provided
-                state.dateTimeValidator(timeStamp)
-            },
-            title = { title(if (style == DateTimePickerStyle.Date) null else Icons.Rounded.AccessTime) }
-        )
+    // make the picker content scrollable if the screen height sizing is more restrictive
+    // like in landscape mode
+    LazyColumn(
+        modifier = Modifier.weight(1f, false),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        item {
+            if (picker == DateTimePickerInput.Time) {
+                title(if (style == DateTimePickerStyle.Time) null else Icons.Rounded.CalendarMonth)
+                Spacer(modifier = Modifier.height(10.dp))
+                TimePicker(state = timePickerState, modifier = Modifier.padding(10.dp))
+            } else {
+                DatePicker(
+                    state = datePickerState,
+                    dateValidator = { timeStamp ->
+                        // validate selectable dates if a range is provided
+                        state.dateTimeValidator(timeStamp)
+                    },
+                    title = { title(if (style == DateTimePickerStyle.Date) null else Icons.Rounded.AccessTime) }
+                )
+            }
+        }
     }
 }
 
@@ -222,7 +232,7 @@ private fun PickerTitle(
 ) {
     Row(
         Modifier
-            .padding(start = 25.dp, top = 25.dp, end = 15.dp, bottom = 15.dp)
+            .padding(start = 25.dp, end = 15.dp, bottom = 10.dp)
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically
@@ -255,7 +265,7 @@ private fun PickerFooter(
     Row(
         Modifier
             .wrapContentHeight()
-            .padding(10.dp)
+            .padding(start = 10.dp, end = 10.dp)
             .fillMaxWidth()
     ) {
         if (state.activePickerInput.value == DateTimePickerInput.Date) {
@@ -298,13 +308,15 @@ private fun DateTimePickerDialog(
     ) {
         Surface(
             modifier = Modifier
-                .requiredWidth(DateTimePickerDialogTokens.containerWidth)
+                .padding(start = 25.dp, end = 25.dp)
+                .widthIn(DateTimePickerDialogTokens.containerWidth)
                 .heightIn(DateTimePickerDialogTokens.containerHeight),
             shape = shape,
             color = MaterialTheme.colorScheme.surface,
             tonalElevation = tonalElevation,
         ) {
             Column(
+                modifier = modifier.padding(top = 25.dp, bottom = 10.dp),
                 verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {

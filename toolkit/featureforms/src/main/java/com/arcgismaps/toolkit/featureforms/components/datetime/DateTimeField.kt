@@ -47,12 +47,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.datetime.picker.DateTimePicker
 import com.arcgismaps.toolkit.featureforms.components.datetime.picker.DateTimePickerState
 import com.arcgismaps.toolkit.featureforms.components.datetime.picker.DateTimePickerStyle
+import com.arcgismaps.toolkit.featureforms.utils.PlaceholderTransformation
 
 @Composable
 internal fun DateTimeField(
@@ -124,7 +126,7 @@ internal fun DateTimeField(
                 .padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 10.dp)
         ) {
             OutlinedTextField(
-                value = epochMillis?.formattedDateTime(state.shouldShowTime) ?: stringResource(id = R.string.novalue),
+                value = epochMillis?.formattedDateTime(state.shouldShowTime) ?: "",
                 onValueChange = {},
                 modifier = Modifier
                     .fillMaxSize()
@@ -173,6 +175,9 @@ internal fun DateTimeField(
                         Text(text = state.description)
                     }
                 },
+                visualTransformation = if (state.value.value == null)
+                    PlaceholderTransformation(stringResource(id = R.string.novalue))
+                else VisualTransformation.None,
                 singleLine = true,
                 colors = textFieldColors,
                 interactionSource = interactionSource
@@ -180,7 +185,7 @@ internal fun DateTimeField(
         }
     } else {
         ImmutableDate(
-            valueString = epochMillis?.formattedDateTime(state.shouldShowTime) ?: stringResource(id = R.string.novalue),
+            valueString = epochMillis?.formattedDateTime(state.shouldShowTime) ?: "",
             label = state.label,
             supportingText = state.description
         )
@@ -240,6 +245,9 @@ private fun ImmutableDate(
             readOnly = true,
             label = { Text(text = label) },
             supportingText = { Text(text = supportingText) },
+            visualTransformation = if (valueString.isEmpty())
+                PlaceholderTransformation(stringResource(id = R.string.novalue))
+            else VisualTransformation.None,
             colors = colors
         )
     }
