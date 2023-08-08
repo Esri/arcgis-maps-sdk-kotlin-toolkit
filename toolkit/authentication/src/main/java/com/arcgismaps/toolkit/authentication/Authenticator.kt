@@ -22,6 +22,8 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.security.KeyChain
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -44,7 +46,7 @@ import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 @Composable
 public fun Authenticator(
     authenticatorState: AuthenticatorState,
-    fillMaxHeight: Boolean = true
+    modifier: Modifier = Modifier.fillMaxSize()
 ) {
     val pendingOAuthUserSignIn =
         authenticatorState.pendingOAuthUserSignIn.collectAsStateWithLifecycle().value
@@ -57,14 +59,14 @@ public fun Authenticator(
         authenticatorState.pendingServerTrustChallenge.collectAsStateWithLifecycle().value
 
     pendingServerTrustChallenge?.let {
-        ServerTrustAuthenticator(it, fillMaxHeight)
+        ServerTrustAuthenticator(it, modifier)
     }
 
     val pendingUsernamePasswordChallenge =
         authenticatorState.pendingUsernamePasswordChallenge.collectAsStateWithLifecycle().value
 
     pendingUsernamePasswordChallenge?.let {
-        UsernamePasswordAuthenticator(it, fillMaxHeight)
+        UsernamePasswordAuthenticator(it, modifier)
     }
 
     val pendingClientCertificateChallenge =
@@ -107,7 +109,7 @@ public fun DialogAuthenticator(authenticatorState: AuthenticatorState) {
             onDismissRequest = { authenticatorState.dismissAll() },
             modifier = Modifier.clip(MaterialTheme.shapes.extraLarge),
         ) {
-            Authenticator(authenticatorState = authenticatorState, fillMaxHeight = false)
+            Authenticator(authenticatorState = authenticatorState, modifier = Modifier.fillMaxWidth())
         }
     }
 }
