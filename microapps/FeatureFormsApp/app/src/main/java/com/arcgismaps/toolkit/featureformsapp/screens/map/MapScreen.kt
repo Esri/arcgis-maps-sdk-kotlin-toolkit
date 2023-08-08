@@ -150,11 +150,7 @@ fun TopFormBar(
                     Icon(imageVector = Icons.Default.Check, contentDescription = "Save Feature")
                 }
             }
-        },
-        // set the top app bar to 70% opacity
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
-        )
+        }
     )
 }
 
