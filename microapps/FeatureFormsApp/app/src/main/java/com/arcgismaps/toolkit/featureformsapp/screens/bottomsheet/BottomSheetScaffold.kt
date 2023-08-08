@@ -354,17 +354,17 @@ private fun BottomSheetScaffoldLayout(
         val layoutHeight = constraints.maxHeight
         val looseConstraints = constraints.copy(minWidth = 0, minHeight = 0)
 
-        val sheetPlaceable = subcompose(BottomSheetScaffoldLayoutSlot.Sheet) {
-            bottomSheet(layoutHeight)
-        }[0].measure(looseConstraints)
-        val sheetOffsetY = sheetOffset().roundToInt()
-        val sheetOffsetX = Integer.max(0, (layoutWidth - sheetPlaceable.width) / 2)
-
         val topBarPlaceable = topBar?.let {
             subcompose(BottomSheetScaffoldLayoutSlot.TopBar) { topBar() }[0]
                 .measure(looseConstraints)
         }
         val topBarHeight = topBarPlaceable?.height ?: 0
+
+        val sheetPlaceable = subcompose(BottomSheetScaffoldLayoutSlot.Sheet) {
+            bottomSheet(layoutHeight - topBarHeight)
+        }[0].measure(looseConstraints.copy(maxHeight = layoutHeight - topBarHeight))
+        val sheetOffsetY = sheetOffset().roundToInt() + topBarHeight
+        val sheetOffsetX = Integer.max(0, (layoutWidth - sheetPlaceable.width) / 2)
 
         val bodyConstraints = looseConstraints.copy(maxHeight = layoutHeight - topBarHeight)
         val bodyPlaceable = subcompose(BottomSheetScaffoldLayoutSlot.Body) {
