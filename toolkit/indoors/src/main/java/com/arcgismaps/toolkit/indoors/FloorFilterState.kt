@@ -83,7 +83,7 @@ public sealed interface FloorFilterState {
  */
 private class FloorFilterStateImpl(
     var geoModel: GeoModel,
-    var coroutineScope: CoroutineScope,
+    coroutineScope: CoroutineScope,
     override var uiProperties: UIProperties,
     var onSelectionChangedListener: (FloorFilterSelection) -> Unit
 ) : FloorFilterState {
@@ -140,10 +140,14 @@ private class FloorFilterStateImpl(
         set(value) {
             _selectedSiteId = value
             selectedFacilityId = null
-            coroutineScope.launch {
-                getSelectedSite()?.let {
-                    onSelectionChangedListener(FloorFilterSelection(FloorFilterSelection.Type.FloorSite(it)))
-                }
+            getSelectedSite()?.let {
+                onSelectionChangedListener(
+                    FloorFilterSelection(
+                        FloorFilterSelection.Type.FloorSite(
+                            it
+                        )
+                    )
+                )
             }
         }
 
@@ -163,11 +167,15 @@ private class FloorFilterStateImpl(
                 _selectedSiteId = getSelectedFacility()?.site?.id
             }
             selectedLevelId = getDefaultLevelIdForFacility(value)
-            coroutineScope.launch {
-                _onFacilityChanged.emit(getSelectedFacility())
-                getSelectedFacility()?.let {
-                    onSelectionChangedListener(FloorFilterSelection(FloorFilterSelection.Type.FloorFacility(it)))
-                }
+            _onFacilityChanged.value = getSelectedFacility()
+            getSelectedFacility()?.let {
+                onSelectionChangedListener(
+                    FloorFilterSelection(
+                        FloorFilterSelection.Type.FloorFacility(
+                            it
+                        )
+                    )
+                )
             }
         }
 
@@ -191,11 +199,15 @@ private class FloorFilterStateImpl(
                 }
                 filterMap()
             }
-            coroutineScope.launch {
-                _onLevelChanged.emit(getSelectedLevel())
-                getSelectedLevel()?.let {
-                    onSelectionChangedListener(FloorFilterSelection(FloorFilterSelection.Type.FloorLevel(it)))
-                }
+            _onLevelChanged.value = getSelectedLevel()
+            getSelectedLevel()?.let {
+                onSelectionChangedListener(
+                    FloorFilterSelection(
+                        FloorFilterSelection.Type.FloorLevel(
+                            it
+                        )
+                    )
+                )
             }
         }
 
@@ -383,8 +395,8 @@ public enum class ButtonPosition {
  * Factory function for the creating FloorFilterState.
  *
  * @param geoModel the floor aware geoModel that drives the [FloorFilter]
- * @param coroutineScope scope for [FloorFilterState] that it can use to launch jobs in response
- *        to events that change the selectedSiteId, selectedFacilityId or selectedLevelId
+ * @param coroutineScope scope for [FloorFilterState] that it can use to load the [GeoModel] and the
+ *        FloorManager
  * @param uiProperties set of properties to customize the UI used in the [FloorFilter]
  * @param onSelectionChangedListener a lambda to facilitate setting of new ViewPoint on the [GeoView]
  *        with the Site or Facilities extent whenever a new Site or Facility is selected

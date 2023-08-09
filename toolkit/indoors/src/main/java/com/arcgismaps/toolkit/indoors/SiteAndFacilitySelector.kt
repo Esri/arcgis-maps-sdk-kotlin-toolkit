@@ -287,24 +287,24 @@ internal fun SitesAndFacilitiesFilter(
     val focusManager = LocalFocusManager.current
 
     // list of all the site/facility names to display when no search prompt is used
-    val allSitesOrFacilities: List<SiteFacilityWrapper> =
+    val allSitesOrFacilities: MutableList<SiteFacilityWrapper> =
         if (!isFacilitiesSelectorVisible)
             floorFilterState.sites.map { floorSite ->
                 SiteFacilityWrapper(
                     site = floorSite,
                     isSelected = floorSite.id == floorFilterState.selectedSiteId
                 )
-            }
+            }.toMutableList()
         else
             floorFilterState.getSelectedSite()?.facilities?.map { floorFacility ->
                 SiteFacilityWrapper(
                     facility = floorFacility,
                     isSelected = floorFacility.id == floorFilterState.selectedFacilityId
                 )
-            } ?: return
+            }?.toMutableList() ?: return
 
     // sort the site/facilities by alphabetical order
-    allSitesOrFacilities.sortedBy { it.name }
+    allSitesOrFacilities.sortBy { it.name }
 
     // list of site/facility names to display when search prompt is used
     var filteredSitesOrFacilities: List<SiteFacilityWrapper> by remember {
@@ -350,8 +350,8 @@ internal fun SitesAndFacilitiesFilter(
                         contentDescription = "Search Icon"
                     )
                 },
-                trailingIcon = {
-                    if (text.isNotEmpty()) {
+                trailingIcon = if (text.isNotEmpty()) {
+                    {
                         Icon(
                             modifier = Modifier.clickable {
                                 text = ""
@@ -362,6 +362,8 @@ internal fun SitesAndFacilitiesFilter(
                             contentDescription = "Clear Search Icon"
                         )
                     }
+                } else {
+                    null
                 },
                 onValueChange = { textInput ->
                     text = textInput.lines()[0]

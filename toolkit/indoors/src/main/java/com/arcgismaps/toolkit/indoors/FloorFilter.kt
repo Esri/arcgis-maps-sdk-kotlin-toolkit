@@ -35,7 +35,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -53,6 +52,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.mapping.GeoModel
 import com.arcgismaps.mapping.floor.FloorFacility
 
@@ -104,11 +104,11 @@ import com.arcgismaps.mapping.floor.FloorFacility
  */
 @Composable
 public fun FloorFilter(
-    modifier: Modifier = Modifier,
-    floorFilterState: FloorFilterState
+    floorFilterState: FloorFilterState,
+    modifier: Modifier = Modifier
 ) {
     // display the floor filter only if the floor manager is loaded
-    if (floorFilterState.floorManager.collectAsState().value == null) return
+    if (floorFilterState.floorManager.collectAsStateWithLifecycle().value == null) return
 
     // keep an instance of the UI properties
     val uiProperties = floorFilterState.uiProperties
@@ -138,10 +138,10 @@ public fun FloorFilter(
             var isFacilitiesSelectorVisible by rememberSaveable { mutableStateOf(false) }
 
             // get the current selected facility
-            val selectedFacility = floorFilterState.onFacilityChanged.collectAsState().value
+            val selectedFacility = floorFilterState.onFacilityChanged.collectAsStateWithLifecycle().value
 
             // get the selected level ID
-            val selectedLevelID = floorFilterState.onLevelChanged.collectAsState().value?.id
+            val selectedLevelID = floorFilterState.onLevelChanged.collectAsStateWithLifecycle().value?.id
 
             // if no facility is selected, only display site-facility selector button
             if (selectedFacility == null) {

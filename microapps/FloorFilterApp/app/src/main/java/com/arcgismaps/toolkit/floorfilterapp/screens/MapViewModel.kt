@@ -58,7 +58,7 @@ class MapViewModel(
     }
 
     /**
-     * Returns the envelope that has a buffer factor applied to the given Geometry's extent.
+     * Returns the envelope with an added buffer factor applied to the given Geometry's extent.
      *
      * @since 200.2.0
      */
