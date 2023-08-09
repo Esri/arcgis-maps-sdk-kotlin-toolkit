@@ -74,15 +74,9 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
         },
         scaffoldState = bottomSheetScaffoldState,
         sheetPeekHeight = 40.dp,
-        sheetExpansionHeight = SheetExpansionHeight(0.5f, 0.9f)
-    ) {
-        Box {
+        sheetExpansionHeight = SheetExpansionHeight(0.5f),
+        topBar = {
             val scope = rememberCoroutineScope()
-            // show the composable map using the mapViewModel
-            ComposableMap(
-                modifier = Modifier.fillMaxSize(),
-                mapState = mapViewModel
-            )
             // show the top bar which changes available actions based on if the FeatureForm is
             // being shown and is in edit mode
             TopFormBar(
@@ -96,6 +90,12 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                 onBackPressed()
             }
         }
+    ) {
+        // show the composable map using the mapViewModel
+        ComposableMap(
+            modifier = Modifier.fillMaxSize(),
+            mapState = mapViewModel
+        )
     }
     // clear focus and hide the keyboard when the bottom sheet is hidden and the keyboard is visible
     ClearFocus(
@@ -150,11 +150,7 @@ fun TopFormBar(
                     Icon(imageVector = Icons.Default.Check, contentDescription = "Save Feature")
                 }
             }
-        },
-        // set the top app bar to 70% opacity
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
-        )
+        }
     )
 }
 
