@@ -86,7 +86,8 @@ internal fun SiteAndFacilitySelector(
     isSiteFacilitySelectorVisible: Boolean,
     isFacilitiesSelectorVisible: Boolean,
     onSiteFacilitySelectorVisibilityChanged: (Boolean) -> Unit,
-    onFacilitiesSelectorVisible: (Boolean) -> Unit
+    onFacilitiesSelectorVisible: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     // keep an instance of the colors used
     val uiProperties = floorFilterState.uiProperties
@@ -100,9 +101,7 @@ internal fun SiteAndFacilitySelector(
             properties = DialogProperties(usePlatformDefaultWidth = false)
         ) {
             Surface(
-                modifier = Modifier
-                    .width(500.dp)
-                    .padding(horizontal = 25.dp),
+                modifier = modifier,
                 shadowElevation = 10.dp,
                 color = Color.Transparent
             ) {

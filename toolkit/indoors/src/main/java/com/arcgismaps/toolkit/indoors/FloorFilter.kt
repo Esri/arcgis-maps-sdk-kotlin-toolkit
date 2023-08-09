@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
@@ -335,6 +336,9 @@ internal fun SiteFacilityButton(
         isFacilitiesSelectorVisible,
         onSiteFacilitySelectorVisibilityChanged,
         onFacilitiesSelectorVisible,
+        Modifier
+            .width(500.dp)
+            .padding(horizontal = 25.dp)
     )
 
 }
