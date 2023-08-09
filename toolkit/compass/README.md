@@ -11,14 +11,51 @@ Note that the MapView auto-snaps back to north when it's within a threshold of n
 ## Features
 
 Compass:
+- Built with Jetpack Compose.
 - Automatically hides when the rotation is zero.
 - Can be configured to be always visible.
 - Will reset the map rotation to North when tapped.
 
 ## Behavior
 
+The `autoHide` property can be used to configure the visibility behavior of the compass. With `autoHide` enabled, whenever the map is not oriented north (non-zero orientation)
+the compass appears. When reset to north, it disappears. When `autoHide` is disabled, the compass is always visible.
+
 ## Usage
 
-## Example
-To see it in action, try out the micro-app. and refer to the in the project.
+### Basic usage for displaying a `Compass` on a `MapView`
 
+The simplest workflow is to add the `Compass` composable as a child element to the content of a `ComposableMap`. 
+The tap action is provided as a callback using the `onClick()` lambda. This can be used to reset the rotation of the MapView.
+
+```kotlin
+// create an ArcGISMap
+val map = ArcGISMap(BasemapStyle.ArcGISImagery)
+
+// create a MapInterface
+val mapState = MapInterface(map)
+
+// get the current map rotation from the MapState and hoist it as a state
+val mapRotation by mapState.mapRotation.collectAsState(flowType = DuplexFlow.Type.Read)
+
+// show a composable map using the MapInterface
+ComposableMap(
+    modifier = Modifier.fillMaxSize(),
+    mapInterface = mapState
+) {
+    Row(modifier = Modifier
+        .height(IntrinsicSize.Max)
+        .fillMaxWidth()
+        .padding(25.dp)) {
+
+        // show the compass and pass the current mapRotation
+        Compass(rotation = mapRotation) {
+            // reset the ComposableMap viewpoint rotation to point north using the mapState
+            mapState.setViewpointRotation(0.0)
+        }
+    }
+}
+```
+
+## Example
+To see it in action, try out the [Compass micro-app](../../microapps/CompassApp) and refer to [MainScreen.kt](../../microapps/CompassApp/app/src/main/java/com/arcgismaps/toolkit/compassapp/screens/MainScreen.kt) in the project.
