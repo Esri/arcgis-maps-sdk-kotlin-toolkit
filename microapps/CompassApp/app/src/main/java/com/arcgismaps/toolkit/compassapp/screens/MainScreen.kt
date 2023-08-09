@@ -35,7 +35,6 @@ import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.compass.Compass
 import com.arcgismaps.toolkit.composablemap.ComposableMap
 import com.arcgismaps.toolkit.composablemap.DuplexFlow
-import com.arcgismaps.toolkit.composablemap.MapInterface
 
 @Composable
 fun MainScreen() {
@@ -63,36 +62,4 @@ fun MainScreen() {
     }
     // set the composable map's viewpoint to North America
     mapViewModel.setViewpoint(Viewpoint(39.8, -98.6, 10e7))
-}
-
-@Composable
-fun Test() {
-
-    // create an ArcGISMap
-    val map = ArcGISMap(BasemapStyle.ArcGISImagery)
-
-    // create a MapInterface
-    val mapState = MapInterface(map)
-
-    // get the current map rotation from the MapState and hoist it as a state
-    val mapRotation by mapState.mapRotation.collectAsState(flowType = DuplexFlow.Type.Read)
-
-    // show a composable map using the MapInterface
-    ComposableMap(
-        modifier = Modifier.fillMaxSize(),
-        mapInterface = mapState
-    ) {
-        Row(modifier = Modifier
-            .height(IntrinsicSize.Max)
-            .fillMaxWidth()
-            .padding(25.dp)) {
-
-            // show the compass and pass the current mapRotation
-            Compass(rotation = mapRotation) {
-                // reset the ComposableMap viewpoint rotation to point north using the mapState
-                mapState.setViewpointRotation(0.0)
-            }
-        }
-    }
-
 }

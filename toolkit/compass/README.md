@@ -33,15 +33,15 @@ The tap action is provided as a callback using the `onClick()` lambda. This can 
 val map = ArcGISMap(BasemapStyle.ArcGISImagery)
 
 // create a MapInterface
-val mapState = MapInterface(map)
+val mapInterface = MapInterface(map)
 
-// get the current map rotation from the MapState and hoist it as a state
-val mapRotation by mapState.mapRotation.collectAsState(flowType = DuplexFlow.Type.Read)
+// get the current map rotation from the MapInterface and hoist it as a state
+val mapRotation by mapInterface.mapRotation.collectAsState(flowType = DuplexFlow.Type.Read)
 
 // show a composable map using the MapInterface
 ComposableMap(
     modifier = Modifier.fillMaxSize(),
-    mapInterface = mapState
+    mapInterface = mapInterface
 ) {
     Row(modifier = Modifier
         .height(IntrinsicSize.Max)
@@ -50,8 +50,8 @@ ComposableMap(
 
         // show the compass and pass the current mapRotation
         Compass(rotation = mapRotation) {
-            // reset the ComposableMap viewpoint rotation to point north using the mapState
-            mapState.setViewpointRotation(0.0)
+            // reset the ComposableMap viewpoint rotation to point north using the MapInterface
+            mapInterface.setViewpointRotation(0.0)
         }
     }
 }
