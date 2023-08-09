@@ -57,5 +57,15 @@ ComposableMap(
 }
 ```
 
+To configure the auto-hide behavior, pass in the `autoHide` parameter.
+
+```kotlin
+// show the compass and pass the current mapRotation
+Compass(rotation = mapRotation, autoHide = false) {
+    // reset the ComposableMap viewpoint rotation to point north using the MapInterface
+    mapInterface.setViewpointRotation(0.0)
+}
+```
+
 ## Example
 To see it in action, try out the [Compass micro-app](../../microapps/CompassApp) and refer to [MainScreen.kt](../../microapps/CompassApp/app/src/main/java/com/arcgismaps/toolkit/compassapp/screens/MainScreen.kt) in the project.
