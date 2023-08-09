@@ -138,10 +138,15 @@ public fun FloorFilter(
             var isFacilitiesSelectorVisible by rememberSaveable { mutableStateOf(false) }
 
             // get the current selected facility
-            val selectedFacility = floorFilterState.onFacilityChanged.collectAsStateWithLifecycle().value
+            var selectedFacility = floorFilterState.onFacilityChanged.collectAsStateWithLifecycle().value
 
             // get the selected level ID
             val selectedLevelID = floorFilterState.onLevelChanged.collectAsStateWithLifecycle().value?.id
+
+            // get the selected facility if the level was set programmatically
+            if (selectedFacility == null) {
+                selectedFacility = floorFilterState.getSelectedFacility()
+            }
 
             // if no facility is selected, only display site-facility selector button
             if (selectedFacility == null) {

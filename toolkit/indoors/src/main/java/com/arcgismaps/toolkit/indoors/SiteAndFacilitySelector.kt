@@ -129,7 +129,6 @@ internal fun SiteAndFacilitySelector(
                             ) { selectedSite ->
                                 floorFilterState.selectedSiteId = selectedSite.site?.id
                                 onFacilitiesSelectorVisible(true)
-
                             }
                         } else {
                             // display the facilities top bar
