@@ -170,7 +170,7 @@ authenticatorState.oAuthUserConfiguration = OAuthUserConfiguration(
 
 ### Signing out
 
-This library provides an extension function on `AuthenticationManger` to remove any stored credentials:
+The authentication toolkit library provides an extension function on `AuthenticationManger` to remove any stored credentials:
 
 ```kotlin
 ArcGISEnvironment.authenticationManager.signOut()
