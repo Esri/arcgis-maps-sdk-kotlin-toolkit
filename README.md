@@ -3,7 +3,11 @@
 
 ## Toolkit Components
 
-The project is structured into two folders, `microapps` and `toolkit` each containing many modules, and a folder for releasing a bill of materials (BOM).
+[Authentication](toolkit/authentication) - Displays a user interface when network and ArcGIS authentication challenges occur.
+[Compass](toolkit/compass) - Shows a compass direction when the map is rotated. Auto-hides when the map points north.
+[Indoors](toolkit/indoors) - Provides composable API for use in indoors workflows, such as filtering floor plan data in a geo view by a site, a building in the site, or a floor in the building.
+
+The toolkit gradle project is structured into two folders, `microapps` and `toolkit` each containing many modules, and a folder for releasing a bill of materials (BOM).
 
 ```
 arcgis-maps-sdk-kotlin-toolkit
@@ -18,7 +22,7 @@ arcgis-maps-sdk-kotlin-toolkit
 ├── build.gradle.kts
 └── settings.gradle.kts
 ```
-The `toolkit` folder contains releasable libraries -- these are the components of the toolkit.
+The `toolkit` folder contains releasable libraries -- these are the components of the toolkit listed above, and other internal library modules.
 For each module in the `toolkit` folder there is a corresponding app in the `microapps` folder which depends on it.
 The apps are not released but are useful for working on a particular component in isolation.
 
