@@ -18,6 +18,10 @@
 
 import org.gradle.configurationcache.extensions.capitalized
 
+// add new module to this list will declare a new toolkit module(Ex: "newComponent") with that name
+// and also add a companion micro app(Ex: "newComponent-app").
+// For mismatching toolkit component and microApp names add them individually at end of this file.
+// Refer to "indoors" project with "floor-filter-app" as an example.
 val projects = listOf("template", "authentication", "compass")
 
 pluginManagement {
@@ -59,6 +63,8 @@ var includedProjects = projects.flatMap { listOf(":$it", ":$it-app") }.toTypedAr
 include(*includedProjects)
 include (":bom")
 include (":composable-map")
+include (":indoors")
+include (":floor-filter-app")
 
 projects.forEach {
     project(":$it").projectDir = File(rootDir, "toolkit/$it")
@@ -67,3 +73,5 @@ projects.forEach {
 
 project(":bom").projectDir = File(rootDir, "bom")
 project(":composable-map").projectDir = File(rootDir, "toolkit/composable-map")
+project(":indoors").projectDir = File(rootDir, "toolkit/indoors")
+project(":floor-filter-app").projectDir = File(rootDir, "microapps/FloorFilterApp/app")
