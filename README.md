@@ -6,7 +6,7 @@ The ArcGIS Maps SDK for Kotlin Toolkit contains components that will simplify yo
 
 * **[Authenticator](toolkit/authentication)** - Displays a user interface when network and ArcGIS authentication challenges occur.
 * **[Compass](toolkit/compass)** - Shows a compass direction when the map is rotated. Auto-hides when the map points north.
-* **[FloorFilter](toolkit/indoors)** - Simplifies visualization of GIS data for a specific floor of a building.
+* **[FloorFilter](toolkit/indoors)** - Allows filtering of floor plan data in a geo view by a site, a facility in the site, or a floor in the facility.
 
 ## Requirements
 
