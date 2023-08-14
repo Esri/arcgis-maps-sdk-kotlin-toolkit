@@ -53,7 +53,12 @@ dependencyResolutionManagement {
     
     versionCatalogs {
         create("arcgis") {
-            version("mapsSdk", "$sdkVersionNumber-$sdkBuildNumber")
+            val versionAndBuild = if (sdkBuildNumber.isNotEmpty()) {
+                "$sdkVersionNumber-$sdkBuildNumber"
+            } else {
+                sdkVersionNumber
+            }
+            version("mapsSdk", "$versionAndBuild")
             library("mapsSdk", "com.esri", "arcgis-maps-kotlin").versionRef("mapsSdk")
         }
     }
