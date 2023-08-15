@@ -46,6 +46,11 @@ dependencyResolutionManagement {
         mavenCentral()
         maven {
             url = java.net.URI(
+                "https://esri.jfrog.io/artifactory/arcgis"
+            )
+        }
+        maven {
+            url = java.net.URI(
                 "https://olympus.esri.com/artifactory/arcgisruntime-repo/"
             )
         }
@@ -66,10 +71,10 @@ dependencyResolutionManagement {
 
 var includedProjects = projects.flatMap { listOf(":$it", ":$it-app") }.toTypedArray()
 include(*includedProjects)
-include (":bom")
-include (":composable-map")
-include (":indoors")
-include (":floor-filter-app")
+include(":bom")
+include(":composable-map")
+include(":indoors")
+include(":floor-filter-app")
 
 projects.forEach {
     project(":$it").projectDir = File(rootDir, "toolkit/$it")
