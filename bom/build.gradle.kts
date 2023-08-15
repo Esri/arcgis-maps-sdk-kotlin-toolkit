@@ -31,7 +31,12 @@ val artifactoryUsername: String by project
 val artifactoryPassword: String by project
 val versionNumber: String by project
 val buildNumber: String by project
-val artifactVersion: String = "$versionNumber-$buildNumber"
+val ignoreBuildNumber: String by project
+val artifactVersion: String = if (ignoreBuildNumber == "true") {
+    versionNumber
+} else {
+    "$versionNumber-$buildNumber"
+}
 
 // ensure that the evaluation of the bom project happens after all other projects
 // so that plugins are applied to all projects, and can be used to identify
