@@ -44,4 +44,5 @@ val floorFilterState = FloorFilterState(geoModel, coroutineScope, uiProperties)
 FloorFilter(floorFilterState = mapViewModel.floorFilterState)
 ```
 
-To see the FloorFilter in action, try out the [floor-filter-app](https://github.com/ArcGIS/arcgis-maps-sdk-kotlin-toolkit/tree/main/microapps/FloorFilterApp) micro app.
+To see the FloorFilter in action, try out the [floor-filter-app](../../microapps/FloorFilterApp) micro app.
+../../toolkit/authentication/README.md
