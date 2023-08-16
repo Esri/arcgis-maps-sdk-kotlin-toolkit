@@ -4,12 +4,14 @@ import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
+import com.arcgismaps.mapping.featureforms.FeatureForm
+import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.mapping.featureforms.TextAreaFormInput
+import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.R
-import com.arcgismaps.toolkit.featureforms.api.FeatureFormDefinition
-import com.arcgismaps.toolkit.featureforms.api.FieldFeatureFormElement
-import com.arcgismaps.toolkit.featureforms.api.TextAreaFeatureFormInput
-import com.arcgismaps.toolkit.featureforms.api.TextBoxFeatureFormInput
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
+import com.arcgismaps.toolkit.featureforms.utils.editValue
+import com.arcgismaps.toolkit.featureforms.utils.getElementValue
 
 /**
  * State for the [FormTextField]
@@ -99,23 +101,27 @@ internal interface FormTextFieldState {
  * @param featureFormElement the form element.
  * @param context a Context scoped to the lifetime of a call to the [FieldElement] composable function.
  */
-internal fun FormTextFieldState(featureFormElement: FieldFeatureFormElement,
-                                formDefinition: FeatureFormDefinition,
+internal fun FormTextFieldState(featureFormElement: FieldFormElement,
+                                form: FeatureForm,
                                 context: Context): FormTextFieldState =
-    FormTextFieldStateImpl(featureFormElement, formDefinition, context)
+    FormTextFieldStateImpl(featureFormElement, form, context)
 
 /**
  * Default implementation for the [FormTextFieldState]. See [FormTextFieldState()] for the factory.
  *
- * @param featureFormElement the form element.
+ * @param formElement the form element.
  * @property context a Context scoped to the lifetime of a call to the [FieldElement] composable function.
  */
 private class FormTextFieldStateImpl(
-    private val featureFormElement: FieldFeatureFormElement,
-    private val featureFormDefinition: FeatureFormDefinition,
+    private val formElement: FieldFormElement,
+    private val featureForm: FeatureForm,
     private val context: Context
 ) : FormTextFieldState {
-    private val _value = mutableStateOf(featureFormElement.value)
+    private val _value = mutableStateOf(formElement.value.ifEmpty {
+        // "prime" the value until expressions can be evaluated to populate the value.
+        // TODO: remove this when the value is provided by expression evaluation.
+        featureForm.getElementValue(formElement)?.toString() ?: ""
+    })
     override val value: State<String> = _value
     
     private val _isFocused = mutableStateOf(false)
@@ -128,28 +134,28 @@ private class FormTextFieldStateImpl(
     override val hasError: State<Boolean> = _hasError
     
     // set the label from the FieldFeatureFormElement
-    override val label = featureFormElement.label
+    override val label = formElement.label
     
     // set the description from the FieldFeatureFormElement
-    override val description = featureFormElement.description
+    override val description = formElement.description
     
     // set the placeholder from the FieldFeatureFormElement
-    override val placeholder = featureFormElement.hint
+    override val placeholder = formElement.hint
     
     // indicates singleLine only if TextBoxFeatureFormInput
-    override val singleLine = featureFormElement.inputType is TextBoxFeatureFormInput
+    override val singleLine = formElement.input is TextBoxFormInput
     
     // fetch the minLength based on the featureFormElement.inputType
-    override val minLength = when (featureFormElement.inputType) {
-        is TextAreaFeatureFormInput -> featureFormElement.inputType.minLength
-        is TextBoxFeatureFormInput -> featureFormElement.inputType.minLength
+    override val minLength = when (formElement.input) {
+        is TextAreaFormInput -> (formElement.input as TextAreaFormInput).minLength
+        is TextBoxFormInput -> (formElement.input as TextBoxFormInput).minLength
         else -> throw IllegalArgumentException()
     }.toInt()
     
     // fetch the maxLength based on the featureFormElement.inputType
-    override val maxLength = when (featureFormElement.inputType) {
-        is TextAreaFeatureFormInput -> featureFormElement.inputType.maxLength
-        is TextBoxFeatureFormInput -> featureFormElement.inputType.maxLength
+    override val maxLength = when (formElement.input) {
+        is TextAreaFormInput -> (formElement.input as TextAreaFormInput).maxLength
+        is TextBoxFormInput -> (formElement.input as TextBoxFormInput).maxLength
         else -> throw IllegalArgumentException()
     }.toInt()
     
@@ -187,7 +193,7 @@ private class FormTextFieldStateImpl(
         } else ""
     }
     
-    override val isEditable: Boolean = featureFormElement.isEditable
+    override val isEditable: Boolean = formElement.editableExpressionName.isNotEmpty()
     
     override fun onValueChanged(input: String) {
        editValue(input)
@@ -217,6 +223,6 @@ private class FormTextFieldStateImpl(
      * and refresh the feature.
      */
     private fun editValue(value: Any?) {
-        featureFormDefinition.editValue(featureFormElement, value)
+        featureForm.editValue(formElement, value)
     }
 }

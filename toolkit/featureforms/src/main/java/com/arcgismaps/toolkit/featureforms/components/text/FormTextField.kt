@@ -4,13 +4,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -35,14 +32,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.toolkit.featureforms.api.FeatureFormDefinition
-import com.arcgismaps.toolkit.featureforms.api.FieldFeatureFormElement
-import com.arcgismaps.toolkit.featureforms.api.TestData
-import com.arcgismaps.toolkit.featureforms.api.TextAreaFeatureFormInput
-import com.arcgismaps.toolkit.featureforms.api.TextBoxFeatureFormInput
-import com.arcgismaps.toolkit.featureforms.components.FieldElement
 import com.arcgismaps.toolkit.featureforms.utils.ClearFocus
 import com.arcgismaps.toolkit.featureforms.utils.PlaceholderTransformation
 
@@ -154,26 +144,5 @@ internal fun FormTextField(
             else
                 OutlinedTextFieldDefaults.colors()
         )
-    }
-}
-
-@Preview(
-    showBackground = true,
-    backgroundColor = 16777215L
-)
-@Composable
-private fun FormTextFieldPreview() {
-    val formDefinition = FeatureFormDefinition.fromJsonOrNull(TestData.formInfo)!!
-    LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(20.dp)) {
-        items(formDefinition.formElements) { formElement ->
-            if (((formElement as FieldFeatureFormElement).inputType is TextBoxFeatureFormInput)
-                || (formElement.inputType is TextAreaFeatureFormInput)
-            ) {
-                FieldElement(
-                    field = formElement,
-                    formDefinition = formDefinition
-                )
-            }
-        }
     }
 }

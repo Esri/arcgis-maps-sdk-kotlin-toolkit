@@ -21,9 +21,12 @@ package com.arcgismaps.toolkit.featureforms.components.datetime
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import com.arcgismaps.toolkit.featureforms.api.DateTimePickerFeatureFormInput
-import com.arcgismaps.toolkit.featureforms.api.FeatureFormDefinition
-import com.arcgismaps.toolkit.featureforms.api.FieldFeatureFormElement
+import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
+import com.arcgismaps.mapping.featureforms.FeatureForm
+import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.toolkit.featureforms.utils.editValue
+import com.arcgismaps.toolkit.featureforms.utils.getElementValue
+import java.time.Instant
 
 /**
  * State for the [DateTimeField].
@@ -117,14 +120,14 @@ internal interface DateTimeFieldState {
     fun clearValue()
 }
 
-internal class DateTimeFieldStateImpl(
-    val element: FieldFeatureFormElement,
-    private val formDefinition: FeatureFormDefinition,
-    input: DateTimePickerFeatureFormInput = element.inputType as DateTimePickerFeatureFormInput
+private class DateTimeFieldStateImpl(
+    private val element: FieldFormElement,
+    private val form: FeatureForm,
+    input: DateTimePickerFormInput = element.input as DateTimePickerFormInput
 ) : DateTimeFieldState {
-    override val minEpochMillis: Long? = input.min?.toLong()
+    override val minEpochMillis: Long? = input.min?.toEpochMilli()
     
-    override val maxEpochMillis: Long? = input.max?.toLong()
+    override val maxEpochMillis: Long? = input.max?.toEpochMilli()
     
     override val shouldShowTime: Boolean = input.includeTime
     
@@ -132,10 +135,10 @@ internal class DateTimeFieldStateImpl(
     
     override val placeholderText: String = element.hint
     
-    private val _isEditable: MutableState<Boolean> = mutableStateOf(element.isEditable)
+    private val _isEditable: MutableState<Boolean> = mutableStateOf(element.editableExpressionName.isNotEmpty())
     override val isEditable: State<Boolean> = _isEditable
     
-    private val _isRequired: MutableState<Boolean> = mutableStateOf(element.requiredExpression.isNotBlank())
+    private val _isRequired: MutableState<Boolean> = mutableStateOf(element.requiredExpressionName.isNotBlank())
     override val isRequired: State<Boolean> = _isRequired
     
     override val description: String = element.description
@@ -144,7 +147,23 @@ internal class DateTimeFieldStateImpl(
     override val value: State<Long?> = _value
     
     init {
-        setValue(element.value)
+        val initialValue = form.getElementValue(element)?.let {
+            when (it) {
+                is Instant -> {
+                    it.toEpochMilli()
+                }
+        
+                is Long -> {
+                    it
+                }
+        
+                else -> {
+                    null
+                }
+            }
+        }
+        
+        setValue(initialValue)
     }
     
     private fun setValue(value: String) {
@@ -155,7 +174,7 @@ internal class DateTimeFieldStateImpl(
     }
     
     override fun setValue(dateTime: Long?) {
-        formDefinition.editValue(element, dateTime)
+        form.editValue(element, dateTime)
         _value.value = dateTime
     }
     
@@ -167,12 +186,12 @@ internal class DateTimeFieldStateImpl(
 }
 
 /**
- * Factory function to create a [DateTimeFieldState] using the [featureFormElement].
+ * Factory function to create a [DateTimeFieldState] using the [formElement].
  *
- * @param featureFormElement the form element.
- * @param formDefinition the FeatureFormDefinition which provides access to the Feature (for now).
+ * @param formElement the form element.
+ * @param form the FeatureForm which provides access to the Feature (for now).
  */
 internal fun DateTimeFieldState(
-    featureFormElement: FieldFeatureFormElement,
-    formDefinition: FeatureFormDefinition
-): DateTimeFieldState = DateTimeFieldStateImpl(featureFormElement, formDefinition)
+    formElement: FieldFormElement,
+    form: FeatureForm
+): DateTimeFieldState = DateTimeFieldStateImpl(formElement, form)

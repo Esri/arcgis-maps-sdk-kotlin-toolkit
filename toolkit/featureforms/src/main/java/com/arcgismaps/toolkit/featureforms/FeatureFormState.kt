@@ -1,7 +1,7 @@
 package com.arcgismaps.toolkit.featureforms
 
 import com.arcgismaps.data.ServiceFeatureTable
-import com.arcgismaps.toolkit.featureforms.api.FeatureFormDefinition
+import com.arcgismaps.mapping.featureforms.FeatureForm
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -48,11 +48,11 @@ public sealed class EditingTransactionState {
  */
 public interface FeatureFormState {
     /**
-     * The FormDefinition that defines the Form
+     * The FeatureForm that defines the Form and provides Feature access.
      *
      * @since 200.2.0
      */
-    public val formDefinition: StateFlow<FeatureFormDefinition?>
+    public val featureForm: StateFlow<FeatureForm?>
     
     /**
      * Indicates that the form UI is available to the user for editing
@@ -62,11 +62,11 @@ public interface FeatureFormState {
     public val transactionState: StateFlow<EditingTransactionState>
     
     /**
-     * Sets the feature to which edits will be applied.
+     * Sets the feature form to which edits will be applied.
      *
      * @since 200.2.0
      */
-    public fun setFormDefinition(definition: FeatureFormDefinition)
+    public fun setFeatureForm(featureForm: FeatureForm)
     
     /**
      * Sets the editing mode of the form
@@ -96,8 +96,8 @@ public interface FeatureFormState {
  * Default implementation for the [FeatureFormState]
  */
 public class FeatureFormStateImpl : FeatureFormState {
-    private val _formDefinition: MutableStateFlow<FeatureFormDefinition?> = MutableStateFlow(null)
-    override val formDefinition: StateFlow<FeatureFormDefinition?> = _formDefinition.asStateFlow()
+    private val _featureForm: MutableStateFlow<FeatureForm?> = MutableStateFlow(null)
+    override val featureForm: StateFlow<FeatureForm?> = _featureForm.asStateFlow()
     private val _transactionState: MutableStateFlow<EditingTransactionState> = MutableStateFlow(EditingTransactionState.NotEditing)
     override val transactionState: StateFlow<EditingTransactionState> = _transactionState.asStateFlow()
     override fun setTransactionState(state: EditingTransactionState) {
@@ -106,10 +106,10 @@ public class FeatureFormStateImpl : FeatureFormState {
     
     public override suspend fun commitEdits(stateAfterCommit: EditingTransactionState): Result<Unit> {
         setTransactionState(EditingTransactionState.Committing)
-        val feature = formDefinition.value?.feature
+        val feature = featureForm.value?.feature
             ?: return Result.failure(IllegalStateException("cannot save feature edit without a Feature"))
         val serviceFeatureTable =
-            formDefinition.value?.feature?.featureTable as? ServiceFeatureTable ?: return Result.failure(
+            featureForm.value?.feature?.featureTable as? ServiceFeatureTable ?: return Result.failure(
                 IllegalStateException("cannot save feature edit without a ServiceFeatureTable")
             )
         
@@ -128,15 +128,15 @@ public class FeatureFormStateImpl : FeatureFormState {
     
     override suspend fun rollbackEdits(stateAfterRollback: EditingTransactionState): Result<Unit> {
         setTransactionState(EditingTransactionState.RollingBack)
-        val feature = formDefinition.value?.feature
+        val feature = featureForm.value?.feature
         (feature?.featureTable as? ServiceFeatureTable)?.undoLocalEdits()
         feature?.refresh()
         setTransactionState(stateAfterRollback)
         return Result.success(Unit)
     }
     
-    override fun setFormDefinition(definition: FeatureFormDefinition) {
-        _formDefinition.value = definition
+    override fun setFeatureForm(featureForm: FeatureForm) {
+        _featureForm.value = featureForm
     }
 }
 
