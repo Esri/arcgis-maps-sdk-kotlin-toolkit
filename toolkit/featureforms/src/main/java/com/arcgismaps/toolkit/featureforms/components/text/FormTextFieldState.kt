@@ -4,17 +4,14 @@ import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
-import com.arcgismaps.data.Feature
-import com.arcgismaps.data.FieldType
 import com.arcgismaps.mapping.featureforms.FeatureForm
-import com.arcgismaps.mapping.featureforms.FeatureFormDefinition
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
-import kotlin.math.roundToInt
-import kotlin.math.roundToLong
+import com.arcgismaps.toolkit.featureforms.utils.editValue
+import com.arcgismaps.toolkit.featureforms.utils.getElementValue
 
 /**
  * State for the [FormTextField]
@@ -196,7 +193,7 @@ private class FormTextFieldStateImpl(
         } else ""
     }
     
-    override val isEditable: Boolean = featureFormElement.isEditable
+    override val isEditable: Boolean = formElement.editableExpressionName.isNotEmpty()
     
     override fun onValueChanged(input: String) {
        editValue(input)
@@ -228,78 +225,4 @@ private class FormTextFieldStateImpl(
     private fun editValue(value: Any?) {
         featureForm.editValue(formElement, value)
     }
-}
-
-/**
- * Retrieve the value of a [FieldFormElement] from the [FeatureFormDefinition].
- * This call is likely to be pushed into core.
- */
-@Suppress("unused")
-internal fun FeatureForm.getElementValue(formElement: FieldFormElement): Any? {
-    return feature.attributes[formElement.fieldName]
-}
-
-/**
- * Set the value in the feature's attribute map. This call can only be made when a transaction is open.
- * Committing the transaction will either discard this edit or persist it in the associated geodatabase,
- * and refresh the feature.
- *
- * This call is likely to be pushed into core.
- */
-internal fun FeatureForm.editValue(formElement: FieldFormElement, value: Any?) {
-    feature.castAndSetAttributeValue(value, formElement.fieldName)
-}
-
-
-private fun Feature.castAndSetAttributeValue(value: Any?, key: String) {
-    val field = featureTable?.getField(key) ?: run {
-        attributes[key] = value
-        return
-    }
-    
-    var finalValue = value
-    when (field.fieldType) {
-        FieldType.Int16 -> {
-            finalValue = when (value) {
-                is String -> value.toIntOrNull()?.toShort()
-                is Int -> value.toShort()
-                is Double -> value.roundToInt().toShort()
-                else -> null
-            }
-        }
-        FieldType.Int32 -> {
-            finalValue = when (value) {
-                is String -> value.toIntOrNull()
-                is Int -> value
-                is Double -> value.roundToInt()
-                else -> null
-            }
-        }
-        FieldType.Int64 -> {
-            finalValue = when (value) {
-                is String -> value.toLongOrNull()
-                is Int -> value.toLong()
-                is Double -> value.roundToLong()
-                else -> null
-            }
-        }
-        FieldType.Float32 -> {
-            finalValue = when (value) {
-                is String -> value.toFloatOrNull()
-                is Int -> value.toFloat()
-                is Double -> value.toFloat()
-                else -> null
-            }
-        }
-        FieldType.Float64 -> {
-            finalValue = when (value) {
-                is String -> value.toDoubleOrNull()
-                is Int -> value.toDouble()
-                is Float -> value.toDouble()
-                else -> null
-            }
-        }
-        else -> Unit
-    }
-    attributes[key] = finalValue
 }

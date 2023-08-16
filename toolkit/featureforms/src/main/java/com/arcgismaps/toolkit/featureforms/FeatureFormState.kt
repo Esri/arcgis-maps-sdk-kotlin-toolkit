@@ -48,7 +48,7 @@ public sealed class EditingTransactionState {
  */
 public interface FeatureFormState {
     /**
-     * The FormDefinition that defines the Form
+     * The FeatureForm that defines the Form and provides Feature access.
      *
      * @since 200.2.0
      */
@@ -62,7 +62,7 @@ public interface FeatureFormState {
     public val transactionState: StateFlow<EditingTransactionState>
     
     /**
-     * Sets the feature to which edits will be applied.
+     * Sets the feature form to which edits will be applied.
      *
      * @since 200.2.0
      */

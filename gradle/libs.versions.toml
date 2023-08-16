@@ -23,7 +23,6 @@ kotlin = "1.8.20"
 ksp = "1.8.20-1.0.11"
 minSdk = "26"
 kotlinxCoroutinesTest = "1.6.3"
-kotlinxSerializationJson = "1.5.0"
 truth = "1.1.4"
 
 [libraries]
@@ -51,9 +50,6 @@ hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", v
 hilt-ext-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "hiltExt" }
 hilt-ext-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "hiltExt" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
-kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin"}
-kotlinx-serialization-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core", version.ref = "kotlinxSerializationJson" }
-kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 androidx-material-icons = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "androidxMaterialIcons"}
 truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
@@ -66,8 +62,6 @@ kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 gradle-secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version = "2.0.1"}
-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-
 
 [bundles]
 core = [
@@ -91,12 +85,6 @@ composeTest = [
 debug = [
     "androidx-compose-ui-tooling",
     "androidx-compose-ui-test-manifest"
-]
-
-serialization = [
-    "kotlinx-serialization-core",
-    "kotlinx-serialization-json",
-    "kotlin-reflect"
 ]
 
 unitTest = [

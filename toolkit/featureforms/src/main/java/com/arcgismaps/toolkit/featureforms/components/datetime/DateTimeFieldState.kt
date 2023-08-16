@@ -24,8 +24,8 @@ import androidx.compose.runtime.mutableStateOf
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
-import com.arcgismaps.toolkit.featureforms.components.text.editValue
-import com.arcgismaps.toolkit.featureforms.components.text.getElementValue
+import com.arcgismaps.toolkit.featureforms.utils.editValue
+import com.arcgismaps.toolkit.featureforms.utils.getElementValue
 import java.time.Instant
 
 /**
