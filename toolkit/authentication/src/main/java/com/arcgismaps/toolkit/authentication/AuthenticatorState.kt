@@ -384,7 +384,7 @@ public fun AuthenticatorState(
  * @return A [Result] containing the [OAuthUserCredential] if successful.
  * @since 200.2.0
  */
-private suspend fun OAuthUserConfiguration.handleOAuthChallenge(
+public suspend fun OAuthUserConfiguration.handleOAuthChallenge(
     onPendingSignIn: (OAuthUserSignIn?) -> Unit
 ): Result<OAuthUserCredential> =
     OAuthUserCredential.create(this) { oAuthUserSignIn ->

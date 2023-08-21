@@ -11,7 +11,7 @@ androidxLifecycle = "2.3.1"
 androidxLifecycleRuntimeCompose = "2.6.0-beta01"
 androidxTestExt = "1.1.2"
 androidxViewmodelCompose = "2.6.1"
-compileSdk = "33"
+compileSdk = "34"
 compose-material3 = "1.1.0"
 junit = "4.13.2"
 kotlin = "1.8.20"
@@ -44,6 +44,7 @@ kotlinx-serialization-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
+browser = { group = "androidx.browser", name = "browser", version = "1.6.0" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }

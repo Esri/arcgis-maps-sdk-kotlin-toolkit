@@ -23,6 +23,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
+import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.authentication.AuthenticatorState
 import com.arcgismaps.toolkit.authentication.signOut
@@ -34,12 +35,12 @@ import org.json.JSONObject
 
 class AuthenticationAppViewModel(application: Application) : AndroidViewModel(application) {
 
-    val authenticatorState: AuthenticatorState = AuthenticatorState()
+    val authenticatorState: AuthenticatorState = AuthenticatorState(setAsArcGISAuthenticationChallengeHandler = false)
 
     private val noPortalInfoText = application.getString(R.string.no_portal_info)
     private val startInfoText = application.getString(R.string.start_info_text)
     private val arcGISUrl = "https://www.arcgis.com"
-    private val oAuthUserConfiguration = OAuthUserConfiguration(
+    public val oAuthUserConfiguration = OAuthUserConfiguration(
         arcGISUrl,
         // This client ID is for demo purposes only. For use of the Authenticator in your own app,
         // create your own client ID. For more info see: https://developers.arcgis.com/documentation/mapping-apis-and-services/security/tutorials/register-your-application/
@@ -60,6 +61,8 @@ class AuthenticationAppViewModel(application: Application) : AndroidViewModel(ap
     private val _url: MutableStateFlow<String> = MutableStateFlow(arcGISUrl)
     val url: StateFlow<String> = _url.asStateFlow()
     fun setUrl(newUrl: String) { _url.value = newUrl }
+
+    var pendingSignIn: OAuthUserSignIn? = null
 
     fun signOut() = viewModelScope.launch {
         _isLoading.value = true

@@ -35,19 +35,15 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.AuthenticationApp">
+            android:theme="@style/Theme.AuthenticationApp"
+            android:launchMode="singleInstance"
+            android:taskAffinity="">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
 
-        <activity
-            android:name="com.arcgismaps.toolkit.authentication.OAuthUserSignInActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
-            android:exported="true"
-            android:launchMode="singleTop" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 

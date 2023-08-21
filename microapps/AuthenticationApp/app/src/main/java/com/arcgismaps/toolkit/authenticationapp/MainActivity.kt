@@ -19,9 +19,11 @@
 package com.arcgismaps.toolkit.authenticationapp
 
 import android.app.Application
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -50,29 +52,47 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
+import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeHandler
+import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
 import com.arcgismaps.toolkit.authentication.AuthenticatorState
 import com.arcgismaps.toolkit.authentication.DialogAuthenticator
 import com.arcgismaps.toolkit.authenticationapp.ui.theme.AuthenticationAppTheme
 
-class MainActivity : ComponentActivity() {
+class MainActivity : ComponentActivity(), ArcGISAuthenticationChallengeHandler {
+
+    val authenticationAppViewModel by viewModels<AuthenticationAppViewModel>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Application context must be set for client certificate authentication.
         ArcGISEnvironment.applicationContext = applicationContext
+        ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler = this
+        completeOAuthSignIn(authenticationAppViewModel.pendingSignIn)
         setContent {
             AuthenticationAppTheme {
-                AuthenticationApp()
+                AuthenticationApp(authenticationAppViewModel)
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        completeOAuthSignIn(authenticationAppViewModel.pendingSignIn)
+    }
+
+
+    override suspend fun handleArcGISAuthenticationChallenge(challenge: ArcGISAuthenticationChallenge): ArcGISAuthenticationChallengeResponse {
+        return handleOAuthChallenge(challenge, authenticationAppViewModel.oAuthUserConfiguration) {
+            authenticationAppViewModel.pendingSignIn = it
+        } ?: authenticationAppViewModel.authenticatorState.handleArcGISAuthenticationChallenge(challenge)
     }
 }
 
 @Composable
-private fun AuthenticationApp() {
+private fun AuthenticationApp(authenticationAppViewModel: AuthenticationAppViewModel) {
     val application = LocalContext.current.applicationContext as Application
-    val authenticationAppViewModel = viewModel { AuthenticationAppViewModel(application) }
     val authenticatorState: AuthenticatorState = authenticationAppViewModel.authenticatorState
     Column {
         val infoText = authenticationAppViewModel.infoText.collectAsState().value
