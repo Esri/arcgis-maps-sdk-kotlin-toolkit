@@ -47,18 +47,21 @@ import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 @Composable
 public fun Authenticator(
     authenticatorState: AuthenticatorState,
-    modifier: Modifier = Modifier.fillMaxSize()
+    modifier: Modifier = Modifier.fillMaxSize(),
+    handleOAuthUserSignIn: Boolean = true
 ) {
     // If the back button is pressed, this ensures that any prompts get dismissed.
     BackHandler {
         authenticatorState.dismissAll()
     }
 
-    val pendingOAuthUserSignIn =
-        authenticatorState.pendingOAuthUserSignIn.collectAsStateWithLifecycle().value
+    if (handleOAuthUserSignIn) {
+        val pendingOAuthUserSignIn =
+            authenticatorState.pendingOAuthUserSignIn.collectAsStateWithLifecycle().value
 
-    pendingOAuthUserSignIn?.let {
-        OAuthAuthenticator(it, authenticatorState)
+        pendingOAuthUserSignIn?.let {
+            OAuthAuthenticator(it, authenticatorState)
+        }
     }
 
     val pendingServerTrustChallenge =
@@ -108,14 +111,15 @@ private fun Context.findActivity(): Activity {
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-public fun DialogAuthenticator(authenticatorState: AuthenticatorState) {
+public fun DialogAuthenticator(authenticatorState: AuthenticatorState,
+                               handleOAuthUserSignIn: Boolean = true) {
     val showDialog = authenticatorState.isDisplayed.collectAsStateWithLifecycle(initialValue = false).value
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { authenticatorState.dismissAll() },
             modifier = Modifier.clip(MaterialTheme.shapes.extraLarge),
         ) {
-            Authenticator(authenticatorState = authenticatorState, modifier = Modifier.fillMaxWidth())
+            Authenticator(authenticatorState = authenticatorState, modifier = Modifier.fillMaxWidth(), handleOAuthUserSignIn)
         }
     }
 }

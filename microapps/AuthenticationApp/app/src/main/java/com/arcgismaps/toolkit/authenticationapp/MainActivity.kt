@@ -53,14 +53,13 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
-import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeHandler
-import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
 import com.arcgismaps.toolkit.authentication.AuthenticatorState
 import com.arcgismaps.toolkit.authentication.DialogAuthenticator
 import com.arcgismaps.toolkit.authenticationapp.ui.theme.AuthenticationAppTheme
 
-class MainActivity : ComponentActivity(), ArcGISAuthenticationChallengeHandler {
+class MainActivity : ComponentActivity()
+//    , ArcGISAuthenticationChallengeHandler
+{
 
     val authenticationAppViewModel by viewModels<AuthenticationAppViewModel>()
 
@@ -68,8 +67,9 @@ class MainActivity : ComponentActivity(), ArcGISAuthenticationChallengeHandler {
         super.onCreate(savedInstanceState)
         // Application context must be set for client certificate authentication.
         ArcGISEnvironment.applicationContext = applicationContext
-        ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler = this
-        completeOAuthSignIn(authenticationAppViewModel.pendingSignIn)
+//        ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler = this
+//        completeOAuthSignIn(authenticationAppViewModel.authenticatorState.pendingOAuthUserSignIn.value)
+        launchCustomTabsOnPendingOAuthUserSignIn(authenticationAppViewModel.authenticatorState)
         setContent {
             AuthenticationAppTheme {
                 AuthenticationApp(authenticationAppViewModel)
@@ -79,15 +79,16 @@ class MainActivity : ComponentActivity(), ArcGISAuthenticationChallengeHandler {
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        completeOAuthSignIn(authenticationAppViewModel.pendingSignIn)
+        completeOAuthSignIn(authenticationAppViewModel.authenticatorState, intent)
     }
 
-
-    override suspend fun handleArcGISAuthenticationChallenge(challenge: ArcGISAuthenticationChallenge): ArcGISAuthenticationChallengeResponse {
-        return handleOAuthChallenge(challenge, authenticationAppViewModel.oAuthUserConfiguration) {
-            authenticationAppViewModel.pendingSignIn = it
-        } ?: authenticationAppViewModel.authenticatorState.handleArcGISAuthenticationChallenge(challenge)
-    }
+//
+//
+//    override suspend fun handleArcGISAuthenticationChallenge(challenge: ArcGISAuthenticationChallenge): ArcGISAuthenticationChallengeResponse {
+//        return handleOAuthChallenge(challenge, authenticationAppViewModel.oAuthUserConfiguration) {
+//            authenticationAppViewModel.pendingSignIn = it
+//        } ?: authenticationAppViewModel.authenticatorState.handleArcGISAuthenticationChallenge(challenge)
+//    }
 }
 
 @Composable
@@ -107,7 +108,7 @@ private fun AuthenticationApp(authenticationAppViewModel: AuthenticationAppViewM
         )
         InfoScreen(text = infoText, isLoading = isLoading)
     }
-    DialogAuthenticator(authenticatorState = authenticatorState)
+    DialogAuthenticator(authenticatorState = authenticatorState, handleOAuthUserSignIn = false)
 }
 
 /**

@@ -35,7 +35,7 @@ import org.json.JSONObject
 
 class AuthenticationAppViewModel(application: Application) : AndroidViewModel(application) {
 
-    val authenticatorState: AuthenticatorState = AuthenticatorState(setAsArcGISAuthenticationChallengeHandler = false)
+    val authenticatorState: AuthenticatorState = AuthenticatorState()
 
     private val noPortalInfoText = application.getString(R.string.no_portal_info)
     private val startInfoText = application.getString(R.string.start_info_text)
