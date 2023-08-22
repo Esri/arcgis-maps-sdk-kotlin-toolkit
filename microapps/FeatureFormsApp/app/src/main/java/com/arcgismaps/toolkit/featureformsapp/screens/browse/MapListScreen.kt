@@ -41,6 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arcgismaps.toolkit.featureformsapp.R
+import com.arcgismaps.toolkit.featureformsapp.data.DataSourceType
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -56,7 +57,7 @@ fun MapListScreen(
     mapListViewModel: MapListViewModel = hiltViewModel(),
     onItemClick: (String) -> Unit = {}
 ) {
-    val uiState by mapListViewModel.uiState.collectAsState()
+    val portalItems by mapListViewModel.portalItems.collectAsState(emptyList())
     val lazyListState = rememberLazyListState()
 
     Scaffold(topBar = {
@@ -72,7 +73,7 @@ fun MapListScreen(
         // use a cross fade animation to show a loading indicator when the data is loading
         // and transition to the list of portalItems once loaded
         Crossfade(
-            targetState = uiState.localPortalItems.isEmpty(),
+            targetState = portalItems.isEmpty(),
             modifier = Modifier.padding(padding)
         ) { state ->
             when (state) {
@@ -91,32 +92,24 @@ fun MapListScreen(
                     state = lazyListState,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    items(uiState.localPortalItems) {
+                    items(portalItems) {
                         MapListItem(
-                            title = it.title,
-                            lastModified = it.modified?.format("MMM dd yyyy") ?: "",
-                            thumbnail = it.thumbnail?.image?.bitmap?.asImageBitmap(),
+                            title = it.portalItem.title,
+                            lastModified = it.portalItem.modified?.format("MMM dd yyyy") ?: "",
+                            iconDrawable = if (it.itemData.type == DataSourceType.Local) R.drawable.ic_public
+                            else R.drawable.ic_private,
+                            thumbnail = it.portalItem.thumbnail?.image?.bitmap?.asImageBitmap(),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(100.dp)
                         ) {
-                            onItemClick(it.url)
+                            onItemClick(it.portalItem.url)
                         }
                     }
                 }
             }
         }
     }
-}
-
-@Composable
-fun PublicMapList() {
-
-}
-
-@Composable
-fun AuthenticatedMapList() {
-
 }
 
 /**
@@ -127,6 +120,7 @@ fun AuthenticatedMapList() {
 fun MapListItem(
     title: String,
     lastModified: String,
+    iconDrawable: Int,
     modifier: Modifier = Modifier,
     thumbnail: ImageBitmap? = null,
     onClick: () -> Unit = {}
@@ -137,27 +131,36 @@ fun MapListItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Spacer(modifier = Modifier.width(20.dp))
-        thumbnail?.let {
+        Box {
+            thumbnail?.let {
+                Image(
+                    bitmap = it,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxHeight(0.8f)
+                        .aspectRatio(16 / 9f)
+                        .clip(RoundedCornerShape(15.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            }
+            // if thumbnail is empty then use the default map placeholder
+                ?: Image(
+                    painter = painterResource(id = R.drawable.ic_default_map),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxHeight(0.8f)
+                        .aspectRatio(16 / 9f)
+                        .clip(RoundedCornerShape(15.dp)),
+                    contentScale = ContentScale.Crop
+                )
             Image(
-                bitmap = it,
+                painterResource(id = iconDrawable),
                 contentDescription = null,
                 modifier = Modifier
-                    .fillMaxHeight(0.8f)
-                    .aspectRatio(16 / 9f)
-                    .clip(RoundedCornerShape(15.dp)),
-                contentScale = ContentScale.Crop
+                    .padding(5.dp).size(25.dp)
             )
         }
-        // if thumbnail is empty then use the default map placeholder
-            ?: Image(
-                painter = painterResource(id = R.drawable.ic_default_map),
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxHeight(0.8f)
-                    .aspectRatio(16 / 9f)
-                    .clip(RoundedCornerShape(15.dp)),
-                contentScale = ContentScale.Crop
-            )
+
         Spacer(modifier = Modifier.width(20.dp))
         Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
             Text(text = title, style = MaterialTheme.typography.bodyLarge)
@@ -178,6 +181,7 @@ fun MapListItemPreview() {
     MapListItem(
         title = "Water Utility",
         lastModified = "June 1 2023",
+        iconDrawable = R.drawable.ic_public,
         modifier = Modifier.size(width = 485.dp, height = 100.dp)
     )
 }

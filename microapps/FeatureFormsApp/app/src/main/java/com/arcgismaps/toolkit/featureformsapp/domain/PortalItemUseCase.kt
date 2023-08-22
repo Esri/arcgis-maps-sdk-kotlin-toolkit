@@ -80,6 +80,8 @@ class PortalItemUseCase(
 
     fun observe(): Flow<List<PortalItemData>> = itemsFlow
 
+    suspend fun refresh() = itemRepository.refresh()
+
     /**
      * Used by the UI to get a specific PortalItem by url
      */

@@ -19,7 +19,6 @@
 package com.arcgismaps.toolkit.featureformsapp.data
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,25 +35,13 @@ class ItemRepository(
 ) {
     private var itemData: MutableStateFlow<List<ItemData>> = MutableStateFlow(emptyList())
 
-    init {
-        scope.launch {
-            // load local items immediately
-            val localItems = itemDataSource.fetchItemData()
-            itemData.emit(localItems)
-        }
-    }
-
     fun observe(): Flow<List<ItemData>> = itemData.asStateFlow()
 
     suspend fun refresh() = withContext(scope.coroutineContext) {
+        // load local items
+        val localItems = itemDataSource.fetchItemData()
         // get network items
         val remoteItems = remoteDataSource.fetchItemData()
-        val updatedList = itemData.value.toMutableList()
-        for (item in remoteItems) {
-            if (item !in updatedList) {
-                updatedList.add(item)
-            }
-        }
-        itemData.emit(updatedList)
+        itemData.emit(localItems + remoteItems)
     }
 }
