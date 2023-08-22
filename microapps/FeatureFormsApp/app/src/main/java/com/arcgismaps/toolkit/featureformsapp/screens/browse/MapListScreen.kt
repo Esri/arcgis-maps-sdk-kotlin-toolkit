@@ -56,7 +56,7 @@ fun MapListScreen(
     mapListViewModel: MapListViewModel = hiltViewModel(),
     onItemClick: (String) -> Unit = {}
 ) {
-    val portalItems by mapListViewModel.portalItems.collectAsState()
+    val uiState by mapListViewModel.uiState.collectAsState()
     val lazyListState = rememberLazyListState()
 
     Scaffold(topBar = {
@@ -72,7 +72,7 @@ fun MapListScreen(
         // use a cross fade animation to show a loading indicator when the data is loading
         // and transition to the list of portalItems once loaded
         Crossfade(
-            targetState = portalItems.isEmpty(),
+            targetState = uiState.localPortalItems.isEmpty(),
             modifier = Modifier.padding(padding)
         ) { state ->
             when (state) {
@@ -91,7 +91,7 @@ fun MapListScreen(
                     state = lazyListState,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    items(portalItems) {
+                    items(uiState.localPortalItems) {
                         MapListItem(
                             title = it.title,
                             lastModified = it.modified?.format("MMM dd yyyy") ?: "",
@@ -107,6 +107,16 @@ fun MapListScreen(
             }
         }
     }
+}
+
+@Composable
+fun PublicMapList() {
+
+}
+
+@Composable
+fun AuthenticatedMapList() {
+
 }
 
 /**

@@ -20,6 +20,7 @@ package com.arcgismaps.toolkit.featureformsapp.di
 
 import com.arcgismaps.toolkit.featureformsapp.data.ItemDataSource
 import com.arcgismaps.toolkit.featureformsapp.data.ItemRepository
+import com.arcgismaps.toolkit.featureformsapp.data.ItemRemoteDataSource
 import com.arcgismaps.toolkit.featureformsapp.domain.PortalItemUseCase
 import dagger.Module
 import dagger.Provides
@@ -36,6 +37,10 @@ import javax.inject.Singleton
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
 annotation class PortalItemDataSource
+
+@Qualifier
+@Retention(AnnotationRetention.RUNTIME)
+annotation class PortalItemRemoteDataSource
 
 /**
  * Provide an annotation to inject the PortalItem repository
@@ -57,6 +62,11 @@ class DataModule() {
     @PortalItemDataSource
     internal fun provideItemDataSource(@IoDispatcher dispatcher: CoroutineDispatcher): ItemDataSource =
         ItemDataSource(dispatcher)
+
+    @Provides
+    @PortalItemRemoteDataSource
+    internal fun provideItemRemoteDataSource(@IoDispatcher dispatcher: CoroutineDispatcher): ItemRemoteDataSource =
+        ItemRemoteDataSource(dispatcher)
     
     /**
      * The provider of the PortalItem data source. Only used below.
@@ -65,9 +75,10 @@ class DataModule() {
     @PortalItemRepository
     internal fun provideItemRepository(
         @ApplicationScope applicationScope: CoroutineScope,
-        @PortalItemDataSource itemDataSource: ItemDataSource
+        @PortalItemDataSource itemDataSource: ItemDataSource,
+        @PortalItemRemoteDataSource remoteDataSource: ItemRemoteDataSource
     ): ItemRepository =
-        ItemRepository(applicationScope, itemDataSource)
+        ItemRepository(applicationScope, itemDataSource, remoteDataSource)
     
     /**
      * The provider of the PortalItem use case, scoped to the navigation graph lifetime by means of the

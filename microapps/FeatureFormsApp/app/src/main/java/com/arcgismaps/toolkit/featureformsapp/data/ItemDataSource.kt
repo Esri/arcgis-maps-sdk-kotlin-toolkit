@@ -26,28 +26,16 @@ import kotlinx.coroutines.withContext
  */
 class ItemDataSource(
     private val dispatcher: CoroutineDispatcher, private val itemApi: ItemApi = object : ItemApi {
-        override fun fetchItems(): List<ItemData> =
+        override suspend fun fetchItems(): List<ItemData> =
             getListOfMaps()
                 .map {
-                    ItemData(it)
+                    ItemData(it, DataSourceType.Local)
                 }
     }
 ) {
     suspend fun fetchItemData(): List<ItemData> = withContext(dispatcher) {
         itemApi.fetchItems()
     }
-}
-
-/**
- * the data for the item. Just an URL, but abstracted away
- */
-data class ItemData(val url: String)
-
-/**
- * The API to use to get the items
- */
-interface ItemApi {
-    fun fetchItems(): List<ItemData>
 }
 
 /**

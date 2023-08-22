@@ -19,32 +19,42 @@
 package com.arcgismaps.toolkit.featureformsapp.data
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
  * A repository to sit between the data source and the UI/domain layer.
  */
-class ItemRepository(private val scope: CoroutineScope, private val itemDataSource: ItemDataSource) {
-    private val mutex = Mutex()
-    
-    private var itemData: List<ItemData> = emptyList()
-    
-    /**
-     * Fetch and cache the items
-     */
-    suspend fun fetchItems(): List<ItemData> {
-        return if (itemData.isEmpty()) {
-            withContext(scope.coroutineContext) {
-                itemDataSource.fetchItemData().also { list ->
-                    mutex.withLock {
-                        itemData = list
-                    }
-                }
-            }
-        } else {
-            mutex.withLock { itemData }
+class ItemRepository(
+    private val scope: CoroutineScope,
+    private val itemDataSource: ItemDataSource,
+    private val remoteDataSource: ItemRemoteDataSource
+) {
+    private var itemData: MutableStateFlow<List<ItemData>> = MutableStateFlow(emptyList())
+
+    init {
+        scope.launch {
+            // load local items immediately
+            val localItems = itemDataSource.fetchItemData()
+            itemData.emit(localItems)
         }
+    }
+
+    fun observe(): Flow<List<ItemData>> = itemData.asStateFlow()
+
+    suspend fun refresh() = withContext(scope.coroutineContext) {
+        // get network items
+        val remoteItems = remoteDataSource.fetchItemData()
+        val updatedList = itemData.value.toMutableList()
+        for (item in remoteItems) {
+            if (item !in updatedList) {
+                updatedList.add(item)
+            }
+        }
+        itemData.emit(updatedList)
     }
 }

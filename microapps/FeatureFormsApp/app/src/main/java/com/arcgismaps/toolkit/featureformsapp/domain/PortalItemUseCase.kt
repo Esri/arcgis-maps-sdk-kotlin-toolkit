@@ -18,25 +18,55 @@
 
 package com.arcgismaps.toolkit.featureformsapp.domain
 
+import android.util.Log
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.toolkit.featureformsapp.data.ItemData
 import com.arcgismaps.toolkit.featureformsapp.data.ItemRepository
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 
-data class PortalItemData(val portalItem: PortalItem, val formLayerName: String? = null)
+data class PortalItemData(
+    val portalItem: PortalItem,
+    val itemData: ItemData,
+    val formLayerName: String? = null
+)
 
 /**
  * A domain layer to transform item data into loaded PortalItems, along with some domain knowledge of what layer
  * in each item is of interest.
  */
-class PortalItemUseCase(private val scope: CoroutineScope, private val itemRepository: ItemRepository) {
-    private val mutex = Mutex()
-    
-    private var items: List<PortalItemData> = emptyList()
-    
+class PortalItemUseCase(
+    scope: CoroutineScope,
+    private val itemRepository: ItemRepository
+) {
+
+    private val itemsFlow: MutableStateFlow<List<PortalItemData>> = MutableStateFlow(emptyList())
+
+    init {
+        scope.launch {
+            itemRepository.observe().collect { list ->
+                val portalItemData = list.map { itemData ->
+                    PortalItemData(
+                        portalItem = PortalItem(itemData.url),
+                        itemData = itemData,
+                        formLayerName = formLayerName(itemData)
+                    ).also {
+                        it.portalItem.load()
+                        it.portalItem.thumbnail?.load()
+                        Log.e("TAG", "loaded portal ${it.portalItem.itemId} ", )
+                    }
+                }
+                itemsFlow.emit(portalItemData)
+            }
+        }
+        scope.launch {
+            itemRepository.refresh()
+        }
+    }
+
     /**
      * Provide the name of the layer with forms that we would like to use to identify features. If not needed, because
      * the map has one layer for example, then return null.
@@ -47,36 +77,13 @@ class PortalItemUseCase(private val scope: CoroutineScope, private val itemRepos
         } else {
             null
         }
-    
-    /**
-     * Fetch item data, transform it into loaded PortalItems, and cache them.
-     */
-    suspend fun fetchPortalItemData(): List<PortalItemData> {
-        return if (items.isEmpty()) {
-            withContext(scope.coroutineContext) {
-                itemRepository.fetchItems().map { itemData ->
-                    PortalItemData(PortalItem(itemData.url), formLayerName(itemData)).also { portalItemData ->
-                        portalItemData.portalItem.load()
-                            .onSuccess {
-                                val portalItem = portalItemData.portalItem
-                                portalItem.load()
-                                portalItem.thumbnail?.load()
-                            }
-                    }
-                }.also {
-                    mutex.withLock { items = it }
-                }
-            }
-        } else {
-            mutex.withLock { items }
-        }
-    }
-    
+
+    fun observe(): Flow<List<PortalItemData>> = itemsFlow
+
     /**
      * Used by the UI to get a specific PortalItem by url
      */
-    suspend operator fun invoke(url: String): PortalItemData =
-        fetchPortalItemData().first {
-            url == it.portalItem.url
-        }
+    operator fun invoke(url: String): PortalItemData = itemsFlow.value.first {
+        url == it.portalItem.url
+    }
 }
