@@ -48,8 +48,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -115,6 +117,10 @@ internal fun DateTimePicker(
         endInclusive = state.maxDateTime?.toZonedDateTime()?.year
             ?: DatePickerDefaults.YearRange.last
     )
+    
+    val pickerInput = rememberSaveable { state.activePickerInput }.value
+    println("recomposing with input ${pickerInput.name}")
+    
     // DateTime from the state's value
     val dateTime by state.dateTime
     // create and remember a DatePickerState that resets when dateTime changes
@@ -135,6 +141,7 @@ internal fun DateTimePicker(
             is24Hour = false,
         )
     }
+    
     // confirm button is only active when a date has been selected
     val confirmEnabled by remember(dateTime) {
         derivedStateOf { datePickerState.selectedDateMillis != null }
@@ -150,13 +157,14 @@ internal fun DateTimePicker(
             datePickerState = datePickerState,
             timePickerState = timePickerState,
             style = state.pickerStyle,
-            picker = state.activePickerInput.value,
+            picker = pickerInput
         ) {
             state.togglePickerInput()
         }
         PickerFooter(
             state = state,
             confirmEnabled = confirmEnabled,
+            pickerInput = pickerInput,
             onToday = {
                 state.today()
             },
@@ -257,6 +265,7 @@ private fun PickerTitle(
 private fun PickerFooter(
     state: DateTimePickerState,
     confirmEnabled: Boolean,
+    pickerInput: DateTimePickerInput,
     onToday: () -> Unit = {},
     onNow: () -> Unit = {},
     onCancelled: () -> Unit = {},
@@ -268,7 +277,7 @@ private fun PickerFooter(
             .padding(start = 10.dp, end = 10.dp)
             .fillMaxWidth()
     ) {
-        if (state.activePickerInput.value == DateTimePickerInput.Date) {
+        if (pickerInput == DateTimePickerInput.Date) {
             TextButton(
                 onClick = onToday,
                 // only enable Today button if today is within the range if provided

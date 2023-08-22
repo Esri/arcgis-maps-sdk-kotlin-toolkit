@@ -41,6 +41,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -64,12 +65,15 @@ internal fun DateTimeField(
     val isEditable by state.isEditable
     val isRequired by state.isRequired
     val epochMillis by state.value
-    val pickerStyle = if (state.shouldShowTime) {
+    val shouldShowTime = rememberSaveable {
+        state.shouldShowTime
+    }
+    val pickerStyle = if (shouldShowTime) {
         DateTimePickerStyle.DateTime
     } else {
         DateTimePickerStyle.Date
     }
-    var openDialog by remember { mutableStateOf(false) }
+    var openDialog by rememberSaveable { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
     // the field
     if (isEditable) {
