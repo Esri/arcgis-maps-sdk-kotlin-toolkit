@@ -1,7 +1,58 @@
 # ArcGIS Maps SDK for Kotlin Toolkit
 
+The ArcGIS Maps SDK for Kotlin Toolkit contains components that will simplify your Kotlin app development. It is built off of the new ArcGIS Maps SDK for Kotlin.
 
 ## Toolkit Components
+
+* **[Authenticator](toolkit/authentication)** - Displays a user interface when network and ArcGIS authentication challenges occur.
+* **[Compass](toolkit/compass)** - Shows a compass direction when the map is rotated. Auto-hides when the map points north.
+* **[FloorFilter](toolkit/indoors)** - Allows filtering of floor plan data in a geo view by a site, a facility in the site, or a floor in the facility.
+
+## Requirements
+
+Please see the [developer setup](doc/general/developer_setup.md) for a complete description of requirements
+* ArcGIS Maps SDK for Kotlin    
+  See [this guide](https://developers.arcgis.com/kotlin/install-and-set-up/) for complete instructions and
+other options for installing the SDK.
+* JDK 17
+
+The *ArcGIS Maps SDK for Kotlin Toolkit* has a *Minimum SDK* version of *26*, meaning that it can run on devices with *Android Oreo (8.0)* or newer.
+
+## Installation
+
+### Using the BOM
+
+The *ArcGIS Maps SDK for Kotlin Toolkit* is released with a "bill of materials" (`BOM`). The releasable BOM is versioned and represents a set of versions of the toolkit components which are compatible with one another. You may specify dependencies as follows
+
+```
+implementation(platform('com.esri:arcgis-maps-kotlin-toolkit-bom:200.2.0'))
+implementation('com.esri:arcgis-maps-kotlin-toolkit-authenticator')
+implementation('com.esri:arcgis-maps-kotlin-toolkit-compass')
+```
+
+The template and TemplateApp modules are for bootstrapping new modules.
+
+Please see the [package structure](doc/general/developer_setup.md#package-structure) documentation for more details.
+
+## Issues
+
+Find a bug or want to request a new feature enhancement? Please let us know by [submitting an issue](https://github.com/Esri/arcgis-maps-sdk-kotlin-toolkit/issues/new).
+
+## Contributing
+
+Esri welcomes contributions from anyone and everyone. Please see our [guidelines for contributing](https://github.com/esri/contributing).
+
+### Creating a New Toolkit Component
+
+A new toolkit component can be added to this project by running the bash script at the top level
+`./new-component-starter.sh -n NameOfNewComponent"`
+
+This will create a new library module for the new component, and a new app module which depends on the library.
+Capitalization isn't necessary, but it won't capitalize anything but the first letter if none is specified.
+
+This script requires bash 4.0 or higher.
+
+### About this Repo
 
 The project is structured into two folders, `microapps` and `toolkit` each containing many modules, and a folder for releasing a bill of materials (BOM).
 
@@ -22,47 +73,9 @@ The `toolkit` folder contains releasable libraries -- these are the components o
 For each module in the `toolkit` folder there is a corresponding app in the `microapps` folder which depends on it.
 The apps are not released but are useful for working on a particular component in isolation.
 
-The `bom` folder supports the release of a "bill of materials" (`BOM`). The releasable BOM is versioned and represents
-a set of versions of the toolkit components which are compatible with one another. For example, a user may specify dependencies as follows
-
-```
-implementation(platform('com.esri:arcgis-maps-kotlin-toolkit-bom:0.1'))
-implementation('com.esri:arcgis-maps-kotlin-toolkit-authenticator')
-implementation('com.esri:arcgis-maps-kotlin-toolkit-compass')
-```
-
-Only the bom is versioned above. The components versions are defined in the bom's pom file.
-
 The template and TemplateApp modules are for bootstrapping new modules.
 
 Please see the [package structure](doc/general/developer_setup.md#package-structure) documentation for more details.
-
-## Requirements
-
-Please see the [developer setup](doc/general/developer_setup.md) for a complete description of requirements
-* ArcGIS Maps SDK for Kotlin    
-  See [this guide](https://developers.arcgis.com/kotlin/install-and-set-up/) for complete instructions and
-other options for installing the SDK.
-* Android SDK 33
-* JDK 17
-
-## Issues
-
-Find a bug or want to request a new feature enhancement? Please let us know by [submitting an issue](https://github.com/Esri/arcgis-maps-sdk-kotlin-toolkit/issues/new).
-
-## Contributing
-
-Esri welcomes contributions from anyone and everyone. Please see our [guidelines for contributing](https://github.com/esri/contributing).
-
-## Creating a new toolkit component
-
-A new toolkit component can be added to this project by running the bash script at the top level
-`./new-component-starter.sh -n NameOfNewComponent"`
-
-This will create a new library module for the new component, and a new app module which depends on the library.
-Capitalization isn't necessary, but it won't capitalize anything but the first letter if none is specified.
-
-This script requires bash 4.0 or higher.
 
 ## Licensing
 
