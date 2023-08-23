@@ -6,9 +6,9 @@ in the building.
 
 |FloorFilter|
 |:--:|
-|![image](https://github.com/Esri/arcgis-maps-sdk-kotlin-toolkit/assets/5582469/50cceda2-9b57-4596-b5eb-7c970e9aeeba)|
+|![image](screenshot.png)|
 
-##  Workflow-
+##  Workflow
 
 The simplest workflow is for the app to instantiate a `FloorFilter` using an instance of the `FloorFilterState` to ideally display it within the GeoView. The `Modifier` properties of `Box`,`Column` or `Row` could be used to position the `FloorFilter` inside of a Composable Map.
 
