@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
+import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
 /**
  * Displays appropriate Authentication UI when issued a challenge. For example, if an [ArcGISAuthenticationChallenge]
@@ -48,20 +49,18 @@ import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 public fun Authenticator(
     authenticatorState: AuthenticatorState,
     modifier: Modifier = Modifier.fillMaxSize(),
-    handleOAuthUserSignIn: Boolean = true
+    onPendingOAuthUserSignIn: ((OAuthUserSignIn?) -> Unit)? = null
 ) {
     // If the back button is pressed, this ensures that any prompts get dismissed.
     BackHandler {
         authenticatorState.dismissAll()
     }
 
-    if (handleOAuthUserSignIn) {
-        val pendingOAuthUserSignIn =
-            authenticatorState.pendingOAuthUserSignIn.collectAsStateWithLifecycle().value
+    val pendingOAuthUserSignIn =
+        authenticatorState.pendingOAuthUserSignIn.collectAsStateWithLifecycle().value
 
-        pendingOAuthUserSignIn?.let {
-            OAuthAuthenticator(it, authenticatorState)
-        }
+    pendingOAuthUserSignIn?.let {
+        OAuthAuthenticator(it, authenticatorState, onPendingOAuthUserSignIn)
     }
 
     val pendingServerTrustChallenge =
@@ -112,14 +111,14 @@ private fun Context.findActivity(): Activity {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 public fun DialogAuthenticator(authenticatorState: AuthenticatorState,
-                               handleOAuthUserSignIn: Boolean = true) {
+                               onPendingOAuthUserSignIn: ((OAuthUserSignIn?) -> Unit)? = null) {
     val showDialog = authenticatorState.isDisplayed.collectAsStateWithLifecycle(initialValue = false).value
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { authenticatorState.dismissAll() },
             modifier = Modifier.clip(MaterialTheme.shapes.extraLarge),
         ) {
-            Authenticator(authenticatorState = authenticatorState, modifier = Modifier.fillMaxWidth(), handleOAuthUserSignIn)
+            Authenticator(authenticatorState = authenticatorState, modifier = Modifier.fillMaxWidth(), onPendingOAuthUserSignIn)
         }
     }
 }

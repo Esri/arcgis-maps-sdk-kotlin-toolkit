@@ -16,27 +16,26 @@ import com.arcgismaps.toolkit.authentication.handleOAuthChallenge
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 
-fun completeOAuthSignIn(authenticatorState: AuthenticatorState, intent: Intent?) {
-    if (intent != null && intent.data != null) {
+fun AuthenticatorState.completeOAuthSignIn(intent: Intent) {
+    if (intent.data != null) {
         val uriString = intent.data.toString()
-        authenticatorState.pendingOAuthUserSignIn.value?.complete(uriString)
+        pendingOAuthUserSignIn.value?.complete(uriString)
     }
     else {
-        authenticatorState.pendingOAuthUserSignIn.value?.cancel()
+        pendingOAuthUserSignIn.value?.cancel()
     }
-    authenticatorState.dismissAll()
 }
 
 context (Activity, ArcGISAuthenticationChallengeHandler)
 suspend fun handleOAuthChallenge(challenge: ArcGISAuthenticationChallenge, oAuthUserConfiguration: OAuthUserConfiguration, setPendingSignIn: (OAuthUserSignIn?) -> Unit) : ArcGISAuthenticationChallengeResponse? {
     if (oAuthUserConfiguration.canBeUsedForUrl(challenge.requestUrl)) {
         val credential = oAuthUserConfiguration.handleOAuthChallenge { pendingSignIn ->
+            setPendingSignIn(pendingSignIn)
             CustomTabsIntent.Builder().build().apply {
                 if (oAuthUserConfiguration.preferPrivateWebBrowserSession) {
                     intent.putExtra("com.google.android.apps.chrome.EXTRA_OPEN_NEW_INCOGNITO_TAB", true)
                 }
             }.launchUrl(this@Activity, Uri.parse(pendingSignIn?.authorizeUrl))
-            setPendingSignIn(pendingSignIn)
         }.getOrThrow()
         return ArcGISAuthenticationChallengeResponse.ContinueWithCredential(credential)
     }
@@ -44,10 +43,10 @@ suspend fun handleOAuthChallenge(challenge: ArcGISAuthenticationChallenge, oAuth
 }
 
 context (Activity)
-fun launchCustomTabs(pendingSignIn: OAuthUserSignIn?, oAuthUserConfiguration: OAuthUserConfiguration)
+fun launchCustomTabs(pendingSignIn: OAuthUserSignIn?)
 {
     CustomTabsIntent.Builder().build().apply {
-        if (oAuthUserConfiguration.preferPrivateWebBrowserSession) {
+        if (pendingSignIn?.oAuthUserConfiguration?.preferPrivateWebBrowserSession == true) {
             intent.putExtra("com.google.android.apps.chrome.EXTRA_OPEN_NEW_INCOGNITO_TAB", true)
         }
     }.launchUrl(this@Activity, Uri.parse(pendingSignIn?.authorizeUrl))
@@ -58,7 +57,7 @@ fun launchCustomTabsOnPendingOAuthUserSignIn(authenticatorState: AuthenticatorSt
     lifecycleScope.launch {
         authenticatorState.pendingOAuthUserSignIn.filterNotNull().collect { pendingSignIn ->
             authenticatorState.oAuthUserConfiguration?.let { configuration ->
-                launchCustomTabs(pendingSignIn, configuration)
+                launchCustomTabs(pendingSignIn)
             }
         }
     }

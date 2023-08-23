@@ -53,8 +53,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
+import com.arcgismaps.toolkit.authentication.Authenticator
 import com.arcgismaps.toolkit.authentication.AuthenticatorState
-import com.arcgismaps.toolkit.authentication.DialogAuthenticator
 import com.arcgismaps.toolkit.authenticationapp.ui.theme.AuthenticationAppTheme
 
 class MainActivity : ComponentActivity()
@@ -68,8 +69,7 @@ class MainActivity : ComponentActivity()
         // Application context must be set for client certificate authentication.
         ArcGISEnvironment.applicationContext = applicationContext
 //        ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler = this
-//        completeOAuthSignIn(authenticationAppViewModel.authenticatorState.pendingOAuthUserSignIn.value)
-        launchCustomTabsOnPendingOAuthUserSignIn(authenticationAppViewModel.authenticatorState)
+//        launchCustomTabsOnPendingOAuthUserSignIn(authenticationAppViewModel.authenticatorState)
         setContent {
             AuthenticationAppTheme {
                 AuthenticationApp(authenticationAppViewModel)
@@ -79,37 +79,41 @@ class MainActivity : ComponentActivity()
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        completeOAuthSignIn(authenticationAppViewModel.authenticatorState, intent)
+        intent?.let {
+            authenticationAppViewModel.authenticatorState.completeOAuthSignIn(it)
+        }
     }
 
-//
-//
 //    override suspend fun handleArcGISAuthenticationChallenge(challenge: ArcGISAuthenticationChallenge): ArcGISAuthenticationChallengeResponse {
 //        return handleOAuthChallenge(challenge, authenticationAppViewModel.oAuthUserConfiguration) {
 //            authenticationAppViewModel.pendingSignIn = it
 //        } ?: authenticationAppViewModel.authenticatorState.handleArcGISAuthenticationChallenge(challenge)
 //    }
+
+    @Composable
+    private fun AuthenticationApp(authenticationAppViewModel: AuthenticationAppViewModel) {
+        val application = LocalContext.current.applicationContext as Application
+        val authenticatorState: AuthenticatorState = authenticationAppViewModel.authenticatorState
+        Column {
+            val infoText = authenticationAppViewModel.infoText.collectAsState().value
+            val isLoading = authenticationAppViewModel.isLoading.collectAsState().value
+            PortalDetails(
+                url = authenticationAppViewModel.url.collectAsState().value,
+                onSetUrl = authenticationAppViewModel::setUrl,
+                useOAuth = authenticationAppViewModel.useOAuth.collectAsState().value,
+                onSetUseOAuth = authenticationAppViewModel::setUseOAuth,
+                onSignOut = authenticationAppViewModel::signOut,
+                onLoadPortal = authenticationAppViewModel::loadPortal
+            )
+            InfoScreen(text = infoText, isLoading = isLoading)
+        }
+        Authenticator(authenticatorState, onPendingOAuthUserSignIn = { pendingSignIn: OAuthUserSignIn? ->
+            launchCustomTabs(pendingSignIn)
+        })
+//        DialogAuthenticator(authenticatorState = authenticatorState, handleOAuthUserSignIn = false)
+    }
 }
 
-@Composable
-private fun AuthenticationApp(authenticationAppViewModel: AuthenticationAppViewModel) {
-    val application = LocalContext.current.applicationContext as Application
-    val authenticatorState: AuthenticatorState = authenticationAppViewModel.authenticatorState
-    Column {
-        val infoText = authenticationAppViewModel.infoText.collectAsState().value
-        val isLoading = authenticationAppViewModel.isLoading.collectAsState().value
-        PortalDetails(
-            url = authenticationAppViewModel.url.collectAsState().value,
-            onSetUrl = authenticationAppViewModel::setUrl,
-            useOAuth = authenticationAppViewModel.useOAuth.collectAsState().value,
-            onSetUseOAuth = authenticationAppViewModel::setUseOAuth,
-            onSignOut = authenticationAppViewModel::signOut,
-            onLoadPortal = authenticationAppViewModel::loadPortal
-        )
-        InfoScreen(text = infoText, isLoading = isLoading)
-    }
-    DialogAuthenticator(authenticatorState = authenticatorState, handleOAuthUserSignIn = false)
-}
 
 /**
  * Allows the user to enter a url and load a portal.
