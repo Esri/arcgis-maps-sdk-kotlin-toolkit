@@ -4,7 +4,7 @@ This micro app showcases the use of the FloorFilter toolkit component. It uses t
 the Indoors Information Model schema and floor awareness.
 
 When the Site button is tapped, a prompt opens so the user can select a site and then a facility. After selecting a site and facility,
-a list of levels is displayed.-
+a list of levels is displayed.
 
 |Site Button|
 |:--:|
