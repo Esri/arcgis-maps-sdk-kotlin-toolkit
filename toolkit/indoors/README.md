@@ -6,7 +6,7 @@ in the building.
 
 |FloorFilter|
 |:--:|
-|![image](https://github.com/Esri/arcgis-maps-sdk-kotlin-toolkit/assets/5582469/50cceda2-9b57-4596-b5eb-7c970e9aeeba)|
+|![image](screenshot.png)|
 
 ##  Workflow
 
