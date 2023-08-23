@@ -55,7 +55,7 @@ class MapViewModel @Inject constructor(
                 tolerance = 22.0,
                 returnPopupsOnly = false
             ).onSuccess { results ->
-                results.geoElements.firstOrNull { it is ArcGISFeature }?.let {
+                results.geoElements.firstOrNull { it is ArcGISFeature }?.let { it ->
                     val feature = it as ArcGISFeature
                     feature.load().onSuccess {
                         try {
@@ -67,6 +67,10 @@ class MapViewModel @Inject constructor(
                             setTransactionState(EditingTransactionState.Editing)
                         } catch (e: Exception) {
                             e.printStackTrace() // for debugging core issues
+                            println("${e.message}")
+                            e.cause?.let { cause ->
+                                println("cause ${cause.message}")
+                            }
                             Toast.makeText(
                                 context,
                                 "failed to create a FeatureForm for the feature and layer",

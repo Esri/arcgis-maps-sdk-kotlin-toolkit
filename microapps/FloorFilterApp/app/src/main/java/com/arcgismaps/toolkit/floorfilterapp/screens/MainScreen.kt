@@ -41,7 +41,7 @@ fun MainScreen() {
 
     ComposableMap(
         modifier = Modifier.fillMaxSize(),
-        mapInterface = mapViewModel
+        mapState = m
     ) {
         Box(
             modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 40.dp),
