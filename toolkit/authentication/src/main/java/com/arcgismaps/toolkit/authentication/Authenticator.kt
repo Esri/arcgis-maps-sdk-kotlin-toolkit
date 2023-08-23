@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
+import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
 /**
  * Displays appropriate Authentication UI when issued a challenge. For example, if an [ArcGISAuthenticationChallenge]
@@ -47,7 +48,8 @@ import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 @Composable
 public fun Authenticator(
     authenticatorState: AuthenticatorState,
-    modifier: Modifier = Modifier.fillMaxSize()
+    modifier: Modifier = Modifier.fillMaxSize(),
+    onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)? = null
 ) {
     // If the back button is pressed, this ensures that any prompts get dismissed.
     BackHandler {
@@ -58,7 +60,7 @@ public fun Authenticator(
         authenticatorState.pendingOAuthUserSignIn.collectAsStateWithLifecycle().value
 
     pendingOAuthUserSignIn?.let {
-        OAuthAuthenticator(it, authenticatorState)
+        OAuthAuthenticator(it, authenticatorState, onPendingOAuthUserSignIn)
     }
 
     val pendingServerTrustChallenge =

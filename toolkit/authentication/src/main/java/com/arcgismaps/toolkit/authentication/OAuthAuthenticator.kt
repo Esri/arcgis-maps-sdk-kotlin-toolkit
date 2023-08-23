@@ -40,10 +40,15 @@ private const val DEFAULT_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob"
 internal fun OAuthAuthenticator(
     oAuthPendingSignIn: OAuthUserSignIn,
     authenticatorState: AuthenticatorState,
+    onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)?,
 ) {
     if (authenticatorState.oAuthUserConfiguration?.redirectUrl == DEFAULT_REDIRECT_URI) {
         OAuthWebView(oAuthPendingSignIn, authenticatorState)
-    } else {
+    }
+    else if (onPendingOAuthUserSignIn != null) {
+        onPendingOAuthUserSignIn.invoke(oAuthPendingSignIn)
+    }
+    else {
         val launcher =
             rememberLauncherForActivityResult(contract = OAuthUserSignInActivity.Contract()) { redirectUrl ->
                 redirectUrl?.let {
