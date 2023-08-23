@@ -18,8 +18,13 @@
 
 package com.arcgismaps.toolkit.authentication
 
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
+import androidx.browser.customtabs.CustomTabsIntent
 import com.arcgismaps.httpcore.authentication.AuthenticationManager
 import com.arcgismaps.httpcore.authentication.OAuthUserCredential
+import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
 /**
  * Revokes OAuth tokens and removes all credentials from the [AuthenticationManager.arcGISCredentialStore]
@@ -35,4 +40,24 @@ public suspend fun AuthenticationManager.signOut() {
     }
     arcGISCredentialStore.removeAll()
     networkCredentialStore.removeAll()
+}
+
+public fun AuthenticatorState.completeOAuthSignIn(intent: Intent) {
+    if (intent.data != null) {
+        val uriString = intent.data.toString()
+        pendingOAuthUserSignIn.value?.complete(uriString)
+    }
+    else {
+        pendingOAuthUserSignIn.value?.cancel()
+    }
+}
+
+context (Activity)
+public fun launchCustomTabs(pendingSignIn: OAuthUserSignIn?)
+{
+    CustomTabsIntent.Builder().build().apply {
+        if (pendingSignIn?.oAuthUserConfiguration?.preferPrivateWebBrowserSession == true) {
+            intent.putExtra("com.google.android.apps.chrome.EXTRA_OPEN_NEW_INCOGNITO_TAB", true)
+        }
+    }.launchUrl(this@Activity, Uri.parse(pendingSignIn?.authorizeUrl))
 }

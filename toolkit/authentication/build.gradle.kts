@@ -44,6 +44,8 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
+        // Context receivers are used for letting users launch custom tabs from their own activity
+        freeCompilerArgs = freeCompilerArgs + "-Xcontext-receivers"
     }
     @Suppress("UnstableApiUsage")
     buildFeatures {
