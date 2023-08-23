@@ -110,14 +110,14 @@ private fun Context.findActivity(): Activity {
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-public fun DialogAuthenticator(authenticatorState: AuthenticatorState) {
+public fun DialogAuthenticator(authenticatorState: AuthenticatorState, onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)? = null) {
     val showDialog = authenticatorState.isDisplayed.collectAsStateWithLifecycle(initialValue = false).value
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { authenticatorState.dismissAll() },
             modifier = Modifier.clip(MaterialTheme.shapes.extraLarge),
         ) {
-            Authenticator(authenticatorState = authenticatorState, modifier = Modifier.fillMaxWidth())
+            Authenticator(authenticatorState = authenticatorState, modifier = Modifier.fillMaxWidth(), onPendingOAuthUserSignIn)
         }
     }
 }
