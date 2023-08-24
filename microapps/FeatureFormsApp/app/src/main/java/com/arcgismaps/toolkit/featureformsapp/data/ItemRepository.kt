@@ -18,6 +18,10 @@
 
 package com.arcgismaps.toolkit.featureformsapp.data
 
+import android.util.Log
+import com.arcgismaps.toolkit.featureformsapp.data.local.ItemDao
+import com.arcgismaps.toolkit.featureformsapp.data.local.ItemData
+import com.arcgismaps.toolkit.featureformsapp.data.network.ItemRemoteDataSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,20 +32,28 @@ import kotlinx.coroutines.withContext
 /**
  * A repository to sit between the data source and the UI/domain layer.
  */
-class ItemRepository(
+class ItemRepository (
     private val scope: CoroutineScope,
-    private val itemDataSource: ItemDataSource,
+    private val localDataSource: ItemDao,
     private val remoteDataSource: ItemRemoteDataSource
 ) {
+
+    init {
+        scope.launch {
+            localDataSource.observeAll().collect {
+                Log.e("TAG",  "got : $it: ", )
+                itemData.emit(it)
+            }
+        }
+    }
+
     private var itemData: MutableStateFlow<List<ItemData>> = MutableStateFlow(emptyList())
 
     fun observe(): Flow<List<ItemData>> = itemData.asStateFlow()
 
     suspend fun refresh() = withContext(scope.coroutineContext) {
-        // load local items
-        val localItems = itemDataSource.fetchItemData()
         // get network items
         val remoteItems = remoteDataSource.fetchItemData()
-        itemData.emit(localItems + remoteItems)
+        localDataSource.upsertAll(remoteItems)
     }
 }

@@ -18,16 +18,27 @@
 
 package com.arcgismaps.toolkit.featureformsapp.di
 
-import com.arcgismaps.toolkit.featureformsapp.data.ItemDataSource
+import android.content.Context
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.arcgismaps.toolkit.featureformsapp.data.ItemRepository
-import com.arcgismaps.toolkit.featureformsapp.data.ItemRemoteDataSource
+import com.arcgismaps.toolkit.featureformsapp.data.local.ItemDao
+import com.arcgismaps.toolkit.featureformsapp.data.local.ItemData
+import com.arcgismaps.toolkit.featureformsapp.data.local.ItemDatabase
+import com.arcgismaps.toolkit.featureformsapp.data.local.getListOfMaps
+import com.arcgismaps.toolkit.featureformsapp.data.network.ItemRemoteDataSource
 import com.arcgismaps.toolkit.featureformsapp.domain.PortalItemUseCase
+import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
@@ -35,7 +46,7 @@ import javax.inject.Singleton
  * Provide an annotation to inject the PortalItem data source
  */
 @Qualifier
-@Retention(AnnotationRetention.RUNTIME)
+@Retention(AnnotationRetention.SOURCE)
 annotation class PortalItemDataSource
 
 @Qualifier
@@ -54,14 +65,7 @@ annotation class PortalItemRepository
  */
 @Module
 @InstallIn(SingletonComponent::class)
-class DataModule() {
-    /**
-     * The provider of the PortalItem data source. Only used below.
-     */
-    @Provides
-    @PortalItemDataSource
-    internal fun provideItemDataSource(@IoDispatcher dispatcher: CoroutineDispatcher): ItemDataSource =
-        ItemDataSource(dispatcher)
+class DataModule {
 
     @Provides
     @PortalItemRemoteDataSource
@@ -75,7 +79,7 @@ class DataModule() {
     @PortalItemRepository
     internal fun provideItemRepository(
         @ApplicationScope applicationScope: CoroutineScope,
-        @PortalItemDataSource itemDataSource: ItemDataSource,
+        @PortalItemDataSource itemDataSource: ItemDao,
         @PortalItemRemoteDataSource remoteDataSource: ItemRemoteDataSource
     ): ItemRepository =
         ItemRepository(applicationScope, itemDataSource, remoteDataSource)
@@ -93,4 +97,37 @@ class DataModule() {
         applicationScope,
         itemRepository
     )
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+object PersistenceModule {
+
+    /**
+     * The provider of the PortalItem data source. Only used below.
+     */
+    @Singleton
+    @Provides
+    @PortalItemDataSource
+    fun provideItemDao(database: ItemDatabase): ItemDao = database.itemDao()
+
+    @Singleton
+    @Provides
+    fun provideDataBase(@ApplicationContext context: Context, itemDaoProvider : Lazy<ItemDao>): ItemDatabase {
+        return Room.databaseBuilder(
+            context.applicationContext,
+            ItemDatabase::class.java,
+            "items.db"
+        ).addCallback(object : RoomDatabase.Callback() {
+
+            override fun onCreate(db: SupportSQLiteDatabase) {
+                super.onCreate(db)
+                CoroutineScope(Dispatchers.IO).launch {
+                    itemDaoProvider.get().upsertAll(getListOfMaps().map {
+                        ItemData(it)
+                    })
+                }
+            }
+        }).build()
+    }
 }

@@ -1,14 +1,14 @@
-package com.arcgismaps.toolkit.featureformsapp.data
+package com.arcgismaps.toolkit.featureformsapp.data.local
 
-enum class DataSourceType {
-    Local,
-    Remote
-}
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
 
 /**
  * the data for the item. Just an URL, but abstracted away
  */
-data class ItemData(val url: String, val type : DataSourceType)
+@Entity
+data class ItemData(@PrimaryKey val url: String)
 
 /**
  * The API to use to get the items

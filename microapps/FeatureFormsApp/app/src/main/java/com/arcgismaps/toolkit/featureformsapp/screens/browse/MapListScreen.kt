@@ -40,8 +40,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arcgismaps.portal.PortalAccess
 import com.arcgismaps.toolkit.featureformsapp.R
-import com.arcgismaps.toolkit.featureformsapp.data.DataSourceType
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -96,7 +96,7 @@ fun MapListScreen(
                         MapListItem(
                             title = it.portalItem.title,
                             lastModified = it.portalItem.modified?.format("MMM dd yyyy") ?: "",
-                            iconDrawable = if (it.itemData.type == DataSourceType.Local) R.drawable.ic_public
+                            iconDrawable = if (it.portalItem.access == PortalAccess.Public) R.drawable.ic_public
                             else R.drawable.ic_private,
                             thumbnail = it.portalItem.thumbnail?.image?.bitmap?.asImageBitmap(),
                             modifier = Modifier

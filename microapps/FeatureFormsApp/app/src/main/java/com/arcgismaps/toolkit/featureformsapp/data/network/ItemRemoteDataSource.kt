@@ -1,8 +1,10 @@
-package com.arcgismaps.toolkit.featureformsapp.data
+package com.arcgismaps.toolkit.featureformsapp.data.network
 
 import android.util.Log
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.portal.PortalItemType
+import com.arcgismaps.toolkit.featureformsapp.data.local.ItemApi
+import com.arcgismaps.toolkit.featureformsapp.data.local.ItemData
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
@@ -23,7 +25,7 @@ class ItemRemoteDataSource(
             return user.fetchContentInFolder(folder.folderId).getOrDefault(emptyList()).filter {
                 it.type == PortalItemType.WebMap
             }.map {
-                ItemData(it.url, DataSourceType.Remote)
+                ItemData(it.url)
             }
         }
     }
