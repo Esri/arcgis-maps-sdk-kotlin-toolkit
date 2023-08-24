@@ -32,6 +32,6 @@ class ItemRemoteDataSource(
 ) {
 
     suspend fun fetchItemData(): List<ItemData> = withContext(dispatcher) {
-        itemApi.fetchItems()
+        return@withContext itemApi.fetchItems()
     }
 }

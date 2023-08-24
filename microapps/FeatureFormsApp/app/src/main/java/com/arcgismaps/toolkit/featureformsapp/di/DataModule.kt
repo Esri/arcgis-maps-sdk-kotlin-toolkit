@@ -18,47 +18,36 @@
 
 package com.arcgismaps.toolkit.featureformsapp.di
 
-import android.content.Context
-import androidx.room.Room
-import androidx.room.RoomDatabase
-import androidx.sqlite.db.SupportSQLiteDatabase
 import com.arcgismaps.toolkit.featureformsapp.data.ItemRepository
+import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
 import com.arcgismaps.toolkit.featureformsapp.data.local.ItemDao
-import com.arcgismaps.toolkit.featureformsapp.data.local.ItemData
-import com.arcgismaps.toolkit.featureformsapp.data.local.ItemDatabase
-import com.arcgismaps.toolkit.featureformsapp.data.local.getListOfMaps
+import com.arcgismaps.toolkit.featureformsapp.data.local.PortalItemDao
 import com.arcgismaps.toolkit.featureformsapp.data.network.ItemRemoteDataSource
 import com.arcgismaps.toolkit.featureformsapp.domain.PortalItemUseCase
-import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
-/**
- * Provide an annotation to inject the PortalItem data source
- */
-@Qualifier
-@Retention(AnnotationRetention.SOURCE)
-annotation class PortalItemDataSource
 
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
-annotation class PortalItemRemoteDataSource
+annotation class ItemRemoteSource
 
 /**
  * Provide an annotation to inject the PortalItem repository
  */
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
-annotation class PortalItemRepository
+annotation class ItemRepo
+
+@Qualifier
+@Retention(AnnotationRetention.RUNTIME)
+annotation class PortalItemRepo
 
 /**
  * The singleton portal item use case provider
@@ -68,7 +57,7 @@ annotation class PortalItemRepository
 class DataModule {
 
     @Provides
-    @PortalItemRemoteDataSource
+    @ItemRemoteSource
     internal fun provideItemRemoteDataSource(@IoDispatcher dispatcher: CoroutineDispatcher): ItemRemoteDataSource =
         ItemRemoteDataSource(dispatcher)
     
@@ -76,13 +65,21 @@ class DataModule {
      * The provider of the PortalItem data source. Only used below.
      */
     @Provides
-    @PortalItemRepository
+    @ItemRepo
     internal fun provideItemRepository(
         @ApplicationScope applicationScope: CoroutineScope,
-        @PortalItemDataSource itemDataSource: ItemDao,
-        @PortalItemRemoteDataSource remoteDataSource: ItemRemoteDataSource
+        @ItemLocalSource itemLocalSource: ItemDao,
+        @ItemRemoteSource remoteDataSource: ItemRemoteDataSource
     ): ItemRepository =
-        ItemRepository(applicationScope, itemDataSource, remoteDataSource)
+        ItemRepository(applicationScope, itemLocalSource, remoteDataSource)
+
+    @Provides
+    @PortalItemRepo
+    internal fun providePortalItemRepository(
+        @ApplicationScope applicationScope: CoroutineScope,
+        @PortalItemLocalSource portalItemDao: PortalItemDao,
+    ): PortalItemRepository =
+        PortalItemRepository(applicationScope, portalItemDao)
     
     /**
      * The provider of the PortalItem use case, scoped to the navigation graph lifetime by means of the
@@ -92,42 +89,11 @@ class DataModule {
     @Provides
     fun providePortalItemUseCase(
         @ApplicationScope applicationScope: CoroutineScope,
-        @PortalItemRepository itemRepository: ItemRepository
+        @ItemRepo itemRepository: ItemRepository,
+        @PortalItemRepo portalItemRepository: PortalItemRepository
     ): PortalItemUseCase = PortalItemUseCase(
         applicationScope,
-        itemRepository
+        itemRepository,
+        portalItemRepository
     )
-}
-
-@Module
-@InstallIn(SingletonComponent::class)
-object PersistenceModule {
-
-    /**
-     * The provider of the PortalItem data source. Only used below.
-     */
-    @Singleton
-    @Provides
-    @PortalItemDataSource
-    fun provideItemDao(database: ItemDatabase): ItemDao = database.itemDao()
-
-    @Singleton
-    @Provides
-    fun provideDataBase(@ApplicationContext context: Context, itemDaoProvider : Lazy<ItemDao>): ItemDatabase {
-        return Room.databaseBuilder(
-            context.applicationContext,
-            ItemDatabase::class.java,
-            "items.db"
-        ).addCallback(object : RoomDatabase.Callback() {
-
-            override fun onCreate(db: SupportSQLiteDatabase) {
-                super.onCreate(db)
-                CoroutineScope(Dispatchers.IO).launch {
-                    itemDaoProvider.get().upsertAll(getListOfMaps().map {
-                        ItemData(it)
-                    })
-                }
-            }
-        }).build()
-    }
 }

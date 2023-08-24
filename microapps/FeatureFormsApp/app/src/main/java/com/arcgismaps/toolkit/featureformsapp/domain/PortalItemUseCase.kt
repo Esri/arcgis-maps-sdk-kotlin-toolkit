@@ -18,17 +18,20 @@
 
 package com.arcgismaps.toolkit.featureformsapp.domain
 
+import android.util.Log
 import com.arcgismaps.mapping.PortalItem
+import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.featureformsapp.data.local.ItemData
 import com.arcgismaps.toolkit.featureformsapp.data.ItemRepository
+import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlin.system.measureTimeMillis
 
 data class PortalItemData(
     val portalItem: PortalItem,
-    val itemData: ItemData,
     val formLayerName: String? = null
 )
 
@@ -38,7 +41,8 @@ data class PortalItemData(
  */
 class PortalItemUseCase(
     scope: CoroutineScope,
-    private val itemRepository: ItemRepository
+    private val itemRepository: ItemRepository,
+    private val portalItemRepository: PortalItemRepository
 ) {
 
     private val itemsMap: MutableMap<String, PortalItemData> = mutableMapOf()
@@ -49,24 +53,40 @@ class PortalItemUseCase(
     init {
         scope.launch {
             itemRepository.observe().collect { itemDataList ->
-                itemDataList.forEach { itemData ->
-                    if (itemData.url !in itemsMap) {
-                        val portalItemData = PortalItemData(
-                            portalItem = PortalItem(itemData.url),
-                            itemData = itemData,
-                            formLayerName = formLayerName(itemData)
-                        )
-                        portalItemData.portalItem.load()
-                        portalItemData.portalItem.portal.load()
-                        portalItemData.portalItem.thumbnail?.load()
-                        itemsMap[itemData.url] = portalItemData
+                Log.e("TAG", "got : $itemDataList: ")
+                val time = measureTimeMillis {
+                    itemDataList.forEach { itemData ->
+                        if (itemData.url !in itemsMap) {
+
+                            val portalItem =
+                                portalItemRepository.getEntry(itemData.url)?.let { cacheEntry ->
+                                    Log.e("TAG", "cache: using from cache", )
+                                    val portal = Portal(cacheEntry.portalUrl)
+                                    PortalItem.fromJsonOrNull(cacheEntry.json, portal)
+                                } ?: run {
+                                    Log.e("TAG", "cache: no cache item found", )
+                                    PortalItem(itemData.url).also {
+                                        it.load()
+                                        portalItemRepository.createEntry(
+                                            itemData.url,
+                                            it.toJson(),
+                                            it.portal.url
+                                        )
+                                    }
+                                }
+
+                            val portalItemData = PortalItemData(
+                                portalItem = portalItem,
+                                formLayerName = formLayerName(itemData)
+                            )
+
+                            itemsMap[itemData.url] = portalItemData
+                        }
                     }
+                    portalItemsFlow.value = itemsMap.values.toList()
                 }
-                portalItemsFlow.value = itemsMap.values.toList()
+                Log.e("TAG", "total portal load time: $time")
             }
-        }
-        scope.launch {
-            itemRepository.refresh()
         }
     }
 
@@ -88,7 +108,5 @@ class PortalItemUseCase(
     /**
      * Used by the UI to get a specific PortalItem by url
      */
-    operator fun invoke(url: String): PortalItemData = portalItemsFlow.value.first {
-        url == it.portalItem.url
-    }
+    operator fun invoke(url: String): PortalItemData? = itemsMap[url]
 }

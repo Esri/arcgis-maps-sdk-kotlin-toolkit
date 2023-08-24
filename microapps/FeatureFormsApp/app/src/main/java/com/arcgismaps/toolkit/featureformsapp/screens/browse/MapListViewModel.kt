@@ -23,7 +23,6 @@ class MapListViewModel @Inject constructor(
     private val portalItemUseCase: PortalItemUseCase
 ) : ViewModel() {
 
-    //private val _portalItems: MutableStateFlow<List<PortalItem>> = MutableStateFlow(emptyList())
     val portalItems: Flow<List<PortalItemData>> = portalItemUseCase.observe()
 
     suspend fun refresh() {

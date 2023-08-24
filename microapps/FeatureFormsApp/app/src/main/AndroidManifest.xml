@@ -6,7 +6,8 @@
 
     <application
         android:name=".FeatureFormApplication"
-        android:allowBackup="true"
+        android:allowBackup="false"
+        android:fullBackupOnly="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"

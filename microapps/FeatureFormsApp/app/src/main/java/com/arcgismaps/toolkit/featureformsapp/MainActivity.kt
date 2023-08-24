@@ -1,16 +1,27 @@
 package com.arcgismaps.toolkit.featureformsapp
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.lifecycle.lifecycleScope
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeHandler
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
 import com.arcgismaps.httpcore.authentication.TokenCredential
+import com.arcgismaps.mapping.PortalItem
+import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.featureformsapp.screens.FeatureFormApp
 import com.arcgismaps.toolkit.featureformsapp.ui.theme.FeatureFormsAppTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import kotlin.system.measureTimeMillis
 
 class FormsArcGISAuthenticationChallengeHandler(
     private val username: String,
@@ -46,6 +57,7 @@ class MainActivity : ComponentActivity() {
                 BuildConfig.webMapUser,
                 BuildConfig.webMapPassword
             )
+
         setContent {
             FeatureFormsAppTheme {
                 FeatureFormApp()

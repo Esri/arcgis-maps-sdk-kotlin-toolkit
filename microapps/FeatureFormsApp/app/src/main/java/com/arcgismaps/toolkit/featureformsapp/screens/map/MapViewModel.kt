@@ -36,7 +36,7 @@ class MapViewModel @Inject constructor(
     
     init {
         viewModelScope.launch {
-            portalItemData = portalItemUseCase(url)
+            portalItemData = portalItemUseCase(url) ?: return@launch
             setMap(ArcGISMap(portalItemData.portalItem))
         }
     }

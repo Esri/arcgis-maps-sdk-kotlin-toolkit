@@ -18,21 +18,18 @@
 
 package com.arcgismaps.toolkit.featureformsapp.data
 
-import android.util.Log
 import com.arcgismaps.toolkit.featureformsapp.data.local.ItemDao
 import com.arcgismaps.toolkit.featureformsapp.data.local.ItemData
 import com.arcgismaps.toolkit.featureformsapp.data.network.ItemRemoteDataSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
  * A repository to sit between the data source and the UI/domain layer.
  */
-class ItemRepository (
+class ItemRepository(
     private val scope: CoroutineScope,
     private val localDataSource: ItemDao,
     private val remoteDataSource: ItemRemoteDataSource
@@ -40,20 +37,33 @@ class ItemRepository (
 
     init {
         scope.launch {
-            localDataSource.observeAll().collect {
-                Log.e("TAG",  "got : $it: ", )
-                itemData.emit(it)
+            if (localDataSource.getAll().isEmpty()) {
+                refresh()
             }
         }
     }
 
-    private var itemData: MutableStateFlow<List<ItemData>> = MutableStateFlow(emptyList())
-
-    fun observe(): Flow<List<ItemData>> = itemData.asStateFlow()
+    fun observe(): Flow<List<ItemData>> = localDataSource.observeAll()
 
     suspend fun refresh() = withContext(scope.coroutineContext) {
+        // get local items
+        val localItems = refreshLocalItems()
         // get network items
         val remoteItems = remoteDataSource.fetchItemData()
-        localDataSource.upsertAll(remoteItems)
+        localDataSource.deleteAll()
+        localDataSource.upsertAll(localItems + remoteItems)
+    }
+
+    private fun refreshLocalItems(): List<ItemData> {
+        return getListOfMaps().map { ItemData(it) }
     }
 }
+
+/**
+ * Data source of a list of portal urls
+ */
+fun getListOfMaps(): List<String> =
+    listOf(
+        "https://www.arcgis.com/home/item.html?id=0c4b6b70a56b40b08c5b0420c570a6ac",
+    )
+

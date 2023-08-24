@@ -1,5 +1,6 @@
 package com.arcgismaps.toolkit.featureformsapp.screens.browse
 
+import android.util.Log
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -157,7 +158,8 @@ fun MapListItem(
                 painterResource(id = iconDrawable),
                 contentDescription = null,
                 modifier = Modifier
-                    .padding(5.dp).size(25.dp)
+                    .padding(5.dp)
+                    .size(25.dp)
             )
         }
 
