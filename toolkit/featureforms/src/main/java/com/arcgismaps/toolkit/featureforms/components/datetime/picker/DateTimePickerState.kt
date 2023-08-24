@@ -20,6 +20,8 @@ package com.arcgismaps.toolkit.featureforms.components.datetime.picker
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.listSaver
 import com.arcgismaps.toolkit.featureforms.components.datetime.toZonedDateTime
 import java.time.Instant
 import java.util.TimeZone
@@ -164,9 +166,9 @@ private class DateTimePickerStateImpl(
     override val maxDateTime: Long?,
     initialValue: Long?,
     override val label: String,
-    override val description: String = ""
+    override val description: String = "",
+    pickerInput: DateTimePickerInput
 ) : DateTimePickerState {
-
     override var dateTime = mutableStateOf(
         DateTime.createWithLocalTime(initialValue)
     )
@@ -177,14 +179,9 @@ private class DateTimePickerStateImpl(
     override val timeZone: TimeZone = TimeZone.getDefault()
 
     override val timeZoneOffset = initialValue?.let { timeZone.getOffset(it) } ?: 0
-
-    override var activePickerInput = mutableStateOf(
-        if (pickerStyle == DateTimePickerStyle.DateTime
-            || pickerStyle == DateTimePickerStyle.Date
-        ) DateTimePickerInput.Date
-        else DateTimePickerInput.Time
-    )
-
+    
+    override val activePickerInput = mutableStateOf(pickerInput)
+    
     override fun setDateTime(date: Long?, hour: Int, minute: Int) {
         dateTime.value = DateTime(date, hour, minute)
     }
@@ -248,12 +245,33 @@ internal fun DateTimePickerState(
     maxDateTime: Long? = null,
     initialValue: Long? = null,
     label: String,
-    description: String = ""
+    description: String = "",
+    pickerInput: DateTimePickerInput
 ): DateTimePickerState = DateTimePickerStateImpl(
     style,
     minDateTime,
     maxDateTime,
     initialValue,
     label,
-    description
+    description,
+    pickerInput
+)
+
+/**
+ * a StateSaver for the DateTimePickerState.
+ *
+ * @param initialValue the value needed to initialize a DateTimePickerState
+ * @return a StateSaver
+ * @since 200.3.0
+ */
+internal fun dateTimePickerStateSaver(initialValue: Long?): Saver<DateTimePickerState, Any> = listSaver(
+    save = {
+        listOf(it.pickerStyle, it.minDateTime, it.maxDateTime, initialValue, it.label, it.description, it.activePickerInput.value)
+    },
+    restore = {
+        // note: passes the date time picker state exactly as saved to
+        // set the initial view of the dialog based on how it was saved,
+        // not on initial conditions.
+        DateTimePickerStateImpl(it[0] as DateTimePickerStyle, it[1] as Long?, it[2] as Long?, it[3] as Long?, it[4] as String, it[5] as String, it[6] as DateTimePickerInput)
+    }
 )

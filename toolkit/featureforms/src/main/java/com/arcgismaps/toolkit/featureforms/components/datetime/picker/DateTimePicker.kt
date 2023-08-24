@@ -48,10 +48,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -118,9 +116,10 @@ internal fun DateTimePicker(
             ?: DatePickerDefaults.YearRange.last
     )
     
-    val pickerInput = rememberSaveable { state.activePickerInput }.value
-    println("recomposing with input ${pickerInput.name}")
-    
+    // State<> properties on state objects are remembered as part of remembering the
+    // state object itself at the call site. Otherwise, when the state object is recreated as part of rememberSaveable
+    // it will have a new instance of the State<> object, and the old is leaked but still observed for recomposition.
+    val pickerInput by state.activePickerInput
     // DateTime from the state's value
     val dateTime by state.dateTime
     // create and remember a DatePickerState that resets when dateTime changes
@@ -349,7 +348,8 @@ private fun DateTimePickerPreview() {
     val state = DateTimePickerState(
         style = DateTimePickerStyle.DateTime,
         label = "Next Inspection Date",
-        description = "Enter a date in the next six months"
+        description = "Enter a date in the next six months",
+        pickerInput  = DateTimePickerInput.Date
     )
     DateTimePicker(state = state, {}, {}, {})
 }
