@@ -188,10 +188,8 @@ private class DateTimePickerStateImpl(
 
     override fun togglePickerInput() {
         activePickerInput.value = if (activePickerInput.value == DateTimePickerInput.Date) {
-            println("toggling to time")
             DateTimePickerInput.Time
         } else {
-            println("toggling to date")
             DateTimePickerInput.Date
         }
     }
