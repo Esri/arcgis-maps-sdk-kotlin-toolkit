@@ -27,7 +27,9 @@ import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.system.measureTimeMillis
 
 data class PortalItemData(
@@ -40,13 +42,10 @@ data class PortalItemData(
  * in each item is of interest.
  */
 class PortalItemUseCase(
-    scope: CoroutineScope,
+    val scope: CoroutineScope,
     private val itemRepository: ItemRepository,
     private val portalItemRepository: PortalItemRepository
 ) {
-
-    private val itemsMap: MutableMap<String, PortalItemData> = mutableMapOf()
-
     private val portalItemsFlow: MutableStateFlow<List<PortalItemData>> =
         MutableStateFlow(emptyList())
 
@@ -54,38 +53,30 @@ class PortalItemUseCase(
         scope.launch {
             itemRepository.observe().collect { itemDataList ->
                 Log.e("TAG", "got : $itemDataList: ")
-                val time = measureTimeMillis {
-                    itemDataList.forEach { itemData ->
-                        if (itemData.url !in itemsMap) {
 
-                            val portalItem =
-                                portalItemRepository.getEntry(itemData.url)?.let { cacheEntry ->
-                                    Log.e("TAG", "cache: using from cache", )
-                                    val portal = Portal(cacheEntry.portalUrl)
-                                    PortalItem.fromJsonOrNull(cacheEntry.json, portal)
-                                } ?: run {
-                                    Log.e("TAG", "cache: no cache item found", )
-                                    PortalItem(itemData.url).also {
-                                        it.load()
-                                        portalItemRepository.createEntry(
-                                            itemData.url,
-                                            it.toJson(),
-                                            it.portal.url
-                                        )
-                                    }
-                                }
-
-                            val portalItemData = PortalItemData(
-                                portalItem = portalItem,
-                                formLayerName = formLayerName(itemData)
-                            )
-
-                            itemsMap[itemData.url] = portalItemData
+                val loadedPortalItems = itemDataList.map { itemData ->
+                    val portalItem =
+                        portalItemRepository.getEntry(itemData.url)?.let { cacheEntry ->
+                            Log.e("TAG", "cache: using from cache")
+                            val portal = Portal(cacheEntry.portalUrl)
+                            PortalItem.fromJsonOrNull(cacheEntry.json, portal)
+                        } ?: run {
+                            Log.e("TAG", "cache: no cache item found")
+                            PortalItem(itemData.url).also {
+                                it.load()
+                                portalItemRepository.createEntry(
+                                    itemData.url,
+                                    it.toJson(),
+                                    it.portal.url
+                                )
+                            }
                         }
-                    }
-                    portalItemsFlow.value = itemsMap.values.toList()
+                    PortalItemData(
+                        portalItem = portalItem,
+                        formLayerName = formLayerName(itemData)
+                    )
                 }
-                Log.e("TAG", "total portal load time: $time")
+                portalItemsFlow.emit(loadedPortalItems)
             }
         }
     }
@@ -105,8 +96,15 @@ class PortalItemUseCase(
 
     suspend fun refresh() = itemRepository.refresh()
 
+    suspend fun isEmpty() : Boolean = withContext(scope.coroutineContext) {
+        return@withContext itemRepository.getAll().isEmpty()
+    }
+
     /**
      * Used by the UI to get a specific PortalItem by url
      */
-    operator fun invoke(url: String): PortalItemData? = itemsMap[url]
+    operator fun invoke(url: String): PortalItemData? =
+        portalItemsFlow.value.firstOrNull { it.portalItem.url == url }
+
+
 }

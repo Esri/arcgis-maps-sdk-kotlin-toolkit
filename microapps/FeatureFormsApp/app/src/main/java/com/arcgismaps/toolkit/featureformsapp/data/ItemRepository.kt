@@ -36,21 +36,25 @@ class ItemRepository(
 ) {
 
     init {
-        scope.launch {
-            if (localDataSource.getAll().isEmpty()) {
-                refresh()
-            }
-        }
+//        scope.launch {
+//            if (localDataSource.getAll().isEmpty()) {
+//                refresh()
+//            }
+//        }
     }
 
     fun observe(): Flow<List<ItemData>> = localDataSource.observeAll()
 
+    suspend fun getAll(): List<ItemData> = withContext(scope.coroutineContext) {
+        localDataSource.getAll()
+    }
+
     suspend fun refresh() = withContext(scope.coroutineContext) {
+        localDataSource.deleteAll()
         // get local items
         val localItems = refreshLocalItems()
         // get network items
         val remoteItems = remoteDataSource.fetchItemData()
-        localDataSource.deleteAll()
         localDataSource.upsertAll(localItems + remoteItems)
     }
 
@@ -64,6 +68,6 @@ class ItemRepository(
  */
 fun getListOfMaps(): List<String> =
     listOf(
-        "https://www.arcgis.com/home/item.html?id=0c4b6b70a56b40b08c5b0420c570a6ac",
+        //"https://www.arcgis.com/home/item.html?id=0c4b6b70a56b40b08c5b0420c570a6ac",
     )
 

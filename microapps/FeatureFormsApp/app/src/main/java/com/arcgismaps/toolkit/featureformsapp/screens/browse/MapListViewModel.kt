@@ -25,7 +25,23 @@ class MapListViewModel @Inject constructor(
 
     val portalItems: Flow<List<PortalItemData>> = portalItemUseCase.observe()
 
-    suspend fun refresh() {
-        portalItemUseCase.refresh()
+    private var isLoading = false
+
+    init {
+        viewModelScope.launch {
+            if (portalItemUseCase.isEmpty()) {
+                portalItemUseCase.refresh()
+            }
+        }
+    }
+
+    fun refresh() {
+        if (!isLoading) {
+            isLoading = true
+            viewModelScope.launch {
+                portalItemUseCase.refresh()
+                isLoading = false
+            }
+        }
     }
 }

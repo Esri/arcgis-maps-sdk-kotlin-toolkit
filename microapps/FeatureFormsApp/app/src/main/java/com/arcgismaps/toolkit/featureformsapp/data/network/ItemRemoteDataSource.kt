@@ -15,7 +15,10 @@ class ItemRemoteDataSource(
                 "https://runtimecoretest.maps.arcgis.com",
                 connection = Portal.Connection.Authenticated
             )
-            portal.load().onFailure { return emptyList() }
+            portal.load().onFailure {
+                Log.e("ItemRemoteDataSource", "fetchItems: ${it.message}", )
+                return emptyList()
+            }
             val user = portal.user ?: return emptyList()
             val portalUserContent = user.fetchContent().getOrElse { return emptyList() }
             val folder = portalUserContent.folders.first {

@@ -21,7 +21,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -30,6 +35,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,6 +47,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arcgismaps.portal.PortalAccess
@@ -51,7 +60,6 @@ import java.time.format.DateTimeFormatter
  * Displays a list of PortalItems using the [mapListViewModel]. Provides a callback [onItemClick]
  * when an item is tapped.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapListScreen(
     modifier: Modifier = Modifier,
@@ -61,15 +69,12 @@ fun MapListScreen(
     val portalItems by mapListViewModel.portalItems.collectAsState(emptyList())
     val lazyListState = rememberLazyListState()
 
+    Log.e("TAG", "MapListScreen: $portalItems")
+
     Scaffold(topBar = {
-        TopAppBar(
-            title = {
-                Text(
-                    text = "Maps",
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold)
-                )
-            },
-        )
+        AppBar() {
+            mapListViewModel.refresh()
+        }
     }) { padding ->
         // use a cross fade animation to show a loading indicator when the data is loading
         // and transition to the list of portalItems once loaded
@@ -93,18 +98,19 @@ fun MapListScreen(
                     state = lazyListState,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    items(portalItems) {
+                    items(portalItems) { item ->
                         MapListItem(
-                            title = it.portalItem.title,
-                            lastModified = it.portalItem.modified?.format("MMM dd yyyy") ?: "",
-                            iconDrawable = if (it.portalItem.access == PortalAccess.Public) R.drawable.ic_public
+                            title = item.portalItem.title,
+                            lastModified = item.portalItem.modified?.format("MMM dd yyyy")
+                                ?: "",
+                            iconDrawable = if (item.portalItem.access == PortalAccess.Public) R.drawable.ic_public
                             else R.drawable.ic_private,
-                            thumbnail = it.portalItem.thumbnail?.image?.bitmap?.asImageBitmap(),
+                            thumbnail = item.portalItem.thumbnail?.image?.bitmap?.asImageBitmap(),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(100.dp)
                         ) {
-                            onItemClick(it.portalItem.url)
+                            onItemClick(item.portalItem.url)
                         }
                     }
                 }
@@ -112,6 +118,7 @@ fun MapListScreen(
         }
     }
 }
+
 
 /**
  * A list item row for a PortalItem that shows the [title], [lastModified] and [thumbnail]. Provides
@@ -169,6 +176,36 @@ fun MapListItem(
             Text(text = "Last Updated: $lastModified", style = MaterialTheme.typography.labelSmall)
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AppBar(onRefresh: () -> Unit = {}) {
+    var expanded by remember { mutableStateOf(false) }
+    TopAppBar(
+        title = {
+            Text(
+                text = "Maps",
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold)
+            )
+        },
+        actions = {
+            IconButton(onClick = { expanded = true }) {
+                Image(imageVector = Icons.Default.MoreVert, contentDescription = null)
+            }
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.width(150.dp),
+                offset = DpOffset((15).dp, 0.dp)
+            ) {
+                DropdownMenuItem(text = { Text(text = "Refresh") }, onClick = {
+                    expanded = false
+                    onRefresh()
+                })
+            }
+        }
+    )
 }
 
 /**
