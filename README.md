@@ -26,7 +26,7 @@ The *ArcGIS Maps SDK for Kotlin Toolkit* is released with a "bill of materials" 
 
 ```
 implementation(platform('com.esri:arcgis-maps-kotlin-toolkit-bom:200.2.0'))
-implementation('com.esri:arcgis-maps-kotlin-toolkit-authenticator')
+implementation('com.esri:arcgis-maps-kotlin-toolkit-authentication')
 implementation('com.esri:arcgis-maps-kotlin-toolkit-compass')
 ```
 
