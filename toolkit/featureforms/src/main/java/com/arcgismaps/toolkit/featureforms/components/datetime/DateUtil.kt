@@ -34,6 +34,7 @@ internal fun Long.toUtcDateTime(): ZonedDateTime {
     return instant.atZone(ZoneOffset.UTC)
 }
 
+@Suppress("unused")
 internal fun Long.toZonedDateMillis(): Long {
     val zonedDateTime = toZonedDateTime()
     val hours = zonedDateTime.hour
@@ -47,7 +48,7 @@ internal fun Long.toZonedDateMillis(): Long {
         .toEpochSecond() * 1000
 }
 
-internal fun Long.toUtcDateMillis(): Long {
+internal fun Long.toDateMillis(): Long {
     val utcDateTime = toUtcDateTime()
     val hours = utcDateTime.hour
     val minutes = utcDateTime.minute
@@ -68,4 +69,14 @@ internal fun Long.formattedDateTime(includeTime: Boolean): String {
         DateTimeFormatter.ofPattern("MMM dd, yyyy")
     }
     return this.toZonedDateTime().format(formatter)
+}
+
+internal fun Long.formattedUtcDateTime(includeTime: Boolean): String {
+    
+    val formatter = if (includeTime) {
+        DateTimeFormatter.ofPattern("MMM dd, yyyy h:mm a")
+    } else {
+        DateTimeFormatter.ofPattern("MMM dd, yyyy")
+    }
+    return this.toUtcDateTime().format(formatter)
 }

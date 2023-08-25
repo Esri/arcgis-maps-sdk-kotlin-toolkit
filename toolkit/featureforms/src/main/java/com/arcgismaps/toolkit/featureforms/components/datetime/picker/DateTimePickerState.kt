@@ -20,9 +20,9 @@ package com.arcgismaps.toolkit.featureforms.components.datetime.picker
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import com.arcgismaps.toolkit.featureforms.components.datetime.toUtcDateMillis
+import com.arcgismaps.toolkit.featureforms.components.datetime.formattedUtcDateTime
+import com.arcgismaps.toolkit.featureforms.components.datetime.toDateMillis
 import com.arcgismaps.toolkit.featureforms.components.datetime.toUtcDateTime
-import com.arcgismaps.toolkit.featureforms.components.datetime.toZonedDateMillis
 import com.arcgismaps.toolkit.featureforms.components.datetime.toZonedDateTime
 import java.time.Instant
 import java.util.TimeZone
@@ -31,36 +31,27 @@ import java.util.TimeZone
  * A class to hold a DateTime. [date] represents the number of milliseconds of the date (at Midnight) since epoch
  * (January 1, 1970) in UTC. While [hour], [minute] and [second] represent time in local time zone.
  */
-internal class UtcDateTime(
+internal class UtcDateTime private constructor(
     val epochMillis: Long?,
     val date: Long?,
     val hour: Int = 0,
     val minute: Int = 0,
     val second: Int = 0
 ) {
-    private val offset: Int = epochMillis?.let {
-        val ret = TimeZone.getDefault().getOffset(it)
-        println("offset is $ret")
-        ret
-    } ?: 0
-    
-    // make it make sense.
+    // Force the picker to show a zoned date by providing the utc date plus the zone offset, converted to a UTC date
+    // (the picker deals in utc dates only)
     val dateForPicker: Long?
-        get() = epochMillis?.plus(offset)
+        get() {
+            println("date for picker without offset ${epochMillis?.formattedUtcDateTime(true)}")
+            println("date for picker  with offset ${epochMillis?.plus(epochMillis.offset)?.toDateMillis()?.formattedUtcDateTime(true)}")
+            return epochMillis?.plus(epochMillis.offset)?.toDateMillis()
+        }
     
     val hourForPicker: Int
         get() = epochMillis?.toZonedDateTime()?.hour ?: hour
     
     val minuteForPicker: Int
         get() = epochMillis?.toZonedDateTime()?.minute ?: minute
-  
-    /**
-     * Converts and returns the current DateTime in number of milliseconds since epoch
-     * (January 1, 1970) in UTC.
-     */
-    fun getDateTimeInMillis(): Long? {
-        return epochMillis
-    }
     
     companion object {
         /**
@@ -69,20 +60,35 @@ internal class UtcDateTime(
          * DateTime will have no date with time set to 0:00 hrs.
          *
          * @param dateTime The number of milliseconds since epoch (January 1, 1970) in UTC.
+         * @return a new UtcDateTime
          */
         fun create(dateTime: Long?): UtcDateTime {
             val utcDateTime = dateTime?.toUtcDateTime()
             return UtcDateTime(
                 dateTime,
-                dateTime?.toUtcDateMillis(),
+                dateTime?.toDateMillis(),
                 utcDateTime?.hour ?: 0,
                 utcDateTime?.minute ?: 0,
                 utcDateTime?.second ?: 0
             )
         }
+        
+        /**
+         * Used to set the datetime from the result of the datetime picker dialog.
+         *
+         * @date the midnight UTC epoch millis of the date set in the picker.
+         * @hour the hour selected in the picker 0-23
+         * @hour the minute selected in the picker 0-59
+         *
+         * @return a new UtcDateTime
+         */
         fun createFromDateAndTime(date: Long?, hour: Int, minute: Int): UtcDateTime {
             val epochMillis = if (date != null) {
-                date + hour * 3_600_000 + minute * 60_000
+                println("createFromDateAndTime without offset ${date.formattedUtcDateTime(true)} hour $hour minute $minute ")
+                println("createFromDateAndTime with offset ${date.minus(date.offset).toDateMillis().formattedUtcDateTime(true) } hour $hour minute $minute ")
+                val millis = (date + hour * 3_600_000 + minute * 60_000).minus(date.offset)
+                println("final epoch millis to set the attribute: ${millis.formattedUtcDateTime(true)}")
+                millis
             } else {
                 null
             }
@@ -196,10 +202,8 @@ private class DateTimePickerStateImpl(
     
     override val selectedDateTimeMillis: Long?
         get() {
-            return dateTime.value.getDateTimeInMillis()?.let {
-                val offset = timeZone.getOffset(it)
-                it.minus(offset)
-            }
+            println("getting selected date time millis ${dateTime.value.epochMillis?.formattedUtcDateTime(true)}")
+            return dateTime.value.epochMillis
         }
     
     override val timeZone: TimeZone = TimeZone.getDefault()
@@ -214,6 +218,7 @@ private class DateTimePickerStateImpl(
     )
     
     override fun setDateTime(date: Long?, hour: Int, minute: Int) {
+        println("setting date time from the picker  ${date?.formattedUtcDateTime(true)} hours $hour mins $minute")
         dateTime.value = UtcDateTime.createFromDateAndTime(date, hour, minute)
     }
     
@@ -237,22 +242,15 @@ private class DateTimePickerStateImpl(
     
     override fun today() {
         dateTime.value = UtcDateTime.createFromDateAndTime(
-            Instant.now().toEpochMilli().toZonedDateMillis(),
+            Instant.now().toEpochMilli().toDateMillis(),
             dateTime.value.hour,
             dateTime.value.minute
         )
     }
     
     override fun now() {
-        dateTime.value  = UtcDateTime.create(Instant.now().toEpochMilli())
-//        // only reset the time in local time zone
-//        val zonedTime = Instant.now().atZone(timeZone.toZoneId()).plus(timeZoneOffset)
-//        // persist the date information
-//        dateTime.value = UtcDateTime.createFromDateAndTime(
-//            date = dateTime.value.date,
-//            hour = zonedTime.hour,
-//            minute = zonedTime.minute
-//        )
+        val now = Instant.now().toEpochMilli().toZonedDateTime()
+        dateTime.value = UtcDateTime.createFromDateAndTime(dateTime.value.date, now.hour, now.minute)
     }
 }
 
@@ -283,3 +281,8 @@ internal fun DateTimePickerState(
     label,
     description
 )
+
+private val Long?.offset: Int
+    get() = this?.let {
+        TimeZone.getDefault().getOffset(it)
+    } ?: 0
