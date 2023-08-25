@@ -19,6 +19,7 @@
 package com.arcgismaps.toolkit.featureforms.components.datetime
 
 import java.time.Instant
+import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.TimeZone
@@ -26,6 +27,37 @@ import java.util.TimeZone
 internal fun Long.toZonedDateTime(): ZonedDateTime {
     val instant = Instant.ofEpochMilli(this)
     return instant.atZone(TimeZone.getDefault().toZoneId())
+}
+
+internal fun Long.toUtcDateTime(): ZonedDateTime {
+    val instant = Instant.ofEpochMilli(this)
+    return instant.atZone(ZoneOffset.UTC)
+}
+
+internal fun Long.toZonedDateMillis(): Long {
+    val zonedDateTime = toZonedDateTime()
+    val hours = zonedDateTime.hour
+    val minutes = zonedDateTime.minute
+    val seconds = zonedDateTime.second
+    
+    return zonedDateTime
+        .minusHours(hours.toLong())
+        .minusMinutes(minutes.toLong())
+        .minusSeconds(seconds.toLong())
+        .toEpochSecond() * 1000
+}
+
+internal fun Long.toUtcDateMillis(): Long {
+    val utcDateTime = toUtcDateTime()
+    val hours = utcDateTime.hour
+    val minutes = utcDateTime.minute
+    val seconds = utcDateTime.second
+    
+    return utcDateTime
+        .minusHours(hours.toLong())
+        .minusMinutes(minutes.toLong())
+        .minusSeconds(seconds.toLong())
+        .toEpochSecond() * 1000
 }
 
 internal fun Long.formattedDateTime(includeTime: Boolean): String {

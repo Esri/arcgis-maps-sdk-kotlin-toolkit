@@ -120,8 +120,8 @@ internal fun DateTimePicker(
     // create and remember a DatePickerState that resets when dateTime changes
     val datePickerState = rememberSaveable(dateTime, saver = DatePickerState.Saver()) {
         DatePickerState(
-            initialSelectedDateMillis = dateTime.dateTime?.plus(state.timeZoneOffset),
-            initialDisplayedMonthMillis = dateTime.dateTime?.plus(state.timeZoneOffset)
+            initialSelectedDateMillis = dateTime.dateForPicker,
+            initialDisplayedMonthMillis = dateTime.dateForPicker
                 ?: (state.minDateTime ?: state.maxDateTime),
             datePickerRange,
             DisplayMode.Picker
@@ -130,8 +130,8 @@ internal fun DateTimePicker(
     // create and remember a TimePickerState that resets when dateTime changes
     val timePickerState = rememberSaveable(dateTime, saver = TimePickerState.Saver()) {
         TimePickerState(
-            initialHour = dateTime.hour,
-            initialMinute = dateTime.minute,
+            initialHour = dateTime.hourForPicker,
+            initialMinute = dateTime.minuteForPicker,
             is24Hour = false,
         )
     }
@@ -165,9 +165,8 @@ internal fun DateTimePicker(
             },
             onCancelled = onCancelled,
             onConfirmed = {
-                // remove time zone offset before setting value
                 state.setDateTime(
-                    date = datePickerState.selectedDateMillis?.minus(state.timeZoneOffset),
+                    date = datePickerState.selectedDateMillis,
                     hour = timePickerState.hour,
                     minute = timePickerState.minute
                 )
