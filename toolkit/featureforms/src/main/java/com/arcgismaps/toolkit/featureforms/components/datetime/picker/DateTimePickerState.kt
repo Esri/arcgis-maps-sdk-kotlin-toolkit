@@ -88,11 +88,11 @@ internal class UtcDateTime private constructor(
         
         /**
          * Used to set the datetime from the result of the datetime picker dialog.
-         * Since the date picker works and displays with UTC millis only, the value
-         * provided to it was artificially increased by the current time zone offset millis.
-         * This value must now be subtracted off so the result represents epoch milliseconds.
+         * Since the date picker works and displays with millis only, in order to show the date and time
+         * in the current zone, we pass to it a long value which is not epoch millis, but epoch millis plus the
+         * current timezone offset millis. This value must now be subtracted off so the result represents epoch milliseconds.
          *
-         * @param date the midnight UTC epoch millis of the date set in the picker, augmented by the current timezone offset millis
+         * @param date the midnight UTC epoch millis of the date set in the picker
          * @param hour the hour selected in the picker 0-23
          * @param hour the minute selected in the picker 0-59
          * @see dateForPicker
