@@ -44,9 +44,9 @@ class PortalItemRepository(
 
     fun getItems(): Flow<List<PortalItem>> = portalItemFlow
 
-    suspend fun refresh(forceUpdate: Boolean = false): List<Long> = withContext(dispatcher) {
+    suspend fun refresh(forceUpdate: Boolean = false) = withContext(dispatcher) {
         if (forceUpdate) deleteAllCacheEntries()
-        return@withContext itemRepository.refresh()
+        itemRepository.refresh()
     }
 
     suspend fun getItemCount(): Int = withContext(dispatcher) {

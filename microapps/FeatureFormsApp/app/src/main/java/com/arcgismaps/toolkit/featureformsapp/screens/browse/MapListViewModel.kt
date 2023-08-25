@@ -4,19 +4,21 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arcgismaps.mapping.PortalItem
+import com.arcgismaps.portal.LoadableImage
 import com.arcgismaps.toolkit.featureformsapp.domain.PortalItemData
 import com.arcgismaps.toolkit.featureformsapp.domain.PortalItemUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -34,36 +36,35 @@ class MapListViewModel @Inject constructor(
     private val portalItemUseCase: PortalItemUseCase
 ) : ViewModel() {
 
-    private val _uiState: MutableStateFlow<MapListUIState> =
-        MutableStateFlow(MapListUIState(false, emptyList()))
-    val uiState = _uiState.asStateFlow()
+    private val _isLoading = MutableStateFlow(false)
+
+    val imageLoader: suspend (LoadableImage) -> Unit = {
+        viewModelScope.launch(Dispatchers.IO) { it.load() }.join()
+    }
+
+    val uiState: StateFlow<MapListUIState> =
+        combine(_isLoading, portalItemUseCase.observe()) { isLoading, portalItemData ->
+            MapListUIState(isLoading, portalItemData)
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(1000),
+            initialValue = MapListUIState(true, emptyList())
+        )
 
     init {
         viewModelScope.launch {
             if (portalItemUseCase.isEmpty()) {
                 refresh()
             }
-            portalItemUseCase.observe().collectLatest {
-                Log.e("TAG", "a: rec", )
-                _uiState.emit(
-                    MapListUIState(isLoading = false, data = it)
-                )
-            }
         }
     }
 
     fun refresh() {
-        if (!_uiState.value.isLoading) {
-            viewModelScope.launch(start = CoroutineStart.UNDISPATCHED) {
-                Log.e("TAG", "refresh: refreshin", )
-                _uiState.emit(MapListUIState(isLoading = true, emptyList()))
-                val refreshedItems = portalItemUseCase.refresh()
-                Log.e("TAG", "refresh: $refreshedItems", )
-                if (refreshedItems == 0) {
-                    _uiState.emit(
-                        MapListUIState(isLoading = false, data = _uiState.value.data)
-                    )
-                }
+        if (!_isLoading.value) {
+            viewModelScope.launch {
+                _isLoading.emit(true)
+                portalItemUseCase.refresh()
+                _isLoading.emit(false)
             }
         }
     }

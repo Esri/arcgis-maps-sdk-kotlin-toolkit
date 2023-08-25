@@ -24,6 +24,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
 
 data class PortalItemData(
@@ -36,7 +37,7 @@ data class PortalItemData(
  * in each item is of interest.
  */
 class PortalItemUseCase(
-    private val dispatcher: CoroutineDispatcher,
+    dispatcher: CoroutineDispatcher,
     scope: CoroutineScope,
     private val portalItemRepository: PortalItemRepository
 ) {
@@ -49,11 +50,11 @@ class PortalItemUseCase(
                 formLayerName = formLayerName(item.itemId)
             )
         }
-    }
+    }.flowOn(dispatcher)
 
     fun observe(): Flow<List<PortalItemData>> = flow
 
-    suspend fun refresh(): Int = portalItemRepository.refresh().count()
+    suspend fun refresh() = portalItemRepository.refresh()
 
     suspend fun isEmpty(): Boolean = portalItemRepository.getItemCount() == 0
 

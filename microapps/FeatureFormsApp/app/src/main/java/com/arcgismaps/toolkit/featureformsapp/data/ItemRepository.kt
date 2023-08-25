@@ -42,13 +42,13 @@ class ItemRepository(
 
     suspend fun getCount(): Int = withContext(dispatcher) { localDataSource.getCount() }
 
-    suspend fun refresh(): List<Long> = withContext(dispatcher) {
+    suspend fun refresh() = withContext(dispatcher) {
         // get local items
         val localItems = refreshLocalItems()
         // get network items
         val remoteItems = remoteDataSource.fetchItemData()
         // purge existing items and add the updated items
-        return@withContext localDataSource.deleteAndInsert(localItems + remoteItems)
+        localDataSource.deleteAndInsert(localItems + remoteItems)
     }
 
     private fun refreshLocalItems(): List<ItemData> = getListOfMaps().map { ItemData(it) }

@@ -38,6 +38,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,6 +56,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arcgismaps.portal.LoadableImage
 import com.arcgismaps.portal.PortalAccess
 import com.arcgismaps.toolkit.featureformsapp.R
 import java.time.Instant
@@ -107,14 +109,14 @@ fun MapListScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         items(uiState.data) { item ->
-                            Log.e("TAG", "MapListScreen: building")
                             MapListItem(
                                 title = item.portalItem.title,
                                 lastModified = item.portalItem.modified?.format("MMM dd yyyy")
                                     ?: "",
                                 iconDrawable = if (item.portalItem.access == PortalAccess.Public) R.drawable.ic_public
                                 else R.drawable.ic_private,
-                                thumbnail = item.portalItem.thumbnail?.image?.bitmap?.asImageBitmap(),
+                                thumbnail = item.portalItem.thumbnail, //?.image?.bitmap?.asImageBitmap(),
+                                imageLoader = mapListViewModel.imageLoader,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(100.dp)
@@ -149,7 +151,8 @@ fun MapListItem(
     lastModified: String,
     iconDrawable: Int,
     modifier: Modifier = Modifier,
-    thumbnail: ImageBitmap? = null,
+    thumbnail: LoadableImage? = null,
+    imageLoader : suspend (LoadableImage) -> Unit,
     onClick: () -> Unit = {}
 ) {
     Row(
@@ -159,27 +162,7 @@ fun MapListItem(
     ) {
         Spacer(modifier = Modifier.width(20.dp))
         Box {
-            thumbnail?.let {
-                Image(
-                    bitmap = it,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxHeight(0.8f)
-                        .aspectRatio(16 / 9f)
-                        .clip(RoundedCornerShape(15.dp)),
-                    contentScale = ContentScale.Crop
-                )
-            }
-            // if thumbnail is empty then use the default map placeholder
-                ?: Image(
-                    painter = painterResource(id = R.drawable.ic_default_map),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxHeight(0.8f)
-                        .aspectRatio(16 / 9f)
-                        .clip(RoundedCornerShape(15.dp)),
-                    contentScale = ContentScale.Crop
-                )
+            MapItemThumbnail(thumbnail = thumbnail, imageLoader)
             Image(
                 painterResource(id = iconDrawable),
                 contentDescription = null,
@@ -193,6 +176,38 @@ fun MapListItem(
         Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
             Text(text = title, style = MaterialTheme.typography.bodyLarge)
             Text(text = "Last Updated: $lastModified", style = MaterialTheme.typography.labelSmall)
+        }
+    }
+}
+
+@Composable
+fun MapItemThumbnail(thumbnail : LoadableImage?, loader : suspend (LoadableImage) -> Unit) {
+    var loadedImage by remember { mutableStateOf<ImageBitmap?>(null) }
+    loadedImage?.let {
+        Image(
+            bitmap = it,
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxHeight(0.8f)
+                .aspectRatio(16 / 9f)
+                .clip(RoundedCornerShape(15.dp)),
+            contentScale = ContentScale.Crop
+        )
+    }
+    // if thumbnail is empty then use the default map placeholder
+        ?: Image(
+            painter = painterResource(id = R.drawable.ic_default_map),
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxHeight(0.8f)
+                .aspectRatio(16 / 9f)
+                .clip(RoundedCornerShape(15.dp)),
+            contentScale = ContentScale.Crop
+        )
+    LaunchedEffect(thumbnail) {
+        thumbnail?.let {
+            loader(it)
+            loadedImage = it.image?.bitmap?.asImageBitmap()
         }
     }
 }
@@ -240,6 +255,7 @@ fun MapListItemPreview() {
         title = "Water Utility",
         lastModified = "June 1 2023",
         iconDrawable = R.drawable.ic_public,
-        modifier = Modifier.size(width = 485.dp, height = 100.dp)
+        modifier = Modifier.size(width = 485.dp, height = 100.dp),
+        imageLoader = {}
     )
 }
