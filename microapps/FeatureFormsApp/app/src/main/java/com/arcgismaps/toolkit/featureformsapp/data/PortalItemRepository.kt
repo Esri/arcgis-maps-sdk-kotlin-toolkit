@@ -22,7 +22,7 @@ class PortalItemRepository(
     @OptIn(ExperimentalCoroutinesApi::class)
     private val portalItemFlow: Flow<List<PortalItem>> = itemRepository.observe().mapLatest {
         it.map { itemData ->
-            val portalItem = getEntry(itemData.url)?.let { cacheEntry ->
+            val portalItem = getCacheEntry(itemData.url)?.let { cacheEntry ->
                 Log.e("TAG", "cache: using from cache")
                 val portal = Portal(cacheEntry.portalUrl)
                 PortalItem.fromJsonOrNull(cacheEntry.json, portal)
@@ -30,7 +30,7 @@ class PortalItemRepository(
                 Log.e("TAG", "cache: no cache item found")
                 PortalItem(itemData.url).also { portalItem ->
                     portalItem.load()
-                    createEntry(
+                    createCacheEntry(
                         itemData.url,
                         portalItem.toJson(),
                         portalItem.portal.url
@@ -42,28 +42,29 @@ class PortalItemRepository(
         }
     }.flowOn(dispatcher)
 
-    fun getItems() : Flow<List<PortalItem>> = portalItemFlow
+    fun getItems(): Flow<List<PortalItem>> = portalItemFlow
 
-    suspend fun refresh() : List<Long> = withContext(dispatcher) {
+    suspend fun refresh(forceUpdate: Boolean = false): List<Long> = withContext(dispatcher) {
+        if (forceUpdate) deleteAllCacheEntries()
         return@withContext itemRepository.refresh()
     }
 
-    suspend fun getItemCount() : Int = withContext(dispatcher) {
+    suspend fun getItemCount(): Int = withContext(dispatcher) {
         return@withContext itemRepository.getCount()
     }
 
-    private suspend fun createEntry(itemId: String, json: String, portalUrl: String) =
+    private suspend fun createCacheEntry(itemId: String, json: String, portalUrl: String) =
         withContext(dispatcher) {
             itemCacheDao.upsert(ItemCacheEntry(itemId, json, portalUrl))
         }
 
-    private suspend fun getEntry(itemId: String): ItemCacheEntry? = withContext(dispatcher) {
+    private suspend fun getCacheEntry(itemId: String): ItemCacheEntry? = withContext(dispatcher) {
         return@withContext itemCacheDao.getById(itemId)
     }
 
-    private suspend fun deleteAll() = withContext(dispatcher) {
-        itemCacheDao.deleteAll()
-    }
+    private suspend fun deleteAllCacheEntries() =
+        withContext(dispatcher) { itemCacheDao.deleteAll() }
+
 
     operator fun invoke(url: String): PortalItem? = portalItems[url]
 }

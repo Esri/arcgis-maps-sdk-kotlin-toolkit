@@ -1,7 +1,12 @@
 package com.arcgismaps.toolkit.featureformsapp.screens.browse
 
 import android.util.Log
-import androidx.compose.animation.Crossfade
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.with
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -60,6 +65,7 @@ import java.time.format.DateTimeFormatter
  * Displays a list of PortalItems using the [mapListViewModel]. Provides a callback [onItemClick]
  * when an item is tapped.
  */
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun MapListScreen(
     modifier: Modifier = Modifier,
@@ -76,9 +82,12 @@ fun MapListScreen(
     }) { padding ->
         // use a cross fade animation to show a loading indicator when the data is loading
         // and transition to the list of portalItems once loaded
-        Crossfade(
+        AnimatedContent(
             targetState = uiState.isLoading,
-            modifier = Modifier.padding(padding)
+            modifier = Modifier.padding(padding),
+            transitionSpec = {
+                fadeIn(animationSpec = tween(1000)) with fadeOut()
+            }
         ) { state ->
             when (state) {
                 true -> Box(modifier = modifier.fillMaxSize()) {
@@ -98,6 +107,7 @@ fun MapListScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         items(uiState.data) { item ->
+                            Log.e("TAG", "MapListScreen: building")
                             MapListItem(
                                 title = item.portalItem.title,
                                 lastModified = item.portalItem.modified?.format("MMM dd yyyy")
@@ -113,12 +123,13 @@ fun MapListScreen(
                             }
                         }
                     }
-                } else {
+                } else if (!uiState.isLoading) {
                     Column(
                         modifier = Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        Log.e("TAG", "MapListScreen: nothing to show")
                         Text(text = "Nothing to show. Pull-down to Refresh")
                     }
                 }

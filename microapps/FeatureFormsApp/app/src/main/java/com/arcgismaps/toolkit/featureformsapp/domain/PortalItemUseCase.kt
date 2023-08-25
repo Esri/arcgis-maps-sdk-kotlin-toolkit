@@ -24,7 +24,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
 
 data class PortalItemData(
@@ -50,8 +49,13 @@ class PortalItemUseCase(
                 formLayerName = formLayerName(item.itemId)
             )
         }
-    }.flowOn(dispatcher)
+    }
 
+    fun observe(): Flow<List<PortalItemData>> = flow
+
+    suspend fun refresh(): Int = portalItemRepository.refresh().count()
+
+    suspend fun isEmpty(): Boolean = portalItemRepository.getItemCount() == 0
 
     /**
      * Provide the name of the layer with forms that we would like to use to identify features. If not needed, because
@@ -63,14 +67,6 @@ class PortalItemUseCase(
         } else {
             null
         }
-
-    fun observe(): Flow<List<PortalItemData>> = flow
-
-    suspend fun refresh(): Int {
-        return portalItemRepository.refresh().count()
-    }
-
-    suspend fun isEmpty(): Boolean = portalItemRepository.getItemCount() == 0
 
     /**
      * Used by the UI to get a specific PortalItem by url

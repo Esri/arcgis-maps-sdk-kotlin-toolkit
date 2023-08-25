@@ -48,7 +48,7 @@ class ItemRepository(
         // get network items
         val remoteItems = remoteDataSource.fetchItemData()
         // purge existing items and add the updated items
-        return@withContext localDataSource.deleteAndInsert(localItems) // + remoteItems)
+        return@withContext localDataSource.deleteAndInsert(localItems + remoteItems)
     }
 
     private fun refreshLocalItems(): List<ItemData> = getListOfMaps().map { ItemData(it) }
@@ -59,6 +59,6 @@ class ItemRepository(
  */
 fun getListOfMaps(): List<String> =
     listOf(
-        //"https://www.arcgis.com/home/item.html?id=0c4b6b70a56b40b08c5b0420c570a6ac",
+        "https://www.arcgis.com/home/item.html?id=0c4b6b70a56b40b08c5b0420c570a6ac",
     )
 
