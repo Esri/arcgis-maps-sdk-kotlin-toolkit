@@ -66,20 +66,18 @@ fun MapListScreen(
     mapListViewModel: MapListViewModel = hiltViewModel(),
     onItemClick: (String) -> Unit = {}
 ) {
-    val portalItems by mapListViewModel.portalItems.collectAsState(emptyList())
+    val uiState by mapListViewModel.uiState.collectAsState()
     val lazyListState = rememberLazyListState()
 
-    Log.e("TAG", "MapListScreen: $portalItems")
-
     Scaffold(topBar = {
-        AppBar() {
+        AppBar {
             mapListViewModel.refresh()
         }
     }) { padding ->
         // use a cross fade animation to show a loading indicator when the data is loading
         // and transition to the list of portalItems once loaded
         Crossfade(
-            targetState = portalItems.isEmpty(),
+            targetState = uiState.isLoading,
             modifier = Modifier.padding(padding)
         ) { state ->
             when (state) {
@@ -92,26 +90,36 @@ fun MapListScreen(
                     )
                 }
 
-                false -> LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    state = lazyListState,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    items(portalItems) { item ->
-                        MapListItem(
-                            title = item.portalItem.title,
-                            lastModified = item.portalItem.modified?.format("MMM dd yyyy")
-                                ?: "",
-                            iconDrawable = if (item.portalItem.access == PortalAccess.Public) R.drawable.ic_public
-                            else R.drawable.ic_private,
-                            thumbnail = item.portalItem.thumbnail?.image?.bitmap?.asImageBitmap(),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(100.dp)
-                        ) {
-                            onItemClick(item.portalItem.url)
+                false -> if (uiState.data.isNotEmpty()) {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        state = lazyListState,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        items(uiState.data) { item ->
+                            MapListItem(
+                                title = item.portalItem.title,
+                                lastModified = item.portalItem.modified?.format("MMM dd yyyy")
+                                    ?: "",
+                                iconDrawable = if (item.portalItem.access == PortalAccess.Public) R.drawable.ic_public
+                                else R.drawable.ic_private,
+                                thumbnail = item.portalItem.thumbnail?.image?.bitmap?.asImageBitmap(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(100.dp)
+                            ) {
+                                onItemClick(item.portalItem.url)
+                            }
                         }
+                    }
+                } else {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(text = "Nothing to show. Pull-down to Refresh")
                     }
                 }
             }

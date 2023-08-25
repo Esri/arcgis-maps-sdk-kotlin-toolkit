@@ -9,14 +9,14 @@ import androidx.room.RoomDatabase
 import androidx.room.Upsert
 
 @Entity
-data class PortalItemCacheEntry(
+data class ItemCacheEntry(
     @PrimaryKey val itemId: String,
     val json: String,
     val portalUrl: String
 )
 
 @Dao
-interface PortalItemDao {
+interface ItemCacheDao {
 
     /**
      * fetch an item by id.
@@ -24,19 +24,25 @@ interface PortalItemDao {
      * @param itemId the item id.
      * @return the cache entry with the item id.
      */
-    @Query("SELECT * FROM portalitemcacheentry WHERE itemId = :itemId")
-    suspend fun getById(itemId: String): PortalItemCacheEntry?
+    @Query("SELECT * FROM itemcacheentry WHERE itemId = :itemId")
+    suspend fun getById(itemId: String): ItemCacheEntry?
 
     /**
      * Insert or update an item in the database. If an entry already exists, replace it.
      *
-     * @param entry the PortalItemCacheEntry to be inserted or updated.
+     * @param entry the ItemCacheEntry to be inserted or updated.
      */
     @Upsert
-    suspend fun upsert(entry: PortalItemCacheEntry)
+    suspend fun upsert(entry: ItemCacheEntry)
+
+    /**
+     * Delete all items.
+     */
+    @Query("DELETE FROM itemcacheentry")
+    suspend fun deleteAll()
 }
 
-@Database(entities = [PortalItemCacheEntry::class], version = 1, exportSchema = false)
-abstract class PortalItemDatabase : RoomDatabase() {
-    abstract fun portalItemDao() : PortalItemDao
+@Database(entities = [ItemCacheEntry::class], version = 1, exportSchema = false)
+abstract class ItemCacheDatabase : RoomDatabase() {
+    abstract fun itemCacheDao() : ItemCacheDao
 }

@@ -18,49 +18,40 @@
 
 package com.arcgismaps.toolkit.featureformsapp.data
 
+import android.util.Log
 import com.arcgismaps.toolkit.featureformsapp.data.local.ItemDao
 import com.arcgismaps.toolkit.featureformsapp.data.local.ItemData
 import com.arcgismaps.toolkit.featureformsapp.data.network.ItemRemoteDataSource
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEmpty
 import kotlinx.coroutines.withContext
 
 /**
  * A repository to sit between the data source and the UI/domain layer.
  */
 class ItemRepository(
-    private val scope: CoroutineScope,
+    private val dispatcher: CoroutineDispatcher,
     private val localDataSource: ItemDao,
     private val remoteDataSource: ItemRemoteDataSource
 ) {
 
-    init {
-//        scope.launch {
-//            if (localDataSource.getAll().isEmpty()) {
-//                refresh()
-//            }
-//        }
-    }
+    fun observe(): Flow<List<ItemData>> = localDataSource.observeAll().flowOn(dispatcher)
 
-    fun observe(): Flow<List<ItemData>> = localDataSource.observeAll()
+    suspend fun getCount(): Int = withContext(dispatcher) { localDataSource.getCount() }
 
-    suspend fun getAll(): List<ItemData> = withContext(scope.coroutineContext) {
-        localDataSource.getAll()
-    }
-
-    suspend fun refresh() = withContext(scope.coroutineContext) {
-        localDataSource.deleteAll()
+    suspend fun refresh(): List<Long> = withContext(dispatcher) {
         // get local items
         val localItems = refreshLocalItems()
         // get network items
         val remoteItems = remoteDataSource.fetchItemData()
-        localDataSource.upsertAll(localItems + remoteItems)
+        // purge existing items and add the updated items
+        return@withContext localDataSource.deleteAndInsert(localItems) // + remoteItems)
     }
 
-    private fun refreshLocalItems(): List<ItemData> {
-        return getListOfMaps().map { ItemData(it) }
-    }
+    private fun refreshLocalItems(): List<ItemData> = getListOfMaps().map { ItemData(it) }
 }
 
 /**

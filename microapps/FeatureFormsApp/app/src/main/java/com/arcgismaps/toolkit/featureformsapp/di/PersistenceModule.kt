@@ -2,10 +2,10 @@ package com.arcgismaps.toolkit.featureformsapp.di
 
 import android.content.Context
 import androidx.room.Room
+import com.arcgismaps.toolkit.featureformsapp.data.local.ItemCacheDao
+import com.arcgismaps.toolkit.featureformsapp.data.local.ItemCacheDatabase
 import com.arcgismaps.toolkit.featureformsapp.data.local.ItemDao
 import com.arcgismaps.toolkit.featureformsapp.data.local.ItemDatabase
-import com.arcgismaps.toolkit.featureformsapp.data.local.PortalItemDao
-import com.arcgismaps.toolkit.featureformsapp.data.local.PortalItemDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,7 +23,7 @@ annotation class ItemLocalSource
 
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
-annotation class PortalItemLocalSource
+annotation class ItemCache
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -39,12 +39,12 @@ object PersistenceModule {
 
     @Singleton
     @Provides
-    @PortalItemLocalSource
-    fun providePortalItemDao(database: PortalItemDatabase): PortalItemDao = database.portalItemDao()
+    @ItemCache
+    fun providePortalItemDao(database: ItemCacheDatabase): ItemCacheDao = database.itemCacheDao()
 
     @Singleton
     @Provides
-    fun provideDataBase(@ApplicationContext context: Context): ItemDatabase {
+    fun provideItemDataBase(@ApplicationContext context: Context): ItemDatabase {
         return Room.databaseBuilder(
             context.applicationContext,
             ItemDatabase::class.java,
@@ -54,10 +54,10 @@ object PersistenceModule {
 
     @Singleton
     @Provides
-    fun providePortalItemDataBase(@ApplicationContext context: Context): PortalItemDatabase {
+    fun provideItemCacheDataBase(@ApplicationContext context: Context): ItemCacheDatabase {
         return Room.databaseBuilder(
             context.applicationContext,
-            PortalItemDatabase::class.java,
+            ItemCacheDatabase::class.java,
             "portal_items.db"
         ).build()
     }

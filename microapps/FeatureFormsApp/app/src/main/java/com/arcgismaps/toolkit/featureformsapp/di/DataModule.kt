@@ -20,8 +20,8 @@ package com.arcgismaps.toolkit.featureformsapp.di
 
 import com.arcgismaps.toolkit.featureformsapp.data.ItemRepository
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
+import com.arcgismaps.toolkit.featureformsapp.data.local.ItemCacheDao
 import com.arcgismaps.toolkit.featureformsapp.data.local.ItemDao
-import com.arcgismaps.toolkit.featureformsapp.data.local.PortalItemDao
 import com.arcgismaps.toolkit.featureformsapp.data.network.ItemRemoteDataSource
 import com.arcgismaps.toolkit.featureformsapp.domain.PortalItemUseCase
 import dagger.Module
@@ -67,19 +67,20 @@ class DataModule {
     @Provides
     @ItemRepo
     internal fun provideItemRepository(
-        @ApplicationScope applicationScope: CoroutineScope,
+        @IoDispatcher dispatcher: CoroutineDispatcher,
         @ItemLocalSource itemLocalSource: ItemDao,
         @ItemRemoteSource remoteDataSource: ItemRemoteDataSource
     ): ItemRepository =
-        ItemRepository(applicationScope, itemLocalSource, remoteDataSource)
+        ItemRepository(dispatcher, itemLocalSource, remoteDataSource)
 
     @Provides
     @PortalItemRepo
     internal fun providePortalItemRepository(
-        @ApplicationScope applicationScope: CoroutineScope,
-        @PortalItemLocalSource portalItemDao: PortalItemDao,
+        @IoDispatcher dispatcher: CoroutineDispatcher,
+        @ItemRepo itemRepository: ItemRepository,
+        @ItemCache itemCacheDao: ItemCacheDao,
     ): PortalItemRepository =
-        PortalItemRepository(applicationScope, portalItemDao)
+        PortalItemRepository(dispatcher, itemRepository, itemCacheDao)
     
     /**
      * The provider of the PortalItem use case, scoped to the navigation graph lifetime by means of the
@@ -88,12 +89,12 @@ class DataModule {
     @Singleton
     @Provides
     fun providePortalItemUseCase(
+        @IoDispatcher dispatcher: CoroutineDispatcher,
         @ApplicationScope applicationScope: CoroutineScope,
-        @ItemRepo itemRepository: ItemRepository,
         @PortalItemRepo portalItemRepository: PortalItemRepository
     ): PortalItemUseCase = PortalItemUseCase(
+        dispatcher,
         applicationScope,
-        itemRepository,
         portalItemRepository
     )
 }
