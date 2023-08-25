@@ -208,7 +208,6 @@ internal fun DateTimeField(
             onDismissRequest = { openDialog = false },
             onCancelled = { openDialog = false },
             onConfirmed = {
-                println("on confirm DateTimeField from picker")
                 state.setValue(pickerState.selectedDateTimeMillis)
                 openDialog = false
             })

@@ -174,7 +174,6 @@ private class DateTimeFieldStateImpl(
     }
     
     override fun setValue(dateTime: Long?) {
-        println("setting date time on the form ${dateTime?.formattedUtcDateTime(true)}")
         form.editValue(element, dateTime)
         _value.value = dateTime
     }

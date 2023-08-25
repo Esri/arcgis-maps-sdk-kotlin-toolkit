@@ -201,10 +201,7 @@ private class DateTimePickerStateImpl(
     )
     
     override val selectedDateTimeMillis: Long?
-        get() {
-            println("getting selected date time millis ${dateTime.value.epochMillis?.formattedUtcDateTime(true)}")
-            return dateTime.value.epochMillis
-        }
+        get() = dateTime.value.epochMillis
     
     override val timeZone: TimeZone = TimeZone.getDefault()
     
@@ -218,7 +215,6 @@ private class DateTimePickerStateImpl(
     )
     
     override fun setDateTime(date: Long?, hour: Int, minute: Int) {
-        println("setting date time from the picker  ${date?.formattedUtcDateTime(true)} hours $hour mins $minute")
         dateTime.value = UtcDateTime.createFromDateAndTime(date, hour, minute)
     }
     
