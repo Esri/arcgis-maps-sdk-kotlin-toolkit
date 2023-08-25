@@ -20,9 +20,8 @@ package com.arcgismaps.toolkit.featureforms.components.datetime.picker
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import com.arcgismaps.toolkit.featureforms.components.datetime.formattedUtcDateTime
 import com.arcgismaps.toolkit.featureforms.components.datetime.toDateMillis
-import com.arcgismaps.toolkit.featureforms.components.datetime.toUtcDateTime
+import com.arcgismaps.toolkit.featureforms.components.datetime.toDateTimeinUtcZone
 import com.arcgismaps.toolkit.featureforms.components.datetime.toZonedDateTime
 import java.time.Instant
 import java.util.TimeZone
@@ -38,35 +37,49 @@ internal class UtcDateTime private constructor(
     val minute: Int = 0,
     val second: Int = 0
 ) {
-    // Force the picker to show a zoned date by providing the utc date plus the zone offset, converted to a UTC date
-    // (the picker deals in utc dates only)
-    val dateForPicker: Long?
-        get() {
-            println("date for picker without offset ${epochMillis?.formattedUtcDateTime(true)}")
-            println("date for picker  with offset ${epochMillis?.plus(epochMillis.offset)?.toDateMillis()?.formattedUtcDateTime(true)}")
-            return epochMillis?.plus(epochMillis.offset)?.toDateMillis()
-        }
+    /**
+     *  Force the picker to show a zoned date by providing the utc datetime as millis, plus the zone offset,
+     *  and truncated to midnight of the resulting epoch millis.
+     *  the picker deals, and shows, dates as millis only, This will add the timezone offset to epoch millis,
+     *  and then pass it to the picker to show the current zoned time. It is subsequently subtracted from any
+     *  choice made by the user.
+     *
+     *  @see createFromDateAndTime
+     *  @since 200.3.0
+     */
+    internal val dateForPicker: Long?
+        get() = epochMillis?.plus(epochMillis.offset)?.toDateMillis()
     
-    val hourForPicker: Int
+    /**
+     * The hour of the datetime in the current timezone.
+     *
+     * @since 200.3.0
+     */
+    internal val hourForPicker: Int
         get() = epochMillis?.toZonedDateTime()?.hour ?: hour
     
-    val minuteForPicker: Int
+    /**
+     * The minutes of the datetime in the current timezone.
+     *
+     * @since 200.3.0
+     */
+    internal val minuteForPicker: Int
         get() = epochMillis?.toZonedDateTime()?.minute ?: minute
     
     companion object {
         /**
-         * Creates an instance of [UtcDateTime] using [dateTime] with the [hour], [minute] and [second]
-         * representing time in the local zone. If the [dateTime] value is null then the returned
+         * Creates an instance of [UtcDateTime] using [epochMillis] with the [hour], [minute] and [second]
+         * representing time in the UTC zone. If the [epochMillis] value is null then the returned
          * DateTime will have no date with time set to 0:00 hrs.
          *
-         * @param dateTime The number of milliseconds since epoch (January 1, 1970) in UTC.
+         * @param epochMillis The number of milliseconds since epoch (January 1, 1970) in UTC.
          * @return a new UtcDateTime
          */
-        fun create(dateTime: Long?): UtcDateTime {
-            val utcDateTime = dateTime?.toUtcDateTime()
+        internal fun create(epochMillis: Long?): UtcDateTime {
+            val utcDateTime = epochMillis?.toDateTimeinUtcZone()
             return UtcDateTime(
-                dateTime,
-                dateTime?.toDateMillis(),
+                epochMillis,
+                epochMillis?.toDateMillis(),
                 utcDateTime?.hour ?: 0,
                 utcDateTime?.minute ?: 0,
                 utcDateTime?.second ?: 0
@@ -75,20 +88,20 @@ internal class UtcDateTime private constructor(
         
         /**
          * Used to set the datetime from the result of the datetime picker dialog.
+         * Since the date picker works and displays with UTC millis only, the value
+         * provided to it was artificially increased by the current time zone offset millis.
+         * This value must now be subtracted off so the result represents epoch milliseconds.
          *
-         * @date the midnight UTC epoch millis of the date set in the picker.
-         * @hour the hour selected in the picker 0-23
-         * @hour the minute selected in the picker 0-59
-         *
+         * @param date the midnight UTC epoch millis of the date set in the picker, augmented by the current timezone offset millis
+         * @param hour the hour selected in the picker 0-23
+         * @param hour the minute selected in the picker 0-59
+         * @see dateForPicker
          * @return a new UtcDateTime
+         * @since 200.3.0
          */
-        fun createFromDateAndTime(date: Long?, hour: Int, minute: Int): UtcDateTime {
+        internal fun createFromDateAndTime(date: Long?, hour: Int, minute: Int): UtcDateTime {
             val epochMillis = if (date != null) {
-                println("createFromDateAndTime without offset ${date.formattedUtcDateTime(true)} hour $hour minute $minute ")
-                println("createFromDateAndTime with offset ${date.minus(date.offset).toDateMillis().formattedUtcDateTime(true) } hour $hour minute $minute ")
-                val millis = (date + hour * 3_600_000 + minute * 60_000).minus(date.offset)
-                println("final epoch millis to set the attribute: ${millis.formattedUtcDateTime(true)}")
-                millis
+                (date + hour * 3_600_000 + minute * 60_000).minus(date.offset)
             } else {
                 null
             }
