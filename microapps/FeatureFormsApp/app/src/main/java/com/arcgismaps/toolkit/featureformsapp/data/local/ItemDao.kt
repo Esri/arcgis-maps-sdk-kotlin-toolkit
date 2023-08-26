@@ -8,7 +8,6 @@ import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.RoomDatabase
 import androidx.room.Transaction
-import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -24,11 +23,19 @@ interface ItemApi {
     suspend fun fetchItems(): List<ItemData>
 }
 
+/**
+ * Data Access Object for the itemdata table.
+ */
 @Dao
 interface ItemDao {
 
+    /**
+     * Insert an item into the itemdata table.
+     *
+     * @param item the ItemData type to insert.
+     */
     @Insert
-    suspend fun insert(items: ItemData) : Long
+    suspend fun insert(item: ItemData) : Long
 
     /**
      * Observes list of ItemData.
@@ -38,7 +45,11 @@ interface ItemDao {
     @Query("SELECT * FROM itemdata")
     fun observeAll(): Flow<List<ItemData>>
 
-
+    /**
+     * Get the number of items in the table.
+     *
+     * @return the number of items.
+     */
     @Query("SELECT COUNT(*) FROM itemdata")
     suspend fun getCount() : Int
 
@@ -48,7 +59,12 @@ interface ItemDao {
     @Query("DELETE FROM itemdata")
     suspend fun deleteAll()
 
-
+    /**
+     * Deletes all existing items in the table and inserts the new list [items].
+     *
+     * @param items the list of items to insert.
+     * @return the list of row id's that were inserted.
+     */
     @Transaction
     suspend fun deleteAndInsert(items: List<ItemData>) : List<Long> {
         deleteAll()
@@ -58,6 +74,10 @@ interface ItemDao {
     }
 }
 
+/**
+ * The Room Database that contains the ItemData table.
+ *
+ */
 @Database(entities = [ItemData::class], version = 1, exportSchema = false)
 abstract class ItemDatabase : RoomDatabase() {
     abstract fun itemDao(): ItemDao
