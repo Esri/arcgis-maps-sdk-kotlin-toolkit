@@ -23,6 +23,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
 import com.arcgismaps.httpcore.authentication.AuthenticationManager
+import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 import com.arcgismaps.httpcore.authentication.OAuthUserCredential
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
@@ -52,12 +53,36 @@ public fun AuthenticatorState.completeOAuthSignIn(intent: Intent) {
     }
 }
 
+/**
+ * Launches the custom tabs activity with the provided authorize URL. The resulting intent will
+ * launch using an Incognito tab if the [pendingSignIn]'s [OAuthUserConfiguration.preferPrivateWebBrowserSession]
+ * is true.
+ *
+ * @receiver an [Activity] used to launch the [CustomTabsIntent].
+ * @param pendingSignIn the [OAuthUserSignIn] that requires completion.
+ *
+ * @since 200.2.0
+ */
 context (Activity)
-public fun launchCustomTabs(pendingSignIn: OAuthUserSignIn?)
-{
+public fun launchCustomTabs(pendingSignIn: OAuthUserSignIn?): Unit =
+    launchCustomTabs(pendingSignIn?.authorizeUrl, pendingSignIn?.oAuthUserConfiguration?.preferPrivateWebBrowserSession)
+
+
+
+/**
+ * Launches the custom tabs activity with the provided authorize URL.
+ *
+ * @param authorizeUrl the authorize URL used by the custom tabs browser to prompt for OAuth
+ * user credentials
+ * @param useIncognito whether the [CustomTabsIntent] should use Incognito mode, if available.
+ *
+ * @since 200.2.0
+ */
+context (Activity)
+internal fun launchCustomTabs(authorizeUrl: String?, useIncognito: Boolean?) {
     CustomTabsIntent.Builder().build().apply {
-        if (pendingSignIn?.oAuthUserConfiguration?.preferPrivateWebBrowserSession == true) {
+        if (useIncognito == true) {
             intent.putExtra("com.google.android.apps.chrome.EXTRA_OPEN_NEW_INCOGNITO_TAB", true)
         }
-    }.launchUrl(this@Activity, Uri.parse(pendingSignIn?.authorizeUrl))
+    }.launchUrl(this@Activity, Uri.parse(authorizeUrl))
 }
