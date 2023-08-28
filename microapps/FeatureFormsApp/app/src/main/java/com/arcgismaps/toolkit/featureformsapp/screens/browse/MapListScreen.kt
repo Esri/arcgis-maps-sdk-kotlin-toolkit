@@ -73,7 +73,7 @@ fun MapListScreen(
         // and transition to the list of portalItems once loaded
         Crossfade(
             targetState = portalItems.isEmpty(),
-            modifier = Modifier.padding(padding)
+            modifier = Modifier.padding(padding), label = ""
         ) { state ->
             when (state) {
                 true -> Box(modifier = modifier.fillMaxSize()) {
