@@ -79,7 +79,7 @@ fun MapListScreen(
 
     Scaffold(topBar = {
         AppBar {
-            mapListViewModel.refresh()
+            mapListViewModel.refresh(it)
         }
     }) { padding ->
         // use a cross fade animation to show a loading indicator when the data is loading
@@ -115,8 +115,7 @@ fun MapListScreen(
                                     ?: "",
                                 iconDrawable = if (item.portalItem.access == PortalAccess.Public) R.drawable.ic_public
                                 else R.drawable.ic_private,
-                                thumbnail = item.portalItem.thumbnail, //?.image?.bitmap?.asImageBitmap(),
-                                imageLoader = mapListViewModel.imageLoader,
+                                thumbnail = item.portalItem.thumbnail?.image?.bitmap?.asImageBitmap(),
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(100.dp)
@@ -151,8 +150,7 @@ fun MapListItem(
     lastModified: String,
     iconDrawable: Int,
     modifier: Modifier = Modifier,
-    thumbnail: LoadableImage? = null,
-    imageLoader : suspend (LoadableImage) -> Unit,
+    thumbnail: ImageBitmap? = null,
     onClick: () -> Unit = {}
 ) {
     Row(
@@ -162,7 +160,27 @@ fun MapListItem(
     ) {
         Spacer(modifier = Modifier.width(20.dp))
         Box {
-            MapItemThumbnail(thumbnail = thumbnail, imageLoader)
+            thumbnail?.let {
+                Image(
+                    bitmap = it,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxHeight(0.8f)
+                        .aspectRatio(16 / 9f)
+                        .clip(RoundedCornerShape(15.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            }
+            // if thumbnail is empty then use the default map placeholder
+                ?: Image(
+                    painter = painterResource(id = R.drawable.ic_default_map),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxHeight(0.8f)
+                        .aspectRatio(16 / 9f)
+                        .clip(RoundedCornerShape(15.dp)),
+                    contentScale = ContentScale.Crop
+                )
             Image(
                 painterResource(id = iconDrawable),
                 contentDescription = null,
@@ -180,41 +198,9 @@ fun MapListItem(
     }
 }
 
-@Composable
-fun MapItemThumbnail(thumbnail : LoadableImage?, loader : suspend (LoadableImage) -> Unit) {
-    var loadedImage by remember { mutableStateOf<ImageBitmap?>(null) }
-    loadedImage?.let {
-        Image(
-            bitmap = it,
-            contentDescription = null,
-            modifier = Modifier
-                .fillMaxHeight(0.8f)
-                .aspectRatio(16 / 9f)
-                .clip(RoundedCornerShape(15.dp)),
-            contentScale = ContentScale.Crop
-        )
-    }
-    // if thumbnail is empty then use the default map placeholder
-        ?: Image(
-            painter = painterResource(id = R.drawable.ic_default_map),
-            contentDescription = null,
-            modifier = Modifier
-                .fillMaxHeight(0.8f)
-                .aspectRatio(16 / 9f)
-                .clip(RoundedCornerShape(15.dp)),
-            contentScale = ContentScale.Crop
-        )
-    LaunchedEffect(thumbnail) {
-        thumbnail?.let {
-            loader(it)
-            loadedImage = it.image?.bitmap?.asImageBitmap()
-        }
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppBar(onRefresh: () -> Unit = {}) {
+fun AppBar(onRefresh: (Boolean) -> Unit = {}) {
     var expanded by remember { mutableStateOf(false) }
     TopAppBar(
         title = {
@@ -235,7 +221,11 @@ fun AppBar(onRefresh: () -> Unit = {}) {
             ) {
                 DropdownMenuItem(text = { Text(text = "Refresh") }, onClick = {
                     expanded = false
-                    onRefresh()
+                    onRefresh(false)
+                })
+                DropdownMenuItem(text = { Text(text = "Clear Cache") }, onClick = {
+                    expanded = false
+                    onRefresh(true)
                 })
             }
         }
@@ -255,7 +245,6 @@ fun MapListItemPreview() {
         title = "Water Utility",
         lastModified = "June 1 2023",
         iconDrawable = R.drawable.ic_public,
-        modifier = Modifier.size(width = 485.dp, height = 100.dp),
-        imageLoader = {}
+        modifier = Modifier.size(width = 485.dp, height = 100.dp)
     )
 }

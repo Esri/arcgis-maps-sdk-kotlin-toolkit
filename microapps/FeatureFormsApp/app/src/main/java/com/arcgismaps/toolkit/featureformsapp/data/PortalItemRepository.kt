@@ -1,34 +1,35 @@
 package com.arcgismaps.toolkit.featureformsapp.data
 
-import android.util.Log
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.featureformsapp.data.local.ItemCacheDao
 import com.arcgismaps.toolkit.featureformsapp.data.local.ItemCacheEntry
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
 
 class PortalItemRepository(
+    private val scope: CoroutineScope,
     private val dispatcher: CoroutineDispatcher,
     private val itemRepository: ItemRepository,
-    private val itemCacheDao: ItemCacheDao
+    private val itemCacheDao: ItemCacheDao,
 ) {
     private val portalItems: MutableMap<String, PortalItem> = mutableMapOf()
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val portalItemFlow: Flow<List<PortalItem>> = itemRepository.observe().mapLatest {
-        it.map { itemData ->
-            val portalItem = getCacheEntry(itemData.url)?.let { cacheEntry ->
-                Log.e("TAG", "cache: using from cache")
-                val portal = Portal(cacheEntry.portalUrl)
-                PortalItem.fromJsonOrNull(cacheEntry.json, portal)
-            } ?: run {
-                Log.e("TAG", "cache: no cache item found")
-                PortalItem(itemData.url).also { portalItem ->
+    private val portalItemFlow: Flow<List<PortalItem>> =
+        itemRepository.observe().mapLatest {
+            it.map { itemData ->
+                val portalItem = getCacheEntry(itemData.url)?.let { cacheEntry ->
+                    val portal = Portal(cacheEntry.portalUrl)
+                    PortalItem.fromJsonOrNull(cacheEntry.json, portal)
+                } ?: PortalItem(itemData.url).also { portalItem ->
                     portalItem.load()
                     createCacheEntry(
                         itemData.url,
@@ -36,17 +37,18 @@ class PortalItemRepository(
                         portalItem.portal.url
                     )
                 }
+                portalItems[itemData.url] = portalItem
+                portalItem.thumbnail?.load()
+                portalItem
             }
-            portalItems[itemData.url] = portalItem
-            portalItem
-        }
-    }.flowOn(dispatcher)
+        }.flowOn(dispatcher)
 
     fun getItems(): Flow<List<PortalItem>> = portalItemFlow
 
     suspend fun refresh(forceUpdate: Boolean = false) = withContext(dispatcher) {
         if (forceUpdate) deleteAllCacheEntries()
         itemRepository.refresh()
+        portalItemFlow.conflate().firstOrNull()
     }
 
     suspend fun getItemCount(): Int = withContext(dispatcher) {
@@ -64,7 +66,6 @@ class PortalItemRepository(
 
     private suspend fun deleteAllCacheEntries() =
         withContext(dispatcher) { itemCacheDao.deleteAll() }
-
 
     operator fun invoke(url: String): PortalItem? = portalItems[url]
 }

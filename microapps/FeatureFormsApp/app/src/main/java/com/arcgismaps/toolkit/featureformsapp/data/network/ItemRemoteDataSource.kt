@@ -12,19 +12,18 @@ class ItemRemoteDataSource(
     private val dispatcher: CoroutineDispatcher, private val itemApi: ItemApi = object : ItemApi {
         override suspend fun fetchItems(): List<ItemData> {
             val portal = Portal(
-                "https://runtimecoretest.maps.arcgis.com",
+                portalUri,
                 connection = Portal.Connection.Authenticated
             )
             portal.load().onFailure {
-                Log.e("ItemRemoteDataSource", "fetchItems: ${it.message}", )
+                Log.e("ItemRemoteDataSource", "error in fetchItems: ${it.message}", )
                 return emptyList()
             }
             val user = portal.user ?: return emptyList()
             val portalUserContent = user.fetchContent().getOrElse { return emptyList() }
-            val folder = portalUserContent.folders.first {
-                it.title == "Apollo"
-            }
-            Log.e("TAG", "testGetPortal: folder id ${folder.folderId}")
+            val folder = portalUserContent.folders.firstOrNull {
+                it.title == portalFolder
+            } ?: return emptyList()
             return user.fetchContentInFolder(folder.folderId).getOrDefault(emptyList()).filter {
                 it.type == PortalItemType.WebMap
             }.map {
@@ -33,6 +32,11 @@ class ItemRemoteDataSource(
         }
     }
 ) {
+
+    companion object {
+        const val portalUri = "https://www.arcgis.com"
+        const val portalFolder = "Apollo"
+    }
 
     suspend fun fetchItemData(): List<ItemData> = withContext(dispatcher) {
         return@withContext itemApi.fetchItems()

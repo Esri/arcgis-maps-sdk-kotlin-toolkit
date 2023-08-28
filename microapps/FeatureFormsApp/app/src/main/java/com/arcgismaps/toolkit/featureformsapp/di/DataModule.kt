@@ -76,11 +76,12 @@ class DataModule {
     @Provides
     @PortalItemRepo
     internal fun providePortalItemRepository(
+        @ApplicationScope coroutineScope: CoroutineScope,
         @IoDispatcher dispatcher: CoroutineDispatcher,
         @ItemRepo itemRepository: ItemRepository,
         @ItemCache itemCacheDao: ItemCacheDao,
     ): PortalItemRepository =
-        PortalItemRepository(dispatcher, itemRepository, itemCacheDao)
+        PortalItemRepository(coroutineScope, dispatcher, itemRepository, itemCacheDao)
     
     /**
      * The provider of the PortalItem use case, scoped to the navigation graph lifetime by means of the

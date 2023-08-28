@@ -54,7 +54,7 @@ class PortalItemUseCase(
 
     fun observe(): Flow<List<PortalItemData>> = flow
 
-    suspend fun refresh() = portalItemRepository.refresh()
+    suspend fun refresh(forceUpdate : Boolean) = portalItemRepository.refresh(forceUpdate)
 
     suspend fun isEmpty(): Boolean = portalItemRepository.getItemCount() == 0
 
