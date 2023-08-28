@@ -15,6 +15,7 @@ import androidx.room.Upsert
 data class ItemCacheEntry(
     @PrimaryKey val itemId: String,
     val json: String,
+    val thumbnailUri: String,
     val portalUrl: String
 )
 

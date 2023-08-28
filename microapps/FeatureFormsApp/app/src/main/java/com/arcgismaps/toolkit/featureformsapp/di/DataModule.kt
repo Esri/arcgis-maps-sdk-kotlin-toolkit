@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.featureformsapp.di
 
+import android.content.Context
 import com.arcgismaps.toolkit.featureformsapp.data.ItemRepository
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
 import com.arcgismaps.toolkit.featureformsapp.data.local.ItemCacheDao
@@ -27,6 +28,7 @@ import com.arcgismaps.toolkit.featureformsapp.domain.PortalItemUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -88,8 +90,9 @@ class DataModule {
         @IoDispatcher dispatcher: CoroutineDispatcher,
         @ItemRepo itemRepository: ItemRepository,
         @ItemCache itemCacheDao: ItemCacheDao,
+        @ApplicationContext context: Context
     ): PortalItemRepository =
-        PortalItemRepository(dispatcher, itemRepository, itemCacheDao)
+        PortalItemRepository(dispatcher, itemRepository, itemCacheDao, context.filesDir.absolutePath)
     
     /**
      * The provider of the PortalItem use case, scoped to the navigation graph lifetime by means of the

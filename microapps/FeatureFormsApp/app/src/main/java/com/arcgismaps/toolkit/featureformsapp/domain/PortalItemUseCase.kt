@@ -18,7 +18,7 @@
 
 package com.arcgismaps.toolkit.featureformsapp.domain
 
-import com.arcgismaps.mapping.PortalItem
+import com.arcgismaps.toolkit.featureformsapp.data.PortalItemData
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -27,10 +27,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
 
-data class PortalItemData(
-    val portalItem: PortalItem,
-    val formLayerName: String? = null
-)
+data class PortalItemWithLayer(val data: PortalItemData, val formLayerName: String? = null)
+
 
 /**
  * A domain layer to transform the loaded portal items with some added domain knowledge of what layer
@@ -43,18 +41,19 @@ class PortalItemUseCase(
 ) {
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val portalItemDataFlow: Flow<List<PortalItemData>> = portalItemRepository.getItems().mapLatest {
-        it.map { item ->
-            PortalItemData(
-                portalItem = item,
-                formLayerName = formLayerName(item.itemId)
-            )
-        }
-    }.flowOn(dispatcher)
+    private val portalItemDataFlow: Flow<List<PortalItemWithLayer>> =
+        portalItemRepository.getItems().mapLatest {
+            it.map { item ->
+                PortalItemWithLayer(
+                    data = item,
+                    formLayerName = formLayerName(item.portalItem.itemId)
+                )
+            }
+        }.flowOn(dispatcher)
 
-    fun observe(): Flow<List<PortalItemData>> = portalItemDataFlow
+    fun observe(): Flow<List<PortalItemWithLayer>> = portalItemDataFlow
 
-    suspend fun refresh(forceUpdate : Boolean) = portalItemRepository.refresh(forceUpdate)
+    suspend fun refresh(forceUpdate: Boolean) = portalItemRepository.refresh(forceUpdate)
 
     suspend fun isEmpty(): Boolean = portalItemRepository.getItemCount() == 0
 
@@ -72,9 +71,9 @@ class PortalItemUseCase(
     /**
      * Used by the UI to get a specific PortalItem by url
      */
-    operator fun invoke(url: String): PortalItemData? {
+    operator fun invoke(url: String): PortalItemWithLayer? {
         return portalItemRepository(url)?.let {
-            PortalItemData(it, formLayerName(it.itemId))
+            PortalItemWithLayer(PortalItemData(it, ""), formLayerName(it.itemId))
         }
     }
 }

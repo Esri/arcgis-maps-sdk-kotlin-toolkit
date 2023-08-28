@@ -38,7 +38,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -47,16 +46,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.arcgismaps.portal.LoadableImage
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.arcgismaps.portal.PortalAccess
 import com.arcgismaps.toolkit.featureformsapp.R
 import java.time.Instant
@@ -110,17 +109,17 @@ fun MapListScreen(
                     ) {
                         items(uiState.data) { item ->
                             MapListItem(
-                                title = item.portalItem.title,
-                                lastModified = item.portalItem.modified?.format("MMM dd yyyy")
+                                title = item.data.portalItem.title,
+                                lastModified = item.data.portalItem.modified?.format("MMM dd yyyy")
                                     ?: "",
-                                iconDrawable = if (item.portalItem.access == PortalAccess.Public) R.drawable.ic_public
+                                iconDrawable = if (item.data.portalItem.access == PortalAccess.Public) R.drawable.ic_public
                                 else R.drawable.ic_private,
-                                thumbnail = item.portalItem.thumbnail?.image?.bitmap?.asImageBitmap(),
+                                thumbnailUri = item.data.thumbnailUri.ifEmpty { null },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(100.dp)
                             ) {
-                                onItemClick(item.portalItem.url)
+                                onItemClick(item.data.portalItem.url)
                             }
                         }
                     }
@@ -150,7 +149,7 @@ fun MapListItem(
     lastModified: String,
     iconDrawable: Int,
     modifier: Modifier = Modifier,
-    thumbnail: ImageBitmap? = null,
+    thumbnailUri: String? = null,
     onClick: () -> Unit = {}
 ) {
     Row(
@@ -160,9 +159,9 @@ fun MapListItem(
     ) {
         Spacer(modifier = Modifier.width(20.dp))
         Box {
-            thumbnail?.let {
-                Image(
-                    bitmap = it,
+            thumbnailUri?.let {
+                AsyncImage(
+                    model = it,
                     contentDescription = null,
                     modifier = Modifier
                         .fillMaxHeight(0.8f)

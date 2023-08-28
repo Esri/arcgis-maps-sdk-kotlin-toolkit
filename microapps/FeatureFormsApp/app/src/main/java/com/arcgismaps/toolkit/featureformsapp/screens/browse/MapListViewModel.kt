@@ -3,8 +3,8 @@ package com.arcgismaps.toolkit.featureformsapp.screens.browse
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arcgismaps.toolkit.featureformsapp.domain.PortalItemData
 import com.arcgismaps.toolkit.featureformsapp.domain.PortalItemUseCase
+import com.arcgismaps.toolkit.featureformsapp.domain.PortalItemWithLayer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -16,7 +16,7 @@ import javax.inject.Inject
 
 data class MapListUIState(
     val isLoading: Boolean,
-    val data: List<PortalItemData>
+    val data: List<PortalItemWithLayer>
 )
 
 /**
