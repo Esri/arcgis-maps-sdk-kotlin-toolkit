@@ -31,7 +31,6 @@ import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
 private const val KEY_INTENT_EXTRA_AUTHORIZE_URL = "INTENT_EXTRA_KEY_AUTHORIZE_URL"
 private const val KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL = "KEY_INTENT_EXTRA_OAUTH_RESPONSE_URI"
-private const val KEY_INTENT_EXTRA_PROMPT_SIGN_IN = "KEY_INTENT_EXTRA_PROMPT_SIGN_IN"
 private const val KEY_INTENT_EXTRA_PRIVATE_BROWSING = "KEY_INTENT_EXTRA_PRIVATE_BROWSING"
 private const val KEY_INTENT_EXTRA_CUSTOM_TABS_HAS_LAUNCHED = "KEY_INTENT_EXTRA_CUSTOM_TABS_HAS_LAUNCHED"
 
@@ -134,13 +133,11 @@ public class OAuthUserSignInActivity : ComponentActivity() {
         } else {
             // If custom tabs hasn't launched yet, then this is the first time we've run the activity.
             // So let's launch custom tabs (if we are being prompted to via the sign in)
-            if (intent.hasExtra(KEY_INTENT_EXTRA_PROMPT_SIGN_IN)) {
                 // authorize URL should be a valid string since we are adding it in the ActivityResultContract
-                val authorizeUrl = intent.getStringExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL)
-                val useIncognito = intent.getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false)
-                authorizeUrl?.let {
-                    launchCustomTabs(it, useIncognito)
-                }
+            val authorizeUrl = intent.getStringExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL)
+            val useIncognito = intent.getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false)
+            authorizeUrl?.let {
+                launchCustomTabs(it, useIncognito)
             }
         }
     }
@@ -196,7 +193,6 @@ public class OAuthUserSignInActivity : ComponentActivity() {
         override fun createIntent(context: Context, input: OAuthUserSignIn): Intent =
             Intent(context, OAuthUserSignInActivity::class.java).apply {
                 putExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL, input.authorizeUrl)
-                putExtra(KEY_INTENT_EXTRA_PROMPT_SIGN_IN, true)
                 putExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, input.oAuthUserConfiguration.preferPrivateWebBrowserSession)
             }
 
