@@ -23,16 +23,17 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.PersistableBundle
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.browser.customtabs.CustomTabsIntent
-import androidx.lifecycle.Lifecycle
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
 private const val KEY_INTENT_EXTRA_AUTHORIZE_URL = "INTENT_EXTRA_KEY_AUTHORIZE_URL"
 private const val KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL = "KEY_INTENT_EXTRA_OAUTH_RESPONSE_URI"
 private const val KEY_INTENT_EXTRA_PROMPT_SIGN_IN = "KEY_INTENT_EXTRA_PROMPT_SIGN_IN"
 private const val KEY_INTENT_EXTRA_PRIVATE_BROWSING = "KEY_INTENT_EXTRA_PRIVATE_BROWSING"
+private const val KEY_INTENT_EXTRA_CUSTOM_TABS_HAS_LAUNCHED = "KEY_INTENT_EXTRA_CUSTOM_TABS_HAS_LAUNCHED"
 
 private const val RESULT_CODE_SUCCESS = 1
 private const val RESULT_CODE_CANCELED = 2
@@ -97,16 +98,17 @@ private const val RESULT_CODE_CANCELED = 2
  */
 public class OAuthUserSignInActivity : ComponentActivity() {
 
-    public override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        if (intent.hasExtra(KEY_INTENT_EXTRA_PROMPT_SIGN_IN)) {
-            // authorize URL should be a valid string since we are adding it in the ActivityResultContract
-            val authorizeUrl = intent.getStringExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL)
-            val useIncognito = intent.getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false)
-            authorizeUrl?.let {
-                launchCustomTabs(it, useIncognito)
-            }
-        }
+    private var customTabsHasLaunched = false
+
+    override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
+        super.onSaveInstanceState(outState, outPersistentState)
+        outState.putBoolean(KEY_INTENT_EXTRA_CUSTOM_TABS_HAS_LAUNCHED, customTabsHasLaunched)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        customTabsHasLaunched = savedInstanceState.getBoolean(
+            KEY_INTENT_EXTRA_CUSTOM_TABS_HAS_LAUNCHED)
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -116,24 +118,30 @@ public class OAuthUserSignInActivity : ComponentActivity() {
         handleRedirectIntent(intent)
     }
 
-    // This is required to ensure the back button and x button on the custom tab correctly cancels the
-    // pending sign in. We could have used onWindowFocusChanged, but this callback is explicitly called
-    // this activity returns to the top of the stack, so it fits our use case.
-    override fun onTopResumedActivityChanged(isTopResumedActivity: Boolean) {
-        super.onTopResumedActivityChanged(isTopResumedActivity)
+    override fun onResume() {
+        super.onResume()
 
-        // We only want to respond to focus changed events when this activity is in "resumed" state.
-        // On some devices (Oreo) we get unexpected focus changed events with isTopResumedActivity true which cause this Activity
-        // to be finished (destroyed) prematurely, for example:
-        // - On Oreo log in to portal with OAuth
-        // - When the browser window is launched this triggers a top resumed activity changed event with isTopResumedActivity true but at this point
-        //   we do not want to finish this activity -> at this point the activity is in paused state (isResumed == false) so
-        //   we can use this to ignore this "rogue" focus changed event.
-        if (isTopResumedActivity && lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+        // If the user presses the back button or x button while the custom tab is displayed,
+        // this is the place we'll get to first. If the user logs in or presses the cancel button
+        // on the actual OAuth page, then we'll go to onNewIntent first and the activity
+        // will be finished from there. So if we get here and we know that custom tabs has launched,
+        // then we can be assured that it's because the user wants to cancel authentication.
+        if (customTabsHasLaunched) {
             // if we got here the user must have pressed the back button or the x button while the
             // custom tab was visible - finish by cancelling OAuth sign in
             setResult(RESULT_CODE_CANCELED, Intent())
             finish()
+        } else {
+            // If custom tabs hasn't launched yet, then this is the first time we've run the activity.
+            // So let's launch custom tabs (if we are being prompted to via the sign in)
+            if (intent.hasExtra(KEY_INTENT_EXTRA_PROMPT_SIGN_IN)) {
+                // authorize URL should be a valid string since we are adding it in the ActivityResultContract
+                val authorizeUrl = intent.getStringExtra(KEY_INTENT_EXTRA_AUTHORIZE_URL)
+                val useIncognito = intent.getBooleanExtra(KEY_INTENT_EXTRA_PRIVATE_BROWSING, false)
+                authorizeUrl?.let {
+                    launchCustomTabs(it, useIncognito)
+                }
+            }
         }
     }
 
@@ -166,6 +174,7 @@ public class OAuthUserSignInActivity : ComponentActivity() {
      * @since 200.2.0
      */
     private fun launchCustomTabs(authorizeUrl: String, useIncognito: Boolean) {
+        customTabsHasLaunched = true
         CustomTabsIntent.Builder().build().apply {
             if (useIncognito) {
                 intent.putExtra("com.google.android.apps.chrome.EXTRA_OPEN_NEW_INCOGNITO_TAB", true)
