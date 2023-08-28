@@ -43,8 +43,8 @@ public suspend fun AuthenticationManager.signOut() {
     networkCredentialStore.removeAll()
 }
 
-public fun AuthenticatorState.completeOAuthSignIn(intent: Intent) {
-    if (intent.data != null) {
+public fun AuthenticatorState.completeOAuthSignIn(intent: Intent?) {
+    if (intent != null && intent.data != null) {
         val uriString = intent.data.toString()
         pendingOAuthUserSignIn.value?.complete(uriString)
     }
