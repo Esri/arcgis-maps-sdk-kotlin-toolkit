@@ -1,6 +1,5 @@
 package com.arcgismaps.toolkit.featureformsapp.screens.browse
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -29,8 +28,11 @@ class MapListViewModel @Inject constructor(
     private val portalItemUseCase: PortalItemUseCase
 ) : ViewModel() {
 
+    // State flow to keep track of current loading state
     private val _isLoading = MutableStateFlow(false)
 
+    // State flow that combines the _isLoading and the PortalItemUseCase data flow to create
+    // a MapListUIState
     val uiState: StateFlow<MapListUIState> =
         combine(_isLoading, portalItemUseCase.observe()) { isLoading, portalItemData ->
             MapListUIState(isLoading, portalItemData)
@@ -42,12 +44,17 @@ class MapListViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            // if the data is empty, refresh it
+            // this is used to identify first launch
             if (portalItemUseCase.isEmpty()) {
                 refresh(false)
             }
         }
     }
 
+    /**
+     * Refreshes the data. [forceUpdate] clears the local cache.
+     */
     fun refresh(forceUpdate : Boolean) {
         if (!_isLoading.value) {
             viewModelScope.launch {

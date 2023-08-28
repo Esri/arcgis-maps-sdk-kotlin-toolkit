@@ -8,6 +8,9 @@ import androidx.room.Query
 import androidx.room.RoomDatabase
 import androidx.room.Upsert
 
+/**
+ * Model to represent a PortalItem Cache entry.
+ */
 @Entity
 data class ItemCacheEntry(
     @PrimaryKey val itemId: String,
@@ -19,7 +22,7 @@ data class ItemCacheEntry(
 interface ItemCacheDao {
 
     /**
-     * fetch an item by id.
+     * fetch an entry by id.
      *
      * @param itemId the item id.
      * @return the cache entry with the item id.
@@ -28,7 +31,7 @@ interface ItemCacheDao {
     suspend fun getById(itemId: String): ItemCacheEntry?
 
     /**
-     * Insert or update an item in the database. If an entry already exists, replace it.
+     * Insert or update an entry in the database. If an entry already exists, replace it.
      *
      * @param entry the ItemCacheEntry to be inserted or updated.
      */
@@ -36,12 +39,15 @@ interface ItemCacheDao {
     suspend fun upsert(entry: ItemCacheEntry)
 
     /**
-     * Delete all items.
+     * Delete all entries.
      */
     @Query("DELETE FROM itemcacheentry")
     suspend fun deleteAll()
 }
 
+/**
+ * The room database that contains the ItemCacheEntry table.
+ */
 @Database(entities = [ItemCacheEntry::class], version = 1, exportSchema = false)
 abstract class ItemCacheDatabase : RoomDatabase() {
     abstract fun itemCacheDao() : ItemCacheDao

@@ -33,36 +33,42 @@ import kotlinx.coroutines.CoroutineScope
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
-
+/**
+ * Provide an annotation to inject the ItemRemoteDataSource
+ */
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
 annotation class ItemRemoteSource
 
 /**
- * Provide an annotation to inject the PortalItem repository
+ * Provide an annotation to inject the ItemRepository
  */
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
 annotation class ItemRepo
 
+/**
+ * Provide an annotation to inject the PortalItemRepository
+ */
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
 annotation class PortalItemRepo
 
-/**
- * The singleton portal item use case provider
- */
+
 @Module
 @InstallIn(SingletonComponent::class)
 class DataModule {
 
+    /**
+     * The provider of the ItemRemoteDataSource.
+     */
     @Provides
     @ItemRemoteSource
     internal fun provideItemRemoteDataSource(@IoDispatcher dispatcher: CoroutineDispatcher): ItemRemoteDataSource =
         ItemRemoteDataSource(dispatcher)
     
     /**
-     * The provider of the PortalItem data source. Only used below.
+     * The provider of the ItemRepository.
      */
     @Provides
     @ItemRepo
@@ -73,15 +79,17 @@ class DataModule {
     ): ItemRepository =
         ItemRepository(dispatcher, itemLocalSource, remoteDataSource)
 
+    /**
+     * The provider of the PortalItemRepository.
+     */
     @Provides
     @PortalItemRepo
     internal fun providePortalItemRepository(
-        @ApplicationScope coroutineScope: CoroutineScope,
         @IoDispatcher dispatcher: CoroutineDispatcher,
         @ItemRepo itemRepository: ItemRepository,
         @ItemCache itemCacheDao: ItemCacheDao,
     ): PortalItemRepository =
-        PortalItemRepository(coroutineScope, dispatcher, itemRepository, itemCacheDao)
+        PortalItemRepository(dispatcher, itemRepository, itemCacheDao)
     
     /**
      * The provider of the PortalItem use case, scoped to the navigation graph lifetime by means of the

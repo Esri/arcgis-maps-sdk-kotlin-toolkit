@@ -33,7 +33,7 @@ data class PortalItemData(
 )
 
 /**
- * A domain layer to transform item data into loaded PortalItems, along with some domain knowledge of what layer
+ * A domain layer to transform the loaded portal items with some added domain knowledge of what layer
  * in each item is of interest.
  */
 class PortalItemUseCase(
@@ -43,7 +43,7 @@ class PortalItemUseCase(
 ) {
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val flow: Flow<List<PortalItemData>> = portalItemRepository.getItems().mapLatest {
+    private val portalItemDataFlow: Flow<List<PortalItemData>> = portalItemRepository.getItems().mapLatest {
         it.map { item ->
             PortalItemData(
                 portalItem = item,
@@ -52,7 +52,7 @@ class PortalItemUseCase(
         }
     }.flowOn(dispatcher)
 
-    fun observe(): Flow<List<PortalItemData>> = flow
+    fun observe(): Flow<List<PortalItemData>> = portalItemDataFlow
 
     suspend fun refresh(forceUpdate : Boolean) = portalItemRepository.refresh(forceUpdate)
 

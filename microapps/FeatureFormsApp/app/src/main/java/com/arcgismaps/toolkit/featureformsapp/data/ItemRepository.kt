@@ -18,15 +18,12 @@
 
 package com.arcgismaps.toolkit.featureformsapp.data
 
-import android.util.Log
 import com.arcgismaps.toolkit.featureformsapp.data.local.ItemDao
 import com.arcgismaps.toolkit.featureformsapp.data.local.ItemData
 import com.arcgismaps.toolkit.featureformsapp.data.network.ItemRemoteDataSource
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEmpty
 import kotlinx.coroutines.withContext
 
 /**
@@ -38,10 +35,20 @@ class ItemRepository(
     private val remoteDataSource: ItemRemoteDataSource
 ) {
 
+    /**
+     * Provides a Flow<List<ItemData>> to observe.
+     */
     fun observe(): Flow<List<ItemData>> = localDataSource.observeAll().flowOn(dispatcher)
 
+    /**
+     * Returns the number of items in the current data source.
+     */
     suspend fun getCount(): Int = withContext(dispatcher) { localDataSource.getCount() }
 
+    /**
+     * Refreshes the local and network data source to fetch the latest content. This operation is
+     * suspending.
+     */
     suspend fun refresh() = withContext(dispatcher) {
         // get local items
         val localItems = refreshLocalItems()
@@ -55,7 +62,7 @@ class ItemRepository(
 }
 
 /**
- * Data source of a list of portal urls
+ * Local data source of a list of portal urls
  */
 fun getListOfMaps(): List<String> =
     listOf(
