@@ -79,6 +79,9 @@ class PortalItemRepository(
         return@withContext itemCacheDao.getCount()
     }
 
+    /**
+     * Loads the list of [items] into loaded portal items and adds them to the Cache.
+     */
     private suspend fun loadAndCachePortalItems(items: List<ItemData>) {
         val entries = items.map { itemData ->
             val portalItem = PortalItem(itemData.url)
@@ -103,11 +106,17 @@ class PortalItemRepository(
         createCacheEntries(entries)
     }
 
+    /**
+     * Deletes and inserts the list of [entries] using the [ItemCacheDao].
+     */
     private suspend fun createCacheEntries(entries: List<ItemCacheEntry>) =
         withContext(dispatcher) {
             itemCacheDao.deleteAndInsert(entries)
         }
 
+    /**
+     * Deletes all entries in the database using the [ItemCacheDao].
+     */
     private suspend fun deleteAllCacheEntries() =
         withContext(Dispatchers.IO) {
             itemCacheDao.deleteAll()
@@ -115,6 +124,10 @@ class PortalItemRepository(
             if (thumbsDir.exists()) thumbsDir.deleteRecursively()
         }
 
+    /**
+     * Creates a JPEG thumbnail using the [bitmap] with [name] filename in the local files
+     * directory and returns the absolute path to the file.
+     */
     private suspend fun createThumbnail(name: String, bitmap: Bitmap): String =
         withContext(Dispatchers.IO) {
             val thumbsDir = File("$filesDir/thumbs")
