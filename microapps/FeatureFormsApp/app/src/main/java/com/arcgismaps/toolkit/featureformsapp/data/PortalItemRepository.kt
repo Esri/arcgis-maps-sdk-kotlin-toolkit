@@ -5,7 +5,6 @@ import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.featureformsapp.data.local.ItemCacheDao
 import com.arcgismaps.toolkit.featureformsapp.data.local.ItemCacheEntry
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.conflate
@@ -44,7 +43,7 @@ class PortalItemRepository(
                         portalItem.portal.url
                     )
                 }
-                portalItems[itemData.url] = portalItem
+                portalItems[portalItem.itemId] = portalItem
                 portalItem.thumbnail?.load()
                 portalItem
             }
@@ -89,5 +88,5 @@ class PortalItemRepository(
     private suspend fun deleteAllCacheEntries() =
         withContext(dispatcher) { itemCacheDao.deleteAll() }
 
-    operator fun invoke(url: String): PortalItem? = portalItems[url]
+    operator fun invoke(itemId: String): PortalItem? = portalItems[itemId]
 }

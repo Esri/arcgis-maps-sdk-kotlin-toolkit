@@ -120,7 +120,7 @@ fun MapListScreen(
                                     .fillMaxWidth()
                                     .height(100.dp)
                             ) {
-                                onItemClick(item.portalItem.url)
+                                onItemClick(item.portalItem.itemId)
                             }
                         }
                     }
@@ -130,7 +130,6 @@ fun MapListScreen(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Log.e("TAG", "MapListScreen: nothing to show")
                         Text(text = "Nothing to show. Pull-down to Refresh")
                     }
                 }

@@ -72,8 +72,8 @@ class PortalItemUseCase(
     /**
      * Used by the UI to get a specific PortalItem by url
      */
-    operator fun invoke(url: String): PortalItemData? {
-        return portalItemRepository(url)?.let {
+    operator fun invoke(itemId: String): PortalItemData? {
+        return portalItemRepository(itemId)?.let {
             PortalItemData(it, formLayerName(it.itemId))
         }
     }

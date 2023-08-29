@@ -31,12 +31,12 @@ class MapViewModel @Inject constructor(
 ) : ViewModel(),
     MapState by MapState(),
     FeatureFormState by FeatureFormState() {
-    private val url: String = savedStateHandle["uri"]!!
+    private val itemId: String = savedStateHandle["uri"]!!
     lateinit var portalItemData: PortalItemData
     
     init {
         viewModelScope.launch {
-            portalItemData = portalItemUseCase(url) ?: return@launch
+            portalItemData = portalItemUseCase(itemId) ?: return@launch
             setMap(ArcGISMap(portalItemData.portalItem))
         }
     }
