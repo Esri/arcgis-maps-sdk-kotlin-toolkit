@@ -199,6 +199,7 @@ private class FloorFilterStateImpl(
                 }
                 filterMap()
             }
+            _onFacilityChanged.value = getSelectedFacility()
             _onLevelChanged.value = getSelectedLevel()
             getSelectedLevel()?.let {
                 onSelectionChangedListener(
