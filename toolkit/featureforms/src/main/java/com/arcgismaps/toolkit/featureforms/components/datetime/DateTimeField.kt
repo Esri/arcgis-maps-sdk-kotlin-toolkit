@@ -54,9 +54,8 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.datetime.picker.DateTimePicker
 import com.arcgismaps.toolkit.featureforms.components.datetime.picker.DateTimePickerInput
-import com.arcgismaps.toolkit.featureforms.components.datetime.picker.DateTimePickerState
 import com.arcgismaps.toolkit.featureforms.components.datetime.picker.DateTimePickerStyle
-import com.arcgismaps.toolkit.featureforms.components.datetime.picker.dateTimePickerStateSaver
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.rememberDateTimePickerState
 import com.arcgismaps.toolkit.featureforms.utils.PlaceholderTransformation
 
 @Composable
@@ -67,7 +66,7 @@ internal fun DateTimeField(
     val isEditable by state.isEditable
     val isRequired by state.isRequired
     val epochMillis by state.value
-    val shouldShowTime = rememberSaveable {
+    val shouldShowTime = remember {
         state.shouldShowTime
     }
     val pickerStyle = if (shouldShowTime) {
@@ -198,17 +197,15 @@ internal fun DateTimeField(
     }
 
     if (openDialog) {
-        val pickerState = rememberSaveable(saver = dateTimePickerStateSaver(epochMillis)) {
-            DateTimePickerState(
-                pickerStyle,
-                state.minEpochMillis,
-                state.maxEpochMillis,
-                epochMillis,
-                state.label,
-                state.description,
-                DateTimePickerInput.Date
-            )
-        }
+        val pickerState = rememberDateTimePickerState(
+            pickerStyle,
+            state.minEpochMillis,
+            state.maxEpochMillis,
+            epochMillis,
+            state.label,
+            state.description,
+            DateTimePickerInput.Date
+        )
         // the picker dialog
         DateTimePicker(
             state = pickerState,
