@@ -1,7 +1,6 @@
 package com.arcgismaps.toolkit.featureformsapp.data
 
 import android.graphics.Bitmap
-import android.util.Log
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.featureformsapp.data.local.ItemCacheDao
@@ -17,10 +16,6 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
-import kotlin.io.path.name
 
 data class PortalItemData(
     val portalItem: PortalItem,
@@ -119,7 +114,11 @@ class PortalItemRepository(
     }
 
     private suspend fun deleteAllCacheEntries() =
-        withContext(dispatcher) { itemCacheDao.deleteAll() }
+        withContext(Dispatchers.IO) {
+            itemCacheDao.deleteAll()
+            val thumbsDir = File("$filesDir/thumbs")
+            if (thumbsDir.exists()) thumbsDir.deleteRecursively()
+        }
 
     private suspend fun createThumbnail(name: String, bitmap: Bitmap): String =
         withContext(Dispatchers.IO) {
