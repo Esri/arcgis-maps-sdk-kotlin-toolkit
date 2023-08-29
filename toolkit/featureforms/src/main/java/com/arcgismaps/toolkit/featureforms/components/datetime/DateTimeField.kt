@@ -41,6 +41,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -52,8 +53,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.datetime.picker.DateTimePicker
-import com.arcgismaps.toolkit.featureforms.components.datetime.picker.DateTimePickerState
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.DateTimePickerInput
 import com.arcgismaps.toolkit.featureforms.components.datetime.picker.DateTimePickerStyle
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.rememberDateTimePickerState
 import com.arcgismaps.toolkit.featureforms.utils.PlaceholderTransformation
 
 @Composable
@@ -64,12 +66,15 @@ internal fun DateTimeField(
     val isEditable by state.isEditable
     val isRequired by state.isRequired
     val epochMillis by state.value
-    val pickerStyle = if (state.shouldShowTime) {
+    val shouldShowTime = remember {
+        state.shouldShowTime
+    }
+    val pickerStyle = if (shouldShowTime) {
         DateTimePickerStyle.DateTime
     } else {
         DateTimePickerStyle.Date
     }
-    var openDialog by remember { mutableStateOf(false) }
+    var openDialog by rememberSaveable { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
     // the field
     if (isEditable) {
@@ -192,16 +197,15 @@ internal fun DateTimeField(
     }
 
     if (openDialog) {
-        val pickerState = remember {
-            DateTimePickerState(
-                pickerStyle,
-                state.minEpochMillis,
-                state.maxEpochMillis,
-                epochMillis,
-                state.label,
-                state.description
-            )
-        }
+        val pickerState = rememberDateTimePickerState(
+            pickerStyle,
+            state.minEpochMillis,
+            state.maxEpochMillis,
+            epochMillis,
+            state.label,
+            state.description,
+            DateTimePickerInput.Date
+        )
         // the picker dialog
         DateTimePicker(
             state = pickerState,
