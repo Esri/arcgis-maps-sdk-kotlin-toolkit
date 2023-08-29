@@ -78,7 +78,7 @@ fun MapListScreen(
     val lazyListState = rememberLazyListState()
 
     Scaffold(topBar = {
-        AppBar {
+        AppBar(uiState.isLoading) {
             mapListViewModel.refresh(it)
         }
     }) { padding ->
@@ -199,7 +199,7 @@ fun MapListItem(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppBar(onRefresh: (Boolean) -> Unit = {}) {
+fun AppBar(isLoading: Boolean, onRefresh: (Boolean) -> Unit = {}) {
     var expanded by remember { mutableStateOf(false) }
     TopAppBar(
         title = {
@@ -218,11 +218,17 @@ fun AppBar(onRefresh: (Boolean) -> Unit = {}) {
                 modifier = Modifier.width(150.dp),
                 offset = DpOffset((15).dp, 0.dp)
             ) {
-                DropdownMenuItem(text = { Text(text = "Refresh") }, onClick = {
-                    expanded = false
-                    onRefresh(false)
-                })
-                DropdownMenuItem(text = { Text(text = "Clear Cache") }, onClick = {
+                DropdownMenuItem(
+                    text = { Text(text = "Refresh") },
+                    enabled = !isLoading,
+                    onClick = {
+                        expanded = false
+                        onRefresh(false)
+                    })
+                DropdownMenuItem(
+                    text = { Text(text = "Clear Cache") },
+                    enabled = !isLoading,
+                    onClick = {
                     expanded = false
                     onRefresh(true)
                 })

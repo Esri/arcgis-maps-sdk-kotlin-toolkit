@@ -66,6 +66,6 @@ class ItemRepository(
  */
 fun getListOfMaps(): List<String> =
     listOf(
-        "https://www.arcgis.com/home/item.html?id=0c4b6b70a56b40b08c5b0420c570a6ac",
+        "https://www.arcgis.com/home/item.html?id=a95963333bf84055b7115dc60d10443e",
     )
 
