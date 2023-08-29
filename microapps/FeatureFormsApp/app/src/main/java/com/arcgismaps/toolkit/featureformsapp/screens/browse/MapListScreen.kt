@@ -128,8 +128,7 @@ fun MapListScreen(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Log.e("TAG", "MapListScreen: nothing to show")
-                        Text(text = "Nothing to show. Pull-down to Refresh")
+                        Text(text = "Nothing to show.")
                     }
                 }
             }

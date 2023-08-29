@@ -42,7 +42,7 @@ class PortalItemUseCase(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val portalItemDataFlow: Flow<List<PortalItemWithLayer>> =
-        portalItemRepository.getItems().mapLatest {
+        portalItemRepository.observe().mapLatest {
             it.map { item ->
                 PortalItemWithLayer(
                     data = item,
