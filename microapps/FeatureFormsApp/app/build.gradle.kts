@@ -76,10 +76,8 @@ dependencies {
     annotationProcessor(libs.room.compiler)
     implementation(libs.room.ext)
     kapt(libs.room.compiler)
-
     // coil
-    implementation("io.coil-kt:coil:2.4.0")
-    implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation(libs.coil.compose)
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)
