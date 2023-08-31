@@ -55,7 +55,7 @@ object PersistenceModule {
     @Provides
     fun provideItemDataBase(@ApplicationContext context: Context): ItemDatabase {
         return Room.databaseBuilder(
-            context.applicationContext,
+            context,
             ItemDatabase::class.java,
             "items.db"
         ).build()
@@ -68,7 +68,7 @@ object PersistenceModule {
     @Provides
     fun provideItemCacheDataBase(@ApplicationContext context: Context): ItemCacheDatabase {
         return Room.databaseBuilder(
-            context.applicationContext,
+            context,
             ItemCacheDatabase::class.java,
             "portal_items.db"
         ).build()

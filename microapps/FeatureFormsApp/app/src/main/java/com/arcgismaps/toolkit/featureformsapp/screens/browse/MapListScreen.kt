@@ -1,6 +1,5 @@
 package com.arcgismaps.toolkit.featureformsapp.screens.browse
 
-import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
@@ -38,7 +37,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,7 +54,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.arcgismaps.portal.LoadableImage
 import com.arcgismaps.portal.PortalAccess
 import com.arcgismaps.toolkit.featureformsapp.R
 import java.time.Instant
@@ -89,7 +86,8 @@ fun MapListScreen(
             modifier = Modifier.padding(padding),
             transitionSpec = {
                 fadeIn(animationSpec = tween(1000)) with fadeOut()
-            }
+            },
+            label = "list fade"
         ) { state ->
             when (state) {
                 true -> Box(modifier = modifier.fillMaxSize()) {

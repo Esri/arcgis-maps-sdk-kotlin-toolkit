@@ -21,7 +21,6 @@ package com.arcgismaps.toolkit.featureformsapp.domain
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
@@ -38,7 +37,6 @@ data class PortalItemData(
  */
 class PortalItemUseCase(
     dispatcher: CoroutineDispatcher,
-    scope: CoroutineScope,
     private val portalItemRepository: PortalItemRepository
 ) {
 
