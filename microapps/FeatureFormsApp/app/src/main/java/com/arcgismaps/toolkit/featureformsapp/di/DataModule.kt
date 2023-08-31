@@ -18,15 +18,15 @@
 
 package com.arcgismaps.toolkit.featureformsapp.di
 
-import com.arcgismaps.toolkit.featureformsapp.data.ItemRepository
+import android.content.Context
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
 import com.arcgismaps.toolkit.featureformsapp.data.local.ItemCacheDao
-import com.arcgismaps.toolkit.featureformsapp.data.local.ItemDao
 import com.arcgismaps.toolkit.featureformsapp.data.network.ItemRemoteDataSource
 import com.arcgismaps.toolkit.featureformsapp.domain.PortalItemUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import javax.inject.Qualifier
@@ -38,13 +38,6 @@ import javax.inject.Singleton
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
 annotation class ItemRemoteSource
-
-/**
- * Provide an annotation to inject the ItemRepository
- */
-@Qualifier
-@Retention(AnnotationRetention.RUNTIME)
-annotation class ItemRepo
 
 /**
  * Provide an annotation to inject the PortalItemRepository
@@ -65,18 +58,6 @@ class DataModule {
     @ItemRemoteSource
     internal fun provideItemRemoteDataSource(@IoDispatcher dispatcher: CoroutineDispatcher): ItemRemoteDataSource =
         ItemRemoteDataSource(dispatcher)
-    
-    /**
-     * The provider of the ItemRepository.
-     */
-    @Provides
-    @ItemRepo
-    internal fun provideItemRepository(
-        @IoDispatcher dispatcher: CoroutineDispatcher,
-        @ItemLocalSource itemLocalSource: ItemDao,
-        @ItemRemoteSource remoteDataSource: ItemRemoteDataSource
-    ): ItemRepository =
-        ItemRepository(dispatcher, itemLocalSource, remoteDataSource)
 
     /**
      * The provider of the PortalItemRepository.
@@ -85,10 +66,11 @@ class DataModule {
     @PortalItemRepo
     internal fun providePortalItemRepository(
         @IoDispatcher dispatcher: CoroutineDispatcher,
-        @ItemRepo itemRepository: ItemRepository,
+        @ItemRemoteSource remoteDataSource: ItemRemoteDataSource,
         @ItemCache itemCacheDao: ItemCacheDao,
+        @ApplicationContext context: Context
     ): PortalItemRepository =
-        PortalItemRepository(dispatcher, itemRepository, itemCacheDao)
+        PortalItemRepository(dispatcher, remoteDataSource, itemCacheDao, context.filesDir.absolutePath)
     
     /**
      * The provider of the PortalItem use case, scoped to the navigation graph lifetime by means of the

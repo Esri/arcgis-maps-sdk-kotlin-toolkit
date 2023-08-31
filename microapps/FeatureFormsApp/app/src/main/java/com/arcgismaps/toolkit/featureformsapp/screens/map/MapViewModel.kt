@@ -13,8 +13,8 @@ import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.toolkit.composablemap.MapState
 import com.arcgismaps.toolkit.featureforms.EditingTransactionState
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
-import com.arcgismaps.toolkit.featureformsapp.domain.PortalItemData
 import com.arcgismaps.toolkit.featureformsapp.domain.PortalItemUseCase
+import com.arcgismaps.toolkit.featureformsapp.domain.PortalItemWithLayer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -32,12 +32,12 @@ class MapViewModel @Inject constructor(
     MapState by MapState(),
     FeatureFormState by FeatureFormState() {
     private val itemId: String = savedStateHandle["uri"]!!
-    lateinit var portalItemData: PortalItemData
+    lateinit var portalItemData: PortalItemWithLayer
     
     init {
         viewModelScope.launch {
             portalItemData = portalItemUseCase(itemId) ?: return@launch
-            setMap(ArcGISMap(portalItemData.portalItem))
+            setMap(ArcGISMap(portalItemData.data.portalItem))
         }
     }
     
