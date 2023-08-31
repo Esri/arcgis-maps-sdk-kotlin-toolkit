@@ -13,6 +13,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
@@ -35,6 +37,8 @@ class PortalItemRepository(
 ) {
     // in memory cache of loaded portal items
     private val portalItems: MutableMap<String, PortalItem> = mutableMapOf()
+    // to protect shared state of portalItems
+    private val mutex = Mutex()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val portalItemsFlow: Flow<List<PortalItemData>> =
@@ -63,14 +67,16 @@ class PortalItemRepository(
      * AND the repository has finished loading the portal items.
      */
     suspend fun refresh(forceUpdate: Boolean = false) = withContext(dispatcher) {
-        if (forceUpdate) deleteAllCacheEntries()
-        portalItems.clear()
-        // get local items
-        val localItems = getListOfMaps().map { ItemData(it) }
-        // get network items
-        val remoteItems = remoteDataSource.fetchItemData()
-        // load the portal items and add them to cache
-        loadAndCachePortalItems(localItems + remoteItems)
+        mutex.withLock {
+            if (forceUpdate) deleteAllCacheEntries()
+            portalItems.clear()
+            // get local items
+            val localItems = getListOfMaps().map { ItemData(it) }
+            // get network items
+            val remoteItems = remoteDataSource.fetchItemData()
+            // load the portal items and add them to cache
+            loadAndCachePortalItems(localItems + remoteItems)
+        }
     }
 
     /**
@@ -149,5 +155,5 @@ class PortalItemRepository(
  */
 fun getListOfMaps(): List<String> =
     listOf(
-        "https://www.arcgis.com/home/item.html?id=0c4b6b70a56b40b08c5b0420c570a6ac",
+        "https://www.arcgis.com/home/item.html?id=a95963333bf84055b7115dc60d10443e",
     )

@@ -55,7 +55,7 @@ class MapListViewModel @Inject constructor(
     /**
      * Refreshes the data. [forceUpdate] clears the local cache.
      */
-    fun refresh(forceUpdate : Boolean) {
+    fun refresh(forceUpdate: Boolean) {
         if (!_isLoading.value) {
             viewModelScope.launch {
                 _isLoading.emit(true)
