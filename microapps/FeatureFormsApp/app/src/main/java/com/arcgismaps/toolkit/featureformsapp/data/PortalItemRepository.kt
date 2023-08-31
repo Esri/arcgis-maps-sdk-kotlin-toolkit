@@ -131,7 +131,7 @@ class PortalItemRepository(
     private suspend fun createThumbnail(name: String, bitmap: Bitmap): String =
         withContext(Dispatchers.IO) {
             val thumbsDir = File("$filesDir/thumbs")
-            if (!thumbsDir.exists()) thumbsDir.mkdir()
+            if (!thumbsDir.exists()) thumbsDir.mkdirs()
             val file = File("${thumbsDir.absolutePath}/${name}.jpg")
             file.createNewFile()
             FileOutputStream(file).use {
