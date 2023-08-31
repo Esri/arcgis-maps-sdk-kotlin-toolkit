@@ -144,11 +144,6 @@ public fun FloorFilter(
             // get the selected level ID
             val selectedLevelID = floorFilterState.onLevelChanged.collectAsStateWithLifecycle().value?.id
 
-            // get the selected facility if the level was set programmatically
-            if (selectedFacility == null) {
-                selectedFacility = floorFilterState.getSelectedFacility()
-            }
-
             // if no facility is selected, only display site-facility selector button
             if (selectedFacility == null) {
                 SiteFacilityButton(
