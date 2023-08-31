@@ -55,7 +55,6 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import com.arcgismaps.portal.PortalAccess
 import com.arcgismaps.toolkit.featureformsapp.R
 import java.time.Instant
 import java.time.ZoneId
