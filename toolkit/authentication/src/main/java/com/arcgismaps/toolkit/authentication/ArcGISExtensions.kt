@@ -43,6 +43,14 @@ public suspend fun AuthenticationManager.signOut() {
     networkCredentialStore.removeAll()
 }
 
+/**
+ * Completes the current [AuthenticatorState.pendingOAuthUserSignIn] with data from the provided [intent].
+ *
+ * The [intent.data] should contain a string representing the redirect URI that came from a browser
+ * where the OAuth sign-in was performed. If the data is null, the sign-in will be cancelled.
+ *
+ * @since 200.3.0
+ */
 public fun AuthenticatorState.completeOAuthSignIn(intent: Intent?) {
     if (intent != null && intent.data != null) {
         val uriString = intent.data.toString()
@@ -63,8 +71,7 @@ public fun AuthenticatorState.completeOAuthSignIn(intent: Intent?) {
  *
  * @since 200.2.0
  */
-context (Activity)
-public fun launchCustomTabs(pendingSignIn: OAuthUserSignIn?): Unit =
+public fun Activity.launchCustomTabs(pendingSignIn: OAuthUserSignIn?): Unit =
     launchCustomTabs(pendingSignIn?.authorizeUrl, pendingSignIn?.oAuthUserConfiguration?.preferPrivateWebBrowserSession)
 
 
@@ -78,11 +85,10 @@ public fun launchCustomTabs(pendingSignIn: OAuthUserSignIn?): Unit =
  *
  * @since 200.2.0
  */
-context (Activity)
-internal fun launchCustomTabs(authorizeUrl: String?, useIncognito: Boolean?) {
+internal fun Activity.launchCustomTabs(authorizeUrl: String?, useIncognito: Boolean?) {
     CustomTabsIntent.Builder().build().apply {
         if (useIncognito == true) {
             intent.putExtra("com.google.android.apps.chrome.EXTRA_OPEN_NEW_INCOGNITO_TAB", true)
         }
-    }.launchUrl(this@Activity, Uri.parse(authorizeUrl))
+    }.launchUrl(this, Uri.parse(authorizeUrl))
 }
