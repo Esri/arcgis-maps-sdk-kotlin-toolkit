@@ -29,7 +29,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
@@ -81,11 +80,9 @@ class DataModule {
     @Provides
     fun providePortalItemUseCase(
         @IoDispatcher dispatcher: CoroutineDispatcher,
-        @ApplicationScope applicationScope: CoroutineScope,
         @PortalItemRepo portalItemRepository: PortalItemRepository
     ): PortalItemUseCase = PortalItemUseCase(
         dispatcher,
-        applicationScope,
         portalItemRepository
     )
 }

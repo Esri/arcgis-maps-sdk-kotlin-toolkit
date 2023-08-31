@@ -31,7 +31,6 @@ object PersistenceModule {
     @ItemCache
     fun provideItemCacheDao(database: ItemCacheDatabase): ItemCacheDao = database.itemCacheDao()
 
-
     /**
      * The provider of the ItemCacheDatabase.
      */
@@ -39,7 +38,7 @@ object PersistenceModule {
     @Provides
     fun provideItemCacheDataBase(@ApplicationContext context: Context): ItemCacheDatabase {
         return Room.databaseBuilder(
-            context.applicationContext,
+            context,
             ItemCacheDatabase::class.java,
             "portal_items.db"
         ).build()

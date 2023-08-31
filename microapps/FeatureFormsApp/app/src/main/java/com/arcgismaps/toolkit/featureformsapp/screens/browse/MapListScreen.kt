@@ -1,6 +1,5 @@
 package com.arcgismaps.toolkit.featureformsapp.screens.browse
 
-import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
@@ -56,6 +55,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.arcgismaps.portal.PortalAccess
 import com.arcgismaps.toolkit.featureformsapp.R
 import java.time.Instant
 import java.time.ZoneId
@@ -77,7 +77,7 @@ fun MapListScreen(
     val lazyListState = rememberLazyListState()
 
     Scaffold(topBar = {
-        AppBar {
+        AppBar(uiState.isLoading) {
             mapListViewModel.refresh(it)
         }
     }) { padding ->
@@ -88,7 +88,8 @@ fun MapListScreen(
             modifier = Modifier.padding(padding),
             transitionSpec = {
                 fadeIn(animationSpec = tween(1000)) with fadeOut()
-            }
+            },
+            label = "list fade"
         ) { state ->
             when (state) {
                 true -> Box(modifier = modifier.fillMaxSize()) {
@@ -118,7 +119,7 @@ fun MapListScreen(
                                     .fillMaxWidth()
                                     .height(100.dp)
                             ) {
-                                onItemClick(item.data.portalItem.url)
+                                onItemClick(item.data.portalItem.itemId)
                             }
                         }
                     }
@@ -203,7 +204,7 @@ fun MapListItem(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppBar(onRefresh: (Boolean) -> Unit = {}) {
+fun AppBar(isLoading: Boolean, onRefresh: (Boolean) -> Unit = {}) {
     var expanded by remember { mutableStateOf(false) }
     TopAppBar(
         title = {
@@ -222,11 +223,17 @@ fun AppBar(onRefresh: (Boolean) -> Unit = {}) {
                 modifier = Modifier.width(150.dp),
                 offset = DpOffset((15).dp, 0.dp)
             ) {
-                DropdownMenuItem(text = { Text(text = "Refresh") }, onClick = {
-                    expanded = false
-                    onRefresh(false)
-                })
-                DropdownMenuItem(text = { Text(text = "Clear Cache") }, onClick = {
+                DropdownMenuItem(
+                    text = { Text(text = "Refresh") },
+                    enabled = !isLoading,
+                    onClick = {
+                        expanded = false
+                        onRefresh(false)
+                    })
+                DropdownMenuItem(
+                    text = { Text(text = "Clear Cache") },
+                    enabled = !isLoading,
+                    onClick = {
                     expanded = false
                     onRefresh(true)
                 })

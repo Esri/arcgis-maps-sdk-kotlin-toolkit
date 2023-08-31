@@ -21,7 +21,7 @@ class ItemRemoteDataSource(
             )
             // log an exception and return if the portal loading fails
             portal.load().onFailure {
-                Log.e("ItemRemoteDataSource", "error in fetchItems: ${it.message}", )
+                Log.e("ItemRemoteDataSource", "error in fetchItems: ${it.message}")
                 return emptyList()
             }
             val user = portal.user ?: return emptyList()
@@ -56,6 +56,6 @@ class ItemRemoteDataSource(
     }
 
     suspend fun fetchItemData(): List<ItemData> = withContext(dispatcher) {
-        return@withContext itemApi.fetchItems()
+        itemApi.fetchItems()
     }
 }

@@ -44,6 +44,7 @@ class PortalItemRepository(
                 val portal = Portal(entry.portalUrl)
                 val portalItem = PortalItem.fromJsonOrNull(entry.json, portal)
                 portalItem?.let {
+                    portalItems[portalItem.itemId] = portalItem
                     PortalItemData(portalItem, entry.thumbnailUri)
                 }
             }
@@ -140,7 +141,7 @@ class PortalItemRepository(
             return@withContext file.absolutePath
         }
 
-    operator fun invoke(url: String): PortalItem? = portalItems[url]
+    operator fun invoke(itemId: String): PortalItem? = portalItems[itemId]
 }
 
 /**
