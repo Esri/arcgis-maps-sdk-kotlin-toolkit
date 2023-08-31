@@ -318,7 +318,7 @@ private fun DateTimePickerDialog(
             modifier = Modifier
                 .padding(start = 25.dp, end = 25.dp)
                 .widthIn(DateTimePickerDialogTokens.containerWidth)
-                .heightIn(DateTimePickerDialogTokens.containerHeight),
+                .height(DateTimePickerDialogTokens.containerHeight),
             shape = shape,
             color = MaterialTheme.colorScheme.surface,
             tonalElevation = tonalElevation,
@@ -338,7 +338,7 @@ private fun DateTimePickerDialog(
  * Properties for the [DateTimePickerDialog].
  */
 private object DateTimePickerDialogTokens {
-    val containerHeight = 568.0.dp
+    val containerHeight = 600.0.dp
     val containerWidth = 360.0.dp
 }
 
