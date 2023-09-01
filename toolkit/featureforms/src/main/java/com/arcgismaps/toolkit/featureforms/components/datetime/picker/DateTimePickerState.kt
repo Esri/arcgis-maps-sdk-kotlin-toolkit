@@ -318,7 +318,7 @@ internal fun rememberDateTimePickerState(
     label: String,
     description: String = "",
     pickerInput: DateTimePickerInput
-): DateTimePickerState = rememberSaveable(saver = dateTimePickerStateSaver(initialValue)) {
+): DateTimePickerState = rememberSaveable(saver = dateTimePickerStateSaver()) {
     DateTimePickerState(
         style,
         minDateTime,
@@ -333,16 +333,15 @@ internal fun rememberDateTimePickerState(
 /**
  * a StateSaver for the DateTimePickerState.
  *
- * @param initialValue the value needed to initialize a DateTimePickerState
  * @return a StateSaver
  * @since 200.3.0
  */
-internal fun dateTimePickerStateSaver(initialValue: Long?): Saver<DateTimePickerState, Any> = listSaver(
+internal fun dateTimePickerStateSaver(): Saver<DateTimePickerState, Any> = listSaver(
     save = {
         listOf(it.pickerStyle,
             it.minDateTime,
             it.maxDateTime,
-            initialValue,
+            it.dateTime.value.epochMillis,
             it.label,
             it.description,
             it.activePickerInput.value

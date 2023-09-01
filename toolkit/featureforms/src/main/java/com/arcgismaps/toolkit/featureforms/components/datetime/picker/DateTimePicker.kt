@@ -222,7 +222,6 @@ private fun (ColumnScope).PickerContent(
                 Spacer(modifier = Modifier.height(10.dp))
                 TimePicker(state = timePickerState, modifier = Modifier.padding(10.dp))
             } else {
-                println("data picker state ${datePickerState.selectedDateMillis}")
                 DatePicker(
                     state = datePickerState,
                     dateValidator = { timeStamp ->
