@@ -115,6 +115,11 @@ internal fun DateTimePicker(
         endInclusive = state.maxDateTime?.toZonedDateTime()?.year
             ?: DatePickerDefaults.YearRange.last
     )
+    
+    // State<> properties on state objects are remembered as part of remembering the
+    // state object itself at the call site. Otherwise, when the state object is recreated as part of rememberSaveable
+    // it will have a new instance of the State<> object, and the old is leaked but still observed for recomposition.
+    val pickerInput by state.activePickerInput
     // DateTime from the state's value
     val dateTime by state.dateTime
     // create and remember a DatePickerState that resets when dateTime changes
@@ -135,6 +140,7 @@ internal fun DateTimePicker(
             is24Hour = false,
         )
     }
+    
     // confirm button is only active when a date has been selected
     val confirmEnabled by remember(dateTime) {
         derivedStateOf { datePickerState.selectedDateMillis != null }
@@ -150,13 +156,14 @@ internal fun DateTimePicker(
             datePickerState = datePickerState,
             timePickerState = timePickerState,
             style = state.pickerStyle,
-            picker = state.activePickerInput.value,
+            picker = pickerInput
         ) {
             state.togglePickerInput()
         }
         PickerFooter(
             state = state,
             confirmEnabled = confirmEnabled,
+            pickerInput = pickerInput,
             onToday = {
                 state.today()
             },
@@ -256,6 +263,7 @@ private fun PickerTitle(
 private fun PickerFooter(
     state: DateTimePickerState,
     confirmEnabled: Boolean,
+    pickerInput: DateTimePickerInput,
     onToday: () -> Unit = {},
     onNow: () -> Unit = {},
     onCancelled: () -> Unit = {},
@@ -267,7 +275,7 @@ private fun PickerFooter(
             .padding(start = 10.dp, end = 10.dp)
             .fillMaxWidth()
     ) {
-        if (state.activePickerInput.value == DateTimePickerInput.Date) {
+        if (pickerInput == DateTimePickerInput.Date) {
             TextButton(
                 onClick = onToday,
                 // only enable Today button if today is within the range if provided
@@ -339,7 +347,8 @@ private fun DateTimePickerPreview() {
     val state = DateTimePickerState(
         style = DateTimePickerStyle.DateTime,
         label = "Next Inspection Date",
-        description = "Enter a date in the next six months"
+        description = "Enter a date in the next six months",
+        pickerInput  = DateTimePickerInput.Date
     )
     DateTimePicker(state = state, {}, {}, {})
 }

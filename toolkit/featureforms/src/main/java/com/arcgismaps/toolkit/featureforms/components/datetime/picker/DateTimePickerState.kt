@@ -18,8 +18,12 @@
 
 package com.arcgismaps.toolkit.featureforms.components.datetime.picker
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.toolkit.featureforms.components.datetime.toDateMillis
 import com.arcgismaps.toolkit.featureforms.components.datetime.toDateTimeInUtcZone
 import com.arcgismaps.toolkit.featureforms.components.datetime.toZonedDateTime
@@ -206,9 +210,9 @@ private class DateTimePickerStateImpl(
     override val maxDateTime: Long?,
     initialValue: Long?,
     override val label: String,
-    override val description: String = ""
+    override val description: String = "",
+    pickerInput: DateTimePickerInput
 ) : DateTimePickerState {
-    
     override var dateTime = mutableStateOf(
         UtcDateTime.create(initialValue)
     )
@@ -220,12 +224,7 @@ private class DateTimePickerStateImpl(
     
     override val timeZoneOffset = initialValue?.let { timeZone.getOffset(it) } ?: 0
     
-    override var activePickerInput = mutableStateOf(
-        if (pickerStyle == DateTimePickerStyle.DateTime
-            || pickerStyle == DateTimePickerStyle.Date
-        ) DateTimePickerInput.Date
-        else DateTimePickerInput.Time
-    )
+    override val activePickerInput = mutableStateOf(pickerInput)
     
     override fun setDateTime(date: Long?, hour: Int, minute: Int) {
         dateTime.value = UtcDateTime.createFromDateAndTime(date, hour, minute)
@@ -281,14 +280,84 @@ internal fun DateTimePickerState(
     maxDateTime: Long? = null,
     initialValue: Long? = null,
     label: String,
-    description: String = ""
+    description: String = "",
+    pickerInput: DateTimePickerInput
 ): DateTimePickerState = DateTimePickerStateImpl(
     style,
     minDateTime,
     maxDateTime,
     initialValue,
     label,
-    description
+    description,
+    pickerInput
+)
+
+/**
+ * a Composable function to create and remember a DateTimePickerState instance
+ *
+ * @param style the date time picker style
+ * @param minDateTime the minimum pickable date time
+ * @param maxDateTime the maxiimum pickable date time
+ * @param initialValue the initial value in epoch milliseconds for the picker
+ * @param label the label from the element
+ * @param description the description from the element
+ * @param pickerInput the input type to display in the picker.
+ * @return a remembered DateTimePickerState
+ * @since 200.3.0
+ */
+@Composable
+internal fun rememberDateTimePickerState(
+    style: DateTimePickerStyle,
+    minDateTime: Long? = null,
+    maxDateTime: Long? = null,
+    initialValue: Long? = null,
+    label: String,
+    description: String = "",
+    pickerInput: DateTimePickerInput
+): DateTimePickerState = rememberSaveable(saver = dateTimePickerStateSaver(initialValue)) {
+    DateTimePickerState(
+        style,
+        minDateTime,
+        maxDateTime,
+        initialValue,
+        label,
+        description,
+        pickerInput
+    )
+}
+
+/**
+ * a StateSaver for the DateTimePickerState.
+ *
+ * @param initialValue the value needed to initialize a DateTimePickerState
+ * @return a StateSaver
+ * @since 200.3.0
+ */
+internal fun dateTimePickerStateSaver(initialValue: Long?): Saver<DateTimePickerState, Any> = listSaver(
+    save = {
+        listOf(it.pickerStyle,
+            it.minDateTime,
+            it.maxDateTime,
+            initialValue,
+            it.label,
+            it.description,
+            it.activePickerInput.value
+        )
+    },
+    restore = {
+        // note: passes the date time picker state exactly as saved to
+        // set the initial view of the dialog based on how it was saved,
+        // not on initial conditions.
+        DateTimePickerStateImpl(
+            it[0] as DateTimePickerStyle,
+            it[1] as Long?,
+            it[2] as Long?,
+            it[3] as Long?,
+            it[4] as String,
+            it[5] as String,
+            it[6] as DateTimePickerInput
+        )
+    }
 )
 
 private val Long?.defaultTimeZoneOffset: Int
