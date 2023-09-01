@@ -21,7 +21,7 @@ package com.arcgismaps.toolkit.featureforms.components.datetime.picker
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.arcgismaps.toolkit.featureforms.components.datetime.toDateMillis
-import com.arcgismaps.toolkit.featureforms.components.datetime.toDateTimeinUtcZone
+import com.arcgismaps.toolkit.featureforms.components.datetime.toDateTimeInUtcZone
 import com.arcgismaps.toolkit.featureforms.components.datetime.toZonedDateTime
 import java.time.Instant
 import java.util.TimeZone
@@ -48,7 +48,7 @@ internal class UtcDateTime private constructor(
      *  @since 200.3.0
      */
     internal val dateForPicker: Long?
-        get() = epochMillis?.plus(epochMillis.offset)?.toDateMillis()
+        get() = epochMillis?.plus(epochMillis.defaultTimeZoneOffset)?.toDateMillis()
     
     /**
      * The hour of the datetime in the current timezone.
@@ -76,7 +76,7 @@ internal class UtcDateTime private constructor(
          * @return a new UtcDateTime
          */
         internal fun create(epochMillis: Long?): UtcDateTime {
-            val utcDateTime = epochMillis?.toDateTimeinUtcZone()
+            val utcDateTime = epochMillis?.toDateTimeInUtcZone()
             return UtcDateTime(
                 epochMillis,
                 epochMillis?.toDateMillis(),
@@ -101,7 +101,7 @@ internal class UtcDateTime private constructor(
          */
         internal fun createFromDateAndTime(date: Long?, hour: Int, minute: Int): UtcDateTime {
             val epochMillis = if (date != null) {
-                (date + hour * 3_600_000 + minute * 60_000).minus(date.offset)
+                (date + hour * 3_600_000 + minute * 60_000).minus(date.defaultTimeZoneOffset)
             } else {
                 null
             }
@@ -291,7 +291,7 @@ internal fun DateTimePickerState(
     description
 )
 
-private val Long?.offset: Int
+private val Long?.defaultTimeZoneOffset: Int
     get() = this?.let {
         TimeZone.getDefault().getOffset(it)
     } ?: 0
