@@ -59,7 +59,6 @@ class PortalItemUseCase(private val scope: CoroutineScope, private val itemRepos
                         portalItemData.portalItem.load()
                             .onSuccess {
                                 val portalItem = portalItemData.portalItem
-                                portalItem.load()
                                 portalItem.thumbnail?.load()
                             }
                     }
