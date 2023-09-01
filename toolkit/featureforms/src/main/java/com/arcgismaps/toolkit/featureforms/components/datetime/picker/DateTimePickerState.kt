@@ -172,6 +172,10 @@ internal interface DateTimePickerState {
     
     /**
      * Sets the [dateTime].
+     *
+     * @param date the epoch millis at the start of the date (i.e. midnight)
+     * @param hour the hour of the day (0-23)
+     * @param minute the minute of the hour (0-59)
      */
     fun setDateTime(date: Long?, hour: Int, minute: Int)
     
@@ -249,7 +253,7 @@ private class DateTimePickerStateImpl(
     }
     
     override fun today() {
-        dateTime.value = UtcDateTime.createFromDateAndTime(
+        setDateTime(
             Instant.now().toEpochMilli().toDateMillis(),
             dateTime.value.hour,
             dateTime.value.minute
