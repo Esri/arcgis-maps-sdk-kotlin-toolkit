@@ -83,7 +83,7 @@ class PortalItemRepository(
      * Returns the number of items in the repository.
      */
     suspend fun getItemCount(): Int = withContext(dispatcher) {
-        return@withContext itemCacheDao.getCount()
+        itemCacheDao.getCount()
     }
 
     /**
@@ -144,7 +144,7 @@ class PortalItemRepository(
             FileOutputStream(file).use {
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it)
             }
-            return@withContext file.absolutePath
+            file.absolutePath
         }
 
     operator fun invoke(itemId: String): PortalItem? = portalItems[itemId]
