@@ -107,6 +107,7 @@ public class OAuthUserSignInActivity : ComponentActivity() {
         }
     }
 
+    // This override gets called first when the CustomTabs close button or the back button is pressed.
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
 
