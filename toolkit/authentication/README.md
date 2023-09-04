@@ -148,7 +148,7 @@ override fun onResume() {
 }
 ```
 
-Please note that your app's activity must have a `launchMode` of either `singleTop` or `singleInstance` for OAuth authentication to work.
+Please note that your app's activity must have a `launchMode` of `singleTop` for OAuth authentication to work.
 
 ### Launch OAuth Prompts in Incognito Mode
 
