@@ -123,26 +123,32 @@ If you want to intercept this redirect before allowing the sign-in to complete, 
 </activity>
 ```
 
-2. Handle the redirect in your app's activity:
+2. Call `launchCustomTabs` in the lambda `onPendingOAuthUserSignIn` of the `Authenticator`, passing in the pending `OAuthUserSignIn`:
 
 ```kotlin
-override fun onCreate(savedInstanceState: Bundle?) {
-	super.onCreate(savedInstanceState)
-	// Handle OAuth redirect intents by checking the intent.data
-	intent?.data?.let { uri ->
-		val uriString = uri.toString()
-		if (uriString.startsWith("my-ags-app")) {
-			// Do whatever business logic your app requires
-			val newIntent = Intent(this, OAuthUserSignInActivity::class.java).apply {
-				data = uri
-			}
-			startActivity(newIntent)
-		}
-	}
+DialogAuthenticator(authenticatorState = authenticatorState) { pendingSignIn ->
+	launchCustomTabs(pendingSignIn)
 }
 ```
 
-Please note that the `OAuthUserSignInActivity` must have a `launchMode` of either `singleTop` or `singleInstance` for OAuth authentication to work.
+2. Handle the redirect in your app activity's `onNewIntent` and `onResume` overrides:
+
+```kotlin
+override fun onNewIntent(intent: Intent?) {
+    super.onNewIntent(intent)
+    // This gets called first when OAuth redirects back to the app with a successful or cancelled
+    // sign-in.
+    authenticationAppViewModel.authenticatorState.completeOAuthSignIn(intent)
+}
+
+override fun onResume() {
+    super.onResume()
+    // This gets called when the Custom Tab is closed using the close button or the phone's back button.
+    authenticationAppViewModel.authenticatorState.completeOAuthSignIn(intent)
+}
+```
+
+Please note that your app's activity must have a `launchMode` of either `singleTop` or `singleInstance` for OAuth authentication to work.
 
 ### Launch OAuth Prompts in Incognito Mode
 
