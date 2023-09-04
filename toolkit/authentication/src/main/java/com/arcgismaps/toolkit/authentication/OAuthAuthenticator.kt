@@ -43,30 +43,28 @@ internal fun OAuthAuthenticator(
     authenticatorState: AuthenticatorState,
     onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)?,
 ) {
+    // If a configuration change happens while the OAuth activity is active, then when the activity
+    // returns, this composable would launch the activity again due to being recomposed. This flag
+    // prevents a relaunch. Note that this flag does not need to be reset to false, because after the
+    // OAuth prompt completes, the OAuthAuthenticator will leave the composition, thus on a subsequent
+    // OAuth challenge the OAuthAuthenticator will re-enter the composition and a new `didLaunch` state
+    // variable will be initialized again here to false.
+    var didLaunch by rememberSaveable { mutableStateOf(false) }
+    val launcher =
+        rememberLauncherForActivityResult(contract = OAuthUserSignInActivity.Contract()) { redirectUrl ->
+            redirectUrl?.let {
+                oAuthPendingSignIn.complete(redirectUrl)
+            } ?: oAuthPendingSignIn.cancel()
+        }
     if (authenticatorState.oAuthUserConfiguration?.redirectUrl == DEFAULT_REDIRECT_URI) {
         OAuthWebView(oAuthPendingSignIn, authenticatorState)
     } else {
-        // If a configuration change happens while the OAuth activity is active, then when the activity
-        // returns, this composable would launch the activity again due to being recomposed. This flag
-        // prevents a relaunch. Note that this flag does not need to be reset to false, because after the
-        // OAuth prompt completes, the OAuthAuthenticator will leave the composition, thus on a subsequent
-        // OAuth challenge the OAuthAuthenticator will re-enter the composition and a new `didLaunch` state
-        // variable will be initialized again here to false.
-        var didLaunch by rememberSaveable { mutableStateOf(false) }
-
         // Launching an activity is a side effect. We don't need `LaunchedEffect` because this is not suspending
         // and there's nothing that needs to keep running if it gets recomposed. In reality, we also don't
         // expect `oAuthPendingSignIn` to change while this composable is displayed.
         if (!didLaunch) {
             didLaunch = true
             if (onPendingOAuthUserSignIn == null) {
-                val launcher =
-                    rememberLauncherForActivityResult(contract = OAuthUserSignInActivity.Contract()) { redirectUrl ->
-                        redirectUrl?.let {
-                            oAuthPendingSignIn.complete(redirectUrl)
-                        } ?: oAuthPendingSignIn.cancel()
-                    }
-
                 SideEffect {
                     launcher.launch(oAuthPendingSignIn)
                 }
