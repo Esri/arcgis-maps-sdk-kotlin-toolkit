@@ -67,27 +67,28 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
 
-@Composable
-private fun AuthenticationApp() {
-    val application = LocalContext.current.applicationContext as Application
-    val authenticationAppViewModel = viewModel { AuthenticationAppViewModel(application) }
-    val authenticatorState: AuthenticatorState = authenticationAppViewModel.authenticatorState
-    Column {
-        val infoText = authenticationAppViewModel.infoText.collectAsState().value
-        val isLoading = authenticationAppViewModel.isLoading.collectAsState().value
-        PortalDetails(
-            url = authenticationAppViewModel.url.collectAsState().value,
-            onSetUrl = authenticationAppViewModel::setUrl,
-            useOAuth = authenticationAppViewModel.useOAuth.collectAsState().value,
-            onSetUseOAuth = authenticationAppViewModel::setUseOAuth,
-            onSignOut = authenticationAppViewModel::signOut,
-            onLoadPortal = authenticationAppViewModel::loadPortal
-        )
-        InfoScreen(text = infoText, isLoading = isLoading)
+
+    @Composable
+    private fun AuthenticationApp() {
+        val application = LocalContext.current.applicationContext as Application
+        val authenticationAppViewModel = viewModel { AuthenticationAppViewModel(application) }
+        val authenticatorState: AuthenticatorState = authenticationAppViewModel.authenticatorState
+        Column {
+            val infoText = authenticationAppViewModel.infoText.collectAsState().value
+            val isLoading = authenticationAppViewModel.isLoading.collectAsState().value
+            PortalDetails(
+                url = authenticationAppViewModel.url.collectAsState().value,
+                onSetUrl = authenticationAppViewModel::setUrl,
+                useOAuth = authenticationAppViewModel.useOAuth.collectAsState().value,
+                onSetUseOAuth = authenticationAppViewModel::setUseOAuth,
+                onSignOut = authenticationAppViewModel::signOut,
+                onLoadPortal = authenticationAppViewModel::loadPortal
+            )
+            InfoScreen(text = infoText, isLoading = isLoading)
+        }
+        DialogAuthenticator(authenticatorState = authenticatorState)
     }
-    DialogAuthenticator(authenticatorState = authenticatorState)
 }
 
 /**
