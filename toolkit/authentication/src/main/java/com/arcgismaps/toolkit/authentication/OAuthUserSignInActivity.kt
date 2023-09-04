@@ -26,6 +26,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.lifecycle.Lifecycle
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
 private const val KEY_INTENT_EXTRA_AUTHORIZE_URL = "INTENT_EXTRA_KEY_AUTHORIZE_URL"
@@ -105,6 +106,25 @@ public class OAuthUserSignInActivity : ComponentActivity() {
             authorizeUrl?.let {
                 launchCustomTabs(it, useIncognito)
             }
+        }
+    }
+
+    // This override gets called first when the CustomTabs close button or the back button is pressed.
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+
+        // We only want to respond to focus changed events when this activity is in "resumed" state.
+        // On some devices (Oreo) we get unexpected focus changed events with hasFocus true which cause this Activity
+        // to be finished (destroyed) prematurely, for example:
+        // - On Oreo log in to portal with OAuth
+        // - When the browser window is launched this triggers a focus changed event with hasFocus true but at this point
+        //   we do not want to finish this activity -> at this point the activity is in paused state (isResumed == false) so
+        //   we can use this to ignore this "rogue" focus changed event.
+        if (hasFocus && lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+            // if we got here the user must have pressed the back button or the x button while the
+            // custom tab was visible - finish by cancelling OAuth sign in
+            setResult(RESULT_CODE_CANCELED, Intent())
+            finish()
         }
     }
 
