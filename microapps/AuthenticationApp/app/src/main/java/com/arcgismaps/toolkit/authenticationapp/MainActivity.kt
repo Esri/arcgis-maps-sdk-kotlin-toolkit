@@ -50,7 +50,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.toolkit.authentication.AuthenticatorState
 import com.arcgismaps.toolkit.authentication.DialogAuthenticator
 import com.arcgismaps.toolkit.authenticationapp.ui.theme.AuthenticationAppTheme
 
@@ -63,6 +62,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             AuthenticationAppTheme {
                 AuthenticationApp()
+                DialogAuthenticator(authenticatorState = authenticationAppViewModel.authenticatorState)
             }
         }
     }
@@ -70,7 +70,6 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     private fun AuthenticationApp() {
-        val authenticatorState: AuthenticatorState = authenticationAppViewModel.authenticatorState
         Column {
             val infoText = authenticationAppViewModel.infoText.collectAsState().value
             val isLoading = authenticationAppViewModel.isLoading.collectAsState().value
@@ -84,7 +83,6 @@ class MainActivity : ComponentActivity() {
             )
             InfoScreen(text = infoText, isLoading = isLoading)
         }
-        DialogAuthenticator(authenticatorState = authenticatorState)
     }
 }
 
