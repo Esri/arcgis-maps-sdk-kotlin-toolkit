@@ -1,11 +1,14 @@
 package com.arcgismaps.toolkit.featureforms.components.datetime.picker.time
 
+import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.material3.R
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.os.ConfigurationCompat
+import java.util.Locale
 
 @Immutable
 @JvmInline
@@ -31,6 +34,7 @@ internal value class Strings private constructor(
     }
 }
 
+@SuppressLint("PrivateResource")
 @Composable
 @ReadOnlyComposable
 internal fun getString(string: Strings): String {
@@ -51,4 +55,13 @@ internal fun getString(string: Strings): String {
         Strings.TimePickerMinuteTextField -> resources.getString(R.string.time_picker_minute_text_field)
         else -> ""
     }
+}
+
+@Composable
+@ReadOnlyComposable
+internal fun getString(string: Strings, vararg formatArgs: Any): String {
+    val raw = getString(string)
+    val locale =
+        ConfigurationCompat.getLocales(LocalConfiguration.current).get(0) ?: Locale.getDefault()
+    return String.format(locale, raw, *formatArgs)
 }

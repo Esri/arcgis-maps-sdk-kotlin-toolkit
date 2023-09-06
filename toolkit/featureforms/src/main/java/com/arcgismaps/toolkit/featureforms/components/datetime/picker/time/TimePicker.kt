@@ -88,6 +88,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.platform.InspectorValueInfo
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.debugInspectorInfo
@@ -113,9 +114,25 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.center
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-//import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimeInputTokens.PeriodSelectorContainerHeight
-//import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimePickerTokens.ClockDialContainerSize
-//import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimePickerTokens.ClockDialSelectorHandleContainerSize
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimeInputTokens.PeriodSelectorContainerHeight
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimeInputTokens.PeriodSelectorContainerWidth
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimeInputTokens.TimeFieldContainerHeight
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimeInputTokens.TimeFieldContainerWidth
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimeInputTokens.TimeFieldSeparatorColor
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimePickerTokens.ClockDialContainerSize
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimePickerTokens.ClockDialLabelTextFont
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimePickerTokens.ClockDialSelectorCenterContainerSize
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimePickerTokens.ClockDialSelectorHandleContainerSize
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimePickerTokens.ClockDialSelectorTrackContainerWidth
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimePickerTokens.PeriodSelectorContainerShape
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimePickerTokens.PeriodSelectorHorizontalContainerHeight
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimePickerTokens.PeriodSelectorHorizontalContainerWidth
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimePickerTokens.PeriodSelectorOutlineColor
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimePickerTokens.PeriodSelectorVerticalContainerHeight
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimePickerTokens.PeriodSelectorVerticalContainerWidth
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimePickerTokens.TimeSelectorContainerHeight
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimePickerTokens.TimeSelectorContainerShape
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimePickerTokens.TimeSelectorContainerWidth
 import java.text.NumberFormat
 import kotlin.math.PI
 import kotlin.math.abs
@@ -125,6 +142,7 @@ import kotlin.math.hypot
 import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlinx.coroutines.launch
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimePickerTokens.TimeSelectorLabelTextFont
 
 /**
  * <a href="https://m3.material.io/components/time-pickers/overview" class="external" target="_blank">Material Design time picker</a>.
@@ -1103,7 +1121,7 @@ internal fun ClockFace(
                 selectableGroup()
             },
         targetState = state.values,
-        animationSpec = tween(durationMillis = MotionTokens.DurationMedium3.toInt())
+        animationSpec = tween(durationMillis = 350)
     ) { screen ->
         CircularLayout(
             modifier = Modifier
@@ -1554,9 +1572,16 @@ private enum class LayoutId {
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-internal expect val defaultTimePickerLayoutType: TimePickerLayoutType
+internal val defaultTimePickerLayoutType: TimePickerLayoutType
     @Composable
-    @ReadOnlyComposable get
+    @ReadOnlyComposable get() = with(LocalConfiguration.current) {
+        if (screenHeightDp < screenWidthDp) {
+            TimePickerLayoutType.Horizontal
+        } else {
+            TimePickerLayoutType.Vertical
+        }
+    }
+
 
 @JvmInline
 internal value class Selection private constructor(val value: Int) {
