@@ -142,9 +142,24 @@ internal fun DateTimePicker(
     }
     
     // confirm button is only active when a date has been selected
-    val confirmEnabled by remember(dateTime) {
-        derivedStateOf { datePickerState.selectedDateMillis != null }
+    val confirmEnabled by remember(datePickerState.selectedDateMillis, timePickerState.hour, timePickerState.minute) {
+        derivedStateOf {
+            datePickerState.selectedDateMillis?.let {
+                state.dateTimeValidator(it + timePickerState.hour * 3_600_000 + timePickerState.minute * 60_000)
+            } ?: false
+        }
     }
+//    val confirmEnabled by remember(datePickerState.) {
+//        derivedStateOf {
+// //           datePickerState.selectedDateMillis != null
+//            datePickerState.selectedDateMillis?.let { selection ->
+//
+//                val foo = state.minDateTime <= selection && selection <= state.maxDateTime
+//                println("selection in range $foo minDateTime: ${state.minDateTime} selection $selection ${state.maxDateTime}")
+//                foo
+//            } ?: false
+//        }
+//    }
     // create a DateTimePickerDialog
     DateTimePickerDialog(
         onDismissRequest = onDismissRequest
@@ -340,6 +355,32 @@ private object DateTimePickerDialogTokens {
     val containerHeight = 568.0.dp
     val containerWidth = 360.0.dp
 }
+
+/**
+ * A lenient operator which "ignores" if the receiver is null. This is used
+ * to short circuit a comparison if the receiver is null, meaning the comparison
+ * isn't valid or necessary.
+ *
+ * @param other the right hand side of the comparison
+ * @return -1 if the this receiver is strictly less than other, 1 if the this receiver is strictly greater than other
+ * and 0 if the two values are equal, or the receiver is null.
+ */
+private operator fun Long?.compareTo(other: Long): Int = this?.compareTo(other) ?: 0
+
+/**
+ * A lenient operator which "ignores" if the parameter is null. This is used
+ * to short circuit a comparison if the parameter is null, meaning the comparison
+ * isn't valid or necessary.
+ *
+ * @param other the right hand side of the comparison
+ * @return -1 if the this receiver is strictly less than other, 1 if the this receiver is strictly greater than other
+ * and 0 if the two values are equal, or the parameter is null.
+ */
+
+private operator fun Long.compareTo(other: Long?): Int = other?.let {
+    this.compareTo(it)
+} ?: 0
+
 
 @Preview
 @Composable
