@@ -145,21 +145,13 @@ internal fun DateTimePicker(
     val confirmEnabled by remember(datePickerState.selectedDateMillis, timePickerState.hour, timePickerState.minute) {
         derivedStateOf {
             datePickerState.selectedDateMillis?.let {
-                state.dateTimeValidator(it + timePickerState.hour * 3_600_000 + timePickerState.minute * 60_000)
+                state.dateTimeValidator(
+                    it + timePickerState.hour * 3_600_000 + timePickerState.minute * 60_000
+                )
             } ?: false
         }
     }
-//    val confirmEnabled by remember(datePickerState.) {
-//        derivedStateOf {
-// //           datePickerState.selectedDateMillis != null
-//            datePickerState.selectedDateMillis?.let { selection ->
-//
-//                val foo = state.minDateTime <= selection && selection <= state.maxDateTime
-//                println("selection in range $foo minDateTime: ${state.minDateTime} selection $selection ${state.maxDateTime}")
-//                foo
-//            } ?: false
-//        }
-//    }
+
     // create a DateTimePickerDialog
     DateTimePickerDialog(
         onDismissRequest = onDismissRequest
@@ -234,8 +226,7 @@ private fun (ColumnScope).PickerContent(
                 DatePicker(
                     state = datePickerState,
                     dateValidator = { timeStamp ->
-                        // validate selectable dates if a range is provided
-                        state.dateTimeValidator(timeStamp)
+                        state.dateValidator(timeStamp)
                     },
                     title = { title(if (style == DateTimePickerStyle.Date) null else Icons.Rounded.AccessTime) }
                 )
@@ -294,7 +285,11 @@ private fun PickerFooter(
             TextButton(
                 onClick = onToday,
                 // only enable Today button if today is within the range if provided
-                enabled = state.dateTimeValidator(Instant.now().toEpochMilli())
+                // the date validator assumes the Long is from the picker,
+                // i.e. offset from UTC.
+                enabled = state.dateValidator(
+                    UtcDateTime.create(Instant.now().toEpochMilli()).dateForPicker!!
+                )
             ) {
                 Text(stringResource(R.string.today))
             }
