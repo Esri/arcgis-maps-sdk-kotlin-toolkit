@@ -18,12 +18,16 @@ package com.arcgismaps.toolkit.authentication
 
 import android.net.http.SslError
 import android.security.KeyChain
+import android.util.Log
 import android.view.ViewGroup
 import android.webkit.ClientCertRequest
+import android.webkit.CookieManager
 import android.webkit.HttpAuthHandler
 import android.webkit.SslErrorHandler
 import android.webkit.WebResourceRequest
+import android.webkit.WebStorage
 import android.webkit.WebView
+import android.webkit.WebView.clearClientCertPreferences
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
@@ -101,7 +105,7 @@ private class OAuthWebViewClient(
     override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
         request?.url?.let {
             if (it.toString().contains("/oauth2/approval", true)) {
-                oAuthUserSignIn.complete(it.toString())
+                finish(it.toString(), webView = view)
                 return true
             }
         }
@@ -134,11 +138,11 @@ private class OAuthWebViewClient(
                     val passwordCredential = credential as PasswordCredential
                     handler?.proceed(passwordCredential.username, passwordCredential.password)
                 } ?: run {
-                    oAuthUserSignIn.cancel(exception)
+                    finish(exception = exception, webView = view)
                     handler?.cancel()
                 }
             } ?: run {
-                oAuthUserSignIn.cancel(IllegalStateException("Host is not known."))
+                finish(exception = IllegalStateException("Host is not known."), webView = view)
                 handler?.cancel()
             }
         }
@@ -153,6 +157,9 @@ private class OAuthWebViewClient(
      * @param view the WebView that is initiating this callback.
      * @param request the request to apply the Certificate Private Key & Chain or cancel.
      * @since 200.2.0
+     */
+    /**
+     *
      */
     override fun onReceivedClientCertRequest(view: WebView?, request: ClientCertRequest?) {
         scope.launch {
@@ -201,11 +208,11 @@ private class OAuthWebViewClient(
                 getCredentialOrPrompt(host, sslException, NetworkAuthenticationType.ServerTrust)?.let {
                     handler?.proceed()
                 } ?: run {
-                    oAuthUserSignIn.cancel(sslException)
+                    finish(exception = sslException, webView = view)
                     handler?.cancel()
                 }
             } ?: run {
-                oAuthUserSignIn.cancel(IllegalStateException("Host is not known."))
+                finish(exception = IllegalStateException("Host is not known."), webView = view)
                 handler?.cancel()
             }
         }
@@ -222,7 +229,7 @@ private class OAuthWebViewClient(
     override fun onPageFinished(view: WebView?, url: String?) {
         view?.internalError?.let { internalError ->
             val redirectUrl = oAuthUserSignIn.oAuthUserConfiguration.redirectUrl
-            oAuthUserSignIn.complete("$redirectUrl?$internalError")
+            finish("$redirectUrl?$internalError", webView = view)
         }
     }
 
@@ -258,6 +265,28 @@ private class OAuthWebViewClient(
                 }
             }
         return credential
+    }
+
+
+    private fun finish(redirectUrl: String? = null, exception: Exception? = null, webView: WebView?) {
+        if (redirectUrl != null) {
+            oAuthUserSignIn.complete(redirectUrl)
+        } else if (exception != null) {
+            oAuthUserSignIn.cancel(exception)
+        }
+        if (oAuthUserSignIn.oAuthUserConfiguration.preferPrivateWebBrowserSession) {
+            webView?.clearSession()
+        }
+    }
+
+    internal fun WebView.clearSession() {
+        clearCache(true)
+        clearFormData()
+        clearHistory()
+        clearSslPreferences()
+        clearClientCertPreferences(null)
+        CookieManager.getInstance().removeAllCookies(null)
+        WebStorage.getInstance().deleteAllData()
     }
 
     /**
