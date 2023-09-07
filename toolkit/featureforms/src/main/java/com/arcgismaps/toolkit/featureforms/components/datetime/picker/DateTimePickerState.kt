@@ -172,6 +172,10 @@ internal interface DateTimePickerState {
     
     /**
      * Sets the [dateTime].
+     *
+     * @param date the epoch millis at the start of the date (i.e. midnight)
+     * @param hour the hour of the day (0-23)
+     * @param minute the minute of the hour (0-59)
      */
     fun setDateTime(date: Long?, hour: Int, minute: Int)
     
@@ -280,7 +284,7 @@ private class DateTimePickerStateImpl(
     }
     
     override fun today() {
-        dateTime.value = UtcDateTime.createFromPickerValues(
+        setDateTime(
             Instant.now().toEpochMilli().toDateMillis(),
             dateTime.value.hour,
             dateTime.value.minute
@@ -345,7 +349,7 @@ internal fun rememberDateTimePickerState(
     label: String,
     description: String = "",
     pickerInput: DateTimePickerInput
-): DateTimePickerState = rememberSaveable(saver = dateTimePickerStateSaver(initialValue)) {
+): DateTimePickerState = rememberSaveable(saver = dateTimePickerStateSaver()) {
     DateTimePickerState(
         style,
         minDateTime,
@@ -360,16 +364,15 @@ internal fun rememberDateTimePickerState(
 /**
  * a StateSaver for the DateTimePickerState.
  *
- * @param initialValue the value needed to initialize a DateTimePickerState
  * @return a StateSaver
  * @since 200.3.0
  */
-internal fun dateTimePickerStateSaver(initialValue: Long?): Saver<DateTimePickerState, Any> = listSaver(
+internal fun dateTimePickerStateSaver(): Saver<DateTimePickerState, Any> = listSaver(
     save = {
         listOf(it.pickerStyle,
             it.minDateTime,
             it.maxDateTime,
-            initialValue,
+            it.dateTime.value.epochMillis,
             it.label,
             it.description,
             it.activePickerInput.value
