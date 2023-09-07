@@ -3,17 +3,6 @@
 package com.arcgismaps.toolkit.featureforms.components.datetime.picker.time
 
 import android.text.format.DateFormat.is24HourFormat
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
@@ -45,6 +34,17 @@ import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
@@ -133,6 +133,8 @@ import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimeP
 import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimePickerTokens.TimeSelectorContainerHeight
 import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimePickerTokens.TimeSelectorContainerShape
 import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimePickerTokens.TimeSelectorContainerWidth
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimePickerTokens.TimeSelectorLabelTextFont
+import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import kotlin.math.PI
 import kotlin.math.abs
@@ -141,8 +143,6 @@ import kotlin.math.cos
 import kotlin.math.hypot
 import kotlin.math.roundToInt
 import kotlin.math.sin
-import kotlinx.coroutines.launch
-import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimePickerTokens.TimeSelectorLabelTextFont
 
 /**
  * <a href="https://m3.material.io/components/time-pickers/overview" class="external" target="_blank">Material Design time picker</a>.
@@ -508,10 +508,11 @@ internal class TimePickerState(
     internal val values get() = if (selection == Selection.Minute) Minutes else Hours
 
     internal var selection by mutableStateOf(Selection.Hour)
-    internal var isAfternoonToggle by mutableStateOf(initialHour > 12 && !is24Hour)
-    internal var isInnerCircle by mutableStateOf(initialHour >= 12)
-
-    internal var hourAngle by mutableStateOf(RadiansPerHour * initialHour % 12 - FullCircle / 4)
+    // fix : its afternoon if hour is greater than 11
+    internal var isAfternoonToggle by mutableStateOf(initialHour > 11 && !is24Hour)
+    internal var isInnerCircle by mutableStateOf(initialHour >= 13)
+    // fix : (initialHour % 12) braces missing
+    internal var hourAngle by mutableStateOf(RadiansPerHour * (initialHour % 12) - FullCircle / 4)
     internal var minuteAngle by mutableStateOf(RadiansPerMinute * initialMinute - FullCircle / 4)
 
     private val mutex = MutatorMutex()
