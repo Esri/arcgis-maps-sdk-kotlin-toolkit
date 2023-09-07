@@ -131,7 +131,7 @@ DialogAuthenticator(authenticatorState = authenticatorState) { pendingSignIn ->
 }
 ```
 
-2. Handle the redirect in your app activity's `onNewIntent` and `onResume` overrides:
+3. Handle the redirect in your app activity's `onNewIntent` and `onResume` overrides:
 
 ```kotlin
 override fun onNewIntent(intent: Intent?) {
