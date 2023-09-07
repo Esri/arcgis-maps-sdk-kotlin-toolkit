@@ -133,6 +133,8 @@ DialogAuthenticator(authenticatorState = authenticatorState) { pendingSignIn ->
 
 3. Handle the redirect in your app activity's `onNewIntent` and `onResume` overrides:
 
+Note: You can check if the `intent` was caused by an OAuth redirect because the `intent.data.toString()` will start with your OAuth configuration's redirect URI.
+
 ```kotlin
 override fun onNewIntent(intent: Intent?) {
     super.onNewIntent(intent)
