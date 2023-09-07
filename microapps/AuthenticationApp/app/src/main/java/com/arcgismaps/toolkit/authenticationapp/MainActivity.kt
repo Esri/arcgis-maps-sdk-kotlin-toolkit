@@ -61,28 +61,27 @@ class MainActivity : ComponentActivity() {
         ArcGISEnvironment.applicationContext = applicationContext
         setContent {
             AuthenticationAppTheme {
-                AuthenticationApp()
+                AuthenticationApp(authenticationAppViewModel)
                 DialogAuthenticator(authenticatorState = authenticationAppViewModel.authenticatorState)
             }
         }
     }
+}
 
-
-    @Composable
-    private fun AuthenticationApp() {
-        Column {
-            val infoText = authenticationAppViewModel.infoText.collectAsState().value
-            val isLoading = authenticationAppViewModel.isLoading.collectAsState().value
-            PortalDetails(
-                url = authenticationAppViewModel.url.collectAsState().value,
-                onSetUrl = authenticationAppViewModel::setUrl,
-                useOAuth = authenticationAppViewModel.useOAuth.collectAsState().value,
-                onSetUseOAuth = authenticationAppViewModel::setUseOAuth,
-                onSignOut = authenticationAppViewModel::signOut,
-                onLoadPortal = authenticationAppViewModel::loadPortal
-            )
-            InfoScreen(text = infoText, isLoading = isLoading)
-        }
+@Composable
+private fun AuthenticationApp(authenticationAppViewModel: AuthenticationAppViewModel) {
+    Column {
+        val infoText = authenticationAppViewModel.infoText.collectAsState().value
+        val isLoading = authenticationAppViewModel.isLoading.collectAsState().value
+        PortalDetails(
+            url = authenticationAppViewModel.url.collectAsState().value,
+            onSetUrl = authenticationAppViewModel::setUrl,
+            useOAuth = authenticationAppViewModel.useOAuth.collectAsState().value,
+            onSetUseOAuth = authenticationAppViewModel::setUseOAuth,
+            onSignOut = authenticationAppViewModel::signOut,
+            onLoadPortal = authenticationAppViewModel::loadPortal
+        )
+        InfoScreen(text = infoText, isLoading = isLoading)
     }
 }
 
