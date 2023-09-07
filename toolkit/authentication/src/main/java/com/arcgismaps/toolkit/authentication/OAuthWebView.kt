@@ -157,9 +157,6 @@ private class OAuthWebViewClient(
      * @param request the request to apply the Certificate Private Key & Chain or cancel.
      * @since 200.2.0
      */
-    /**
-     *
-     */
     override fun onReceivedClientCertRequest(view: WebView?, request: ClientCertRequest?) {
         scope.launch {
             view?.url?.let {
