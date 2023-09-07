@@ -115,13 +115,18 @@ internal fun DateTimePicker(
         endInclusive = state.maxDateTime?.toZonedDateTime()?.year
             ?: DatePickerDefaults.YearRange.last
     )
+    
+    // State<> properties on state objects are remembered as part of remembering the
+    // state object itself at the call site. Otherwise, when the state object is recreated as part of rememberSaveable
+    // it will have a new instance of the State<> object, and the old is leaked but still observed for recomposition.
+    val pickerInput by state.activePickerInput
     // DateTime from the state's value
     val dateTime by state.dateTime
     // create and remember a DatePickerState that resets when dateTime changes
     val datePickerState = rememberSaveable(dateTime, saver = DatePickerState.Saver()) {
         DatePickerState(
-            initialSelectedDateMillis = dateTime.dateTime?.plus(state.timeZoneOffset),
-            initialDisplayedMonthMillis = dateTime.dateTime?.plus(state.timeZoneOffset)
+            initialSelectedDateMillis = dateTime.dateForPicker,
+            initialDisplayedMonthMillis = dateTime.dateForPicker
                 ?: (state.minDateTime ?: state.maxDateTime),
             datePickerRange,
             DisplayMode.Picker
@@ -130,11 +135,12 @@ internal fun DateTimePicker(
     // create and remember a TimePickerState that resets when dateTime changes
     val timePickerState = rememberSaveable(dateTime, saver = TimePickerState.Saver()) {
         TimePickerState(
-            initialHour = dateTime.hour,
-            initialMinute = dateTime.minute,
+            initialHour = dateTime.hourForPicker,
+            initialMinute = dateTime.minuteForPicker,
             is24Hour = false,
         )
     }
+    
     // confirm button is only active when a date has been selected
     val confirmEnabled by remember(dateTime) {
         derivedStateOf { datePickerState.selectedDateMillis != null }
@@ -150,13 +156,14 @@ internal fun DateTimePicker(
             datePickerState = datePickerState,
             timePickerState = timePickerState,
             style = state.pickerStyle,
-            picker = state.activePickerInput.value,
+            picker = pickerInput
         ) {
             state.togglePickerInput()
         }
         PickerFooter(
             state = state,
             confirmEnabled = confirmEnabled,
+            pickerInput = pickerInput,
             onToday = {
                 state.today()
             },
@@ -165,9 +172,8 @@ internal fun DateTimePicker(
             },
             onCancelled = onCancelled,
             onConfirmed = {
-                // remove time zone offset before setting value
                 state.setDateTime(
-                    date = datePickerState.selectedDateMillis?.minus(state.timeZoneOffset),
+                    date = datePickerState.selectedDateMillis,
                     hour = timePickerState.hour,
                     minute = timePickerState.minute
                 )
@@ -257,6 +263,7 @@ private fun PickerTitle(
 private fun PickerFooter(
     state: DateTimePickerState,
     confirmEnabled: Boolean,
+    pickerInput: DateTimePickerInput,
     onToday: () -> Unit = {},
     onNow: () -> Unit = {},
     onCancelled: () -> Unit = {},
@@ -268,7 +275,7 @@ private fun PickerFooter(
             .padding(start = 10.dp, end = 10.dp)
             .fillMaxWidth()
     ) {
-        if (state.activePickerInput.value == DateTimePickerInput.Date) {
+        if (pickerInput == DateTimePickerInput.Date) {
             TextButton(
                 onClick = onToday,
                 // only enable Today button if today is within the range if provided
@@ -310,7 +317,7 @@ private fun DateTimePickerDialog(
             modifier = Modifier
                 .padding(start = 25.dp, end = 25.dp)
                 .widthIn(DateTimePickerDialogTokens.containerWidth)
-                .heightIn(DateTimePickerDialogTokens.containerHeight),
+                .height(DateTimePickerDialogTokens.containerHeight),
             shape = shape,
             color = MaterialTheme.colorScheme.surface,
             tonalElevation = tonalElevation,
@@ -330,7 +337,7 @@ private fun DateTimePickerDialog(
  * Properties for the [DateTimePickerDialog].
  */
 private object DateTimePickerDialogTokens {
-    val containerHeight = 568.0.dp
+    val containerHeight = 600.0.dp
     val containerWidth = 360.0.dp
 }
 
@@ -340,7 +347,8 @@ private fun DateTimePickerPreview() {
     val state = DateTimePickerState(
         style = DateTimePickerStyle.DateTime,
         label = "Next Inspection Date",
-        description = "Enter a date in the next six months"
+        description = "Enter a date in the next six months",
+        pickerInput  = DateTimePickerInput.Date
     )
     DateTimePicker(state = state, {}, {}, {})
 }

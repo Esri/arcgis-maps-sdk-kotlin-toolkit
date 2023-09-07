@@ -18,65 +18,60 @@
 
 package com.arcgismaps.toolkit.featureformsapp.domain
 
-import com.arcgismaps.mapping.PortalItem
-import com.arcgismaps.toolkit.featureformsapp.data.ItemData
-import com.arcgismaps.toolkit.featureformsapp.data.ItemRepository
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
+import com.arcgismaps.toolkit.featureformsapp.data.PortalItemData
+import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.mapLatest
 
-data class PortalItemData(val portalItem: PortalItem, val formLayerName: String? = null)
+data class PortalItemWithLayer(val data: PortalItemData, val formLayerName: String? = null)
+
 
 /**
- * A domain layer to transform item data into loaded PortalItems, along with some domain knowledge of what layer
+ * A domain layer to transform the loaded portal items with some added domain knowledge of what layer
  * in each item is of interest.
  */
-class PortalItemUseCase(private val scope: CoroutineScope, private val itemRepository: ItemRepository) {
-    private val mutex = Mutex()
-    
-    private var items: List<PortalItemData> = emptyList()
-    
+class PortalItemUseCase(
+    dispatcher: CoroutineDispatcher,
+    private val portalItemRepository: PortalItemRepository
+) {
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val portalItemDataFlow: Flow<List<PortalItemWithLayer>> =
+        portalItemRepository.observe().mapLatest {
+            it.map { item ->
+                PortalItemWithLayer(
+                    data = item,
+                    formLayerName = formLayerName(item.portalItem.itemId)
+                )
+            }
+        }.flowOn(dispatcher)
+
+    fun observe(): Flow<List<PortalItemWithLayer>> = portalItemDataFlow
+
+    suspend fun refresh(forceUpdate: Boolean) = portalItemRepository.refresh(forceUpdate)
+
+    suspend fun isEmpty(): Boolean = portalItemRepository.getItemCount() == 0
+
     /**
      * Provide the name of the layer with forms that we would like to use to identify features. If not needed, because
      * the map has one layer for example, then return null.
      */
-    private fun formLayerName(itemData: ItemData): String? =
-        if (itemData.url == "https://runtimecoretest.maps.arcgis.com/home/item.html?id=0f6864ddc35241649e5ad2ee61a3abe4") {
+    private fun formLayerName(itemId: String): String? =
+        if (itemId == "0f6864ddc35241649e5ad2ee61a3abe4") {
             "CityworksDynamic - Water Hydrants"
         } else {
             null
         }
-    
-    /**
-     * Fetch item data, transform it into loaded PortalItems, and cache them.
-     */
-    suspend fun fetchPortalItemData(): List<PortalItemData> {
-        return if (items.isEmpty()) {
-            withContext(scope.coroutineContext) {
-                itemRepository.fetchItems().map { itemData ->
-                    PortalItemData(PortalItem(itemData.url), formLayerName(itemData)).also { portalItemData ->
-                        portalItemData.portalItem.load()
-                            .onSuccess {
-                                val portalItem = portalItemData.portalItem
-                                portalItem.load()
-                                portalItem.thumbnail?.load()
-                            }
-                    }
-                }.also {
-                    mutex.withLock { items = it }
-                }
-            }
-        } else {
-            mutex.withLock { items }
-        }
-    }
-    
+
     /**
      * Used by the UI to get a specific PortalItem by url
      */
-    suspend operator fun invoke(url: String): PortalItemData =
-        fetchPortalItemData().first {
-            url == it.portalItem.url
+    operator fun invoke(itemId: String): PortalItemWithLayer? {
+        return portalItemRepository(itemId)?.let {
+            PortalItemWithLayer(PortalItemData(it, ""), formLayerName(it.itemId))
         }
+    }
 }
