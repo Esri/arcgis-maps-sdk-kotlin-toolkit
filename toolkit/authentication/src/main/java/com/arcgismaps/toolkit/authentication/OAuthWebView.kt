@@ -18,7 +18,6 @@ package com.arcgismaps.toolkit.authentication
 
 import android.net.http.SslError
 import android.security.KeyChain
-import android.util.Log
 import android.view.ViewGroup
 import android.webkit.ClientCertRequest
 import android.webkit.CookieManager
@@ -267,19 +266,33 @@ private class OAuthWebViewClient(
         return credential
     }
 
-
+    /**
+     * Completes the WebView OAuth challenge by either passing back a [redirectUrl] or an [exception].
+     * if [OAuthUserConfiguration.preferPrivateWebBrowserSession] is set to true, this method will clear the [webView]'s
+     * session.
+     *
+     * @since 200.3.0
+     */
     private fun finish(redirectUrl: String? = null, exception: Exception? = null, webView: WebView?) {
         if (redirectUrl != null) {
             oAuthUserSignIn.complete(redirectUrl)
         } else if (exception != null) {
             oAuthUserSignIn.cancel(exception)
         }
+
         if (oAuthUserSignIn.oAuthUserConfiguration.preferPrivateWebBrowserSession) {
             webView?.clearSession()
         }
     }
 
-    internal fun WebView.clearSession() {
+    /**
+     * Clears the WebView's cache, form data, history, SSL preferences, client certificate preferences, Cookies, and
+     * storage used by the JavaScript APIs.
+     * Taken from: https://stackoverflow.com/questions/9819325/android-webview-private-browsing
+     *
+     * @since 200.3.0
+     */
+    private fun WebView.clearSession() {
         clearCache(true)
         clearFormData()
         clearHistory()
