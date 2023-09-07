@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -122,8 +121,9 @@ internal fun DateTimePicker(
     val pickerInput by state.activePickerInput
     // DateTime from the state's value
     val dateTime by state.dateTime
-    // create and remember a DatePickerState that resets when dateTime changes
-    val datePickerState = rememberSaveable(dateTime, saver = DatePickerState.Saver()) {
+    
+    // create and remember a DatePickerState
+    val datePickerState = rememberSaveable(saver = DatePickerState.Saver()) {
         DatePickerState(
             initialSelectedDateMillis = dateTime.dateForPicker,
             initialDisplayedMonthMillis = dateTime.dateForPicker
@@ -132,6 +132,10 @@ internal fun DateTimePicker(
             DisplayMode.Picker
         )
     }
+    
+    //reset the selection if/when the dateTime changes
+    datePickerState.setSelection(dateTime.dateForPicker)
+
     // create and remember a TimePickerState that resets when dateTime changes
     val timePickerState = rememberSaveable(dateTime, saver = TimePickerState.Saver()) {
         TimePickerState(
