@@ -18,56 +18,59 @@
 
 package com.arcgismaps.toolkit.featureformsapp.di
 
-import com.arcgismaps.toolkit.featureformsapp.data.ItemDataSource
-import com.arcgismaps.toolkit.featureformsapp.data.ItemRepository
+import android.content.Context
+import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
+import com.arcgismaps.toolkit.featureformsapp.data.local.ItemCacheDao
+import com.arcgismaps.toolkit.featureformsapp.data.network.ItemRemoteDataSource
 import com.arcgismaps.toolkit.featureformsapp.domain.PortalItemUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
 /**
- * Provide an annotation to inject the PortalItem data source
+ * Provide an annotation to inject the ItemRemoteDataSource
  */
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
-annotation class PortalItemDataSource
+annotation class ItemRemoteSource
 
 /**
- * Provide an annotation to inject the PortalItem repository
+ * Provide an annotation to inject the PortalItemRepository
  */
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
-annotation class PortalItemRepository
+annotation class PortalItemRepo
 
-/**
- * The singleton portal item use case provider
- */
+
 @Module
 @InstallIn(SingletonComponent::class)
-class DataModule() {
+class DataModule {
+
     /**
-     * The provider of the PortalItem data source. Only used below.
+     * The provider of the ItemRemoteDataSource.
      */
     @Provides
-    @PortalItemDataSource
-    internal fun provideItemDataSource(@IoDispatcher dispatcher: CoroutineDispatcher): ItemDataSource =
-        ItemDataSource(dispatcher)
-    
+    @ItemRemoteSource
+    internal fun provideItemRemoteDataSource(@IoDispatcher dispatcher: CoroutineDispatcher): ItemRemoteDataSource =
+        ItemRemoteDataSource(dispatcher)
+
     /**
-     * The provider of the PortalItem data source. Only used below.
+     * The provider of the PortalItemRepository.
      */
     @Provides
-    @PortalItemRepository
-    internal fun provideItemRepository(
-        @ApplicationScope applicationScope: CoroutineScope,
-        @PortalItemDataSource itemDataSource: ItemDataSource
-    ): ItemRepository =
-        ItemRepository(applicationScope, itemDataSource)
+    @PortalItemRepo
+    internal fun providePortalItemRepository(
+        @IoDispatcher dispatcher: CoroutineDispatcher,
+        @ItemRemoteSource remoteDataSource: ItemRemoteDataSource,
+        @ItemCache itemCacheDao: ItemCacheDao,
+        @ApplicationContext context: Context
+    ): PortalItemRepository =
+        PortalItemRepository(dispatcher, remoteDataSource, itemCacheDao, context.filesDir.absolutePath)
     
     /**
      * The provider of the PortalItem use case, scoped to the navigation graph lifetime by means of the
@@ -76,10 +79,10 @@ class DataModule() {
     @Singleton
     @Provides
     fun providePortalItemUseCase(
-        @ApplicationScope applicationScope: CoroutineScope,
-        @PortalItemRepository itemRepository: ItemRepository
+        @IoDispatcher dispatcher: CoroutineDispatcher,
+        @PortalItemRepo portalItemRepository: PortalItemRepository
     ): PortalItemUseCase = PortalItemUseCase(
-        applicationScope,
-        itemRepository
+        dispatcher,
+        portalItemRepository
     )
 }
