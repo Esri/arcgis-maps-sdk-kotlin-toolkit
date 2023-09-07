@@ -25,8 +25,9 @@ import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.toolkit.featureforms.utils.editValue
-import com.arcgismaps.toolkit.featureforms.utils.getElementValue
-import java.time.Instant
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.TimeZone
 
 /**
  * State for the [DateTimeField].
@@ -147,23 +148,16 @@ private class DateTimeFieldStateImpl(
     override val value: State<Long?> = _value
     
     init {
-        val initialValue = form.getElementValue(element)?.let {
-            when (it) {
-                is Instant -> {
-                    it.toEpochMilli()
-                }
-        
-                is Long -> {
-                    it
-                }
-        
-                else -> {
-                    null
-                }
-            }
+        if (element.value.isNotEmpty()) {
+            // note, getting values from attributes no longer works in build 3989, there is garbage in the null fields.
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+            val initialValue =
+                LocalDateTime.parse(element.value, formatter).atZone(TimeZone.getDefault().toZoneId()).toInstant()
+                    .toEpochMilli()
+            setValue(initialValue)
+        } else {
+            setValue(null)
         }
-        
-        setValue(initialValue)
     }
     
     private fun setValue(value: String) {
