@@ -52,13 +52,10 @@ public suspend fun AuthenticationManager.signOut() {
  * @since 200.3.0
  */
 public fun AuthenticatorState.completeOAuthSignIn(intent: Intent?) {
-    if (intent != null && intent.data != null) {
-        val uriString = intent.data.toString()
+    intent?.data?.let {
+        val uriString = it.toString()
         pendingOAuthUserSignIn.value?.complete(uriString)
-    }
-    else {
-        pendingOAuthUserSignIn.value?.cancel()
-    }
+    } ?: pendingOAuthUserSignIn.value?.cancel()
 }
 
 /**

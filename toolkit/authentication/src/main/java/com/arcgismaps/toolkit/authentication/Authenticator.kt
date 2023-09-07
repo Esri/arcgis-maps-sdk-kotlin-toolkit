@@ -43,6 +43,9 @@ import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
  * then a Custom Chrome Tab will be launched to complete the OAuth sign in.
  *
  * @param authenticatorState an [AuthenticatorState]. See [AuthenticatorState.Companion.Factory].
+ * @param onPendingOAuthUserSignIn if not null, this will be called when an OAuth challenge is pending
+ * and the browser should be launched. Use this if you wish to handle OAuth challenges from your own
+ * activity rather than using the [OAuthUserSignInActivity].
  * @since 200.2.0
  */
 @Composable
