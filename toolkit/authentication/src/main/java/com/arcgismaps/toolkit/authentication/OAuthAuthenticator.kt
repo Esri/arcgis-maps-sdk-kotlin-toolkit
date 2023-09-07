@@ -67,14 +67,8 @@ internal fun OAuthAuthenticator(
         // expect `oAuthPendingSignIn` to change while this composable is displayed.
         if (!didLaunch) {
             didLaunch = true
-            if (onPendingOAuthUserSignIn == null) {
-                SideEffect {
-                    launcher.launch(oAuthPendingSignIn)
-                }
-            } else {
-                SideEffect {
-                    onPendingOAuthUserSignIn.invoke(oAuthPendingSignIn)
-                }
+            SideEffect {
+                onPendingOAuthUserSignIn?.invoke(oAuthPendingSignIn) ?: launcher.launch(oAuthPendingSignIn)
             }
         }
     }
