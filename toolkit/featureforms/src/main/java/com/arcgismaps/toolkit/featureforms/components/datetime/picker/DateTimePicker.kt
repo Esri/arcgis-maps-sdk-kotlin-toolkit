@@ -132,9 +132,6 @@ internal fun DateTimePicker(
             DisplayMode.Picker
         )
     }
-    
-    //reset the selection if/when the dateTime changes
-    datePickerState.setSelection(dateTime.dateForPicker)
 
     // create and remember a TimePickerState that resets when dateTime changes
     val timePickerState = rememberSaveable(dateTime, saver = TimePickerState.Saver()) {
