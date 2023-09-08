@@ -45,8 +45,13 @@ class ArtifactPublisher : Plugin<Project> {
         val artifactoryUsername: String by project
         val artifactoryPassword: String by project
         val versionNumber: String by project
+        val ignoreBuildNumber: String by project
         val buildNumber: String by project
-        val artifactVersion: String = "$versionNumber-$buildNumber"
+        val artifactVersion: String = if (ignoreBuildNumber == "true") {
+            versionNumber
+        } else {
+            "$versionNumber-$buildNumber"
+        }
         val artifactoryArtifactId: String = "$artifactoryArtifactBaseId-${project.name}"
         
         project.pluginManager.apply(MavenPublishPlugin::class.java)

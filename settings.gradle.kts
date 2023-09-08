@@ -18,6 +18,10 @@
 
 import org.gradle.configurationcache.extensions.capitalized
 
+// add new module to this list will declare a new toolkit module(Ex: "newComponent") with that name
+// and also add a companion micro app(Ex: "newComponent-app").
+// For mismatching toolkit component and microApp names add them individually at end of this file.
+// Refer to "indoors" project with "floor-filter-app" as an example.
 val projects = listOf("template", "featureforms", "authentication", "compass")
 
 pluginManagement {
@@ -44,6 +48,11 @@ dependencyResolutionManagement {
         mavenCentral()
         maven {
             url = java.net.URI(
+                "https://esri.jfrog.io/artifactory/arcgis"
+            )
+        }
+        maven {
+            url = java.net.URI(
                 "https://olympus.esri.com/artifactory/arcgisruntime-repo/"
             )
         }
@@ -51,7 +60,12 @@ dependencyResolutionManagement {
     
     versionCatalogs {
         create("arcgis") {
-            version("mapsSdk", "$sdkVersionNumber-$sdkBuildNumber")
+            val versionAndBuild = if (sdkBuildNumber.isNotEmpty()) {
+                "$sdkVersionNumber-$sdkBuildNumber"
+            } else {
+                sdkVersionNumber
+            }
+            version("mapsSdk", "$versionAndBuild")
             library("mapsSdk", "com.esri", "arcgis-maps-kotlin").versionRef("mapsSdk")
         }
     }
@@ -59,8 +73,10 @@ dependencyResolutionManagement {
 
 var includedProjects = projects.flatMap { listOf(":$it", ":$it-app") }.toTypedArray()
 include(*includedProjects)
-include (":bom")
-include (":composable-map")
+include(":bom")
+include(":composable-map")
+include(":indoors")
+include(":floor-filter-app")
 
 projects.forEach {
     project(":$it").projectDir = File(rootDir, "toolkit/$it")
@@ -69,3 +85,5 @@ projects.forEach {
 
 project(":bom").projectDir = File(rootDir, "bom")
 project(":composable-map").projectDir = File(rootDir, "toolkit/composable-map")
+project(":indoors").projectDir = File(rootDir, "toolkit/indoors")
+project(":floor-filter-app").projectDir = File(rootDir, "microapps/FloorFilterApp/app")
