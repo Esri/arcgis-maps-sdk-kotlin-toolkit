@@ -129,6 +129,12 @@ public fun ComposableMap(
             }
         }
     }
+    
+    DisposableEffect(Unit) {
+        onDispose {
+            mapView.onDestroy(lifecycleOwner)
+        }
+    }
 
     DisposableEffect(lifecycleOwner) {
         lifecycleOwner.lifecycle.addObserver(mapView)
