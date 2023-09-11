@@ -227,7 +227,6 @@ private class DateTimePickerStateImpl(
     override var dateTime = mutableStateOf(
         UtcDateTime.create(initialValue)
     )
-    
     override val selectedDateTimeMillis: Long?
         get() = dateTime.value.epochMillis
     
@@ -240,7 +239,7 @@ private class DateTimePickerStateImpl(
     override fun setDateTime(date: Long?, hour: Int, minute: Int) {
         dateTime.value = UtcDateTime.createFromPickerValues(date, hour, minute)
     }
-    
+   
     override fun togglePickerInput() {
         activePickerInput.value = if (activePickerInput.value == DateTimePickerInput.Date) {
             DateTimePickerInput.Time
