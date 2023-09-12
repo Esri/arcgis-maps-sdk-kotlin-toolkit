@@ -48,6 +48,7 @@ import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -120,7 +121,7 @@ internal fun DateTimePicker(
     val dateTime by state.dateTime
     
     // create and remember a DatePickerState
-    val datePickerState = rememberSaveable(saver = DatePickerState.Saver()) {
+    val datePickerState = rememberSaveable(dateTime, saver = DatePickerState.Saver()) {
         DatePickerState(
             initialSelectedDateMillis = dateTime.dateForPicker,
             initialDisplayedMonthMillis = dateTime.dateForPicker
@@ -224,13 +225,15 @@ private fun (ColumnScope).PickerContent(
                 Spacer(modifier = Modifier.height(10.dp))
                 TimePicker(state = timePickerState, modifier = Modifier.padding(10.dp))
             } else {
-                DatePicker(
-                    state = datePickerState,
-                    dateValidator = { timeStamp ->
-                        state.dateValidator(timeStamp)
-                    },
-                    title = { title(if (style == DateTimePickerStyle.Date) null else Icons.Rounded.AccessTime) }
-                )
+                key(state.dateTime.value) {
+                    DatePicker(
+                        state = datePickerState,
+                        dateValidator = { timeStamp ->
+                            state.dateValidator(timeStamp)
+                        },
+                        title = { title(if (style == DateTimePickerStyle.Date) null else Icons.Rounded.AccessTime) }
+                    )
+                }
             }
         }
     }
