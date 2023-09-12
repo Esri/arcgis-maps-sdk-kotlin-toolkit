@@ -47,9 +47,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,6 +59,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.arcgismaps.toolkit.featureforms.R
+import com.arcgismaps.toolkit.featureforms.components.datetime.toDateMillis
 import com.arcgismaps.toolkit.featureforms.components.datetime.toZonedDateTime
 import java.time.Instant
 
@@ -115,9 +114,7 @@ internal fun DateTimePicker(
             ?: DatePickerDefaults.YearRange.last
     )
     
-    // State<> properties on state objects are remembered as part of remembering the
-    // state object itself at the call site. Otherwise, when the state object is recreated as part of rememberSaveable
-    // it will have a new instance of the State<> object, and the old is leaked but still observed for recomposition.
+    // The picker input type, date or time.
     val pickerInput by state.activePickerInput
     // DateTime from the state's value
     val dateTime by state.dateTime
@@ -133,26 +130,19 @@ internal fun DateTimePicker(
         )
     }
     
-    //reset the selection if/when the dateTime changes
-    datePickerState.setSelection(dateTime.dateForPicker)
-
-    // create and remember a TimePickerState that resets when dateTime changes
-    val timePickerState = rememberSaveable(dateTime, saver = TimePickerState.Saver()) {
-        TimePickerState(
-            initialHour = dateTime.hourForPicker,
-            initialMinute = dateTime.minuteForPicker,
-            is24Hour = false,
-        )
-    }
-    
-    // confirm button is only active when a date has been selected
-    val confirmEnabled by remember(dateTime) {
-        derivedStateOf { datePickerState.selectedDateMillis != null }
-    }
     // create a DateTimePickerDialog
     DateTimePickerDialog(
         onDismissRequest = onDismissRequest
     ) {
+        // create and remember a TimePickerState that resets when dateTime changes
+        val timePickerState = rememberSaveable(dateTime, saver = TimePickerState.Saver()) {
+            TimePickerState(
+                initialHour = dateTime.hourForPicker,
+                initialMinute = dateTime.minuteForPicker,
+                is24Hour = false,
+            )
+        }
+    
         PickerContent(
             label = state.label,
             description = state.description,
@@ -166,13 +156,27 @@ internal fun DateTimePicker(
         }
         PickerFooter(
             state = state,
-            confirmEnabled = confirmEnabled,
+            confirmEnabled = datePickerState.selectedDateMillis?.let {
+                state.dateTimeValidator(
+                    it + timePickerState.hour * 3_600_000 + timePickerState.minute * 60_000
+                )
+            } ?: false,
             pickerInput = pickerInput,
             onToday = {
-                state.today()
+                val now = Instant.now().toEpochMilli().toDateMillis()
+                state.setDateTime(
+                    now.plus(now.defaultTimeZoneOffset),
+                    state.dateTime.value.hour,
+                    state.dateTime.value.minute
+                )
             },
             onNow = {
-                state.now()
+                val now = Instant.now().toEpochMilli().toZonedDateTime()
+                state.setDateTime(
+                    state.dateTime.value.dateForPicker,
+                    now.hour,
+                    now.minute
+                )
             },
             onCancelled = onCancelled,
             onConfirmed = {
@@ -223,8 +227,7 @@ private fun (ColumnScope).PickerContent(
                 DatePicker(
                     state = datePickerState,
                     dateValidator = { timeStamp ->
-                        // validate selectable dates if a range is provided
-                        state.dateTimeValidator(timeStamp)
+                        state.dateValidator(timeStamp)
                     },
                     title = { title(if (style == DateTimePickerStyle.Date) null else Icons.Rounded.AccessTime) }
                 )
@@ -283,7 +286,11 @@ private fun PickerFooter(
             TextButton(
                 onClick = onToday,
                 // only enable Today button if today is within the range if provided
-                enabled = state.dateTimeValidator(Instant.now().toEpochMilli())
+                // the date validator assumes the Long is from the picker,
+                // i.e. offset from UTC.
+                enabled = state.dateValidator(
+                    UtcDateTime.create(Instant.now().toEpochMilli()).dateForPicker!!
+                )
             ) {
                 Text(stringResource(R.string.today))
             }

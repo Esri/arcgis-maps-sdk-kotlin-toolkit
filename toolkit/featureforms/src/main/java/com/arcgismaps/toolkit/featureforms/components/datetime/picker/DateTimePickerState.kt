@@ -27,7 +27,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.toolkit.featureforms.components.datetime.toDateMillis
 import com.arcgismaps.toolkit.featureforms.components.datetime.toDateTimeInUtcZone
 import com.arcgismaps.toolkit.featureforms.components.datetime.toZonedDateTime
-import java.time.Instant
 import java.util.TimeZone
 
 /**
@@ -48,7 +47,7 @@ internal class UtcDateTime private constructor(
      *  and then pass it to the picker to show the current zoned time. It is subsequently subtracted from any
      *  choice made by the user.
      *
-     *  @see createFromDateAndTime
+     *  @see createFromPickerValues
      *  @since 200.3.0
      */
     internal val dateForPicker: Long?
@@ -89,7 +88,7 @@ internal class UtcDateTime private constructor(
                 utcDateTime?.second ?: 0
             )
         }
-        
+    
         /**
          * Used to set the datetime from the result of the datetime picker dialog.
          * Since the date picker works and displays with millis only, in order to show the date and time
@@ -103,7 +102,7 @@ internal class UtcDateTime private constructor(
          * @return a new UtcDateTime
          * @since 200.3.0
          */
-        internal fun createFromDateAndTime(date: Long?, hour: Int, minute: Int): UtcDateTime {
+        internal fun createFromPickerValues(date: Long?, hour: Int, minute: Int): UtcDateTime {
             val epochMillis = if (date != null) {
                 (date + hour * 3_600_000 + minute * 60_000).minus(date.defaultTimeZoneOffset)
             } else {
@@ -187,22 +186,17 @@ internal interface DateTimePickerState {
     
     /**
      * Validates if the [timeStamp] is between the given ranges of [minDateTime] and [maxDateTime]
-     * if they were provided and returns true if the validation was successful, otherwise false
+     * if they were provided. Returns true if the validation was successful, otherwise false
      * is returned. Both the [minDateTime] and [maxDateTime] are included in the range.
      */
     fun dateTimeValidator(timeStamp: Long): Boolean
     
     /**
-     * Sets the current [dateTime]'s date value to today's date while preserving the time, if any
-     * time was previously set.
+     * Validates if the UTC date of the [timeStamp] is between the dates of the given datetime ranges [minDateTime]
+     * and [maxDateTime] if they were provided. Returns true if the validation was successful, otherwise false
+     * is returned. Both the [minDateTime] and [maxDateTime] are included in the range.
      */
-    fun today()
-    
-    /**
-     * Sets the current [dateTime]'s hour, minute and second values to the current local time while
-     * preserving the date, if any date was previously set.
-     */
-    fun now()
+    fun dateValidator(timeStamp: Long): Boolean
 }
 
 /**
@@ -220,7 +214,6 @@ private class DateTimePickerStateImpl(
     override var dateTime = mutableStateOf(
         UtcDateTime.create(initialValue)
     )
-    
     override val selectedDateTimeMillis: Long?
         get() = dateTime.value.epochMillis
     
@@ -231,9 +224,9 @@ private class DateTimePickerStateImpl(
     override val activePickerInput = mutableStateOf(pickerInput)
     
     override fun setDateTime(date: Long?, hour: Int, minute: Int) {
-        dateTime.value = UtcDateTime.createFromDateAndTime(date, hour, minute)
+        dateTime.value = UtcDateTime.createFromPickerValues(date, hour, minute)
     }
-    
+   
     override fun togglePickerInput() {
         activePickerInput.value = if (activePickerInput.value == DateTimePickerInput.Date) {
             DateTimePickerInput.Time
@@ -243,26 +236,37 @@ private class DateTimePickerStateImpl(
     }
     
     override fun dateTimeValidator(timeStamp: Long): Boolean {
+        // the date time validator is invoked by the date picker,
+        // which operates in milliseconds that are offset from UTC
+        // To compare it to min and max, the input must be converted
+        // to UTC.
+        val utcDateTime = timeStamp.minus(timeStamp.defaultTimeZoneOffset)
+        
         return minDateTime?.let { min ->
             maxDateTime?.let { max ->
-                timeStamp in min..max
-            } ?: (timeStamp >= min)
+                utcDateTime in min..max
+            } ?: (utcDateTime >= min)
         } ?: maxDateTime?.let {
-            timeStamp <= it
+            utcDateTime <= it
         } ?: true
     }
     
-    override fun today() {
-        setDateTime(
-            Instant.now().toEpochMilli().toDateMillis(),
-            dateTime.value.hour,
-            dateTime.value.minute
-        )
-    }
-    
-    override fun now() {
-        val now = Instant.now().toEpochMilli().toZonedDateTime()
-        dateTime.value = UtcDateTime.createFromDateAndTime(dateTime.value.date, now.hour, now.minute)
+    override fun dateValidator(timeStamp: Long): Boolean {
+        // the date validator is invoked by the date picker,
+        // which operates in milliseconds that are offset from UTC
+        // To compare it to min and max, the input must be converted
+        // to UTC.
+        val utcDate = UtcDateTime.create(timeStamp.minus(timeStamp.defaultTimeZoneOffset)).date!!
+        val minDate = UtcDateTime.create(minDateTime).date
+        val maxDate = UtcDateTime.create(maxDateTime).date
+
+        return minDate?.let { min ->
+            maxDate?.let { max ->
+                utcDate in min..max
+            } ?: (utcDate >= min)
+        } ?: maxDate?.let {
+            utcDate <= it
+        } ?: true
     }
 }
 
@@ -363,7 +367,7 @@ internal fun dateTimePickerStateSaver(): Saver<DateTimePickerState, Any> = listS
     }
 )
 
-private val Long?.defaultTimeZoneOffset: Int
+internal val Long?.defaultTimeZoneOffset: Int
     get() = this?.let {
         TimeZone.getDefault().getOffset(it)
     } ?: 0
