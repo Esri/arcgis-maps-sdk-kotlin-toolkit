@@ -109,6 +109,10 @@ private fun Context.findActivity(): Activity {
 /**
  * Displays the [Authenticator] in an [AlertDialog]. See the Authenticator component for more details.
  *
+ * @param authenticatorState an [AuthenticatorState]. See [AuthenticatorState.Companion.Factory].
+ * @param onPendingOAuthUserSignIn if not null, this will be called when an OAuth challenge is pending
+ * and the browser should be launched. Use this if you wish to handle OAuth challenges from your own
+ * activity rather than using the [OAuthUserSignInActivity].
  * @since 200.2.0
  */
 @OptIn(ExperimentalMaterial3Api::class)

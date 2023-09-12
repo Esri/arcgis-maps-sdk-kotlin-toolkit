@@ -19,7 +19,6 @@
 package com.arcgismaps.toolkit.authentication
 
 import android.app.Activity
-import android.content.Intent
 import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
 import com.arcgismaps.httpcore.authentication.AuthenticationManager
@@ -44,32 +43,22 @@ public suspend fun AuthenticationManager.signOut() {
 }
 
 /**
- * Completes the current [AuthenticatorState.pendingOAuthUserSignIn] with data from the provided [intent].
- *
- * The [intent.data] should contain a string representing the redirect URI that came from a browser
- * where the OAuth sign-in was performed. If the data is null, the sign-in will be cancelled.
- *
- * @since 200.3.0
- */
-public fun AuthenticatorState.completeOAuthSignIn(intent: Intent?) {
-    intent?.data?.let {
-        val uriString = it.toString()
-        pendingOAuthUserSignIn.value?.complete(uriString)
-    } ?: pendingOAuthUserSignIn.value?.cancel()
-}
-
-/**
  * Launches the custom tabs activity with the provided authorize URL. The resulting intent will
  * launch using an Incognito tab if the [pendingSignIn]'s [OAuthUserConfiguration.preferPrivateWebBrowserSession]
  * is true.
  *
  * @receiver an [Activity] used to launch the [CustomTabsIntent].
- * @param pendingSignIn the [OAuthUserSignIn] that requires completion.
+ * @param pendingSignIn the [OAuthUserSignIn] that requires completion, or a null value if there is no
+ * longer a pending sign in.
  *
  * @since 200.2.0
  */
-public fun Activity.launchCustomTabs(pendingSignIn: OAuthUserSignIn?): Unit =
-    launchCustomTabs(pendingSignIn?.authorizeUrl, pendingSignIn?.oAuthUserConfiguration?.preferPrivateWebBrowserSession)
+public fun Activity.launchCustomTabs(pendingSignIn: OAuthUserSignIn?): Unit {
+    launchCustomTabs(
+        pendingSignIn?.authorizeUrl ?: return,
+        pendingSignIn.oAuthUserConfiguration.preferPrivateWebBrowserSession
+    )
+}
 
 
 
@@ -77,12 +66,12 @@ public fun Activity.launchCustomTabs(pendingSignIn: OAuthUserSignIn?): Unit =
  * Launches the custom tabs activity with the provided authorize URL.
  *
  * @param authorizeUrl the authorize URL used by the custom tabs browser to prompt for OAuth
- * user credentials
+ * user credentials.
  * @param useIncognito whether the [CustomTabsIntent] should use Incognito mode, if available.
  *
  * @since 200.2.0
  */
-internal fun Activity.launchCustomTabs(authorizeUrl: String?, useIncognito: Boolean?) {
+internal fun Activity.launchCustomTabs(authorizeUrl: String, useIncognito: Boolean?) {
     CustomTabsIntent.Builder().build().apply {
         if (useIncognito == true) {
             intent.putExtra("com.google.android.apps.chrome.EXTRA_OPEN_NEW_INCOGNITO_TAB", true)
