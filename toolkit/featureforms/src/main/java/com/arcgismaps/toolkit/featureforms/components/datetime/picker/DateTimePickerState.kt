@@ -27,7 +27,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.toolkit.featureforms.components.datetime.toDateMillis
 import com.arcgismaps.toolkit.featureforms.components.datetime.toDateTimeInUtcZone
 import com.arcgismaps.toolkit.featureforms.components.datetime.toZonedDateTime
-import java.time.Instant
 import java.util.TimeZone
 
 /**
@@ -198,18 +197,6 @@ internal interface DateTimePickerState {
      * is returned. Both the [minDateTime] and [maxDateTime] are included in the range.
      */
     fun dateValidator(timeStamp: Long): Boolean
-    
-    /**
-     * Sets the current [dateTime]'s date value to today's date while preserving the time, if any
-     * time was previously set.
-     */
-    fun today()
-    
-    /**
-     * Sets the current [dateTime]'s hour, minute and second values to the current local time while
-     * preserving the date, if any date was previously set.
-     */
-    fun now()
 }
 
 /**
@@ -280,19 +267,6 @@ private class DateTimePickerStateImpl(
         } ?: maxDate?.let {
             utcDate <= it
         } ?: true
-    }
-    
-    override fun today() {
-        setDateTime(
-            Instant.now().toEpochMilli().toDateMillis(),
-            dateTime.value.hour,
-            dateTime.value.minute
-        )
-    }
-    
-    override fun now() {
-        val now = Instant.now().toEpochMilli().toZonedDateTime()
-        dateTime.value = UtcDateTime.createFromPickerValues(dateTime.value.date, now.hour, now.minute)
     }
 }
 
@@ -393,7 +367,7 @@ internal fun dateTimePickerStateSaver(): Saver<DateTimePickerState, Any> = listS
     }
 )
 
-private val Long?.defaultTimeZoneOffset: Int
+internal val Long?.defaultTimeZoneOffset: Int
     get() = this?.let {
         TimeZone.getDefault().getOffset(it)
     } ?: 0
