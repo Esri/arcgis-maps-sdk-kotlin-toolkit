@@ -165,9 +165,9 @@ internal fun DateTimePicker(
             onToday = {
                 val now = Instant.now().toEpochMilli().toDateMillis()
                 state.setDateTime(
-                    now.minus(now.defaultTimeZoneOffset),
-                    state.dateTime.value.hour,
-                    state.dateTime.value.minute
+                    now.plus(now.defaultTimeZoneOffset).toDateMillis(),
+                    timePickerState.hour,
+                    timePickerState.minute
                 )
                 datePickerState.setSelection(state.dateTime.value.dateForPicker)
             },
