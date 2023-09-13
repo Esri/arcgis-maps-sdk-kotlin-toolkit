@@ -84,13 +84,13 @@ class MyAppViewModel(application: Application) : AndroidViewModel(application), 
 }
 ```
 
-### Intercepting OAuth Sign-in Redirects
+### Intercepting OAuth Sign-in
 
 The `Authenticator` launches a Custom Tab when an OAuth challenge is issued. When the Custom Tab completes with a redirect url, it is received by the `OAuthUserSignInActivity` that is declared in your app's manifest via its intent filter.
 
-If you want to intercept this redirect before allowing the sign-in to complete, you can do that with the following steps:
+If you want to launch a Custom Tab from your own app's activity, these steps will allow you to do that:
 
-1. Remove the `intent-filter` from the `OAuthUserSignInActivity` in your app's manifest and put it on the activity that you wish to receive the redirect intent:
+1. Remove the `OAuthUserSignInActivity` in your app's manifest and put its intent filter on the activity that you wish to receive the redirect intent:
 
 ```xml
 <activity
@@ -113,13 +113,6 @@ If you want to intercept this redirect before allowing the sign-in to complete, 
 			android:host="auth"
 			android:scheme="my-ags-app" />
 	</intent-filter>
-</activity>
-
-<activity
-	android:name="com.arcgismaps.toolkit.authentication.OAuthUserSignInActivity"
-	android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
-	android:exported="true"
-	android:launchMode="singleTop" >
 </activity>
 ```
 
