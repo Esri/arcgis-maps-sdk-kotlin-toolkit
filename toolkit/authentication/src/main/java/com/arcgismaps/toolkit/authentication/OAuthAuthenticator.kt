@@ -56,19 +56,25 @@ internal fun OAuthAuthenticator(
         // OAuth challenge the OAuthAuthenticator will re-enter the composition and a new `didLaunch` state
         // variable will be initialized again here to false.
         var didLaunch by rememberSaveable { mutableStateOf(false) }
-        val launcher =
-            rememberLauncherForActivityResult(contract = OAuthUserSignInActivity.Contract()) { redirectUrl ->
-                redirectUrl?.let {
-                    oAuthPendingSignIn.complete(redirectUrl)
-                } ?: oAuthPendingSignIn.cancel()
-            }
         // Launching an activity is a side effect. We don't need `LaunchedEffect` because this is not suspending
         // and there's nothing that needs to keep running if it gets recomposed. In reality, we also don't
         // expect `oAuthPendingSignIn` to change while this composable is displayed.
         if (!didLaunch) {
             didLaunch = true
-            SideEffect {
-                onPendingOAuthUserSignIn?.invoke(oAuthPendingSignIn) ?: launcher.launch(oAuthPendingSignIn)
+            if (onPendingOAuthUserSignIn != null) {
+                SideEffect {
+                    onPendingOAuthUserSignIn.invoke(oAuthPendingSignIn)
+                }
+            } else {
+                val launcher =
+                    rememberLauncherForActivityResult(contract = OAuthUserSignInActivity.Contract()) { redirectUrl ->
+                        redirectUrl?.let {
+                            oAuthPendingSignIn.complete(redirectUrl)
+                        } ?: oAuthPendingSignIn.cancel()
+                    }
+                SideEffect {
+                    launcher.launch(oAuthPendingSignIn)
+                }
             }
         }
     }
