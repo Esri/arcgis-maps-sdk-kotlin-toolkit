@@ -62,19 +62,24 @@ internal fun OAuthWebView(
     authenticatorState: AuthenticatorState,
 ) {
     val context = LocalContext.current
-    var webView = WebView(context).apply {
-        settings.apply {
-            displayZoomControls = false
-            javaScriptEnabled = true
+    var webView = WebView(context)
+        .apply {
+            settings.apply {
+                displayZoomControls = false
+                javaScriptEnabled = true
+            }
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+            val scope = rememberCoroutineScope()
+            webViewClient = OAuthWebViewClient(authenticatorState, oAuthUserSignIn, scope)
+        }.also { webView ->
+            if (oAuthUserSignIn.oAuthUserConfiguration.preferPrivateWebBrowserSession) {
+                webView.clearAllSessions()
+            }
+            webView.loadUrl(oAuthUserSignIn.authorizeUrl)
         }
-        layoutParams = ViewGroup.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.MATCH_PARENT
-        )
-        val scope = rememberCoroutineScope()
-        webViewClient = OAuthWebViewClient(authenticatorState, oAuthUserSignIn, scope)
-        loadUrl(oAuthUserSignIn.authorizeUrl)
-    }
     AndroidView(factory = { webView }, update = { webView = it })
 
     BackHandler(enabled = true) {
@@ -278,25 +283,8 @@ private class OAuthWebViewClient(
         }
 
         if (oAuthUserSignIn.oAuthUserConfiguration.preferPrivateWebBrowserSession) {
-            webView?.clearSession()
+            webView?.clearAllSessions()
         }
-    }
-
-    /**
-     * Clears the WebView's cache, form data, history, SSL preferences, client certificate preferences, Cookies, and
-     * storage used by the JavaScript APIs.
-     * Taken from: https://stackoverflow.com/questions/9819325/android-webview-private-browsing
-     *
-     * @since 200.3.0
-     */
-    private fun WebView.clearSession() {
-        clearCache(true)
-        clearFormData()
-        clearHistory()
-        clearSslPreferences()
-        clearClientCertPreferences(null)
-        CookieManager.getInstance().removeAllCookies(null)
-        WebStorage.getInstance().deleteAllData()
     }
 
     /**
@@ -322,5 +310,22 @@ private class OAuthWebViewClient(
                 }
             }
         }
+}
+
+/**
+ * Clears the session for all application's WebView instances. This includes: cache, form data, history, SSL preferences,
+ * client certificate preferences, Cookies, and storage used by the JavaScript APIs.
+ * Taken from: https://stackoverflow.com/questions/9819325/android-webview-private-browsing
+ *
+ * @since 200.3.0
+ */a
+internal fun WebView.clearAllSessions() {
+    clearCache(true)
+    clearFormData()
+    clearHistory()
+    clearSslPreferences()
+    clearClientCertPreferences(null)
+    CookieManager.getInstance().removeAllCookies(null)
+    WebStorage.getInstance().deleteAllData()
 }
 
