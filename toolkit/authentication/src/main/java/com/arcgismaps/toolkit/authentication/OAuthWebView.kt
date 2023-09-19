@@ -314,6 +314,8 @@ private class OAuthWebViewClient(
  * client certificate preferences, Cookies, and storage used by the JavaScript APIs.
  * Taken from: https://stackoverflow.com/questions/9819325/android-webview-private-browsing
  *
+ * Note: Calling this method when creating the [WebView] will result in the failure `net::ERR_CERT_DATABASE_CHANGED`.
+ *
  * @since 200.3.0
  */
 internal fun WebView.clearAllSessions() {
