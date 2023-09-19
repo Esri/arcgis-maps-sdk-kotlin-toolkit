@@ -38,14 +38,13 @@ class AuthenticationAppViewModel(application: Application) : AndroidViewModel(ap
 
     private val noPortalInfoText = application.getString(R.string.no_portal_info)
     private val startInfoText = application.getString(R.string.start_info_text)
-    private val arcGISUrl = "https://rt-saml2.esri.com/portal"
+    private val arcGISUrl = "https://www.arcgis.com"
     private val oAuthUserConfiguration = OAuthUserConfiguration(
         arcGISUrl,
         // This client ID is for demo purposes only. For use of the Authenticator in your own app,
         // create your own client ID. For more info see: https://developers.arcgis.com/documentation/mapping-apis-and-services/security/tutorials/register-your-application/
-        "unyKGmbz5h6VbMtR",
-        "urn:ietf:wg:oauth:2.0:oob",
-        preferPrivateWebBrowserSession = true
+        "lgAdHkYZYlwwfAhC",
+        "my-ags-app://auth"
     )
 
     private val _infoText: MutableStateFlow<String> = MutableStateFlow(startInfoText)
