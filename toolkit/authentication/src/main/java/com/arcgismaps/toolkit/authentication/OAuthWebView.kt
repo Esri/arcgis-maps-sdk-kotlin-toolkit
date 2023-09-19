@@ -179,7 +179,7 @@ private class OAuthWebViewClient(
                     request?.cancel()
                 }
             } ?: run {
-                finish(exception =IllegalStateException("Host is not known."), webView = view)
+                finish(exception = IllegalStateException("Host is not known."), webView = view)
                 request?.cancel()
             }
         }
