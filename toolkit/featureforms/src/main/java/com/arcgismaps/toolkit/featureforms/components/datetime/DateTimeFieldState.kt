@@ -148,11 +148,11 @@ private class DateTimeFieldStateImpl(
     override val value: State<Long?> = _value
     
     init {
-        if (element.value.isNotEmpty()) {
+        if (element.value.value.isNotEmpty()) {
             // note, getting values from attributes no longer works in build 3989, there is garbage in the null fields.
             val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
             val initialValue =
-                LocalDateTime.parse(element.value, formatter).atZone(TimeZone.getDefault().toZoneId()).toInstant()
+                LocalDateTime.parse(element.value.value, formatter).atZone(TimeZone.getDefault().toZoneId()).toInstant()
                     .toEpochMilli()
             setValue(initialValue)
         } else {
@@ -172,7 +172,7 @@ private class DateTimeFieldStateImpl(
         _value.value = dateTime
     }
     
-    override fun resetValue() = setValue(element.value)
+    override fun resetValue() = setValue(element.value.value)
     
     override fun clearValue() {
         setValue(null)

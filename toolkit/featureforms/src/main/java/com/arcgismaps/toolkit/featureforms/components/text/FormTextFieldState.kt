@@ -117,7 +117,7 @@ private class FormTextFieldStateImpl(
     private val featureForm: FeatureForm,
     private val context: Context
 ) : FormTextFieldState {
-    private val _value = mutableStateOf(formElement.value.ifEmpty {
+    private val _value = mutableStateOf(formElement.value.value.ifEmpty {
         // "prime" the value until expressions can be evaluated to populate the value.
         // TODO: remove this when the value is provided by expression evaluation.
         featureForm.getElementValue(formElement)?.toString() ?: ""
