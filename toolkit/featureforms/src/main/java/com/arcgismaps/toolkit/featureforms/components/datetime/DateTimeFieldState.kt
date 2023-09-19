@@ -25,6 +25,7 @@ import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.toolkit.featureforms.utils.editValue
+import kotlinx.coroutines.flow.StateFlow
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.TimeZone
@@ -89,14 +90,14 @@ internal interface DateTimeFieldState {
      *
      * @since 200.2.0
      */
-    val isEditable: State<Boolean>
+    val isEditable: StateFlow<Boolean>
     
     /**
      * `true` if the field must have a datetime value
      *
      * @since 200.2.0
      */
-    val isRequired: State<Boolean>
+    val isRequired: StateFlow<Boolean>
     
     /**
      * Updates the attribute.
@@ -136,11 +137,9 @@ private class DateTimeFieldStateImpl(
     
     override val placeholderText: String = element.hint
     
-    private val _isEditable: MutableState<Boolean> = mutableStateOf(element.editableExpressionName.isNotEmpty())
-    override val isEditable: State<Boolean> = _isEditable
+    override val isEditable: StateFlow<Boolean> = element.isEditable
     
-    private val _isRequired: MutableState<Boolean> = mutableStateOf(element.requiredExpressionName.isNotBlank())
-    override val isRequired: State<Boolean> = _isRequired
+    override val isRequired: StateFlow<Boolean> = element.isRequired
     
     override val description: String = element.description
     

@@ -12,6 +12,8 @@ import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
 import com.arcgismaps.toolkit.featureforms.utils.editValue
 import com.arcgismaps.toolkit.featureforms.utils.getElementValue
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * State for the [FormTextField]
@@ -52,6 +54,8 @@ internal interface FormTextFieldState {
      */
     val value: State<String>
     
+    val valueChanged: StateFlow<String>
+    
     /**
      * State for the supporting text that gets displayed under the [FormTextField].
      */
@@ -82,7 +86,7 @@ internal interface FormTextFieldState {
     /**
      * State that indicates if the field is editable.
      */
-    val isEditable: Boolean
+    val isEditable: StateFlow<Boolean>
     
     /**
      * Callback to update the current value of the FormTextFieldState to the given [input].
@@ -93,6 +97,8 @@ internal interface FormTextFieldState {
      * Callback to set the current focus value to the given [focus].
      */
     fun onFocusChanged(focus: Boolean)
+    
+    suspend fun evaluateExpressions()
 }
 
 /**
@@ -103,8 +109,9 @@ internal interface FormTextFieldState {
  */
 internal fun FormTextFieldState(featureFormElement: FieldFormElement,
                                 form: FeatureForm,
-                                context: Context): FormTextFieldState =
-    FormTextFieldStateImpl(featureFormElement, form, context)
+                                context: Context,
+                                scope: CoroutineScope): FormTextFieldState =
+    FormTextFieldStateImpl(featureFormElement, form, context, scope)
 
 /**
  * Default implementation for the [FormTextFieldState]. See [FormTextFieldState()] for the factory.
@@ -115,7 +122,8 @@ internal fun FormTextFieldState(featureFormElement: FieldFormElement,
 private class FormTextFieldStateImpl(
     private val formElement: FieldFormElement,
     private val featureForm: FeatureForm,
-    private val context: Context
+    private val context: Context,
+    private val scope: CoroutineScope
 ) : FormTextFieldState {
     private val _value = mutableStateOf(formElement.value.value.ifEmpty {
         // "prime" the value until expressions can be evaluated to populate the value.
@@ -123,6 +131,7 @@ private class FormTextFieldStateImpl(
         featureForm.getElementValue(formElement)?.toString() ?: ""
     })
     override val value: State<String> = _value
+    override val valueChanged: StateFlow<String> = formElement.value
     
     private val _isFocused = mutableStateOf(false)
     override val isFocused: State<Boolean> = _isFocused
@@ -193,10 +202,13 @@ private class FormTextFieldStateImpl(
         } else ""
     }
     
-    override val isEditable: Boolean = formElement.editableExpressionName.isNotEmpty()
+    override val isEditable: StateFlow<Boolean> = formElement.isEditable
     
     override fun onValueChanged(input: String) {
        editValue(input)
+//        scope.launch {
+//            featureForm.evaluateExpressions()
+//        }
         _value.value = input
         validateLength()
     }
@@ -224,5 +236,9 @@ private class FormTextFieldStateImpl(
      */
     private fun editValue(value: Any?) {
         featureForm.editValue(formElement, value)
+    }
+    
+    override suspend fun evaluateExpressions() {
+        featureForm.evaluateExpressions()
     }
 }

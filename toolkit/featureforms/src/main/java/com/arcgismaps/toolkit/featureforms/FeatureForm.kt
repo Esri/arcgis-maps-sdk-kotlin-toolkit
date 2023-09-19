@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -35,6 +36,9 @@ public fun FeatureForm(
 ) {
     val featureForm by featureFormState.featureForm.collectAsState()
     featureForm?.let {
+        LaunchedEffect(Unit) {
+            it.evaluateExpressions()
+        }
         FeatureFormContent(form = it, modifier = modifier)
     } ?: run {
         Column(
