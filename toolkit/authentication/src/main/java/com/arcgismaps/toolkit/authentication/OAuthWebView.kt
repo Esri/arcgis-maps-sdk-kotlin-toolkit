@@ -75,9 +75,6 @@ internal fun OAuthWebView(
             val scope = rememberCoroutineScope()
             webViewClient = OAuthWebViewClient(authenticatorState, oAuthUserSignIn, scope)
         }.also { webView ->
-            if (oAuthUserSignIn.oAuthUserConfiguration.preferPrivateWebBrowserSession) {
-                webView.clearAllSessions()
-            }
             webView.loadUrl(oAuthUserSignIn.authorizeUrl)
         }
     AndroidView(factory = { webView }, update = { webView = it })
@@ -178,11 +175,11 @@ private class OAuthWebViewClient(
                         )
                     }
                 } ?: run {
-                    oAuthUserSignIn.cancel(exception)
+                    finish(exception = exception, webView = view)
                     request?.cancel()
                 }
             } ?: run {
-                oAuthUserSignIn.cancel(IllegalStateException("Host is not known."))
+                finish(exception =IllegalStateException("Host is not known."), webView = view)
                 request?.cancel()
             }
         }
@@ -203,9 +200,9 @@ private class OAuthWebViewClient(
      */
     override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
         scope.launch {
-            view?.url?.let {
-                val host = URL(view.url).host
-                val sslException = SSLException("Connection to $host failed, ${error?.toString()}")
+            error?.url?.let {
+                val host = URL(it).host
+                val sslException = SSLException("Connection to $host failed, ${error}")
                 getCredentialOrPrompt(host, sslException, NetworkAuthenticationType.ServerTrust)?.let {
                     handler?.proceed()
                 } ?: run {
@@ -318,7 +315,7 @@ private class OAuthWebViewClient(
  * Taken from: https://stackoverflow.com/questions/9819325/android-webview-private-browsing
  *
  * @since 200.3.0
- */a
+ */
 internal fun WebView.clearAllSessions() {
     clearCache(true)
     clearFormData()
