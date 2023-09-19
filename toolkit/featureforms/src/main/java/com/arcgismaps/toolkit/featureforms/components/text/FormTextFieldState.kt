@@ -12,7 +12,6 @@ import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
 import com.arcgismaps.toolkit.featureforms.utils.editValue
 import com.arcgismaps.toolkit.featureforms.utils.getElementValue
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
 /**
@@ -89,6 +88,11 @@ internal interface FormTextFieldState {
     val isEditable: StateFlow<Boolean>
     
     /**
+     * State that indicates if the field is required.
+     */
+    val isRequired: StateFlow<Boolean>
+    
+    /**
      * Callback to update the current value of the FormTextFieldState to the given [input].
      */
     fun onValueChanged(input: String)
@@ -109,9 +113,8 @@ internal interface FormTextFieldState {
  */
 internal fun FormTextFieldState(featureFormElement: FieldFormElement,
                                 form: FeatureForm,
-                                context: Context,
-                                scope: CoroutineScope): FormTextFieldState =
-    FormTextFieldStateImpl(featureFormElement, form, context, scope)
+                                context: Context): FormTextFieldState =
+    FormTextFieldStateImpl(featureFormElement, form, context)
 
 /**
  * Default implementation for the [FormTextFieldState]. See [FormTextFieldState()] for the factory.
@@ -122,8 +125,7 @@ internal fun FormTextFieldState(featureFormElement: FieldFormElement,
 private class FormTextFieldStateImpl(
     private val formElement: FieldFormElement,
     private val featureForm: FeatureForm,
-    private val context: Context,
-    private val scope: CoroutineScope
+    private val context: Context
 ) : FormTextFieldState {
     private val _value = mutableStateOf(formElement.value.value.ifEmpty {
         // "prime" the value until expressions can be evaluated to populate the value.
@@ -204,11 +206,10 @@ private class FormTextFieldStateImpl(
     
     override val isEditable: StateFlow<Boolean> = formElement.isEditable
     
+    override val isRequired: StateFlow<Boolean> = formElement.isRequired
+    
     override fun onValueChanged(input: String) {
-       editValue(input)
-//        scope.launch {
-//            featureForm.evaluateExpressions()
-//        }
+        editValue(input)
         _value.value = input
         validateLength()
     }
