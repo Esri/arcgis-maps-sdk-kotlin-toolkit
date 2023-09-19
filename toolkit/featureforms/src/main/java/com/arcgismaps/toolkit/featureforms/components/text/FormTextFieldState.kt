@@ -85,6 +85,11 @@ internal interface FormTextFieldState {
     val isEditable: Boolean
     
     /**
+     * State that indicates if the field is required.
+     */
+    val isRequired: Boolean
+    
+    /**
      * Callback to update the current value of the FormTextFieldState to the given [input].
      */
     fun onValueChanged(input: String)
@@ -133,8 +138,14 @@ private class FormTextFieldStateImpl(
     private val _hasError = mutableStateOf(false)
     override val hasError: State<Boolean> = _hasError
     
+    override val isRequired: Boolean = formElement.requiredExpressionName.isNotEmpty()
+    
     // set the label from the FieldFeatureFormElement
-    override val label = formElement.label
+    override val label = if (!isRequired) {
+        formElement.label
+    } else {
+        "${formElement.label} *"
+    }
     
     // set the description from the FieldFeatureFormElement
     override val description = formElement.description
@@ -210,10 +221,15 @@ private class FormTextFieldStateImpl(
      * [hasError] and [errorMessage] if there was an error in validation.
      */
     private fun validateLength() {
-        _hasError.value = (_value.value.length !in minLength..maxLength).also {
-            if (it) {
-                _errorMessage.value = helperText
-            }
+        _hasError.value = if (_value.value.length !in minLength..maxLength) {
+            _errorMessage.value = helperText
+            true
+            
+        } else if (isRequired && _value.value.isEmpty()) {
+            _errorMessage.value = context.getString(R.string.required)
+            true
+        } else {
+            false
         }
     }
     
