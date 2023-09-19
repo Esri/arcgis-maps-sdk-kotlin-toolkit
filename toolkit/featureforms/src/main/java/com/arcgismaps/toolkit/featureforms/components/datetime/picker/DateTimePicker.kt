@@ -44,8 +44,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimePicker
-import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -60,6 +58,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.arcgismaps.toolkit.featureforms.R
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimePicker
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimePickerState
 import com.arcgismaps.toolkit.featureforms.components.datetime.toDateMillis
 import com.arcgismaps.toolkit.featureforms.components.datetime.toZonedDateTime
 import java.time.Instant
@@ -164,11 +164,11 @@ internal fun DateTimePicker(
             } ?: false,
             pickerInput = pickerInput,
             onToday = {
-                val now = Instant.now().toEpochMilli().toDateMillis()
+                val now = Instant.now().toEpochMilli()
                 state.setDateTime(
-                    now.plus(now.defaultTimeZoneOffset),
-                    state.dateTime.value.hour,
-                    state.dateTime.value.minute
+                    now.plus(now.defaultTimeZoneOffset).toDateMillis(),
+                    timePickerState.hour,
+                    timePickerState.minute
                 )
             },
             onNow = {
