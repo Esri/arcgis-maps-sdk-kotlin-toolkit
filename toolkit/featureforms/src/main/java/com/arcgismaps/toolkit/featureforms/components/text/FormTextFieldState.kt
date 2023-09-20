@@ -218,14 +218,13 @@ private class FormTextFieldStateImpl(
     }
     
     /**
-     * Validates the current [value]'s length based on the [minLength] and [maxLength] and sets the
+     * Validates the current [value]'s length based on the [minLength], [maxLength], and [isRequired] and sets the
      * [hasError] and [errorMessage] if there was an error in validation.
      */
     private fun validateLength() {
         _hasError.value = if (_value.value.length !in minLength..maxLength) {
             _errorMessage.value = helperText
             true
-            
         } else if (isRequired && _value.value.isEmpty()) {
             _errorMessage.value = context.getString(R.string.required)
             true
