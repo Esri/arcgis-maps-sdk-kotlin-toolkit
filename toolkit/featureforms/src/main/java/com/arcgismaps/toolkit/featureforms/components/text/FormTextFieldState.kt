@@ -141,6 +141,7 @@ private class FormTextFieldStateImpl(
     override val isRequired: Boolean = formElement.requiredExpressionName.isNotEmpty()
     
     // set the label from the FieldFeatureFormElement
+    // note when isRequired becomes a StateFlow, this logic will move into the compose function
     override val label = if (!isRequired) {
         formElement.label
     } else {
