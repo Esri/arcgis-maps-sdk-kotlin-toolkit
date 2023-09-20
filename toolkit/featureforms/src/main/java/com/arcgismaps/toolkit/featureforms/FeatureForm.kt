@@ -13,6 +13,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
@@ -35,17 +38,30 @@ public fun FeatureForm(
     modifier: Modifier = Modifier
 ) {
     val featureForm by featureFormState.featureForm.collectAsState()
+    var initialEvaluation by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        // ensure expressions are evaluated before state objects are created.
+        featureForm?.evaluateExpressions()
+        initialEvaluation = true
+    }
+    
     featureForm?.let {
-        LaunchedEffect(Unit) {
-            it.evaluateExpressions()
+        if (initialEvaluation) {
+            FeatureFormContent(form = it, modifier = modifier)
+        } else {
+            NoDataToDisplay(modifier)
         }
-        FeatureFormContent(form = it, modifier = modifier)
     } ?: run {
-        Column(
-            modifier = modifier.fillMaxSize()
-        ) {
-            Text(text = "No information to display.")
-        }
+        NoDataToDisplay(modifier)
+    }
+}
+
+@Composable
+internal fun NoDataToDisplay(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.fillMaxSize()
+    ) {
+        Text(text = "No information to display.")
     }
 }
 

@@ -49,9 +49,19 @@ internal fun FormTextField(
     val contentLength by state.contentLength
     var clearFocus by remember { mutableStateOf(false) }
     val isEditable by state.isEditable.collectAsState()
+    val isRequired by state.isRequired.collectAsState()
+    val label by remember(isRequired) {
+        if (isRequired) {
+            mutableStateOf("${state.label} *")
+        } else {
+            mutableStateOf(state.label)
+        }
+    }
     val text by if (isEditable) {
+        //user edits
         state.value
     } else {
+        // changes from expression evaluation
         state.valueChanged.collectAsState()
     }
     
@@ -84,7 +94,7 @@ internal fun FormTextField(
             enabled = isEditable,
             label = {
                 Text(
-                    text = state.label,
+                    text = label,
                     modifier = Modifier.semantics { contentDescription = "label" })
             },
             trailingIcon = {

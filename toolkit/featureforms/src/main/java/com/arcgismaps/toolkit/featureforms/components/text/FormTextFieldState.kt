@@ -93,11 +93,6 @@ internal interface FormTextFieldState {
     val isRequired: StateFlow<Boolean>
     
     /**
-     * State that indicates if the field is required.
-     */
-    val isRequired: Boolean
-    
-    /**
      * Callback to update the current value of the FormTextFieldState to the given [input].
      */
     fun onValueChanged(input: String)
@@ -149,14 +144,10 @@ private class FormTextFieldStateImpl(
     private val _hasError = mutableStateOf(false)
     override val hasError: State<Boolean> = _hasError
     
-    override val isRequired: Boolean = formElement.requiredExpressionName.isNotEmpty()
+    override val isRequired: StateFlow<Boolean> = formElement.isRequired
     
     // set the label from the FieldFeatureFormElement
-    override val label = if (!isRequired) {
-        formElement.label
-    } else {
-        "${formElement.label} *"
-    }
+    override val label = formElement.label
     
     // set the description from the FieldFeatureFormElement
     override val description = formElement.description
@@ -217,8 +208,6 @@ private class FormTextFieldStateImpl(
     
     override val isEditable: StateFlow<Boolean> = formElement.isEditable
     
-    override val isRequired: StateFlow<Boolean> = formElement.isRequired
-    
     override fun onValueChanged(input: String) {
         editValue(input)
         _value.value = input
@@ -238,7 +227,7 @@ private class FormTextFieldStateImpl(
             _errorMessage.value = helperText
             true
             
-        } else if (isRequired && _value.value.isEmpty()) {
+        } else if (isRequired.value && _value.value.isEmpty()) {
             _errorMessage.value = context.getString(R.string.required)
             true
         } else {
