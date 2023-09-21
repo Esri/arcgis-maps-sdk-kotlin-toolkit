@@ -86,17 +86,17 @@ internal fun DateTimeField(
                 focusedTextColor = Color.Gray,
                 unfocusedTextColor = Color.Gray,
                 focusedSupportingTextColor = if (isRequired) {
-                    Color.Red
+                    MaterialTheme.colorScheme.error
                 } else {
                     Color.Unspecified
                 },
                 unfocusedSupportingTextColor = if (isRequired) {
-                    Color.Red
+                    MaterialTheme.colorScheme.error
                 } else {
                     Color.Unspecified
                 },
                 disabledSupportingTextColor = if (isRequired) {
-                    Color.Red
+                    MaterialTheme.colorScheme.error
                 } else {
                     MaterialTheme.colorScheme.onSurface
                 }
@@ -108,12 +108,12 @@ internal fun DateTimeField(
                 disabledBorderColor = MaterialTheme.colorScheme.onSurface,
                 disabledTrailingIconColor = MaterialTheme.colorScheme.onSurface,
                 focusedSupportingTextColor = if (isRequired) {
-                    Color.Red
+                    MaterialTheme.colorScheme.error
                 } else {
                     Color.Unspecified
                 },
                 unfocusedSupportingTextColor = if (isRequired) {
-                    Color.Red
+                    MaterialTheme.colorScheme.error
                 } else {
                     Color.Unspecified
                 },
@@ -135,7 +135,8 @@ internal fun DateTimeField(
                 onValueChange = {},
                 modifier = Modifier
                     .fillMaxSize()
-                    .focusable(true, interactionSource),
+                    .focusable(true, interactionSource)
+                    .semantics { contentDescription = "outlined text field" },
                 readOnly = true,
                 enabled = true,
                 label = {
@@ -144,7 +145,9 @@ internal fun DateTimeField(
                     } else {
                         state.label
                     }
-                    Text(text = text)
+                    Text(text = text,
+                        modifier = Modifier.semantics { contentDescription = "label" }
+                    )
                 },
                 trailingIcon = {
                     if (epochMillis != null) {
@@ -175,9 +178,15 @@ internal fun DateTimeField(
                 },
                 supportingText = {
                     if (epochMillis == null && isRequired) {
-                        Text(text = stringResource(R.string.required))
+                        Text(
+                            text = stringResource(R.string.required),
+                            modifier = Modifier.semantics { contentDescription = "helper" }
+                        )
                     } else {
-                        Text(text = state.description)
+                        Text(
+                            text = state.description,
+                            modifier = Modifier.semantics { contentDescription = "helper" }
+                        )
                     }
                 },
                 visualTransformation = if (state.value.value == null)
