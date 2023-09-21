@@ -66,7 +66,16 @@ internal fun DateTimeField(
 ) {
     val isEditable by state.isEditable.collectAsState()
     val isRequired by state.isRequired.collectAsState()
-    val epochMillis by state.value
+    val epochMillis by if (isEditable) {
+        state.value
+    } else {
+        state.valueChanged.collectAsState()
+    }
+    
+    LaunchedEffect(epochMillis) {
+        state.evaluateExpressions()
+    }
+
     val shouldShowTime = remember {
         state.shouldShowTime
     }

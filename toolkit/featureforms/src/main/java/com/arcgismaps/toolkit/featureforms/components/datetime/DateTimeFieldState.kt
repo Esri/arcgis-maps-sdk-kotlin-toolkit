@@ -25,7 +25,11 @@ import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.toolkit.featureforms.utils.editValue
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.TimeZone
@@ -86,6 +90,14 @@ internal interface DateTimeFieldState {
     val value: State<Long?>
     
     /**
+     * An update to the date time from the evaluation of Arcade expressions.
+     * This will only emit if the element is editable.
+     *
+     * @since 200.3.0
+     */
+    val valueChanged: StateFlow<Long?>
+    
+    /**
      * `true` if the date time may be edited.
      *
      * @since 200.2.0
@@ -120,14 +132,26 @@ internal interface DateTimeFieldState {
      * @since 200.2.0
      */
     fun clearValue()
+    
+    /**
+     * evaluate arcade expressions as needed due to user input
+     *
+     * @since 200.3.0
+     */
+    suspend fun evaluateExpressions()
 }
 
 private class DateTimeFieldStateImpl(
     private val element: FieldFormElement,
     private val form: FeatureForm,
+    scope: CoroutineScope,
     input: DateTimePickerFormInput = element.input as DateTimePickerFormInput
 ) : DateTimeFieldState {
     override val minEpochMillis: Long? = input.min?.toEpochMilli()
+    
+    private val formattedValueChanged: StateFlow<String> = element.value
+    private val _valueChanged: MutableStateFlow<Long?> = MutableStateFlow(dateTimeFromString(element.value.value))
+    override val valueChanged: StateFlow<Long?> = _valueChanged.asStateFlow()
     
     override val maxEpochMillis: Long? = input.max?.toEpochMilli()
     
@@ -147,18 +171,19 @@ private class DateTimeFieldStateImpl(
     override val value: State<Long?> = _value
     
     init {
-        if (element.value.value.isNotEmpty()) {
-            // note, getting values from attributes no longer works in build 3989, there is garbage in the null fields.
-            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
-            val initialValue =
-                LocalDateTime.parse(element.value.value, formatter).atZone(TimeZone.getDefault().toZoneId()).toInstant()
-                    .toEpochMilli()
-            setValue(initialValue)
-        } else {
-            setValue(null)
+        setValue(dateTimeFromString(element.value.value))
+        scope.launch {
+            // Until the element emits the raw value, we will need to map it to a Long?
+            // unfortunately, Flow.map on a StateFlow returns a Flow so we just map it
+            // by collecting on it and emitting it again.
+            formattedValueChanged
+                .collect {
+                    _valueChanged.value = dateTimeFromString(it)
+                }
         }
+        
     }
-    
+ 
     private fun setValue(value: String) {
         if (value.isNotEmpty()) {
             val asLong = value.toLong()
@@ -176,6 +201,10 @@ private class DateTimeFieldStateImpl(
     override fun clearValue() {
         setValue(null)
     }
+    
+    override suspend fun evaluateExpressions() {
+        form.evaluateExpressions()
+    }
 }
 
 /**
@@ -186,5 +215,18 @@ private class DateTimeFieldStateImpl(
  */
 internal fun DateTimeFieldState(
     formElement: FieldFormElement,
-    form: FeatureForm
-): DateTimeFieldState = DateTimeFieldStateImpl(formElement, form)
+    form: FeatureForm,
+    scope: CoroutineScope
+): DateTimeFieldState = DateTimeFieldStateImpl(formElement, form, scope)
+
+
+internal fun dateTimeFromString(formattedDateTime: String): Long? {
+    if (formattedDateTime.isNotEmpty()) {
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+        return LocalDateTime.parse(formattedDateTime, formatter).atZone(TimeZone.getDefault().toZoneId())
+            .toInstant()
+            .toEpochMilli()
+    }
+    return null
+}
+

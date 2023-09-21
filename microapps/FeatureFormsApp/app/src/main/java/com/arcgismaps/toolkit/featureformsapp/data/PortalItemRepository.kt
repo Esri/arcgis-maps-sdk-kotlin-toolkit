@@ -155,6 +155,5 @@ class PortalItemRepository(
  */
 fun getListOfMaps(): List<String> =
     listOf(
-        "https://www.arcgis.com/home/item.html?id=a95963333bf84055b7115dc60d10443e",
-        //"https://runtimecoretest.maps.arcgis.com/home/item.html?id=6d2d865bd6da48a79a7bb81f6a0176b9"
+        "https://www.arcgis.com/home/item.html?id=a95963333bf84055b7115dc60d10443e"
     )

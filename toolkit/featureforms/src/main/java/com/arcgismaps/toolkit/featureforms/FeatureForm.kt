@@ -39,7 +39,7 @@ public fun FeatureForm(
 ) {
     val featureForm by featureFormState.featureForm.collectAsState()
     var initialEvaluation by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
+    LaunchedEffect(featureForm) {
         // ensure expressions are evaluated before state objects are created.
         featureForm?.evaluateExpressions()
         initialEvaluation = true

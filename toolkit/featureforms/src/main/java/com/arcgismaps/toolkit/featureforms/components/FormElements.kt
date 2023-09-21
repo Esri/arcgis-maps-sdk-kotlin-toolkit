@@ -3,6 +3,7 @@ package com.arcgismaps.toolkit.featureforms.components
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
@@ -19,6 +20,7 @@ import com.arcgismaps.toolkit.featureforms.components.text.FormTextFieldState
 internal fun FieldElement(field: FieldFormElement, form: FeatureForm) {
     val context = LocalContext.current
     val visible by field.isVisible.collectAsState()
+    val scope = rememberCoroutineScope()
     
     if (visible) {
         when (field.input) {
@@ -46,7 +48,8 @@ internal fun FieldElement(field: FieldFormElement, form: FeatureForm) {
                 DateTimeField(
                     state = DateTimeFieldState(
                         formElement = field,
-                        form = form
+                        form = form,
+                        scope = scope
                     )
                 )
             }
