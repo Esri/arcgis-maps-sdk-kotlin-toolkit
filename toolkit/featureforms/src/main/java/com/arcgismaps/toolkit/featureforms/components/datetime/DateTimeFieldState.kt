@@ -173,7 +173,7 @@ private class DateTimeFieldStateImpl(
     init {
         setValue(dateTimeFromString(element.value.value))
         scope.launch {
-            // Until the element emits the raw value, we will need to map it to a Long?
+            // Until the field form element provides the raw value, we will need to map this String to a `Long?`
             // unfortunately, Flow.map on a StateFlow returns a Flow so we just map it
             // by collecting on it and emitting it again.
             formattedValueChanged
@@ -220,6 +220,12 @@ internal fun DateTimeFieldState(
 ): DateTimeFieldState = DateTimeFieldStateImpl(formElement, form, scope)
 
 
+/**
+ * Maps the [FieldFormElement.value] from a String to Long?
+ * Empty strings are made to be null Longs.
+ *
+ * @since 200.3.0
+ */
 internal fun dateTimeFromString(formattedDateTime: String): Long? {
     if (formattedDateTime.isNotEmpty()) {
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
