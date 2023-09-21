@@ -20,10 +20,13 @@ import android.net.http.SslError
 import android.security.KeyChain
 import android.view.ViewGroup
 import android.webkit.ClientCertRequest
+import android.webkit.CookieManager
 import android.webkit.HttpAuthHandler
 import android.webkit.SslErrorHandler
 import android.webkit.WebResourceRequest
+import android.webkit.WebStorage
 import android.webkit.WebView
+import android.webkit.WebView.clearClientCertPreferences
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
@@ -59,19 +62,21 @@ internal fun OAuthWebView(
     authenticatorState: AuthenticatorState,
 ) {
     val context = LocalContext.current
-    var webView = WebView(context).apply {
-        settings.apply {
-            displayZoomControls = false
-            javaScriptEnabled = true
+    var webView = WebView(context)
+        .apply {
+            settings.apply {
+                displayZoomControls = false
+                javaScriptEnabled = true
+            }
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+            val scope = rememberCoroutineScope()
+            webViewClient = OAuthWebViewClient(authenticatorState, oAuthUserSignIn, scope)
+        }.also { webView ->
+            webView.loadUrl(oAuthUserSignIn.authorizeUrl)
         }
-        layoutParams = ViewGroup.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.MATCH_PARENT
-        )
-        val scope = rememberCoroutineScope()
-        webViewClient = OAuthWebViewClient(authenticatorState, oAuthUserSignIn, scope)
-        loadUrl(oAuthUserSignIn.authorizeUrl)
-    }
     AndroidView(factory = { webView }, update = { webView = it })
 
     BackHandler(enabled = true) {
@@ -101,7 +106,7 @@ private class OAuthWebViewClient(
     override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
         request?.url?.let {
             if (it.toString().contains("/oauth2/approval", true)) {
-                oAuthUserSignIn.complete(it.toString())
+                finish(it.toString(), webView = view)
                 return true
             }
         }
@@ -134,11 +139,11 @@ private class OAuthWebViewClient(
                     val passwordCredential = credential as PasswordCredential
                     handler?.proceed(passwordCredential.username, passwordCredential.password)
                 } ?: run {
-                    oAuthUserSignIn.cancel(exception)
+                    finish(exception = exception, webView = view)
                     handler?.cancel()
                 }
             } ?: run {
-                oAuthUserSignIn.cancel(IllegalStateException("Host is not known."))
+                finish(exception = IllegalStateException("Host is not known."), webView = view)
                 handler?.cancel()
             }
         }
@@ -170,11 +175,11 @@ private class OAuthWebViewClient(
                         )
                     }
                 } ?: run {
-                    oAuthUserSignIn.cancel(exception)
+                    finish(exception = exception, webView = view)
                     request?.cancel()
                 }
             } ?: run {
-                oAuthUserSignIn.cancel(IllegalStateException("Host is not known."))
+                finish(exception = IllegalStateException("Host is not known."), webView = view)
                 request?.cancel()
             }
         }
@@ -195,17 +200,17 @@ private class OAuthWebViewClient(
      */
     override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
         scope.launch {
-            view?.url?.let {
-                val host = URL(view.url).host
-                val sslException = SSLException("Connection to $host failed, ${error?.toString()}")
+            error?.url?.let {
+                val host = URL(it).host
+                val sslException = SSLException("Connection to $host failed, ${error}")
                 getCredentialOrPrompt(host, sslException, NetworkAuthenticationType.ServerTrust)?.let {
                     handler?.proceed()
                 } ?: run {
-                    oAuthUserSignIn.cancel(sslException)
+                    finish(exception = sslException, webView = view)
                     handler?.cancel()
                 }
             } ?: run {
-                oAuthUserSignIn.cancel(IllegalStateException("Host is not known."))
+                finish(exception = IllegalStateException("Host is not known."), webView = view)
                 handler?.cancel()
             }
         }
@@ -222,7 +227,7 @@ private class OAuthWebViewClient(
     override fun onPageFinished(view: WebView?, url: String?) {
         view?.internalError?.let { internalError ->
             val redirectUrl = oAuthUserSignIn.oAuthUserConfiguration.redirectUrl
-            oAuthUserSignIn.complete("$redirectUrl?$internalError")
+            finish("$redirectUrl?$internalError", webView = view)
         }
     }
 
@@ -261,6 +266,25 @@ private class OAuthWebViewClient(
     }
 
     /**
+     * Completes the WebView OAuth challenge by either passing back a [redirectUrl] or an [exception].
+     * if [OAuthUserConfiguration.preferPrivateWebBrowserSession] is set to true, this method will clear the [webView]'s
+     * session.
+     *
+     * @since 200.3.0
+     */
+    private fun finish(redirectUrl: String? = null, exception: Exception? = null, webView: WebView?) {
+        if (redirectUrl != null) {
+            oAuthUserSignIn.complete(redirectUrl)
+        } else if (exception != null) {
+            oAuthUserSignIn.cancel(exception)
+        }
+
+        if (oAuthUserSignIn.oAuthUserConfiguration.preferPrivateWebBrowserSession) {
+            webView?.clearAllSessions()
+        }
+    }
+
+    /**
      * Returns the WebView's internal error, if there's one.
      *
      * @since 200.2.0
@@ -283,5 +307,24 @@ private class OAuthWebViewClient(
                 }
             }
         }
+}
+
+/**
+ * Clears the session for all application's WebView instances. This includes: cache, form data, history, SSL preferences,
+ * client certificate preferences, Cookies, and storage used by the JavaScript APIs.
+ * Taken from: https://stackoverflow.com/questions/9819325/android-webview-private-browsing
+ *
+ * Note: Calling this method when creating the [WebView] will result in the failure `net::ERR_CERT_DATABASE_CHANGED`.
+ *
+ * @since 200.3.0
+ */
+internal fun WebView.clearAllSessions() {
+    clearCache(true)
+    clearFormData()
+    clearHistory()
+    clearSslPreferences()
+    clearClientCertPreferences(null)
+    CookieManager.getInstance().removeAllCookies(null)
+    WebStorage.getInstance().deleteAllData()
 }
 
