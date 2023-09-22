@@ -53,6 +53,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -133,7 +135,8 @@ internal fun DateTimePicker(
     
     // create a DateTimePickerDialog
     DateTimePickerDialog(
-        onDismissRequest = onDismissRequest
+        onDismissRequest = onDismissRequest,
+        modifier = Modifier.semantics { contentDescription = "date time picker dialog" }
     ) {
         // create and remember a TimePickerState that resets when dateTime changes
         val timePickerState = rememberSaveable(dateTime, saver = TimePickerState.Saver()) {
@@ -254,9 +257,15 @@ private fun PickerTitle(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(Modifier.weight(1f)) {
-            Text(text = label, style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = label, style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.semantics { contentDescription = "picker title label" }
+            )
             Spacer(modifier = Modifier.height(5.dp))
-            Text(text = description, style = MaterialTheme.typography.bodySmall)
+            Text(
+                text = description, style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.semantics { contentDescription = "picker title description" }
+            )
         }
         icon?.let {
             IconButton(onClick = onIconTap) {
@@ -322,6 +331,7 @@ private fun DateTimePickerDialog(
     properties: DialogProperties = DialogProperties(usePlatformDefaultWidth = false),
     content: @Composable ColumnScope.() -> Unit
 ) {
+    println("composing dialog")
     AlertDialog(
         onDismissRequest = onDismissRequest,
         modifier = modifier.wrapContentHeight(),

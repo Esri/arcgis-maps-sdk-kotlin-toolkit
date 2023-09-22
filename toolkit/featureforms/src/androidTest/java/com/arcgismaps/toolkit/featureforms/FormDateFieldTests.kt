@@ -23,7 +23,9 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotFocused
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.data.ArcGISFeature
@@ -43,12 +45,14 @@ import org.junit.After
 import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
-
 @OptIn(ExperimentalCoroutinesApi::class)
 class FormDateFieldTests {
     private val labelSemanticLabel = "label"
     private val helperSemanticLabel = "helper"
     private val outlinedTextFieldSemanticLabel = "outlined text field"
+    private val pickerDialogSemanticLabel = "date time picker dialog"
+    private val pickerTitleLabelSemanticLabel = "picker title label"
+    private val pickerTitleDescriptionSemanticLabel = "picker title description"
     private val charCountSemanticLabel = "char count"
     private val clearTextSemanticLabel = "Clear text button"
     
@@ -119,6 +123,37 @@ class FormDateFieldTests {
         assertEquals("Required", helperText)
         helper.assertTextColor(errorTextColor)
         
+    }
+    
+    /**
+     * Given a required DateTimeField with no value
+     * When it is focused
+     * Then the label is displayed with an asterisk and the helper text says Required in red
+     * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-21-unfocused-and-focused-state-no-value-date-required
+     */
+    @Test
+    fun testNoValueFocusedStateRequiredField() = runTest {
+        composeTestRule.setContent {
+            DateTimeField(
+                state = DateTimeFieldState(
+                    fieldFeatureFormElement,
+                    featureForm
+                )
+            )
+        }
+        val outlinedTextField = composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
+        outlinedTextField.performClick()
+        
+        val dialog = composeTestRule.onAllNodes(
+            hasContentDescription(pickerDialogSemanticLabel),
+            useUnmergedTree = true
+        ).onFirst()
+        dialog.assertIsDisplayed()
+        val label = composeTestRule.onNodeWithContentDescription(pickerTitleLabelSemanticLabel)
+        label.assertIsDisplayed()
+        
+        val helper = composeTestRule.onNode(hasContentDescription(pickerTitleDescriptionSemanticLabel))
+        helper.assertIsDisplayed()
     }
     
     /**
