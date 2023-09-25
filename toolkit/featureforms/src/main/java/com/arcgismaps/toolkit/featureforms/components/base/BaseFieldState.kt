@@ -1,3 +1,19 @@
+/*
+ * Copyright 2023 Esri
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.arcgismaps.toolkit.featureforms.components.base
 
 import androidx.compose.runtime.State
@@ -7,6 +23,10 @@ import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.toolkit.featureforms.utils.editValue
 import com.arcgismaps.toolkit.featureforms.utils.getElementValue
 
+/**
+ * Base interface for any Field within a feature form. It provides the default set of properties
+ * that are common to all [FieldFormElement]'s.
+ */
 internal interface BaseFieldState {
     /**
      * Title for the field.
@@ -44,6 +64,9 @@ internal interface BaseFieldState {
     fun onValueChanged(input: String)
 }
 
+/**
+ * Default implementation for [BaseFieldState]. See [BaseFieldState()] for the factory.
+ */
 private class BaseFieldStateImpl(
     private val formElement: FieldFormElement,
     private val featureForm: FeatureForm
@@ -87,6 +110,12 @@ private class BaseFieldStateImpl(
     }
 }
 
+/**
+ * Factory function to create a [BaseFieldState].
+ *
+ * @param formElement The [FieldFormElement] to create the state from.
+ * @param featureForm The [FeatureForm] that the [formElement] is a part of.
+ */
 internal fun BaseFieldState(
     formElement: FieldFormElement,
     featureForm: FeatureForm

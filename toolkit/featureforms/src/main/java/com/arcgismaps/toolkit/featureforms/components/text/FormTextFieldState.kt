@@ -1,3 +1,19 @@
+/*
+ * Copyright 2023 Esri
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.arcgismaps.toolkit.featureforms.components.text
 
 import android.content.Context
@@ -14,14 +30,16 @@ import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 
 
 /**
- * Default implementation for the [FormTextFieldState]. See [FormTextFieldState()] for the factory.
+ * A class to handle the state of a [FormTextField]. Essential properties are inherited from the
+ * [BaseFieldState].
  *
- * @param formElement the form element.
+ * @param formElement The [FieldFormElement] to create the state from.
+ * @param featureForm The [FeatureForm] that the [formElement] is a part of.
  * @property context a Context scoped to the lifetime of a call to the [FieldElement] composable function.
  */
 internal class FormTextFieldState(
-    private val formElement: FieldFormElement,
-    private val featureForm: FeatureForm,
+    formElement: FieldFormElement,
+    featureForm: FeatureForm,
     private val context: Context
 ) : BaseFieldState by BaseFieldState(formElement, featureForm) {
 
