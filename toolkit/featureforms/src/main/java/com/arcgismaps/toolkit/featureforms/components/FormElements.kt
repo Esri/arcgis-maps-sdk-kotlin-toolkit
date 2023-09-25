@@ -54,8 +54,9 @@ internal fun FieldElement(field: FieldFormElement, form: FeatureForm) {
         is ComboBoxFormInput -> {
             ComboBoxField(
                 state = ComboBoxFieldState(
-                    field,
-                    form
+                    formElement = field,
+                    form = form,
+                    context = context
                 )
             )
         }

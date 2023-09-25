@@ -1,7 +1,6 @@
 package com.arcgismaps.toolkit.featureforms.components.text
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -11,6 +10,7 @@ import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
+import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 
 
 /**

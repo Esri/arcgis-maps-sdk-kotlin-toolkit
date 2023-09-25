@@ -18,11 +18,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.materialIcon
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.List
-import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -32,7 +30,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -49,7 +46,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.utils.ClearFocus
 import com.arcgismaps.toolkit.featureforms.utils.PlaceholderTransformation
@@ -57,7 +53,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 internal fun ComboBoxField(state: ComboBoxFieldState, modifier: Modifier = Modifier) {
-    val text = state.selectedValue.value?.name ?: ""
+    val text = state.value.value
     var showBottomSheet by remember { mutableStateOf(false) }
     var clearFocus by remember { mutableStateOf(false) }
     // if the keyboard is gone clear focus from the field as a side-effect
@@ -75,9 +71,8 @@ internal fun ComboBoxField(state: ComboBoxFieldState, modifier: Modifier = Modif
     ) {
         OutlinedTextField(
             value = text,
-            onValueChange = {
-                // state.onValueChanged(it)
-            },
+            // do not need to listen to value changes since this is a readonly text field
+            onValueChange = {},
             modifier = Modifier
                 .fillMaxSize()
                 .focusable(!state.isEditable)
@@ -195,10 +190,10 @@ internal fun ComboBoxBottomSheet(state: ComboBoxFieldState, onDismissRequest: ()
                     ListItem(
                         headlineContent = { Text(text = it.name) },
                         modifier = Modifier.clickable {
-                            state.setValue(it)
+                            state.onValueChanged(it.name)
                         },
                         trailingContent = {
-                            if (it == state.selectedValue.value) {
+                            if (it.name == state.value.value) {
                                 Icon(imageVector = Icons.Outlined.Check, contentDescription = null)
                             }
                         })
@@ -207,10 +202,4 @@ internal fun ComboBoxBottomSheet(state: ComboBoxFieldState, onDismissRequest: ()
             Spacer(modifier = Modifier.weight(1f))
         }
     }
-}
-
-@Preview
-@Composable
-private fun ComboBoxPreview() {
-
 }

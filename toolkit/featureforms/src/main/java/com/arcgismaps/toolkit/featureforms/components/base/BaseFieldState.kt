@@ -1,6 +1,5 @@
-package com.arcgismaps.toolkit.featureforms.components.text
+package com.arcgismaps.toolkit.featureforms.components.base
 
-import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.arcgismaps.mapping.featureforms.FeatureForm
@@ -10,27 +9,33 @@ import com.arcgismaps.toolkit.featureforms.utils.getElementValue
 
 internal interface BaseFieldState {
     /**
-     * Title for the [FormTextField].
+     * Title for the field.
      */
     val label: String
 
     /**
-     * Description text for the [FormTextField].
+     * Description text for the field.
      */
     val description: String
 
     /**
-     * Placeholder hint for the [FormTextField]
+     * Placeholder hint for the field.
      */
     val placeholder: String
 
     /**
-     * Current value state for the [FormTextField].
+     * Current value state for the field.
      */
     val value: State<String>
 
+    /**
+     * Property that indicates if the field is editable.
+     */
     val isEditable : Boolean
 
+    /**
+     * Property that indicates if the field is required.
+     */
     val isRequired : Boolean
 
     /**

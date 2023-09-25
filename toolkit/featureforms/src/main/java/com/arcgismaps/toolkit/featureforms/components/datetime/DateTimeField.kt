@@ -181,7 +181,7 @@ internal fun DateTimeField(
                     }
                 },
                 visualTransformation = if (state.value.value == null)
-                    PlaceholderTransformation(stringResource(id = R.string.novalue))
+                    PlaceholderTransformation(stringResource(id = R.string.no_value))
                 else VisualTransformation.None,
                 singleLine = true,
                 colors = textFieldColors,
@@ -250,7 +250,7 @@ private fun ImmutableDate(
             label = { Text(text = label) },
             supportingText = { Text(text = supportingText) },
             visualTransformation = if (valueString.isEmpty())
-                PlaceholderTransformation(stringResource(id = R.string.novalue))
+                PlaceholderTransformation(stringResource(id = R.string.no_value))
             else VisualTransformation.None,
             colors = colors
         )
