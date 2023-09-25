@@ -55,7 +55,7 @@ internal fun FieldElement(field: FieldFormElement, form: FeatureForm) {
             ComboBoxField(
                 state = ComboBoxFieldState(
                     formElement = field,
-                    form = form,
+                    featureForm = form,
                     context = context
                 )
             )
