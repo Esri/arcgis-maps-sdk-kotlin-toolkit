@@ -18,10 +18,10 @@ internal class ComboBoxFieldState(
 
     val codedValues: List<CodedValue> = form.getCodedValues(formElement.fieldName)
 
-    private val showNoValueOption: FormInputNoValueOption =
+    val showNoValueOption: FormInputNoValueOption =
         (formElement.input as ComboBoxFormInput).noValueOption
 
-    private val noValueLabel: String =
+    val noValueLabel: String =
         (formElement.input as ComboBoxFormInput).noValueLabel
 
     override val placeholder: String = if (isRequired) {
