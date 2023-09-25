@@ -22,7 +22,7 @@ import org.gradle.configurationcache.extensions.capitalized
 // and also add a companion micro app(Ex: "newComponent-app").
 // For mismatching toolkit component and microApp names add them individually at end of this file.
 // Refer to "indoors" project with "floor-filter-app" as an example.
-val projects = listOf("template", "authentication", "compass", "geo-composables")
+val projects = listOf("template", "authentication", "compass")
 
 pluginManagement {
     repositories {
@@ -75,6 +75,7 @@ include(":bom")
 include(":composable-map")
 include(":indoors")
 include(":floor-filter-app")
+include(":geo-composables")
 include(":map-composable-app")
 
 projects.forEach {
@@ -86,4 +87,5 @@ project(":bom").projectDir = File(rootDir, "bom")
 project(":composable-map").projectDir = File(rootDir, "toolkit/composable-map")
 project(":indoors").projectDir = File(rootDir, "toolkit/indoors")
 project(":floor-filter-app").projectDir = File(rootDir, "microapps/FloorFilterApp/app")
+project(":geo-composables").projectDir = File(rootDir, "toolkit/geo-composables")
 project(":map-composable-app").projectDir = File(rootDir, "microapps/MapComposableApp/app")
