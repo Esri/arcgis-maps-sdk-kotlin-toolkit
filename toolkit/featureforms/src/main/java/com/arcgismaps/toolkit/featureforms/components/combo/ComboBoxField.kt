@@ -72,7 +72,10 @@ internal fun ComboBoxField(state: ComboBoxFieldState, modifier: Modifier = Modif
         singleLine = true,
         trailingIcon = Icons.Outlined.List,
         supportingText = {
-
+            Text(
+                text = state.description,
+                modifier = Modifier.semantics { contentDescription = "description" },
+            )
         },
         interactionSource = interactionSource
     )
