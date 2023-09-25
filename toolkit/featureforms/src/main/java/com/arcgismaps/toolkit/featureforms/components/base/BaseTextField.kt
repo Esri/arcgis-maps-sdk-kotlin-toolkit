@@ -43,13 +43,14 @@ internal fun BaseTextField(
     text: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
+    readOnly: Boolean,
     isEditable: Boolean,
     label: String,
     placeholder: String,
     singleLine: Boolean,
     trailingIcon: ImageVector? = null,
-    supportingText: @Composable (ColumnScope.() -> Unit)?,
-    onFocusChange: ((Boolean) -> Unit)?,
+    supportingText: @Composable (ColumnScope.() -> Unit)? = null,
+    onFocusChange: ((Boolean) -> Unit)? = null,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
 ) {
     var clearFocus by remember { mutableStateOf(false) }
@@ -76,7 +77,7 @@ internal fun BaseTextField(
                 .fillMaxSize()
                 .focusable(!isEditable)
                 .semantics { contentDescription = "outlined text field" },
-            readOnly = !isEditable,
+            readOnly = readOnly,
             enabled = isEditable,
             label = {
                 Text(
@@ -87,9 +88,9 @@ internal fun BaseTextField(
                 // single line field and is editable
                 if (singleLine && isEditable) {
                     // show a trailing icon if provided when the field is empty
-                    if (text.isEmpty() && trailingIcon != null) {
+                    if ((readOnly || text.isEmpty()) && trailingIcon != null) {
                         Icon(imageVector = trailingIcon, contentDescription = "field icon")
-                    } else if (text.isNotEmpty()) {
+                    } else if (text.isNotEmpty() && !readOnly) {
                         // show a clear icon instead if the field is not empty
                         IconButton(
                             onClick = { onValueChange("") },

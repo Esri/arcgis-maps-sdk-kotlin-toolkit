@@ -47,6 +47,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.featureforms.components.base.BaseTextField
 import com.arcgismaps.toolkit.featureforms.utils.ClearFocus
 import com.arcgismaps.toolkit.featureforms.utils.PlaceholderTransformation
 import kotlinx.coroutines.launch
@@ -61,54 +62,20 @@ internal fun ComboBoxField(state: ComboBoxFieldState, modifier: Modifier = Modif
 
     val interactionSource = remember { MutableInteractionSource() }
 
-    Column(modifier = modifier
-        .fillMaxSize()
-        .pointerInput(Unit) {
-            // any tap on a blank space will also dismiss the keyboard and clear focus
-            detectTapGestures { clearFocus = true }
-        }
-        .padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 10.dp)
-    ) {
-        OutlinedTextField(
-            value = text,
-            // do not need to listen to value changes since this is a readonly text field
-            onValueChange = {},
-            modifier = Modifier
-                .fillMaxSize()
-                .focusable(!state.isEditable)
-                .semantics { contentDescription = "outlined text field" },
-            readOnly = true,
-            enabled = state.isEditable,
-            label = {
-                Text(
-                    text = state.label,
-                    modifier = Modifier.semantics { contentDescription = "label" })
-            },
-            trailingIcon = {
-                Icon(imageVector = Icons.Outlined.List, contentDescription = null)
-            },
-            supportingText = {
-            },
-            visualTransformation = if (text.isEmpty())
-                PlaceholderTransformation(state.placeholder.ifEmpty { " " })
-            else VisualTransformation.None,
-            keyboardActions = KeyboardActions(
-                onDone = { clearFocus = true }
-            ),
-            keyboardOptions = KeyboardOptions.Default.copy(
-                imeAction = ImeAction.Done
-            ),
-            singleLine = true,
-            colors = if (text.isEmpty() && state.placeholder.isNotEmpty())
-                OutlinedTextFieldDefaults.colors(
-                    unfocusedTextColor = Color.Gray,
-                    focusedTextColor = Color.Gray
-                )
-            else
-                OutlinedTextFieldDefaults.colors(),
-            interactionSource = interactionSource
-        )
-    }
+    BaseTextField(
+        text = text,
+        onValueChange = {},
+        readOnly = true,
+        isEditable = state.isEditable,
+        label = state.label,
+        placeholder = state.placeholder,
+        singleLine = true,
+        trailingIcon = Icons.Outlined.List,
+        supportingText = {
+
+        },
+        interactionSource = interactionSource
+    )
 
     if (showBottomSheet) {
         ComboBoxBottomSheet(state = state) {

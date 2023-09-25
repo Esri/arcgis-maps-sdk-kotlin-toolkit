@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -30,13 +31,14 @@ internal fun FormTextField(
             state.validateLength()
         },
         modifier = modifier.fillMaxSize(),
+        readOnly = false,
         isEditable = state.isEditable,
         label = state.label,
         placeholder = state.placeholder,
         singleLine = state.singleLine,
         supportingText = {
             val textColor = if (hasError) MaterialTheme.colorScheme.error
-            else MaterialTheme.colorScheme.onSurfaceVariant
+            else MaterialTheme.colorScheme.onSurface
             Row {
                 if (supportingText.isNotEmpty()) {
                     Text(
