@@ -1,5 +1,6 @@
 package com.arcgismaps.toolkit.featureforms.components.combo
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -67,7 +68,7 @@ internal fun ComboBoxField(state: ComboBoxFieldState, modifier: Modifier = Modif
 
     BaseTextField(
         text = text,
-        onValueChange = {},
+        onValueChange = { state.onValueChanged(it) },
         readOnly = true,
         isEditable = state.isEditable,
         label = state.label,

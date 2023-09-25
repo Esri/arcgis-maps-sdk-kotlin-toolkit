@@ -1,5 +1,6 @@
 package com.arcgismaps.toolkit.featureforms.components.base
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -75,7 +76,7 @@ internal fun BaseTextField(
             onValueChange = onValueChange,
             modifier = Modifier
                 .fillMaxSize()
-                .focusable(!isEditable)
+                .focusable(isEditable, interactionSource)
                 .semantics { contentDescription = "outlined text field" },
             readOnly = readOnly,
             enabled = isEditable,
@@ -88,9 +89,9 @@ internal fun BaseTextField(
                 // single line field and is editable
                 if (singleLine && isEditable) {
                     // show a trailing icon if provided when the field is empty
-                    if ((readOnly || text.isEmpty()) && trailingIcon != null) {
+                    if (text.isEmpty() && trailingIcon != null) {
                         Icon(imageVector = trailingIcon, contentDescription = "field icon")
-                    } else if (text.isNotEmpty() && !readOnly) {
+                    } else if (text.isNotEmpty()) {
                         // show a clear icon instead if the field is not empty
                         IconButton(
                             onClick = { onValueChange("") },
