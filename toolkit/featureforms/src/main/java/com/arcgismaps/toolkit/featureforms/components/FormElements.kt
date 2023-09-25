@@ -25,8 +25,8 @@ internal fun FieldElement(field: FieldFormElement, form: FeatureForm) {
         is TextAreaFormInput -> {
             FormTextField(
                 state = FormTextFieldState(
-                    featureFormElement = field,
-                    form = form,
+                    formElement = field,
+                    featureForm = form,
                     context = context
                 )
             )
@@ -35,8 +35,8 @@ internal fun FieldElement(field: FieldFormElement, form: FeatureForm) {
         is TextBoxFormInput -> {
             FormTextField(
                 state = FormTextFieldState(
-                    featureFormElement = field,
-                    form = form,
+                    formElement = field,
+                    featureForm = form,
                     context = context
                 )
             )

@@ -64,6 +64,7 @@ internal fun FormTextField(
             value = text,
             onValueChange = {
                 state.onValueChanged(it)
+                state.validateLength()
             },
             modifier = Modifier
                 .fillMaxSize()
