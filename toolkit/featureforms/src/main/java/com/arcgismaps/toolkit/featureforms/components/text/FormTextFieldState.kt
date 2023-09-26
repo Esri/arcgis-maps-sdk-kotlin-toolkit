@@ -11,8 +11,13 @@ import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
 import com.arcgismaps.toolkit.featureforms.utils.editValue
-import com.arcgismaps.toolkit.featureforms.utils.getElementValue
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 
 /**
  * State for the [FormTextField]
@@ -51,9 +56,9 @@ internal interface FormTextFieldState {
     /**
      * Current value state for the [FormTextField].
      */
-    val value: State<String>
+    val value: StateFlow<String>
     
-    val valueChanged: StateFlow<String>
+    //val valueChanged: StateFlow<String>
     
     /**
      * State for the supporting text that gets displayed under the [FormTextField].
@@ -127,13 +132,16 @@ private class FormTextFieldStateImpl(
     private val featureForm: FeatureForm,
     private val context: Context
 ) : FormTextFieldState {
-    private val _value = mutableStateOf(formElement.value.value.ifEmpty {
-        // "prime" the value until expressions can be evaluated to populate the value.
-        // TODO: remove this when the value is provided by expression evaluation.
-        featureForm.getElementValue(formElement)?.toString() ?: ""
-    })
-    override val value: State<String> = _value
-    override val valueChanged: StateFlow<String> = formElement.value
+    private val _value = MutableStateFlow(formElement.value.value)
+    
+    override val value: StateFlow<String> =
+        combine(_value, formElement.value, formElement.isEditable) { user, expr, editable ->
+            if (editable) {
+                user
+            } else {
+                expr
+            }
+        }.stateIn(CoroutineScope(Dispatchers.IO), SharingStarted.Eagerly, _value.value)
     
     private val _isFocused = mutableStateOf(false)
     override val isFocused: State<Boolean> = _isFocused

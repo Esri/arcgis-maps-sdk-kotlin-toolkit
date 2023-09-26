@@ -57,14 +57,7 @@ internal fun FormTextField(
             mutableStateOf(state.label)
         }
     }
-    val text by if (isEditable) {
-        //user edits
-        state.value
-    } else {
-        // changes from expression evaluation
-        state.valueChanged.collectAsState()
-    }
-    
+    val text by state.value.collectAsState()
     LaunchedEffect(text) {
         state.evaluateExpressions()
     }
