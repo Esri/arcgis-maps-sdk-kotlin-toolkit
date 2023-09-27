@@ -137,7 +137,10 @@ private class FormTextFieldStateImpl(
     override val value: StateFlow<String> =
         combine(_value, formElement.value, formElement.isEditable) { user, expr, editable ->
             if (editable) {
-                user
+                user.also {
+                    editValue(user)
+                    evaluateExpressions()
+                }
             } else {
                 expr
             }
@@ -217,7 +220,6 @@ private class FormTextFieldStateImpl(
     override val isEditable: StateFlow<Boolean> = formElement.isEditable
     
     override fun onValueChanged(input: String) {
-        editValue(input)
         _value.value = input
         validateLength()
     }
