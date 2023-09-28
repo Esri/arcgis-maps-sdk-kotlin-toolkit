@@ -17,11 +17,7 @@
 package com.arcgismaps.toolkit.featureforms.components.combo
 
 import android.content.Context
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.res.stringResource
 import com.arcgismaps.data.CodedValue
-import com.arcgismaps.data.CodedValueDomain
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
@@ -30,8 +26,6 @@ import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 
 /**
  * A class to handle the state of a [ComboBoxField]. Essential properties are inherited from the
@@ -46,7 +40,7 @@ internal class ComboBoxFieldState(
     featureForm: FeatureForm,
     context: Context,
     scope: CoroutineScope
-) : BaseFieldState by BaseFieldState(formElement, featureForm, scope) {
+) : BaseFieldState(formElement, featureForm, scope) {
 
     /**
      * The list of coded values associated with this field.

@@ -31,8 +31,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 
@@ -49,8 +47,8 @@ internal class FormTextFieldState(
     formElement: FieldFormElement,
     featureForm: FeatureForm,
     private val context: Context,
-    private val scope: CoroutineScope,
-) : BaseFieldState by BaseFieldState(formElement, featureForm, scope) {
+    scope: CoroutineScope,
+) : BaseFieldState(formElement, featureForm, scope) {
     // indicates singleLine only if TextBoxFeatureFormInput
     val singleLine = formElement.input is TextBoxFormInput
 
@@ -125,11 +123,11 @@ internal class FormTextFieldState(
      * [hasError] and [_errorMessage] if there was an error in validation.
      */
     private fun validate(value: String) {
-        _hasError.value = if (value.length !in minLength..maxLength) {
-            _errorMessage = helperText
-            true
-        } else if (isRequired.value && value.isEmpty()) {
+        _hasError.value = if (isRequired.value && value.isEmpty()) {
             _errorMessage = context.getString(R.string.required)
+            true
+        } else if (value.length !in minLength..maxLength) {
+            _errorMessage = helperText
             true
         } else {
             false

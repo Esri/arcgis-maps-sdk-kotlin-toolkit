@@ -28,71 +28,42 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
- * Base interface for any Field within a feature form. It provides the default set of properties
+ * Base state class for any Field within a feature form. It provides the default set of properties
  * that are common to all [FieldFormElement]'s.
  */
-internal interface BaseFieldState {
+internal open class BaseFieldState(
+    private val formElement: FieldFormElement,
+    private val featureForm: FeatureForm,
+    private val scope: CoroutineScope
+) {
     /**
      * Title for the field.
      */
-    val label: String
+    open val label: String = formElement.label
 
     /**
      * Description text for the field.
      */
-    val description: String
+    val description: String = formElement.description
 
     /**
      * Placeholder hint for the field.
      */
-    val placeholder: String
-
-    /**
-     * Current value state for the field.
-     */
-    val value: StateFlow<String>
-
-    /**
-     * Property that indicates if the field is editable.
-     */
-    val isEditable: StateFlow<Boolean>
-
-    /**
-     * Property that indicates if the field is required.
-     */
-    val isRequired: StateFlow<Boolean>
-
-    /**
-     * Callback to update the current value of the FormTextFieldState to the given [input].
-     */
-    fun onValueChanged(input: String)
-
-    /**
-     * Evaluates the underlying expressions for this field. The results can be observed through the
-     * [value], [isRequired] and [isEditable] state flows.
-     */
-    suspend fun evaluateExpressions()
-}
-
-/**
- * Default implementation for [BaseFieldState]. See [BaseFieldState()] for the factory.
- */
-private class BaseFieldStateImpl(
-    private val formElement: FieldFormElement,
-    private val featureForm: FeatureForm,
-    private val scope: CoroutineScope
-) : BaseFieldState {
+    open val placeholder: String = formElement.hint
 
     // a state flow to handle user input changes
     private val _value = MutableStateFlow(formElement.value.value)
 
-    // transform the user input value flow with the formElement value and required into a single
-    // value flow based on if the field is editable
-    override val value: StateFlow<String> = combine(
+    /**
+     * Current value state for the field.
+     */
+    val value: StateFlow<String> = combine(
         _value,
         formElement.value,
         formElement.isEditable
     ) { userEdit, exprResult, editable ->
+        // transform the user input value flow with the formElement value and required into a single
+        // value flow based on if the field is editable
         if (editable) {
             userEdit
         } else {
@@ -100,23 +71,30 @@ private class BaseFieldStateImpl(
         }
     }.stateIn(scope, SharingStarted.Eagerly, _value.value)
 
-    override val isEditable: StateFlow<Boolean> = formElement.isEditable
+    /**
+     * Property that indicates if the field is editable.
+     */
+    val isEditable: StateFlow<Boolean> = formElement.isEditable
 
-    override val isRequired: StateFlow<Boolean> = formElement.isRequired
+    /**
+     * Property that indicates if the field is required.
+     */
+    val isRequired: StateFlow<Boolean> = formElement.isRequired
 
-    override val description: String = formElement.description
-
-    override val placeholder: String = formElement.hint
-
-    override val label: String = formElement.label
-
-    override fun onValueChanged(input: String) {
+    /**
+     * Callback to update the current value of the FormTextFieldState to the given [input].
+     */
+    fun onValueChanged(input: String) {
         editValue(input)
         _value.value = input
         scope.launch { evaluateExpressions() }
     }
 
-    override suspend fun evaluateExpressions() {
+    /**
+     * Evaluates the underlying expressions for this field. The results can be observed through the
+     * [value], [isRequired] and [isEditable] state flows.
+     */
+    private suspend fun evaluateExpressions() {
         featureForm.evaluateExpressions()
     }
 
@@ -129,15 +107,3 @@ private class BaseFieldStateImpl(
         featureForm.editValue(formElement, value)
     }
 }
-
-/**
- * Factory function to create a [BaseFieldState].
- *
- * @param formElement The [FieldFormElement] to create the state from.
- * @param featureForm The [FeatureForm] that the [formElement] is a part of.
- */
-internal fun BaseFieldState(
-    formElement: FieldFormElement,
-    featureForm: FeatureForm,
-    scope: CoroutineScope
-): BaseFieldState = BaseFieldStateImpl(formElement, featureForm, scope)
