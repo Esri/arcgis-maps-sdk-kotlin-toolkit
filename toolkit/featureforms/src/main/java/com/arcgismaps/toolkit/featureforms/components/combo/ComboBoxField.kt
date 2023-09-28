@@ -47,6 +47,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,6 +57,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
@@ -71,17 +73,18 @@ import com.arcgismaps.toolkit.featureforms.components.base.BaseTextField
 
 @Composable
 internal fun ComboBoxField(state: ComboBoxFieldState, modifier: Modifier = Modifier) {
-    val context = LocalContext.current
-    val text = state.value.value
+    val value by state.value.collectAsState()
+    val isEditable by state.isEditable.collectAsState()
+    val isRequired by state.isRequired.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
 
     BaseTextField(
-        text = text,
+        text = value,
         onValueChange = { state.onValueChanged(it) },
         modifier = modifier,
         readOnly = true,
-        isEditable = state.isEditable,
+        isEditable = isEditable,
         label = state.label,
         placeholder = state.placeholder,
         singleLine = true,
@@ -97,13 +100,13 @@ internal fun ComboBoxField(state: ComboBoxFieldState, modifier: Modifier = Modif
 
     if (showDialog) {
         ComboBoxDialog(
-            initialValue = state.value.value,
+            initialValue = value,
             values = state.codedValues.map { it.name },
             label = state.label,
             description = state.description,
-            isRequired = state.isRequired,
+            isRequired = isRequired,
             noValueOption = state.showNoValueOption,
-            noValueLabel = state.noValueLabel.ifEmpty { context.getString(R.string.no_value) },
+            noValueLabel = state.noValueLabel.ifEmpty { stringResource(R.string.no_value) },
             onValueChange = {
                 state.onValueChanged(it)
             }
@@ -170,7 +173,7 @@ internal fun ComboBoxDialog(
                             },
                             modifier = Modifier.weight(1f),
                             placeholder = {
-                                Text(text = "Filter $label")
+                                Text(text = stringResource(R.string.filter, label))
                             },
                             trailingIcon = {
                                 if (searchText.isNotEmpty()) {
@@ -193,7 +196,7 @@ internal fun ComboBoxDialog(
                             ),
                         )
                         TextButton(onClick = onDismissRequest) {
-                            Text(text = "Done")
+                            Text(text = stringResource(R.string.done))
                         }
                     }
                     Text(

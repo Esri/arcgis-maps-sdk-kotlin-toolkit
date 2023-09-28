@@ -26,5 +26,7 @@
     <string name="today">Today</string>
     <string name="now">Now</string>
     <string name="cancel">Cancel</string>
-    <string name="ok">Ok</string>
+    <string name="ok">OK</string>
+    <string name="done">Done</string>
+    <string name="filter">Filter %1$d</string>
 </resources>
