@@ -55,18 +55,22 @@ internal interface BaseFieldState {
     /**
      * Property that indicates if the field is editable.
      */
-    val isEditable : StateFlow<Boolean>
+    val isEditable: StateFlow<Boolean>
 
     /**
      * Property that indicates if the field is required.
      */
-    val isRequired : StateFlow<Boolean>
+    val isRequired: StateFlow<Boolean>
 
     /**
      * Callback to update the current value of the FormTextFieldState to the given [input].
      */
     fun onValueChanged(input: String)
 
+    /**
+     * Evaluates the underlying expressions for this field. The results can be observed through the
+     * [value], [isRequired] and [isEditable] state flows.
+     */
     suspend fun evaluateExpressions()
 }
 
@@ -79,16 +83,22 @@ private class BaseFieldStateImpl(
     private val scope: CoroutineScope
 ) : BaseFieldState {
 
+    // a state flow to handle user input changes
     private val _value = MutableStateFlow(formElement.value.value)
 
-    override val value: StateFlow<String> =
-        combine(_value, formElement.value, formElement.isEditable) { userEdit, exprResult, editable ->
-            if (editable) {
-                userEdit
-            } else {
-                exprResult
-            }
-        }.stateIn(scope, SharingStarted.Eagerly, _value.value)
+    // transform the user input value flow with the formElement value and required into a single
+    // value flow based on if the field is editable
+    override val value: StateFlow<String> = combine(
+        _value,
+        formElement.value,
+        formElement.isEditable
+    ) { userEdit, exprResult, editable ->
+        if (editable) {
+            userEdit
+        } else {
+            exprResult
+        }
+    }.stateIn(scope, SharingStarted.Eagerly, _value.value)
 
     override val isEditable: StateFlow<Boolean> = formElement.isEditable
 
@@ -98,14 +108,7 @@ private class BaseFieldStateImpl(
 
     override val placeholder: String = formElement.hint
 
-    // set the label from the FieldFeatureFormElement
-    // note when isRequired becomes a StateFlow, this logic will move into the compose function
-    override val label = formElement.label
-//    if (!isRequired.value) {
-//        formElement.label
-//    } else {
-//        "${formElement.label} *"
-//    }
+    override val label: String = formElement.label
 
     override fun onValueChanged(input: String) {
         editValue(input)
