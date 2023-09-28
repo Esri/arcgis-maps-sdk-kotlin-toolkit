@@ -28,5 +28,5 @@
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
     <string name="done">Done</string>
-    <string name="filter">Filter</string>
+    <string name="filter">Filter %1$s</string>
 </resources>

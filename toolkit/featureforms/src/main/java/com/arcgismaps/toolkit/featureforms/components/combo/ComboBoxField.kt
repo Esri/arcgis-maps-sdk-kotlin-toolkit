@@ -172,7 +172,7 @@ internal fun ComboBoxDialog(
                             },
                             modifier = Modifier.weight(1f),
                             placeholder = {
-                                Text(text = "${stringResource(R.string.filter)} $label")
+                                Text(text = stringResource(R.string.filter, label))
                             },
                             trailingIcon = {
                                 if (searchText.isNotEmpty()) {
