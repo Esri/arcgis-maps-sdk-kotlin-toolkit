@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
@@ -52,7 +53,7 @@ public fun FeatureForm(
         if (initialEvaluation) {
             FeatureFormContent(form = it, modifier = modifier)
         } else {
-            NoDataToDisplay(modifier)
+            InitializingExpressions(modifier)
         }
     } ?: run {
         NoDataToDisplay(modifier)
@@ -60,7 +61,7 @@ public fun FeatureForm(
 }
 
 @Composable
-internal fun NoDataToDisplay(modifier: Modifier = Modifier) {
+internal fun InitializingExpressions(modifier: Modifier = Modifier) {
     Column(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -71,6 +72,15 @@ internal fun NoDataToDisplay(modifier: Modifier = Modifier) {
             .height(80.dp)
         )
         Text(text = "Initializing")
+    }
+}
+
+@Composable
+internal fun NoDataToDisplay(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.fillMaxSize()
+    ) {
+        Text(text = "No information to display.")
     }
 }
 
@@ -103,4 +113,17 @@ internal fun FeatureFormContent(
             }
         }
     }
+}
+
+@Preview
+@Composable
+private fun InitializingExpressionsPreview() {
+    InitializingExpressions()
+}
+
+
+@Preview
+@Composable
+private fun NoDataPreview() {
+    NoDataToDisplay()
 }
