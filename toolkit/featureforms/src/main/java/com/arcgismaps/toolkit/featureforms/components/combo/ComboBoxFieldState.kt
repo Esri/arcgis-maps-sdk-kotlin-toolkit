@@ -51,7 +51,7 @@ internal class ComboBoxFieldState(
     /**
      * The list of coded values associated with this field.
      */
-    val codedValues: List<CodedValue> = featureForm.getCodedValues(formElement.fieldName)
+    val codedValues: List<CodedValue> = (formElement.input as ComboBoxFormInput).codedValues
 
     /**
      * This property defines whether to display a special "no value" option if this field is
@@ -71,11 +71,4 @@ internal class ComboBoxFieldState(
     } else if (showNoValueOption == FormInputNoValueOption.Show) {
         noValueLabel.ifEmpty { context.getString(R.string.no_value) }
     } else ""
-}
-
-internal fun FeatureForm.getCodedValues(fieldName: String): List<CodedValue> {
-    return feature.featureTable?.getField(fieldName)?.let {
-        val domain = it.domain as? CodedValueDomain
-        domain?.codedValues ?: emptyList()
-    } ?: emptyList()
 }
