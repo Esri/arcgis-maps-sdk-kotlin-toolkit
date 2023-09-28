@@ -68,7 +68,7 @@ internal fun FormTextField(
         .fillMaxSize()
         .onFocusChanged { state.onFocusChanged(it.hasFocus) }
         .pointerInput(Unit) {
-            // any tap on a blank space will also dismiss the keyboard and clear focusS
+            // any tap on a blank space will also dismiss the keyboard and clear focus
             detectTapGestures { clearFocus = true }
         }
         .padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 10.dp)
