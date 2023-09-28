@@ -47,11 +47,11 @@ internal fun FormTextField(
     var clearFocus by remember { mutableStateOf(false) }
     val isEditable by state.isEditable.collectAsState()
     val isRequired by state.isRequired.collectAsState()
-    val label by remember(isRequired) {
+    val label = remember(isRequired) {
         if (isRequired) {
-            mutableStateOf("${state.label} *")
+            "${state.label} *"
         } else {
-            mutableStateOf(state.label)
+            state.label
         }
     }
     val text by state.value.collectAsState()
