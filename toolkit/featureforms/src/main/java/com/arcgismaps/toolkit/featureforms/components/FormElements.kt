@@ -5,8 +5,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
-import com.arcgismaps.data.CodedValue
-import com.arcgismaps.data.CodedValueDomain
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
@@ -66,7 +64,8 @@ internal fun FieldElement(field: FieldFormElement, form: FeatureForm) {
                     state = ComboBoxFieldState(
                         formElement = field,
                         featureForm = form,
-                        context = context
+                        context = context,
+                        scope = scope
                     )
                 )
             }

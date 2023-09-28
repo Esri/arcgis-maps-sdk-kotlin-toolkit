@@ -28,6 +28,7 @@ import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 
 /**
@@ -56,13 +57,6 @@ internal class FormTextFieldState(
                 if (_isFocused.value) helperText else ""
             }
         }
-    }
-
-    // derive the content length from the current value only if any length constraint is set
-    val contentLength = derivedStateOf {
-        if (minLength > 0 || maxLength > 0) {
-            value.value.length.toString()
-        } else ""
     }
 
     private var _errorMessage: String = ""
@@ -102,22 +96,30 @@ internal class FormTextFieldState(
             // TODO: when consuming the core API throw here and remove the line above.
             //throw IllegalStateException("invalid form data or attribute: text field must have a nonzero max length")
         }
-    
+
+    init {
+        scope.launch {
+            value.collect {
+                if (isEditable.value && isFocused.value) {
+                    validate(it)
+                }
+            }
+        }
+    }
+
     fun onFocusChanged(focus: Boolean) {
         _isFocused.value = focus
     }
 
     /**
      * Validates the current [value]'s length based on the [minLength], [maxLength], and [isRequired] and sets the
-     * [hasError] and [errorMessage] if there was an error in validation.
+     * [hasError] and [_errorMessage] if there was an error in validation.
      */
-
-    fun validate() {
-        _hasError.value = if (value.value.length !in minLength..maxLength) {
+    private fun validate(value: String) {
+        _hasError.value = if (value.length !in minLength..maxLength) {
             _errorMessage = helperText
             true
-            
-        } else if (isRequired.value && value.value.isEmpty()) {
+        } else if (isRequired.value && value.isEmpty()) {
             _errorMessage = context.getString(R.string.required)
             true
         } else {

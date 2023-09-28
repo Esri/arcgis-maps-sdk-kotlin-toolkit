@@ -22,6 +22,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -46,7 +48,7 @@ internal fun FormTextField(
         }
     }
     val supportingText by state.supportingText
-    val contentLength = if (state.minLength > 0 || state.maxLength > 0) "$text.length" else ""
+    val contentLength = if (state.minLength > 0 || state.maxLength > 0) "${text.length}" else ""
     val hasError by state.hasError
     val isFocused by state.isFocused
 
@@ -54,7 +56,6 @@ internal fun FormTextField(
         text = text,
         onValueChange = {
             state.onValueChanged(it)
-            state.validate()
         },
         modifier = modifier.fillMaxSize(),
         readOnly = false,

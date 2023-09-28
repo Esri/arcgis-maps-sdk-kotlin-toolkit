@@ -101,7 +101,7 @@ internal fun ComboBoxField(state: ComboBoxFieldState, modifier: Modifier = Modif
     if (showDialog) {
         ComboBoxDialog(
             initialValue = value,
-            values = state.codedValues.map { it.name },
+            values = state.codedValues.map { it.code.toString() },
             label = state.label,
             description = state.description,
             isRequired = isRequired,
@@ -173,7 +173,7 @@ internal fun ComboBoxDialog(
                             },
                             modifier = Modifier.weight(1f),
                             placeholder = {
-                                Text(text = stringResource(R.string.filter, label))
+                                Text(text = "${stringResource(R.string.filter)} $label")
                             },
                             trailingIcon = {
                                 if (searchText.isNotEmpty()) {
