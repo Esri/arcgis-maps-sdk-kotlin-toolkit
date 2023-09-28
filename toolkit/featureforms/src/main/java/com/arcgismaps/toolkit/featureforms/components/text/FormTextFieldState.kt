@@ -28,6 +28,12 @@ import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 
 
@@ -61,8 +67,8 @@ internal class FormTextFieldState(
 
     private var _errorMessage: String = ""
 
-    private val _isFocused = mutableStateOf(false)
-    val isFocused: State<Boolean> = _isFocused
+    private val _isFocused: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val isFocused: StateFlow<Boolean> = _isFocused.asStateFlow()
 
     private val _hasError = mutableStateOf(false)
     val hasError: State<Boolean> = _hasError
@@ -99,16 +105,19 @@ internal class FormTextFieldState(
 
     init {
         scope.launch {
-            value.collect {
-                if (isEditable.value && isFocused.value) {
-                    validate(it)
+            value.drop(1).collect { newValue ->
+                if (isEditable.value) {
+                    validate(newValue)
                 }
             }
         }
-    }
-
-    fun onFocusChanged(focus: Boolean) {
-        _isFocused.value = focus
+        scope.launch {
+            isFocused.collect {
+                if (it) {
+                    validate(value.value)
+                }
+            }
+        }
     }
 
     /**
@@ -125,5 +134,9 @@ internal class FormTextFieldState(
         } else {
             false
         }
+    }
+
+    fun onFocusChanged(focus: Boolean) {
+        _isFocused.value = focus
     }
 }

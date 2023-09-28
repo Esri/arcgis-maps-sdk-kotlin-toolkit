@@ -40,6 +40,7 @@ internal fun FormTextField(
     val text by state.value.collectAsState()
     val isEditable by state.isEditable.collectAsState()
     val isRequired by state.isRequired.collectAsState()
+    val isFocused by state.isFocused.collectAsState()
     val label = remember(isRequired) {
         if (isRequired) {
             "${state.label} *"
@@ -50,7 +51,6 @@ internal fun FormTextField(
     val supportingText by state.supportingText
     val contentLength = if (state.minLength > 0 || state.maxLength > 0) "${text.length}" else ""
     val hasError by state.hasError
-    val isFocused by state.isFocused
 
     BaseTextField(
         text = text,
