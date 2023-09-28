@@ -5,12 +5,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
+import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
+import com.arcgismaps.toolkit.featureforms.components.combo.ComboBoxField
+import com.arcgismaps.toolkit.featureforms.components.combo.ComboBoxFieldState
 import com.arcgismaps.toolkit.featureforms.components.datetime.DateTimeField
 import com.arcgismaps.toolkit.featureforms.components.datetime.DateTimeFieldState
 import com.arcgismaps.toolkit.featureforms.components.text.FormTextField
@@ -27,8 +30,8 @@ internal fun FieldElement(field: FieldFormElement, form: FeatureForm) {
             is TextAreaFormInput -> {
                 FormTextField(
                     state = FormTextFieldState(
-                        featureFormElement = field,
-                        form = form,
+                        formElement = field,
+                        featureForm = form,
                         context = context,
                         scope = scope
                     )
@@ -38,8 +41,8 @@ internal fun FieldElement(field: FieldFormElement, form: FeatureForm) {
             is TextBoxFormInput -> {
                 FormTextField(
                     state = FormTextFieldState(
-                        featureFormElement = field,
-                        form = form,
+                        formElement = field,
+                        featureForm = form,
                         context = context,
                         scope = scope
                     )
@@ -51,6 +54,17 @@ internal fun FieldElement(field: FieldFormElement, form: FeatureForm) {
                     state = DateTimeFieldState(
                         formElement = field,
                         form = form,
+                        scope = scope
+                    )
+                )
+            }
+
+            is ComboBoxFormInput -> {
+                ComboBoxField(
+                    state = ComboBoxFieldState(
+                        formElement = field,
+                        featureForm = form,
+                        context = context,
                         scope = scope
                     )
                 )
