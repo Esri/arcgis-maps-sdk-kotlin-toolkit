@@ -3,6 +3,7 @@ package com.arcgismaps.toolkit.featureforms.components
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
@@ -25,32 +26,43 @@ internal fun FieldElement(field: FieldFormElement, form: FeatureForm) {
     if (visible) {
         when (field.input) {
             is TextAreaFormInput -> {
-                FormTextField(
-                    state = FormTextFieldState(
+                val state = remember(form, field) {
+                    FormTextFieldState(
                         featureFormElement = field,
                         form = form,
-                        context = context
+                        context = context,
+                        scope = scope
                     )
+                }
+                FormTextField(
+                    state = state
                 )
             }
         
             is TextBoxFormInput -> {
-                FormTextField(
-                    state = FormTextFieldState(
+                val state = remember(form, field) {
+                    FormTextFieldState(
                         featureFormElement = field,
                         form = form,
-                        context = context
+                        context = context,
+                        scope = scope
                     )
+                }
+                FormTextField(
+                    state = state
                 )
             }
         
             is DateTimePickerFormInput -> {
-                DateTimeField(
-                    state = DateTimeFieldState(
+                val state = remember(form, field) {
+                    DateTimeFieldState(
                         formElement = field,
                         form = form,
                         scope = scope
                     )
+                }
+                DateTimeField(
+                    state = state
                 )
             }
         

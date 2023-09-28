@@ -12,12 +12,12 @@ import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
 import com.arcgismaps.toolkit.featureforms.utils.editValue
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /**
  * State for the [FormTextField]
@@ -118,8 +118,9 @@ internal interface FormTextFieldState {
  */
 internal fun FormTextFieldState(featureFormElement: FieldFormElement,
                                 form: FeatureForm,
-                                context: Context): FormTextFieldState =
-    FormTextFieldStateImpl(featureFormElement, form, context)
+                                context: Context,
+                                scope: CoroutineScope): FormTextFieldState =
+    FormTextFieldStateImpl(featureFormElement, form, context, scope)
 
 /**
  * Default implementation for the [FormTextFieldState]. See [FormTextFieldState()] for the factory.
@@ -130,21 +131,19 @@ internal fun FormTextFieldState(featureFormElement: FieldFormElement,
 private class FormTextFieldStateImpl(
     private val formElement: FieldFormElement,
     private val featureForm: FeatureForm,
-    private val context: Context
+    private val context: Context,
+    private val scope: CoroutineScope
 ) : FormTextFieldState {
     private val _value = MutableStateFlow(formElement.value.value)
     
     override val value: StateFlow<String> =
-        combine(_value, formElement.value, formElement.isEditable) { user, expr, editable ->
+        combine(_value, formElement.value, formElement.isEditable) { userEdit, exprResult, editable ->
             if (editable) {
-                user.also {
-                    editValue(user)
-                    evaluateExpressions()
-                }
+                userEdit
             } else {
-                expr
+                exprResult
             }
-        }.stateIn(CoroutineScope(Dispatchers.IO), SharingStarted.Eagerly, _value.value)
+        }.stateIn(scope, SharingStarted.Eagerly, _value.value)
     
     private val _isFocused = mutableStateOf(false)
     override val isFocused: State<Boolean> = _isFocused
@@ -218,10 +217,14 @@ private class FormTextFieldStateImpl(
     }
     
     override val isEditable: StateFlow<Boolean> = formElement.isEditable
-    
+
     override fun onValueChanged(input: String) {
         _value.value = input
+        editValue(input)
         validateLength()
+        scope.launch {
+            evaluateExpressions()
+        }
     }
     
     override fun onFocusChanged(focus: Boolean) {
@@ -233,11 +236,11 @@ private class FormTextFieldStateImpl(
      * [hasError] and [errorMessage] if there was an error in validation.
      */
     private fun validateLength() {
-        _hasError.value = if (_value.value.length !in minLength..maxLength) {
+        _hasError.value = if (value.value.length !in minLength..maxLength) {
             _errorMessage.value = helperText
             true
             
-        } else if (isRequired.value && _value.value.isEmpty()) {
+        } else if (isRequired.value && value.value.isEmpty()) {
             _errorMessage.value = context.getString(R.string.required)
             true
         } else {
