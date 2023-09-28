@@ -20,6 +20,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,12 +42,24 @@ internal fun FormTextField(
     state: FormTextFieldState,
     modifier: Modifier = Modifier,
 ) {
-    val text by state.value
     val hasError by state.hasError
     val isFocused by state.isFocused
-    val supportingText by state.supportingText
-    val contentLength by state.contentLength
     var clearFocus by remember { mutableStateOf(false) }
+    val isEditable by state.isEditable.collectAsState()
+    val isRequired by state.isRequired.collectAsState()
+    val label = remember(isRequired) {
+        if (isRequired) {
+            "${state.label} *"
+        } else {
+            state.label
+        }
+    }
+    val text by state.value.collectAsState()
+    val supportingText by state.supportingText
+    val contentLength =
+        if (state.minLength > 0 || state.maxLength > 0) {
+            text.length.toString()
+        } else ""
 
     // if the keyboard is gone clear focus from the field as a side-effect
     ClearFocus(clearFocus) { clearFocus = false }
@@ -55,7 +68,7 @@ internal fun FormTextField(
         .fillMaxSize()
         .onFocusChanged { state.onFocusChanged(it.hasFocus) }
         .pointerInput(Unit) {
-            // any tap on a blank space will also dismiss the keyboard and clear focus
+            // any tap on a blank space will also dismiss the keyboard and clear focusS
             detectTapGestures { clearFocus = true }
         }
         .padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 10.dp)
@@ -67,17 +80,17 @@ internal fun FormTextField(
             },
             modifier = Modifier
                 .fillMaxSize()
-                .focusable(!state.isEditable)
+                .focusable(!isEditable)
                 .semantics { contentDescription = "outlined text field" },
-            readOnly = !state.isEditable,
-            enabled = state.isEditable,
+            readOnly = !isEditable,
+            enabled = isEditable,
             label = {
                 Text(
-                    text = state.label,
+                    text = label,
                     modifier = Modifier.semantics { contentDescription = "label" })
             },
             trailingIcon = {
-                if (state.isEditable && isFocused && !state.singleLine && text.isNotEmpty()) {
+                if (isEditable && isFocused && !state.singleLine && text.isNotEmpty()) {
                     IconButton(
                         onClick = { clearFocus = true },
                         modifier = Modifier.semantics {
@@ -89,7 +102,7 @@ internal fun FormTextField(
                             contentDescription = "Done"
                         )
                     }
-                } else if (state.isEditable && text.isNotEmpty()) {
+                } else if (isEditable && text.isNotEmpty()) {
                     IconButton(
                         onClick = { state.onValueChanged("") },
                         modifier = Modifier.semantics { contentDescription = "Clear text button" }

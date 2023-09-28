@@ -1,6 +1,9 @@
 package com.arcgismaps.toolkit.featureforms.components
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
@@ -16,37 +19,45 @@ import com.arcgismaps.toolkit.featureforms.components.text.FormTextFieldState
 @Composable
 internal fun FieldElement(field: FieldFormElement, form: FeatureForm) {
     val context = LocalContext.current
-    when (field.input) {
-        is TextAreaFormInput -> {
-            FormTextField(
-                state = FormTextFieldState(
-                    featureFormElement = field,
-                    form = form,
-                    context = context
+    val visible by field.isVisible.collectAsState()
+    val scope = rememberCoroutineScope()
+    
+    if (visible) {
+        when (field.input) {
+            is TextAreaFormInput -> {
+                FormTextField(
+                    state = FormTextFieldState(
+                        featureFormElement = field,
+                        form = form,
+                        context = context,
+                        scope = scope
+                    )
                 )
-            )
-        }
+            }
         
-        is TextBoxFormInput -> {
-            FormTextField(
-                state = FormTextFieldState(
-                    featureFormElement = field,
-                    form = form,
-                    context = context
+            is TextBoxFormInput -> {
+                FormTextField(
+                    state = FormTextFieldState(
+                        featureFormElement = field,
+                        form = form,
+                        context = context,
+                        scope = scope
+                    )
                 )
-            )
-        }
+            }
         
-        is DateTimePickerFormInput -> {
-            DateTimeField(
-                state = DateTimeFieldState(
-                    formElement = field,
-                    form = form
+            is DateTimePickerFormInput -> {
+                DateTimeField(
+                    state = DateTimeFieldState(
+                        formElement = field,
+                        form = form,
+                        scope = scope
+                    )
                 )
-            )
-        }
+            }
         
-        else -> { /* TO-DO: add support for other input types */
+            else -> { /* TO-DO: add support for other input types */
+            }
         }
     }
 }

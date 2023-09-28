@@ -11,7 +11,13 @@ import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
 import com.arcgismaps.toolkit.featureforms.utils.editValue
-import com.arcgismaps.toolkit.featureforms.utils.getElementValue
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /**
  * State for the [FormTextField]
@@ -50,7 +56,9 @@ internal interface FormTextFieldState {
     /**
      * Current value state for the [FormTextField].
      */
-    val value: State<String>
+    val value: StateFlow<String>
+    
+    //val valueChanged: StateFlow<String>
     
     /**
      * State for the supporting text that gets displayed under the [FormTextField].
@@ -82,12 +90,12 @@ internal interface FormTextFieldState {
     /**
      * State that indicates if the field is editable.
      */
-    val isEditable: Boolean
+    val isEditable: StateFlow<Boolean>
     
     /**
      * State that indicates if the field is required.
      */
-    val isRequired: Boolean
+    val isRequired: StateFlow<Boolean>
     
     /**
      * Callback to update the current value of the FormTextFieldState to the given [input].
@@ -98,6 +106,8 @@ internal interface FormTextFieldState {
      * Callback to set the current focus value to the given [focus].
      */
     fun onFocusChanged(focus: Boolean)
+    
+    suspend fun evaluateExpressions()
 }
 
 /**
@@ -108,8 +118,9 @@ internal interface FormTextFieldState {
  */
 internal fun FormTextFieldState(featureFormElement: FieldFormElement,
                                 form: FeatureForm,
-                                context: Context): FormTextFieldState =
-    FormTextFieldStateImpl(featureFormElement, form, context)
+                                context: Context,
+                                scope: CoroutineScope): FormTextFieldState =
+    FormTextFieldStateImpl(featureFormElement, form, context, scope)
 
 /**
  * Default implementation for the [FormTextFieldState]. See [FormTextFieldState()] for the factory.
@@ -120,14 +131,19 @@ internal fun FormTextFieldState(featureFormElement: FieldFormElement,
 private class FormTextFieldStateImpl(
     private val formElement: FieldFormElement,
     private val featureForm: FeatureForm,
-    private val context: Context
+    private val context: Context,
+    private val scope: CoroutineScope
 ) : FormTextFieldState {
-    private val _value = mutableStateOf(formElement.value.ifEmpty {
-        // "prime" the value until expressions can be evaluated to populate the value.
-        // TODO: remove this when the value is provided by expression evaluation.
-        featureForm.getElementValue(formElement)?.toString() ?: ""
-    })
-    override val value: State<String> = _value
+    private val _value = MutableStateFlow(formElement.value.value)
+    
+    override val value: StateFlow<String> =
+        combine(_value, formElement.value, formElement.isEditable) { userEdit, exprResult, editable ->
+            if (editable) {
+                userEdit
+            } else {
+                exprResult
+            }
+        }.stateIn(scope, SharingStarted.Eagerly, _value.value)
     
     private val _isFocused = mutableStateOf(false)
     override val isFocused: State<Boolean> = _isFocused
@@ -138,15 +154,10 @@ private class FormTextFieldStateImpl(
     private val _hasError = mutableStateOf(false)
     override val hasError: State<Boolean> = _hasError
     
-    override val isRequired: Boolean = formElement.requiredExpressionName.isNotEmpty()
+    override val isRequired: StateFlow<Boolean> = formElement.isRequired
     
     // set the label from the FieldFeatureFormElement
-    // note when isRequired becomes a StateFlow, this logic will move into the compose function
-    override val label = if (!isRequired) {
-        formElement.label
-    } else {
-        "${formElement.label} *"
-    }
+    override val label = formElement.label
     
     // set the description from the FieldFeatureFormElement
     override val description = formElement.description
@@ -205,12 +216,15 @@ private class FormTextFieldStateImpl(
         } else ""
     }
     
-    override val isEditable: Boolean = formElement.editableExpressionName.isNotEmpty()
-    
+    override val isEditable: StateFlow<Boolean> = formElement.isEditable
+
     override fun onValueChanged(input: String) {
-       editValue(input)
         _value.value = input
+        editValue(input)
         validateLength()
+        scope.launch {
+            evaluateExpressions()
+        }
     }
     
     override fun onFocusChanged(focus: Boolean) {
@@ -222,10 +236,11 @@ private class FormTextFieldStateImpl(
      * [hasError] and [errorMessage] if there was an error in validation.
      */
     private fun validateLength() {
-        _hasError.value = if (_value.value.length !in minLength..maxLength) {
+        _hasError.value = if (value.value.length !in minLength..maxLength) {
             _errorMessage.value = helperText
             true
-        } else if (isRequired && _value.value.isEmpty()) {
+            
+        } else if (isRequired.value && value.value.isEmpty()) {
             _errorMessage.value = context.getString(R.string.required)
             true
         } else {
@@ -240,5 +255,9 @@ private class FormTextFieldStateImpl(
      */
     private fun editValue(value: Any?) {
         featureForm.editValue(formElement, value)
+    }
+    
+    override suspend fun evaluateExpressions() {
+        featureForm.evaluateExpressions()
     }
 }
