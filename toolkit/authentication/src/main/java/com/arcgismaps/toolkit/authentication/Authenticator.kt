@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
+import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
 /**
  * Displays appropriate Authentication UI when issued a challenge. For example, if an [ArcGISAuthenticationChallenge]
@@ -42,12 +43,16 @@ import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
  * then a Custom Chrome Tab will be launched to complete the OAuth sign in.
  *
  * @param authenticatorState an [AuthenticatorState]. See [AuthenticatorState.Companion.Factory].
+ * @param onPendingOAuthUserSignIn if not null, this will be called when an OAuth challenge is pending
+ * and the browser should be launched. Use this if you wish to handle OAuth challenges from your own
+ * activity rather than using the [OAuthUserSignInActivity].
  * @since 200.2.0
  */
 @Composable
 public fun Authenticator(
     authenticatorState: AuthenticatorState,
-    modifier: Modifier = Modifier.fillMaxSize()
+    modifier: Modifier = Modifier.fillMaxSize(),
+    onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)? = null
 ) {
     // If the back button is pressed, this ensures that any prompts get dismissed.
     BackHandler {
@@ -58,7 +63,7 @@ public fun Authenticator(
         authenticatorState.pendingOAuthUserSignIn.collectAsStateWithLifecycle().value
 
     pendingOAuthUserSignIn?.let {
-        OAuthAuthenticator(it, authenticatorState)
+        OAuthAuthenticator(it, authenticatorState, onPendingOAuthUserSignIn)
     }
 
     val pendingServerTrustChallenge =
@@ -104,18 +109,22 @@ private fun Context.findActivity(): Activity {
 /**
  * Displays the [Authenticator] in an [AlertDialog]. See the Authenticator component for more details.
  *
+ * @param authenticatorState an [AuthenticatorState]. See [AuthenticatorState.Companion.Factory].
+ * @param onPendingOAuthUserSignIn if not null, this will be called when an OAuth challenge is pending
+ * and the browser should be launched. Use this if you wish to handle OAuth challenges from your own
+ * activity rather than using the [OAuthUserSignInActivity].
  * @since 200.2.0
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-public fun DialogAuthenticator(authenticatorState: AuthenticatorState) {
+public fun DialogAuthenticator(authenticatorState: AuthenticatorState, onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)? = null) {
     val showDialog = authenticatorState.isDisplayed.collectAsStateWithLifecycle(initialValue = false).value
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { authenticatorState.dismissAll() },
             modifier = Modifier.clip(MaterialTheme.shapes.extraLarge),
         ) {
-            Authenticator(authenticatorState = authenticatorState, modifier = Modifier.fillMaxWidth())
+            Authenticator(authenticatorState = authenticatorState, modifier = Modifier.fillMaxWidth(), onPendingOAuthUserSignIn)
         }
     }
 }
