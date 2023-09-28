@@ -52,6 +52,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -75,7 +76,7 @@ internal fun ComboBoxField(state: ComboBoxFieldState, modifier: Modifier = Modif
     val value by state.value.collectAsState()
     val isEditable by state.isEditable.collectAsState()
     val isRequired by state.isRequired.collectAsState()
-    var showDialog by remember { mutableStateOf(false) }
+    var showDialog by rememberSaveable { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
 
     BaseTextField(
@@ -135,7 +136,7 @@ internal fun ComboBoxDialog(
     onValueChange: (String) -> Unit,
     onDismissRequest: () -> Unit
 ) {
-    var searchText by remember { mutableStateOf("") }
+    var searchText by rememberSaveable { mutableStateOf("") }
     val codedValues = if (!isRequired) {
         if (noValueOption == FormInputNoValueOption.Show) {
             listOf(noValueLabel) + values
