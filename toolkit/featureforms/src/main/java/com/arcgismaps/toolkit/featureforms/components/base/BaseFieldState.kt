@@ -16,12 +16,16 @@
 
 package com.arcgismaps.toolkit.featureforms.components.base
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.toolkit.featureforms.utils.editValue
-import com.arcgismaps.toolkit.featureforms.utils.getElementValue
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /**
  * Base interface for any Field within a feature form. It provides the default set of properties
@@ -46,22 +50,24 @@ internal interface BaseFieldState {
     /**
      * Current value state for the field.
      */
-    val value: State<String>
+    val value: StateFlow<String>
 
     /**
      * Property that indicates if the field is editable.
      */
-    val isEditable : Boolean
+    val isEditable : StateFlow<Boolean>
 
     /**
      * Property that indicates if the field is required.
      */
-    val isRequired : Boolean
+    val isRequired : StateFlow<Boolean>
 
     /**
      * Callback to update the current value of the FormTextFieldState to the given [input].
      */
     fun onValueChanged(input: String)
+
+    suspend fun evaluateExpressions()
 }
 
 /**
@@ -69,35 +75,46 @@ internal interface BaseFieldState {
  */
 private class BaseFieldStateImpl(
     private val formElement: FieldFormElement,
-    private val featureForm: FeatureForm
+    private val featureForm: FeatureForm,
+    private val scope: CoroutineScope
 ) : BaseFieldState {
 
-    private val _value = mutableStateOf(formElement.value.ifEmpty {
-        // "prime" the value until expressions can be evaluated to populate the value.
-        // TODO: remove this when the value is provided by expression evaluation.
-        featureForm.getElementValue(formElement)?.toString() ?: ""
-    })
-    override val value: State<String> = _value
+    private val _value = MutableStateFlow(formElement.value.value)
+
+    override val value: StateFlow<String> =
+        combine(_value, formElement.value, formElement.isEditable) { userEdit, exprResult, editable ->
+            if (editable) {
+                userEdit
+            } else {
+                exprResult
+            }
+        }.stateIn(scope, SharingStarted.Eagerly, _value.value)
+
+    override val isEditable: StateFlow<Boolean> = formElement.isEditable
+
+    override val isRequired: StateFlow<Boolean> = formElement.isRequired
 
     override val description: String = formElement.description
 
     override val placeholder: String = formElement.hint
 
-    override val isEditable: Boolean = formElement.editableExpressionName.isNotEmpty()
-
-    override val isRequired: Boolean = formElement.requiredExpressionName.isNotEmpty()
-
     // set the label from the FieldFeatureFormElement
     // note when isRequired becomes a StateFlow, this logic will move into the compose function
-    override val label = if (!isRequired) {
-        formElement.label
-    } else {
-        "${formElement.label} *"
-    }
+    override val label = formElement.label
+//    if (!isRequired.value) {
+//        formElement.label
+//    } else {
+//        "${formElement.label} *"
+//    }
 
     override fun onValueChanged(input: String) {
         editValue(input)
         _value.value = input
+        scope.launch { evaluateExpressions() }
+    }
+
+    override suspend fun evaluateExpressions() {
+        featureForm.evaluateExpressions()
     }
 
     /**
@@ -118,5 +135,6 @@ private class BaseFieldStateImpl(
  */
 internal fun BaseFieldState(
     formElement: FieldFormElement,
-    featureForm: FeatureForm
-): BaseFieldState = BaseFieldStateImpl(formElement, featureForm)
+    featureForm: FeatureForm,
+    scope: CoroutineScope
+): BaseFieldState = BaseFieldStateImpl(formElement, featureForm, scope)
