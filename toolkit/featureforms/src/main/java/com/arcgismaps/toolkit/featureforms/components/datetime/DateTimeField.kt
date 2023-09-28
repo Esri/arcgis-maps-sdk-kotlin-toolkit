@@ -66,15 +66,7 @@ internal fun DateTimeField(
 ) {
     val isEditable by state.isEditable.collectAsState()
     val isRequired by state.isRequired.collectAsState()
-    val epochMillis by if (isEditable) {
-        state.value
-    } else {
-        state.valueChanged.collectAsState()
-    }
-    
-    LaunchedEffect(epochMillis) {
-        state.evaluateExpressions()
-    }
+    val epochMillis by state.value.collectAsState()
 
     val shouldShowTime = remember {
         state.shouldShowTime
@@ -190,7 +182,7 @@ internal fun DateTimeField(
                         Text(text = state.description)
                     }
                 },
-                visualTransformation = if (state.value.value == null)
+                visualTransformation = if (epochMillis == null)
                     PlaceholderTransformation(stringResource(id = R.string.novalue))
                 else VisualTransformation.None,
                 singleLine = true,

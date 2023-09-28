@@ -18,17 +18,16 @@
 
 package com.arcgismaps.toolkit.featureforms.components.datetime
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.toolkit.featureforms.utils.editValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -87,15 +86,7 @@ internal interface DateTimeFieldState {
      *
      * @since 200.2.0
      */
-    val value: State<Long?>
-    
-    /**
-     * An update to the date time from the evaluation of Arcade expressions.
-     * This will only emit if the element is editable.
-     *
-     * @since 200.3.0
-     */
-    val valueChanged: StateFlow<Long?>
+    val value: StateFlow<Long?>
     
     /**
      * `true` if the date time may be edited.
@@ -144,14 +135,10 @@ internal interface DateTimeFieldState {
 private class DateTimeFieldStateImpl(
     private val element: FieldFormElement,
     private val form: FeatureForm,
-    scope: CoroutineScope,
+    private val scope: CoroutineScope,
     input: DateTimePickerFormInput = element.input as DateTimePickerFormInput
 ) : DateTimeFieldState {
     override val minEpochMillis: Long? = input.min?.toEpochMilli()
-    
-    private val formattedValueChanged: StateFlow<String> = element.value
-    private val _valueChanged: MutableStateFlow<Long?> = MutableStateFlow(dateTimeFromString(element.value.value))
-    override val valueChanged: StateFlow<Long?> = _valueChanged.asStateFlow()
     
     override val maxEpochMillis: Long? = input.max?.toEpochMilli()
     
@@ -167,21 +154,17 @@ private class DateTimeFieldStateImpl(
     
     override val description: String = element.description
     
-    private val _value: MutableState<Long?> = mutableStateOf(null)
-    override val value: State<Long?> = _value
+    private val _value: MutableStateFlow<Long?> = MutableStateFlow(null)
+    override val value: StateFlow<Long?> = combine(_value, element.value, isEditable) { userEdit, exprResult, editable ->
+        if (editable) {
+            userEdit
+        } else {
+            dateTimeFromString(exprResult)
+        }
+    }.stateIn(scope, SharingStarted.Eagerly, dateTimeFromString(element.value.value))
     
     init {
-        setValue(dateTimeFromString(element.value.value))
-        scope.launch {
-            // Until the field form element provides the raw value, we will need to map this String to a `Long?`
-            // unfortunately, Flow.map on a StateFlow returns a Flow so we just map it
-            // by collecting on it and emitting it again.
-            formattedValueChanged
-                .collect {
-                    _valueChanged.value = dateTimeFromString(it)
-                }
-        }
-        
+        _value.value = dateTimeFromString(element.value.value)
     }
  
     private fun setValue(value: String) {
@@ -194,6 +177,9 @@ private class DateTimeFieldStateImpl(
     override fun setValue(dateTime: Long?) {
         form.editValue(element, dateTime)
         _value.value = dateTime
+        scope.launch {
+            evaluateExpressions()
+        }
     }
     
     override fun resetValue() = setValue(element.value.value)
