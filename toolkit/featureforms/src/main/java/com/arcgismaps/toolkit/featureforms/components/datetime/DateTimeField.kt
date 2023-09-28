@@ -38,6 +38,7 @@ import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -63,9 +64,10 @@ internal fun DateTimeField(
     state: DateTimeFieldState,
     modifier: Modifier = Modifier
 ) {
-    val isEditable by state.isEditable
-    val isRequired by state.isRequired
-    val epochMillis by state.value
+    val isEditable by state.isEditable.collectAsState()
+    val isRequired by state.isRequired.collectAsState()
+    val epochMillis by state.value.collectAsState()
+
     val shouldShowTime = remember {
         state.shouldShowTime
     }
@@ -180,7 +182,7 @@ internal fun DateTimeField(
                         Text(text = state.description)
                     }
                 },
-                visualTransformation = if (state.value.value == null)
+                visualTransformation = if (epochMillis == null)
                     PlaceholderTransformation(stringResource(id = R.string.no_value))
                 else VisualTransformation.None,
                 singleLine = true,

@@ -22,7 +22,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -33,22 +35,31 @@ internal fun FormTextField(
     state: FormTextFieldState,
     modifier: Modifier = Modifier,
 ) {
-    val text by state.value
+    val text by state.value.collectAsState()
+    val isEditable by state.isEditable.collectAsState()
+    val isRequired by state.isRequired.collectAsState()
+    val label = remember(isRequired) {
+        if (isRequired) {
+            "${state.label} *"
+        } else {
+            state.label
+        }
+    }
+    val supportingText by state.supportingText
+    val contentLength = if (state.minLength > 0 || state.maxLength > 0) "$text.length" else ""
     val hasError by state.hasError
     val isFocused by state.isFocused
-    val supportingText by state.supportingText
-    val contentLength by state.contentLength
 
     BaseTextField(
         text = text,
         onValueChange = {
             state.onValueChanged(it)
-            state.validateLength()
+            state.validate()
         },
         modifier = modifier.fillMaxSize(),
         readOnly = false,
-        isEditable = state.isEditable,
-        label = state.label,
+        isEditable = isEditable,
+        label = label,
         placeholder = state.placeholder,
         singleLine = state.singleLine,
         supportingText = {

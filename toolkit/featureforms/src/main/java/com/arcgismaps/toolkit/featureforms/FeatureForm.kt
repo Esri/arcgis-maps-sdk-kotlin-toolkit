@@ -1,21 +1,29 @@
 package com.arcgismaps.toolkit.featureforms
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
@@ -34,14 +42,45 @@ public fun FeatureForm(
     modifier: Modifier = Modifier
 ) {
     val featureForm by featureFormState.featureForm.collectAsState()
+    var initialEvaluation by remember { mutableStateOf(false) }
+    LaunchedEffect(featureForm) {
+        // ensure expressions are evaluated before state objects are created.
+        featureForm?.evaluateExpressions()
+        initialEvaluation = true
+    }
+    
     featureForm?.let {
-        FeatureFormContent(form = it, modifier = modifier)
-    } ?: run {
-        Column(
-            modifier = modifier.fillMaxSize()
-        ) {
-            Text(text = "No information to display.")
+        if (initialEvaluation) {
+            FeatureFormContent(form = it, modifier = modifier)
+        } else {
+            InitializingExpressions(modifier)
         }
+    } ?: run {
+        NoDataToDisplay(modifier)
+    }
+}
+
+@Composable
+internal fun InitializingExpressions(modifier: Modifier = Modifier) {
+    Column(
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier.fillMaxSize()
+    ) {
+        CircularProgressIndicator(modifier = Modifier
+            .width(80.dp)
+            .height(80.dp)
+        )
+        Text(text = "Initializing")
+    }
+}
+
+@Composable
+internal fun NoDataToDisplay(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.fillMaxSize()
+    ) {
+        Text(text = "No information to display.")
     }
 }
 
@@ -74,4 +113,17 @@ internal fun FeatureFormContent(
             }
         }
     }
+}
+
+@Preview
+@Composable
+private fun InitializingExpressionsPreview() {
+    InitializingExpressions()
+}
+
+
+@Preview
+@Composable
+private fun NoDataPreview() {
+    NoDataToDisplay()
 }

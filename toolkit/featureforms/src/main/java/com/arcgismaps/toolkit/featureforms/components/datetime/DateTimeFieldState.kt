@@ -18,13 +18,17 @@
 
 package com.arcgismaps.toolkit.featureforms.components.datetime
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.toolkit.featureforms.utils.editValue
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.TimeZone
@@ -82,21 +86,21 @@ internal interface DateTimeFieldState {
      *
      * @since 200.2.0
      */
-    val value: State<Long?>
+    val value: StateFlow<Long?>
     
     /**
      * `true` if the date time may be edited.
      *
      * @since 200.2.0
      */
-    val isEditable: State<Boolean>
+    val isEditable: StateFlow<Boolean>
     
     /**
      * `true` if the field must have a datetime value
      *
      * @since 200.2.0
      */
-    val isRequired: State<Boolean>
+    val isRequired: StateFlow<Boolean>
     
     /**
      * Updates the attribute.
@@ -119,11 +123,19 @@ internal interface DateTimeFieldState {
      * @since 200.2.0
      */
     fun clearValue()
+    
+    /**
+     * evaluate arcade expressions as needed due to user input
+     *
+     * @since 200.3.0
+     */
+    suspend fun evaluateExpressions()
 }
 
 private class DateTimeFieldStateImpl(
     private val element: FieldFormElement,
     private val form: FeatureForm,
+    private val scope: CoroutineScope,
     input: DateTimePickerFormInput = element.input as DateTimePickerFormInput
 ) : DateTimeFieldState {
     override val minEpochMillis: Long? = input.min?.toEpochMilli()
@@ -136,30 +148,25 @@ private class DateTimeFieldStateImpl(
     
     override val placeholderText: String = element.hint
     
-    private val _isEditable: MutableState<Boolean> = mutableStateOf(element.editableExpressionName.isNotEmpty())
-    override val isEditable: State<Boolean> = _isEditable
+    override val isEditable: StateFlow<Boolean> = element.isEditable
     
-    private val _isRequired: MutableState<Boolean> = mutableStateOf(element.requiredExpressionName.isNotBlank())
-    override val isRequired: State<Boolean> = _isRequired
+    override val isRequired: StateFlow<Boolean> = element.isRequired
     
     override val description: String = element.description
     
-    private val _value: MutableState<Long?> = mutableStateOf(null)
-    override val value: State<Long?> = _value
+    private val _value: MutableStateFlow<Long?> = MutableStateFlow(null)
+    override val value: StateFlow<Long?> = combine(_value, element.value, isEditable) { userEdit, exprResult, editable ->
+        if (editable) {
+            userEdit
+        } else {
+            dateTimeFromString(exprResult)
+        }
+    }.stateIn(scope, SharingStarted.Eagerly, dateTimeFromString(element.value.value))
     
     init {
-        if (element.value.isNotEmpty()) {
-            // note, getting values from attributes no longer works in build 3989, there is garbage in the null fields.
-            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
-            val initialValue =
-                LocalDateTime.parse(element.value, formatter).atZone(TimeZone.getDefault().toZoneId()).toInstant()
-                    .toEpochMilli()
-            setValue(initialValue)
-        } else {
-            setValue(null)
-        }
+        _value.value = dateTimeFromString(element.value.value)
     }
-    
+ 
     private fun setValue(value: String) {
         if (value.isNotEmpty()) {
             val asLong = value.toLong()
@@ -170,12 +177,19 @@ private class DateTimeFieldStateImpl(
     override fun setValue(dateTime: Long?) {
         form.editValue(element, dateTime)
         _value.value = dateTime
+        scope.launch {
+            evaluateExpressions()
+        }
     }
     
-    override fun resetValue() = setValue(element.value)
+    override fun resetValue() = setValue(element.value.value)
     
     override fun clearValue() {
         setValue(null)
+    }
+    
+    override suspend fun evaluateExpressions() {
+        form.evaluateExpressions()
     }
 }
 
@@ -187,5 +201,24 @@ private class DateTimeFieldStateImpl(
  */
 internal fun DateTimeFieldState(
     formElement: FieldFormElement,
-    form: FeatureForm
-): DateTimeFieldState = DateTimeFieldStateImpl(formElement, form)
+    form: FeatureForm,
+    scope: CoroutineScope
+): DateTimeFieldState = DateTimeFieldStateImpl(formElement, form, scope)
+
+
+/**
+ * Maps the [FieldFormElement.value] from a String to Long?
+ * Empty strings are made to be null Longs.
+ *
+ * @since 200.3.0
+ */
+internal fun dateTimeFromString(formattedDateTime: String): Long? {
+    if (formattedDateTime.isNotEmpty()) {
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+        return LocalDateTime.parse(formattedDateTime, formatter).atZone(TimeZone.getDefault().toZoneId())
+            .toInstant()
+            .toEpochMilli()
+    }
+    return null
+}
+

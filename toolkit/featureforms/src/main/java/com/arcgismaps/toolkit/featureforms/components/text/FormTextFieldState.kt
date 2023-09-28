@@ -27,6 +27,7 @@ import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
+import kotlinx.coroutines.CoroutineScope
 
 
 /**
@@ -40,9 +41,9 @@ import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 internal class FormTextFieldState(
     formElement: FieldFormElement,
     featureForm: FeatureForm,
-    private val context: Context
-) : BaseFieldState by BaseFieldState(formElement, featureForm) {
-
+    private val context: Context,
+    private val scope: CoroutineScope,
+) : BaseFieldState by BaseFieldState(formElement, featureForm, scope) {
     // indicates singleLine only if TextBoxFeatureFormInput
     val singleLine = formElement.input is TextBoxFormInput
 
@@ -73,14 +74,14 @@ internal class FormTextFieldState(
     val hasError: State<Boolean> = _hasError
 
     // fetch the minLength based on the featureFormElement.inputType
-    private val minLength = when (formElement.input) {
+    val minLength = when (formElement.input) {
         is TextAreaFormInput -> (formElement.input as TextAreaFormInput).minLength
         is TextBoxFormInput -> (formElement.input as TextBoxFormInput).minLength
         else -> throw IllegalArgumentException()
     }.toInt()
 
     // fetch the maxLength based on the featureFormElement.inputType
-    private val maxLength = when (formElement.input) {
+    val maxLength = when (formElement.input) {
         is TextAreaFormInput -> (formElement.input as TextAreaFormInput).maxLength
         is TextBoxFormInput -> (formElement.input as TextBoxFormInput).maxLength
         else -> throw IllegalArgumentException()
@@ -101,7 +102,7 @@ internal class FormTextFieldState(
             // TODO: when consuming the core API throw here and remove the line above.
             //throw IllegalStateException("invalid form data or attribute: text field must have a nonzero max length")
         }
-
+    
     fun onFocusChanged(focus: Boolean) {
         _isFocused.value = focus
     }
@@ -110,11 +111,13 @@ internal class FormTextFieldState(
      * Validates the current [value]'s length based on the [minLength], [maxLength], and [isRequired] and sets the
      * [hasError] and [errorMessage] if there was an error in validation.
      */
-    fun validateLength() {
+
+    fun validate() {
         _hasError.value = if (value.value.length !in minLength..maxLength) {
             _errorMessage = helperText
             true
-        } else if (isRequired && value.value.isEmpty()) {
+            
+        } else if (isRequired.value && value.value.isEmpty()) {
             _errorMessage = context.getString(R.string.required)
             true
         } else {
