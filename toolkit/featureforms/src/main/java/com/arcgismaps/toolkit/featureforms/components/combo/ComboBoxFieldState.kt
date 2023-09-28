@@ -17,6 +17,9 @@
 package com.arcgismaps.toolkit.featureforms.components.combo
 
 import android.content.Context
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.res.stringResource
 import com.arcgismaps.data.CodedValue
 import com.arcgismaps.data.CodedValueDomain
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
@@ -26,6 +29,9 @@ import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 /**
  * A class to handle the state of a [ComboBoxField]. Essential properties are inherited from the
@@ -38,8 +44,9 @@ import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 internal class ComboBoxFieldState(
     formElement: FieldFormElement,
     featureForm: FeatureForm,
-    context: Context
-) : BaseFieldState by BaseFieldState(formElement, featureForm) {
+    context: Context,
+    scope: CoroutineScope
+) : BaseFieldState by BaseFieldState(formElement, featureForm, scope) {
 
     /**
      * The list of coded values associated with this field.
@@ -59,7 +66,7 @@ internal class ComboBoxFieldState(
     val noValueLabel: String =
         (formElement.input as ComboBoxFormInput).noValueLabel
 
-    override val placeholder: String = if (isRequired) {
+    override val placeholder = if (isRequired.value) {
         context.getString(R.string.enter_value)
     } else if (showNoValueOption == FormInputNoValueOption.Show) {
         noValueLabel.ifEmpty { context.getString(R.string.no_value) }
