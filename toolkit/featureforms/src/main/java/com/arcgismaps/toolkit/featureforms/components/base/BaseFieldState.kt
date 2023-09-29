@@ -16,9 +16,7 @@
 
 package com.arcgismaps.toolkit.featureforms.components.base
 
-import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
-import com.arcgismaps.toolkit.featureforms.utils.editValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -32,35 +30,42 @@ import kotlinx.coroutines.launch
  * that are common to all [FieldFormElement]'s.
  */
 internal open class BaseFieldState(
-    private val formElement: FieldFormElement,
-    private val featureForm: FeatureForm,
-    private val scope: CoroutineScope
+    open val label : String,
+    open val placeholder : String,
+    val description: String,
+    initialValue: String,
+    valueFlow : StateFlow<String>,
+    val isEditable : StateFlow<Boolean>,
+    val isRequired: StateFlow<Boolean>,
+    private val scope: CoroutineScope,
+    private val onEditValue : (Any?) -> Unit,
+    private val onEvaluateExpression: suspend () -> Unit,
 ) {
     /**
      * Title for the field.
      */
-    open val label: String = formElement.label
+    // open val label: String = formElement.label
 
     /**
      * Description text for the field.
      */
-    val description: String = formElement.description
+    // val description: String = formElement.description
 
     /**
      * Placeholder hint for the field.
      */
-    open val placeholder: String = formElement.hint
+    // open val placeholder: String = formElement.hint
 
     // a state flow to handle user input changes
-    private val _value = MutableStateFlow(formElement.value.value)
+    private val _value = MutableStateFlow(initialValue)
 
     /**
      * Current value state for the field.
      */
     val value: StateFlow<String> = combine(
         _value,
-        formElement.value,
-        formElement.isEditable
+        valueFlow,
+        isEditable
     ) { userEdit, exprResult, editable ->
         // transform the user input value flow with the formElement value and required into a single
         // value flow based on if the field is editable
@@ -69,41 +74,41 @@ internal open class BaseFieldState(
         } else {
             exprResult
         }
-    }.stateIn(scope, SharingStarted.Eagerly, _value.value)
+    }.stateIn(scope, SharingStarted.Eagerly, initialValue)
 
     /**
      * Property that indicates if the field is editable.
      */
-    val isEditable: StateFlow<Boolean> = formElement.isEditable
+    // val isEditable: StateFlow<Boolean> = isEditable
 
     /**
      * Property that indicates if the field is required.
      */
-    val isRequired: StateFlow<Boolean> = formElement.isRequired
+    // val isRequired: StateFlow<Boolean> = isRequired
 
     /**
      * Callback to update the current value of the FormTextFieldState to the given [input].
      */
     fun onValueChanged(input: String) {
-        editValue(input)
+        onEditValue(input)
         _value.value = input
-        scope.launch { evaluateExpressions() }
+        scope.launch { onEvaluateExpression() }
     }
 
     /**
      * Evaluates the underlying expressions for this field. The results can be observed through the
      * [value], [isRequired] and [isEditable] state flows.
      */
-    private suspend fun evaluateExpressions() {
-        featureForm.evaluateExpressions()
-    }
+//    private suspend fun evaluateExpressions() {
+//        featureForm.evaluateExpressions()
+//    }
 
     /**
      * Set the value in the feature's attribute map.
      * Committing the transaction will either discard this edit or persist it in the associated geodatabase,
      * and refresh the feature.
      */
-    private fun editValue(value: Any?) {
-        featureForm.editValue(formElement, value)
-    }
+//    private fun editValue(value: Any?) {
+//        featureForm.editValue(formElement, value)
+//    }
 }

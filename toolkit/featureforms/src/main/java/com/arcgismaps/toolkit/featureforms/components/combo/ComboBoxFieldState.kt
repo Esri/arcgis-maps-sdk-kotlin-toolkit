@@ -25,6 +25,7 @@ import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
+import com.arcgismaps.toolkit.featureforms.utils.editValue
 import kotlinx.coroutines.CoroutineScope
 
 /**
@@ -40,7 +41,18 @@ internal class ComboBoxFieldState(
     featureForm: FeatureForm,
     context: Context,
     scope: CoroutineScope
-) : BaseFieldState(formElement, featureForm, scope) {
+) : BaseFieldState(
+    label = formElement.label,
+    placeholder = formElement.hint,
+    description = formElement.description,
+    valueFlow = formElement.value,
+    isEditable = formElement.isEditable,
+    isRequired = formElement.isRequired,
+    scope = scope,
+    initialValue = formElement.value.value,
+    onEditValue = { featureForm.editValue(formElement, it) },
+    onEvaluateExpression = { featureForm.evaluateExpressions() }
+) {
 
     /**
      * The list of coded values associated with this field.
