@@ -16,9 +16,12 @@
 
 package com.arcgismaps.toolkit.featureforms.components.base
 
+import com.arcgismaps.data.Domain
+import com.arcgismaps.data.FieldType
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.toolkit.featureforms.utils.editValue
+import com.arcgismaps.toolkit.featureforms.utils.fieldType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -45,6 +48,10 @@ internal open class BaseFieldState(
      * Description text for the field.
      */
     val description: String = formElement.description
+    
+    val fieldType: FieldType = featureForm.fieldType(formElement)
+    
+    val domain: Domain? = formElement.domain
 
     /**
      * Placeholder hint for the field.

@@ -20,6 +20,7 @@ import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
+import com.arcgismaps.data.RangeDomain
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
@@ -27,6 +28,9 @@ import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
+import com.arcgismaps.toolkit.featureforms.utils.isFloatingPoint
+import com.arcgismaps.toolkit.featureforms.utils.isIntegerType
+import com.arcgismaps.toolkit.featureforms.utils.isNumeric
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -62,7 +66,7 @@ internal class FormTextFieldState(
             }
         }
     }
-
+    
     private var _errorMessage: String = ""
 
     private val _isFocused: MutableStateFlow<Boolean> = MutableStateFlow(false)
@@ -87,34 +91,76 @@ internal class FormTextFieldState(
 
     // build helper text
     private val helperText =
-        if (minLength > 0 && maxLength > 0) {
-            if (minLength == maxLength) {
-                context.getString(R.string.enter_n_chars, minLength)
+        if (fieldType.isNumeric) {
+            val domain = formElement.domain
+            
+            if (domain != null && domain is RangeDomain) {
+                val min = domain.minValue as? Number
+                val max = domain.maxValue as? Number
+                
+                if (min != null && max != null) {
+                    context.getString(R.string.numeric_range_helper_text, min.toInt(), max.toInt())
+                } else if (min != null) {
+                    context.getString(R.string.less_than_min_value)
+                } else if (max != null) {
+                    context.getString(R.string.exceeds_max_value)
+                } else {
+                    ""
+                }
             } else {
-                context.getString(R.string.enter_min_to_max_chars, minLength, maxLength)
+                ""
             }
-        } else if (maxLength > 0) {
-            context.getString(R.string.maximum_n_chars, maxLength)
+
         } else {
-            context.getString(R.string.maximum_n_chars, 254)
-            // TODO: when consuming the core API throw here and remove the line above.
-            //throw IllegalStateException("invalid form data or attribute: text field must have a nonzero max length")
+            if (minLength > 0 && maxLength > 0) {
+                if (minLength == maxLength) {
+                    context.getString(R.string.enter_n_chars, minLength)
+                } else {
+                    context.getString(R.string.enter_min_to_max_chars, minLength, maxLength)
+                }
+            } else if (maxLength > 0) {
+                context.getString(R.string.maximum_n_chars, maxLength)
+            } else {
+                context.getString(R.string.maximum_n_chars, 254)
+            }
         }
 
     init {
         scope.launch {
             value.drop(1).collect { newValue ->
                 if (isEditable.value) {
-                    validate(newValue)
+                    validate(newValue, true)
                 }
             }
         }
         scope.launch {
             isFocused.collect {
                 if (it) {
-                    validate(value.value)
+                    validate(value.value, true)
+                } else {
+                    validate(value.value, !isRequired.value)
                 }
             }
+        }
+    }
+    
+    private fun validateNumericRange(value: String): Boolean {
+        require(fieldType.isNumeric)
+        return if (domain != null && domain is RangeDomain) {
+            val min = domain.minValue as? Number
+            val max = domain.maxValue as? Number
+            val doubleVal = value.toDouble()
+            if (min != null && max != null) {
+                doubleVal in min.toDouble()..max.toDouble()
+            } else if (min != null) {
+                min.toDouble() >= doubleVal
+            } else if (max != null) {
+                doubleVal <= max.toDouble()
+            } else {
+                true
+            }
+        } else {
+            true
         }
     }
 
@@ -122,13 +168,28 @@ internal class FormTextFieldState(
      * Validates the current [value]'s length based on the [minLength], [maxLength], and [isRequired] and sets the
      * [hasError] and [_errorMessage] if there was an error in validation.
      */
-    private fun validate(value: String) {
-        _hasError.value = if (isRequired.value && value.isEmpty()) {
+    private fun validate(value: String, canBeEmpty: Boolean) {
+        _hasError.value = if (!canBeEmpty && value.isEmpty()) {
             _errorMessage = context.getString(R.string.required)
             true
-        } else if (value.length !in minLength..maxLength) {
+        } else if (!fieldType.isNumeric && value.length !in minLength..maxLength) {
             _errorMessage = helperText
             true
+        } else if (fieldType.isNumeric) {
+            if (value.isEmpty() && canBeEmpty) {
+                false
+            } else if (fieldType.isIntegerType && value.toIntOrNull() == null) {
+                _errorMessage = context.getString(R.string.value_must_be_a_whole_number)
+                true
+            } else if (fieldType.isFloatingPoint && value.toDoubleOrNull() == null) {
+                _errorMessage = context.getString(R.string.value_must_be_a_number)
+                true
+            } else if (!validateNumericRange(value)) {
+                _errorMessage = helperText
+                true
+            } else {
+                false
+            }
         } else {
             false
         }

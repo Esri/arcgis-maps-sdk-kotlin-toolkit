@@ -49,6 +49,37 @@ internal fun FeatureForm.editValue(formElement: FieldFormElement, value: Any?) {
     feature.castAndSetAttributeValue(value, formElement.fieldName)
 }
 
+internal fun FeatureForm.fieldType(element: FieldFormElement): FieldType {
+    val fieldType = feature.featureTable?.getField(element.fieldName)?.fieldType
+    require(fieldType != null) {
+        "expected feature table to have field with name ${element.fieldName}"
+    }
+    return fieldType
+}
+
+internal val FieldType.isNumeric: Boolean
+    get() {
+        return isFloatingPoint || isIntegerType
+    }
+
+internal val FieldType.isFloatingPoint: Boolean
+    get() {
+        return when (this) {
+            FieldType.Float32 -> true
+            FieldType.Float64 -> true
+            else -> false
+        }
+    }
+
+internal val FieldType.isIntegerType: Boolean
+    get() {
+        return when (this) {
+            FieldType.Int16 -> true
+            FieldType.Int32 -> true
+            FieldType.Int64 -> true
+            else -> false
+        }
+    }
 
 private fun Feature.castAndSetAttributeValue(value: Any?, key: String) {
     val field = featureTable?.getField(key) ?: run {

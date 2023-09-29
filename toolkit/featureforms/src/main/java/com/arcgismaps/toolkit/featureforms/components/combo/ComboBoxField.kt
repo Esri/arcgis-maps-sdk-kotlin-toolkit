@@ -89,6 +89,7 @@ internal fun ComboBoxField(state: ComboBoxFieldState, modifier: Modifier = Modif
         placeholder = state.placeholder,
         singleLine = true,
         trailingIcon = Icons.Outlined.List,
+        fieldType = state.fieldType,
         supportingText = {
             Text(
                 text = state.description,

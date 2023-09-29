@@ -22,8 +22,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -63,6 +61,7 @@ internal fun FormTextField(
         label = label,
         placeholder = state.placeholder,
         singleLine = state.singleLine,
+        fieldType = state.fieldType,
         supportingText = {
             val textColor = if (hasError) MaterialTheme.colorScheme.error
             else MaterialTheme.colorScheme.onSurface

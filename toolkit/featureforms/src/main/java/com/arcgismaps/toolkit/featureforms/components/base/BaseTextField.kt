@@ -47,10 +47,14 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.data.FieldType
 import com.arcgismaps.toolkit.featureforms.utils.ClearFocus
 import com.arcgismaps.toolkit.featureforms.utils.PlaceholderTransformation
+import com.arcgismaps.toolkit.featureforms.utils.isFloatingPoint
+import com.arcgismaps.toolkit.featureforms.utils.isIntegerType
 
 /**
  * A base text field component built on top of an [OutlinedTextField] that provides a standard for
@@ -88,6 +92,7 @@ internal fun BaseTextField(
     label: String,
     placeholder: String,
     singleLine: Boolean,
+    fieldType: FieldType,
     trailingIcon: ImageVector? = null,
     supportingText: @Composable (ColumnScope.() -> Unit)? = null,
     onFocusChange: ((Boolean) -> Unit)? = null,
@@ -195,7 +200,8 @@ internal fun BaseTextField(
                 onDone = { clearFocus = true }
             ),
             keyboardOptions = KeyboardOptions.Default.copy(
-                imeAction = if (singleLine) ImeAction.Done else ImeAction.None
+                imeAction = if (singleLine) ImeAction.Done else ImeAction.None,
+                keyboardType = if (fieldType.isIntegerType) KeyboardType.NumberPassword else if (fieldType.isFloatingPoint) KeyboardType.Number else KeyboardType.Ascii
             ),
             singleLine = singleLine,
             interactionSource = interactionSource,
