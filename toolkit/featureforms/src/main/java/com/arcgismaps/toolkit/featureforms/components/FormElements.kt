@@ -1,5 +1,6 @@
 package com.arcgismaps.toolkit.featureforms.components
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -14,6 +15,7 @@ import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.components.combo.ComboBoxField
+import com.arcgismaps.toolkit.featureforms.components.combo.ComboBoxFieldProperties
 import com.arcgismaps.toolkit.featureforms.components.combo.ComboBoxFieldState
 import com.arcgismaps.toolkit.featureforms.components.datetime.DateTimeField
 import com.arcgismaps.toolkit.featureforms.components.datetime.DateTimeFieldState
@@ -21,12 +23,18 @@ import com.arcgismaps.toolkit.featureforms.components.text.FormTextField
 import com.arcgismaps.toolkit.featureforms.components.text.FormTextFieldState
 import com.arcgismaps.toolkit.featureforms.components.text.TextFieldProperties
 import com.arcgismaps.toolkit.featureforms.utils.editValue
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun FieldElement(field: FieldFormElement, form: FeatureForm) {
     val context = LocalContext.current
     val visible by field.isVisible.collectAsState()
     val scope = rememberCoroutineScope()
+
+    val onEditValue: (Any?) -> Unit = { value ->
+        form.editValue(field, value)
+        scope.launch { form.evaluateExpressions() }
+    }
 
     if (visible) {
         when (field.input) {
@@ -42,8 +50,8 @@ internal fun FieldElement(field: FieldFormElement, form: FeatureForm) {
                     (field.input as TextAreaFormInput).maxLength.toInt()
                 }
                 val state = rememberSaveable(
-                    form, saver =
-                    FormTextFieldState.Saver(field, form, context, scope)
+                    field,
+                    saver = FormTextFieldState.Saver(field, form, context, scope)
                 ) {
                     FormTextFieldState(
                         properties = TextFieldProperties(
@@ -59,8 +67,7 @@ internal fun FieldElement(field: FieldFormElement, form: FeatureForm) {
                         ),
                         scope = scope,
                         context = context,
-                        onEditValue = { form.editValue(field, it) },
-                        onEvaluateExpression = { form.evaluateExpressions() },
+                        onEditValue = { onEditValue(it) }
                     )
                 }
                 FormTextField(state = state)
@@ -77,14 +84,29 @@ internal fun FieldElement(field: FieldFormElement, form: FeatureForm) {
             }
 
             is ComboBoxFormInput -> {
-                ComboBoxField(
-                    state = ComboBoxFieldState(
-                        formElement = field,
-                        featureForm = form,
+                val input = field.input as ComboBoxFormInput
+                val state = rememberSaveable(
+                    field,
+                    saver = ComboBoxFieldState.Saver(field, form, context, scope)
+                ) {
+                    ComboBoxFieldState(
+                        properties = ComboBoxFieldProperties(
+                            label = field.label,
+                            placeholder = field.hint,
+                            description = field.description,
+                            value = field.value,
+                            editable = field.isEditable,
+                            required = field.isRequired,
+                            codedValues = input.codedValues,
+                            showNoValueOption = input.noValueOption,
+                            noValueLabel = input.noValueLabel
+                        ),
                         context = context,
-                        scope = scope
+                        scope = scope,
+                        onEditValue = { onEditValue(it) }
                     )
-                )
+                }
+                ComboBoxField(state = state)
             }
 
             else -> { /* TO-DO: add support for other input types */

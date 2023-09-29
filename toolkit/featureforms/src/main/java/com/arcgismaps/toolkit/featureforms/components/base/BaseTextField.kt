@@ -163,7 +163,7 @@ internal fun BaseTextField(
                                 contentDescription = "Done"
                             )
                         }
-                    } else {
+                    } else if(text.isNotEmpty()) {
                         // show a clear icon instead if the multiline field is not empty
                         IconButton(
                             onClick = { onValueChange("") },

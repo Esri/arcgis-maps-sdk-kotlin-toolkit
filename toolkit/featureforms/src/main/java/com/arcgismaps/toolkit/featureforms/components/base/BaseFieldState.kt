@@ -23,7 +23,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 
 internal open class FieldProperties(
     val label: String,
@@ -37,13 +36,19 @@ internal open class FieldProperties(
 /**
  * Base state class for any Field within a feature form. It provides the default set of properties
  * that are common to all [FieldFormElement]'s.
+ *
+ * @param properties the [FieldProperties] associated with this state.
+ * @param initialValue optional initial value to set for this field. It is set to the value of
+ * [FieldProperties.value] by default.
+ * @param scope a [CoroutineScope] to start [StateFlow] collectors on.
+ * @param onEditValue a callback to invoke when the user edits result in a change of value. This
+ * is called on [BaseFieldState.onValueChanged].
  */
 internal open class BaseFieldState(
     properties: FieldProperties,
     initialValue: String = properties.value.value,
-    private val scope: CoroutineScope,
+    scope: CoroutineScope,
     private val onEditValue: (Any?) -> Unit,
-    private val onEvaluateExpression: suspend () -> Unit,
 ) {
     /**
      * Title for the field.
@@ -96,23 +101,5 @@ internal open class BaseFieldState(
     fun onValueChanged(input: String) {
         onEditValue(input)
         _value.value = input
-        scope.launch { onEvaluateExpression() }
     }
-
-    /**
-     * Evaluates the underlying expressions for this field. The results can be observed through the
-     * [value], [isRequired] and [isEditable] state flows.
-     */
-//    private suspend fun evaluateExpressions() {
-//        featureForm.evaluateExpressions()
-//    }
-
-    /**
-     * Set the value in the feature's attribute map.
-     * Committing the transaction will either discard this edit or persist it in the associated geodatabase,
-     * and refresh the feature.
-     */
-//    private fun editValue(value: Any?) {
-//        featureForm.editValue(formElement, value)
-//    }
 }

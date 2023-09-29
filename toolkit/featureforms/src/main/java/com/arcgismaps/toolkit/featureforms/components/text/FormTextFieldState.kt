@@ -17,6 +17,7 @@
 package com.arcgismaps.toolkit.featureforms.components.text
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -52,23 +53,25 @@ internal class TextFieldProperties(
  * A class to handle the state of a [FormTextField]. Essential properties are inherited from the
  * [BaseFieldState].
  *
- * @param formElement The [FieldFormElement] to create the state from.
- * @param featureForm The [FeatureForm] that the [formElement] is a part of.
- * @property context a Context scoped to the lifetime of a call to the [FieldElement] composable function.
+ * @param properties the [TextFieldProperties] associated with this state.
+ * @param initialValue optional initial value to set for this field. It is set to the value of
+ * [TextFieldProperties.value] by default.
+ * @param scope a [CoroutineScope] to start [StateFlow] collectors on.
+ * @param context a Context scoped to the lifetime of a call to the [FieldElement] composable function.
+ * @param onEditValue a callback to invoke when the user edits result in a change of value. This
+ * is called on [FormTextFieldState.onValueChanged].
  */
 internal class FormTextFieldState(
     properties: TextFieldProperties,
     initialValue: String = properties.value.value,
     scope: CoroutineScope,
     private val context: Context,
-    onEditValue: ((Any?) -> Unit),
-    onEvaluateExpression: (suspend () -> Unit),
+    onEditValue: ((Any?) -> Unit)
 ) : BaseFieldState(
     properties = properties,
     initialValue = initialValue,
     scope = scope,
-    onEditValue = onEditValue,
-    onEvaluateExpression = onEvaluateExpression
+    onEditValue = onEditValue
 ) {
     // indicates singleLine only if TextBoxFeatureFormInput
     val singleLine = properties.singleLine
@@ -168,6 +171,7 @@ internal class FormTextFieldState(
                 )
             },
             restore = { list ->
+                Log.e("TAG", "Saver: restoring", )
                 FormTextFieldState(
                     properties = TextFieldProperties(
                         label = formElement.label,
@@ -180,11 +184,13 @@ internal class FormTextFieldState(
                         minLength = list[2] as Int,
                         maxLength = list[3] as Int
                     ),
-                    scope = scope,
                     initialValue = list[0] as String,
-                    onEditValue = { newValue -> form.editValue(formElement, newValue) },
-                    onEvaluateExpression = { form.evaluateExpressions() },
-                    context = context
+                    scope = scope,
+                    context = context,
+                    onEditValue = { newValue ->
+                        form.editValue(formElement, newValue)
+                        scope.launch { form.evaluateExpressions() }
+                    },
                 ).apply {
                     _hasError.value = list[4] as Boolean
                     _errorMessage = list[5] as String
