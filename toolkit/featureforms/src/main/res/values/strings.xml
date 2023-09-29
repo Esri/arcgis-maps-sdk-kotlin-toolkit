@@ -20,10 +20,13 @@
     <string name="enter_n_chars">Enter %1$d characters</string>
     <string name="enter_min_to_max_chars">Enter %1$d to %2$d characters</string>
     <string name="maximum_n_chars">Maximum %1$d characters</string>
-    <string name="novalue">No value</string>
+    <string name="no_value">No value</string>
+    <string name="enter_value">Enter Value</string>
     <string name="required">Required</string>
     <string name="today">Today</string>
     <string name="now">Now</string>
     <string name="cancel">Cancel</string>
-    <string name="ok">Ok</string>
+    <string name="ok">OK</string>
+    <string name="done">Done</string>
+    <string name="filter">Filter %1$s</string>
 </resources>
