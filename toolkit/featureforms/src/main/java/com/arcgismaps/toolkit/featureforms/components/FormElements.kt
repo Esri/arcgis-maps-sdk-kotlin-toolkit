@@ -37,9 +37,9 @@ internal fun FieldElement(field: FieldFormElement, form: FeatureForm) {
                     (field.input as TextAreaFormInput).minLength.toInt()
                 }
                 val maxLength = if (field.input is TextBoxFormInput) {
-                    (field.input as TextBoxFormInput).minLength.toInt()
+                    (field.input as TextBoxFormInput).maxLength.toInt()
                 } else {
-                    (field.input as TextAreaFormInput).minLength.toInt()
+                    (field.input as TextAreaFormInput).maxLength.toInt()
                 }
                 val state = rememberSaveable(
                     form, saver =
