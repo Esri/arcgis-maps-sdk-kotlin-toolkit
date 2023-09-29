@@ -149,7 +149,7 @@ internal fun BaseTextField(
                     // show a trailing icon to indicate field type
                     Icon(imageVector = trailingIcon, contentDescription = "field icon")
                     // multiline editable field
-                } else if (!singleLine && isEditable && text.isNotEmpty()) {
+                } else if (!singleLine && isEditable) {
                     if (isFocused) {
                         // show a done button only when focused
                         IconButton(
