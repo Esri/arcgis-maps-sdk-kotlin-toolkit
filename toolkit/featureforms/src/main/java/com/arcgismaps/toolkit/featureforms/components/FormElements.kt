@@ -19,6 +19,7 @@ import com.arcgismaps.toolkit.featureforms.components.datetime.DateTimeField
 import com.arcgismaps.toolkit.featureforms.components.datetime.DateTimeFieldState
 import com.arcgismaps.toolkit.featureforms.components.text.FormTextField
 import com.arcgismaps.toolkit.featureforms.components.text.FormTextFieldState
+import com.arcgismaps.toolkit.featureforms.components.text.TextFieldProperties
 import com.arcgismaps.toolkit.featureforms.utils.editValue
 
 @Composable
@@ -29,41 +30,37 @@ internal fun FieldElement(field: FieldFormElement, form: FeatureForm) {
 
     if (visible) {
         when (field.input) {
-            is TextAreaFormInput -> {
-                val input = field.input as TextAreaFormInput
-                val state = rememberSaveable(
-                    form, saver =
-                    FormTextFieldState.Saver(field, form, context, scope)
-                ) {
-                    FormTextFieldState(
-                        formElement = field,
-                        scope = scope,
-                        onEditValue = { form.editValue(field, it) },
-                        onEvaluateExpression = { form.evaluateExpressions() },
-                        singleLine = false,
-                        minLength = input.minLength.toInt(),
-                        maxLength = input.maxLength.toInt(),
-                        context = context
-                    )
+            is TextBoxFormInput, is TextAreaFormInput -> {
+                val minLength = if (field.input is TextBoxFormInput) {
+                    (field.input as TextBoxFormInput).minLength.toInt()
+                } else {
+                    (field.input as TextAreaFormInput).minLength.toInt()
                 }
-                FormTextField(state = state)
-            }
-
-            is TextBoxFormInput -> {
-                val input = field.input as TextBoxFormInput
+                val maxLength = if (field.input is TextBoxFormInput) {
+                    (field.input as TextBoxFormInput).minLength.toInt()
+                } else {
+                    (field.input as TextAreaFormInput).minLength.toInt()
+                }
                 val state = rememberSaveable(
                     form, saver =
                     FormTextFieldState.Saver(field, form, context, scope)
                 ) {
                     FormTextFieldState(
-                        formElement = field,
+                        properties = TextFieldProperties(
+                            label = field.label,
+                            placeholder = field.hint,
+                            description = field.description,
+                            value = field.value,
+                            editable = field.isEditable,
+                            required = field.isRequired,
+                            singleLine = field.input is TextBoxFormInput,
+                            minLength = minLength,
+                            maxLength = maxLength,
+                        ),
                         scope = scope,
+                        context = context,
                         onEditValue = { form.editValue(field, it) },
                         onEvaluateExpression = { form.evaluateExpressions() },
-                        singleLine = false,
-                        minLength = input.minLength.toInt(),
-                        maxLength = input.maxLength.toInt(),
-                        context = context
                     )
                 }
                 FormTextField(state = state)

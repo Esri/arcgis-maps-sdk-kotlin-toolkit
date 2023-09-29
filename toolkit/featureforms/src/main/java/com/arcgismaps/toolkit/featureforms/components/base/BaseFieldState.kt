@@ -25,36 +25,40 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+internal open class FieldProperties(
+    val label: String,
+    val placeholder: String,
+    val description: String,
+    val value: StateFlow<String>,
+    val required: StateFlow<Boolean>,
+    val editable: StateFlow<Boolean>
+)
+
 /**
  * Base state class for any Field within a feature form. It provides the default set of properties
  * that are common to all [FieldFormElement]'s.
  */
 internal open class BaseFieldState(
-    open val label : String,
-    open val placeholder : String,
-    val description: String,
-    initialValue: String,
-    valueFlow : StateFlow<String>,
-    val isEditable : StateFlow<Boolean>,
-    val isRequired: StateFlow<Boolean>,
+    properties: FieldProperties,
+    initialValue: String = properties.value.value,
     private val scope: CoroutineScope,
-    private val onEditValue : (Any?) -> Unit,
+    private val onEditValue: (Any?) -> Unit,
     private val onEvaluateExpression: suspend () -> Unit,
 ) {
     /**
      * Title for the field.
      */
-    // open val label: String = formElement.label
-
-    /**
-     * Description text for the field.
-     */
-    // val description: String = formElement.description
+    open val label: String = properties.label
 
     /**
      * Placeholder hint for the field.
      */
-    // open val placeholder: String = formElement.hint
+    open val placeholder: String = properties.placeholder
+
+    /**
+     * Description text for the field.
+     */
+    val description: String = properties.description
 
     // a state flow to handle user input changes
     private val _value = MutableStateFlow(initialValue)
@@ -64,8 +68,8 @@ internal open class BaseFieldState(
      */
     val value: StateFlow<String> = combine(
         _value,
-        valueFlow,
-        isEditable
+        properties.value,
+        properties.editable
     ) { userEdit, exprResult, editable ->
         // transform the user input value flow with the formElement value and required into a single
         // value flow based on if the field is editable
@@ -79,12 +83,12 @@ internal open class BaseFieldState(
     /**
      * Property that indicates if the field is editable.
      */
-    // val isEditable: StateFlow<Boolean> = isEditable
+    val isEditable: StateFlow<Boolean> = properties.editable
 
     /**
      * Property that indicates if the field is required.
      */
-    // val isRequired: StateFlow<Boolean> = isRequired
+    val isRequired: StateFlow<Boolean> = properties.required
 
     /**
      * Callback to update the current value of the FormTextFieldState to the given [input].

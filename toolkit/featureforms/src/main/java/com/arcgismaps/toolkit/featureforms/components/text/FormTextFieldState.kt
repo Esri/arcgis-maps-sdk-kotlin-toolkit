@@ -24,11 +24,10 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
-import com.arcgismaps.mapping.featureforms.TextAreaFormInput
-import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
+import com.arcgismaps.toolkit.featureforms.components.base.FieldProperties
 import com.arcgismaps.toolkit.featureforms.utils.editValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,6 +36,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 
+internal class TextFieldProperties(
+    label: String,
+    placeholder: String,
+    description: String,
+    value: StateFlow<String>,
+    required: StateFlow<Boolean>,
+    editable: StateFlow<Boolean>,
+    val singleLine: Boolean,
+    val minLength: Int,
+    val maxLength: Int,
+) : FieldProperties(label, placeholder, description, value, required, editable)
 
 /**
  * A class to handle the state of a [FormTextField]. Essential properties are inherited from the
@@ -47,29 +57,27 @@ import kotlinx.coroutines.launch
  * @property context a Context scoped to the lifetime of a call to the [FieldElement] composable function.
  */
 internal class FormTextFieldState(
-    formElement: FieldFormElement,
+    properties: TextFieldProperties,
+    initialValue: String = properties.value.value,
     scope: CoroutineScope,
-    initialValue: String = formElement.value.value,
-    onEditValue: (Any?) -> Unit,
-    onEvaluateExpression: suspend () -> Unit,
-    val singleLine: Boolean,
-    val minLength: Int,
-    val maxLength: Int,
-    private val context: Context
+    private val context: Context,
+    onEditValue: ((Any?) -> Unit),
+    onEvaluateExpression: (suspend () -> Unit),
 ) : BaseFieldState(
-    label = formElement.label,
-    placeholder = formElement.hint,
-    description = formElement.description,
+    properties = properties,
     initialValue = initialValue,
-    valueFlow = formElement.value,
-    isEditable = formElement.isEditable,
-    isRequired = formElement.isRequired,
     scope = scope,
     onEditValue = onEditValue,
     onEvaluateExpression = onEvaluateExpression
 ) {
     // indicates singleLine only if TextBoxFeatureFormInput
-    //val singleLine = formElement.input is TextBoxFormInput
+    val singleLine = properties.singleLine
+
+    // fetch the minLength based on the featureFormElement.inputType
+    val minLength = properties.minLength
+
+    // fetch the maxLength based on the featureFormElement.inputType
+    val maxLength = properties.maxLength
 
     // supporting text will depend on multiple other states. If there is an error, it will display
     // error message. Otherwise description is displayed, unless it is empty in which case
@@ -82,27 +90,13 @@ internal class FormTextFieldState(
         }
     }
 
-    private var _errorMessage: String = ""
-
     private val _isFocused: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isFocused: StateFlow<Boolean> = _isFocused.asStateFlow()
 
     private val _hasError = mutableStateOf(false)
     val hasError: State<Boolean> = _hasError
 
-//    // fetch the minLength based on the featureFormElement.inputType
-//    //val minLength = when (formElement.input) {
-//        is TextAreaFormInput -> (formElement.input as TextAreaFormInput).minLength
-//        is TextBoxFormInput -> (formElement.input as TextBoxFormInput).minLength
-//        else -> throw IllegalArgumentException()
-//    }.toInt()
-//
-//    // fetch the maxLength based on the featureFormElement.inputType
-//    /val maxLength = when (formElement.input) {
-//        is TextAreaFormInput -> (formElement.input as TextAreaFormInput).maxLength
-//        is TextBoxFormInput -> (formElement.input as TextBoxFormInput).maxLength
-//        else -> throw IllegalArgumentException()
-//    }.toInt()
+    private var _errorMessage: String = ""
 
     // build helper text
     private val helperText = if (minLength > 0 && maxLength > 0) {
@@ -164,20 +158,37 @@ internal class FormTextFieldState(
             scope: CoroutineScope
         ): Saver<FormTextFieldState, Any> = listSaver(
             save = {
-                listOf(it.value.value, it.singleLine, it.minLength, it.maxLength)
+                listOf(
+                    it.value.value,
+                    it.singleLine,
+                    it.minLength,
+                    it.maxLength,
+                    it.hasError.value,
+                    it._errorMessage
+                )
             },
             restore = { list ->
                 FormTextFieldState(
-                    formElement = formElement,
+                    properties = TextFieldProperties(
+                        label = formElement.label,
+                        placeholder = formElement.hint,
+                        description = formElement.description,
+                        value = formElement.value,
+                        required = formElement.isRequired,
+                        editable = formElement.isEditable,
+                        singleLine = list[1] as Boolean,
+                        minLength = list[2] as Int,
+                        maxLength = list[3] as Int
+                    ),
                     scope = scope,
                     initialValue = list[0] as String,
                     onEditValue = { newValue -> form.editValue(formElement, newValue) },
                     onEvaluateExpression = { form.evaluateExpressions() },
-                    singleLine = list[1] as Boolean,
-                    minLength = list[2] as Int,
-                    maxLength = list[3] as Int,
                     context = context
-                )
+                ).apply {
+                    _hasError.value = list[4] as Boolean
+                    _errorMessage = list[5] as String
+                }
             }
         )
     }
