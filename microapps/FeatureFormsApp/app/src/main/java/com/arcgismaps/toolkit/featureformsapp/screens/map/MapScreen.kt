@@ -1,23 +1,29 @@
 package com.arcgismaps.toolkit.featureformsapp.screens.map
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.rememberBottomSheetScaffoldState
+import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.rememberStandardBottomSheetState
+import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -29,11 +35,7 @@ import com.arcgismaps.toolkit.composablemap.ComposableMap
 import com.arcgismaps.toolkit.featureforms.EditingTransactionState
 import com.arcgismaps.toolkit.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureformsapp.R
-import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.BottomSheetScaffold
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetExpansionHeight
-import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetValue
-import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.rememberBottomSheetScaffoldState
-import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.rememberStandardBottomSheetState
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
