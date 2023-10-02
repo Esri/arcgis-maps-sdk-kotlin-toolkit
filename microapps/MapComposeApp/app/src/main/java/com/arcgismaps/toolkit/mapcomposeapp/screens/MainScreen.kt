@@ -18,11 +18,37 @@
 
 package com.arcgismaps.toolkit.mapcomposeapp.screens
 
+import android.util.Log
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
+import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.toolkit.geocompose.Map
+import com.arcgismaps.toolkit.geocompose.MapProperties
+import kotlinx.coroutines.launch
 
 @Composable
 fun MainScreen() {
-    // Todo implementation
-    Map()
+    val mapProperties = MapProperties().apply {
+        arcGISMap.value = ArcGISMap(BasemapStyle.ArcGISImagery)
+    }
+    val scope = rememberCoroutineScope()
+    Map(
+        modifier = Modifier.fillMaxSize(),
+        mapProperties = mapProperties,
+    ) { mapState ->
+
+        scope.launch {
+            mapState.onSingleTapConfirmed.collect {
+                Log.e("Event", "Tapped Location: ${it?.mapPoint?.x},${it?.mapPoint?.y}")
+                if (mapProperties.arcGISMap.value?.basemap?.value?.name?.contains("Night") == true) {
+                    mapProperties.arcGISMap.value = ArcGISMap(BasemapStyle.ArcGISImagery)
+                } else {
+                    mapProperties.arcGISMap.value = ArcGISMap(BasemapStyle.ArcGISNavigationNight)
+                }
+            }
+        }
+    }
 }

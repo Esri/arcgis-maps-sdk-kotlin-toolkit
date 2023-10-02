@@ -18,18 +18,54 @@
 
 package com.arcgismaps.toolkit.geocompose
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.LifecycleOwner
+import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.BasemapStyle
+import com.arcgismaps.mapping.view.MapView
+import kotlinx.coroutines.launch
 
 @Composable
-public fun Map() {
-    // Todo implementation...
-    Text("Implement Map here! ")
+public fun Map(
+    modifier: Modifier = Modifier,
+    mapProperties: MapProperties,
+    mapState: (MapState) -> Unit = {}
+) {
+    // get an instance of the current lifecycle owner
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
+    val mapView = remember { MapView(context) }
+
+    DisposableEffect(lifecycleOwner) {
+        lifecycleOwner.lifecycle.addObserver(mapView)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(mapView)
+        }
+    }
+
+    mapState(MapState(mapView, coroutineScope, mapProperties))
+
+    // wrap the MapView as an AndroidView
+    AndroidView(
+        modifier = modifier,
+        factory = { mapView }
+    )
 }
+
 
 @Preview
 @Composable
 internal fun MapPreview() {
-    Map()
+    val arcGISMap = ArcGISMap(BasemapStyle.ArcGISStreetsNight)
+    Map(mapProperties = MapProperties())
 }
