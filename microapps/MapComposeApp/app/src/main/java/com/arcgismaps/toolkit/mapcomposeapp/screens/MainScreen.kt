@@ -19,36 +19,79 @@
 package com.arcgismaps.toolkit.mapcomposeapp.screens
 
 import android.util.Log
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
+import com.arcgismaps.mapping.view.WrapAroundMode
 import com.arcgismaps.toolkit.geocompose.Map
 import com.arcgismaps.toolkit.geocompose.MapProperties
-import kotlinx.coroutines.launch
+import com.arcgismaps.toolkit.geocompose.MapState
 
 @Composable
 fun MainScreen() {
-    val mapProperties = MapProperties().apply {
-        arcGISMap.value = ArcGISMap(BasemapStyle.ArcGISImagery)
+    val mapProperties = remember {
+        MapProperties(arcGISMap = ArcGISMap(BasemapStyle.ArcGISImagery))
     }
-    val scope = rememberCoroutineScope()
-    Map(
-        modifier = Modifier.fillMaxSize(),
-        mapProperties = mapProperties,
-    ) { mapState ->
 
-        scope.launch {
-            mapState.onSingleTapConfirmed.collect {
-                Log.e("Event", "Tapped Location: ${it?.mapPoint?.x},${it?.mapPoint?.y}")
-                if (mapProperties.arcGISMap.value?.basemap?.value?.name?.contains("Night") == true) {
-                    mapProperties.arcGISMap.value = ArcGISMap(BasemapStyle.ArcGISImagery)
+    var mapState: MapState? = null
+
+
+    LaunchedEffect(Unit) {
+        mapState?.drawStatus?.collect {
+            Log.e("DrawStatus", "DrawStatus: ${it?.toString()}")
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        mapState?.onSingleTapConfirmed?.collect {
+            // tap confirmed
+        }
+    }
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Map(
+            modifier = Modifier.size(500.dp),
+            mapProperties = mapProperties,
+            mapState = { mapState = it }
+        )
+        Row(
+            modifier = Modifier
+                .padding(12.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(text = "Toggle wrap around mode")
+
+            val wrapAroundMode = mapProperties.wrapAroundMode.collectAsState()
+            val isChecked = wrapAroundMode.value is WrapAroundMode.EnabledWhenSupported
+
+            Switch(checked = isChecked, onCheckedChange = {
+                if (it) {
+                    mapProperties.wrapAroundMode.value = WrapAroundMode.EnabledWhenSupported
                 } else {
-                    mapProperties.arcGISMap.value = ArcGISMap(BasemapStyle.ArcGISNavigationNight)
+                    mapProperties.wrapAroundMode.value = WrapAroundMode.Disabled
                 }
-            }
+            })
         }
     }
 }

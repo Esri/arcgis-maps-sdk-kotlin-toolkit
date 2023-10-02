@@ -27,17 +27,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.lifecycle.LifecycleOwner
-import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.view.MapView
-import kotlinx.coroutines.launch
 
 @Composable
 public fun Map(
     modifier: Modifier = Modifier,
     mapProperties: MapProperties,
-    mapState: (MapState) -> Unit = {}
+    mapState: (MapState) -> Unit = {},
+    // content: @Composable () -> Unit = {} // Would this be helpful?
 ) {
     // get an instance of the current lifecycle owner
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -60,12 +57,10 @@ public fun Map(
         modifier = modifier,
         factory = { mapView }
     )
+
 }
 
 
 @Preview
 @Composable
-internal fun MapPreview() {
-    val arcGISMap = ArcGISMap(BasemapStyle.ArcGISStreetsNight)
-    Map(mapProperties = MapProperties())
-}
+internal fun MapPreview() {}

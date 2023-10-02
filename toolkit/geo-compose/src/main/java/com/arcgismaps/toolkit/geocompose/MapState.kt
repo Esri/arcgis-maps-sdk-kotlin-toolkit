@@ -11,21 +11,28 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 /**
- * - Set a property
- * - Read a property
- * - GeoView operation that returns a result
- * - Be notified about GeoView events
+ * Properties of the MapView which are listed as MutableStateFlows
  */
+public class MapProperties(
+    arcGISMap: ArcGISMap? = null,
+    wrapAroundMode: WrapAroundMode? = WrapAroundMode.EnabledWhenSupported
+) {
+    public val arcGISMap: MutableStateFlow<ArcGISMap?> = MutableStateFlow(null)
+    public val wrapAroundMode: MutableStateFlow<WrapAroundMode?> = MutableStateFlow(null)
 
-
-public class MapProperties() {
-    public var arcGISMap: MutableStateFlow<ArcGISMap?> = MutableStateFlow(null)
-    public var wrapAroundMode: WrapAroundMode? = null
+    init {
+        this.arcGISMap.value = arcGISMap
+        this.wrapAroundMode.value = wrapAroundMode
+    }
 }
 
-public sealed interface MapState {
+/**
+ * MapState interface of MapView's flow events and it's properties
+ */
+public sealed interface MapState : GeoState {
     public val mapProperties: MapProperties
     public val onSingleTapConfirmed: StateFlow<SingleTapConfirmedEvent?>
+    public val mapRotation: StateFlow<Double>
 }
 
 public fun MapState(
@@ -38,12 +45,14 @@ private class MapStateImpl(
     var mapView: MapView,
     coroutineScope: CoroutineScope,
     override var mapProperties: MapProperties,
-) : MapState {
+) : MapState, GeoStateImpl(mapView, coroutineScope) {
 
     private val _onSingleTapConfirmed: MutableStateFlow<SingleTapConfirmedEvent?> =
         MutableStateFlow(null)
-    override val onSingleTapConfirmed: StateFlow<SingleTapConfirmedEvent?> =
-        _onSingleTapConfirmed.asStateFlow()
+    override val onSingleTapConfirmed = _onSingleTapConfirmed.asStateFlow()
+
+    private val _mapRotation: MutableStateFlow<Double> = MutableStateFlow(0.0)
+    override val mapRotation: StateFlow<Double> = _mapRotation.asStateFlow()
 
     init {
         coroutineScope.launch {
@@ -53,8 +62,22 @@ private class MapStateImpl(
         }
 
         coroutineScope.launch {
+            mapView.mapRotation.collect {
+                _mapRotation
+            }
+        }
+
+        coroutineScope.launch {
             mapProperties.arcGISMap.collect {
                 mapView.map = it
+            }
+        }
+
+        coroutineScope.launch {
+            mapProperties.wrapAroundMode.collect {
+                it?.let {
+                    mapView.wrapAroundMode = it
+                }
             }
         }
     }
