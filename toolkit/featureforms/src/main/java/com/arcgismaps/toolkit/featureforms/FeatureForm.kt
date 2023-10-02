@@ -60,6 +60,7 @@ public fun FeatureForm(
     featureFormState: FeatureFormState,
     modifier: Modifier = Modifier
 ) {
+    Log.e("TAG", "FeatureForm: recomp")
     val featureForm by featureFormState.featureForm.collectAsState()
     var initialEvaluation by remember(featureForm) { mutableStateOf(false) }
     LaunchedEffect(featureForm) {
@@ -130,9 +131,9 @@ internal fun FeatureFormContent(
             modifier = Modifier.fillMaxSize(),
             state = lazyListState
         ) {
-            itemsIndexed(form.elements) { index, formElement ->
+            items(form.elements) { formElement ->
                 if (formElement is FieldFormElement) {
-                    val state = states.getOrNull(index)
+                    val state = states[formElement.id]
                     if (state != null) {
                         FieldElement(
                             field = formElement,
@@ -151,23 +152,26 @@ private fun rememberFieldStates(
     form: FeatureForm,
     context: Context,
     scope: CoroutineScope
-): List<BaseFieldState> {
-    return form.elements.mapNotNull {
-        if (it is FieldFormElement) {
-            when (it.input) {
+): Map<String, BaseFieldState?> {
+    return form.elements.filterIsInstance<FieldFormElement>().associateBy(
+        { fieldElement ->
+            fieldElement.id
+        },
+        { fieldElement ->
+            when (fieldElement.input) {
                 is TextBoxFormInput, is TextAreaFormInput -> {
-                    val minLength = if (it.input is TextBoxFormInput) {
-                        (it.input as TextBoxFormInput).minLength.toInt()
+                    val minLength = if (fieldElement.input is TextBoxFormInput) {
+                        (fieldElement.input as TextBoxFormInput).minLength.toInt()
                     } else {
-                        (it.input as TextAreaFormInput).minLength.toInt()
+                        (fieldElement.input as TextAreaFormInput).minLength.toInt()
                     }
-                    val maxLength = if (it.input is TextBoxFormInput) {
-                        (it.input as TextBoxFormInput).maxLength.toInt()
+                    val maxLength = if (fieldElement.input is TextBoxFormInput) {
+                        (fieldElement.input as TextBoxFormInput).maxLength.toInt()
                     } else {
-                        (it.input as TextAreaFormInput).maxLength.toInt()
+                        (fieldElement.input as TextAreaFormInput).maxLength.toInt()
                     }
                     rememberFormTextFieldState(
-                        field = it,
+                        field = fieldElement,
                         minLength = minLength,
                         maxLength = maxLength,
                         form = form,
@@ -178,7 +182,7 @@ private fun rememberFieldStates(
 
                 is ComboBoxFormInput -> {
                     rememberComboBoxFieldState(
-                        field = it,
+                        field = fieldElement,
                         form = form,
                         context = context,
                         scope = scope
@@ -189,8 +193,7 @@ private fun rememberFieldStates(
                     null
                 }
             }
-        } else null
-    }
+        })
 }
 
 @Preview
@@ -205,3 +208,11 @@ private fun InitializingExpressionsPreview() {
 private fun NoDataPreview() {
     NoDataToDisplay()
 }
+
+/**
+ * Unique id for each form element.
+ */
+internal val FieldFormElement.id: String
+    get() {
+        return fieldName + label + description + hint
+    }
