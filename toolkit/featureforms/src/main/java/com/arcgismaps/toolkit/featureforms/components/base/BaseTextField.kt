@@ -22,7 +22,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -114,7 +114,7 @@ internal fun BaseTextField(
             value = text,
             onValueChange = onValueChange,
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .focusable(isEditable, interactionSource)
                 .semantics { contentDescription = "outlined text field" },
             readOnly = readOnly,

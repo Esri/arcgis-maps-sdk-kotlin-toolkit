@@ -18,13 +18,17 @@ package com.arcgismaps.toolkit.featureforms.components.text
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
@@ -61,12 +65,13 @@ internal class TextFieldProperties(
  * @param onEditValue a callback to invoke when the user edits result in a change of value. This
  * is called on [FormTextFieldState.onValueChanged].
  */
+@Stable
 internal class FormTextFieldState(
     properties: TextFieldProperties,
     initialValue: String = properties.value.value,
     scope: CoroutineScope,
     private val context: Context,
-    onEditValue: ((Any?) -> Unit)
+    onEditValue: (Any?) -> Unit
 ) : BaseFieldState(
     properties = properties,
     initialValue = initialValue,
@@ -171,7 +176,6 @@ internal class FormTextFieldState(
                 )
             },
             restore = { list ->
-                Log.e("TAG", "Saver: restoring", )
                 FormTextFieldState(
                     properties = TextFieldProperties(
                         label = formElement.label,
@@ -198,4 +202,36 @@ internal class FormTextFieldState(
             }
         )
     }
+}
+
+@Composable
+internal fun rememberFormTextFieldState(
+    field: FieldFormElement,
+    minLength: Int,
+    maxLength: Int,
+    form: FeatureForm,
+    context: Context,
+    scope: CoroutineScope
+): FormTextFieldState = rememberSaveable(
+    saver = FormTextFieldState.Saver(field, form, context, scope)
+) {
+    FormTextFieldState(
+        properties = TextFieldProperties(
+            label = field.label,
+            placeholder = field.hint,
+            description = field.description,
+            value = field.value,
+            editable = field.isEditable,
+            required = field.isRequired,
+            singleLine = field.input is TextBoxFormInput,
+            minLength = minLength,
+            maxLength = maxLength,
+        ),
+        scope = scope,
+        context = context,
+        onEditValue = {
+            form.editValue(field, it)
+            scope.launch { form.evaluateExpressions() }
+        }
+    )
 }

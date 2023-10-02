@@ -17,8 +17,10 @@
 package com.arcgismaps.toolkit.featureforms.components.combo
 
 import android.content.Context
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.data.CodedValue
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
@@ -130,4 +132,35 @@ internal class ComboBoxFieldState(
             }
         )
     }
+}
+
+@Composable
+internal fun rememberComboBoxFieldState(
+    field: FieldFormElement,
+    form: FeatureForm,
+    context: Context,
+    scope: CoroutineScope
+): ComboBoxFieldState = rememberSaveable(
+    saver = ComboBoxFieldState.Saver(field, form, context, scope)
+) {
+    val input = field.input as ComboBoxFormInput
+    ComboBoxFieldState(
+        properties = ComboBoxFieldProperties(
+            label = field.label,
+            placeholder = field.hint,
+            description = field.description,
+            value = field.value,
+            editable = field.isEditable,
+            required = field.isRequired,
+            codedValues = input.codedValues,
+            showNoValueOption = input.noValueOption,
+            noValueLabel = input.noValueLabel
+        ),
+        context = context,
+        scope = scope,
+        onEditValue = {
+            form.editValue(field, it)
+            scope.launch { form.evaluateExpressions() }
+        }
+    )
 }

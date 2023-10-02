@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -34,6 +35,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.arcgismaps.toolkit.composablemap.ComposableMap
 import com.arcgismaps.toolkit.featureforms.EditingTransactionState
 import com.arcgismaps.toolkit.featureforms.FeatureForm
+import com.arcgismaps.toolkit.featureforms.FeatureFormState
 import com.arcgismaps.toolkit.featureformsapp.R
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetExpansionHeight
 import kotlinx.coroutines.flow.map
@@ -66,11 +68,13 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
     // create a bottom sheet scaffold
     BottomSheetScaffold(
         sheetContent = {
-            // set bottom sheet content to the FeatureForm
-            FeatureForm(
-                featureFormState = mapViewModel,
-                modifier = Modifier.fillMaxSize()
-            )
+            key(mapViewModel as FeatureFormState) {
+                // set bottom sheet content to the FeatureForm
+                FeatureForm(
+                    featureFormState = mapViewModel,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
         },
         scaffoldState = bottomSheetScaffoldState,
         sheetPeekHeight = 40.dp,
