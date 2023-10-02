@@ -17,7 +17,6 @@
 package com.arcgismaps.toolkit.featureforms.components.text
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
