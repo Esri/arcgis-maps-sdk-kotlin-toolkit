@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.composablemap
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -51,8 +52,7 @@ public fun ComposableMap(
 
     val map by mapInterface.map.collectAsState()
     val insets by mapInterface.insets.collectAsState()
-    val mapView = remember {
-        MapView(context).also { view ->
+    val mapView = remember { MapView(context).also { view ->
             with(view) {
                 with(coroutineScope) {
                     launch {
@@ -130,23 +130,27 @@ public fun ComposableMap(
         }
     }
     
+//    DisposableEffect(mapView) {
+//        onDispose {
+//            mapView.onDestroy(lifecycleOwner)
+//        }
+//    }
+
     DisposableEffect(Unit) {
+        lifecycleOwner.lifecycle.addObserver(mapView)
         onDispose {
+            Log.d("Lifecycle : composable map","in onDispose")
+            lifecycleOwner.lifecycle.removeObserver(mapView)
             mapView.onDestroy(lifecycleOwner)
         }
     }
-
-    DisposableEffect(lifecycleOwner) {
-        lifecycleOwner.lifecycle.addObserver(mapView)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(mapView)
-        }
-    }
     
-    Box(modifier = modifier.semantics {
-        contentDescription = "MapContainer"
-    }) {
-        AndroidView(modifier = Modifier
+    Box(
+//        modifier = modifier.semantics {
+//        contentDescription = "MapContainer"
+//    }
+    ) {
+        AndroidView(modifier = modifier
             .fillMaxSize()
             .semantics {
                 contentDescription = "MapView"

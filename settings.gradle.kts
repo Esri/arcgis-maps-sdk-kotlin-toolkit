@@ -57,6 +57,9 @@ dependencyResolutionManagement {
     }
     
     versionCatalogs {
+        create("sdklibs") {
+            from(files("../kotlin/android-api/gradle/sdklibs.versions.toml"))
+        }
         create("arcgis") {
             val versionAndBuild = if (sdkBuildNumber.isNotEmpty()) {
                 "$sdkVersionNumber-$sdkBuildNumber"
@@ -69,6 +72,7 @@ dependencyResolutionManagement {
     }
 }
 
+includeBuild("../kotlin/android-api")
 var includedProjects = projects.flatMap { listOf(":$it", ":$it-app") }.toTypedArray()
 include(*includedProjects)
 include(":bom")

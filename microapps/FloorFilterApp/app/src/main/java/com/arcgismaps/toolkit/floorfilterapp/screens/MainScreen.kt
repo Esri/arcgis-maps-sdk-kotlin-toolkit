@@ -44,7 +44,9 @@ fun MainScreen() {
         mapInterface = mapViewModel
     ) {
         Box(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 40.dp),
+            modifier = Modifier.fillMaxSize()
+                .padding(horizontal = 20.dp, vertical = 40.dp)
+            ,
             contentAlignment = Alignment.BottomStart
         ) {
             FloorFilter(floorFilterState = mapViewModel.floorFilterState)

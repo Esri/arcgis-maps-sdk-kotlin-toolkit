@@ -85,6 +85,7 @@ dependencies {
     implementation(libs.bundles.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+    implementation("androidx.navigation:navigation-compose:2.6.0")
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)

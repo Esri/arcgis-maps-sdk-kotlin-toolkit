@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.toolkit.compassapp.navigation.CompassNavigation
 import com.arcgismaps.toolkit.compassapp.screens.MainScreen
 import com.arcgismaps.toolkit.compassapp.ui.theme.CompassAppTheme
 
@@ -37,21 +38,23 @@ class MainActivity : ComponentActivity() {
             ApiKey.create(BuildConfig.API_KEY)
         setContent {
             CompassAppTheme {
-                CompassApp()
+//                CompassApp()
+                CompassNavigation()
             }
         }
     }
 }
 
-@Composable
-fun CompassApp() {
-    MainScreen()
-}
+//@Composable
+//fun CompassApp() {
+//    MainScreen()
+//}
 
-@Preview(showBackground = true)
-@Composable
-fun AppPreview() {
-    CompassAppTheme {
-        CompassApp()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun AppPreview() {
+//    CompassAppTheme {
+//        CompassApp()
+////        CompassNavigation()
+//    }
+//}
