@@ -1,11 +1,9 @@
 package com.arcgismaps.toolkit.featureforms.components
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
@@ -15,7 +13,6 @@ import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.combo.ComboBoxField
-import com.arcgismaps.toolkit.featureforms.components.combo.ComboBoxFieldProperties
 import com.arcgismaps.toolkit.featureforms.components.combo.ComboBoxFieldState
 import com.arcgismaps.toolkit.featureforms.components.datetime.DateTimeField
 import com.arcgismaps.toolkit.featureforms.components.datetime.DateTimeFieldState
@@ -27,28 +24,26 @@ internal fun FieldElement(field: FieldFormElement, form: FeatureForm, state: Bas
     val visible by field.isVisible.collectAsState()
     val scope = rememberCoroutineScope()
     if (visible) {
-        Column {
-            when (field.input) {
-                is TextBoxFormInput, is TextAreaFormInput -> {
-                    FormTextField(state = state as FormTextFieldState)
-                }
+        when (field.input) {
+            is TextBoxFormInput, is TextAreaFormInput -> {
+                FormTextField(state = state as FormTextFieldState)
+            }
 
-                is DateTimePickerFormInput -> {
-                    DateTimeField(
-                        state = DateTimeFieldState(
-                            formElement = field,
-                            form = form,
-                            scope = scope
-                        )
+            is DateTimePickerFormInput -> {
+                DateTimeField(
+                    state = DateTimeFieldState(
+                        formElement = field,
+                        form = form,
+                        scope = scope
                     )
-                }
+                )
+            }
 
-                is ComboBoxFormInput -> {
-                    ComboBoxField(state = state as ComboBoxFieldState)
-                }
+            is ComboBoxFormInput -> {
+                ComboBoxField(state = state as ComboBoxFieldState)
+            }
 
-                else -> { /* TO-DO: add support for other input types */
-                }
+            else -> { /* TO-DO: add support for other input types */
             }
         }
     }
