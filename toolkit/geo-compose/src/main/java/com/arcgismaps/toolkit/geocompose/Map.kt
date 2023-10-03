@@ -32,8 +32,7 @@ import com.arcgismaps.mapping.view.MapView
 @Composable
 public fun Map(
     modifier: Modifier = Modifier,
-    mapProperties: MapProperties,
-    mapState: (MapState) -> Unit = {},
+    mapState: MapState,
     // content: @Composable () -> Unit = {} // Would this be helpful?
 ) {
     // get an instance of the current lifecycle owner
@@ -45,12 +44,12 @@ public fun Map(
 
     DisposableEffect(lifecycleOwner) {
         lifecycleOwner.lifecycle.addObserver(mapView)
+        mapState.registerGeoView(mapView)
         onDispose {
+            mapState.unregisterGeoView()
             lifecycleOwner.lifecycle.removeObserver(mapView)
         }
     }
-
-    mapState(MapState(mapView, coroutineScope, mapProperties))
 
     // wrap the MapView as an AndroidView
     AndroidView(

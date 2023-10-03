@@ -31,7 +31,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -41,25 +46,26 @@ import com.arcgismaps.mapping.view.WrapAroundMode
 import com.arcgismaps.toolkit.geocompose.Map
 import com.arcgismaps.toolkit.geocompose.MapProperties
 import com.arcgismaps.toolkit.geocompose.MapState
+import kotlin.math.roundToInt
 
 @Composable
 fun MainScreen() {
     val mapProperties = remember {
-        MapProperties(arcGISMap = ArcGISMap(BasemapStyle.ArcGISImagery))
+        MapProperties(arcGISMap = ArcGISMap(BasemapStyle.ArcGISStreetsNight))
     }
 
-    var mapState: MapState? = null
+    val mapState = MapState(rememberCoroutineScope(), mapProperties)
 
 
     LaunchedEffect(Unit) {
-        mapState?.drawStatus?.collect {
+        mapState.drawStatus.collect {
             Log.e("DrawStatus", "DrawStatus: ${it?.toString()}")
         }
     }
 
     LaunchedEffect(Unit) {
-        mapState?.onSingleTapConfirmed?.collect {
-            // tap confirmed
+        mapState.onSingleTapConfirmed.collect {
+            Log.e("MapTapped", "MapTapped: ${it?.mapPoint?.x},${it?.mapPoint?.y}")
         }
     }
 
@@ -69,9 +75,8 @@ fun MainScreen() {
         verticalArrangement = Arrangement.Center
     ) {
         Map(
-            modifier = Modifier.size(500.dp),
-            mapProperties = mapProperties,
-            mapState = { mapState = it }
+            modifier = Modifier.size(500.dp), // Not able to use Modifier.weight here, not entirely sure why.
+            mapState = mapState,
         )
         Row(
             modifier = Modifier
@@ -85,13 +90,66 @@ fun MainScreen() {
             val wrapAroundMode = mapProperties.wrapAroundMode.collectAsState()
             val isChecked = wrapAroundMode.value is WrapAroundMode.EnabledWhenSupported
 
-            Switch(checked = isChecked, onCheckedChange = {
-                if (it) {
-                    mapProperties.wrapAroundMode.value = WrapAroundMode.EnabledWhenSupported
-                } else {
-                    mapProperties.wrapAroundMode.value = WrapAroundMode.Disabled
+            Switch(
+                checked = isChecked,
+                onCheckedChange = {
+                    if (it) {
+                        mapProperties.wrapAroundMode.value = WrapAroundMode.EnabledWhenSupported
+                    } else {
+                        mapProperties.wrapAroundMode.value = WrapAroundMode.Disabled
+                    }
                 }
-            })
+            )
+        }
+
+        Row(
+            modifier = Modifier
+                .padding(12.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(text = "Toggle ArcGIS map day/night")
+
+            val arcGISMap = mapProperties.arcGISMap.collectAsState().value
+            var isMapLoaded by rememberSaveable { mutableStateOf(false) }
+            LaunchedEffect(Unit) {
+                arcGISMap?.load()?.onSuccess {
+                    isMapLoaded = true
+                }
+            }
+
+            val isNightMode = arcGISMap?.basemap?.collectAsState()?.value?.name.toString()
+                .contains("StreetsNight")
+            Switch(
+                enabled = isMapLoaded,
+                checked = isNightMode,
+                onCheckedChange = {
+                    if (it) {
+                        mapProperties.arcGISMap.value = ArcGISMap(BasemapStyle.ArcGISStreetsNight)
+                    } else {
+                        mapProperties.arcGISMap.value = ArcGISMap(BasemapStyle.ArcGISStreets)
+                    }
+                }
+            )
+        }
+
+        Row(
+            modifier = Modifier
+                .padding(12.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            var rotation by rememberSaveable {
+                mutableStateOf(0.0)
+            }
+            LaunchedEffect(Unit){
+                mapState.mapRotation.collect{
+                    rotation = it
+                }
+            }
+            Text(text = "Current map rotation degrees: ${rotation.roundToInt()}")
         }
     }
 }

@@ -36,47 +36,54 @@ public sealed interface MapState : GeoState {
 }
 
 public fun MapState(
-    mapView: MapView,
     coroutineScope: CoroutineScope,
     mapProperties: MapProperties,
-): MapState = MapStateImpl(mapView, coroutineScope, mapProperties)
+): MapState = MapStateImpl(coroutineScope, mapProperties)
 
 private class MapStateImpl(
-    var mapView: MapView,
     coroutineScope: CoroutineScope,
     override var mapProperties: MapProperties,
-) : MapState, GeoStateImpl(mapView, coroutineScope) {
+) : MapState, GeoStateImpl(coroutineScope) {
 
     private val _onSingleTapConfirmed: MutableStateFlow<SingleTapConfirmedEvent?> =
         MutableStateFlow(null)
     override val onSingleTapConfirmed = _onSingleTapConfirmed.asStateFlow()
 
     private val _mapRotation: MutableStateFlow<Double> = MutableStateFlow(0.0)
-    override val mapRotation: StateFlow<Double> = _mapRotation.asStateFlow()
+    override val mapRotation = _mapRotation.asStateFlow()
+
+    private var mapView: MapView? = null
 
     init {
         coroutineScope.launch {
-            mapView.onSingleTapConfirmed.collect {
+            geoView.collect {
+                it?.let { geoView ->
+                    mapView = geoView as MapView // doesn't feel like an ideal approach to setting the MapView
+                }
+            }
+        }
+        coroutineScope.launch {
+            mapView?.onSingleTapConfirmed?.collect {
                 _onSingleTapConfirmed.value = it
             }
         }
 
         coroutineScope.launch {
-            mapView.mapRotation.collect {
-                _mapRotation
+            mapView?.mapRotation?.collect {
+                _mapRotation.value = it
             }
         }
 
         coroutineScope.launch {
             mapProperties.arcGISMap.collect {
-                mapView.map = it
+                mapView?.map = it
             }
         }
 
         coroutineScope.launch {
             mapProperties.wrapAroundMode.collect {
                 it?.let {
-                    mapView.wrapAroundMode = it
+                    mapView?.wrapAroundMode = it
                 }
             }
         }
