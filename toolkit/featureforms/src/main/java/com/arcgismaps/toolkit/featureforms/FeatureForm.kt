@@ -125,13 +125,11 @@ internal fun FeatureFormContent(
             items(form.elements) { formElement ->
                 if (formElement is FieldFormElement) {
                     val state = states[formElement.id]
-                    if (state != null) {
-                        FieldElement(
-                            field = formElement,
-                            form = form,
-                            state = state
-                        )
-                    }
+                    FieldElement(
+                        field = formElement,
+                        form = form,
+                        state = state
+                    )
                 }
             }
         }
