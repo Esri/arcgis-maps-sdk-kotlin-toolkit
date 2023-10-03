@@ -1,5 +1,6 @@
 package com.arcgismaps.toolkit.featureforms.components
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -15,9 +16,12 @@ import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.combo.ComboBoxField
 import com.arcgismaps.toolkit.featureforms.components.combo.ComboBoxFieldState
 import com.arcgismaps.toolkit.featureforms.components.datetime.DateTimeField
+import com.arcgismaps.toolkit.featureforms.components.datetime.DateTimeFieldProperties
 import com.arcgismaps.toolkit.featureforms.components.datetime.DateTimeFieldState
 import com.arcgismaps.toolkit.featureforms.components.text.FormTextField
 import com.arcgismaps.toolkit.featureforms.components.text.FormTextFieldState
+import com.arcgismaps.toolkit.featureforms.utils.editValue
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun FieldElement(field: FieldFormElement, form: FeatureForm, state: BaseFieldState?) {
@@ -32,11 +36,25 @@ internal fun FieldElement(field: FieldFormElement, form: FeatureForm, state: Bas
             }
 
             is DateTimePickerFormInput -> {
+                val input = field.input as DateTimePickerFormInput
                 DateTimeField(
                     state = DateTimeFieldState(
-                        formElement = field,
-                        form = form,
-                        scope = scope
+                        properties = DateTimeFieldProperties(
+                            label = field.label,
+                            placeholder = field.hint,
+                            description = field.description,
+                            value = field.value,
+                            editable = field.isEditable,
+                            required = field.isRequired,
+                            minEpochMillis = input.min?.toEpochMilli(),
+                            maxEpochMillis = input.max?.toEpochMilli(),
+                            shouldShowTime = input.includeTime
+                        ),
+                        scope = scope,
+                        onEditValue = {
+                            form.editValue(field, it)
+                            scope.launch { form.evaluateExpressions() }
+                        }
                     )
                 )
             }
