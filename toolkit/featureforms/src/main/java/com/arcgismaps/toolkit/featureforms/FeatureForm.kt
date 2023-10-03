@@ -39,6 +39,7 @@ import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.combo.rememberComboBoxFieldState
 import com.arcgismaps.toolkit.featureforms.components.text.rememberFormTextFieldState
 import kotlinx.coroutines.CoroutineScope
+import java.util.Objects
 
 /**
  * A composable Form toolkit component that enables users to edit field values of features in a
@@ -141,7 +142,7 @@ private fun rememberFieldStates(
     form: FeatureForm,
     context: Context,
     scope: CoroutineScope
-): Map<String, BaseFieldState?> {
+): Map<Int, BaseFieldState?> {
     return form.elements.filterIsInstance<FieldFormElement>().associateBy(
         { fieldElement ->
             fieldElement.id
@@ -201,7 +202,7 @@ private fun NoDataPreview() {
 /**
  * Unique id for each form element.
  */
-internal val FieldFormElement.id: String
+internal val FieldFormElement.id: Int
     get() {
-        return fieldName + label + description + hint
+        return Objects.hash(fieldName, label, description, hint)
     }
