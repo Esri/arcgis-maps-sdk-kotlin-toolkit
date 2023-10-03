@@ -35,5 +35,4 @@ allprojects{
             jvmTarget = JavaVersion.VERSION_1_8.toString()
         }
     }
-    alias(libs.plugins.kotlin.serialization) apply false
 }
