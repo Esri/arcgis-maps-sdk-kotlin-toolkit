@@ -78,6 +78,15 @@ internal fun ComboBoxField(state: ComboBoxFieldState, modifier: Modifier = Modif
     val isRequired by state.isRequired.collectAsState()
     var showDialog by rememberSaveable { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
+    // to check if the field was ever focused by the user
+    var wasFocused by rememberSaveable { mutableStateOf(false) }
+    val label = remember(isRequired) {
+        if (isRequired) {
+            "${state.label} *"
+        } else {
+            state.label
+        }
+    }
 
     BaseTextField(
         text = value,
@@ -85,15 +94,23 @@ internal fun ComboBoxField(state: ComboBoxFieldState, modifier: Modifier = Modif
         modifier = modifier,
         readOnly = true,
         isEditable = isEditable,
-        label = state.label,
+        label = label,
         placeholder = state.placeholder,
         singleLine = true,
         trailingIcon = Icons.Outlined.List,
         supportingText = {
-            Text(
-                text = state.description,
-                modifier = Modifier.semantics { contentDescription = "description" },
-            )
+            // if the field was focused and is required, validate the current value
+            if (wasFocused && isRequired && value.isEmpty()) {
+                Text(
+                    text = stringResource(id = R.string.required),
+                    color = MaterialTheme.colorScheme.error
+                )
+            } else {
+                Text(
+                    text = state.description,
+                    modifier = Modifier.semantics { contentDescription = "description" },
+                )
+            }
         },
         interactionSource = interactionSource
     )
@@ -118,6 +135,7 @@ internal fun ComboBoxField(state: ComboBoxFieldState, modifier: Modifier = Modif
     LaunchedEffect(interactionSource) {
         interactionSource.interactions.collect {
             if (it is PressInteraction.Release) {
+                wasFocused = true
                 showDialog = true
             }
         }
