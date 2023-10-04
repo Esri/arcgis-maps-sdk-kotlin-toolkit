@@ -32,18 +32,15 @@ import com.arcgismaps.toolkit.geocompose.MapState
 
 @Composable
 fun MainScreen() {
+    
     val mapState = MapState(arcGISMap = ArcGISMap(BasemapStyle.ArcGISStreets))
+    Map(modifier = Modifier.fillMaxSize(), mapState = mapState)
 
     LaunchedEffect(Unit) {
         mapState.drawStatus.collect {
             Log.e("DrawStatus", "DrawStatus: ${it?.toString()}")
         }
     }
-
-    Map(
-        modifier = Modifier.fillMaxSize(),
-        mapState = mapState,
-    )
 
     Button(onClick = {
         val newArcGISMap = ArcGISMap(BasemapStyle.ArcGISStreetsNight)
