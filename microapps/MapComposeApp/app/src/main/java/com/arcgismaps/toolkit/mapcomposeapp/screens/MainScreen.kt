@@ -46,7 +46,8 @@ fun MainScreen() {
     )
 
     Button(onClick = {
-        // mapState.arcGISMap.value = ArcGISMap(BasemapStyle.ArcGISStreetsNight)
+        val newArcGISMap = ArcGISMap(BasemapStyle.ArcGISStreetsNight)
+        mapState.setArcGISMap(newArcGISMap)
     }) {
         Text(text = "Toggle map to night")
     }

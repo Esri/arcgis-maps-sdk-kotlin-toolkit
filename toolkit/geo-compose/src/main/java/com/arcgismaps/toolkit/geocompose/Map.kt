@@ -30,7 +30,6 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.mapping.view.MapView
-import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 public fun Map(
@@ -62,7 +61,7 @@ public fun Map(
     mapView.map = mapState.arcGISMap.collectAsState().value
     // assign MapView status to MapState
     LaunchedEffect(Unit) {
-        mapView.drawStatus.collect { mapState.drawStatus.value = it }
+        mapView.drawStatus.collect { mapState.setDrawStatus(it) }
     }
 }
 
