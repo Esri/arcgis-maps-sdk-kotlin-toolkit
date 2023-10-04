@@ -1,5 +1,4 @@
 /*
- *
  *  Copyright 2023 Esri
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,15 +17,40 @@
 
 package com.arcgismaps.toolkit.geocompose
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.viewinterop.AndroidView
+import com.arcgismaps.mapping.view.MapView
 
 @Composable
-public fun Map() {
-    // Todo implementation...
-    Text("Implement Map here! ")
+public fun Map(modifier: Modifier = Modifier, mapState: MapState = MapState()) {
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val context = LocalContext.current
+    val mapView = remember { MapView(context) }
+    val map by mapState.arcGISMap.collectAsState()
+
+    AndroidView(modifier = modifier, factory = { mapView })
+
+    DisposableEffect(Unit) {
+        lifecycleOwner.lifecycle.addObserver(mapView)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(mapView)
+            mapView.onDestroy(lifecycleOwner)
+        }
+    }
+
+    mapView.map = map
+
 }
+
 
 @Preview
 @Composable

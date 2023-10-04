@@ -1,5 +1,4 @@
 /*
- *
  *  Copyright 2023 Esri
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,22 +15,20 @@
  *
  */
 
-package com.arcgismaps.toolkit.mapcomposeapp.screens
+package com.arcgismaps.toolkit.geocompose
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.BasemapStyle
-import com.arcgismaps.toolkit.geocompose.Map
-import com.arcgismaps.toolkit.geocompose.MapState
-
-@Composable
-fun MainScreen() {
-
-    val mapState = MapState(arcGISMap = ArcGISMap(BasemapStyle.ArcGISStreets))
-    Map(
-        modifier = Modifier.fillMaxSize(),
-        mapState = mapState,
-    )
+/**
+ * Represents the state for the GeoCompose.
+ *
+ * @since 200.3.0
+ */
+public sealed interface GeoComposeState {
+    // TODO add implementation
 }
+
+public fun GeoComposeState(): GeoComposeState =
+    GeoComposeStateImpl()
+
+public open class GeoComposeStateImpl() : GeoComposeState {
+}
+
