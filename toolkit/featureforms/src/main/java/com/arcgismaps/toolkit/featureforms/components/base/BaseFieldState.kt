@@ -28,25 +28,43 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
+
+internal open class FieldProperties(
+    val label: String,
+    val placeholder: String,
+    val description: String,
+    val value: StateFlow<String>,
+    val required: StateFlow<Boolean>,
+    val editable: StateFlow<Boolean>
+)
 
 /**
  * Base state class for any Field within a feature form. It provides the default set of properties
  * that are common to all [FieldFormElement]'s.
+ *
+ * @param properties the [FieldProperties] associated with this state.
+ * @param initialValue optional initial value to set for this field. It is set to the value of
+ * [FieldProperties.value] by default.
+ * @param scope a [CoroutineScope] to start [StateFlow] collectors on.
+ * @param onEditValue a callback to invoke when the user edits result in a change of value. This
+ * is called on [BaseFieldState.onValueChanged].
  */
 internal open class BaseFieldState(
-    private val formElement: FieldFormElement,
-    private val featureForm: FeatureForm,
-    private val scope: CoroutineScope
+    properties: FieldProperties,
+    initialValue: String = properties.value.value,
+    scope: CoroutineScope,
+    private val onEditValue: (Any?) -> Unit,
 ) {
     /**
      * Title for the field.
      */
-    open val label: String = formElement.label
+    open val label: String = properties.label
 
     /**
-     * Description text for the field.
+     * Placeholder hint for the field.
      */
+    open val placeholder: String = properties.placeholder
+
     val description: String = formElement.description
     
     val fieldType: FieldType = featureForm.fieldType(formElement)
@@ -54,20 +72,20 @@ internal open class BaseFieldState(
     val domain: Domain? = formElement.domain
 
     /**
-     * Placeholder hint for the field.
+     * Description text for the field.
      */
-    open val placeholder: String = formElement.hint
+    val description: String = properties.description
 
     // a state flow to handle user input changes
-    private val _value = MutableStateFlow(formElement.value.value)
+    private val _value = MutableStateFlow(initialValue)
 
     /**
      * Current value state for the field.
      */
     val value: StateFlow<String> = combine(
         _value,
-        formElement.value,
-        formElement.isEditable
+        properties.value,
+        properties.editable
     ) { userEdit, exprResult, editable ->
         // transform the user input value flow with the formElement value and required into a single
         // value flow based on if the field is editable
@@ -76,41 +94,23 @@ internal open class BaseFieldState(
         } else {
             exprResult
         }
-    }.stateIn(scope, SharingStarted.Eagerly, _value.value)
+    }.stateIn(scope, SharingStarted.Eagerly, initialValue)
 
     /**
      * Property that indicates if the field is editable.
      */
-    val isEditable: StateFlow<Boolean> = formElement.isEditable
+    val isEditable: StateFlow<Boolean> = properties.editable
 
     /**
      * Property that indicates if the field is required.
      */
-    val isRequired: StateFlow<Boolean> = formElement.isRequired
+    val isRequired: StateFlow<Boolean> = properties.required
 
     /**
      * Callback to update the current value of the FormTextFieldState to the given [input].
      */
     fun onValueChanged(input: String) {
-        editValue(input)
+        onEditValue(input)
         _value.value = input
-        scope.launch { evaluateExpressions() }
-    }
-
-    /**
-     * Evaluates the underlying expressions for this field. The results can be observed through the
-     * [value], [isRequired] and [isEditable] state flows.
-     */
-    private suspend fun evaluateExpressions() {
-        featureForm.evaluateExpressions()
-    }
-
-    /**
-     * Set the value in the feature's attribute map.
-     * Committing the transaction will either discard this edit or persist it in the associated geodatabase,
-     * and refresh the feature.
-     */
-    private fun editValue(value: Any?) {
-        featureForm.editValue(formElement, value)
     }
 }

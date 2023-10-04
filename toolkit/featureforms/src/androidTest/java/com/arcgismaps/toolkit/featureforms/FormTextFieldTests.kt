@@ -90,7 +90,7 @@ class FormTextFieldTests {
     val composeTestRule = createComposeRule()
     
     @Before
-    fun setContent()  {
+    fun setContent()  = runTest {
         composeTestRule.setContent {
             val scope = rememberCoroutineScope()
             FormTextField(
@@ -102,6 +102,7 @@ class FormTextFieldTests {
                 )
             )
         }
+        featureForm.evaluateExpressions()
     }
     
     @After
