@@ -33,38 +33,33 @@ class MapViewModel @Inject constructor(
     FeatureFormState by FeatureFormState() {
     private val itemId: String = savedStateHandle["uri"]!!
     lateinit var portalItemData: PortalItemWithLayer
-    
+
     init {
         viewModelScope.launch {
             portalItemData = portalItemUseCase(itemId) ?: return@launch
             setMap(ArcGISMap(portalItemData.data.portalItem))
         }
     }
-    
+
     context(MapView, CoroutineScope) override fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {
         launch {
-            val layer = map.value?.operationalLayers?.filterIsInstance<FeatureLayer>()?.firstOrNull { layer ->
-                portalItemData.formLayerName?.let {
-                    layer.name == it
-                } ?: true
-            } ?: return@launch
-
-            this@MapView.identifyLayer(
-                layer = layer,
+            this@MapView.identifyLayers(
                 screenCoordinate = singleTapEvent.screenCoordinate,
                 tolerance = 22.0,
                 returnPopupsOnly = false
             ).onSuccess { results ->
-                results.geoElements.firstOrNull { it is ArcGISFeature }?.let {
+                results.firstOrNull()?.geoElements?.firstOrNull { it is ArcGISFeature }?.let {
                     val feature = it as ArcGISFeature
                     feature.load().onSuccess {
                         try {
-                            val featureForm = FeatureForm(feature, layer.featureFormDefinition!!)
-                            // update the FeatureFormState's FeatureForm
-                            setFeatureForm(featureForm)
-                            // set the FeatureFormState to an editing state to bring up the
-                            // FeatureForm UI
-                            setTransactionState(EditingTransactionState.Editing)
+                            (feature.featureTable?.layer as FeatureLayer).featureFormDefinition?.let { featureFormDefinition ->
+                                val featureForm = FeatureForm(feature, featureFormDefinition)
+                                // update the FeatureFormState's FeatureForm
+                                setFeatureForm(featureForm)
+                                // set the FeatureFormState to an editing state to bring up the
+                                // FeatureForm UI
+                                setTransactionState(EditingTransactionState.Editing)
+                            } ?: throw Exception("This feature does not have a FeatureFormDefinition")
                         } catch (e: Exception) {
                             e.printStackTrace() // for debugging core issues
                             Toast.makeText(
