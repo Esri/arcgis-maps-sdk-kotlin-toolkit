@@ -20,6 +20,8 @@ package com.arcgismaps.toolkit.geocompose
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -28,12 +30,13 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.mapping.view.MapView
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 public fun Map(
     modifier: Modifier = Modifier,
     mapState: MapState,
-    // content: @Composable () -> Unit = {} // Would this be helpful?
+    // content: @Composable () -> Unit = {}
 ) {
     // get an instance of the current lifecycle owner
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -44,9 +47,7 @@ public fun Map(
 
     DisposableEffect(lifecycleOwner) {
         lifecycleOwner.lifecycle.addObserver(mapView)
-        mapState.registerGeoView(mapView)
         onDispose {
-            mapState.unregisterGeoView()
             lifecycleOwner.lifecycle.removeObserver(mapView)
         }
     }
@@ -57,9 +58,16 @@ public fun Map(
         factory = { mapView }
     )
 
+    // set the MapView map using MapState
+    mapView.map = mapState.arcGISMap.collectAsState().value
+    // assign MapView status to MapState
+    LaunchedEffect(Unit) {
+        mapView.drawStatus.collect { mapState.drawStatus.value = it }
+    }
 }
 
 
 @Preview
 @Composable
-internal fun MapPreview() {}
+internal fun MapPreview() {
+}
