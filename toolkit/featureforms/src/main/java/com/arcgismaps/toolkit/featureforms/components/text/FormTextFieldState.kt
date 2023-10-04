@@ -17,16 +17,22 @@
 package com.arcgismaps.toolkit.featureforms.components.text
 
 import android.content.Context
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
-import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
+import com.arcgismaps.toolkit.featureforms.components.base.FieldProperties
+import com.arcgismaps.toolkit.featureforms.utils.editValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -34,23 +40,51 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 
+internal class TextFieldProperties(
+    label: String,
+    placeholder: String,
+    description: String,
+    value: StateFlow<String>,
+    required: StateFlow<Boolean>,
+    editable: StateFlow<Boolean>,
+    val singleLine: Boolean,
+    val minLength: Int,
+    val maxLength: Int,
+) : FieldProperties(label, placeholder, description, value, required, editable)
 
 /**
  * A class to handle the state of a [FormTextField]. Essential properties are inherited from the
  * [BaseFieldState].
  *
- * @param formElement The [FieldFormElement] to create the state from.
- * @param featureForm The [FeatureForm] that the [formElement] is a part of.
- * @property context a Context scoped to the lifetime of a call to the [FieldElement] composable function.
+ * @param properties the [TextFieldProperties] associated with this state.
+ * @param initialValue optional initial value to set for this field. It is set to the value of
+ * [TextFieldProperties.value] by default.
+ * @param scope a [CoroutineScope] to start [StateFlow] collectors on.
+ * @param context a Context scoped to the lifetime of a call to the [FieldElement] composable function.
+ * @param onEditValue a callback to invoke when the user edits result in a change of value. This
+ * is called on [FormTextFieldState.onValueChanged].
  */
+@Stable
 internal class FormTextFieldState(
-    formElement: FieldFormElement,
-    featureForm: FeatureForm,
-    private val context: Context,
+    properties: TextFieldProperties,
+    initialValue: String = properties.value.value,
     scope: CoroutineScope,
-) : BaseFieldState(formElement, featureForm, scope) {
+    private val context: Context,
+    onEditValue: (Any?) -> Unit
+) : BaseFieldState(
+    properties = properties,
+    initialValue = initialValue,
+    scope = scope,
+    onEditValue = onEditValue
+) {
     // indicates singleLine only if TextBoxFeatureFormInput
-    val singleLine = formElement.input is TextBoxFormInput
+    val singleLine = properties.singleLine
+
+    // fetch the minLength based on the featureFormElement.inputType
+    val minLength = properties.minLength
+
+    // fetch the maxLength based on the featureFormElement.inputType
+    val maxLength = properties.maxLength
 
     // supporting text will depend on multiple other states. If there is an error, it will display
     // error message. Otherwise description is displayed, unless it is empty in which case
@@ -63,43 +97,28 @@ internal class FormTextFieldState(
         }
     }
 
-    private var _errorMessage: String = ""
-
     private val _isFocused: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isFocused: StateFlow<Boolean> = _isFocused.asStateFlow()
 
     private val _hasError = mutableStateOf(false)
     val hasError: State<Boolean> = _hasError
 
-    // fetch the minLength based on the featureFormElement.inputType
-    val minLength = when (formElement.input) {
-        is TextAreaFormInput -> (formElement.input as TextAreaFormInput).minLength
-        is TextBoxFormInput -> (formElement.input as TextBoxFormInput).minLength
-        else -> throw IllegalArgumentException()
-    }.toInt()
-
-    // fetch the maxLength based on the featureFormElement.inputType
-    val maxLength = when (formElement.input) {
-        is TextAreaFormInput -> (formElement.input as TextAreaFormInput).maxLength
-        is TextBoxFormInput -> (formElement.input as TextBoxFormInput).maxLength
-        else -> throw IllegalArgumentException()
-    }.toInt()
+    private var _errorMessage: String = ""
 
     // build helper text
-    private val helperText =
-        if (minLength > 0 && maxLength > 0) {
-            if (minLength == maxLength) {
-                context.getString(R.string.enter_n_chars, minLength)
-            } else {
-                context.getString(R.string.enter_min_to_max_chars, minLength, maxLength)
-            }
-        } else if (maxLength > 0) {
-            context.getString(R.string.maximum_n_chars, maxLength)
+    private val helperText = if (minLength > 0 && maxLength > 0) {
+        if (minLength == maxLength) {
+            context.getString(R.string.enter_n_chars, minLength)
         } else {
-            context.getString(R.string.maximum_n_chars, 254)
-            // TODO: when consuming the core API throw here and remove the line above.
-            //throw IllegalStateException("invalid form data or attribute: text field must have a nonzero max length")
+            context.getString(R.string.enter_min_to_max_chars, minLength, maxLength)
         }
+    } else if (maxLength > 0) {
+        context.getString(R.string.maximum_n_chars, maxLength)
+    } else {
+        context.getString(R.string.maximum_n_chars, 254)
+        // TODO: when consuming the core API throw here and remove the line above.
+        //throw IllegalStateException("invalid form data or attribute: text field must have a nonzero max length")
+    }
 
     init {
         scope.launch {
@@ -137,4 +156,81 @@ internal class FormTextFieldState(
     fun onFocusChanged(focus: Boolean) {
         _isFocused.value = focus
     }
+
+    companion object {
+        fun Saver(
+            formElement: FieldFormElement,
+            form: FeatureForm,
+            context: Context,
+            scope: CoroutineScope
+        ): Saver<FormTextFieldState, Any> = listSaver(
+            save = {
+                listOf(
+                    it.value.value,
+                    it.singleLine,
+                    it.minLength,
+                    it.maxLength,
+                    it.hasError.value,
+                    it._errorMessage
+                )
+            },
+            restore = { list ->
+                FormTextFieldState(
+                    properties = TextFieldProperties(
+                        label = formElement.label,
+                        placeholder = formElement.hint,
+                        description = formElement.description,
+                        value = formElement.value,
+                        required = formElement.isRequired,
+                        editable = formElement.isEditable,
+                        singleLine = list[1] as Boolean,
+                        minLength = list[2] as Int,
+                        maxLength = list[3] as Int
+                    ),
+                    initialValue = list[0] as String,
+                    scope = scope,
+                    context = context,
+                    onEditValue = { newValue ->
+                        form.editValue(formElement, newValue)
+                        scope.launch { form.evaluateExpressions() }
+                    },
+                ).apply {
+                    _hasError.value = list[4] as Boolean
+                    _errorMessage = list[5] as String
+                }
+            }
+        )
+    }
+}
+
+@Composable
+internal fun rememberFormTextFieldState(
+    field: FieldFormElement,
+    minLength: Int,
+    maxLength: Int,
+    form: FeatureForm,
+    context: Context,
+    scope: CoroutineScope
+): FormTextFieldState = rememberSaveable(
+    saver = FormTextFieldState.Saver(field, form, context, scope)
+) {
+    FormTextFieldState(
+        properties = TextFieldProperties(
+            label = field.label,
+            placeholder = field.hint,
+            description = field.description,
+            value = field.value,
+            editable = field.isEditable,
+            required = field.isRequired,
+            singleLine = field.input is TextBoxFormInput,
+            minLength = minLength,
+            maxLength = maxLength,
+        ),
+        scope = scope,
+        context = context,
+        onEditValue = {
+            form.editValue(field, it)
+            scope.launch { form.evaluateExpressions() }
+        }
+    )
 }

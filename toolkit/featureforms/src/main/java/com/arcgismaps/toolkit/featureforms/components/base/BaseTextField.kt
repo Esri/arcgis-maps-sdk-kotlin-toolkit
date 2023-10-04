@@ -22,7 +22,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -114,7 +114,7 @@ internal fun BaseTextField(
             value = text,
             onValueChange = onValueChange,
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .focusable(isEditable, interactionSource)
                 .semantics { contentDescription = "outlined text field" },
             readOnly = readOnly,
@@ -149,7 +149,7 @@ internal fun BaseTextField(
                     // show a trailing icon to indicate field type
                     Icon(imageVector = trailingIcon, contentDescription = "field icon")
                     // multiline editable field
-                } else if (!singleLine && isEditable && text.isNotEmpty()) {
+                } else if (!singleLine && isEditable) {
                     if (isFocused) {
                         // show a done button only when focused
                         IconButton(
@@ -163,7 +163,7 @@ internal fun BaseTextField(
                                 contentDescription = "Done"
                             )
                         }
-                    } else {
+                    } else if(text.isNotEmpty()) {
                         // show a clear icon instead if the multiline field is not empty
                         IconButton(
                             onClick = { onValueChange("") },
