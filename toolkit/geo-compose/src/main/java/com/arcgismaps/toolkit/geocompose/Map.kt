@@ -51,7 +51,6 @@ public fun Map(modifier: Modifier = Modifier, mapState: MapState = MapState()) {
 
 }
 
-
 @Preview
 @Composable
 internal fun MapPreview() {
