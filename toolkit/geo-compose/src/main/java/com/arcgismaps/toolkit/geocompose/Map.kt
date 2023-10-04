@@ -20,7 +20,6 @@ package com.arcgismaps.toolkit.geocompose
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -48,6 +47,7 @@ public fun Map(
         lifecycleOwner.lifecycle.addObserver(mapView)
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(mapView)
+            mapView.onDestroy(lifecycleOwner)
         }
     }
 
@@ -60,9 +60,7 @@ public fun Map(
     // set the MapView map using MapState
     mapView.map = mapState.arcGISMap.collectAsState().value
     // assign MapView status to MapState
-    LaunchedEffect(Unit) {
-        mapView.drawStatus.collect { mapState.setDrawStatus(it) }
-    }
+    mapState.setDrawStatus(mapView.drawStatus.collectAsState().value)
 }
 
 
