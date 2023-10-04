@@ -90,7 +90,12 @@ internal fun ComboBoxField(state: ComboBoxFieldState, modifier: Modifier = Modif
 
     BaseTextField(
         text = value,
-        onValueChange = { state.onValueChanged(it) },
+        onValueChange = {
+            state.onValueChanged(it)
+            // consider a "clear" operation to be a focused state even though the clear icon
+            // is not part of the field's focus target
+            if (it.isEmpty()) wasFocused = true
+        },
         modifier = modifier,
         readOnly = true,
         isEditable = isEditable,
