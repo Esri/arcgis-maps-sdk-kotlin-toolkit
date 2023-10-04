@@ -18,10 +18,7 @@ package com.arcgismaps.toolkit.featureforms.components.base
 
 import com.arcgismaps.data.Domain
 import com.arcgismaps.data.FieldType
-import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
-import com.arcgismaps.toolkit.featureforms.utils.editValue
-import com.arcgismaps.toolkit.featureforms.utils.fieldType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -35,7 +32,9 @@ internal open class FieldProperties(
     val description: String,
     val value: StateFlow<String>,
     val required: StateFlow<Boolean>,
-    val editable: StateFlow<Boolean>
+    val editable: StateFlow<Boolean>,
+    val fieldType: FieldType,
+    val domain: Domain? = null
 )
 
 /**
@@ -64,13 +63,7 @@ internal open class BaseFieldState(
      * Placeholder hint for the field.
      */
     open val placeholder: String = properties.placeholder
-
-    val description: String = formElement.description
     
-    val fieldType: FieldType = featureForm.fieldType(formElement)
-    
-    val domain: Domain? = formElement.domain
-
     /**
      * Description text for the field.
      */
@@ -105,7 +98,16 @@ internal open class BaseFieldState(
      * Property that indicates if the field is required.
      */
     val isRequired: StateFlow<Boolean> = properties.required
-
+    
+    /**
+     * Property that provides the domain of the field's value, if any.
+     */
+    val domain: Domain? = properties.domain
+    
+    /**
+     * The FieldType of the associated feature's attribute.
+     */
+    val fieldType: FieldType = properties.fieldType
     /**
      * Callback to update the current value of the FormTextFieldState to the given [input].
      */

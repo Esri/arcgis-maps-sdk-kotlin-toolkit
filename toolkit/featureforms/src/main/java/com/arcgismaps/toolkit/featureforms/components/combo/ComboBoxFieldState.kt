@@ -23,6 +23,8 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.data.CodedValue
+import com.arcgismaps.data.Domain
+import com.arcgismaps.data.FieldType
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
@@ -33,6 +35,7 @@ import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.FieldProperties
 import com.arcgismaps.toolkit.featureforms.components.text.TextFieldProperties
 import com.arcgismaps.toolkit.featureforms.utils.editValue
+import com.arcgismaps.toolkit.featureforms.utils.fieldType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -44,10 +47,12 @@ internal class ComboBoxFieldProperties(
     value: StateFlow<String>,
     required: StateFlow<Boolean>,
     editable: StateFlow<Boolean>,
+    fieldType: FieldType,
+    domain: Domain?,
     val codedValues: List<CodedValue>,
     val showNoValueOption: FormInputNoValueOption,
     val noValueLabel: String
-) : FieldProperties(label, placeholder, description, value, required, editable)
+) : FieldProperties(label, placeholder, description, value, required, editable, fieldType, domain)
 
 /**
  * A class to handle the state of a [ComboBoxField]. Essential properties are inherited from the
@@ -117,6 +122,8 @@ internal class ComboBoxFieldState(
                         description = formElement.description,
                         value = formElement.value,
                         editable = formElement.isEditable,
+                        fieldType = form.fieldType(formElement),
+                        domain = formElement.domain,
                         required = formElement.isRequired,
                         codedValues = input.codedValues,
                         showNoValueOption = input.noValueOption,
@@ -153,6 +160,8 @@ internal fun rememberComboBoxFieldState(
             value = field.value,
             editable = field.isEditable,
             required = field.isRequired,
+            fieldType = form.fieldType(field),
+            domain = field.domain,
             codedValues = input.codedValues,
             showNoValueOption = input.noValueOption,
             noValueLabel = input.noValueLabel

@@ -22,27 +22,31 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
-import com.arcgismaps.data.RangeDomain
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
+import com.arcgismaps.data.Domain
+import com.arcgismaps.data.FieldType
+import com.arcgismaps.data.RangeDomain
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
+import com.arcgismaps.toolkit.featureforms.components.base.FieldProperties
+import com.arcgismaps.toolkit.featureforms.utils.editValue
+import com.arcgismaps.toolkit.featureforms.utils.fieldType
 import com.arcgismaps.toolkit.featureforms.utils.isFloatingPoint
 import com.arcgismaps.toolkit.featureforms.utils.isIntegerType
 import com.arcgismaps.toolkit.featureforms.utils.isNumeric
-import com.arcgismaps.toolkit.featureforms.components.base.FieldProperties
-import com.arcgismaps.toolkit.featureforms.utils.editValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
+import kotlin.math.ulp
 
 internal class TextFieldProperties(
     label: String,
@@ -51,10 +55,12 @@ internal class TextFieldProperties(
     value: StateFlow<String>,
     required: StateFlow<Boolean>,
     editable: StateFlow<Boolean>,
+    fieldType: FieldType,
+    domain: Domain?,
     val singleLine: Boolean,
     val minLength: Int,
     val maxLength: Int,
-) : FieldProperties(label, placeholder, description, value, required, editable)
+) : FieldProperties(label, placeholder, description, value, required, editable, fieldType, domain)
 
 /**
  * A class to handle the state of a [FormTextField]. Essential properties are inherited from the
@@ -89,7 +95,7 @@ internal class FormTextFieldState(
 
     // fetch the maxLength based on the featureFormElement.inputType
     val maxLength = properties.maxLength
-
+    
     // supporting text will depend on multiple other states. If there is an error, it will display
     // error message. Otherwise description is displayed, unless it is empty in which case
     // the helper text is displayed when the field is focused.
@@ -112,19 +118,19 @@ internal class FormTextFieldState(
     // build helper text
     private val helperText =
         if (fieldType.isNumeric) {
-            val domain = formElement.domain
-            
             if (domain != null && domain is RangeDomain) {
-                val min = domain.minValue as? Number
-                val max = domain.maxValue as? Number
-                
-                if (min != null && max != null) {
-                    context.getString(R.string.numeric_range_helper_text, min.toInt(), max.toInt())
-                } else if (min != null) {
-                    context.getString(R.string.less_than_min_value)
-                } else if (max != null) {
-                    context.getString(R.string.exceeds_max_value)
+                val min = domain.minValue
+                val max = domain.maxValue
+                // to format the range of either integer or floating point
+                // values without a lot of logic, they are formatted as strings.
+                if (min is Number && max is Number) {
+                    context.getString(R.string.numeric_range_helper_text, min.format(), max.format())
+                } else if (min is Number) {
+                     context.getString(R.string.less_than_min_value, min.format())
+                } else if (max is Number) {
+                    context.getString(R.string.exceeds_max_value, max.format())
                 } else {
+                    // not likely to happen.
                     ""
                 }
             } else {
@@ -165,18 +171,20 @@ internal class FormTextFieldState(
     }
     
     private fun validateNumericRange(value: String): Boolean {
-        require(fieldType.isNumeric)
         return if (domain != null && domain is RangeDomain) {
             val min = domain.minValue as? Number
             val max = domain.maxValue as? Number
-            val doubleVal = value.toDouble()
+        
+            // format as the numeric types with the largest space
+            val numberVal: Number = if (fieldType.isIntegerType) value.toLong() else value.toDouble()
             if (min != null && max != null) {
-                doubleVal in min.toDouble()..max.toDouble()
+                min <= numberVal && numberVal <= max
             } else if (min != null) {
-                min.toDouble() >= doubleVal
+                min >= numberVal
             } else if (max != null) {
-                doubleVal <= max.toDouble()
+                numberVal <= max
             } else {
+                // not likely to happen.
                 true
             }
         } else {
@@ -245,6 +253,8 @@ internal class FormTextFieldState(
                         value = formElement.value,
                         required = formElement.isRequired,
                         editable = formElement.isEditable,
+                        domain = formElement.domain,
+                        fieldType = form.fieldType(formElement),
                         singleLine = list[1] as Boolean,
                         minLength = list[2] as Int,
                         maxLength = list[3] as Int
@@ -264,6 +274,7 @@ internal class FormTextFieldState(
         )
     }
 }
+
 
 @Composable
 internal fun rememberFormTextFieldState(
@@ -285,6 +296,8 @@ internal fun rememberFormTextFieldState(
             editable = field.isEditable,
             required = field.isRequired,
             singleLine = field.input is TextBoxFormInput,
+            domain = field.domain,
+            fieldType = form.fieldType(field),
             minLength = minLength,
             maxLength = maxLength,
         ),
@@ -296,3 +309,49 @@ internal fun rememberFormTextFieldState(
         }
     )
 }
+
+/**
+ * Provide a format string for any numeric type.
+ *
+ * @param digits: If the number is floating point, restricts the decimal digits
+ * @return a formatted string representing the number.
+ */
+private fun Number.format(digits: Int = 2): String =
+    when (this) {
+        is Double -> "%.${digits}f".format(this)
+        is Float -> "%.${digits}f".format(this)
+        else -> "$this"
+    }
+
+/**
+ * Non intrinsic (primitive) floating point comparison, and fixed comparison thrown in to boot.
+ */
+private operator fun Number.compareTo(other: Number): Int =
+    // do this twice,
+    // can't use a Float ulp (unit of least precision) to represent the ulp of a Double!
+    if (this is Double) {
+        val upper = this + ulp
+        val lower = this - ulp
+        if (lower < other && other < upper) {
+            0
+        } else if (this < other) {
+            -1
+        } else {
+            1
+        }
+    } else if (this is Float) {
+        val upper = this + ulp
+        val lower = this - ulp
+        if (lower < other && other < upper) {
+            0
+        } else if (this < other) {
+            -1
+        } else {
+            1
+        }
+    } else {
+        (this.toLong()).compareTo(other)
+    }
+
+    
+

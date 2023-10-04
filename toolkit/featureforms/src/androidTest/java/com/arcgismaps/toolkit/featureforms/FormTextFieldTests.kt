@@ -50,9 +50,13 @@ import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.toolkit.featureforms.components.text.FormTextField
 import com.arcgismaps.toolkit.featureforms.components.text.FormTextFieldState
+import com.arcgismaps.toolkit.featureforms.components.text.TextFieldProperties
+import com.arcgismaps.toolkit.featureforms.utils.editValue
+import com.arcgismaps.toolkit.featureforms.utils.fieldType
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.fail
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -72,7 +76,7 @@ class FormTextFieldTests {
         sharedFeatureForm!!
     }
 
-    private val fieldFeatureFormElement by lazy {
+    private val field by lazy {
         featureForm.elements
             .filterIsInstance<FieldFormElement>()
             .first {
@@ -93,12 +97,28 @@ class FormTextFieldTests {
     fun setContent()  = runTest {
         composeTestRule.setContent {
             val scope = rememberCoroutineScope()
+            val textFieldProperties = TextFieldProperties(
+                label = field.label,
+                placeholder = field.hint,
+                description = field.description,
+                value = field.value,
+                editable = field.isEditable,
+                required = field.isRequired,
+                singleLine = field.input is TextBoxFormInput,
+                domain = field.domain,
+                fieldType = featureForm.fieldType(field),
+                minLength = (field.input as TextBoxFormInput).minLength.toInt(),
+                maxLength = (field.input as TextBoxFormInput).maxLength.toInt()
+            )
             FormTextField(
                 state = FormTextFieldState(
-                    fieldFeatureFormElement,
-                    featureForm,
-                    LocalContext.current,
-                    scope
+                    textFieldProperties,
+                    scope = scope,
+                    context = LocalContext.current,
+                    onEditValue = {
+                        featureForm.editValue(field, it)
+                        scope.launch { featureForm.evaluateExpressions() }
+                    }
                 )
             )
         }
@@ -144,7 +164,7 @@ class FormTextFieldTests {
         val helper = composeTestRule.onNode(hasContentDescription(helperSemanticLabel), useUnmergedTree = true)
         val helperText = helper.getTextString()
         helper.assertIsDisplayed()
-        val maxLength = (fieldFeatureFormElement.input as TextBoxFormInput).maxLength
+        val maxLength = (field.input as TextBoxFormInput).maxLength
         assertEquals("Maximum $maxLength characters", helperText)
     }
     
@@ -166,7 +186,7 @@ class FormTextFieldTests {
         val helper = composeTestRule.onNode(hasContentDescription(helperSemanticLabel), useUnmergedTree = true)
         val helperText = helper.getTextString()
         helper.assertIsDisplayed()
-        val maxLength = (fieldFeatureFormElement.input as TextBoxFormInput).maxLength.toInt()
+        val maxLength = (field.input as TextBoxFormInput).maxLength.toInt()
         assertEquals("Maximum $maxLength characters", helperText)
         
         val charCountNode =
@@ -197,7 +217,7 @@ class FormTextFieldTests {
         val helper = composeTestRule.onNode(hasContentDescription(helperSemanticLabel), useUnmergedTree = true)
         val helperText = helper.getTextString()
         helper.assertIsDisplayed()
-        val maxLength = (fieldFeatureFormElement.input as TextBoxFormInput).maxLength.toInt()
+        val maxLength = (field.input as TextBoxFormInput).maxLength.toInt()
         assertEquals("Maximum $maxLength characters", helperText)
         
         outlinedTextField.performImeAction()
@@ -220,7 +240,7 @@ class FormTextFieldTests {
      */
     @Test
     fun testErrorValueFocusedState() = runTest {
-        val maxLength = (fieldFeatureFormElement.input as TextBoxFormInput).maxLength.toInt()
+        val maxLength = (field.input as TextBoxFormInput).maxLength.toInt()
         val outlinedTextField = composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
         val text = buildString {
             repeat(maxLength + 1) {
@@ -259,7 +279,7 @@ class FormTextFieldTests {
     @Test
     fun testErrorValueUnfocusedState() = runTest {
         val outlinedTextField = composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
-        val maxLength = (fieldFeatureFormElement.input as TextBoxFormInput).maxLength.toInt()
+        val maxLength = (field.input as TextBoxFormInput).maxLength.toInt()
         val text = buildString {
             repeat(maxLength + 1) {
                 append("x")

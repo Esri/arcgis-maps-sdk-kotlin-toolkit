@@ -29,9 +29,9 @@
     <string name="ok">OK</string>
     <string name="done">Done</string>
     <string name="filter">Filter %1$s</string>
-    <string name="numeric_range_helper_text">Enter value from %1$d to %2$d</string>
-    <string name="less_than_min_value">Less than minimum value</string>
-    <string name="exceeds_max_value">Exceeds maximum value</string>
+    <string name="numeric_range_helper_text">Enter value from %1$s to %2$s</string>
+    <string name="less_than_min_value">Less than minimum value %1$s</string>
+    <string name="exceeds_max_value">Exceeds maximum value %1$s</string>
     <string name="value_must_be_a_whole_number">Value must be a whole number</string>
     <string name="value_must_be_a_number">Value must be a number</string>
 </resources>
