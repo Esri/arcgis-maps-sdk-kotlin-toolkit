@@ -21,11 +21,9 @@ package com.arcgismaps.toolkit.authentication
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContract
-import androidx.browser.customtabs.CustomTabsIntent
 import androidx.lifecycle.Lifecycle
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
@@ -153,22 +151,6 @@ public class OAuthUserSignInActivity : ComponentActivity() {
             setResult(RESULT_CODE_CANCELED)
             finish()
         }
-    }
-
-    /**
-     * Launches the custom tabs activity with the provided authorize URL.
-     *
-     * @param authorizeUrl the authorize URL used by the custom tabs browser to prompt for OAuth
-     * user credentials
-     *
-     * @since 200.2.0
-     */
-    private fun launchCustomTabs(authorizeUrl: String, useIncognito: Boolean) {
-        CustomTabsIntent.Builder().build().apply {
-            if (useIncognito) {
-                intent.putExtra("com.google.android.apps.chrome.EXTRA_OPEN_NEW_INCOGNITO_TAB", true)
-            }
-        }.launchUrl(this, Uri.parse(authorizeUrl))
     }
 
     /**

@@ -28,28 +28,27 @@ import androidx.compose.runtime.setValue
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
 private const val DEFAULT_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob"
+
 /**
  * Launches a Custom Chrome Tab using the url in [oAuthPendingSignIn] and calls [onActivityResult] on completion.
  *
  * @see OAuthUserSignInActivity
  * @param oAuthPendingSignIn the [OAuthUserSignIn] pending completion.
  * @param authenticatorState an [AuthenticatorState].
+ * @param onPendingOAuthUserSignIn if not null, this will be called when an OAuth challenge is pending
+ * and the browser should be launched. Use this if you wish to handle OAuth challenges from your own
+ * activity rather than using the [OAuthUserSignInActivity].
  * @since 200.2.0
  */
 @Composable
 internal fun OAuthAuthenticator(
     oAuthPendingSignIn: OAuthUserSignIn,
     authenticatorState: AuthenticatorState,
+    onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)?,
 ) {
     if (authenticatorState.oAuthUserConfiguration?.redirectUrl == DEFAULT_REDIRECT_URI) {
         OAuthWebView(oAuthPendingSignIn, authenticatorState)
     } else {
-        val launcher =
-            rememberLauncherForActivityResult(contract = OAuthUserSignInActivity.Contract()) { redirectUrl ->
-                redirectUrl?.let {
-                    oAuthPendingSignIn.complete(redirectUrl)
-                } ?: oAuthPendingSignIn.cancel()
-            }
         // If a configuration change happens while the OAuth activity is active, then when the activity
         // returns, this composable would launch the activity again due to being recomposed. This flag
         // prevents a relaunch. Note that this flag does not need to be reset to false, because after the
@@ -62,8 +61,20 @@ internal fun OAuthAuthenticator(
         // expect `oAuthPendingSignIn` to change while this composable is displayed.
         if (!didLaunch) {
             didLaunch = true
-            SideEffect {
-                launcher.launch(oAuthPendingSignIn)
+            if (onPendingOAuthUserSignIn != null) {
+                SideEffect {
+                    onPendingOAuthUserSignIn.invoke(oAuthPendingSignIn)
+                }
+            } else {
+                val launcher =
+                    rememberLauncherForActivityResult(contract = OAuthUserSignInActivity.Contract()) { redirectUrl ->
+                        redirectUrl?.let {
+                            oAuthPendingSignIn.complete(redirectUrl)
+                        } ?: oAuthPendingSignIn.cancel()
+                    }
+                SideEffect {
+                    launcher.launch(oAuthPendingSignIn)
+                }
             }
         }
     }

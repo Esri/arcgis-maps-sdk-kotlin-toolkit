@@ -18,6 +18,7 @@ package com.arcgismaps.toolkit.featureforms.components.combo
 
 import android.content.Context
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -60,6 +61,7 @@ internal class ComboBoxFieldProperties(
  * @param onEditValue a callback to invoke when the user edits result in a change of value. This
  * is called on [ComboBoxFieldState.onValueChanged].
  */
+@Stable
 internal class ComboBoxFieldState(
     properties: ComboBoxFieldProperties,
     initialValue: String = properties.value.value,
