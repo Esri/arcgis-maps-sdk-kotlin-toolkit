@@ -61,7 +61,7 @@ internal class DateTimeFieldProperties(
  *
  * @param properties the [TextFieldProperties] associated with this state.
  * @param initialValue optional initial value to set for this field. It is set to the value of
- * [TextFieldProperties.value] by default.
+ * [DateTimeFieldProperties.value] by default.
  * @param scope a [CoroutineScope] to start [StateFlow] collectors on.
  * @param onEditValue a callback to invoke when the user edits result in a change of value. This
  * is called on [FormTextFieldState.onValueChanged].
