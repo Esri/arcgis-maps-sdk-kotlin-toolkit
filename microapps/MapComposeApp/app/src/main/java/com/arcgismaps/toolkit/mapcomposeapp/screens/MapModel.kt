@@ -1,5 +1,4 @@
 /*
- *
  *  Copyright 2023 Esri
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,20 +17,13 @@
 
 package com.arcgismaps.toolkit.mapcomposeapp.screens
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
+import androidx.lifecycle.ViewModel
 import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.BasemapStyle
-import com.arcgismaps.toolkit.geocompose.Map
 import com.arcgismaps.toolkit.geocompose.MapState
 
-@Composable
-fun MainScreen() {
+class MapModel(
+    arcGISMap: ArcGISMap
+) : ViewModel() {
 
-    val mapModel = MapModel(arcGISMap = ArcGISMap(BasemapStyle.ArcGISImagery))
-    Map(
-        modifier = Modifier.fillMaxSize(),
-        mapState = mapModel.mapState,
-    )
+    val mapState: MapState = MapState(arcGISMap)
 }
