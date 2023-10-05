@@ -29,9 +29,9 @@ import com.arcgismaps.toolkit.geocompose.MapState
 @Composable
 fun MainScreen() {
 
-    val mapModel = MapModel(arcGISMap = ArcGISMap(BasemapStyle.ArcGISImagery))
+    val mapState = MapState(arcGISMap = ArcGISMap(BasemapStyle.ArcGISStreets))
     Map(
         modifier = Modifier.fillMaxSize(),
-        mapState = mapModel.mapState,
+        mapState = mapState,
     )
 }
