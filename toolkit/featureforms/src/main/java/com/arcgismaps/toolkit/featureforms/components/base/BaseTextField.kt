@@ -76,6 +76,7 @@ import com.arcgismaps.toolkit.featureforms.utils.isIntegerType
  * @param placeholder the text to be displayed when the text field input text is empty.
  * @param singleLine when set to true, this text field becomes a single horizontally scrolling
  * text field instead of wrapping onto multiple lines.
+ * @param fieldType the FieldType of the value, which is backed by a Feature attribute.
  * @param trailingIcon the icon to be displayed at the end of the text field container.
  * @param supportingText supporting text to be displayed below the text field.
  * @param onFocusChange callback that is triggered when the focus state for this text field changes.
