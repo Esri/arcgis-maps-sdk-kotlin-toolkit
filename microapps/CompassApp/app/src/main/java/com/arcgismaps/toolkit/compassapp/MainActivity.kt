@@ -21,37 +21,94 @@ package com.arcgismaps.toolkit.compassapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.toolkit.compassapp.screens.MainScreen
-import com.arcgismaps.toolkit.compassapp.ui.theme.CompassAppTheme
+import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.BasemapStyle
+import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.toolkit.compassapp.screens.MapViewModel
+import com.arcgismaps.toolkit.compassapp.screens.MapViewModelFactory
+import com.arcgismaps.toolkit.compassapp.ui.theme.AppTheme
+import com.arcgismaps.toolkit.composablemap.ComposableMap
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // authentication with an API key or named user is
-        // required to access basemaps and other location services
-        ArcGISEnvironment.apiKey =
-            ApiKey.create(BuildConfig.API_KEY)
+        // set an API key
+        ArcGISEnvironment.apiKey = ApiKey.create(BuildConfig.API_KEY)
         setContent {
-            CompassAppTheme {
-                CompassApp()
+            // define a theme
+            AppTheme {
+                // set your Composable content
+                LocationApp()
             }
         }
     }
 }
 
 @Composable
-fun CompassApp() {
-    MainScreen()
+fun LocationApp() {
+
+    /////////
+    // 1. Display some text
+    /////////
+//    Column(
+//        horizontalAlignment = Alignment.CenterHorizontally,
+//        verticalArrangement = Arrangement.Center
+//    ) {
+//        // TODO maybe add an image
+//        Text(text = "Welcome to Dev Summit 2023!")
+//    }
+
+    /////////
+    // 2. display a map
+    /////////
+    // create an ArcGISMap with a basemap style
+    val map = ArcGISMap(BasemapStyle.OsmStreets)
+    // instantiate a MapViewModel using the factory
+    val mapViewModel = viewModel<MapViewModel>(factory = MapViewModelFactory(map))
+    // show a composable map using the mapViewModel
+    ComposableMap(
+        modifier = Modifier.fillMaxSize(),
+        mapInterface = mapViewModel
+    )
+
+    // set the composable map's viewpoint to Germany
+    mapViewModel.setViewpoint(Viewpoint(51.852, 10.477, 10e6))
+
+    /////////
+    //
 }
 
-@Preview(showBackground = true)
+@Preview(showSystemUi = true)
 @Composable
-fun AppPreview() {
-    CompassAppTheme {
-        CompassApp()
+fun LocationAppPreview() {
+    AppTheme {
+        LocationApp()
     }
 }
+
+// just map
+//@Composable
+//fun LocationApp() {
+//    // create an ArcGISMap with a basemap style
+//    val map = ArcGISMap(BasemapStyle.OsmStreets)
+//    // instantiate a MapViewModel using the factory
+//    val mapViewModel = viewModel<MapViewModel>(factory = MapViewModelFactory(map))
+//    // show a composable map using the mapViewModel
+//    ComposableMap(
+//        modifier = Modifier.fillMaxSize(),
+//        mapInterface = mapViewModel
+//    )
+//    // set the composable map's viewpoint to Germany
+//    mapViewModel.setViewpoint(Viewpoint(51.852, 10.477, 10e6))
+//}

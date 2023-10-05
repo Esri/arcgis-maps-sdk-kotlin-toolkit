@@ -32,6 +32,12 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import com.arcgismaps.toolkit.compassapp.ui.theme.Pink40
+import com.arcgismaps.toolkit.compassapp.ui.theme.Pink80
+import com.arcgismaps.toolkit.compassapp.ui.theme.Purple40
+import com.arcgismaps.toolkit.compassapp.ui.theme.Purple80
+import com.arcgismaps.toolkit.compassapp.ui.theme.PurpleGrey40
+import com.arcgismaps.toolkit.compassapp.ui.theme.PurpleGrey80
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -43,7 +49,7 @@ private val LightColorScheme = lightColorScheme(
     primary = Purple40,
     secondary = PurpleGrey40,
     tertiary = Pink40
-    
+
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
     surface = Color(0xFFFFFBFE),
@@ -56,7 +62,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun CompassAppTheme(
+fun AppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
@@ -67,7 +73,7 @@ fun CompassAppTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-        
+
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
@@ -79,10 +85,10 @@ fun CompassAppTheme(
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
         }
     }
-    
+
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
+//        typography = Typography,
         content = content
     )
 }
