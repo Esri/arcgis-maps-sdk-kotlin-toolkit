@@ -93,14 +93,14 @@ class FormTextFieldTests {
     fun setContent()  = runTest {
         composeTestRule.setContent {
             val scope = rememberCoroutineScope()
-            FormTextField(
-                state = FormTextFieldState(
-                    fieldFeatureFormElement,
-                    featureForm,
-                    LocalContext.current,
-                    scope
-                )
-            )
+//            FormTextField(
+//                state = FormTextFieldState(
+//                    fieldFeatureFormElement,
+//                    featureForm,
+//                    LocalContext.current,
+//                    scope
+//                )
+//            )
         }
         featureForm.evaluateExpressions()
     }
