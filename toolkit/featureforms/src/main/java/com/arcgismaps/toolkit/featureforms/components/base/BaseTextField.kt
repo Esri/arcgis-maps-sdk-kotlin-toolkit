@@ -53,8 +53,7 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.data.FieldType
 import com.arcgismaps.toolkit.featureforms.utils.ClearFocus
 import com.arcgismaps.toolkit.featureforms.utils.PlaceholderTransformation
-import com.arcgismaps.toolkit.featureforms.utils.isFloatingPoint
-import com.arcgismaps.toolkit.featureforms.utils.isIntegerType
+import com.arcgismaps.toolkit.featureforms.utils.isNumeric
 
 /**
  * A base text field component built on top of an [OutlinedTextField] that provides a standard for
@@ -202,9 +201,7 @@ internal fun BaseTextField(
             ),
             keyboardOptions = KeyboardOptions.Default.copy(
                 imeAction = if (singleLine) ImeAction.Done else ImeAction.None,
-                keyboardType = if (fieldType.isIntegerType) KeyboardType.NumberPassword
-                else if (fieldType.isFloatingPoint) KeyboardType.Number
-                else KeyboardType.Ascii
+                keyboardType = if (fieldType.isNumeric) KeyboardType.Number else KeyboardType.Ascii
             ),
             singleLine = singleLine,
             interactionSource = interactionSource,
