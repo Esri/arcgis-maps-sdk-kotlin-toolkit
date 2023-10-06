@@ -22,13 +22,14 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -42,6 +43,7 @@ import com.arcgismaps.toolkit.compassapp.screens.MapViewModel
 import com.arcgismaps.toolkit.compassapp.screens.MapViewModelFactory
 import com.arcgismaps.toolkit.compassapp.ui.theme.AppTheme
 import com.arcgismaps.toolkit.composablemap.ComposableMap
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,26 +78,38 @@ fun LocationApp() {
     /////////
     // 2. display a map
     /////////
-    // create an ArcGISMap with a basemap style
-    val map = ArcGISMap(BasemapStyle.OsmStreets)
-    val locationDataSource = SystemLocationDataSource()
-    LaunchedEffect(Unit) {
-        val result = locationDataSource.start()
-        Log.d("LocationApp", "Location data source successfully started: ${result.isSuccess}")
-        result.onFailure {
-            Log.d("LocationApp", "Location data source error: $it")
-        }
-    }
-    // instantiate a MapViewModel using the factory
-    val mapViewModel = viewModel<MapViewModel>(factory = MapViewModelFactory(map, locationDataSource = locationDataSource))
-    // show a composable map using the mapViewModel
-    ComposableMap(
-        modifier = Modifier.fillMaxSize(),
-        mapInterface = mapViewModel
-    )
+    // create an ArcGISMap with a basemap style, and a location data source for displaying the current location
+    val map = remember { ArcGISMap(BasemapStyle.OsmStreets) }
+    val locationDataSource = remember { SystemLocationDataSource() }
 
-    // set the composable map's viewpoint to Germany
-    mapViewModel.setViewpoint(Viewpoint(51.852, 10.477, 10e6))
+    // instantiate a MapViewModel using the factory
+    val mapViewModel =
+        viewModel<MapViewModel>(factory = MapViewModelFactory(map, locationDataSource = locationDataSource))
+
+    val lastLocation = locationDataSource.locationChanged.collectAsState(initial = null)
+
+    LaunchedEffect(Unit) {
+        // start the location data source
+        locationDataSource.start()
+            .onFailure { Log.i("LocationApp", "Failed to start location data source") }
+
+        // set the composable map's viewpoint to Germany
+        mapViewModel.setViewpoint(Viewpoint(51.852, 10.477, 10e6))
+    }
+
+    Column { // TODO: align button?
+        Button(onClick = {
+                lastLocation.value?.let {
+                    mapViewModel.setViewpoint(Viewpoint(it.position, 10e3))
+                }
+            }
+        ) { Text("Zoom to current location") }
+        // show a composable map using the mapViewModel
+        ComposableMap(
+            modifier = Modifier.fillMaxSize(),
+            mapInterface = mapViewModel
+        )
+    }
 
     /////////
     //
