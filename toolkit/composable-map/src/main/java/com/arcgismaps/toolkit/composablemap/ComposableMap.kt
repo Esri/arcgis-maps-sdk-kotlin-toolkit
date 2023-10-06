@@ -35,6 +35,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.arcgismaps.location.SystemLocationDataSource
 import com.arcgismaps.mapping.ViewpointType
 import com.arcgismaps.mapping.view.MapView
 import kotlinx.coroutines.launch
@@ -50,6 +51,7 @@ public fun ComposableMap(
     val lifecycleOwner = LocalLifecycleOwner.current
 
     val map by mapInterface.map.collectAsState()
+    val locationDataSource by mapInterface.locationDataSource.collectAsState()
     val insets by mapInterface.insets.collectAsState()
     val mapView = remember {
         MapView(context).also { view ->
@@ -108,6 +110,7 @@ public fun ComposableMap(
     }
 
     mapView.map = map
+    mapView.locationDisplay.dataSource = locationDataSource ?: SystemLocationDataSource()
     mapView.setViewInsets(
         left = insets.start,
         right = insets.end,

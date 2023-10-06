@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.composablemap
 
+import com.arcgismaps.location.LocationDataSource
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.view.DoubleTapEvent
@@ -137,6 +138,8 @@ public interface MapInterface : MapEvents {
      */
     public val map: StateFlow<ArcGISMap>
 
+    public val locationDataSource: StateFlow<LocationDataSource?>
+
     /**
      * Insets to apply to the Box which contains the [ComposableMap]
      */
@@ -156,8 +159,10 @@ public interface MapInterface : MapEvents {
 /**
  * Factory function for the default implementation of [MapInterface]
  */
-public fun MapInterface(arcGISMap: ArcGISMap, mapInsets: MapInsets = MapInsets()): MapInterface =
-    MapInterfaceImpl(arcGISMap, mapInsets)
+public fun MapInterface(arcGISMap: ArcGISMap,
+                        mapInsets: MapInsets = MapInsets(),
+                        locationDataSource: LocationDataSource? = null): MapInterface =
+    MapInterfaceImpl(arcGISMap, mapInsets, locationDataSource)
 
 /**
  * A default implementation for the [MapInterface]
@@ -165,11 +170,15 @@ public fun MapInterface(arcGISMap: ArcGISMap, mapInsets: MapInsets = MapInsets()
 
 public class MapInterfaceImpl(
     arcGISMap: ArcGISMap,
-    mapInsets: MapInsets = MapInsets()
+    mapInsets: MapInsets = MapInsets(),
+    locationDataSource: LocationDataSource? = null
 ) : MapInterface {
 
     private val _map: MutableStateFlow<ArcGISMap> = MutableStateFlow(arcGISMap)
     override val map: StateFlow<ArcGISMap> = _map.asStateFlow()
+
+    private val _locationDataSource: MutableStateFlow<LocationDataSource?> = MutableStateFlow(locationDataSource)
+    override val locationDataSource: StateFlow<LocationDataSource?> = _locationDataSource.asStateFlow()
 
     private val _insets: MutableStateFlow<MapInsets> = MutableStateFlow(mapInsets)
     override val insets: StateFlow<MapInsets> = _insets.asStateFlow()

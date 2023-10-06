@@ -19,6 +19,7 @@
 package com.arcgismaps.toolkit.compassapp
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
@@ -26,12 +27,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.location.SystemLocationDataSource
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Viewpoint
@@ -45,6 +48,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         // set an API key
         ArcGISEnvironment.apiKey = ApiKey.create(BuildConfig.API_KEY)
+        ArcGISEnvironment.applicationContext = this
         setContent {
             // define a theme
             AppTheme {
@@ -74,8 +78,16 @@ fun LocationApp() {
     /////////
     // create an ArcGISMap with a basemap style
     val map = ArcGISMap(BasemapStyle.OsmStreets)
+    val locationDataSource = SystemLocationDataSource()
+    LaunchedEffect(Unit) {
+        val result = locationDataSource.start()
+        Log.d("LocationApp", "Location data source successfully started: ${result.isSuccess}")
+        result.onFailure {
+            Log.d("LocationApp", "Location data source error: $it")
+        }
+    }
     // instantiate a MapViewModel using the factory
-    val mapViewModel = viewModel<MapViewModel>(factory = MapViewModelFactory(map))
+    val mapViewModel = viewModel<MapViewModel>(factory = MapViewModelFactory(map, locationDataSource = locationDataSource))
     // show a composable map using the mapViewModel
     ComposableMap(
         modifier = Modifier.fillMaxSize(),
