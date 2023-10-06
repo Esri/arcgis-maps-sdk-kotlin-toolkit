@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.BottomSheetDefaults
@@ -51,9 +50,9 @@ import androidx.compose.ui.semantics.dismiss
 import androidx.compose.ui.semantics.expand
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
+import kotlinx.coroutines.launch
 import java.lang.Float.max
 import kotlin.math.roundToInt
-import kotlinx.coroutines.launch
 
 /**
  * <a href="https://m3.material.io/components/bottom-sheets/overview" class="external" target="_blank">Material Design standard bottom sheet scaffold</a>.
@@ -206,18 +205,18 @@ fun rememberStandardBottomSheetState(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun StandardBottomSheet(
+fun StandardBottomSheet(
     state: SheetState,
     peekHeight: Dp,
     expansionHeight: SheetExpansionHeight,
-    sheetSwipeEnabled: Boolean,
     layoutHeight: Float,
-    shape: Shape,
-    containerColor: Color,
-    contentColor: Color,
-    tonalElevation: Dp,
-    shadowElevation: Dp,
-    dragHandle: @Composable (() -> Unit)?,
+    sheetSwipeEnabled: Boolean = true,
+    shape: Shape = BottomSheetDefaults.ExpandedShape,
+    containerColor: Color = BottomSheetDefaults.ContainerColor,
+    contentColor: Color = contentColorFor(containerColor),
+    tonalElevation: Dp = BottomSheetDefaults.Elevation,
+    shadowElevation: Dp = BottomSheetDefaults.Elevation,
+    dragHandle: @Composable (() -> Unit)? = { BottomSheetDefaults.DragHandle() },
     content: @Composable ColumnScope.() -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -413,6 +412,28 @@ private fun BottomSheetScaffoldAnchorChangeHandler(
         } else {
             // Snap to the new offset value of the target if no animation was running
             snapTo(newTarget)
+        }
+    }
+}
+
+@Composable
+fun StandardBottomSheetLayout(
+    modifier: Modifier = Modifier,
+    sheetOffset: () -> Float,
+    bottomSheet: @Composable (layoutHeight: Int) -> Unit,
+) {
+    SubcomposeLayout(modifier = modifier) { constraints ->
+        val layoutWidth = constraints.maxWidth
+        val layoutHeight = constraints.maxHeight
+
+        val sheetPlaceable = subcompose(0) {
+            bottomSheet(layoutHeight)
+        }[0].measure(constraints)
+        val sheetOffsetY = sheetOffset().roundToInt()
+        val sheetOffsetX = Integer.max(0, (layoutWidth - sheetPlaceable.width) / 2)
+
+        layout(layoutWidth, layoutHeight) {
+            sheetPlaceable.placeRelative(sheetOffsetX, sheetOffsetY)
         }
     }
 }
