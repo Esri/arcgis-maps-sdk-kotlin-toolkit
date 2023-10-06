@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.featureforms.FeatureForm
+import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
@@ -60,6 +61,9 @@ class MapViewModel @Inject constructor(
                     feature.load().onSuccess {
                         try {
                             val featureForm = FeatureForm(feature, layer.featureFormDefinition!!)
+                            featureForm.elements.filterIsInstance<FieldFormElement>().forEach {
+                                println("FieldFormElement ${it.label} and description ${it.description} has domain ${it.domain}")
+                            }
                             // update the FeatureFormState's FeatureForm
                             setFeatureForm(featureForm)
                             // set the FeatureFormState to an editing state to bring up the

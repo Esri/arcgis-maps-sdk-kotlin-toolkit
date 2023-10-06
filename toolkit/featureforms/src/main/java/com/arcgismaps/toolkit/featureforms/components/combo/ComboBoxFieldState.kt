@@ -36,6 +36,7 @@ import com.arcgismaps.toolkit.featureforms.components.base.FieldProperties
 import com.arcgismaps.toolkit.featureforms.components.text.TextFieldProperties
 import com.arcgismaps.toolkit.featureforms.utils.editValue
 import com.arcgismaps.toolkit.featureforms.utils.fieldType
+import com.arcgismaps.toolkit.featureforms.utils.rangeDomain
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -47,12 +48,12 @@ internal class ComboBoxFieldProperties(
     value: StateFlow<String>,
     required: StateFlow<Boolean>,
     editable: StateFlow<Boolean>,
-    fieldType: FieldType,
-    domain: Domain?,
+    val fieldType: FieldType,
+    val domain: Domain?,
     val codedValues: List<CodedValue>,
     val showNoValueOption: FormInputNoValueOption,
     val noValueLabel: String
-) : FieldProperties(label, placeholder, description, value, required, editable, fieldType, domain)
+) : FieldProperties(label, placeholder, description, value, required, editable)
 
 /**
  * A class to handle the state of a [ComboBoxField]. Essential properties are inherited from the
@@ -94,6 +95,16 @@ internal class ComboBoxFieldState(
      * The custom label to use if [showNoValueOption] is enabled.
      */
     val noValueLabel: String = properties.noValueLabel
+    
+    /**
+     * Property that provides the domain of the field's value, if any.
+     */
+    val domain: Domain? = properties.domain
+    
+    /**
+     * The FieldType of the associated feature's attribute.
+     */
+    val fieldType: FieldType = properties.fieldType
 
     override val placeholder = if (isRequired.value) {
         context.getString(R.string.enter_value)
@@ -122,12 +133,12 @@ internal class ComboBoxFieldState(
                         description = formElement.description,
                         value = formElement.value,
                         editable = formElement.isEditable,
-                        fieldType = form.fieldType(formElement),
-                        domain = formElement.domain,
                         required = formElement.isRequired,
                         codedValues = input.codedValues,
                         showNoValueOption = input.noValueOption,
-                        noValueLabel = input.noValueLabel
+                        noValueLabel = input.noValueLabel,
+                        fieldType = form.fieldType(formElement),
+                        domain = form.rangeDomain(formElement)
                     ),
                     initialValue = list[0],
                     context = context,
@@ -160,11 +171,11 @@ internal fun rememberComboBoxFieldState(
             value = field.value,
             editable = field.isEditable,
             required = field.isRequired,
-            fieldType = form.fieldType(field),
-            domain = field.domain,
             codedValues = input.codedValues,
             showNoValueOption = input.noValueOption,
-            noValueLabel = input.noValueLabel
+            noValueLabel = input.noValueLabel,
+            fieldType = form.fieldType(field),
+            domain = form.rangeDomain(field)
         ),
         context = context,
         scope = scope,

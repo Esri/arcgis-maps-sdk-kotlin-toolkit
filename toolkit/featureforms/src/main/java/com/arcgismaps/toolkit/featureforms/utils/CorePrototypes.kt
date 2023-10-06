@@ -18,6 +18,7 @@ package com.arcgismaps.toolkit.featureforms.utils
 
 import com.arcgismaps.data.Feature
 import com.arcgismaps.data.FieldType
+import com.arcgismaps.data.RangeDomain
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FeatureFormDefinition
 import com.arcgismaps.mapping.featureforms.FieldFormElement
@@ -57,6 +58,9 @@ internal fun FeatureForm.fieldType(element: FieldFormElement): FieldType {
     return fieldType
 }
 
+internal fun FeatureForm.rangeDomain(element: FieldFormElement): RangeDomain? =
+    feature.featureTable?.getField(element.fieldName)?.domain as? RangeDomain
+
 internal val FieldType.isNumeric: Boolean
     get() {
         return isFloatingPoint || isIntegerType
@@ -80,6 +84,61 @@ internal val FieldType.isIntegerType: Boolean
             else -> false
         }
     }
+
+/**
+ * cast the min and max values to the type indicated by the RangeDomain.fieldType
+ * Then return those values as a tuple of Doubles.
+ */
+
+internal val RangeDomain.asDoubleTuple: MinMax<Double>
+    get() {
+    return when (fieldType) {
+        FieldType.Int16 -> {
+            MinMax((minValue as? Int)?.toDouble(), (maxValue as? Int)?.toDouble())
+        }
+        FieldType.Int32 -> {
+            MinMax((minValue as? Int)?.toDouble(), (maxValue as? Int)?.toDouble())  
+        }
+        FieldType.Int64 -> {
+            MinMax((minValue as? Long)?.toDouble(), (maxValue as? Long)?.toDouble())
+        }
+        FieldType.Float32 -> {
+            MinMax((minValue as? Float)?.toDouble(), (maxValue as? Float)?.toDouble())
+        }
+        FieldType.Float64 -> {
+            MinMax(minValue as? Double, maxValue as? Double)
+        }
+        else -> throw IllegalArgumentException("RangeDomain must have a numeric field type")
+    }
+}
+
+/**
+ * cast the min and max values to the type indicated by the RangeDomain.fieldType
+ * Then return those values as a tuple of Longs.
+ */
+internal val RangeDomain.asLongTuple: MinMax<Long>
+    get() {
+        return when (fieldType) {
+            FieldType.Int16 -> {
+                MinMax((minValue as? Int)?.toLong(), (maxValue as? Int)?.toLong())
+            }
+            FieldType.Int32 -> {
+                MinMax((minValue as? Int)?.toLong(), (maxValue as? Int)?.toLong())
+            }
+            FieldType.Int64 -> {
+                MinMax(minValue as? Long, maxValue as? Long)
+            }
+            FieldType.Float32 -> {
+                MinMax((minValue as? Float)?.toLong(), (maxValue as? Float)?.toLong())
+            }
+            FieldType.Float64 -> {
+                MinMax((minValue as? Double)?.toLong(), (maxValue as? Double)?.toLong())
+            }
+            else -> throw IllegalArgumentException("RangeDomain must have a numeric field type")
+        }
+    }
+
+internal data class MinMax<T: Number>(val min: T?, val max: T?)
 
 private fun Feature.castAndSetAttributeValue(value: Any?, key: String) {
     val field = featureTable?.getField(key) ?: run {

@@ -35,18 +35,20 @@ import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.FieldProperties
+import com.arcgismaps.toolkit.featureforms.utils.asDoubleTuple
+import com.arcgismaps.toolkit.featureforms.utils.asLongTuple
 import com.arcgismaps.toolkit.featureforms.utils.editValue
 import com.arcgismaps.toolkit.featureforms.utils.fieldType
 import com.arcgismaps.toolkit.featureforms.utils.isFloatingPoint
 import com.arcgismaps.toolkit.featureforms.utils.isIntegerType
 import com.arcgismaps.toolkit.featureforms.utils.isNumeric
+import com.arcgismaps.toolkit.featureforms.utils.rangeDomain
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
-import kotlin.math.ulp
 
 internal class TextFieldProperties(
     label: String,
@@ -55,12 +57,12 @@ internal class TextFieldProperties(
     value: StateFlow<String>,
     required: StateFlow<Boolean>,
     editable: StateFlow<Boolean>,
-    fieldType: FieldType,
-    domain: Domain?,
+    val fieldType: FieldType,
+    val domain: Domain?,
     val singleLine: Boolean,
     val minLength: Int,
     val maxLength: Int,
-) : FieldProperties(label, placeholder, description, value, required, editable, fieldType, domain)
+) : FieldProperties(label, placeholder, description, value, required, editable)
 
 /**
  * A class to handle the state of a [FormTextField]. Essential properties are inherited from the
@@ -112,7 +114,17 @@ internal class FormTextFieldState(
 
     private val _hasError = mutableStateOf(false)
     val hasError: State<Boolean> = _hasError
-
+    
+    /**
+     * Property that provides the domain of the field's value, if any.
+     */
+    val domain: Domain? = properties.domain
+    
+    /**
+     * The FieldType of the associated feature's attribute.
+     */
+    val fieldType: FieldType = properties.fieldType
+    
     private var _errorMessage: String = ""
 
     // build helper text
@@ -136,7 +148,6 @@ internal class FormTextFieldState(
             } else {
                 ""
             }
-
         } else {
             if (minLength > 0 && maxLength > 0) {
                 if (minLength == maxLength) {
@@ -171,22 +182,36 @@ internal class FormTextFieldState(
     }
     
     private fun validateNumericRange(value: String): Boolean {
+        require(fieldType.isNumeric)
         return if (domain != null && domain is RangeDomain) {
-            val min = domain.minValue as? Number
-            val max = domain.maxValue as? Number
-        
-            // format as the numeric types with the largest space
-            val numberVal: Number = if (fieldType.isIntegerType) value.toLong() else value.toDouble()
-            if (min != null && max != null) {
-                min <= numberVal && numberVal <= max
-            } else if (min != null) {
-                min >= numberVal
-            } else if (max != null) {
-                numberVal <= max
+            if (fieldType.isIntegerType) {
+                val (min, max) = domain.asLongTuple
+                val numberVal = value.toLong()
+                if (min != null && max != null) {
+                    numberVal in min..max
+                } else if (min != null) {
+                    min <= numberVal
+                } else if (max != null) {
+                    numberVal <= max
+                } else {
+                    // not likely to happen.
+                    true
+                }
             } else {
-                // not likely to happen.
-                true
+                val (min, max) = domain.asDoubleTuple
+                val numberVal = value.toDouble()
+                if (min != null && max != null) {
+                    numberVal in min..max
+                } else if (min != null) {
+                    min <= numberVal
+                } else if (max != null) {
+                    numberVal <= max
+                } else {
+                    // not likely to happen.
+                    true
+                }
             }
+            
         } else {
             true
         }
@@ -232,7 +257,7 @@ internal class FormTextFieldState(
             formElement: FieldFormElement,
             form: FeatureForm,
             context: Context,
-            scope: CoroutineScope
+            scope: CoroutineScope,
         ): Saver<FormTextFieldState, Any> = listSaver(
             save = {
                 listOf(
@@ -283,7 +308,7 @@ internal fun rememberFormTextFieldState(
     maxLength: Int,
     form: FeatureForm,
     context: Context,
-    scope: CoroutineScope
+    scope: CoroutineScope,
 ): FormTextFieldState = rememberSaveable(
     saver = FormTextFieldState.Saver(field, form, context, scope)
 ) {
@@ -296,8 +321,8 @@ internal fun rememberFormTextFieldState(
             editable = field.isEditable,
             required = field.isRequired,
             singleLine = field.input is TextBoxFormInput,
-            domain = field.domain,
             fieldType = form.fieldType(field),
+            domain = form.rangeDomain(field),
             minLength = minLength,
             maxLength = maxLength,
         ),
@@ -321,34 +346,4 @@ private fun Number.format(digits: Int = 2): String =
         is Double -> "%.${digits}f".format(this)
         is Float -> "%.${digits}f".format(this)
         else -> "$this"
-    }
-
-/**
- * Non intrinsic (primitive) floating point comparison, and fixed comparison thrown in to boot.
- */
-private operator fun Number.compareTo(other: Number): Int =
-    // do this twice,
-    // can't use a Float ulp (unit of least precision) to represent the ulp of a Double!
-    if (this is Double) {
-        val upper = this + ulp
-        val lower = this - ulp
-        if (lower < other && other < upper) {
-            0
-        } else if (this < other) {
-            -1
-        } else {
-            1
-        }
-    } else if (this is Float) {
-        val upper = this + ulp
-        val lower = this - ulp
-        if (lower < other && other < upper) {
-            0
-        } else if (this < other) {
-            -1
-        } else {
-            1
-        }
-    } else {
-        (this.toLong()).compareTo(other)
     }

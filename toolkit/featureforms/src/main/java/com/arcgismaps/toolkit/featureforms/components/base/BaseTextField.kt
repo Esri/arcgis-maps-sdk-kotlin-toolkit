@@ -202,7 +202,9 @@ internal fun BaseTextField(
             ),
             keyboardOptions = KeyboardOptions.Default.copy(
                 imeAction = if (singleLine) ImeAction.Done else ImeAction.None,
-                keyboardType = if (fieldType.isIntegerType) KeyboardType.NumberPassword else if (fieldType.isFloatingPoint) KeyboardType.Number else KeyboardType.Ascii
+                keyboardType = if (fieldType.isIntegerType) KeyboardType.NumberPassword
+                else if (fieldType.isFloatingPoint) KeyboardType.Number
+                else KeyboardType.Ascii
             ),
             singleLine = singleLine,
             interactionSource = interactionSource,
