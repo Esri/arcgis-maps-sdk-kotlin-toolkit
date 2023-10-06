@@ -68,15 +68,11 @@ dependencyResolutionManagement {
             version("mapsSdk", versionAndBuild)
             library("mapsSdk", "com.esri", "arcgis-maps-kotlin").versionRef("mapsSdk")
         }
-
-//        create("sdklibs") {
-//            from(files("../../devtopia/kotlin/android-api/gradle/sdklibs.versions.toml"))
-//        }
     }
 }
 
 var includedProjects = projects.flatMap { listOf(":$it", ":$it-app") }.toTypedArray()
-//includeBuild("../../devtopia/kotlin/android-api")
+
 include(*includedProjects)
 include(":bom")
 include(":composable-map")
