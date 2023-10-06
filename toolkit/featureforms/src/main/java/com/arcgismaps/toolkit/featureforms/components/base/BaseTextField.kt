@@ -90,7 +90,7 @@ internal fun BaseTextField(
     label: String,
     placeholder: String,
     singleLine: Boolean,
-    keyboardType: KeyboardType,
+    keyboardType: KeyboardType = KeyboardType.Ascii,
     trailingIcon: ImageVector? = null,
     supportingText: @Composable (ColumnScope.() -> Unit)? = null,
     onFocusChange: ((Boolean) -> Unit)? = null,

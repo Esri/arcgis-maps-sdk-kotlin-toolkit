@@ -71,6 +71,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.base.BaseTextField
+import com.arcgismaps.toolkit.featureforms.utils.isNumeric
 
 @Composable
 internal fun ComboBoxField(state: ComboBoxFieldState, modifier: Modifier = Modifier) {
@@ -90,7 +91,6 @@ internal fun ComboBoxField(state: ComboBoxFieldState, modifier: Modifier = Modif
         placeholder = state.placeholder,
         singleLine = true,
         trailingIcon = Icons.Outlined.List,
-        keyboardType = KeyboardType.Ascii,
         supportingText = {
             Text(
                 text = state.description,
@@ -108,6 +108,11 @@ internal fun ComboBoxField(state: ComboBoxFieldState, modifier: Modifier = Modif
             description = state.description,
             isRequired = isRequired,
             noValueOption = state.showNoValueOption,
+            keyboardType = if (state.fieldType.isNumeric) {
+                KeyboardType.Number
+            } else {
+                KeyboardType.Ascii
+            },
             noValueLabel = state.noValueLabel.ifEmpty { stringResource(R.string.no_value) },
             onValueChange = {
                 state.onValueChanged(it)
@@ -135,6 +140,7 @@ internal fun ComboBoxDialog(
     isRequired: Boolean,
     noValueOption: FormInputNoValueOption,
     noValueLabel: String,
+    keyboardType: KeyboardType,
     onValueChange: (String) -> Unit,
     onDismissRequest: () -> Unit
 ) {
@@ -189,7 +195,8 @@ internal fun ComboBoxDialog(
                             },
                             singleLine = true,
                             keyboardOptions = KeyboardOptions.Default.copy(
-                                imeAction = ImeAction.Done
+                                imeAction = ImeAction.Done,
+                                keyboardType = keyboardType
                             ),
                             shape = RoundedCornerShape(15.dp),
                             colors = TextFieldDefaults.colors(
@@ -266,6 +273,7 @@ private fun ComboBoxDialogPreview() {
         noValueOption = FormInputNoValueOption.Show,
         noValueLabel = "No Value",
         onValueChange = {},
-        onDismissRequest = {}
+        onDismissRequest = {},
+        keyboardType = KeyboardType.Ascii
     )
 }
