@@ -127,7 +127,7 @@ public fun ComposableMap(
         launch {
             mapInterface.viewpoint.collect(DuplexFlow.Type.Write) {
                 it?.let {
-                    mapView.setViewpoint(it)
+                    mapView.setViewpointAnimated(it)
                 }
             }
         }
