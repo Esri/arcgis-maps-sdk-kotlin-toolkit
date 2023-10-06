@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.featureforms.utils
 
+import com.arcgismaps.data.Domain
 import com.arcgismaps.data.Feature
 import com.arcgismaps.data.FieldType
 import com.arcgismaps.data.RangeDomain
@@ -58,8 +59,8 @@ internal fun FeatureForm.fieldType(element: FieldFormElement): FieldType {
     return fieldType
 }
 
-internal fun FeatureForm.rangeDomain(element: FieldFormElement): RangeDomain? =
-    feature.featureTable?.getField(element.fieldName)?.domain as? RangeDomain
+internal fun FeatureForm.domain(element: FieldFormElement): Domain? =
+    feature.featureTable?.getField(element.fieldName)?.domain
 
 internal val FieldType.isNumeric: Boolean
     get() {

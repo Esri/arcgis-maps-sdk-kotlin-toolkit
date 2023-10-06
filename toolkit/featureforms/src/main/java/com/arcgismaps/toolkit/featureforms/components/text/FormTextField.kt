@@ -28,7 +28,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.input.KeyboardType
 import com.arcgismaps.toolkit.featureforms.components.base.BaseTextField
+import com.arcgismaps.toolkit.featureforms.utils.isNumeric
 
 @Composable
 internal fun FormTextField(
@@ -61,7 +63,7 @@ internal fun FormTextField(
         label = label,
         placeholder = state.placeholder,
         singleLine = state.singleLine,
-        fieldType = state.fieldType,
+        keyboardType = if (state.fieldType.isNumeric) KeyboardType.Number else KeyboardType.Ascii,
         supportingText = {
             val textColor = if (hasError) MaterialTheme.colorScheme.error
             else MaterialTheme.colorScheme.onSurface

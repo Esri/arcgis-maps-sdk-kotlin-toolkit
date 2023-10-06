@@ -63,6 +63,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -89,7 +90,7 @@ internal fun ComboBoxField(state: ComboBoxFieldState, modifier: Modifier = Modif
         placeholder = state.placeholder,
         singleLine = true,
         trailingIcon = Icons.Outlined.List,
-        fieldType = state.fieldType,
+        keyboardType = KeyboardType.Ascii,
         supportingText = {
             Text(
                 text = state.description,

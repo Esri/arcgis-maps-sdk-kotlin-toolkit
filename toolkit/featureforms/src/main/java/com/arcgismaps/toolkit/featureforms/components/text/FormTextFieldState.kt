@@ -37,12 +37,12 @@ import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.FieldProperties
 import com.arcgismaps.toolkit.featureforms.utils.asDoubleTuple
 import com.arcgismaps.toolkit.featureforms.utils.asLongTuple
+import com.arcgismaps.toolkit.featureforms.utils.domain
 import com.arcgismaps.toolkit.featureforms.utils.editValue
 import com.arcgismaps.toolkit.featureforms.utils.fieldType
 import com.arcgismaps.toolkit.featureforms.utils.isFloatingPoint
 import com.arcgismaps.toolkit.featureforms.utils.isIntegerType
 import com.arcgismaps.toolkit.featureforms.utils.isNumeric
-import com.arcgismaps.toolkit.featureforms.utils.rangeDomain
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -116,12 +116,12 @@ internal class FormTextFieldState(
     val hasError: State<Boolean> = _hasError
     
     /**
-     * Property that provides the domain of the field's value, if any.
+     * The domain of the element's field.
      */
     val domain: Domain? = properties.domain
     
     /**
-     * The FieldType of the associated feature's attribute.
+     * The FieldType of the element's field.
      */
     val fieldType: FieldType = properties.fieldType
     
@@ -278,7 +278,7 @@ internal class FormTextFieldState(
                         value = formElement.value,
                         required = formElement.isRequired,
                         editable = formElement.isEditable,
-                        domain = formElement.domain,
+                        domain = form.domain(formElement) as? RangeDomain,
                         fieldType = form.fieldType(formElement),
                         singleLine = list[1] as Boolean,
                         minLength = list[2] as Int,
@@ -322,7 +322,7 @@ internal fun rememberFormTextFieldState(
             required = field.isRequired,
             singleLine = field.input is TextBoxFormInput,
             fieldType = form.fieldType(field),
-            domain = form.rangeDomain(field),
+            domain = form.domain(field) as? RangeDomain,
             minLength = minLength,
             maxLength = maxLength,
         ),

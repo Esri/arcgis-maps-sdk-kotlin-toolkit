@@ -50,10 +50,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.data.FieldType
 import com.arcgismaps.toolkit.featureforms.utils.ClearFocus
 import com.arcgismaps.toolkit.featureforms.utils.PlaceholderTransformation
-import com.arcgismaps.toolkit.featureforms.utils.isNumeric
 
 /**
  * A base text field component built on top of an [OutlinedTextField] that provides a standard for
@@ -75,7 +73,7 @@ import com.arcgismaps.toolkit.featureforms.utils.isNumeric
  * @param placeholder the text to be displayed when the text field input text is empty.
  * @param singleLine when set to true, this text field becomes a single horizontally scrolling
  * text field instead of wrapping onto multiple lines.
- * @param fieldType the FieldType of the value, which is backed by a Feature attribute.
+ * @param keyboardType the keyboard type to use depending on the FormFieldElement input type.
  * @param trailingIcon the icon to be displayed at the end of the text field container.
  * @param supportingText supporting text to be displayed below the text field.
  * @param onFocusChange callback that is triggered when the focus state for this text field changes.
@@ -92,7 +90,7 @@ internal fun BaseTextField(
     label: String,
     placeholder: String,
     singleLine: Boolean,
-    fieldType: FieldType,
+    keyboardType: KeyboardType,
     trailingIcon: ImageVector? = null,
     supportingText: @Composable (ColumnScope.() -> Unit)? = null,
     onFocusChange: ((Boolean) -> Unit)? = null,
@@ -201,7 +199,7 @@ internal fun BaseTextField(
             ),
             keyboardOptions = KeyboardOptions.Default.copy(
                 imeAction = if (singleLine) ImeAction.Done else ImeAction.None,
-                keyboardType = if (fieldType.isNumeric) KeyboardType.Number else KeyboardType.Ascii
+                keyboardType = keyboardType
             ),
             singleLine = singleLine,
             interactionSource = interactionSource,
