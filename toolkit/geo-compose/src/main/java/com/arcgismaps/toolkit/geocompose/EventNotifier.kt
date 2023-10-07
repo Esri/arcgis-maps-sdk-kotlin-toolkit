@@ -19,6 +19,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
  * email: contracts@esri.com
  */
 
-public class EventForwarder {
-    internal var drawStatus: MutableStateFlow<DrawStatus?> = MutableStateFlow(DrawStatus.InProgress)
+/**
+ * Here we hold on to all the backing properties of the public StateFlow properties exposed via
+ * GeoComposeState interface.
+ */
+public class EventNotifier {
+    internal val drawStatus: MutableStateFlow<DrawStatus?> = MutableStateFlow(DrawStatus.InProgress)
 }

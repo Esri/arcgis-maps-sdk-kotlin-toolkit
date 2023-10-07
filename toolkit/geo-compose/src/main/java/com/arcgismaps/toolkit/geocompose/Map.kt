@@ -64,11 +64,10 @@ public fun Map(
 
     LaunchedEffect(mapState) {
         mapView.drawStatus.collect {
-            mapState.eventForwarder.drawStatus.value = it
+            mapState.eventNotifier.drawStatus.value = it
         }
     }
 }
-
 
 @Preview
 @Composable
