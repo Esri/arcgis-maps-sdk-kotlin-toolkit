@@ -27,13 +27,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
+import com.arcgismaps.toolkit.geocompose.EventForwarder
 import com.arcgismaps.toolkit.geocompose.Map
 import com.arcgismaps.toolkit.geocompose.MapState
 
 @Composable
 fun MainScreen() {
-    
-    val mapState = MapState(arcGISMap = ArcGISMap(BasemapStyle.ArcGISStreets))
+    val eventForwarder = EventForwarder()
+    val mapState = MapState(arcGISMap = ArcGISMap(BasemapStyle.ArcGISStreets), eventForwarder)
     Map(modifier = Modifier.fillMaxSize(), mapState = mapState)
 
     LaunchedEffect(Unit) {
