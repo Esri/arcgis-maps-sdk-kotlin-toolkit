@@ -96,12 +96,12 @@ fun LocationApp() {
     val lastLocation = locationDataSource.locationChanged.collectAsState(initial = null)
 
     LaunchedEffect(Unit) {
+        // set the composable map's viewpoint to Germany
+        mapViewModel.setViewpoint(Viewpoint(51.852, 10.477, 10e6))
+
         // start the location data source
         locationDataSource.start()
             .onFailure { Log.i("LocationApp", "Failed to start location data source") }
-
-        // set the composable map's viewpoint to Germany
-        mapViewModel.setViewpoint(Viewpoint(51.852, 10.477, 10e6))
     }
 
     Scaffold(
