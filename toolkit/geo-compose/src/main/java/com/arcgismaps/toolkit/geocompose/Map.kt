@@ -19,6 +19,7 @@ package com.arcgismaps.toolkit.geocompose
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -28,6 +29,7 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.mapping.view.MapView
+import kotlinx.coroutines.launch
 
 @Composable
 public fun Map(modifier: Modifier = Modifier, mapState: MapState = MapState()) {
@@ -35,7 +37,6 @@ public fun Map(modifier: Modifier = Modifier, mapState: MapState = MapState()) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val mapView = remember { MapView(context) }
-    val map by mapState.arcGISMap.collectAsState()
 
     AndroidView(modifier = modifier, factory = { mapView })
 
@@ -47,8 +48,13 @@ public fun Map(modifier: Modifier = Modifier, mapState: MapState = MapState()) {
         }
     }
 
-    mapView.map = map
-
+    LaunchedEffect(mapState) {
+        launch {
+            mapState.arcGISMap.collect {
+                mapView.map = it
+            }
+        }
+    }
 }
 
 @Preview

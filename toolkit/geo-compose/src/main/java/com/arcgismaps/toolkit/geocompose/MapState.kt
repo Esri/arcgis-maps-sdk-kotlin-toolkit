@@ -27,22 +27,11 @@ import kotlinx.coroutines.flow.asStateFlow
  *
  * @since 200.3.0
  */
-public sealed interface MapState : GeoComposeState {
-    public val arcGISMap: StateFlow<ArcGISMap?>
-
-    public fun setArcGISMap(arcGISMap: ArcGISMap)
-}
-
-public fun MapState(arcGISMap: ArcGISMap? = null): MapState = MapStateImpl(arcGISMap)
-
-private class MapStateImpl(
-    arcGISMap: ArcGISMap?
-) : MapState {
-
+public class MapState(arcGISMap: ArcGISMap? = null) : GeoComposeState() {
     private val _arcGISMap: MutableStateFlow<ArcGISMap?> = MutableStateFlow(null)
-    override val arcGISMap: StateFlow<ArcGISMap?> = _arcGISMap.asStateFlow()
+    public val arcGISMap: StateFlow<ArcGISMap?> = _arcGISMap.asStateFlow()
 
-    override fun setArcGISMap(arcGISMap: ArcGISMap){
+    public fun setArcGISMap(arcGISMap: ArcGISMap){
         _arcGISMap.value = arcGISMap
     }
 

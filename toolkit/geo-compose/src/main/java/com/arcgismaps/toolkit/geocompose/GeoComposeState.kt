@@ -22,13 +22,6 @@ package com.arcgismaps.toolkit.geocompose
  *
  * @since 200.3.0
  */
-public sealed interface GeoComposeState {
+public sealed class GeoComposeState {
     // TODO add implementation
 }
-
-public fun GeoComposeState(): GeoComposeState =
-    GeoComposeStateImpl()
-
-public open class GeoComposeStateImpl() : GeoComposeState {
-}
-
