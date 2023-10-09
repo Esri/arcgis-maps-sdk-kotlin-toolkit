@@ -32,7 +32,7 @@ import com.arcgismaps.toolkit.geocompose.MapState
 
 @Composable
 fun MainScreen() {
-    
+
     val mapState = MapState(arcGISMap = ArcGISMap(BasemapStyle.ArcGISStreets))
     Map(modifier = Modifier.fillMaxSize(), mapState = mapState)
 
@@ -44,7 +44,7 @@ fun MainScreen() {
 
     Button(onClick = {
         val newArcGISMap = ArcGISMap(BasemapStyle.ArcGISStreetsNight)
-        mapState.setArcGISMap(newArcGISMap)
+        mapState.arcGISMap.value = newArcGISMap
     }) {
         Text(text = "Toggle map to night")
     }

@@ -20,26 +20,11 @@ package com.arcgismaps.toolkit.geocompose
 
 import com.arcgismaps.mapping.ArcGISMap
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
-public sealed interface MapState : GeoComposeState {
-    public val arcGISMap: StateFlow<ArcGISMap?>
-    public fun setArcGISMap(arcGISMap: ArcGISMap)
-}
-
-public fun MapState(arcGISMap: ArcGISMap? = null): MapState = MapStateImpl(arcGISMap)
-
-private class MapStateImpl(arcGISMap: ArcGISMap?) : MapState, GeoComposeStateImpl() {
-
-    private val _arcGISMap: MutableStateFlow<ArcGISMap?> = MutableStateFlow(null)
-    override val arcGISMap: StateFlow<ArcGISMap?> = _arcGISMap.asStateFlow()
-
-    override fun setArcGISMap(arcGISMap: ArcGISMap){
-        _arcGISMap.value = arcGISMap
-    }
+public class MapState(arcGISMap: ArcGISMap? = null) : GeoComposeState() {
+    public val arcGISMap: MutableStateFlow<ArcGISMap?> = MutableStateFlow(null)
 
     init {
-        _arcGISMap.value = arcGISMap
+        this.arcGISMap.value = arcGISMap
     }
 }

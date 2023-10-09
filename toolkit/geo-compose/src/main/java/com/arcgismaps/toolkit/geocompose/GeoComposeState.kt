@@ -20,18 +20,12 @@ package com.arcgismaps.toolkit.geocompose
 
 import com.arcgismaps.mapping.view.DrawStatus
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
-public sealed interface GeoComposeState {
-    public val drawStatus: StateFlow<DrawStatus?>
-    public fun setDrawStatus(drawStatus: DrawStatus)
-}
+public sealed class GeoComposeState protected constructor() {
+    public val drawStatus: MutableStateFlow<DrawStatus?> = MutableStateFlow(null)
 
-internal open class GeoComposeStateImpl() : GeoComposeState {
-    private val _drawStatus: MutableStateFlow<DrawStatus?> = MutableStateFlow(null)
-    override val drawStatus: StateFlow<DrawStatus?> = _drawStatus.asStateFlow()
-    override fun setDrawStatus(drawStatus: DrawStatus) {
-        _drawStatus.value = drawStatus
+    init {
+        // add GeoComposeState init here..
     }
 }
+
