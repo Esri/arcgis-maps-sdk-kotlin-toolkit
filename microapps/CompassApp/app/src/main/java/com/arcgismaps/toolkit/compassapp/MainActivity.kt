@@ -22,6 +22,8 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
@@ -30,8 +32,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
@@ -67,49 +74,51 @@ fun LocationApp() {
     /////////
     // 1. Display some text
     /////////
-//    Column(
-//        horizontalAlignment = Alignment.CenterHorizontally,
-//        verticalArrangement = Arrangement.Center
-//    ) {
-//        // TODO maybe add an image
-//        Text(text = "Welcome to Dev Summit 2023!")
-//    }
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        // TODO: adjust text size based on the size of your device screen!! (emulator or physical)
+        Text(text = "Welcome to Dev Summit 2023!", fontSize = 30.sp, textAlign = TextAlign.Center)
+        Image(painter = painterResource(id = R.drawable.kotlin_hero), contentDescription = null)
+    }
 
     /////////
     // 2. display a map
     /////////
     // create an ArcGISMap with a basemap style, and a location data source for displaying the current location
-    val map = remember { ArcGISMap(BasemapStyle.OsmStreets) }
-    val locationDataSource = remember { SystemLocationDataSource() }
-
-    // instantiate a MapViewModel using the factory
-    val mapViewModel =
-        viewModel<MapViewModel>(factory = MapViewModelFactory(map, locationDataSource = locationDataSource))
-
-    val lastLocation = locationDataSource.locationChanged.collectAsState(initial = null)
-
-    LaunchedEffect(Unit) {
-        // start the location data source
-        locationDataSource.start()
-            .onFailure { Log.i("LocationApp", "Failed to start location data source") }
-
-        // set the composable map's viewpoint to Germany
-        mapViewModel.setViewpoint(Viewpoint(51.852, 10.477, 10e6))
-    }
-
-    Column { // TODO: align button?
-        Button(onClick = {
-                lastLocation.value?.let {
-                    mapViewModel.setViewpoint(Viewpoint(it.position, 10e3))
-                }
-            }
-        ) { Text("Zoom to current location") }
-        // show a composable map using the mapViewModel
-        ComposableMap(
-            modifier = Modifier.fillMaxSize(),
-            mapInterface = mapViewModel
-        )
-    }
+//    val map = remember { ArcGISMap(BasemapStyle.OsmStreets) }
+//    val locationDataSource = remember { SystemLocationDataSource() }
+//
+//    // instantiate a MapViewModel using the factory
+//    val mapViewModel =
+//        viewModel<MapViewModel>(factory = MapViewModelFactory(map, locationDataSource = locationDataSource))
+//
+//    val lastLocation = locationDataSource.locationChanged.collectAsState(initial = null)
+//
+//    LaunchedEffect(Unit) {
+//        // start the location data source
+//        locationDataSource.start()
+//            .onFailure { Log.i("LocationApp", "Failed to start location data source") }
+//
+//        // set the composable map's viewpoint to Germany
+//        mapViewModel.setViewpoint(Viewpoint(51.852, 10.477, 10e6))
+//    }
+//
+//    Column { // TODO: align button?
+//        Button(onClick = {
+//                lastLocation.value?.let {
+//                    mapViewModel.setViewpoint(Viewpoint(it.position, 10e3))
+//                }
+//            }
+//        ) { Text("Zoom to current location") }
+//        // show a composable map using the mapViewModel
+//        ComposableMap(
+//            modifier = Modifier.fillMaxSize(),
+//            mapInterface = mapViewModel
+//        )
+//    }
 
     /////////
     //
