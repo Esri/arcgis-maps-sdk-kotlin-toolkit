@@ -57,14 +57,15 @@ class MapViewModel @Inject constructor(
                     .firstOrNull()?.let { feature ->
                         feature.load().onSuccess {
                             try {
-                                (feature.featureTable?.layer as FeatureLayer).featureFormDefinition?.let { featureFormDefinition ->
-                                    val featureForm = FeatureForm(feature, featureFormDefinition)
-                                    // update the FeatureFormState's FeatureForm
-                                    setFeatureForm(featureForm)
-                                    // set the FeatureFormState to an editing state to bring up the
-                                    // FeatureForm UI
-                                    setTransactionState(EditingTransactionState.Editing)
-                                } ?: throw Exception("This feature does not have a FeatureFormDefinition")
+                                val featureForm = FeatureForm(
+                                    feature,
+                                    (feature.featureTable?.layer as FeatureLayer).featureFormDefinition!!
+                                )
+                                // update the FeatureFormState's FeatureForm
+                                setFeatureForm(featureForm)
+                                // set the FeatureFormState to an editing state to bring up the
+                                // FeatureForm UI
+                                setTransactionState(EditingTransactionState.Editing)
                             } catch (e: Exception) {
                                 e.printStackTrace() // for debugging core issues
                                 Toast.makeText(
