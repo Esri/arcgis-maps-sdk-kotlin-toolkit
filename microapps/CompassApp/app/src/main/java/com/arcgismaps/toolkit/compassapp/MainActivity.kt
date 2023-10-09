@@ -41,6 +41,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.License
+import com.arcgismaps.LicenseKey
 import com.arcgismaps.location.SystemLocationDataSource
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
@@ -55,6 +57,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         // set an API key
         ArcGISEnvironment.apiKey = ApiKey.create(BuildConfig.API_KEY)
+        LicenseKey.create(BuildConfig.LICENSE_KEY)
+            ?.let { ArcGISEnvironment.setLicense(it) }
+            ?: throw IllegalStateException("Invalid license key set in onCreate")
         ArcGISEnvironment.applicationContext = this
         setContent {
             // define a theme
