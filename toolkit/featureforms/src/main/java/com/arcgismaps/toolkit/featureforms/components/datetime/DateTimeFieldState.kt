@@ -18,193 +18,153 @@
 
 package com.arcgismaps.toolkit.featureforms.components.datetime
 
+import android.util.Log
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
+import com.arcgismaps.toolkit.featureforms.components.base.FieldProperties
+import com.arcgismaps.toolkit.featureforms.components.text.FormTextFieldState
+import com.arcgismaps.toolkit.featureforms.components.text.TextFieldProperties
 import com.arcgismaps.toolkit.featureforms.utils.editValue
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 import java.util.TimeZone
 
-/**
- * State for the [DateTimeField].
- *
- * @since 200.2.0
- */
-internal interface DateTimeFieldState {
-    /**
-     * The minimum allowable date and time.
-     *
-     * @since 200.2.0
-     */
-    val minEpochMillis: Long?
-    
-    /**
-     * The maximum allowable date and time.
-     *
-     * @since 200.2.0
-     */
-    val maxEpochMillis: Long?
-    
-    /**
-     * `true` if the field should show time or allow time to be set on the field.
-     *
-     * @since 200.2.0
-     */
+internal class DateTimeFieldProperties(
+    label: String,
+    placeholder: String,
+    description: String,
+    value: StateFlow<String>,
+    required: StateFlow<Boolean>,
+    editable: StateFlow<Boolean>,
+    val minEpochMillis: Long?,
+    val maxEpochMillis: Long?,
     val shouldShowTime: Boolean
-    
-    /**
-     * The label used on the Field.
-     *
-     * @since 200.2.0
-     */
-    val label: String
-    
-    /**
-     * The placeholder text.
-     *
-     * @since 200.2.0
-     */
-    val placeholderText: String
-    
-    /**
-     * The name of the field.
-     *
-     * @since 200.2.0
-     */
-    val description: String
-    
-    /**
-     * The text representation of the date time.
-     *
-     * @since 200.2.0
-     */
-    val value: StateFlow<Long?>
-    
-    /**
-     * `true` if the date time may be edited.
-     *
-     * @since 200.2.0
-     */
-    val isEditable: StateFlow<Boolean>
-    
-    /**
-     * `true` if the field must have a datetime value
-     *
-     * @since 200.2.0
-     */
-    val isRequired: StateFlow<Boolean>
-    
-    /**
-     * Updates the attribute.
-     *
-     * @param dateTime the date time expressed as epoch milliseconds
-     * @since 200.2.0
-     */
-    fun setValue(dateTime: Long?)
-    
-    /**
-     * Reset to the original value of the Feature attribute
-     *
-     * @since 200.2.0
-     */
-    fun resetValue()
-    
-    /**
-     * Clear the value of the Feature
-     *
-     * @since 200.2.0
-     */
-    fun clearValue()
-    
-    /**
-     * evaluate arcade expressions as needed due to user input
-     *
-     * @since 200.3.0
-     */
-    suspend fun evaluateExpressions()
-}
-
-private class DateTimeFieldStateImpl(
-    private val element: FieldFormElement,
-    private val form: FeatureForm,
-    private val scope: CoroutineScope,
-    input: DateTimePickerFormInput = element.input as DateTimePickerFormInput
-) : DateTimeFieldState {
-    override val minEpochMillis: Long? = input.min?.toEpochMilli()
-    
-    override val maxEpochMillis: Long? = input.max?.toEpochMilli()
-    
-    override val shouldShowTime: Boolean = input.includeTime
-    
-    override val label: String = element.label
-    
-    override val placeholderText: String = element.hint
-    
-    override val isEditable: StateFlow<Boolean> = element.isEditable
-    
-    override val isRequired: StateFlow<Boolean> = element.isRequired
-    
-    override val description: String = element.description
-    
-    private val _value: MutableStateFlow<Long?> = MutableStateFlow(null)
-    override val value: StateFlow<Long?> = combine(_value, element.value, isEditable) { userEdit, exprResult, editable ->
-        if (editable) {
-            userEdit
-        } else {
-            dateTimeFromString(exprResult)
-        }
-    }.stateIn(scope, SharingStarted.Eagerly, dateTimeFromString(element.value.value))
-    
-    init {
-        _value.value = dateTimeFromString(element.value.value)
-    }
- 
-    private fun setValue(value: String) {
-        if (value.isNotEmpty()) {
-            val asLong = value.toLong()
-            setValue(asLong)
-        }
-    }
-    
-    override fun setValue(dateTime: Long?) {
-        form.editValue(element, dateTime)
-        _value.value = dateTime
-        scope.launch {
-            evaluateExpressions()
-        }
-    }
-    
-    override fun resetValue() = setValue(element.value.value)
-    
-    override fun clearValue() {
-        setValue(null)
-    }
-    
-    override suspend fun evaluateExpressions() {
-        form.evaluateExpressions()
-    }
-}
+) : FieldProperties(label, placeholder, description, value, required, editable)
 
 /**
- * Factory function to create a [DateTimeFieldState] using the [formElement].
+ * A class to handle the state of a [DateTimeField]. Essential properties are inherited from the
+ * [BaseFieldState].
  *
- * @param formElement the form element.
- * @param form the FeatureForm which provides access to the Feature (for now).
+ * @param properties the [TextFieldProperties] associated with this state.
+ * @param initialValue optional initial value to set for this field. It is set to the value of
+ * [DateTimeFieldProperties.value] by default.
+ * @param scope a [CoroutineScope] to start [StateFlow] collectors on.
+ * @param onEditValue a callback to invoke when the user edits result in a change of value. This
+ * is called on [FormTextFieldState.onValueChanged].
  */
-internal fun DateTimeFieldState(
-    formElement: FieldFormElement,
+internal class DateTimeFieldState(
+    properties: DateTimeFieldProperties,
+    initialValue: String = properties.value.value,
+    scope: CoroutineScope,
+    onEditValue: (Any?) -> Unit
+) : BaseFieldState(
+    properties = properties,
+    initialValue = initialValue,
+    scope = scope,
+    onEditValue = onEditValue
+) {
+    val minEpochMillis: Long? = properties.minEpochMillis
+
+    val maxEpochMillis: Long? = properties.maxEpochMillis
+
+    val shouldShowTime: Boolean = properties.shouldShowTime
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val epochMillis: StateFlow<Long?> = value.mapLatest {
+        if (it.toLongOrNull() != null) {
+            it.toLong()
+        } else {
+            dateTimeFromString(it)
+        }
+    }.stateIn(
+        scope,
+        started = SharingStarted.Eagerly,
+        initialValue = dateTimeFromString(value.value)
+    )
+
+    companion object {
+        fun Saver(
+            field: FieldFormElement,
+            form: FeatureForm,
+            scope: CoroutineScope
+        ): Saver<DateTimeFieldState, Any> = listSaver(
+            save = {
+                listOf(it.value.value)
+            },
+            restore = { list ->
+                val input = field.input as DateTimePickerFormInput
+                DateTimeFieldState(
+                    properties = DateTimeFieldProperties(
+                        label = field.label,
+                        placeholder = field.hint,
+                        description = field.description,
+                        value = field.value,
+                        editable = field.isEditable,
+                        required = field.isRequired,
+                        minEpochMillis = input.min?.toEpochMilli(),
+                        maxEpochMillis = input.max?.toEpochMilli(),
+                        shouldShowTime = input.includeTime
+                    ),
+                    initialValue = list[0],
+                    scope = scope,
+                    onEditValue = {
+                        form.editValue(field, it)
+                        scope.launch { form.evaluateExpressions() }
+                    }
+                )
+            }
+        )
+    }
+}
+
+@Composable
+internal fun rememberDateTimeFieldState(
+    field: FieldFormElement,
+    minEpochMillis: Long?,
+    maxEpochMillis: Long?,
+    shouldShowTime: Boolean,
     form: FeatureForm,
     scope: CoroutineScope
-): DateTimeFieldState = DateTimeFieldStateImpl(formElement, form, scope)
-
+): DateTimeFieldState = rememberSaveable(
+    saver = DateTimeFieldState.Saver(
+        field = field,
+        form = form,
+        scope = scope
+    )
+) {
+    DateTimeFieldState(
+        properties = DateTimeFieldProperties(
+            label = field.label,
+            placeholder = field.hint,
+            description = field.description,
+            value = field.value,
+            editable = field.isEditable,
+            required = field.isRequired,
+            minEpochMillis = minEpochMillis,
+            maxEpochMillis = maxEpochMillis,
+            shouldShowTime = shouldShowTime
+        ),
+        scope = scope,
+        onEditValue = {
+            form.editValue(field, it)
+            scope.launch { form.evaluateExpressions() }
+        }
+    )
+}
 
 /**
  * Maps the [FieldFormElement.value] from a String to Long?
@@ -213,12 +173,20 @@ internal fun DateTimeFieldState(
  * @since 200.3.0
  */
 internal fun dateTimeFromString(formattedDateTime: String): Long? {
-    if (formattedDateTime.isNotEmpty()) {
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
-        return LocalDateTime.parse(formattedDateTime, formatter).atZone(TimeZone.getDefault().toZoneId())
-            .toInstant()
-            .toEpochMilli()
-    }
-    return null
+    return if (formattedDateTime.isNotEmpty()) {
+        try {
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+            LocalDateTime.parse(formattedDateTime, formatter)
+                .atZone(TimeZone.getDefault().toZoneId())
+                .toInstant()
+                .toEpochMilli()
+        } catch (ex: DateTimeParseException) {
+            Log.e(
+                "DateTimeFieldState",
+                "dateTimeFromString: Error parsing $formattedDateTime into a valid date time",
+                ex
+            )
+            null
+        }
+    } else null
 }
-
