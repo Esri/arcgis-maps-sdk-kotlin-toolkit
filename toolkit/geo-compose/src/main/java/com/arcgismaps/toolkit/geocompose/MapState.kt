@@ -17,11 +17,11 @@
 
 package com.arcgismaps.toolkit.geocompose
 
-import androidx.annotation.UiThread
 import com.arcgismaps.geometry.Geometry
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.mapping.ViewpointType
 import com.arcgismaps.mapping.view.AnimationCurve
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,6 +37,9 @@ public class MapState(arcGISMap: ArcGISMap? = null) : GeoComposeState() {
     private val _arcGISMap: MutableStateFlow<ArcGISMap?> = MutableStateFlow(null)
     public val arcGISMap: StateFlow<ArcGISMap?> = _arcGISMap.asStateFlow()
 
+    private val _currentViewpoint: MutableStateFlow<Viewpoint?> = MutableStateFlow(null)
+    internal val currentViewpointType: MutableStateFlow<ViewpointType?> = MutableStateFlow(null)
+    internal val viewpointChannel = Channel<ViewpointOperation>()
     public fun setArcGISMap(arcGISMap: ArcGISMap) {
         _arcGISMap.value = arcGISMap
     }
@@ -45,48 +48,77 @@ public class MapState(arcGISMap: ArcGISMap? = null) : GeoComposeState() {
         _arcGISMap.value = arcGISMap
     }
 
-    internal val viewpointChannel = Channel<ViewpointOperation>()
+    public fun getCurrentViewpoint(viewpointType: ViewpointType): StateFlow<Viewpoint?> {
+        currentViewpointType.value = viewpointType
+        return _currentViewpoint
+    }
 
-    @UiThread
+    internal fun setCurrentViewpoint(viewpoint: Viewpoint?) {
+        _currentViewpoint.value = viewpoint
+    }
+
+    public suspend fun setViewpointAnimated(
+        viewpoint: Viewpoint
+    ): Result<Boolean> =
+        ViewpointOperation.ViewpointAnimated(viewpoint).let {
+            viewpointChannel.send(it)
+            it.await()
+        }
+
+    public suspend fun setViewpointAnimated(
+        viewpoint: Viewpoint,
+        durationSeconds: Float
+    ): Result<Boolean> =
+        ViewpointOperation.ViewpointAnimatedWithDuration(viewpoint, durationSeconds).let {
+            viewpointChannel.send(it)
+            it.await()
+        }
+
+
     public suspend fun setViewpointAnimated(
         viewpoint: Viewpoint,
         durationSeconds: Float,
         curve: AnimationCurve
     ): Result<Boolean> =
-        ViewpointOperation.ViewpointAnimated(viewpoint, durationSeconds, curve).let {
-            viewpointChannel.send(it)
-            it.await()
-        }
+        ViewpointOperation.ViewpointAnimatedWithDurationAndCurve(viewpoint, durationSeconds, curve)
+            .let {
+                viewpointChannel.send(it)
+                it.await()
+            }
 
-    @UiThread
     public suspend fun setViewpointCenter(point: Point): Result<Boolean> =
         ViewpointOperation.ViewpointCenter(point).let {
             viewpointChannel.send(it)
             it.await()
         }
 
-    @UiThread
     public suspend fun setViewpointCenter(center: Point, scale: Double): Result<Boolean> =
         ViewpointOperation.ViewpointCenterAndScale(center, scale).let {
             viewpointChannel.send(it)
             it.await()
         }
 
-    @UiThread
     public suspend fun setViewpointGeometry(boundingGeometry: Geometry): Result<Boolean> =
         ViewpointOperation.ViewpointGeometry(boundingGeometry).let {
             viewpointChannel.send(it)
             it.await()
         }
 
-    @UiThread
+    public suspend fun setViewpointGeometry(
+        boundingGeometry: Geometry,
+        paddingInDips: Double
+    ): Result<Boolean> =
+        ViewpointOperation.ViewpointGeometryAndPadding(boundingGeometry, paddingInDips).let {
+            viewpointChannel.send(it)
+            it.await()
+        }
+
     public suspend fun setViewpointRotation(angleDegrees: Double): Result<Boolean> =
         ViewpointOperation.ViewpointRotation(angleDegrees).let {
             viewpointChannel.send(it)
             it.await()
         }
 
-    @UiThread
     public suspend fun setViewpointScale(scale: Double): Result<Boolean> =
         ViewpointOperation.ViewpointScale(scale).let {
             viewpointChannel.send(it)

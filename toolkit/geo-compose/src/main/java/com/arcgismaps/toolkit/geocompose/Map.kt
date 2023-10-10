@@ -26,6 +26,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
+import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.mapping.ViewpointType
 import com.arcgismaps.mapping.view.MapView
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -54,12 +56,41 @@ public fun Map(modifier: Modifier = Modifier, mapState: MapState = MapState()) {
             }
         }
 
+        launch {
+            mapView.viewpointChanged.collect {
+                var currentViewpoint: Viewpoint? = null
+                if (mapState.currentViewpointType.value == ViewpointType.BoundingGeometry) {
+                    currentViewpoint = mapView.getCurrentViewpoint(
+                        viewpointType = ViewpointType.BoundingGeometry
+                    )
+                } else if (mapState.currentViewpointType.value == ViewpointType.CenterAndScale) {
+                    currentViewpoint = mapView.getCurrentViewpoint(
+                        viewpointType = ViewpointType.CenterAndScale
+                    )
+                }
+                mapState.setCurrentViewpoint(currentViewpoint)
+            }
+        }
+
         // Collect viewpoint operations and pass the results back to the channel
         launch {
             mapState.viewpointChannel.receiveAsFlow().collect {
                 launch {
                     when (it) {
                         is ViewpointOperation.ViewpointAnimated -> {
+                            val result = mapView.setViewpointAnimated(it.viewpoint)
+                            it.completeWith(result)
+                        }
+
+                        is ViewpointOperation.ViewpointAnimatedWithDuration -> {
+                            val result = mapView.setViewpointAnimated(
+                                viewpoint = it.viewpoint,
+                                durationSeconds = it.durationSeconds
+                            )
+                            it.completeWith(result)
+                        }
+
+                        is ViewpointOperation.ViewpointAnimatedWithDurationAndCurve -> {
                             val result = mapView.setViewpointAnimated(
                                 viewpoint = it.viewpoint,
                                 durationSeconds = it.durationSeconds,
@@ -80,6 +111,14 @@ public fun Map(modifier: Modifier = Modifier, mapState: MapState = MapState()) {
 
                         is ViewpointOperation.ViewpointGeometry -> {
                             val result = mapView.setViewpointGeometry(it.boundingGeometry)
+                            it.completeWith(result)
+                        }
+
+                        is ViewpointOperation.ViewpointGeometryAndPadding -> {
+                            val result = mapView.setViewpointGeometry(
+                                boundingGeometry = it.boundingGeometry,
+                                paddingInDips = it.paddingInDips
+                            )
                             it.completeWith(result)
                         }
 
