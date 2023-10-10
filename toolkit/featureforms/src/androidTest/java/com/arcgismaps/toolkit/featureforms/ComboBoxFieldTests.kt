@@ -17,6 +17,8 @@
 package com.arcgismaps.toolkit.featureforms
 
 import android.content.Context
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertContentDescriptionContains
@@ -62,6 +64,8 @@ class ComboBoxFieldTests {
         sharedFeatureForm!!
     }
 
+    private var errorTextColor : Color? = null
+
     private fun getFormElementWithLabel(label: String): FieldFormElement {
         return featureForm.elements
             .filterIsInstance<FieldFormElement>()
@@ -81,6 +85,7 @@ class ComboBoxFieldTests {
     @Before
     fun setContent() {
         composeTestRule.setContent {
+            errorTextColor = MaterialTheme.colorScheme.error
             val state = FeatureFormState()
             state.setFeatureForm(featureForm)
             FeatureForm(featureFormState = state)
@@ -263,25 +268,15 @@ class ComboBoxFieldTests {
     }
 
     /**
-     * Test case 3.5: Required Value
-     * Steps:
-     * load the webmap listed below
-     * access the form definition on the first operational layer
-     * access the feature with object ID 2
-     * access the FormElement with label Required Combo Box
-     * Expectation: the value is visible and equal to "Pine"
-     * tap the clear icon to clear the value
-     * Expectation: the value is visible and equal to "Enter Value"
-     * Expectation: the helper text is visible, has the platform default error color and says "Required"
-     * tap the value to bring up the picker
-     * Expectation: only the coded values for this field are visible as selectable rows
-     * tap the "Oak" option
-     * tap the "Done" button
-     * Expectation: the value is visible and equal to "Oak"
+     * Test case 3.5:
+     * Given a ComboBoxField with a pre-existing value, description and is required
+     * When the ComboBoxField value is cleared
+     * Then the helper text is visible, has the platform default error color and says "Required" AND
+     * only the coded values for this field are visible as selectable rows
      * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-35-required-value
      */
     @Test
-    fun testRequiredValue() {
+    fun testRequiredValueWithComboBoxPicker() {
         val formElement = getFormElementWithLabel("Required Combo Box")
         val input = formElement.input as ComboBoxFormInput
         val requiredLabel = "${formElement.label} *"
@@ -302,8 +297,8 @@ class ComboBoxFieldTests {
         composeTestRule.onRoot().printToLog("TAG")
         // assert "Enter Value" placeholder is visible
         comboBoxField.assertTextEquals(requiredLabel, context.getString(R.string.enter_value))
-        // validate required text is visible
-        comboBoxField.onChildWithText(context.getString(R.string.required))
+        // validate required text is visible and is in error color
+        comboBoxField.onChildWithText(context.getString(R.string.required)).assertTextColor(errorTextColor!!)
 
         // open the picker
         comboBoxField.performClick()
@@ -336,23 +331,53 @@ class ComboBoxFieldTests {
     }
 
     /**
-     * Test case 3.6: noValueOption is 'Hide'
-     * Steps:
-     * load the webmap listed below
-     * access the form definition on the first operational layer
-     * access the feature with object ID 2
-     * access the FormElement with label Combo No Value False
-     * Expectation: the value is empty
-     * tap the value to bring up the picker
-     * Expectation: the picker appears and only the coded values for this field are visible as selectable rows
-     * tap the "First" option
-     * tap the "Done" button
-     * Expectation: the value is visible and equal to "First"
+     * Test case 3.6:
+     * Given a ComboBoxField with a pre-existing value, description and showNoValueOption is Hide
+     * When the ComboBoxField is tapped
+     * Then only the coded values for this field are visible as selectable rows
      * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-36-novalueoption-is-hide
      */
     @Test
-    fun testRequiredValueWithComboBoxPicker() {
+    fun testNoValueOptionHidden() {
+        val formElement = getFormElementWithLabel("Combo No Value False")
+        val input = formElement.input as ComboBoxFormInput
+        // find the field with the the label
+        val comboBoxField = composeTestRule.onNodeWithText(formElement.label)
+        // assert it is displayed and not focused
+        comboBoxField.assertIsDisplayed()
+        comboBoxField.assertIsNotFocused()
+        // validate that the pre-populated value shown shown in accurate and as expected and that
+        // no placeholder is visible. blank space is used here due to PlaceHolderTransformation
+        comboBoxField.assertTextEquals(formElement.label, " ")
 
+        // open the picker
+        comboBoxField.performClick()
+        // find the dialog
+        val comboBoxDialogList =
+            composeTestRule.onNodeWithContentDescription(comboBoxDialogListSemanticLabel)
+        comboBoxDialogList.assertIsDisplayed()
+        // validate all coded values rows are also displayed
+        input.codedValues.forEach {
+            val listItem = comboBoxDialogList.onChildWithContentDescription("${it.name} list item")
+            listItem.assertIsDisplayed()
+        }
+        // validate a noValueLabel row is not displayed
+        assert(
+            composeTestRule.onAllNodesWithContentDescription(noValueRowSemanticLabel)
+                .fetchSemanticsNodes().isEmpty()
+        )
+        val codedValueToSelect = input.codedValues.first().name
+        // find the first list item and tap on it
+        val listItem =
+            comboBoxDialogList.onChildWithContentDescription("$codedValueToSelect list item")
+        listItem.assertIsDisplayed()
+        listItem.performClick()
+        // find and tap the done button
+        val doneButton =
+            composeTestRule.onNodeWithContentDescription(comboBoxDialogDoneButtonSemanticLabel)
+        doneButton.performClick()
+        // validate the selection has changed
+        comboBoxField.assertTextEquals(formElement.label, codedValueToSelect)
     }
 
     companion object {
