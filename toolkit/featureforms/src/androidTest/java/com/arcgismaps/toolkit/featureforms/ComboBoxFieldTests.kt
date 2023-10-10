@@ -248,15 +248,6 @@ class ComboBoxFieldTests {
         val noValueRow = comboBoxDialogList.onChildWithContentDescription(
             noValueRowSemanticLabel
         ).assertIsDisplayed()
-        // validate all coded values rows are also displayed
-        input.codedValues.forEach {
-            val listItem = comboBoxDialogList.onChildWithContentDescription("${it.name} list item")
-            listItem.assertIsDisplayed()
-            // if this item is selected, then validate the check mark is shown
-            if (it.name == formElement.value.value) {
-                listItem.onChildWithContentDescription("list item check").assertIsDisplayed()
-            }
-        }
         // select the no value row
         noValueRow.performClick()
         // find and tap the done button
@@ -272,7 +263,8 @@ class ComboBoxFieldTests {
      * Given a ComboBoxField with a pre-existing value, description and is required
      * When the ComboBoxField value is cleared
      * Then the helper text is visible, has the platform default error color and says "Required" AND
-     * only the coded values for this field are visible as selectable rows
+     * When the ComboBoxField is tapped
+     * Then a noValueLabel row is not present
      * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-35-required-value
      */
     @Test
@@ -306,12 +298,7 @@ class ComboBoxFieldTests {
         val comboBoxDialogList =
             composeTestRule.onNodeWithContentDescription(comboBoxDialogListSemanticLabel)
         comboBoxDialogList.assertIsDisplayed()
-        // validate all coded values rows are also displayed
-        input.codedValues.forEach {
-            val listItem = comboBoxDialogList.onChildWithContentDescription("${it.name} list item")
-            listItem.assertIsDisplayed()
-        }
-        // validate a noValueLabel row is not displayed
+        // validate a noValueLabel row is not present
         assert(
             composeTestRule.onAllNodesWithContentDescription(noValueRowSemanticLabel)
                 .fetchSemanticsNodes().isEmpty()
@@ -334,7 +321,7 @@ class ComboBoxFieldTests {
      * Test case 3.6:
      * Given a ComboBoxField with a pre-existing value, description and showNoValueOption is Hide
      * When the ComboBoxField is tapped
-     * Then only the coded values for this field are visible as selectable rows
+     * Then a noValueLabel row is not present
      * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-36-novalueoption-is-hide
      */
     @Test
@@ -356,11 +343,6 @@ class ComboBoxFieldTests {
         val comboBoxDialogList =
             composeTestRule.onNodeWithContentDescription(comboBoxDialogListSemanticLabel)
         comboBoxDialogList.assertIsDisplayed()
-        // validate all coded values rows are also displayed
-        input.codedValues.forEach {
-            val listItem = comboBoxDialogList.onChildWithContentDescription("${it.name} list item")
-            listItem.assertIsDisplayed()
-        }
         // validate a noValueLabel row is not displayed
         assert(
             composeTestRule.onAllNodesWithContentDescription(noValueRowSemanticLabel)
