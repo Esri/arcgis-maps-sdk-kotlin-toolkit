@@ -18,8 +18,10 @@
 
 package com.arcgismaps.toolkit.mapcomposeapp.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.arcgismaps.mapping.ArcGISMap
@@ -35,4 +37,10 @@ fun MainScreen() {
         modifier = Modifier.fillMaxSize(),
         mapState = mapState,
     )
+
+    LaunchedEffect(Unit) {
+        mapState.drawStatus.collect {
+            Log.e("DrawStatus", "DrawStatus: ${it?.toString()}")
+        }
+    }
 }

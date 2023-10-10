@@ -17,11 +17,26 @@
 
 package com.arcgismaps.toolkit.geocompose
 
+import com.arcgismaps.mapping.view.DrawStatus
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+
 /**
  * Represents the state for the GeoCompose.
  *
  * @since 200.3.0
  */
 public sealed class GeoComposeState {
-    // TODO add implementation
+    private val _drawStatus: MutableSharedFlow<DrawStatus> = MutableSharedFlow( extraBufferCapacity = Int.MAX_VALUE,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    public val drawStatus: SharedFlow<DrawStatus> = _drawStatus.asSharedFlow()
+    internal fun setDrawStatus(drawStatus: DrawStatus) {
+        _drawStatus.tryEmit(drawStatus)
+//        _drawStatus.value = drawStatus
+    }
 }
