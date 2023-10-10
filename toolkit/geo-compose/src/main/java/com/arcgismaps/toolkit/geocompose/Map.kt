@@ -57,18 +57,24 @@ public fun Map(modifier: Modifier = Modifier, mapState: MapState = MapState()) {
         }
 
         launch {
+            mapState.viewpoint.collect {
+                it?.let {
+                    mapView.setViewpoint(it)
+                }
+            }
+        }
+
+        launch {
             mapView.viewpointChanged.collect {
                 var currentViewpoint: Viewpoint? = null
                 if (mapState.currentViewpointType.value == ViewpointType.BoundingGeometry) {
-                    currentViewpoint = mapView.getCurrentViewpoint(
-                        viewpointType = ViewpointType.BoundingGeometry
-                    )
+                    currentViewpoint = mapView.getCurrentViewpoint(ViewpointType.BoundingGeometry)
                 } else if (mapState.currentViewpointType.value == ViewpointType.CenterAndScale) {
-                    currentViewpoint = mapView.getCurrentViewpoint(
-                        viewpointType = ViewpointType.CenterAndScale
-                    )
+                    currentViewpoint = mapView.getCurrentViewpoint(ViewpointType.CenterAndScale)
                 }
-                mapState.setCurrentViewpoint(currentViewpoint)
+                if (currentViewpoint != null) {
+                    mapState.setViewpoint(currentViewpoint)
+                }
             }
         }
 

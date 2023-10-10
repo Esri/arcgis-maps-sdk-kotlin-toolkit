@@ -37,9 +37,10 @@ public class MapState(arcGISMap: ArcGISMap? = null) : GeoComposeState() {
     private val _arcGISMap: MutableStateFlow<ArcGISMap?> = MutableStateFlow(null)
     public val arcGISMap: StateFlow<ArcGISMap?> = _arcGISMap.asStateFlow()
 
-    private val _currentViewpoint: MutableStateFlow<Viewpoint?> = MutableStateFlow(null)
     internal val currentViewpointType: MutableStateFlow<ViewpointType?> = MutableStateFlow(null)
     internal val viewpointChannel = Channel<ViewpointOperation>()
+    internal val viewpoint: MutableStateFlow<Viewpoint?> = MutableStateFlow(null)
+
     public fun setArcGISMap(arcGISMap: ArcGISMap) {
         _arcGISMap.value = arcGISMap
     }
@@ -50,11 +51,11 @@ public class MapState(arcGISMap: ArcGISMap? = null) : GeoComposeState() {
 
     public fun getCurrentViewpoint(viewpointType: ViewpointType): StateFlow<Viewpoint?> {
         currentViewpointType.value = viewpointType
-        return _currentViewpoint
+        return viewpoint
     }
 
-    internal fun setCurrentViewpoint(viewpoint: Viewpoint?) {
-        _currentViewpoint.value = viewpoint
+    public fun setViewpoint(viewpoint: Viewpoint) {
+        this.viewpoint.value = viewpoint
     }
 
     public suspend fun setViewpointAnimated(
