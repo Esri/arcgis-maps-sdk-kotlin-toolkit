@@ -55,6 +55,7 @@ class ComboBoxFieldTests {
     private val clearTextSemanticLabel = "Clear text button"
     private val optionsIconSemanticLabel = "field icon"
     private val comboBoxDialogListSemanticLabel = "ComboBoxDialogLazyColumn"
+    private val comboBoxDialogDoneButtonSemanticLabel = "combo box done selection"
     private lateinit var context: Context
 
     private val featureForm by lazy {
@@ -91,7 +92,7 @@ class ComboBoxFieldTests {
      * Given a ComboBoxField with a pre-existing value, description and a no value label
      * When the pre-existing value is cleared
      * Then the ComboBoxField shows the noValueLabel
-     * https://devtopia.esri.com/runtime/common-toolkit/blob/ace0cb49775dd2bdeae88a0d1e8b2695ed820feb/designs/Forms/FormsTestDesign.md#test-case-31-pre-existing-value-description-clear-button-no-value-label
+     * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-31-pre-existing-value-description-clear-button-no-value-label
      */
     @Test
     fun testClearValueNoValueLabel() {
@@ -132,7 +133,7 @@ class ComboBoxFieldTests {
      * Given a ComboBoxField with no pre-existing value, description and a no value label
      * When the field is observed
      * Then the ComboBoxField shows the noValueLabel and the options menu icon is visible
-     * https://devtopia.esri.com/runtime/common-toolkit/blob/ace0cb49775dd2bdeae88a0d1e8b2695ed820feb/designs/Forms/FormsTestDesign.md#test-case-32-no-pre-existing-value-no-value-label-options-button
+     * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-32-no-pre-existing-value-no-value-label-options-button
      */
     @Test
     fun testNoValueAndNoValueLabel() {
@@ -167,9 +168,10 @@ class ComboBoxFieldTests {
      * Test case 3.3:
      * Given a ComboBoxField with a pre-existing value, description and a no value label
      * When the ComboBoxField is tapped
-     * Then the ComboBoxDialog is shown with the noValueLabel row AND all coded values are visible
-     * with the selected value marked with a check
-     * https://devtopia.esri.com/runtime/common-toolkit/blob/ace0cb49775dd2bdeae88a0d1e8b2695ed820feb/designs/Forms/FormsTestDesign.md#test-case-33-pick-a-value
+     * Then the ComboBoxDialog is shown with all coded values AND
+     * When a coded value is selected from the dialog and dismissed
+     * Then the ComboBoxField also shows this selected value
+     * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-33-pick-a-value
      */
     @Test
     fun testEnteredValueWithComboBoxPicker() {
@@ -192,27 +194,27 @@ class ComboBoxFieldTests {
         comboBoxField.assertTextEquals(formElement.label, formElement.value.value)
         // tap the value to bring up the picker
         comboBoxField.performClick()
-        composeTestRule.mainClock.advanceTimeBy(1000)
         // find the dialog
         val comboBoxDialogList = composeTestRule.onNodeWithContentDescription(comboBoxDialogListSemanticLabel)
-        val listItem = comboBoxDialogList.onChildWithContentDescription("String 1 list item")
+        comboBoxDialogList.assertIsDisplayed()
+        val codedValueToSelect = input.codedValues.first().name
+        // find the first list item and tap on it
+        val listItem = comboBoxDialogList.onChildWithContentDescription("$codedValueToSelect list item")
         listItem.assertIsDisplayed()
+        listItem.performClick()
+        // find and tap the done button
+        val doneButton = composeTestRule.onNodeWithContentDescription(comboBoxDialogDoneButtonSemanticLabel)
+        doneButton.performClick()
+        // validate the selection has changed
+        comboBoxField.assertTextEquals(formElement.label, codedValueToSelect)
     }
 
     /**
-     * Test case 3.4: Picker with a noValueLabel row
-     * Steps:
-     * load the webmap listed below
-     * access the form definition on the first operational layer
-     * access the feature with object ID 2
-     * access the FormElement with label "Combo String"
-     * Expectation: the value is visible and equal to "String 3"
-     * tap the value to bring up the picker
-     * Expectation: the picker appears and a "No value" row (or ComboBoxFormInput.noValueLabel) is added to the top of the list
-     * Expectation: and all the coded values for this field are visible as selectable rows
-     * tap the ""No value" option
-     * tap the "Done" button
-     * Expectation: the value is visible and equal to "No value"
+     * Test case 3.4:
+     * Given a ComboBoxField with a pre-existing value, description and a no value label
+     * When the ComboBoxField is tapped
+     * Then the ComboBoxDialog is shown and a noValueLabel row is visible and selectable
+     * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-34-picker-with-a-novaluelabel-row
      */
     @Test
     fun testNoValueRow() {
@@ -231,11 +233,12 @@ class ComboBoxFieldTests {
         // find the dialog
         val comboBoxDialogList = composeTestRule.onNodeWithContentDescription(comboBoxDialogListSemanticLabel)
         comboBoxDialogList.assertIsDisplayed()
+        val noValueLabel = input.noValueLabel.ifEmpty { context.getString(R.string.no_value) }
         // this field has a no value label and not required, hence check for the row
-        comboBoxDialogList.onChildWithContentDescription(
-            "${input.noValueLabel.ifEmpty { context.getString(R.string.no_value) }} list item"
+        val noValueRow = comboBoxDialogList.onChildWithContentDescription(
+            "$noValueLabel list item"
         ).assertIsDisplayed()
-        // validate all coded values rows are displayed
+        // validate all coded values rows are also displayed
         input.codedValues.forEach {
             val listItem = comboBoxDialogList.onChildWithContentDescription("${it.name} list item")
             listItem.assertIsDisplayed()
@@ -244,6 +247,13 @@ class ComboBoxFieldTests {
                 listItem.onChildWithContentDescription("list item check").assertIsDisplayed()
             }
         }
+        // select the no value row
+        noValueRow.performClick()
+        // find and tap the done button
+        val doneButton = composeTestRule.onNodeWithContentDescription(comboBoxDialogDoneButtonSemanticLabel)
+        doneButton.performClick()
+        // validate the selection has changed
+        comboBoxField.assertTextEquals(formElement.label, noValueLabel)
     }
 
     /**

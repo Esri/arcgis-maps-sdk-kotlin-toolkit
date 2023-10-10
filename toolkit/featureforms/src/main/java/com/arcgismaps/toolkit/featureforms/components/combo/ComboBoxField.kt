@@ -218,7 +218,12 @@ internal fun ComboBoxDialog(
                                 unfocusedIndicatorColor = Color.Transparent
                             ),
                         )
-                        TextButton(onClick = onDismissRequest) {
+                        TextButton(
+                            onClick = onDismissRequest,
+                            modifier = Modifier.semantics {
+                                contentDescription = "combo box done selection"
+                            }
+                        ) {
                             Text(text = stringResource(R.string.done))
                         }
                     }
