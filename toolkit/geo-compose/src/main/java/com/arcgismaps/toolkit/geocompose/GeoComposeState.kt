@@ -17,18 +17,11 @@
 
 package com.arcgismaps.toolkit.geocompose
 
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
-
-@Composable
-public fun Scene() {
-    // Todo implementation...
-    Text("Implement Scene here! ")
-}
-
-@Preview
-@Composable
-internal fun ScenePreview() {
-    Scene()
+/**
+ * Represents the state for the GeoCompose.
+ *
+ * @since 200.3.0
+ */
+public sealed class GeoComposeState {
+    // TODO add implementation
 }

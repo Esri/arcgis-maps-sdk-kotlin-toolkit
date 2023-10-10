@@ -17,18 +17,25 @@
 
 package com.arcgismaps.toolkit.geocompose
 
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
+import com.arcgismaps.mapping.ArcGISMap
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
-@Composable
-public fun Scene() {
-    // Todo implementation...
-    Text("Implement Scene here! ")
-}
+/**
+ * Represents the state for the Map.
+ *
+ * @since 200.3.0
+ */
+public class MapState(arcGISMap: ArcGISMap? = null) : GeoComposeState() {
+    private val _arcGISMap: MutableStateFlow<ArcGISMap?> = MutableStateFlow(null)
+    public val arcGISMap: StateFlow<ArcGISMap?> = _arcGISMap.asStateFlow()
 
-@Preview
-@Composable
-internal fun ScenePreview() {
-    Scene()
+    public fun setArcGISMap(arcGISMap: ArcGISMap){
+        _arcGISMap.value = arcGISMap
+    }
+
+    init {
+        _arcGISMap.value = arcGISMap
+    }
 }
