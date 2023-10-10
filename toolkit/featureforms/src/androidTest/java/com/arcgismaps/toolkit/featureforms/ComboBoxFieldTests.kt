@@ -25,9 +25,11 @@ import androidx.compose.ui.test.assertIsNotFocused
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.printToLog
 import androidx.test.platform.app.InstrumentationRegistry
@@ -48,14 +50,12 @@ import org.junit.Rule
 import org.junit.Test
 
 class ComboBoxFieldTests {
-    private val labelSemanticLabel = "label"
     private val descriptionSemanticLabel = "description"
-    private val outlinedTextFieldSemanticLabel = "outlined text field"
-    private val charCountSemanticLabel = "char count"
     private val clearTextSemanticLabel = "Clear text button"
     private val optionsIconSemanticLabel = "field icon"
     private val comboBoxDialogListSemanticLabel = "ComboBoxDialogLazyColumn"
     private val comboBoxDialogDoneButtonSemanticLabel = "combo box done selection"
+    private val noValueRowSemanticLabel = "no value row"
     private lateinit var context: Context
 
     private val featureForm by lazy {
@@ -160,7 +160,8 @@ class ComboBoxFieldTests {
             input.noValueLabel.ifEmpty { context.getString(R.string.no_value) }
         )
         // validate that the options icon is visible
-        val optionsIconNode = comboBoxField.assertContentDescriptionContains(optionsIconSemanticLabel)
+        val optionsIconNode =
+            comboBoxField.assertContentDescriptionContains(optionsIconSemanticLabel)
         optionsIconNode.assertIsDisplayed()
     }
 
@@ -195,15 +196,18 @@ class ComboBoxFieldTests {
         // tap the value to bring up the picker
         comboBoxField.performClick()
         // find the dialog
-        val comboBoxDialogList = composeTestRule.onNodeWithContentDescription(comboBoxDialogListSemanticLabel)
+        val comboBoxDialogList =
+            composeTestRule.onNodeWithContentDescription(comboBoxDialogListSemanticLabel)
         comboBoxDialogList.assertIsDisplayed()
         val codedValueToSelect = input.codedValues.first().name
         // find the first list item and tap on it
-        val listItem = comboBoxDialogList.onChildWithContentDescription("$codedValueToSelect list item")
+        val listItem =
+            comboBoxDialogList.onChildWithContentDescription("$codedValueToSelect list item")
         listItem.assertIsDisplayed()
         listItem.performClick()
         // find and tap the done button
-        val doneButton = composeTestRule.onNodeWithContentDescription(comboBoxDialogDoneButtonSemanticLabel)
+        val doneButton =
+            composeTestRule.onNodeWithContentDescription(comboBoxDialogDoneButtonSemanticLabel)
         doneButton.performClick()
         // validate the selection has changed
         comboBoxField.assertTextEquals(formElement.label, codedValueToSelect)
@@ -231,12 +235,13 @@ class ComboBoxFieldTests {
         // open the picker
         comboBoxField.performClick()
         // find the dialog
-        val comboBoxDialogList = composeTestRule.onNodeWithContentDescription(comboBoxDialogListSemanticLabel)
+        val comboBoxDialogList =
+            composeTestRule.onNodeWithContentDescription(comboBoxDialogListSemanticLabel)
         comboBoxDialogList.assertIsDisplayed()
         val noValueLabel = input.noValueLabel.ifEmpty { context.getString(R.string.no_value) }
         // this field has a no value label and not required, hence check for the row
         val noValueRow = comboBoxDialogList.onChildWithContentDescription(
-            "$noValueLabel list item"
+            noValueRowSemanticLabel
         ).assertIsDisplayed()
         // validate all coded values rows are also displayed
         input.codedValues.forEach {
@@ -250,7 +255,8 @@ class ComboBoxFieldTests {
         // select the no value row
         noValueRow.performClick()
         // find and tap the done button
-        val doneButton = composeTestRule.onNodeWithContentDescription(comboBoxDialogDoneButtonSemanticLabel)
+        val doneButton =
+            composeTestRule.onNodeWithContentDescription(comboBoxDialogDoneButtonSemanticLabel)
         doneButton.performClick()
         // validate the selection has changed
         comboBoxField.assertTextEquals(formElement.label, noValueLabel)
@@ -272,10 +278,61 @@ class ComboBoxFieldTests {
      * tap the "Oak" option
      * tap the "Done" button
      * Expectation: the value is visible and equal to "Oak"
+     * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-35-required-value
      */
     @Test
     fun testRequiredValue() {
+        val formElement = getFormElementWithLabel("Required Combo Box")
+        val input = formElement.input as ComboBoxFormInput
+        val requiredLabel = "${formElement.label} *"
+        // find the field with the the label
+        val comboBoxField = composeTestRule.onNodeWithText(requiredLabel)
+        // assert it is displayed and not focused
+        comboBoxField.assertIsDisplayed()
+        comboBoxField.assertIsNotFocused()
+        // validate that the pre-populated value shown shown in accurate and as expected
+        // assertTextEquals matches the Text(the label) and Editable Text (the actual editable input text)
+        comboBoxField.assertTextEquals(requiredLabel, formElement.value.value)
+        // find the clear text node within its children
+        val clearButton = comboBoxField.onChildWithContentDescription(clearTextSemanticLabel)
+        // validate the clear icon is visible
+        clearButton.assertIsDisplayed()
+        // clear the value
+        clearButton.performClick()
+        composeTestRule.onRoot().printToLog("TAG")
+        // assert "Enter Value" placeholder is visible
+        comboBoxField.assertTextEquals(requiredLabel, context.getString(R.string.enter_value))
+        // validate required text is visible
+        comboBoxField.onChildWithText(context.getString(R.string.required))
 
+        // open the picker
+        comboBoxField.performClick()
+        // find the dialog
+        val comboBoxDialogList =
+            composeTestRule.onNodeWithContentDescription(comboBoxDialogListSemanticLabel)
+        comboBoxDialogList.assertIsDisplayed()
+        // validate all coded values rows are also displayed
+        input.codedValues.forEach {
+            val listItem = comboBoxDialogList.onChildWithContentDescription("${it.name} list item")
+            listItem.assertIsDisplayed()
+        }
+        // validate a noValueLabel row is not displayed
+        assert(
+            composeTestRule.onAllNodesWithContentDescription(noValueRowSemanticLabel)
+                .fetchSemanticsNodes().isEmpty()
+        )
+        val codedValueToSelect = input.codedValues.first().name
+        // find the first list item and tap on it
+        val listItem =
+            comboBoxDialogList.onChildWithContentDescription("$codedValueToSelect list item")
+        listItem.assertIsDisplayed()
+        listItem.performClick()
+        // find and tap the done button
+        val doneButton =
+            composeTestRule.onNodeWithContentDescription(comboBoxDialogDoneButtonSemanticLabel)
+        doneButton.performClick()
+        // validate the selection has changed
+        comboBoxField.assertTextEquals(requiredLabel, codedValueToSelect)
     }
 
     /**
@@ -291,6 +348,7 @@ class ComboBoxFieldTests {
      * tap the "First" option
      * tap the "Done" button
      * Expectation: the value is visible and equal to "First"
+     * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-36-novalueoption-is-hide
      */
     @Test
     fun testRequiredValueWithComboBoxPicker() {
@@ -338,6 +396,27 @@ class ComboBoxFieldTests {
     }
 }
 
+/**
+ * Returns the child node with the given text [value]. This only checks for the
+ * children with a depth of 1. An exception is thrown if the child with the content description
+ * does not exist.
+ */
+internal fun SemanticsNodeInteraction.onChildWithText(value: String): SemanticsNodeInteraction {
+    val nodes = onChildren()
+    val count = nodes.fetchSemanticsNodes().count()
+
+    for (i in 0 until count) {
+        val semanticsNode = nodes[i].fetchSemanticsNode()
+        if (semanticsNode.config[SemanticsProperties.Text].toList().map
+            {
+                it.text
+            }.contains(value)
+        ) {
+            return nodes[i]
+        }
+    }
+    throw AssertionError("No node exists with the given content description : $value")
+}
 
 /**
  * Returns the child node with the given content description [value]. This only checks for the

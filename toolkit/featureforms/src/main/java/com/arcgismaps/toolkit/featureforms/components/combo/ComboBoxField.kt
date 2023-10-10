@@ -268,7 +268,11 @@ internal fun ComboBoxDialog(
                                     onValueChange(if (it == noValueLabel) "" else it)
                                 }
                                 .semantics {
-                                    contentDescription = "$it list item"
+                                    contentDescription = if (it == noValueLabel) {
+                                        "no value row"
+                                    } else {
+                                        "$it list item"
+                                    }
                                 },
                             trailingContent = {
                                 if (it == initialValue || (it == noValueLabel && initialValue.isEmpty())) {
