@@ -27,6 +27,7 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.mapping.view.MapView
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 @Composable
@@ -50,6 +51,49 @@ public fun Map(modifier: Modifier = Modifier, mapState: MapState = MapState()) {
         launch {
             mapState.arcGISMap.collect {
                 mapView.map = it
+            }
+        }
+
+        // Collect viewpoint operations and pass the results back to the channel
+        launch {
+            mapState.viewpointChannel.receiveAsFlow().collect {
+                launch {
+                    when (it) {
+                        is ViewpointOperation.ViewpointAnimated -> {
+                            val result = mapView.setViewpointAnimated(
+                                viewpoint = it.viewpoint,
+                                durationSeconds = it.durationSeconds,
+                                curve = it.curve
+                            )
+                            it.completeWith(result)
+                        }
+
+                        is ViewpointOperation.ViewpointCenter -> {
+                            val result = mapView.setViewpointCenter(it.center)
+                            it.completeWith(result)
+                        }
+
+                        is ViewpointOperation.ViewpointCenterAndScale -> {
+                            val result = mapView.setViewpointCenter(it.center, it.scale)
+                            it.completeWith(result)
+                        }
+
+                        is ViewpointOperation.ViewpointGeometry -> {
+                            val result = mapView.setViewpointGeometry(it.boundingGeometry)
+                            it.completeWith(result)
+                        }
+
+                        is ViewpointOperation.ViewpointRotation -> {
+                            val result = mapView.setViewpointRotation(it.angleDegrees)
+                            it.completeWith(result)
+                        }
+
+                        is ViewpointOperation.ViewpointScale -> {
+                            val result = mapView.setViewpointScale(it.scale)
+                            it.completeWith(result)
+                        }
+                    }
+                }
             }
         }
     }

@@ -17,7 +17,13 @@
 
 package com.arcgismaps.toolkit.geocompose
 
+import androidx.annotation.UiThread
+import com.arcgismaps.geometry.Geometry
+import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.mapping.view.AnimationCurve
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,11 +37,59 @@ public class MapState(arcGISMap: ArcGISMap? = null) : GeoComposeState() {
     private val _arcGISMap: MutableStateFlow<ArcGISMap?> = MutableStateFlow(null)
     public val arcGISMap: StateFlow<ArcGISMap?> = _arcGISMap.asStateFlow()
 
-    public fun setArcGISMap(arcGISMap: ArcGISMap){
+    public fun setArcGISMap(arcGISMap: ArcGISMap) {
         _arcGISMap.value = arcGISMap
     }
 
     init {
         _arcGISMap.value = arcGISMap
     }
+
+    internal val viewpointChannel = Channel<ViewpointOperation>()
+
+    @UiThread
+    public suspend fun setViewpointAnimated(
+        viewpoint: Viewpoint,
+        durationSeconds: Float,
+        curve: AnimationCurve
+    ): Result<Boolean> =
+        ViewpointOperation.ViewpointAnimated(viewpoint, durationSeconds, curve).let {
+            viewpointChannel.send(it)
+            it.await()
+        }
+
+    @UiThread
+    public suspend fun setViewpointCenter(point: Point): Result<Boolean> =
+        ViewpointOperation.ViewpointCenter(point).let {
+            viewpointChannel.send(it)
+            it.await()
+        }
+
+    @UiThread
+    public suspend fun setViewpointCenter(center: Point, scale: Double): Result<Boolean> =
+        ViewpointOperation.ViewpointCenterAndScale(center, scale).let {
+            viewpointChannel.send(it)
+            it.await()
+        }
+
+    @UiThread
+    public suspend fun setViewpointGeometry(boundingGeometry: Geometry): Result<Boolean> =
+        ViewpointOperation.ViewpointGeometry(boundingGeometry).let {
+            viewpointChannel.send(it)
+            it.await()
+        }
+
+    @UiThread
+    public suspend fun setViewpointRotation(angleDegrees: Double): Result<Boolean> =
+        ViewpointOperation.ViewpointRotation(angleDegrees).let {
+            viewpointChannel.send(it)
+            it.await()
+        }
+
+    @UiThread
+    public suspend fun setViewpointScale(scale: Double): Result<Boolean> =
+        ViewpointOperation.ViewpointScale(scale).let {
+            viewpointChannel.send(it)
+            it.await()
+        }
 }
