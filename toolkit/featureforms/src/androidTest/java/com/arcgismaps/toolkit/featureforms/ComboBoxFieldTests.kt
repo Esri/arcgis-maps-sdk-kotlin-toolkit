@@ -17,16 +17,19 @@
 package com.arcgismaps.toolkit.featureforms
 
 import android.content.Context
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.assertContentDescriptionContains
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotFocused
 import androidx.compose.ui.test.assertTextEquals
-import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithContentDescription
-import androidx.compose.ui.test.performTextClearance
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.printToLog
 import androidx.test.platform.app.InstrumentationRegistry
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.data.ArcGISFeature
@@ -37,14 +40,8 @@ import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FeatureFormDefinition
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.layers.FeatureLayer
-import com.arcgismaps.toolkit.featureforms.components.combo.ComboBoxField
-import com.arcgismaps.toolkit.featureforms.components.combo.ComboBoxFieldProperties
-import com.arcgismaps.toolkit.featureforms.components.combo.ComboBoxFieldState
-import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.fail
 import kotlinx.coroutines.test.runTest
-import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.text.IsEqualIgnoringCase.equalToIgnoringCase
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Rule
@@ -56,17 +53,19 @@ class ComboBoxFieldTests {
     private val outlinedTextFieldSemanticLabel = "outlined text field"
     private val charCountSemanticLabel = "char count"
     private val clearTextSemanticLabel = "Clear text button"
-    private lateinit var context : Context
+    private val optionsIconSemanticLabel = "field icon"
+    private val comboBoxDialogListSemanticLabel = "ComboBoxDialogLazyColumn"
+    private lateinit var context: Context
 
     private val featureForm by lazy {
         sharedFeatureForm!!
     }
 
-    private val formElement by lazy {
-        featureForm.elements
+    private fun getFormElementWithLabel(label: String): FieldFormElement {
+        return featureForm.elements
             .filterIsInstance<FieldFormElement>()
             .first {
-                it.label == "Combo String"
+                it.label == label
             }
     }
 
@@ -79,28 +78,11 @@ class ComboBoxFieldTests {
     val composeTestRule = createComposeRule()
 
     @Before
-    fun setContent() = runTest {
+    fun setContent() {
         composeTestRule.setContent {
-            val scope = rememberCoroutineScope()
-            val context = LocalContext.current
-            val input = (formElement.input as ComboBoxFormInput)
-            val state = ComboBoxFieldState(
-                properties = ComboBoxFieldProperties(
-                    label = formElement.label,
-                    placeholder = formElement.hint,
-                    description = formElement.description,
-                    value = formElement.value,
-                    required = formElement.isRequired,
-                    editable = formElement.isEditable,
-                    codedValues = input.codedValues,
-                    showNoValueOption = input.noValueOption,
-                    noValueLabel = input.noValueLabel
-                ),
-                scope = scope,
-                context = context,
-                onEditValue = {}
-            )
-            ComboBoxField(state = state)
+            val state = FeatureFormState()
+            state.setFeatureForm(featureForm)
+            FeatureForm(featureFormState = state)
         }
     }
 
@@ -108,41 +90,200 @@ class ComboBoxFieldTests {
      * Test case 3.1:
      * Given a ComboBoxField with a pre-existing value, description and a no value label
      * When the pre-existing value is cleared
-     * Then the ComboBoxField shows "No Value"
+     * Then the ComboBoxField shows the noValueLabel
      * https://devtopia.esri.com/runtime/common-toolkit/blob/ace0cb49775dd2bdeae88a0d1e8b2695ed820feb/designs/Forms/FormsTestDesign.md#test-case-31-pre-existing-value-description-clear-button-no-value-label
      */
     @Test
     fun testClearValueNoValueLabel() {
-        val comboBoxField = composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
+        val formElement = getFormElementWithLabel("Combo String")
+        val input = formElement.input as ComboBoxFormInput
+        // find the field with the the label
+        val comboBoxField = composeTestRule.onNodeWithText(formElement.label)
+        // assert it is displayed and not focused
+        comboBoxField.assertIsDisplayed()
         comboBoxField.assertIsNotFocused()
-
-        val label = composeTestRule.onNodeWithContentDescription(labelSemanticLabel)
-        label.assertIsDisplayed()
-        comboBoxField.assertTextEquals(formElement.label, formElement.value.value, includeEditableText = true)
-
-        val description = composeTestRule.onNode(hasContentDescription(descriptionSemanticLabel), useUnmergedTree = true)
-        val descriptionText = description.getTextString()
-        description.assertIsDisplayed()
-        assertEquals(descriptionText, formElement.description)
+        // find the child node with the description semantic label
+        val descriptionNode = comboBoxField.onChildWithContentDescription(descriptionSemanticLabel)
+        val hasDescriptionMatcher = hasText(formElement.description)
+        // validate the correct description is visible
+        assert(hasDescriptionMatcher.matches(descriptionNode.fetchSemanticsNode())) {
+            "Failed to assert the following: ${hasDescriptionMatcher.description}"
+        }
+        // validate that the pre-populated value shown shown in accurate and as expected
+        // assertTextEquals matches the Text(the label) and Editable Text (the actual editable input text)
+        comboBoxField.assertTextEquals(formElement.label, formElement.value.value)
+        // find the clear text node within its children
+        val clearButton = comboBoxField.onChildWithContentDescription(clearTextSemanticLabel)
+        // validate the clear icon is visible
+        clearButton.assertIsDisplayed()
         // clear the value
-        comboBoxField.performTextClearance()
+        clearButton.performClick()
+        // assert "no value" placeholder is visible
+        // assertTextEquals matches the Text(the label) and Editable Text (the placeholder here
+        // due to the use of the PlaceHolderTransformation)
+        comboBoxField.assertTextEquals(
+            formElement.label,
+            input.noValueLabel.ifEmpty { context.getString(R.string.no_value) }
+        )
+    }
 
-        // assert "no value" placeholder is visible, this method is needed due to the use of
-        // a PlaceHolderTransformation
-        for ((k, v) in comboBoxField.fetchSemanticsNode().config) {
-            if (k.name == "EditableText"){
-                assertThat(v.toString(), equalToIgnoringCase("no value"))
+    /**
+     * Test case 3.2:
+     * Given a ComboBoxField with no pre-existing value, description and a no value label
+     * When the field is observed
+     * Then the ComboBoxField shows the noValueLabel and the options menu icon is visible
+     * https://devtopia.esri.com/runtime/common-toolkit/blob/ace0cb49775dd2bdeae88a0d1e8b2695ed820feb/designs/Forms/FormsTestDesign.md#test-case-32-no-pre-existing-value-no-value-label-options-button
+     */
+    @Test
+    fun testNoValueAndNoValueLabel() {
+        val formElement = getFormElementWithLabel("Combo Integer")
+        val input = formElement.input as ComboBoxFormInput
+        // find the field with the the label
+        val comboBoxField = composeTestRule.onNodeWithText(formElement.label)
+        comboBoxField.printToLog("TAG")
+        // assert it is displayed and not focused
+        comboBoxField.assertIsDisplayed()
+        comboBoxField.assertIsNotFocused()
+        // find the child node with the description semantic label
+        val descriptionNode = comboBoxField.onChildWithContentDescription(descriptionSemanticLabel)
+        val hasDescriptionMatcher = hasText(formElement.description)
+        // validate the correct description is visible
+        assert(hasDescriptionMatcher.matches(descriptionNode.fetchSemanticsNode())) {
+            "Failed to assert the following: ${hasDescriptionMatcher.description}"
+        }
+        // assert "no value" placeholder is visible
+        // assertTextEquals matches the Text(the label) and Editable Text (the placeholder here
+        // due to the use of the PlaceHolderTransformation)
+        comboBoxField.assertTextEquals(
+            formElement.label,
+            input.noValueLabel.ifEmpty { context.getString(R.string.no_value) }
+        )
+        // validate that the options icon is visible
+        val optionsIconNode = comboBoxField.assertContentDescriptionContains(optionsIconSemanticLabel)
+        optionsIconNode.assertIsDisplayed()
+    }
+
+    /**
+     * Test case 3.3:
+     * Given a ComboBoxField with a pre-existing value, description and a no value label
+     * When the ComboBoxField is tapped
+     * Then the ComboBoxDialog is shown with the noValueLabel row AND all coded values are visible
+     * with the selected value marked with a check
+     * https://devtopia.esri.com/runtime/common-toolkit/blob/ace0cb49775dd2bdeae88a0d1e8b2695ed820feb/designs/Forms/FormsTestDesign.md#test-case-33-pick-a-value
+     */
+    @Test
+    fun testEnteredValueWithComboBoxPicker() {
+        val formElement = getFormElementWithLabel("Combo String")
+        val input = formElement.input as ComboBoxFormInput
+        // find the field with the the label
+        val comboBoxField = composeTestRule.onNodeWithText(formElement.label)
+        // assert it is displayed and not focused
+        comboBoxField.assertIsDisplayed()
+        comboBoxField.assertIsNotFocused()
+        // find the child node with the description semantic label
+        val descriptionNode = comboBoxField.onChildWithContentDescription(descriptionSemanticLabel)
+        val hasDescriptionMatcher = hasText(formElement.description)
+        // validate the correct description is visible
+        assert(hasDescriptionMatcher.matches(descriptionNode.fetchSemanticsNode())) {
+            "Failed to assert the following: ${hasDescriptionMatcher.description}"
+        }
+        // validate that the pre-populated value shown shown in accurate and as expected
+        // assertTextEquals matches the Text(the label) and Editable Text (the actual editable input text)
+        comboBoxField.assertTextEquals(formElement.label, formElement.value.value)
+        // tap the value to bring up the picker
+        comboBoxField.performClick()
+        composeTestRule.mainClock.advanceTimeBy(1000)
+        // find the dialog
+        val comboBoxDialogList = composeTestRule.onNodeWithContentDescription(comboBoxDialogListSemanticLabel)
+        val listItem = comboBoxDialogList.onChildWithContentDescription("String 1 list item")
+        listItem.assertIsDisplayed()
+    }
+
+    /**
+     * Test case 3.4: Picker with a noValueLabel row
+     * Steps:
+     * load the webmap listed below
+     * access the form definition on the first operational layer
+     * access the feature with object ID 2
+     * access the FormElement with label "Combo String"
+     * Expectation: the value is visible and equal to "String 3"
+     * tap the value to bring up the picker
+     * Expectation: the picker appears and a "No value" row (or ComboBoxFormInput.noValueLabel) is added to the top of the list
+     * Expectation: and all the coded values for this field are visible as selectable rows
+     * tap the ""No value" option
+     * tap the "Done" button
+     * Expectation: the value is visible and equal to "No value"
+     */
+    @Test
+    fun testNoValueRow() {
+        val formElement = getFormElementWithLabel("Combo String")
+        val input = formElement.input as ComboBoxFormInput
+        // find the field with the the label
+        val comboBoxField = composeTestRule.onNodeWithText(formElement.label)
+        // assert it is displayed and not focused
+        comboBoxField.assertIsDisplayed()
+        comboBoxField.assertIsNotFocused()
+        // validate that the pre-populated value shown shown in accurate and as expected
+        // assertTextEquals matches the Text(the label) and Editable Text (the actual editable input text)
+        comboBoxField.assertTextEquals(formElement.label, formElement.value.value)
+        // open the picker
+        comboBoxField.performClick()
+        // find the dialog
+        val comboBoxDialogList = composeTestRule.onNodeWithContentDescription(comboBoxDialogListSemanticLabel)
+        comboBoxDialogList.assertIsDisplayed()
+        // this field has a no value label and not required, hence check for the row
+        comboBoxDialogList.onChildWithContentDescription(
+            "${input.noValueLabel.ifEmpty { context.getString(R.string.no_value) }} list item"
+        ).assertIsDisplayed()
+        // validate all coded values rows are displayed
+        input.codedValues.forEach {
+            val listItem = comboBoxDialogList.onChildWithContentDescription("${it.name} list item")
+            listItem.assertIsDisplayed()
+            // if this item is selected, then validate the check mark is shown
+            if (it.name == formElement.value.value) {
+                listItem.onChildWithContentDescription("list item check").assertIsDisplayed()
             }
         }
     }
 
+    /**
+     * Test case 3.5: Required Value
+     * Steps:
+     * load the webmap listed below
+     * access the form definition on the first operational layer
+     * access the feature with object ID 2
+     * access the FormElement with label Required Combo Box
+     * Expectation: the value is visible and equal to "Pine"
+     * tap the clear icon to clear the value
+     * Expectation: the value is visible and equal to "Enter Value"
+     * Expectation: the helper text is visible, has the platform default error color and says "Required"
+     * tap the value to bring up the picker
+     * Expectation: only the coded values for this field are visible as selectable rows
+     * tap the "Oak" option
+     * tap the "Done" button
+     * Expectation: the value is visible and equal to "Oak"
+     */
     @Test
-    fun testNoValueAndNoValueLabel() {
+    fun testRequiredValue() {
 
     }
 
+    /**
+     * Test case 3.6: noValueOption is 'Hide'
+     * Steps:
+     * load the webmap listed below
+     * access the form definition on the first operational layer
+     * access the feature with object ID 2
+     * access the FormElement with label Combo No Value False
+     * Expectation: the value is empty
+     * tap the value to bring up the picker
+     * Expectation: the picker appears and only the coded values for this field are visible as selectable rows
+     * tap the "First" option
+     * tap the "Done" button
+     * Expectation: the value is visible and equal to "First"
+     */
     @Test
-    fun testEnteredValueWithComboBoxPicker() {
+    fun testRequiredValueWithComboBoxPicker() {
 
     }
 
@@ -185,4 +326,23 @@ class ComboBoxFieldTests {
             }
         }
     }
+}
+
+
+/**
+ * Returns the child node with the given content description [value]. This only checks for the
+ * children with a depth of 1. An exception is thrown if the child with the content description
+ * does not exist.
+ */
+internal fun SemanticsNodeInteraction.onChildWithContentDescription(value: String): SemanticsNodeInteraction {
+    val nodes = onChildren()
+    val count = nodes.fetchSemanticsNodes().count()
+
+    for (i in 0 until count) {
+        val semanticsNode = nodes[i].fetchSemanticsNode()
+        if (semanticsNode.config[SemanticsProperties.ContentDescription].contains(value)) {
+            return nodes[i]
+        }
+    }
+    throw AssertionError("No node exists with the given content description : $value")
 }

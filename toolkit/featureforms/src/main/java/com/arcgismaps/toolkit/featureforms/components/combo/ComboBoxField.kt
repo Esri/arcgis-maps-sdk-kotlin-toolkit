@@ -239,7 +239,11 @@ internal fun ComboBoxDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                 )
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                LazyColumn(modifier = Modifier
+                    .fillMaxSize()
+                    .semantics {
+                        contentDescription = "ComboBoxDialogLazyColumn"
+                    }) {
                     items(filteredList) {
                         ListItem(
                             headlineContent = {
@@ -257,12 +261,15 @@ internal fun ComboBoxDialog(
                                 .clickable {
                                     // if the no value label was selected, set the value to be empty
                                     onValueChange(if (it == noValueLabel) "" else it)
+                                }
+                                .semantics {
+                                    contentDescription = "$it list item"
                                 },
                             trailingContent = {
                                 if (it == initialValue || (it == noValueLabel && initialValue.isEmpty())) {
                                     Icon(
                                         imageVector = Icons.Outlined.Check,
-                                        contentDescription = null
+                                        contentDescription = "list item check"
                                     )
                                 }
                             }
