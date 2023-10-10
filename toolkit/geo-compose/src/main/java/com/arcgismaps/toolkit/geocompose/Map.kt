@@ -73,7 +73,7 @@ public fun Map(modifier: Modifier = Modifier, mapState: MapState = MapState()) {
                     currentViewpoint = mapView.getCurrentViewpoint(ViewpointType.CenterAndScale)
                 }
                 if (currentViewpoint != null) {
-                    mapState.setViewpoint(currentViewpoint)
+                    mapState.setCurrentViewpoint(currentViewpoint)
                 }
             }
         }

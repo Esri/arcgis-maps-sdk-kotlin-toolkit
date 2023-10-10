@@ -21,9 +21,7 @@ import com.arcgismaps.geometry.Geometry
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.Viewpoint
-import com.arcgismaps.mapping.ViewpointType
 import com.arcgismaps.mapping.view.AnimationCurve
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -37,10 +35,6 @@ public class MapState(arcGISMap: ArcGISMap? = null) : GeoComposeState() {
     private val _arcGISMap: MutableStateFlow<ArcGISMap?> = MutableStateFlow(null)
     public val arcGISMap: StateFlow<ArcGISMap?> = _arcGISMap.asStateFlow()
 
-    internal val currentViewpointType: MutableStateFlow<ViewpointType?> = MutableStateFlow(null)
-    internal val viewpointChannel = Channel<ViewpointOperation>()
-    internal val viewpoint: MutableStateFlow<Viewpoint?> = MutableStateFlow(null)
-
     public fun setArcGISMap(arcGISMap: ArcGISMap) {
         _arcGISMap.value = arcGISMap
     }
@@ -49,33 +43,12 @@ public class MapState(arcGISMap: ArcGISMap? = null) : GeoComposeState() {
         _arcGISMap.value = arcGISMap
     }
 
-    public fun getCurrentViewpoint(viewpointType: ViewpointType): StateFlow<Viewpoint?> {
-        currentViewpointType.value = viewpointType
-        return viewpoint
-    }
 
-    public fun setViewpoint(viewpoint: Viewpoint) {
-        this.viewpoint.value = viewpoint
-    }
-
-    public suspend fun setViewpointAnimated(
-        viewpoint: Viewpoint
-    ): Result<Boolean> =
-        ViewpointOperation.ViewpointAnimated(viewpoint).let {
-            viewpointChannel.send(it)
-            it.await()
-        }
-
-    public suspend fun setViewpointAnimated(
-        viewpoint: Viewpoint,
-        durationSeconds: Float
-    ): Result<Boolean> =
-        ViewpointOperation.ViewpointAnimatedWithDuration(viewpoint, durationSeconds).let {
-            viewpointChannel.send(it)
-            it.await()
-        }
-
-
+    /**
+     * Change the Map to the [viewpoint] with [durationSeconds] and animation [curve] asynchronously.
+     *
+     * @since 200.3.0
+     */
     public suspend fun setViewpointAnimated(
         viewpoint: Viewpoint,
         durationSeconds: Float,
@@ -87,24 +60,44 @@ public class MapState(arcGISMap: ArcGISMap? = null) : GeoComposeState() {
                 it.await()
             }
 
-    public suspend fun setViewpointCenter(point: Point): Result<Boolean> =
-        ViewpointOperation.ViewpointCenter(point).let {
+    /**
+     * Change the Map to the [center] point asynchronously.
+     *
+     * @since 200.3.0
+     */
+    public suspend fun setViewpointCenter(center: Point): Result<Boolean> =
+        ViewpointOperation.ViewpointCenter(center).let {
             viewpointChannel.send(it)
             it.await()
         }
 
+    /**
+     * Change the Map to the [center] point and [scale] asynchronously.
+     *
+     * @since 200.3.0
+     */
     public suspend fun setViewpointCenter(center: Point, scale: Double): Result<Boolean> =
         ViewpointOperation.ViewpointCenterAndScale(center, scale).let {
             viewpointChannel.send(it)
             it.await()
         }
 
+    /**
+     * Change the Map to the [boundingGeometry] asynchronously.
+     *
+     * @since 200.3.0
+     */
     public suspend fun setViewpointGeometry(boundingGeometry: Geometry): Result<Boolean> =
         ViewpointOperation.ViewpointGeometry(boundingGeometry).let {
             viewpointChannel.send(it)
             it.await()
         }
 
+    /**
+     * Change the Map to the [boundingGeometry] with [paddingInDips] asynchronously.
+     *
+     * @since 200.3.0
+     */
     public suspend fun setViewpointGeometry(
         boundingGeometry: Geometry,
         paddingInDips: Double
@@ -114,12 +107,22 @@ public class MapState(arcGISMap: ArcGISMap? = null) : GeoComposeState() {
             it.await()
         }
 
+    /**
+     * Rotates the Map to the provided [angleDegrees] asynchronously.
+     *
+     * @since 200.3.0
+     */
     public suspend fun setViewpointRotation(angleDegrees: Double): Result<Boolean> =
         ViewpointOperation.ViewpointRotation(angleDegrees).let {
             viewpointChannel.send(it)
             it.await()
         }
 
+    /**
+     * Change the Map to zoom to a [scale] asynchronously.
+     *
+     * @since 200.3.0
+     */
     public suspend fun setViewpointScale(scale: Double): Result<Boolean> =
         ViewpointOperation.ViewpointScale(scale).let {
             viewpointChannel.send(it)
