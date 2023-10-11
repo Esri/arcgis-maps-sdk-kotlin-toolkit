@@ -171,7 +171,7 @@ internal class FormTextFieldState(
             }
         }
         scope.launch {
-            isFocused.collect {
+            isFocused.drop(1).collect {
                 if (it) {
                     validate(value.value, true)
                 } else {
