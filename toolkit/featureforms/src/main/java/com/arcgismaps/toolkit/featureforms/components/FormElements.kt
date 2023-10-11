@@ -3,7 +3,6 @@ package com.arcgismaps.toolkit.featureforms.components
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
@@ -23,31 +22,20 @@ import com.arcgismaps.toolkit.featureforms.components.text.FormTextField
 import com.arcgismaps.toolkit.featureforms.components.text.FormTextFieldState
 
 @Composable
-internal fun FieldElement(field: FieldFormElement, form: FeatureForm, state: BaseFieldState?) {
+internal fun FieldElement(field: FieldFormElement, state: BaseFieldState) {
     val visible by field.isVisible.collectAsState()
-    val scope = rememberCoroutineScope()
     if (visible) {
         when (field.input) {
             is TextBoxFormInput, is TextAreaFormInput -> {
-                state?.let {
-                    FormTextField(state = state as FormTextFieldState)
-                }
+                FormTextField(state = state as FormTextFieldState)
             }
 
             is DateTimePickerFormInput -> {
-                DateTimeField(
-                    state = DateTimeFieldState(
-                        formElement = field,
-                        form = form,
-                        scope = scope
-                    )
-                )
+                DateTimeField(state = state as DateTimeFieldState)
             }
 
             is ComboBoxFormInput -> {
-                state?.let {
-                    ComboBoxField(state = state as ComboBoxFieldState)
-                }
+                ComboBoxField(state = state as ComboBoxFieldState)
             }
     
             is SwitchFormInput -> {
