@@ -80,6 +80,8 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class).all {
 }
 
 dependencies {
+    implementation(project(":compass"))
+    implementation(project(":indoors"))
     implementation(project(":geo-compose"))
     implementation(arcgis.mapsSdk)
     implementation(libs.bundles.composeCore)
