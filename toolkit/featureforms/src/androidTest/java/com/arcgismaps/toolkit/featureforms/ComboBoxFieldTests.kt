@@ -146,7 +146,6 @@ class ComboBoxFieldTests {
         val input = formElement.input as ComboBoxFormInput
         // find the field with the the label
         val comboBoxField = composeTestRule.onNodeWithText(formElement.label)
-        comboBoxField.printToLog("TAG")
         // assert it is displayed and not focused
         comboBoxField.assertIsDisplayed()
         comboBoxField.assertIsNotFocused()
@@ -174,7 +173,7 @@ class ComboBoxFieldTests {
      * Test case 3.3:
      * Given a ComboBoxField with a pre-existing value, description and a no value label
      * When the ComboBoxField is tapped
-     * Then the ComboBoxDialog is shown with all coded values AND
+     * Then a ComboBoxDialog is shown AND
      * When a coded value is selected from the dialog and dismissed
      * Then the ComboBoxField also shows this selected value
      * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-33-pick-a-value
