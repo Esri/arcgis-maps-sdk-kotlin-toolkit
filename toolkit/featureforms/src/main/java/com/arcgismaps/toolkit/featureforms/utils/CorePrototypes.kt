@@ -23,6 +23,7 @@ import com.arcgismaps.data.RangeDomain
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FeatureFormDefinition
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import java.time.Instant
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
@@ -186,6 +187,13 @@ private fun Feature.castAndSetAttributeValue(value: Any?, key: String) {
                 is String -> value.toDoubleOrNull()
                 is Int -> value.toDouble()
                 is Float -> value.toDouble()
+                else -> null
+            }
+        }
+        FieldType.Date -> {
+            finalValue = when (value) {
+                is String -> value.toLongOrNull()?.let { Instant.ofEpochMilli(it) }
+                is Long -> Instant.ofEpochMilli(value)
                 else -> null
             }
         }
