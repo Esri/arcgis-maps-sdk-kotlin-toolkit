@@ -52,6 +52,68 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.utils.ClearFocus
 import com.arcgismaps.toolkit.featureforms.utils.PlaceholderTransformation
 
+@Composable
+private fun trailingIcon(
+    text: String,
+    isEditable: Boolean,
+    singleLine: Boolean,
+    isFocused: Boolean,
+    trailingIcon: ImageVector?,
+    onValueChange: (String) -> Unit,
+    onDone: () -> Unit
+): (@Composable () -> Unit)? {
+    // single line field and is editable
+    return if (singleLine && isEditable && text.isEmpty() && trailingIcon != null) {
+        {
+            // show a trailing icon if provided when the field is empty
+            Icon(imageVector = trailingIcon, contentDescription = "field icon")
+        }
+    } else if (singleLine && isEditable && text.isNotEmpty()) {
+        {
+            // show a clear icon instead if the field is not empty
+            IconButton(onClick = { onValueChange("") }, modifier = Modifier.semantics {
+                contentDescription = "Clear text button"
+            }) {
+                Icon(
+                    imageVector = Icons.Rounded.Clear, contentDescription = "Clear Text"
+                )
+            }
+        }
+    } else if (singleLine && trailingIcon != null) {
+        // single line field but not editable
+        {
+            // show a trailing icon to indicate field type
+            Icon(imageVector = trailingIcon, contentDescription = "field icon")
+        }
+    } else if (!singleLine && isEditable && isFocused) {
+        // multiline editable field
+        {
+            // show a done button only when focused
+            IconButton(onClick =  { onDone() }, modifier = Modifier.semantics {
+                contentDescription = "Save local edit button"
+            }) {
+                Icon(
+                    imageVector = Icons.Rounded.CheckCircle, contentDescription = "Done"
+                )
+            }
+        }
+        
+    } else if (!singleLine && isEditable && text.isNotEmpty()) {
+        {
+            // show a clear icon instead if the multiline field is not empty
+            IconButton(onClick = { onValueChange("") }, modifier = Modifier.semantics {
+                contentDescription = "Clear text button"
+            }) {
+                Icon(
+                    imageVector = Icons.Rounded.Clear, contentDescription = "Clear Text"
+                )
+            }
+        }
+    } else {
+        null
+    }
+}
+
 /**
  * A base text field component built on top of an [OutlinedTextField] that provides a standard for
  * visual and behavioral properties. This can be used to build more customized composite components.
@@ -89,6 +151,7 @@ internal fun BaseTextField(
     placeholder: String,
     singleLine: Boolean,
     trailingIcon: ImageVector? = null,
+    suffix: (@Composable () -> Unit)? = null,
     supportingText: @Composable (ColumnScope.() -> Unit)? = null,
     onFocusChange: ((Boolean) -> Unit)? = null,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
@@ -120,64 +183,23 @@ internal fun BaseTextField(
             readOnly = readOnly,
             enabled = isEditable,
             label = {
-                Text(
-                    text = label,
-                    modifier = Modifier.semantics { contentDescription = "label" })
+                Text(text = label,
+                    modifier = Modifier.semantics { contentDescription = "label" }
+                )
             },
-            trailingIcon = {
-                // single line field and is editable
-                if (singleLine && isEditable) {
-                    // show a trailing icon if provided when the field is empty
-                    if (text.isEmpty() && trailingIcon != null) {
-                        Icon(imageVector = trailingIcon, contentDescription = "field icon")
-                    } else if (text.isNotEmpty()) {
-                        // show a clear icon instead if the field is not empty
-                        IconButton(
-                            onClick = { onValueChange("") },
-                            modifier = Modifier.semantics {
-                                contentDescription = "Clear text button"
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.Clear,
-                                contentDescription = "Clear Text"
-                            )
-                        }
-                    }
-                    // single line field but not editable
-                } else if (singleLine && trailingIcon != null) {
-                    // show a trailing icon to indicate field type
-                    Icon(imageVector = trailingIcon, contentDescription = "field icon")
-                    // multiline editable field
-                } else if (!singleLine && isEditable) {
-                    if (isFocused) {
-                        // show a done button only when focused
-                        IconButton(
-                            onClick = { clearFocus = true },
-                            modifier = Modifier.semantics {
-                                contentDescription = "Save local edit button"
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.CheckCircle,
-                                contentDescription = "Done"
-                            )
-                        }
-                    } else if(text.isNotEmpty()) {
-                        // show a clear icon instead if the multiline field is not empty
-                        IconButton(
-                            onClick = { onValueChange("") },
-                            modifier = Modifier.semantics {
-                                contentDescription = "Clear text button"
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.Clear,
-                                contentDescription = "Clear Text"
-                            )
-                        }
-                    }
-                }
+            suffix = suffix,
+            trailingIcon = if (suffix == null) {
+                trailingIcon(
+                    text,
+                    isEditable,
+                    singleLine,
+                    isFocused,
+                    trailingIcon,
+                    onValueChange = onValueChange,
+                    onDone = { clearFocus = true }
+                )
+            } else {
+                null
             },
             supportingText = {
                 Column(

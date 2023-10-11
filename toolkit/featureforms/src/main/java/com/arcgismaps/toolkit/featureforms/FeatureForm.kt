@@ -32,11 +32,14 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
-import com.arcgismaps.toolkit.featureforms.components.combo.rememberComboBoxFieldState
+import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberComboBoxFieldState
+import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberComboBoxFieldStateForSwitch
+import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberSwitchFieldState
 import com.arcgismaps.toolkit.featureforms.components.text.rememberFormTextFieldState
 import kotlinx.coroutines.CoroutineScope
 import java.util.Objects
@@ -177,6 +180,25 @@ private fun rememberFieldStates(
                         context = context,
                         scope = scope
                     )
+                }
+                
+                is SwitchFormInput -> {
+                    if (fieldElement.value.value.isNotEmpty()) {
+                        rememberSwitchFieldState(
+                            field = fieldElement,
+                            form = form,
+                            scope = scope
+                        )
+                    } else {
+                        // if no default value for the coded value is set
+                        // present the switch as a combo box with a no value option.
+                        rememberComboBoxFieldStateForSwitch(
+                            field = fieldElement,
+                            form = form,
+                            context = context,
+                            scope = scope
+                        )
+                    }
                 }
 
                 else -> {
