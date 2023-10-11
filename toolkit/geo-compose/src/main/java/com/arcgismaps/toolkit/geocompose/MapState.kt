@@ -43,7 +43,6 @@ public class MapState(arcGISMap: ArcGISMap? = null) : GeoComposeState() {
         _arcGISMap.value = arcGISMap
     }
 
-
     /**
      * Change the Map to the [viewpoint] with [durationSeconds] and animation [curve] asynchronously.
      *
@@ -54,7 +53,7 @@ public class MapState(arcGISMap: ArcGISMap? = null) : GeoComposeState() {
         durationSeconds: Float,
         curve: AnimationCurve
     ): Result<Boolean> =
-        ViewpointOperation.ViewpointAnimatedWithDurationAndCurve(viewpoint, durationSeconds, curve)
+        ViewpointOperation.ViewpointAnimated(viewpoint, durationSeconds, curve)
             .let {
                 viewpointChannel.send(it)
                 it.await()
@@ -77,7 +76,7 @@ public class MapState(arcGISMap: ArcGISMap? = null) : GeoComposeState() {
      * @since 200.3.0
      */
     public suspend fun setViewpointCenter(center: Point, scale: Double): Result<Boolean> =
-        ViewpointOperation.ViewpointCenterAndScale(center, scale).let {
+        ViewpointOperation.ViewpointCenter(center, scale).let {
             viewpointChannel.send(it)
             it.await()
         }
@@ -102,7 +101,7 @@ public class MapState(arcGISMap: ArcGISMap? = null) : GeoComposeState() {
         boundingGeometry: Geometry,
         paddingInDips: Double
     ): Result<Boolean> =
-        ViewpointOperation.ViewpointGeometryAndPadding(boundingGeometry, paddingInDips).let {
+        ViewpointOperation.ViewpointGeometry(boundingGeometry, paddingInDips).let {
             viewpointChannel.send(it)
             it.await()
         }

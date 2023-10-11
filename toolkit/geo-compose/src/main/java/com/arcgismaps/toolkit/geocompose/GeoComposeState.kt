@@ -20,8 +20,6 @@ package com.arcgismaps.toolkit.geocompose
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.ViewpointType
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Represents the state for the GeoCompose.
@@ -30,10 +28,9 @@ import kotlinx.coroutines.flow.StateFlow
  */
 public sealed class GeoComposeState {
 
-    private val currentViewpoint: MutableStateFlow<Viewpoint?> = MutableStateFlow(null)
-    internal val currentViewpointType: MutableStateFlow<ViewpointType?> = MutableStateFlow(null)
-    internal val viewpoint: MutableStateFlow<Viewpoint?> = MutableStateFlow(null)
     internal val viewpointChannel = Channel<ViewpointOperation>()
+    internal val getCurrentViewpointChannel = Channel<GetCurrentViewpointOperation>()
+    internal val setViewpointChannel = Channel<SetViewpointOperation>()
 
     /**
      * Change the GeoCompose to the new [viewpoint] with animation.
@@ -59,37 +56,30 @@ public sealed class GeoComposeState {
         viewpoint: Viewpoint,
         durationSeconds: Float
     ): Result<Boolean> =
-        ViewpointOperation.ViewpointAnimatedWithDuration(viewpoint, durationSeconds).let {
+        ViewpointOperation.ViewpointAnimated(viewpoint, durationSeconds).let {
             viewpointChannel.send(it)
             it.await()
         }
 
     /**
-     * Set the [viewpoint] and is updated instantaneously.
+     * Retrieve the current viewpoint for this Map using the given [viewpointType].
      *
      * @since 200.3.0
      */
-    public fun setViewpoint(viewpoint: Viewpoint) {
-        this.viewpoint.value = viewpoint
-    }
+    public suspend fun getCurrentViewpoint(viewpointType: ViewpointType): Result<Viewpoint> =
+        GetCurrentViewpointOperation.GetCurrentViewpoint(viewpointType).let {
+            getCurrentViewpointChannel.send(it)
+            it.await()
+        }
 
     /**
-     * Returns the StateFlow of the [currentViewpoint] based on the [viewpointType]
-     * which emits on every viewpoint change.
+     * Change the Map to the new [viewpoint]. The viewpoint is updated instantaneously.
      *
      * @since 200.3.0
      */
-    public fun getCurrentViewpoint(viewpointType: ViewpointType): StateFlow<Viewpoint?> {
-        currentViewpointType.value = viewpointType
-        return currentViewpoint
-    }
-
-    /**
-     * Sets the [currentViewpoint] to the [viewpoint] based on the currently set [ViewpointType].
-     *
-     * @since 200.3.0
-     */
-    internal fun setCurrentViewpoint(viewpoint: Viewpoint) {
-        currentViewpoint.value = viewpoint
+    public suspend fun setViewpoint(viewpoint: Viewpoint) {
+        SetViewpointOperation.SetViewpoint(viewpoint).let {
+            setViewpointChannel.send(it)
+        }
     }
 }

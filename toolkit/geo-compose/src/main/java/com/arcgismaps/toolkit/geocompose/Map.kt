@@ -26,8 +26,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
-import com.arcgismaps.mapping.Viewpoint
-import com.arcgismaps.mapping.ViewpointType
 import com.arcgismaps.mapping.view.MapView
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -56,24 +54,29 @@ public fun Map(modifier: Modifier = Modifier, mapState: MapState = MapState()) {
             }
         }
 
+        // Collect set viewpoint operation and assign the passed value to the MapView
         launch {
-            mapState.viewpoint.collect {
-                it?.let {
-                    mapView.setViewpoint(it)
+            mapState.setViewpointChannel.receiveAsFlow().collect {
+                when (it) {
+                    is SetViewpointOperation.SetViewpoint -> {
+                        mapView.setViewpoint(it.viewpoint)
+                    }
                 }
             }
         }
 
+        // Collect get current viewpoint operation and pass the current viewpoint back to the channel
         launch {
-            mapView.viewpointChanged.collect {
-                var currentViewpoint: Viewpoint? = null
-                if (mapState.currentViewpointType.value == ViewpointType.BoundingGeometry) {
-                    currentViewpoint = mapView.getCurrentViewpoint(ViewpointType.BoundingGeometry)
-                } else if (mapState.currentViewpointType.value == ViewpointType.CenterAndScale) {
-                    currentViewpoint = mapView.getCurrentViewpoint(ViewpointType.CenterAndScale)
-                }
-                if (currentViewpoint != null) {
-                    mapState.setCurrentViewpoint(currentViewpoint)
+            mapState.getCurrentViewpointChannel.receiveAsFlow().collect {
+                when (it) {
+                    is GetCurrentViewpointOperation.GetCurrentViewpoint -> {
+                        val currentViewpoint = mapView.getCurrentViewpoint(it.viewpointType)
+                        if (currentViewpoint != null) {
+                            it.completeWith(Result.success(currentViewpoint))
+                        } else {
+                            it.completeWith(Result.failure(Throwable("Error retrieving the current viewpoint")))
+                        }
+                    }
                 }
             }
         }
@@ -81,62 +84,59 @@ public fun Map(modifier: Modifier = Modifier, mapState: MapState = MapState()) {
         // Collect viewpoint operations and pass the results back to the channel
         launch {
             mapState.viewpointChannel.receiveAsFlow().collect {
-                launch {
-                    when (it) {
-                        is ViewpointOperation.ViewpointAnimated -> {
-                            val result = mapView.setViewpointAnimated(it.viewpoint)
-                            it.completeWith(result)
-                        }
-
-                        is ViewpointOperation.ViewpointAnimatedWithDuration -> {
-                            val result = mapView.setViewpointAnimated(
-                                viewpoint = it.viewpoint,
-                                durationSeconds = it.durationSeconds
-                            )
-                            it.completeWith(result)
-                        }
-
-                        is ViewpointOperation.ViewpointAnimatedWithDurationAndCurve -> {
+                when (it) {
+                    is ViewpointOperation.ViewpointAnimated -> {
+                        if (it.curve != null && it.durationSeconds != null) {
                             val result = mapView.setViewpointAnimated(
                                 viewpoint = it.viewpoint,
                                 durationSeconds = it.durationSeconds,
                                 curve = it.curve
                             )
                             it.completeWith(result)
+                        } else if (it.durationSeconds != null) {
+                            val result = mapView.setViewpointAnimated(
+                                viewpoint = it.viewpoint,
+                                durationSeconds = it.durationSeconds
+                            )
+                            it.completeWith(result)
+                        } else {
+                            val result = mapView.setViewpointAnimated(it.viewpoint)
+                            it.completeWith(result)
                         }
+                    }
 
-                        is ViewpointOperation.ViewpointCenter -> {
+                    is ViewpointOperation.ViewpointCenter -> {
+                        if (it.scale != null) {
+                            val result = mapView.setViewpointCenter(it.center, it.scale)
+                            it.completeWith(result)
+                        } else {
                             val result = mapView.setViewpointCenter(it.center)
                             it.completeWith(result)
                         }
 
-                        is ViewpointOperation.ViewpointCenterAndScale -> {
-                            val result = mapView.setViewpointCenter(it.center, it.scale)
-                            it.completeWith(result)
-                        }
+                    }
 
-                        is ViewpointOperation.ViewpointGeometry -> {
-                            val result = mapView.setViewpointGeometry(it.boundingGeometry)
-                            it.completeWith(result)
-                        }
-
-                        is ViewpointOperation.ViewpointGeometryAndPadding -> {
+                    is ViewpointOperation.ViewpointGeometry -> {
+                        if (it.paddingInDips != null) {
                             val result = mapView.setViewpointGeometry(
                                 boundingGeometry = it.boundingGeometry,
                                 paddingInDips = it.paddingInDips
                             )
                             it.completeWith(result)
-                        }
-
-                        is ViewpointOperation.ViewpointRotation -> {
-                            val result = mapView.setViewpointRotation(it.angleDegrees)
+                        } else {
+                            val result = mapView.setViewpointGeometry(it.boundingGeometry)
                             it.completeWith(result)
                         }
+                    }
 
-                        is ViewpointOperation.ViewpointScale -> {
-                            val result = mapView.setViewpointScale(it.scale)
-                            it.completeWith(result)
-                        }
+                    is ViewpointOperation.ViewpointRotation -> {
+                        val result = mapView.setViewpointRotation(it.angleDegrees)
+                        it.completeWith(result)
+                    }
+
+                    is ViewpointOperation.ViewpointScale -> {
+                        val result = mapView.setViewpointScale(it.scale)
+                        it.completeWith(result)
                     }
                 }
             }

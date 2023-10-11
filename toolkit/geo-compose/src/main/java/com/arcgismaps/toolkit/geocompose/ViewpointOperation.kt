@@ -36,26 +36,14 @@ internal sealed class ViewpointOperation {
 
     class ViewpointAnimated(
         val viewpoint: Viewpoint,
+        val durationSeconds: Float? = null,
+        val curve: AnimationCurve? = null
     ) : ViewpointOperation()
 
-    class ViewpointAnimatedWithDuration(
-        val viewpoint: Viewpoint,
-        val durationSeconds: Float,
-    ) : ViewpointOperation()
 
-    class ViewpointAnimatedWithDurationAndCurve(
-        val viewpoint: Viewpoint,
-        val durationSeconds: Float,
-        val curve: AnimationCurve
-    ) : ViewpointOperation()
+    class ViewpointCenter(val center: Point, val scale: Double? = null) : ViewpointOperation()
 
-    class ViewpointCenter(val center: Point) : ViewpointOperation()
-
-    class ViewpointCenterAndScale(val center: Point, val scale: Double) : ViewpointOperation()
-
-    class ViewpointGeometry(val boundingGeometry: Geometry) : ViewpointOperation()
-
-    class ViewpointGeometryAndPadding(val boundingGeometry: Geometry, val paddingInDips: Double) :
+    class ViewpointGeometry(val boundingGeometry: Geometry, val paddingInDips: Double? = null) :
         ViewpointOperation()
 
     class ViewpointRotation(val angleDegrees: Double) : ViewpointOperation()
