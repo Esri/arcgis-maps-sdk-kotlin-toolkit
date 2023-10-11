@@ -9,5 +9,5 @@ import com.arcgismaps.mapping.Viewpoint
  * @since 200.3.0
  */
 internal sealed class SetViewpointOperation {
-    class SetViewpoint(val viewpoint: Viewpoint) : SetViewpointOperation()
+    data class SetViewpoint(val viewpoint: Viewpoint) : SetViewpointOperation()
 }

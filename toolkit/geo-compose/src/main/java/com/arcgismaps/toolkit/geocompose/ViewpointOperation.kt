@@ -34,21 +34,21 @@ import kotlinx.coroutines.completeWith
 internal sealed class ViewpointOperation {
     private val deferred = CompletableDeferred<Boolean>()
 
-    class ViewpointAnimated(
+    data class ViewpointAnimated(
         val viewpoint: Viewpoint,
         val durationSeconds: Float? = null,
         val curve: AnimationCurve? = null
     ) : ViewpointOperation()
 
 
-    class ViewpointCenter(val center: Point, val scale: Double? = null) : ViewpointOperation()
+    data class ViewpointCenter(val center: Point, val scale: Double? = null) : ViewpointOperation()
 
-    class ViewpointGeometry(val boundingGeometry: Geometry, val paddingInDips: Double? = null) :
+    data class ViewpointGeometry(val boundingGeometry: Geometry, val paddingInDips: Double? = null) :
         ViewpointOperation()
 
-    class ViewpointRotation(val angleDegrees: Double) : ViewpointOperation()
+    data class ViewpointRotation(val angleDegrees: Double) : ViewpointOperation()
 
-    class ViewpointScale(val scale: Double) : ViewpointOperation()
+    data class ViewpointScale(val scale: Double) : ViewpointOperation()
 
     suspend fun await(): Result<Boolean> = runCatchingCancellable {
         deferred.await()

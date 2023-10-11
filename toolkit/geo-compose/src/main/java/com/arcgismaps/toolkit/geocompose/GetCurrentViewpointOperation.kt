@@ -13,7 +13,7 @@ import kotlinx.coroutines.completeWith
 internal sealed class GetCurrentViewpointOperation {
     private val deferred = CompletableDeferred<Viewpoint>()
 
-    class GetCurrentViewpoint(val viewpointType: ViewpointType) : GetCurrentViewpointOperation()
+    data class GetCurrentViewpoint(val viewpointType: ViewpointType) : GetCurrentViewpointOperation()
 
     suspend fun await(): Result<Viewpoint> = runCatchingCancellable {
         deferred.await()
