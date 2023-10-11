@@ -30,7 +30,7 @@ internal open class FieldProperties(
     val description: String,
     val value: StateFlow<String>,
     val required: StateFlow<Boolean>,
-    val editable: StateFlow<Boolean>,
+    val editable: StateFlow<Boolean>
 )
 
 /**

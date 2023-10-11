@@ -220,6 +220,8 @@ internal class FormTextFieldState(
     /**
      * Validates the current [value]'s length based on the [minLength], [maxLength], and [isRequired] and sets the
      * [hasError] and [_errorMessage] if there was an error in validation.
+     *
+     * @param canBeEmpty true if empty text  is allowed in the TextField
      */
     private fun validate(value: String, canBeEmpty: Boolean) {
         _hasError.value = if (!canBeEmpty && value.isEmpty()) {
@@ -308,7 +310,7 @@ internal fun rememberFormTextFieldState(
     maxLength: Int,
     form: FeatureForm,
     context: Context,
-    scope: CoroutineScope,
+    scope: CoroutineScope
 ): FormTextFieldState = rememberSaveable(
     saver = FormTextFieldState.Saver(field, form, context, scope)
 ) {

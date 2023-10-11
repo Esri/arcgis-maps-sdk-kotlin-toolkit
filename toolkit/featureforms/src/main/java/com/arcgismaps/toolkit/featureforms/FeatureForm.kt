@@ -169,7 +169,7 @@ private fun rememberFieldStates(
                         maxLength = maxLength,
                         form = form,
                         context = context,
-                        scope = scope,
+                        scope = scope
                     )
                 }
 
