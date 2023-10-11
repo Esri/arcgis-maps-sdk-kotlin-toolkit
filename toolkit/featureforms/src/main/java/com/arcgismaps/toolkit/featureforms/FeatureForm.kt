@@ -33,12 +33,14 @@ import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.mapping.featureforms.RadioButtonsFormInput
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.combo.rememberComboBoxFieldState
 import com.arcgismaps.toolkit.featureforms.components.datetime.rememberDateTimeFieldState
+import com.arcgismaps.toolkit.featureforms.components.radio.rememberRadioButtonFieldState
 import com.arcgismaps.toolkit.featureforms.components.text.rememberFormTextFieldState
 import kotlinx.coroutines.CoroutineScope
 import java.util.Objects
@@ -190,6 +192,14 @@ private fun rememberFieldStates(
                         field = fieldElement,
                         form = form,
                         context = context,
+                        scope = scope
+                    )
+                }
+
+                is RadioButtonsFormInput -> {
+                    rememberRadioButtonFieldState(
+                        field = fieldElement,
+                        form = form,
                         scope = scope
                     )
                 }
