@@ -17,13 +17,19 @@
 
 package com.arcgismaps.toolkit.geocompose
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.mapping.view.MapView
@@ -32,6 +38,12 @@ import kotlinx.coroutines.launch
 
 @Composable
 public fun Map(modifier: Modifier = Modifier, mapState: MapState = MapState()) {
+
+    // If function is accessed in preview mode
+    if (LocalInspectionMode.current) {
+        MockMap(modifier, mapState)
+        return
+    }
 
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
@@ -144,8 +156,22 @@ public fun Map(modifier: Modifier = Modifier, mapState: MapState = MapState()) {
     }
 }
 
-@Preview
+
+@Composable
+internal fun MockMap(modifier: Modifier = Modifier, mapState: MapState) {
+    Image(
+        modifier = modifier.fillMaxSize(),
+        painter = painterResource(id = R.drawable.preview_map),
+        contentDescription = "ArcGISMap",
+        contentScale = ContentScale.FillBounds
+    )
+}
+
+
+@Preview(showSystemUi = true, device = "id:pixel_6")
 @Composable
 internal fun MapPreview() {
-    Map()
+    MaterialTheme {
+        Map()
+    }
 }
