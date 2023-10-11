@@ -18,8 +18,14 @@
 package com.arcgismaps.toolkit.geocompose
 
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.view.DrawStatus
+import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
@@ -33,6 +39,16 @@ public class MapState(arcGISMap: ArcGISMap? = null) : GeoComposeState() {
 
     public fun setArcGISMap(arcGISMap: ArcGISMap){
         _arcGISMap.value = arcGISMap
+    }
+
+    private val _onSingleTapConfirmed = MutableSharedFlow<SingleTapConfirmedEvent>(
+        replay = 0,
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+    public val onSingleTapConfirmed: SharedFlow<SingleTapConfirmedEvent?> = _onSingleTapConfirmed.asSharedFlow()
+    internal fun notifyOnSingleTapConfirmed(singleTapConfirmedEvent: SingleTapConfirmedEvent) {
+        _onSingleTapConfirmed.tryEmit(singleTapConfirmedEvent)
     }
 
     init {

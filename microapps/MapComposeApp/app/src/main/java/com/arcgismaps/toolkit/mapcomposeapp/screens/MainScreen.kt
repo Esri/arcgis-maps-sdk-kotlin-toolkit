@@ -28,6 +28,7 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.toolkit.geocompose.Map
 import com.arcgismaps.toolkit.geocompose.MapState
+import kotlinx.coroutines.launch
 
 @Composable
 fun MainScreen() {
@@ -39,8 +40,15 @@ fun MainScreen() {
     )
 
     LaunchedEffect(Unit) {
-        mapState.drawStatus.collect {
-            Log.e("DrawStatus", "DrawStatus: ${it?.toString()}")
+        launch {
+            mapState.drawStatus.collect {
+                Log.e("MainScreen", "DrawStatus: ${it?.toString()}")
+            }
+        }
+        launch {
+            mapState.onSingleTapConfirmed.collect {
+                Log.e("MainScreen", "onSingleTapConfirmed: ${it?.toString()}")
+            }
         }
     }
 }

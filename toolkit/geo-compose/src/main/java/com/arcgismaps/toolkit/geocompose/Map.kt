@@ -27,6 +27,8 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.mapping.view.MapView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
@@ -55,6 +57,17 @@ public fun Map(modifier: Modifier = Modifier, mapState: MapState = MapState()) {
         launch {
             mapView.drawStatus.collect {
                 mapState.notifyDrawStatusChange(it)
+            }
+        }
+        forwardGestureEvents(mapView, mapState, this)
+    }
+}
+
+private suspend fun forwardGestureEvents(mapView: MapView, mapState: MapState, coroutineScope: CoroutineScope) {
+    with(coroutineScope) {
+        launch (Dispatchers.Main.immediate) {
+            mapView.onSingleTapConfirmed.collect {
+                mapState.notifyOnSingleTapConfirmed(it)
             }
         }
     }
