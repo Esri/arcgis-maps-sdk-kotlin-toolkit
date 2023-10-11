@@ -54,7 +54,7 @@ public fun Map(modifier: Modifier = Modifier, mapState: MapState = MapState()) {
         }
         launch {
             mapView.drawStatus.collect {
-                mapState.setDrawStatus(it)
+                mapState.notifyDrawStatusChange(it)
             }
         }
     }

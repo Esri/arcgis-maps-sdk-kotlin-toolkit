@@ -32,11 +32,9 @@ import kotlinx.coroutines.flow.asStateFlow
  * @since 200.3.0
  */
 public sealed class GeoComposeState {
-    private val _drawStatus: MutableSharedFlow<DrawStatus> = MutableSharedFlow( extraBufferCapacity = Int.MAX_VALUE,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST)
-    public val drawStatus: SharedFlow<DrawStatus> = _drawStatus.asSharedFlow()
-    internal fun setDrawStatus(drawStatus: DrawStatus) {
-        _drawStatus.tryEmit(drawStatus)
-//        _drawStatus.value = drawStatus
+    private val _drawStatus: MutableStateFlow<DrawStatus?> = MutableStateFlow(DrawStatus.InProgress)
+    public val drawStatus: StateFlow<DrawStatus?> = _drawStatus.asStateFlow()
+    internal fun notifyDrawStatusChange(drawStatus: DrawStatus) {
+        _drawStatus.value = drawStatus
     }
 }
