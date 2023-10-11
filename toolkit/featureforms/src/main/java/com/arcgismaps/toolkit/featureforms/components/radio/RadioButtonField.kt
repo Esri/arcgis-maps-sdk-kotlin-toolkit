@@ -35,10 +35,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
+import com.arcgismaps.toolkit.featureforms.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -48,6 +51,12 @@ internal fun RadioButtonField(state: RadioButtonFieldState, modifier: Modifier =
     val value by state.value.collectAsState()
     val editable by state.isEditable.collectAsState()
     val required by state.isRequired.collectAsState()
+    val noValueLabel = state.noValueLabel.ifEmpty { stringResource(R.string.no_value) }
+    val options = if (!required) {
+        if (state.showNoValueOption == FormInputNoValueOption.Show) {
+            listOf(noValueLabel) + state.codedValues
+        } else state.codedValues
+    } else state.codedValues
 
     val label = remember(required) {
         if (required) {
@@ -84,10 +93,10 @@ internal fun RadioButtonField(state: RadioButtonFieldState, modifier: Modifier =
                     shape = RoundedCornerShape(5.dp)
                 )
         ) {
-            state.codedValues.forEach { code ->
+            options.forEach { code ->
                 RadioButtonRow(
                     value = code,
-                    selected = (code == value),
+                    selected = (code == value) || (code == noValueLabel && value.isEmpty()),
                     onClick = { state.onValueChanged(code) }
                 )
             }
@@ -127,13 +136,13 @@ private fun RadioButtonRow(
     }
 }
 
-internal class RadioButtonFieldColors (
-    val labelColor : Color,
-    val focusedLabelColor : Color,
-    val disabledLabelColor : Color,
-    val supportingTextColor : Color,
-    val containerColor : Color,
-    val containerBorderColor : Color
+internal class RadioButtonFieldColors(
+    val labelColor: Color,
+    val focusedLabelColor: Color,
+    val disabledLabelColor: Color,
+    val supportingTextColor: Color,
+    val containerColor: Color,
+    val containerBorderColor: Color
 )
 
 @Preview(showBackground = true, backgroundColor = 0xFFFFFFFF, showSystemUi = true)
@@ -147,7 +156,7 @@ private fun RadioButtonFieldPreview() {
                 description = "Description",
                 value = MutableStateFlow(""),
                 editable = MutableStateFlow(true),
-                required = MutableStateFlow(true),
+                required = MutableStateFlow(false),
                 codedValues = listOf("One", "Two", "Three"),
                 showNoValueOption = FormInputNoValueOption.Show,
                 noValueLabel = "No Value"
