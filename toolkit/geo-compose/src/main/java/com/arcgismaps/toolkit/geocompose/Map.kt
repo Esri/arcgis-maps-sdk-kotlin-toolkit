@@ -17,6 +17,8 @@
 
 package com.arcgismaps.toolkit.geocompose
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -24,19 +26,35 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.mapping.view.MapView
 import kotlinx.coroutines.launch
 
 @Composable
-public fun Map(modifier: Modifier = Modifier, mapState: MapState = MapState()) {
+public fun Map(
+    modifier: Modifier = Modifier,
+    mapState: MapState = MapState(),
+    overlay: @Composable () -> Unit = {}
+) {
 
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val mapView = remember { MapView(context) }
 
-    AndroidView(modifier = modifier, factory = { mapView })
+    Box(modifier = Modifier.semantics {
+        contentDescription = "MapContainer"
+    }) {
+        AndroidView(modifier = modifier
+            .fillMaxSize()
+            .semantics {
+                contentDescription = "MapView"
+            }, factory = { mapView })
+
+        overlay()
+    }
 
     DisposableEffect(Unit) {
         lifecycleOwner.lifecycle.addObserver(mapView)
