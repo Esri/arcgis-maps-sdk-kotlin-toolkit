@@ -52,6 +52,12 @@ public fun Map(modifier: Modifier = Modifier, mapState: MapState = MapState()) {
                 mapView.map = it
             }
         }
+
+        launch {
+            mapView.viewpointChanged.collect {
+                mapState.notifyViewpointChanged()
+            }
+        }
     }
 }
 

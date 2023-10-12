@@ -17,11 +17,42 @@
 
 package com.arcgismaps.toolkit.geocompose
 
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+
 /**
  * Represents the state for the GeoCompose.
  *
  * @since 200.3.0
  */
 public sealed class GeoComposeState {
-    // TODO add implementation
+
+    /**
+     * A [MutableSharedFlow] backing the public immutable viewpointChanged [SharedFlow].
+     *
+     * @since 200.3.0
+     */
+    private val _viewpointChanged: MutableSharedFlow<Unit> =
+        MutableSharedFlow(
+            extraBufferCapacity = Int.MAX_VALUE,
+            onBufferOverflow = BufferOverflow.DROP_OLDEST
+        )
+
+    /**
+     * A [SharedFlow] which notifies when the viewpoint of GeoCompose has changed.
+     *
+     * @since 200.3.0
+     */
+    public val viewpointChanged: SharedFlow<Unit> = _viewpointChanged.asSharedFlow()
+
+    /**
+     * Emits the viewpointChanged event.
+     *
+     * @since 200.3.0
+     */
+    internal fun notifyViewpointChanged() {
+        _viewpointChanged.tryEmit(Unit)
+    }
 }
