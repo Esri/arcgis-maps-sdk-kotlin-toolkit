@@ -40,7 +40,7 @@ import com.arcgismaps.toolkit.featureforms.components.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberCodedValueFieldState
 import com.arcgismaps.toolkit.featureforms.components.datetime.rememberDateTimeFieldState
-import com.arcgismaps.toolkit.featureforms.components.radio.rememberRadioButtonFieldState
+import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberRadioButtonFieldState
 import com.arcgismaps.toolkit.featureforms.components.text.rememberFormTextFieldState
 import kotlinx.coroutines.CoroutineScope
 import java.util.Objects

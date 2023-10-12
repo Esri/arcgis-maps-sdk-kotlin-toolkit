@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.arcgismaps.toolkit.featureforms.components.radio
+package com.arcgismaps.toolkit.featureforms.components.codedvalue
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.saveable.Saver
@@ -22,50 +22,24 @@ import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
-import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.mapping.featureforms.RadioButtonsFormInput
-import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
-import com.arcgismaps.toolkit.featureforms.components.base.FieldProperties
-import com.arcgismaps.toolkit.featureforms.components.combo.ComboBoxFieldState
 import com.arcgismaps.toolkit.featureforms.utils.editValue
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-internal class RadioButtonFieldProperties(
-    label: String,
-    placeholder: String,
-    description: String,
-    value: StateFlow<String>,
-    required: StateFlow<Boolean>,
-    editable: StateFlow<Boolean>,
-    val codedValues: List<String>,
-    val showNoValueOption: FormInputNoValueOption,
-    val noValueLabel: String
-) : FieldProperties(label, placeholder, description, value, required, editable)
+internal typealias RadioButtonFieldProperties = CodedValueFieldProperties
 
 internal class RadioButtonFieldState(
     properties: RadioButtonFieldProperties,
     initialValue: String = properties.value.value,
     scope: CoroutineScope,
     onEditValue: ((Any?) -> Unit)
-) : BaseFieldState(properties, initialValue, scope, onEditValue) {
-
-    /**
-     * The list of coded values associated with this field.
-     */
-    val codedValues: List<String> = properties.codedValues
-
-    /**
-     * This property defines whether to display a special "no value" option if this field is
-     * optional.
-     */
-    val showNoValueOption: FormInputNoValueOption = properties.showNoValueOption
-
-    /**
-     * The custom label to use if [showNoValueOption] is enabled.
-     */
-    val noValueLabel: String = properties.noValueLabel
+) : CodedValueFieldState(
+    properties = properties,
+    initialValue = initialValue,
+    scope = scope,
+    onEditValue = onEditValue
+) {
 
     companion object {
         fun Saver(

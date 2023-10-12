@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.arcgismaps.toolkit.featureforms.components.radio
+package com.arcgismaps.toolkit.featureforms.components.codedvalue
 
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
