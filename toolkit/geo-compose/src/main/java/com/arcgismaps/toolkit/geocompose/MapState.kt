@@ -60,48 +60,35 @@ public class MapState(arcGISMap: ArcGISMap? = null) : GeoComposeState() {
             }
 
     /**
-     * Change the Map to the [center] point asynchronously.
+     * Change the Map to the [center] point using an optional [scale] asynchronously.
      *
      * @since 200.3.0
      */
-    public suspend fun setViewpointCenter(center: Point): Result<Boolean> =
-        ViewpointOperation.ViewpointCenter(center).let {
+    public suspend fun setViewpointCenter(center: Point, scale: Double? = null): Result<Boolean> =
+        if (scale != null) ViewpointOperation.ViewpointCenter(center, scale).let {
+            viewpointChannel.send(it)
+            it.await()
+        } else ViewpointOperation.ViewpointCenter(center).let {
             viewpointChannel.send(it)
             it.await()
         }
 
     /**
-     * Change the Map to the [center] point and [scale] asynchronously.
-     *
-     * @since 200.3.0
-     */
-    public suspend fun setViewpointCenter(center: Point, scale: Double): Result<Boolean> =
-        ViewpointOperation.ViewpointCenter(center, scale).let {
-            viewpointChannel.send(it)
-            it.await()
-        }
-
-    /**
-     * Change the Map to the [boundingGeometry] asynchronously.
-     *
-     * @since 200.3.0
-     */
-    public suspend fun setViewpointGeometry(boundingGeometry: Geometry): Result<Boolean> =
-        ViewpointOperation.ViewpointGeometry(boundingGeometry).let {
-            viewpointChannel.send(it)
-            it.await()
-        }
-
-    /**
-     * Change the Map to the [boundingGeometry] with [paddingInDips] asynchronously.
+     * Change the Map to the [boundingGeometry] using an optional [paddingInDips] asynchronously.
      *
      * @since 200.3.0
      */
     public suspend fun setViewpointGeometry(
         boundingGeometry: Geometry,
-        paddingInDips: Double
+        paddingInDips: Double? = null
     ): Result<Boolean> =
-        ViewpointOperation.ViewpointGeometry(boundingGeometry, paddingInDips).let {
+        if (paddingInDips != null) ViewpointOperation.ViewpointGeometry(
+            boundingGeometry,
+            paddingInDips
+        ).let {
+            viewpointChannel.send(it)
+            it.await()
+        } else ViewpointOperation.ViewpointGeometry(boundingGeometry).let {
             viewpointChannel.send(it)
             it.await()
         }

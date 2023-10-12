@@ -33,30 +33,22 @@ public sealed class GeoComposeState {
     internal val setViewpointChannel = Channel<SetViewpointOperation>()
 
     /**
-     * Change the GeoCompose to the new [viewpoint] with animation.
-     * This function uses the standard animation duration.
-     *
-     * @since 200.3.0
-     */
-    public suspend fun setViewpointAnimated(
-        viewpoint: Viewpoint
-    ): Result<Boolean> =
-        ViewpointOperation.ViewpointAnimated(viewpoint).let {
-            viewpointChannel.send(it)
-            it.await()
-        }
-
-    /**
-     * Change the GeoCompose to the new [viewpoint] with animation, taking the given number
-     * of seconds to complete the navigation.
+     * Change the GeoCompose to the new [viewpoint] with animation, using an optional
+     * [durationSeconds] of seconds to complete the navigation.
      *
      * @since 200.3.0
      */
     public suspend fun setViewpointAnimated(
         viewpoint: Viewpoint,
-        durationSeconds: Float
+        durationSeconds: Float? = null
     ): Result<Boolean> =
-        ViewpointOperation.ViewpointAnimated(viewpoint, durationSeconds).let {
+        if (durationSeconds != null) ViewpointOperation.ViewpointAnimated(
+            viewpoint,
+            durationSeconds
+        ).let {
+            viewpointChannel.send(it)
+            it.await()
+        } else ViewpointOperation.ViewpointAnimated(viewpoint).let {
             viewpointChannel.send(it)
             it.await()
         }
