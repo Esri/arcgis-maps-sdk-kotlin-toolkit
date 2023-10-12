@@ -38,10 +38,10 @@ import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
-import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberComboBoxFieldStateForSwitch
-import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberSwitchFieldState
-import com.arcgismaps.toolkit.featureforms.components.combo.rememberComboBoxFieldState
+import com.arcgismaps.toolkit.featureforms.components.combobox.rememberComboBoxFieldState
+import com.arcgismaps.toolkit.featureforms.components.combobox.rememberComboBoxFieldStateForSwitch
 import com.arcgismaps.toolkit.featureforms.components.datetime.rememberDateTimeFieldState
+import com.arcgismaps.toolkit.featureforms.components.switch.rememberSwitchFieldState
 import com.arcgismaps.toolkit.featureforms.components.text.rememberFormTextFieldState
 import kotlinx.coroutines.CoroutineScope
 import java.util.Objects
@@ -198,7 +198,10 @@ private fun rememberFieldStates(
                 }
                 
                 is SwitchFormInput -> {
-                    if (fieldElement.value.value.isNotEmpty()) {
+                    val initialValue = fieldElement.value.value
+                    val input = fieldElement.input as SwitchFormInput
+                    if (initialValue.isNotEmpty()
+                        && (initialValue == input.onValue.toString() || initialValue == input.offValue.code.toString())) {
                         rememberSwitchFieldState(
                             field = fieldElement,
                             form = form,
@@ -206,6 +209,7 @@ private fun rememberFieldStates(
                         )
                     } else {
                         // if no default value for the coded value is set
+                        // or if the current value doesn't match the coded value codes
                         // present the switch as a combo box with a no value option.
                         rememberComboBoxFieldStateForSwitch(
                             field = fieldElement,

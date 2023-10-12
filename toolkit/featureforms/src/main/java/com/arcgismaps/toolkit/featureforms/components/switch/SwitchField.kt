@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.arcgismaps.toolkit.featureforms.components.codedvalue
+package com.arcgismaps.toolkit.featureforms.components.switch
 
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text

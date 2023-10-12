@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.arcgismaps.toolkit.featureforms.components.codedvalue
+package com.arcgismaps.toolkit.featureforms.components.switch
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
