@@ -38,7 +38,7 @@ import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
-import com.arcgismaps.toolkit.featureforms.components.combo.rememberComboBoxFieldState
+import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberCodedValueFieldState
 import com.arcgismaps.toolkit.featureforms.components.datetime.rememberDateTimeFieldState
 import com.arcgismaps.toolkit.featureforms.components.radio.rememberRadioButtonFieldState
 import com.arcgismaps.toolkit.featureforms.components.text.rememberFormTextFieldState
@@ -188,10 +188,9 @@ private fun rememberFieldStates(
                 }
 
                 is ComboBoxFormInput -> {
-                    rememberComboBoxFieldState(
+                    rememberCodedValueFieldState(
                         field = fieldElement,
                         form = form,
-                        context = context,
                         scope = scope
                     )
                 }

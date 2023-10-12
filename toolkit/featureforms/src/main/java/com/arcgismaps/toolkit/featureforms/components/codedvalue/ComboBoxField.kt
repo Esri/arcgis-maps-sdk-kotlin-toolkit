@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.arcgismaps.toolkit.featureforms.components.combo
+package com.arcgismaps.toolkit.featureforms.components.codedvalue
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -72,7 +72,7 @@ import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.base.BaseTextField
 
 @Composable
-internal fun ComboBoxField(state: ComboBoxFieldState, modifier: Modifier = Modifier) {
+internal fun ComboBoxField(state: CodedValueFieldState, modifier: Modifier = Modifier) {
     val value by state.value.collectAsState()
     val isEditable by state.isEditable.collectAsState()
     val isRequired by state.isRequired.collectAsState()
@@ -87,6 +87,11 @@ internal fun ComboBoxField(state: ComboBoxFieldState, modifier: Modifier = Modif
             state.label
         }
     }
+    val placeholder = if (isRequired) {
+        stringResource(R.string.enter_value)
+    } else if (state.showNoValueOption == FormInputNoValueOption.Show) {
+        state.noValueLabel.ifEmpty { stringResource(R.string.no_value) }
+    } else ""
 
     BaseTextField(
         text = value,
@@ -100,7 +105,7 @@ internal fun ComboBoxField(state: ComboBoxFieldState, modifier: Modifier = Modif
         readOnly = true,
         isEditable = isEditable,
         label = label,
-        placeholder = state.placeholder,
+        placeholder = placeholder,
         singleLine = true,
         trailingIcon = Icons.Outlined.List,
         supportingText = {
@@ -123,7 +128,7 @@ internal fun ComboBoxField(state: ComboBoxFieldState, modifier: Modifier = Modif
     if (showDialog) {
         ComboBoxDialog(
             initialValue = value,
-            values = state.codedValues.map { it.code.toString() },
+            values = state.codedValues,
             label = state.label,
             description = state.description,
             isRequired = isRequired,
