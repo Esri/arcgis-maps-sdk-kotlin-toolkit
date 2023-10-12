@@ -85,12 +85,6 @@ internal open class CodedValueFieldState(
      */
     val noValueLabel: String = properties.noValueLabel
 
-//    override val placeholder = if (isRequired.value) {
-//        context.getString(R.string.enter_value)
-//    } else if (showNoValueOption == FormInputNoValueOption.Show) {
-//        noValueLabel.ifEmpty { context.getString(R.string.no_value) }
-//    } else ""
-
     companion object {
 
         /**
