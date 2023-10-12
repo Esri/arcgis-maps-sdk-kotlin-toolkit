@@ -25,17 +25,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
@@ -47,7 +47,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
-internal fun RadioButtonField(state: RadioButtonFieldState, modifier: Modifier = Modifier) {
+internal fun RadioButtonField(
+    state: RadioButtonFieldState,
+    modifier: Modifier = Modifier,
+    colors: RadioButtonFieldColors = RadioButtonFieldDefaults.colors()
+) {
     val value by state.value.collectAsState()
     val editable by state.isEditable.collectAsState()
     val required by state.isRequired.collectAsState()
@@ -75,37 +79,36 @@ internal fun RadioButtonField(state: RadioButtonFieldState, modifier: Modifier =
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.bodyLarge,
-            color = if (editable) {
-                MaterialTheme.colorScheme.onSurfaceVariant
-            } else {
-                MaterialTheme.colorScheme.onSurface.copy(
-                    alpha = 0.38f
-                )
-            }
+            style = MaterialTheme.typography.bodyMedium,
+            color = colors.labelColor(enabled = editable)
         )
         Column(
             modifier = Modifier
                 .selectableGroup()
                 .border(
                     width = 1.dp,
-                    color = MaterialTheme.colorScheme.primaryContainer,
+                    color = colors.containerBorderColor(enabled = editable),
                     shape = RoundedCornerShape(5.dp)
                 )
         ) {
-            options.forEach { code ->
-                RadioButtonRow(
-                    value = code,
-                    selected = (code == value) || (code == noValueLabel && value.isEmpty()),
-                    onClick = { state.onValueChanged(code) }
-                )
+            CompositionLocalProvider(
+                LocalContentColor provides colors.textColor(enabled = editable)
+            ) {
+                options.forEach { code ->
+                    RadioButtonRow(
+                        value = code,
+                        selected = (code == value) || (code == noValueLabel && value.isEmpty()),
+                        enabled = editable,
+                        onClick = { state.onValueChanged(code) }
+                    )
+                }
             }
         }
         if (state.description.isNotEmpty()) {
             Text(
                 text = state.description,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = colors.supportingTextColor(enabled = editable)
             )
         }
     }
@@ -116,6 +119,7 @@ internal fun RadioButtonField(state: RadioButtonFieldState, modifier: Modifier =
 private fun RadioButtonRow(
     value: String,
     selected: Boolean,
+    enabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -124,26 +128,26 @@ private fun RadioButtonRow(
             .fillMaxWidth()
             .selectable(
                 selected = selected,
+                enabled = enabled,
+                role = Role.RadioButton,
                 onClick = onClick,
-                role = Role.RadioButton
             )
-            .padding(15.dp),
+            .padding(10.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(15.dp)
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        RadioButton(selected = selected, onClick = null)
-        Text(text = value, style = MaterialTheme.typography.bodyLarge)
+        RadioButton(
+            selected = selected,
+            onClick = null,
+            enabled = enabled
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium
+        )
     }
 }
 
-internal class RadioButtonFieldColors(
-    val labelColor: Color,
-    val focusedLabelColor: Color,
-    val disabledLabelColor: Color,
-    val supportingTextColor: Color,
-    val containerColor: Color,
-    val containerBorderColor: Color
-)
 
 @Preview(showBackground = true, backgroundColor = 0xFFFFFFFF, showSystemUi = true)
 @Composable
@@ -151,7 +155,7 @@ private fun RadioButtonFieldPreview() {
     MaterialTheme {
         val state = RadioButtonFieldState(
             properties = RadioButtonFieldProperties(
-                label = "Label",
+                label = "A list of values",
                 placeholder = "Placeholder",
                 description = "Description",
                 value = MutableStateFlow(""),
