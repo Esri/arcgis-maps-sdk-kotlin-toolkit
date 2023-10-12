@@ -18,7 +18,6 @@
 package com.arcgismaps.toolkit.geocompose
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -56,7 +55,6 @@ public fun Map(
         contentDescription = "MapContainer"
     }) {
         AndroidView(modifier = modifier
-            .fillMaxSize()
             .semantics {
                 contentDescription = "MapView"
             }, factory = { mapView })
