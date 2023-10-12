@@ -128,7 +128,7 @@ internal fun ComboBoxField(state: CodedValueFieldState, modifier: Modifier = Mod
     if (showDialog) {
         ComboBoxDialog(
             initialValue = value,
-            values = state.codedValues.map { it.code.toString() },
+            values = state.codedValues,
             label = state.label,
             description = state.description,
             isRequired = isRequired,
