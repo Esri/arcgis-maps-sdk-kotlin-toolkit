@@ -33,6 +33,14 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.mapping.view.MapView
 import kotlinx.coroutines.launch
 
+/**
+ * A compose equivalent of the [MapView].
+ *
+ * @param modifier Modifier to be applied to the Map
+ * @param mapState the state of the Map
+ * @param overlay the composable overlays to display on top of the Map. Example, a compass, floorfilter etc.
+ * @since 200.3.0
+ */
 @Composable
 public fun Map(
     modifier: Modifier = Modifier,
