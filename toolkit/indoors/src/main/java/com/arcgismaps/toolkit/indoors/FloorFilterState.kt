@@ -214,6 +214,8 @@ private class FloorFilterStateImpl(
     init {
         coroutineScope.launch {
             loadFloorManager()
+            val initialFacility = getSelectedFacility()
+            if (initialFacility != null) selectedFacilityId = initialFacility.id
         }
     }
 
@@ -253,7 +255,8 @@ private class FloorFilterStateImpl(
      * @since 200.2.0
      */
     override fun getSelectedFacility(): FloorFacility? {
-        return facilities.firstOrNull { isFacilitySelected(it) }
+        return if (sites.isEmpty()) facilities.first()
+            else facilities.firstOrNull { isFacilitySelected(it) }
     }
 
     /**

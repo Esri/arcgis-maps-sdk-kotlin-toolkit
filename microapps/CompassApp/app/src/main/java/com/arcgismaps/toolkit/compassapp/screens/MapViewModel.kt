@@ -26,13 +26,13 @@ import com.arcgismaps.toolkit.composablemap.MapInsets
 import com.arcgismaps.toolkit.composablemap.MapInterface
 
 class MapViewModel(
-    arcGISMap: ArcGISMap,
+    arcGISMap: ArcGISMap?,
     mapInsets: MapInsets = MapInsets(),
     locationDataSource: LocationDataSource? = null
 ) : ViewModel(), MapInterface by MapInterface(arcGISMap, mapInsets, locationDataSource)
 
 class MapViewModelFactory(
-    private val arcGISMap: ArcGISMap,
+    private val arcGISMap: ArcGISMap?,
     private val mapInsets: MapInsets = MapInsets(),
     private val locationDataSource: LocationDataSource? = null
 ) : ViewModelProvider.NewInstanceFactory() {
