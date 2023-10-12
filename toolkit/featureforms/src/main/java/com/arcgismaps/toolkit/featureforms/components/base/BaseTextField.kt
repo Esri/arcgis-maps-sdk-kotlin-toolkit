@@ -183,7 +183,8 @@ internal fun BaseTextField(
             readOnly = readOnly,
             enabled = isEditable,
             label = {
-                Text(text = label,
+                Text(
+                    text = label,
                     modifier = Modifier.semantics { contentDescription = "label" }
                 )
             },

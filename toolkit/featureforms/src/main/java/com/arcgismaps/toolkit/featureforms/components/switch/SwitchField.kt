@@ -45,16 +45,17 @@ internal fun SwitchField(state: SwitchFieldState, modifier: Modifier = Modifier)
         singleLine = true,
         suffix = {
             Switch(
-                checked = checkedState, onCheckedChange = { newState ->
+                checked = checkedState,
+                onCheckedChange = { newState ->
                     val newValue = (
                         if (newState)
                             state.yesValue.code?.toString()
                         else
                             state.noValue.code?.toString()
-                        ) ?: throw IllegalStateException("domain code must not be null")
+                        ) ?: throw IllegalStateException("coded value code must not be null")
                     state.onValueChanged(newValue)
                 },
-                modifier = Modifier,
+                modifier = Modifier.semantics { contentDescription = "switch" },
                 enabled = isEditable
             )
         },

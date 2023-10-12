@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.arcgismaps.toolkit.featureforms.components.combobox
+package com.arcgismaps.toolkit.featureforms.components.combo
 
 import android.content.Context
 import androidx.compose.runtime.Composable
@@ -134,6 +134,11 @@ internal class ComboBoxFieldState(
             }
         )
     
+        /**
+         * A Saver for when the ComboBox is used with a SwitchFormInput.
+         * This happens when the initial value of the field is not in the coded value codes
+         * of the domain property of the element.
+         */
         fun SaverForSwitch(
             formElement: FieldFormElement,
             form: FeatureForm,
@@ -204,7 +209,12 @@ internal fun rememberComboBoxFieldState(
     )
 }
 
-
+/**
+ * A remember function for when the CombobBoxFieldState is created
+ * from a SwitchFormInput. This happens when the initial value
+ * of the element is not in the coded value codes of the domain property
+ * of the element.
+ */
 @Composable
 internal fun rememberComboBoxFieldStateForSwitch(
     field: FieldFormElement,

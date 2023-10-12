@@ -12,12 +12,12 @@ import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
-import com.arcgismaps.toolkit.featureforms.components.combobox.ComboBoxField
-import com.arcgismaps.toolkit.featureforms.components.combobox.ComboBoxFieldState
-import com.arcgismaps.toolkit.featureforms.components.switch.SwitchField
-import com.arcgismaps.toolkit.featureforms.components.switch.SwitchFieldState
+import com.arcgismaps.toolkit.featureforms.components.combo.ComboBoxField
+import com.arcgismaps.toolkit.featureforms.components.combo.ComboBoxFieldState
 import com.arcgismaps.toolkit.featureforms.components.datetime.DateTimeField
 import com.arcgismaps.toolkit.featureforms.components.datetime.DateTimeFieldState
+import com.arcgismaps.toolkit.featureforms.components.switch.SwitchField
+import com.arcgismaps.toolkit.featureforms.components.switch.SwitchFieldState
 import com.arcgismaps.toolkit.featureforms.components.text.FormTextField
 import com.arcgismaps.toolkit.featureforms.components.text.FormTextFieldState
 

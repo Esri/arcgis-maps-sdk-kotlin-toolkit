@@ -38,8 +38,8 @@ import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
-import com.arcgismaps.toolkit.featureforms.components.combobox.rememberComboBoxFieldState
-import com.arcgismaps.toolkit.featureforms.components.combobox.rememberComboBoxFieldStateForSwitch
+import com.arcgismaps.toolkit.featureforms.components.combo.rememberComboBoxFieldState
+import com.arcgismaps.toolkit.featureforms.components.combo.rememberComboBoxFieldStateForSwitch
 import com.arcgismaps.toolkit.featureforms.components.datetime.rememberDateTimeFieldState
 import com.arcgismaps.toolkit.featureforms.components.switch.rememberSwitchFieldState
 import com.arcgismaps.toolkit.featureforms.components.text.rememberFormTextFieldState
@@ -201,7 +201,7 @@ private fun rememberFieldStates(
                     val initialValue = fieldElement.value.value
                     val input = fieldElement.input as SwitchFormInput
                     if (initialValue.isNotEmpty()
-                        && (initialValue == input.onValue.toString() || initialValue == input.offValue.code.toString())) {
+                        && (initialValue == input.onValue.code.toString() || initialValue == input.offValue.code.toString())) {
                         rememberSwitchFieldState(
                             field = fieldElement,
                             form = form,
