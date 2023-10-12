@@ -60,6 +60,7 @@ public fun Map(modifier: Modifier = Modifier, mapState: MapState = MapState()) {
                 when (it) {
                     is SetViewpointOperation.SetViewpoint -> {
                         mapView.setViewpoint(it.viewpoint)
+                        it.completeWith(Result.success(Unit))
                     }
                 }
             }
@@ -74,7 +75,7 @@ public fun Map(modifier: Modifier = Modifier, mapState: MapState = MapState()) {
                         if (currentViewpoint != null) {
                             it.completeWith(Result.success(currentViewpoint))
                         } else {
-                            it.completeWith(Result.failure(Throwable("Error retrieving the current viewpoint")))
+                            it.completeWith(Result.failure(IllegalStateException("Unable to retrieve the current viewpoint")))
                         }
                     }
                 }

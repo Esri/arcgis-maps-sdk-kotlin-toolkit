@@ -77,9 +77,10 @@ public sealed class GeoComposeState {
      *
      * @since 200.3.0
      */
-    public suspend fun setViewpoint(viewpoint: Viewpoint) {
+    public suspend fun setViewpoint(viewpoint: Viewpoint): Result<Unit> =
         SetViewpointOperation.SetViewpoint(viewpoint).let {
             setViewpointChannel.send(it)
+            it.await()
         }
-    }
+
 }
