@@ -63,7 +63,7 @@ public fun Map(modifier: Modifier = Modifier, mapState: MapState = MapState()) {
     }
 }
 
-private suspend fun forwardGestureEvents(mapView: MapView, mapState: MapState, coroutineScope: CoroutineScope) {
+private fun forwardGestureEvents(mapView: MapView, mapState: MapState, coroutineScope: CoroutineScope) {
     with(coroutineScope) {
         launch (Dispatchers.Main.immediate) {
             mapView.onSingleTapConfirmed.collect {
