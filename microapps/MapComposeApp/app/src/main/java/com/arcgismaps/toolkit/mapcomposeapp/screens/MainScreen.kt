@@ -18,14 +18,17 @@
 
 package com.arcgismaps.toolkit.mapcomposeapp.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.toolkit.geocompose.Map
 import com.arcgismaps.toolkit.geocompose.MapState
+import kotlinx.coroutines.launch
 
 @Composable
 fun MainScreen() {
@@ -35,4 +38,12 @@ fun MainScreen() {
         modifier = Modifier.fillMaxSize(),
         mapState = mapState,
     )
+
+    LaunchedEffect(Unit) {
+        launch {
+            mapState.viewpointChanged.collect {
+                Log.e("MainScreen", "viewpointChanged: ${it?.toString()}")
+            }
+        }
+    }
 }
