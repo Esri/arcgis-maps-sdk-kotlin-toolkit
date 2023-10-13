@@ -17,6 +17,7 @@
 
 package com.arcgismaps.toolkit.geocompose
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -26,6 +27,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
+import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.mapping.view.LocationDisplay
 import com.arcgismaps.mapping.view.MapView
 import kotlinx.coroutines.launch
 
@@ -47,12 +50,37 @@ public fun Map(modifier: Modifier = Modifier, mapState: MapState = MapState()) {
     }
 
     LaunchedEffect(mapState) {
+        // update the MapView's map
         launch {
             mapState.arcGISMap.collect {
                 mapView.map = it
             }
         }
+        // update the MapView's location display
+        launch {
+            mapState.locationDisplay.collect { locationDisplay ->
+                if (locationDisplay != null) {
+                    mapView.locationDisplay = locationDisplay
+                } else {
+                    mapView.setDefaultLocationDisplay(context)
+                }
+            }
+        }
     }
+}
+
+/**
+ * Sets a default [LocationDisplay] instance on [this] MapView after checking
+ * [ArcGISEnvironment.applicationContext]. If `ArcGISEnvironment.applicationContext` is not set yet,
+ * [context] will be set.
+ *
+ * @since 200.3.0
+ */
+private fun MapView.setDefaultLocationDisplay(context: Context) {
+    if (ArcGISEnvironment.applicationContext == null) {
+        ArcGISEnvironment.applicationContext = context.applicationContext
+    }
+    locationDisplay = LocationDisplay()
 }
 
 @Preview
