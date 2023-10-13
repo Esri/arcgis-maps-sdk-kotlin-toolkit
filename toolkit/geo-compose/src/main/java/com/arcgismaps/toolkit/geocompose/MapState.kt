@@ -18,6 +18,7 @@
 package com.arcgismaps.toolkit.geocompose
 
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.view.LocationDisplay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,6 +34,13 @@ public class MapState(arcGISMap: ArcGISMap? = null) : GeoComposeState() {
 
     public fun setArcGISMap(arcGISMap: ArcGISMap){
         _arcGISMap.value = arcGISMap
+    }
+
+    private val _locationDisplay: MutableStateFlow<LocationDisplay?> = MutableStateFlow(null)
+    public val locationDisplay: StateFlow<LocationDisplay?> = _locationDisplay.asStateFlow()
+
+    public fun setLocationDisplay(locationDisplay: LocationDisplay?){
+        _locationDisplay.value = locationDisplay
     }
 
     init {
