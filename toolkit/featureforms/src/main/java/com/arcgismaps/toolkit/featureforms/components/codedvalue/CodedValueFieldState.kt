@@ -41,7 +41,7 @@ internal open class CodedValueFieldProperties(
     value: StateFlow<String>,
     required: StateFlow<Boolean>,
     editable: StateFlow<Boolean>,
-    val codedValues: List<String>,
+    val codedValues: List<CodedValue>,
     val showNoValueOption: FormInputNoValueOption,
     val noValueLabel: String
 ) : FieldProperties(label, placeholder, description, value, required, editable)
@@ -72,7 +72,7 @@ internal open class CodedValueFieldState(
     /**
      * The list of coded values associated with this field.
      */
-    val codedValues: List<String> = properties.codedValues
+    val codedValues: List<CodedValue> = properties.codedValues
 
     /**
      * This property defines whether to display a special "no value" option if this field is
@@ -111,7 +111,7 @@ internal open class CodedValueFieldState(
                         value = formElement.value,
                         editable = formElement.isEditable,
                         required = formElement.isRequired,
-                        codedValues = input.codedValues.map { it.code.toString() },
+                        codedValues = input.codedValues,
                         showNoValueOption = input.noValueOption,
                         noValueLabel = input.noValueLabel
                     ),
@@ -144,7 +144,7 @@ internal fun rememberCodedValueFieldState(
             value = field.value,
             editable = field.isEditable,
             required = field.isRequired,
-            codedValues = input.codedValues.map { it.code.toString() },
+            codedValues = input.codedValues,
             showNoValueOption = input.noValueOption,
             noValueLabel = input.noValueLabel
         ),
