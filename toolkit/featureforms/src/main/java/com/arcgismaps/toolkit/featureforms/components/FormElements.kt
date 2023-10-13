@@ -40,15 +40,10 @@ internal fun FieldElement(field: FieldFormElement, state: BaseFieldState) {
             }
 
             is RadioButtonsFormInput -> {
-                val value by state.value.collectAsState()
-                val codedValues = (field.input as RadioButtonsFormInput).codedValues.map {
-                    it.code.toString()
-                }
-                val fallback = (value !in codedValues) && (field.input as RadioButtonsFormInput).noValueOption == FormInputNoValueOption.Show
-                if (fallback) {
+                if ((state as RadioButtonFieldState).shouldFallback()) {
                     ComboBoxField(state = state as CodedValueFieldState)
                 } else {
-                    RadioButtonField(state = state as RadioButtonFieldState)
+                    RadioButtonField(state = state)
                 }
             }
 

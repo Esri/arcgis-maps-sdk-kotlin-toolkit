@@ -41,7 +41,25 @@ internal class RadioButtonFieldState(
     onEditValue = onEditValue
 ) {
 
+    /**
+     * Returns true if the current value of [value] is not in the [codedValues]. This should
+     * trigger a fallback to a ComboBox. If the [value] is empty then this returns false.
+     */
+    fun shouldFallback(): Boolean {
+        return if (value.value.isEmpty()) {
+            false
+        } else {
+            !codedValues.any {
+                it.code.toString() == value.value
+            }
+        }
+    }
+
     companion object {
+
+        /**
+         * Default saver for the [RadioButtonFieldState].
+         */
         fun Saver(
             formElement: FieldFormElement,
             form: FeatureForm,
@@ -62,7 +80,7 @@ internal class RadioButtonFieldState(
                         value = formElement.value,
                         editable = formElement.isEditable,
                         required = formElement.isRequired,
-                        codedValues = input.codedValues.map { it.code.toString() },
+                        codedValues = input.codedValues,
                         showNoValueOption = input.noValueOption,
                         noValueLabel = input.noValueLabel
                     ),
@@ -95,7 +113,7 @@ internal fun rememberRadioButtonFieldState(
             value = field.value,
             editable = field.isEditable,
             required = field.isRequired,
-            codedValues = input.codedValues.map { it.code.toString() },
+            codedValues = input.codedValues,
             showNoValueOption = input.noValueOption,
             noValueLabel = input.noValueLabel
         ),
