@@ -95,7 +95,7 @@ internal fun ComboBoxField(state: CodedValueFieldState, modifier: Modifier = Mod
     } else ""
 
     BaseTextField(
-        text = value,
+        text = state.getCodedValueNameOrNull(value) ?: value,
         onValueChange = {
             state.onValueChanged(it)
             // consider a "clear" operation to be a focused state even though the clear icon
