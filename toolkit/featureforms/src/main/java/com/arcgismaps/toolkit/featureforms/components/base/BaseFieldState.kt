@@ -98,7 +98,7 @@ internal open class BaseFieldState(
     /**
      * Callback to update the current value of the FormTextFieldState to the given [input].
      */
-    fun onValueChanged(input: String) {
+    open fun onValueChanged(input: String) {
         onEditValue(input)
         _value.value = input
     }

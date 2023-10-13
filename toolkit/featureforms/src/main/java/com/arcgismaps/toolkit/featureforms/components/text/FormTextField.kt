@@ -50,7 +50,7 @@ internal fun FormTextField(
     }
     val supportingText by state.supportingText
     val contentLength = if (state.minLength > 0 || state.maxLength > 0) "${text.length}" else ""
-    val hasError by state.hasError
+    val supportingTextIsErrorMessage by state.supportingTextIsErrorMessage
 
     BaseTextField(
         text = text,
@@ -65,7 +65,7 @@ internal fun FormTextField(
         singleLine = state.singleLine,
         keyboardType = if (state.fieldType.isNumeric) KeyboardType.Number else KeyboardType.Ascii,
         supportingText = {
-            val textColor = if (hasError) MaterialTheme.colorScheme.error
+            val textColor = if (supportingTextIsErrorMessage) MaterialTheme.colorScheme.error
             else MaterialTheme.colorScheme.onSurface
             Row {
                 if (supportingText.isNotEmpty()) {
