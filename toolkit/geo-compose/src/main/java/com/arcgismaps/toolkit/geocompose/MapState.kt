@@ -65,10 +65,7 @@ public class MapState(arcGISMap: ArcGISMap? = null) : GeoComposeState() {
      * @since 200.3.0
      */
     public suspend fun setViewpointCenter(center: Point, scale: Double? = null): Result<Boolean> =
-        if (scale != null) ViewpointOperation.ViewpointCenter(center, scale).let {
-            viewpointChannel.send(it)
-            it.await()
-        } else ViewpointOperation.ViewpointCenter(center).let {
+        ViewpointOperation.ViewpointCenter(center, scale).let {
             viewpointChannel.send(it)
             it.await()
         }
@@ -82,13 +79,10 @@ public class MapState(arcGISMap: ArcGISMap? = null) : GeoComposeState() {
         boundingGeometry: Geometry,
         paddingInDips: Double? = null
     ): Result<Boolean> =
-        if (paddingInDips != null) ViewpointOperation.ViewpointGeometry(
+        ViewpointOperation.ViewpointGeometry(
             boundingGeometry,
             paddingInDips
         ).let {
-            viewpointChannel.send(it)
-            it.await()
-        } else ViewpointOperation.ViewpointGeometry(boundingGeometry).let {
             viewpointChannel.send(it)
             it.await()
         }

@@ -42,13 +42,10 @@ public sealed class GeoComposeState {
         viewpoint: Viewpoint,
         durationSeconds: Float? = null
     ): Result<Boolean> =
-        if (durationSeconds != null) ViewpointOperation.ViewpointAnimated(
+        ViewpointOperation.ViewpointAnimated(
             viewpoint,
             durationSeconds
         ).let {
-            viewpointChannel.send(it)
-            it.await()
-        } else ViewpointOperation.ViewpointAnimated(viewpoint).let {
             viewpointChannel.send(it)
             it.await()
         }

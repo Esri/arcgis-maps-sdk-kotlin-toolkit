@@ -66,7 +66,7 @@ public fun Map(modifier: Modifier = Modifier, mapState: MapState = MapState()) {
             }
         }
 
-        // Collect get current viewpoint operation and pass the current viewpoint back to the channel
+        // Collect get current viewpoint operation and pass the current viewpoint back to it
         launch {
             mapState.getCurrentViewpointChannel.receiveAsFlow().collect {
                 when (it) {
@@ -82,7 +82,7 @@ public fun Map(modifier: Modifier = Modifier, mapState: MapState = MapState()) {
             }
         }
 
-        // Collect viewpoint operations and pass the results back to the channel
+        // Collect viewpoint operations and pass the results back to it
         launch {
             mapState.viewpointChannel.receiveAsFlow().collect {
                 when (it) {
