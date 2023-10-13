@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.featureforms.components.codedvalue
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -97,8 +98,10 @@ internal fun ComboBoxField(state: CodedValueFieldState, modifier: Modifier = Mod
         state.noValueLabel.ifEmpty { stringResource(R.string.no_value) }
     } else ""
 
+    Log.e("TAG", "ComboBoxField: ${state.getCodedValueNameOrNull(value)}", )
+
     BaseTextField(
-        text = value,
+        text = state.getCodedValueNameOrNull(value) ?: value,
         onValueChange = {
             state.onValueChanged(it)
             // consider a "clear" operation to be a focused state even though the clear icon
