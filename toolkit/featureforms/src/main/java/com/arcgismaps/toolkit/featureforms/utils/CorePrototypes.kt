@@ -39,6 +39,14 @@ internal fun FeatureForm.getElementValue(formElement: FieldFormElement): Any? {
     return feature.attributes[formElement.fieldName]
 }
 
+internal fun FeatureForm.fieldIsNullable(element: FieldFormElement): Boolean {
+    val isNullable = feature.featureTable?.getField(element.fieldName)?.nullable
+    require(isNullable != null) {
+        "expected feature table to have field with name ${element.fieldName}"
+    }
+    return isNullable
+}
+
 /**
  * Set the value in the feature's attribute map. This call can only be made when a transaction is open.
  * Committing the transaction will either discard this edit or persist it in the associated geodatabase,

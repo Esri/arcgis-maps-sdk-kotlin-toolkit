@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.arcgismaps.toolkit.featureforms.components.switch
+package com.arcgismaps.toolkit.featureforms.components.codedvalue
 
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -29,8 +29,8 @@ import com.arcgismaps.toolkit.featureforms.components.base.BaseTextField
 @Composable
 internal fun SwitchField(state: SwitchFieldState, modifier: Modifier = Modifier) {
     val valueCode by state.value.collectAsState()
-    val checkedState = valueCode == state.yesValue.code!!.toString()
-    val value = if (checkedState) state.yesValue.name else state.noValue.name
+    val checkedState = valueCode == state.onValue.code!!.toString()
+    val value = if (checkedState) state.onValue.name else state.offValue.name
     val isEditable by state.isEditable.collectAsState()
     BaseTextField(
         text = value,
@@ -49,9 +49,9 @@ internal fun SwitchField(state: SwitchFieldState, modifier: Modifier = Modifier)
                 onCheckedChange = { newState ->
                     val newValue = (
                         if (newState)
-                            state.yesValue.code?.toString()
+                            state.onValue.code?.toString()
                         else
-                            state.noValue.code?.toString()
+                            state.offValue.code?.toString()
                         ) ?: throw IllegalStateException("coded value code must not be null")
                     state.onValueChanged(newValue)
                 },

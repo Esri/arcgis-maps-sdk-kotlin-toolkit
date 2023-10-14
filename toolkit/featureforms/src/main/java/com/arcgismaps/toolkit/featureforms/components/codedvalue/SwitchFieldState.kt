@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.arcgismaps.toolkit.featureforms.components.switch
+package com.arcgismaps.toolkit.featureforms.components.codedvalue
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
@@ -24,14 +24,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.data.CodedValue
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
-import com.arcgismaps.toolkit.featureforms.components.base.FieldProperties
 import com.arcgismaps.toolkit.featureforms.utils.editValue
+import com.arcgismaps.toolkit.featureforms.utils.fieldIsNullable
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 internal class SwitchFieldProperties(
@@ -40,16 +39,31 @@ internal class SwitchFieldProperties(
     description: String,
     value: StateFlow<String>,
     editable: StateFlow<Boolean>,
-    val yesValue: CodedValue,
-    val noValue: CodedValue,
-) : FieldProperties(label, placeholder, description, value, required = MutableStateFlow(true).asStateFlow(), editable)
+    required: StateFlow<Boolean>,
+    val onValue: CodedValue,
+    val offValue: CodedValue,
+    showNoValueOption: FormInputNoValueOption,
+    noValueLabel: String
+) : CodedValueFieldProperties(
+    label,
+    placeholder,
+    description,
+    value,
+    required,
+    editable,
+    listOf(onValue, offValue),
+    showNoValueOption,
+    noValueLabel
+)
 
 /**
  * A class to handle the state of a [SwitchField]. Essential properties are inherited from the
  * [BaseFieldState].
  *
  * @param properties the [SwitchFieldProperties] associated with this state.
- * @param initialValue optional initial value to set for this field. This value should be a CodedValue code or subtype
+ * @property initialValue the initial value to set for this field. This value should be a CodedValue code or subtype.
+ * It is necessary to inspect this property during composition to see if a ComboBox should be presented when the value (code) is not in the
+ * domain of the FieldFormElement.domain.
  * @param scope a [CoroutineScope] to start [StateFlow] collectors on.
  * @param onEditValue a callback to invoke when the user edits result in a change of value. This
  * is called on [SwitchFieldState.onValueChanged].
@@ -57,10 +71,10 @@ internal class SwitchFieldProperties(
 @Stable
 internal class SwitchFieldState(
     properties: SwitchFieldProperties,
-    initialValue: String = properties.value.value,
+    val initialValue: String = properties.value.value,
     scope: CoroutineScope,
     onEditValue: ((Any?) -> Unit)
-) : BaseFieldState(
+) : CodedValueFieldState(
     properties = properties,
     scope = scope,
     initialValue = initialValue,
@@ -69,18 +83,19 @@ internal class SwitchFieldState(
     /**
      * The CodedValue that represents the "on" state of the Switch.
      */
-    val yesValue: CodedValue = properties.yesValue
+    val onValue: CodedValue = properties.onValue
     
     /**
      * The CodedValue that represents the "off" state of the Switch.
      */
-    val noValue: CodedValue = properties.noValue
+    val offValue: CodedValue = properties.offValue
     
     companion object {
         fun Saver(
             formElement: FieldFormElement,
             form: FeatureForm,
-            scope: CoroutineScope
+            scope: CoroutineScope,
+            noValueString: String
         ): Saver<SwitchFieldState, Any> = listSaver(
             save = {
                 listOf(
@@ -96,13 +111,22 @@ internal class SwitchFieldState(
                         description = formElement.description,
                         value = formElement.value,
                         editable = formElement.isEditable,
-                        yesValue = input.onValue,
-                        noValue = input.offValue,
+                        required = formElement.isRequired,
+                        onValue = input.onValue,
+                        offValue = input.offValue,
+                        showNoValueOption = if (form.fieldIsNullable(formElement))
+                            FormInputNoValueOption.Show
+                        else
+                            FormInputNoValueOption.Hide,
+                        noValueLabel = noValueString
                     ),
                     initialValue = list[0],
                     scope = scope,
                     onEditValue = { codedValueName ->
-                        form.editValue(formElement, if (codedValueName == input.onValue.name) input.onValue.code else input.offValue.code)
+                        form.editValue(
+                            formElement,
+                            if (codedValueName == input.onValue.name) input.onValue.code else input.offValue.code
+                        )
                         scope.launch { form.evaluateExpressions() }
                     }
                 )
@@ -115,9 +139,10 @@ internal class SwitchFieldState(
 internal fun rememberSwitchFieldState(
     field: FieldFormElement,
     form: FeatureForm,
-    scope: CoroutineScope
+    scope: CoroutineScope,
+    noValueString: String
 ): SwitchFieldState = rememberSaveable(
-    saver = SwitchFieldState.Saver(field, form, scope)
+    saver = SwitchFieldState.Saver(field, form, scope, noValueString)
 ) {
     val input = field.input as SwitchFormInput
     SwitchFieldState(
@@ -127,8 +152,14 @@ internal fun rememberSwitchFieldState(
             description = field.description,
             value = field.value,
             editable = field.isEditable,
-            yesValue = input.onValue,
-            noValue = input.offValue
+            required = field.isRequired,
+            onValue = input.onValue,
+            offValue = input.offValue,
+            showNoValueOption = if (form.fieldIsNullable(field))
+                FormInputNoValueOption.Show
+            else
+                FormInputNoValueOption.Hide,
+            noValueLabel = noValueString
         ),
         scope = scope,
         onEditValue = {

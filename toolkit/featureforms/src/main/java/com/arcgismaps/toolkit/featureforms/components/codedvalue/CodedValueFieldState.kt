@@ -26,9 +26,6 @@ import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
-import com.arcgismaps.mapping.featureforms.SwitchFormInput
-import com.arcgismaps.toolkit.featureforms.R
-import com.arcgismaps.toolkit.featureforms.components.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.FieldProperties
 import com.arcgismaps.toolkit.featureforms.components.text.TextFieldProperties
@@ -75,7 +72,7 @@ internal open class CodedValueFieldState(
     /**
      * The list of coded values associated with this field.
      */
-    val codedValues: List<CodedValue> = properties.codedValues
+    open val codedValues: List<CodedValue> = properties.codedValues
 
     /**
      * This property defines whether to display a special "no value" option if this field is
@@ -89,7 +86,6 @@ internal open class CodedValueFieldState(
     val noValueLabel: String = properties.noValueLabel
 
     companion object {
-
         /**
          * The default saver for a [CodedValueFieldState] implemented for a [ComboBoxFormInput] type.
          * Hence for [formElement] the [FieldFormElement.input] type must be a [ComboBoxFormInput].
@@ -119,48 +115,6 @@ internal open class CodedValueFieldState(
                         noValueLabel = input.noValueLabel
                     ),
                     initialValue = list[0],
-                    scope = scope,
-                    onEditValue = { newValue ->
-                        form.editValue(formElement, newValue)
-                        scope.launch { form.evaluateExpressions() }
-                    }
-                )
-            }
-        )
-    
-        /**
-         * A Saver for when the ComboBox is used with a SwitchFormInput.
-         * This happens when the initial value of the field is not in the coded value codes
-         * of the domain property of the element.
-         */
-        fun SaverForSwitch(
-            formElement: FieldFormElement,
-            form: FeatureForm,
-            context: Context,
-            scope: CoroutineScope
-        ): Saver<ComboBoxFieldState, Any> = listSaver(
-            save = {
-                listOf(
-                    it.value.value
-                )
-            },
-            restore = { list ->
-                val input = formElement.input as SwitchFormInput
-                val codedValues = listOf(input.onValue, input.offValue)
-                ComboBoxFieldState(
-                    properties = ComboBoxFieldProperties(
-                        label = formElement.label,
-                        placeholder = formElement.hint,
-                        description = formElement.description,
-                        value = formElement.value,
-                        editable = formElement.isEditable,
-                        required = formElement.isRequired,
-                        codedValues = codedValues,
-                        showNoValueOption = FormInputNoValueOption.Show,
-                        noValueLabel = context.getString(R.string.no_value)
-                    ),
-                    initialValue = list[0],
-                    context = context,
                     scope = scope,
                     onEditValue = { newValue ->
                         form.editValue(formElement, newValue)
@@ -200,42 +154,3 @@ internal fun rememberCodedValueFieldState(
         }
     )
 }
-
-/**
- * A remember function for when the CombobBoxFieldState is created
- * from a SwitchFormInput. This happens when the initial value
- * of the element is not in the coded value codes of the domain property
- * of the element.
- */
-@Composable
-internal fun rememberComboBoxFieldStateForSwitch(
-    field: FieldFormElement,
-    form: FeatureForm,
-    context: Context,
-    scope: CoroutineScope
-): ComboBoxFieldState = rememberSaveable(
-    saver = ComboBoxFieldState.SaverForSwitch(field, form, context, scope)
-) {
-    val input = field.input as SwitchFormInput
-    val codedValues = listOf(input.onValue, input.offValue)
-    ComboBoxFieldState(
-        properties = ComboBoxFieldProperties(
-            label = field.label,
-            placeholder = field.hint,
-            description = field.description,
-            value = field.value,
-            editable = field.isEditable,
-            required = field.isRequired,
-            codedValues = codedValues,
-            showNoValueOption =  FormInputNoValueOption.Show,
-            noValueLabel = context.getString(R.string.no_value)
-        ),
-        context = context,
-        scope = scope,
-        onEditValue = {
-            form.editValue(field, it)
-            scope.launch { form.evaluateExpressions() }
-        }
-    )
-}
-

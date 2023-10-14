@@ -38,10 +38,9 @@ import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
-import com.arcgismaps.toolkit.featureforms.components.combo.rememberComboBoxFieldStateForSwitch
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberCodedValueFieldState
+import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberSwitchFieldState
 import com.arcgismaps.toolkit.featureforms.components.datetime.rememberDateTimeFieldState
-import com.arcgismaps.toolkit.featureforms.components.switch.rememberSwitchFieldState
 import com.arcgismaps.toolkit.featureforms.components.text.rememberFormTextFieldState
 import kotlinx.coroutines.CoroutineScope
 import java.util.Objects
@@ -197,26 +196,12 @@ private fun rememberFieldStates(
                 }
                 
                 is SwitchFormInput -> {
-                    val initialValue = fieldElement.value.value
-                    val input = fieldElement.input as SwitchFormInput
-                    if (initialValue.isNotEmpty()
-                        && (initialValue == input.onValue.code.toString() || initialValue == input.offValue.code.toString())) {
-                        rememberSwitchFieldState(
-                            field = fieldElement,
-                            form = form,
-                            scope = scope
-                        )
-                    } else {
-                        // if no default value for the coded value is set
-                        // or if the current value doesn't match the coded value codes
-                        // present the switch as a combo box with a no value option.
-                        rememberComboBoxFieldStateForSwitch(
-                            field = fieldElement,
-                            form = form,
-                            context = context,
-                            scope = scope
-                        )
-                    }
+                    rememberSwitchFieldState(
+                        field = fieldElement,
+                        form = form,
+                        scope = scope,
+                        noValueString = context.getString(R.string.no_value)
+                    )
                 }
 
                 else -> {

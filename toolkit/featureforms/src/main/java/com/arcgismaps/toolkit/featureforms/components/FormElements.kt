@@ -12,12 +12,12 @@ import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
-import com.arcgismaps.toolkit.featureforms.components.codedvalue.ComboBoxField
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.CodedValueFieldState
+import com.arcgismaps.toolkit.featureforms.components.codedvalue.ComboBoxField
+import com.arcgismaps.toolkit.featureforms.components.codedvalue.SwitchField
+import com.arcgismaps.toolkit.featureforms.components.codedvalue.SwitchFieldState
 import com.arcgismaps.toolkit.featureforms.components.datetime.DateTimeField
 import com.arcgismaps.toolkit.featureforms.components.datetime.DateTimeFieldState
-import com.arcgismaps.toolkit.featureforms.components.switch.SwitchField
-import com.arcgismaps.toolkit.featureforms.components.switch.SwitchFieldState
 import com.arcgismaps.toolkit.featureforms.components.text.FormTextField
 import com.arcgismaps.toolkit.featureforms.components.text.FormTextFieldState
 
@@ -39,9 +39,13 @@ internal fun FieldElement(field: FieldFormElement, state: BaseFieldState) {
             }
     
             is SwitchFormInput -> {
-                if (state is SwitchFieldState) {
+                val input = field.input as SwitchFormInput
+                val switchFieldState = state as SwitchFieldState
+                if (switchFieldState.initialValue.isNotEmpty()
+                    && (switchFieldState.initialValue == input.onValue.code.toString()
+                        || switchFieldState.initialValue == input.offValue.code.toString())) {
                     SwitchField(state = state)
-                } else if (state is ComboBoxFieldState) {
+                } else {
                     ComboBoxField(state = state)
                 }
             }
