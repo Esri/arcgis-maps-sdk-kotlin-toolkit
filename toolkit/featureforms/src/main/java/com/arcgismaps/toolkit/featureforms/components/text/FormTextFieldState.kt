@@ -30,6 +30,7 @@ import com.arcgismaps.data.FieldType
 import com.arcgismaps.data.RangeDomain
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
@@ -108,7 +109,7 @@ internal class FormTextFieldState(
     // fetch the maxLength based on the featureFormElement.inputType
     val maxLength = properties.maxLength
     
-    private var wasFocused: Boolean = false
+    private var hasBeenFocused: Boolean = false
     
     // supporting text will depend on multiple other states. If there is an error, it will display
     // error message. Otherwise description is displayed, unless it is empty in which case
@@ -121,7 +122,6 @@ internal class FormTextFieldState(
 
     private var validationErrors: MutableList<ValidationErrorState> = mutableListOf()
     private val _hasError = mutableStateOf(false)
-    val hasError: State<Boolean> = _hasError
     private val _supportingTextIsErrorMessage = mutableStateOf(false)
     val supportingTextIsErrorMessage: State<Boolean> = _supportingTextIsErrorMessage
     
@@ -161,8 +161,6 @@ internal class FormTextFieldState(
         )
     }
     
-    private var _errorMessage: String = ""
-
     // build helper text
     private val helperText =
         if (fieldType.isNumeric) {
@@ -212,7 +210,7 @@ internal class FormTextFieldState(
         scope.launch {
             isFocused.drop(1).collect {
                 if (it) {
-                    wasFocused = true
+                    hasBeenFocused = true
                 }
                 updateValidation(value.value)
             }
@@ -314,7 +312,7 @@ internal class FormTextFieldState(
             } else {
                 validationErrors.first()
             }
-        } else if (wasFocused) {
+        } else if (hasBeenFocused) {
             validationErrors.firstOrNull { it == Required} ?: validationErrors.first()
         } else {
             // never been focused
@@ -362,14 +360,12 @@ internal class FormTextFieldState(
             save = {
                 listOf(
                     it.value.value,
-                    it.singleLine,
-                    it.minLength,
-                    it.maxLength,
-                    it.hasError.value,
-                    it._errorMessage
+                    it.hasBeenFocused
                 )
             },
             restore = { list ->
+                val minLength = (formElement.input as? TextBoxFormInput)?.minLength ?: (formElement.input as TextAreaFormInput).minLength
+                val maxLength = (formElement.input as? TextBoxFormInput)?.maxLength ?: (formElement.input as TextAreaFormInput).maxLength
                 FormTextFieldState(
                     properties = TextFieldProperties(
                         label = formElement.label,
@@ -380,9 +376,9 @@ internal class FormTextFieldState(
                         editable = formElement.isEditable,
                         domain = form.domain(formElement) as? RangeDomain,
                         fieldType = form.fieldType(formElement),
-                        singleLine = list[1] as Boolean,
-                        minLength = list[2] as Int,
-                        maxLength = list[3] as Int
+                        singleLine = formElement.input is TextBoxFormInput,
+                        minLength = minLength.toInt(),
+                        maxLength = maxLength.toInt()
                     ),
                     initialValue = list[0] as String,
                     scope = scope,
@@ -392,8 +388,9 @@ internal class FormTextFieldState(
                         scope.launch { form.evaluateExpressions() }
                     },
                 ).apply {
-                    _hasError.value = list[4] as Boolean
-                    _errorMessage = list[5] as String
+                    // focus is lost on rotation. https://devtopia.esri.com/runtime/apollo/issues/230
+                    hasBeenFocused = list[1] as Boolean
+                    updateValidation(list[0] as String)
                 }
             }
         )
