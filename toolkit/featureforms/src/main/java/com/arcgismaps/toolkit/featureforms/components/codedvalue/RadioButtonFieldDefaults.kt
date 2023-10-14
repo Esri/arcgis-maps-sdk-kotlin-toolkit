@@ -33,12 +33,12 @@ internal object RadioButtonFieldDefaults {
             alpha = textDisabledAlpha
         ),
         defaultSupportingTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        supportingTextDisabledColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(
+        disabledSupportingTextColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(
             alpha = textDisabledAlpha
         ),
         errorColor = MaterialTheme.colorScheme.error,
         defaultContainerBorderColor = MaterialTheme.colorScheme.outline,
-        containerBorderDisabledColor = MaterialTheme.colorScheme.outline.copy(
+        disabledContainerBorderColor = MaterialTheme.colorScheme.outline.copy(
             alpha = containerDisabledAlpha
         ),
         defaultTextColor = LocalContentColor.current,
@@ -50,10 +50,10 @@ internal data class RadioButtonFieldColors(
     val defaultLabelColor: Color,
     val disabledLabelColor: Color,
     val defaultSupportingTextColor: Color,
-    val supportingTextDisabledColor: Color,
+    val disabledSupportingTextColor: Color,
     val errorColor: Color,
     val defaultContainerBorderColor: Color,
-    val containerBorderDisabledColor: Color,
+    val disabledContainerBorderColor: Color,
     val defaultTextColor: Color,
     val disabledTextColor: Color
 ) {
@@ -81,7 +81,7 @@ internal data class RadioButtonFieldColors(
         return if (enabled) {
             defaultSupportingTextColor
         } else {
-            supportingTextDisabledColor
+            disabledSupportingTextColor
         }
     }
 
@@ -95,7 +95,7 @@ internal data class RadioButtonFieldColors(
         return if (enabled) {
             defaultContainerBorderColor
         } else {
-            containerBorderDisabledColor
+            disabledContainerBorderColor
         }
     }
 

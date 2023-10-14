@@ -33,20 +33,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.data.CodedValue
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.toolkit.featureforms.R
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 internal fun RadioButtonField(
@@ -58,19 +52,41 @@ internal fun RadioButtonField(
     val editable by state.isEditable.collectAsState()
     val required by state.isRequired.collectAsState()
     val noValueLabel = state.noValueLabel.ifEmpty { stringResource(R.string.no_value) }
-    val options = if (!required) {
-        if (state.showNoValueOption == FormInputNoValueOption.Show) {
-            mapOf("" to noValueLabel) + state.codedValues.associateBy({ it.code }, { it.name })
-        } else state.codedValues.associateBy({ it.code }, { it.name })
-    } else state.codedValues.associateBy({ it.code }, { it.name })
-
-    val label = remember(required) {
-        if (required) {
-            "${state.label} *"
-        } else {
-            state.label
-        }
+    RadioButtonField(
+        label = state.label,
+        description = state.description,
+        value = value,
+        editable = editable,
+        required = required,
+        codedValues = state.codedValues.associateBy({ it.code }, { it.name }),
+        showNoValueOption = state.showNoValueOption,
+        noValueLabel = noValueLabel,
+        modifier = modifier,
+        colors = colors
+    ) {
+        state.onValueChanged(it)
     }
+}
+
+@Composable
+private fun RadioButtonField(
+    label: String,
+    description: String,
+    value: String,
+    editable: Boolean,
+    required: Boolean,
+    codedValues: Map<Any?, String>,
+    showNoValueOption: FormInputNoValueOption,
+    noValueLabel: String,
+    modifier: Modifier = Modifier,
+    colors: RadioButtonFieldColors = RadioButtonFieldDefaults.colors(),
+    onValueChanged: (String) -> Unit = {}
+) {
+    val options = if (!required) {
+        if (showNoValueOption == FormInputNoValueOption.Show) {
+            mapOf("" to noValueLabel) + codedValues
+        } else codedValues
+    } else codedValues
 
     Column(
         modifier = modifier
@@ -80,7 +96,11 @@ internal fun RadioButtonField(
         horizontalAlignment = Alignment.Start
     ) {
         Text(
-            text = label,
+            text = if (required) {
+                "$label *"
+            } else {
+                label
+            },
             style = MaterialTheme.typography.bodyMedium,
             color = colors.labelColor(enabled = editable)
         )
@@ -102,14 +122,14 @@ internal fun RadioButtonField(
                         selected = (code?.toString()
                             ?: "") == value || (name == noValueLabel && value.isEmpty()),
                         enabled = editable,
-                        onClick = { state.onValueChanged(code?.toString() ?: "") }
+                        onClick = { onValueChanged(code?.toString() ?: "") }
                     )
                 }
             }
         }
-        if (state.description.isNotEmpty()) {
+        if (description.isNotEmpty()) {
             Text(
-                text = state.description,
+                text = description,
                 style = MaterialTheme.typography.bodySmall,
                 color = colors.supportingTextColor(enabled = editable)
             )
@@ -151,26 +171,23 @@ private fun RadioButtonRow(
     }
 }
 
-
-//@Preview(showBackground = true, backgroundColor = 0xFFFFFFFF, showSystemUi = true)
-//@Composable
-//private fun RadioButtonFieldPreview() {
-//    MaterialTheme {
-//        val state = RadioButtonFieldState(
-//            properties = RadioButtonFieldProperties(
-//                label = "A list of values",
-//                placeholder = "Placeholder",
-//                description = "Description",
-//                value = MutableStateFlow(""),
-//                editable = MutableStateFlow(true),
-//                required = MutableStateFlow(false),
-//                codedValues = listOf("One", "Two", "Three"),
-//                showNoValueOption = FormInputNoValueOption.Show,
-//                noValueLabel = "No Value"
-//            ),
-//            scope = CoroutineScope(Dispatchers.IO),
-//            onEditValue = {}
-//        )
-//        RadioButtonField(state = state)
-//    }
-//}
+@Preview(showBackground = true, backgroundColor = 0xFFFFFFFF, showSystemUi = true)
+@Composable
+private fun RadioButtonFieldPreview() {
+    MaterialTheme {
+        RadioButtonField(
+            label = "A list of values",
+            description = "Description",
+            value = "",
+            editable = true,
+            required = true,
+            codedValues = mapOf(
+                "One" to "One",
+                "Two" to "Two",
+                "Three" to "Three"
+            ),
+            showNoValueOption = FormInputNoValueOption.Show,
+            noValueLabel = "No Value",
+        ) { }
+    }
+}
