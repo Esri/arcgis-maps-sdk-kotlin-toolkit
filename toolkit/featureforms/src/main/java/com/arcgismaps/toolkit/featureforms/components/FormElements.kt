@@ -11,8 +11,8 @@ import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
-import com.arcgismaps.toolkit.featureforms.components.combo.ComboBoxField
-import com.arcgismaps.toolkit.featureforms.components.combo.ComboBoxFieldState
+import com.arcgismaps.toolkit.featureforms.components.codedvalue.ComboBoxField
+import com.arcgismaps.toolkit.featureforms.components.codedvalue.CodedValueFieldState
 import com.arcgismaps.toolkit.featureforms.components.datetime.DateTimeField
 import com.arcgismaps.toolkit.featureforms.components.datetime.DateTimeFieldState
 import com.arcgismaps.toolkit.featureforms.components.text.FormTextField
@@ -32,7 +32,7 @@ internal fun FieldElement(field: FieldFormElement, state: BaseFieldState) {
             }
 
             is ComboBoxFormInput -> {
-                ComboBoxField(state = state as ComboBoxFieldState)
+                ComboBoxField(state = state as CodedValueFieldState)
             }
 
             else -> { /* TO-DO: add support for other input types */
