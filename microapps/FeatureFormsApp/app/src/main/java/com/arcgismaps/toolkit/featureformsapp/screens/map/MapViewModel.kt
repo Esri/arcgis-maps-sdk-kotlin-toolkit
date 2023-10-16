@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.featureforms.FeatureForm
-import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent

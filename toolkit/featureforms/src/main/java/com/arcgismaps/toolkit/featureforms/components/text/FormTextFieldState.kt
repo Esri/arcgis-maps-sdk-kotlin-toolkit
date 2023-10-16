@@ -115,12 +115,11 @@ internal class FormTextFieldState(
     // error message. Otherwise description is displayed, unless it is empty in which case
     // the helper text is displayed when the field is focused.
     private val _supportingText: MutableState<String> = mutableStateOf(description)
-    val supportingText = _supportingText
+    val supportingText: State<String> = _supportingText
  
     private val _isFocused: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isFocused: StateFlow<Boolean> = _isFocused.asStateFlow()
 
-    private var validationErrors: MutableList<ValidationErrorState> = mutableListOf()
     private val _hasError = mutableStateOf(false)
     private val _supportingTextIsErrorMessage = mutableStateOf(false)
     val supportingTextIsErrorMessage: State<Boolean> = _supportingTextIsErrorMessage
@@ -135,7 +134,7 @@ internal class FormTextFieldState(
      */
     val fieldType: FieldType = properties.fieldType
     
-    private val errors: MutableMap<ValidationErrorState, String> by lazy {
+    private val errorMessages: MutableMap<ValidationErrorState, String> by lazy {
         val min = if (domain is RangeDomain) {
             (domain.minValue as? Number)?.format()
         } else {
@@ -218,17 +217,17 @@ internal class FormTextFieldState(
     }
     
     private fun updateValidation(value: String) {
-        validationErrors = validate(value)
-        val errorToDisplay = errorMessageToDisplay(value, validationErrors)
+        val errors = validate(value)
+        val errorToDisplay = errorMessageToDisplay(value, errors)
         _supportingTextIsErrorMessage.value = errorToDisplay != NoError
         _supportingText.value = if (errorToDisplay != NoError) {
-            errors[errorToDisplay] ?: throw IllegalStateException("validation error must have a message")
+            errorMessages[errorToDisplay] ?: throw IllegalStateException("validation error must have a message")
         } else {
             description.ifEmpty {
                 if (_isFocused.value) helperText else ""
             }
         }
-        _hasError.value = validationErrors.isNotEmpty()
+        _hasError.value = errors.isNotEmpty()
     }
     
     private fun validateTextRange(value: String): ValidationErrorState =
@@ -250,7 +249,8 @@ internal class FormTextFieldState(
         if (domain != null && domain is RangeDomain) {
             if (fieldType.isIntegerType) {
                 val (min, max) = domain.asLongTuple
-                val numberVal = value.toLong()
+                val numberVal = value.toLongOrNull()
+                requireNotNull(numberVal)
                 if (min != null && max != null) {
                     if (numberVal in min..max) {
                         NoError
@@ -275,7 +275,8 @@ internal class FormTextFieldState(
                 }
             } else {
                 val (min, max) = domain.asDoubleTuple
-                val numberVal = value.toDouble()
+                val numberVal = value.toDoubleOrNull()
+                requireNotNull(numberVal)
                 if (min != null && max != null) {
                     if (numberVal in min..max) {
                         NoError
@@ -307,12 +308,15 @@ internal class FormTextFieldState(
         if (validationErrors.isEmpty()) {
             NoError
         } else if (isFocused.value) {
+            // if focused, don't show the "Required" error string
             if (value.isEmpty()) {
+                //if empty don't show parse errors
                 validationErrors.firstOrNull { it != Required && it != NotANumber && it != NotAWholeNumber} ?: NoError
             } else {
                 validationErrors.first()
             }
         } else if (hasBeenFocused) {
+            // if focused has been gained and lost, show the Required error if the field is empty and isRequired.
             validationErrors.firstOrNull { it == Required} ?: validationErrors.first()
         } else {
             // never been focused
@@ -330,7 +334,7 @@ internal class FormTextFieldState(
             if (rangeError != NoError) {
                 ret += rangeError
             }
-        } else if (fieldType.isNumeric) {
+        } else {
             if (fieldType.isIntegerType && value.toIntOrNull() == null && value.isNotEmpty()) {
                 ret += NotAWholeNumber
             } else if (fieldType.isFloatingPoint && value.toDoubleOrNull() == null && value.isNotEmpty()) {
@@ -355,7 +359,7 @@ internal class FormTextFieldState(
             formElement: FieldFormElement,
             form: FeatureForm,
             context: Context,
-            scope: CoroutineScope,
+            scope: CoroutineScope
         ): Saver<FormTextFieldState, Any> = listSaver(
             save = {
                 listOf(
@@ -396,7 +400,6 @@ internal class FormTextFieldState(
         )
     }
 }
-
 
 @Composable
 internal fun rememberFormTextFieldState(
