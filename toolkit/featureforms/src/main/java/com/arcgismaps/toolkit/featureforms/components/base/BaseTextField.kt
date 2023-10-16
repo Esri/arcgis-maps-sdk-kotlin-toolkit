@@ -29,8 +29,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Clear
+import androidx.compose.material.icons.rounded.TextFields
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -48,6 +50,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.utils.ClearFocus
 import com.arcgismaps.toolkit.featureforms.utils.PlaceholderTransformation
@@ -122,7 +126,10 @@ internal fun BaseTextField(
             label = {
                 Text(
                     text = label,
-                    modifier = Modifier.semantics { contentDescription = "label" })
+                    modifier = Modifier.semantics { contentDescription = "label" },
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1
+                )
             },
             trailingIcon = {
                 // single line field and is editable
@@ -163,7 +170,7 @@ internal fun BaseTextField(
                                 contentDescription = "Done"
                             )
                         }
-                    } else if(text.isNotEmpty()) {
+                    } else if (text.isNotEmpty()) {
                         // show a clear icon instead if the multiline field is not empty
                         IconButton(
                             onClick = { onValueChange("") },
@@ -206,6 +213,26 @@ internal fun BaseTextField(
                 )
             else
                 OutlinedTextFieldDefaults.colors()
+        )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
+@Composable
+private fun BaseTextFieldPreview() {
+    MaterialTheme {
+        BaseTextField(
+            text = "",
+            onValueChange = {},
+            readOnly = false,
+            isEditable = true,
+            label = "Title",
+            placeholder = "Enter Value",
+            singleLine = true,
+            trailingIcon = Icons.Rounded.TextFields,
+            supportingText = {
+                Text(text = "A Description")
+            }
         )
     }
 }
