@@ -279,7 +279,7 @@ internal fun ComboBoxDialog(
                                     contentDescription = if (name == noValueLabel) {
                                         "no value row"
                                     } else {
-                                        "$it list item"
+                                        "$name list item"
                                     }
                                 },
                             trailingContent = {
