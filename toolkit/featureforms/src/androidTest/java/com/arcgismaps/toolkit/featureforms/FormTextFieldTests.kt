@@ -21,12 +21,6 @@ package com.arcgismaps.toolkit.featureforms
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.SemanticsActions
-import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.semantics.getOrNull
-import androidx.compose.ui.test.SemanticsMatcher
-import androidx.compose.ui.test.SemanticsNodeInteraction
-import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotFocused
@@ -37,8 +31,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.TextLayoutResult
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.data.QueryParameters
@@ -50,9 +42,13 @@ import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.toolkit.featureforms.components.text.FormTextField
 import com.arcgismaps.toolkit.featureforms.components.text.FormTextFieldState
+import com.arcgismaps.toolkit.featureforms.components.text.TextFieldProperties
+import com.arcgismaps.toolkit.featureforms.utils.editValue
+import com.arcgismaps.toolkit.featureforms.utils.fieldType
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.fail
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -72,7 +68,7 @@ class FormTextFieldTests {
         sharedFeatureForm!!
     }
 
-    private val fieldFeatureFormElement by lazy {
+    private val field by lazy {
         featureForm.elements
             .filterIsInstance<FieldFormElement>()
             .first {
@@ -93,12 +89,28 @@ class FormTextFieldTests {
     fun setContent()  = runTest {
         composeTestRule.setContent {
             val scope = rememberCoroutineScope()
+            val textFieldProperties = TextFieldProperties(
+                label = field.label,
+                placeholder = field.hint,
+                description = field.description,
+                value = field.value,
+                editable = field.isEditable,
+                required = field.isRequired,
+                singleLine = field.input is TextBoxFormInput,
+                domain = field.domain,
+                fieldType = featureForm.fieldType(field),
+                minLength = (field.input as TextBoxFormInput).minLength.toInt(),
+                maxLength = (field.input as TextBoxFormInput).maxLength.toInt()
+            )
             FormTextField(
                 state = FormTextFieldState(
-                    fieldFeatureFormElement,
-                    featureForm,
-                    LocalContext.current,
-                    scope
+                    textFieldProperties,
+                    scope = scope,
+                    context = LocalContext.current,
+                    onEditValue = {
+                        featureForm.editValue(field, it)
+                        scope.launch { featureForm.evaluateExpressions() }
+                    }
                 )
             )
         }
@@ -144,7 +156,7 @@ class FormTextFieldTests {
         val helper = composeTestRule.onNode(hasContentDescription(helperSemanticLabel), useUnmergedTree = true)
         val helperText = helper.getTextString()
         helper.assertIsDisplayed()
-        val maxLength = (fieldFeatureFormElement.input as TextBoxFormInput).maxLength
+        val maxLength = (field.input as TextBoxFormInput).maxLength
         assertEquals("Maximum $maxLength characters", helperText)
     }
     
@@ -166,7 +178,7 @@ class FormTextFieldTests {
         val helper = composeTestRule.onNode(hasContentDescription(helperSemanticLabel), useUnmergedTree = true)
         val helperText = helper.getTextString()
         helper.assertIsDisplayed()
-        val maxLength = (fieldFeatureFormElement.input as TextBoxFormInput).maxLength.toInt()
+        val maxLength = (field.input as TextBoxFormInput).maxLength.toInt()
         assertEquals("Maximum $maxLength characters", helperText)
         
         val charCountNode =
@@ -197,7 +209,7 @@ class FormTextFieldTests {
         val helper = composeTestRule.onNode(hasContentDescription(helperSemanticLabel), useUnmergedTree = true)
         val helperText = helper.getTextString()
         helper.assertIsDisplayed()
-        val maxLength = (fieldFeatureFormElement.input as TextBoxFormInput).maxLength.toInt()
+        val maxLength = (field.input as TextBoxFormInput).maxLength.toInt()
         assertEquals("Maximum $maxLength characters", helperText)
         
         outlinedTextField.performImeAction()
@@ -220,7 +232,7 @@ class FormTextFieldTests {
      */
     @Test
     fun testErrorValueFocusedState() = runTest {
-        val maxLength = (fieldFeatureFormElement.input as TextBoxFormInput).maxLength.toInt()
+        val maxLength = (field.input as TextBoxFormInput).maxLength.toInt()
         val outlinedTextField = composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
         val text = buildString {
             repeat(maxLength + 1) {
@@ -259,7 +271,7 @@ class FormTextFieldTests {
     @Test
     fun testErrorValueUnfocusedState() = runTest {
         val outlinedTextField = composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
-        val maxLength = (fieldFeatureFormElement.input as TextBoxFormInput).maxLength.toInt()
+        val maxLength = (field.input as TextBoxFormInput).maxLength.toInt()
         val text = buildString {
             repeat(maxLength + 1) {
                 append("x")
@@ -324,33 +336,4 @@ class FormTextFieldTests {
         }
     }
     
-}
-
-fun SemanticsNodeInteraction.getAnnotatedTextString(): AnnotatedString {
-    val textList = fetchSemanticsNode().config.first {
-        it.key.name == "Text"
-    }.value as List<*>
-    return textList.first() as AnnotatedString
-}
-
-fun SemanticsNodeInteraction.getTextString(): String {
-    return getAnnotatedTextString().text
-}
-
-fun SemanticsNodeInteraction.assertTextColor(
-    color: Color
-): SemanticsNodeInteraction = assert(isOfColor(color))
-
-private fun isOfColor(color: Color): SemanticsMatcher = SemanticsMatcher(
-    "${SemanticsProperties.Text.name} is of color '$color'"
-) {
-    val textLayoutResults = mutableListOf<TextLayoutResult>()
-    it.config.getOrNull(SemanticsActions.GetTextLayoutResult)
-        ?.action
-        ?.invoke(textLayoutResults)
-    return@SemanticsMatcher if (textLayoutResults.isEmpty()) {
-        false
-    } else {
-        textLayoutResults.first().layoutInput.style.color == color
-    }
 }

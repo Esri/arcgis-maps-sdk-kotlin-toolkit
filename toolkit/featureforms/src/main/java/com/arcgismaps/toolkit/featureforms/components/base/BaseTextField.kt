@@ -49,6 +49,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -76,6 +77,7 @@ import com.arcgismaps.toolkit.featureforms.utils.PlaceholderTransformation
  * @param placeholder the text to be displayed when the text field input text is empty.
  * @param singleLine when set to true, this text field becomes a single horizontally scrolling
  * text field instead of wrapping onto multiple lines.
+ * @param keyboardType the keyboard type to use depending on the FormFieldElement input type.
  * @param trailingIcon the icon to be displayed at the end of the text field container.
  * @param supportingText supporting text to be displayed below the text field.
  * @param onFocusChange callback that is triggered when the focus state for this text field changes.
@@ -92,6 +94,7 @@ internal fun BaseTextField(
     label: String,
     placeholder: String,
     singleLine: Boolean,
+    keyboardType: KeyboardType = KeyboardType.Ascii,
     trailingIcon: ImageVector? = null,
     supportingText: @Composable (ColumnScope.() -> Unit)? = null,
     onFocusChange: ((Boolean) -> Unit)? = null,
@@ -202,7 +205,8 @@ internal fun BaseTextField(
                 onDone = { clearFocus = true }
             ),
             keyboardOptions = KeyboardOptions.Default.copy(
-                imeAction = if (singleLine) ImeAction.Done else ImeAction.None
+                imeAction = if (singleLine) ImeAction.Done else ImeAction.None,
+                keyboardType = keyboardType
             ),
             singleLine = singleLine,
             interactionSource = interactionSource,

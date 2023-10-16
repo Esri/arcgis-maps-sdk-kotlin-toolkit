@@ -63,13 +63,16 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.arcgismaps.data.FieldType
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.base.BaseTextField
+import com.arcgismaps.toolkit.featureforms.utils.isNumeric
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
@@ -134,6 +137,11 @@ internal fun ComboBoxField(state: CodedValueFieldState, modifier: Modifier = Mod
             description = state.description,
             isRequired = isRequired,
             noValueOption = state.showNoValueOption,
+            keyboardType = if (state.fieldType.isNumeric) {
+                KeyboardType.Number
+            } else {
+                KeyboardType.Ascii
+            },
             noValueLabel = state.noValueLabel.ifEmpty { stringResource(R.string.no_value) },
             onValueChange = { code ->
                 state.onValueChanged(code?.toString() ?: "")
@@ -162,6 +170,7 @@ internal fun ComboBoxDialog(
     isRequired: Boolean,
     noValueOption: FormInputNoValueOption,
     noValueLabel: String,
+    keyboardType: KeyboardType,
     onValueChange: (Any?) -> Unit,
     onDismissRequest: () -> Unit
 ) {
@@ -216,7 +225,8 @@ internal fun ComboBoxDialog(
                             },
                             singleLine = true,
                             keyboardOptions = KeyboardOptions.Default.copy(
-                                imeAction = ImeAction.Done
+                                imeAction = ImeAction.Done,
+                                keyboardType = keyboardType
                             ),
                             shape = RoundedCornerShape(15.dp),
                             colors = TextFieldDefaults.colors(
@@ -297,6 +307,7 @@ private fun ComboBoxPreview() {
             value = MutableStateFlow(""),
             editable = MutableStateFlow(true),
             required = MutableStateFlow(false),
+            fieldType = FieldType.Text,
             codedValues = listOf(),
             showNoValueOption = FormInputNoValueOption.Show,
             noValueLabel = "No value"
@@ -326,6 +337,7 @@ private fun ComboBoxDialogPreview() {
         noValueOption = FormInputNoValueOption.Show,
         noValueLabel = "No Value",
         onValueChange = {},
-        onDismissRequest = {}
+        onDismissRequest = {},
+        keyboardType = KeyboardType.Ascii
     )
 }

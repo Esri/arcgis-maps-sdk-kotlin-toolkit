@@ -22,6 +22,7 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.data.CodedValue
+import com.arcgismaps.data.FieldType
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
@@ -30,6 +31,7 @@ import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.FieldProperties
 import com.arcgismaps.toolkit.featureforms.components.text.TextFieldProperties
 import com.arcgismaps.toolkit.featureforms.utils.editValue
+import com.arcgismaps.toolkit.featureforms.utils.fieldType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -41,6 +43,7 @@ internal open class CodedValueFieldProperties(
     value: StateFlow<String>,
     required: StateFlow<Boolean>,
     editable: StateFlow<Boolean>,
+    val fieldType: FieldType,
     val codedValues: List<CodedValue>,
     val showNoValueOption: FormInputNoValueOption,
     val noValueLabel: String
@@ -84,6 +87,11 @@ internal open class CodedValueFieldState(
      * The custom label to use if [showNoValueOption] is enabled.
      */
     val noValueLabel: String = properties.noValueLabel
+    
+    /**
+     * The FieldType of the element's Field.
+     */
+    val fieldType: FieldType = properties.fieldType
 
     /**
      * Returns the name of the [code] if it is present in [codedValues] else returns null.
@@ -122,7 +130,8 @@ internal open class CodedValueFieldState(
                         required = formElement.isRequired,
                         codedValues = input.codedValues,
                         showNoValueOption = input.noValueOption,
-                        noValueLabel = input.noValueLabel
+                        noValueLabel = input.noValueLabel,
+                        fieldType = form.fieldType(formElement)
                     ),
                     initialValue = list[0],
                     scope = scope,
@@ -155,7 +164,8 @@ internal fun rememberCodedValueFieldState(
             required = field.isRequired,
             codedValues = input.codedValues,
             showNoValueOption = input.noValueOption,
-            noValueLabel = input.noValueLabel
+            noValueLabel = input.noValueLabel,
+            fieldType = form.fieldType(field)
         ),
         scope = scope,
         onEditValue = {

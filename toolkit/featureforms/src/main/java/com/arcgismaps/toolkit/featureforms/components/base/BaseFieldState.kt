@@ -59,7 +59,7 @@ internal open class BaseFieldState(
      * Placeholder hint for the field.
      */
     open val placeholder: String = properties.placeholder
-
+    
     /**
      * Description text for the field.
      */
@@ -94,11 +94,11 @@ internal open class BaseFieldState(
      * Property that indicates if the field is required.
      */
     val isRequired: StateFlow<Boolean> = properties.required
-
+   
     /**
      * Callback to update the current value of the FormTextFieldState to the given [input].
      */
-    fun onValueChanged(input: String) {
+    open fun onValueChanged(input: String) {
         onEditValue(input)
         _value.value = input
     }
