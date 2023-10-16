@@ -93,6 +93,15 @@ internal open class CodedValueFieldState(
      */
     val fieldType: FieldType = properties.fieldType
 
+    /**
+     * Returns the name of the [code] if it is present in [codedValues] else returns null.
+     */
+    fun getCodedValueNameOrNull(code: Any?): String? {
+        return codedValues.find {
+            it.code.toString() == code.toString()
+        }?.name
+    }
+
     companion object {
 
         /**
