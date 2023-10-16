@@ -65,13 +65,14 @@ class MainActivity : ComponentActivity() {
         setupAPIKey()
 
         setContent {
-                LocationDemo()
+                TextDemo()
         }
     }
 }
 
 @Composable
 fun TextDemo() {
+
     Text(text = "Welcome to European Dev Summit 2023!",
         fontSize = 20.sp, modifier = Modifier.padding(20.dp, 200.dp, 0.dp, 0.dp))
 
@@ -105,6 +106,7 @@ fun MapDemo() {
 
 @Composable
 fun LocationDemo() {
+    val scope = rememberCoroutineScope()
     val map by produceState<ArcGISMap?>(initialValue = null) {
         val mmpk = MobileMapPackage(
             "/data/user/0/com.arcgismaps.toolkit.compassapp/files/Berlin_Kotlin_23.mmpk"
@@ -113,6 +115,7 @@ fun LocationDemo() {
         if (mmpk.maps.isEmpty()) return@produceState
         value = mmpk.maps[0]
     }
+    val floorFilterState = map?.let { remember { FloorFilterState(it, scope) } }
 
     // TODO: create a location display once API is ready
     // get the location data source from the location display
@@ -130,9 +133,6 @@ fun LocationDemo() {
         locationDataSource.start()
             .onFailure { Log.i("LocationDemo", "Failed to start location data source") }
     }
-
-    val scope = rememberCoroutineScope()
-    val floorFilterState = map?.let { remember { FloorFilterState(it, scope) } }
 
     Scaffold(
         floatingActionButton = {
