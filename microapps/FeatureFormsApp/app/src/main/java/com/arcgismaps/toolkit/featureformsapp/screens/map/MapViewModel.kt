@@ -48,29 +48,35 @@ class MapViewModel @Inject constructor(
                 tolerance = 22.0,
                 returnPopupsOnly = false
             ).onSuccess { results ->
-                results.firstOrNull()?.geoElements?.firstOrNull { it is ArcGISFeature }?.let {
-                    val feature = it as ArcGISFeature
-                    feature.load().onSuccess {
-                        try {
-                            (feature.featureTable?.layer as FeatureLayer).featureFormDefinition?.let { featureFormDefinition ->
-                                val featureForm = FeatureForm(feature, featureFormDefinition)
+                results
+                    .mapNotNull { result ->
+                        result.geoElements.filterIsInstance<ArcGISFeature>().firstOrNull { feature ->
+                            (feature.featureTable?.layer as? FeatureLayer)?.featureFormDefinition != null
+                        }
+                    }
+                    .firstOrNull()?.let { feature ->
+                        feature.load().onSuccess {
+                            try {
+                                val featureForm = FeatureForm(
+                                    feature,
+                                    (feature.featureTable?.layer as FeatureLayer).featureFormDefinition!!
+                                )
                                 // update the FeatureFormState's FeatureForm
                                 setFeatureForm(featureForm)
                                 // set the FeatureFormState to an editing state to bring up the
                                 // FeatureForm UI
                                 setTransactionState(EditingTransactionState.Editing)
-                            } ?: throw Exception("This feature does not have a FeatureFormDefinition")
-                        } catch (e: Exception) {
-                            e.printStackTrace() // for debugging core issues
-                            Toast.makeText(
-                                context,
-                                "failed to create a FeatureForm for the feature and layer",
-                                Toast.LENGTH_LONG
-                            ).show()
-                        }
-                    }.onFailure { println("failed to load tapped Feature") }
-                } ?: println("tap was not on a feature")
-            }
+                            } catch (e: Exception) {
+                                e.printStackTrace() // for debugging core issues
+                                Toast.makeText(
+                                    context,
+                                    "failed to create a FeatureForm for the feature and layer",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        }.onFailure { println("failed to load tapped Feature") }
+                    } ?: println("identified features do not have feature forms defined")
+            }.onFailure { println("tap was not on a feature") }
         }
     }
 }

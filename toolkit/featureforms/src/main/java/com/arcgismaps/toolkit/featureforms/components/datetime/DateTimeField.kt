@@ -66,7 +66,7 @@ internal fun DateTimeField(
 ) {
     val isEditable by state.isEditable.collectAsState()
     val isRequired by state.isRequired.collectAsState()
-    val epochMillis by state.value.collectAsState()
+    val epochMillis by state.epochMillis.collectAsState()
 
     val shouldShowTime = remember {
         state.shouldShowTime
@@ -151,7 +151,7 @@ internal fun DateTimeField(
                 trailingIcon = {
                     if (epochMillis != null) {
                         IconButton(
-                            onClick = { state.clearValue() },
+                            onClick = { state.onValueChanged("") },
                             modifier = Modifier.semantics {
                                 contentDescription = "Clear text button"
                             }
@@ -214,7 +214,7 @@ internal fun DateTimeField(
             onDismissRequest = { openDialog = false },
             onCancelled = { openDialog = false },
             onConfirmed = {
-                state.setValue(pickerState.selectedDateTimeMillis)
+                state.onValueChanged(pickerState.selectedDateTimeMillis.toString())
                 openDialog = false
             })
     }

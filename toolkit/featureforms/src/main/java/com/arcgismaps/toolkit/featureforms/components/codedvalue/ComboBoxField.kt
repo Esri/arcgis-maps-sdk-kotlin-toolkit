@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.arcgismaps.toolkit.featureforms.components.combo
+package com.arcgismaps.toolkit.featureforms.components.codedvalue
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -52,6 +51,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -70,9 +70,10 @@ import androidx.compose.ui.window.DialogProperties
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.base.BaseTextField
+import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
-internal fun ComboBoxField(state: ComboBoxFieldState, modifier: Modifier = Modifier) {
+internal fun ComboBoxField(state: CodedValueFieldState, modifier: Modifier = Modifier) {
     val value by state.value.collectAsState()
     val isEditable by state.isEditable.collectAsState()
     val isRequired by state.isRequired.collectAsState()
@@ -87,9 +88,14 @@ internal fun ComboBoxField(state: ComboBoxFieldState, modifier: Modifier = Modif
             state.label
         }
     }
+    val placeholder = if (isRequired) {
+        stringResource(R.string.enter_value)
+    } else if (state.showNoValueOption == FormInputNoValueOption.Show) {
+        state.noValueLabel.ifEmpty { stringResource(R.string.no_value) }
+    } else ""
 
     BaseTextField(
-        text = value,
+        text = state.getCodedValueNameOrNull(value) ?: value,
         onValueChange = {
             state.onValueChanged(it)
             // consider a "clear" operation to be a focused state even though the clear icon
@@ -100,7 +106,7 @@ internal fun ComboBoxField(state: ComboBoxFieldState, modifier: Modifier = Modif
         readOnly = true,
         isEditable = isEditable,
         label = label,
-        placeholder = state.placeholder,
+        placeholder = placeholder,
         singleLine = true,
         trailingIcon = Icons.Outlined.List,
         supportingText = {
@@ -123,14 +129,14 @@ internal fun ComboBoxField(state: ComboBoxFieldState, modifier: Modifier = Modif
     if (showDialog) {
         ComboBoxDialog(
             initialValue = value,
-            values = state.codedValues.map { it.code.toString() },
+            values = state.codedValues.associateBy({ it.code }, { it.name }),
             label = state.label,
             description = state.description,
             isRequired = isRequired,
             noValueOption = state.showNoValueOption,
             noValueLabel = state.noValueLabel.ifEmpty { stringResource(R.string.no_value) },
-            onValueChange = {
-                state.onValueChanged(it)
+            onValueChange = { code ->
+                state.onValueChanged(code?.toString() ?: "")
             }
         ) {
             showDialog = false
@@ -150,26 +156,26 @@ internal fun ComboBoxField(state: ComboBoxFieldState, modifier: Modifier = Modif
 @Composable
 internal fun ComboBoxDialog(
     initialValue: String,
-    values: List<String>,
+    values: Map<Any?, String>,
     label: String,
     description: String,
     isRequired: Boolean,
     noValueOption: FormInputNoValueOption,
     noValueLabel: String,
-    onValueChange: (String) -> Unit,
+    onValueChange: (Any?) -> Unit,
     onDismissRequest: () -> Unit
 ) {
     var searchText by rememberSaveable { mutableStateOf("") }
     val codedValues = if (!isRequired) {
         if (noValueOption == FormInputNoValueOption.Show) {
-            listOf(noValueLabel) + values
+            mapOf("" to noValueLabel) + values
         } else values
     } else values
 
     val filteredList by remember {
         derivedStateOf {
             codedValues.filter {
-                it.contains(searchText, ignoreCase = true)
+                it.value.contains(searchText, ignoreCase = true)
             }
         }
     }
@@ -247,14 +253,16 @@ internal fun ComboBoxDialog(
                 LazyColumn(modifier = Modifier
                     .fillMaxSize()
                     .semantics {
-                        contentDescription = "ComboBoxDialogLazyColumn"
+                    contentDescription = "ComboBoxDialogLazyColumn"
                     }) {
-                    items(filteredList) {
+                    items(filteredList.count()) {
+                        val code = filteredList.keys.elementAt(it)
+                        val name = filteredList.getValue(code)
                         ListItem(
                             headlineContent = {
                                 Text(
-                                    text = it,
-                                    style = if (it == noValueLabel) LocalTextStyle.current.copy(
+                                    text = name,
+                                    style = if (name == noValueLabel) LocalTextStyle.current.copy(
                                         fontStyle = FontStyle.Italic,
                                         fontWeight = FontWeight.Light
                                     )
@@ -265,17 +273,19 @@ internal fun ComboBoxDialog(
                                 .fillMaxWidth()
                                 .clickable {
                                     // if the no value label was selected, set the value to be empty
-                                    onValueChange(if (it == noValueLabel) "" else it)
+                                    onValueChange(code)
                                 }
                                 .semantics {
-                                    contentDescription = if (it == noValueLabel) {
+                                    contentDescription = if (name == noValueLabel) {
                                         "no value row"
                                     } else {
                                         "$it list item"
                                     }
                                 },
                             trailingContent = {
-                                if (it == initialValue || (it == noValueLabel && initialValue.isEmpty())) {
+                                if ((code?.toString()
+                                        ?: "") == initialValue || (name == noValueLabel && initialValue.isEmpty())
+                                ) {
                                     Icon(
                                         imageVector = Icons.Outlined.Check,
                                         contentDescription = "list item check"
@@ -291,12 +301,41 @@ internal fun ComboBoxDialog(
     }
 }
 
+@Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
+@Composable
+private fun ComboBoxPreview() {
+    val scope = rememberCoroutineScope()
+    val state = CodedValueFieldState(
+        properties = CodedValueFieldProperties(
+            label = "Types",
+            placeholder = "",
+            description = "Select the tree species",
+            value = MutableStateFlow(""),
+            editable = MutableStateFlow(true),
+            required = MutableStateFlow(false),
+            codedValues = listOf(),
+            showNoValueOption = FormInputNoValueOption.Show,
+            noValueLabel = "No value"
+        ),
+        scope = scope,
+        onEditValue = {}
+    )
+    ComboBoxField(state = state)
+}
+
 @Preview
 @Composable
 private fun ComboBoxDialogPreview() {
     ComboBoxDialog(
-        initialValue = "Birch",
-        values = listOf("Birch", "Maple", "Oak", "Spruce", "Hickory", "Hemlock"),
+        initialValue = "x",
+        values = mapOf(
+            "Birch" to "Birch",
+            "Maple" to "Maple",
+            "Oak" to "Oak",
+            "Spruce" to "Spruce",
+            "Hickory" to "Hickory",
+            "Hemlock" to "Hemlock"
+        ),
         label = "Types",
         description = "Select the tree species",
         isRequired = false,

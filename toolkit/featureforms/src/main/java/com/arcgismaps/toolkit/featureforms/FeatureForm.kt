@@ -30,13 +30,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
+import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
-import com.arcgismaps.toolkit.featureforms.components.combo.rememberComboBoxFieldState
+import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberCodedValueFieldState
+import com.arcgismaps.toolkit.featureforms.components.datetime.rememberDateTimeFieldState
 import com.arcgismaps.toolkit.featureforms.components.text.rememberFormTextFieldState
 import kotlinx.coroutines.CoroutineScope
 import java.util.Objects
@@ -126,11 +128,12 @@ internal fun FeatureFormContent(
             items(form.elements) { formElement ->
                 if (formElement is FieldFormElement) {
                     val state = states[formElement.id]
-                    FieldElement(
-                        field = formElement,
-                        form = form,
-                        state = state
-                    )
+                    if (state != null) {
+                        FieldElement(
+                            field = formElement,
+                            state = state
+                        )
+                    }
                 }
             }
         }
@@ -170,11 +173,22 @@ private fun rememberFieldStates(
                     )
                 }
 
+                is DateTimePickerFormInput -> {
+                    val input = fieldElement.input as DateTimePickerFormInput
+                    rememberDateTimeFieldState(
+                        field = fieldElement,
+                        minEpochMillis = input.min?.toEpochMilli(),
+                        maxEpochMillis = input.max?.toEpochMilli(),
+                        shouldShowTime = input.includeTime,
+                        form = form,
+                        scope = scope
+                    )
+                }
+
                 is ComboBoxFormInput -> {
-                    rememberComboBoxFieldState(
+                    rememberCodedValueFieldState(
                         field = fieldElement,
                         form = form,
-                        context = context,
                         scope = scope
                     )
                 }

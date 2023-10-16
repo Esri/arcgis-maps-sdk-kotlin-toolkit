@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package com.arcgismaps.toolkit.featureforms.components.combo
+package com.arcgismaps.toolkit.featureforms.components.codedvalue
 
-import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.saveable.Saver
@@ -27,8 +26,6 @@ import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
-import com.arcgismaps.toolkit.featureforms.R
-import com.arcgismaps.toolkit.featureforms.components.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.FieldProperties
 import com.arcgismaps.toolkit.featureforms.components.text.TextFieldProperties
@@ -37,7 +34,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-internal class ComboBoxFieldProperties(
+internal open class CodedValueFieldProperties(
     label: String,
     placeholder: String,
     description: String,
@@ -50,23 +47,21 @@ internal class ComboBoxFieldProperties(
 ) : FieldProperties(label, placeholder, description, value, required, editable)
 
 /**
- * A class to handle the state of a [ComboBoxField]. Essential properties are inherited from the
- * [BaseFieldState].
+ * A class to handle the state of a [ComboBoxField]. Essential properties are inherited
+ * from the [BaseFieldState].
  *
- * @param properties the [ComboBoxFieldProperties] associated with this state.
+ * @param properties the [CodedValueFieldProperties] associated with this state.
  * @param initialValue optional initial value to set for this field. It is set to the value of
  * [TextFieldProperties.value] by default.
  * @param scope a [CoroutineScope] to start [StateFlow] collectors on.
- * @param context a Context scoped to the lifetime of a call to the [FieldElement] composable function.
  * @param onEditValue a callback to invoke when the user edits result in a change of value. This
- * is called on [ComboBoxFieldState.onValueChanged].
+ * is called on [CodedValueFieldState.onValueChanged].
  */
 @Stable
-internal class ComboBoxFieldState(
-    properties: ComboBoxFieldProperties,
+internal open class CodedValueFieldState(
+    properties: CodedValueFieldProperties,
     initialValue: String = properties.value.value,
     scope: CoroutineScope,
-    context: Context,
     onEditValue: ((Any?) -> Unit)
 ) : BaseFieldState(
     properties = properties,
@@ -90,19 +85,26 @@ internal class ComboBoxFieldState(
      */
     val noValueLabel: String = properties.noValueLabel
 
-    override val placeholder = if (isRequired.value) {
-        context.getString(R.string.enter_value)
-    } else if (showNoValueOption == FormInputNoValueOption.Show) {
-        noValueLabel.ifEmpty { context.getString(R.string.no_value) }
-    } else ""
+    /**
+     * Returns the name of the [code] if it is present in [codedValues] else returns null.
+     */
+    fun getCodedValueNameOrNull(code: Any?): String? {
+        return codedValues.find {
+            it.code.toString() == code.toString()
+        }?.name
+    }
 
     companion object {
+
+        /**
+         * The default saver for a [CodedValueFieldState] implemented for a [ComboBoxFormInput] type.
+         * Hence for [formElement] the [FieldFormElement.input] type must be a [ComboBoxFormInput].
+         */
         fun Saver(
             formElement: FieldFormElement,
             form: FeatureForm,
-            context: Context,
             scope: CoroutineScope
-        ): Saver<ComboBoxFieldState, Any> = listSaver(
+        ): Saver<CodedValueFieldState, Any> = listSaver(
             save = {
                 listOf(
                     it.value.value
@@ -110,8 +112,8 @@ internal class ComboBoxFieldState(
             },
             restore = { list ->
                 val input = formElement.input as ComboBoxFormInput
-                ComboBoxFieldState(
-                    properties = ComboBoxFieldProperties(
+                CodedValueFieldState(
+                    properties = CodedValueFieldProperties(
                         label = formElement.label,
                         placeholder = formElement.hint,
                         description = formElement.description,
@@ -123,7 +125,6 @@ internal class ComboBoxFieldState(
                         noValueLabel = input.noValueLabel
                     ),
                     initialValue = list[0],
-                    context = context,
                     scope = scope,
                     onEditValue = { newValue ->
                         form.editValue(formElement, newValue)
@@ -136,17 +137,16 @@ internal class ComboBoxFieldState(
 }
 
 @Composable
-internal fun rememberComboBoxFieldState(
+internal fun rememberCodedValueFieldState(
     field: FieldFormElement,
     form: FeatureForm,
-    context: Context,
     scope: CoroutineScope
-): ComboBoxFieldState = rememberSaveable(
-    saver = ComboBoxFieldState.Saver(field, form, context, scope)
+): CodedValueFieldState = rememberSaveable(
+    saver = CodedValueFieldState.Saver(field, form, scope)
 ) {
     val input = field.input as ComboBoxFormInput
-    ComboBoxFieldState(
-        properties = ComboBoxFieldProperties(
+    CodedValueFieldState(
+        properties = CodedValueFieldProperties(
             label = field.label,
             placeholder = field.hint,
             description = field.description,
@@ -157,7 +157,6 @@ internal fun rememberComboBoxFieldState(
             showNoValueOption = input.noValueOption,
             noValueLabel = input.noValueLabel
         ),
-        context = context,
         scope = scope,
         onEditValue = {
             form.editValue(field, it)
