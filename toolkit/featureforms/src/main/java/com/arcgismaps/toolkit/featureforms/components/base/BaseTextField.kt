@@ -29,8 +29,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Clear
+import androidx.compose.material.icons.rounded.TextFields
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -47,7 +49,10 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.utils.ClearFocus
 import com.arcgismaps.toolkit.featureforms.utils.PlaceholderTransformation
@@ -134,6 +139,7 @@ private fun trailingIcon(
  * @param placeholder the text to be displayed when the text field input text is empty.
  * @param singleLine when set to true, this text field becomes a single horizontally scrolling
  * text field instead of wrapping onto multiple lines.
+ * @param keyboardType the keyboard type to use depending on the FormFieldElement input type.
  * @param trailingIcon the icon to be displayed at the end of the text field container.
  * @param supportingText supporting text to be displayed below the text field.
  * @param onFocusChange callback that is triggered when the focus state for this text field changes.
@@ -150,6 +156,7 @@ internal fun BaseTextField(
     label: String,
     placeholder: String,
     singleLine: Boolean,
+    keyboardType: KeyboardType = KeyboardType.Ascii,
     trailingIcon: ImageVector? = null,
     suffix: (@Composable () -> Unit)? = null,
     supportingText: @Composable (ColumnScope.() -> Unit)? = null,
@@ -185,7 +192,9 @@ internal fun BaseTextField(
             label = {
                 Text(
                     text = label,
-                    modifier = Modifier.semantics { contentDescription = "label" }
+                    modifier = Modifier.semantics { contentDescription = "label" },
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1		    
                 )
             },
             suffix = suffix,
@@ -218,7 +227,8 @@ internal fun BaseTextField(
                 onDone = { clearFocus = true }
             ),
             keyboardOptions = KeyboardOptions.Default.copy(
-                imeAction = if (singleLine) ImeAction.Done else ImeAction.None
+                imeAction = if (singleLine) ImeAction.Done else ImeAction.None,
+                keyboardType = keyboardType
             ),
             singleLine = singleLine,
             interactionSource = interactionSource,
@@ -229,6 +239,26 @@ internal fun BaseTextField(
                 )
             else
                 OutlinedTextFieldDefaults.colors()
+        )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
+@Composable
+private fun BaseTextFieldPreview() {
+    MaterialTheme {
+        BaseTextField(
+            text = "",
+            onValueChange = {},
+            readOnly = false,
+            isEditable = true,
+            label = "Title",
+            placeholder = "Enter Value",
+            singleLine = true,
+            trailingIcon = Icons.Rounded.TextFields,
+            supportingText = {
+                Text(text = "A Description")
+            }
         )
     }
 }
