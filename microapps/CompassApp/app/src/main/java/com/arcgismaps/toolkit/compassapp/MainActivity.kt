@@ -18,15 +18,12 @@
 
 package com.arcgismaps.toolkit.compassapp
 
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -42,12 +39,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -61,7 +55,6 @@ import com.arcgismaps.mapping.MobileMapPackage
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.compassapp.screens.MapViewModel
 import com.arcgismaps.toolkit.compassapp.screens.MapViewModelFactory
-import com.arcgismaps.toolkit.compassapp.ui.theme.AppTheme
 import com.arcgismaps.toolkit.composablemap.ComposableMap
 import com.arcgismaps.toolkit.indoors.FloorFilter
 import com.arcgismaps.toolkit.indoors.FloorFilterState
@@ -72,33 +65,43 @@ class MainActivity : ComponentActivity() {
         setupAPIKey()
 
         setContent {
-                TextDemo()
-//                MapDemo()
-//                LocationDemo()
+                LocationDemo()
         }
     }
 }
 
 @Composable
 fun TextDemo() {
-    Text(text = "Welcome to European Dev Summit 2023!", fontSize = 20.sp, modifier = Modifier.padding(20.dp, 200.dp, 0.dp, 0.dp))
-    Image(painter = painterResource(id = R.drawable.kotlin_hero), contentDescription = null, modifier = Modifier.padding(0.dp, 200.dp, 0.dp, 0.dp))
+    Text(text = "Welcome to European Dev Summit 2023!",
+        fontSize = 20.sp, modifier = Modifier.padding(20.dp, 200.dp, 0.dp, 0.dp))
+
+    Image(painter = painterResource(id = R.drawable.kotlin_hero),
+        contentDescription = null, modifier = Modifier.padding(0.dp, 200.dp, 0.dp, 0.dp))
 }
+
+
 
 @Composable
 fun MapDemo() {
-    // create an ArcGISMap with a basemap style
-    val map = remember { ArcGISMap(BasemapStyle.OsmStreets) }
-    // instantiate a MapViewModel using the factory
-    val mapViewModel = viewModel<MapViewModel>(factory = MapViewModelFactory(map))
-    // show a composable map using the mapViewModel
+    // create an arcGISMap with basemap style and initial viewpoint
+    val arcGISMap = remember { ArcGISMap(BasemapStyle.OsmStreets).apply {
+        initialViewpoint = Viewpoint(51.852, 10.477, 10e6)
+    } };
+    // instantiate map state and assign it the ArcGISMap
+    // TODO: the MapViewModel will be replaced by new MapState API
+    val mapState = viewModel<MapViewModel>(factory = MapViewModelFactory(arcGISMap))
+
+    // create a composable Map and assign the mapstate to it
+    // TODO: ComposableMap will become Map
     ComposableMap(
         modifier = Modifier.fillMaxSize(),
-        mapInterface = mapViewModel
+        mapInterface = mapState
     )
-    // set the composable map's viewpoint to Germany
-    mapViewModel.setViewpoint(Viewpoint(51.852, 10.477, 10e6))
+    // TODO: this line will be removed once viewpoint bug is fixed
+    mapState.setViewpoint(Viewpoint(51.852, 10.477, 10e6))
 }
+
+
 
 @Composable
 fun LocationDemo() {
@@ -111,18 +114,21 @@ fun LocationDemo() {
         value = mmpk.maps[0]
     }
 
+    // TODO: create a location display once API is ready
+    // get the location data source from the location display
     val locationDataSource = remember { SystemLocationDataSource() }
 
-    val mapViewModel = map?.let {
+    val mapState = map?.let {
         viewModel<MapViewModel>(factory = MapViewModelFactory(map, locationDataSource = locationDataSource))
     }
 
-    val lastLocation = locationDataSource.locationChanged.collectAsState(initial = null)
+    // collect location updates
+    val lastKnownLocation = locationDataSource.locationChanged.collectAsState(initial = null)
 
     LaunchedEffect(Unit) {
         // start the location data source
         locationDataSource.start()
-            .onFailure { Log.i("LocationApp", "Failed to start location data source") }
+            .onFailure { Log.i("LocationDemo", "Failed to start location data source") }
     }
 
     val scope = rememberCoroutineScope()
@@ -133,9 +139,9 @@ fun LocationDemo() {
             // display a button that zooms to the current location
             FloatingActionButton(
                 onClick = {
-                    lastLocation.value?.let {
+                    lastKnownLocation.value?.let {
                         // TODO: the inner safe (?.) call can be removed eventually
-                        mapViewModel?.setViewpoint(Viewpoint(it.position, 2500.0))
+                        mapState?.setViewpoint(Viewpoint(it.position, 2500.0))
                     }
                 },
                 modifier = Modifier
@@ -154,14 +160,14 @@ fun LocationDemo() {
         }
     ) {
 
-        if (floorFilterState != null && mapViewModel != null) {
+        if (floorFilterState != null && mapState != null) {
 
             // show a composable map using the mapViewModel
             ComposableMap(
                 modifier = Modifier
                     .padding(it)
                     .fillMaxSize(),
-                mapInterface = mapViewModel
+                mapInterface = mapState
             ) {
                 Box(
                     modifier = Modifier
@@ -172,62 +178,11 @@ fun LocationDemo() {
                     FloorFilter(floorFilterState = floorFilterState)
                     // TODO: probably shouldn't set viewpoint here, use initialViewpoint once that is working
                     //  or else move this to a different place
-                    mapViewModel.setViewpoint(Viewpoint(52.5119, 13.3922, 100000.0))
+                    mapState.setViewpoint(Viewpoint(52.5119, 13.3922, 100000.0))
                 }
             }
         }
     }
-
-    //    // create an ArcGISMap with a basemap style, and a location data source for displaying the current location
-//    val map = remember { ArcGISMap(BasemapStyle.OsmStreets) } // TODO: needs to use the MMPK?
-//    val locationDataSource = remember { SystemLocationDataSource() }
-//
-//    // instantiate a MapViewModel using the factory
-//    val mapViewModel =
-//        viewModel<MapViewModel>(factory = MapViewModelFactory(map, locationDataSource = locationDataSource))
-//
-//    val lastLocation = locationDataSource.locationChanged.collectAsState(initial = null)
-//
-//    LaunchedEffect(Unit) {
-//        // set the composable map's viewpoint to Germany
-//        mapViewModel.setViewpoint(Viewpoint(51.852, 10.477, 10e6))
-//
-//        // start the location data source
-//        locationDataSource.start()
-//            .onFailure { Log.i("LocationApp", "Failed to start location data source") }
-//    }
-//
-//    Scaffold(
-//        floatingActionButton = {
-//            // display a button that zooms to the current location
-//            FloatingActionButton(
-//                onClick = {
-//                    lastLocation.value?.let {
-//                        mapViewModel.setViewpoint(Viewpoint(it.position, 10e3))
-//                    }
-//                },
-//                modifier = Modifier.padding(40.dp).size(80.dp),
-//                shape = CircleShape,
-//                containerColor = Color.Purple
-//            ) {
-//                Icon(
-//                    painter = painterResource(id = R.drawable.my_location),
-//                    contentDescription = "Go to current location",
-//                    modifier = Modifier.fillMaxSize(0.75f),
-//                    tint = Color.White
-//                )
-//            }
-//        }
-//    ) {
-//
-//        // show a composable map using the mapViewModel
-//        ComposableMap(
-//            modifier = Modifier
-//                .padding(it)
-//                .fillMaxSize(),
-//            mapInterface = mapViewModel
-//        )
-//    }
 }
 
 
@@ -247,13 +202,7 @@ fun LocationDemo() {
 
 
 
-//@Preview(showSystemUi = true)
-//@Composable
-//fun AppPreview() {
-//    AppTheme {
-//        DemoApp()
-//    }
-//}
+
 
 private val Color.Companion.Purple get() = Color(185, 27, 219)
 
