@@ -104,8 +104,10 @@ fun MapDemo() {
 @Composable
 fun LocationDemo() {
     val map by produceState<ArcGISMap?>(initialValue = null) {
+//        val mmpk =
+//            MobileMapPackage("/data/user/0/com.arcgismaps.toolkit.compassapp/files/BerlinDevSummit_10_20.mmpk")
         val mmpk =
-            MobileMapPackage("/data/user/0/com.arcgismaps.toolkit.compassapp/files/BerlinDevSummit_10_20.mmpk")
+            MobileMapPackage("/data/user/0/com.arcgismaps.toolkit.compassapp/files/Berlin_Kotlin_23.mmpk")
         mmpk.load().onSuccess { Log.i("xcv", "loaded mmpk with ${mmpk.maps.size} maps") }.getOrThrow()
 //        mmpk.load().getOrNull() ?: return@produceState
 //        if (mmpk.maps.isEmpty()) return@produceState
