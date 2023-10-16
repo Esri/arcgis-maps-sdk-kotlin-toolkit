@@ -22,6 +22,7 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.data.CodedValue
+import com.arcgismaps.data.FieldType
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
@@ -29,6 +30,7 @@ import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.utils.editValue
 import com.arcgismaps.toolkit.featureforms.utils.fieldIsNullable
+import com.arcgismaps.toolkit.featureforms.utils.fieldType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -40,6 +42,7 @@ internal class SwitchFieldProperties(
     value: StateFlow<String>,
     editable: StateFlow<Boolean>,
     required: StateFlow<Boolean>,
+    fieldType: FieldType,
     val onValue: CodedValue,
     val offValue: CodedValue,
     showNoValueOption: FormInputNoValueOption,
@@ -51,6 +54,7 @@ internal class SwitchFieldProperties(
     value,
     required,
     editable,
+    fieldType,
     listOf(onValue, offValue),
     showNoValueOption,
     noValueLabel
@@ -112,7 +116,8 @@ internal class SwitchFieldState(
                         value = formElement.value,
                         editable = formElement.isEditable,
                         required = formElement.isRequired,
-                        onValue = input.onValue,
+                        fieldType = form.fieldType(formElement),
+                            onValue = input.onValue,
                         offValue = input.offValue,
                         showNoValueOption = if (form.fieldIsNullable(formElement))
                             FormInputNoValueOption.Show
@@ -153,6 +158,7 @@ internal fun rememberSwitchFieldState(
             value = field.value,
             editable = field.isEditable,
             required = field.isRequired,
+            fieldType = form.fieldType(field),
             onValue = input.onValue,
             offValue = input.offValue,
             showNoValueOption = if (form.fieldIsNullable(field))

@@ -24,6 +24,7 @@ import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.RadioButtonsFormInput
 import com.arcgismaps.toolkit.featureforms.utils.editValue
+import com.arcgismaps.toolkit.featureforms.utils.fieldType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -80,6 +81,7 @@ internal class RadioButtonFieldState(
                         value = formElement.value,
                         editable = formElement.isEditable,
                         required = formElement.isRequired,
+                        fieldType = form.fieldType(formElement),
                         codedValues = input.codedValues,
                         showNoValueOption = input.noValueOption,
                         noValueLabel = input.noValueLabel
@@ -113,6 +115,7 @@ internal fun rememberRadioButtonFieldState(
             value = field.value,
             editable = field.isEditable,
             required = field.isRequired,
+            fieldType = form.fieldType(field),
             codedValues = input.codedValues,
             showNoValueOption = input.noValueOption,
             noValueLabel = input.noValueLabel
