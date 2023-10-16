@@ -102,10 +102,10 @@ internal class FormTextFieldState(
 ) {
     // indicates singleLine only if TextBoxFeatureFormInput
     val singleLine = properties.singleLine
-
+    
     // fetch the minLength based on the featureFormElement.inputType
     val minLength = properties.minLength
-
+    
     // fetch the maxLength based on the featureFormElement.inputType
     val maxLength = properties.maxLength
     
@@ -116,10 +116,10 @@ internal class FormTextFieldState(
     // the helper text is displayed when the field is focused.
     private val _supportingText: MutableState<String> = mutableStateOf(description)
     val supportingText: State<String> = _supportingText
- 
+    
     private val _isFocused: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isFocused: StateFlow<Boolean> = _isFocused.asStateFlow()
-
+    
     private val _hasError = mutableStateOf(false)
     private val _supportingTextIsErrorMessage = mutableStateOf(false)
     val supportingTextIsErrorMessage: State<Boolean> = _supportingTextIsErrorMessage
@@ -140,7 +140,7 @@ internal class FormTextFieldState(
         } else {
             ""
         }
-    
+        
         val max = if (domain is RangeDomain) {
             (domain.maxValue as? Number)?.format()
         } else {
@@ -171,7 +171,7 @@ internal class FormTextFieldState(
                 if (min is Number && max is Number) {
                     context.getString(R.string.numeric_range_helper_text, min.format(), max.format())
                 } else if (min is Number) {
-                     context.getString(R.string.less_than_min_value, min.format())
+                    context.getString(R.string.less_than_min_value, min.format())
                 } else if (max is Number) {
                     context.getString(R.string.exceeds_max_value, max.format())
                 } else {
@@ -194,7 +194,7 @@ internal class FormTextFieldState(
                 context.getString(R.string.maximum_n_chars, 254)
             }
         }
-
+    
     init {
         scope.launch {
             value.drop(1).collect { newValue ->
@@ -245,82 +245,115 @@ internal class FormTextFieldState(
             NoError
         }
     
-    private fun validateNumericRange(value: String): ValidationErrorState =
-        if (domain != null && domain is RangeDomain) {
-            if (fieldType.isIntegerType) {
-                val (min, max) = domain.asLongTuple
-                val numberVal = value.toLongOrNull()
-                requireNotNull(numberVal)
-                if (min != null && max != null) {
-                    if (numberVal in min..max) {
-                        NoError
-                    } else {
-                        MinMaxNumericConstraint
-                    }
-                } else if (min != null) {
-                    if (min <= numberVal) {
-                        NoError
-                    } else {
-                        MinNumericConstraint
-                    }
-                    
-                } else if (max != null) {
-                    if (numberVal <= max) {
-                        NoError
-                    } else {
-                        MaxNumericConstraint
-                    }
+    private fun validateNumber(value: String): ValidationErrorState =
+        if (fieldType.isIntegerType) {
+            val numberVal = value.toIntOrNull()
+            if (numberVal == null) {
+                NotAWholeNumber
+            } else {
+                validateNumericRange(numberVal)
+            }
+        } else {
+            val numberVal = value.toDoubleOrNull()
+            if (numberVal == null) {
+                NotANumber
+            } else {
+                validateNumericRange(numberVal)
+            }
+        }
+    
+    private fun validateNumericRange(numberVal: Int): ValidationErrorState {
+        require(fieldType.isIntegerType)
+        return if (domain != null && domain is RangeDomain) {
+            val (min, max) = domain.asLongTuple
+            if (min != null && max != null) {
+                if (numberVal in min..max) {
+                    NoError
                 } else {
-                   NoError
+                    MinMaxNumericConstraint
+                }
+            } else if (min != null) {
+                if (min <= numberVal) {
+                    NoError
+                } else {
+                    MinNumericConstraint
+                }
+            } else if (max != null) {
+                if (numberVal <= max) {
+                    NoError
+                } else {
+                    MaxNumericConstraint
                 }
             } else {
-                val (min, max) = domain.asDoubleTuple
-                val numberVal = value.toDoubleOrNull()
-                requireNotNull(numberVal)
-                if (min != null && max != null) {
-                    if (numberVal in min..max) {
-                        NoError
-                    } else {
-                        MinMaxNumericConstraint
-                    }
-                } else if (min != null) {
-                    if (min <= numberVal) {
-                        NoError
-                    } else {
-                        MinNumericConstraint
-                    }
-                } else if (max != null) {
-                    if (numberVal <= max) {
-                        NoError
-                    } else {
-                        MaxNumericConstraint
-                    }
-                } else {
-                    NoError
-                }
+                NoError
             }
-            
         } else {
             NoError
         }
+    }
     
-    private fun errorMessageToDisplay(value: String, validationErrors: List<ValidationErrorState>): ValidationErrorState =
+    private fun validateNumericRange(numberVal: Double): ValidationErrorState {
+        require(fieldType.isFloatingPoint)
+        return if (domain != null && domain is RangeDomain) {
+            val (min, max) = domain.asDoubleTuple
+            if (min != null && max != null) {
+                if (numberVal in min..max) {
+                    NoError
+                } else {
+                    MinMaxNumericConstraint
+                }
+            } else if (min != null) {
+                if (min <= numberVal) {
+                    NoError
+                } else {
+                    MinNumericConstraint
+                }
+            } else if (max != null) {
+                if (numberVal <= max) {
+                    NoError
+                } else {
+                    MaxNumericConstraint
+                }
+            } else {
+                NoError
+            }
+        } else {
+            NoError
+        }
+    }
+    
+    private fun errorMessageToDisplay(
+        value: String,
+        validationErrors: List<ValidationErrorState>
+    ): ValidationErrorState =
         if (validationErrors.isEmpty()) {
             NoError
         } else if (isFocused.value) {
-            // if focused, don't show the "Required" error string
             if (value.isEmpty()) {
-                //if empty don't show parse errors
-                validationErrors.firstOrNull { it != Required && it != NotANumber && it != NotAWholeNumber} ?: NoError
+                // if focused and empty, don't show the "Required" error or numeric parse errors
+                validationErrors.firstOrNull { it != Required && it != NotANumber && it != NotAWholeNumber } ?: NoError
             } else {
+                // if non empty, focused, show any error other than required (the Required error shouldn't be in the list)
+                check (!validationErrors.contains(Required))
                 validationErrors.first()
             }
         } else if (hasBeenFocused) {
-            // if focused has been gained and lost, show the Required error if the field is empty and isRequired.
-            validationErrors.firstOrNull { it == Required} ?: validationErrors.first()
+            if (value.isEmpty()) {
+                if (validationErrors.contains(Required)) {
+                    // show any non required and non parse error before showing a Required error
+                    validationErrors.firstOrNull { it != Required && it != NotANumber && it != NotAWholeNumber  } ?: Required
+                } else {
+                    // don't show parse errors when empty and not required (and when required, show required as above)
+                    validationErrors.firstOrNull { it != NotANumber && it != NotAWholeNumber  } ?: NoError
+                }
+            } else {
+                // if non empty, unfocused, show any error other than required (the Required error shouldn't be in the list)
+                check (!validationErrors.contains(Required))
+                validationErrors.first()
+            }
         } else {
             // never been focused
-            validationErrors.firstOrNull { it != Required} ?: NoError
+            NoError
         }
     
     private fun validate(value: String): MutableList<ValidationErrorState> {
@@ -335,14 +368,10 @@ internal class FormTextFieldState(
                 ret += rangeError
             }
         } else {
-            if (fieldType.isIntegerType && value.toIntOrNull() == null && value.isNotEmpty()) {
-                ret += NotAWholeNumber
-            } else if (fieldType.isFloatingPoint && value.toDoubleOrNull() == null && value.isNotEmpty()) {
-                ret += NotANumber
-            } else {
-                val rangeError = validateNumericRange(value)
-                if (rangeError != NoError) {
-                    ret += rangeError
+            val error = validateNumber(value)
+            if (error != NoError) {
+                if (error != NoError) {
+                    ret += error
                 }
             }
         }
