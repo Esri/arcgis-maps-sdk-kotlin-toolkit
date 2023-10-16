@@ -41,7 +41,7 @@ internal fun FieldElement(field: FieldFormElement, state: BaseFieldState) {
 
             is RadioButtonsFormInput -> {
                 if ((state as RadioButtonFieldState).shouldFallback()) {
-                    ComboBoxField(state = state as CodedValueFieldState)
+                    ComboBoxField(state = state)
                 } else {
                     RadioButtonField(state = state)
                 }
