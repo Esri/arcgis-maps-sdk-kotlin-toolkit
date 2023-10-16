@@ -69,8 +69,7 @@ import com.arcgismaps.toolkit.indoors.FloorFilterState
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setupAPIKey(this);
-        Log.i("xcv", filesDir.toString())
+        setupAPIKey()
 
         setContent {
                 TextDemo()
@@ -104,16 +103,12 @@ fun MapDemo() {
 @Composable
 fun LocationDemo() {
     val map by produceState<ArcGISMap?>(initialValue = null) {
-//        val mmpk =
-//            MobileMapPackage("/data/user/0/com.arcgismaps.toolkit.compassapp/files/BerlinDevSummit_10_20.mmpk")
-        val mmpk =
-            MobileMapPackage("/data/user/0/com.arcgismaps.toolkit.compassapp/files/Berlin_Kotlin_23.mmpk")
-        mmpk.load().onSuccess { Log.i("xcv", "loaded mmpk with ${mmpk.maps.size} maps") }.getOrThrow()
-//        mmpk.load().getOrNull() ?: return@produceState
-//        if (mmpk.maps.isEmpty()) return@produceState
+        val mmpk = MobileMapPackage(
+            "/data/user/0/com.arcgismaps.toolkit.compassapp/files/Berlin_Kotlin_23.mmpk"
+        )
+        mmpk.load().getOrNull() ?: return@produceState
+        if (mmpk.maps.isEmpty()) return@produceState
         value = mmpk.maps[0]
-        // FIXME:
-        //value = ArcGISMap("https://www.arcgis.com/home/item.html?id=f133a698536f44c8884ad81f80b6cfc7")
     }
 
     val locationDataSource = remember { SystemLocationDataSource() }
@@ -175,6 +170,8 @@ fun LocationDemo() {
                 ) {
                     // TODO: initial floor as 1. Also bug fixes to display levels.
                     FloorFilter(floorFilterState = floorFilterState)
+                    // TODO: probably shouldn't set viewpoint here, use initialViewpoint once that is working
+                    //  or else move this to a different place
                     mapViewModel.setViewpoint(Viewpoint(52.5119, 13.3922, 100000.0))
                 }
             }
@@ -260,11 +257,11 @@ fun LocationDemo() {
 
 private val Color.Companion.Purple get() = Color(185, 27, 219)
 
-private fun setupAPIKey(context: Context) {
+private fun MainActivity.setupAPIKey() {
     // set an API key
     ArcGISEnvironment.apiKey = ApiKey.create(BuildConfig.API_KEY)
     LicenseKey.create(BuildConfig.LICENSE_KEY)
         ?.let { ArcGISEnvironment.setLicense(it) }
         ?: throw IllegalStateException("Invalid license key set in onCreate")
-    ArcGISEnvironment.applicationContext = context
+    ArcGISEnvironment.applicationContext = this
 }
