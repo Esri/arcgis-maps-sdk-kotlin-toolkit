@@ -18,6 +18,7 @@ package com.arcgismaps.toolkit.featureforms.components.codedvalue
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.components.base.BaseTextField
 
 @Composable
@@ -48,22 +50,6 @@ internal fun SwitchField(state: SwitchFieldState, modifier: Modifier = Modifier)
         label = state.label,
         placeholder = state.placeholder,
         singleLine = true,
-        suffix = {
-            Switch(
-                checked = checkedState,
-                onCheckedChange = { newState ->
-                    val newValue = (
-                        if (newState)
-                            state.onValue.code?.toString()
-                        else
-                            state.offValue.code?.toString()
-                        ) ?: throw IllegalStateException("coded value code must not be null")
-                    state.onValueChanged(newValue)
-                },
-                modifier = Modifier.semantics { contentDescription = "switch" },
-                enabled = isEditable
-            )
-        },
         supportingText = {
             Text(
                 text = state.description,
@@ -71,7 +57,24 @@ internal fun SwitchField(state: SwitchFieldState, modifier: Modifier = Modifier)
             )
         },
         interactionSource = interactionSource
-    )
+    ) {
+        Switch(
+            checked = checkedState,
+            onCheckedChange = { newState ->
+                val newValue = (
+                    if (newState)
+                        state.onValue.code?.toString()
+                    else
+                        state.offValue.code?.toString()
+                    ) ?: throw IllegalStateException("coded value code must not be null")
+                state.onValueChanged(newValue)
+            },
+            modifier = Modifier
+                .semantics { contentDescription = "switch" }
+                .padding(horizontal = 10.dp),
+            enabled = isEditable
+        )
+    }
     
     LaunchedEffect(valueCode) {
         interactionSource.interactions.collect {

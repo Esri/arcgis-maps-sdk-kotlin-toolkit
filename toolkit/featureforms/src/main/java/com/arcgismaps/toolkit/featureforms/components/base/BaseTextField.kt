@@ -145,6 +145,7 @@ private fun trailingIcon(
  * @param onFocusChange callback that is triggered when the focus state for this text field changes.
  * @param interactionSource the MutableInteractionSource representing the stream of Interactions
  * for this text field.
+ * @param trailingContent a widget to be displayed at the end of the text field container.
  */
 @Composable
 internal fun BaseTextField(
@@ -158,11 +159,11 @@ internal fun BaseTextField(
     singleLine: Boolean,
     keyboardType: KeyboardType = KeyboardType.Ascii,
     trailingIcon: ImageVector? = null,
-    suffix: (@Composable () -> Unit)? = null,
     supportingText: @Composable (ColumnScope.() -> Unit)? = null,
     onFocusChange: ((Boolean) -> Unit)? = null,
-    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
-) {
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    trailingContent: (@Composable () -> Unit)? = null
+    ) {
     var clearFocus by remember { mutableStateOf(false) }
     var isFocused by remember { mutableStateOf(false) }
 
@@ -194,23 +195,19 @@ internal fun BaseTextField(
                     text = label,
                     modifier = Modifier.semantics { contentDescription = "label" },
                     overflow = TextOverflow.Ellipsis,
-                    maxLines = 1		    
+                    maxLines = 1
                 )
             },
-            suffix = suffix,
-            trailingIcon = if (suffix == null) {
-                trailingIcon(
-                    text,
-                    isEditable,
-                    singleLine,
-                    isFocused,
-                    trailingIcon,
-                    onValueChange = onValueChange,
-                    onDone = { clearFocus = true }
-                )
-            } else {
-                null
-            },
+            trailingIcon = trailingContent
+                ?: trailingIcon(
+                text,
+                isEditable,
+                singleLine,
+                isFocused,
+                trailingIcon,
+                onValueChange = onValueChange,
+                onDone = { clearFocus = true }
+            ),
             supportingText = {
                 Column(
                     modifier = Modifier.clickable {
