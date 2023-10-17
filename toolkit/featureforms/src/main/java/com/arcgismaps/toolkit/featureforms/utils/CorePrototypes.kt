@@ -23,6 +23,11 @@ import com.arcgismaps.data.RangeDomain
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FeatureFormDefinition
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import java.time.Instant
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
@@ -70,6 +75,10 @@ internal fun FeatureForm.fieldType(element: FieldFormElement): FieldType {
 
 internal fun FeatureForm.domain(element: FieldFormElement): Domain? =
     feature.featureTable?.getField(element.fieldName)?.domain
+
+internal fun FieldFormElement.formattedFlow(scope: CoroutineScope): StateFlow<String> =
+    value.map { formattedValue }.stateIn(scope, SharingStarted.Eagerly, formattedValue)
+
 
 internal val FieldType.isNumeric: Boolean
     get() {

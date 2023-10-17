@@ -31,6 +31,7 @@ import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.utils.editValue
 import com.arcgismaps.toolkit.featureforms.utils.fieldIsNullable
 import com.arcgismaps.toolkit.featureforms.utils.fieldType
+import com.arcgismaps.toolkit.featureforms.utils.formattedFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -118,7 +119,7 @@ internal class SwitchFieldState(
                         label = formElement.label,
                         placeholder = formElement.hint,
                         description = formElement.description,
-                        value = formElement.value,
+                        value = formElement.formattedFlow(scope),
                         editable = formElement.isEditable,
                         required = formElement.isRequired,
                         fieldType = form.fieldType(formElement),
@@ -162,7 +163,7 @@ internal fun rememberSwitchFieldState(
             label = field.label,
             placeholder = field.hint,
             description = field.description,
-            value = field.value,
+            value = field.formattedFlow(scope),
             editable = field.isEditable,
             required = field.isRequired,
             fieldType = form.fieldType(field),
