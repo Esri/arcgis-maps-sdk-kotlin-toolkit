@@ -45,6 +45,7 @@ internal class SwitchFieldProperties(
     fieldType: FieldType,
     val onValue: CodedValue,
     val offValue: CodedValue,
+    val fallback: Boolean,
     showNoValueOption: FormInputNoValueOption,
     noValueLabel: String
 ) : CodedValueFieldProperties(
@@ -66,8 +67,6 @@ internal class SwitchFieldProperties(
  *
  * @param properties the [SwitchFieldProperties] associated with this state.
  * @property initialValue the initial value to set for this field. This value should be a CodedValue code or subtype.
- * It is necessary to inspect this property during composition to see if a ComboBox should be presented when the value (code) is not in the
- * domain of the FieldFormElement.domain.
  * @param scope a [CoroutineScope] to start [StateFlow] collectors on.
  * @param onEditValue a callback to invoke when the user edits result in a change of value. This
  * is called on [SwitchFieldState.onValueChanged].
@@ -94,6 +93,11 @@ internal class SwitchFieldState(
      */
     val offValue: CodedValue = properties.offValue
     
+    /**
+     * Whether this Switch should fall back to being displayed as a ComboBox.
+     */
+    val fallback: Boolean = properties.fallback
+    
     companion object {
         fun Saver(
             formElement: FieldFormElement,
@@ -103,7 +107,8 @@ internal class SwitchFieldState(
         ): Saver<SwitchFieldState, Any> = listSaver(
             save = {
                 listOf(
-                    it.value.value
+                    it.value.value,
+                    it.fallback
                 )
             },
             restore = { list ->
@@ -117,15 +122,16 @@ internal class SwitchFieldState(
                         editable = formElement.isEditable,
                         required = formElement.isRequired,
                         fieldType = form.fieldType(formElement),
-                            onValue = input.onValue,
+                        onValue = input.onValue,
                         offValue = input.offValue,
+                        fallback = list[1] as Boolean,
                         showNoValueOption = if (form.fieldIsNullable(formElement))
                             FormInputNoValueOption.Show
                         else
                             FormInputNoValueOption.Hide,
                         noValueLabel = noValueString
                     ),
-                    initialValue = list[0],
+                    initialValue = list[0] as String,
                     scope = scope,
                     onEditValue = { codedValueName ->
                         form.editValue(
@@ -144,6 +150,7 @@ internal class SwitchFieldState(
 internal fun rememberSwitchFieldState(
     field: FieldFormElement,
     form: FeatureForm,
+    fallback: Boolean,
     scope: CoroutineScope,
     noValueString: String
 ): SwitchFieldState = rememberSaveable(
@@ -161,6 +168,7 @@ internal fun rememberSwitchFieldState(
             fieldType = form.fieldType(field),
             onValue = input.onValue,
             offValue = input.offValue,
+            fallback = fallback,
             showNoValueOption = if (form.fieldIsNullable(field))
                 FormInputNoValueOption.Show
             else

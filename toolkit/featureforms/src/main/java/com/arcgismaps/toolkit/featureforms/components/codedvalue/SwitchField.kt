@@ -16,11 +16,15 @@
 
 package com.arcgismaps.toolkit.featureforms.components.codedvalue
 
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -32,6 +36,7 @@ internal fun SwitchField(state: SwitchFieldState, modifier: Modifier = Modifier)
     val checkedState = valueCode == state.onValue.code!!.toString()
     val value = if (checkedState) state.onValue.name else state.offValue.name
     val isEditable by state.isEditable.collectAsState()
+    val interactionSource = remember { MutableInteractionSource() }
     BaseTextField(
         text = value,
         onValueChange = {
@@ -64,6 +69,21 @@ internal fun SwitchField(state: SwitchFieldState, modifier: Modifier = Modifier)
                 text = state.description,
                 modifier = Modifier.semantics { contentDescription = "description" },
             )
-        }
+        },
+        interactionSource = interactionSource
     )
+    
+    LaunchedEffect(valueCode) {
+        interactionSource.interactions.collect {
+            if (it is PressInteraction.Release) {
+                val newValue = (
+                    if (checkedState)
+                        state.offValue.code?.toString()
+                    else
+                        state.onValue.code?.toString()
+                    ) ?: throw IllegalStateException("coded value code must not be null")
+                state.onValueChanged(newValue)
+            }
+        }
+    }
 }

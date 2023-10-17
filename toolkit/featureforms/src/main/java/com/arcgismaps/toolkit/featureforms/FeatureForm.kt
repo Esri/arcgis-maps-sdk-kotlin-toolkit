@@ -33,16 +33,16 @@ import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
-import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.mapping.featureforms.RadioButtonsFormInput
+import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberCodedValueFieldState
+import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberRadioButtonFieldState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberSwitchFieldState
 import com.arcgismaps.toolkit.featureforms.components.datetime.rememberDateTimeFieldState
-import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberRadioButtonFieldState
 import com.arcgismaps.toolkit.featureforms.components.text.rememberFormTextFieldState
 import kotlinx.coroutines.CoroutineScope
 import java.util.Objects
@@ -198,9 +198,14 @@ private fun rememberFieldStates(
                 }
                 
                 is SwitchFormInput -> {
+                    val input = fieldElement.input as SwitchFormInput
+                    val initialValue = fieldElement.value.value
+                    val fallback = initialValue.isEmpty()
+                        || (initialValue != input.onValue.code.toString() && initialValue != input.offValue.code.toString())
                     rememberSwitchFieldState(
                         field = fieldElement,
                         form = form,
+                        fallback = fallback,
                         scope = scope,
                         noValueString = context.getString(R.string.no_value)
                     )
