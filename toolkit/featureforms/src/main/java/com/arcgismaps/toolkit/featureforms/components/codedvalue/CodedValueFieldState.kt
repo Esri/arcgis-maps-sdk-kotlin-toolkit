@@ -75,7 +75,7 @@ internal open class CodedValueFieldState(
     /**
      * The list of coded values associated with this field.
      */
-    val codedValues: List<CodedValue> = properties.codedValues
+    open val codedValues: List<CodedValue> = properties.codedValues
 
     /**
      * This property defines whether to display a special "no value" option if this field is
@@ -103,7 +103,6 @@ internal open class CodedValueFieldState(
     }
 
     companion object {
-
         /**
          * The default saver for a [CodedValueFieldState] implemented for a [ComboBoxFormInput] type.
          * Hence for [formElement] the [FieldFormElement.input] type must be a [ComboBoxFormInput].
