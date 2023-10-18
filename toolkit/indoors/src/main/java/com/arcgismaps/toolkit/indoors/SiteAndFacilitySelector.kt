@@ -132,8 +132,6 @@ internal fun SiteAndFacilitySelector(
                             }
                         } else {
                             // display the facilitiesSelector
-
-                            // display the facilities top bar
                             FacilitySelectorTopBar(
                                 floorFilterState = floorFilterState,
                                 uiProperties = uiProperties,
