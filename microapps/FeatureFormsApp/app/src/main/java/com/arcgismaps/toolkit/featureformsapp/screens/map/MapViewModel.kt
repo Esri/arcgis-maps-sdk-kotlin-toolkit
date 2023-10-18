@@ -48,13 +48,22 @@ class MapViewModel @Inject constructor(
                 tolerance = 22.0,
                 returnPopupsOnly = false
             ).onSuccess { results ->
-                results
-                    .mapNotNull { result ->
-                        result.geoElements.filterIsInstance<ArcGISFeature>().firstOrNull { feature ->
-                            (feature.featureTable?.layer as? FeatureLayer)?.featureFormDefinition != null
-                        }
+                results.firstNotNullOfOrNull { result ->
+                    try {
+                        result.geoElements.filterIsInstance<ArcGISFeature>()
+                            .firstOrNull { feature ->
+                                (feature.featureTable?.layer as? FeatureLayer)?.featureFormDefinition != null
+                            }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        Toast.makeText(
+                            context,
+                            "failed to load the FeatureFormDefinition for the feature",
+                            Toast.LENGTH_LONG
+                        ).show()
+                        null
                     }
-                    .firstOrNull()?.let { feature ->
+                }?.let { feature ->
                         feature.load().onSuccess {
                             try {
                                 val featureForm = FeatureForm(
