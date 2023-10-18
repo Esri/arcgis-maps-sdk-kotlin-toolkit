@@ -1,6 +1,7 @@
 package com.arcgismaps.toolkit.featureforms
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -21,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,11 +41,15 @@ import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.components.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
+import com.arcgismaps.toolkit.featureforms.components.codedvalue.CodedValueFieldState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberCodedValueFieldState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberRadioButtonFieldState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberSwitchFieldState
+import com.arcgismaps.toolkit.featureforms.components.datetime.DateTimeFieldState
 import com.arcgismaps.toolkit.featureforms.components.datetime.rememberDateTimeFieldState
 import com.arcgismaps.toolkit.featureforms.components.text.rememberFormTextFieldState
+import com.arcgismaps.toolkit.featureforms.utils.DialogType
+import com.arcgismaps.toolkit.featureforms.utils.makeDialog
 import kotlinx.coroutines.CoroutineScope
 import java.util.Objects
 
@@ -111,6 +117,35 @@ internal fun FeatureFormContent(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val states = rememberFieldStates(form = form, context = context, scope = scope)
+    var dialogType: DialogType by rememberSaveable {
+        mutableStateOf(DialogType.NoDialog)
+    }
+    FeatureFormBody(form = form, states = states, modifier = modifier) { state, id ->
+        if (state is DateTimeFieldState) {
+            dialogType = DialogType.DatePickerDialog(id)
+        } else if (state is CodedValueFieldState) {
+            dialogType = DialogType.ComboBoxDialog(id)
+        }
+    }
+    val dialog = makeDialog(
+        dialogType = dialogType,
+        state = dialogType.getStateKey()?.let { stateKey ->
+            states[stateKey]
+        },
+        onDismissRequest = {
+            dialogType = DialogType.NoDialog
+        }
+    )
+    dialog?.invoke()
+}
+
+@Composable
+private fun FeatureFormBody(
+    form: FeatureForm,
+    states: Map<Int, BaseFieldState?>,
+    modifier: Modifier = Modifier,
+    onDialogRequest: ((BaseFieldState, Int) -> Unit)? = null
+) {
     val lazyListState = rememberLazyListState()
     Column(
         modifier = modifier.fillMaxSize(),
@@ -135,7 +170,11 @@ internal fun FeatureFormContent(
                     if (state != null) {
                         FieldElement(
                             field = formElement,
-                            state = state
+                            state = state,
+                            onDialogRequest = {
+                                Log.e("TAG", "FeatureFormBody: tapped")
+                                onDialogRequest?.invoke(state, formElement.id)
+                            }
                         )
                     }
                 }
@@ -196,7 +235,7 @@ private fun rememberFieldStates(
                         scope = scope
                     )
                 }
-                
+
                 is SwitchFormInput -> {
                     val input = fieldElement.input as SwitchFormInput
                     val initialValue = fieldElement.value.value
