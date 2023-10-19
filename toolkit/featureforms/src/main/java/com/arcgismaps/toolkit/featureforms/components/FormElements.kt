@@ -56,7 +56,10 @@ internal fun FieldElement(
                 if (!switchState.fallback) {
                     SwitchField(state = state)
                 } else {
-                    ComboBoxField(state = state)
+                    ComboBoxField(
+                        state = state,
+                        onDialogRequest = onDialogRequest
+                    )
                 }
             }
 
