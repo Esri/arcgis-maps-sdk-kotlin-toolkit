@@ -61,7 +61,6 @@ internal fun DateTimeField(
     val isEditable by state.isEditable.collectAsState()
     val isRequired by state.isRequired.collectAsState()
     val epochMillis by state.epochMillis.collectAsState()
-
     val interactionSource = remember { MutableInteractionSource() }
     // the field
     if (isEditable) {
@@ -149,7 +148,6 @@ internal fun DateTimeField(
                     } else {
                         IconButton(
                             onClick = {
-                                // openDialog = true
                                 onDialogRequest()
                             },
                             modifier = Modifier.semantics {
@@ -189,8 +187,7 @@ internal fun DateTimeField(
     LaunchedEffect(interactionSource) {
         interactionSource.interactions.collect {
             if (it is PressInteraction.Release) {
-                // open the date picker dialog only when the touch is released
-                // openDialog = true
+                // request to show the date picker dialog only when the touch is released
                 onDialogRequest()
             }
         }

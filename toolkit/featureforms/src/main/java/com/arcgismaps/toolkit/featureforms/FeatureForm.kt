@@ -1,7 +1,6 @@
 package com.arcgismaps.toolkit.featureforms
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -171,7 +170,6 @@ private fun FeatureFormBody(
                             field = formElement,
                             state = state,
                             onDialogRequest = {
-                                Log.e("TAG", "FeatureFormBody: tapped")
                                 onFieldDialogRequest?.invoke(state, formElement.id)
                             }
                         )

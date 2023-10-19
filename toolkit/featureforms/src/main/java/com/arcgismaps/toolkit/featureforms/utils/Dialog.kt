@@ -32,11 +32,32 @@ import com.arcgismaps.toolkit.featureforms.components.datetime.picker.DateTimePi
 import com.arcgismaps.toolkit.featureforms.components.datetime.picker.rememberDateTimePickerState
 import java.io.Serializable
 
+/**
+ * Specifies the type of dialog to use for a [FeatureFormDialog].
+ */
 internal sealed class DialogType : Serializable {
+    /**
+     * Indicates no dialog should be shown.
+     */
     object NoDialog : DialogType()
+
+    /**
+     * Indicates a [DatePickerDialog] should be shown.
+     *
+     * @param stateKey the key for a [DateTimeFieldState].
+     */
     data class DatePickerDialog(val stateKey: Int) : DialogType()
+
+    /**
+     * Indicates a [ComboBoxDialog]
+     *
+     * @param stateKey the key for a [CodedValueFieldState].
+     */
     data class ComboBoxDialog(val stateKey: Int) : DialogType()
 
+    /**
+     * Returns the key for this dialog type state. Null is returned if its a [NoDialog].
+     */
     fun getStateKey(): Int? {
         return when (this) {
             is DatePickerDialog -> {
@@ -54,6 +75,15 @@ internal sealed class DialogType : Serializable {
     }
 }
 
+/**
+ * A dialog container for different field types.
+ *
+ * @param dialogType the [DialogType] to show.
+ * @param state the [BaseFieldState] associated with the field element. This will be cast to its
+ * appropriate subtype based on the [dialogType].
+ * @param onDismissRequest a callback invoked to dismiss the dialog when the user clicks outside
+ * the dialog or on the back button.
+ */
 @Composable
 internal fun FeatureFormDialog(
     dialogType: DialogType,
