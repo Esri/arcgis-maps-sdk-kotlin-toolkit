@@ -75,7 +75,7 @@ internal open class CodedValueFieldState(
     /**
      * The list of coded values associated with this field.
      */
-    open val codedValues: List<CodedValue> = properties.codedValues
+    val codedValues: List<CodedValue> = properties.codedValues
 
     /**
      * This property defines whether to display a special "no value" option if this field is
