@@ -370,9 +370,7 @@ internal class FormTextFieldState(
         } else {
             val error = validateNumber(value)
             if (error != NoError) {
-                if (error != NoError) {
-                    ret += error
-                }
+                ret += error
             }
         }
         

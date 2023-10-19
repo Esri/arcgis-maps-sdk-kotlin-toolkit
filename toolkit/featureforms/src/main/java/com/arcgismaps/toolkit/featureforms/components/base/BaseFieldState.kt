@@ -22,6 +22,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.flattenMerge
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
@@ -74,7 +75,7 @@ internal open class BaseFieldState(
      * Current value state for the field.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    val value: StateFlow<String> = flowOf(_value, properties.value)
+    val value: StateFlow<String> = flowOf(_value, properties.value.drop(1))
         .flattenMerge()
         .stateIn(scope, SharingStarted.Eagerly, initialValue)
 
