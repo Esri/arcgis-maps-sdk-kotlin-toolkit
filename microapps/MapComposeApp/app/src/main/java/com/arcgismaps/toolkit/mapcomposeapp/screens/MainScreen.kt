@@ -20,19 +20,19 @@ package com.arcgismaps.toolkit.mapcomposeapp.screens
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.toolkit.geocompose.Map
-import com.arcgismaps.toolkit.geocompose.MapState
 
 @Composable
 fun MainScreen() {
-
-    val mapState = remember { MapState(arcGISMap = ArcGISMap(BasemapStyle.ArcGISStreets)) }
+    val arcGISMap by remember { mutableStateOf(ArcGISMap(BasemapStyle.ArcGISStreets)) }
     Map(
         modifier = Modifier.fillMaxSize(),
-        mapState = mapState,
+        arcGISMap = arcGISMap,
     )
 }
