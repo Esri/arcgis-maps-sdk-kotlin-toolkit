@@ -17,50 +17,41 @@
 
 package com.arcgismaps.toolkit.geocompose
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.view.MapView
+import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
+
 
 /**
  * A compose equivalent of the [MapView].
  *
  * @param modifier Modifier to be applied to the Map
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable
- * @param overlay the composable overlays to display on top of the Map. Example, a compass, floorfilter etc.
+ * @param content the composable overlays to display on top of the Map. Example, a compass, floorfilter etc.
  * @since 200.3.0
  */
 @Composable
 public fun Map(
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap? = null,
-    overlay: @Composable () -> Unit = {}
+    mapOperator: MapOperator,
+    onSingleTapConfirmed: (SingleTapConfirmedEvent) -> Unit = {},
+    content: @Composable () -> Unit = {}
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
-    val context = LocalContext.current
-    val mapView = remember { MapView(context) }.apply {
+    val mapView = remember { mapOperator.mapView }.apply {
         map = arcGISMap
     }
 
-    Box(modifier = Modifier.semantics {
-        contentDescription = "MapContainer"
-    }) {
-        AndroidView(modifier = modifier
-            .semantics {
-                contentDescription = "MapView"
-            }, factory = { mapView })
-
-        overlay()
-    }
+    AndroidView(modifier = modifier, factory = { mapView })
 
     DisposableEffect(Unit) {
         lifecycleOwner.lifecycle.addObserver(mapView)
@@ -69,10 +60,20 @@ public fun Map(
             mapView.onDestroy(lifecycleOwner)
         }
     }
+
+
+    LaunchedEffect(onSingleTapConfirmed) {
+        mapView.onSingleTapConfirmed.collect {
+            onSingleTapConfirmed(it)
+        }
+    }
 }
 
 @Preview
 @Composable
 internal fun MapPreview() {
-    Map()
+    MapOperator {
+        Map(mapOperator = it)
+    }
+
 }
