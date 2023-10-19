@@ -49,7 +49,7 @@ import com.arcgismaps.toolkit.featureforms.components.datetime.DateTimeFieldStat
 import com.arcgismaps.toolkit.featureforms.components.datetime.rememberDateTimeFieldState
 import com.arcgismaps.toolkit.featureforms.components.text.rememberFormTextFieldState
 import com.arcgismaps.toolkit.featureforms.utils.DialogType
-import com.arcgismaps.toolkit.featureforms.utils.makeDialog
+import com.arcgismaps.toolkit.featureforms.utils.FeatureFormDialog
 import kotlinx.coroutines.CoroutineScope
 import java.util.Objects
 
@@ -127,7 +127,7 @@ internal fun FeatureFormContent(
             dialogType = DialogType.ComboBoxDialog(id)
         }
     }
-    val dialog = makeDialog(
+    FeatureFormDialog(
         dialogType = dialogType,
         state = dialogType.getStateKey()?.let { stateKey ->
             states[stateKey]
@@ -136,7 +136,6 @@ internal fun FeatureFormContent(
             dialogType = DialogType.NoDialog
         }
     )
-    dialog?.invoke()
 }
 
 @Composable

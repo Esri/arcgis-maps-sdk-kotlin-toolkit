@@ -55,73 +55,68 @@ internal sealed class DialogType : Serializable {
 }
 
 @Composable
-internal fun makeDialog(
+internal fun FeatureFormDialog(
     dialogType: DialogType,
     state: BaseFieldState?,
     onDismissRequest: () -> Unit
-): (@Composable () -> Unit)? {
-    return when (dialogType) {
+) {
+    when (dialogType) {
         is DialogType.NoDialog -> {
             /* show nothing */
-            null
         }
 
         is DialogType.DatePickerDialog -> {
-            {
-                if (state is DateTimeFieldState) {
-                    val shouldShowTime = remember {
-                        state.shouldShowTime
-                    }
-                    val pickerStyle = if (shouldShowTime) {
-                        DateTimePickerStyle.DateTime
-                    } else {
-                        DateTimePickerStyle.Date
-                    }
-                    val pickerState = rememberDateTimePickerState(
-                        pickerStyle,
-                        state.minEpochMillis,
-                        state.maxEpochMillis,
-                        state.epochMillis.collectAsState().value,
-                        state.label,
-                        state.description,
-                        DateTimePickerInput.Date
-                    )
-                    // the picker dialog
-                    DateTimePicker(
-                        state = pickerState,
-                        onDismissRequest = onDismissRequest,
-                        onCancelled = onDismissRequest,
-                        onConfirmed = {
-                            state.onValueChanged(pickerState.selectedDateTimeMillis.toString())
-                            onDismissRequest()
-                        }
-                    )
+            if (state is DateTimeFieldState) {
+                val shouldShowTime = remember {
+                    state.shouldShowTime
                 }
+                val pickerStyle = if (shouldShowTime) {
+                    DateTimePickerStyle.DateTime
+                } else {
+                    DateTimePickerStyle.Date
+                }
+                val pickerState = rememberDateTimePickerState(
+                    pickerStyle,
+                    state.minEpochMillis,
+                    state.maxEpochMillis,
+                    state.epochMillis.collectAsState().value,
+                    state.label,
+                    state.description,
+                    DateTimePickerInput.Date
+                )
+                // the picker dialog
+                DateTimePicker(
+                    state = pickerState,
+                    onDismissRequest = onDismissRequest,
+                    onCancelled = onDismissRequest,
+                    onConfirmed = {
+                        state.onValueChanged(pickerState.selectedDateTimeMillis.toString())
+                        onDismissRequest()
+                    }
+                )
             }
         }
 
         is DialogType.ComboBoxDialog -> {
-            {
-                if (state is CodedValueFieldState) {
-                    ComboBoxDialog(
-                        initialValue = state.value.collectAsState().value,
-                        values = state.codedValues.associateBy({ it.code }, { it.name }),
-                        label = state.label,
-                        description = state.description,
-                        isRequired = state.isRequired.collectAsState().value,
-                        noValueOption = state.showNoValueOption,
-                        keyboardType = if (state.fieldType.isNumeric) {
-                            KeyboardType.Number
-                        } else {
-                            KeyboardType.Ascii
-                        },
-                        noValueLabel = state.noValueLabel.ifEmpty { stringResource(R.string.no_value) },
-                        onValueChange = { code ->
-                            state.onValueChanged(code?.toString() ?: "")
-                        },
-                        onDismissRequest = onDismissRequest
-                    )
-                }
+            if (state is CodedValueFieldState) {
+                ComboBoxDialog(
+                    initialValue = state.value.collectAsState().value,
+                    values = state.codedValues.associateBy({ it.code }, { it.name }),
+                    label = state.label,
+                    description = state.description,
+                    isRequired = state.isRequired.collectAsState().value,
+                    noValueOption = state.showNoValueOption,
+                    keyboardType = if (state.fieldType.isNumeric) {
+                        KeyboardType.Number
+                    } else {
+                        KeyboardType.Ascii
+                    },
+                    noValueLabel = state.noValueLabel.ifEmpty { stringResource(R.string.no_value) },
+                    onValueChange = { code ->
+                        state.onValueChanged(code?.toString() ?: "")
+                    },
+                    onDismissRequest = onDismissRequest
+                )
             }
         }
     }
