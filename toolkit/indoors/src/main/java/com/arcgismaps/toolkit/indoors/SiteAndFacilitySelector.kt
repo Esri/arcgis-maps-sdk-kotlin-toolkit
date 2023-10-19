@@ -112,7 +112,8 @@ internal fun SiteAndFacilitySelector(
                 )
                 {
                     Column {
-                        if (!isFacilitiesSelectorVisible) {
+                        // display the siteSelector
+                        if (!isFacilitiesSelectorVisible && floorFilterState.sites.isNotEmpty()) {
                             // display the sites top bar
                             SiteSelectorTopBar(
                                 uiProperties = uiProperties,
@@ -130,6 +131,8 @@ internal fun SiteAndFacilitySelector(
                                 onFacilitiesSelectorVisible(true)
                             }
                         } else {
+                            // display the facilitiesSelector
+
                             // display the facilities top bar
                             FacilitySelectorTopBar(
                                 floorFilterState = floorFilterState,
@@ -211,15 +214,18 @@ internal fun FacilitySelectorTopBar(
         modifier = Modifier.height(65.dp).fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        // a box is helpful to use a consistent clickable animation
-        Box(
-            modifier = Modifier.clickable { backToSiteButtonClicked() }
-        ) {
-            Icon(
-                modifier = Modifier.fillMaxHeight().padding(horizontal = 6.dp).size(24.dp),
-                painter = painterResource(id = R.drawable.ic_chevron_left_32),
-                contentDescription = "Go Back to Site Selector"
-            )
+        // if there are no sites, do not allow going back to the siteSelector from facilitySelector
+        if (floorFilterState.sites.isNotEmpty()) {
+            // a box is helpful to use a consistent clickable animation
+            Box(
+                modifier = Modifier.clickable { backToSiteButtonClicked() }
+            ) {
+                Icon(
+                    modifier = Modifier.fillMaxHeight().padding(horizontal = 6.dp).size(24.dp),
+                    painter = painterResource(id = R.drawable.ic_chevron_left_32),
+                    contentDescription = "Go Back to Site Selector"
+                )
+            }
         }
         Divider(
             color = Color.LightGray,
@@ -245,7 +251,7 @@ internal fun FacilitySelectorTopBar(
 
             Text(
                 text = stringResource(R.string.floor_filter_site_selector_top_bar) +
-                        floorFilterState.getSelectedSite()?.name.toString(),
+                        (floorFilterState.getSelectedSite()?.name ?: "not available"),
                 fontSize = 15.sp,
                 color = Color.Gray
             )
@@ -284,6 +290,11 @@ internal fun SitesAndFacilitiesFilter(
     // focus manager is used to clear focus from OutlinedTextField on search
     val focusManager = LocalFocusManager.current
 
+    val facilitiesAtSelectedSite = if (floorFilterState.sites.isNotEmpty())
+        floorFilterState.getSelectedSite()?.facilities
+    else
+        floorFilterState.facilities
+
     // list of all the site/facility names to display when no search prompt is used
     val allSitesOrFacilities: MutableList<SiteFacilityWrapper> =
         if (!isFacilitiesSelectorVisible)
@@ -294,7 +305,7 @@ internal fun SitesAndFacilitiesFilter(
                 )
             }.toMutableList()
         else
-            floorFilterState.getSelectedSite()?.facilities?.map { floorFacility ->
+            facilitiesAtSelectedSite?.map { floorFacility ->
                 SiteFacilityWrapper(
                     facility = floorFacility,
                     isSelected = floorFacility.id == floorFilterState.selectedFacilityId
