@@ -19,7 +19,12 @@ package com.arcgismaps.toolkit.featureforms.utils
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
+import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
+import com.arcgismaps.toolkit.featureforms.components.codedvalue.CodedValueFieldState
+import com.arcgismaps.toolkit.featureforms.components.codedvalue.ComboBoxDialog
 import com.arcgismaps.toolkit.featureforms.components.datetime.DateTimeFieldState
 import com.arcgismaps.toolkit.featureforms.components.datetime.picker.DateTimePicker
 import com.arcgismaps.toolkit.featureforms.components.datetime.picker.DateTimePickerInput
@@ -55,13 +60,14 @@ internal fun makeDialog(
     state: BaseFieldState?,
     onDismissRequest: () -> Unit
 ): (@Composable () -> Unit)? {
-    return {
-        when (dialogType) {
-            is DialogType.NoDialog -> { /* show nothing */
-                null
-            }
+    return when (dialogType) {
+        is DialogType.NoDialog -> {
+            /* show nothing */
+            null
+        }
 
-            is DialogType.DatePickerDialog -> {
+        is DialogType.DatePickerDialog -> {
+            {
                 if (state is DateTimeFieldState) {
                     val shouldShowTime = remember {
                         state.shouldShowTime
@@ -92,9 +98,30 @@ internal fun makeDialog(
                     )
                 }
             }
+        }
 
-            is DialogType.ComboBoxDialog -> {
-
+        is DialogType.ComboBoxDialog -> {
+            {
+                if (state is CodedValueFieldState) {
+                    ComboBoxDialog(
+                        initialValue = state.value.collectAsState().value,
+                        values = state.codedValues.associateBy({ it.code }, { it.name }),
+                        label = state.label,
+                        description = state.description,
+                        isRequired = state.isRequired.collectAsState().value,
+                        noValueOption = state.showNoValueOption,
+                        keyboardType = if (state.fieldType.isNumeric) {
+                            KeyboardType.Number
+                        } else {
+                            KeyboardType.Ascii
+                        },
+                        noValueLabel = state.noValueLabel.ifEmpty { stringResource(R.string.no_value) },
+                        onValueChange = { code ->
+                            state.onValueChanged(code?.toString() ?: "")
+                        },
+                        onDismissRequest = onDismissRequest
+                    )
+                }
             }
         }
     }

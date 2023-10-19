@@ -144,7 +144,7 @@ private fun FeatureFormBody(
     form: FeatureForm,
     states: Map<Int, BaseFieldState?>,
     modifier: Modifier = Modifier,
-    onDialogRequest: ((BaseFieldState, Int) -> Unit)? = null
+    onFieldDialogRequest: ((BaseFieldState, Int) -> Unit)? = null
 ) {
     val lazyListState = rememberLazyListState()
     Column(
@@ -173,7 +173,7 @@ private fun FeatureFormBody(
                             state = state,
                             onDialogRequest = {
                                 Log.e("TAG", "FeatureFormBody: tapped")
-                                onDialogRequest?.invoke(state, formElement.id)
+                                onFieldDialogRequest?.invoke(state, formElement.id)
                             }
                         )
                     }

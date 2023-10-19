@@ -70,15 +70,6 @@ internal fun DateTimeField(
     val isRequired by state.isRequired.collectAsState()
     val epochMillis by state.epochMillis.collectAsState()
 
-    val shouldShowTime = remember {
-        state.shouldShowTime
-    }
-    val pickerStyle = if (shouldShowTime) {
-        DateTimePickerStyle.DateTime
-    } else {
-        DateTimePickerStyle.Date
-    }
-    //var openDialog by rememberSaveable { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
     // the field
     if (isEditable) {
@@ -202,27 +193,6 @@ internal fun DateTimeField(
             supportingText = state.description
         )
     }
-
-//    if (openDialog) {
-//        val pickerState = rememberDateTimePickerState(
-//            pickerStyle,
-//            state.minEpochMillis,
-//            state.maxEpochMillis,
-//            epochMillis,
-//            state.label,
-//            state.description,
-//            DateTimePickerInput.Date
-//        )
-//        // the picker dialog
-//        DateTimePicker(
-//            state = pickerState,
-//            onDismissRequest = { openDialog = false },
-//            onCancelled = { openDialog = false },
-//            onConfirmed = {
-//                state.onValueChanged(pickerState.selectedDateTimeMillis.toString())
-//                openDialog = false
-//            })
-//    }
 
     LaunchedEffect(interactionSource) {
         interactionSource.interactions.collect {

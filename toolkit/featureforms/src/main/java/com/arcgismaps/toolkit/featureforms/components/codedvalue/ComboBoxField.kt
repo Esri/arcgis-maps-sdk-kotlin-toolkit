@@ -72,15 +72,17 @@ import com.arcgismaps.data.FieldType
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.base.BaseTextField
-import com.arcgismaps.toolkit.featureforms.utils.isNumeric
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
-internal fun ComboBoxField(state: CodedValueFieldState, modifier: Modifier = Modifier) {
+internal fun ComboBoxField(
+    state: CodedValueFieldState,
+    modifier: Modifier = Modifier,
+    onDialogRequest: () -> Unit = {}
+) {
     val value by state.value.collectAsState()
     val isEditable by state.isEditable.collectAsState()
     val isRequired by state.isRequired.collectAsState()
-    var showDialog by rememberSaveable { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
     // to check if the field was ever focused by the user
     var wasFocused by rememberSaveable { mutableStateOf(false) }
@@ -129,33 +131,11 @@ internal fun ComboBoxField(state: CodedValueFieldState, modifier: Modifier = Mod
         interactionSource = interactionSource
     )
 
-    if (showDialog) {
-        ComboBoxDialog(
-            initialValue = value,
-            values = state.codedValues.associateBy({ it.code }, { it.name }),
-            label = state.label,
-            description = state.description,
-            isRequired = isRequired,
-            noValueOption = state.showNoValueOption,
-            keyboardType = if (state.fieldType.isNumeric) {
-                KeyboardType.Number
-            } else {
-                KeyboardType.Ascii
-            },
-            noValueLabel = state.noValueLabel.ifEmpty { stringResource(R.string.no_value) },
-            onValueChange = { code ->
-                state.onValueChanged(code?.toString() ?: "")
-            }
-        ) {
-            showDialog = false
-        }
-    }
-
     LaunchedEffect(interactionSource) {
         interactionSource.interactions.collect {
             if (it is PressInteraction.Release) {
                 wasFocused = true
-                showDialog = true
+                onDialogRequest()
             }
         }
     }

@@ -45,7 +45,10 @@ internal fun FieldElement(
             }
 
             is ComboBoxFormInput -> {
-                ComboBoxField(state = state as CodedValueFieldState)
+                ComboBoxField(
+                    state = state as CodedValueFieldState,
+                    onDialogRequest = onDialogRequest
+                )
             }
 
             is SwitchFormInput -> {
