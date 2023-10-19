@@ -17,12 +17,15 @@
 
 package com.arcgismaps.toolkit.geocompose
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.mapping.ArcGISMap
@@ -51,7 +54,16 @@ public fun Map(
         map = arcGISMap
     }
 
-    AndroidView(modifier = modifier, factory = { mapView })
+    Box(modifier = Modifier.semantics {
+        contentDescription = "MapContainer"
+    }) {
+        AndroidView(modifier = modifier
+            .semantics {
+                contentDescription = "MapView"
+            }, factory = { mapView })
+
+        content()
+    }
 
     DisposableEffect(Unit) {
         lifecycleOwner.lifecycle.addObserver(mapView)
