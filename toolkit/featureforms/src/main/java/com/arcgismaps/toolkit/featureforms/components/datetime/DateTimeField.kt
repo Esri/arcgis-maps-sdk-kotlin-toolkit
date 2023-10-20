@@ -40,10 +40,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -53,30 +50,17 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.R
-import com.arcgismaps.toolkit.featureforms.components.datetime.picker.DateTimePicker
-import com.arcgismaps.toolkit.featureforms.components.datetime.picker.DateTimePickerInput
-import com.arcgismaps.toolkit.featureforms.components.datetime.picker.DateTimePickerStyle
-import com.arcgismaps.toolkit.featureforms.components.datetime.picker.rememberDateTimePickerState
 import com.arcgismaps.toolkit.featureforms.utils.PlaceholderTransformation
 
 @Composable
 internal fun DateTimeField(
     state: DateTimeFieldState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onDialogRequest: () -> Unit = {}
 ) {
     val isEditable by state.isEditable.collectAsState()
     val isRequired by state.isRequired.collectAsState()
     val epochMillis by state.epochMillis.collectAsState()
-
-    val shouldShowTime = remember {
-        state.shouldShowTime
-    }
-    val pickerStyle = if (shouldShowTime) {
-        DateTimePickerStyle.DateTime
-    } else {
-        DateTimePickerStyle.Date
-    }
-    var openDialog by rememberSaveable { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
     // the field
     if (isEditable) {
@@ -163,7 +147,9 @@ internal fun DateTimeField(
                         }
                     } else {
                         IconButton(
-                            onClick = { openDialog = true },
+                            onClick = {
+                                onDialogRequest()
+                            },
                             modifier = Modifier.semantics {
                                 contentDescription = "Show datetime picker"
                             }
@@ -198,32 +184,11 @@ internal fun DateTimeField(
         )
     }
 
-    if (openDialog) {
-        val pickerState = rememberDateTimePickerState(
-            pickerStyle,
-            state.minEpochMillis,
-            state.maxEpochMillis,
-            epochMillis,
-            state.label,
-            state.description,
-            DateTimePickerInput.Date
-        )
-        // the picker dialog
-        DateTimePicker(
-            state = pickerState,
-            onDismissRequest = { openDialog = false },
-            onCancelled = { openDialog = false },
-            onConfirmed = {
-                state.onValueChanged(pickerState.selectedDateTimeMillis.toString())
-                openDialog = false
-            })
-    }
-
     LaunchedEffect(interactionSource) {
         interactionSource.interactions.collect {
             if (it is PressInteraction.Release) {
-                // open the date picker dialog only when the touch is released
-                openDialog = true
+                // request to show the date picker dialog only when the touch is released
+                onDialogRequest()
             }
         }
     }
