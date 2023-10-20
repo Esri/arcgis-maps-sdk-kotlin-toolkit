@@ -20,6 +20,7 @@ package com.arcgismaps.toolkit.geocompose
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -30,12 +31,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.view.MapView
+import kotlinx.coroutines.launch
 
 /**
  * A compose equivalent of the [MapView].
  *
  * @param modifier Modifier to be applied to the Map
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable
+ * @param onViewPointChanged lambda invoked when the viewpoint of the Map has changed
  * @param overlay the composable overlays to display on top of the Map. Example, a compass, floorfilter etc.
  * @since 200.3.0
  */
@@ -43,6 +46,7 @@ import com.arcgismaps.mapping.view.MapView
 public fun Map(
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap? = null,
+    onViewPointChanged: (() -> Unit)? = null,
     overlay: @Composable () -> Unit = {}
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -67,6 +71,16 @@ public fun Map(
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(mapView)
             mapView.onDestroy(lifecycleOwner)
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        onViewPointChanged?.let { onViewPointChangedLambda ->
+            launch {
+                mapView.viewpointChanged.collect {
+                    onViewPointChangedLambda()
+                }
+            }
         }
     }
 }
