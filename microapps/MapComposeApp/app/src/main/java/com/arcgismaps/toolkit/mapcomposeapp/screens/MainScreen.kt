@@ -71,7 +71,6 @@ fun MainScreen() {
         Map(
             modifier = Modifier.fillMaxSize(),
             arcGISMap = arcGISMap,
-            mapOperator = mapOperator,
             onSingleTapConfirmed = { }
         ){
 

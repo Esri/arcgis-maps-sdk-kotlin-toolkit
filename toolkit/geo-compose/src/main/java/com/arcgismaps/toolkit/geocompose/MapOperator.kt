@@ -51,7 +51,6 @@ public open class MapOperatorScope {
     public open fun Map(
         modifier: Modifier = Modifier,
         arcGISMap: ArcGISMap? = null,
-        mapOperator: MapOperator,
         onSingleTapConfirmed: (SingleTapConfirmedEvent) -> Unit = {},
         content: @Composable MapOperatorScope.() -> Unit = {}
     ) {

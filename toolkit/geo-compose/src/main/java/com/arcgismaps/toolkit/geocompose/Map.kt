@@ -46,14 +46,13 @@ internal class MapOperatorScopeImpl : MapOperatorScope() {
     override fun Map(
         modifier: Modifier,
         arcGISMap: ArcGISMap?,
-        mapOperator: MapOperator,
         onSingleTapConfirmed: (SingleTapConfirmedEvent) -> Unit,
         content: @Composable MapOperatorScope.() -> Unit
     ) {
         val lifecycleOwner = LocalLifecycleOwner.current
-        val mapView = remember { mapOperator.mapView }.apply {
-            map = arcGISMap
-        }
+        val mapView = LocalMapView.current ?: return
+
+        mapView.map = arcGISMap
 
         Box(modifier = Modifier.semantics {
             contentDescription = "MapContainer"
@@ -88,7 +87,7 @@ internal class MapOperatorScopeImpl : MapOperatorScope() {
 @Composable
 internal fun MapPreview() {
     MapOperator {
-        Map(mapOperator = it)
+        Map()
     }
 
 }
