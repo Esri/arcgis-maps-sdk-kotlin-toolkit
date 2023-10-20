@@ -32,54 +32,57 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 
+internal class MapOperatorScopeImpl : MapOperatorScope() {
 
-/**
- * A compose equivalent of the [MapView].
- *
- * @param modifier Modifier to be applied to the Map
- * @param arcGISMap the [ArcGISMap] to be rendered by this composable
- * @param content the composable overlays to display on top of the Map. Example, a compass, floorfilter etc.
- * @since 200.3.0
- */
-@Composable
-public fun Map(
-    modifier: Modifier = Modifier,
-    arcGISMap: ArcGISMap? = null,
-    mapOperator: MapOperator,
-    onSingleTapConfirmed: (SingleTapConfirmedEvent) -> Unit = {},
-    content: @Composable () -> Unit = {}
-) {
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val mapView = remember { mapOperator.mapView }.apply {
-        map = arcGISMap
-    }
-
-    Box(modifier = Modifier.semantics {
-        contentDescription = "MapContainer"
-    }) {
-        AndroidView(modifier = modifier
-            .semantics {
-                contentDescription = "MapView"
-            }, factory = { mapView })
-
-        content()
-    }
-
-    DisposableEffect(Unit) {
-        lifecycleOwner.lifecycle.addObserver(mapView)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(mapView)
-            mapView.onDestroy(lifecycleOwner)
+    /**
+     * A compose equivalent of the [MapView].
+     *
+     * @param modifier Modifier to be applied to the Map
+     * @param arcGISMap the [ArcGISMap] to be rendered by this composable
+     * @param content the composable overlays to display on top of the Map. Example, a compass, floorfilter etc.
+     * @since 200.3.0
+     */
+    @Composable
+    override fun Map(
+        modifier: Modifier,
+        arcGISMap: ArcGISMap?,
+        mapOperator: MapOperator,
+        onSingleTapConfirmed: (SingleTapConfirmedEvent) -> Unit,
+        content: @Composable MapOperatorScope.() -> Unit
+    ) {
+        val lifecycleOwner = LocalLifecycleOwner.current
+        val mapView = remember { mapOperator.mapView }.apply {
+            map = arcGISMap
         }
-    }
+
+        Box(modifier = Modifier.semantics {
+            contentDescription = "MapContainer"
+        }) {
+            AndroidView(modifier = modifier
+                .semantics {
+                    contentDescription = "MapView"
+                }, factory = { mapView })
+
+            content()
+        }
+
+        DisposableEffect(Unit) {
+            lifecycleOwner.lifecycle.addObserver(mapView)
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(mapView)
+                mapView.onDestroy(lifecycleOwner)
+            }
+        }
 
 
-    LaunchedEffect(onSingleTapConfirmed) {
-        mapView.onSingleTapConfirmed.collect {
-            onSingleTapConfirmed(it)
+        LaunchedEffect(onSingleTapConfirmed) {
+            mapView.onSingleTapConfirmed.collect {
+                onSingleTapConfirmed(it)
+            }
         }
     }
 }
+
 
 @Preview
 @Composable

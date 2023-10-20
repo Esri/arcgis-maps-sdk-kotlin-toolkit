@@ -21,25 +21,40 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.Polygon
+import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.ScreenCoordinate
+import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 
 internal val LocalMapView = compositionLocalOf<MapView?> { null }
 
 @Composable
 public fun MapOperator(
-    content: @Composable (mapOperator: MapOperator) -> Unit
+    content: @Composable MapOperatorScope.(mapOperator: MapOperator) -> Unit
 ) {
     val context = LocalContext.current
     val mapOperator = remember { MapOperator(MapView(context)) }
 
     CompositionLocalProvider(LocalMapView provides mapOperator.mapView) {
-        content(mapOperator)
+        MapOperatorScopeImpl().content(mapOperator)
+    }
+}
+
+public open class MapOperatorScope {
+    @Composable
+    public open fun Map(
+        modifier: Modifier = Modifier,
+        arcGISMap: ArcGISMap? = null,
+        mapOperator: MapOperator,
+        onSingleTapConfirmed: (SingleTapConfirmedEvent) -> Unit = {},
+        content: @Composable MapOperatorScope.() -> Unit = {}
+    ) {
     }
 }
 
