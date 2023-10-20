@@ -21,8 +21,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -45,14 +45,13 @@ import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 public fun Map(
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap? = null,
-    mapOperator: MapOperator,
     onSingleTapConfirmed: (SingleTapConfirmedEvent) -> Unit = {},
     content: @Composable () -> Unit = {}
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
-    val mapView = remember { mapOperator.mapView }.apply {
-        map = arcGISMap
-    }
+    val mapView = (LocalMapView.current ?: MapView(LocalContext.current))
+
+    mapView.map = arcGISMap
 
     Box(modifier = Modifier.semantics {
         contentDescription = "MapContainer"
@@ -85,7 +84,7 @@ public fun Map(
 @Composable
 internal fun MapPreview() {
     MapOperator {
-        Map(mapOperator = it)
+        Map()
     }
 
 }
