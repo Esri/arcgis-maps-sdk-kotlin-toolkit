@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,34 +42,44 @@ import kotlinx.coroutines.launch
 /**
  * Displays a [Map] with a [LocationDisplay].
  * The location display can be started/stopped using a [Switch].
+ * If the location display fails to start, an error message is displayed below the switch.
  */
 @Composable
 fun MainScreen() {
     val scope = rememberCoroutineScope()
     val arcGISMap = remember { ArcGISMap(BasemapStyle.ArcGISImagery) }
     val checked = remember { mutableStateOf(false) }
+    val errorMessage = remember { mutableStateOf("") }
     val locationDisplay = rememberLocationDisplay {
         start(scope) {
             checked.value = it.isSuccess
+            it.onFailure { error ->
+                errorMessage.value = error.message ?: "Failed to start location display"
+            }
         }
     }
 
     Column {
         Row(modifier = Modifier.padding(5.dp)) {
-            Switch(
-                checked.value,
-                onCheckedChange = {
-                    checked.value = it
-                    if (locationDisplay.isStarted) {
-                        locationDisplay.stop(scope)
-                        checked.value = false
-                    } else {
-                        locationDisplay.start(scope) { result ->
-                            checked.value = result.isSuccess
+            Column {
+                Switch(
+                    checked.value,
+                    onCheckedChange = {
+                        checked.value = it
+                        if (locationDisplay.isStarted) {
+                            locationDisplay.stop(scope)
+                            checked.value = false
+                        } else {
+                            locationDisplay.start(scope) { result ->
+                                checked.value = result.isSuccess
+                            }
                         }
                     }
+                )
+                if (errorMessage.value.isNotEmpty()) {
+                    Text(errorMessage.value)
                 }
-            )
+            }
         }
         Map(
             modifier = Modifier.fillMaxSize(),
