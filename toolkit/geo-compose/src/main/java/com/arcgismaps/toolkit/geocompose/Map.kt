@@ -28,7 +28,9 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
+import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.view.LocationDisplay
 import com.arcgismaps.mapping.view.MapView
 
 /**
@@ -36,6 +38,7 @@ import com.arcgismaps.mapping.view.MapView
  *
  * @param modifier Modifier to be applied to the Map
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable
+ * @param locationDisplay the [LocationDisplay] used by the [Map]
  * @param overlay the composable overlays to display on top of the Map. Example, a compass, floorfilter etc.
  * @since 200.3.0
  */
@@ -43,12 +46,14 @@ import com.arcgismaps.mapping.view.MapView
 public fun Map(
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap? = null,
+    locationDisplay: LocationDisplay = rememberLocationDisplay(),
     overlay: @Composable () -> Unit = {}
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val mapView = remember { MapView(context) }.apply {
-        map = arcGISMap
+        this.map = arcGISMap
+        this.locationDisplay = locationDisplay
     }
 
     Box(modifier = Modifier.semantics {
@@ -68,6 +73,27 @@ public fun Map(
             lifecycleOwner.lifecycle.removeObserver(mapView)
             mapView.onDestroy(lifecycleOwner)
         }
+    }
+}
+
+/**
+ * Create and [remember] a [LocationDisplay].
+ * Checks that [ArcGISEnvironment.applicationContext] is set and if not, sets one.
+ * [init] will be called when the [LocationDisplay] is first created to configure its
+ * initial state.
+ *
+ * @since 200.3.0
+ */
+@Composable
+public inline fun rememberLocationDisplay(
+    key: String? = null,
+    crossinline init: LocationDisplay.() -> Unit = {}
+): LocationDisplay {
+    if (ArcGISEnvironment.applicationContext == null) {
+        ArcGISEnvironment.applicationContext = LocalContext.current
+    }
+    return remember(key) {
+        LocationDisplay().apply(init)
     }
 }
 
