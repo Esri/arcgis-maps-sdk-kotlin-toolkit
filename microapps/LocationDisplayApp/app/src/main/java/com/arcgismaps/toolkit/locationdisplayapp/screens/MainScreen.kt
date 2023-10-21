@@ -40,7 +40,7 @@ import kotlinx.coroutines.launch
 
 /**
  * Displays a [Map] with a [LocationDisplay].
- * The location display can be started.stopped using a [Switch].
+ * The location display can be started/stopped using a [Switch].
  */
 @Composable
 fun MainScreen() {
