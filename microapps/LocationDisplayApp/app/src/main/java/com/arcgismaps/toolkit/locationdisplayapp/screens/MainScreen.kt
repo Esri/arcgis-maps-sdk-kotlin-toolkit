@@ -19,18 +19,30 @@
 package com.arcgismaps.toolkit.locationdisplayapp.screens
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.arcgismaps.location.LocationDataSourceStatus
+import com.arcgismaps.location.LocationDisplayAutoPanMode
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.view.LocationDisplay
@@ -40,10 +52,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 /**
- * Displays a [Map] with a [LocationDisplay].
+ * Displays a [Map] with a [LocationDisplay] obtained with [rememberLocationDisplay].
  * The location display can be started/stopped using a [Switch].
  * If the location display fails to start, an error message is displayed below the switch.
+ * An action button provides a choice of [LocationDisplayAutoPanMode] options. Upon selecting an
+ * option, the auto pan mode of the location display is set.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
     val scope = rememberCoroutineScope()
@@ -59,33 +74,97 @@ fun MainScreen() {
         }
     }
 
-    Column {
-        Row(modifier = Modifier.padding(5.dp)) {
-            Column {
-                Switch(
-                    checked.value,
-                    onCheckedChange = {
-                        checked.value = it
-                        if (locationDisplay.isStarted) {
-                            locationDisplay.stop(scope)
-                            checked.value = false
-                        } else {
-                            locationDisplay.start(scope) { result ->
-                                checked.value = result.isSuccess
+    Scaffold(
+        topBar = {
+            var actionsExpanded by remember { mutableStateOf(false) }
+            TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
+                ),
+                title = {
+                    Text("Location Display App")
+                },
+                actions = {
+                    Column {
+                        Switch(
+                            checked.value,
+                            onCheckedChange = {
+                                checked.value = it
+                                if (locationDisplay.isStarted) {
+                                    locationDisplay.stop(scope)
+                                    checked.value = false
+                                } else {
+                                    locationDisplay.start(scope) { result ->
+                                        checked.value = result.isSuccess
+                                    }
+                                }
                             }
+                        )
+                        if (errorMessage.value.isNotEmpty()) {
+                            Text(errorMessage.value)
                         }
                     }
-                )
-                if (errorMessage.value.isNotEmpty()) {
-                    Text(errorMessage.value)
+                    IconButton(
+                        onClick = {
+                            actionsExpanded = !actionsExpanded
+                        }) {
+                        Icon(Icons.Default.MoreVert, "More")
+                    }
+                    AutoPanModeDropDownMenu(
+                        locationDisplay = locationDisplay,
+                        expanded = actionsExpanded,
+                        onDismissRequest = {
+                            actionsExpanded = false
+                        }
+                    )
                 }
-            }
-        }
+            )
+        },
+    ) { innerPadding ->
         Map(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize(),
             arcGISMap = arcGISMap,
             locationDisplay = locationDisplay
         )
+    }
+}
+
+/**
+ * A drop down menu providing auto pan options for [locationDisplay].
+ */
+@Composable
+fun AutoPanModeDropDownMenu(
+    modifier: Modifier = Modifier,
+    expanded: Boolean = false,
+    onDismissRequest: (() -> Unit) = {},
+    locationDisplay: LocationDisplay
+) {
+    val items = remember {
+        listOf(
+            LocationDisplayAutoPanMode.Off,
+            LocationDisplayAutoPanMode.CompassNavigation,
+            LocationDisplayAutoPanMode.Navigation,
+            LocationDisplayAutoPanMode.Recenter
+        )
+    }
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+        modifier = modifier
+    ) {
+        items.forEach {
+            DropdownMenuItem(
+                text = {
+                    Text(text = it.label)
+                },
+                onClick = { 
+                    locationDisplay.setAutoPanMode(it)
+                    onDismissRequest()
+                })
+        }
     }
 }
 
@@ -120,3 +199,14 @@ private fun LocationDisplay.stop(scope: CoroutineScope) {
         dataSource.stop()
     }
 }
+
+/**
+ * A label string for a [LocationDisplayAutoPanMode].
+ */
+private val LocationDisplayAutoPanMode.label: String
+    get() = when (this) {
+        LocationDisplayAutoPanMode.Off -> "Off"
+        LocationDisplayAutoPanMode.Navigation -> "Navigation"
+        LocationDisplayAutoPanMode.Recenter -> "Recenter"
+        LocationDisplayAutoPanMode.CompassNavigation -> "Compass Navigation"
+    }
