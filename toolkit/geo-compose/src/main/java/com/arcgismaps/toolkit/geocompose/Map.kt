@@ -82,6 +82,8 @@ public fun Map(
  * [init] will be called when the [LocationDisplay] is first created to configure its
  * initial state.
  *
+ * @param key invalidates the remembered LocationDisplay if different from the previous composition
+ * @param init called when the [LocationDisplay] is created to configure its initial state
  * @since 200.3.0
  */
 @Composable
