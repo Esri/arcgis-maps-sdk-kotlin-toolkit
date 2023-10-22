@@ -86,7 +86,7 @@ public fun Map(
  */
 @Composable
 public inline fun rememberLocationDisplay(
-    key: String? = null,
+    key: Any? = null,
     crossinline init: LocationDisplay.() -> Unit = {}
 ): LocationDisplay {
     if (ArcGISEnvironment.applicationContext == null) {
