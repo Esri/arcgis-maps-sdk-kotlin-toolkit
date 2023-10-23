@@ -28,10 +28,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.base.BaseTextField
@@ -47,6 +52,8 @@ internal fun DateTimeField(
     val isRequired by state.isRequired.collectAsState()
     val epochMillis by state.epochMillis.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
+    // to check if the field was ever focused by the user
+    var wasFocused by rememberSaveable { mutableStateOf(false) }
     val label = if (isRequired) {
         "${state.label} *"
     } else {
@@ -67,10 +74,17 @@ internal fun DateTimeField(
         interactionSource = interactionSource,
         trailingIcon = Icons.Rounded.EditCalendar,
         supportingText = {
-            if (epochMillis == null && isRequired) {
-                Text(text = stringResource(R.string.required))
+            // if the field was focused and is required, validate the current value
+            if (wasFocused && isRequired && epochMillis == null) {
+                Text(
+                    text = stringResource(id = R.string.required),
+                    color = MaterialTheme.colorScheme.error
+                )
             } else {
-                Text(text = state.description)
+                Text(
+                    text = state.description,
+                    modifier = Modifier.semantics { contentDescription = "description" },
+                )
             }
         }
     )
@@ -78,6 +92,7 @@ internal fun DateTimeField(
     LaunchedEffect(interactionSource) {
         interactionSource.interactions.collect {
             if (it is PressInteraction.Release) {
+                wasFocused = true
                 // request to show the date picker dialog only when the touch is released
                 // the dialog is responsible for updating the value on the state
                 onDialogRequest()
