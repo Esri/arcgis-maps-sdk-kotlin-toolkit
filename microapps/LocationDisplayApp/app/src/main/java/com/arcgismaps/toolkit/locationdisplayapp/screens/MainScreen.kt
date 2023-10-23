@@ -63,13 +63,13 @@ import kotlinx.coroutines.launch
 fun MainScreen() {
     val scope = rememberCoroutineScope()
     val arcGISMap = remember { ArcGISMap(BasemapStyle.ArcGISImagery) }
-    val checked = remember { mutableStateOf(false) }
-    val errorMessage = remember { mutableStateOf("") }
+    var checked by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
     val locationDisplay = rememberLocationDisplay {
         start(scope) {
-            checked.value = it.isSuccess
+            checked = it.isSuccess
             it.onFailure { error ->
-                errorMessage.value = error.message ?: "Failed to start location display"
+                errorMessage = error.message ?: "Failed to start location display"
             }
         }
     }
@@ -88,21 +88,21 @@ fun MainScreen() {
                 actions = {
                     Column {
                         Switch(
-                            checked.value,
+                            checked,
                             onCheckedChange = {
-                                checked.value = it
+                                checked = it
                                 if (locationDisplay.isStarted) {
                                     locationDisplay.stop(scope)
-                                    checked.value = false
+                                    checked = false
                                 } else {
                                     locationDisplay.start(scope) { result ->
-                                        checked.value = result.isSuccess
+                                        checked = result.isSuccess
                                     }
                                 }
                             }
                         )
-                        if (errorMessage.value.isNotEmpty()) {
-                            Text(errorMessage.value)
+                        if (errorMessage.isNotEmpty()) {
+                            Text(errorMessage)
                         }
                     }
                     IconButton(
