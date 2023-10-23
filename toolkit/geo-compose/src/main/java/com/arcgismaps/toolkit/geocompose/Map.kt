@@ -51,10 +51,7 @@ public fun Map(
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
-    val mapView = remember { MapView(context) }.apply {
-        this.map = arcGISMap
-        this.locationDisplay = locationDisplay
-    }
+    val mapView = remember { MapView(context) }
 
     Box(modifier = Modifier.semantics {
         contentDescription = "MapContainer"
@@ -62,7 +59,12 @@ public fun Map(
         AndroidView(modifier = modifier
             .semantics {
                 contentDescription = "MapView"
-            }, factory = { mapView })
+            },
+            factory = { mapView },
+            update = {
+                it.map = arcGISMap
+                it.locationDisplay = locationDisplay
+            })
 
         overlay()
     }
