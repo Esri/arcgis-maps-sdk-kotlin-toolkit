@@ -90,13 +90,15 @@ fun MainScreen() {
                         Switch(
                             checked,
                             onCheckedChange = {
-                                checked = it
                                 if (locationDisplay.isStarted) {
                                     locationDisplay.stop(scope)
                                     checked = false
                                 } else {
                                     locationDisplay.start(scope) { result ->
                                         checked = result.isSuccess
+                                        result.onFailure { error ->
+                                            errorMessage = error.message ?: "Failed to start location display"
+                                        }
                                     }
                                 }
                             }
