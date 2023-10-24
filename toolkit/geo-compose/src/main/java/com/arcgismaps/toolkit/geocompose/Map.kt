@@ -31,7 +31,9 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
+import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.view.LocationDisplay
 import com.arcgismaps.mapping.view.MapView
 import kotlinx.coroutines.launch
 
@@ -40,6 +42,7 @@ import kotlinx.coroutines.launch
  *
  * @param modifier Modifier to be applied to the Map
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable
+ * @param locationDisplay the [LocationDisplay] used by the composable [com.arcgismaps.toolkit.geocompose.Map]
  * @param onViewpointChanged lambda invoked when the viewpoint of the Map has changed
  * @param overlay the composable overlays to display on top of the Map. Example, a compass, floorfilter etc.
  * @since 200.3.0
@@ -48,14 +51,13 @@ import kotlinx.coroutines.launch
 public fun Map(
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap? = null,
+    locationDisplay: LocationDisplay = rememberLocationDisplay(),
     onViewpointChanged: (() -> Unit)? = null,
     overlay: @Composable () -> Unit = {}
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
-    val mapView = remember { MapView(context) }.apply {
-        map = arcGISMap
-    }
+    val mapView = remember { MapView(context) }
 
     Box(modifier = Modifier.semantics {
         contentDescription = "MapContainer"
@@ -63,7 +65,12 @@ public fun Map(
         AndroidView(modifier = modifier
             .semantics {
                 contentDescription = "MapView"
-            }, factory = { mapView })
+            },
+            factory = { mapView },
+            update = {
+                it.map = arcGISMap
+                it.locationDisplay = locationDisplay
+            })
 
         overlay()
     }
@@ -85,6 +92,29 @@ public fun Map(
                 }
             }
         }
+    }
+}
+
+/**
+ * Create and [remember] a [LocationDisplay].
+ * Checks that [ArcGISEnvironment.applicationContext] is set and if not, sets one.
+ * [init] will be called when the [LocationDisplay] is first created to configure its
+ * initial state.
+ *
+ * @param key invalidates the remembered LocationDisplay if different from the previous composition
+ * @param init called when the [LocationDisplay] is created to configure its initial state
+ * @since 200.3.0
+ */
+@Composable
+public inline fun rememberLocationDisplay(
+    key: Any? = null,
+    crossinline init: LocationDisplay.() -> Unit = {}
+): LocationDisplay {
+    if (ArcGISEnvironment.applicationContext == null) {
+        ArcGISEnvironment.applicationContext = LocalContext.current
+    }
+    return remember(key) {
+        LocationDisplay().apply(init)
     }
 }
 
