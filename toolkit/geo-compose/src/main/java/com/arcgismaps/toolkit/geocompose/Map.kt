@@ -21,7 +21,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -34,14 +36,18 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
-
+import com.arcgismaps.mapping.view.LocationDisplay
+import kotlinx.coroutines.launch
 
 /**
  * A compose equivalent of the [MapView].
  *
  * @param modifier Modifier to be applied to the Map
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable
- * @param content the composable overlays to display on top of the Map. Example, a compass, floorfilter etc.
+ * @param graphicsOverlays TODO DOC
+ * @param locationDisplay the [LocationDisplay] used by the composable [com.arcgismaps.toolkit.geocompose.Map]
+ * @param onViewpointChanged lambda invoked when the viewpoint of the Map has changed
+ * @param overlay the composable overlays to display on top of the Map. Example, a compass, floorfilter etc.
  * @since 200.3.0
  */
 @Composable
@@ -49,23 +55,24 @@ public fun Map(
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap? = null,
     graphicsOverlays: MutableList<GraphicsOverlay> = rememberGraphicOverlays(),
-    onSingleTapConfirmed: (SingleTapConfirmedEvent) -> Unit = {},
-    content: @Composable () -> Unit = {}
+    locationDisplay: LocationDisplay = rememberLocationDisplay(),
+    onViewpointChanged: (() -> Unit)? = null,
+    overlay: @Composable () -> Unit = {}
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
-    val mapView = (LocalMapView.current ?: MapView(LocalContext.current))
+    val context = LocalContext.current
+    val mapView = remember { MapView(context) }
 
-    mapView.map = arcGISMap
+    Box(modifier = Modifier.semantics { contentDescription = "MapContainer" }) {
+        AndroidView(
+            modifier = modifier.semantics { contentDescription = "MapView" },
+            factory = { mapView },
+            update = {
+                it.map = arcGISMap
+                it.locationDisplay = locationDisplay
+            })
 
-    Box(modifier = Modifier.semantics {
-        contentDescription = "MapContainer"
-    }) {
-        AndroidView(modifier = modifier
-            .semantics {
-                contentDescription = "MapView"
-            }, factory = { mapView })
-
-        content()
+        overlay()
     }
 
     DisposableEffect(Unit) {
@@ -76,11 +83,38 @@ public fun Map(
         }
     }
 
-
-    LaunchedEffect(onSingleTapConfirmed) {
-        mapView.onSingleTapConfirmed.collect {
-            onSingleTapConfirmed(it)
+    val currentViewPointChanged by rememberUpdatedState(onViewpointChanged)
+    LaunchedEffect(Unit) {
+        launch {
+            mapView.viewpointChanged.collect {
+                currentViewPointChanged?.let {
+                    it()
+                }
+            }
         }
+    }
+}
+
+/**
+ * Create and [remember] a [LocationDisplay].
+ * Checks that [ArcGISEnvironment.applicationContext] is set and if not, sets one.
+ * [init] will be called when the [LocationDisplay] is first created to configure its
+ * initial state.
+ *
+ * @param key invalidates the remembered LocationDisplay if different from the previous composition
+ * @param init called when the [LocationDisplay] is created to configure its initial state
+ * @since 200.3.0
+ */
+@Composable
+public inline fun rememberLocationDisplay(
+    key: Any? = null,
+    crossinline init: LocationDisplay.() -> Unit = {}
+): LocationDisplay {
+    if (ArcGISEnvironment.applicationContext == null) {
+        ArcGISEnvironment.applicationContext = LocalContext.current
+    }
+    return remember(key) {
+        LocationDisplay().apply(init)
     }
 }
 
@@ -102,8 +136,5 @@ public inline fun rememberGraphicOverlays(
 @Preview
 @Composable
 internal fun MapPreview() {
-    MapOperator {
-        Map()
-    }
-
+    Map()
 }
