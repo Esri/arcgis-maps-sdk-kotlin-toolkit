@@ -20,6 +20,7 @@ package com.arcgismaps.toolkit.geocompose
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -32,10 +33,26 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.view.MapView
 
 /**
+ * MapInsets control the active visible area, instructing the Map to ignore parts that may be obstructed
+ * by overlaid UI elements and affecting the Map's logical center, the reported visible area and
+ * the location display.
+ * Units for start, top, end and bottom are specified in device-independent pixels (dp).
+ *
+ * @since 200.3.0
+ */
+public data class MapInsets(
+    var start: Double = 30.0,
+    var top: Double = 30.0,
+    var end: Double = 30.0,
+    var bottom: Double = 30.0
+)
+
+/**
  * A compose equivalent of the [MapView].
  *
  * @param modifier Modifier to be applied to the Map
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable
+ * @param mapInsets the start, top, end and bottom insets on the Map
  * @param overlay the composable overlays to display on top of the Map. Example, a compass, floorfilter etc.
  * @since 200.3.0
  */
@@ -43,6 +60,7 @@ import com.arcgismaps.mapping.view.MapView
 public fun Map(
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap? = null,
+    mapInsets: MapInsets = MapInsets(),
     overlay: @Composable () -> Unit = {}
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -57,9 +75,15 @@ public fun Map(
         AndroidView(modifier = modifier
             .semantics {
                 contentDescription = "MapView"
-            }, factory = { mapView })
+            }, factory = { mapView }) {
+            it.setViewInsets(mapInsets.start, mapInsets.end, mapInsets.top, mapInsets.bottom)
+        }
 
         overlay()
+    }
+
+    LaunchedEffect(Unit) {
+        mapView.setViewInsets(mapInsets.start, mapInsets.end, mapInsets.top, mapInsets.bottom)
     }
 
     DisposableEffect(Unit) {
