@@ -52,7 +52,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 /**
- * Displays a [Map] with a [LocationDisplay] obtained with [rememberLocationDisplay].
+ * Displays a composable [com.arcgismaps.toolkit.geocompose.Map] with a [LocationDisplay] obtained
+ * with [rememberLocationDisplay].
  * The location display can be started/stopped using a [Switch].
  * If the location display fails to start, an error message is displayed below the switch.
  * An action button provides a choice of [LocationDisplayAutoPanMode] options. Upon selecting an
