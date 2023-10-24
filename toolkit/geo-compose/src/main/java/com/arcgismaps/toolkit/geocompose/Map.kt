@@ -20,7 +20,10 @@ package com.arcgismaps.toolkit.geocompose
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -28,9 +31,12 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
+import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.view.LocationDisplay
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.MapViewInteractionOptions
+import kotlinx.coroutines.launch
 
 public val MapViewInteractionOptionDefaults: MapViewInteractionOptions = MapViewInteractionOptions()
 
@@ -39,6 +45,8 @@ public val MapViewInteractionOptionDefaults: MapViewInteractionOptions = MapView
  *
  * @param modifier Modifier to be applied to the Map
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable
+ * @param locationDisplay the [LocationDisplay] used by the composable [com.arcgismaps.toolkit.geocompose.Map]
+ * @param onViewpointChanged lambda invoked when the viewpoint of the Map has changed
  * @param overlay the composable overlays to display on top of the Map. Example, a compass, floorfilter etc.
  * @since 200.3.0
  */
@@ -46,7 +54,9 @@ public val MapViewInteractionOptionDefaults: MapViewInteractionOptions = MapView
 public fun Map(
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap? = null,
+    locationDisplay: LocationDisplay = rememberLocationDisplay(),
     mapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptionDefaults,
+    onViewpointChanged: (() -> Unit)? = null,
     overlay: @Composable () -> Unit = {}
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -64,6 +74,7 @@ public fun Map(
             update = {
                 it.map = arcGISMap
                 it.interactionOptions = mapViewInteractionOptions
+                it.locationDisplay = locationDisplay
             })
 
         overlay()
@@ -75,6 +86,40 @@ public fun Map(
             lifecycleOwner.lifecycle.removeObserver(mapView)
             mapView.onDestroy(lifecycleOwner)
         }
+    }
+
+    val currentViewPointChanged by rememberUpdatedState(onViewpointChanged)
+    LaunchedEffect(Unit) {
+        launch {
+            mapView.viewpointChanged.collect {
+                currentViewPointChanged?.let {
+                    it()
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Create and [remember] a [LocationDisplay].
+ * Checks that [ArcGISEnvironment.applicationContext] is set and if not, sets one.
+ * [init] will be called when the [LocationDisplay] is first created to configure its
+ * initial state.
+ *
+ * @param key invalidates the remembered LocationDisplay if different from the previous composition
+ * @param init called when the [LocationDisplay] is created to configure its initial state
+ * @since 200.3.0
+ */
+@Composable
+public inline fun rememberLocationDisplay(
+    key: Any? = null,
+    crossinline init: LocationDisplay.() -> Unit = {}
+): LocationDisplay {
+    if (ArcGISEnvironment.applicationContext == null) {
+        ArcGISEnvironment.applicationContext = LocalContext.current
+    }
+    return remember(key) {
+        LocationDisplay().apply(init)
     }
 }
 
