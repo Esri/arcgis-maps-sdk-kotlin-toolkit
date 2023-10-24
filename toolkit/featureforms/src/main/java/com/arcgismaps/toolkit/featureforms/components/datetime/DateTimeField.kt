@@ -18,216 +18,109 @@
 
 package com.arcgismaps.toolkit.featureforms.components.datetime
 
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material.icons.rounded.EditCalendar
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.R
-import com.arcgismaps.toolkit.featureforms.utils.PlaceholderTransformation
+import com.arcgismaps.toolkit.featureforms.components.base.BaseTextField
+import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 internal fun DateTimeField(
     state: DateTimeFieldState,
     modifier: Modifier = Modifier,
-    onDialogRequest: () -> Unit = {}
+    onDialogRequest: () -> Unit
 ) {
     val isEditable by state.isEditable.collectAsState()
     val isRequired by state.isRequired.collectAsState()
     val epochMillis by state.epochMillis.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
-    // the field
-    if (isEditable) {
-        val textFieldColors = if (epochMillis == null) {
-            OutlinedTextFieldDefaults.colors(
-                disabledLabelColor = MaterialTheme.colorScheme.onSurface,
-                disabledTextColor = Color.Gray,
-                disabledBorderColor = MaterialTheme.colorScheme.onSurface,
-                focusedTextColor = Color.Gray,
-                unfocusedTextColor = Color.Gray,
-                focusedSupportingTextColor = if (isRequired) {
-                    Color.Red
-                } else {
-                    Color.Unspecified
-                },
-                unfocusedSupportingTextColor = if (isRequired) {
-                    Color.Red
-                } else {
-                    Color.Unspecified
-                },
-                disabledSupportingTextColor = if (isRequired) {
-                    Color.Red
-                } else {
-                    MaterialTheme.colorScheme.onSurface
-                }
-            )
-        } else {
-            OutlinedTextFieldDefaults.colors(
-                disabledLabelColor = MaterialTheme.colorScheme.onSurface,
-                disabledTextColor = MaterialTheme.colorScheme.onSurface,
-                disabledBorderColor = MaterialTheme.colorScheme.onSurface,
-                disabledTrailingIconColor = MaterialTheme.colorScheme.onSurface,
-                focusedSupportingTextColor = if (isRequired) {
-                    Color.Red
-                } else {
-                    Color.Unspecified
-                },
-                unfocusedSupportingTextColor = if (isRequired) {
-                    Color.Red
-                } else {
-                    Color.Unspecified
-                },
-                disabledSupportingTextColor = if (isRequired) {
-                    Color.Red
-                } else {
-                    MaterialTheme.colorScheme.onSurface
-                }
-            )
-        }
-
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 10.dp)
-        ) {
-            OutlinedTextField(
-                value = epochMillis?.formattedDateTime(state.shouldShowTime) ?: "",
-                onValueChange = {},
-                modifier = Modifier
-                    .fillMaxSize()
-                    .focusable(true, interactionSource),
-                readOnly = true,
-                enabled = true,
-                label = {
-                    val text = if (isRequired) {
-                        "${state.label} *"
-                    } else {
-                        state.label
-                    }
-                    Text(text = text)
-                },
-                trailingIcon = {
-                    if (epochMillis != null) {
-                        IconButton(
-                            onClick = { state.onValueChanged("") },
-                            modifier = Modifier.semantics {
-                                contentDescription = "Clear text button"
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.Clear,
-                                contentDescription = "Clear Text"
-                            )
-                        }
-                    } else {
-                        IconButton(
-                            onClick = {
-                                onDialogRequest()
-                            },
-                            modifier = Modifier.semantics {
-                                contentDescription = "Show datetime picker"
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.EditCalendar,
-                                contentDescription = "Edit calendar icon"
-                            )
-                        }
-                    }
-                },
-                supportingText = {
-                    if (epochMillis == null && isRequired) {
-                        Text(text = stringResource(R.string.required))
-                    } else {
-                        Text(text = state.description)
-                    }
-                },
-                visualTransformation = if (epochMillis == null)
-                    PlaceholderTransformation(stringResource(id = R.string.no_value))
-                else VisualTransformation.None,
-                singleLine = true,
-                colors = textFieldColors,
-                interactionSource = interactionSource
-            )
-        }
+    // to check if the field was ever focused by the user
+    var wasFocused by rememberSaveable { mutableStateOf(false) }
+    val label = if (isRequired) {
+        "${state.label} *"
     } else {
-        ImmutableDate(
-            valueString = epochMillis?.formattedDateTime(state.shouldShowTime) ?: "",
-            label = state.label,
-            supportingText = state.description
-        )
+        state.label
     }
+
+    BaseTextField(
+        text = epochMillis?.formattedDateTime(state.shouldShowTime) ?: "",
+        onValueChange = {
+            state.onValueChanged(it)
+        },
+        modifier = modifier,
+        readOnly = true,
+        isEditable = isEditable,
+        label = label,
+        placeholder = state.placeholder.ifEmpty { stringResource(id = R.string.no_value) },
+        singleLine = true,
+        interactionSource = interactionSource,
+        trailingIcon = Icons.Rounded.EditCalendar,
+        supportingText = {
+            // if the field was focused and is required, validate the current value
+            if (wasFocused && isRequired && epochMillis == null) {
+                Text(
+                    text = stringResource(id = R.string.required),
+                    color = MaterialTheme.colorScheme.error
+                )
+            } else {
+                Text(
+                    text = state.description,
+                    modifier = Modifier.semantics { contentDescription = "description" },
+                )
+            }
+        }
+    )
 
     LaunchedEffect(interactionSource) {
         interactionSource.interactions.collect {
             if (it is PressInteraction.Release) {
+                wasFocused = true
                 // request to show the date picker dialog only when the touch is released
+                // the dialog is responsible for updating the value on the state
                 onDialogRequest()
             }
         }
     }
 }
 
-@Stable
+@Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
 @Composable
-private fun ImmutableDate(
-    valueString: String,
-    label: String,
-    supportingText: String,
-    colors: TextFieldColors = OutlinedTextFieldDefaults.colors()
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 10.dp)
-    ) {
-        OutlinedTextField(
-            value = valueString,
-            onValueChange = {},
-            modifier = Modifier
-                .fillMaxWidth(),
-            enabled = false,
-            readOnly = true,
-            label = { Text(text = label) },
-            supportingText = { Text(text = supportingText) },
-            visualTransformation = if (valueString.isEmpty())
-                PlaceholderTransformation(stringResource(id = R.string.no_value))
-            else VisualTransformation.None,
-            colors = colors
+private fun DateTimeFieldPreview() {
+    MaterialTheme {
+        val scope = rememberCoroutineScope()
+        val state = DateTimeFieldState(
+            properties = DateTimeFieldProperties(
+                label = "Launch Date and Time",
+                placeholder = "",
+                description = "Enter the date for apollo 11 launch",
+                value = MutableStateFlow(""),
+                editable = MutableStateFlow(true),
+                required = MutableStateFlow(false),
+                minEpochMillis = null,
+                maxEpochMillis = null,
+                shouldShowTime = true
+            ),
+            scope = scope,
+            onEditValue = {}
         )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun ImmutableDatePreview() {
-    Column {
-        ImmutableDate(label = "Date", valueString = "1234", supportingText = "supporting text")
+        DateTimeField(state = state) {}
     }
 }
