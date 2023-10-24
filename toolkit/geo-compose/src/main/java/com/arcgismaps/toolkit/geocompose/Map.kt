@@ -49,7 +49,7 @@ public val MapViewInteractionOptionDefaults: MapViewInteractionOptions = MapView
  * @param modifier Modifier to be applied to the Map
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable
  * @param locationDisplay the [LocationDisplay] used by the composable [com.arcgismaps.toolkit.geocompose.Map]
- * @param mapViewInteractionOptions the state of this Map's interaction options
+ * @param mapViewInteractionOptions the [MapViewInteractionOptions] used by this composable [com.arcgismaps.toolkit.geocompose.Map]
  * @param onViewpointChanged lambda invoked when the viewpoint of the Map has changed
  * @param overlay the composable overlays to display on top of the Map. Example, a compass, floorfilter etc.
  * @since 200.3.0
