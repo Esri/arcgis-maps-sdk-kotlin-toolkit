@@ -39,6 +39,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -82,6 +83,10 @@ fun TextDemo() {
 
 
 
+
+
+
+
 @Composable
 fun MapDemo() {
     // create an arcGISMap with basemap style and initial viewpoint
@@ -93,7 +98,7 @@ fun MapDemo() {
     val mapState = viewModel<MapViewModel>(factory = MapViewModelFactory(arcGISMap))
 
     // create a composable Map and assign the mapstate to it
-    // TODO: ComposableMap will become Map
+    // TODO: ComposableMap will become MapView
     ComposableMap(
         modifier = Modifier.fillMaxSize(),
         mapInterface = mapState
@@ -141,7 +146,7 @@ fun LocationDemo() {
                 onClick = {
                     lastKnownLocation.value?.let {
                         // TODO: the inner safe (?.) call can be removed eventually
-                        mapState?.setViewpoint(Viewpoint(it.position, 2500.0))
+                        mapState?.setViewpoint(Viewpoint(it.position, 2000.0))
                     }
                 },
                 modifier = Modifier
@@ -173,6 +178,7 @@ fun LocationDemo() {
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(20.dp, 40.dp), // TODO: needed? named params?
+                    contentAlignment = Alignment.BottomStart
                 ) {
                     // TODO: initial floor as 1. Also bug fixes to display levels.
                     FloorFilter(floorFilterState = floorFilterState)
