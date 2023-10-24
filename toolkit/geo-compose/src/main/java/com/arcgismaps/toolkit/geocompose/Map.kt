@@ -32,6 +32,8 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.MapViewInteractionOptions
 
+public val MapViewInteractionOptionDefaults: MapViewInteractionOptions = MapViewInteractionOptions()
+
 /**
  * A compose equivalent of the [MapView].
  *
@@ -44,18 +46,12 @@ import com.arcgismaps.mapping.view.MapViewInteractionOptions
 public fun Map(
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap? = null,
-    mapViewInteractionOptions: MapViewInteractionOptions? = null,
+    mapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptionDefaults,
     overlay: @Composable () -> Unit = {}
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
-    val mapView = remember { MapView(context) }.apply {
-        map = arcGISMap
-        if (mapViewInteractionOptions != null) {
-            interactionOptions = mapViewInteractionOptions
-        }
-    }
-
+    val mapView = remember { MapView(context) }
 
     Box(modifier = Modifier.semantics {
         contentDescription = "MapContainer"
@@ -63,7 +59,12 @@ public fun Map(
         AndroidView(modifier = modifier
             .semantics {
                 contentDescription = "MapView"
-            }, factory = { mapView })
+            },
+            factory = { mapView },
+            update = {
+                it.map = arcGISMap
+                it.interactionOptions = mapViewInteractionOptions
+            })
 
         overlay()
     }
