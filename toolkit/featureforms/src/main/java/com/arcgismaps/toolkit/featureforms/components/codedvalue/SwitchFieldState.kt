@@ -135,8 +135,7 @@ internal class SwitchFieldState(
                     initialValue = list[0] as String,
                     scope = scope,
                     onEditValue = { codedValueName ->
-                        form.editValue(
-                            formElement,
+                        formElement.editValue(
                             if (codedValueName == input.onValue.name) input.onValue.code else input.offValue.code
                         )
                         scope.launch { form.evaluateExpressions() }
@@ -178,7 +177,7 @@ internal fun rememberSwitchFieldState(
         ),
         scope = scope,
         onEditValue = {
-            form.editValue(field, it)
+            field.editValue(it)
             scope.launch { form.evaluateExpressions() }
         }
     )

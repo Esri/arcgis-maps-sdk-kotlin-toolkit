@@ -123,7 +123,7 @@ internal class DateTimeFieldState(
                     initialValue = list[0],
                     scope = scope,
                     onEditValue = {
-                        form.editValue(field, it)
+                        field.editValue(it)
                         scope.launch { form.evaluateExpressions() }
                     }
                 )
@@ -161,7 +161,7 @@ internal fun rememberDateTimeFieldState(
         ),
         scope = scope,
         onEditValue = {
-            form.editValue(field, it)
+            field.editValue(it)
             scope.launch { form.evaluateExpressions() }
         }
     )
