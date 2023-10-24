@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -28,7 +29,9 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
+import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 
@@ -45,6 +48,7 @@ import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 public fun Map(
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap? = null,
+    graphicsOverlays: MutableList<GraphicsOverlay> = rememberGraphicOverlays(),
     onSingleTapConfirmed: (SingleTapConfirmedEvent) -> Unit = {},
     content: @Composable () -> Unit = {}
 ) {
@@ -79,6 +83,21 @@ public fun Map(
         }
     }
 }
+
+@Composable
+public inline fun rememberGraphicOverlays(
+    key: Any? = null,
+    crossinline init: MutableListImpl<GraphicsOverlay>.() -> Unit = {}
+): MutableList<GraphicsOverlay> {
+    if (ArcGISEnvironment.applicationContext == null) {
+        ArcGISEnvironment.applicationContext = LocalContext.current
+    }
+
+    return remember(key) {
+        MutableListImpl<GraphicsOverlay>().apply(init)
+    }
+}
+
 
 @Preview
 @Composable
