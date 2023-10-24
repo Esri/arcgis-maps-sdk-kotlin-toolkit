@@ -20,7 +20,10 @@ package com.arcgismaps.toolkit.geocompose
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -32,6 +35,7 @@ import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.view.LocationDisplay
 import com.arcgismaps.mapping.view.MapView
+import kotlinx.coroutines.launch
 
 /**
  * A compose equivalent of the [MapView].
@@ -39,6 +43,7 @@ import com.arcgismaps.mapping.view.MapView
  * @param modifier Modifier to be applied to the Map
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable
  * @param locationDisplay the [LocationDisplay] used by the composable [com.arcgismaps.toolkit.geocompose.Map]
+ * @param onViewpointChanged lambda invoked when the viewpoint of the Map has changed
  * @param overlay the composable overlays to display on top of the Map. Example, a compass, floorfilter etc.
  * @since 200.3.0
  */
@@ -47,6 +52,7 @@ public fun Map(
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap? = null,
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
+    onViewpointChanged: (() -> Unit)? = null,
     overlay: @Composable () -> Unit = {}
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -74,6 +80,17 @@ public fun Map(
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(mapView)
             mapView.onDestroy(lifecycleOwner)
+        }
+    }
+
+    val currentViewPointChanged by rememberUpdatedState(onViewpointChanged)
+    LaunchedEffect(Unit) {
+        launch {
+            mapView.viewpointChanged.collect {
+                currentViewPointChanged?.let {
+                    it()
+                }
+            }
         }
     }
 }
