@@ -35,9 +35,14 @@ import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.MapView
-import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.LocationDisplay
+import com.arcgismaps.mapping.view.MapViewInteractionOptions
 import kotlinx.coroutines.launch
+
+/**
+ * The default instance of [MapViewInteractionOptions]
+ */
+public val MapViewInteractionOptionDefaults: MapViewInteractionOptions = MapViewInteractionOptions()
 
 /**
  * A compose equivalent of the [MapView].
@@ -46,6 +51,7 @@ import kotlinx.coroutines.launch
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable
  * @param graphicsOverlays TODO DOC
  * @param locationDisplay the [LocationDisplay] used by the composable [com.arcgismaps.toolkit.geocompose.Map]
+ * @param mapViewInteractionOptions the [MapViewInteractionOptions] used by this composable [com.arcgismaps.toolkit.geocompose.Map]
  * @param onViewpointChanged lambda invoked when the viewpoint of the Map has changed
  * @param overlay the composable overlays to display on top of the Map. Example, a compass, floorfilter etc.
  * @since 200.3.0
@@ -56,6 +62,7 @@ public fun Map(
     arcGISMap: ArcGISMap? = null,
     graphicsOverlays: MutableList<GraphicsOverlay> = rememberGraphicOverlays(),
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
+    mapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptionDefaults,
     onViewpointChanged: (() -> Unit)? = null,
     overlay: @Composable () -> Unit = {}
 ) {
@@ -69,6 +76,7 @@ public fun Map(
             factory = { mapView },
             update = {
                 it.map = arcGISMap
+                it.interactionOptions = mapViewInteractionOptions
                 it.locationDisplay = locationDisplay
             })
 
