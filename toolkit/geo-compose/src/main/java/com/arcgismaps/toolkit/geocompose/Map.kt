@@ -41,10 +41,10 @@ import com.arcgismaps.mapping.view.MapView
  * @since 200.3.0
  */
 public data class MapInsets(
-    var start: Double = 30.0,
-    var top: Double = 30.0,
-    var end: Double = 30.0,
-    var bottom: Double = 30.0
+    var start: Double = 0.0,
+    var top: Double = 0.0,
+    var end: Double = 0.0,
+    var bottom: Double = 0.0
 )
 
 /**
