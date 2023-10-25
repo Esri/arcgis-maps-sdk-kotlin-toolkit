@@ -40,7 +40,7 @@ public class GraphicsOverlayMutableList :
     /**
      * [SharedFlow] used to emit changes made to the [graphicsOverlays] list
      */
-    public val changed: SharedFlow<ChangedEvent> = _changed.asSharedFlow()
+    internal val changed: SharedFlow<ChangedEvent> = _changed.asSharedFlow()
 
     override fun add(index: Int, element: GraphicsOverlay) {
         graphicsOverlays.add(element)
@@ -82,10 +82,10 @@ public class GraphicsOverlayMutableList :
      * type of [ChangedEvent].
      * @since 200.3.0
      */
-    public sealed class ChangedEvent(internal val element: GraphicsOverlay? = null) {
-        public class Added(element: GraphicsOverlay) : ChangedEvent(element)
-        public class Removed(element: GraphicsOverlay) : ChangedEvent(element)
-        public class Cleared : ChangedEvent()
+    internal sealed class ChangedEvent(internal val element: GraphicsOverlay? = null) {
+        class Added(element: GraphicsOverlay) : ChangedEvent(element)
+        class Removed(element: GraphicsOverlay) : ChangedEvent(element)
+        class Cleared : ChangedEvent()
     }
 }
 
