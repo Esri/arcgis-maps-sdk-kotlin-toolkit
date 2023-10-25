@@ -211,7 +211,12 @@ fun rememberHiltonMap(): State<ArcGISMap?> {
         val mmpk = MobileMapPackage("${context.filesDir}/Berlin_Kotlin_23.mmpk")
         mmpk.load().getOrNull() ?: return@produceState
         if (mmpk.maps.isEmpty()) return@produceState
-        value = mmpk.maps[0]
+        val map = mmpk.maps[0]
+        // Load these eagerly so that when we come to make the floor filter it won't need to
+        // do the loading itself (which messes up our initialization of the floor filter).
+        map.load().getOrNull() ?: return@produceState
+        map.floorManager?.load()?.getOrNull() ?: return@produceState
+        value = map
     }
 }
 
