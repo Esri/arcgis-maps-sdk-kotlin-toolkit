@@ -24,7 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 @Composable
 public fun SceneView() {
     // Todo implementation...
-    Text("Implement Scene here! ")
+    Text("Implement SceneView here! ")
 }
 
 @Preview
