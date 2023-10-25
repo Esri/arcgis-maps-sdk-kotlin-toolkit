@@ -56,7 +56,6 @@ import androidx.compose.ui.unit.sp
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.LicenseKey
-import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.MobileMapPackage
@@ -129,7 +128,7 @@ fun LocationDemo() {
     LaunchedEffect(Unit) {
         locationDisplay.dataSource.start()
             .onFailure { Log.i("LocationDemo", "Failed to start location data source") }
-        // TODO(FINLAY): check if this logging is desirable  ^^
+        // TODO(JEN): Comment on whether we should keep this logging in the final demo.
     }
 
     Scaffold(
@@ -137,9 +136,7 @@ fun LocationDemo() {
             FloatingActionButton(
                 onClick = {
                     lastKnownLocation.value?.let {
-                        Log.i("LocationDemo", "before ${(viewpoint.targetGeometry as? Point)?.x}") // FIXME:
                         viewpoint = Viewpoint(it.position, 2000.0)
-                        Log.i("LocationDemo", "after ${(viewpoint.targetGeometry as? Point)?.x}") // FIXME:
                     }
                 },
                 modifier = Modifier
