@@ -199,6 +199,7 @@ private fun cast(value: Any?, fieldType: FieldType): Any? =
             when (value) {
                 is String -> value.toLongOrNull()?.let { Instant.ofEpochMilli(it) }
                 is Long -> Instant.ofEpochMilli(value)
+                is Instant -> value
                 else -> null
             }
         }

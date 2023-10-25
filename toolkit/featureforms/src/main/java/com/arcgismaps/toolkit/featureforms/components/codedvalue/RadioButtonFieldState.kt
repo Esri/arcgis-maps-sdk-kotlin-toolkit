@@ -52,7 +52,7 @@ internal class RadioButtonFieldState(
             false
         } else {
             !codedValues.any {
-                it.code.toString() == value.value
+                it.name == value.value
             }
         }
     }

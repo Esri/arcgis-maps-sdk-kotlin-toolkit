@@ -216,7 +216,8 @@ internal fun DateTimeField(
             onConfirmed = {
                 state.onValueChanged(pickerState.selectedDateTimeMillis.toString())
                 openDialog = false
-            })
+            }
+        )
     }
 
     LaunchedEffect(interactionSource) {

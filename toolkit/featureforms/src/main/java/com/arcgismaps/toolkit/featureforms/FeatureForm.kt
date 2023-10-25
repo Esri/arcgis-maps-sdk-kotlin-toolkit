@@ -201,7 +201,7 @@ private fun rememberFieldStates(
                     val input = fieldElement.input as SwitchFormInput
                     val initialValue = fieldElement.formattedValue
                     val fallback = initialValue.isEmpty()
-                        || (initialValue != input.onValue.code.toString() && initialValue != input.offValue.code.toString())
+                        || (fieldElement.value.value != input.onValue.name && fieldElement.value.value != input.offValue.name)
                     rememberSwitchFieldState(
                         field = fieldElement,
                         form = form,
