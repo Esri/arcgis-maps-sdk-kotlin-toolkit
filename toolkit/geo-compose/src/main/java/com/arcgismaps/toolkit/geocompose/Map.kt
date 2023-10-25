@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -30,8 +31,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.view.LocationDisplay
 import com.arcgismaps.mapping.view.MapView
+import kotlinx.coroutines.launch
 
 /**
  * A compose equivalent of the [MapView].
@@ -46,12 +49,14 @@ import com.arcgismaps.mapping.view.MapView
 public fun Map(
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap? = null,
+    viewpoint: Viewpoint? = null,
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     overlay: @Composable () -> Unit = {}
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val mapView = remember { MapView(context) }
+    val scope = rememberCoroutineScope()
 
     Box(modifier = Modifier.semantics {
         contentDescription = "MapContainer"
@@ -64,6 +69,9 @@ public fun Map(
             update = {
                 it.map = arcGISMap
                 it.locationDisplay = locationDisplay
+                viewpoint?.let { viewpoint ->
+                    scope.launch { it.setViewpointAnimated(viewpoint) }
+                }
             })
 
         overlay()
