@@ -18,6 +18,8 @@
 package com.arcgismaps.toolkit.geocompose
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -30,12 +32,19 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.view.LocationDisplay
 import com.arcgismaps.mapping.view.MapView
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
+
+internal val MapViewInsetDefaults = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp)
+//internal val MapViewInsetDefaults: PaddingValues = PaddingValues()
 
 /**
  * A compose equivalent of the [MapView].
@@ -53,11 +62,15 @@ public fun Map(
     arcGISMap: ArcGISMap? = null,
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     onViewpointChanged: (() -> Unit)? = null,
+    mapInsets: WindowInsets = MapViewInsetDefaults,
+//    mapInsets: PaddingValues = MapViewInsetDefaults,
     overlay: @Composable () -> Unit = {}
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val mapView = remember { MapView(context) }
+    val layoutDirection = LocalLayoutDirection.current
+    val density = LocalDensity.current
 
     Box(modifier = Modifier.semantics {
         contentDescription = "MapContainer"
@@ -70,6 +83,12 @@ public fun Map(
             update = {
                 it.map = arcGISMap
                 it.locationDisplay = locationDisplay
+                it.setViewInsets(
+                    mapInsets.getLeft(density, layoutDirection).toDouble(),
+                    mapInsets.getRight(density, layoutDirection).toDouble(),
+                    mapInsets.getTop(density).toDouble(),
+                    mapInsets.getBottom(density).toDouble()
+                )
             })
 
         overlay()
