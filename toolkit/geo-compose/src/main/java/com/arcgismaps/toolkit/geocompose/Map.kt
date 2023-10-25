@@ -97,9 +97,9 @@ public fun Map(
  * @since 200.3.0
  */
 @Composable
-public inline fun rememberLocationDisplay(
+public fun rememberLocationDisplay(
     key: Any? = null,
-    crossinline init: LocationDisplay.() -> Unit = {}
+    init: LocationDisplay.() -> Unit = {}
 ): LocationDisplay {
     if (ArcGISEnvironment.applicationContext == null) {
         ArcGISEnvironment.applicationContext = LocalContext.current
