@@ -136,7 +136,7 @@ internal open class CodedValueFieldState(
                     initialValue = list[0],
                     scope = scope,
                     onEditValue = { newValue ->
-                        formElement.editValue(newValue)
+                        form.editValue(formElement, newValue)
                         scope.launch { form.evaluateExpressions() }
                     }
                 )
@@ -169,7 +169,7 @@ internal fun rememberCodedValueFieldState(
         ),
         scope = scope,
         onEditValue = {
-            field.editValue(it)
+            form.editValue(field, it)
             scope.launch { form.evaluateExpressions() }
         }
     )

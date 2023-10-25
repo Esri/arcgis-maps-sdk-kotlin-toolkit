@@ -418,7 +418,7 @@ internal class FormTextFieldState(
                     scope = scope,
                     context = context,
                     onEditValue = { newValue ->
-                        formElement.editValue(newValue)
+                        form.editValue(formElement, newValue)
                         scope.launch { form.evaluateExpressions() }
                     },
                 ).apply {
@@ -459,7 +459,7 @@ internal fun rememberFormTextFieldState(
         scope = scope,
         context = context,
         onEditValue = {
-            field.editValue(it)
+            form.editValue(field, it)
             scope.launch { form.evaluateExpressions() }
         }
     )

@@ -27,6 +27,9 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import java.time.Instant
+import kotlin.math.roundToInt
+import kotlin.math.roundToLong
 
 /**
  * This file contains logic which will eventually be provided by core. Do not add anything to this file that isn't
@@ -47,12 +50,12 @@ internal fun FeatureForm.fieldIsNullable(element: FieldFormElement): Boolean {
  *
  * @param value the value to be set on the attribute represented by this FieldFormElement.
  */
-internal fun FieldFormElement.editValue(value: Any?) {
+internal fun FeatureForm.editValue(element: FieldFormElement, value: Any?) {
     try {
-        updateValue(value)
+        element.updateValue(cast(value, fieldType(element)))
     } catch (e: Exception) {
         //TODO: remove before release.
-        Log.w("FieldFormElement.editValue", "caught ${e.message} while updating value of field $label")
+        Log.w("FieldFormElement.editValue", "caught ${e.message} while updating value of field ${element.label}")
     }
 }
 
@@ -149,3 +152,58 @@ internal val RangeDomain.asLongTuple: MinMax<Long>
     }
 
 internal data class MinMax<T: Number>(val min: T?, val max: T?)
+
+private fun cast(value: Any?, fieldType: FieldType): Any? =
+   when (fieldType) {
+        FieldType.Int16 -> {
+            when (value) {
+                is String -> value.toIntOrNull()?.toShort()
+                is Int -> value.toShort()
+                is Double -> value.roundToInt().toShort()
+                else -> null
+            }
+        }
+        FieldType.Int32 -> {
+            when (value) {
+                is String -> value.toIntOrNull()
+                is Int -> value
+                is Double -> value.roundToInt()
+                else -> null
+            }
+        }
+        FieldType.Int64 -> {
+            when (value) {
+                is String -> value.toLongOrNull()
+                is Int -> value.toLong()
+                is Double -> value.roundToLong()
+                else -> null
+            }
+        }
+        FieldType.Float32 -> {
+            when (value) {
+                is String -> value.toFloatOrNull()
+                is Int -> value.toFloat()
+                is Double -> value.toFloat()
+                else -> null
+            }
+        }
+        FieldType.Float64 -> {
+            when (value) {
+                is String -> value.toDoubleOrNull()
+                is Int -> value.toDouble()
+                is Float -> value.toDouble()
+                else -> null
+            }
+        }
+        FieldType.Date -> {
+            when (value) {
+                is String -> value.toLongOrNull()?.let { Instant.ofEpochMilli(it) }
+                is Long -> Instant.ofEpochMilli(value)
+                else -> null
+            }
+        }
+       FieldType.Text -> {
+           value?.toString()
+       }
+       else -> throw IllegalArgumentException("casting FieldFormElement value to $fieldType is not allowed")
+    }
