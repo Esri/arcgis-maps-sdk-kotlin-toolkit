@@ -29,6 +29,6 @@ public fun SceneView() {
 
 @Preview
 @Composable
-internal fun ScenePreview() {
+internal fun SceneViewPreview() {
     SceneView()
 }
