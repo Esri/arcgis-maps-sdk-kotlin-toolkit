@@ -1,6 +1,13 @@
 package com.arcgismaps.toolkit.featureforms
 
 import android.content.Context
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.with
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -13,13 +20,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -50,6 +58,7 @@ import com.arcgismaps.toolkit.featureforms.components.text.rememberFormTextField
 import com.arcgismaps.toolkit.featureforms.utils.DialogType
 import com.arcgismaps.toolkit.featureforms.utils.FeatureFormDialog
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import java.util.Objects
 
 /**
@@ -65,37 +74,64 @@ public fun FeatureForm(
     modifier: Modifier = Modifier
 ) {
     val featureForm by featureFormState.featureForm.collectAsState()
-    var initialEvaluation by remember(featureForm) { mutableStateOf(false) }
-    LaunchedEffect(featureForm) {
-        // ensure expressions are evaluated before state objects are created.
-        featureForm?.evaluateExpressions()
-        initialEvaluation = true
-    }
+    var initialEvaluation by rememberSaveable(featureForm) { mutableStateOf(false) }
 
     featureForm?.let {
-        if (initialEvaluation) {
-            FeatureFormContent(form = it, modifier = modifier)
-        } else {
-            InitializingExpressions(modifier)
+        InitializingExpressions(modifier) {
+            initialEvaluation
         }
+        FeatureFormContent(form = it, modifier = modifier)
     } ?: run {
         NoDataToDisplay(modifier)
     }
+
+    LaunchedEffect(featureForm) {
+        // ensure expressions are evaluated before state objects are created.
+        featureForm?.evaluateExpressions()
+        // add an artificial delay of 300ms to avoid the slight flicker if the
+        // expressions are evaluated quickly
+        delay(300)
+        initialEvaluation = true
+    }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
-internal fun InitializingExpressions(modifier: Modifier = Modifier) {
-    Column(
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier.fillMaxSize()
-    ) {
-        CircularProgressIndicator(
-            modifier = Modifier
-                .width(80.dp)
-                .height(80.dp)
-        )
-        Text(text = "Initializing")
+internal fun InitializingExpressions(
+    modifier: Modifier = Modifier,
+    evaluationProvider: () -> Boolean
+) {
+    AnimatedContent(
+        targetState = evaluationProvider(),
+        transitionSpec = {
+            slideInVertically() with
+                slideOutVertically(
+                    animationSpec = tween()
+                ) { 0 } + fadeOut()
+        },
+        label = "evaluation loading animation"
+    ) { evaluated ->
+        if (!evaluated) {
+            Surface(modifier = modifier.fillMaxSize()) {
+                Column(
+                    verticalArrangement = Arrangement.Top,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .width(60.dp)
+                            .height(60.dp)
+                    )
+                    Spacer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(20.dp)
+                    )
+                    Text(text = "Initializing", style = MaterialTheme.typography.titleMedium)
+                }
+            }
+        }
     }
 }
 
@@ -262,10 +298,10 @@ private fun rememberFieldStates(
         })
 }
 
-@Preview
+@Preview(showBackground = true, backgroundColor = 0xFFFFFF)
 @Composable
 private fun InitializingExpressionsPreview() {
-    InitializingExpressions()
+    InitializingExpressions { false }
 }
 
 
