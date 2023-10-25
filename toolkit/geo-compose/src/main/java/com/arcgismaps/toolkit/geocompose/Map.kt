@@ -21,9 +21,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -33,6 +37,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.LocationDisplay
@@ -49,7 +54,7 @@ public val MapViewInteractionOptionDefaults: MapViewInteractionOptions = MapView
  *
  * @param modifier Modifier to be applied to the Map
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable
- * @param graphicsOverlays TODO DOC
+ * @param graphicsOverlays TODO ADD DOC
  * @param locationDisplay the [LocationDisplay] used by the composable [com.arcgismaps.toolkit.geocompose.Map]
  * @param mapViewInteractionOptions the [MapViewInteractionOptions] used by this composable [com.arcgismaps.toolkit.geocompose.Map]
  * @param onViewpointChanged lambda invoked when the viewpoint of the Map has changed
@@ -60,7 +65,7 @@ public val MapViewInteractionOptionDefaults: MapViewInteractionOptions = MapView
 public fun Map(
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap? = null,
-    graphicsOverlays: MutableList<GraphicsOverlay> = rememberGraphicOverlays(),
+    graphicsOverlays: SnapshotStateList<GraphicsOverlay> = rememberGraphicOverlays(),
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     mapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptionDefaults,
     onViewpointChanged: (() -> Unit)? = null,
@@ -78,6 +83,8 @@ public fun Map(
                 it.map = arcGISMap
                 it.interactionOptions = mapViewInteractionOptions
                 it.locationDisplay = locationDisplay
+                it.graphicsOverlays.clear()
+                it.graphicsOverlays.addAll(graphicsOverlays)
             })
 
         overlay()
@@ -126,17 +133,20 @@ public inline fun rememberLocationDisplay(
     }
 }
 
+/**
+ * TODO ADD DOC
+ */
 @Composable
 public inline fun rememberGraphicOverlays(
     key: Any? = null,
-    crossinline init: MutableListImpl<GraphicsOverlay>.() -> Unit = {}
-): MutableList<GraphicsOverlay> {
+    crossinline init: SnapshotStateList<GraphicsOverlay>.() -> Unit = {}
+): SnapshotStateList<GraphicsOverlay> {
     if (ArcGISEnvironment.applicationContext == null) {
         ArcGISEnvironment.applicationContext = LocalContext.current
     }
 
     return remember(key) {
-        MutableListImpl<GraphicsOverlay>().apply(init)
+        mutableStateListOf<GraphicsOverlay>().apply(init)
     }
 }
 
