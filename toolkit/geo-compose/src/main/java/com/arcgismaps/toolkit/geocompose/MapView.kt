@@ -46,17 +46,17 @@ public val MapViewInteractionOptionDefaults: MapViewInteractionOptions = MapView
 /**
  * A compose equivalent of the [MapView].
  *
- * @param modifier Modifier to be applied to the Map
+ * @param modifier Modifier to be applied to the composable MapView
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable
- * @param graphicsOverlays the [GraphicsOverlayMutableList] used by this composable [com.arcgismaps.toolkit.geocompose.Map]
- * @param locationDisplay the [LocationDisplay] used by the composable [com.arcgismaps.toolkit.geocompose.Map]
- * @param mapViewInteractionOptions the [MapViewInteractionOptions] used by this composable [com.arcgismaps.toolkit.geocompose.Map]
- * @param onViewpointChanged lambda invoked when the viewpoint of the Map has changed
- * @param overlay the composable overlays to display on top of the Map. Example, a compass, floorfilter etc.
+ * @param graphicsOverlays the [GraphicsOverlayMutableList] used by this composable [com.arcgismaps.toolkit.geocompose.MapView]
+ * @param locationDisplay the [LocationDisplay] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
+ * @param mapViewInteractionOptions the [MapViewInteractionOptions] used by this composable [com.arcgismaps.toolkit.geocompose.MapView]
+ * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
+ * @param overlay the composable overlays to display on top of the composable MapView. Example, a compass, floorfilter etc.
  * @since 200.3.0
  */
 @Composable
-public fun Map(
+public fun MapView(
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap? = null,
     graphicsOverlays: GraphicsOverlayMutableList = rememberGraphicOverlays(),
@@ -177,6 +177,6 @@ public inline fun rememberGraphicOverlays(
 
 @Preview
 @Composable
-internal fun MapPreview() {
-    Map()
+internal fun MapViewPreview() {
+    MapView()
 }
