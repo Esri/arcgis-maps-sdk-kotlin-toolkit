@@ -18,26 +18,54 @@
 package com.arcgismaps.toolkit.devsummitdemoapp
 
 import android.os.Bundle
+import android.util.Log
+import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.neverEqualPolicy
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.LicenseKey
+import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
+import com.arcgismaps.mapping.MobileMapPackage
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.geocompose.Map
+import com.arcgismaps.toolkit.geocompose.rememberLocationDisplay
+import com.arcgismaps.toolkit.indoors.FloorFilter
+import com.arcgismaps.toolkit.indoors.FloorFilterState
+import com.arcgismaps.toolkit.indoors.UIProperties
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,8 +73,7 @@ class MainActivity : ComponentActivity() {
         setupAPIKey()
 
         setContent {
-//            TextDemo()
-            MapDemo()
+            LocationDemo()
         }
     }
 }
@@ -68,103 +95,134 @@ fun TextDemo() {
 
 @Composable
 fun MapDemo() {
-    // create an arcGISMap with basemap style and initial viewpoint
-    val arcGISMap = remember {
-        ArcGISMap(BasemapStyle.OsmStreets).apply {
-            initialViewpoint = Viewpoint(51.852, 10.477, 10e6)
-        }
-    }
+    // create an arcGISMap with basemap style
+    val arcGISMap = remember { ArcGISMap(BasemapStyle.OsmStreets) }
 
-    // invoke the Map Composable and pass the ArcGISMap to it
+    // invoke the Map Composable, pass the ArcGISMap to it, and set a viewpoint
     Map(
         modifier = Modifier.fillMaxSize(),
-        arcGISMap = arcGISMap
+        arcGISMap = arcGISMap,
+        viewpoint = Viewpoint(51.852, 10.477, 10e6),
     )
 }
 
-//
-//@Composable
-//fun LocationDemo() {
-//    val scope = rememberCoroutineScope()
-//    val map by produceState<ArcGISMap?>(initialValue = null) {
-//        val mmpk = MobileMapPackage(
-//            "/data/user/0/com.arcgismaps.toolkit.compassapp/files/Berlin_Kotlin_23.mmpk"
-//        )
-//        mmpk.load().getOrNull() ?: return@produceState
-//        if (mmpk.maps.isEmpty()) return@produceState
-//        value = mmpk.maps[0]
-//    }
-//    val floorFilterState = map?.let { remember { FloorFilterState(it, scope) } }
-//
-//    // TODO: create a location display once API is ready
-//    // get the location data source from the location display
-//    val locationDataSource = remember { SystemLocationDataSource() }
-//
-//    val mapState = map?.let {
-//        viewModel<MapViewModel>(factory = MapViewModelFactory(map, locationDataSource = locationDataSource))
-//    }
-//
-//    // collect location updates
-//    val lastKnownLocation = locationDataSource.locationChanged.collectAsState(initial = null)
-//
-//    LaunchedEffect(Unit) {
-//        // start the location data source
-//        locationDataSource.start()
-//            .onFailure { Log.i("LocationDemo", "Failed to start location data source") }
-//    }
-//
-//    Scaffold(
-//        floatingActionButton = {
-//            // display a button that zooms to the current location
-//            FloatingActionButton(
-//                onClick = {
-//                    lastKnownLocation.value?.let {
-//                        // TODO: the inner safe (?.) call can be removed eventually
-//                        mapState?.setViewpoint(Viewpoint(it.position, 2000.0))
-//                    }
-//                },
-//                modifier = Modifier
-//                    .padding(40.dp)
-//                    .size(80.dp),
-//                shape = CircleShape,
-//                containerColor = Color.Purple
-//            ) {
-//                Icon(
-//                    painter = painterResource(id = R.drawable.my_location),
-//                    contentDescription = "Go to current location",
-//                    modifier = Modifier.fillMaxSize(0.75f),
-//                    tint = Color.White
-//                )
-//            }
-//        }
-//    ) {
-//
-//        if (floorFilterState != null && mapState != null) {
-//
-//            // show a composable map using the mapViewModel
-//            ComposableMap(
-//                modifier = Modifier
-//                    .padding(it)
-//                    .fillMaxSize(),
-//                mapInterface = mapState
-//            ) {
-//                Box(
-//                    modifier = Modifier
-//                        .fillMaxSize()
-//                        .padding(20.dp, 40.dp), // TODO: needed? named params?
-//                    contentAlignment = Alignment.BottomStart
-//                ) {
-//                    // TODO: initial floor as 1. Also bug fixes to display levels.
-//                    FloorFilter(floorFilterState = floorFilterState)
-//                    // TODO: probably shouldn't set viewpoint here, use initialViewpoint once that is working
-//                    //  or else move this to a different place
-//                    mapState.setViewpoint(Viewpoint(52.5119, 13.3922, 100000.0))
-//                }
-//            }
-//        }
-//    }
-//}
+@Composable
+fun LocationDemo() {
+    val scope = rememberCoroutineScope()
+    val map by rememberHiltonMap()
 
+    var viewpoint by remember { mutableStateOf(Viewpoint(52.5119, 13.3922, 100000.0), neverEqualPolicy()) }
+
+    val floorFilterState = map?.let { remember { FloorFilterState(it, scope, createUiProperties()) } }
+
+    val locationDisplay = rememberLocationDisplay()
+
+    val lastKnownLocation = locationDisplay.location.collectAsState()
+
+    LaunchedEffect(Unit) {
+        locationDisplay.dataSource.start()
+            .onFailure { Log.i("LocationDemo", "Failed to start location data source") }
+        // TODO(FINLAY): check if this logging is desirable  ^^
+    }
+
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    lastKnownLocation.value?.let {
+                        Log.i("LocationDemo", "before ${(viewpoint.targetGeometry as? Point)?.x}") // FIXME:
+                        viewpoint = Viewpoint(it.position, 2000.0)
+                        Log.i("LocationDemo", "after ${(viewpoint.targetGeometry as? Point)?.x}") // FIXME:
+                    }
+                },
+                modifier = Modifier
+                    .padding(40.dp)
+                    .size(80.dp),
+                shape = CircleShape,
+                containerColor = Color.Purple,
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.my_location),
+                    contentDescription = "Go to current location",
+                    modifier = Modifier.fillMaxSize(0.75f),
+                    tint = Color.White,
+                )
+            }
+        }
+    ) {
+
+        Map(
+            modifier = Modifier
+                .padding(it)
+                .fillMaxSize(),
+            arcGISMap = map,
+            locationDisplay = locationDisplay,
+            viewpoint = viewpoint,
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(20.dp, 40.dp),
+                contentAlignment = Alignment.BottomStart,
+            ) {
+                if (floorFilterState != null) {
+                    FloorFilter(floorFilterState = floorFilterState)
+                }
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@Composable
+fun rememberHiltonMap(): State<ArcGISMap?> {
+    val context = LocalContext.current
+    return produceState<ArcGISMap?>(initialValue = null) {
+        val mmpk = MobileMapPackage("${context.filesDir}/Berlin_Kotlin_23.mmpk")
+        mmpk.load().getOrNull() ?: return@produceState
+        if (mmpk.maps.isEmpty()) return@produceState
+        value = mmpk.maps[0]
+    }
+}
+
+fun createUiProperties(): UIProperties {
+    return UIProperties(
+        siteFacilityButtonVisibility = View.INVISIBLE,
+        closeButtonVisibility = View.INVISIBLE,
+        buttonSize = Size(75.dp.value, 55.dp.value),
+        typography = Typography(labelLarge = TextStyle(fontSize = 20.sp)),
+    )
+}
 
 private val Color.Companion.Purple get() = Color(185, 27, 219)
 
