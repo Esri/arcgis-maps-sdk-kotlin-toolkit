@@ -78,6 +78,7 @@ include(":floor-filter-app")
 include(":geo-compose")
 include(":map-compose-app")
 include(":location-display-app")
+include(":map-insets-app")
 
 projects.forEach {
     project(":$it").projectDir = File(rootDir, "toolkit/$it")
@@ -91,3 +92,4 @@ project(":floor-filter-app").projectDir = File(rootDir, "microapps/FloorFilterAp
 project(":geo-compose").projectDir = File(rootDir, "toolkit/geo-compose")
 project(":map-compose-app").projectDir = File(rootDir, "microapps/mapcomposeapp/app")
 project(":location-display-app").projectDir = File(rootDir, "microapps/locationdisplayapp/app")
+project(":map-insets-app").projectDir = File(rootDir, "microapps/mapinsetsapp/app")
