@@ -113,7 +113,14 @@ fun LocationDemo() {
 
     var viewpoint by remember { mutableStateOf(Viewpoint(52.5119, 13.3922, 100000.0), neverEqualPolicy()) }
 
-    val floorFilterState = map?.let { remember { FloorFilterState(it, scope, createUiProperties()) } }
+    // TODO(JEN): Comment on whether we should put this code into a helper function to hide it.
+    val floorFilterState = map?.let {
+        remember {
+            FloorFilterState(it, scope, createUiProperties()).apply {
+                selectedFacilityId = "Hilton Berlin"
+            }
+        }
+    }
 
     val locationDisplay = rememberLocationDisplay()
 
