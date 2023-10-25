@@ -175,7 +175,6 @@ public inline fun rememberGraphicOverlays(
     }
 }
 
-
 @Preview
 @Composable
 internal fun MapPreview() {
