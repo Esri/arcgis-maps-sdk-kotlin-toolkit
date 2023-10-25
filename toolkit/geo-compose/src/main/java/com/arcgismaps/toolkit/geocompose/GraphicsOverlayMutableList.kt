@@ -24,7 +24,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 
 /**
- * A collection class to encapsulate the [GraphicsOverlay] list used by the [com.arcgismaps.toolkit.geocompose.Map]
+ * A collection class to encapsulate the [GraphicsOverlay] list used by the [com.arcgismaps.toolkit.geocompose.MapView]
  * @since 200.3.0
  */
 public class GraphicsOverlayMutableList :
