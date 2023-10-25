@@ -22,7 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
-public fun Scene() {
+public fun SceneView() {
     // Todo implementation...
     Text("Implement Scene here! ")
 }
@@ -30,5 +30,5 @@ public fun Scene() {
 @Preview
 @Composable
 internal fun ScenePreview() {
-    Scene()
+    SceneView()
 }
