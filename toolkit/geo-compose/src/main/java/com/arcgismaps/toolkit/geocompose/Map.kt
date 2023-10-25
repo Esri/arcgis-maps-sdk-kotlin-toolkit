@@ -33,14 +33,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.view.GraphicsOverlay
-import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.LocationDisplay
+import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.MapViewInteractionOptions
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 
 /**
@@ -82,8 +77,6 @@ public fun Map(
                 it.map = arcGISMap
                 it.interactionOptions = mapViewInteractionOptions
                 it.locationDisplay = locationDisplay
-                it.graphicsOverlays.clear()
-                it.graphicsOverlays.addAll(graphicsOverlays)
             })
 
         overlay()
