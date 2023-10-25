@@ -33,6 +33,6 @@ fun MainScreen() {
     val arcGISMap by remember { mutableStateOf(ArcGISMap(BasemapStyle.ArcGISStreets)) }
     MapView(
         modifier = Modifier.fillMaxSize(),
-        arcGISMap = arcGISMap,
+        arcGISMap = arcGISMap
     )
 }
