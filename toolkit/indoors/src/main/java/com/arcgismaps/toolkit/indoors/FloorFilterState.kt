@@ -22,6 +22,7 @@ import androidx.compose.material3.Typography
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.LoadStatus
 import com.arcgismaps.mapping.GeoModel
 import com.arcgismaps.mapping.floor.FloorFacility
 import com.arcgismaps.mapping.floor.FloorLevel
@@ -213,7 +214,11 @@ private class FloorFilterStateImpl(
         }
 
     init {
-        coroutineScope.launch {
+        // If stuff is already loaded then synchronously initialize the class so that its properties
+        // can be used right away.
+        if (geoModel.loadStatus.value == LoadStatus.Loaded && geoModel.floorManager?.loadStatus?.value == LoadStatus.Loaded)
+            _floorManager.value = geoModel.floorManager
+        else coroutineScope.launch {
             loadFloorManager()
         }
     }
