@@ -20,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -50,6 +51,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
             // show the top bar which changes available actions based on if the FeatureForm is
             // being shown and is in edit mode
             TopFormBar(
+                title = mapViewModel.portalItemData.data.portalItem.title,
                 editingMode = inEditingMode,
                 onClose = {
                     scope.launch { mapViewModel.rollbackEdits(EditingTransactionState.NotEditing) }
@@ -99,6 +101,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopFormBar(
+    title : String,
     editingMode: Boolean,
     onClose: () -> Unit = {},
     onSave: () -> Unit = {},
@@ -106,9 +109,11 @@ fun TopFormBar(
 ) {
     TopAppBar(
         title = {
-            if (editingMode) Text(
-                text = stringResource(R.string.edit_feature),
-                style = MaterialTheme.typography.titleLarge
+            Text(
+                text = if (editingMode) stringResource(R.string.edit_feature) else title,
+                style = MaterialTheme.typography.titleMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         },
         navigationIcon = {
@@ -138,5 +143,5 @@ fun TopFormBar(
 @Preview
 @Composable
 fun TopFormBarPreview() {
-    TopFormBar(true)
+    TopFormBar("Map", false)
 }

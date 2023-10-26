@@ -18,10 +18,13 @@ package com.arcgismaps.toolkit.featureforms.components.base
 
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.flattenMerge
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 
 internal open class FieldProperties(
@@ -71,19 +74,10 @@ internal open class BaseFieldState(
     /**
      * Current value state for the field.
      */
-    val value: StateFlow<String> = combine(
-        _value,
-        properties.value,
-        properties.editable
-    ) { userEdit, exprResult, editable ->
-        // transform the user input value flow with the formElement value and required into a single
-        // value flow based on if the field is editable
-        if (editable) {
-            userEdit
-        } else {
-            exprResult
-        }
-    }.stateIn(scope, SharingStarted.Eagerly, initialValue)
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val value: StateFlow<String> = flowOf(_value, properties.value.drop(1))
+        .flattenMerge()
+        .stateIn(scope, SharingStarted.Eagerly, initialValue)
 
     /**
      * Property that indicates if the field is editable.

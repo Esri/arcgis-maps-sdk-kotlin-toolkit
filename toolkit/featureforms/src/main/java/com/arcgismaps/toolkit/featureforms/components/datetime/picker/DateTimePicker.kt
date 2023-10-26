@@ -107,6 +107,17 @@ internal fun DateTimePicker(
     onCancelled: () -> Unit,
     onConfirmed: () -> Unit
 ) {
+    // if the date time has no value, set a default value
+    if (state.dateTime.value.epochMillis == null) {
+        val now = Instant.now().toEpochMilli()
+        // check if current day and time is a valid timestamp
+        // it should be validated with the current local timestamp hence the added offset
+        if (state.dateTimeValidator(now.plus(now.defaultTimeZoneOffset))) {
+            // set the default timestamp value to the current local time instant
+            state.today(0, 0)
+            state.now()
+        }
+    }
     // calculate the date ranges from the state
     val datePickerRange = IntRange(
         start = state.minDateTime?.toZonedDateTime()?.year
@@ -114,12 +125,10 @@ internal fun DateTimePicker(
         endInclusive = state.maxDateTime?.toZonedDateTime()?.year
             ?: DatePickerDefaults.YearRange.last
     )
-    
     // The picker input type, date or time.
     val pickerInput by state.activePickerInput
     // DateTime from the state's value
     val dateTime by state.dateTime
-    
     // create and remember a DatePickerState
     val datePickerState = rememberSaveable(dateTime, saver = DatePickerState.Saver()) {
         DatePickerState(
@@ -130,7 +139,6 @@ internal fun DateTimePicker(
             DisplayMode.Picker
         )
     }
-    
     // create a DateTimePickerDialog
     DateTimePickerDialog(
         onDismissRequest = onDismissRequest
@@ -143,7 +151,6 @@ internal fun DateTimePicker(
                 is24Hour = false,
             )
         }
-    
         PickerContent(
             label = state.label,
             description = state.description,
@@ -164,20 +171,10 @@ internal fun DateTimePicker(
             } ?: false,
             pickerInput = pickerInput,
             onToday = {
-                val now = Instant.now().toEpochMilli()
-                state.setDateTime(
-                    now.plus(now.defaultTimeZoneOffset).toDateMillis(),
-                    timePickerState.hour,
-                    timePickerState.minute
-                )
+                state.today(timePickerState.hour, timePickerState.minute)
             },
             onNow = {
-                val now = Instant.now().toEpochMilli().toZonedDateTime()
-                state.setDateTime(
-                    state.dateTime.value.dateForPicker,
-                    now.hour,
-                    now.minute
-                )
+                state.now()
             },
             onCancelled = onCancelled,
             onConfirmed = {
@@ -362,7 +359,7 @@ private fun DateTimePickerPreview() {
         style = DateTimePickerStyle.DateTime,
         label = "Next Inspection Date",
         description = "Enter a date in the next six months",
-        pickerInput  = DateTimePickerInput.Date
+        pickerInput = DateTimePickerInput.Date
     )
     DateTimePicker(state = state, {}, {}, {})
 }
