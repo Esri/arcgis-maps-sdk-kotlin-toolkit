@@ -119,8 +119,6 @@ fun LocationDemo() {
 
     LaunchedEffect(Unit) {
         locationDisplay.dataSource.start()
-            .onFailure { Log.i("LocationDemo", "Failed to start location data source") }
-        // TODO(JEN): Comment on whether we should keep this logging in the final demo.
     }
 
     Scaffold(
