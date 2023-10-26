@@ -192,6 +192,7 @@ private fun cast(value: Any?, fieldType: FieldType): Any? =
                 is String -> value.toDoubleOrNull()
                 is Int -> value.toDouble()
                 is Float -> value.toDouble()
+                is Double -> value.toDouble()
                 else -> null
             }
         }

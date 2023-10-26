@@ -51,7 +51,7 @@ internal open class BaseFieldState(
     properties: FieldProperties,
     initialValue: String = properties.value.value,
     scope: CoroutineScope,
-    private val onEditValue: (Any?) -> Unit,
+    protected val onEditValue: (Any?) -> Unit,
 ) {
     /**
      * Title for the field.
@@ -69,7 +69,7 @@ internal open class BaseFieldState(
     val description: String = properties.description
 
     // a state flow to handle user input changes
-    private val _value = MutableStateFlow(initialValue)
+    protected val _value = MutableStateFlow(initialValue)
 
     /**
      * Current value state for the field.
