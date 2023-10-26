@@ -27,6 +27,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.toolkit.featureforms.components.datetime.toDateMillis
 import com.arcgismaps.toolkit.featureforms.components.datetime.toDateTimeInUtcZone
 import com.arcgismaps.toolkit.featureforms.components.datetime.toZonedDateTime
+import java.time.Instant
 import java.util.TimeZone
 
 /**
@@ -197,6 +198,17 @@ internal interface DateTimePickerState {
      * is returned. Both the [minDateTime] and [maxDateTime] are included in the range.
      */
     fun dateValidator(timeStamp: Long): Boolean
+
+    /**
+     * Sets the [dateTime]'s time value to the current time instant in local time.
+     */
+    fun now()
+
+    /**
+     * Sets the [dateTime]'s day to the current day while persisting the time information
+     * as specified by the [hour] and [minute].
+     */
+    fun today(hour: Int, minute: Int)
 }
 
 /**
@@ -267,6 +279,24 @@ private class DateTimePickerStateImpl(
         } ?: maxDate?.let {
             utcDate <= it
         } ?: true
+    }
+
+    override fun now() {
+        val now = Instant.now().toEpochMilli().toZonedDateTime()
+        setDateTime(
+            dateTime.value.dateForPicker,
+            now.hour,
+            now.minute
+        )
+    }
+
+    override fun today(hour: Int, minute: Int) {
+        val now = Instant.now().toEpochMilli()
+        setDateTime(
+            now.plus(now.defaultTimeZoneOffset).toDateMillis(),
+            hour,
+            minute
+        )
     }
 }
 
