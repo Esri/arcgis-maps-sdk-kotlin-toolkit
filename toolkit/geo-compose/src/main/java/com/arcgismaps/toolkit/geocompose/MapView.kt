@@ -116,6 +116,14 @@ public fun MapView(
                         mapView.graphicsOverlays.add(graphicsOverlay)
                     }
 
+                // On GraphicsOverlay inserted:
+                is GraphicsOverlayMutableList.ChangedEvent.Inserted ->
+                    if (changedEvent.index != null) {
+                        changedEvent.element?.let { graphicsOverlay ->
+                            mapView.graphicsOverlays.add(changedEvent.index, graphicsOverlay)
+                        }
+                    }
+
                 // On GraphicsOverlay removed:
                 is GraphicsOverlayMutableList.ChangedEvent.Removed ->
                     mapView.graphicsOverlays.remove(changedEvent.element)
@@ -123,6 +131,12 @@ public fun MapView(
                 // On GraphicsOverlay cleared:
                 is GraphicsOverlayMutableList.ChangedEvent.Cleared ->
                     mapView.graphicsOverlays.clear()
+
+                // On GraphicsOverlay updated:
+                is GraphicsOverlayMutableList.ChangedEvent.Updated ->
+                    if (changedEvent.index != null && changedEvent.element != null) {
+                        mapView.graphicsOverlays[changedEvent.index] = changedEvent.element
+                    }
             }
         }
     }

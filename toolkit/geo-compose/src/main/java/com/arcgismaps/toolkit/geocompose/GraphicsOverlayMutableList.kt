@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 
 /**
  * A collection class to encapsulate the [GraphicsOverlay] list used by the [com.arcgismaps.toolkit.geocompose.MapView]
+ *
  * @since 200.3.0
  */
 public class GraphicsOverlayMutableList :
@@ -42,15 +43,15 @@ public class GraphicsOverlayMutableList :
      */
     internal val changed: SharedFlow<ChangedEvent> = _changed.asSharedFlow()
 
-    override fun add(index: Int, element: GraphicsOverlay) {
-        graphicsOverlays.add(element)
-        _changed.tryEmit(ChangedEvent.Added(element))
-    }
-
     override fun add(element: GraphicsOverlay): Boolean {
         val boolean = graphicsOverlays.add(element)
         _changed.tryEmit(ChangedEvent.Added(element))
         return boolean
+    }
+
+    override fun add(index: Int, element: GraphicsOverlay) {
+        graphicsOverlays.add(index, element)
+        _changed.tryEmit(ChangedEvent.Inserted(index, element))
     }
 
     override fun get(index: Int): GraphicsOverlay {
@@ -59,14 +60,19 @@ public class GraphicsOverlayMutableList :
 
     override fun set(index: Int, element: GraphicsOverlay): GraphicsOverlay {
         graphicsOverlays[index] = element
-        _changed.tryEmit(ChangedEvent.Added(element))
+        _changed.tryEmit(ChangedEvent.Updated(index, element))
         return element
     }
 
     override fun removeAt(index: Int): GraphicsOverlay {
-        val element = graphicsOverlays.removeAt(index)
-        _changed.tryEmit(ChangedEvent.Removed(element))
+        val element = graphicsOverlays[index]
+        remove(element)
         return element
+    }
+
+    override fun remove(element: GraphicsOverlay): Boolean {
+        _changed.tryEmit(ChangedEvent.Removed(element))
+        return graphicsOverlays.remove(element)
     }
 
     override val size: Int
@@ -80,11 +86,17 @@ public class GraphicsOverlayMutableList :
     /**
      * Sealed class used to notify the compose MapView to update the GraphicOverlays on the
      * type of [ChangedEvent].
+     *
      * @since 200.3.0
      */
-    internal sealed class ChangedEvent(internal val element: GraphicsOverlay? = null) {
+    internal sealed class ChangedEvent(
+        internal val element: GraphicsOverlay? = null,
+        internal val index: Int? = null
+    ) {
         class Added(element: GraphicsOverlay) : ChangedEvent(element)
+        class Inserted(index: Int, element: GraphicsOverlay) : ChangedEvent(element, index)
         class Removed(element: GraphicsOverlay) : ChangedEvent(element)
+        class Updated(index: Int, element: GraphicsOverlay) : ChangedEvent(element, index)
         class Cleared : ChangedEvent()
     }
 }
