@@ -107,19 +107,11 @@ fun MapDemo() {
 
 @Composable
 fun LocationDemo() {
-    val scope = rememberCoroutineScope()
     val map by rememberHiltonMap()
 
     var viewpoint by remember { mutableStateOf(Viewpoint(52.5119, 13.3922, 100000.0), neverEqualPolicy()) }
 
-    // TODO(JEN): Comment on whether we should put this code into a helper function to hide it.
-    val floorFilterState = map?.let {
-        remember {
-            FloorFilterState(it, scope, createUiProperties()).apply {
-                selectedFacilityId = "Hilton Berlin"
-            }
-        }
-    }
+    val floorFilterState = rememberFloorFilterState(map)
 
     val locationDisplay = rememberLocationDisplay()
 
@@ -207,6 +199,21 @@ fun LocationDemo() {
 
 
 
+
+
+
+
+@Composable
+fun rememberFloorFilterState(map: ArcGISMap?): FloorFilterState? {
+    val scope = rememberCoroutineScope()
+    return map?.let {
+        remember {
+            FloorFilterState(it, scope, createUiProperties()).apply {
+                selectedFacilityId = "Hilton Berlin"
+            }
+        }
+    }
+}
 
 @Composable
 fun rememberHiltonMap(): State<ArcGISMap?> {
