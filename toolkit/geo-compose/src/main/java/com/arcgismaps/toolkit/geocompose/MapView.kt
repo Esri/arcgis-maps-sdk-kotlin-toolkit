@@ -179,15 +179,7 @@ public inline fun rememberLocationDisplay(
 public inline fun rememberGraphicOverlays(
     key: Any? = null,
     crossinline init: GraphicsOverlayMutableList.() -> Unit = {}
-): GraphicsOverlayMutableList {
-    if (ArcGISEnvironment.applicationContext == null) {
-        ArcGISEnvironment.applicationContext = LocalContext.current
-    }
-
-    return remember(key) {
-        GraphicsOverlayMutableList().apply(init)
-    }
-}
+): GraphicsOverlayMutableList = remember(key) { GraphicsOverlayMutableList().apply(init) }
 
 @Preview
 @Composable
