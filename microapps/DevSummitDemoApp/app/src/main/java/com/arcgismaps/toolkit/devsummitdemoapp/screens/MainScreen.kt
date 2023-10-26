@@ -46,7 +46,7 @@ import com.arcgismaps.location.LocationDisplayAutoPanMode
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.view.LocationDisplay
-import com.arcgismaps.toolkit.geocompose.Map
+import com.arcgismaps.toolkit.geocompose.MapView
 import com.arcgismaps.toolkit.geocompose.rememberLocationDisplay
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -120,7 +120,7 @@ fun MainScreen() {
             )
         },
     ) { innerPadding ->
-        Map(
+        MapView(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize(),

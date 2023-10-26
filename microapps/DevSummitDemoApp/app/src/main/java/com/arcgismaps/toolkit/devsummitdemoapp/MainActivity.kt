@@ -60,7 +60,7 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.MobileMapPackage
 import com.arcgismaps.mapping.Viewpoint
-import com.arcgismaps.toolkit.geocompose.Map
+import com.arcgismaps.toolkit.geocompose.MapView
 import com.arcgismaps.toolkit.geocompose.rememberLocationDisplay
 import com.arcgismaps.toolkit.indoors.FloorFilter
 import com.arcgismaps.toolkit.indoors.FloorFilterState
@@ -98,7 +98,7 @@ fun MapDemo() {
     val arcGISMap = remember { ArcGISMap(BasemapStyle.OsmStreets) }
 
     // invoke the Map Composable, pass the ArcGISMap to it, and set a viewpoint
-    Map(
+    MapView(
         modifier = Modifier.fillMaxSize(),
         arcGISMap = arcGISMap,
         viewpoint = Viewpoint(51.852, 10.477, 10e6),
@@ -147,7 +147,7 @@ fun LocationDemo() {
         }
     ) {
 
-        Map(
+        MapView(
             modifier = Modifier
                 .padding(it)
                 .fillMaxSize(),

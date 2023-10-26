@@ -26,12 +26,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
-import com.arcgismaps.toolkit.geocompose.Map
+import com.arcgismaps.toolkit.geocompose.MapView
 
 @Composable
 fun MainScreen() {
     val arcGISMap by remember { mutableStateOf(ArcGISMap(BasemapStyle.ArcGISStreets)) }
-    Map(
+    MapView(
         modifier = Modifier.fillMaxSize(),
         arcGISMap = arcGISMap,
     )

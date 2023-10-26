@@ -41,12 +41,12 @@ import kotlinx.coroutines.launch
  *
  * @param modifier Modifier to be applied to the Map
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable
- * @param locationDisplay the [LocationDisplay] used by the [Map]
+ * @param locationDisplay the [LocationDisplay] used by the [MapView]
  * @param overlay the composable overlays to display on top of the Map. Example, a compass, floorfilter etc.
  * @since 200.3.0
  */
 @Composable
-public fun Map(
+public fun MapView(
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap? = null,
     viewpoint: Viewpoint? = null,
@@ -112,5 +112,5 @@ public fun rememberLocationDisplay(
 @Preview
 @Composable
 internal fun MapPreview() {
-    Map()
+    MapView()
 }
