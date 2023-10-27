@@ -42,11 +42,13 @@ import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.featureforms.RadioButtonsFormInput
 import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
-import com.arcgismaps.toolkit.featureforms.components.FieldElement
+import com.arcgismaps.toolkit.featureforms.components.formelement.FieldElement
+import com.arcgismaps.toolkit.featureforms.components.formelement.GroupElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.CodedValueFieldState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberCodedValueFieldState
@@ -199,16 +201,21 @@ private fun FeatureFormBody(
             state = lazyListState
         ) {
             items(form.elements) { formElement ->
-                if (formElement is FieldFormElement) {
-                    val state = states[formElement.id]
-                    if (state != null) {
-                        FieldElement(
-                            field = formElement,
-                            state = state,
-                            onDialogRequest = {
-                                onFieldDialogRequest?.invoke(state, formElement.id)
-                            }
-                        )
+                when(formElement) {
+                    is FieldFormElement -> {
+                        val state = states[formElement.id]
+                        if (state != null) {
+                            FieldElement(
+                                field = formElement,
+                                state = state,
+                                onDialogRequest = {
+                                    onFieldDialogRequest?.invoke(state, formElement.id)
+                                }
+                            )
+                        }
+                    }
+                    is GroupFormElement -> {
+                        GroupElement(formElement, form)
                     }
                 }
             }
