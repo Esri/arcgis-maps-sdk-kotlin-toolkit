@@ -54,8 +54,10 @@ internal fun FeatureForm.editValue(element: FieldFormElement, value: Any?) {
     try {
         element.updateValue(cast(value, fieldType(element)))
     } catch (e: Exception) {
-        //TODO: remove before release.
-        Log.w("FieldFormElement.editValue", "caught ${e.message} while updating value of field ${element.label}")
+        //TODO: remove before release. (and also the try catch)
+        Log.w(
+            "Form.editValue", "caught ${e.message} while updating value of field ${element.label} to $value"
+        )
     }
 }
 

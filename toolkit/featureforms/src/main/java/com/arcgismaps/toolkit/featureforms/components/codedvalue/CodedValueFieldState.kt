@@ -102,6 +102,14 @@ internal open class CodedValueFieldState(
             it.code.toString() == code.toString()
         }?.name
     }
+    
+    override fun onValueChanged(input: String) {
+        val code = codedValues.firstOrNull {
+            it.name == input
+        }?.code
+        onEditValue(code)
+        _value.value = input
+    }
 
     companion object {
         /**
