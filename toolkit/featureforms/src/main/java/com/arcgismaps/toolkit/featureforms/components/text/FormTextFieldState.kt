@@ -68,12 +68,13 @@ internal class TextFieldProperties(
     value: StateFlow<String>,
     required: StateFlow<Boolean>,
     editable: StateFlow<Boolean>,
+    visible: StateFlow<Boolean>,
     val fieldType: FieldType,
     val domain: Domain?,
     val singleLine: Boolean,
     val minLength: Int,
     val maxLength: Int,
-) : FieldProperties(label, placeholder, description, value, required, editable)
+) : FieldProperties(label, placeholder, description, value, required, editable, visible)
 
 /**
  * A class to handle the state of a [FormTextField]. Essential properties are inherited from the
@@ -405,6 +406,7 @@ internal class FormTextFieldState(
                         value = formElement.value,
                         required = formElement.isRequired,
                         editable = formElement.isEditable,
+                        visible = formElement.isVisible,
                         domain = form.domain(formElement) as? RangeDomain,
                         fieldType = form.fieldType(formElement),
                         singleLine = formElement.input is TextBoxFormInput,
@@ -447,6 +449,7 @@ internal fun rememberFormTextFieldState(
             value = field.value,
             editable = field.isEditable,
             required = field.isRequired,
+            visible = field.isVisible,
             singleLine = field.input is TextBoxFormInput,
             fieldType = form.fieldType(field),
             domain = form.domain(field) as? RangeDomain,

@@ -43,11 +43,12 @@ internal open class CodedValueFieldProperties(
     value: StateFlow<String>,
     required: StateFlow<Boolean>,
     editable: StateFlow<Boolean>,
+    visible: StateFlow<Boolean>,
     val fieldType: FieldType,
     val codedValues: List<CodedValue>,
     val showNoValueOption: FormInputNoValueOption,
     val noValueLabel: String
-) : FieldProperties(label, placeholder, description, value, required, editable)
+) : FieldProperties(label, placeholder, description, value, required, editable, visible)
 
 /**
  * A class to handle the state of a [ComboBoxField]. Essential properties are inherited
@@ -127,6 +128,7 @@ internal open class CodedValueFieldState(
                         value = formElement.value,
                         editable = formElement.isEditable,
                         required = formElement.isRequired,
+                        visible = formElement.isVisible,
                         codedValues = input.codedValues,
                         showNoValueOption = input.noValueOption,
                         noValueLabel = input.noValueLabel,
@@ -161,6 +163,7 @@ internal fun rememberCodedValueFieldState(
             value = field.value,
             editable = field.isEditable,
             required = field.isRequired,
+            visible = field.isVisible,
             codedValues = input.codedValues,
             showNoValueOption = input.noValueOption,
             noValueLabel = input.noValueLabel,

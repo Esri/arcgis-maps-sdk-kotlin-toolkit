@@ -114,6 +114,7 @@ private fun DateTimeFieldPreview() {
                 value = MutableStateFlow(""),
                 editable = MutableStateFlow(true),
                 required = MutableStateFlow(false),
+                visible = MutableStateFlow(true),
                 minEpochMillis = null,
                 maxEpochMillis = null,
                 shouldShowTime = true
