@@ -33,7 +33,8 @@ internal open class FieldProperties(
     val description: String,
     val value: StateFlow<String>,
     val required: StateFlow<Boolean>,
-    val editable: StateFlow<Boolean>
+    val editable: StateFlow<Boolean>,
+    val visible: StateFlow<Boolean>
 )
 
 /**
@@ -88,6 +89,11 @@ internal open class BaseFieldState(
      * Property that indicates if the field is required.
      */
     val isRequired: StateFlow<Boolean> = properties.required
+
+    /**
+     * Property that indicates if the field is visible.
+     */
+    val isVisible: StateFlow<Boolean> = properties.visible
    
     /**
      * Callback to update the current value of the FormTextFieldState to the given [input].

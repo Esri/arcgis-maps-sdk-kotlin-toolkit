@@ -50,10 +50,11 @@ internal class DateTimeFieldProperties(
     value: StateFlow<String>,
     required: StateFlow<Boolean>,
     editable: StateFlow<Boolean>,
+    visible: StateFlow<Boolean>,
     val minEpochMillis: Long?,
     val maxEpochMillis: Long?,
     val shouldShowTime: Boolean
-) : FieldProperties(label, placeholder, description, value, required, editable)
+) : FieldProperties(label, placeholder, description, value, required, editable, visible)
 
 /**
  * A class to handle the state of a [DateTimeField]. Essential properties are inherited from the
@@ -115,6 +116,7 @@ internal class DateTimeFieldState(
                         value = field.value,
                         editable = field.isEditable,
                         required = field.isRequired,
+                        visible = field.isVisible,
                         minEpochMillis = input.min?.toEpochMilli(),
                         maxEpochMillis = input.max?.toEpochMilli(),
                         shouldShowTime = input.includeTime
@@ -154,6 +156,7 @@ internal fun rememberDateTimeFieldState(
             value = field.value,
             editable = field.isEditable,
             required = field.isRequired,
+            visible = field.isVisible,
             minEpochMillis = minEpochMillis,
             maxEpochMillis = maxEpochMillis,
             shouldShowTime = shouldShowTime
