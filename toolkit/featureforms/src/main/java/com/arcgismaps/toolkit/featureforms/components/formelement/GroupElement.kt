@@ -16,26 +16,18 @@
 
 package com.arcgismaps.toolkit.featureforms.components.formelement
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Warning
-import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.KeyboardArrowUp
-import androidx.compose.material.icons.rounded.Warning
-import androidx.compose.material.icons.rounded.WarningAmber
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,29 +35,21 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.mapping.featureforms.FeatureForm
-import com.arcgismaps.mapping.featureforms.FieldFormElement
-import com.arcgismaps.mapping.featureforms.FormElement
-import com.arcgismaps.mapping.featureforms.FormGroupState
 import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.BaseGroupState
-import com.arcgismaps.toolkit.featureforms.id
-import com.arcgismaps.toolkit.featureforms.rememberFieldStates
 
 @Composable
 internal fun GroupElement(
     groupElement: GroupFormElement,
     state: BaseGroupState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onDialogRequest: (BaseFieldState, Int) -> Unit
 ) {
     val visible by groupElement.isVisible.collectAsState()
     if (visible) {
@@ -74,7 +58,8 @@ internal fun GroupElement(
             description = state.description,
             expanded = state.expanded,
             fieldStates = state.fieldStates,
-            modifier = modifier
+            modifier = modifier,
+            onDialogRequest = onDialogRequest
         )
     }
 }
@@ -84,8 +69,9 @@ private fun GroupElement(
     label: String,
     description: String,
     expanded: Boolean,
-    fieldStates : Map<Int, BaseFieldState?>,
+    fieldStates: Map<Int, BaseFieldState?>,
     modifier: Modifier = Modifier,
+    onDialogRequest: ((BaseFieldState, Int) -> Unit)? = null
 ) {
     var contextExpanded by remember {
         mutableStateOf(expanded)
@@ -109,7 +95,13 @@ private fun GroupElement(
             contextExpanded = !contextExpanded
         }
         GroupElementContent(isVisible = contextExpanded) {
-
+            fieldStates.forEach { (key, state) ->
+                if (state != null) {
+                    FieldElement(state = state) {
+                        onDialogRequest?.invoke(state, key)
+                    }
+                }
+            }
         }
     }
 }
@@ -149,7 +141,6 @@ private fun GroupElementContent(
     if (isVisible) {
         Column(
             modifier = Modifier
-                .background(color = Color.LightGray)
                 .fillMaxSize()
         ) {
             content()

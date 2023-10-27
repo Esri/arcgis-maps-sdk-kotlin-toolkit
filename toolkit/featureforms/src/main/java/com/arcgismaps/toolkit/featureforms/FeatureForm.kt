@@ -236,7 +236,13 @@ private fun FeatureFormBody(
                     is GroupFormElement -> {
                         val state = groupStateMap[formElement.id]
                         if (state != null) {
-                            GroupElement(formElement, state)
+                            GroupElement(
+                                formElement,
+                                state,
+                                onDialogRequest = { baseFieldState, key ->
+                                    onFieldDialogRequest?.invoke(baseFieldState, key)
+                                }
+                            )
                         }
                     }
                 }
