@@ -40,6 +40,8 @@ import com.arcgismaps.mapping.view.LongPressEvent
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.MapViewInteractionOptions
 import com.arcgismaps.mapping.view.PanChangeEvent
+import com.arcgismaps.mapping.view.RotationChangeEvent
+import com.arcgismaps.mapping.view.ScaleChangeEvent
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
@@ -60,6 +62,9 @@ public val MapViewInteractionOptionDefaults: MapViewInteractionOptions = MapView
  * @param locationDisplay the [LocationDisplay] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param mapViewInteractionOptions the [MapViewInteractionOptions] used by this composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
+ * @param isInteracting lambda invoked when the user is currently interacting with the composable MapView
+ * @param onRotate lambda invoked when a user performs a rotation gesture on the composable MapView
+ * @param onScale lambda invoked when a user performs a pinch gesture on the composable MapView
  * @param onUp lambda invoked when the user removes all their pointers from the composable MapView
  * @param onDown lambda invoked when the user first presses on the composable MapView
  * @param onSingleTapConfirmed lambda invoked when the user taps once on the composable MapView
@@ -77,6 +82,9 @@ public fun MapView(
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     mapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptionDefaults,
     onViewpointChanged: (() -> Unit)? = null,
+    isInteracting: ((Boolean) -> Unit)? = null,
+    onRotate: ((RotationChangeEvent) -> Unit)? = null,
+    onScale: ((ScaleChangeEvent) -> Unit)? = null,
     onUp: ((UpEvent) -> Unit)? = null,
     onDown: ((DownEvent) -> Unit)? = null,
     onSingleTapConfirmed: ((SingleTapConfirmedEvent) -> Unit)? = null,
@@ -127,6 +135,9 @@ public fun MapView(
         setupCallbacksForGestureEvents(
             mapView,
             this,
+            isInteracting,
+            onRotate,
+            onScale,
             onUp,
             onDown,
             onSingleTapConfirmed,
@@ -169,6 +180,9 @@ public inline fun rememberLocationDisplay(
 private fun setupCallbacksForGestureEvents(
     mapView: MapView,
     composeScope: CoroutineScope,
+    isInteracting: ((Boolean) -> Unit)?,
+    onRotate: ((RotationChangeEvent) -> Unit)?,
+    onScale: ((ScaleChangeEvent) -> Unit)?,
     onUp: ((UpEvent) -> Unit)?,
     onDown: ((DownEvent) -> Unit)?,
     onSingleTapConfirmed: ((SingleTapConfirmedEvent) -> Unit)?,
@@ -178,6 +192,27 @@ private fun setupCallbacksForGestureEvents(
     onPan: ((PanChangeEvent) -> Unit)?
 ) {
     with(composeScope) {
+        launch(Dispatchers.Main.immediate) {
+            mapView.isInteracting.collect { isUserInteracting ->
+                isInteracting?.let {
+                    it(isUserInteracting)
+                }
+            }
+        }
+        launch(Dispatchers.Main.immediate) {
+            mapView.onRotate.collect { rotationChangeEvent ->
+                onRotate?.let {
+                    it(rotationChangeEvent)
+                }
+            }
+        }
+        launch(Dispatchers.Main.immediate) {
+            mapView.onScale.collect { scaleChangeEvent ->
+                onScale?.let {
+                    it(scaleChangeEvent)
+                }
+            }
+        }
         launch(Dispatchers.Main.immediate) {
             mapView.onUp.collect { upEvent ->
                 onUp?.let {
