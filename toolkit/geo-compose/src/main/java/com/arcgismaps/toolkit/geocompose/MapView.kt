@@ -36,12 +36,18 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.view.LocationDisplay
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.MapViewInteractionOptions
+import com.arcgismaps.mapping.view.SelectionProperties
 import kotlinx.coroutines.launch
 
 /**
  * The default instance of [MapViewInteractionOptions]
  */
 public val MapViewInteractionOptionDefaults: MapViewInteractionOptions = MapViewInteractionOptions()
+
+/**
+ * The default instance of [SelectionProperties]
+ */
+public val MapViewDefaultSelectionProperties: SelectionProperties = SelectionProperties()
 
 /**
  * A compose equivalent of the [MapView].
@@ -58,6 +64,7 @@ public val MapViewInteractionOptionDefaults: MapViewInteractionOptions = MapView
 public fun MapView(
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap? = null,
+    selectionProperties: SelectionProperties = MapViewDefaultSelectionProperties,
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     mapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptionDefaults,
     onViewpointChanged: (() -> Unit)? = null,
@@ -77,6 +84,7 @@ public fun MapView(
             factory = { mapView },
             update = {
                 it.map = arcGISMap
+                it.selectionProperties = selectionProperties
                 it.interactionOptions = mapViewInteractionOptions
                 it.locationDisplay = locationDisplay
             })
