@@ -94,10 +94,8 @@ fun TextDemo() {
 
 @Composable
 fun MapDemo() {
-    // create an arcGISMap with basemap style
     val arcGISMap = remember { ArcGISMap(BasemapStyle.OsmStreets) }
 
-    // invoke the Map Composable, pass the ArcGISMap to it, and set a viewpoint
     MapView(
         modifier = Modifier.fillMaxSize(),
         arcGISMap = arcGISMap,
