@@ -36,12 +36,18 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.view.LocationDisplay
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.MapViewInteractionOptions
+import com.arcgismaps.mapping.view.ViewLabelProperties
 import kotlinx.coroutines.launch
 
 /**
  * The default instance of [MapViewInteractionOptions]
  */
 public val MapViewInteractionOptionDefaults: MapViewInteractionOptions = MapViewInteractionOptions()
+
+/**
+ * The default instance of [ViewLabelProperties]
+ */
+public val MapViewLabelingDefaults: ViewLabelProperties = ViewLabelProperties()
 
 /**
  * A compose equivalent of the [MapView].
@@ -60,6 +66,7 @@ public fun MapView(
     arcGISMap: ArcGISMap? = null,
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     mapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptionDefaults,
+    labeling: ViewLabelProperties = MapViewLabelingDefaults,
     onViewpointChanged: (() -> Unit)? = null,
     overlay: @Composable () -> Unit = {}
 ) {
@@ -79,6 +86,7 @@ public fun MapView(
                 it.map = arcGISMap
                 it.interactionOptions = mapViewInteractionOptions
                 it.locationDisplay = locationDisplay
+                it.labeling = labeling
             })
 
         overlay()
