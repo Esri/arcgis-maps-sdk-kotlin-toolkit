@@ -203,7 +203,6 @@ private fun FeatureFormBody(
                     val state = states[formElement.id]
                     if (state != null) {
                         FieldElement(
-                            field = formElement,
                             state = state,
                             onDialogRequest = {
                                 onFieldDialogRequest?.invoke(state, formElement.id)
