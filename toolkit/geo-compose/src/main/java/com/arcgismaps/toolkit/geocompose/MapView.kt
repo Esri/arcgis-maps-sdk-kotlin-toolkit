@@ -64,9 +64,9 @@ public val MapViewDefaultSelectionProperties: SelectionProperties = SelectionPro
 public fun MapView(
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap? = null,
-    selectionProperties: SelectionProperties = MapViewDefaultSelectionProperties,
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     mapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptionDefaults,
+    selectionProperties: SelectionProperties = MapViewDefaultSelectionProperties,
     onViewpointChanged: (() -> Unit)? = null,
     overlay: @Composable () -> Unit = {}
 ) {
