@@ -49,7 +49,6 @@ public val MapViewInteractionOptionDefaults: MapViewInteractionOptions = MapView
  *
  * @param modifier Modifier to be applied to the composable MapView
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable
- * @param graphicsOverlays the [GraphicsOverlayMutableList] used by this composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param locationDisplay the [LocationDisplay] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param geometryEditor create and edit geometries by interacting with the composable [com.arcgismaps.toolkit.geocompose.MapView].
  * @param mapViewInteractionOptions the [MapViewInteractionOptions] used by this composable [com.arcgismaps.toolkit.geocompose.MapView]
@@ -61,9 +60,8 @@ public val MapViewInteractionOptionDefaults: MapViewInteractionOptions = MapView
 public fun MapView(
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap? = null,
-    graphicsOverlays: GraphicsOverlayMutableList = rememberGraphicOverlays(),
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
-    geometryEditor: GeometryEditor = rememberGeometryEditor(),
+    geometryEditor: GeometryEditor? = null,
     mapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptionDefaults,
     onViewpointChanged: (() -> Unit)? = null,
     overlay: @Composable () -> Unit = {}
@@ -104,32 +102,6 @@ public fun MapView(
             }
         }
     }
-
-    LaunchedEffect(graphicsOverlays) {
-        // sync up the MapView with the new graphics overlays
-        mapView.graphicsOverlays.clear()
-        graphicsOverlays.forEach {
-            mapView.graphicsOverlays.add(it)
-        }
-        // start observing graphicsOverlays for subsequent changes
-        graphicsOverlays.changed.collect { changedEvent ->
-            when (changedEvent) {
-                // On GraphicsOverlay added:
-                is GraphicsOverlayMutableList.ChangedEvent.Added ->
-                    changedEvent.element?.let { graphicsOverlay ->
-                        mapView.graphicsOverlays.add(graphicsOverlay)
-                    }
-
-                // On GraphicsOverlay removed:
-                is GraphicsOverlayMutableList.ChangedEvent.Removed ->
-                    mapView.graphicsOverlays.remove(changedEvent.element)
-
-                // On GraphicsOverlay cleared:
-                is GraphicsOverlayMutableList.ChangedEvent.Cleared ->
-                    mapView.graphicsOverlays.clear()
-            }
-        }
-    }
 }
 
 /**
@@ -154,54 +126,6 @@ public inline fun rememberLocationDisplay(
         LocationDisplay().apply(init)
     }
 }
-
-/**
- * Create and [remember] a [GraphicsOverlayMutableList].
- * Checks that [ArcGISEnvironment.applicationContext] is set and if not, sets one.
- * [init] will be called when the [GraphicsOverlayMutableList] is first created to configure its
- * initial state.
- *
- * @param key invalidates the remembered GraphicsOverlayMutableList if different from the previous composition
- * @param init called when the [GraphicsOverlayMutableList] is created to configure its initial state
- * @since 200.3.0
- */
-@Composable
-public inline fun rememberGraphicOverlays(
-    key: Any? = null,
-    crossinline init: GraphicsOverlayMutableList.() -> Unit = {}
-): GraphicsOverlayMutableList {
-    if (ArcGISEnvironment.applicationContext == null) {
-        ArcGISEnvironment.applicationContext = LocalContext.current
-    }
-
-    return remember(key) {
-        GraphicsOverlayMutableList().apply(init)
-    }
-}
-
-/**
- * Create and [remember] a [GeometryEditor].
- * Checks that [ArcGISEnvironment.applicationContext] is set and if not, sets one.
- * [init] will be called when the [GeometryEditor] is first created to configure its
- * initial state.
- *
- * @param key invalidates the remembered LocationDisplay if different from the previous composition
- * @param init called when the [GeometryEditor] is created to configure its initial state
- * @since 200.3.0
- */
-@Composable
-public inline fun rememberGeometryEditor(
-    key: Any? = null,
-    crossinline init: GeometryEditor.() -> Unit = {}
-): GeometryEditor {
-    if (ArcGISEnvironment.applicationContext == null) {
-        ArcGISEnvironment.applicationContext = LocalContext.current
-    }
-    return remember(key) {
-        GeometryEditor().apply(init)
-    }
-}
-
 
 @Preview
 @Composable
