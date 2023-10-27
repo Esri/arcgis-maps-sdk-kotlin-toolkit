@@ -31,7 +31,7 @@ internal class GroupProperties(
 
 internal class BaseGroupState(
     properties: GroupProperties,
-    fieldStates: List<BaseFieldState>
+    val fieldStates: Map<Int, BaseFieldState?>
 ) {
     val label = properties.label
 
@@ -40,7 +40,7 @@ internal class BaseGroupState(
     val expanded = properties.expanded
 
     companion object {
-        fun Saver(): Saver<BaseGroupState, Any> = listSaver(
+        fun Saver(fieldStates: Map<Int, BaseFieldState?>): Saver<BaseGroupState, Any> = listSaver(
             save = {
                 listOf(it.label, it.description, it.expanded)
             },
@@ -52,7 +52,7 @@ internal class BaseGroupState(
                 )
                 BaseGroupState(
                     properties = properties,
-                    fieldStates = emptyList()
+                    fieldStates = fieldStates
                 )
             }
         )
@@ -61,9 +61,10 @@ internal class BaseGroupState(
 
 @Composable
 internal fun rememberBaseGroupState(
-    group: GroupFormElement
+    group: GroupFormElement,
+    fieldStates: Map<Int, BaseFieldState?>
 ): BaseGroupState = rememberSaveable(
-    saver = BaseGroupState.Saver()
+    saver = BaseGroupState.Saver(fieldStates)
 ) {
     BaseGroupState(
         properties = GroupProperties(
@@ -71,6 +72,6 @@ internal fun rememberBaseGroupState(
             description = group.description,
             expanded = group.initialState == FormGroupState.Expanded
         ),
-        fieldStates = emptyList()
+        fieldStates = fieldStates
     )
 }

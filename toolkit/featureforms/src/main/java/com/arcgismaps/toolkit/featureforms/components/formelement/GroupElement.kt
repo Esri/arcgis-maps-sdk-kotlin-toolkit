@@ -56,6 +56,7 @@ import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormElement
 import com.arcgismaps.mapping.featureforms.FormGroupState
 import com.arcgismaps.mapping.featureforms.GroupFormElement
+import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.BaseGroupState
 import com.arcgismaps.toolkit.featureforms.id
 import com.arcgismaps.toolkit.featureforms.rememberFieldStates
@@ -72,6 +73,7 @@ internal fun GroupElement(
             label = state.label,
             description = state.description,
             expanded = state.expanded,
+            fieldStates = state.fieldStates,
             modifier = modifier
         )
     }
@@ -82,6 +84,7 @@ private fun GroupElement(
     label: String,
     description: String,
     expanded: Boolean,
+    fieldStates : Map<Int, BaseFieldState?>,
     modifier: Modifier = Modifier,
 ) {
     var contextExpanded by remember {
@@ -105,7 +108,9 @@ private fun GroupElement(
         ) {
             contextExpanded = !contextExpanded
         }
-        GroupElementContent(isVisible = contextExpanded)
+        GroupElementContent(isVisible = contextExpanded) {
+
+        }
     }
 }
 
@@ -139,23 +144,15 @@ private fun GroupElementHeader(
 @Composable
 private fun GroupElementContent(
     isVisible: Boolean,
+    content: @Composable () -> Unit
 ) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     if (isVisible) {
         Column(
             modifier = Modifier
                 .background(color = Color.LightGray)
                 .fillMaxSize()
         ) {
-            Text(text = "Hello")
-//            formElements.forEach { formElement ->
-//                if (formElement is FieldFormElement) {
-//                    states[formElement.id]?.let { state ->
-//                        FieldElement(field = formElement, state = state)
-//                    }
-//                }
-//            }
+            content()
         }
     }
 }
@@ -166,6 +163,7 @@ private fun GroupElementPreview() {
     GroupElement(
         label = "Title",
         description = "Description",
-        expanded = false
+        expanded = false,
+        fieldStates = mutableMapOf()
     )
 }

@@ -162,7 +162,11 @@ internal fun FeatureFormContent(
         context = context,
         scope = scope
     )
-    val groupStateMap = rememberGroupStates(form = form)
+    val groupStateMap = rememberGroupStates(
+        form = form,
+        context = context,
+        scope = scope
+    )
     var dialogType: DialogType by rememberSaveable {
         mutableStateOf(DialogType.NoDialog)
     }
@@ -244,14 +248,22 @@ private fun FeatureFormBody(
 
 @Composable
 internal fun rememberGroupStates(
-    form: FeatureForm
+    form: FeatureForm,
+    context: Context,
+    scope: CoroutineScope,
 ): Map<Int, BaseGroupState> {
     return form.elements.filterIsInstance<GroupFormElement>().associateBy(
         {
             it.id
         },
         {
-            rememberBaseGroupState(group = it)
+            val fieldStates = rememberFieldStates(
+                form = form,
+                elements = it.formElements,
+                context = context,
+                scope = scope
+            )
+            rememberBaseGroupState(group = it, fieldStates)
         }
     )
 }
