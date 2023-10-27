@@ -1,5 +1,6 @@
 package com.arcgismaps.toolkit.featureformsapp.screens.map
 
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -57,7 +58,12 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                     scope.launch { mapViewModel.rollbackEdits(EditingTransactionState.NotEditing) }
                 },
                 onSave = {
-                    scope.launch { mapViewModel.commitEdits(EditingTransactionState.NotEditing) }
+                    scope.launch {
+                        mapViewModel.commitEdits(EditingTransactionState.NotEditing)
+                            .onFailure {
+                                Log.w("Forms","applying edits from feature form failed with ${it.message}")
+                            }
+                    }
                 }) {
                 onBackPressed()
             }
