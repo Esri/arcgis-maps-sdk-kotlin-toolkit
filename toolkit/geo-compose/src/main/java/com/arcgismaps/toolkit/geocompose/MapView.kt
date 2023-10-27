@@ -36,6 +36,7 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.view.LocationDisplay
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.MapViewInteractionOptions
+import com.arcgismaps.mapping.view.WrapAroundMode
 import kotlinx.coroutines.launch
 
 /**
@@ -50,6 +51,7 @@ public val MapViewInteractionOptionDefaults: MapViewInteractionOptions = MapView
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable
  * @param locationDisplay the [LocationDisplay] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param mapViewInteractionOptions the [MapViewInteractionOptions] used by this composable [com.arcgismaps.toolkit.geocompose.MapView]
+ * @param wrapAroundMode the [WrapAroundMode] to specify whether continuous panning across the international date line is enabled
  * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
  * @param overlay the composable overlays to display on top of the composable MapView. Example, a compass, floorfilter etc.
  * @since 200.3.0
@@ -60,6 +62,7 @@ public fun MapView(
     arcGISMap: ArcGISMap? = null,
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     mapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptionDefaults,
+    wrapAroundMode: WrapAroundMode = WrapAroundMode.EnabledWhenSupported,
     onViewpointChanged: (() -> Unit)? = null,
     overlay: @Composable () -> Unit = {}
 ) {
@@ -79,6 +82,7 @@ public fun MapView(
                 it.map = arcGISMap
                 it.interactionOptions = mapViewInteractionOptions
                 it.locationDisplay = locationDisplay
+                it.wrapAroundMode = wrapAroundMode
             })
 
         overlay()
