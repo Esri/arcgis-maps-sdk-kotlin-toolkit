@@ -42,6 +42,7 @@ import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.mapping.featureforms.FormElement
 import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.featureforms.RadioButtonsFormInput
 import com.arcgismaps.mapping.featureforms.SwitchFormInput
@@ -50,6 +51,8 @@ import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.components.formelement.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.formelement.GroupElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
+import com.arcgismaps.toolkit.featureforms.components.base.BaseGroupState
+import com.arcgismaps.toolkit.featureforms.components.base.rememberBaseGroupState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.CodedValueFieldState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberCodedValueFieldState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberRadioButtonFieldState
@@ -153,11 +156,22 @@ internal fun FeatureFormContent(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val states = rememberFieldStates(form = form, context = context, scope = scope)
+    val fieldStateMap = rememberFieldStates(
+        form = form,
+        elements = form.elements,
+        context = context,
+        scope = scope
+    )
+    val groupStateMap = rememberGroupStates(form = form)
     var dialogType: DialogType by rememberSaveable {
         mutableStateOf(DialogType.NoDialog)
     }
-    FeatureFormBody(form = form, states = states, modifier = modifier) { state, id ->
+    FeatureFormBody(
+        form = form,
+        fieldStateMap = fieldStateMap,
+        groupStateMap = groupStateMap,
+        modifier = modifier
+    ) { state, id ->
         if (state is DateTimeFieldState) {
             dialogType = DialogType.DatePickerDialog(id)
         } else if (state is CodedValueFieldState) {
@@ -167,7 +181,7 @@ internal fun FeatureFormContent(
     FeatureFormDialog(
         dialogType = dialogType,
         state = dialogType.getStateKey()?.let { stateKey ->
-            states[stateKey]
+            fieldStateMap[stateKey]
         },
         onDismissRequest = {
             dialogType = DialogType.NoDialog
@@ -178,7 +192,8 @@ internal fun FeatureFormContent(
 @Composable
 private fun FeatureFormBody(
     form: FeatureForm,
-    states: Map<Int, BaseFieldState?>,
+    fieldStateMap: Map<Int, BaseFieldState?>,
+    groupStateMap: Map<Int, BaseGroupState>,
     modifier: Modifier = Modifier,
     onFieldDialogRequest: ((BaseFieldState, Int) -> Unit)? = null
 ) {
@@ -201,9 +216,9 @@ private fun FeatureFormBody(
             state = lazyListState
         ) {
             items(form.elements) { formElement ->
-                when(formElement) {
+                when (formElement) {
                     is FieldFormElement -> {
-                        val state = states[formElement.id]
+                        val state = fieldStateMap[formElement.id]
                         if (state != null) {
                             FieldElement(
                                 field = formElement,
@@ -214,8 +229,12 @@ private fun FeatureFormBody(
                             )
                         }
                     }
+
                     is GroupFormElement -> {
-                        GroupElement(formElement, form)
+                        val state = groupStateMap[formElement.id]
+                        if (state != null) {
+                            GroupElement(formElement, state)
+                        }
                     }
                 }
             }
@@ -224,12 +243,27 @@ private fun FeatureFormBody(
 }
 
 @Composable
-private fun rememberFieldStates(
+internal fun rememberGroupStates(
+    form: FeatureForm
+): Map<Int, BaseGroupState> {
+    return form.elements.filterIsInstance<GroupFormElement>().associateBy(
+        {
+            it.id
+        },
+        {
+            rememberBaseGroupState(group = it)
+        }
+    )
+}
+
+@Composable
+internal fun rememberFieldStates(
     form: FeatureForm,
+    elements: List<FormElement>,
     context: Context,
     scope: CoroutineScope
 ): Map<Int, BaseFieldState?> {
-    return form.elements.filterIsInstance<FieldFormElement>().associateBy(
+    return elements.filterIsInstance<FieldFormElement>().associateBy(
         { fieldElement ->
             fieldElement.id
         },
@@ -324,4 +358,16 @@ private fun NoDataPreview() {
 internal val FieldFormElement.id: Int
     get() {
         return Objects.hash(fieldName, label, description, hint)
+    }
+
+/**
+ * Unique id for each form element.
+ */
+internal val GroupFormElement.id: Int
+    get() {
+        return Objects.hash(
+            formElements.forEach { if (it is FieldFormElement) it.id },
+            label,
+            description
+        )
     }
