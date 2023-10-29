@@ -124,6 +124,17 @@ public fun MapView(
     }
 
     val currentViewPointChanged by rememberUpdatedState(onViewpointChanged)
+    val currentIsInteracting by rememberUpdatedState(isInteracting)
+    val currentOnRotate by rememberUpdatedState(onRotate)
+    val currentOnScale by rememberUpdatedState(onScale)
+    val currentOnUp by rememberUpdatedState(onUp)
+    val currentOnDown by rememberUpdatedState(onDown)
+    val currentSingleTapConfirmed by rememberUpdatedState(onSingleTapConfirmed)
+    val currentOnDoubleTap by rememberUpdatedState(onDoubleTap)
+    val currentOnLongPress by rememberUpdatedState(onLongPress)
+    val currentOnTwoPointerTap by rememberUpdatedState(onTwoPointerTap)
+    val currentOnPan by rememberUpdatedState(onPan)
+
     LaunchedEffect(Unit) {
         launch {
             mapView.viewpointChanged.collect {
@@ -132,20 +143,77 @@ public fun MapView(
                 }
             }
         }
-        setupCallbacksForGestureEvents(
-            mapView,
-            this,
-            isInteracting,
-            onRotate,
-            onScale,
-            onUp,
-            onDown,
-            onSingleTapConfirmed,
-            onDoubleTap,
-            onLongPress,
-            onTwoPointerTap,
-            onPan
-        )
+        // setup callback for Gesture Events
+        launch(Dispatchers.Main.immediate) {
+            mapView.isInteracting.collect { isUserInteracting ->
+                currentIsInteracting?.let {
+                    it(isUserInteracting)
+                }
+            }
+        }
+        launch(Dispatchers.Main.immediate) {
+            mapView.onRotate.collect { rotationChangeEvent ->
+                currentOnRotate?.let {
+                    it(rotationChangeEvent)
+                }
+            }
+        }
+        launch(Dispatchers.Main.immediate) {
+            mapView.onScale.collect { scaleChangeEvent ->
+                currentOnScale?.let {
+                    it(scaleChangeEvent)
+                }
+            }
+        }
+        launch(Dispatchers.Main.immediate) {
+            mapView.onUp.collect { upEvent ->
+                currentOnUp?.let {
+                    it(upEvent)
+                }
+            }
+        }
+        launch(Dispatchers.Main.immediate) {
+            mapView.onDown.collect { downEvent ->
+                currentOnDown?.let {
+                    it(downEvent)
+                }
+            }
+        }
+        launch(Dispatchers.Main.immediate) {
+            mapView.onSingleTapConfirmed.collect { singleTapConfirmedEvent ->
+                currentSingleTapConfirmed?.let {
+                    it(singleTapConfirmedEvent)
+                }
+            }
+        }
+        launch(Dispatchers.Main.immediate) {
+            mapView.onDoubleTap.collect { doubleTapEvent ->
+                currentOnDoubleTap?.let {
+                    it(doubleTapEvent)
+                }
+            }
+        }
+        launch(Dispatchers.Main.immediate) {
+            mapView.onLongPress.collect { longPressEvent ->
+                currentOnLongPress?.let {
+                    it(longPressEvent)
+                }
+            }
+        }
+        launch(Dispatchers.Main.immediate) {
+            mapView.onTwoPointerTap.collect { twoPointerTapEvent ->
+                currentOnTwoPointerTap?.let {
+                    it(twoPointerTapEvent)
+                }
+            }
+        }
+        launch(Dispatchers.Main.immediate) {
+            mapView.onPan.collect { panChangeEvent ->
+                currentOnPan?.let {
+                    it(panChangeEvent)
+                }
+            }
+        }
     }
 }
 
@@ -169,99 +237,6 @@ public inline fun rememberLocationDisplay(
     }
     return remember(key) {
         LocationDisplay().apply(init)
-    }
-}
-
-/**
- * Sets up the callbacks for all the Gesture Events.
- *
- * @since 200.3.0
- */
-private fun setupCallbacksForGestureEvents(
-    mapView: MapView,
-    composeScope: CoroutineScope,
-    isInteracting: ((Boolean) -> Unit)?,
-    onRotate: ((RotationChangeEvent) -> Unit)?,
-    onScale: ((ScaleChangeEvent) -> Unit)?,
-    onUp: ((UpEvent) -> Unit)?,
-    onDown: ((DownEvent) -> Unit)?,
-    onSingleTapConfirmed: ((SingleTapConfirmedEvent) -> Unit)?,
-    onDoubleTap: ((DoubleTapEvent) -> Unit)?,
-    onLongPress: ((LongPressEvent) -> Unit)?,
-    onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)?,
-    onPan: ((PanChangeEvent) -> Unit)?
-) {
-    with(composeScope) {
-        launch(Dispatchers.Main.immediate) {
-            mapView.isInteracting.collect { isUserInteracting ->
-                isInteracting?.let {
-                    it(isUserInteracting)
-                }
-            }
-        }
-        launch(Dispatchers.Main.immediate) {
-            mapView.onRotate.collect { rotationChangeEvent ->
-                onRotate?.let {
-                    it(rotationChangeEvent)
-                }
-            }
-        }
-        launch(Dispatchers.Main.immediate) {
-            mapView.onScale.collect { scaleChangeEvent ->
-                onScale?.let {
-                    it(scaleChangeEvent)
-                }
-            }
-        }
-        launch(Dispatchers.Main.immediate) {
-            mapView.onUp.collect { upEvent ->
-                onUp?.let {
-                    it(upEvent)
-                }
-            }
-        }
-        launch(Dispatchers.Main.immediate) {
-            mapView.onDown.collect { downEvent ->
-                onDown?.let {
-                    it(downEvent)
-                }
-            }
-        }
-        launch(Dispatchers.Main.immediate) {
-            mapView.onSingleTapConfirmed.collect { singleTapConfirmedEvent ->
-                onSingleTapConfirmed?.let {
-                    it(singleTapConfirmedEvent)
-                }
-            }
-        }
-        launch(Dispatchers.Main.immediate) {
-            mapView.onDoubleTap.collect { doubleTapEvent ->
-                onDoubleTap?.let {
-                    it(doubleTapEvent)
-                }
-            }
-        }
-        launch(Dispatchers.Main.immediate) {
-            mapView.onLongPress.collect { longPressEvent ->
-                onLongPress?.let {
-                    it(longPressEvent)
-                }
-            }
-        }
-        launch(Dispatchers.Main.immediate) {
-            mapView.onTwoPointerTap.collect { twoPointerTapEvent ->
-                onTwoPointerTap?.let {
-                    it(twoPointerTapEvent)
-                }
-            }
-        }
-        launch(Dispatchers.Main.immediate) {
-            mapView.onPan.collect { panChangeEvent ->
-                onPan?.let {
-                    it(panChangeEvent)
-                }
-            }
-        }
     }
 }
 
