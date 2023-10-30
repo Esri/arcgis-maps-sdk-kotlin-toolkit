@@ -36,6 +36,7 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.view.LocationDisplay
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.MapViewInteractionOptions
+import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
 import kotlinx.coroutines.launch
 
 /**
@@ -49,6 +50,7 @@ public val MapViewInteractionOptionDefaults: MapViewInteractionOptions = MapView
  * @param modifier Modifier to be applied to the composable MapView
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable
  * @param locationDisplay the [LocationDisplay] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
+ * @param geometryEditor the [GeometryEditor] used by the composable [com.arcgismaps.toolkit.geocompose.MapView] to create and edit geometries by user interaction.
  * @param mapViewInteractionOptions the [MapViewInteractionOptions] used by this composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
  * @param overlay the composable overlays to display on top of the composable MapView. Example, a compass, floorfilter etc.
@@ -59,6 +61,7 @@ public fun MapView(
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap? = null,
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
+    geometryEditor: GeometryEditor? = null,
     mapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptionDefaults,
     onViewpointChanged: (() -> Unit)? = null,
     overlay: @Composable () -> Unit = {}
@@ -67,18 +70,15 @@ public fun MapView(
     val context = LocalContext.current
     val mapView = remember { MapView(context) }
 
-    Box(modifier = Modifier.semantics {
-        contentDescription = "MapViewContainer"
-    }) {
-        AndroidView(modifier = modifier
-            .semantics {
-                contentDescription = "MapView"
-            },
+    Box(modifier = Modifier.semantics { contentDescription = "MapContainer" }) {
+        AndroidView(
+            modifier = modifier.semantics { contentDescription = "MapView" },
             factory = { mapView },
             update = {
                 it.map = arcGISMap
                 it.interactionOptions = mapViewInteractionOptions
                 it.locationDisplay = locationDisplay
+                it.geometryEditor = geometryEditor
             })
 
         overlay()
