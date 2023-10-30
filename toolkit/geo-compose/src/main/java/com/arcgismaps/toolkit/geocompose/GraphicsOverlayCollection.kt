@@ -28,8 +28,8 @@ import kotlinx.coroutines.flow.asSharedFlow
  *
  * @since 200.3.0
  */
-public class GraphicsOverlayMutableList :
-    AbstractMutableList<GraphicsOverlay>() {
+public class GraphicsOverlayCollection :
+    Iterable<GraphicsOverlay> {
 
     private val graphicsOverlays = mutableListOf<GraphicsOverlay>()
 
@@ -43,42 +43,28 @@ public class GraphicsOverlayMutableList :
      */
     internal val changed: SharedFlow<ChangedEvent> = _changed.asSharedFlow()
 
-    override fun add(element: GraphicsOverlay): Boolean {
-        val boolean = graphicsOverlays.add(element)
-        _changed.tryEmit(ChangedEvent.Added(element))
-        return boolean
+    override fun iterator(): Iterator<GraphicsOverlay> {
+        return graphicsOverlays.iterator()
     }
 
-    override fun add(index: Int, element: GraphicsOverlay) {
-        graphicsOverlays.add(index, element)
-        _changed.tryEmit(ChangedEvent.Inserted(index, element))
+    public fun add(element: GraphicsOverlay): Boolean {
+        return if (graphicsOverlays.add(element)) {
+            _changed.tryEmit(ChangedEvent.Added(element))
+            true
+        } else false
     }
 
-    override fun get(index: Int): GraphicsOverlay {
-        return graphicsOverlays[index]
+    public fun remove(element: GraphicsOverlay): Boolean {
+        return if (graphicsOverlays.remove(element)) {
+            _changed.tryEmit(ChangedEvent.Removed(element))
+            true
+        } else false
     }
 
-    override fun set(index: Int, element: GraphicsOverlay): GraphicsOverlay {
-        graphicsOverlays[index] = element
-        _changed.tryEmit(ChangedEvent.Updated(index, element))
-        return element
-    }
-
-    override fun removeAt(index: Int): GraphicsOverlay {
-        val element = graphicsOverlays[index]
-        remove(element)
-        return element
-    }
-
-    override fun remove(element: GraphicsOverlay): Boolean {
-        _changed.tryEmit(ChangedEvent.Removed(element))
-        return graphicsOverlays.remove(element)
-    }
-
-    override val size: Int
+    public val size: Int
         get() = graphicsOverlays.size
 
-    override fun clear() {
+    public fun clear() {
         graphicsOverlays.clear()
         _changed.tryEmit(ChangedEvent.Cleared())
     }
@@ -89,14 +75,9 @@ public class GraphicsOverlayMutableList :
      *
      * @since 200.3.0
      */
-    internal sealed class ChangedEvent(
-        internal val element: GraphicsOverlay? = null,
-        internal val index: Int? = null
-    ) {
+    internal sealed class ChangedEvent(internal val element: GraphicsOverlay? = null) {
         class Added(element: GraphicsOverlay) : ChangedEvent(element)
-        class Inserted(index: Int, element: GraphicsOverlay) : ChangedEvent(element, index)
         class Removed(element: GraphicsOverlay) : ChangedEvent(element)
-        class Updated(index: Int, element: GraphicsOverlay) : ChangedEvent(element, index)
         class Cleared : ChangedEvent()
     }
 }

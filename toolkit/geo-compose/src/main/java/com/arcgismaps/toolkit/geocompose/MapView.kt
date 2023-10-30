@@ -48,7 +48,7 @@ public val MapViewInteractionOptionDefaults: MapViewInteractionOptions = MapView
  *
  * @param modifier Modifier to be applied to the composable MapView
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable
- * @param graphicsOverlays the [GraphicsOverlayMutableList] used by this composable [com.arcgismaps.toolkit.geocompose.MapView]
+ * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param locationDisplay the [LocationDisplay] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param mapViewInteractionOptions the [MapViewInteractionOptions] used by this composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
@@ -59,7 +59,7 @@ public val MapViewInteractionOptionDefaults: MapViewInteractionOptions = MapView
 public fun MapView(
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap? = null,
-    graphicsOverlays: GraphicsOverlayMutableList = rememberGraphicOverlays(),
+    graphicsOverlays: GraphicsOverlayCollection? = null,
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     mapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptionDefaults,
     onViewpointChanged: (() -> Unit)? = null,
@@ -104,39 +104,23 @@ public fun MapView(
     LaunchedEffect(graphicsOverlays) {
         // sync up the MapView with the new graphics overlays
         mapView.graphicsOverlays.clear()
-        graphicsOverlays.forEach {
+        graphicsOverlays?.forEach {
             mapView.graphicsOverlays.add(it)
         }
         // start observing graphicsOverlays for subsequent changes
-        graphicsOverlays.changed.collect { changedEvent ->
+        graphicsOverlays?.changed?.collect { changedEvent ->
             when (changedEvent) {
                 // On GraphicsOverlay added:
-                is GraphicsOverlayMutableList.ChangedEvent.Added ->
-                    changedEvent.element?.let { graphicsOverlay ->
-                        mapView.graphicsOverlays.add(graphicsOverlay)
-                    }
-
-                // On GraphicsOverlay inserted:
-                is GraphicsOverlayMutableList.ChangedEvent.Inserted ->
-                    if (changedEvent.index != null) {
-                        changedEvent.element?.let { graphicsOverlay ->
-                            mapView.graphicsOverlays.add(changedEvent.index, graphicsOverlay)
-                        }
-                    }
+                is GraphicsOverlayCollection.ChangedEvent.Added ->
+                    changedEvent.element?.let { mapView.graphicsOverlays.add(it) }
 
                 // On GraphicsOverlay removed:
-                is GraphicsOverlayMutableList.ChangedEvent.Removed ->
+                is GraphicsOverlayCollection.ChangedEvent.Removed ->
                     mapView.graphicsOverlays.remove(changedEvent.element)
 
-                // On GraphicsOverlay cleared:
-                is GraphicsOverlayMutableList.ChangedEvent.Cleared ->
+                // On GraphicsOverlays cleared:
+                is GraphicsOverlayCollection.ChangedEvent.Cleared ->
                     mapView.graphicsOverlays.clear()
-
-                // On GraphicsOverlay updated:
-                is GraphicsOverlayMutableList.ChangedEvent.Updated ->
-                    if (changedEvent.index != null && changedEvent.element != null) {
-                        mapView.graphicsOverlays[changedEvent.index] = changedEvent.element
-                    }
             }
         }
     }
@@ -164,22 +148,6 @@ public inline fun rememberLocationDisplay(
         LocationDisplay().apply(init)
     }
 }
-
-/**
- * Create and [remember] a [GraphicsOverlayMutableList].
- * Checks that [ArcGISEnvironment.applicationContext] is set and if not, sets one.
- * [init] will be called when the [GraphicsOverlayMutableList] is first created to configure its
- * initial state.
- *
- * @param key invalidates the remembered GraphicsOverlayMutableList if different from the previous composition
- * @param init called when the [GraphicsOverlayMutableList] is created to configure its initial state
- * @since 200.3.0
- */
-@Composable
-public inline fun rememberGraphicOverlays(
-    key: Any? = null,
-    crossinline init: GraphicsOverlayMutableList.() -> Unit = {}
-): GraphicsOverlayMutableList = remember(key) { GraphicsOverlayMutableList().apply(init) }
 
 @Preview
 @Composable
