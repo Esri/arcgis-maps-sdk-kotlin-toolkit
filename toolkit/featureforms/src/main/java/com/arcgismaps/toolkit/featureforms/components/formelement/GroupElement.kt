@@ -16,7 +16,10 @@
 
 package com.arcgismaps.toolkit.featureforms.components.formelement
 
-import androidx.compose.foundation.border
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,8 +27,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.KeyboardArrowDown
-import androidx.compose.material.icons.rounded.KeyboardArrowUp
+import androidx.compose.material.icons.rounded.ExpandLess
+import androidx.compose.material.icons.rounded.ExpandMore
+import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -73,15 +77,12 @@ private fun GroupElement(
     onClick: () -> Unit,
     onDialogRequest: ((BaseFieldState, Int) -> Unit)? = null
 ) {
-    Column(
+    Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 10.dp)
-            .border(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.outline,
-                shape = RoundedCornerShape(5.dp)
-            ),
+            .padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 10.dp),
+        shape = RoundedCornerShape(5.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
     ) {
         GroupElementHeader(
             modifier = Modifier.fillMaxWidth(),
@@ -90,11 +91,15 @@ private fun GroupElement(
             isExpanded = expanded,
             onClick = onClick
         )
-        GroupElementContent(expanded = expanded) {
-            fieldStates.forEach { (key, state) ->
-                if (state != null) {
-                    FieldElement(state = state) {
-                        onDialogRequest?.invoke(state, key)
+        AnimatedVisibility(visible = expanded) {
+            Column(
+                modifier = Modifier.background(MaterialTheme.colorScheme.background)
+            ) {
+                fieldStates.forEach { (key, state) ->
+                    if (state != null) {
+                        FieldElement(state = state) {
+                            onDialogRequest?.invoke(state, key)
+                        }
                     }
                 }
             }
@@ -121,28 +126,20 @@ private fun GroupElementHeader(
             Text(text = title, style = MaterialTheme.typography.bodyMedium)
             Text(text = description, style = MaterialTheme.typography.bodySmall)
         }
-        if (isExpanded) {
-            Icon(imageVector = Icons.Rounded.KeyboardArrowUp, contentDescription = null)
-        } else {
-            Icon(imageVector = Icons.Rounded.KeyboardArrowDown, contentDescription = null)
+        Crossfade(targetState = isExpanded, label = "expanded-icon-anim") {
+            Icon(
+                imageVector = if (it) {
+                    Icons.Rounded.ExpandLess
+                } else {
+                    Icons.Rounded.ExpandMore
+                },
+                contentDescription = null
+            )
         }
     }
 }
 
-@Composable
-private fun GroupElementContent(
-    expanded: Boolean,
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
-) {
-    if (expanded) {
-        Column(modifier = modifier) {
-            content()
-        }
-    }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFFFFFF, showSystemUi = true)
+@Preview(showBackground = true, backgroundColor = 0xFFFFFF)
 @Composable
 private fun GroupElementPreview() {
     GroupElement(
