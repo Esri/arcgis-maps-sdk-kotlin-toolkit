@@ -48,7 +48,7 @@ public val MapViewInteractionOptionDefaults: MapViewInteractionOptions = MapView
 /**
  * The default instance of [ViewLabelProperties]
  */
-public val MapViewLabelPropertiesDefaults: ViewLabelProperties = ViewLabelProperties()
+public val DefaultMapViewLabelProperties: ViewLabelProperties = ViewLabelProperties()
 
 /**
  * A compose equivalent of the [MapView].
@@ -58,7 +58,7 @@ public val MapViewLabelPropertiesDefaults: ViewLabelProperties = ViewLabelProper
  * @param locationDisplay the [LocationDisplay] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param geometryEditor the [GeometryEditor] used by the composable [com.arcgismaps.toolkit.geocompose.MapView] to create and edit geometries by user interaction.
  * @param mapViewInteractionOptions the [MapViewInteractionOptions] used by this composable [com.arcgismaps.toolkit.geocompose.MapView]
- * @param viewLabelProperties the [ViewLabelProperties] used by the composable [com.arcgismaps.toolkit.geocompose.MapView] to set the label property.
+ * @param viewLabelProperties the [ViewLabelProperties] used by the composable [com.arcgismaps.toolkit.geocompose.MapView].
  * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
  * @param overlay the composable overlays to display on top of the composable MapView. Example, a compass, floorfilter etc.
  * @since 200.3.0
@@ -70,7 +70,7 @@ public fun MapView(
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     geometryEditor: GeometryEditor? = null,
     mapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptionDefaults,
-    viewLabelProperties: ViewLabelProperties = MapViewLabelPropertiesDefaults,
+    viewLabelProperties: ViewLabelProperties = DefaultMapViewLabelProperties,
     onViewpointChanged: (() -> Unit)? = null,
     overlay: @Composable () -> Unit = {}
 ) {
