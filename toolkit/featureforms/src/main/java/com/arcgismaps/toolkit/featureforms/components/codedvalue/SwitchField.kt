@@ -34,8 +34,8 @@ import com.arcgismaps.toolkit.featureforms.components.base.BaseTextField
 
 @Composable
 internal fun SwitchField(state: SwitchFieldState, modifier: Modifier = Modifier) {
-    val valueCode by state.value.collectAsState()
-    val checkedState = valueCode == state.onValue.code!!.toString()
+    val codeName by state.value.collectAsState()
+    val checkedState = codeName == state.onValue.name
     val value = if (checkedState) state.onValue.name else state.offValue.name
     val isEditable by state.isEditable.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
@@ -63,10 +63,10 @@ internal fun SwitchField(state: SwitchFieldState, modifier: Modifier = Modifier)
             onCheckedChange = { newState ->
                 val newValue = (
                     if (newState)
-                        state.onValue.code?.toString()
+                        state.onValue.name
                     else
-                        state.offValue.code?.toString()
-                    ) ?: throw IllegalStateException("coded value code must not be null")
+                        state.offValue.name
+                    )
                 state.onValueChanged(newValue)
             },
             modifier = Modifier
@@ -76,15 +76,15 @@ internal fun SwitchField(state: SwitchFieldState, modifier: Modifier = Modifier)
         )
     }
     
-    LaunchedEffect(valueCode) {
+    LaunchedEffect(codeName) {
         interactionSource.interactions.collect {
             if (it is PressInteraction.Release) {
                 val newValue = (
                     if (checkedState)
-                        state.offValue.code?.toString()
+                        state.offValue.name
                     else
-                        state.onValue.code?.toString()
-                    ) ?: throw IllegalStateException("coded value code must not be null")
+                        state.onValue.name
+                    )
                 state.onValueChanged(newValue)
             }
         }

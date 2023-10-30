@@ -151,7 +151,7 @@ internal fun ComboBoxDialog(
     noValueOption: FormInputNoValueOption,
     noValueLabel: String,
     keyboardType: KeyboardType,
-    onValueChange: (Any?) -> Unit,
+    onValueChange: (String) -> Unit,
     onDismissRequest: () -> Unit
 ) {
     var searchText by rememberSaveable { mutableStateOf("") }
@@ -254,11 +254,10 @@ internal fun ComboBoxDialog(
                                 .fillMaxWidth()
                                 .clickable {
                                     // if the no value label was selected, set the value to be empty
-                                    onValueChange(code)
+                                    onValueChange(name)
                                 },
                             trailingContent = {
-                                if ((code?.toString()
-                                        ?: "") == initialValue || (name == noValueLabel && initialValue.isEmpty())
+                                if (name == initialValue || (name == noValueLabel && initialValue.isEmpty())
                                 ) {
                                     Icon(
                                         imageVector = Icons.Outlined.Check,

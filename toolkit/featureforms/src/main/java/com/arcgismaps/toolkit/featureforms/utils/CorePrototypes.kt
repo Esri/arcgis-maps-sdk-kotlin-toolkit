@@ -16,13 +16,17 @@
 
 package com.arcgismaps.toolkit.featureforms.utils
 
+import android.util.Log
 import com.arcgismaps.data.Domain
-import com.arcgismaps.data.Feature
 import com.arcgismaps.data.FieldType
 import com.arcgismaps.data.RangeDomain
 import com.arcgismaps.mapping.featureforms.FeatureForm
-import com.arcgismaps.mapping.featureforms.FeatureFormDefinition
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import java.time.Instant
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
@@ -31,15 +35,6 @@ import kotlin.math.roundToLong
  * This file contains logic which will eventually be provided by core. Do not add anything to this file that isn't
  * scheduled for core implementation. This entire file will be removed before the 200.3.0 release.
  */
-
-/**
- * Retrieve the value of a [FieldFormElement] from the [FeatureFormDefinition].
- * This call is likely to be pushed into core.
- */
-@Suppress("unused")
-internal fun FeatureForm.getElementValue(formElement: FieldFormElement): Any? {
-    return feature.attributes[formElement.fieldName]
-}
 
 internal fun FeatureForm.fieldIsNullable(element: FieldFormElement): Boolean {
     val isNullable = feature.featureTable?.getField(element.fieldName)?.nullable
@@ -51,13 +46,19 @@ internal fun FeatureForm.fieldIsNullable(element: FieldFormElement): Boolean {
 
 /**
  * Set the value in the feature's attribute map. This call can only be made when a transaction is open.
- * Committing the transaction will either discard this edit or persist it in the associated geodatabase,
- * and refresh the feature.
+ * Catches and swallows exceptions. Remove this function when [FieldFormElement.updateValue] no longer throws.
  *
- * This call is likely to be pushed into core.
+ * @param value the value to be set on the attribute represented by this FieldFormElement.
  */
-internal fun FeatureForm.editValue(formElement: FieldFormElement, value: Any?) {
-    feature.castAndSetAttributeValue(value, formElement.fieldName)
+internal fun FeatureForm.editValue(element: FieldFormElement, value: Any?) {
+    try {
+        element.updateValue(cast(value, fieldType(element)))
+    } catch (e: Exception) {
+        //TODO: remove before release. (and also the try catch)
+        Log.w(
+            "Form.editValue", "caught ${e.message} while updating value of field ${element.label} to $value"
+        )
+    }
 }
 
 internal fun FeatureForm.fieldType(element: FieldFormElement): FieldType {
@@ -70,6 +71,10 @@ internal fun FeatureForm.fieldType(element: FieldFormElement): FieldType {
 
 internal fun FeatureForm.domain(element: FieldFormElement): Domain? =
     feature.featureTable?.getField(element.fieldName)?.domain
+
+internal fun FieldFormElement.formattedValueFlow(scope: CoroutineScope): StateFlow<String> =
+    value.map { formattedValue }.stateIn(scope, SharingStarted.Eagerly, formattedValue)
+
 
 internal val FieldType.isNumeric: Boolean
     get() {
@@ -150,16 +155,10 @@ internal val RangeDomain.asLongTuple: MinMax<Long>
 
 internal data class MinMax<T: Number>(val min: T?, val max: T?)
 
-private fun Feature.castAndSetAttributeValue(value: Any?, key: String) {
-    val field = featureTable?.getField(key) ?: run {
-        attributes[key] = value
-        return
-    }
-    
-    var finalValue = value
-    when (field.fieldType) {
+private fun cast(value: Any?, fieldType: FieldType): Any? =
+   when (fieldType) {
         FieldType.Int16 -> {
-            finalValue = when (value) {
+            when (value) {
                 is String -> value.toIntOrNull()?.toShort()
                 is Int -> value.toShort()
                 is Double -> value.roundToInt().toShort()
@@ -167,7 +166,7 @@ private fun Feature.castAndSetAttributeValue(value: Any?, key: String) {
             }
         }
         FieldType.Int32 -> {
-            finalValue = when (value) {
+            when (value) {
                 is String -> value.toIntOrNull()
                 is Int -> value
                 is Double -> value.roundToInt()
@@ -175,7 +174,7 @@ private fun Feature.castAndSetAttributeValue(value: Any?, key: String) {
             }
         }
         FieldType.Int64 -> {
-            finalValue = when (value) {
+            when (value) {
                 is String -> value.toLongOrNull()
                 is Int -> value.toLong()
                 is Double -> value.roundToLong()
@@ -183,7 +182,7 @@ private fun Feature.castAndSetAttributeValue(value: Any?, key: String) {
             }
         }
         FieldType.Float32 -> {
-            finalValue = when (value) {
+            when (value) {
                 is String -> value.toFloatOrNull()
                 is Int -> value.toFloat()
                 is Double -> value.toFloat()
@@ -191,21 +190,24 @@ private fun Feature.castAndSetAttributeValue(value: Any?, key: String) {
             }
         }
         FieldType.Float64 -> {
-            finalValue = when (value) {
+            when (value) {
                 is String -> value.toDoubleOrNull()
                 is Int -> value.toDouble()
                 is Float -> value.toDouble()
+                is Double -> value.toDouble()
                 else -> null
             }
         }
         FieldType.Date -> {
-            finalValue = when (value) {
+            when (value) {
                 is String -> value.toLongOrNull()?.let { Instant.ofEpochMilli(it) }
                 is Long -> Instant.ofEpochMilli(value)
+                is Instant -> value
                 else -> null
             }
         }
-        else -> Unit
+       FieldType.Text -> {
+           value?.toString()
+       }
+       else -> throw IllegalArgumentException("casting FieldFormElement value to $fieldType is not allowed")
     }
-    attributes[key] = finalValue
-}

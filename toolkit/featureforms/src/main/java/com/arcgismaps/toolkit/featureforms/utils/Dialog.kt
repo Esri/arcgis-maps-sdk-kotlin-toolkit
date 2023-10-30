@@ -142,8 +142,8 @@ internal fun FeatureFormDialog(
                         KeyboardType.Ascii
                     },
                     noValueLabel = state.noValueLabel.ifEmpty { stringResource(R.string.no_value) },
-                    onValueChange = { code ->
-                        state.onValueChanged(code?.toString() ?: "")
+                    onValueChange = { nameOrEmpty ->
+                        state.onValueChanged(nameOrEmpty)
                     },
                     onDismissRequest = onDismissRequest
                 )

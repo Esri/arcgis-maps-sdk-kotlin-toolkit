@@ -51,6 +51,7 @@ import com.arcgismaps.toolkit.featureforms.utils.asLongTuple
 import com.arcgismaps.toolkit.featureforms.utils.domain
 import com.arcgismaps.toolkit.featureforms.utils.editValue
 import com.arcgismaps.toolkit.featureforms.utils.fieldType
+import com.arcgismaps.toolkit.featureforms.utils.formattedValueFlow
 import com.arcgismaps.toolkit.featureforms.utils.isFloatingPoint
 import com.arcgismaps.toolkit.featureforms.utils.isIntegerType
 import com.arcgismaps.toolkit.featureforms.utils.isNumeric
@@ -403,7 +404,7 @@ internal class FormTextFieldState(
                         label = formElement.label,
                         placeholder = formElement.hint,
                         description = formElement.description,
-                        value = formElement.value,
+                        value = formElement.formattedValueFlow(scope),
                         required = formElement.isRequired,
                         editable = formElement.isEditable,
                         visible = formElement.isVisible,
@@ -446,7 +447,7 @@ internal fun rememberFormTextFieldState(
             label = field.label,
             placeholder = field.hint,
             description = field.description,
-            value = field.value,
+            value = field.formattedValueFlow(scope),
             editable = field.isEditable,
             required = field.isRequired,
             visible = field.isVisible,
