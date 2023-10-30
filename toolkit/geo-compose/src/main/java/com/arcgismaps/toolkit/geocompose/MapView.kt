@@ -47,7 +47,7 @@ public val MapViewInteractionOptionDefaults: MapViewInteractionOptions = MapView
 /**
  * The default instance of [SelectionProperties]
  */
-public val MapViewDefaultSelectionProperties: SelectionProperties = SelectionProperties()
+public val MapViewSelectionPropertiesDefaults: SelectionProperties = SelectionProperties()
 
 /**
  * A compose equivalent of the [MapView].
@@ -56,6 +56,7 @@ public val MapViewDefaultSelectionProperties: SelectionProperties = SelectionPro
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable
  * @param locationDisplay the [LocationDisplay] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param mapViewInteractionOptions the [MapViewInteractionOptions] used by this composable [com.arcgismaps.toolkit.geocompose.MapView]
+ * @param selectionProperties the [SelectionProperties] used by the composable [com.arcgismaps.toolkit.geocompose.MapView] to set a selection color.
  * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
  * @param overlay the composable overlays to display on top of the composable MapView. Example, a compass, floorfilter etc.
  * @since 200.3.0
@@ -66,7 +67,7 @@ public fun MapView(
     arcGISMap: ArcGISMap? = null,
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     mapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptionDefaults,
-    selectionProperties: SelectionProperties = MapViewDefaultSelectionProperties,
+    selectionProperties: SelectionProperties = MapViewSelectionPropertiesDefaults,
     onViewpointChanged: (() -> Unit)? = null,
     overlay: @Composable () -> Unit = {}
 ) {
