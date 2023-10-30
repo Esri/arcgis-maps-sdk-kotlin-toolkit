@@ -1,5 +1,7 @@
 package com.arcgismaps.toolkit.featureformsapp.screens.map
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -19,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,6 +36,7 @@ import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetValue
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.StandardBottomSheet
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.StandardBottomSheetLayout
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.rememberStandardBottomSheetState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -43,6 +47,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
     val editingFlow =
         remember { mapViewModel.transactionState.map { it is EditingTransactionState.Editing } }
     val inEditingMode by editingFlow.collectAsState(initial = false)
+    val context = LocalContext.current
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -57,7 +62,19 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                     scope.launch { mapViewModel.rollbackEdits(EditingTransactionState.NotEditing) }
                 },
                 onSave = {
-                    scope.launch { mapViewModel.commitEdits(EditingTransactionState.NotEditing) }
+                    scope.launch {
+                        mapViewModel.commitEdits(EditingTransactionState.NotEditing)
+                            .onFailure {
+                                Log.w("Forms", "applying edits from feature form failed with ${it.message}")
+                                launch(Dispatchers.Main) {
+                                    Toast.makeText(
+                                        context,
+                                        "applying edits from feature form failed with ${it.message}",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            }
+                    }
                 }) {
                 onBackPressed()
             }

@@ -116,13 +116,12 @@ private fun RadioButtonField(
             CompositionLocalProvider(
                 LocalContentColor provides colors.textColor(enabled = editable)
             ) {
-                options.forEach { (code, name) ->
+                options.forEach { (_, name) ->
                     RadioButtonRow(
                         value = name,
-                        selected = (code?.toString()
-                            ?: "") == value || (name == noValueLabel && value.isEmpty()),
+                        selected = name == value || (name == noValueLabel && value.isEmpty()),
                         enabled = editable,
-                        onClick = { onValueChanged(code?.toString() ?: "") }
+                        onClick = { onValueChanged(name) }
                     )
                 }
             }
