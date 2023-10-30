@@ -72,7 +72,7 @@ internal fun FeatureForm.fieldType(element: FieldFormElement): FieldType {
 internal fun FeatureForm.domain(element: FieldFormElement): Domain? =
     feature.featureTable?.getField(element.fieldName)?.domain
 
-internal fun FieldFormElement.formattedFlow(scope: CoroutineScope): StateFlow<String> =
+internal fun FieldFormElement.formattedValueFlow(scope: CoroutineScope): StateFlow<String> =
     value.map { formattedValue }.stateIn(scope, SharingStarted.Eagerly, formattedValue)
 
 
