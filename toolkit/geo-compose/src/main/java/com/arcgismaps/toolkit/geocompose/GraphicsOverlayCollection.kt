@@ -47,23 +47,45 @@ public class GraphicsOverlayCollection :
         return graphicsOverlays.iterator()
     }
 
-    public fun add(element: GraphicsOverlay): Boolean {
-        return if (graphicsOverlays.add(element)) {
-            _changed.tryEmit(ChangedEvent.Added(element))
+    /**
+     * Add a [graphicsOverlay] to the composable [MapView]'s graphics overlays.
+     *
+     * @return if the add operation succeeds, return true.
+     * @since 200.3.0
+     */
+    public fun add(graphicsOverlay: GraphicsOverlay): Boolean {
+        return if (graphicsOverlays.add(graphicsOverlay)) {
+            _changed.tryEmit(ChangedEvent.Added(graphicsOverlay))
             true
         } else false
     }
 
-    public fun remove(element: GraphicsOverlay): Boolean {
-        return if (graphicsOverlays.remove(element)) {
-            _changed.tryEmit(ChangedEvent.Removed(element))
+    /**
+     * Remove a [graphicsOverlay] from the composable [MapView]'s graphics overlays.
+     *
+     * @return if the remove operation succeeds, return true.
+     * @since 200.3.0
+     */
+    public fun remove(graphicsOverlay: GraphicsOverlay): Boolean {
+        return if (graphicsOverlays.remove(graphicsOverlay)) {
+            _changed.tryEmit(ChangedEvent.Removed(graphicsOverlay))
             true
         } else false
     }
 
+    /**
+     * Returns the size of this instance.
+     *
+     * @since 200.3.0
+     */
     public val size: Int
         get() = graphicsOverlays.size
 
+    /**
+     * Clears the list of [GraphicsOverlay] from the [MapView]
+     *
+     * @since 200.3.0
+     */
     public fun clear() {
         graphicsOverlays.clear()
         _changed.tryEmit(ChangedEvent.Cleared())
