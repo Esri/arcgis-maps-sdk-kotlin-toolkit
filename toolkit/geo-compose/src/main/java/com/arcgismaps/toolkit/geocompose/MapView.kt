@@ -61,7 +61,7 @@ public val MapViewInteractionOptionDefaults: MapViewInteractionOptions = MapView
 public fun MapView(
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap? = null,
-    graphicsOverlays: GraphicsOverlayCollection? = null,
+    graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     geometryEditor: GeometryEditor? = null,
     mapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptionDefaults,
@@ -105,14 +105,26 @@ public fun MapView(
         }
     }
 
-    LaunchedEffect(graphicsOverlays) {
+    GraphicsOverlaysUpdater(graphicsOverlays, mapView)
+}
+
+/**
+ * Update the [mapView]'s graphicsOverlays property to reflect changes made to the
+ * [graphicsOverlayCollection] based on the type of [GraphicsOverlayCollection.ChangedEvent]
+ */
+@Composable
+private fun GraphicsOverlaysUpdater(
+    graphicsOverlayCollection: GraphicsOverlayCollection,
+    mapView: MapView
+) {
+    LaunchedEffect(graphicsOverlayCollection) {
         // sync up the MapView with the new graphics overlays
         mapView.graphicsOverlays.clear()
-        graphicsOverlays?.forEach {
+        graphicsOverlayCollection.forEach {
             mapView.graphicsOverlays.add(it)
         }
         // start observing graphicsOverlays for subsequent changes
-        graphicsOverlays?.changed?.collect { changedEvent ->
+        graphicsOverlayCollection.changed.collect { changedEvent ->
             when (changedEvent) {
                 // On GraphicsOverlay added:
                 is GraphicsOverlayCollection.ChangedEvent.Added ->
@@ -151,6 +163,23 @@ public inline fun rememberLocationDisplay(
     return remember(key) {
         LocationDisplay().apply(init)
     }
+}
+
+/**
+ * Create and [remember] a [GraphicsOverlayCollection].
+ * [init] will be called when the [GraphicsOverlayCollection] is first created to configure its
+ * initial state.
+ *
+ * @param key invalidates the remembered LocationDisplay if different from the previous composition
+ * @param init called when the [GraphicsOverlayCollection] is created to configure its initial state
+ * @since 200.3.0
+ */
+@Composable
+public inline fun rememberGraphicsOverlayCollection(
+    key: Any? = null,
+    crossinline init: GraphicsOverlayCollection.() -> Unit = {}
+): GraphicsOverlayCollection = remember(key) {
+    GraphicsOverlayCollection().apply(init)
 }
 
 @Preview
