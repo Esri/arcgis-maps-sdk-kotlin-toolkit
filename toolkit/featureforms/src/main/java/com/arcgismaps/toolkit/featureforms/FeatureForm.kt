@@ -258,17 +258,17 @@ internal fun rememberGroupStates(
     scope: CoroutineScope,
 ): Map<Int, BaseGroupState> {
     return form.elements.filterIsInstance<GroupFormElement>().associateBy(
-        {
-            it.id
+        { groupElement ->
+            groupElement.id
         },
-        {
+        { groupElement ->
             val fieldStates = rememberFieldStates(
                 form = form,
-                elements = it.formElements,
+                elements = groupElement.formElements,
                 context = context,
                 scope = scope
             )
-            rememberBaseGroupState(group = it, fieldStates)
+            rememberBaseGroupState(groupElement = groupElement, fieldStates = fieldStates)
         }
     )
 }

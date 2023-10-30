@@ -17,6 +17,8 @@
 package com.arcgismaps.toolkit.featureforms.components.base
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -37,12 +39,17 @@ internal class BaseGroupState(
 
     val description = properties.description
 
-    val expanded = properties.expanded
+    private val _expanded = mutableStateOf(properties.expanded)
+    val expanded : State<Boolean> = _expanded
+
+    fun setExpanded(value : Boolean) {
+        _expanded.value = value
+    }
 
     companion object {
         fun Saver(fieldStates: Map<Int, BaseFieldState?>): Saver<BaseGroupState, Any> = listSaver(
             save = {
-                listOf(it.label, it.description, it.expanded)
+                listOf(it.label, it.description, it.expanded.value)
             },
             restore = {
                 val properties = GroupProperties(
@@ -61,16 +68,16 @@ internal class BaseGroupState(
 
 @Composable
 internal fun rememberBaseGroupState(
-    group: GroupFormElement,
+    groupElement: GroupFormElement,
     fieldStates: Map<Int, BaseFieldState?>
 ): BaseGroupState = rememberSaveable(
     saver = BaseGroupState.Saver(fieldStates)
 ) {
     BaseGroupState(
         properties = GroupProperties(
-            label = group.label,
-            description = group.description,
-            expanded = group.initialState == FormGroupState.Expanded
+            label = groupElement.label,
+            description = groupElement.description,
+            expanded = groupElement.initialState == FormGroupState.Expanded
         ),
         fieldStates = fieldStates
     )
