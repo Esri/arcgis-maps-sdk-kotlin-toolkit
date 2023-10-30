@@ -43,12 +43,12 @@ import kotlinx.coroutines.launch
 /**
  * The default instance of [MapViewInteractionOptions]
  */
-public val MapViewInteractionOptionDefaults: MapViewInteractionOptions = MapViewInteractionOptions()
+public val DefaultMapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptions()
 
 /**
  * The default instance of [SelectionProperties]
  */
-public val MapViewSelectionPropertiesDefaults: SelectionProperties = SelectionProperties()
+public val DefaultMapViewSelectionProperties: SelectionProperties = SelectionProperties()
 
 /**
  * A compose equivalent of the [MapView].
@@ -58,7 +58,7 @@ public val MapViewSelectionPropertiesDefaults: SelectionProperties = SelectionPr
  * @param locationDisplay the [LocationDisplay] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param geometryEditor the [GeometryEditor] used by the composable [com.arcgismaps.toolkit.geocompose.MapView] to create and edit geometries by user interaction.
  * @param mapViewInteractionOptions the [MapViewInteractionOptions] used by this composable [com.arcgismaps.toolkit.geocompose.MapView]
- * @param selectionProperties the [SelectionProperties] used by the composable [com.arcgismaps.toolkit.geocompose.MapView] to set a selection color.
+ * @param selectionProperties the [SelectionProperties] used by the composable [com.arcgismaps.toolkit.geocompose.MapView].
  * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
  * @param overlay the composable overlays to display on top of the composable MapView. Example, a compass, floorfilter etc.
  * @since 200.3.0
@@ -69,8 +69,8 @@ public fun MapView(
     arcGISMap: ArcGISMap? = null,
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     geometryEditor: GeometryEditor? = null,
-    mapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptionDefaults,
-    selectionProperties: SelectionProperties = MapViewSelectionPropertiesDefaults,
+    mapViewInteractionOptions: MapViewInteractionOptions = DefaultMapViewInteractionOptions,
+    selectionProperties: SelectionProperties = DefaultMapViewSelectionProperties,
     onViewpointChanged: (() -> Unit)? = null,
     overlay: @Composable () -> Unit = {}
 ) {
