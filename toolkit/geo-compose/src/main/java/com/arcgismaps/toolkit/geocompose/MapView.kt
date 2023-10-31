@@ -125,20 +125,9 @@ public fun MapView(
         }
     }
 
-    val currentViewPointChanged by rememberUpdatedState(onViewpointChanged)
-
-    LaunchedEffect(Unit) {
-        launch {
-            mapView.viewpointChanged.collect {
-                currentViewPointChanged?.let {
-                    it()
-                }
-            }
-        }
-    }
-
     MapViewEventHandler(
         mapView,
+        onViewpointChanged,
         onInteractingChanged,
         onRotate,
         onScale,
@@ -153,11 +142,12 @@ public fun MapView(
 }
 
 /**
- * Sets up the callbacks for all the gesture events.
+ * Sets up the callbacks for all the MapView events.
  */
 @Composable
 private fun MapViewEventHandler(
     mapView: MapView,
+    onViewpointChanged: (() -> Unit)?,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)?,
     onRotate: ((RotationChangeEvent) -> Unit)?,
     onScale: ((ScaleChangeEvent) -> Unit)?,
@@ -169,6 +159,7 @@ private fun MapViewEventHandler(
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)?,
     onPan: ((PanChangeEvent) -> Unit)?
 ) {
+    val currentViewPointChanged by rememberUpdatedState(onViewpointChanged)
     val currentOnInteractingChanged by rememberUpdatedState(onInteractingChanged)
     val currentOnRotate by rememberUpdatedState(onRotate)
     val currentOnScale by rememberUpdatedState(onScale)
@@ -181,6 +172,13 @@ private fun MapViewEventHandler(
     val currentOnPan by rememberUpdatedState(onPan)
 
     LaunchedEffect(Unit) {
+        launch {
+            mapView.viewpointChanged.collect {
+                currentViewPointChanged?.let {
+                    it()
+                }
+            }
+        }
         launch(Dispatchers.Main.immediate) {
             mapView.isInteracting.collect { isInteracting ->
                 currentOnInteractingChanged?.let {
