@@ -48,8 +48,6 @@ import com.arcgismaps.mapping.featureforms.RadioButtonsFormInput
 import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
-import com.arcgismaps.toolkit.featureforms.components.formelement.FieldElement
-import com.arcgismaps.toolkit.featureforms.components.formelement.GroupElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.BaseGroupState
 import com.arcgismaps.toolkit.featureforms.components.base.rememberBaseGroupState
@@ -59,6 +57,8 @@ import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberRadioBu
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberSwitchFieldState
 import com.arcgismaps.toolkit.featureforms.components.datetime.DateTimeFieldState
 import com.arcgismaps.toolkit.featureforms.components.datetime.rememberDateTimeFieldState
+import com.arcgismaps.toolkit.featureforms.components.formelement.FieldElement
+import com.arcgismaps.toolkit.featureforms.components.formelement.GroupElement
 import com.arcgismaps.toolkit.featureforms.components.text.rememberFormTextFieldState
 import com.arcgismaps.toolkit.featureforms.utils.DialogType
 import com.arcgismaps.toolkit.featureforms.utils.FeatureFormDialog
@@ -185,7 +185,9 @@ internal fun FeatureFormContent(
     FeatureFormDialog(
         dialogType = dialogType,
         state = dialogType.getStateKey()?.let { stateKey ->
-            fieldStateMap[stateKey]
+            fieldStateMap[stateKey] ?: groupStateMap.firstNotNullOfOrNull {
+                it.value.fieldStates[stateKey]
+            }
         },
         onDismissRequest = {
             dialogType = DialogType.NoDialog
