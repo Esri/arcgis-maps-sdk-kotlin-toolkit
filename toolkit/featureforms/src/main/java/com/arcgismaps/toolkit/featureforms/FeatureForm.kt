@@ -63,7 +63,6 @@ import com.arcgismaps.toolkit.featureforms.components.formelement.GroupElement
 import com.arcgismaps.toolkit.featureforms.components.text.rememberFormTextFieldState
 import com.arcgismaps.toolkit.featureforms.utils.DialogType
 import com.arcgismaps.toolkit.featureforms.utils.FeatureFormDialog
-import com.arcgismaps.toolkit.featureforms.utils.filterNotNullValues
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import java.util.Objects
@@ -163,7 +162,7 @@ internal fun FeatureFormContent(
         elements = form.elements,
         context = context,
         scope = scope
-    ).filterNotNullValues()
+    )
     val groupStateMap = rememberGroupStates(
         form = form,
         context = context,
@@ -291,26 +290,24 @@ internal fun rememberFieldStates(
     elements: List<FormElement>,
     context: Context,
     scope: CoroutineScope
-): Map<Int, BaseFieldState?> {
-    return elements.filterIsInstance<FieldFormElement>().associateBy(
-        { fieldElement ->
-            fieldElement.id
-        },
-        { fieldElement ->
-            when (fieldElement.input) {
+): Map<Int, BaseFieldState> {
+    val stateMap = mutableMapOf<Int, BaseFieldState>()
+    elements.forEach {  element ->
+        if (element is FieldFormElement) {
+            val state = when (element.input) {
                 is TextBoxFormInput, is TextAreaFormInput -> {
-                    val minLength = if (fieldElement.input is TextBoxFormInput) {
-                        (fieldElement.input as TextBoxFormInput).minLength.toInt()
+                    val minLength = if (element.input is TextBoxFormInput) {
+                        (element.input as TextBoxFormInput).minLength.toInt()
                     } else {
-                        (fieldElement.input as TextAreaFormInput).minLength.toInt()
+                        (element.input as TextAreaFormInput).minLength.toInt()
                     }
-                    val maxLength = if (fieldElement.input is TextBoxFormInput) {
-                        (fieldElement.input as TextBoxFormInput).maxLength.toInt()
+                    val maxLength = if (element.input is TextBoxFormInput) {
+                        (element.input as TextBoxFormInput).maxLength.toInt()
                     } else {
-                        (fieldElement.input as TextAreaFormInput).maxLength.toInt()
+                        (element.input as TextAreaFormInput).maxLength.toInt()
                     }
                     rememberFormTextFieldState(
-                        field = fieldElement,
+                        field = element,
                         minLength = minLength,
                         maxLength = maxLength,
                         form = form,
@@ -320,9 +317,9 @@ internal fun rememberFieldStates(
                 }
 
                 is DateTimePickerFormInput -> {
-                    val input = fieldElement.input as DateTimePickerFormInput
+                    val input = element.input as DateTimePickerFormInput
                     rememberDateTimeFieldState(
-                        field = fieldElement,
+                        field = element,
                         minEpochMillis = input.min?.toEpochMilli(),
                         maxEpochMillis = input.max?.toEpochMilli(),
                         shouldShowTime = input.includeTime,
@@ -333,19 +330,19 @@ internal fun rememberFieldStates(
 
                 is ComboBoxFormInput -> {
                     rememberCodedValueFieldState(
-                        field = fieldElement,
+                        field = element,
                         form = form,
                         scope = scope
                     )
                 }
 
                 is SwitchFormInput -> {
-                    val input = fieldElement.input as SwitchFormInput
-                    val initialValue = fieldElement.formattedValue
+                    val input = element.input as SwitchFormInput
+                    val initialValue = element.formattedValue
                     val fallback = initialValue.isEmpty()
-                        || (fieldElement.value.value != input.onValue.code && fieldElement.value.value != input.offValue.code)
+                        || (element.value.value != input.onValue.code && element.value.value != input.offValue.code)
                     rememberSwitchFieldState(
-                        field = fieldElement,
+                        field = element,
                         form = form,
                         fallback = fallback,
                         scope = scope,
@@ -355,7 +352,7 @@ internal fun rememberFieldStates(
 
                 is RadioButtonsFormInput -> {
                     rememberRadioButtonFieldState(
-                        field = fieldElement,
+                        field = element,
                         form = form,
                         scope = scope
                     )
@@ -365,7 +362,12 @@ internal fun rememberFieldStates(
                     null
                 }
             }
-        })
+            if (state != null) {
+                stateMap[element.id] = state
+            }
+        }
+    }
+    return stateMap
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFFFFFF)
