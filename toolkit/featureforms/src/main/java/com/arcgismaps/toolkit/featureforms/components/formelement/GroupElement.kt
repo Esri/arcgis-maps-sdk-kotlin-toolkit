@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ExpandLess
 import androidx.compose.material.icons.rounded.ExpandMore
@@ -49,6 +48,7 @@ internal fun GroupElement(
     groupElement: GroupFormElement,
     state: BaseGroupState,
     modifier: Modifier = Modifier,
+    colors: GroupElementColors = GroupElementDefaults.colors(),
     onDialogRequest: (BaseFieldState, Int) -> Unit
 ) {
     val visible by groupElement.isVisible.collectAsState()
@@ -59,6 +59,7 @@ internal fun GroupElement(
             expanded = state.expanded.value,
             fieldStates = state.fieldStates,
             modifier = modifier,
+            colors = colors,
             onClick = {
                 state.setExpanded(!state.expanded.value)
             },
@@ -74,13 +75,14 @@ private fun GroupElement(
     expanded: Boolean,
     fieldStates: Map<Int, BaseFieldState?>,
     modifier: Modifier = Modifier,
+    colors: GroupElementColors,
     onClick: () -> Unit,
     onDialogRequest: ((BaseFieldState, Int) -> Unit)? = null
 ) {
     Card(
         modifier = modifier,
-        shape = RoundedCornerShape(5.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+        shape = GroupElementDefaults.containerShape,
+        border = BorderStroke(GroupElementDefaults.borderThickness, colors.borderColor)
     ) {
         GroupElementHeader(
             modifier = Modifier.fillMaxWidth(),
@@ -91,7 +93,7 @@ private fun GroupElement(
         )
         AnimatedVisibility(visible = expanded) {
             Column(
-                modifier = Modifier.background(MaterialTheme.colorScheme.background)
+                modifier = Modifier.background(colors.containerColor)
             ) {
                 fieldStates.forEach { (key, state) ->
                     if (state != null) {
@@ -146,6 +148,7 @@ private fun GroupElementPreview() {
         expanded = false,
         fieldStates = mutableMapOf(),
         modifier = Modifier.padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 10.dp),
+        colors = GroupElementDefaults.colors(),
         onClick = {}
     )
 }

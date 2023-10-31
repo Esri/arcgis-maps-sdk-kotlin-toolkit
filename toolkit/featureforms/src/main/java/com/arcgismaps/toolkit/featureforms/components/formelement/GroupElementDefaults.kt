@@ -16,17 +16,27 @@
 
 package com.arcgismaps.toolkit.featureforms.components.formelement
 
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.RadioButtonFieldColors
 
 internal object GroupElementDefaults {
 
-    private const val headerColor = 0.38f
-    private const val containerColor = 0.12f
+    val borderThickness = 1.dp
+    val containerShape = RoundedCornerShape(5.dp)
 
-    // border color
-    // border thickness
-    // container shape
+    @Composable
+    fun colors() : GroupElementColors = GroupElementColors(
+        containerColor = MaterialTheme.colorScheme.background,
+        borderColor = MaterialTheme.colorScheme.outline
+    )
 }
+
+internal data class GroupElementColors(
+    val containerColor : Color,
+    val borderColor : Color,
+)
