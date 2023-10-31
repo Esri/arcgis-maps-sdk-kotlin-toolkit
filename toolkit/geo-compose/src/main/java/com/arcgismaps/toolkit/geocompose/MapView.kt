@@ -41,16 +41,6 @@ import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
 import kotlinx.coroutines.launch
 
 /**
- * The default instance of [MapViewInteractionOptions]
- */
-public val DefaultMapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptions()
-
-/**
- * The default instance of [SelectionProperties]
- */
-public val DefaultMapViewSelectionProperties: SelectionProperties = SelectionProperties()
-
-/**
  * A compose equivalent of the [MapView].
  *
  * @param modifier Modifier to be applied to the composable MapView
@@ -69,8 +59,8 @@ public fun MapView(
     arcGISMap: ArcGISMap? = null,
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     geometryEditor: GeometryEditor? = null,
-    mapViewInteractionOptions: MapViewInteractionOptions = DefaultMapViewInteractionOptions,
-    selectionProperties: SelectionProperties = DefaultMapViewSelectionProperties,
+    mapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptions(),
+    selectionProperties: SelectionProperties = SelectionProperties(),
     onViewpointChanged: (() -> Unit)? = null,
     overlay: @Composable () -> Unit = {}
 ) {
