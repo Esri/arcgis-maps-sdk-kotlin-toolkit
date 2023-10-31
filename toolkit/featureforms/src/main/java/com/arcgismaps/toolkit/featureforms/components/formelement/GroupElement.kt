@@ -78,9 +78,7 @@ private fun GroupElement(
     onDialogRequest: ((BaseFieldState, Int) -> Unit)? = null
 ) {
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 10.dp),
+        modifier = modifier,
         shape = RoundedCornerShape(5.dp),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
     ) {
@@ -147,6 +145,7 @@ private fun GroupElementPreview() {
         description = "Description",
         expanded = false,
         fieldStates = mutableMapOf(),
+        modifier = Modifier.padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 10.dp),
         onClick = {}
     )
 }

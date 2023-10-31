@@ -23,6 +23,10 @@ import com.arcgismaps.toolkit.featureforms.components.codedvalue.RadioButtonFiel
 
 internal object GroupElementDefaults {
 
-    private const val textDisabledAlpha = 0.38f
-    private const val containerDisabledAlpha = 0.12f
+    private const val headerColor = 0.38f
+    private const val containerColor = 0.12f
+
+    // border color
+    // border thickness
+    // container shape
 }

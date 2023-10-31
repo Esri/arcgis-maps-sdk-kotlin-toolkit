@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -241,6 +242,14 @@ private fun FeatureFormBody(
                             GroupElement(
                                 formElement,
                                 state,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        start = 15.dp,
+                                        end = 15.dp,
+                                        top = 10.dp,
+                                        bottom = 10.dp
+                                    ),
                                 onDialogRequest = { baseFieldState, key ->
                                     onFieldDialogRequest?.invoke(baseFieldState, key)
                                 }
