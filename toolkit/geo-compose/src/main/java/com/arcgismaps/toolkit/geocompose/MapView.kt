@@ -45,7 +45,6 @@ import com.arcgismaps.mapping.view.ScaleChangeEvent
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -62,7 +61,7 @@ public val MapViewInteractionOptionDefaults: MapViewInteractionOptions = MapView
  * @param locationDisplay the [LocationDisplay] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param mapViewInteractionOptions the [MapViewInteractionOptions] used by this composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
- * @param isInteracting lambda invoked when the user is currently interacting with the composable MapView
+ * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable MapView
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable MapView
  * @param onScale lambda invoked when a user performs a pinch gesture on the composable MapView
  * @param onUp lambda invoked when the user removes all their pointers from the composable MapView
@@ -82,7 +81,7 @@ public fun MapView(
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     mapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptionDefaults,
     onViewpointChanged: (() -> Unit)? = null,
-    isInteracting: ((Boolean) -> Unit)? = null,
+    onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
     onScale: ((ScaleChangeEvent) -> Unit)? = null,
     onUp: ((UpEvent) -> Unit)? = null,
@@ -124,7 +123,50 @@ public fun MapView(
     }
 
     val currentViewPointChanged by rememberUpdatedState(onViewpointChanged)
-    val currentIsInteracting by rememberUpdatedState(isInteracting)
+
+    LaunchedEffect(Unit) {
+        launch {
+            mapView.viewpointChanged.collect {
+                currentViewPointChanged?.let {
+                    it()
+                }
+            }
+        }
+    }
+
+    MapViewEventHandler(
+        mapView,
+        onInteractingChanged,
+        onRotate,
+        onScale,
+        onUp,
+        onDown,
+        onSingleTapConfirmed,
+        onDoubleTap,
+        onLongPress,
+        onTwoPointerTap,
+        onPan
+    )
+}
+
+/**
+ * Sets up the callbacks for all the gesture events.
+ */
+@Composable
+private fun MapViewEventHandler(
+    mapView: MapView,
+    onInteractingChanged: ((isInteracting: Boolean) -> Unit)?,
+    onRotate: ((RotationChangeEvent) -> Unit)?,
+    onScale: ((ScaleChangeEvent) -> Unit)?,
+    onUp: ((UpEvent) -> Unit)?,
+    onDown: ((DownEvent) -> Unit)?,
+    onSingleTapConfirmed: ((SingleTapConfirmedEvent) -> Unit)?,
+    onDoubleTap: ((DoubleTapEvent) -> Unit)?,
+    onLongPress: ((LongPressEvent) -> Unit)?,
+    onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)?,
+    onPan: ((PanChangeEvent) -> Unit)?
+) {
+    val currentOnInteractingChanged by rememberUpdatedState(onInteractingChanged)
     val currentOnRotate by rememberUpdatedState(onRotate)
     val currentOnScale by rememberUpdatedState(onScale)
     val currentOnUp by rememberUpdatedState(onUp)
@@ -136,18 +178,10 @@ public fun MapView(
     val currentOnPan by rememberUpdatedState(onPan)
 
     LaunchedEffect(Unit) {
-        launch {
-            mapView.viewpointChanged.collect {
-                currentViewPointChanged?.let {
-                    it()
-                }
-            }
-        }
-        // setup callback for Gesture Events
         launch(Dispatchers.Main.immediate) {
-            mapView.isInteracting.collect { isUserInteracting ->
-                currentIsInteracting?.let {
-                    it(isUserInteracting)
+            mapView.isInteracting.collect { isInteracting ->
+                currentOnInteractingChanged?.let {
+                    it(isInteracting)
                 }
             }
         }
