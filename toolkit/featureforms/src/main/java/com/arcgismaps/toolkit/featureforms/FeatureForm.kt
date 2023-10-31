@@ -63,6 +63,7 @@ import com.arcgismaps.toolkit.featureforms.components.formelement.GroupElement
 import com.arcgismaps.toolkit.featureforms.components.text.rememberFormTextFieldState
 import com.arcgismaps.toolkit.featureforms.utils.DialogType
 import com.arcgismaps.toolkit.featureforms.utils.FeatureFormDialog
+import com.arcgismaps.toolkit.featureforms.utils.filterNotNullValues
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import java.util.Objects
@@ -162,7 +163,7 @@ internal fun FeatureFormContent(
         elements = form.elements,
         context = context,
         scope = scope
-    )
+    ).filterNotNullValues()
     val groupStateMap = rememberGroupStates(
         form = form,
         context = context,
@@ -199,7 +200,7 @@ internal fun FeatureFormContent(
 @Composable
 private fun FeatureFormBody(
     form: FeatureForm,
-    fieldStateMap: Map<Int, BaseFieldState?>,
+    fieldStateMap: Map<Int, BaseFieldState>,
     groupStateMap: Map<Int, BaseGroupState>,
     modifier: Modifier = Modifier,
     onFieldDialogRequest: ((BaseFieldState, Int) -> Unit)? = null
