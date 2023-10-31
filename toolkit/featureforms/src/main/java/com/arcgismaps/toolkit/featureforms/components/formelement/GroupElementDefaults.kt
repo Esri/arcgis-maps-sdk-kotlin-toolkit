@@ -32,7 +32,7 @@ internal object GroupElementDefaults {
     @Composable
     fun colors() : GroupElementColors = GroupElementColors(
         containerColor = MaterialTheme.colorScheme.background,
-        borderColor = MaterialTheme.colorScheme.outline
+        borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
     )
 }
 
