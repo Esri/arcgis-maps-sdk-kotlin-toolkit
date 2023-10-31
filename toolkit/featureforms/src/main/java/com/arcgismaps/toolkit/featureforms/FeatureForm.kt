@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -42,21 +43,27 @@ import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.mapping.featureforms.FormElement
+import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.featureforms.RadioButtonsFormInput
 import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
-import com.arcgismaps.toolkit.featureforms.components.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
+import com.arcgismaps.toolkit.featureforms.components.base.BaseGroupState
+import com.arcgismaps.toolkit.featureforms.components.base.rememberBaseGroupState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.CodedValueFieldState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberCodedValueFieldState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberRadioButtonFieldState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberSwitchFieldState
 import com.arcgismaps.toolkit.featureforms.components.datetime.DateTimeFieldState
 import com.arcgismaps.toolkit.featureforms.components.datetime.rememberDateTimeFieldState
+import com.arcgismaps.toolkit.featureforms.components.formelement.FieldElement
+import com.arcgismaps.toolkit.featureforms.components.formelement.GroupElement
 import com.arcgismaps.toolkit.featureforms.components.text.rememberFormTextFieldState
 import com.arcgismaps.toolkit.featureforms.utils.DialogType
 import com.arcgismaps.toolkit.featureforms.utils.FeatureFormDialog
+import com.arcgismaps.toolkit.featureforms.utils.filterNotNullValues
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import java.util.Objects
@@ -151,11 +158,26 @@ internal fun FeatureFormContent(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val states = rememberFieldStates(form = form, context = context, scope = scope)
+    val fieldStateMap = rememberFieldStates(
+        form = form,
+        elements = form.elements,
+        context = context,
+        scope = scope
+    ).filterNotNullValues()
+    val groupStateMap = rememberGroupStates(
+        form = form,
+        context = context,
+        scope = scope
+    )
     var dialogType: DialogType by rememberSaveable {
         mutableStateOf(DialogType.NoDialog)
     }
-    FeatureFormBody(form = form, states = states, modifier = modifier) { state, id ->
+    FeatureFormBody(
+        form = form,
+        fieldStateMap = fieldStateMap,
+        groupStateMap = groupStateMap,
+        modifier = modifier
+    ) { state, id ->
         if (state is DateTimeFieldState) {
             dialogType = DialogType.DatePickerDialog(id)
         } else if (state is CodedValueFieldState) {
@@ -165,7 +187,9 @@ internal fun FeatureFormContent(
     FeatureFormDialog(
         dialogType = dialogType,
         state = dialogType.getStateKey()?.let { stateKey ->
-            states[stateKey]
+            fieldStateMap[stateKey] ?: groupStateMap.firstNotNullOfOrNull {
+                it.value.fieldStates[stateKey]
+            }
         },
         onDismissRequest = {
             dialogType = DialogType.NoDialog
@@ -176,7 +200,8 @@ internal fun FeatureFormContent(
 @Composable
 private fun FeatureFormBody(
     form: FeatureForm,
-    states: Map<Int, BaseFieldState?>,
+    fieldStateMap: Map<Int, BaseFieldState>,
+    groupStateMap: Map<Int, BaseGroupState>,
     modifier: Modifier = Modifier,
     onFieldDialogRequest: ((BaseFieldState, Int) -> Unit)? = null
 ) {
@@ -199,15 +224,38 @@ private fun FeatureFormBody(
             state = lazyListState
         ) {
             items(form.elements) { formElement ->
-                if (formElement is FieldFormElement) {
-                    val state = states[formElement.id]
-                    if (state != null) {
-                        FieldElement(
-                            state = state,
-                            onDialogRequest = {
-                                onFieldDialogRequest?.invoke(state, formElement.id)
-                            }
-                        )
+                when (formElement) {
+                    is FieldFormElement -> {
+                        val state = fieldStateMap[formElement.id]
+                        if (state != null) {
+                            FieldElement(
+                                state = state,
+                                onDialogRequest = {
+                                    onFieldDialogRequest?.invoke(state, formElement.id)
+                                }
+                            )
+                        }
+                    }
+
+                    is GroupFormElement -> {
+                        val state = groupStateMap[formElement.id]
+                        if (state != null) {
+                            GroupElement(
+                                formElement,
+                                state,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        start = 15.dp,
+                                        end = 15.dp,
+                                        top = 10.dp,
+                                        bottom = 10.dp
+                                    ),
+                                onDialogRequest = { baseFieldState, key ->
+                                    onFieldDialogRequest?.invoke(baseFieldState, key)
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -216,12 +264,35 @@ private fun FeatureFormBody(
 }
 
 @Composable
-private fun rememberFieldStates(
+internal fun rememberGroupStates(
     form: FeatureForm,
+    context: Context,
+    scope: CoroutineScope,
+): Map<Int, BaseGroupState> {
+    return form.elements.filterIsInstance<GroupFormElement>().associateBy(
+        { groupElement ->
+            groupElement.id
+        },
+        { groupElement ->
+            val fieldStates = rememberFieldStates(
+                form = form,
+                elements = groupElement.formElements,
+                context = context,
+                scope = scope
+            )
+            rememberBaseGroupState(groupElement = groupElement, fieldStates = fieldStates)
+        }
+    )
+}
+
+@Composable
+internal fun rememberFieldStates(
+    form: FeatureForm,
+    elements: List<FormElement>,
     context: Context,
     scope: CoroutineScope
 ): Map<Int, BaseFieldState?> {
-    return form.elements.filterIsInstance<FieldFormElement>().associateBy(
+    return elements.filterIsInstance<FieldFormElement>().associateBy(
         { fieldElement ->
             fieldElement.id
         },
@@ -316,4 +387,16 @@ private fun NoDataPreview() {
 internal val FieldFormElement.id: Int
     get() {
         return Objects.hash(fieldName, label, description, hint)
+    }
+
+/**
+ * Unique id for each form element.
+ */
+internal val GroupFormElement.id: Int
+    get() {
+        return Objects.hash(
+            formElements.forEach { if (it is FieldFormElement) it.id },
+            label,
+            description
+        )
     }
