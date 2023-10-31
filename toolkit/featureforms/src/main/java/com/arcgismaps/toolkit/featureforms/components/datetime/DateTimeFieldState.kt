@@ -40,9 +40,9 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
-import java.util.TimeZone
 
 internal class DateTimeFieldProperties(
     label: String,
@@ -176,12 +176,12 @@ internal fun rememberDateTimeFieldState(
  *
  * @since 200.3.0
  */
-internal fun dateTimeFromString(formattedDateTime: String): Long? {
+internal fun dateTimeFromString(formattedDateTime: String, offset: ZoneOffset = ZoneOffset.UTC): Long? {
     return if (formattedDateTime.isNotEmpty()) {
         try {
             val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
             LocalDateTime.parse(formattedDateTime, formatter)
-                .atZone(TimeZone.getDefault().toZoneId())
+                .atZone(offset)
                 .toInstant()
                 .toEpochMilli()
         } catch (ex: DateTimeParseException) {
