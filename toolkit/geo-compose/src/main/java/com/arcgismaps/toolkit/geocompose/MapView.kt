@@ -38,6 +38,10 @@ import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.view.LocationDisplay
 import com.arcgismaps.mapping.view.MapView
+import com.arcgismaps.mapping.view.MapViewInteractionOptions
+import com.arcgismaps.mapping.view.WrapAroundMode
+import com.arcgismaps.mapping.view.SelectionProperties
+import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.platform.LocalDensity
@@ -49,18 +53,26 @@ internal val MapViewInsetDefaults = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp)
 /**
  * A compose equivalent of the [MapView].
  *
- * @param modifier Modifier to be applied to the Map
+ * @param modifier Modifier to be applied to the composable MapView
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable
- * @param locationDisplay the [LocationDisplay] used by the composable [com.arcgismaps.toolkit.geocompose.Map]
- * @param onViewpointChanged lambda invoked when the viewpoint of the Map has changed
- * @param overlay the composable overlays to display on top of the Map. Example, a compass, floorfilter etc.
+ * @param locationDisplay the [LocationDisplay] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
+ * @param geometryEditor the [GeometryEditor] used by the composable [com.arcgismaps.toolkit.geocompose.MapView] to create and edit geometries by user interaction.
+ * @param mapViewInteractionOptions the [MapViewInteractionOptions] used by this composable [com.arcgismaps.toolkit.geocompose.MapView]
+ * @param wrapAroundMode the [WrapAroundMode] to specify whether continuous panning across the international date line is enabled
+ * @param selectionProperties the [SelectionProperties] used by the composable [com.arcgismaps.toolkit.geocompose.MapView].
+ * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
+ * @param overlay the composable overlays to display on top of the composable MapView. Example, a compass, floorfilter etc.
  * @since 200.3.0
  */
 @Composable
-public fun Map(
+public fun MapView(
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap? = null,
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
+    wrapAroundMode: WrapAroundMode = WrapAroundMode.EnabledWhenSupported,
+    geometryEditor: GeometryEditor? = null,
+    mapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptions(),
+    selectionProperties: SelectionProperties = SelectionProperties(),
     onViewpointChanged: (() -> Unit)? = null,
     mapInsets: WindowInsets = MapViewInsetDefaults,
 //    mapInsets: PaddingValues = MapViewInsetDefaults,
@@ -72,16 +84,14 @@ public fun Map(
     val layoutDirection = LocalLayoutDirection.current
     val density = LocalDensity.current
 
-    Box(modifier = Modifier.semantics {
-        contentDescription = "MapContainer"
-    }) {
-        AndroidView(modifier = modifier
-            .semantics {
-                contentDescription = "MapView"
-            },
+    Box(modifier = Modifier.semantics { contentDescription = "MapContainer" }) {
+        AndroidView(
+            modifier = modifier.semantics { contentDescription = "MapView" },
             factory = { mapView },
             update = {
                 it.map = arcGISMap
+                it.selectionProperties = selectionProperties
+                it.interactionOptions = mapViewInteractionOptions
                 it.locationDisplay = locationDisplay
                 it.setViewInsets(
                     mapInsets.getLeft(density, layoutDirection).toDouble(),
@@ -89,6 +99,8 @@ public fun Map(
                     mapInsets.getTop(density).toDouble(),
                     mapInsets.getBottom(density).toDouble()
                 )
+                it.wrapAroundMode = wrapAroundMode
+                it.geometryEditor = geometryEditor
             })
 
         overlay()
@@ -139,6 +151,6 @@ public inline fun rememberLocationDisplay(
 
 @Preview
 @Composable
-internal fun MapPreview() {
-    Map()
+internal fun MapViewPreview() {
+    MapView()
 }

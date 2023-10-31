@@ -46,13 +46,13 @@ import com.arcgismaps.location.LocationDisplayAutoPanMode
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.view.LocationDisplay
-import com.arcgismaps.toolkit.geocompose.Map
+import com.arcgismaps.toolkit.geocompose.MapView
 import com.arcgismaps.toolkit.geocompose.rememberLocationDisplay
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 /**
- * Displays a composable [com.arcgismaps.toolkit.geocompose.Map] with a [LocationDisplay] obtained
+ * Displays a composable [com.arcgismaps.toolkit.geocompose.MapView] with a [LocationDisplay] obtained
  * with [rememberLocationDisplay].
  * The location display can be started/stopped using a [Switch].
  * If the location display fails to start, an error message is displayed below the switch.
@@ -125,7 +125,7 @@ fun MainScreen() {
             )
         },
     ) { innerPadding ->
-        Map(
+        MapView(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize(),
