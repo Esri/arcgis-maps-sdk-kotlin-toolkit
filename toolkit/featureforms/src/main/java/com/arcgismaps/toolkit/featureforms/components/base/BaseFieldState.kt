@@ -27,11 +27,11 @@ import kotlinx.coroutines.flow.flattenMerge
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 
-internal open class FieldProperties(
+internal open class FieldProperties<T: Any>(
     val label: String,
     val placeholder: String,
     val description: String,
-    val value: StateFlow<String>,
+    val value: StateFlow<T>,
     val required: StateFlow<Boolean>,
     val editable: StateFlow<Boolean>,
     val visible: StateFlow<Boolean>
@@ -48,9 +48,9 @@ internal open class FieldProperties(
  * @param onEditValue a callback to invoke when the user edits result in a change of value. This
  * is called on [BaseFieldState.onValueChanged].
  */
-internal open class BaseFieldState(
-    properties: FieldProperties,
-    initialValue: String = properties.value.value,
+internal open class BaseFieldState<T: Any>(
+    properties: FieldProperties<T>,
+    initialValue: T = properties.value.value,
     scope: CoroutineScope,
     protected val onEditValue: (Any?) -> Unit,
 ) {
@@ -76,7 +76,7 @@ internal open class BaseFieldState(
      * Current value state for the field.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    val value: StateFlow<String> = flowOf(_value, properties.value.drop(1))
+    val value: StateFlow<T> = flowOf(_value, properties.value.drop(1))
         .flattenMerge()
         .stateIn(scope, SharingStarted.Eagerly, initialValue)
 
@@ -98,7 +98,7 @@ internal open class BaseFieldState(
     /**
      * Callback to update the current value of the FormTextFieldState to the given [input].
      */
-    open fun onValueChanged(input: String) {
+    open fun onValueChanged(input: T) {
         onEditValue(input)
         _value.value = input
     }

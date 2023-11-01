@@ -33,9 +33,9 @@ import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.R
-import com.arcgismaps.toolkit.featureforms.components.formelement.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.FieldProperties
+import com.arcgismaps.toolkit.featureforms.components.formelement.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.text.ValidationErrorState.ExactCharConstraint
 import com.arcgismaps.toolkit.featureforms.components.text.ValidationErrorState.MaxCharConstraint
 import com.arcgismaps.toolkit.featureforms.components.text.ValidationErrorState.MaxNumericConstraint
@@ -75,7 +75,7 @@ internal class TextFieldProperties(
     val singleLine: Boolean,
     val minLength: Int,
     val maxLength: Int,
-) : FieldProperties(label, placeholder, description, value, required, editable, visible)
+) : FieldProperties<String>(label, placeholder, description, value, required, editable, visible)
 
 /**
  * A class to handle the state of a [FormTextField]. Essential properties are inherited from the
@@ -96,7 +96,7 @@ internal class FormTextFieldState(
     scope: CoroutineScope,
     private val context: Context,
     onEditValue: (Any?) -> Unit
-) : BaseFieldState(
+) : BaseFieldState<String>(
     properties = properties,
     initialValue = initialValue,
     scope = scope,
