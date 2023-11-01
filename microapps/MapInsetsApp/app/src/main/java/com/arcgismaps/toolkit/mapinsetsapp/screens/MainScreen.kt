@@ -18,13 +18,11 @@
 
 package com.arcgismaps.toolkit.mapinsetsapp.screens
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
@@ -47,8 +45,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
-import com.arcgismaps.toolkit.geocompose.Map
-import com.arcgismaps.toolkit.geocompose.MapInsets
+import com.arcgismaps.toolkit.geocompose.MapView
 
 @Composable
 fun MainScreen() {
@@ -57,47 +54,24 @@ fun MainScreen() {
     Surface(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier.fillMaxSize()) {
 
-            var mapInsets by remember { mutableStateOf(WindowInsets(20.dp, 20.dp, 20.dp, 20.dp))}
-//            var mapInsets by remember { mutableStateOf(MapInsets(20.dp, 20.dp, 20.dp, 20.dp))}
-//            val mapInsets by remember { mutableStateOf(MapInsets(0.0, 0.0, 0.0, 0.0))}
-//            var mapInsets by remember { mutableStateOf(PaddingValues(20.dp, 20.dp, 20.dp, 20.dp))}
+            var mapInsets by remember { mutableStateOf(PaddingValues())}
 
             var leftText by remember { mutableStateOf(TextFieldValue("")) }
             var rightText by remember { mutableStateOf(TextFieldValue("")) }
             var topText by remember { mutableStateOf(TextFieldValue("")) }
             var bottomText by remember { mutableStateOf(TextFieldValue("")) }
+
             val updateInsets = {
-
-//                mapInsets.start = leftText.text.toDoubleOrNull() ?: 0.0
-//                Log.d("mapInset.start", mapInsets.start.toString())
-//                mapInsets.end = rightText.text.toDoubleOrNull() ?: 0.0
-//                mapInsets.top = topText.text.toDoubleOrNull() ?: 0.0
-//                mapInsets.bottom = bottomText.text.toDoubleOrNull() ?: 0.0
-
-//                mapInsets = MapInsets(leftText.text.toDoubleOrNull() ?: 0.0,
-//                    rightText.text.toDoubleOrNull() ?: 0.0,
-//                    topText.text.toDoubleOrNull() ?: 0.0,
-//                    bottomText.text.toDoubleOrNull() ?: 0.0)
-
-//                mapInsets = MapInsets(leftText.text.toDoubleOrNull()?.dp ?: 0.0.dp,
-//                    rightText.text.toDoubleOrNull()?.dp ?: 0.0.dp,
-//                    topText.text.toDoubleOrNull()?.dp ?: 0.0.dp,
-//                    bottomText.text.toDoubleOrNull()?.dp ?: 0.0.dp)
-//            }
-
-//            mapInsets = PaddingValues(leftText.text.toDoubleOrNull()?.dp ?: 0.0.dp,
-//                rightText.text.toDoubleOrNull()?.dp ?: 0.0.dp,
-//                topText.text.toDoubleOrNull()?.dp ?: 0.0.dp,
-//                bottomText.text.toDoubleOrNull()?.dp ?: 0.0.dp)
-
-                mapInsets = WindowInsets(leftText.text.toDoubleOrNull()?.dp ?: 0.0.dp,
-                    rightText.text.toDoubleOrNull()?.dp ?: 0.0.dp,
+                mapInsets = PaddingValues(
+                    leftText.text.toDoubleOrNull()?.dp ?: 0.0.dp,
                     topText.text.toDoubleOrNull()?.dp ?: 0.0.dp,
-                    bottomText.text.toDoubleOrNull()?.dp ?: 0.0.dp)
-        }
+                    rightText.text.toDoubleOrNull()?.dp ?: 0.0.dp,
+                    bottomText.text.toDoubleOrNull()?.dp ?: 0.0.dp
+                )
+            }
 
             val focusManager = LocalFocusManager.current
-            Map(
+            MapView(
                 modifier = Modifier.fillMaxSize(),
                 arcGISMap = arcGISMap,
                 mapInsets = mapInsets
@@ -108,10 +82,10 @@ fun MainScreen() {
                     OutlinedTextField(
                         value = leftText,
                         modifier = Modifier.size(90.dp, 64.dp),
-                        onValueChange = { text: TextFieldValue -> leftText = text; Log.d("leftText", leftText.text)},
+                        onValueChange = { text: TextFieldValue -> leftText = text },
                         label = { Text("Left") },
                         keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Number,
+                            keyboardType = KeyboardType.Decimal,
                             imeAction = ImeAction.Done
                         ),
                         keyboardActions = KeyboardActions(onDone = { updateInsets(); focusManager.clearFocus() })
@@ -151,15 +125,11 @@ fun MainScreen() {
                     )
                 }
                 Button(onClick = {
-//                    mapInsets.start = 0.0
-//                    mapInsets.end = 0.0
-//                    mapInsets.top = 0.0
-//                    mapInsets.bottom = 0.0
-//                    mapInsets = MapInsets(0.0.dp, 0.0.dp, 0.0.dp, 0.0.dp)
-//                    mapInsets = PaddingValues(0.0.dp, 0.0.dp, 0.0.dp, 0.0.dp)
-                    mapInsets = WindowInsets(0.0.dp, 0.0.dp, 0.0.dp, 0.0.dp)
+                    mapInsets = PaddingValues(0.0.dp, 0.0.dp, 0.0.dp, 0.0.dp)
                     leftText = TextFieldValue("")
-
+                    rightText = TextFieldValue("")
+                    topText = TextFieldValue("")
+                    bottomText = TextFieldValue("")
                     focusManager.clearFocus()
                 }, Modifier.fillMaxWidth()) {
                     Text("Reset Insets")

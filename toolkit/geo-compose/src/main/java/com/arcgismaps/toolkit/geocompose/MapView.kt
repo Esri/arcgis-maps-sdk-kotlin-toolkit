@@ -20,6 +20,8 @@ package com.arcgismaps.toolkit.geocompose
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -46,9 +48,7 @@ import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
-
-internal val MapViewInsetDefaults = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp)
-//internal val MapViewInsetDefaults: PaddingValues = PaddingValues()
+import androidx.compose.ui.unit.LayoutDirection
 
 /**
  * A compose equivalent of the [MapView].
@@ -74,15 +74,13 @@ public fun MapView(
     mapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptions(),
     selectionProperties: SelectionProperties = SelectionProperties(),
     onViewpointChanged: (() -> Unit)? = null,
-    mapInsets: WindowInsets = MapViewInsetDefaults,
-//    mapInsets: PaddingValues = MapViewInsetDefaults,
+    mapInsets: PaddingValues = PaddingValues(),
     overlay: @Composable () -> Unit = {}
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val mapView = remember { MapView(context) }
     val layoutDirection = LocalLayoutDirection.current
-    val density = LocalDensity.current
 
     Box(modifier = Modifier.semantics { contentDescription = "MapContainer" }) {
         AndroidView(
@@ -93,12 +91,6 @@ public fun MapView(
                 it.selectionProperties = selectionProperties
                 it.interactionOptions = mapViewInteractionOptions
                 it.locationDisplay = locationDisplay
-                it.setViewInsets(
-                    mapInsets.getLeft(density, layoutDirection).toDouble(),
-                    mapInsets.getRight(density, layoutDirection).toDouble(),
-                    mapInsets.getTop(density).toDouble(),
-                    mapInsets.getBottom(density).toDouble()
-                )
                 it.wrapAroundMode = wrapAroundMode
                 it.geometryEditor = geometryEditor
             })
@@ -114,15 +106,15 @@ public fun MapView(
         }
     }
 
-    val currentViewPointChanged by rememberUpdatedState(onViewpointChanged)
-    LaunchedEffect(Unit) {
-        launch {
-            mapView.viewpointChanged.collect {
-                currentViewPointChanged?.let {
-                    it()
-                }
-            }
-        }
+    LaunchedEffect(mapInsets) {
+        // When this call is made in the AndroidView's update callback, ViewInsets are not applied
+        // on the mapview on initial load. So we set the ViewInsets here.
+        mapView.setViewInsets(
+            mapInsets.calculateStartPadding(layoutDirection).value.toDouble(),
+            mapInsets.calculateEndPadding(layoutDirection).value.toDouble(),
+            mapInsets.calculateTopPadding().value.toDouble(),
+            mapInsets.calculateBottomPadding().value.toDouble()
+        )
     }
 }
 
