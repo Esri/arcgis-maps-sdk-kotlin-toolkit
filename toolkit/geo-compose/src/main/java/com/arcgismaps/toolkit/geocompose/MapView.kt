@@ -38,9 +38,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.view.DoubleTapEvent
+import com.arcgismaps.mapping.view.DownEvent
 import com.arcgismaps.mapping.view.LocationDisplay
+import com.arcgismaps.mapping.view.LongPressEvent
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.MapViewInteractionOptions
+import com.arcgismaps.mapping.view.PanChangeEvent
+import com.arcgismaps.mapping.view.RotationChangeEvent
+import com.arcgismaps.mapping.view.ScaleChangeEvent
+import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
+import com.arcgismaps.mapping.view.TwoPointerTapEvent
+import com.arcgismaps.mapping.view.UpEvent
+import kotlinx.coroutines.Dispatchers
+import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.mapping.view.WrapAroundMode
 import com.arcgismaps.mapping.view.SelectionProperties
 import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
@@ -58,9 +69,20 @@ import androidx.compose.ui.unit.LayoutDirection
  * @param locationDisplay the [LocationDisplay] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param geometryEditor the [GeometryEditor] used by the composable [com.arcgismaps.toolkit.geocompose.MapView] to create and edit geometries by user interaction.
  * @param mapViewInteractionOptions the [MapViewInteractionOptions] used by this composable [com.arcgismaps.toolkit.geocompose.MapView]
+ * @param viewLabelProperties the [ViewLabelProperties] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
+ * @param selectionProperties the [SelectionProperties] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param wrapAroundMode the [WrapAroundMode] to specify whether continuous panning across the international date line is enabled
- * @param selectionProperties the [SelectionProperties] used by the composable [com.arcgismaps.toolkit.geocompose.MapView].
  * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
+ * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable MapView
+ * @param onRotate lambda invoked when a user performs a rotation gesture on the composable MapView
+ * @param onScale lambda invoked when a user performs a pinch gesture on the composable MapView
+ * @param onUp lambda invoked when the user removes all their pointers from the composable MapView
+ * @param onDown lambda invoked when the user first presses on the composable MapView
+ * @param onSingleTapConfirmed lambda invoked when the user taps once on the composable MapView
+ * @param onDoubleTap lambda invoked the user double taps on the composable MapView
+ * @param onLongPress lambda invoked when a user holds a pointer on the composable MapView
+ * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable MapView
+ * @param onPan lambda invoked when a user drags a pointer or pointers across composable MapView
  * @param overlay the composable overlays to display on top of the composable MapView. Example, a compass, floorfilter etc.
  * @since 200.3.0
  */
@@ -72,9 +94,20 @@ public fun MapView(
     wrapAroundMode: WrapAroundMode = WrapAroundMode.EnabledWhenSupported,
     geometryEditor: GeometryEditor? = null,
     mapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptions(),
+    viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
     selectionProperties: SelectionProperties = SelectionProperties(),
     onViewpointChanged: (() -> Unit)? = null,
     mapInsets: PaddingValues = PaddingValues(),
+    onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
+    onRotate: ((RotationChangeEvent) -> Unit)? = null,
+    onScale: ((ScaleChangeEvent) -> Unit)? = null,
+    onUp: ((UpEvent) -> Unit)? = null,
+    onDown: ((DownEvent) -> Unit)? = null,
+    onSingleTapConfirmed: ((SingleTapConfirmedEvent) -> Unit)? = null,
+    onDoubleTap: ((DoubleTapEvent) -> Unit)? = null,
+    onLongPress: ((LongPressEvent) -> Unit)? = null,
+    onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
+    onPan: ((PanChangeEvent) -> Unit)? = null,
     overlay: @Composable () -> Unit = {}
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -91,6 +124,7 @@ public fun MapView(
                 it.selectionProperties = selectionProperties
                 it.interactionOptions = mapViewInteractionOptions
                 it.locationDisplay = locationDisplay
+                it.labeling = viewLabelProperties
                 it.wrapAroundMode = wrapAroundMode
                 it.geometryEditor = geometryEditor
             })
@@ -115,6 +149,132 @@ public fun MapView(
             mapInsets.calculateTopPadding().value.toDouble(),
             mapInsets.calculateBottomPadding().value.toDouble()
         )
+
+        MapViewEventHandler(
+            mapView,
+            onViewpointChanged,
+            onInteractingChanged,
+            onRotate,
+            onScale,
+            onUp,
+            onDown,
+            onSingleTapConfirmed,
+            onDoubleTap,
+            onLongPress,
+            onTwoPointerTap,
+            onPan
+        )
+    }
+}
+
+/**
+ * Sets up the callbacks for all the MapView events.
+ */
+@Composable
+private fun MapViewEventHandler(
+    mapView: MapView,
+    onViewpointChanged: (() -> Unit)?,
+    onInteractingChanged: ((isInteracting: Boolean) -> Unit)?,
+    onRotate: ((RotationChangeEvent) -> Unit)?,
+    onScale: ((ScaleChangeEvent) -> Unit)?,
+    onUp: ((UpEvent) -> Unit)?,
+    onDown: ((DownEvent) -> Unit)?,
+    onSingleTapConfirmed: ((SingleTapConfirmedEvent) -> Unit)?,
+    onDoubleTap: ((DoubleTapEvent) -> Unit)?,
+    onLongPress: ((LongPressEvent) -> Unit)?,
+    onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)?,
+    onPan: ((PanChangeEvent) -> Unit)?
+) {
+    val currentViewPointChanged by rememberUpdatedState(onViewpointChanged)
+    val currentOnInteractingChanged by rememberUpdatedState(onInteractingChanged)
+    val currentOnRotate by rememberUpdatedState(onRotate)
+    val currentOnScale by rememberUpdatedState(onScale)
+    val currentOnUp by rememberUpdatedState(onUp)
+    val currentOnDown by rememberUpdatedState(onDown)
+    val currentSingleTapConfirmed by rememberUpdatedState(onSingleTapConfirmed)
+    val currentOnDoubleTap by rememberUpdatedState(onDoubleTap)
+    val currentOnLongPress by rememberUpdatedState(onLongPress)
+    val currentOnTwoPointerTap by rememberUpdatedState(onTwoPointerTap)
+    val currentOnPan by rememberUpdatedState(onPan)
+
+    LaunchedEffect(Unit) {
+        launch {
+            mapView.viewpointChanged.collect {
+                currentViewPointChanged?.let {
+                    it()
+                }
+            }
+        }
+        launch(Dispatchers.Main.immediate) {
+            mapView.isInteracting.collect { isInteracting ->
+                currentOnInteractingChanged?.let {
+                    it(isInteracting)
+                }
+            }
+        }
+        launch(Dispatchers.Main.immediate) {
+            mapView.onRotate.collect { rotationChangeEvent ->
+                currentOnRotate?.let {
+                    it(rotationChangeEvent)
+                }
+            }
+        }
+        launch(Dispatchers.Main.immediate) {
+            mapView.onScale.collect { scaleChangeEvent ->
+                currentOnScale?.let {
+                    it(scaleChangeEvent)
+                }
+            }
+        }
+        launch(Dispatchers.Main.immediate) {
+            mapView.onUp.collect { upEvent ->
+                currentOnUp?.let {
+                    it(upEvent)
+                }
+            }
+        }
+        launch(Dispatchers.Main.immediate) {
+            mapView.onDown.collect { downEvent ->
+                currentOnDown?.let {
+                    it(downEvent)
+                }
+            }
+        }
+        launch(Dispatchers.Main.immediate) {
+            mapView.onSingleTapConfirmed.collect { singleTapConfirmedEvent ->
+                currentSingleTapConfirmed?.let {
+                    it(singleTapConfirmedEvent)
+                }
+            }
+        }
+        launch(Dispatchers.Main.immediate) {
+            mapView.onDoubleTap.collect { doubleTapEvent ->
+                currentOnDoubleTap?.let {
+                    it(doubleTapEvent)
+                }
+            }
+        }
+        launch(Dispatchers.Main.immediate) {
+            mapView.onLongPress.collect { longPressEvent ->
+                currentOnLongPress?.let {
+                    it(longPressEvent)
+                }
+            }
+        }
+        launch(Dispatchers.Main.immediate) {
+            mapView.onTwoPointerTap.collect { twoPointerTapEvent ->
+                currentOnTwoPointerTap?.let {
+                    it(twoPointerTapEvent)
+                }
+            }
+        }
+        launch(Dispatchers.Main.immediate) {
+            mapView.onPan.collect { panChangeEvent ->
+                currentOnPan?.let {
+                    it(panChangeEvent)
+                }
+            }
+        }
     }
 }
 
