@@ -50,7 +50,7 @@ internal fun GroupElement(
     state: BaseGroupState,
     modifier: Modifier = Modifier,
     colors: GroupElementColors = GroupElementDefaults.colors(),
-    onDialogRequest: (BaseFieldState, Int) -> Unit
+    onDialogRequest: (BaseFieldState<*>, Int) -> Unit
 ) {
     val visible by groupElement.isVisible.collectAsState()
     if (visible) {
@@ -74,11 +74,11 @@ private fun GroupElement(
     label: String,
     description: String,
     expanded: Boolean,
-    fieldStates: Map<Int, BaseFieldState?>,
+    fieldStates: Map<Int, BaseFieldState<*>?>,
     modifier: Modifier = Modifier,
     colors: GroupElementColors,
     onClick: () -> Unit,
-    onDialogRequest: ((BaseFieldState, Int) -> Unit)? = null
+    onDialogRequest: ((BaseFieldState<*>, Int) -> Unit)? = null
 ) {
     Card(
         modifier = modifier,

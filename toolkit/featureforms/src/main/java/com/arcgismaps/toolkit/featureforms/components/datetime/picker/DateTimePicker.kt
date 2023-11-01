@@ -60,9 +60,8 @@ import androidx.compose.ui.window.DialogProperties
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimePicker
 import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimePickerState
-import com.arcgismaps.toolkit.featureforms.components.datetime.toDateMillis
-import com.arcgismaps.toolkit.featureforms.components.datetime.toZonedDateTime
 import java.time.Instant
+import java.util.TimeZone
 
 /**
  * Defines the style of [DateTimePicker].
@@ -120,9 +119,9 @@ internal fun DateTimePicker(
     }
     // calculate the date ranges from the state
     val datePickerRange = IntRange(
-        start = state.minDateTime?.toZonedDateTime()?.year
+        start = state.minDateTime?.atZone(TimeZone.getDefault().toZoneId())?.year
             ?: DatePickerDefaults.YearRange.first,
-        endInclusive = state.maxDateTime?.toZonedDateTime()?.year
+        endInclusive = state.maxDateTime?.atZone(TimeZone.getDefault().toZoneId())?.year
             ?: DatePickerDefaults.YearRange.last
     )
     // The picker input type, date or time.
@@ -134,7 +133,7 @@ internal fun DateTimePicker(
         DatePickerState(
             initialSelectedDateMillis = dateTime.dateForPicker,
             initialDisplayedMonthMillis = dateTime.dateForPicker
-                ?: (state.minDateTime ?: state.maxDateTime),
+                ?: (state.minDateTime?.toEpochMilli() ?: state.maxDateTime?.toEpochMilli()),
             datePickerRange,
             DisplayMode.Picker
         )

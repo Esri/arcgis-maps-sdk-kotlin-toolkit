@@ -49,7 +49,7 @@ internal open class CodedValueFieldProperties(
     val codedValues: List<CodedValue>,
     val showNoValueOption: FormInputNoValueOption,
     val noValueLabel: String
-) : FieldProperties(label, placeholder, description, value, required, editable, visible)
+) : FieldProperties<String>(label, placeholder, description, value, required, editable, visible)
 
 /**
  * A class to handle the state of a [ComboBoxField]. Essential properties are inherited
@@ -68,7 +68,7 @@ internal open class CodedValueFieldState(
     initialValue: String = properties.value.value,
     scope: CoroutineScope,
     onEditValue: ((Any?) -> Unit)
-) : BaseFieldState(
+) : BaseFieldState<String>(
     properties = properties,
     scope = scope,
     initialValue = initialValue,

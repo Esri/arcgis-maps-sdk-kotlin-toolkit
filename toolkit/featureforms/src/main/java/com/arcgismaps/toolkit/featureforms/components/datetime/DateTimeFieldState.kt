@@ -18,7 +18,6 @@
 
 package com.arcgismaps.toolkit.featureforms.components.datetime
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
@@ -31,31 +30,26 @@ import com.arcgismaps.toolkit.featureforms.components.base.FieldProperties
 import com.arcgismaps.toolkit.featureforms.components.text.FormTextFieldState
 import com.arcgismaps.toolkit.featureforms.components.text.TextFieldProperties
 import com.arcgismaps.toolkit.featureforms.utils.editValue
-import com.arcgismaps.toolkit.featureforms.utils.formattedValueFlow
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeParseException
+import java.time.Instant
 
 internal class DateTimeFieldProperties(
     label: String,
     placeholder: String,
     description: String,
-    value: StateFlow<String>,
+    value: StateFlow<Instant?>,
     required: StateFlow<Boolean>,
     editable: StateFlow<Boolean>,
     visible: StateFlow<Boolean>,
-    val minEpochMillis: Long?,
-    val maxEpochMillis: Long?,
+    val minEpochMillis: Instant?,
+    val maxEpochMillis: Instant?,
     val shouldShowTime: Boolean
-) : FieldProperties(label, placeholder, description, value, required, editable, visible)
+) : FieldProperties<Instant?>(label, placeholder, description, value, required, editable, visible)
 
 /**
  * A class to handle the state of a [DateTimeField]. Essential properties are inherited from the
@@ -70,35 +64,31 @@ internal class DateTimeFieldProperties(
  */
 internal class DateTimeFieldState(
     properties: DateTimeFieldProperties,
-    initialValue: String = properties.value.value,
+    initialValue: Instant? = properties.value.value,
     scope: CoroutineScope,
     onEditValue: (Any?) -> Unit
-) : BaseFieldState(
+) : BaseFieldState<Instant?>(
     properties = properties,
     initialValue = initialValue,
     scope = scope,
     onEditValue = onEditValue
 ) {
-    val minEpochMillis: Long? = properties.minEpochMillis
+    val minEpochMillis: Instant? = properties.minEpochMillis
 
-    val maxEpochMillis: Long? = properties.maxEpochMillis
+    val maxEpochMillis: Instant? = properties.maxEpochMillis
 
     val shouldShowTime: Boolean = properties.shouldShowTime
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val epochMillis: StateFlow<Long?> = value.mapLatest {
-        if (it.toLongOrNull() != null) {
-            it.toLong()
-        } else {
-            dateTimeFromString(it)
-        }
-    }.stateIn(
-        scope,
-        started = SharingStarted.Eagerly,
-        initialValue = dateTimeFromString(value.value)
-    )
-
+    
     companion object {
+        internal fun dateTimeValue(value: StateFlow<Any?>, scope: CoroutineScope): StateFlow<Instant?> =
+            value.map {
+                if (it is Instant?) {
+                    it
+                } else {
+                    throw IllegalArgumentException("expected a date time for the value of a date time field")
+                }
+            }.stateIn(scope, SharingStarted.Eagerly, value.value as Instant?)
+        
         fun Saver(
             field: FieldFormElement,
             form: FeatureForm,
@@ -114,12 +104,12 @@ internal class DateTimeFieldState(
                         label = field.label,
                         placeholder = field.hint,
                         description = field.description,
-                        value = field.formattedValueFlow(scope),
+                        value = dateTimeValue(field.value, scope),
                         editable = field.isEditable,
                         required = field.isRequired,
                         visible = field.isVisible,
-                        minEpochMillis = input.min?.toEpochMilli(),
-                        maxEpochMillis = input.max?.toEpochMilli(),
+                        minEpochMillis = input.min,
+                        maxEpochMillis = input.max,
                         shouldShowTime = input.includeTime
                     ),
                     initialValue = list[0],
@@ -137,8 +127,8 @@ internal class DateTimeFieldState(
 @Composable
 internal fun rememberDateTimeFieldState(
     field: FieldFormElement,
-    minEpochMillis: Long?,
-    maxEpochMillis: Long?,
+    minEpochMillis: Instant?,
+    maxEpochMillis: Instant?,
     shouldShowTime: Boolean,
     form: FeatureForm,
     scope: CoroutineScope
@@ -154,7 +144,7 @@ internal fun rememberDateTimeFieldState(
             label = field.label,
             placeholder = field.hint,
             description = field.description,
-            value = field.formattedValueFlow(scope),
+            value = DateTimeFieldState.dateTimeValue(field.value, scope),
             editable = field.isEditable,
             required = field.isRequired,
             visible = field.isVisible,
@@ -170,27 +160,3 @@ internal fun rememberDateTimeFieldState(
     )
 }
 
-/**
- * Maps the [FieldFormElement.value] from a String to Long?
- * Empty strings are made to be null Longs.
- *
- * @since 200.3.0
- */
-internal fun dateTimeFromString(formattedDateTime: String, offset: ZoneOffset = ZoneOffset.UTC): Long? {
-    return if (formattedDateTime.isNotEmpty()) {
-        try {
-            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
-            LocalDateTime.parse(formattedDateTime, formatter)
-                .atZone(offset)
-                .toInstant()
-                .toEpochMilli()
-        } catch (ex: DateTimeParseException) {
-            Log.e(
-                "DateTimeFieldState",
-                "dateTimeFromString: Error parsing $formattedDateTime into a valid date time",
-                ex
-            )
-            null
-        }
-    } else null
-}

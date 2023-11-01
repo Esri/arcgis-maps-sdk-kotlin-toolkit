@@ -27,7 +27,7 @@ import kotlinx.coroutines.flow.flattenMerge
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 
-internal open class FieldProperties<T: Any>(
+internal open class FieldProperties<T>(
     val label: String,
     val placeholder: String,
     val description: String,
@@ -48,7 +48,7 @@ internal open class FieldProperties<T: Any>(
  * @param onEditValue a callback to invoke when the user edits result in a change of value. This
  * is called on [BaseFieldState.onValueChanged].
  */
-internal open class BaseFieldState<T: Any>(
+internal open class BaseFieldState<T>(
     properties: FieldProperties<T>,
     initialValue: T = properties.value.value,
     scope: CoroutineScope,

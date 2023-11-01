@@ -31,6 +31,7 @@ import com.arcgismaps.toolkit.featureforms.components.datetime.picker.DateTimePi
 import com.arcgismaps.toolkit.featureforms.components.datetime.picker.DateTimePickerStyle
 import com.arcgismaps.toolkit.featureforms.components.datetime.picker.rememberDateTimePickerState
 import java.io.Serializable
+import java.time.Instant
 
 /**
  * Specifies the type of dialog to use for a [FeatureFormDialog].
@@ -87,7 +88,7 @@ internal sealed class DialogType : Serializable {
 @Composable
 internal fun FeatureFormDialog(
     dialogType: DialogType,
-    state: BaseFieldState?,
+    state: BaseFieldState<*>?,
     onDismissRequest: () -> Unit
 ) {
     when (dialogType) {
@@ -109,7 +110,7 @@ internal fun FeatureFormDialog(
                     pickerStyle,
                     state.minEpochMillis,
                     state.maxEpochMillis,
-                    state.epochMillis.collectAsState().value,
+                    state.value.collectAsState().value,
                     state.label,
                     state.description,
                     DateTimePickerInput.Date
@@ -120,7 +121,9 @@ internal fun FeatureFormDialog(
                     onDismissRequest = onDismissRequest,
                     onCancelled = onDismissRequest,
                     onConfirmed = {
-                        state.onValueChanged(pickerState.selectedDateTimeMillis.toString())
+                        state.onValueChanged(pickerState.selectedDateTimeMillis?.let {
+                            Instant.ofEpochMilli(it)
+                        })
                         onDismissRequest()
                     }
                 )

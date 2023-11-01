@@ -41,6 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.base.BaseTextField
 import kotlinx.coroutines.flow.MutableStateFlow
+import java.time.Instant
 
 @Composable
 internal fun DateTimeField(
@@ -50,7 +51,7 @@ internal fun DateTimeField(
 ) {
     val isEditable by state.isEditable.collectAsState()
     val isRequired by state.isRequired.collectAsState()
-    val epochMillis by state.epochMillis.collectAsState()
+    val instant by state.value.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
     // to check if the field was ever focused by the user
     var wasFocused by rememberSaveable { mutableStateOf(false) }
@@ -61,9 +62,11 @@ internal fun DateTimeField(
     }
 
     BaseTextField(
-        text = epochMillis?.formattedDateTime(state.shouldShowTime) ?: "",
+        text = instant?.formattedDateTime(state.shouldShowTime) ?: "",
         onValueChange = {
-            state.onValueChanged(it)
+            it.toLongOrNull()?.also { millis ->
+                state.onValueChanged(Instant.ofEpochMilli(millis))
+            } ?: state.onValueChanged(null)
         },
         modifier = modifier,
         readOnly = true,
@@ -75,7 +78,7 @@ internal fun DateTimeField(
         trailingIcon = Icons.Rounded.EditCalendar,
         supportingText = {
             // if the field was focused and is required, validate the current value
-            if (wasFocused && isRequired && epochMillis == null) {
+            if (wasFocused && isRequired && instant == null) {
                 Text(
                     text = stringResource(id = R.string.required),
                     color = MaterialTheme.colorScheme.error
@@ -111,7 +114,7 @@ private fun DateTimeFieldPreview() {
                 label = "Launch Date and Time",
                 placeholder = "",
                 description = "Enter the date for apollo 11 launch",
-                value = MutableStateFlow(""),
+                value = MutableStateFlow(null),
                 editable = MutableStateFlow(true),
                 required = MutableStateFlow(false),
                 visible = MutableStateFlow(true),
