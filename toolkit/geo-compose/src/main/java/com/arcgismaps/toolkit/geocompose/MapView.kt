@@ -135,7 +135,7 @@ private fun GraphicsOverlaysUpdater(
             when (changedEvent) {
                 // On GraphicsOverlay added:
                 is GraphicsOverlayCollection.ChangedEvent.Added ->
-                    changedEvent.element?.let { mapView.graphicsOverlays.add(it) }
+                    mapView.graphicsOverlays.add(changedEvent.element)
 
                 // On GraphicsOverlay removed:
                 is GraphicsOverlayCollection.ChangedEvent.Removed ->

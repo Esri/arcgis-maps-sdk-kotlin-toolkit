@@ -17,6 +17,7 @@
 
 package com.arcgismaps.toolkit.geocompose
 
+import androidx.compose.runtime.Stable
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -28,6 +29,7 @@ import kotlinx.coroutines.flow.asSharedFlow
  *
  * @since 200.3.0
  */
+@Stable
 public class GraphicsOverlayCollection : Iterable<GraphicsOverlay> {
 
     private val graphicsOverlays = mutableListOf<GraphicsOverlay>()
