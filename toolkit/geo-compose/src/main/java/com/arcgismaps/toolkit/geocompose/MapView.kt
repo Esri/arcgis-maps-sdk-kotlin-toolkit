@@ -19,7 +19,6 @@ package com.arcgismaps.toolkit.geocompose
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.runtime.Composable
@@ -30,11 +29,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.mapping.ArcGISMap
@@ -47,19 +46,15 @@ import com.arcgismaps.mapping.view.MapViewInteractionOptions
 import com.arcgismaps.mapping.view.PanChangeEvent
 import com.arcgismaps.mapping.view.RotationChangeEvent
 import com.arcgismaps.mapping.view.ScaleChangeEvent
+import com.arcgismaps.mapping.view.SelectionProperties
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
-import kotlinx.coroutines.Dispatchers
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.mapping.view.WrapAroundMode
-import com.arcgismaps.mapping.view.SelectionProperties
 import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import androidx.compose.foundation.layout.padding
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.LayoutDirection
 
 /**
  * A compose equivalent of the [MapView].
@@ -149,22 +144,22 @@ public fun MapView(
             mapInsets.calculateTopPadding().value.toDouble(),
             mapInsets.calculateBottomPadding().value.toDouble()
         )
-
-        MapViewEventHandler(
-            mapView,
-            onViewpointChanged,
-            onInteractingChanged,
-            onRotate,
-            onScale,
-            onUp,
-            onDown,
-            onSingleTapConfirmed,
-            onDoubleTap,
-            onLongPress,
-            onTwoPointerTap,
-            onPan
-        )
     }
+
+    MapViewEventHandler(
+        mapView,
+        onViewpointChanged,
+        onInteractingChanged,
+        onRotate,
+        onScale,
+        onUp,
+        onDown,
+        onSingleTapConfirmed,
+        onDoubleTap,
+        onLongPress,
+        onTwoPointerTap,
+        onPan
+    )
 }
 
 /**

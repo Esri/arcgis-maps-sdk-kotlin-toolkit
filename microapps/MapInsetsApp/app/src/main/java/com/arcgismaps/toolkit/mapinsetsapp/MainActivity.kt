@@ -27,11 +27,12 @@ import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.toolkit.mapinsetsapp.screens.MainScreen
 import com.arcgismaps.toolkit.mapinsetsapp.ui.theme.MapInsetsAppTheme
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        ArcGISEnvironment.apiKey =
-            ApiKey.create(BuildConfig.API_KEY)
+        ArcGISEnvironment.apiKey = ApiKey.create(BuildConfig.API_KEY)
+
         setContent {
             MapInsetsAppTheme {
                 MapInsetsApp()
@@ -39,10 +40,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
 @Composable
 fun MapInsetsApp() {
     MainScreen()
 }
+
 @Preview(showBackground = true)
 @Composable
 fun AppPreview() {
