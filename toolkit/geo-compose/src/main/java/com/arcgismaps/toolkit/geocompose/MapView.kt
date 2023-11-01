@@ -170,7 +170,7 @@ public inline fun rememberLocationDisplay(
  * [init] will be called when the [GraphicsOverlayCollection] is first created to configure its
  * initial state.
  *
- * @param key invalidates the remembered LocationDisplay if different from the previous composition
+ * @param key invalidates the remembered GraphicsOverlayCollection if different from the previous composition
  * @param init called when the [GraphicsOverlayCollection] is created to configure its initial state
  * @since 200.3.0
  */

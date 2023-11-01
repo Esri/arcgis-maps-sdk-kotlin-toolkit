@@ -28,8 +28,7 @@ import kotlinx.coroutines.flow.asSharedFlow
  *
  * @since 200.3.0
  */
-public class GraphicsOverlayCollection :
-    Iterable<GraphicsOverlay> {
+public class GraphicsOverlayCollection : Iterable<GraphicsOverlay> {
 
     private val graphicsOverlays = mutableListOf<GraphicsOverlay>()
 
@@ -48,7 +47,7 @@ public class GraphicsOverlayCollection :
     }
 
     /**
-     * Add a [graphicsOverlay] to the composable [MapView]'s graphics overlays.
+     * Add a [graphicsOverlay] to this GraphicsOverlayCollection.
      *
      * @return if the add operation succeeds, return true.
      * @since 200.3.0
@@ -61,7 +60,7 @@ public class GraphicsOverlayCollection :
     }
 
     /**
-     * Remove a [graphicsOverlay] from the composable [MapView]'s graphics overlays.
+     * Remove a [graphicsOverlay] from this GraphicsOverlayCollection.
      *
      * @return if the remove operation succeeds, return true.
      * @since 200.3.0
@@ -74,7 +73,7 @@ public class GraphicsOverlayCollection :
     }
 
     /**
-     * Returns the size of this instance.
+     * Returns the number of graphics overlays in this GraphicsOverlayCollection.
      *
      * @since 200.3.0
      */
@@ -82,13 +81,13 @@ public class GraphicsOverlayCollection :
         get() = graphicsOverlays.size
 
     /**
-     * Clears the list of [GraphicsOverlay] from the [MapView]
+     * Clears all graphics overlays from this GraphicsOverlayCollection.
      *
      * @since 200.3.0
      */
     public fun clear() {
         graphicsOverlays.clear()
-        _changed.tryEmit(ChangedEvent.Cleared())
+        _changed.tryEmit(ChangedEvent.Cleared)
     }
 
     /**
@@ -97,10 +96,10 @@ public class GraphicsOverlayCollection :
      *
      * @since 200.3.0
      */
-    internal sealed class ChangedEvent(internal val element: GraphicsOverlay? = null) {
-        class Added(element: GraphicsOverlay) : ChangedEvent(element)
-        class Removed(element: GraphicsOverlay) : ChangedEvent(element)
-        class Cleared : ChangedEvent()
+    internal sealed class ChangedEvent() {
+        class Added(val element: GraphicsOverlay) : ChangedEvent()
+        class Removed(val element: GraphicsOverlay) : ChangedEvent()
+        object Cleared : ChangedEvent()
     }
 }
 
