@@ -35,6 +35,7 @@ import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
+import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.LocationDisplay
 import com.arcgismaps.mapping.view.LongPressEvent
 import com.arcgismaps.mapping.view.MapView
@@ -100,6 +101,7 @@ public fun MapView(
     onLongPress: ((LongPressEvent) -> Unit)? = null,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
+    drawStatus: ((DrawStatus) -> Unit)? = null,
     overlay: @Composable () -> Unit = {}
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -143,7 +145,8 @@ public fun MapView(
         onDoubleTap,
         onLongPress,
         onTwoPointerTap,
-        onPan
+        onPan,
+        drawStatus
     )
 
     GraphicsOverlaysUpdater(graphicsOverlays, mapView)
@@ -165,7 +168,8 @@ private fun MapViewEventHandler(
     onDoubleTap: ((DoubleTapEvent) -> Unit)?,
     onLongPress: ((LongPressEvent) -> Unit)?,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)?,
-    onPan: ((PanChangeEvent) -> Unit)?
+    onPan: ((PanChangeEvent) -> Unit)?,
+    drawStatus: ((DrawStatus) -> Unit)?
 ) {
     val currentViewPointChanged by rememberUpdatedState(onViewpointChanged)
     val currentOnInteractingChanged by rememberUpdatedState(onInteractingChanged)
@@ -178,6 +182,7 @@ private fun MapViewEventHandler(
     val currentOnLongPress by rememberUpdatedState(onLongPress)
     val currentOnTwoPointerTap by rememberUpdatedState(onTwoPointerTap)
     val currentOnPan by rememberUpdatedState(onPan)
+    val currentDrawStatus by rememberUpdatedState(drawStatus)
 
     LaunchedEffect(Unit) {
         launch {
@@ -254,6 +259,13 @@ private fun MapViewEventHandler(
             mapView.onPan.collect { panChangeEvent ->
                 currentOnPan?.let {
                     it(panChangeEvent)
+                }
+            }
+        }
+        launch(Dispatchers.Main.immediate) {
+            mapView.drawStatus.collect { drawStatus ->
+                currentDrawStatus?.let {
+                    it(drawStatus)
                 }
             }
         }
