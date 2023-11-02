@@ -114,7 +114,7 @@ fun MainScreen() {
                     )
                     OutlinedTextField(
                         value = bottomText,
-                        modifier = Modifier.size(96.dp, 64.dp),
+                        modifier = Modifier.size(90.dp, 64.dp),
                         onValueChange = { text: TextFieldValue -> bottomText = text },
                         label = { Text("Bottom") },
                         keyboardOptions = KeyboardOptions(
