@@ -41,7 +41,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.base.BaseTextField
 import kotlinx.coroutines.flow.MutableStateFlow
-import java.time.Instant
 
 @Composable
 internal fun DateTimeField(
@@ -64,9 +63,9 @@ internal fun DateTimeField(
     BaseTextField(
         text = instant?.formattedDateTime(state.shouldShowTime) ?: "",
         onValueChange = {
-            it.toLongOrNull()?.also { millis ->
-                state.onValueChanged(Instant.ofEpochMilli(millis))
-            } ?: state.onValueChanged(null)
+            // the only allowable change is to clear the text
+            require(it.isEmpty())
+            state.onValueChanged(null)
         },
         modifier = modifier,
         readOnly = true,
