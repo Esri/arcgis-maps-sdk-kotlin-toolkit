@@ -28,6 +28,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.data.Domain
 import com.arcgismaps.data.FieldType
 import com.arcgismaps.data.RangeDomain
+import com.arcgismaps.exceptions.FeatureFormValidationException
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
@@ -35,17 +36,18 @@ import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.FieldProperties
+import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState
+import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.ExactCharConstraint
+import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.MaxCharConstraint
+import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.MaxNumericConstraint
+import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.MinMaxCharConstraint
+import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.MinMaxNumericConstraint
+import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.MinNumericConstraint
+import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.NoError
+import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.NotANumber
+import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.NotAWholeNumber
+import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.Required
 import com.arcgismaps.toolkit.featureforms.components.formelement.FieldElement
-import com.arcgismaps.toolkit.featureforms.components.text.ValidationErrorState.ExactCharConstraint
-import com.arcgismaps.toolkit.featureforms.components.text.ValidationErrorState.MaxCharConstraint
-import com.arcgismaps.toolkit.featureforms.components.text.ValidationErrorState.MaxNumericConstraint
-import com.arcgismaps.toolkit.featureforms.components.text.ValidationErrorState.MinMaxCharConstraint
-import com.arcgismaps.toolkit.featureforms.components.text.ValidationErrorState.MinMaxNumericConstraint
-import com.arcgismaps.toolkit.featureforms.components.text.ValidationErrorState.MinNumericConstraint
-import com.arcgismaps.toolkit.featureforms.components.text.ValidationErrorState.NoError
-import com.arcgismaps.toolkit.featureforms.components.text.ValidationErrorState.NotANumber
-import com.arcgismaps.toolkit.featureforms.components.text.ValidationErrorState.NotAWholeNumber
-import com.arcgismaps.toolkit.featureforms.components.text.ValidationErrorState.Required
 import com.arcgismaps.toolkit.featureforms.utils.asDoubleTuple
 import com.arcgismaps.toolkit.featureforms.utils.asLongTuple
 import com.arcgismaps.toolkit.featureforms.utils.domain
@@ -95,12 +97,14 @@ internal class FormTextFieldState(
     initialValue: String = properties.value.value,
     scope: CoroutineScope,
     private val context: Context,
-    onEditValue: (Any?) -> Unit
+    onEditValue: (Any?) -> Unit,
+    validate: () -> List<Throwable>
 ) : BaseFieldState<String>(
     properties = properties,
     initialValue = initialValue,
     scope = scope,
-    onEditValue = onEditValue
+    onEditValue = onEditValue,
+    validate = validate
 ) {
     // indicates singleLine only if TextBoxFeatureFormInput
     val singleLine = properties.singleLine
@@ -125,7 +129,6 @@ internal class FormTextFieldState(
     private val _hasError = mutableStateOf(false)
     private val _supportingTextIsErrorMessage = mutableStateOf(false)
     val supportingTextIsErrorMessage: State<Boolean> = _supportingTextIsErrorMessage
-    
     /**
      * The domain of the element's field.
      */
@@ -150,15 +153,15 @@ internal class FormTextFieldState(
         }
         
         mutableMapOf(
-            Required to context.getString(R.string.required),
-            MaxCharConstraint to context.getString(R.string.maximum_n_chars, if (maxLength > 0) maxLength else 254),
-            ExactCharConstraint to context.getString(R.string.enter_n_chars, minLength),
-            MinMaxCharConstraint to context.getString(R.string.enter_min_to_max_chars, minLength, maxLength),
-            MinNumericConstraint to context.getString(R.string.less_than_min_value, min),
-            MaxNumericConstraint to context.getString(R.string.exceeds_max_value, max),
-            MinMaxNumericConstraint to context.getString(R.string.numeric_range_helper_text, min, max),
-            NotANumber to context.getString(R.string.value_must_be_a_number),
-            NotAWholeNumber to context.getString(R.string.value_must_be_a_whole_number)
+            ValidationErrorState.Required to context.getString(R.string.required),
+            ValidationErrorState.MaxCharConstraint to context.getString(R.string.maximum_n_chars, if (maxLength > 0) maxLength else 254),
+            ValidationErrorState.ExactCharConstraint to context.getString(R.string.enter_n_chars, minLength),
+            ValidationErrorState.MinMaxCharConstraint to context.getString(R.string.enter_min_to_max_chars, minLength, maxLength),
+            ValidationErrorState.MinNumericConstraint to context.getString(R.string.less_than_min_value, min),
+            ValidationErrorState.MaxNumericConstraint to context.getString(R.string.exceeds_max_value, max),
+            ValidationErrorState.MinMaxNumericConstraint to context.getString(R.string.numeric_range_helper_text, min, max),
+            ValidationErrorState.NotANumber to context.getString(R.string.value_must_be_a_number),
+            ValidationErrorState.NotAWholeNumber to context.getString(R.string.value_must_be_a_whole_number)
         )
     }
     
@@ -268,7 +271,7 @@ internal class FormTextFieldState(
         require(fieldType.isIntegerType)
         return if (domain != null && domain is RangeDomain) {
             val (min, max) = domain.asLongTuple
-            if (min != null && max != null) {
+          if (min != null && max != null) {
                 if (numberVal in min..max) {
                     NoError
                 } else {
@@ -336,7 +339,7 @@ internal class FormTextFieldState(
                 validationErrors.firstOrNull { it != Required && it != NotANumber && it != NotAWholeNumber } ?: NoError
             } else {
                 // if non empty, focused, show any error other than required (the Required error shouldn't be in the list)
-                check (!validationErrors.contains(Required))
+                //check (!validationErrors.contains(Required))
                 validationErrors.first()
             }
         } else if (hasBeenFocused) {
@@ -350,7 +353,7 @@ internal class FormTextFieldState(
                 }
             } else {
                 // if non empty, unfocused, show any error other than required (the Required error shouldn't be in the list)
-                check (!validationErrors.contains(Required))
+                //check (!validationErrors.contains(Required))
                 validationErrors.first()
             }
         } else {
@@ -358,24 +361,60 @@ internal class FormTextFieldState(
             NoError
         }
     
-    private fun validate(value: String): MutableList<ValidationErrorState> {
+    private fun validate(value: String): List<ValidationErrorState> {
+        val errors = validate.invoke()
+        errors.forEach {
+            println("error: $it")
+            if (it !is FeatureFormValidationException) {
+                println("unknown error $it with cause ${it.message} ${it.cause}")
+            }
+        
+        }
         val ret = mutableListOf<ValidationErrorState>()
-        if (isRequired.value && value.isEmpty()) {
+        if (errors.any { it is FeatureFormValidationException.RequiredException }) {
             ret += Required
         }
-        
+
         if (!fieldType.isNumeric) {
-            val rangeError = validateTextRange(value)
-            if (rangeError != NoError) {
-                ret += rangeError
+            if (errors.any { it is FeatureFormValidationException.MinCharConstraintException }
+                || errors.any { it is FeatureFormValidationException.MaxCharConstraintException }
+            ) {
+                if (minLength > 0 && maxLength > 0) {
+                    if (minLength == maxLength) {
+                        ret += ExactCharConstraint
+                    } else {
+                        ret += MinMaxCharConstraint
+                    }
+                } else {
+                    ret += MaxCharConstraint
+                }
             }
         } else {
-            val error = validateNumber(value)
-            if (error != NoError) {
-                ret += error
+            if (fieldType.isIntegerType) {
+                println("integer $value as int ${value.toIntOrNull()}")
+                val numberVal = value.toIntOrNull()
+                if (numberVal == null) {
+                    ret += NotAWholeNumber
+                } else {
+                    val error = validateNumericRange(numberVal)
+                    if (error != NoError) {
+                        ret += error
+                    }
+                }
+            } else {
+                println("float $value as float ${value.toDoubleOrNull()}")
+                val numberVal = value.toDoubleOrNull()
+                if (numberVal == null) {
+                    ret += NotANumber
+                } else {
+                    val error = validateNumericRange(numberVal)
+                    if (error != NoError) {
+                        ret += error
+                    }
+                }
             }
         }
-        
+
         return ret
     }
     
@@ -421,6 +460,7 @@ internal class FormTextFieldState(
                         form.editValue(formElement, newValue)
                         scope.launch { form.evaluateExpressions() }
                     },
+                    validate = { formElement.getValidationErrors() }
                 ).apply {
                     // focus is lost on rotation. https://devtopia.esri.com/runtime/apollo/issues/230
                     hasBeenFocused = list[1] as Boolean
@@ -455,28 +495,16 @@ internal fun rememberFormTextFieldState(
             fieldType = form.fieldType(field),
             domain = form.domain(field) as? RangeDomain,
             minLength = minLength,
-            maxLength = maxLength,
+            maxLength = maxLength
         ),
         scope = scope,
         context = context,
         onEditValue = {
             form.editValue(field, it)
             scope.launch { form.evaluateExpressions() }
-        }
+        },
+        validate = { field.getValidationErrors() }
     )
-}
-
-private sealed class ValidationErrorState {
-    object NoError: ValidationErrorState()
-    object Required: ValidationErrorState()
-    object MinMaxCharConstraint: ValidationErrorState()
-    object ExactCharConstraint: ValidationErrorState()
-    object MaxCharConstraint: ValidationErrorState()
-    object MinNumericConstraint: ValidationErrorState()
-    object MaxNumericConstraint: ValidationErrorState()
-    object MinMaxNumericConstraint: ValidationErrorState()
-    object NotANumber: ValidationErrorState()
-    object NotAWholeNumber: ValidationErrorState()
 }
 
 /**
@@ -491,3 +519,12 @@ private fun Number.format(digits: Int = 2): String =
         is Float -> "%.${digits}f".format(this)
         else -> "$this"
     }
+
+private fun Throwable.exceptionToValidationError(): ValidationErrorState {
+    println("got throwable $this")
+    println("cause ${this.cause}")
+    println("message ${this.message}")
+    return Required
+}
+
+

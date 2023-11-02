@@ -53,6 +53,7 @@ internal open class BaseFieldState<T>(
     initialValue: T = properties.value.value,
     scope: CoroutineScope,
     protected val onEditValue: (Any?) -> Unit,
+    val validate: () -> List<Throwable> = {listOf()}
 ) {
     /**
      * Title for the field.
