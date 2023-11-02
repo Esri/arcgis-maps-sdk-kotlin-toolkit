@@ -19,6 +19,7 @@ package com.arcgismaps.toolkit.featureforms.components.formelement
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.CodedValueFieldState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.ComboBoxField
@@ -34,13 +35,14 @@ import com.arcgismaps.toolkit.featureforms.components.text.FormTextFieldState
 @Composable
 internal fun FieldElement(
     state: BaseFieldState,
+    modifier: Modifier = Modifier,
     onDialogRequest: () -> Unit = {}
 ) {
     val visible by state.isVisible.collectAsState()
     if (visible) {
         when (state) {
             is FormTextFieldState -> {
-                FormTextField(state = state)
+                FormTextField(state = state, modifier)
             }
 
             is DateTimeFieldState -> {

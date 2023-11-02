@@ -56,6 +56,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.utils.ClearFocus
 import com.arcgismaps.toolkit.featureforms.utils.PlaceholderTransformation
+import com.arcgismaps.toolkit.featureforms.utils.focusOnStart
 
 @Composable
 private fun trailingIcon(
@@ -187,7 +188,8 @@ internal fun BaseTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .focusable(isEditable, interactionSource)
-                .semantics { contentDescription = "outlined text field" },
+                .semantics { contentDescription = "outlined text field" }
+                .focusOnStart(label),
             readOnly = readOnly,
             enabled = isEditable,
             label = {

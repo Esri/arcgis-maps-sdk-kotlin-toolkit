@@ -1,6 +1,7 @@
 package com.arcgismaps.toolkit.featureforms
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
@@ -63,6 +64,7 @@ import com.arcgismaps.toolkit.featureforms.components.formelement.GroupElement
 import com.arcgismaps.toolkit.featureforms.components.text.rememberFormTextFieldState
 import com.arcgismaps.toolkit.featureforms.utils.DialogType
 import com.arcgismaps.toolkit.featureforms.utils.FeatureFormDialog
+import com.arcgismaps.toolkit.featureforms.utils.LocalFocusedField
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import java.util.Objects
@@ -205,6 +207,20 @@ private fun FeatureFormBody(
     onFieldDialogRequest: ((BaseFieldState, Int) -> Unit)? = null
 ) {
     val lazyListState = rememberLazyListState()
+    val elementsMap = rememberSaveable {
+        mutableMapOf<String, Int>()
+    }
+    val localFieldFocus = LocalFocusedField.current
+    LaunchedEffect(Unit) {
+        // clear field focus if not in view
+        val layoutInfo = lazyListState.layoutInfo
+        val lastFocusedFieldLabel = localFieldFocus.label
+        val lastFocusedItemIndex = elementsMap[lastFocusedFieldLabel]
+        Log.e("TAG", "FeatureFormBody: $lastFocusedFieldLabel $elementsMap $lastFocusedItemIndex, ${layoutInfo.visibleItemsInfo}", )
+        if (lastFocusedItemIndex in layoutInfo.visibleItemsInfo.map { it.index }) {
+            localFieldFocus.label = ""
+        }
+    }
     Column(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -222,7 +238,9 @@ private fun FeatureFormBody(
             modifier = Modifier.fillMaxSize(),
             state = lazyListState
         ) {
-            items(form.elements) { formElement ->
+            items(form.elements.count()) { index ->
+                val formElement = form.elements[index]
+                elementsMap[formElement.label] = index
                 when (formElement) {
                     is FieldFormElement -> {
                         val state = fieldStateMap[formElement.id]
@@ -292,7 +310,7 @@ internal fun rememberFieldStates(
     scope: CoroutineScope
 ): Map<Int, BaseFieldState> {
     val stateMap = mutableMapOf<Int, BaseFieldState>()
-    elements.forEach {  element ->
+    elements.forEach { element ->
         if (element is FieldFormElement) {
             val state = when (element.input) {
                 is TextBoxFormInput, is TextAreaFormInput -> {
