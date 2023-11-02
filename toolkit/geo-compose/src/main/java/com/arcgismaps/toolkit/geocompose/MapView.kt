@@ -57,6 +57,7 @@ import kotlinx.coroutines.launch
  *
  * @param modifier Modifier to be applied to the composable MapView
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable
+ * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param locationDisplay the [LocationDisplay] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param geometryEditor the [GeometryEditor] used by the composable [com.arcgismaps.toolkit.geocompose.MapView] to create and edit geometries by user interaction.
  * @param mapViewInteractionOptions the [MapViewInteractionOptions] used by this composable [com.arcgismaps.toolkit.geocompose.MapView]
@@ -81,6 +82,7 @@ import kotlinx.coroutines.launch
 public fun MapView(
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap? = null,
+    graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     wrapAroundMode: WrapAroundMode = WrapAroundMode.EnabledWhenSupported,
     geometryEditor: GeometryEditor? = null,
@@ -254,6 +256,42 @@ private fun MapViewEventHandler(
             }
         }
     }
+
+    GraphicsOverlaysUpdater(graphicsOverlays, mapView)
+}
+
+/**
+ * Update the [mapView]'s graphicsOverlays property to reflect changes made to the
+ * [graphicsOverlayCollection] based on the type of [GraphicsOverlayCollection.ChangedEvent]
+ */
+@Composable
+private fun GraphicsOverlaysUpdater(
+    graphicsOverlayCollection: GraphicsOverlayCollection,
+    mapView: MapView
+) {
+    LaunchedEffect(graphicsOverlayCollection) {
+        // sync up the MapView with the new graphics overlays
+        mapView.graphicsOverlays.clear()
+        graphicsOverlayCollection.forEach {
+            mapView.graphicsOverlays.add(it)
+        }
+        // start observing graphicsOverlays for subsequent changes
+        graphicsOverlayCollection.changed.collect { changedEvent ->
+            when (changedEvent) {
+                // On GraphicsOverlay added:
+                is GraphicsOverlayCollection.ChangedEvent.Added ->
+                    mapView.graphicsOverlays.add(changedEvent.element)
+
+                // On GraphicsOverlay removed:
+                is GraphicsOverlayCollection.ChangedEvent.Removed ->
+                    mapView.graphicsOverlays.remove(changedEvent.element)
+
+                // On GraphicsOverlays cleared:
+                is GraphicsOverlayCollection.ChangedEvent.Cleared ->
+                    mapView.graphicsOverlays.clear()
+            }
+        }
+    }
 }
 
 /**
@@ -277,6 +315,23 @@ public inline fun rememberLocationDisplay(
     return remember(key) {
         LocationDisplay().apply(init)
     }
+}
+
+/**
+ * Create and [remember] a [GraphicsOverlayCollection].
+ * [init] will be called when the [GraphicsOverlayCollection] is first created to configure its
+ * initial state.
+ *
+ * @param key invalidates the remembered GraphicsOverlayCollection if different from the previous composition
+ * @param init called when the [GraphicsOverlayCollection] is created to configure its initial state
+ * @since 200.3.0
+ */
+@Composable
+public inline fun rememberGraphicsOverlayCollection(
+    key: Any? = null,
+    crossinline init: GraphicsOverlayCollection.() -> Unit = {}
+): GraphicsOverlayCollection = remember(key) {
+    GraphicsOverlayCollection().apply(init)
 }
 
 @Preview
