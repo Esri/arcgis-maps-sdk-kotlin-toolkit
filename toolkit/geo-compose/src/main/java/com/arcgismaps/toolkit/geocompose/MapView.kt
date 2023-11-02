@@ -145,6 +145,8 @@ public fun MapView(
         onTwoPointerTap,
         onPan
     )
+
+    GraphicsOverlaysUpdater(graphicsOverlays, mapView)
 }
 
 /**
@@ -256,8 +258,6 @@ private fun MapViewEventHandler(
             }
         }
     }
-
-    GraphicsOverlaysUpdater(graphicsOverlays, mapView)
 }
 
 /**
