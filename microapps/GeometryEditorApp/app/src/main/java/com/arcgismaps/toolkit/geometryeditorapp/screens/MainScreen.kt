@@ -40,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.arcgismaps.Color
+import com.arcgismaps.geometry.Geometry
 import com.arcgismaps.geometry.GeometryType
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
@@ -49,36 +50,42 @@ import com.arcgismaps.mapping.symbology.SimpleLineSymbol
 import com.arcgismaps.mapping.symbology.SimpleLineSymbolStyle
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
-import com.arcgismaps.mapping.view.geometryeditor.FreehandTool
 import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
+import com.arcgismaps.mapping.view.geometryeditor.VertexTool
 import com.arcgismaps.toolkit.geocompose.GraphicsOverlayCollection
 import com.arcgismaps.toolkit.geocompose.MapView
 import com.arcgismaps.toolkit.geocompose.rememberGraphicsOverlayCollection
 
+// keep the instance of graphics overlay being used to sketch
 private var currentGraphicsOverlay: GraphicsOverlay = GraphicsOverlay()
 
+// track the status if geometry editor is started or stopped
 private var isDrawingEnabled by mutableStateOf(false)
 
-private val freehandTool: FreehandTool = FreehandTool()
-
+// line symbol of the graphic sketched on the map
 private val lineSymbol: SimpleLineSymbol by lazy {
     SimpleLineSymbol(
-        SimpleLineSymbolStyle.Solid,
-        Color.black,
-        4f
+        style = SimpleLineSymbolStyle.Solid,
+        color = Color.black,
+        width = 2f
     )
 }
 
+// fill symbol of the graphic sketched on the map
 private val fillSymbol: SimpleFillSymbol by lazy {
     SimpleFillSymbol(
-        SimpleFillSymbolStyle.Cross,
-        Color.cyan,
-        lineSymbol
+        style = SimpleFillSymbolStyle.Cross,
+        color = Color.cyan,
+        outline = lineSymbol
     )
 }
 
 /**
- *
+ * Displays a composable [MapView] to add graphics with the [GeometryEditor] using [VertexTool]
+ * on a [rememberGraphicsOverlayCollection]. The editing of graphics can be started/stopped using a [Switch].
+ * Each new sketch is added as a new [GraphicsOverlay] and [currentGraphicsOverlay]
+ * represents the currently modified graphics overlay. An action button provides a choice of options
+ * to undo, redo, clear sketch or reset all the graphics overlays.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -108,7 +115,7 @@ fun MainScreen() {
                             } else {
                                 // create new graphics overlay for each new sketch
                                 currentGraphicsOverlay = GraphicsOverlay()
-                                // update list of graphics overlays with new graphics overlay
+                                // update list of graphics overlays with new a graphics overlay
                                 graphicsOverlays.add(currentGraphicsOverlay)
                                 startGeometryEditor(geometryEditor)
                                 true
@@ -143,7 +150,7 @@ fun MainScreen() {
 }
 
 /**
- * TODO
+ * A dropdown menu to provide options for the [geometryEditor]
  */
 @Composable
 fun GeometryEditorDropDownMenu(
@@ -153,14 +160,7 @@ fun GeometryEditorDropDownMenu(
     onDismissRequest: () -> Unit = {},
     graphicsOverlays: GraphicsOverlayCollection
 ) {
-    val items = remember {
-        listOf(
-            "Clear sketch",
-            "Undo sketch",
-            "Redo sketch",
-            "Reset all graphics",
-        )
-    }
+    val items = listOf("Clear sketch", "Undo sketch", "Redo sketch", "Reset all graphics")
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest,
@@ -197,8 +197,11 @@ fun GeometryEditorDropDownMenu(
     }
 }
 
-
+/**
+ * Calls [GeometryEditor.stop] and applies the sketched [Geometry] to the [currentGraphicsOverlay]
+ */
 fun stopGeometryEditor(geometryEditor: GeometryEditor) {
+
     val sketchGeometry = geometryEditor.geometry.value
     geometryEditor.stop()
     val graphic = Graphic(sketchGeometry).apply {
@@ -207,11 +210,17 @@ fun stopGeometryEditor(geometryEditor: GeometryEditor) {
     currentGraphicsOverlay.graphics.add(graphic)
 }
 
+/**
+ * Calls [GeometryEditor.start] to enable sketching a [GeometryType.Polygon]
+ */
 fun startGeometryEditor(geometryEditor: GeometryEditor) {
-    geometryEditor.tool = freehandTool
+    geometryEditor.tool = VertexTool()
     geometryEditor.start(GeometryType.Polygon)
 }
 
+/**
+ * Clears the current editing session of the [geometryEditor]
+ */
 fun clearGeometryEditor(geometryEditor: GeometryEditor) {
     geometryEditor.clearGeometry()
     geometryEditor.clearSelection()
