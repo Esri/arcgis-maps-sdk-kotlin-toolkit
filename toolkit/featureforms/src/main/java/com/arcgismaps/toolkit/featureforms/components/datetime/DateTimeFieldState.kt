@@ -30,11 +30,9 @@ import com.arcgismaps.toolkit.featureforms.components.base.FieldProperties
 import com.arcgismaps.toolkit.featureforms.components.text.FormTextFieldState
 import com.arcgismaps.toolkit.featureforms.components.text.TextFieldProperties
 import com.arcgismaps.toolkit.featureforms.utils.editValue
+import com.arcgismaps.toolkit.featureforms.utils.valueFlow
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.Instant
 
@@ -104,7 +102,7 @@ internal class DateTimeFieldState(
                         label = field.label,
                         placeholder = field.hint,
                         description = field.description,
-                        value = dateTimeValue(field.value, scope),
+                        value = field.valueFlow(scope),
                         editable = field.isEditable,
                         required = field.isRequired,
                         visible = field.isVisible,
@@ -144,7 +142,7 @@ internal fun rememberDateTimeFieldState(
             label = field.label,
             placeholder = field.hint,
             description = field.description,
-            value = DateTimeFieldState.dateTimeValue(field.value, scope),
+            value = field.valueFlow(scope),
             editable = field.isEditable,
             required = field.isRequired,
             visible = field.isVisible,

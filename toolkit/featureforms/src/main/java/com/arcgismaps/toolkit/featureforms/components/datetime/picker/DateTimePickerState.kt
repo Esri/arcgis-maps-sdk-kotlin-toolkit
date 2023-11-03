@@ -120,12 +120,12 @@ internal class UtcDateTime private constructor(
 internal interface DateTimePickerState {
     
     /**
-     * Minimum date time allowed in milliseconds. This should be null if no range restriction is needed.
+     * Minimum date time allowed. This should be null if no range restriction is needed.
      */
     val minDateTime: Instant?
     
     /**
-     * Maximum date time allowed in milliseconds. This should be null if no range restriction is needed.
+     * Maximum date time allowed. This should be null if no range restriction is needed.
      */
     val maxDateTime: Instant?
     

@@ -64,9 +64,10 @@ internal fun DateTimeField(
     BaseTextField(
         text = instant?.formattedDateTime(state.shouldShowTime) ?: "",
         onValueChange = {
-            it.toLongOrNull()?.also { millis ->
-                state.onValueChanged(Instant.ofEpochMilli(millis))
-            } ?: state.onValueChanged(null)
+            // the only allowable change is to clear the text
+            if (it.isEmpty()) {
+                state.onValueChanged(null)
+            }
         },
         modifier = modifier,
         readOnly = true,
