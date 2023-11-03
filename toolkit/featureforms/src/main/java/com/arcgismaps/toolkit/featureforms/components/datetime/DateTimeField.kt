@@ -64,8 +64,9 @@ internal fun DateTimeField(
         text = instant?.formattedDateTime(state.shouldShowTime) ?: "",
         onValueChange = {
             // the only allowable change is to clear the text
-            require(it.isEmpty())
-            state.onValueChanged(null)
+            if (it.isEmpty()) {
+                state.onValueChanged(null)
+            }
         },
         modifier = modifier,
         readOnly = true,
