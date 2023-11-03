@@ -64,7 +64,9 @@ import kotlinx.coroutines.launch
  * @param viewLabelProperties the [ViewLabelProperties] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param selectionProperties the [SelectionProperties] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param wrapAroundMode the [WrapAroundMode] to specify whether continuous panning across the international date line is enabled
+ * @param attributionBarVisible specifies the visibility of the attribution bar
  * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
+ * @param onAttributionTextChanged lambda invoked when the attribution text for the data that is currently displayed in the MapView has changed
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable MapView
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable MapView
  * @param onScale lambda invoked when a user performs a pinch gesture on the composable MapView
@@ -85,11 +87,13 @@ public fun MapView(
     graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     wrapAroundMode: WrapAroundMode = WrapAroundMode.EnabledWhenSupported,
+    attributionBarVisible: Boolean = true,
     geometryEditor: GeometryEditor? = null,
     mapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptions(),
     viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
     selectionProperties: SelectionProperties = SelectionProperties(),
     onViewpointChanged: (() -> Unit)? = null,
+    onAttributionTextChanged: ((String) -> Unit)? = null,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
     onScale: ((ScaleChangeEvent) -> Unit)? = null,
@@ -131,9 +135,16 @@ public fun MapView(
         }
     }
 
+    val currentAttributionBarVisible by rememberUpdatedState(attributionBarVisible)
+    LaunchedEffect(Unit) {
+        // isAttributionBarVisible does not take effect if applied in the AndroidView update callback
+        mapView.isAttributionBarVisible = currentAttributionBarVisible
+    }
+
     MapViewEventHandler(
         mapView,
         onViewpointChanged,
+        onAttributionTextChanged,
         onInteractingChanged,
         onRotate,
         onScale,
@@ -156,6 +167,7 @@ public fun MapView(
 private fun MapViewEventHandler(
     mapView: MapView,
     onViewpointChanged: (() -> Unit)?,
+    onAttributionTextChanged: ((String) -> Unit)?,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)?,
     onRotate: ((RotationChangeEvent) -> Unit)?,
     onScale: ((ScaleChangeEvent) -> Unit)?,
@@ -168,6 +180,7 @@ private fun MapViewEventHandler(
     onPan: ((PanChangeEvent) -> Unit)?
 ) {
     val currentViewPointChanged by rememberUpdatedState(onViewpointChanged)
+    val currentOnAttributionTextChanged by rememberUpdatedState(onAttributionTextChanged)
     val currentOnInteractingChanged by rememberUpdatedState(onInteractingChanged)
     val currentOnRotate by rememberUpdatedState(onRotate)
     val currentOnScale by rememberUpdatedState(onScale)
@@ -184,6 +197,13 @@ private fun MapViewEventHandler(
             mapView.viewpointChanged.collect {
                 currentViewPointChanged?.let {
                     it()
+                }
+            }
+        }
+        launch {
+            mapView.attributionText.collect { attributionText ->
+                currentOnAttributionTextChanged?.let {
+                    it(attributionText)
                 }
             }
         }
