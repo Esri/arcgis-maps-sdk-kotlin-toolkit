@@ -76,7 +76,7 @@ import kotlinx.coroutines.launch
  * @param onLongPress lambda invoked when a user holds a pointer on the composable MapView
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable MapView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable MapView
- * @param drawStatus lambda invoked when the draw status of the composable MapView is changed
+ * @param onDrawStatusChanged lambda invoked when the draw status of the composable MapView is changed
  * @param overlay the composable overlays to display on top of the composable MapView. Example, a compass, floorfilter etc.
  * @since 200.3.0
  */
@@ -102,7 +102,7 @@ public fun MapView(
     onLongPress: ((LongPressEvent) -> Unit)? = null,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
-    drawStatus: ((DrawStatus) -> Unit)? = null,
+    onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
     overlay: @Composable () -> Unit = {}
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -147,7 +147,7 @@ public fun MapView(
         onLongPress,
         onTwoPointerTap,
         onPan,
-        drawStatus
+        onDrawStatusChanged
     )
 
     GraphicsOverlaysUpdater(graphicsOverlays, mapView)
@@ -170,7 +170,7 @@ private fun MapViewEventHandler(
     onLongPress: ((LongPressEvent) -> Unit)?,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)?,
     onPan: ((PanChangeEvent) -> Unit)?,
-    drawStatus: ((DrawStatus) -> Unit)?
+    onDrawStatusChanged: ((DrawStatus) -> Unit)?
 ) {
     val currentViewPointChanged by rememberUpdatedState(onViewpointChanged)
     val currentOnInteractingChanged by rememberUpdatedState(onInteractingChanged)
@@ -183,10 +183,10 @@ private fun MapViewEventHandler(
     val currentOnLongPress by rememberUpdatedState(onLongPress)
     val currentOnTwoPointerTap by rememberUpdatedState(onTwoPointerTap)
     val currentOnPan by rememberUpdatedState(onPan)
-    val currentDrawStatus by rememberUpdatedState(drawStatus)
+    val currentOnDrawStatusChanged by rememberUpdatedState(onDrawStatusChanged)
 
     LaunchedEffect(Unit) {
-        launch {
+        launch(Dispatchers.Main.immediate) {
             mapView.viewpointChanged.collect {
                 currentViewPointChanged?.let {
                     it()
@@ -265,7 +265,7 @@ private fun MapViewEventHandler(
         }
         launch(Dispatchers.Main.immediate) {
             mapView.drawStatus.collect { drawStatus ->
-                currentDrawStatus?.let {
+                currentOnDrawStatusChanged?.let {
                     it(drawStatus)
                 }
             }
