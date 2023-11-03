@@ -66,20 +66,19 @@ internal fun Long.toDateMillis(): Long {
 }
 
 /**
- * Formats epoch milliseconds for the current timezone
+ * Formats an Instant for the current timezone
  *
  * @param includeTime format the time if true
  * @return a string formatted for the value in epoch milliseconds
  * @since 200.3.0
  */
-internal fun Long.formattedDateTime(includeTime: Boolean): String {
-    
+internal fun Instant.formattedDateTime(includeTime: Boolean): String {
     val formatter = if (includeTime) {
         DateTimeFormatter.ofPattern("MMM dd, yyyy h:mm a")
     } else {
         DateTimeFormatter.ofPattern("MMM dd, yyyy")
     }
-    return this.toZonedDateTime().format(formatter)
+    return atZone(TimeZone.getDefault().toZoneId()).format(formatter)
 }
 
 /**

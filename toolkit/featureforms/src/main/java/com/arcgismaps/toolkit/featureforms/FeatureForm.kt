@@ -199,10 +199,10 @@ internal fun FeatureFormContent(
 @Composable
 private fun FeatureFormBody(
     form: FeatureForm,
-    fieldStateMap: Map<Int, BaseFieldState>,
+    fieldStateMap: Map<Int, BaseFieldState<*>>,
     groupStateMap: Map<Int, BaseGroupState>,
     modifier: Modifier = Modifier,
-    onFieldDialogRequest: ((BaseFieldState, Int) -> Unit)? = null
+    onFieldDialogRequest: ((BaseFieldState<*>, Int) -> Unit)? = null
 ) {
     val lazyListState = rememberLazyListState()
     Column(
@@ -290,8 +290,8 @@ internal fun rememberFieldStates(
     elements: List<FormElement>,
     context: Context,
     scope: CoroutineScope
-): Map<Int, BaseFieldState> {
-    val stateMap = mutableMapOf<Int, BaseFieldState>()
+): Map<Int, BaseFieldState<*>> {
+    val stateMap = mutableMapOf<Int, BaseFieldState<*>>()
     elements.forEach {  element ->
         if (element is FieldFormElement) {
             val state = when (element.input) {
@@ -320,8 +320,8 @@ internal fun rememberFieldStates(
                     val input = element.input as DateTimePickerFormInput
                     rememberDateTimeFieldState(
                         field = element,
-                        minEpochMillis = input.min?.toEpochMilli(),
-                        maxEpochMillis = input.max?.toEpochMilli(),
+                        minEpochMillis = input.min,
+                        maxEpochMillis = input.max,
                         shouldShowTime = input.includeTime,
                         form = form,
                         scope = scope

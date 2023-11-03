@@ -33,9 +33,9 @@ import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.R
-import com.arcgismaps.toolkit.featureforms.components.formelement.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.FieldProperties
+import com.arcgismaps.toolkit.featureforms.components.formelement.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.text.ValidationErrorState.ExactCharConstraint
 import com.arcgismaps.toolkit.featureforms.components.text.ValidationErrorState.MaxCharConstraint
 import com.arcgismaps.toolkit.featureforms.components.text.ValidationErrorState.MaxNumericConstraint
@@ -51,10 +51,10 @@ import com.arcgismaps.toolkit.featureforms.utils.asLongTuple
 import com.arcgismaps.toolkit.featureforms.utils.domain
 import com.arcgismaps.toolkit.featureforms.utils.editValue
 import com.arcgismaps.toolkit.featureforms.utils.fieldType
-import com.arcgismaps.toolkit.featureforms.utils.formattedValueFlow
 import com.arcgismaps.toolkit.featureforms.utils.isFloatingPoint
 import com.arcgismaps.toolkit.featureforms.utils.isIntegerType
 import com.arcgismaps.toolkit.featureforms.utils.isNumeric
+import com.arcgismaps.toolkit.featureforms.utils.valueFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -75,7 +75,7 @@ internal class TextFieldProperties(
     val singleLine: Boolean,
     val minLength: Int,
     val maxLength: Int,
-) : FieldProperties(label, placeholder, description, value, required, editable, visible)
+) : FieldProperties<String>(label, placeholder, description, value, required, editable, visible)
 
 /**
  * A class to handle the state of a [FormTextField]. Essential properties are inherited from the
@@ -96,7 +96,7 @@ internal class FormTextFieldState(
     scope: CoroutineScope,
     private val context: Context,
     onEditValue: (Any?) -> Unit
-) : BaseFieldState(
+) : BaseFieldState<String>(
     properties = properties,
     initialValue = initialValue,
     scope = scope,
@@ -404,7 +404,7 @@ internal class FormTextFieldState(
                         label = formElement.label,
                         placeholder = formElement.hint,
                         description = formElement.description,
-                        value = formElement.formattedValueFlow(scope),
+                        value = formElement.valueFlow(scope),
                         required = formElement.isRequired,
                         editable = formElement.isEditable,
                         visible = formElement.isVisible,
@@ -447,7 +447,7 @@ internal fun rememberFormTextFieldState(
             label = field.label,
             placeholder = field.hint,
             description = field.description,
-            value = field.formattedValueFlow(scope),
+            value = field.valueFlow(scope),
             editable = field.isEditable,
             required = field.isRequired,
             visible = field.isVisible,

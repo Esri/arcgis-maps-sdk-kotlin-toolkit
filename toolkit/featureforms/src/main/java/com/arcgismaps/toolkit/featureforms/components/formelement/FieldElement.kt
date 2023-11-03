@@ -32,8 +32,8 @@ import com.arcgismaps.toolkit.featureforms.components.text.FormTextField
 import com.arcgismaps.toolkit.featureforms.components.text.FormTextFieldState
 
 @Composable
-internal fun FieldElement(
-    state: BaseFieldState,
+internal fun <T> FieldElement(
+    state: BaseFieldState<T>,
     onDialogRequest: () -> Unit = {}
 ) {
     val visible by state.isVisible.collectAsState()
