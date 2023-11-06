@@ -76,7 +76,7 @@ import kotlinx.coroutines.launch
  * @param onLongPress lambda invoked when a user holds a pointer on the composable MapView
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable MapView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable MapView
- * @param onDrawStatusChanged lambda invoked when the draw status of the composable MapView is changed
+ * @param onDrawStatusChanged lambda invoked when the draw status of the composable MapView is changes
  * @param overlay the composable overlays to display on top of the composable MapView. Example, a compass, floorfilter etc.
  * @since 200.3.0
  */
@@ -186,7 +186,7 @@ private fun MapViewEventHandler(
     val currentOnDrawStatusChanged by rememberUpdatedState(onDrawStatusChanged)
 
     LaunchedEffect(Unit) {
-        launch(Dispatchers.Main.immediate) {
+        launch {
             mapView.viewpointChanged.collect {
                 currentViewPointChanged?.let {
                     it()
@@ -263,7 +263,7 @@ private fun MapViewEventHandler(
                 }
             }
         }
-        launch(Dispatchers.Main.immediate) {
+        launch {
             mapView.drawStatus.collect { drawStatus ->
                 currentOnDrawStatusChanged?.let {
                     it(drawStatus)
