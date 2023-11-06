@@ -17,7 +17,6 @@
 
 package com.arcgismaps.toolkit.geocompose
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -29,7 +28,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.mapping.ArcGISMap
@@ -76,7 +74,6 @@ import kotlinx.coroutines.launch
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable MapView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable MapView
  * @param mapViewOperator the [MapViewOperator] to associate with the composable [com.arcgismaps.toolkit.geocompose.MapView].
- * @param overlay the composable overlays to display on top of the composable MapView. Example, a compass, floorfilter etc.
  * @since 200.3.0
  */
 @Composable
@@ -336,10 +333,4 @@ public inline fun rememberGraphicsOverlayCollection(
     crossinline init: GraphicsOverlayCollection.() -> Unit = {}
 ): GraphicsOverlayCollection = remember(key) {
     GraphicsOverlayCollection().apply(init)
-}
-
-@Preview
-@Composable
-internal fun MapViewPreview() {
-    MapView()
 }
