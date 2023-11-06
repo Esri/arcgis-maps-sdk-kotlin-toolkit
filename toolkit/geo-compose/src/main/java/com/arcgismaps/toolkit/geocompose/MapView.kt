@@ -42,14 +42,14 @@ import com.arcgismaps.mapping.view.MapViewInteractionOptions
 import com.arcgismaps.mapping.view.PanChangeEvent
 import com.arcgismaps.mapping.view.RotationChangeEvent
 import com.arcgismaps.mapping.view.ScaleChangeEvent
+import com.arcgismaps.mapping.view.SelectionProperties
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
-import kotlinx.coroutines.Dispatchers
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.mapping.view.WrapAroundMode
-import com.arcgismaps.mapping.view.SelectionProperties
 import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
@@ -100,6 +100,7 @@ public fun MapView(
     onLongPress: ((LongPressEvent) -> Unit)? = null,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
+    mapViewOperator: MapViewOperator? = null,
     overlay: @Composable () -> Unit = {}
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -125,7 +126,9 @@ public fun MapView(
 
     DisposableEffect(Unit) {
         lifecycleOwner.lifecycle.addObserver(mapView)
+        mapViewOperator?.setMapView(mapView)
         onDispose {
+            mapViewOperator?.setMapView(null)
             lifecycleOwner.lifecycle.removeObserver(mapView)
             mapView.onDestroy(lifecycleOwner)
         }
