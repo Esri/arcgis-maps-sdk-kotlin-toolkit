@@ -4,7 +4,6 @@ import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.ScreenCoordinate
 
-private const val MAPVIEW_NULL_MESSAGE: String = "This operation cannot be performed if a MapView composable which uses this MapViewOperator is not part of the composition."
 
 /**
  * Used to perform operations on a [com.arcgismaps.toolkit.geocompose.MapView].
@@ -22,8 +21,6 @@ public class MapViewOperator() {
      */
     private var mapView: MapView? = null
 
-    private val lock = Unit
-
     /**
      * Sets the [mapView] parameter on this operator. This should be called by the [com.arcgismaps.toolkit.geocompose.MapView] composable
      * when it enters the composition and set to null when it is disposed by calling [setMapView].
@@ -31,9 +28,7 @@ public class MapViewOperator() {
      * @since 200.3.0
      */
     internal fun setMapView(mapView: MapView?) {
-        synchronized(lock) {
-            this.mapView = mapView
-        }
+        this.mapView = mapView
     }
 
     /**
@@ -42,16 +37,14 @@ public class MapViewOperator() {
      * May return null in some circumstances, such as if the map view's spatial reference has not been determined yet.
      *
      * @param screenCoordinate the screen point, in pixels
-     * @return a [Point] object, or null if the location could not be determined
-     * @throws IllegalStateException if a [com.arcgismaps.toolkit.geocompose.MapView] composable which uses this [MapViewOperator] is not currently part of the composition.
+     * @return a [Point] object, or null if the location could not be determined or an error occurs
      * @since 200.3.0
      */
-    public fun screenToLocation(screenCoordinate: ScreenCoordinate): Point? {
-        synchronized(lock) {
-            check(mapView != null) {
-                MAPVIEW_NULL_MESSAGE
-            }
-            return mapView!!.screenToLocation(screenCoordinate)
+    public fun screenToLocationOrNull(screenCoordinate: ScreenCoordinate): Point? {
+        return try {
+             mapView?.screenToLocation(screenCoordinate)
+        } catch (t: Throwable) {
+            null
         }
     }
 
@@ -62,16 +55,15 @@ public class MapViewOperator() {
      * for the frame where the location is the closest to the center of the view.
      *
      * @param mapPoint a [Point] object representing a coordinate on the map
-     * @return A [ScreenCoordinate] for the screen in pixels. NAN for x and y if an error occurs
-     * @throws IllegalStateException if a [MapView] composable which uses this [MapViewOperator] is not currently part of the composition.
+     * @return A [ScreenCoordinate] for the screen in pixels. May return NAN for x and y, or null if an error occurs
      * @since 200.3.0
      */
-    public fun locationToScreen(mapPoint: Point): ScreenCoordinate {
-        synchronized(lock) {
-            check(mapView != null) {
-                MAPVIEW_NULL_MESSAGE
-            }
-            return mapView!!.locationToScreen(mapPoint)
+    public fun locationToScreenOrNull(mapPoint: Point): ScreenCoordinate? {
+        return try {
+            // TODO: research when NAN can occur
+            mapView?.locationToScreen(mapPoint)
+        } catch (t: Throwable) {
+            null
         }
     }
 }
