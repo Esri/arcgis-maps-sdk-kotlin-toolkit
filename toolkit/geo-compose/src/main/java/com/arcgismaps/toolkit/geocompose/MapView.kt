@@ -141,8 +141,8 @@ public fun MapView(
         // When this call is made in the AndroidView's update callback, ViewInsets are not applied
         // on the mapview on initial load. So we set the ViewInsets here.
         mapView.setViewInsets(
-            mapInsets.calculateStartPadding(layoutDirection).value.toDouble(),
-            mapInsets.calculateEndPadding(layoutDirection).value.toDouble(),
+            mapInsets.calculateLeftPadding(layoutDirection).value.toDouble(),
+            mapInsets.calculateRightPadding(layoutDirection).value.toDouble(),
             mapInsets.calculateTopPadding().value.toDouble(),
             mapInsets.calculateBottomPadding().value.toDouble()
         )
