@@ -75,6 +75,7 @@ import kotlinx.coroutines.launch
  * @param onLongPress lambda invoked when a user holds a pointer on the composable MapView
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable MapView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable MapView
+ * @param mapViewOperator the [MapViewOperator] to associate with the composable [com.arcgismaps.toolkit.geocompose.MapView].
  * @param overlay the composable overlays to display on top of the composable MapView. Example, a compass, floorfilter etc.
  * @since 200.3.0
  */

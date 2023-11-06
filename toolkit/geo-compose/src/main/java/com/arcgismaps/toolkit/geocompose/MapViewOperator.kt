@@ -5,10 +5,17 @@ import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.ScreenCoordinate
 
 private const val MAPVIEW_NULL_MESSAGE: String = "This operation cannot be performed if a MapView composable which uses this MapViewOperator is not part of the composition."
+
+/**
+ * Used to perform operations on a [com.arcgismaps.toolkit.geocompose.MapView].
+ *
+ * There should be a one-to-one relationship between a [MapViewOperator] and a composable [com.arcgismaps.toolkit.geocompose.MapView].
+ * Operations can only be performed once the component has entered the composition.
+ */
 public class MapViewOperator() {
 
     /**
-     * The [MapView] that this operator will operate on. This should be initialized by the [MapView]
+     * The [MapView] that this operator will operate on. This should be initialized by the [com.arcgismaps.toolkit.geocompose.MapView]
      * composable when it enters the composition and set to null when it is disposed by calling [setMapView].
      *
      * @since 200.3.0
@@ -18,7 +25,7 @@ public class MapViewOperator() {
     private val lock = Unit
 
     /**
-     * Sets the [mapView] parameter on this operator. This should be called by the [MapView] composable
+     * Sets the [mapView] parameter on this operator. This should be called by the [com.arcgismaps.toolkit.geocompose.MapView] composable
      * when it enters the composition and set to null when it is disposed by calling [setMapView].
      *
      * @since 200.3.0
@@ -36,7 +43,7 @@ public class MapViewOperator() {
      *
      * @param screenCoordinate the screen point, in pixels
      * @return a [Point] object, or null if the location could not be determined
-     * @throws IllegalStateException if a [MapView] composable which uses this [MapViewOperator] is not currently part of the composition.
+     * @throws IllegalStateException if a [com.arcgismaps.toolkit.geocompose.MapView] composable which uses this [MapViewOperator] is not currently part of the composition.
      * @since 200.3.0
      */
     public fun screenToLocation(screenCoordinate: ScreenCoordinate): Point? {
