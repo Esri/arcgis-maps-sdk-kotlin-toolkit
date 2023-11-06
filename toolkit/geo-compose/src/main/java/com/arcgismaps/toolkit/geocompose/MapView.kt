@@ -194,7 +194,6 @@ private fun MapViewEventHandler(
             }
         }
         launch(Dispatchers.Main.immediate) {
-            currentOnInteractingChanged?.invoke(mapView.isInteracting.value)
             mapView.isInteracting.collect { isInteracting ->
                 currentOnInteractingChanged?.let {
                     it(isInteracting)
@@ -202,7 +201,6 @@ private fun MapViewEventHandler(
             }
         }
         launch {
-            currentOnSpatialReferenceChanged?.invoke(mapView.spatialReference.value)
             mapView.spatialReference.collect { spatialReference ->
                 currentOnSpatialReferenceChanged?.let {
                     it(spatialReference)
