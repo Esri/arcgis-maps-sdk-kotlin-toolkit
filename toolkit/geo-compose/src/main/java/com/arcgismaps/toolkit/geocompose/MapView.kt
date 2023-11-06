@@ -99,36 +99,36 @@ public fun MapView(
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
     mapViewOperator: MapViewOperator? = null,
-    overlay: @Composable () -> Unit = {}
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val mapView = remember { MapView(context) }
 
-    Box(modifier = Modifier.semantics { contentDescription = "MapContainer" }) {
-        AndroidView(
-            modifier = modifier.semantics { contentDescription = "MapView" },
-            factory = { mapView },
-            update = {
-                it.map = arcGISMap
-                it.selectionProperties = selectionProperties
-                it.interactionOptions = mapViewInteractionOptions
-                it.locationDisplay = locationDisplay
-                it.labeling = viewLabelProperties
-                it.wrapAroundMode = wrapAroundMode
-                it.geometryEditor = geometryEditor
-            })
-
-        overlay()
-    }
+    AndroidView(
+        modifier = modifier.semantics { contentDescription = "MapView" },
+        factory = { mapView },
+        update = {
+            it.map = arcGISMap
+            it.selectionProperties = selectionProperties
+            it.interactionOptions = mapViewInteractionOptions
+            it.locationDisplay = locationDisplay
+            it.labeling = viewLabelProperties
+            it.wrapAroundMode = wrapAroundMode
+            it.geometryEditor = geometryEditor
+        })
 
     DisposableEffect(Unit) {
         lifecycleOwner.lifecycle.addObserver(mapView)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(mapView)
+            mapView.onDestroy(lifecycleOwner)
+        }
+    }
+
+    DisposableEffect(mapViewOperator) {
         mapViewOperator?.setMapView(mapView)
         onDispose {
             mapViewOperator?.setMapView(null)
-            lifecycleOwner.lifecycle.removeObserver(mapView)
-            mapView.onDestroy(lifecycleOwner)
         }
     }
 
