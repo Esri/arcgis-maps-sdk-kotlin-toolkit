@@ -80,9 +80,8 @@ fun MapListScreen(
 ) {
     val uiState by mapListViewModel.uiState.collectAsState()
     val lazyListState = rememberLazyListState()
-    var searchText by remember { mutableStateOf("") }
     Scaffold(topBar = {
-        AppBar(uiState.isLoading, searchText = searchText, onSearchTextChanged = { mapSearchText -> searchText = mapSearchText }) {
+        AppBar(uiState.isLoading, uiState.searchText, onSearchTextChanged = { mapListViewModel.filterPortalItems(it) }) {
             mapListViewModel.refresh(it)
         }
     }) { padding ->
@@ -114,11 +113,7 @@ fun MapListScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         items(
-                            uiState.data.filter {
-                                searchText.isEmpty()
-                                    || it.data.portalItem.title.uppercase().contains(searchText.uppercase())
-                                    || it.data.portalItem.itemId.contains(searchText)
-                            }
+                            uiState.data
                         ) { item ->
                             MapListItem(
                                 title = item.data.portalItem.title,
