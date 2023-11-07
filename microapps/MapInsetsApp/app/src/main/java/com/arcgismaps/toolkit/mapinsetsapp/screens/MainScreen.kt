@@ -57,90 +57,90 @@ import com.arcgismaps.toolkit.geocompose.MapView
 fun MainScreen() {
     val arcGISMap = remember { ArcGISMap(BasemapStyle.ArcGISImagery) }
 
-    Surface(modifier = Modifier.fillMaxSize()) {
-        Box(modifier = Modifier.fillMaxSize()) {
+    var mapInsets by remember { mutableStateOf(PaddingValues()) }
 
-            var mapInsets by remember { mutableStateOf(PaddingValues())}
+    var leftText by remember { mutableStateOf(TextFieldValue("")) }
+    var rightText by remember { mutableStateOf(TextFieldValue("")) }
+    var topText by remember { mutableStateOf(TextFieldValue("")) }
+    var bottomText by remember { mutableStateOf(TextFieldValue("")) }
 
-            var leftText by remember { mutableStateOf(TextFieldValue("")) }
-            var rightText by remember { mutableStateOf(TextFieldValue("")) }
-            var topText by remember { mutableStateOf(TextFieldValue("")) }
-            var bottomText by remember { mutableStateOf(TextFieldValue("")) }
+    val updateInsets = {
+        mapInsets = PaddingValues(
+            leftText.text.toDoubleOrNull()?.dp ?: 0.0.dp,
+            topText.text.toDoubleOrNull()?.dp ?: 0.0.dp,
+            rightText.text.toDoubleOrNull()?.dp ?: 0.0.dp,
+            bottomText.text.toDoubleOrNull()?.dp ?: 0.0.dp
+        )
+    }
 
-            val updateInsets = {
-                mapInsets = PaddingValues(
-                    leftText.text.toDoubleOrNull()?.dp ?: 0.0.dp,
-                    topText.text.toDoubleOrNull()?.dp ?: 0.0.dp,
-                    rightText.text.toDoubleOrNull()?.dp ?: 0.0.dp,
-                    bottomText.text.toDoubleOrNull()?.dp ?: 0.0.dp
-                )
-            }
+    val focusManager = LocalFocusManager.current
+    MapView(
+        modifier = Modifier.fillMaxSize(),
+        arcGISMap = arcGISMap,
+        mapInsets = mapInsets
+    )
 
-            val focusManager = LocalFocusManager.current
-            MapView(
-                modifier = Modifier.fillMaxSize(),
-                arcGISMap = arcGISMap,
-                mapInsets = mapInsets
+    Column(Modifier.fillMaxSize()) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+
+            InsetTextField(
+                value = leftText,
+                onValueChange = { text: TextFieldValue -> leftText = text },
+                label = { Text("Left") },
+                updateInsets = updateInsets
             )
 
-            Column(Modifier.fillMaxSize()) {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                    OutlinedTextField(
-                        value = leftText,
-                        modifier = Modifier.size(90.dp, 64.dp),
-                        onValueChange = { text: TextFieldValue -> leftText = text },
-                        label = { Text("Left") },
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Decimal,
-                            imeAction = ImeAction.Done
-                        ),
-                        keyboardActions = KeyboardActions(onDone = { updateInsets(); focusManager.clearFocus() })
-                    )
-                    OutlinedTextField(
-                        value = rightText,
-                        modifier = Modifier.size(90.dp, 64.dp),
-                        onValueChange = { text: TextFieldValue -> rightText = text },
-                        label = { Text("Right") },
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Decimal,
-                            imeAction = ImeAction.Done
-                        ),
-                        keyboardActions = KeyboardActions(onDone = { updateInsets(); focusManager.clearFocus() })
-                    )
-                    OutlinedTextField(
-                        value = topText,
-                        modifier = Modifier.size(90.dp, 64.dp),
-                        onValueChange = { text: TextFieldValue -> topText = text },
-                        label = { Text("Top") },
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Decimal,
-                            imeAction = ImeAction.Done
-                        ),
-                        keyboardActions = KeyboardActions(onDone = { updateInsets(); focusManager.clearFocus() })
-                    )
-                    OutlinedTextField(
-                        value = bottomText,
-                        modifier = Modifier.size(90.dp, 64.dp),
-                        onValueChange = { text: TextFieldValue -> bottomText = text },
-                        label = { Text("Bottom") },
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Decimal,
-                            imeAction = ImeAction.Done
-                        ),
-                        keyboardActions = KeyboardActions(onDone = { updateInsets(); focusManager.clearFocus() })
-                    )
-                }
-                Button(onClick = {
-                    mapInsets = PaddingValues(0.0.dp, 0.0.dp, 0.0.dp, 0.0.dp)
-                    leftText = TextFieldValue("")
-                    rightText = TextFieldValue("")
-                    topText = TextFieldValue("")
-                    bottomText = TextFieldValue("")
-                    focusManager.clearFocus()
-                }, Modifier.fillMaxWidth()) {
-                    Text("Reset Insets")
-                }
-            }
+            InsetTextField(
+                value = rightText,
+                onValueChange = { text: TextFieldValue -> rightText = text },
+                label = { Text("Right") },
+                updateInsets = updateInsets
+            )
+
+            InsetTextField(
+                value = topText,
+                onValueChange = { text: TextFieldValue -> topText = text },
+                label = { Text("Top") },
+                updateInsets = updateInsets
+            )
+
+            InsetTextField(
+                value = bottomText,
+                onValueChange = { text: TextFieldValue -> bottomText = text },
+                label = { Text("Bottom") },
+                updateInsets = updateInsets
+            )
+        }
+        Button(onClick = {
+            mapInsets = PaddingValues(0.0.dp, 0.0.dp, 0.0.dp, 0.0.dp)
+            leftText = TextFieldValue("")
+            rightText = TextFieldValue("")
+            topText = TextFieldValue("")
+            bottomText = TextFieldValue("")
+            focusManager.clearFocus()
+        }, Modifier.fillMaxWidth()) {
+            Text("Reset Insets")
         }
     }
+}
+
+@Composable
+private fun InsetTextField(
+    value: TextFieldValue,
+    onValueChange: (TextFieldValue) -> Unit,
+    label: @Composable () -> Unit,
+    updateInsets: () -> Unit
+) {
+    val focusManager = LocalFocusManager.current
+    OutlinedTextField(
+        value = value,
+        modifier = Modifier.size(90.dp, 64.dp),
+        onValueChange = onValueChange,
+        label = label,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Decimal,
+            imeAction = ImeAction.Done
+        ),
+        keyboardActions = KeyboardActions(onDone = { updateInsets(); focusManager.clearFocus() })
+    )
 }

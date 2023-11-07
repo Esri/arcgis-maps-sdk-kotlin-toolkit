@@ -19,8 +19,6 @@ package com.arcgismaps.toolkit.geocompose
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -71,7 +69,7 @@ import kotlinx.coroutines.launch
  * @param mapViewInteractionOptions the [MapViewInteractionOptions] used by this composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param viewLabelProperties the [ViewLabelProperties] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param selectionProperties the [SelectionProperties] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
- * @param mapInsets the Inset values to control the active visible area, instructing the MapView to ignore parts that may be obstructed
+ * @param mapInsets the inset values to control the active visible area, instructing the MapView to ignore parts that may be obstructed
  * by overlaid UI elements and affecting the MapView's logical center, the reported visible area and the location display.
  * @param grid represents the display of a coordinate system [Grid] on the composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param backgroundGrid the default color and context grid behind the map surface
