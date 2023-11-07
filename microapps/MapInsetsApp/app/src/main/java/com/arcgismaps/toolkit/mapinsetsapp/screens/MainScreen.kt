@@ -47,6 +47,12 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.toolkit.geocompose.MapView
 
+/**
+ * Shows how a composable [com.arcgismaps.toolkit.geocompose.MapView] reacts to the
+ * insets values specified on it. The left, right, top and bottom values can be specified
+ * using the OutlinedTextFields. The attribution bar at the bottom of the MapView moves in
+ * regards to the specified inset values. The Reset Insets buttons sets all inset values to zero.
+ */
 @Composable
 fun MainScreen() {
     val arcGISMap = remember { ArcGISMap(BasemapStyle.ArcGISImagery) }
