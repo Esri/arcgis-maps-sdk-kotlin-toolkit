@@ -56,12 +56,6 @@ import com.arcgismaps.toolkit.geocompose.GraphicsOverlayCollection
 import com.arcgismaps.toolkit.geocompose.MapView
 import com.arcgismaps.toolkit.geocompose.rememberGraphicsOverlayCollection
 
-// keep the instance of graphics overlay being used to sketch
-private var currentGraphicsOverlay: GraphicsOverlay = GraphicsOverlay()
-
-// track the status if geometry editor is started or stopped
-private var isDrawingEnabled by mutableStateOf(false)
-
 // line symbol of the graphic sketched on the map
 private val lineSymbol: SimpleLineSymbol by lazy {
     SimpleLineSymbol(
@@ -83,45 +77,55 @@ private val fillSymbol: SimpleFillSymbol by lazy {
 /**
  * Displays a composable [MapView] to add graphics with the [GeometryEditor] using [VertexTool]
  * on a [rememberGraphicsOverlayCollection]. The editing of graphics can be started/stopped using a [Switch].
- * Each new sketch is added as a new [GraphicsOverlay] and [currentGraphicsOverlay]
- * represents the currently modified graphics overlay. An action button provides a choice of options
+ * Each new sketch is added as a new [GraphicsOverlay]. An action button provides a choice of options
  * to undo, redo, clear sketch or reset all the graphics overlays.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
     val arcGISMap by remember { mutableStateOf(ArcGISMap(BasemapStyle.ArcGISStreets)) }
-    val geometryEditor = GeometryEditor()
+    // the collection of graphics overlays used by the MapView
     val graphicsOverlays = rememberGraphicsOverlayCollection()
+    // the geometry editor used to manage the editing session
+    val geometryEditor by remember { mutableStateOf(GeometryEditor()) }
+    // track the status if geometry editor is started or stopped
+    var isDrawingEnabled by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
-            var actionsExpanded by remember { mutableStateOf(false) }
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
-                title = {
-                    Text("Geometry Editor App")
-                },
+                title = { Text("Geometry Editor App") },
                 actions = {
                     Switch(
                         checked = isDrawingEnabled,
                         onCheckedChange = {
                             isDrawingEnabled = if (isDrawingEnabled) {
+                                GraphicsOverlay().apply {
+                                    // add the sketched graphic to this graphics overlay
+                                    addSketchedGraphic(
+                                        geometryEditor = geometryEditor,
+                                        currentGraphicsOverlay = this
+                                    )
+                                    // update list of graphics overlays with this graphics overlay
+                                    graphicsOverlays.add(this)
+                                }
+                                // on checked change, stop the geometry editor
                                 stopGeometryEditor(geometryEditor)
+                                // set isDrawingEnabled to false
                                 false
                             } else {
-                                // create new graphics overlay for each new sketch
-                                currentGraphicsOverlay = GraphicsOverlay()
-                                // update list of graphics overlays with new a graphics overlay
-                                graphicsOverlays.add(currentGraphicsOverlay)
+                                // on checked change, start the geometry editor
                                 startGeometryEditor(geometryEditor)
+                                // set isDrawingEnabled to true
                                 true
                             }
                         })
 
+                    var actionsExpanded by remember { mutableStateOf(false) }
                     IconButton(onClick = { actionsExpanded = !actionsExpanded }) {
                         Icon(Icons.Default.MoreVert, "More")
                     }
@@ -132,6 +136,9 @@ fun MainScreen() {
                         graphicsOverlays = graphicsOverlays,
                         onDismissRequest = {
                             actionsExpanded = false
+                        },
+                        onDrawingDisabled = {
+                            isDrawingEnabled = false
                         }
                     )
                 }
@@ -158,9 +165,12 @@ fun GeometryEditorDropDownMenu(
     expanded: Boolean = false,
     geometryEditor: GeometryEditor,
     onDismissRequest: () -> Unit = {},
-    graphicsOverlays: GraphicsOverlayCollection
+    graphicsOverlays: GraphicsOverlayCollection,
+    onDrawingDisabled: () -> Unit = {}
 ) {
-    val items = listOf("Clear sketch", "Undo sketch", "Redo sketch", "Reset all graphics")
+    val items = remember {
+        listOf("Clear sketch", "Undo sketch", "Redo sketch", "Reset all graphics")
+    }
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest,
@@ -176,10 +186,9 @@ fun GeometryEditorDropDownMenu(
                         }
 
                         it.contains("Reset all graphics") -> {
-                            isDrawingEnabled = false
                             stopGeometryEditor(geometryEditor)
-                            clearGeometryEditor(geometryEditor)
                             graphicsOverlays.clear()
+                            onDrawingDisabled()
                         }
 
                         it.contains("Undo") -> {
@@ -190,7 +199,7 @@ fun GeometryEditorDropDownMenu(
                             geometryEditor.redo()
                         }
                     }
-
+                    // dismiss the dropdown when an item is selected
                     onDismissRequest()
                 })
         }
@@ -198,16 +207,21 @@ fun GeometryEditorDropDownMenu(
 }
 
 /**
- * Calls [GeometryEditor.stop] and applies the sketched [Geometry] to the [currentGraphicsOverlay]
+ * Applies the sketched [Geometry] to the [currentGraphicsOverlay] using the [geometryEditor]
  */
-fun stopGeometryEditor(geometryEditor: GeometryEditor) {
-
+fun addSketchedGraphic(geometryEditor: GeometryEditor, currentGraphicsOverlay: GraphicsOverlay) {
     val sketchGeometry = geometryEditor.geometry.value
-    geometryEditor.stop()
     val graphic = Graphic(sketchGeometry).apply {
         symbol = fillSymbol
     }
     currentGraphicsOverlay.graphics.add(graphic)
+}
+
+/**
+ * Calls [GeometryEditor.stop] to disable the editing session and clears the [GeometryEditor.geometry]
+ */
+fun stopGeometryEditor(geometryEditor: GeometryEditor) {
+    geometryEditor.stop()
 }
 
 /**
