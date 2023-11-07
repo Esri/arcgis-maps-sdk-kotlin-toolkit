@@ -26,7 +26,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -50,8 +50,11 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -224,6 +227,7 @@ private fun (ColumnScope).PickerContent(
                 key(state.dateTime.value) {
                     DatePicker(
                         state = datePickerState,
+                        modifier = Modifier.scaleIfNarrow(DateTimePickerDialogTokens.containerWidth),
                         dateValidator = { timeStamp ->
                             state.dateValidator(timeStamp)
                         },
@@ -326,7 +330,7 @@ private fun DateTimePickerDialog(
         Surface(
             modifier = Modifier
                 .padding(start = 25.dp, end = 25.dp)
-                .widthIn(DateTimePickerDialogTokens.containerWidth)
+                .requiredWidth(DateTimePickerDialogTokens.containerWidth)
                 .height(DateTimePickerDialogTokens.containerHeight),
             shape = shape,
             color = MaterialTheme.colorScheme.surface,
@@ -351,7 +355,15 @@ private object DateTimePickerDialogTokens {
     val containerWidth = 360.0.dp
 }
 
-@Preview
+internal fun Modifier.scaleIfNarrow(minWidth: Dp): Modifier = composed {
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val scale = if (screenWidth <= minWidth)
+        screenWidth / minWidth
+    else 1f
+    this.scale(scale)
+}
+
+@Preview(showSystemUi = true, showBackground = true, backgroundColor = 0xFFFFFF, widthDp = 392)
 @Composable
 private fun DateTimePickerPreview() {
     val state = DateTimePickerState(
