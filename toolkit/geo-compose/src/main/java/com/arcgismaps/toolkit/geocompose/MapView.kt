@@ -77,6 +77,7 @@ import kotlinx.coroutines.launch
  * @param onLongPress lambda invoked when a user holds a pointer on the composable MapView
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable MapView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable MapView
+ * @param onTimeExtentChanged lambda invoked when the composable MapView [TimeExtent] is changed
  * @param overlay the composable overlays to display on top of the composable MapView. Example, a compass, floorfilter etc.
  * @since 200.3.0
  */
@@ -103,6 +104,7 @@ public fun MapView(
     onLongPress: ((LongPressEvent) -> Unit)? = null,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
+    onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
     overlay: @Composable () -> Unit = {}
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -147,7 +149,8 @@ public fun MapView(
         onDoubleTap,
         onLongPress,
         onTwoPointerTap,
-        onPan
+        onPan,
+        onTimeExtentChanged,
     )
 
     GraphicsOverlaysUpdater(graphicsOverlays, mapView)
@@ -169,9 +172,11 @@ private fun MapViewEventHandler(
     onDoubleTap: ((DoubleTapEvent) -> Unit)?,
     onLongPress: ((LongPressEvent) -> Unit)?,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)?,
-    onPan: ((PanChangeEvent) -> Unit)?
+    onPan: ((PanChangeEvent) -> Unit)?,
+    onTimeExtentChanged: ((TimeExtent?) -> Unit)?
 ) {
     val currentViewPointChanged by rememberUpdatedState(onViewpointChanged)
+    val currentTimeExtentChanged by rememberUpdatedState(onTimeExtentChanged)
     val currentOnInteractingChanged by rememberUpdatedState(onInteractingChanged)
     val currentOnRotate by rememberUpdatedState(onRotate)
     val currentOnScale by rememberUpdatedState(onScale)
@@ -184,6 +189,11 @@ private fun MapViewEventHandler(
     val currentOnPan by rememberUpdatedState(onPan)
 
     LaunchedEffect(Unit) {
+        launch {
+            mapView.timeExtent.collect { currentTimeExtent ->
+                currentTimeExtentChanged?.invoke(currentTimeExtent)
+            }
+        }
         launch {
             mapView.viewpointChanged.collect {
                 currentViewPointChanged?.let {
