@@ -82,6 +82,7 @@ import kotlinx.coroutines.launch
 public fun MapView(
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap? = null,
+    viewpointOperation: ViewpointOperation? = null,
     graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     wrapAroundMode: WrapAroundMode = WrapAroundMode.EnabledWhenSupported,
