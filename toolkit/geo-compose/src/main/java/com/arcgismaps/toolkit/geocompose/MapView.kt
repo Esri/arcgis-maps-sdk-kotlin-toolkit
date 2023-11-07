@@ -37,8 +37,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.view.BackgroundGrid
 import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
+import com.arcgismaps.mapping.view.DrawStatus
+import com.arcgismaps.mapping.view.Grid
 import com.arcgismaps.mapping.view.LocationDisplay
 import com.arcgismaps.mapping.view.LongPressEvent
 import com.arcgismaps.mapping.view.MapView
@@ -61,6 +64,7 @@ import kotlinx.coroutines.launch
  *
  * @param modifier Modifier to be applied to the composable MapView
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable
+ * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param locationDisplay the [LocationDisplay] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param wrapAroundMode the [WrapAroundMode] to specify whether continuous panning across the international date line is enabled
  * @param geometryEditor the [GeometryEditor] used by the composable [com.arcgismaps.toolkit.geocompose.MapView] to create and edit geometries by user interaction.
@@ -69,6 +73,9 @@ import kotlinx.coroutines.launch
  * @param selectionProperties the [SelectionProperties] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param mapInsets the Inset values to control the active visible area, instructing the MapView to ignore parts that may be obstructed
  * by overlaid UI elements and affecting the MapView's logical center, the reported visible area and the location display.
+ * @param grid represents the display of a coordinate system [Grid] on the composable [com.arcgismaps.toolkit.geocompose.MapView]
+ * @param backgroundGrid the default color and context grid behind the map surface
+ * @param wrapAroundMode the [WrapAroundMode] to specify whether continuous panning across the international date line is enabled
  * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable MapView
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable MapView
@@ -80,6 +87,7 @@ import kotlinx.coroutines.launch
  * @param onLongPress lambda invoked when a user holds a pointer on the composable MapView
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable MapView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable MapView
+ * @param onDrawStatusChanged lambda invoked when the draw status of the composable MapView is changes
  * @param overlay the composable overlays to display on top of the composable MapView. Example, a compass, floorfilter etc.
  * @since 200.3.0
  */
@@ -87,6 +95,7 @@ import kotlinx.coroutines.launch
 public fun MapView(
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap? = null,
+    graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     wrapAroundMode: WrapAroundMode = WrapAroundMode.EnabledWhenSupported,
     geometryEditor: GeometryEditor? = null,
@@ -94,6 +103,8 @@ public fun MapView(
     viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
     selectionProperties: SelectionProperties = SelectionProperties(),
     mapInsets: PaddingValues = PaddingValues(),
+    grid: Grid? = null,
+    backgroundGrid: BackgroundGrid = BackgroundGrid(),
     onViewpointChanged: (() -> Unit)? = null,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
@@ -105,6 +116,7 @@ public fun MapView(
     onLongPress: ((LongPressEvent) -> Unit)? = null,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
+    onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
     overlay: @Composable () -> Unit = {}
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -124,6 +136,8 @@ public fun MapView(
                 it.labeling = viewLabelProperties
                 it.wrapAroundMode = wrapAroundMode
                 it.geometryEditor = geometryEditor
+                it.grid = grid
+                it.backgroundGrid = backgroundGrid
             })
 
         overlay()
@@ -160,8 +174,11 @@ public fun MapView(
         onDoubleTap,
         onLongPress,
         onTwoPointerTap,
-        onPan
+        onPan,
+        onDrawStatusChanged
     )
+
+    GraphicsOverlaysUpdater(graphicsOverlays, mapView)
 }
 
 /**
@@ -180,7 +197,8 @@ private fun MapViewEventHandler(
     onDoubleTap: ((DoubleTapEvent) -> Unit)?,
     onLongPress: ((LongPressEvent) -> Unit)?,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)?,
-    onPan: ((PanChangeEvent) -> Unit)?
+    onPan: ((PanChangeEvent) -> Unit)?,
+    onDrawStatusChanged: ((DrawStatus) -> Unit)?
 ) {
     val currentViewPointChanged by rememberUpdatedState(onViewpointChanged)
     val currentOnInteractingChanged by rememberUpdatedState(onInteractingChanged)
@@ -193,6 +211,7 @@ private fun MapViewEventHandler(
     val currentOnLongPress by rememberUpdatedState(onLongPress)
     val currentOnTwoPointerTap by rememberUpdatedState(onTwoPointerTap)
     val currentOnPan by rememberUpdatedState(onPan)
+    val currentOnDrawStatusChanged by rememberUpdatedState(onDrawStatusChanged)
 
     LaunchedEffect(Unit) {
         launch {
@@ -272,6 +291,47 @@ private fun MapViewEventHandler(
                 }
             }
         }
+        launch {
+            mapView.drawStatus.collect { drawStatus ->
+                currentOnDrawStatusChanged?.let {
+                    it(drawStatus)
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Update the [mapView]'s graphicsOverlays property to reflect changes made to the
+ * [graphicsOverlayCollection] based on the type of [GraphicsOverlayCollection.ChangedEvent]
+ */
+@Composable
+private fun GraphicsOverlaysUpdater(
+    graphicsOverlayCollection: GraphicsOverlayCollection,
+    mapView: MapView
+) {
+    LaunchedEffect(graphicsOverlayCollection) {
+        // sync up the MapView with the new graphics overlays
+        mapView.graphicsOverlays.clear()
+        graphicsOverlayCollection.forEach {
+            mapView.graphicsOverlays.add(it)
+        }
+        // start observing graphicsOverlays for subsequent changes
+        graphicsOverlayCollection.changed.collect { changedEvent ->
+            when (changedEvent) {
+                // On GraphicsOverlay added:
+                is GraphicsOverlayCollection.ChangedEvent.Added ->
+                    mapView.graphicsOverlays.add(changedEvent.element)
+
+                // On GraphicsOverlay removed:
+                is GraphicsOverlayCollection.ChangedEvent.Removed ->
+                    mapView.graphicsOverlays.remove(changedEvent.element)
+
+                // On GraphicsOverlays cleared:
+                is GraphicsOverlayCollection.ChangedEvent.Cleared ->
+                    mapView.graphicsOverlays.clear()
+            }
+        }
     }
 }
 
@@ -296,6 +356,23 @@ public inline fun rememberLocationDisplay(
     return remember(key) {
         LocationDisplay().apply(init)
     }
+}
+
+/**
+ * Create and [remember] a [GraphicsOverlayCollection].
+ * [init] will be called when the [GraphicsOverlayCollection] is first created to configure its
+ * initial state.
+ *
+ * @param key invalidates the remembered GraphicsOverlayCollection if different from the previous composition
+ * @param init called when the [GraphicsOverlayCollection] is created to configure its initial state
+ * @since 200.3.0
+ */
+@Composable
+public inline fun rememberGraphicsOverlayCollection(
+    key: Any? = null,
+    crossinline init: GraphicsOverlayCollection.() -> Unit = {}
+): GraphicsOverlayCollection = remember(key) {
+    GraphicsOverlayCollection().apply(init)
 }
 
 @Preview
