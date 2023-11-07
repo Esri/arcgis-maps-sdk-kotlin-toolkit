@@ -16,6 +16,7 @@ import javax.inject.Inject
 
 data class MapListUIState(
     val isLoading: Boolean,
+    val searchText: String,
     val data: List<PortalItemWithLayer>
 )
 
@@ -30,16 +31,23 @@ class MapListViewModel @Inject constructor(
 
     // State flow to keep track of current loading state
     private val _isLoading = MutableStateFlow(false)
-
+    
+    private val _searchText = MutableStateFlow("")
+    
     // State flow that combines the _isLoading and the PortalItemUseCase data flow to create
     // a MapListUIState
     val uiState: StateFlow<MapListUIState> =
-        combine(_isLoading, portalItemUseCase.observe()) { isLoading, portalItemData ->
-            MapListUIState(isLoading, portalItemData)
+        combine(_isLoading, _searchText, portalItemUseCase.observe()) { isLoading, searchText, portalItemData ->
+            val data = portalItemData.filter {
+                searchText.isEmpty()
+                    || it.data.portalItem.title.uppercase().contains(searchText.uppercase())
+                    || it.data.portalItem.itemId.contains(searchText)
+            }
+            MapListUIState(isLoading, searchText, data)
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(1000),
-            initialValue = MapListUIState(true, emptyList())
+            initialValue = MapListUIState(true, "", emptyList())
         )
 
     init {
@@ -63,5 +71,9 @@ class MapListViewModel @Inject constructor(
                 _isLoading.emit(false)
             }
         }
+    }
+    
+    fun filterPortalItems(filterText: String) {
+        _searchText.value = filterText
     }
 }

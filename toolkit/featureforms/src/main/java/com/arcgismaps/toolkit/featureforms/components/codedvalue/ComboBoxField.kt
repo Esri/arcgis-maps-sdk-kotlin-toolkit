@@ -254,7 +254,11 @@ internal fun ComboBoxDialog(
                                 .fillMaxWidth()
                                 .clickable {
                                     // if the no value label was selected, set the value to be empty
-                                    onValueChange(name)
+                                    if (name == noValueLabel) {
+                                        onValueChange("")
+                                    } else {
+                                        onValueChange(name)
+                                    }
                                 },
                             trailingContent = {
                                 if (name == initialValue || (name == noValueLabel && initialValue.isEmpty())

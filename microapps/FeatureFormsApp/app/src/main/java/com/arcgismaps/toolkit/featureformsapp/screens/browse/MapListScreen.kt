@@ -27,16 +27,21 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -47,9 +52,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -74,9 +80,8 @@ fun MapListScreen(
 ) {
     val uiState by mapListViewModel.uiState.collectAsState()
     val lazyListState = rememberLazyListState()
-
     Scaffold(topBar = {
-        AppBar(uiState.isLoading) {
+        AppBar(uiState.isLoading, uiState.searchText, onSearchTextChanged = { mapListViewModel.filterPortalItems(it) }) {
             mapListViewModel.refresh(it)
         }
     }) { padding ->
@@ -107,7 +112,9 @@ fun MapListScreen(
                         state = lazyListState,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        items(uiState.data) { item ->
+                        items(
+                            uiState.data
+                        ) { item ->
                             MapListItem(
                                 title = item.data.portalItem.title,
                                 lastModified = item.data.portalItem.modified?.format("MMM dd yyyy")
@@ -136,9 +143,8 @@ fun MapListScreen(
     }
 }
 
-
 /**
- * A list item row for a PortalItem that shows the [title], [lastModified] and [thumbnail]. Provides
+ * A list item row for a PortalItem that shows the [title], [lastModified] and thumbnail. Provides
  * an [onClick] callback when the item is tapped.
  */
 @Composable
@@ -203,13 +209,47 @@ fun MapListItem(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppBar(isLoading: Boolean, onRefresh: (Boolean) -> Unit = {}) {
+@Preview
+fun AppBarPreview() {
+    AppBar(false, "", {})
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AppBar(isLoading: Boolean, searchText: String, onSearchTextChanged: (String) -> Unit, onRefresh: (Boolean) -> Unit = {}) {
     var expanded by remember { mutableStateOf(false) }
     TopAppBar(
         title = {
-            Text(
-                text = "Maps",
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold)
+            TextField(
+                value = searchText,
+                onValueChange = {
+                    onSearchTextChanged(it)
+                },
+                modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+                placeholder = {
+                    Text(text = "Filter Maps")
+                },
+                trailingIcon = {
+                    if (searchText.isNotEmpty()) {
+                        IconButton(onClick = { onSearchTextChanged("") }) {
+                            Icon(
+                                imageVector = Icons.Outlined.Close,
+                                contentDescription = null
+                            )
+                        }
+                    }
+                },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done
+                ),
+                shape = RoundedCornerShape(30.dp),
+                colors = TextFieldDefaults.colors(
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
+                ),
+                textStyle = MaterialTheme.typography.titleMedium
             )
         },
         actions = {
