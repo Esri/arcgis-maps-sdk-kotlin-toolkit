@@ -52,7 +52,7 @@ import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
 import kotlinx.coroutines.launch
 
 /**
- * A compose equivalent of the view-based [MapView].
+ * A compose equivalent of the view-based [com.arcgismaps.mapping.view.MapView].
  *
  * @param modifier Modifier to be applied to the composable [MapView]
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable
