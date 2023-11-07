@@ -55,13 +55,15 @@ public class MapViewOperator : GeoViewOperator() {
      * for the frame where the location is the closest to the center of the view.
      *
      * @param mapPoint a [Point] object representing a coordinate on the map
-     * @return A [ScreenCoordinate] for the screen in pixels. May return NAN for x and y, or null if an error occurs
+     * @return A [ScreenCoordinate] for the screen in pixels. Returns null if an error occurs
      * @since 200.3.0
      */
     public fun locationToScreenOrNull(mapPoint: Point): ScreenCoordinate? {
         return try {
-            // TODO: research when NAN can occur
-            mapView?.locationToScreen(mapPoint)
+            mapView?.locationToScreen(mapPoint)?.let {
+                if (it.x.isNaN() || it.y.isNaN()) null
+                else it
+            }
         } catch (t: Throwable) {
             null
         }
