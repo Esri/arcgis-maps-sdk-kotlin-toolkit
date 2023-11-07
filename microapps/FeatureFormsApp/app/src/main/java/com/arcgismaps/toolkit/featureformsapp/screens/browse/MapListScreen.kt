@@ -226,7 +226,7 @@ fun AppBar(isLoading: Boolean, searchText: String, onSearchTextChanged: (String)
                 onValueChange = {
                     onSearchTextChanged(it)
                 },
-                modifier = Modifier.padding(vertical = 10.dp),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
                 placeholder = {
                     Text(text = "Filter Maps")
                 },
@@ -244,7 +244,7 @@ fun AppBar(isLoading: Boolean, searchText: String, onSearchTextChanged: (String)
                 keyboardOptions = KeyboardOptions.Default.copy(
                     imeAction = ImeAction.Done
                 ),
-                shape = RoundedCornerShape(15.dp),
+                shape = RoundedCornerShape(30.dp),
                 colors = TextFieldDefaults.colors(
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent
