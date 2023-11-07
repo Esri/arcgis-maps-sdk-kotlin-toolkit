@@ -37,7 +37,6 @@ import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
 import com.arcgismaps.mapping.view.LocationDisplay
 import com.arcgismaps.mapping.view.LongPressEvent
-import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.MapViewInteractionOptions
 import com.arcgismaps.mapping.view.PanChangeEvent
 import com.arcgismaps.mapping.view.RotationChangeEvent
@@ -53,29 +52,29 @@ import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
 import kotlinx.coroutines.launch
 
 /**
- * A compose equivalent of the [MapView].
+ * A compose equivalent of the view-based [MapView].
  *
- * @param modifier Modifier to be applied to the composable MapView
+ * @param modifier Modifier to be applied to the composable [MapView]
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable
- * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable [com.arcgismaps.toolkit.geocompose.MapView]
- * @param locationDisplay the [LocationDisplay] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
- * @param geometryEditor the [GeometryEditor] used by the composable [com.arcgismaps.toolkit.geocompose.MapView] to create and edit geometries by user interaction.
- * @param mapViewInteractionOptions the [MapViewInteractionOptions] used by this composable [com.arcgismaps.toolkit.geocompose.MapView]
- * @param viewLabelProperties the [ViewLabelProperties] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
- * @param selectionProperties the [SelectionProperties] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
+ * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable [MapView]
+ * @param locationDisplay the [LocationDisplay] used by the composable [MapView]
+ * @param geometryEditor the [GeometryEditor] used by the composable [MapView] to create and edit geometries by user interaction.
+ * @param mapViewInteractionOptions the [MapViewInteractionOptions] used by this composable [MapView]
+ * @param viewLabelProperties the [ViewLabelProperties] used by the composable [MapView]
+ * @param selectionProperties the [SelectionProperties] used by the composable [MapView]
  * @param wrapAroundMode the [WrapAroundMode] to specify whether continuous panning across the international date line is enabled
- * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
- * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable MapView
- * @param onRotate lambda invoked when a user performs a rotation gesture on the composable MapView
- * @param onScale lambda invoked when a user performs a pinch gesture on the composable MapView
- * @param onUp lambda invoked when the user removes all their pointers from the composable MapView
- * @param onDown lambda invoked when the user first presses on the composable MapView
- * @param onSingleTapConfirmed lambda invoked when the user taps once on the composable MapView
- * @param onDoubleTap lambda invoked the user double taps on the composable MapView
- * @param onLongPress lambda invoked when a user holds a pointer on the composable MapView
- * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable MapView
- * @param onPan lambda invoked when a user drags a pointer or pointers across composable MapView
- * @param overlay the composable overlays to display on top of the composable MapView. Example, a compass, floorfilter etc.
+ * @param onViewpointChanged lambda invoked when the viewpoint of the composable [MapView] has changed
+ * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable [MapView]
+ * @param onRotate lambda invoked when a user performs a rotation gesture on the composable [MapView]
+ * @param onScale lambda invoked when a user performs a pinch gesture on the composable [MapView]
+ * @param onUp lambda invoked when the user removes all their pointers from the composable [MapView]
+ * @param onDown lambda invoked when the user first presses on the composable [MapView]
+ * @param onSingleTapConfirmed lambda invoked when the user taps once on the composable [MapView]
+ * @param onDoubleTap lambda invoked the user double taps on the composable [MapView]
+ * @param onLongPress lambda invoked when a user holds a pointer on the composable [MapView]
+ * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable [MapView]
+ * @param onPan lambda invoked when a user drags a pointer or pointers across composable [MapView]
+ * @param overlay the composable overlays to display on top of the composable [MapView]. Example, a compass, floorfilter etc.
  * @since 200.3.0
  */
 @Composable
@@ -104,7 +103,7 @@ public fun MapView(
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
-    val mapView = remember { MapView(context) }
+    val mapView = remember { com.arcgismaps.mapping.view.MapView(context) }
 
     Box(modifier = Modifier.semantics { contentDescription = "MapContainer" }) {
         AndroidView(
@@ -150,11 +149,11 @@ public fun MapView(
 }
 
 /**
- * Sets up the callbacks for all the MapView events.
+ * Sets up the callbacks for all the view-based [mapView] events.
  */
 @Composable
 private fun MapViewEventHandler(
-    mapView: MapView,
+    mapView: com.arcgismaps.mapping.view.MapView,
     onViewpointChanged: (() -> Unit)?,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)?,
     onRotate: ((RotationChangeEvent) -> Unit)?,
@@ -261,13 +260,13 @@ private fun MapViewEventHandler(
 }
 
 /**
- * Update the [mapView]'s graphicsOverlays property to reflect changes made to the
+ * Update the view-based [mapView]'s graphicsOverlays property to reflect changes made to the
  * [graphicsOverlayCollection] based on the type of [GraphicsOverlayCollection.ChangedEvent]
  */
 @Composable
 private fun GraphicsOverlaysUpdater(
     graphicsOverlayCollection: GraphicsOverlayCollection,
-    mapView: MapView
+    mapView: com.arcgismaps.mapping.view.MapView
 ) {
     LaunchedEffect(graphicsOverlayCollection) {
         // sync up the MapView with the new graphics overlays
