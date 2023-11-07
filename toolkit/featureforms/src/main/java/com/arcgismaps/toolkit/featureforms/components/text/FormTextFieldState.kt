@@ -364,7 +364,7 @@ internal class FormTextFieldState(
     private fun validate(value: String): List<ValidationErrorState> {
         val errors = validate.invoke()
         errors.forEach {
-            println("error: $it")
+            println("$label error: $it")
             if (it !is FeatureFormValidationException) {
                 println("unknown error $it with cause ${it.message} ${it.cause}")
             }

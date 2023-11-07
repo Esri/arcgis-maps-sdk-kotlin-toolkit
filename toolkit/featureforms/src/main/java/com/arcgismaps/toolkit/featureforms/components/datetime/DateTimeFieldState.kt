@@ -78,15 +78,6 @@ internal class DateTimeFieldState(
     val shouldShowTime: Boolean = properties.shouldShowTime
     
     companion object {
-        internal fun dateTimeValue(value: StateFlow<Any?>, scope: CoroutineScope): StateFlow<Instant?> =
-            value.map {
-                if (it is Instant?) {
-                    it
-                } else {
-                    throw IllegalArgumentException("expected a date time for the value of a date time field")
-                }
-            }.stateIn(scope, SharingStarted.Eagerly, value.value as Instant?)
-        
         fun Saver(
             field: FieldFormElement,
             form: FeatureForm,
