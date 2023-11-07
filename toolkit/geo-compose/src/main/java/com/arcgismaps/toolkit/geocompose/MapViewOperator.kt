@@ -34,7 +34,7 @@ public class MapViewOperator : GeoViewOperator() {
 
     /**
      * The [MapView] that this operator will operate on. This should be initialized by the [com.arcgismaps.toolkit.geocompose.MapView]
-     * composable when it enters the composition and set to null when it is disposed.
+     * composable when it enters the composition and set to null when it is disposed by calling [setMapView].
      *
      * @since 200.3.0
      */
@@ -42,7 +42,7 @@ public class MapViewOperator : GeoViewOperator() {
 
     /**
      * Sets the [mapView] parameter on this operator. This should be called by the [com.arcgismaps.toolkit.geocompose.MapView] composable
-     * when it enters the composition and set to null when it is disposed by calling [setMapView].
+     * when it enters the composition and set to null when it is disposed.
      *
      * @since 200.3.0
      */
