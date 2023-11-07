@@ -173,8 +173,8 @@ private fun MapViewEventHandler(
     onPan: ((PanChangeEvent) -> Unit)?
 ) {
     val currentViewPointChanged by rememberUpdatedState(onViewpointChanged)
-    val currentOnInteractingChanged by rememberUpdatedState(onInteractingChanged)
     val currentOnSpatialReferenceChanged by rememberUpdatedState(onSpatialReferenceChanged)
+    val currentOnInteractingChanged by rememberUpdatedState(onInteractingChanged)
     val currentOnRotate by rememberUpdatedState(onRotate)
     val currentOnScale by rememberUpdatedState(onScale)
     val currentOnUp by rememberUpdatedState(onUp)
@@ -191,14 +191,14 @@ private fun MapViewEventHandler(
                 currentViewPointChanged?.invoke()
             }
         }
-        launch(Dispatchers.Main.immediate) {
-            mapView.isInteracting.collect { isInteracting ->
-                currentOnInteractingChanged?.invoke(isInteracting)
-            }
-        }
         launch {
             mapView.spatialReference.collect { spatialReference ->
                 currentOnSpatialReferenceChanged?.invoke(spatialReference)
+            }
+        }
+        launch(Dispatchers.Main.immediate) {
+            mapView.isInteracting.collect { isInteracting ->
+                currentOnInteractingChanged?.invoke(isInteracting)
             }
         }
         launch(Dispatchers.Main.immediate) {
