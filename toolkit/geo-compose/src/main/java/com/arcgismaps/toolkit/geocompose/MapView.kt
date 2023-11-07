@@ -190,15 +190,15 @@ private fun MapViewEventHandler(
 
     LaunchedEffect(Unit) {
         launch {
-            mapView.timeExtent.collect { currentTimeExtent ->
-                currentTimeExtentChanged?.invoke(currentTimeExtent)
-            }
-        }
-        launch {
             mapView.viewpointChanged.collect {
                 currentViewPointChanged?.let {
                     it()
                 }
+            }
+        }
+        launch {
+            mapView.timeExtent.collect { currentTimeExtent ->
+                currentTimeExtentChanged?.invoke(currentTimeExtent)
             }
         }
         launch(Dispatchers.Main.immediate) {
