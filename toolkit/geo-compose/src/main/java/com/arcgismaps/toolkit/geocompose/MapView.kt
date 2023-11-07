@@ -66,8 +66,8 @@ import kotlinx.coroutines.launch
  * @param selectionProperties the [SelectionProperties] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param wrapAroundMode the [WrapAroundMode] to specify whether continuous panning across the international date line is enabled
  * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
- * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable MapView
  * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the MapView has changed
+ * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable MapView
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable MapView
  * @param onScale lambda invoked when a user performs a pinch gesture on the composable MapView
  * @param onUp lambda invoked when the user removes all their pointers from the composable MapView
@@ -92,8 +92,8 @@ public fun MapView(
     viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
     selectionProperties: SelectionProperties = SelectionProperties(),
     onViewpointChanged: (() -> Unit)? = null,
-    onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
+    onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
     onScale: ((ScaleChangeEvent) -> Unit)? = null,
     onUp: ((UpEvent) -> Unit)? = null,
@@ -137,8 +137,8 @@ public fun MapView(
     MapViewEventHandler(
         mapView,
         onViewpointChanged,
-        onInteractingChanged,
         onSpatialReferenceChanged,
+        onInteractingChanged,
         onRotate,
         onScale,
         onUp,
@@ -160,8 +160,8 @@ public fun MapView(
 private fun MapViewEventHandler(
     mapView: MapView,
     onViewpointChanged: (() -> Unit)?,
-    onInteractingChanged: ((isInteracting: Boolean) -> Unit)?,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)?,
+    onInteractingChanged: ((isInteracting: Boolean) -> Unit)?,
     onRotate: ((RotationChangeEvent) -> Unit)?,
     onScale: ((ScaleChangeEvent) -> Unit)?,
     onUp: ((UpEvent) -> Unit)?,
