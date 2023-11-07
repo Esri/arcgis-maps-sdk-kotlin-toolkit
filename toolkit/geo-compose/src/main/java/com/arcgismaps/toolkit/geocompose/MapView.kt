@@ -72,7 +72,9 @@ import kotlinx.coroutines.launch
  * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable MapView
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable MapView
+ * @param onMapRotationChanged lambda invoked with the composable MapView's current rotation
  * @param onScale lambda invoked when a user performs a pinch gesture on the composable MapView
+ * @param onMapScaleChanged lambda invoked with the composable MapView's current scale
  * @param onUp lambda invoked when the user removes all their pointers from the composable MapView
  * @param onDown lambda invoked when the user first presses on the composable MapView
  * @param onSingleTapConfirmed lambda invoked when the user taps once on the composable MapView
@@ -100,7 +102,9 @@ public fun MapView(
     onViewpointChanged: (() -> Unit)? = null,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
+    onMapRotationChanged: ((Double) -> Unit)? = null,
     onScale: ((ScaleChangeEvent) -> Unit)? = null,
+    onMapScaleChanged: ((Double) -> Unit)? = null,
     onUp: ((UpEvent) -> Unit)? = null,
     onDown: ((DownEvent) -> Unit)? = null,
     onSingleTapConfirmed: ((SingleTapConfirmedEvent) -> Unit)? = null,
@@ -147,7 +151,9 @@ public fun MapView(
         onViewpointChanged,
         onInteractingChanged,
         onRotate,
+        onMapRotationChanged,
         onScale,
+        onMapScaleChanged,
         onUp,
         onDown,
         onSingleTapConfirmed,
@@ -170,7 +176,9 @@ private fun MapViewEventHandler(
     onViewpointChanged: (() -> Unit)?,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)?,
     onRotate: ((RotationChangeEvent) -> Unit)?,
+    onMapRotationChanged: ((Double) -> Unit)?,
     onScale: ((ScaleChangeEvent) -> Unit)?,
+    onMapScaleChanged: ((Double) -> Unit)?,
     onUp: ((UpEvent) -> Unit)?,
     onDown: ((DownEvent) -> Unit)?,
     onSingleTapConfirmed: ((SingleTapConfirmedEvent) -> Unit)?,
@@ -183,7 +191,9 @@ private fun MapViewEventHandler(
     val currentViewPointChanged by rememberUpdatedState(onViewpointChanged)
     val currentOnInteractingChanged by rememberUpdatedState(onInteractingChanged)
     val currentOnRotate by rememberUpdatedState(onRotate)
+    val currentOnMapRotationChanged by rememberUpdatedState(onMapRotationChanged)
     val currentOnScale by rememberUpdatedState(onScale)
+    val currentOnMapScaleChanged by rememberUpdatedState(onMapScaleChanged)
     val currentOnUp by rememberUpdatedState(onUp)
     val currentOnDown by rememberUpdatedState(onDown)
     val currentSingleTapConfirmed by rememberUpdatedState(onSingleTapConfirmed)
@@ -199,6 +209,16 @@ private fun MapViewEventHandler(
                 currentViewPointChanged?.let {
                     it()
                 }
+            }
+        }
+        launch {
+            mapView.mapRotation.collect { mapRotation ->
+                currentOnMapRotationChanged?.invoke(mapRotation)
+            }
+        }
+        launch {
+            mapView.mapScale.collect { mapScale ->
+                currentOnMapScaleChanged?.invoke(mapScale)
             }
         }
         launch(Dispatchers.Main.immediate) {
