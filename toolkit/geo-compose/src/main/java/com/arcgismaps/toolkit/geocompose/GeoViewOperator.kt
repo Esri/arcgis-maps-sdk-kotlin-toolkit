@@ -18,7 +18,7 @@
 package com.arcgismaps.toolkit.geocompose
 
 /**
- * Used to perform interactions on a GeoView.
+ * Used to perform operations on a GeoView.
  *
  * @since 200.3.0
  */

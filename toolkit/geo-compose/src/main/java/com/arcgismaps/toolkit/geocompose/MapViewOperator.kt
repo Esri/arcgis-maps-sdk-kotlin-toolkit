@@ -27,12 +27,14 @@ import com.arcgismaps.mapping.view.ScreenCoordinate
  *
  * There should be a one-to-one relationship between a [MapViewOperator] and a composable [com.arcgismaps.toolkit.geocompose.MapView].
  * Operations can only be performed once the component has entered the composition.
+ *
+ * @since 200.3.0
  */
 public class MapViewOperator : GeoViewOperator() {
 
     /**
      * The [MapView] that this operator will operate on. This should be initialized by the [com.arcgismaps.toolkit.geocompose.MapView]
-     * composable when it enters the composition and set to null when it is disposed by calling [setMapView].
+     * composable when it enters the composition and set to null when it is disposed.
      *
      * @since 200.3.0
      */
