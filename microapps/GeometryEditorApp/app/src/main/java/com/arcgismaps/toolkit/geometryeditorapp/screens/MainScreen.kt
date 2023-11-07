@@ -76,7 +76,7 @@ private val fillSymbol: SimpleFillSymbol by lazy {
 
 /**
  * Displays a composable [MapView] to add graphics with the [GeometryEditor] using [VertexTool]
- * on a [rememberGraphicsOverlayCollection]. The editing of graphics can be started/stopped using a [Switch].
+ * on a [GraphicsOverlayCollection]. The editing of graphics can be started/stopped using a [Switch].
  * Each new sketch is added as a new [GraphicsOverlay]. An action button provides a choice of options
  * to undo, redo, clear sketch or reset all the graphics overlays.
  */
@@ -87,7 +87,7 @@ fun MainScreen() {
     // the collection of graphics overlays used by the MapView
     val graphicsOverlays = rememberGraphicsOverlayCollection()
     // the geometry editor used to manage the editing session
-    val geometryEditor by remember { mutableStateOf(GeometryEditor()) }
+    val geometryEditor = remember { GeometryEditor() }
     // track the status if geometry editor is started or stopped
     var isDrawingEnabled by remember { mutableStateOf(false) }
 
@@ -137,7 +137,7 @@ fun MainScreen() {
                         onDismissRequest = {
                             actionsExpanded = false
                         },
-                        onDrawingDisabled = {
+                        onResetAllGraphics = {
                             isDrawingEnabled = false
                         }
                     )
@@ -166,7 +166,7 @@ fun GeometryEditorDropDownMenu(
     geometryEditor: GeometryEditor,
     onDismissRequest: () -> Unit = {},
     graphicsOverlays: GraphicsOverlayCollection,
-    onDrawingDisabled: () -> Unit = {}
+    onResetAllGraphics: () -> Unit = {}
 ) {
     val items = remember {
         listOf("Clear sketch", "Undo sketch", "Redo sketch", "Reset all graphics")
@@ -188,7 +188,7 @@ fun GeometryEditorDropDownMenu(
                         it.contains("Reset all graphics") -> {
                             stopGeometryEditor(geometryEditor)
                             graphicsOverlays.clear()
-                            onDrawingDisabled()
+                            onResetAllGraphics()
                         }
 
                         it.contains("Undo") -> {
