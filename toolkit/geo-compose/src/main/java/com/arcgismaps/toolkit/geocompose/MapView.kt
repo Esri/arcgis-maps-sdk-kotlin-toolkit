@@ -33,8 +33,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.view.BackgroundGrid
 import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
+import com.arcgismaps.mapping.view.DrawStatus
+import com.arcgismaps.mapping.view.Grid
 import com.arcgismaps.mapping.view.LocationDisplay
 import com.arcgismaps.mapping.view.LongPressEvent
 import com.arcgismaps.mapping.view.MapView
@@ -63,6 +66,8 @@ import kotlinx.coroutines.launch
  * @param mapViewInteractionOptions the [MapViewInteractionOptions] used by this composable MapView
  * @param viewLabelProperties the [ViewLabelProperties] used by the composable MapView
  * @param selectionProperties the [SelectionProperties] used by the composable MapView
+ * @param grid represents the display of a coordinate system [Grid] on the composable MapView
+ * @param backgroundGrid the default color and context grid behind the map surface
  * @param wrapAroundMode the [WrapAroundMode] to specify whether continuous panning across the international date line is enabled
  * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable MapView
@@ -75,6 +80,7 @@ import kotlinx.coroutines.launch
  * @param onLongPress lambda invoked when a user holds a pointer on the composable MapView
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable MapView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable MapView
+ * @param onDrawStatusChanged lambda invoked when the draw status of the composable MapView is changes
  * @param overlay the composable overlays to display on top of the composable MapView. Example, a compass, floorfilter etc.
  * @since 200.3.0
  */
@@ -89,6 +95,8 @@ public fun MapView(
     mapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptions(),
     viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
     selectionProperties: SelectionProperties = SelectionProperties(),
+    grid: Grid? = null,
+    backgroundGrid: BackgroundGrid = BackgroundGrid(),
     onViewpointChanged: (() -> Unit)? = null,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
@@ -100,6 +108,7 @@ public fun MapView(
     onLongPress: ((LongPressEvent) -> Unit)? = null,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
+    onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
     overlay: @Composable () -> Unit = {}
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -118,6 +127,8 @@ public fun MapView(
                 it.labeling = viewLabelProperties
                 it.wrapAroundMode = wrapAroundMode
                 it.geometryEditor = geometryEditor
+                it.grid = grid
+                it.backgroundGrid = backgroundGrid
             })
 
         overlay()
@@ -143,7 +154,8 @@ public fun MapView(
         onDoubleTap,
         onLongPress,
         onTwoPointerTap,
-        onPan
+        onPan,
+        onDrawStatusChanged
     )
 
     GraphicsOverlaysUpdater(graphicsOverlays, mapView)
@@ -165,7 +177,8 @@ private fun MapViewEventHandler(
     onDoubleTap: ((DoubleTapEvent) -> Unit)?,
     onLongPress: ((LongPressEvent) -> Unit)?,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)?,
-    onPan: ((PanChangeEvent) -> Unit)?
+    onPan: ((PanChangeEvent) -> Unit)?,
+    onDrawStatusChanged: ((DrawStatus) -> Unit)?
 ) {
     val currentViewPointChanged by rememberUpdatedState(onViewpointChanged)
     val currentOnInteractingChanged by rememberUpdatedState(onInteractingChanged)
@@ -178,6 +191,7 @@ private fun MapViewEventHandler(
     val currentOnLongPress by rememberUpdatedState(onLongPress)
     val currentOnTwoPointerTap by rememberUpdatedState(onTwoPointerTap)
     val currentOnPan by rememberUpdatedState(onPan)
+    val currentOnDrawStatusChanged by rememberUpdatedState(onDrawStatusChanged)
 
     LaunchedEffect(Unit) {
         launch {
@@ -254,6 +268,13 @@ private fun MapViewEventHandler(
             mapView.onPan.collect { panChangeEvent ->
                 currentOnPan?.let {
                     it(panChangeEvent)
+                }
+            }
+        }
+        launch {
+            mapView.drawStatus.collect { drawStatus ->
+                currentOnDrawStatusChanged?.let {
+                    it(drawStatus)
                 }
             }
         }
