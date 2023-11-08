@@ -18,6 +18,8 @@
 
 package com.arcgismaps.toolkit.featureforms.components.datetime.picker
 
+import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -27,6 +29,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -227,7 +230,6 @@ private fun (ColumnScope).PickerContent(
                 key(state.dateTime.value) {
                     DatePicker(
                         state = datePickerState,
-                        modifier = Modifier.scaleIfNarrow(DateTimePickerDialogTokens.containerWidth),
                         dateValidator = { timeStamp ->
                             state.dateValidator(timeStamp)
                         },
@@ -329,9 +331,10 @@ private fun DateTimePickerDialog(
     ) {
         Surface(
             modifier = Modifier
-                .padding(start = 25.dp, end = 25.dp)
-                .requiredWidth(DateTimePickerDialogTokens.containerWidth)
-                .height(DateTimePickerDialogTokens.containerHeight),
+                .padding(horizontal = DateTimePickerDialogTokens.horizontalPadding)
+                .widthWithOrientation(DateTimePickerDialogTokens.containerWidth)
+                .height(DateTimePickerDialogTokens.containerHeight)
+                .scaleIfNarrow(DateTimePickerDialogTokens.containerWidth + DateTimePickerDialogTokens.horizontalPadding * 2),
             shape = shape,
             color = MaterialTheme.colorScheme.surface,
             tonalElevation = tonalElevation,
@@ -353,8 +356,27 @@ private fun DateTimePickerDialog(
 private object DateTimePickerDialogTokens {
     val containerHeight = 600.0.dp
     val containerWidth = 360.0.dp
+    val horizontalPadding = 25.dp
 }
 
+/**
+ * Constraints the width of the content based on the orientation and the [width]. If the
+ * current orientation is portrait, [Modifier.requiredWidth] used. If it is landscape then
+ * [Modifier.widthIn] is used. This is useful when different layouts are needed in portrait
+ * and landscape orientations.
+ */
+internal fun Modifier.widthWithOrientation(width: Dp) : Modifier = composed {
+    val configuration = LocalConfiguration.current
+    if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        this.widthIn(width)
+    } else {
+        this.requiredWidth(width)
+    }
+}
+
+/**
+ * Scales the content appropriately if the current screen width is less than the [minWidth].
+ */
 internal fun Modifier.scaleIfNarrow(minWidth: Dp): Modifier = composed {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val scale = if (screenWidth <= minWidth)
