@@ -57,6 +57,7 @@ import kotlinx.coroutines.launch
  *
  * @param modifier Modifier to be applied to the composable MapView
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable
+ * @param viewpointOperation a [MapViewpointOperation] that changes this MapView to a new viewpoint
  * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param locationDisplay the [LocationDisplay] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param geometryEditor the [GeometryEditor] used by the composable [com.arcgismaps.toolkit.geocompose.MapView] to create and edit geometries by user interaction.
@@ -82,7 +83,7 @@ import kotlinx.coroutines.launch
 public fun MapView(
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap? = null,
-    viewpointOperation: ViewpointOperation? = null,
+    viewpointOperation: MapViewpointOperation? = null,
     graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     wrapAroundMode: WrapAroundMode = WrapAroundMode.EnabledWhenSupported,
@@ -132,6 +133,8 @@ public fun MapView(
         }
     }
 
+    ViewpointUpdater(mapView, viewpointOperation)
+
     MapViewEventHandler(
         mapView,
         onViewpointChanged,
@@ -148,6 +151,35 @@ public fun MapView(
     )
 
     GraphicsOverlaysUpdater(graphicsOverlays, mapView)
+}
+
+@Composable
+private fun ViewpointUpdater(
+    mapView: MapView,
+    viewpointOperation: MapViewpointOperation?
+) {
+    LaunchedEffect(viewpointOperation) {
+        when (viewpointOperation) {
+            is MapViewpointOperation.SetViewpoint -> mapView.setViewpoint(viewpointOperation.viewpoint)
+
+            is MapViewpointOperation.SetViewpointAnimated -> {
+                viewpointOperation.execute(mapView)
+            }
+            is MapViewpointOperation.SetViewpointCenter -> {
+                if (viewpointOperation.scale != null) {
+                    mapView.setViewpointCenter(
+                        viewpointOperation.center,
+                        viewpointOperation.scale
+                    )
+                } else {
+                    mapView.setViewpointCenter(viewpointOperation.center)
+                }
+            }
+            else -> {
+               // TODO("ViewpointOperation handling not yet implemented")
+            }
+        }
+    }
 }
 
 /**

@@ -18,11 +18,14 @@
 
 package com.arcgismaps.toolkit.locationdisplayapp.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -41,15 +44,29 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.arcgismaps.geometry.Point
+import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.location.LocationDataSourceStatus
 import com.arcgismaps.location.LocationDisplayAutoPanMode
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
+import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.view.LocationDisplay
 import com.arcgismaps.toolkit.geocompose.MapView
+import com.arcgismaps.toolkit.geocompose.MapViewpointOperation
 import com.arcgismaps.toolkit.geocompose.rememberLocationDisplay
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+
+val edinburgh = Viewpoint(
+    Point(-3.188267, 55.953251, SpatialReference.wgs84())
+)
+
+val redlands = Point(-117.19494, 34.05723, SpatialReference.wgs84()
+)
+val munich = Viewpoint(
+    Point(11.5820, 48.1315, SpatialReference.wgs84())
+)
 
 /**
  * Displays a composable [com.arcgismaps.toolkit.geocompose.MapView] with a [LocationDisplay] obtained
@@ -125,13 +142,59 @@ fun MainScreen() {
             )
         },
     ) { innerPadding ->
-        MapView(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize(),
-            arcGISMap = arcGISMap,
-            locationDisplay = locationDisplay
-        )
+        Column(
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            var currentViewpointOperation by remember {
+                mutableStateOf<MapViewpointOperation?>(null)
+            }
+
+            Row {
+                Button(
+                    onClick = {
+                        currentViewpointOperation = null
+                    }
+                ){
+                    Text(" Null")
+                }
+                Button(
+                    onClick = {
+                        currentViewpointOperation = MapViewpointOperation.SetViewpoint(edinburgh)
+                    }
+                ) {
+                    Text("Viewpoint Edi")
+                }
+                Button(
+                    onClick = {
+                        currentViewpointOperation = MapViewpointOperation.SetViewpointAnimated(
+                            viewpoint = munich,
+                            durationSeconds = 10f,
+                            onCompleted = {
+                                Log.d("ViewpointTest", "SetViewpointAnimated completed: $it")
+                            }
+                        )
+                    }
+                ){
+                    Text("Animate Munich")
+                }
+                Button(
+                    onClick = {
+                        currentViewpointOperation = MapViewpointOperation.SetViewpointCenter(
+                            center = redlands,
+                            scale = 10e5
+                        )
+                    }
+                ){
+                    Text("Center Redlands")
+                }
+            }
+            MapView(
+                modifier = Modifier.fillMaxSize(),
+                arcGISMap = arcGISMap,
+                locationDisplay = locationDisplay,
+                viewpointOperation = currentViewpointOperation
+            )
+        }
     }
 }
 
