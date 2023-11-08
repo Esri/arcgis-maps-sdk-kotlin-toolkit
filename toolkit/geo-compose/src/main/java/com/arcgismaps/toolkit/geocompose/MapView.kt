@@ -99,6 +99,7 @@ public fun MapView(
     backgroundGrid: BackgroundGrid = BackgroundGrid(),
     onViewpointChanged: (() -> Unit)? = null,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
+    onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
     onScale: ((ScaleChangeEvent) -> Unit)? = null,
     onUp: ((UpEvent) -> Unit)? = null,
@@ -146,6 +147,7 @@ public fun MapView(
         mapView,
         onViewpointChanged,
         onInteractingChanged,
+        onNavigationChanged,
         onRotate,
         onScale,
         onUp,
@@ -169,6 +171,7 @@ private fun MapViewEventHandler(
     mapView: MapView,
     onViewpointChanged: (() -> Unit)?,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)?,
+    onNavigationChanged: ((isNavigating: Boolean) -> Unit)?,
     onRotate: ((RotationChangeEvent) -> Unit)?,
     onScale: ((ScaleChangeEvent) -> Unit)?,
     onUp: ((UpEvent) -> Unit)?,
@@ -182,6 +185,7 @@ private fun MapViewEventHandler(
 ) {
     val currentViewPointChanged by rememberUpdatedState(onViewpointChanged)
     val currentOnInteractingChanged by rememberUpdatedState(onInteractingChanged)
+    val currentOnNavigationChanged by rememberUpdatedState(onNavigationChanged)
     val currentOnRotate by rememberUpdatedState(onRotate)
     val currentOnScale by rememberUpdatedState(onScale)
     val currentOnUp by rememberUpdatedState(onUp)
@@ -206,6 +210,11 @@ private fun MapViewEventHandler(
                 currentOnInteractingChanged?.let {
                     it(isInteracting)
                 }
+            }
+        }
+        launch(Dispatchers.Main.immediate) {
+            mapView.navigationChanged.collect {
+                currentOnNavigationChanged?.invoke(it)
             }
         }
         launch(Dispatchers.Main.immediate) {
