@@ -37,6 +37,7 @@ import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
 import com.arcgismaps.mapping.view.LocationDisplay
 import com.arcgismaps.mapping.view.LongPressEvent
+import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.MapViewInteractionOptions
 import com.arcgismaps.mapping.view.PanChangeEvent
 import com.arcgismaps.mapping.view.RotationChangeEvent
@@ -49,7 +50,6 @@ import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.mapping.view.WrapAroundMode
 import com.arcgismaps.mapping.view.SelectionProperties
 import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
-import com.arcgismaps.mapping.view.MapView
 import kotlinx.coroutines.launch
 
 /**
