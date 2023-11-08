@@ -384,7 +384,7 @@ internal fun Modifier.scaleIfNarrow(minWidth: Dp): Modifier = composed {
     this.scale(scale)
 }
 
-@Preview(showSystemUi = true, showBackground = true, backgroundColor = 0xFFFFFF, widthDp = 392)
+@Preview
 @Composable
 private fun DateTimePickerPreview() {
     val state = DateTimePickerState(
