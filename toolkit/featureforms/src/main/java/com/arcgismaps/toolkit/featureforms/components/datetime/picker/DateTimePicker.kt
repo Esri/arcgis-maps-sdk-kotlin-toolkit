@@ -378,7 +378,7 @@ internal fun Modifier.widthWithOrientation(width: Dp) : Modifier = composed {
  */
 internal fun Modifier.scaleIfNarrow(minWidth: Dp): Modifier = composed {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-    val scale = if (screenWidth <= minWidth)
+    val scale = if (screenWidth < minWidth)
         screenWidth / minWidth
     else 1f
     this.scale(scale)
