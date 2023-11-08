@@ -55,27 +55,29 @@ import com.arcgismaps.toolkit.geocompose.MapView
 fun MainScreen() {
     val arcGISMap = remember { ArcGISMap(BasemapStyle.ArcGISImagery) }
 
-    var mapInsets by remember { mutableStateOf(PaddingValues()) }
+    var insets by remember { mutableStateOf(PaddingValues()) }
 
     var leftText by remember { mutableStateOf(TextFieldValue("")) }
     var rightText by remember { mutableStateOf(TextFieldValue("")) }
     var topText by remember { mutableStateOf(TextFieldValue("")) }
     var bottomText by remember { mutableStateOf(TextFieldValue("")) }
 
-    val updateInsets = {
-        mapInsets = PaddingValues(
-            leftText.text.toDoubleOrNull()?.dp ?: 0.0.dp,
-            topText.text.toDoubleOrNull()?.dp ?: 0.0.dp,
-            rightText.text.toDoubleOrNull()?.dp ?: 0.0.dp,
-            bottomText.text.toDoubleOrNull()?.dp ?: 0.0.dp
-        )
+    val updateInsets = remember {
+        {
+            insets = PaddingValues(
+                leftText.text.toDoubleOrNull()?.dp ?: 0.0.dp,
+                topText.text.toDoubleOrNull()?.dp ?: 0.0.dp,
+                rightText.text.toDoubleOrNull()?.dp ?: 0.0.dp,
+                bottomText.text.toDoubleOrNull()?.dp ?: 0.0.dp
+            )
+        }
     }
 
     val focusManager = LocalFocusManager.current
     MapView(
         modifier = Modifier.fillMaxSize(),
         arcGISMap = arcGISMap,
-        insets = mapInsets
+        insets = insets
     )
 
     Column(Modifier.fillMaxSize()) {
@@ -110,7 +112,7 @@ fun MainScreen() {
             )
         }
         Button(onClick = {
-            mapInsets = PaddingValues(0.0.dp, 0.0.dp, 0.0.dp, 0.0.dp)
+            insets = PaddingValues(0.0.dp, 0.0.dp, 0.0.dp, 0.0.dp)
             leftText = TextFieldValue("")
             rightText = TextFieldValue("")
             topText = TextFieldValue("")
