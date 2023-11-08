@@ -80,7 +80,6 @@ import kotlinx.coroutines.launch
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable MapView
  * @param onDrawStatusChanged lambda invoked when the draw status of the composable MapView is changes
  * @param mapViewProxy the [MapViewProxy] to associate with the composable [MapView].
- * @param overlay the composable overlays to display on top of the composable MapView. Example, a compass, floorfilter etc.
  * @since 200.3.0
  */
 @Composable
@@ -109,7 +108,6 @@ public fun MapView(
     onPan: ((PanChangeEvent) -> Unit)? = null,
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
     mapViewProxy: MapViewProxy? = null,
-    overlay: @Composable () -> Unit = {}
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
