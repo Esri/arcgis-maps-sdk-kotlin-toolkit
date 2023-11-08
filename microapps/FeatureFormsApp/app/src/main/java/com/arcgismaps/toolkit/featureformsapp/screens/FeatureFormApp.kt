@@ -1,6 +1,7 @@
 package com.arcgismaps.toolkit.featureformsapp.screens
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -21,7 +22,9 @@ fun FeatureFormApp() {
         // Login screen
         composable("login") {
             val loginViewModel = hiltViewModel<LoginViewModel>()
-            LoginScreen(loginViewModel)
+            LoginScreen(loginViewModel) {
+                navController.navigate("home")
+            }
         }
         // Home screen - shows the list of maps
         composable("home") {
