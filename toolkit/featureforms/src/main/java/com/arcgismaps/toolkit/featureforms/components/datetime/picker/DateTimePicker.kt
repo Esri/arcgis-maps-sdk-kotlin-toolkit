@@ -19,7 +19,6 @@
 package com.arcgismaps.toolkit.featureforms.components.datetime.picker
 
 import android.content.res.Configuration
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
