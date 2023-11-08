@@ -18,35 +18,34 @@
 package com.arcgismaps.toolkit.geocompose
 
 import com.arcgismaps.geometry.Point
-import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.ScreenCoordinate
 
 
 /**
- * Used to perform operations on a [com.arcgismaps.toolkit.geocompose.MapView].
+ * Used to perform operations on a [MapView].
  *
- * There should be a one-to-one relationship between a [MapViewOperator] and a composable [com.arcgismaps.toolkit.geocompose.MapView].
+ * There should be a one-to-one relationship between a [MapViewProxy] and a composable [MapView].
  * Operations can only be performed once the component has entered the composition.
  *
  * @since 200.3.0
  */
-public class MapViewOperator : GeoViewOperator() {
+public class MapViewProxy : GeoViewProxy() {
 
     /**
-     * The [MapView] that this operator will operate on. This should be initialized by the [com.arcgismaps.toolkit.geocompose.MapView]
+     * The [com.arcgismaps.mapping.view.MapView] that this operator will operate on. This should be initialized by the composable [MapView]
      * composable when it enters the composition and set to null when it is disposed by calling [setMapView].
      *
      * @since 200.3.0
      */
-    private var mapView: MapView? = null
+    private var mapView: com.arcgismaps.mapping.view.MapView? = null
 
     /**
-     * Sets the [mapView] parameter on this operator. This should be called by the [com.arcgismaps.toolkit.geocompose.MapView] composable
+     * Sets the [mapView] parameter on this operator. This should be called by the composable [MapView]
      * when it enters the composition and set to null when it is disposed.
      *
      * @since 200.3.0
      */
-    internal fun setMapView(mapView: MapView?) {
+    internal fun setMapView(mapView: com.arcgismaps.mapping.view.MapView?) {
         this.mapView = mapView
     }
 

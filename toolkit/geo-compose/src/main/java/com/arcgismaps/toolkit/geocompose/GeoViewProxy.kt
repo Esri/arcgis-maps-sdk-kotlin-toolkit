@@ -22,5 +22,5 @@ package com.arcgismaps.toolkit.geocompose
  *
  * @since 200.3.0
  */
-public sealed class GeoViewOperator {
+public sealed class GeoViewProxy {
 }

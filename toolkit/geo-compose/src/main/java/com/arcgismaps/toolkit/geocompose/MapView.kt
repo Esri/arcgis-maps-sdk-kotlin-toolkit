@@ -73,7 +73,7 @@ import kotlinx.coroutines.launch
  * @param onLongPress lambda invoked when a user holds a pointer on the composable MapView
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable MapView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable MapView
- * @param mapViewOperator the [MapViewOperator] to associate with the composable [com.arcgismaps.toolkit.geocompose.MapView].
+ * @param mapViewProxy the [MapViewProxy] to associate with the composable [MapView].
  * @since 200.3.0
  */
 @Composable
@@ -98,7 +98,7 @@ public fun MapView(
     onLongPress: ((LongPressEvent) -> Unit)? = null,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
-    mapViewOperator: MapViewOperator? = null,
+    mapViewProxy: MapViewProxy? = null,
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
@@ -125,10 +125,10 @@ public fun MapView(
         }
     }
 
-    DisposableEffect(mapViewOperator) {
-        mapViewOperator?.setMapView(mapView)
+    DisposableEffect(mapViewProxy) {
+        mapViewProxy?.setMapView(mapView)
         onDispose {
-            mapViewOperator?.setMapView(null)
+            mapViewProxy?.setMapView(null)
         }
     }
 
