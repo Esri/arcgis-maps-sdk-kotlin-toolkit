@@ -167,8 +167,8 @@ private fun AttributionStateHandler(mapView: MapView, attributionState: Attribut
             }
         }
         launch {
-            mapView.onAttributionBarLayoutChanged.collect {
-                attributionState.onAttributionBarLayoutChanged?.invoke(it)
+            mapView.onAttributionBarLayoutChanged.collect { attributionBarLayoutChangedEvent ->
+                attributionState.onAttributionBarLayoutChanged?.invoke(attributionBarLayoutChangedEvent)
             }
         }
     }
