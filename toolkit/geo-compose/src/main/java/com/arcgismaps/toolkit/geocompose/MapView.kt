@@ -69,7 +69,7 @@ import kotlinx.coroutines.launch
  * @param mapViewInteractionOptions the [MapViewInteractionOptions] used by this composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param viewLabelProperties the [ViewLabelProperties] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param selectionProperties the [SelectionProperties] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
- * @param mapInsets the inset values to control the active visible area, instructing the MapView to ignore parts that may be obstructed
+ * @param insets the inset values to control the active visible area, instructing the MapView to ignore parts that may be obstructed
  * by overlaid UI elements and affecting the MapView's logical center, the reported visible area and the location display.
  * @param grid represents the display of a coordinate system [Grid] on the composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param backgroundGrid the default color and context grid behind the map surface
@@ -100,7 +100,7 @@ public fun MapView(
     mapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptions(),
     viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
     selectionProperties: SelectionProperties = SelectionProperties(),
-    mapInsets: PaddingValues = PaddingValues(),
+    insets: PaddingValues = PaddingValues(),
     grid: Grid? = null,
     backgroundGrid: BackgroundGrid = BackgroundGrid(),
     onViewpointChanged: (() -> Unit)? = null,
@@ -149,14 +149,14 @@ public fun MapView(
         }
     }
 
-    LaunchedEffect(mapInsets) {
+    LaunchedEffect(insets) {
         // When this call is made in the AndroidView's update callback, ViewInsets are not applied
         // on the mapview on initial load. So we set the ViewInsets here.
         mapView.setViewInsets(
-            mapInsets.calculateLeftPadding(layoutDirection).value.toDouble(),
-            mapInsets.calculateRightPadding(layoutDirection).value.toDouble(),
-            mapInsets.calculateTopPadding().value.toDouble(),
-            mapInsets.calculateBottomPadding().value.toDouble()
+            insets.calculateLeftPadding(layoutDirection).value.toDouble(),
+            insets.calculateRightPadding(layoutDirection).value.toDouble(),
+            insets.calculateTopPadding().value.toDouble(),
+            insets.calculateBottomPadding().value.toDouble()
         )
     }
 
