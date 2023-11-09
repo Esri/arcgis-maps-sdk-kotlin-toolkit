@@ -166,7 +166,6 @@ public fun MapView(
 }
 
 /**
-<<<<<<< HEAD
  * Sets up the attribution bar's property and events.
  */
 @Composable
