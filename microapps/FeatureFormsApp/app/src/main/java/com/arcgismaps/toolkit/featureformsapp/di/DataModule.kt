@@ -20,9 +20,11 @@ package com.arcgismaps.toolkit.featureformsapp.di
 
 import android.content.Context
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
+import com.arcgismaps.toolkit.featureformsapp.data.PortalSettings
 import com.arcgismaps.toolkit.featureformsapp.data.local.ItemCacheDao
 import com.arcgismaps.toolkit.featureformsapp.data.network.ItemRemoteDataSource
 import com.arcgismaps.toolkit.featureformsapp.domain.PortalItemUseCase
+import com.arcgismaps.toolkit.featureformsapp.R
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -85,4 +87,10 @@ class DataModule {
         dispatcher,
         portalItemRepository
     )
+
+    @Singleton
+    @Provides
+    internal fun providePortalSettings(
+        @ApplicationContext context: Context
+    ): PortalSettings = PortalSettings(context = context)
 }

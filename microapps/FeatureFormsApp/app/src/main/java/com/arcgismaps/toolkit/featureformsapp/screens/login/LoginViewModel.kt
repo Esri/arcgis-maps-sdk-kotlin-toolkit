@@ -16,32 +16,30 @@
 
 package com.arcgismaps.toolkit.featureformsapp.screens.login
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
-import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeHandler
-import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
-import com.arcgismaps.httpcore.authentication.TokenCredential
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.authentication.AuthenticatorState
 import com.arcgismaps.toolkit.featureformsapp.BuildConfig
+import com.arcgismaps.toolkit.featureformsapp.LoginState
+import com.arcgismaps.toolkit.featureformsapp.data.PortalSettings
 import com.arcgismaps.toolkit.featureformsapp.data.network.ItemRemoteDataSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import org.json.JSONObject
 import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
+    private val portalSettings: PortalSettings
 ) : ViewModel() {
 
     private val authenticatorState = AuthenticatorState()
 
-    val loginState = MutableStateFlow(false)
+    private val _loginState : MutableStateFlow<LoginState> = MutableStateFlow(LoginState.NotLoggedIn)
+    val loginState = _loginState.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -52,50 +50,15 @@ class LoginViewModel @Inject constructor(
     }
 
     fun loginWithDefaultCredentials() {
+        _loginState.value = LoginState.Loading
         viewModelScope.launch(Dispatchers.IO) {
             authenticatorState.oAuthUserConfiguration = null
+            portalSettings.setPortalUrl(portalSettings.defaultPortalUrl)
             val portal = Portal(ItemRemoteDataSource.portalUri, Portal.Connection.Authenticated)
             portal.load().onFailure {
-                Log.e("TAG", "loginWithDefaultCredentials: $it", )
+                _loginState.value = LoginState.NotLoggedIn
             }.onSuccess {
-                val text = portal.portalInfo?.let {
-                    val json = it.toJson()
-                    val jsonObject = JSONObject(json)
-                    jsonObject.toString(4)
-                } ?: "no info"
-                Log.e("TAG", "loginWithDefaultCredentials: Success $text", )
-                loginState.value = true
-            }
-        }
-    }
-}
-
-//val authenticationChallengeHandler = FormsArcGISAuthenticationChallengeHandler(
-//    BuildConfig.webMapUser,
-//    BuildConfig.webMapPassword
-//)
-//ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler =
-//authenticationChallengeHandler
-
-class FormsArcGISAuthenticationChallengeHandler(
-    private val username: String,
-    private val password: String
-) : ArcGISAuthenticationChallengeHandler {
-    override suspend fun handleArcGISAuthenticationChallenge(
-        challenge: ArcGISAuthenticationChallenge
-    ): ArcGISAuthenticationChallengeResponse {
-        val result: Result<TokenCredential> =
-            TokenCredential.create(
-                challenge.requestUrl,
-                username,
-                password,
-                tokenExpirationInterval = 0
-            )
-        return result.let {
-            if (it.isSuccess) {
-                ArcGISAuthenticationChallengeResponse.ContinueWithCredential(it.getOrThrow())
-            } else {
-                ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError(it.exceptionOrNull()!!)
+                _loginState.value = LoginState.LoggedIn
             }
         }
     }
