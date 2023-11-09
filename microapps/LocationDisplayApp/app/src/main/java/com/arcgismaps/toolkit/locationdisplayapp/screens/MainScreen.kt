@@ -159,14 +159,14 @@ fun MainScreen() {
                 }
                 Button(
                     onClick = {
-                        currentViewpointOperation = MapViewpointOperation.SetViewpoint(edinburgh)
+                        currentViewpointOperation = MapViewpointOperation.Set(edinburgh)
                     }
                 ) {
                     Text("Viewpoint Edi")
                 }
                 Button(
                     onClick = {
-                        currentViewpointOperation = MapViewpointOperation.SetViewpointAnimated(
+                        currentViewpointOperation = MapViewpointOperation.Animate(
                             viewpoint = munich,
                             durationSeconds = 10f
                         ).also {
@@ -184,7 +184,7 @@ fun MainScreen() {
                 }
                 Button(
                     onClick = {
-                        currentViewpointOperation = MapViewpointOperation.SetViewpointCenter(
+                        currentViewpointOperation = MapViewpointOperation.Center(
                             center = redlands,
                             scale = 10e5
                         )

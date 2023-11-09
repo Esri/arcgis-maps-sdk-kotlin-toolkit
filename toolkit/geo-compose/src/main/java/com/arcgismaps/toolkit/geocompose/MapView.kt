@@ -160,12 +160,14 @@ private fun ViewpointUpdater(
 ) {
     LaunchedEffect(viewpointOperation) {
         when (viewpointOperation) {
-            is MapViewpointOperation.SetViewpoint -> mapView.setViewpoint(viewpointOperation.viewpoint)
-
-            is MapViewpointOperation.SetViewpointAnimated -> {
+            is MapViewpointOperation.Set -> {
+                mapView.setViewpoint(viewpointOperation.viewpoint)
+                viewpointOperation.complete(Result.success(true))
+            }
+            is MapViewpointOperation.Animate -> {
                 viewpointOperation.execute(mapView)
             }
-            is MapViewpointOperation.SetViewpointCenter -> {
+            is MapViewpointOperation.Center -> {
                 if (viewpointOperation.scale != null) {
                     mapView.setViewpointCenter(
                         viewpointOperation.center,
