@@ -168,11 +168,16 @@ fun MainScreen() {
                     onClick = {
                         currentViewpointOperation = MapViewpointOperation.SetViewpointAnimated(
                             viewpoint = munich,
-                            durationSeconds = 10f,
-                            onCompleted = {
-                                Log.d("ViewpointTest", "SetViewpointAnimated completed: $it")
+                            durationSeconds = 10f
+                        ).also {
+                            scope.launch {
+                                it.await().onFailure { throwable ->
+                                    Log.d("ViewpointTest", "SetViewpointAnimated failed: ${throwable.message}")
+                                }.onSuccess {
+                                    Log.d("ViewpointTest", "SetViewpointAnimated completed: $it")
+                                }
                             }
-                        )
+                        }
                     }
                 ){
                     Text("Animate Munich")
