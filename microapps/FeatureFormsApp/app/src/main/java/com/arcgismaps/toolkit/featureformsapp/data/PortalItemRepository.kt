@@ -79,6 +79,13 @@ class PortalItemRepository(
         }
     }
 
+    suspend fun deleteAll() = withContext(dispatcher) {
+        mutex.withLock {
+            deleteAllCacheEntries()
+            portalItems.clear()
+        }
+    }
+
     /**
      * Returns the number of items in the repository.
      */

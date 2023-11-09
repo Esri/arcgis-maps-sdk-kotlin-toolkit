@@ -51,6 +51,8 @@ class PortalItemUseCase(
 
     fun observe(): Flow<List<PortalItemWithLayer>> = portalItemDataFlow
 
+    suspend fun deleteAll() = portalItemRepository.deleteAll()
+
     suspend fun refresh(forceUpdate: Boolean) = portalItemRepository.refresh(forceUpdate)
 
     suspend fun isEmpty(): Boolean = portalItemRepository.getItemCount() == 0

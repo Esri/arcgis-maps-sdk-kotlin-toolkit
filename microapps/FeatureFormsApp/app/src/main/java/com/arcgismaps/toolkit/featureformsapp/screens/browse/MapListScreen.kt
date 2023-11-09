@@ -81,9 +81,13 @@ fun MapListScreen(
     val uiState by mapListViewModel.uiState.collectAsState()
     val lazyListState = rememberLazyListState()
     Scaffold(topBar = {
-        AppBar(uiState.isLoading, uiState.searchText, onSearchTextChanged = { mapListViewModel.filterPortalItems(it) }) {
-            mapListViewModel.refresh(it)
-        }
+        AppBar(
+            uiState.isLoading,
+            uiState.searchText,
+            onSearchTextChanged = mapListViewModel::filterPortalItems,
+            onRefresh = mapListViewModel::refresh,
+            onSignOut = mapListViewModel::signOut
+        )
     }) { padding ->
         // use a cross fade animation to show a loading indicator when the data is loading
         // and transition to the list of portalItems once loaded
@@ -217,7 +221,13 @@ fun AppBarPreview() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppBar(isLoading: Boolean, searchText: String, onSearchTextChanged: (String) -> Unit, onRefresh: (Boolean) -> Unit = {}) {
+fun AppBar(
+    isLoading: Boolean,
+    searchText: String,
+    onSearchTextChanged: (String) -> Unit,
+    onRefresh: (Boolean) -> Unit = {},
+    onSignOut: () -> Unit = {}
+) {
     var expanded by remember { mutableStateOf(false) }
     TopAppBar(
         title = {
@@ -226,7 +236,9 @@ fun AppBar(isLoading: Boolean, searchText: String, onSearchTextChanged: (String)
                 onValueChange = {
                     onSearchTextChanged(it)
                 },
-                modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 6.dp),
                 placeholder = {
                     Text(text = "Filter Maps")
                 },
@@ -268,14 +280,21 @@ fun AppBar(isLoading: Boolean, searchText: String, onSearchTextChanged: (String)
                     onClick = {
                         expanded = false
                         onRefresh(false)
-                    })
+                    }
+                )
                 DropdownMenuItem(
                     text = { Text(text = "Clear Cache") },
                     enabled = !isLoading,
                     onClick = {
-                    expanded = false
-                    onRefresh(true)
-                })
+                        expanded = false
+                        onRefresh(true)
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text(text = "Sign Out") },
+                    enabled = !isLoading,
+                    onClick = onSignOut
+                )
             }
         }
     )

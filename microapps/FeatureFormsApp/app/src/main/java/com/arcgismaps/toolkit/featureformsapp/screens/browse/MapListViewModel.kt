@@ -3,8 +3,11 @@ package com.arcgismaps.toolkit.featureformsapp.screens.browse
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arcgismaps.toolkit.featureformsapp.data.PortalSettings
 import com.arcgismaps.toolkit.featureformsapp.domain.PortalItemUseCase
 import com.arcgismaps.toolkit.featureformsapp.domain.PortalItemWithLayer
+import com.arcgismaps.toolkit.featureformsapp.navigation.NavigationRoute
+import com.arcgismaps.toolkit.featureformsapp.navigation.Navigator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -26,7 +29,9 @@ data class MapListUIState(
 @HiltViewModel
 class MapListViewModel @Inject constructor(
     @Suppress("UNUSED_PARAMETER") savedStateHandle: SavedStateHandle,
-    private val portalItemUseCase: PortalItemUseCase
+    private val portalItemUseCase: PortalItemUseCase,
+    private val portalSettings: PortalSettings,
+    private val navigator: Navigator
 ) : ViewModel() {
 
     // State flow to keep track of current loading state
@@ -75,5 +80,13 @@ class MapListViewModel @Inject constructor(
     
     fun filterPortalItems(filterText: String) {
         _searchText.value = filterText
+    }
+
+    fun signOut() {
+        viewModelScope.launch {
+            // portalItemUseCase.deleteAll()
+            portalSettings.signOut()
+            navigator.navigateTo(NavigationRoute.Login)
+        }
     }
 }

@@ -25,12 +25,14 @@ import com.arcgismaps.toolkit.featureformsapp.data.local.ItemCacheDao
 import com.arcgismaps.toolkit.featureformsapp.data.network.ItemRemoteDataSource
 import com.arcgismaps.toolkit.featureformsapp.domain.PortalItemUseCase
 import com.arcgismaps.toolkit.featureformsapp.R
+import com.arcgismaps.toolkit.featureformsapp.navigation.Navigator
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
@@ -91,6 +93,14 @@ class DataModule {
     @Singleton
     @Provides
     internal fun providePortalSettings(
-        @ApplicationContext context: Context
-    ): PortalSettings = PortalSettings(context = context)
+        @ApplicationContext context: Context,
+        @ApplicationScope scope : CoroutineScope,
+    ): PortalSettings = PortalSettings(context = context, scope = scope)
+
+    @Singleton
+    @Provides
+    internal fun provideNavigator(
+        @ApplicationContext context: Context,
+        @ApplicationScope scope : CoroutineScope,
+    ): Navigator = Navigator()
 }
