@@ -24,7 +24,7 @@ import com.arcgismaps.mapping.view.ScreenCoordinate
 /**
  * Used to perform operations on a [MapView].
  *
- * There should be a one-to-one relationship between a [MapViewProxy] and a composable [MapView].
+ * There should be a one-to-one relationship between a MapViewProxy and a composable [MapView]. This relationship is esatblished by passing an instance of MapViewProxy to the composable [MapView] function.
  * Operations can only be performed once the component has entered the composition.
  *
  * @since 200.3.0
