@@ -69,7 +69,7 @@ import kotlinx.coroutines.launch
  * @param viewLabelProperties the [ViewLabelProperties] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param selectionProperties the [SelectionProperties] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param insets the inset values to control the active visible area, instructing the MapView to ignore parts that may be obstructed
- * by overlaid UI elements and affecting the MapView's logical center, the reported visible area and the location display.
+ * by overlaid UI elements and affecting the MapView's logical center, the reported visible area and the location display
  * @param grid represents the display of a coordinate system [Grid] on the composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param backgroundGrid the default color and context grid behind the map surface
  * @param wrapAroundMode the [WrapAroundMode] to specify whether continuous panning across the international date line is enabled

@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -74,14 +75,11 @@ fun MainScreen() {
     }
 
     val focusManager = LocalFocusManager.current
-    MapView(
-        modifier = Modifier.fillMaxSize(),
-        arcGISMap = arcGISMap,
-        insets = insets
-    )
-
     Column(Modifier.fillMaxSize()) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
 
             InsetTextField(
                 value = leftText,
@@ -111,6 +109,7 @@ fun MainScreen() {
                 updateInsets = updateInsets
             )
         }
+
         Button(onClick = {
             insets = PaddingValues(0.0.dp, 0.0.dp, 0.0.dp, 0.0.dp)
             leftText = TextFieldValue("")
@@ -118,9 +117,15 @@ fun MainScreen() {
             topText = TextFieldValue("")
             bottomText = TextFieldValue("")
             focusManager.clearFocus()
-        }, Modifier.fillMaxWidth()) {
+        }, Modifier.fillMaxWidth().padding(horizontal = 40.dp)) {
             Text("Reset Insets")
         }
+
+        MapView(
+            modifier = Modifier.fillMaxSize(),
+            arcGISMap = arcGISMap,
+            insets = insets
+        )
     }
 }
 
