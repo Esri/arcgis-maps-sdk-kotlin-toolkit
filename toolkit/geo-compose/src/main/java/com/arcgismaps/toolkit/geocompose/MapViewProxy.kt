@@ -32,7 +32,7 @@ import com.arcgismaps.mapping.view.ScreenCoordinate
 public class MapViewProxy : GeoViewProxy() {
 
     /**
-     * The [com.arcgismaps.mapping.view.MapView] that this operator will operate on. This should be initialized by the composable [MapView]
+     * The [com.arcgismaps.mapping.view.MapView] that this MapViewProxy will operate on. This should be initialized by the composable [MapView]
      * composable when it enters the composition and set to null when it is disposed by calling [setMapView].
      *
      * @since 200.3.0
