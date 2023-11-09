@@ -102,19 +102,19 @@ private fun RadioButtonField(
                 label
             },
             style = MaterialTheme.typography.bodyMedium,
-            color = colors.labelColor(enabled = editable)
+            color = colors.labelColor
         )
         Column(
             modifier = Modifier
                 .selectableGroup()
                 .border(
                     width = 1.dp,
-                    color = colors.containerBorderColor(enabled = editable),
+                    color = colors.containerBorderColor,
                     shape = RoundedCornerShape(5.dp)
                 )
         ) {
             CompositionLocalProvider(
-                LocalContentColor provides colors.textColor(enabled = editable)
+                LocalContentColor provides colors.textColor
             ) {
                 options.forEach { (_, name) ->
                     RadioButtonRow(
@@ -130,7 +130,7 @@ private fun RadioButtonField(
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodySmall,
-                color = colors.supportingTextColor(enabled = editable)
+                color = colors.supportingTextColor
             )
         }
     }

@@ -152,8 +152,8 @@ internal fun BaseTextField(
     text: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    readOnly: Boolean,
     isEditable: Boolean,
+    readOnly: Boolean = !isEditable,
     label: String,
     placeholder: String,
     singleLine: Boolean,
@@ -189,7 +189,6 @@ internal fun BaseTextField(
                 .focusable(isEditable, interactionSource)
                 .semantics { contentDescription = "outlined text field" },
             readOnly = readOnly,
-            enabled = isEditable,
             label = {
                 Text(
                     text = label,
@@ -247,7 +246,6 @@ private fun BaseTextFieldPreview() {
         BaseTextField(
             text = "",
             onValueChange = {},
-            readOnly = false,
             isEditable = true,
             label = "Title",
             placeholder = "Enter Value",
