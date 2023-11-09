@@ -62,7 +62,7 @@ import kotlinx.coroutines.launch
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable MapView
  * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable MapView
  * @param locationDisplay the [LocationDisplay] used by the composable MapView
- * @param geometryEditor the [GeometryEditor] used by the composable MapView to create and edit geometries by user interaction.
+ * @param geometryEditor the [GeometryEditor] used by the composable MapView to create and edit geometries by user interaction
  * @param mapViewInteractionOptions the [MapViewInteractionOptions] used by this composable MapView
  * @param viewLabelProperties the [ViewLabelProperties] used by the composable MapView
  * @param selectionProperties the [SelectionProperties] used by the composable MapView
