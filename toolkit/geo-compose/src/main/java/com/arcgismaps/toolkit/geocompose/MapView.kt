@@ -65,6 +65,7 @@ import kotlinx.coroutines.launch
  * @param viewLabelProperties the [ViewLabelProperties] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param selectionProperties the [SelectionProperties] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param timeExtent the [TimeExtent] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
+ * @param onTimeExtentChanged lambda invoked when the composable MapView [TimeExtent] is changed
  * @param wrapAroundMode the [WrapAroundMode] to specify whether continuous panning across the international date line is enabled
  * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable MapView
@@ -77,7 +78,6 @@ import kotlinx.coroutines.launch
  * @param onLongPress lambda invoked when a user holds a pointer on the composable MapView
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable MapView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable MapView
- * @param onTimeExtentChanged lambda invoked when the composable MapView [TimeExtent] is changed
  * @param overlay the composable overlays to display on top of the composable MapView. Example, a compass, floorfilter etc.
  * @since 200.3.0
  */
@@ -93,6 +93,7 @@ public fun MapView(
     viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
     selectionProperties: SelectionProperties = SelectionProperties(),
     timeExtent: TimeExtent? = null,
+    onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
     onViewpointChanged: (() -> Unit)? = null,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
@@ -104,7 +105,6 @@ public fun MapView(
     onLongPress: ((LongPressEvent) -> Unit)? = null,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
-    onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
     overlay: @Composable () -> Unit = {}
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
