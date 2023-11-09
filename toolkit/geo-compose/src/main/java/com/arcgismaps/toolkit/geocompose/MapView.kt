@@ -56,17 +56,17 @@ import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
 import kotlinx.coroutines.launch
 
 /**
- * A compose equivalent of the [MapView].
+ * A compose equivalent of the view-based [MapView].
  *
  * @param modifier Modifier to be applied to the composable MapView
- * @param arcGISMap the [ArcGISMap] to be rendered by this composable
- * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable [com.arcgismaps.toolkit.geocompose.MapView]
- * @param locationDisplay the [LocationDisplay] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
- * @param geometryEditor the [GeometryEditor] used by the composable [com.arcgismaps.toolkit.geocompose.MapView] to create and edit geometries by user interaction.
- * @param mapViewInteractionOptions the [MapViewInteractionOptions] used by this composable [com.arcgismaps.toolkit.geocompose.MapView]
- * @param viewLabelProperties the [ViewLabelProperties] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
- * @param selectionProperties the [SelectionProperties] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
- * @param grid represents the display of a coordinate system [Grid] on the composable [com.arcgismaps.toolkit.geocompose.MapView]
+ * @param arcGISMap the [ArcGISMap] to be rendered by this composable MapView
+ * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable MapView
+ * @param locationDisplay the [LocationDisplay] used by the composable MapView
+ * @param geometryEditor the [GeometryEditor] used by the composable MapView to create and edit geometries by user interaction
+ * @param mapViewInteractionOptions the [MapViewInteractionOptions] used by this composable MapView
+ * @param viewLabelProperties the [ViewLabelProperties] used by the composable MapView
+ * @param selectionProperties the [SelectionProperties] used by the composable MapView
+ * @param grid represents the display of a coordinate system [Grid] on the composable MapView
  * @param backgroundGrid the default color and context grid behind the map surface
  * @param wrapAroundMode the [WrapAroundMode] to specify whether continuous panning across the international date line is enabled
  * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
@@ -168,7 +168,7 @@ public fun MapView(
 }
 
 /**
- * Sets up the callbacks for all the MapView events.
+ * Sets up the callbacks for all the view-based [mapView] events.
  */
 @Composable
 private fun MapViewEventHandler(
@@ -206,9 +206,7 @@ private fun MapViewEventHandler(
     LaunchedEffect(Unit) {
         launch {
             mapView.viewpointChanged.collect {
-                currentViewPointChanged?.let {
-                    it()
-                }
+                currentViewPointChanged?.invoke()
             }
         }
         launch {
@@ -223,86 +221,64 @@ private fun MapViewEventHandler(
         }
         launch(Dispatchers.Main.immediate) {
             mapView.isInteracting.collect { isInteracting ->
-                currentOnInteractingChanged?.let {
-                    it(isInteracting)
-                }
+                currentOnInteractingChanged?.invoke(isInteracting)
             }
         }
         launch(Dispatchers.Main.immediate) {
             mapView.onRotate.collect { rotationChangeEvent ->
-                currentOnRotate?.let {
-                    it(rotationChangeEvent)
-                }
+                currentOnRotate?.invoke(rotationChangeEvent)
             }
         }
         launch(Dispatchers.Main.immediate) {
             mapView.onScale.collect { scaleChangeEvent ->
-                currentOnScale?.let {
-                    it(scaleChangeEvent)
-                }
+                currentOnScale?.invoke(scaleChangeEvent)
             }
         }
         launch(Dispatchers.Main.immediate) {
             mapView.onUp.collect { upEvent ->
-                currentOnUp?.let {
-                    it(upEvent)
-                }
+                currentOnUp?.invoke(upEvent)
             }
         }
         launch(Dispatchers.Main.immediate) {
             mapView.onDown.collect { downEvent ->
-                currentOnDown?.let {
-                    it(downEvent)
-                }
+                currentOnDown?.invoke(downEvent)
             }
         }
         launch(Dispatchers.Main.immediate) {
             mapView.onSingleTapConfirmed.collect { singleTapConfirmedEvent ->
-                currentSingleTapConfirmed?.let {
-                    it(singleTapConfirmedEvent)
-                }
+                currentSingleTapConfirmed?.invoke(singleTapConfirmedEvent)
             }
         }
         launch(Dispatchers.Main.immediate) {
             mapView.onDoubleTap.collect { doubleTapEvent ->
-                currentOnDoubleTap?.let {
-                    it(doubleTapEvent)
-                }
+                currentOnDoubleTap?.invoke(doubleTapEvent)
             }
         }
         launch(Dispatchers.Main.immediate) {
             mapView.onLongPress.collect { longPressEvent ->
-                currentOnLongPress?.let {
-                    it(longPressEvent)
-                }
+                currentOnLongPress?.invoke(longPressEvent)
             }
         }
         launch(Dispatchers.Main.immediate) {
             mapView.onTwoPointerTap.collect { twoPointerTapEvent ->
-                currentOnTwoPointerTap?.let {
-                    it(twoPointerTapEvent)
-                }
+                currentOnTwoPointerTap?.invoke(twoPointerTapEvent)
             }
         }
         launch(Dispatchers.Main.immediate) {
             mapView.onPan.collect { panChangeEvent ->
-                currentOnPan?.let {
-                    it(panChangeEvent)
-                }
+                currentOnPan?.invoke(panChangeEvent)
             }
         }
         launch {
             mapView.drawStatus.collect { drawStatus ->
-                currentOnDrawStatusChanged?.let {
-                    it(drawStatus)
-                }
+                currentOnDrawStatusChanged?.invoke(drawStatus)
             }
         }
     }
 }
 
 /**
- * Update the [mapView]'s graphicsOverlays property to reflect changes made to the
+ * Update the view-based [mapView]'s graphicsOverlays property to reflect changes made to the
  * [graphicsOverlayCollection] based on the type of [GraphicsOverlayCollection.ChangedEvent]
  */
 @Composable
