@@ -69,6 +69,7 @@ import kotlinx.coroutines.launch
  * @param grid represents the display of a coordinate system [Grid] on the composable MapView
  * @param backgroundGrid the default color and context grid behind the map surface
  * @param wrapAroundMode the [WrapAroundMode] to specify whether continuous panning across the international date line is enabled
+ * @param attributionState specifies the attribution bar's visibility, text changed and layout changed events
  * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable MapView
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable MapView
@@ -90,11 +91,12 @@ public fun MapView(
     arcGISMap: ArcGISMap? = null,
     graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
-    wrapAroundMode: WrapAroundMode = WrapAroundMode.EnabledWhenSupported,
     geometryEditor: GeometryEditor? = null,
     mapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptions(),
     viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
     selectionProperties: SelectionProperties = SelectionProperties(),
+    wrapAroundMode: WrapAroundMode = WrapAroundMode.EnabledWhenSupported,
+    attributionState: AttributionState = AttributionState(),
     grid: Grid? = null,
     backgroundGrid: BackgroundGrid = BackgroundGrid(),
     onViewpointChanged: (() -> Unit)? = null,
@@ -142,6 +144,8 @@ public fun MapView(
         }
     }
 
+    AttributionStateHandler(mapView, attributionState)
+
     MapViewEventHandler(
         mapView,
         onViewpointChanged,
@@ -159,6 +163,27 @@ public fun MapView(
     )
 
     GraphicsOverlaysUpdater(graphicsOverlays, mapView)
+}
+
+/**
+ * Sets up the attribution bar's property and events.
+ */
+@Composable
+private fun AttributionStateHandler(mapView: MapView, attributionState: AttributionState) {
+    LaunchedEffect(attributionState) {
+        // isAttributionBarVisible does not take effect if applied in the AndroidView update callback
+        mapView.isAttributionBarVisible = attributionState.isAttributionBarVisible
+        launch {
+            mapView.attributionText.collect {
+                attributionState.onAttributionTextChanged?.invoke(it)
+            }
+        }
+        launch {
+            mapView.onAttributionBarLayoutChanged.collect { attributionBarLayoutChangedEvent ->
+                attributionState.onAttributionBarLayoutChanged?.invoke(attributionBarLayoutChangedEvent)
+            }
+        }
+    }
 }
 
 /**
