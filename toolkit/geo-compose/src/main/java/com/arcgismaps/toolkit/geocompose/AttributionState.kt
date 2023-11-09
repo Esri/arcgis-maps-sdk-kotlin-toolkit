@@ -20,7 +20,7 @@ import androidx.compose.runtime.Stable
 import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
 
 /**
- * Data class for attribution bar related properties/events on the [com.arcgismaps.toolkit.geocompose.MapView].
+ * State holder for attribution bar related properties/events on the [com.arcgismaps.toolkit.geocompose.MapView].
  *
  * @since 200.3.0
  */
