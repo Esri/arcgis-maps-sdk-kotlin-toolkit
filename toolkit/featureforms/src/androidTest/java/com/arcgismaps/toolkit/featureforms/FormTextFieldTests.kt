@@ -45,6 +45,7 @@ import com.arcgismaps.toolkit.featureforms.components.text.FormTextFieldState
 import com.arcgismaps.toolkit.featureforms.components.text.TextFieldProperties
 import com.arcgismaps.toolkit.featureforms.utils.editValue
 import com.arcgismaps.toolkit.featureforms.utils.fieldType
+import com.arcgismaps.toolkit.featureforms.utils.valueFlow
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.fail
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -93,14 +94,15 @@ class FormTextFieldTests {
                 label = field.label,
                 placeholder = field.hint,
                 description = field.description,
-                value = field.value,
+                value = field.valueFlow(scope),
                 editable = field.isEditable,
                 required = field.isRequired,
                 singleLine = field.input is TextBoxFormInput,
                 domain = field.domain,
                 fieldType = featureForm.fieldType(field),
                 minLength = (field.input as TextBoxFormInput).minLength.toInt(),
-                maxLength = (field.input as TextBoxFormInput).maxLength.toInt()
+                maxLength = (field.input as TextBoxFormInput).maxLength.toInt(),
+                visible = field.isVisible
             )
             FormTextField(
                 state = FormTextFieldState(

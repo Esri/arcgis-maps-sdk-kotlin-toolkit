@@ -37,6 +37,7 @@ import com.arcgismaps.toolkit.featureforms.components.text.FormTextFieldState
 import com.arcgismaps.toolkit.featureforms.components.text.TextFieldProperties
 import com.arcgismaps.toolkit.featureforms.utils.editValue
 import com.arcgismaps.toolkit.featureforms.utils.fieldType
+import com.arcgismaps.toolkit.featureforms.utils.valueFlow
 import junit.framework.TestCase
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
@@ -81,14 +82,15 @@ class FormTextFieldRangeNumericTests {
                 label = integerField.label,
                 placeholder = integerField.hint,
                 description = integerField.description,
-                value = integerField.value,
+                value = integerField.valueFlow(scope),
                 editable = integerField.isEditable,
                 required = integerField.isRequired,
                 singleLine = integerField.input is TextBoxFormInput,
                 domain = integerField.domain,
                 fieldType = featureForm.fieldType(integerField),
                 minLength = (integerField.input as TextBoxFormInput).minLength.toInt(),
-                maxLength = (integerField.input as TextBoxFormInput).maxLength.toInt()
+                maxLength = (integerField.input as TextBoxFormInput).maxLength.toInt(),
+                visible = integerField.isVisible
             )
             FormTextField(
                 state = FormTextFieldState(
