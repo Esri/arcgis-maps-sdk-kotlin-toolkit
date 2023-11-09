@@ -158,7 +158,9 @@ fun LocationDemo() {
                 contentAlignment = Alignment.BottomStart,
             ) {
                 if (floorFilterState != null) {
+
                     FloorFilter(floorFilterState = floorFilterState)
+
                 }
             }
         }
