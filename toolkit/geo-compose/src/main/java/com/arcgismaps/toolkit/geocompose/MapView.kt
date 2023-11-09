@@ -69,12 +69,12 @@ import kotlinx.coroutines.launch
  * @param grid represents the display of a coordinate system [Grid] on the composable MapView
  * @param backgroundGrid the default color and context grid behind the map surface
  * @param wrapAroundMode the [WrapAroundMode] to specify whether continuous panning across the international date line is enabled
- * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
- * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable MapView
- * @param onRotate lambda invoked when a user performs a rotation gesture on the composable MapView
+ * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changedMapView
  * @param onMapRotationChanged lambda invoked with the composable MapView's current rotation
- * @param onScale lambda invoked when a user performs a pinch gesture on the composable MapView
  * @param onMapScaleChanged lambda invoked with the composable MapView's current scale
+ * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable MapView
+ * @param onRotate lambda invoked when a user performs a rotation gesture on the composable
+ * @param onScale lambda invoked when a user performs a pinch gesture on the composable MapView
  * @param onUp lambda invoked when the user removes all their pointers from the composable MapView
  * @param onDown lambda invoked when the user first presses on the composable MapView
  * @param onSingleTapConfirmed lambda invoked when the user taps once on the composable MapView
@@ -100,11 +100,11 @@ public fun MapView(
     grid: Grid? = null,
     backgroundGrid: BackgroundGrid = BackgroundGrid(),
     onViewpointChanged: (() -> Unit)? = null,
+    onMapRotationChanged: ((Double) -> Unit)? = null,
+    onMapScaleChanged: ((Double) -> Unit)? = null,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
-    onMapRotationChanged: ((Double) -> Unit)? = null,
     onScale: ((ScaleChangeEvent) -> Unit)? = null,
-    onMapScaleChanged: ((Double) -> Unit)? = null,
     onUp: ((UpEvent) -> Unit)? = null,
     onDown: ((DownEvent) -> Unit)? = null,
     onSingleTapConfirmed: ((SingleTapConfirmedEvent) -> Unit)? = null,
@@ -149,11 +149,11 @@ public fun MapView(
     MapViewEventHandler(
         mapView,
         onViewpointChanged,
+        onMapRotationChanged,
+        onMapScaleChanged,
         onInteractingChanged,
         onRotate,
-        onMapRotationChanged,
         onScale,
-        onMapScaleChanged,
         onUp,
         onDown,
         onSingleTapConfirmed,
@@ -174,11 +174,11 @@ public fun MapView(
 private fun MapViewEventHandler(
     mapView: MapView,
     onViewpointChanged: (() -> Unit)?,
+    onMapRotationChanged: ((Double) -> Unit)?,
+    onMapScaleChanged: ((Double) -> Unit)?,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)?,
     onRotate: ((RotationChangeEvent) -> Unit)?,
-    onMapRotationChanged: ((Double) -> Unit)?,
     onScale: ((ScaleChangeEvent) -> Unit)?,
-    onMapScaleChanged: ((Double) -> Unit)?,
     onUp: ((UpEvent) -> Unit)?,
     onDown: ((DownEvent) -> Unit)?,
     onSingleTapConfirmed: ((SingleTapConfirmedEvent) -> Unit)?,
@@ -189,11 +189,11 @@ private fun MapViewEventHandler(
     onDrawStatusChanged: ((DrawStatus) -> Unit)?
 ) {
     val currentViewPointChanged by rememberUpdatedState(onViewpointChanged)
+    val currentOnMapRotationChanged by rememberUpdatedState(onMapRotationChanged)
+    val currentOnMapScaleChanged by rememberUpdatedState(onMapScaleChanged)
     val currentOnInteractingChanged by rememberUpdatedState(onInteractingChanged)
     val currentOnRotate by rememberUpdatedState(onRotate)
-    val currentOnMapRotationChanged by rememberUpdatedState(onMapRotationChanged)
     val currentOnScale by rememberUpdatedState(onScale)
-    val currentOnMapScaleChanged by rememberUpdatedState(onMapScaleChanged)
     val currentOnUp by rememberUpdatedState(onUp)
     val currentOnDown by rememberUpdatedState(onDown)
     val currentSingleTapConfirmed by rememberUpdatedState(onSingleTapConfirmed)
