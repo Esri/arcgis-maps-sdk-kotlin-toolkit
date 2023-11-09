@@ -70,7 +70,7 @@ import kotlinx.coroutines.launch
  * @param grid represents the display of a coordinate system [Grid] on the composable MapView
  * @param backgroundGrid the default color and context grid behind the map surface
  * @param wrapAroundMode the [WrapAroundMode] to specify whether continuous panning across the international date line is enabled
- * @param timeExtent the [TimeExtent] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
+ * @param timeExtent the [TimeExtent] used by the composable MapView
  * @param onTimeExtentChanged lambda invoked when the composable MapView [TimeExtent] is changed
  * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable MapView
