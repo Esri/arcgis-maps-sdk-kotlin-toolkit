@@ -56,17 +56,17 @@ import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
 import kotlinx.coroutines.launch
 
 /**
- * A compose equivalent of the [MapView].
+ * A compose equivalent of the view-based [MapView].
  *
  * @param modifier Modifier to be applied to the composable MapView
- * @param arcGISMap the [ArcGISMap] to be rendered by this composable
- * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable [com.arcgismaps.toolkit.geocompose.MapView]
- * @param locationDisplay the [LocationDisplay] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
- * @param geometryEditor the [GeometryEditor] used by the composable [com.arcgismaps.toolkit.geocompose.MapView] to create and edit geometries by user interaction.
- * @param mapViewInteractionOptions the [MapViewInteractionOptions] used by this composable [com.arcgismaps.toolkit.geocompose.MapView]
- * @param viewLabelProperties the [ViewLabelProperties] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
- * @param selectionProperties the [SelectionProperties] used by the composable [com.arcgismaps.toolkit.geocompose.MapView]
- * @param grid represents the display of a coordinate system [Grid] on the composable [com.arcgismaps.toolkit.geocompose.MapView]
+ * @param arcGISMap the [ArcGISMap] to be rendered by this composable MapView
+ * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable MapView
+ * @param locationDisplay the [LocationDisplay] used by the composable MapView
+ * @param geometryEditor the [GeometryEditor] used by the composable MapView to create and edit geometries by user interaction
+ * @param mapViewInteractionOptions the [MapViewInteractionOptions] used by this composable MapView
+ * @param viewLabelProperties the [ViewLabelProperties] used by the composable MapView
+ * @param selectionProperties the [SelectionProperties] used by the composable MapView
+ * @param grid represents the display of a coordinate system [Grid] on the composable MapView
  * @param backgroundGrid the default color and context grid behind the map surface
  * @param wrapAroundMode the [WrapAroundMode] to specify whether continuous panning across the international date line is enabled
  * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
@@ -162,7 +162,7 @@ public fun MapView(
 }
 
 /**
- * Sets up the callbacks for all the MapView events.
+ * Sets up the callbacks for all the view-based [mapView] events.
  */
 @Composable
 private fun MapViewEventHandler(
@@ -258,7 +258,7 @@ private fun MapViewEventHandler(
 }
 
 /**
- * Update the [mapView]'s graphicsOverlays property to reflect changes made to the
+ * Update the view-based [mapView]'s graphicsOverlays property to reflect changes made to the
  * [graphicsOverlayCollection] based on the type of [GraphicsOverlayCollection.ChangedEvent]
  */
 @Composable
