@@ -196,86 +196,62 @@ private fun MapViewEventHandler(
     LaunchedEffect(Unit) {
         launch {
             mapView.viewpointChanged.collect {
-                currentViewPointChanged?.let {
-                    it()
-                }
+                currentViewPointChanged?.invoke()
             }
         }
         launch(Dispatchers.Main.immediate) {
             mapView.isInteracting.collect { isInteracting ->
-                currentOnInteractingChanged?.let {
-                    it(isInteracting)
-                }
+                currentOnInteractingChanged?.invoke(isInteracting)
             }
         }
         launch(Dispatchers.Main.immediate) {
             mapView.onRotate.collect { rotationChangeEvent ->
-                currentOnRotate?.let {
-                    it(rotationChangeEvent)
-                }
+                currentOnRotate?.invoke(rotationChangeEvent)
             }
         }
         launch(Dispatchers.Main.immediate) {
             mapView.onScale.collect { scaleChangeEvent ->
-                currentOnScale?.let {
-                    it(scaleChangeEvent)
-                }
+                currentOnScale?.invoke(scaleChangeEvent)
             }
         }
         launch(Dispatchers.Main.immediate) {
             mapView.onUp.collect { upEvent ->
-                currentOnUp?.let {
-                    it(upEvent)
-                }
+                currentOnUp?.invoke(upEvent)
             }
         }
         launch(Dispatchers.Main.immediate) {
             mapView.onDown.collect { downEvent ->
-                currentOnDown?.let {
-                    it(downEvent)
-                }
+                currentOnDown?.invoke(downEvent)
             }
         }
         launch(Dispatchers.Main.immediate) {
             mapView.onSingleTapConfirmed.collect { singleTapConfirmedEvent ->
-                currentSingleTapConfirmed?.let {
-                    it(singleTapConfirmedEvent)
-                }
+                currentSingleTapConfirmed?.invoke(singleTapConfirmedEvent)
             }
         }
         launch(Dispatchers.Main.immediate) {
             mapView.onDoubleTap.collect { doubleTapEvent ->
-                currentOnDoubleTap?.let {
-                    it(doubleTapEvent)
-                }
+                currentOnDoubleTap?.invoke(doubleTapEvent)
             }
         }
         launch(Dispatchers.Main.immediate) {
             mapView.onLongPress.collect { longPressEvent ->
-                currentOnLongPress?.let {
-                    it(longPressEvent)
-                }
+                currentOnLongPress?.invoke(longPressEvent)
             }
         }
         launch(Dispatchers.Main.immediate) {
             mapView.onTwoPointerTap.collect { twoPointerTapEvent ->
-                currentOnTwoPointerTap?.let {
-                    it(twoPointerTapEvent)
-                }
+                currentOnTwoPointerTap?.invoke(twoPointerTapEvent)
             }
         }
         launch(Dispatchers.Main.immediate) {
             mapView.onPan.collect { panChangeEvent ->
-                currentOnPan?.let {
-                    it(panChangeEvent)
-                }
+                currentOnPan?.invoke(panChangeEvent)
             }
         }
         launch {
             mapView.drawStatus.collect { drawStatus ->
-                currentOnDrawStatusChanged?.let {
-                    it(drawStatus)
-                }
+                currentOnDrawStatusChanged?.invoke(drawStatus)
             }
         }
     }
