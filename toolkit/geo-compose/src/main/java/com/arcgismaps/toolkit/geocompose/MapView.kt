@@ -70,6 +70,7 @@ import kotlinx.coroutines.launch
  * @param backgroundGrid the default color and context grid behind the map surface
  * @param wrapAroundMode the [WrapAroundMode] to specify whether continuous panning across the international date line is enabled
  * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
+ * @param onNavigationChanged lambda invoked when the navigation status of the composable MapView has changed
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable MapView
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable MapView
  * @param onScale lambda invoked when a user performs a pinch gesture on the composable MapView
@@ -98,8 +99,8 @@ public fun MapView(
     grid: Grid? = null,
     backgroundGrid: BackgroundGrid = BackgroundGrid(),
     onViewpointChanged: (() -> Unit)? = null,
-    onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
+    onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
     onScale: ((ScaleChangeEvent) -> Unit)? = null,
     onUp: ((UpEvent) -> Unit)? = null,
@@ -146,8 +147,8 @@ public fun MapView(
     MapViewEventHandler(
         mapView,
         onViewpointChanged,
-        onInteractingChanged,
         onNavigationChanged,
+        onInteractingChanged,
         onRotate,
         onScale,
         onUp,
@@ -170,8 +171,8 @@ public fun MapView(
 private fun MapViewEventHandler(
     mapView: MapView,
     onViewpointChanged: (() -> Unit)?,
-    onInteractingChanged: ((isInteracting: Boolean) -> Unit)?,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)?,
+    onInteractingChanged: ((isInteracting: Boolean) -> Unit)?,
     onRotate: ((RotationChangeEvent) -> Unit)?,
     onScale: ((ScaleChangeEvent) -> Unit)?,
     onUp: ((UpEvent) -> Unit)?,
@@ -184,8 +185,8 @@ private fun MapViewEventHandler(
     onDrawStatusChanged: ((DrawStatus) -> Unit)?
 ) {
     val currentViewPointChanged by rememberUpdatedState(onViewpointChanged)
-    val currentOnInteractingChanged by rememberUpdatedState(onInteractingChanged)
     val currentOnNavigationChanged by rememberUpdatedState(onNavigationChanged)
+    val currentOnInteractingChanged by rememberUpdatedState(onInteractingChanged)
     val currentOnRotate by rememberUpdatedState(onRotate)
     val currentOnScale by rememberUpdatedState(onScale)
     val currentOnUp by rememberUpdatedState(onUp)
@@ -205,16 +206,16 @@ private fun MapViewEventHandler(
                 }
             }
         }
+        launch {
+            mapView.navigationChanged.collect {
+                currentOnNavigationChanged?.invoke(it)
+            }
+        }
         launch(Dispatchers.Main.immediate) {
             mapView.isInteracting.collect { isInteracting ->
                 currentOnInteractingChanged?.let {
                     it(isInteracting)
                 }
-            }
-        }
-        launch(Dispatchers.Main.immediate) {
-            mapView.navigationChanged.collect {
-                currentOnNavigationChanged?.invoke(it)
             }
         }
         launch(Dispatchers.Main.immediate) {
