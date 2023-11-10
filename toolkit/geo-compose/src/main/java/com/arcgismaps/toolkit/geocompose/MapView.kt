@@ -30,6 +30,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.view.BackgroundGrid
 import com.arcgismaps.mapping.view.DoubleTapEvent
@@ -54,7 +55,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
- * A compose equivalent of the [MapView].
+ * A compose equivalent of the view-based [MapView].
  *
  * @param modifier Modifier to be applied to the composable MapView
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable
@@ -68,7 +69,9 @@ import kotlinx.coroutines.launch
  * @param grid represents the display of a coordinate system [Grid] on the composable [com.arcgismaps.toolkit.geocompose.MapView]
  * @param backgroundGrid the default color and context grid behind the map surface
  * @param wrapAroundMode the [WrapAroundMode] to specify whether continuous panning across the international date line is enabled
+ * @param attributionState specifies the attribution bar's visibility, text changed and layout changed events
  * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
+ * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the composable MapView has changed
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable MapView
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable MapView
  * @param onScale lambda invoked when a user performs a pinch gesture on the composable MapView
@@ -88,15 +91,17 @@ public fun MapView(
     arcGISMap: ArcGISMap? = null,
     graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
-    wrapAroundMode: WrapAroundMode = WrapAroundMode.EnabledWhenSupported,
     geometryEditor: GeometryEditor? = null,
     mapViewProxy: MapViewProxy? = null,
     mapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptions(),
     viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
     selectionProperties: SelectionProperties = SelectionProperties(),
+    wrapAroundMode: WrapAroundMode = WrapAroundMode.EnabledWhenSupported,
+    attributionState: AttributionState = AttributionState(),
     grid: Grid? = null,
     backgroundGrid: BackgroundGrid = BackgroundGrid(),
     onViewpointChanged: (() -> Unit)? = null,
+    onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
     onScale: ((ScaleChangeEvent) -> Unit)? = null,
@@ -143,9 +148,12 @@ public fun MapView(
         }
     }
 
+    AttributionStateHandler(mapView, attributionState)
+
     MapViewEventHandler(
         mapView,
         onViewpointChanged,
+        onSpatialReferenceChanged,
         onInteractingChanged,
         onRotate,
         onScale,
@@ -163,12 +171,34 @@ public fun MapView(
 }
 
 /**
- * Sets up the callbacks for all the MapView events.
+ * Sets up the attribution bar's property and events.
+ */
+@Composable
+private fun AttributionStateHandler(mapView: MapView, attributionState: AttributionState) {
+    LaunchedEffect(attributionState) {
+        // isAttributionBarVisible does not take effect if applied in the AndroidView update callback
+        mapView.isAttributionBarVisible = attributionState.isAttributionBarVisible
+        launch {
+            mapView.attributionText.collect {
+                attributionState.onAttributionTextChanged?.invoke(it)
+            }
+        }
+        launch {
+            mapView.onAttributionBarLayoutChanged.collect { attributionBarLayoutChangedEvent ->
+                attributionState.onAttributionBarLayoutChanged?.invoke(attributionBarLayoutChangedEvent)
+            }
+        }
+    }
+}
+
+/**
+ * Sets up the callbacks for all the view-based [mapView] events.
  */
 @Composable
 private fun MapViewEventHandler(
     mapView: MapView,
     onViewpointChanged: (() -> Unit)?,
+    onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)?,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)?,
     onRotate: ((RotationChangeEvent) -> Unit)?,
     onScale: ((ScaleChangeEvent) -> Unit)?,
@@ -182,6 +212,7 @@ private fun MapViewEventHandler(
     onDrawStatusChanged: ((DrawStatus) -> Unit)?
 ) {
     val currentViewPointChanged by rememberUpdatedState(onViewpointChanged)
+    val currentOnSpatialReferenceChanged by rememberUpdatedState(onSpatialReferenceChanged)
     val currentOnInteractingChanged by rememberUpdatedState(onInteractingChanged)
     val currentOnRotate by rememberUpdatedState(onRotate)
     val currentOnScale by rememberUpdatedState(onScale)
@@ -197,93 +228,74 @@ private fun MapViewEventHandler(
     LaunchedEffect(Unit) {
         launch {
             mapView.viewpointChanged.collect {
-                currentViewPointChanged?.let {
-                    it()
-                }
+                currentViewPointChanged?.invoke()
+            }
+        }
+        launch {
+            mapView.spatialReference.collect { spatialReference ->
+                currentOnSpatialReferenceChanged?.invoke(spatialReference)
             }
         }
         launch(Dispatchers.Main.immediate) {
             mapView.isInteracting.collect { isInteracting ->
-                currentOnInteractingChanged?.let {
-                    it(isInteracting)
-                }
+                currentOnInteractingChanged?.invoke(isInteracting)
             }
         }
         launch(Dispatchers.Main.immediate) {
             mapView.onRotate.collect { rotationChangeEvent ->
-                currentOnRotate?.let {
-                    it(rotationChangeEvent)
-                }
+                currentOnRotate?.invoke(rotationChangeEvent)
             }
         }
         launch(Dispatchers.Main.immediate) {
             mapView.onScale.collect { scaleChangeEvent ->
-                currentOnScale?.let {
-                    it(scaleChangeEvent)
-                }
+                currentOnScale?.invoke(scaleChangeEvent)
             }
         }
         launch(Dispatchers.Main.immediate) {
             mapView.onUp.collect { upEvent ->
-                currentOnUp?.let {
-                    it(upEvent)
-                }
+                currentOnUp?.invoke(upEvent)
             }
         }
         launch(Dispatchers.Main.immediate) {
             mapView.onDown.collect { downEvent ->
-                currentOnDown?.let {
-                    it(downEvent)
-                }
+                currentOnDown?.invoke(downEvent)
             }
         }
         launch(Dispatchers.Main.immediate) {
             mapView.onSingleTapConfirmed.collect { singleTapConfirmedEvent ->
-                currentSingleTapConfirmed?.let {
-                    it(singleTapConfirmedEvent)
-                }
+                currentSingleTapConfirmed?.invoke(singleTapConfirmedEvent)
             }
         }
         launch(Dispatchers.Main.immediate) {
             mapView.onDoubleTap.collect { doubleTapEvent ->
-                currentOnDoubleTap?.let {
-                    it(doubleTapEvent)
-                }
+                currentOnDoubleTap?.invoke(doubleTapEvent)
             }
         }
         launch(Dispatchers.Main.immediate) {
             mapView.onLongPress.collect { longPressEvent ->
-                currentOnLongPress?.let {
-                    it(longPressEvent)
-                }
+                currentOnLongPress?.invoke(longPressEvent)
             }
         }
         launch(Dispatchers.Main.immediate) {
             mapView.onTwoPointerTap.collect { twoPointerTapEvent ->
-                currentOnTwoPointerTap?.let {
-                    it(twoPointerTapEvent)
-                }
+                currentOnTwoPointerTap?.invoke(twoPointerTapEvent)
             }
         }
         launch(Dispatchers.Main.immediate) {
             mapView.onPan.collect { panChangeEvent ->
-                currentOnPan?.let {
-                    it(panChangeEvent)
-                }
+                currentOnPan?.invoke(panChangeEvent)
             }
         }
         launch {
             mapView.drawStatus.collect { drawStatus ->
-                currentOnDrawStatusChanged?.let {
-                    it(drawStatus)
-                }
+                currentOnDrawStatusChanged?.invoke(drawStatus)
             }
         }
     }
 }
 
 /**
- * Update the [mapView]'s graphicsOverlays property to reflect changes made to the
+ * Update the view-based [mapView]'s graphicsOverlays property to reflect changes made to the
  * [graphicsOverlayCollection] based on the type of [GraphicsOverlayCollection.ChangedEvent]
  */
 @Composable
