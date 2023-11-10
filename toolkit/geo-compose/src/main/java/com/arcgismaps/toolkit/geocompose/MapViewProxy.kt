@@ -24,16 +24,20 @@ import com.arcgismaps.mapping.view.ScreenCoordinate
 /**
  * Used to perform operations on a [MapView].
  *
- * There should be a one-to-one relationship between a MapViewProxy and a composable [MapView]. This relationship is established by passing an instance of MapViewProxy to the composable [MapView] function.
- * Operations can only be performed once the associated composable MapView has entered the composition. Operations performed when the associated composable MapView is not in the composition will fail gracefully, i.e. won't throw exceptions but won't return a successful result.
+ * There should be a one-to-one relationship between a MapViewProxy and a composable [MapView]. This
+ * relationship is established by passing an instance of MapViewProxy to the composable [MapView] function.
+ * Operations can only be performed once the associated composable MapView has entered the composition.
+ * Operations performed when the associated composable MapView is not in the composition will fail gracefully,
+ * i.e. won't throw exceptions but won't return a successful result.
  *
  * @since 200.3.0
  */
 public class MapViewProxy : GeoViewProxy() {
 
     /**
-     * The [com.arcgismaps.mapping.view.MapView] that this MapViewProxy will operate on. This should be initialized by the composable [MapView]
-     * composable when it enters the composition and set to null when it is disposed by calling [setMapView].
+     * The [com.arcgismaps.mapping.view.MapView] that this MapViewProxy will operate on. This should
+     * be initialized by the composable [MapView] when it enters the composition and set to null when
+     * it is disposed by calling [setMapView].
      *
      * @since 200.3.0
      */
@@ -52,7 +56,8 @@ public class MapViewProxy : GeoViewProxy() {
     /**
      * Converts a screen coordinate (in pixels) to a coordinate within the mapview's spatial reference.
      *
-     * May return null in some circumstances, such as if the mapview's spatial reference has not been determined yet.
+     * May return null in some circumstances, such as if the mapview's spatial reference has not been
+     * determined yet.
      *
      * @param screenCoordinate the screen point, in pixels
      * @return a [Point] object, or null if the location could not be determined or an error occurs
