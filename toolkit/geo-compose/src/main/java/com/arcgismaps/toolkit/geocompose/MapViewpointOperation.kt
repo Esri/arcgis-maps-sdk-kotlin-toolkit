@@ -30,7 +30,7 @@ public sealed class MapViewpointOperation {
         public val scale: Double? = null
     ): MapViewpointOperation()
 
-    public class Bounding(
+    public class SetBoundingGeometry(
         public val boundingGeometry: Geometry,
         public val paddingInDips: Double? = null
     ): MapViewpointOperation()
@@ -78,7 +78,7 @@ internal suspend fun MapViewpointOperation.Center.execute(mapView: MapView) =
         throw e
     }
 
-internal suspend fun MapViewpointOperation.Bounding.execute(mapView: MapView) =
+internal suspend fun MapViewpointOperation.SetBoundingGeometry.execute(mapView: MapView) =
     try {
         val result = if (this.paddingInDips != null) {
             mapView.setViewpointGeometry(this.boundingGeometry, this.paddingInDips)
