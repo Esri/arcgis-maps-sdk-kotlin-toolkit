@@ -18,10 +18,12 @@
 
 package com.arcgismaps.toolkit.mapviewsetviewpointapp.screens
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,10 +35,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.Point
@@ -55,6 +59,12 @@ fun MainScreen() {
     val arcGISMap by remember { mutableStateOf(ArcGISMap(BasemapStyle.ArcGISStreets)) }
     var mapViewpointOperation: MapViewpointOperation? by remember {
         mutableStateOf(null)
+    }
+    var showProgressIndicator by remember { mutableStateOf(false) }
+    LaunchedEffect(key1 = mapViewpointOperation) {
+        showProgressIndicator = true
+        mapViewpointOperation?.await()
+        showProgressIndicator = false
     }
     Scaffold(
         topBar = {
@@ -82,13 +92,21 @@ fun MainScreen() {
             )
         },
     ) { innerPadding ->
-        MapView(
+        Box(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize(),
-            arcGISMap = arcGISMap,
-            viewpointOperation = mapViewpointOperation
-        )
+            contentAlignment = Alignment.Center
+        ) {
+            MapView(
+                Modifier.fillMaxSize(),
+                arcGISMap = arcGISMap,
+                viewpointOperation = mapViewpointOperation
+            )
+            if (showProgressIndicator) {
+                CircularProgressIndicator()
+            }
+        }
     }
 }
 
