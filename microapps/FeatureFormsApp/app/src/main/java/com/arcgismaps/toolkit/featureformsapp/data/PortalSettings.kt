@@ -19,17 +19,14 @@ package com.arcgismaps.toolkit.featureformsapp.data
 import android.content.Context
 import android.content.SharedPreferences
 import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.httpcore.authentication.ArcGISCredentialStore
 import com.arcgismaps.toolkit.authentication.signOut
 import com.arcgismaps.toolkit.featureformsapp.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class PortalSettings(
-    context: Context,
-    scope: CoroutineScope,
+    context: Context
 ) {
     private val preferences: SharedPreferences =
         context.getSharedPreferences("portal_settings", Context.MODE_PRIVATE)
@@ -37,12 +34,6 @@ class PortalSettings(
     val defaultPortalUrl: String = context.getString(R.string.agol_portal_url)
 
     private val urlKey = "url"
-
-    init {
-        scope.launch {
-
-        }
-    }
 
     fun getPortalUrl(): String {
         return preferences.getString(urlKey, "") ?: ""

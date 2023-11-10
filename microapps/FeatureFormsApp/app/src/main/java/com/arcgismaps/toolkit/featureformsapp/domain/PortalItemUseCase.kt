@@ -53,7 +53,8 @@ class PortalItemUseCase(
 
     suspend fun deleteAll() = portalItemRepository.deleteAll()
 
-    suspend fun refresh(forceUpdate: Boolean) = portalItemRepository.refresh(forceUpdate)
+    suspend fun refresh(portalUri: String, forceUpdate: Boolean) =
+        portalItemRepository.refresh(portalUri, forceUpdate)
 
     suspend fun isEmpty(): Boolean = portalItemRepository.getItemCount() == 0
 

@@ -9,5 +9,5 @@ data class ItemData(val url: String)
  * The API to use to get the items
  */
 interface ItemApi {
-    suspend fun fetchItems(): List<ItemData>
+    suspend fun fetchItems(portalUri: String): List<ItemData>
 }

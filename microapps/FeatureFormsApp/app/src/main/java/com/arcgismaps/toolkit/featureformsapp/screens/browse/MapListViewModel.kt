@@ -3,6 +3,7 @@ package com.arcgismaps.toolkit.featureformsapp.screens.browse
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arcgismaps.toolkit.authentication.AuthenticatorState
 import com.arcgismaps.toolkit.featureformsapp.data.PortalSettings
 import com.arcgismaps.toolkit.featureformsapp.domain.PortalItemUseCase
 import com.arcgismaps.toolkit.featureformsapp.domain.PortalItemWithLayer
@@ -34,6 +35,8 @@ class MapListViewModel @Inject constructor(
     private val navigator: Navigator
 ) : ViewModel() {
 
+    private val authenticatorState = AuthenticatorState()
+
     // State flow to keep track of current loading state
     private val _isLoading = MutableStateFlow(false)
     
@@ -63,6 +66,11 @@ class MapListViewModel @Inject constructor(
                 refresh(false)
             }
         }
+        viewModelScope.launch {
+            authenticatorState.pendingServerTrustChallenge.collect {
+                it?.trust()
+            }
+        }
     }
 
     /**
@@ -72,7 +80,7 @@ class MapListViewModel @Inject constructor(
         if (!_isLoading.value) {
             viewModelScope.launch {
                 _isLoading.emit(true)
-                portalItemUseCase.refresh(forceUpdate)
+                portalItemUseCase.refresh(portalSettings.getPortalUrl(), forceUpdate)
                 _isLoading.emit(false)
             }
         }
@@ -84,7 +92,7 @@ class MapListViewModel @Inject constructor(
 
     fun signOut() {
         viewModelScope.launch {
-            // portalItemUseCase.deleteAll()
+            portalItemUseCase.deleteAll()
             portalSettings.signOut()
             navigator.navigateTo(NavigationRoute.Login)
         }

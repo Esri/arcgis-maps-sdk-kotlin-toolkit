@@ -1,6 +1,7 @@
 package com.arcgismaps.toolkit.featureformsapp.data
 
 import android.graphics.Bitmap
+import android.util.Log
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.featureformsapp.data.local.ItemCacheDao
@@ -37,6 +38,7 @@ class PortalItemRepository(
 ) {
     // in memory cache of loaded portal items
     private val portalItems: MutableMap<String, PortalItem> = mutableMapOf()
+
     // to protect shared state of portalItems
     private val mutex = Mutex()
 
@@ -66,14 +68,15 @@ class PortalItemRepository(
      * This operation is suspending and will wait until the underlying data source has finished
      * AND the repository has finished loading the portal items.
      */
-    suspend fun refresh(forceUpdate: Boolean = false) = withContext(dispatcher) {
+    suspend fun refresh(portalUri: String, forceUpdate: Boolean = false) = withContext(dispatcher) {
         mutex.withLock {
             if (forceUpdate) deleteAllCacheEntries()
             portalItems.clear()
             // get local items
             val localItems = getListOfMaps().map { ItemData(it) }
             // get network items
-            val remoteItems = remoteDataSource.fetchItemData()
+            val remoteItems = remoteDataSource.fetchItemData(portalUri)
+            Log.e("TAG", "refresh: remoteitems ${remoteItems.count()}", )
             // load the portal items and add them to cache
             loadAndCachePortalItems(localItems + remoteItems)
         }
@@ -97,24 +100,30 @@ class PortalItemRepository(
      * Loads the list of [items] into loaded portal items and adds them to the Cache.
      */
     private suspend fun loadAndCachePortalItems(items: List<ItemData>) {
-        val entries = items.map { itemData ->
+        val entries = items.mapNotNull { itemData ->
             val portalItem = PortalItem(itemData.url)
-            portalItem.load()
-            val thumbnailUri = portalItem.thumbnail?.let { thumbnail ->
-                thumbnail.load()
-                thumbnail.image?.bitmap?.let { bitmap ->
-                    createThumbnail(
-                        portalItem.itemId,
-                        bitmap
-                    )
-                }
-            } ?: ""
-            ItemCacheEntry(
-                itemData.url,
-                portalItem.toJson(),
-                thumbnailUri,
-                portalItem.portal.url
-            )
+            val result = portalItem.load().onFailure {
+                Log.e("TAG", "loadAndCachePortalItems: url-${itemData.url} $it", )
+            }
+            if (result.isFailure) {
+                null
+            } else {
+                val thumbnailUri = portalItem.thumbnail?.let { thumbnail ->
+                    thumbnail.load()
+                    thumbnail.image?.bitmap?.let { bitmap ->
+                        createThumbnail(
+                            portalItem.itemId,
+                            bitmap
+                        )
+                    }
+                } ?: ""
+                ItemCacheEntry(
+                    itemData.url,
+                    portalItem.toJson(),
+                    thumbnailUri,
+                    portalItem.portal.url
+                )
+            }
         }
         // purge existing items and add the updated items
         createCacheEntries(entries)
@@ -125,6 +134,7 @@ class PortalItemRepository(
      */
     private suspend fun createCacheEntries(entries: List<ItemCacheEntry>) =
         withContext(dispatcher) {
+            Log.e("TAG", "createCacheEntries: entries ${entries.count()}", )
             itemCacheDao.deleteAndInsert(entries)
         }
 

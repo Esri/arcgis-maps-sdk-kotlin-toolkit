@@ -5,13 +5,18 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
@@ -45,14 +50,14 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var navigator: Navigator
 
-    private val loginState: MutableStateFlow<LoginState> = MutableStateFlow(LoginState.Loading)
+    private val appState: MutableStateFlow<AppState> = MutableStateFlow(AppState.Loading)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ArcGISEnvironment.applicationContext = this
         setContent {
             FeatureFormsAppTheme {
-                FeatureFormApp(loginState.collectAsState().value, navigator)
+                FeatureFormApp(appState.collectAsState().value, navigator)
             }
         }
         lifecycleScope.launch {
@@ -73,22 +78,22 @@ class MainActivity : ComponentActivity() {
             val url = portalSettings.getPortalUrl()
             val credential =
                 ArcGISEnvironment.authenticationManager.arcGISCredentialStore.getCredential(url)
-            loginState.value = if (credential == null) {
-                LoginState.NotLoggedIn
+            appState.value = if (credential == null) {
+                AppState.NotLoggedIn
             } else {
-                LoginState.LoggedIn
+                AppState.LoggedIn
             }
         }
 }
 
 @Composable
-fun FeatureFormApp(loginState: LoginState, navigator: Navigator) {
-    if (loginState is LoginState.Loading) {
+fun FeatureFormApp(appState: AppState, navigator: Navigator) {
+    if (appState is AppState.Loading) {
         LoadingIndicator(modifier = Modifier.fillMaxSize())
     } else {
         // create a NavController
         val navController = rememberNavController()
-        val startDestination = if (loginState is LoginState.LoggedIn) {
+        val startDestination = if (appState is AppState.LoggedIn) {
             NavigationRoute.Home.route
         } else {
             NavigationRoute.Login.route
@@ -102,21 +107,33 @@ fun FeatureFormApp(loginState: LoginState, navigator: Navigator) {
 }
 
 @Composable
-fun LoadingIndicator(modifier: Modifier = Modifier) {
-    Column(
+fun LoadingIndicator(
+    modifier: Modifier = Modifier,
+    backgroundColor: Color = MaterialTheme.colorScheme.surface,
+    statusText : String = "",
+) {
+    Surface(
         modifier = modifier,
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        color = backgroundColor
     ) {
-        CircularProgressIndicator(
-            modifier = Modifier.size(30.dp),
-            strokeWidth = 5.dp
-        )
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(30.dp),
+                strokeWidth = 5.dp
+            )
+            if (statusText.isNotEmpty()) {
+                Spacer(modifier = Modifier.size(10.dp))
+                Text(text = statusText)
+            }
+        }
     }
 }
 
-sealed class LoginState {
-    object Loading : LoginState()
-    object LoggedIn : LoginState()
-    object NotLoggedIn : LoginState()
+sealed class AppState {
+    object Loading : AppState()
+    object LoggedIn : AppState()
+    object NotLoggedIn : AppState()
 }

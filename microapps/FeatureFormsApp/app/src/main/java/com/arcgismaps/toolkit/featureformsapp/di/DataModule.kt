@@ -94,13 +94,9 @@ class DataModule {
     @Provides
     internal fun providePortalSettings(
         @ApplicationContext context: Context,
-        @ApplicationScope scope : CoroutineScope,
-    ): PortalSettings = PortalSettings(context = context, scope = scope)
+    ): PortalSettings = PortalSettings(context = context)
 
     @Singleton
     @Provides
-    internal fun provideNavigator(
-        @ApplicationContext context: Context,
-        @ApplicationScope scope : CoroutineScope,
-    ): Navigator = Navigator()
+    internal fun provideNavigator(): Navigator = Navigator()
 }
