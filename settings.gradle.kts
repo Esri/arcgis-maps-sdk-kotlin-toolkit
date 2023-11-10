@@ -79,6 +79,7 @@ include(":geo-compose")
 include(":map-compose-app")
 include(":location-display-app")
 include(":geometry-editor-app")
+include(":mapview-setviewpoint-app")
 
 projects.forEach {
     project(":$it").projectDir = File(rootDir, "toolkit/$it")
@@ -88,8 +89,9 @@ projects.forEach {
 project(":bom").projectDir = File(rootDir, "bom")
 project(":composable-map").projectDir = File(rootDir, "toolkit/composable-map")
 project(":indoors").projectDir = File(rootDir, "toolkit/indoors")
-project(":floor-filter-app").projectDir = File(rootDir, "microapps/FloorFilterApp/app")
+project(":floor-filter-ap.p").projectDir = File(rootDir, "microapps/FloorFilterApp/app")
 project(":geo-compose").projectDir = File(rootDir, "toolkit/geo-compose")
 project(":map-compose-app").projectDir = File(rootDir, "microapps/mapcomposeapp/app")
 project(":location-display-app").projectDir = File(rootDir, "microapps/locationdisplayapp/app")
 project(":geometry-editor-app").projectDir = File(rootDir, "microapps/geometryeditorapp/app")
+project(":mapview-setviewpoint-app").projectDir = File(rootDir, "microapps/mapviewsetviewpointapp/app")
