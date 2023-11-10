@@ -24,7 +24,7 @@ import com.arcgismaps.mapping.view.ScreenCoordinate
 /**
  * Used to perform operations on a [MapView].
  *
- * There should be a one-to-one relationship between a MapViewProxy and a composable [MapView]. This relationship is esatblished by passing an instance of MapViewProxy to the composable [MapView] function.
+ * There should be a one-to-one relationship between a MapViewProxy and a composable [MapView]. This relationship is established by passing an instance of MapViewProxy to the composable [MapView] function.
  * Operations can only be performed once the associated composable MapView has entered the composition. Operations performed when the associated composable MapView is not in the composition will fail gracefully, i.e. won't throw exceptions but won't return a successful result.
  *
  * @since 200.3.0
@@ -50,9 +50,9 @@ public class MapViewProxy : GeoViewProxy() {
     }
 
     /**
-     * Converts a screen coordinate (in pixels) to a coordinate within the map view's spatial reference.
+     * Converts a screen coordinate (in pixels) to a coordinate within the mapview's spatial reference.
      *
-     * May return null in some circumstances, such as if the map view's spatial reference has not been determined yet.
+     * May return null in some circumstances, such as if the mapview's spatial reference has not been determined yet.
      *
      * @param screenCoordinate the screen point, in pixels
      * @return a [Point] object, or null if the location could not be determined or an error occurs
@@ -67,7 +67,7 @@ public class MapViewProxy : GeoViewProxy() {
     }
 
     /**
-     * Converts a coordinate within the map view's spatial reference to a screen coordinate (in pixels).
+     * Converts a coordinate within the mapview's spatial reference to a screen coordinate (in pixels).
      * If the wraparound mode is active, this method returns the closest screen location matching the
      * specified map location. 'Closest' meaning: If it's in view, return that location, otherwise return
      * for the frame where the location is the closest to the center of the view.
