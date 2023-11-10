@@ -17,7 +17,6 @@
 package com.arcgismaps.toolkit.featureforms.components.base
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
@@ -186,7 +185,6 @@ internal fun BaseTextField(
             onValueChange = onValueChange,
             modifier = Modifier
                 .fillMaxWidth()
-                .focusable(isEditable, interactionSource)
                 .semantics { contentDescription = "outlined text field" },
             readOnly = readOnly,
             enabled = isEditable,
