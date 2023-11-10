@@ -188,18 +188,21 @@ private fun ViewpointUpdater(
                 viewpointOperation.execute(mapView)
             }
             is MapViewpointOperation.Center -> {
-                if (viewpointOperation.scale != null) {
-                    mapView.setViewpointCenter(
-                        viewpointOperation.center,
-                        viewpointOperation.scale
-                    )
-                } else {
-                    mapView.setViewpointCenter(viewpointOperation.center)
-                }
+                viewpointOperation.execute(mapView)
             }
-            else -> {
-               // TODO("ViewpointOperation handling not yet implemented")
+            is MapViewpointOperation.Rotate -> {
+                viewpointOperation.execute(mapView)
             }
+            is MapViewpointOperation.Scale -> {
+                viewpointOperation.execute(mapView)
+            }
+            is MapViewpointOperation.SetBookmark -> {
+                viewpointOperation.execute(mapView)
+            }
+            is MapViewpointOperation.SetBoundingGeometry -> {
+                viewpointOperation.execute(mapView)
+            }
+            null -> {}
         }
     }
 }
