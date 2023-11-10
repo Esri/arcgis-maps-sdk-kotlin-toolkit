@@ -124,6 +124,12 @@ fun SetViewpointDropdownMenu(
         Point(23.321736, 42.697703, SpatialReference.wgs84())
     }
     val scale = remember { 170000.0 }
+    val bookmark = remember {
+        Bookmark(
+            "Sofia",
+            Viewpoint(sofia, scale)
+        )
+    }
     val sofiaBounds = remember {
         GeometryEngine.bufferOrNull(sofia, 0.083) ?: error("Couldn't buffer point")
     }
@@ -147,12 +153,7 @@ fun SetViewpointDropdownMenu(
                         "Rotate" -> MapViewpointOperation.Rotate(0.0)
                         "Scale" -> MapViewpointOperation.Scale(scale)
                         "Set" -> MapViewpointOperation.Set(Viewpoint(sofia, scale))
-                        "SetBookmark" -> MapViewpointOperation.SetBookmark(
-                            Bookmark(
-                                "Sofia",
-                                Viewpoint(sofia, scale)
-                            )
-                        )
+                        "SetBookmark" -> MapViewpointOperation.SetBookmark(bookmark)
                         "SetBoundingGeometry" -> MapViewpointOperation.SetBoundingGeometry(sofiaBounds)
                         else -> error("Unexpected MapViewpointOperation")
                     }
