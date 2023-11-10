@@ -3,6 +3,7 @@ package com.arcgismaps.toolkit.geocompose
 import androidx.compose.runtime.Stable
 import com.arcgismaps.geometry.Geometry
 import com.arcgismaps.geometry.Point
+import com.arcgismaps.mapping.Bookmark
 import com.arcgismaps.mapping.view.AnimationCurve
 import com.arcgismaps.mapping.view.MapView
 import kotlinx.coroutines.CancellationException
@@ -42,6 +43,10 @@ public sealed class MapViewpointOperation {
     public class Scale(
         public val scale: Double
     ): MapViewpointOperation()
+
+    public class SetBookmark(
+        public val bookmark: Bookmark
+    ) : MapViewpointOperation()
 }
 
 
@@ -103,6 +108,15 @@ internal suspend fun MapViewpointOperation.Rotate.execute(mapView: MapView) =
 internal suspend fun MapViewpointOperation.Scale.execute(mapView: MapView) =
     try {
         val result = mapView.setViewpointScale(this.scale)
+        this.complete(result)
+    } catch (e: CancellationException) {
+        this.complete(Result.success(false))
+        throw e
+    }
+
+internal suspend fun MapViewpointOperation.SetBookmark.execute(mapView: MapView) =
+    try {
+        val result = mapView.setBookmark(this.bookmark)
         this.complete(result)
     } catch (e: CancellationException) {
         this.complete(Result.success(false))
