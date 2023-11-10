@@ -89,7 +89,7 @@ projects.forEach {
 project(":bom").projectDir = File(rootDir, "bom")
 project(":composable-map").projectDir = File(rootDir, "toolkit/composable-map")
 project(":indoors").projectDir = File(rootDir, "toolkit/indoors")
-project(":floor-filter-ap.p").projectDir = File(rootDir, "microapps/FloorFilterApp/app")
+project(":floor-filter-app").projectDir = File(rootDir, "microapps/FloorFilterApp/app")
 project(":geo-compose").projectDir = File(rootDir, "toolkit/geo-compose")
 project(":map-compose-app").projectDir = File(rootDir, "microapps/mapcomposeapp/app")
 project(":location-display-app").projectDir = File(rootDir, "microapps/locationdisplayapp/app")
