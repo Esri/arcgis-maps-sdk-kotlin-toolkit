@@ -19,106 +19,119 @@ public sealed class MapViewpointOperation {
         deferred.complete(result)
     }
 
-    public class Set(public val viewpoint: com.arcgismaps.mapping.Viewpoint): MapViewpointOperation()
+    internal abstract suspend fun execute(mapView: MapView)
+
+    public class Set(public val viewpoint: com.arcgismaps.mapping.Viewpoint): MapViewpointOperation() {
+        override suspend fun execute(mapView: MapView) {
+            mapView.setViewpoint(this.viewpoint)
+            this.complete(Result.success(true))
+        }
+    }
+
     public class Animate(
         public val viewpoint: com.arcgismaps.mapping.Viewpoint,
         public val durationSeconds: Float = 1f, // TODO - determine default
         public val curve: AnimationCurve? = null
-    ): MapViewpointOperation()
+    ): MapViewpointOperation() {
+        override suspend fun execute(mapView: MapView) {
+            try {
+                val result = if (this.curve != null) {
+                    mapView.setViewpointAnimated(
+                        this.viewpoint,
+                        this.durationSeconds,
+                        this.curve
+                    )
+                } else {
+                    mapView.setViewpointAnimated(
+                        this.viewpoint,
+                        this.durationSeconds
+                    )
+                }
+                this.complete(result)
+            } catch (e: CancellationException) {
+                this.complete(Result.success(false))
+                throw e
+            }
+        }
+    }
 
     public class Center(
         public val center: Point,
         public val scale: Double? = null
-    ): MapViewpointOperation()
+    ): MapViewpointOperation() {
+        override suspend fun execute(mapView: MapView) {
+            try {
+                val result = if (this.scale != null) {
+                    mapView.setViewpointCenter(this.center, this.scale)
+                } else {
+                    mapView.setViewpointCenter(this.center)
+                }
+                this.complete(result)
+            } catch (e: CancellationException) {
+                this.complete(Result.success(false))
+                throw e
+            }
+        }
+    }
 
     public class SetBoundingGeometry(
         public val boundingGeometry: Geometry,
         public val paddingInDips: Double? = null
-    ): MapViewpointOperation()
+    ): MapViewpointOperation() {
+        override suspend fun execute(mapView: MapView) {
+            try {
+                val result = if (this.paddingInDips != null) {
+                    mapView.setViewpointGeometry(this.boundingGeometry, this.paddingInDips)
+                } else {
+                    mapView.setViewpointGeometry(this.boundingGeometry)
+                }
+                this.complete(result)
+            } catch (e: CancellationException) {
+                this.complete(Result.success(false))
+                throw e
+            }
+        }
+    }
 
     public class Rotate(
         public val angleDegrees: Double
-    ): MapViewpointOperation()
+    ): MapViewpointOperation() {
+        override suspend fun execute(mapView: MapView) {
+            try {
+                val result = mapView.setViewpointRotation(this.angleDegrees)
+                this.complete(result)
+            } catch (e: CancellationException) {
+                this.complete(Result.success(false))
+                throw e
+            }
+        }
+    }
 
     public class Scale(
         public val scale: Double
-    ): MapViewpointOperation()
+    ): MapViewpointOperation() {
+        override suspend fun execute(mapView: MapView) {
+            try {
+                val result = mapView.setViewpointScale(this.scale)
+                this.complete(result)
+            } catch (e: CancellationException) {
+                this.complete(Result.success(false))
+                throw e
+            }
+        }
+    }
 
     public class SetBookmark(
         public val bookmark: Bookmark
-    ) : MapViewpointOperation()
+    ) : MapViewpointOperation() {
+        override suspend fun execute(mapView: MapView) {
+            try {
+                val result = mapView.setBookmark(this.bookmark)
+                this.complete(result)
+            } catch (e: CancellationException) {
+                this.complete(Result.success(false))
+                throw e
+            }
+        }
+    }
 }
-
-
-internal suspend fun MapViewpointOperation.Animate.execute(mapView: MapView) =
-    try {
-        val result = if (this.curve != null) {
-            mapView.setViewpointAnimated(
-                this.viewpoint,
-                this.durationSeconds,
-                this.curve
-            )
-        } else {
-            mapView.setViewpointAnimated(
-                this.viewpoint,
-                this.durationSeconds
-            )
-        }
-        this.complete(result)
-    } catch (e: CancellationException) {
-        this.complete(Result.success(false))
-        throw e
-    }
-
-internal suspend fun MapViewpointOperation.Center.execute(mapView: MapView) =
-    try {
-        val result = if (this.scale != null) {
-            mapView.setViewpointCenter(this.center, this.scale)
-        } else {
-            mapView.setViewpointCenter(this.center)
-        }
-        this.complete(result)
-    } catch (e: CancellationException) {
-        this.complete(Result.success(false))
-        throw e
-    }
-
-internal suspend fun MapViewpointOperation.SetBoundingGeometry.execute(mapView: MapView) =
-    try {
-        val result = if (this.paddingInDips != null) {
-            mapView.setViewpointGeometry(this.boundingGeometry, this.paddingInDips)
-        } else {
-            mapView.setViewpointGeometry(this.boundingGeometry)
-        }
-        this.complete(result)
-    } catch (e: CancellationException) {
-        this.complete(Result.success(false))
-        throw e
-    }
-
-internal suspend fun MapViewpointOperation.Rotate.execute(mapView: MapView) =
-    try {
-        val result = mapView.setViewpointRotation(this.angleDegrees)
-        this.complete(result)
-    } catch (e: CancellationException) {
-        this.complete(Result.success(false))
-        throw e
-    }
-
-internal suspend fun MapViewpointOperation.Scale.execute(mapView: MapView) =
-    try {
-        val result = mapView.setViewpointScale(this.scale)
-        this.complete(result)
-    } catch (e: CancellationException) {
-        this.complete(Result.success(false))
-        throw e
-    }
-
-internal suspend fun MapViewpointOperation.SetBookmark.execute(mapView: MapView) =
-    try {
-        val result = mapView.setBookmark(this.bookmark)
-        this.complete(result)
-    } catch (e: CancellationException) {
-        this.complete(Result.success(false))
-        throw e
-    }

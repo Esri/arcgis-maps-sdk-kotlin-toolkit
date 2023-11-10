@@ -179,31 +179,7 @@ private fun ViewpointUpdater(
     viewpointOperation: MapViewpointOperation?
 ) {
     LaunchedEffect(viewpointOperation) {
-        when (viewpointOperation) {
-            is MapViewpointOperation.Set -> {
-                mapView.setViewpoint(viewpointOperation.viewpoint)
-                viewpointOperation.complete(Result.success(true))
-            }
-            is MapViewpointOperation.Animate -> {
-                viewpointOperation.execute(mapView)
-            }
-            is MapViewpointOperation.Center -> {
-                viewpointOperation.execute(mapView)
-            }
-            is MapViewpointOperation.Rotate -> {
-                viewpointOperation.execute(mapView)
-            }
-            is MapViewpointOperation.Scale -> {
-                viewpointOperation.execute(mapView)
-            }
-            is MapViewpointOperation.SetBookmark -> {
-                viewpointOperation.execute(mapView)
-            }
-            is MapViewpointOperation.SetBoundingGeometry -> {
-                viewpointOperation.execute(mapView)
-            }
-            null -> {}
-        }
+        viewpointOperation?.execute(mapView)
     }
 }
 
