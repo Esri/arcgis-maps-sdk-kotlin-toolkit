@@ -64,3 +64,47 @@ internal suspend fun MapViewpointOperation.Animate.execute(mapView: MapView) =
         this.complete(Result.success(false))
         throw e
     }
+
+internal suspend fun MapViewpointOperation.Center.execute(mapView: MapView) =
+    try {
+        val result = if (this.scale != null) {
+            mapView.setViewpointCenter(this.center, this.scale)
+        } else {
+            mapView.setViewpointCenter(this.center)
+        }
+        this.complete(result)
+    } catch (e: CancellationException) {
+        this.complete(Result.success(false))
+        throw e
+    }
+
+internal suspend fun MapViewpointOperation.Bounding.execute(mapView: MapView) =
+    try {
+        val result = if (this.paddingInDips != null) {
+            mapView.setViewpointGeometry(this.boundingGeometry, this.paddingInDips)
+        } else {
+            mapView.setViewpointGeometry(this.boundingGeometry)
+        }
+        this.complete(result)
+    } catch (e: CancellationException) {
+        this.complete(Result.success(false))
+        throw e
+    }
+
+internal suspend fun MapViewpointOperation.Rotate.execute(mapView: MapView) =
+    try {
+        val result = mapView.setViewpointRotation(this.angleDegrees)
+        this.complete(result)
+    } catch (e: CancellationException) {
+        this.complete(Result.success(false))
+        throw e
+    }
+
+internal suspend fun MapViewpointOperation.Scale.execute(mapView: MapView) =
+    try {
+        val result = mapView.setViewpointScale(this.scale)
+        this.complete(result)
+    } catch (e: CancellationException) {
+        this.complete(Result.success(false))
+        throw e
+    }
