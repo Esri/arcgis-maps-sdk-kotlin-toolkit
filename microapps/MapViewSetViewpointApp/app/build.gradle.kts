@@ -80,7 +80,7 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class).all {
 }
 
 dependencies {
-    implementation(project(":composable-map"))
+    implementation(project(":geo-compose"))
     implementation(arcgis.mapsSdk)
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)

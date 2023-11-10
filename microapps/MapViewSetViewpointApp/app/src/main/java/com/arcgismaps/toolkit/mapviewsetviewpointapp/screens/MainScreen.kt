@@ -18,8 +18,21 @@
 
 package com.arcgismaps.toolkit.mapviewsetviewpointapp.screens
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.BasemapStyle
+import com.arcgismaps.toolkit.geocompose.MapView
 
 @Composable
 fun MainScreen() {
+    val arcGISMap by remember { mutableStateOf(ArcGISMap(BasemapStyle.ArcGISStreets)) }
+    MapView(
+        modifier = Modifier.fillMaxSize(),
+        arcGISMap = arcGISMap
+    )
 }
