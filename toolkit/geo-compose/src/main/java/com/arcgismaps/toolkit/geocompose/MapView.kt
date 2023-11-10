@@ -32,6 +32,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.view.BackgroundGrid
 import com.arcgismaps.mapping.view.DoubleTapEvent
@@ -45,14 +46,14 @@ import com.arcgismaps.mapping.view.MapViewInteractionOptions
 import com.arcgismaps.mapping.view.PanChangeEvent
 import com.arcgismaps.mapping.view.RotationChangeEvent
 import com.arcgismaps.mapping.view.ScaleChangeEvent
+import com.arcgismaps.mapping.view.SelectionProperties
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
-import kotlinx.coroutines.Dispatchers
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.mapping.view.WrapAroundMode
-import com.arcgismaps.mapping.view.SelectionProperties
 import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
@@ -71,6 +72,7 @@ import kotlinx.coroutines.launch
  * @param wrapAroundMode the [WrapAroundMode] to specify whether continuous panning across the international date line is enabled
  * @param attributionState specifies the attribution bar's visibility, text changed and layout changed events
  * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
+ * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the composable MapView has changed
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable MapView
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable MapView
  * @param onScale lambda invoked when a user performs a pinch gesture on the composable MapView
@@ -100,6 +102,7 @@ public fun MapView(
     grid: Grid? = null,
     backgroundGrid: BackgroundGrid = BackgroundGrid(),
     onViewpointChanged: (() -> Unit)? = null,
+    onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
     onScale: ((ScaleChangeEvent) -> Unit)? = null,
@@ -149,6 +152,7 @@ public fun MapView(
     MapViewEventHandler(
         mapView,
         onViewpointChanged,
+        onSpatialReferenceChanged,
         onInteractingChanged,
         onRotate,
         onScale,
@@ -193,6 +197,7 @@ private fun AttributionStateHandler(mapView: MapView, attributionState: Attribut
 private fun MapViewEventHandler(
     mapView: MapView,
     onViewpointChanged: (() -> Unit)?,
+    onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)?,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)?,
     onRotate: ((RotationChangeEvent) -> Unit)?,
     onScale: ((ScaleChangeEvent) -> Unit)?,
@@ -206,6 +211,7 @@ private fun MapViewEventHandler(
     onDrawStatusChanged: ((DrawStatus) -> Unit)?
 ) {
     val currentViewPointChanged by rememberUpdatedState(onViewpointChanged)
+    val currentOnSpatialReferenceChanged by rememberUpdatedState(onSpatialReferenceChanged)
     val currentOnInteractingChanged by rememberUpdatedState(onInteractingChanged)
     val currentOnRotate by rememberUpdatedState(onRotate)
     val currentOnScale by rememberUpdatedState(onScale)
@@ -222,6 +228,11 @@ private fun MapViewEventHandler(
         launch {
             mapView.viewpointChanged.collect {
                 currentViewPointChanged?.invoke()
+            }
+        }
+        launch {
+            mapView.spatialReference.collect { spatialReference ->
+                currentOnSpatialReferenceChanged?.invoke(spatialReference)
             }
         }
         launch(Dispatchers.Main.immediate) {
