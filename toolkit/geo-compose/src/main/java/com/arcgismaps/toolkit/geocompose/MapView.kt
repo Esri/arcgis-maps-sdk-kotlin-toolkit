@@ -70,8 +70,8 @@ import kotlinx.coroutines.launch
  * @param backgroundGrid the default color and context grid behind the map surface
  * @param wrapAroundMode the [WrapAroundMode] to specify whether continuous panning across the international date line is enabled
  * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
- * @param onMapRotationChanged lambda invoked with the composable MapView's current rotation
- * @param onMapScaleChanged lambda invoked with the composable MapView's current scale
+ * @param onMapRotationChanged lambda invoked when the rotation of this composable MapView has changed
+ * @param onMapScaleChanged lambda invoked when the scale of this composable MapView has changed
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable MapView
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable MapView
  * @param onScale lambda invoked when a user performs a pinch gesture on the composable MapView
