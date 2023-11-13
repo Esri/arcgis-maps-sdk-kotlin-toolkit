@@ -75,6 +75,7 @@ import kotlinx.coroutines.launch
  * @param wrapAroundMode the [WrapAroundMode] to specify whether continuous panning across the international date line is enabled
  * @param attributionState specifies the attribution bar's visibility, text changed and layout changed events
  * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
+ * @param onNavigationChanged lambda invoked when the navigation status of the composable MapView has changed
  * @param onMapRotationChanged lambda invoked when the rotation of this composable MapView has changed
  * @param onMapScaleChanged lambda invoked when the scale of this composable MapView has changed
  * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the composable MapView has changed
@@ -108,6 +109,7 @@ public fun MapView(
     wrapAroundMode: WrapAroundMode = WrapAroundMode.EnabledWhenSupported,
     attributionState: AttributionState = AttributionState(),
     onViewpointChanged: (() -> Unit)? = null,
+    onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
     onMapRotationChanged: ((Double) -> Unit)? = null,
     onMapScaleChanged: ((Double) -> Unit)? = null,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
@@ -174,6 +176,7 @@ public fun MapView(
     MapViewEventHandler(
         mapView,
         onViewpointChanged,
+        onNavigationChanged,
         onMapRotationChanged,
         onMapScaleChanged,
         onSpatialReferenceChanged,
@@ -223,6 +226,7 @@ private fun AttributionStateHandler(mapView: MapView, attributionState: Attribut
 private fun MapViewEventHandler(
     mapView: MapView,
     onViewpointChanged: (() -> Unit)?,
+    onNavigationChanged: ((isNavigating: Boolean) -> Unit)?,
     onMapRotationChanged: ((Double) -> Unit)?,
     onMapScaleChanged: ((Double) -> Unit)?,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)?,
@@ -239,6 +243,7 @@ private fun MapViewEventHandler(
     onDrawStatusChanged: ((DrawStatus) -> Unit)?
 ) {
     val currentViewPointChanged by rememberUpdatedState(onViewpointChanged)
+    val currentOnNavigationChanged by rememberUpdatedState(onNavigationChanged)
     val currentOnMapRotationChanged by rememberUpdatedState(onMapRotationChanged)
     val currentOnMapScaleChanged by rememberUpdatedState(onMapScaleChanged)
     val currentOnSpatialReferenceChanged by rememberUpdatedState(onSpatialReferenceChanged)
@@ -273,6 +278,11 @@ private fun MapViewEventHandler(
         launch {
             mapView.spatialReference.collect { spatialReference ->
                 currentOnSpatialReferenceChanged?.invoke(spatialReference)
+            }
+        }
+        launch {
+            mapView.navigationChanged.collect {
+                currentOnNavigationChanged?.invoke(it)
             }
         }
         launch(Dispatchers.Main.immediate) {
