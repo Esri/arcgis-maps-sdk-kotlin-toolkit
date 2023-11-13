@@ -19,20 +19,15 @@ package com.arcgismaps.toolkit.featureformsapp.screens.login
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.authentication.AuthenticatorState
 import com.arcgismaps.toolkit.featureformsapp.BuildConfig
-import com.arcgismaps.toolkit.featureformsapp.AppState
 import com.arcgismaps.toolkit.featureformsapp.data.PortalSettings
-import com.arcgismaps.toolkit.featureformsapp.data.network.ItemRemoteDataSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 
@@ -41,47 +36,33 @@ class LoginViewModel @Inject constructor(
     private val portalSettings: PortalSettings
 ) : ViewModel() {
 
-    enum class LoginType {
-        AGOL,
-        ENTERPRISE,
-        NONE
-    }
+    private data class Credentials(val username: String = "", val password: String = "")
 
-    val authenticatorState = AuthenticatorState()
+    private val authenticatorState = AuthenticatorState()
 
     private val _loginState: MutableStateFlow<LoginState> = MutableStateFlow(LoginState.NotLoggedIn)
     val loginState = _loginState.asStateFlow()
 
-    private var loginType = LoginType.NONE
 
-    private var username : String = ""
-    private var password : String = ""
+    private var credentials: Credentials = Credentials()
 
     init {
         viewModelScope.launch {
             launch {
                 authenticatorState.pendingServerTrustChallenge.collect {
-                    Log.e("TAG", "server trust $it: ")
                     it?.trust()
                 }
             }
             launch {
-                authenticatorState.pendingClientCertificateChallenge.collect {
-                    Log.e("TAG", "client cert $it: ")
+                authenticatorState.pendingUsernamePasswordChallenge.collect {
+                    it?.continueWithCredentials(credentials.username, credentials.password)
                 }
-            }
-            authenticatorState.pendingUsernamePasswordChallenge.collect {
-                Log.e("TAG", "username chal: ${it?.url}")
-                //if (loginType == LoginType.AGOL) {
-                    //it?.continueWithCredentials(BuildConfig.webMapUser, BuildConfig.webMapPassword)
-                    it?.continueWithCredentials(username, password)
-                //}
             }
         }
     }
 
     fun loginWithDefaultCredentials() {
-        loginType = LoginType.AGOL
+        credentials = Credentials(BuildConfig.webMapUser, BuildConfig.webMapPassword)
         _loginState.value = LoginState.Loading
         viewModelScope.launch(Dispatchers.IO) {
             // set a timeout of 20s
@@ -89,7 +70,8 @@ class LoginViewModel @Inject constructor(
                 //delay(20000)
                 authenticatorState.oAuthUserConfiguration = null
                 portalSettings.setPortalUrl(portalSettings.defaultPortalUrl)
-                val portal = Portal(portalSettings.defaultPortalUrl, Portal.Connection.Authenticated)
+                val portal =
+                    Portal(portalSettings.defaultPortalUrl, Portal.Connection.Authenticated)
                 portal.load().onFailure {
                     _loginState.value = LoginState.Failed(it.message ?: "")
                 }.onSuccess {
@@ -102,10 +84,8 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun loginWithArcGISEnterprise(url: String, username : String, password : String) {
-        this.username = username
-        this.password = password
-        loginType = LoginType.ENTERPRISE
+    fun loginWithArcGISEnterprise(url: String, username: String, password: String) {
+        credentials = Credentials(username, password)
         viewModelScope.launch(Dispatchers.IO) {
             authenticatorState.oAuthUserConfiguration = null
             portalSettings.setPortalUrl(url)
@@ -117,7 +97,7 @@ class LoginViewModel @Inject constructor(
             }
             launch {
                 portal.loadStatus.collect {
-                    Log.e("TAG", "loginWithArcGISEnterprise: $it", )
+                    Log.e("TAG", "loginWithArcGISEnterprise: $it")
                 }
             }
         }
@@ -130,4 +110,3 @@ sealed class LoginState {
     data class Failed(val message: String) : LoginState()
     object NotLoggedIn : LoginState()
 }
-

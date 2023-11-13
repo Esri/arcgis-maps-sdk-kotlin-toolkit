@@ -17,19 +17,24 @@
 package com.arcgismaps.toolkit.featureformsapp.screens.login
 
 import android.widget.Toast
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.with
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -52,10 +57,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.arcgismaps.toolkit.authentication.Authenticator
-import com.arcgismaps.toolkit.authentication.DialogAuthenticator
 import com.arcgismaps.toolkit.featureformsapp.LoadingIndicator
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel(),
@@ -64,7 +68,6 @@ fun LoginScreen(
     val context = LocalContext.current
     val loginState by viewModel.loginState.collectAsState()
     var showEnterpriseLogin by remember { mutableStateOf(false) }
-    var showAuthenticator by remember { mutableStateOf(false) }
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -75,34 +78,46 @@ fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Feature Forms Micro-App",
+                text = "FeatureForms Micro-App",
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontWeight = FontWeight.Bold
                 )
             )
-            Spacer(modifier = Modifier.height(200.dp))
-            if (loginState is LoginState.Loading || loginState is LoginState.Success) {
-                // show a loading indicator if the currently in progress or for a successful login
-                LoadingIndicator(statusText = "Signing in..")
-            } else {
-                LoginOptions(
-                    onDefaultLoginTapped = {
-                        viewModel.loginWithDefaultCredentials()
-                    },
-                    onEnterpriseLoginTapped = {
-                        showEnterpriseLogin = true
-                    },
-                    skipSignInTapped = {
-                        onSuccessfulLogin()
+            AnimatedContent(
+                targetState = loginState is LoginState.Loading || loginState is LoginState.Success,
+                transitionSpec = {
+                    slideInVertically { h -> h }with
+                        slideOutVertically(
+                            animationSpec = tween()
+                        ) { h -> h } + fadeOut()
+                },
+                label = "evaluation loading animation"
+            ) {
+                Column {
+                    if (it) {
+                        // show a loading indicator if the currently in progress or for a successful login
+                        LoadingIndicator(modifier = Modifier.fillMaxSize(), statusText = "Signing in..")
+                    } else {
+                        Spacer(modifier = Modifier.weight(1f))
+                        LoginOptions(
+                            onDefaultLoginTapped = {
+                                viewModel.loginWithDefaultCredentials()
+                            },
+                            onEnterpriseLoginTapped = {
+                                showEnterpriseLogin = true
+                            },
+                            skipSignInTapped = {
+                                onSuccessfulLogin()
+                            }
+                        )
                     }
-                )
+                }
             }
         }
     }
     if (showEnterpriseLogin) {
         EnterpriseLogin(
             onSubmit = { url, username, password ->
-                //showAuthenticator = true
                 viewModel.loginWithArcGISEnterprise(url, username, password)
                 showEnterpriseLogin = false
             }
@@ -110,7 +125,6 @@ fun LoginScreen(
             showEnterpriseLogin = false
         }
     }
-    // Authenticator(authenticatorState = viewModel.authenticatorState)
     LaunchedEffect(Unit) {
         viewModel.loginState.collect {
             if (it is LoginState.Success) {
@@ -149,7 +163,9 @@ fun EnterpriseLogin(
             Text(text = "Enter the ArcGIS Enterprise Portal URL")
         },
         text = {
-            Column {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
                 OutlinedTextField(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -170,7 +186,12 @@ fun EnterpriseLogin(
                         .wrapContentHeight(),
                     value = username,
                     onValueChange = { username = it },
-                    label = { Text(text = "Username", style = MaterialTheme.typography.titleMedium) },
+                    label = {
+                        Text(
+                            text = "Username",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    },
                     placeholder = { Text(text = "Enter the URL") },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
@@ -184,7 +205,12 @@ fun EnterpriseLogin(
                         .wrapContentHeight(),
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text(text = "Password", style = MaterialTheme.typography.titleMedium) },
+                    label = {
+                        Text(
+                            text = "Password",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    },
                     placeholder = { Text(text = "Enter the URL") },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
