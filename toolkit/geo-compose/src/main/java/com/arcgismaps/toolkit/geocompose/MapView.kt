@@ -72,6 +72,8 @@ import kotlinx.coroutines.launch
  * @param wrapAroundMode the [WrapAroundMode] to specify whether continuous panning across the international date line is enabled
  * @param attributionState specifies the attribution bar's visibility, text changed and layout changed events
  * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
+ * @param onMapRotationChanged lambda invoked when the rotation of this composable MapView has changed
+ * @param onMapScaleChanged lambda invoked when the scale of this composable MapView has changed
  * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the composable MapView has changed
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable MapView
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable MapView
@@ -102,6 +104,8 @@ public fun MapView(
     grid: Grid? = null,
     backgroundGrid: BackgroundGrid = BackgroundGrid(),
     onViewpointChanged: (() -> Unit)? = null,
+    onMapRotationChanged: ((Double) -> Unit)? = null,
+    onMapScaleChanged: ((Double) -> Unit)? = null,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
@@ -152,6 +156,8 @@ public fun MapView(
     MapViewEventHandler(
         mapView,
         onViewpointChanged,
+        onMapRotationChanged,
+        onMapScaleChanged,
         onSpatialReferenceChanged,
         onInteractingChanged,
         onRotate,
@@ -184,7 +190,9 @@ private fun AttributionStateHandler(mapView: MapView, attributionState: Attribut
         }
         launch {
             mapView.onAttributionBarLayoutChanged.collect { attributionBarLayoutChangedEvent ->
-                attributionState.onAttributionBarLayoutChanged?.invoke(attributionBarLayoutChangedEvent)
+                attributionState.onAttributionBarLayoutChanged?.invoke(
+                    attributionBarLayoutChangedEvent
+                )
             }
         }
     }
@@ -197,6 +205,8 @@ private fun AttributionStateHandler(mapView: MapView, attributionState: Attribut
 private fun MapViewEventHandler(
     mapView: MapView,
     onViewpointChanged: (() -> Unit)?,
+    onMapRotationChanged: ((Double) -> Unit)?,
+    onMapScaleChanged: ((Double) -> Unit)?,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)?,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)?,
     onRotate: ((RotationChangeEvent) -> Unit)?,
@@ -211,6 +221,8 @@ private fun MapViewEventHandler(
     onDrawStatusChanged: ((DrawStatus) -> Unit)?
 ) {
     val currentViewPointChanged by rememberUpdatedState(onViewpointChanged)
+    val currentOnMapRotationChanged by rememberUpdatedState(onMapRotationChanged)
+    val currentOnMapScaleChanged by rememberUpdatedState(onMapScaleChanged)
     val currentOnSpatialReferenceChanged by rememberUpdatedState(onSpatialReferenceChanged)
     val currentOnInteractingChanged by rememberUpdatedState(onInteractingChanged)
     val currentOnRotate by rememberUpdatedState(onRotate)
@@ -228,6 +240,16 @@ private fun MapViewEventHandler(
         launch {
             mapView.viewpointChanged.collect {
                 currentViewPointChanged?.invoke()
+            }
+        }
+        launch {
+            mapView.mapRotation.collect { mapRotation ->
+                currentOnMapRotationChanged?.invoke(mapRotation)
+            }
+        }
+        launch {
+            mapView.mapScale.collect { mapScale ->
+                currentOnMapScaleChanged?.invoke(mapScale)
             }
         }
         launch {
