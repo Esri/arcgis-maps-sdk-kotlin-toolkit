@@ -17,6 +17,7 @@
 
 package com.arcgismaps.toolkit.geocompose
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -25,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -66,11 +68,15 @@ import kotlinx.coroutines.launch
  * @param mapViewInteractionOptions the [MapViewInteractionOptions] used by this composable MapView
  * @param viewLabelProperties the [ViewLabelProperties] used by the composable MapView
  * @param selectionProperties the [SelectionProperties] used by the composable MapView
+ * @param insets the inset values to control the active visible area, instructing the MapView to ignore parts that may be obstructed
+ * by overlaid UI elements and affecting the MapView's logical center, the reported visible area and the location display
  * @param grid represents the display of a coordinate system [Grid] on the composable MapView
  * @param backgroundGrid the default color and context grid behind the map surface
  * @param wrapAroundMode the [WrapAroundMode] to specify whether continuous panning across the international date line is enabled
  * @param attributionState specifies the attribution bar's visibility, text changed and layout changed events
  * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
+ * @param onMapRotationChanged lambda invoked when the rotation of this composable MapView has changed
+ * @param onMapScaleChanged lambda invoked when the scale of this composable MapView has changed
  * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the composable MapView has changed
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable MapView
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable MapView
@@ -96,11 +102,14 @@ public fun MapView(
     mapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptions(),
     viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
     selectionProperties: SelectionProperties = SelectionProperties(),
-    wrapAroundMode: WrapAroundMode = WrapAroundMode.EnabledWhenSupported,
-    attributionState: AttributionState = AttributionState(),
+    insets: PaddingValues = PaddingValues(),
     grid: Grid? = null,
     backgroundGrid: BackgroundGrid = BackgroundGrid(),
+    wrapAroundMode: WrapAroundMode = WrapAroundMode.EnabledWhenSupported,
+    attributionState: AttributionState = AttributionState(),
     onViewpointChanged: (() -> Unit)? = null,
+    onMapRotationChanged: ((Double) -> Unit)? = null,
+    onMapScaleChanged: ((Double) -> Unit)? = null,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
@@ -117,6 +126,7 @@ public fun MapView(
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val mapView = remember { MapView(context) }
+    val layoutDirection = LocalLayoutDirection.current
 
     AndroidView(
         modifier = modifier.semantics { contentDescription = "MapView" },
@@ -148,11 +158,24 @@ public fun MapView(
         }
     }
 
+    LaunchedEffect(insets) {
+        // When this call is made in the AndroidView's update callback, ViewInsets are not applied
+        // on the mapview on initial load. So we set the ViewInsets here.
+        mapView.setViewInsets(
+            insets.calculateLeftPadding(layoutDirection).value.toDouble(),
+            insets.calculateRightPadding(layoutDirection).value.toDouble(),
+            insets.calculateTopPadding().value.toDouble(),
+            insets.calculateBottomPadding().value.toDouble()
+        )
+    }
+
     AttributionStateHandler(mapView, attributionState)
 
     MapViewEventHandler(
         mapView,
         onViewpointChanged,
+        onMapRotationChanged,
+        onMapScaleChanged,
         onSpatialReferenceChanged,
         onInteractingChanged,
         onRotate,
@@ -185,7 +208,9 @@ private fun AttributionStateHandler(mapView: MapView, attributionState: Attribut
         }
         launch {
             mapView.onAttributionBarLayoutChanged.collect { attributionBarLayoutChangedEvent ->
-                attributionState.onAttributionBarLayoutChanged?.invoke(attributionBarLayoutChangedEvent)
+                attributionState.onAttributionBarLayoutChanged?.invoke(
+                    attributionBarLayoutChangedEvent
+                )
             }
         }
     }
@@ -198,6 +223,8 @@ private fun AttributionStateHandler(mapView: MapView, attributionState: Attribut
 private fun MapViewEventHandler(
     mapView: MapView,
     onViewpointChanged: (() -> Unit)?,
+    onMapRotationChanged: ((Double) -> Unit)?,
+    onMapScaleChanged: ((Double) -> Unit)?,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)?,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)?,
     onRotate: ((RotationChangeEvent) -> Unit)?,
@@ -212,6 +239,8 @@ private fun MapViewEventHandler(
     onDrawStatusChanged: ((DrawStatus) -> Unit)?
 ) {
     val currentViewPointChanged by rememberUpdatedState(onViewpointChanged)
+    val currentOnMapRotationChanged by rememberUpdatedState(onMapRotationChanged)
+    val currentOnMapScaleChanged by rememberUpdatedState(onMapScaleChanged)
     val currentOnSpatialReferenceChanged by rememberUpdatedState(onSpatialReferenceChanged)
     val currentOnInteractingChanged by rememberUpdatedState(onInteractingChanged)
     val currentOnRotate by rememberUpdatedState(onRotate)
@@ -229,6 +258,16 @@ private fun MapViewEventHandler(
         launch {
             mapView.viewpointChanged.collect {
                 currentViewPointChanged?.invoke()
+            }
+        }
+        launch {
+            mapView.mapRotation.collect { mapRotation ->
+                currentOnMapRotationChanged?.invoke(mapRotation)
+            }
+        }
+        launch {
+            mapView.mapScale.collect { mapScale ->
+                currentOnMapScaleChanged?.invoke(mapScale)
             }
         }
         launch {
