@@ -150,6 +150,7 @@ public fun MapView(
 
     MapViewEventHandler(
         mapView,
+        onTimeExtentChanged,
         onViewpointChanged,
         onInteractingChanged,
         onRotate,
@@ -161,7 +162,6 @@ public fun MapView(
         onLongPress,
         onTwoPointerTap,
         onPan,
-        onTimeExtentChanged,
         onDrawStatusChanged
     )
 
@@ -174,6 +174,7 @@ public fun MapView(
 @Composable
 private fun MapViewEventHandler(
     mapView: MapView,
+    onTimeExtentChanged: ((TimeExtent?) -> Unit)?,
     onViewpointChanged: (() -> Unit)?,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)?,
     onRotate: ((RotationChangeEvent) -> Unit)?,
@@ -185,11 +186,10 @@ private fun MapViewEventHandler(
     onLongPress: ((LongPressEvent) -> Unit)?,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)?,
     onPan: ((PanChangeEvent) -> Unit)?,
-    onTimeExtentChanged: ((TimeExtent?) -> Unit)?,
     onDrawStatusChanged: ((DrawStatus) -> Unit)?
 ) {
-    val currentViewPointChanged by rememberUpdatedState(onViewpointChanged)
     val currentTimeExtentChanged by rememberUpdatedState(onTimeExtentChanged)
+    val currentViewPointChanged by rememberUpdatedState(onViewpointChanged)
     val currentOnInteractingChanged by rememberUpdatedState(onInteractingChanged)
     val currentOnRotate by rememberUpdatedState(onRotate)
     val currentOnScale by rememberUpdatedState(onScale)
@@ -204,13 +204,13 @@ private fun MapViewEventHandler(
 
     LaunchedEffect(Unit) {
         launch {
-            mapView.viewpointChanged.collect {
-                currentViewPointChanged?.invoke()
+            mapView.timeExtent.collect { currentTimeExtent ->
+                currentTimeExtentChanged?.invoke(currentTimeExtent)
             }
         }
         launch {
-            mapView.timeExtent.collect { currentTimeExtent ->
-                currentTimeExtentChanged?.invoke(currentTimeExtent)
+            mapView.viewpointChanged.collect {
+                currentViewPointChanged?.invoke()
             }
         }
         launch(Dispatchers.Main.immediate) {
