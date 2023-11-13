@@ -32,6 +32,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.view.BackgroundGrid
 import com.arcgismaps.mapping.view.DoubleTapEvent
@@ -45,14 +46,14 @@ import com.arcgismaps.mapping.view.MapViewInteractionOptions
 import com.arcgismaps.mapping.view.PanChangeEvent
 import com.arcgismaps.mapping.view.RotationChangeEvent
 import com.arcgismaps.mapping.view.ScaleChangeEvent
+import com.arcgismaps.mapping.view.SelectionProperties
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
-import kotlinx.coroutines.Dispatchers
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.mapping.view.WrapAroundMode
-import com.arcgismaps.mapping.view.SelectionProperties
 import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
@@ -69,9 +70,11 @@ import kotlinx.coroutines.launch
  * @param grid represents the display of a coordinate system [Grid] on the composable MapView
  * @param backgroundGrid the default color and context grid behind the map surface
  * @param wrapAroundMode the [WrapAroundMode] to specify whether continuous panning across the international date line is enabled
+ * @param attributionState specifies the attribution bar's visibility, text changed and layout changed events
  * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
  * @param onMapRotationChanged lambda invoked when the rotation of this composable MapView has changed
  * @param onMapScaleChanged lambda invoked when the scale of this composable MapView has changed
+ * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the composable MapView has changed
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable MapView
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable MapView
  * @param onScale lambda invoked when a user performs a pinch gesture on the composable MapView
@@ -92,16 +95,18 @@ public fun MapView(
     arcGISMap: ArcGISMap? = null,
     graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
-    wrapAroundMode: WrapAroundMode = WrapAroundMode.EnabledWhenSupported,
     geometryEditor: GeometryEditor? = null,
     mapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptions(),
     viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
     selectionProperties: SelectionProperties = SelectionProperties(),
+    wrapAroundMode: WrapAroundMode = WrapAroundMode.EnabledWhenSupported,
+    attributionState: AttributionState = AttributionState(),
     grid: Grid? = null,
     backgroundGrid: BackgroundGrid = BackgroundGrid(),
     onViewpointChanged: (() -> Unit)? = null,
     onMapRotationChanged: ((Double) -> Unit)? = null,
     onMapScaleChanged: ((Double) -> Unit)? = null,
+    onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
     onScale: ((ScaleChangeEvent) -> Unit)? = null,
@@ -146,11 +151,14 @@ public fun MapView(
         }
     }
 
+    AttributionStateHandler(mapView, attributionState)
+
     MapViewEventHandler(
         mapView,
         onViewpointChanged,
         onMapRotationChanged,
         onMapScaleChanged,
+        onSpatialReferenceChanged,
         onInteractingChanged,
         onRotate,
         onScale,
@@ -168,6 +176,29 @@ public fun MapView(
 }
 
 /**
+ * Sets up the attribution bar's property and events.
+ */
+@Composable
+private fun AttributionStateHandler(mapView: MapView, attributionState: AttributionState) {
+    LaunchedEffect(attributionState) {
+        // isAttributionBarVisible does not take effect if applied in the AndroidView update callback
+        mapView.isAttributionBarVisible = attributionState.isAttributionBarVisible
+        launch {
+            mapView.attributionText.collect {
+                attributionState.onAttributionTextChanged?.invoke(it)
+            }
+        }
+        launch {
+            mapView.onAttributionBarLayoutChanged.collect { attributionBarLayoutChangedEvent ->
+                attributionState.onAttributionBarLayoutChanged?.invoke(
+                    attributionBarLayoutChangedEvent
+                )
+            }
+        }
+    }
+}
+
+/**
  * Sets up the callbacks for all the view-based [mapView] events.
  */
 @Composable
@@ -176,6 +207,7 @@ private fun MapViewEventHandler(
     onViewpointChanged: (() -> Unit)?,
     onMapRotationChanged: ((Double) -> Unit)?,
     onMapScaleChanged: ((Double) -> Unit)?,
+    onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)?,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)?,
     onRotate: ((RotationChangeEvent) -> Unit)?,
     onScale: ((ScaleChangeEvent) -> Unit)?,
@@ -191,6 +223,7 @@ private fun MapViewEventHandler(
     val currentViewPointChanged by rememberUpdatedState(onViewpointChanged)
     val currentOnMapRotationChanged by rememberUpdatedState(onMapRotationChanged)
     val currentOnMapScaleChanged by rememberUpdatedState(onMapScaleChanged)
+    val currentOnSpatialReferenceChanged by rememberUpdatedState(onSpatialReferenceChanged)
     val currentOnInteractingChanged by rememberUpdatedState(onInteractingChanged)
     val currentOnRotate by rememberUpdatedState(onRotate)
     val currentOnScale by rememberUpdatedState(onScale)
@@ -217,6 +250,11 @@ private fun MapViewEventHandler(
         launch {
             mapView.mapScale.collect { mapScale ->
                 currentOnMapScaleChanged?.invoke(mapScale)
+            }
+        }
+        launch {
+            mapView.spatialReference.collect { spatialReference ->
+                currentOnSpatialReferenceChanged?.invoke(spatialReference)
             }
         }
         launch(Dispatchers.Main.immediate) {
