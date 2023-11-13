@@ -1,4 +1,4 @@
-# Geometry Editor Micro-app
+# MapView Set Viewpoint Micro-app
 
 This micro-app demonstrates the use of `MapViewpointOperation` with a composable `MapView`.
 
