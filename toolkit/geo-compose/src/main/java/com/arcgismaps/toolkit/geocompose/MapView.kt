@@ -173,6 +173,12 @@ public fun MapView(
     GraphicsOverlaysUpdater(graphicsOverlays, mapView)
 }
 
+/**
+ * Updates the viewpoint of the provided [mapView] using the given [viewpointOperation]. This will be
+ * recomposed when [viewpointOperation] changes.
+ *
+ * @since 200.3.0
+ */
 @Composable
 private fun ViewpointUpdater(
     mapView: MapView,
