@@ -94,7 +94,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun FeatureFormApp(appState: AppState, navigator: Navigator) {
     if (appState is AppState.Loading) {
-        LoadingIndicator(modifier = Modifier.fillMaxSize())
+        AnimatedLoading({ true }, modifier = Modifier.fillMaxSize())
     } else {
         // create a NavController
         val navController = rememberNavController()
@@ -113,26 +113,30 @@ fun FeatureFormApp(appState: AppState, navigator: Navigator) {
 }
 
 @Composable
-fun LoadingIndicator(
+fun AnimatedLoading(
+    visibilityProvider: () -> Boolean,
     modifier: Modifier = Modifier,
     backgroundColor: Color = MaterialTheme.colorScheme.surface,
     statusText: String = "",
 ) {
-    Surface(
-        modifier = modifier,
-        color = backgroundColor
-    ) {
-        Column(
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+    val visible = visibilityProvider()
+    if (visible) {
+        Surface(
+            modifier = modifier,
+            color = backgroundColor
         ) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(30.dp),
-                strokeWidth = 5.dp
-            )
-            if (statusText.isNotEmpty()) {
-                Spacer(modifier = Modifier.size(10.dp))
-                Text(text = statusText)
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(30.dp),
+                    strokeWidth = 5.dp
+                )
+                if (statusText.isNotEmpty()) {
+                    Spacer(modifier = Modifier.size(10.dp))
+                    Text(text = statusText)
+                }
             }
         }
     }

@@ -58,7 +58,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.arcgismaps.toolkit.featureformsapp.LoadingIndicator
+import com.arcgismaps.toolkit.featureformsapp.AnimatedLoading
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -87,7 +87,7 @@ fun LoginScreen(
             AnimatedContent(
                 targetState = loginState is LoginState.Loading || loginState is LoginState.Success,
                 transitionSpec = {
-                    slideInVertically { h -> h }with
+                    slideInVertically { h -> h } with
                         slideOutVertically(
                             animationSpec = tween()
                         ) { h -> h } + fadeOut()
@@ -97,7 +97,11 @@ fun LoginScreen(
                 Column {
                     if (it) {
                         // show a loading indicator if the currently in progress or for a successful login
-                        LoadingIndicator(modifier = Modifier.fillMaxSize(), statusText = "Signing in..")
+                        AnimatedLoading(
+                            { true },
+                            modifier = Modifier.fillMaxSize(),
+                            statusText = "Signing in.."
+                        )
                     } else {
                         Spacer(modifier = Modifier.weight(1f))
                         LoginOptions(

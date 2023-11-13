@@ -100,7 +100,6 @@ class LoginViewModel @Inject constructor(
     }
 
     fun skipSignIn() {
-        _loginState.value = LoginState.Loading
         viewModelScope.launch {
             portalSettings.setPortalUrl(portalSettings.defaultPortalUrl)
             portalSettings.setPortalConnection(Portal.Connection.Anonymous)

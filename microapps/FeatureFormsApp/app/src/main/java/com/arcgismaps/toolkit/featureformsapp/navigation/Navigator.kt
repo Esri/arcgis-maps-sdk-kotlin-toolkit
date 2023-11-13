@@ -17,6 +17,7 @@
 package com.arcgismaps.toolkit.featureformsapp.navigation
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.MutableTransitionState
@@ -27,6 +28,10 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.navigation.NamedNavArgument
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavDeepLink
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -71,7 +76,11 @@ fun AppNavigation(
     // create a NavHost with a navigation graph builder
     NavHost(navController = navController, startDestination = startDestination) {
         // Login screen
-        composable(NavigationRoute.Login.route) {
+        composable(
+            NavigationRoute.Login.route,
+            enterTransition = { fadeIn() },
+            exitTransition = { fadeOut() }
+        ) {
             LoginScreen {
                 // on successful login, go to the map list screen
                 navController.navigate(NavigationRoute.Home.route) {
@@ -81,47 +90,30 @@ fun AppNavigation(
             }
         }
         // Home screen - shows the list of maps
-        composable(NavigationRoute.Home.route) {
-            EnterAnimation {
-                MapListScreen { uri ->
-                    // encode the uri since it is equivalent to a navigation route
-                    val encodedUri = URLEncoder.encode(uri, StandardCharsets.UTF_8.toString())
-                    val route = "mapview/$encodedUri"
-                    // navigate to the mapview
-                    navController.navigate(route)
-                }
+        composable(
+            NavigationRoute.Home.route,
+            enterTransition = { fadeIn() },
+            exitTransition = { fadeOut() }
+        ) {
+            MapListScreen { uri ->
+                // encode the uri since it is equivalent to a navigation route
+                val encodedUri = URLEncoder.encode(uri, StandardCharsets.UTF_8.toString())
+                val route = "mapview/$encodedUri"
+                // navigate to the mapview
+                navController.navigate(route)
             }
+
         }
         // MapView Screen - shows the map and the FeatureForms
-        composable(NavigationRoute.MapView.route) {
-            EnterAnimation(
-                enter = slideInHorizontally(),
-                exit = slideOutHorizontally()
-            ) {
-                MapScreen {
-                    // navigate back on back pressed
-                    navController.navigateUp()
-                }
+        composable(
+            NavigationRoute.MapView.route,
+            enterTransition = { slideInHorizontally { h -> h } },
+            exitTransition = { slideOutHorizontally { h -> h } }
+        ) {
+            MapScreen {
+                // navigate back on back pressed
+                navController.navigateUp()
             }
         }
-    }
-}
-
-@Composable
-private fun EnterAnimation(
-    modifier : Modifier = Modifier,
-    enter : EnterTransition = fadeIn(),
-    exit : ExitTransition = fadeOut(),
-    content: @Composable () -> Unit
-) {
-    AnimatedVisibility(
-        visibleState = MutableTransitionState(false).apply {
-            targetState = true
-        },
-        modifier = modifier,
-        enter = enter,
-        exit = exit
-    ) {
-        content()
     }
 }

@@ -62,7 +62,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import com.arcgismaps.toolkit.featureformsapp.LoadingIndicator
+import com.arcgismaps.toolkit.featureformsapp.AnimatedLoading
 import com.arcgismaps.toolkit.featureformsapp.R
 import java.time.Instant
 import java.time.ZoneId
@@ -153,12 +153,13 @@ fun MapListScreen(
             }
         }
     }
-    if (showSignOutProgress) {
-        LoadingIndicator(
-            modifier = Modifier.fillMaxSize(),
-            statusText = "Signing out.."
-        )
-    }
+    AnimatedLoading(
+        visibilityProvider = {
+            showSignOutProgress
+        },
+        modifier = Modifier.fillMaxSize(),
+        statusText = "Signing out.."
+    )
 }
 
 /**
