@@ -18,6 +18,7 @@
 package com.arcgismaps.toolkit.geocompose
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -26,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -67,6 +69,8 @@ import kotlinx.coroutines.launch
  * @param mapViewInteractionOptions the [MapViewInteractionOptions] used by this composable MapView
  * @param viewLabelProperties the [ViewLabelProperties] used by the composable MapView
  * @param selectionProperties the [SelectionProperties] used by the composable MapView
+ * @param insets the inset values to control the active visible area, instructing the MapView to ignore parts that may be obstructed
+ * by overlaid UI elements and affecting the MapView's logical center, the reported visible area and the location display
  * @param grid represents the display of a coordinate system [Grid] on the composable MapView
  * @param backgroundGrid the default color and context grid behind the map surface
  * @param wrapAroundMode the [WrapAroundMode] to specify whether continuous panning across the international date line is enabled
@@ -99,10 +103,11 @@ public fun MapView(
     mapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptions(),
     viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
     selectionProperties: SelectionProperties = SelectionProperties(),
-    wrapAroundMode: WrapAroundMode = WrapAroundMode.EnabledWhenSupported,
-    attributionState: AttributionState = AttributionState(),
+    insets: PaddingValues = PaddingValues(),
     grid: Grid? = null,
     backgroundGrid: BackgroundGrid = BackgroundGrid(),
+    wrapAroundMode: WrapAroundMode = WrapAroundMode.EnabledWhenSupported,
+    attributionState: AttributionState = AttributionState(),
     onViewpointChanged: (() -> Unit)? = null,
     onMapRotationChanged: ((Double) -> Unit)? = null,
     onMapScaleChanged: ((Double) -> Unit)? = null,
@@ -123,6 +128,7 @@ public fun MapView(
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val mapView = remember { MapView(context) }
+    val layoutDirection = LocalLayoutDirection.current
 
     Box(modifier = Modifier.semantics { contentDescription = "MapContainer" }) {
         AndroidView(
@@ -149,6 +155,17 @@ public fun MapView(
             lifecycleOwner.lifecycle.removeObserver(mapView)
             mapView.onDestroy(lifecycleOwner)
         }
+    }
+
+    LaunchedEffect(insets) {
+        // When this call is made in the AndroidView's update callback, ViewInsets are not applied
+        // on the mapview on initial load. So we set the ViewInsets here.
+        mapView.setViewInsets(
+            insets.calculateLeftPadding(layoutDirection).value.toDouble(),
+            insets.calculateRightPadding(layoutDirection).value.toDouble(),
+            insets.calculateTopPadding().value.toDouble(),
+            insets.calculateBottomPadding().value.toDouble()
+        )
     }
 
     AttributionStateHandler(mapView, attributionState)
