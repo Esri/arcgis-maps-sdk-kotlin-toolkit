@@ -17,7 +17,6 @@
 
 package com.arcgismaps.toolkit.geocompose
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -31,7 +30,6 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.geometry.SpatialReference
@@ -65,7 +63,8 @@ import kotlinx.coroutines.launch
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable MapView
  * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable MapView
  * @param locationDisplay the [LocationDisplay] used by the composable MapView
- * @param geometryEditor the [GeometryEditor] used by the composable MapView to create and edit geometries by user interaction
+ * @param geometryEditor the [GeometryEditor] used by the composable MapView to create and edit geometries by user interaction.
+ * @param mapViewProxy the [MapViewProxy] to associate with the composable MapView
  * @param mapViewInteractionOptions the [MapViewInteractionOptions] used by this composable MapView
  * @param viewLabelProperties the [ViewLabelProperties] used by the composable MapView
  * @param selectionProperties the [SelectionProperties] used by the composable MapView
@@ -90,7 +89,6 @@ import kotlinx.coroutines.launch
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable MapView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable MapView
  * @param onDrawStatusChanged lambda invoked when the draw status of the composable MapView is changes
- * @param overlay the composable overlays to display on top of the composable MapView. Example, a compass, floorfilter etc.
  * @since 200.3.0
  */
 @Composable
@@ -100,6 +98,7 @@ public fun MapView(
     graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     geometryEditor: GeometryEditor? = null,
+    mapViewProxy: MapViewProxy? = null,
     mapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptions(),
     viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
     selectionProperties: SelectionProperties = SelectionProperties(),
@@ -123,37 +122,39 @@ public fun MapView(
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
-    overlay: @Composable () -> Unit = {}
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val mapView = remember { MapView(context) }
     val layoutDirection = LocalLayoutDirection.current
 
-    Box(modifier = Modifier.semantics { contentDescription = "MapContainer" }) {
-        AndroidView(
-            modifier = modifier.semantics { contentDescription = "MapView" },
-            factory = { mapView },
-            update = {
-                it.map = arcGISMap
-                it.selectionProperties = selectionProperties
-                it.interactionOptions = mapViewInteractionOptions
-                it.locationDisplay = locationDisplay
-                it.labeling = viewLabelProperties
-                it.wrapAroundMode = wrapAroundMode
-                it.geometryEditor = geometryEditor
-                it.grid = grid
-                it.backgroundGrid = backgroundGrid
-            })
-
-        overlay()
-    }
+    AndroidView(
+        modifier = modifier.semantics { contentDescription = "MapView" },
+        factory = { mapView },
+        update = {
+              it.map = arcGISMap
+              it.selectionProperties = selectionProperties
+              it.interactionOptions = mapViewInteractionOptions
+              it.locationDisplay = locationDisplay
+              it.labeling = viewLabelProperties
+              it.wrapAroundMode = wrapAroundMode
+              it.geometryEditor = geometryEditor
+              it.grid = grid
+              it.backgroundGrid = backgroundGrid
+        })
 
     DisposableEffect(Unit) {
         lifecycleOwner.lifecycle.addObserver(mapView)
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(mapView)
             mapView.onDestroy(lifecycleOwner)
+        }
+    }
+
+    DisposableEffect(mapViewProxy) {
+        mapViewProxy?.setMapView(mapView)
+        onDispose {
+            mapViewProxy?.setMapView(null)
         }
     }
 
@@ -404,10 +405,4 @@ public inline fun rememberGraphicsOverlayCollection(
     crossinline init: GraphicsOverlayCollection.() -> Unit = {}
 ): GraphicsOverlayCollection = remember(key) {
     GraphicsOverlayCollection().apply(init)
-}
-
-@Preview
-@Composable
-internal fun MapViewPreview() {
-    MapView()
 }
