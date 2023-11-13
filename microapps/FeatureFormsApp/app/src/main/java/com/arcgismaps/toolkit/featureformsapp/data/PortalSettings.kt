@@ -70,6 +70,7 @@ class PortalSettings(
     }
 
     suspend fun signOut() = withContext(Dispatchers.IO) {
+        setPortalConnection(Portal.Connection.Authenticated)
         ArcGISEnvironment.authenticationManager.signOut()
     }
 }

@@ -67,7 +67,6 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             // set a timeout of 20s
             val result = withTimeoutOrNull(20000) {
-                //delay(20000)
                 authenticatorState.oAuthUserConfiguration = null
                 portalSettings.setPortalUrl(portalSettings.defaultPortalUrl)
                 portalSettings.setPortalConnection(Portal.Connection.Authenticated)
@@ -96,11 +95,6 @@ class LoginViewModel @Inject constructor(
                 _loginState.value = LoginState.Failed(it.message ?: "")
             }.onSuccess {
                 _loginState.value = LoginState.Success
-            }
-            launch {
-                portal.loadStatus.collect {
-                    Log.e("TAG", "loginWithArcGISEnterprise: $it")
-                }
             }
         }
     }

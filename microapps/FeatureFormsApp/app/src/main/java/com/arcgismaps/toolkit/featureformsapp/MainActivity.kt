@@ -22,6 +22,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.ArcGISCredentialStore
+import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.featureformsapp.data.PortalSettings
 import com.arcgismaps.toolkit.featureformsapp.navigation.AppNavigation
 import com.arcgismaps.toolkit.featureformsapp.navigation.NavigationRoute
@@ -79,7 +80,11 @@ class MainActivity : ComponentActivity() {
             val credential =
                 ArcGISEnvironment.authenticationManager.arcGISCredentialStore.getCredential(url)
             appState.value = if (credential == null) {
-                AppState.NotLoggedIn
+                if (portalSettings.getPortalConnection() == Portal.Connection.Anonymous) {
+                    AppState.SkipSignIn
+                } else {
+                    AppState.NotLoggedIn
+                }
             } else {
                 AppState.LoggedIn
             }
@@ -93,11 +98,12 @@ fun FeatureFormApp(appState: AppState, navigator: Navigator) {
     } else {
         // create a NavController
         val navController = rememberNavController()
-        val startDestination = if (appState is AppState.LoggedIn) {
-            NavigationRoute.Home.route
-        } else {
-            NavigationRoute.Login.route
-        }
+        val startDestination =
+            if (appState is AppState.LoggedIn || appState is AppState.SkipSignIn) {
+                NavigationRoute.Home.route
+            } else {
+                NavigationRoute.Login.route
+            }
         AppNavigation(
             navController = navController,
             navigator = navigator,
@@ -110,7 +116,7 @@ fun FeatureFormApp(appState: AppState, navigator: Navigator) {
 fun LoadingIndicator(
     modifier: Modifier = Modifier,
     backgroundColor: Color = MaterialTheme.colorScheme.surface,
-    statusText : String = "",
+    statusText: String = "",
 ) {
     Surface(
         modifier = modifier,
@@ -136,4 +142,5 @@ sealed class AppState {
     object Loading : AppState()
     object LoggedIn : AppState()
     object NotLoggedIn : AppState()
+    object SkipSignIn : AppState()
 }
