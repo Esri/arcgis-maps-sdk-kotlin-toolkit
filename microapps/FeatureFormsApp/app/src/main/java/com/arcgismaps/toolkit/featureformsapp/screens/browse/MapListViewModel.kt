@@ -10,6 +10,7 @@ import com.arcgismaps.toolkit.featureformsapp.domain.PortalItemWithLayer
 import com.arcgismaps.toolkit.featureformsapp.navigation.NavigationRoute
 import com.arcgismaps.toolkit.featureformsapp.navigation.Navigator
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -102,6 +103,7 @@ class MapListViewModel @Inject constructor(
         viewModelScope.launch {
             portalItemUseCase.deleteAll()
             portalSettings.signOut()
+            delay(1000)
             navigator.navigateTo(NavigationRoute.Login)
         }
     }

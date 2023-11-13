@@ -16,8 +16,17 @@
 
 package com.arcgismaps.toolkit.featureformsapp.navigation
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -48,7 +57,7 @@ sealed class NavigationRoute private constructor(val route: String) {
 fun AppNavigation(
     navController: NavHostController,
     navigator: Navigator,
-    startDestination : String,
+    startDestination: String,
 ) {
     LaunchedEffect(Unit) {
         navigator.navigationFlow.collect {
@@ -73,20 +82,46 @@ fun AppNavigation(
         }
         // Home screen - shows the list of maps
         composable(NavigationRoute.Home.route) {
-            MapListScreen { uri ->
-                // encode the uri since it is equivalent to a navigation route
-                val encodedUri = URLEncoder.encode(uri, StandardCharsets.UTF_8.toString())
-                val route = "mapview/$encodedUri"
-                // navigate to the mapview
-                navController.navigate(route)
+            EnterAnimation {
+                MapListScreen { uri ->
+                    // encode the uri since it is equivalent to a navigation route
+                    val encodedUri = URLEncoder.encode(uri, StandardCharsets.UTF_8.toString())
+                    val route = "mapview/$encodedUri"
+                    // navigate to the mapview
+                    navController.navigate(route)
+                }
             }
         }
         // MapView Screen - shows the map and the FeatureForms
         composable(NavigationRoute.MapView.route) {
-            MapScreen {
-                // navigate back on back pressed
-                navController.navigateUp()
+            EnterAnimation(
+                enter = slideInHorizontally(),
+                exit = slideOutHorizontally()
+            ) {
+                MapScreen {
+                    // navigate back on back pressed
+                    navController.navigateUp()
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun EnterAnimation(
+    modifier : Modifier = Modifier,
+    enter : EnterTransition = fadeIn(),
+    exit : ExitTransition = fadeOut(),
+    content: @Composable () -> Unit
+) {
+    AnimatedVisibility(
+        visibleState = MutableTransitionState(false).apply {
+            targetState = true
+        },
+        modifier = modifier,
+        enter = enter,
+        exit = exit
+    ) {
+        content()
     }
 }

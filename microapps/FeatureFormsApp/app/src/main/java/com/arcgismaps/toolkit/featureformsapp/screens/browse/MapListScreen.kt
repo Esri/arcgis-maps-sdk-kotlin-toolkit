@@ -48,6 +48,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,6 +62,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.arcgismaps.toolkit.featureformsapp.LoadingIndicator
 import com.arcgismaps.toolkit.featureformsapp.R
 import java.time.Instant
 import java.time.ZoneId
@@ -80,13 +82,19 @@ fun MapListScreen(
 ) {
     val uiState by mapListViewModel.uiState.collectAsState()
     val lazyListState = rememberLazyListState()
+    var showSignOutProgress by rememberSaveable {
+        mutableStateOf(false)
+    }
     Scaffold(topBar = {
         AppBar(
             uiState.isLoading,
             uiState.searchText,
             onSearchTextChanged = mapListViewModel::filterPortalItems,
             onRefresh = mapListViewModel::refresh,
-            onSignOut = mapListViewModel::signOut
+            onSignOut = {
+                showSignOutProgress = true
+                mapListViewModel.signOut()
+            }
         )
     }) { padding ->
         // use a cross fade animation to show a loading indicator when the data is loading
@@ -144,6 +152,12 @@ fun MapListScreen(
                 }
             }
         }
+    }
+    if (showSignOutProgress) {
+        LoadingIndicator(
+            modifier = Modifier.fillMaxSize(),
+            statusText = "Signing out.."
+        )
     }
 }
 
@@ -211,7 +225,6 @@ fun MapListItem(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview
 fun AppBarPreview() {
@@ -293,7 +306,10 @@ fun AppBar(
                 DropdownMenuItem(
                     text = { Text(text = "Sign Out") },
                     enabled = !isLoading,
-                    onClick = onSignOut
+                    onClick = {
+                        expanded = false
+                        onSignOut()
+                    }
                 )
             }
         }
