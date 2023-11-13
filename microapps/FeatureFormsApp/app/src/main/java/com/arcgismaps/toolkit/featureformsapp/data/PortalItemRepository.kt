@@ -68,15 +68,19 @@ class PortalItemRepository(
      * This operation is suspending and will wait until the underlying data source has finished
      * AND the repository has finished loading the portal items.
      */
-    suspend fun refresh(portalUri: String, forceUpdate: Boolean = false) = withContext(dispatcher) {
+    suspend fun refresh(
+        portalUri: String,
+        connection: Portal.Connection,
+        forceUpdate: Boolean = false
+    ) = withContext(dispatcher) {
         mutex.withLock {
             if (forceUpdate) deleteAllCacheEntries()
             portalItems.clear()
             // get local items
             val localItems = getListOfMaps().map { ItemData(it) }
             // get network items
-            val remoteItems = remoteDataSource.fetchItemData(portalUri)
-            Log.e("TAG", "refresh: remoteitems ${remoteItems.count()}", )
+            val remoteItems = remoteDataSource.fetchItemData(portalUri, connection)
+            Log.e("TAG", "refresh: remoteitems ${remoteItems.count()}")
             // load the portal items and add them to cache
             loadAndCachePortalItems(localItems + remoteItems)
         }
@@ -103,7 +107,7 @@ class PortalItemRepository(
         val entries = items.mapNotNull { itemData ->
             val portalItem = PortalItem(itemData.url)
             val result = portalItem.load().onFailure {
-                Log.e("TAG", "loadAndCachePortalItems: url-${itemData.url} $it", )
+                Log.e("TAG", "loadAndCachePortalItems: url-${itemData.url} $it")
             }
             if (result.isFailure) {
                 null
@@ -134,7 +138,7 @@ class PortalItemRepository(
      */
     private suspend fun createCacheEntries(entries: List<ItemCacheEntry>) =
         withContext(dispatcher) {
-            Log.e("TAG", "createCacheEntries: entries ${entries.count()}", )
+            Log.e("TAG", "createCacheEntries: entries ${entries.count()}")
             itemCacheDao.deleteAndInsert(entries)
         }
 

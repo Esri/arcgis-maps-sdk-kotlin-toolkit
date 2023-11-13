@@ -19,6 +19,7 @@ package com.arcgismaps.toolkit.featureformsapp.data
 import android.content.Context
 import android.content.SharedPreferences
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.authentication.signOut
 import com.arcgismaps.toolkit.featureformsapp.R
 import kotlinx.coroutines.CoroutineScope
@@ -34,6 +35,28 @@ class PortalSettings(
     val defaultPortalUrl: String = context.getString(R.string.agol_portal_url)
 
     private val urlKey = "url"
+    private val connectionKey = "connection"
+
+    fun getPortalConnection() : Portal.Connection {
+        val connection = preferences.getInt(connectionKey, 0)
+        return if (connection == 0) {
+            Portal.Connection.Authenticated
+        } else {
+            Portal.Connection.Anonymous
+        }
+    }
+
+    suspend fun setPortalConnection(connection: Portal.Connection) = withContext(Dispatchers.IO) {
+        with(preferences.edit()) {
+            val value = if (connection is Portal.Connection.Authenticated) {
+                0
+            } else {
+                1
+            }
+            putInt(connectionKey, value)
+            commit()
+        }
+    }
 
     fun getPortalUrl(): String {
         return preferences.getString(urlKey, "") ?: ""

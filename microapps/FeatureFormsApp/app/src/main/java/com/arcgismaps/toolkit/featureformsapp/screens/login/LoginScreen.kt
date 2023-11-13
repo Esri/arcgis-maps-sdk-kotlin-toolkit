@@ -107,7 +107,7 @@ fun LoginScreen(
                                 showEnterpriseLogin = true
                             },
                             skipSignInTapped = {
-                                onSuccessfulLogin()
+                                viewModel.skipSignIn()
                             }
                         )
                     }

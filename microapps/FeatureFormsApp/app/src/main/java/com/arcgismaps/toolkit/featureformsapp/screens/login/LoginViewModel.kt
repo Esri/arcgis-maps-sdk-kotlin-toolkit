@@ -70,6 +70,7 @@ class LoginViewModel @Inject constructor(
                 //delay(20000)
                 authenticatorState.oAuthUserConfiguration = null
                 portalSettings.setPortalUrl(portalSettings.defaultPortalUrl)
+                portalSettings.setPortalConnection(Portal.Connection.Authenticated)
                 val portal =
                     Portal(portalSettings.defaultPortalUrl, Portal.Connection.Authenticated)
                 portal.load().onFailure {
@@ -89,6 +90,7 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             authenticatorState.oAuthUserConfiguration = null
             portalSettings.setPortalUrl(url)
+            portalSettings.setPortalConnection(Portal.Connection.Authenticated)
             val portal = Portal(url, Portal.Connection.Authenticated)
             portal.load().onFailure {
                 _loginState.value = LoginState.Failed(it.message ?: "")
@@ -100,6 +102,15 @@ class LoginViewModel @Inject constructor(
                     Log.e("TAG", "loginWithArcGISEnterprise: $it")
                 }
             }
+        }
+    }
+
+    fun skipSignIn() {
+        _loginState.value = LoginState.Loading
+        viewModelScope.launch {
+            portalSettings.setPortalUrl(portalSettings.defaultPortalUrl)
+            portalSettings.setPortalConnection(Portal.Connection.Anonymous)
+            _loginState.value = LoginState.Success
         }
     }
 }

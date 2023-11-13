@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.featureformsapp.domain
 
+import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemData
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
 import kotlinx.coroutines.CoroutineDispatcher
@@ -53,8 +54,11 @@ class PortalItemUseCase(
 
     suspend fun deleteAll() = portalItemRepository.deleteAll()
 
-    suspend fun refresh(portalUri: String, forceUpdate: Boolean) =
-        portalItemRepository.refresh(portalUri, forceUpdate)
+    suspend fun refresh(
+        portalUri: String,
+        connection : Portal.Connection,
+        forceUpdate: Boolean,
+    ) = portalItemRepository.refresh(portalUri, connection, forceUpdate)
 
     suspend fun isEmpty(): Boolean = portalItemRepository.getItemCount() == 0
 

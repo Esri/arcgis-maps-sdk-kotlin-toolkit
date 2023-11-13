@@ -14,12 +14,13 @@ import kotlinx.coroutines.withContext
 class ItemRemoteDataSource(
     private val dispatcher: CoroutineDispatcher,
     private val itemApi: ItemApi = object : ItemApi {
-        override suspend fun fetchItems(portalUri : String): List<ItemData> {
+        override suspend fun fetchItems(portalUri : String, connection : Portal.Connection): List<ItemData> {
             // create a Portal
             val portal = Portal(
                 portalUri,
-                connection = Portal.Connection.Authenticated
+                connection = connection
             )
+            Log.e("TAG", "fetchItems: loading portal $portalUri", )
             // log an exception and return if the portal loading fails
             portal.load().onFailure {
                 Log.e("ItemRemoteDataSource", "error in fetchItems: ${it.message}")
@@ -27,6 +28,7 @@ class ItemRemoteDataSource(
             }.onSuccess {
                 Log.e("TAG", "fetchItems: sucess", )
             }
+            Log.e("TAG", "fetchItems: done loading", )
             val user = portal.user ?: return emptyList()
             // fetch the users content
             val portalUserContent = user.fetchContent().getOrElse { return emptyList() }
@@ -65,7 +67,7 @@ class ItemRemoteDataSource(
         const val portalFolder = "Apollo"
     }
 
-    suspend fun fetchItemData(portalUri : String): List<ItemData> = withContext(dispatcher) {
-        itemApi.fetchItems(portalUri)
+    suspend fun fetchItemData(portalUri : String, connection : Portal.Connection): List<ItemData> = withContext(dispatcher) {
+        itemApi.fetchItems(portalUri, connection)
     }
 }

@@ -39,13 +39,17 @@ class MapListViewModel @Inject constructor(
 
     // State flow to keep track of current loading state
     private val _isLoading = MutableStateFlow(false)
-    
+
     private val _searchText = MutableStateFlow("")
-    
+
     // State flow that combines the _isLoading and the PortalItemUseCase data flow to create
     // a MapListUIState
     val uiState: StateFlow<MapListUIState> =
-        combine(_isLoading, _searchText, portalItemUseCase.observe()) { isLoading, searchText, portalItemData ->
+        combine(
+            _isLoading,
+            _searchText,
+            portalItemUseCase.observe()
+        ) { isLoading, searchText, portalItemData ->
             val data = portalItemData.filter {
                 searchText.isEmpty()
                     || it.data.portalItem.title.uppercase().contains(searchText.uppercase())
@@ -80,12 +84,16 @@ class MapListViewModel @Inject constructor(
         if (!_isLoading.value) {
             viewModelScope.launch {
                 _isLoading.emit(true)
-                portalItemUseCase.refresh(portalSettings.getPortalUrl(), forceUpdate)
+                portalItemUseCase.refresh(
+                    portalSettings.getPortalUrl(),
+                    portalSettings.getPortalConnection(),
+                    forceUpdate
+                )
                 _isLoading.emit(false)
             }
         }
     }
-    
+
     fun filterPortalItems(filterText: String) {
         _searchText.value = filterText
     }
