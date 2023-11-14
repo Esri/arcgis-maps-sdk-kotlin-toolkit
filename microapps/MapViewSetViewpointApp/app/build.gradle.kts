@@ -90,5 +90,4 @@ dependencies {
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
     debugImplementation(libs.bundles.debug)
-    implementation(kotlin("reflect"))
 }

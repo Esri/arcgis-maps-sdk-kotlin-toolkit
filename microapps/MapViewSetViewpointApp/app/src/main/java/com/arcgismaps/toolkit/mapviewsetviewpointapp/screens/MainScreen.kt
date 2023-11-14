@@ -118,7 +118,7 @@ fun SetViewpointDropdownMenu(
     onDismissRequest: () -> Unit
 ) {
     val items = remember {
-        MapViewpointOperation::class.sealedSubclasses
+        listOf("Animate", "Center", "Rotate", "Scale", "Set", "SetBookmark", "SetBoundingGeometry")
     }
     val sofia = remember {
         Point(23.321736, 42.697703, SpatialReference.wgs84())
@@ -139,22 +139,26 @@ fun SetViewpointDropdownMenu(
         modifier = modifier
     ) {
         items.forEach {
-            val name = it.simpleName ?: error("No name found for operation type")
+            val name = it
             DropdownMenuItem(
                 text = { Text(text = name) },
                 onClick = {
                     val viewpointOperation = when (name) {
                         "Animate" -> MapViewpointOperation.Animate(
-                                    Viewpoint(sofia, scale),
-                                    5f,
-                                    AnimationCurve.EaseOutCubic
+                            Viewpoint(sofia, scale),
+                            5f,
+                            AnimationCurve.EaseOutCubic
                         )
+
                         "Center" -> MapViewpointOperation.Center(sofia, scale)
                         "Rotate" -> MapViewpointOperation.Rotate(0.0)
                         "Scale" -> MapViewpointOperation.Scale(scale)
                         "Set" -> MapViewpointOperation.Set(Viewpoint(sofia, scale))
                         "SetBookmark" -> MapViewpointOperation.SetBookmark(bookmark)
-                        "SetBoundingGeometry" -> MapViewpointOperation.SetBoundingGeometry(sofiaBounds)
+                        "SetBoundingGeometry" -> MapViewpointOperation.SetBoundingGeometry(
+                            sofiaBounds
+                        )
+
                         else -> error("Unexpected MapViewpointOperation")
                     }
                     onSetViewpointOperation(viewpointOperation)
