@@ -112,7 +112,8 @@ class MapListViewModel @Inject constructor(
         viewModelScope.launch {
             portalItemRepository.deleteAll()
             portalSettings.signOut()
-            delay(1000)
+            // add a artificial delay before navigating screens
+            delay(500)
             navigator.navigateTo(NavigationRoute.Login)
         }
     }

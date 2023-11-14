@@ -80,7 +80,6 @@ class PortalItemRepository(
             val localItems = getListOfMaps().map { ItemData(it) }
             // get network items
             val remoteItems = remoteDataSource.fetchItemData(portalUri, connection)
-            Log.e("TAG", "refresh: remoteitems ${remoteItems.count()}")
             // load the portal items and add them to cache
             loadAndCachePortalItems(localItems + remoteItems)
         }
@@ -106,8 +105,9 @@ class PortalItemRepository(
     private suspend fun loadAndCachePortalItems(items: List<ItemData>) {
         val entries = items.mapNotNull { itemData ->
             val portalItem = PortalItem(itemData.url)
+            // ignore if the portal items fails to load
             val result = portalItem.load().onFailure {
-                Log.e("TAG", "loadAndCachePortalItems: url-${itemData.url} $it")
+                Log.e("PortalItemRepository", "loadAndCachePortalItems: $it")
             }
             if (result.isFailure) {
                 null
@@ -138,7 +138,6 @@ class PortalItemRepository(
      */
     private suspend fun createCacheEntries(entries: List<ItemCacheEntry>) =
         withContext(dispatcher) {
-            Log.e("TAG", "createCacheEntries: entries ${entries.count()}")
             itemCacheDao.deleteAndInsert(entries)
         }
 
