@@ -34,6 +34,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.TimeExtent
 import com.arcgismaps.mapping.view.BackgroundGrid
 import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
@@ -74,6 +75,8 @@ import kotlinx.coroutines.launch
  * @param backgroundGrid the default color and context grid behind the map surface
  * @param wrapAroundMode the [WrapAroundMode] to specify whether continuous panning across the international date line is enabled
  * @param attributionState specifies the attribution bar's visibility, text changed and layout changed events
+ * @param timeExtent the [TimeExtent] used by the composable MapView
+ * @param onTimeExtentChanged lambda invoked when the composable MapView's [TimeExtent] is changed
  * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
  * @param onNavigationChanged lambda invoked when the navigation status of the composable MapView has changed
  * @param onMapRotationChanged lambda invoked when the rotation of this composable MapView has changed
@@ -108,6 +111,8 @@ public fun MapView(
     backgroundGrid: BackgroundGrid = BackgroundGrid(),
     wrapAroundMode: WrapAroundMode = WrapAroundMode.EnabledWhenSupported,
     attributionState: AttributionState = AttributionState(),
+    timeExtent: TimeExtent? = null,
+    onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
     onViewpointChanged: (() -> Unit)? = null,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
     onMapRotationChanged: ((Double) -> Unit)? = null,
@@ -134,15 +139,16 @@ public fun MapView(
         modifier = modifier.semantics { contentDescription = "MapView" },
         factory = { mapView },
         update = {
-              it.map = arcGISMap
-              it.selectionProperties = selectionProperties
-              it.interactionOptions = mapViewInteractionOptions
-              it.locationDisplay = locationDisplay
-              it.labeling = viewLabelProperties
-              it.wrapAroundMode = wrapAroundMode
-              it.geometryEditor = geometryEditor
-              it.grid = grid
-              it.backgroundGrid = backgroundGrid
+            it.map = arcGISMap
+            it.selectionProperties = selectionProperties
+            it.interactionOptions = mapViewInteractionOptions
+            it.locationDisplay = locationDisplay
+            it.labeling = viewLabelProperties
+            it.wrapAroundMode = wrapAroundMode
+            it.geometryEditor = geometryEditor
+            it.grid = grid
+            it.backgroundGrid = backgroundGrid
+            it.setTimeExtent(timeExtent)
         })
 
     DisposableEffect(Unit) {
@@ -175,6 +181,7 @@ public fun MapView(
 
     MapViewEventHandler(
         mapView,
+        onTimeExtentChanged,
         onViewpointChanged,
         onNavigationChanged,
         onMapRotationChanged,
@@ -225,6 +232,7 @@ private fun AttributionStateHandler(mapView: MapView, attributionState: Attribut
 @Composable
 private fun MapViewEventHandler(
     mapView: MapView,
+    onTimeExtentChanged: ((TimeExtent?) -> Unit)?,
     onViewpointChanged: (() -> Unit)?,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)?,
     onMapRotationChanged: ((Double) -> Unit)?,
@@ -242,6 +250,7 @@ private fun MapViewEventHandler(
     onPan: ((PanChangeEvent) -> Unit)?,
     onDrawStatusChanged: ((DrawStatus) -> Unit)?
 ) {
+    val currentTimeExtentChanged by rememberUpdatedState(onTimeExtentChanged)
     val currentViewPointChanged by rememberUpdatedState(onViewpointChanged)
     val currentOnNavigationChanged by rememberUpdatedState(onNavigationChanged)
     val currentOnMapRotationChanged by rememberUpdatedState(onMapRotationChanged)
@@ -260,6 +269,11 @@ private fun MapViewEventHandler(
     val currentOnDrawStatusChanged by rememberUpdatedState(onDrawStatusChanged)
 
     LaunchedEffect(Unit) {
+        launch {
+            mapView.timeExtent.collect { currentTimeExtent ->
+                currentTimeExtentChanged?.invoke(currentTimeExtent)
+            }
+        }
         launch {
             mapView.viewpointChanged.collect {
                 currentViewPointChanged?.invoke()
