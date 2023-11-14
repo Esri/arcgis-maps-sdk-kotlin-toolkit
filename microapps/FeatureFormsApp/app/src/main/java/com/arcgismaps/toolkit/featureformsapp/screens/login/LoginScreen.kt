@@ -59,6 +59,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arcgismaps.toolkit.authentication.Authenticator
+import com.arcgismaps.toolkit.authentication.AuthenticatorState
 import com.arcgismaps.toolkit.featureformsapp.AnimatedLoading
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -121,16 +122,16 @@ fun LoginScreen(
             }
         }
     }
-    if (showEnterpriseLogin) {
-        EnterpriseLogin(
-            onSubmit = { url ->
-                viewModel.loginWithArcGISEnterprise(url)
-            }
-        ) {
+    EnterpriseLogin(
+        visibilityProvider = { showEnterpriseLogin },
+        authenticatorState = viewModel.authenticatorState,
+        onLoginRequest = {
+            viewModel.loginWithArcGISEnterprise(it)
+        },
+        onCancel = {
             showEnterpriseLogin = false
         }
-        Authenticator(authenticatorState = viewModel.authenticatorState)
-    }
+    )
     LaunchedEffect(Unit) {
         viewModel.loginState.collect {
             if (it is LoginState.Success) {
@@ -145,6 +146,29 @@ fun LoginScreen(
 
 @Composable
 fun EnterpriseLogin(
+    visibilityProvider: () -> Boolean,
+    authenticatorState: AuthenticatorState,
+    onLoginRequest: (String) -> Unit,
+    onCancel: () -> Unit
+) {
+    val visible = visibilityProvider()
+    if (visible) {
+        var showPortalUrlForm by remember { mutableStateOf(true) }
+        Authenticator(authenticatorState = authenticatorState)
+        if (showPortalUrlForm) {
+            PortalURLForm(
+                onSubmit = {
+                    showPortalUrlForm = false
+                    onLoginRequest(it)
+                },
+                onCancel = onCancel
+            )
+        }
+    }
+}
+
+@Composable
+fun PortalURLForm(
     onSubmit: (String) -> Unit,
     onCancel: () -> Unit
 ) {
@@ -233,7 +257,7 @@ fun LoginOptions(
 @Preview(showSystemUi = true)
 @Composable
 fun EnterpriseLoginPreview() {
-    EnterpriseLogin(
+    PortalURLForm(
         onSubmit = { a ->
         }
     ) {
