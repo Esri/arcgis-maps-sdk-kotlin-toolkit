@@ -58,6 +58,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arcgismaps.toolkit.authentication.Authenticator
 import com.arcgismaps.toolkit.featureformsapp.AnimatedLoading
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -122,19 +123,20 @@ fun LoginScreen(
     }
     if (showEnterpriseLogin) {
         EnterpriseLogin(
-            onSubmit = { url, username, password ->
-                viewModel.loginWithArcGISEnterprise(url, username, password)
-                showEnterpriseLogin = false
+            onSubmit = { url ->
+                viewModel.loginWithArcGISEnterprise(url)
             }
         ) {
             showEnterpriseLogin = false
         }
+        Authenticator(authenticatorState = viewModel.authenticatorState)
     }
     LaunchedEffect(Unit) {
         viewModel.loginState.collect {
             if (it is LoginState.Success) {
                 onSuccessfulLogin()
             } else if (it is LoginState.Failed) {
+                showEnterpriseLogin = false
                 Toast.makeText(context, "Login failed : ${it.message}", Toast.LENGTH_LONG).show()
             }
         }
@@ -143,17 +145,15 @@ fun LoginScreen(
 
 @Composable
 fun EnterpriseLogin(
-    onSubmit: (String, String, String) -> Unit,
+    onSubmit: (String) -> Unit,
     onCancel: () -> Unit
 ) {
     var url by remember { mutableStateOf("") }
-    var username by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = {},
         confirmButton = {
             Button(onClick = {
-                onSubmit(url, username, password)
+                onSubmit(url)
             }) {
                 Text(text = "Login")
             }
@@ -178,44 +178,6 @@ fun EnterpriseLogin(
                     value = url,
                     onValueChange = { url = it },
                     label = { Text(text = "URL", style = MaterialTheme.typography.titleMedium) },
-                    placeholder = { Text(text = "Enter the URL") },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Uri,
-                        imeAction = ImeAction.Done
-                    )
-                )
-                OutlinedTextField(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight(),
-                    value = username,
-                    onValueChange = { username = it },
-                    label = {
-                        Text(
-                            text = "Username",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    },
-                    placeholder = { Text(text = "Enter the URL") },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Uri,
-                        imeAction = ImeAction.Done
-                    )
-                )
-                OutlinedTextField(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight(),
-                    value = password,
-                    onValueChange = { password = it },
-                    label = {
-                        Text(
-                            text = "Password",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    },
                     placeholder = { Text(text = "Enter the URL") },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
@@ -272,7 +234,7 @@ fun LoginOptions(
 @Composable
 fun EnterpriseLoginPreview() {
     EnterpriseLogin(
-        onSubmit = { a, b, c ->
+        onSubmit = { a ->
         }
     ) {
 

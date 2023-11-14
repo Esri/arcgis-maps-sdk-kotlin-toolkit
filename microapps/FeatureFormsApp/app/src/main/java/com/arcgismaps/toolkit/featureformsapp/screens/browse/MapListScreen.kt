@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -254,11 +253,13 @@ fun AppSearchBar(
         onValueChange = {
             onQueryChange(it)
         },
-        modifier = modifier.onFocusChanged {
-            if (it.hasFocus) {
-                active = true
+        modifier = modifier
+            .onFocusChanged {
+                if (it.hasFocus) {
+                    active = true
+                }
             }
-        }.height(56.dp),
+            .height(56.dp),
         placeholder = {
             Text(text = "Search Maps")
         },
@@ -281,7 +282,10 @@ fun AppSearchBar(
                         )
                     }
                 }
-                IconButton(onClick = { expanded = !expanded }) {
+                IconButton(onClick = {
+                    expanded = !expanded
+                    active = false
+                }) {
                     Icon(
                         imageVector = Icons.Default.AccountCircle,
                         contentDescription = null,
@@ -298,12 +302,16 @@ fun AppSearchBar(
                     DropdownMenu(
                         expanded = expanded,
                         onDismissRequest = { expanded = false },
-                        modifier = Modifier.wrapContentWidth(),
+                        modifier = Modifier.widthIn(150.dp),
                         offset = DpOffset(0.dp, 10.dp)
                     ) {
                         DropdownMenuItem(
                             text = {
-                                Text(text = if (username.isEmpty()) "Not logged in" else "Logged in as $username")
+                                Text(
+                                    text = if (username.isEmpty())
+                                        "Not logged in"
+                                    else "Logged in as $username",
+                                )
                             },
                             onClick = { }
                         )
@@ -337,7 +345,10 @@ fun AppSearchBar(
                                 onSignOut()
                             },
                             leadingIcon = {
-                                Icon(imageVector = Icons.Default.ExitToApp, contentDescription = null)
+                                Icon(
+                                    imageVector = Icons.Default.ExitToApp,
+                                    contentDescription = null
+                                )
                             }
                         )
                     }

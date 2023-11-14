@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureformsapp.screens.login
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arcgismaps.portal.Portal
@@ -38,24 +37,20 @@ class LoginViewModel @Inject constructor(
 
     private data class Credentials(val username: String = "", val password: String = "")
 
-    private val authenticatorState = AuthenticatorState()
+    val authenticatorState = AuthenticatorState()
 
     private val _loginState: MutableStateFlow<LoginState> = MutableStateFlow(LoginState.NotLoggedIn)
     val loginState = _loginState.asStateFlow()
 
-
-    private var credentials: Credentials = Credentials()
+    private var credentials: Credentials? = Credentials()
 
     init {
         viewModelScope.launch {
             launch {
-                authenticatorState.pendingServerTrustChallenge.collect {
-                    it?.trust()
-                }
-            }
-            launch {
                 authenticatorState.pendingUsernamePasswordChallenge.collect {
-                    it?.continueWithCredentials(credentials.username, credentials.password)
+                    if (credentials != null) {
+                        it?.continueWithCredentials(credentials!!.username, credentials!!.password)
+                    }
                 }
             }
         }
@@ -84,8 +79,9 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun loginWithArcGISEnterprise(url: String, username: String, password: String) {
-        credentials = Credentials(username, password)
+    fun loginWithArcGISEnterprise(url: String) {
+        credentials = null
+        _loginState.value = LoginState.Loading
         viewModelScope.launch(Dispatchers.IO) {
             authenticatorState.oAuthUserConfiguration = null
             portalSettings.setPortalUrl(url)
