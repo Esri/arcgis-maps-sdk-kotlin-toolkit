@@ -136,16 +136,16 @@ fun MapListScreen(
                             uiState.data
                         ) { item ->
                             MapListItem(
-                                title = item.data.portalItem.title,
-                                lastModified = item.data.portalItem.modified?.format("MMM dd yyyy")
+                                title = item.portalItem.title,
+                                lastModified = item.portalItem.modified?.format("MMM dd yyyy")
                                     ?: "",
-                                shareType = item.data.portalItem.access.encoding.uppercase(Locale.getDefault()),
-                                thumbnailUri = item.data.thumbnailUri.ifEmpty { null },
+                                shareType = item.portalItem.access.encoding.uppercase(Locale.getDefault()),
+                                thumbnailUri = item.thumbnailUri.ifEmpty { null },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(100.dp)
                             ) {
-                                onItemClick(item.data.portalItem.itemId)
+                                onItemClick(item.portalItem.itemId)
                             }
                         }
                     }

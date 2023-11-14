@@ -56,7 +56,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
             // show the top bar which changes available actions based on if the FeatureForm is
             // being shown and is in edit mode
             TopFormBar(
-                title = mapViewModel.portalItemData.data.portalItem.title,
+                title = mapViewModel.portalItem.title,
                 editingMode = inEditingMode,
                 onClose = {
                     scope.launch { mapViewModel.rollbackEdits(EditingTransactionState.NotEditing) }

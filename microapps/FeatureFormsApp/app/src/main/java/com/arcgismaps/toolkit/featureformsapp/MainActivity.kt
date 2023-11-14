@@ -42,6 +42,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+    // Interface to get the PortalSettings instance from Hilt
     @EntryPoint
     @InstallIn(SingletonComponent::class)
     interface PortalSettingsFactory {
@@ -62,6 +63,7 @@ class MainActivity : ComponentActivity() {
             }
         }
         lifecycleScope.launch {
+            // fetch the singleton PortalSettings
             val factory = EntryPointAccessors.fromApplication(
                 this@MainActivity,
                 PortalSettingsFactory::class.java
@@ -77,9 +79,11 @@ class MainActivity : ComponentActivity() {
             ArcGISEnvironment.authenticationManager.arcGISCredentialStore = arcGISCredentialStore
             // get the portal settings url
             val url = portalSettings.getPortalUrl()
+            // check if any credentials are present for this portal
             val credential =
                 ArcGISEnvironment.authenticationManager.arcGISCredentialStore.getCredential(url)
             appState.value = if (credential == null) {
+                // if the portal connection type set it Anonymous, then the user has skipped sign in
                 if (portalSettings.getPortalConnection() == Portal.Connection.Anonymous) {
                     AppState.SkipSignIn
                 } else {
@@ -98,6 +102,8 @@ fun FeatureFormApp(appState: AppState, navigator: Navigator) {
     } else {
         // create a NavController
         val navController = rememberNavController()
+        // if the user has logged in or skipped sign in, go to the Home screen, else present
+        // login screen
         val startDestination =
             if (appState is AppState.LoggedIn || appState is AppState.SkipSignIn) {
                 NavigationRoute.Home.route
@@ -142,6 +148,9 @@ fun AnimatedLoading(
     }
 }
 
+/**
+ * Represents the current app state based on the login state of the user.
+ */
 sealed class AppState {
     object Loading : AppState()
     object LoggedIn : AppState()

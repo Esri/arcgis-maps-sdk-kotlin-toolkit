@@ -5,9 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.toolkit.authentication.AuthenticatorState
+import com.arcgismaps.toolkit.featureformsapp.data.PortalItemData
+import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
 import com.arcgismaps.toolkit.featureformsapp.data.PortalSettings
-import com.arcgismaps.toolkit.featureformsapp.domain.PortalItemUseCase
-import com.arcgismaps.toolkit.featureformsapp.domain.PortalItemWithLayer
 import com.arcgismaps.toolkit.featureformsapp.navigation.NavigationRoute
 import com.arcgismaps.toolkit.featureformsapp.navigation.Navigator
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,7 +23,7 @@ import javax.inject.Inject
 data class MapListUIState(
     val isLoading: Boolean,
     val searchText: String,
-    val data: List<PortalItemWithLayer>
+    val data: List<PortalItemData>
 )
 
 /**
@@ -32,7 +32,7 @@ data class MapListUIState(
 @HiltViewModel
 class MapListViewModel @Inject constructor(
     @Suppress("UNUSED_PARAMETER") savedStateHandle: SavedStateHandle,
-    private val portalItemUseCase: PortalItemUseCase,
+    private val portalItemRepository: PortalItemRepository,
     private val portalSettings: PortalSettings,
     private val navigator: Navigator
 ) : ViewModel() {
@@ -50,12 +50,12 @@ class MapListViewModel @Inject constructor(
         combine(
             _isLoading,
             _searchText,
-            portalItemUseCase.observe()
+            portalItemRepository.observe()
         ) { isLoading, searchText, portalItemData ->
             val data = portalItemData.filter {
                 searchText.isEmpty()
-                    || it.data.portalItem.title.uppercase().contains(searchText.uppercase())
-                    || it.data.portalItem.itemId.contains(searchText)
+                    || it.portalItem.title.uppercase().contains(searchText.uppercase())
+                    || it.portalItem.itemId.contains(searchText)
             }
             MapListUIState(isLoading, searchText, data)
         }.stateIn(
@@ -68,7 +68,7 @@ class MapListViewModel @Inject constructor(
         viewModelScope.launch {
             // if the data is empty, refresh it
             // this is used to identify first launch
-            if (portalItemUseCase.isEmpty()) {
+            if (portalItemRepository.getItemCount() == 0) {
                 refresh(false)
             }
         }
@@ -94,7 +94,7 @@ class MapListViewModel @Inject constructor(
         if (!_isLoading.value) {
             viewModelScope.launch {
                 _isLoading.emit(true)
-                portalItemUseCase.refresh(
+                portalItemRepository.refresh(
                     portalSettings.getPortalUrl(),
                     portalSettings.getPortalConnection(),
                     forceUpdate
@@ -110,7 +110,7 @@ class MapListViewModel @Inject constructor(
 
     fun signOut() {
         viewModelScope.launch {
-            portalItemUseCase.deleteAll()
+            portalItemRepository.deleteAll()
             portalSettings.signOut()
             delay(1000)
             navigator.navigateTo(NavigationRoute.Login)
