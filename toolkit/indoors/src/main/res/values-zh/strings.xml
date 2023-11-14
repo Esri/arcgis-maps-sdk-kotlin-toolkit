@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="floor_filter_view_filter_hint_sites">试_Filter sites…______________验</string>
+    <string name="floor_filter_view_filter_hint_facilities">试_Filter facilities…___________________验</string>
+    <string name="floor_filter_select_site">试_Select a site______________验</string>
+    <string name="floor_filter_select_facility">试_Select a facility__________________验</string>
+    <string name="floor_filter_no_results">试_No results found__________________验.</string>
+    <string name="floor_filter_site_selector_top_bar">试_Site\u0020-\u0020__________________验</string>
+</resources>

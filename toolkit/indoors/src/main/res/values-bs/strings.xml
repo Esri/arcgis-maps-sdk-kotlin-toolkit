@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="floor_filter_view_filter_hint_sites">Č_Filter sites…______________ž</string>
+    <string name="floor_filter_view_filter_hint_facilities">Č_Filter facilities…___________________ž</string>
+    <string name="floor_filter_select_site">Č_Select a site______________ž</string>
+    <string name="floor_filter_select_facility">Č_Select a facility__________________ž</string>
+    <string name="floor_filter_no_results">Č_No results found__________________ž.</string>
+    <string name="floor_filter_site_selector_top_bar">Č_Site\u0020-\u0020__________________ž</string>
+</resources>
