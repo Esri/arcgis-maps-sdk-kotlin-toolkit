@@ -3,6 +3,7 @@ package com.arcgismaps.toolkit.featureformsapp.screens.browse
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.toolkit.authentication.AuthenticatorState
 import com.arcgismaps.toolkit.featureformsapp.data.PortalSettings
 import com.arcgismaps.toolkit.featureformsapp.domain.PortalItemUseCase
@@ -76,6 +77,14 @@ class MapListViewModel @Inject constructor(
                 it?.trust()
             }
         }
+    }
+
+    fun getUsername(): String {
+        val credential =
+            ArcGISEnvironment.authenticationManager.arcGISCredentialStore.getCredential(
+                portalSettings.getPortalUrl()
+            )
+        return credential?.username ?: ""
     }
 
     /**
