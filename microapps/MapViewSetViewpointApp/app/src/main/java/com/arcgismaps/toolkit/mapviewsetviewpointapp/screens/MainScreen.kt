@@ -53,6 +53,12 @@ import com.arcgismaps.mapping.view.AnimationCurve
 import com.arcgismaps.toolkit.geocompose.MapView
 import com.arcgismaps.toolkit.geocompose.MapViewpointOperation
 
+/**
+ * Displays a composable [com.arcgismaps.toolkit.geocompose.MapView] and permits setting the viewpoint
+ * using options in a dropdown menu. The dropdown menu options represent different methods of setting
+ * the viewpoint, and all of the center on the same location. A circular progress indicator is displayed
+ * over the map while an operation is in progress.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {

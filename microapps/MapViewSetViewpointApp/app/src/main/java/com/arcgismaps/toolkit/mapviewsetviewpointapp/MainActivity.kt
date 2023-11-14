@@ -31,8 +31,7 @@ import com.arcgismaps.toolkit.mapviewsetviewpointapp.ui.theme.MapViewSetViewpoin
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        ArcGISEnvironment.apiKey =
-            ApiKey.create(BuildConfig.API_KEY)
+        ArcGISEnvironment.apiKey = ApiKey.create(BuildConfig.API_KEY)
         setContent {
             MapViewSetViewpointAppTheme {
                 MapViewSetViewpointApp()
