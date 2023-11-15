@@ -1,4 +1,5 @@
 /*
+ *
  *  Copyright 2023 Esri
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,20 +16,14 @@
  *
  */
 
-package com.arcgismaps.toolkit.geocompose
+package com.arcgismaps.toolkit.mapviewinsetsapp.ui.theme
 
-import androidx.compose.runtime.Stable
-import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
+import androidx.compose.ui.graphics.Color
 
-/**
- * State holder for attribution bar related properties/events on the [com.arcgismaps.toolkit.geocompose.MapView].
- *
- * @since 200.3.0
- */
-@Stable
-public data class AttributionState(
-    val isAttributionBarVisible: Boolean = true,
-    val onAttributionTextChanged: ((String) -> Unit)? = null,
-    val onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)? = null
-)
+val Purple80 = Color(0xFFD0BCFF)
+val PurpleGrey80 = Color(0xFFCCC2DC)
+val Pink80 = Color(0xFFEFB8C8)
 
+val Purple40 = Color(0xFF6650a4)
+val PurpleGrey40 = Color(0xFF625b71)
+val Pink40 = Color(0xFF7D5260)

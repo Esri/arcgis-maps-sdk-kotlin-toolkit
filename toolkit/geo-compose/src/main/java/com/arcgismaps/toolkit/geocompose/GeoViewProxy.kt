@@ -17,18 +17,10 @@
 
 package com.arcgismaps.toolkit.geocompose
 
-import androidx.compose.runtime.Stable
-import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
-
 /**
- * State holder for attribution bar related properties/events on the [com.arcgismaps.toolkit.geocompose.MapView].
+ * Used to perform operations on a composable MapView or SceneView.
  *
  * @since 200.3.0
  */
-@Stable
-public data class AttributionState(
-    val isAttributionBarVisible: Boolean = true,
-    val onAttributionTextChanged: ((String) -> Unit)? = null,
-    val onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)? = null
-)
-
+public sealed class GeoViewProxy {
+}

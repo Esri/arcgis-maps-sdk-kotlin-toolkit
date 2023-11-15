@@ -1,4 +1,5 @@
 /*
+ *
  *  Copyright 2023 Esri
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,20 +16,19 @@
  *
  */
 
-package com.arcgismaps.toolkit.geocompose
+package com.arcgismaps.toolkit.mapviewinsetsapp
 
-import androidx.compose.runtime.Stable
-import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
+import org.junit.Assert.assertEquals
+import org.junit.Test
 
 /**
- * State holder for attribution bar related properties/events on the [com.arcgismaps.toolkit.geocompose.MapView].
+ * Example local unit test, which will execute on the development machine (host).
  *
- * @since 200.3.0
+ * See [testing documentation](http://d.android.com/tools/testing).
  */
-@Stable
-public data class AttributionState(
-    val isAttributionBarVisible: Boolean = true,
-    val onAttributionTextChanged: ((String) -> Unit)? = null,
-    val onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)? = null
-)
-
+class ExampleUnitTest {
+    @Test
+    fun addition_isCorrect() {
+        assertEquals(4, 2 + 2)
+    }
+}
