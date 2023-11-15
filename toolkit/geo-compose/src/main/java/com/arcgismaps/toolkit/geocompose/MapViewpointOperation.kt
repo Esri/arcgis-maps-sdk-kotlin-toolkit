@@ -69,7 +69,7 @@ public sealed class MapViewpointOperation {
      */
     public class Animate(
         public val viewpoint: Viewpoint,
-        public val durationSeconds: Float = 0f,
+        public val durationSeconds: Float = 0.25f,
         public val curve: AnimationCurve? = null
     ) : MapViewpointOperation()
 
