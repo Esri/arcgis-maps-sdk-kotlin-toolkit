@@ -1,5 +1,7 @@
 package com.arcgismaps.toolkit.featureformsapp.screens.map
 
+import android.content.Context
+import android.content.res.Configuration
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,15 +20,21 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.window.core.layout.WindowHeightSizeClass
+import androidx.window.core.layout.WindowSizeClass
+import androidx.window.core.layout.WindowWidthSizeClass
+import androidx.window.layout.WindowMetricsCalculator
 import com.arcgismaps.toolkit.composablemap.ComposableMap
 import com.arcgismaps.toolkit.featureforms.EditingTransactionState
 import com.arcgismaps.toolkit.featureforms.FeatureForm
@@ -36,6 +44,8 @@ import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetValue
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.StandardBottomSheet
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.StandardBottomSheetLayout
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.rememberStandardBottomSheetState
+import com.arcgismaps.toolkit.featureformsapp.screens.sidesheet.SideSheet
+import com.arcgismaps.toolkit.featureformsapp.screens.sidesheet.SideSheetLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -48,6 +58,11 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
         remember { mapViewModel.transactionState.map { it is EditingTransactionState.Editing } }
     val inEditingMode by editingFlow.collectAsState(initial = false)
     val context = LocalContext.current
+    val configuration = LocalConfiguration.current
+    val windowSize = getWindowSize(context)
+    val isExpanded = windowSize.windowWidthSizeClass == WindowWidthSizeClass.EXPANDED
+        && windowSize.windowHeightSizeClass != WindowHeightSizeClass.COMPACT
+        && configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -65,7 +80,10 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                     scope.launch {
                         mapViewModel.commitEdits(EditingTransactionState.NotEditing)
                             .onFailure {
-                                Log.w("Forms", "applying edits from feature form failed with ${it.message}")
+                                Log.w(
+                                    "Forms",
+                                    "applying edits from feature form failed with ${it.message}"
+                                )
                                 launch(Dispatchers.Main) {
                                     Toast.makeText(
                                         context,
@@ -88,27 +106,43 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
             mapState = mapViewModel
         )
         if (inEditingMode) {
-            val bottomSheetState = rememberStandardBottomSheetState(
-                initialValue = SheetValue.PartiallyExpanded,
-                confirmValueChange = { it != SheetValue.Hidden },
-                skipHiddenState = false
-            )
-            StandardBottomSheetLayout(
-                modifier = Modifier.padding(padding),
-                sheetOffset = { bottomSheetState.requireOffset() }
-            ) { layoutHeight ->
-                StandardBottomSheet(
-                    state = bottomSheetState,
-                    peekHeight = 40.dp,
-                    expansionHeight = SheetExpansionHeight(0.5f),
-                    sheetSwipeEnabled = true,
-                    layoutHeight = layoutHeight.toFloat()
-                ) {
-                    // set bottom sheet content to the FeatureForm
+            val featureForm = remember {
+                movableContentOf {
                     FeatureForm(
                         featureFormState = mapViewModel,
                         modifier = Modifier.fillMaxSize()
                     )
+                }
+            }
+            if (isExpanded) {
+                SideSheetLayout(
+                    modifier = Modifier.padding(padding)
+                ) { layoutWidth ->
+                    SideSheet(layoutWidth = layoutWidth) {
+                        // set side sheet content to the FeatureForm
+                        featureForm()
+                    }
+                }
+            } else {
+                val bottomSheetState = rememberStandardBottomSheetState(
+                    initialValue = SheetValue.PartiallyExpanded,
+                    confirmValueChange = { it != SheetValue.Hidden },
+                    skipHiddenState = false
+                )
+                StandardBottomSheetLayout(
+                    modifier = Modifier.padding(padding),
+                    sheetOffset = { bottomSheetState.requireOffset() }
+                ) { layoutHeight ->
+                    StandardBottomSheet(
+                        state = bottomSheetState,
+                        peekHeight = 40.dp,
+                        expansionHeight = SheetExpansionHeight(0.5f),
+                        sheetSwipeEnabled = true,
+                        layoutHeight = layoutHeight.toFloat()
+                    ) {
+                        // set bottom sheet content to the FeatureForm
+                        featureForm()
+                    }
                 }
             }
         }
@@ -118,7 +152,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopFormBar(
-    title : String,
+    title: String,
     editingMode: Boolean,
     onClose: () -> Unit = {},
     onSave: () -> Unit = {},
@@ -155,6 +189,14 @@ fun TopFormBar(
             }
         }
     )
+}
+
+fun getWindowSize(context: Context): WindowSizeClass {
+    val metrics = WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(context)
+    val width = metrics.bounds.width()
+    val height = metrics.bounds.height()
+    val density = context.resources.displayMetrics.density
+    return WindowSizeClass.compute(width / density, height / density)
 }
 
 @Preview
