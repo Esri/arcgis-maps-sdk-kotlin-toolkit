@@ -71,7 +71,7 @@ public sealed class MapViewpointOperation {
      * Animates the map view to the bounding geometry with padding applied.
      *
      * @property boundingGeometry the geometry to zoom to. If the spatial reference of the geometry is
-     * different to that of the [MapView], it will be reprojected appropriately
+     * different to that of the composable [MapView], it will be reprojected appropriately
      * @property paddingInDips a distance around the geometry to include in the Viewpoint when zooming,
      * in density-independent pixels
      * @since 200.3.0
@@ -113,7 +113,7 @@ public sealed class MapViewpointOperation {
 }
 
 /**
- * Executes the [MapViewpointOperation] on the given [MapView]. The operation can be awaited using
+ * Executes the [MapViewpointOperation] on the given view-based [MapView]. The operation can be awaited using
  * [MapViewpointOperation.await].
  *
  * @param mapView the view-based MapView to execute this operation on

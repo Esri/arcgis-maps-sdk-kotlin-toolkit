@@ -54,18 +54,16 @@ import com.arcgismaps.toolkit.geocompose.MapView
 import com.arcgismaps.toolkit.geocompose.MapViewpointOperation
 
 /**
- * Displays a composable [com.arcgismaps.toolkit.geocompose.MapView] and permits setting the viewpoint
- * using options in a dropdown menu. The dropdown menu options represent different methods of setting
- * the viewpoint, and all of the center on the same location. A circular progress indicator is displayed
- * over the map while an operation is in progress.
+ * Displays a composable [MapView] and permits setting the viewpoint using options in a dropdown menu.
+ * The dropdown menu options represent different methods of setting the viewpoint, and all of them center
+ * on the same location. A circular progress indicator is displayed over the map while an operation
+ * is in progress.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
     val arcGISMap by remember { mutableStateOf(ArcGISMap(BasemapStyle.ArcGISStreets)) }
-    var mapViewpointOperation: MapViewpointOperation? by remember {
-        mutableStateOf(null)
-    }
+    var mapViewpointOperation: MapViewpointOperation? by remember { mutableStateOf(null) }
     var showProgressIndicator by remember { mutableStateOf(false) }
     LaunchedEffect(key1 = mapViewpointOperation) {
         showProgressIndicator = true
@@ -87,13 +85,10 @@ fun MainScreen() {
                     }
 
                     SetViewpointDropdownMenu(
-                        onSetViewpointOperation = {
-                            mapViewpointOperation = it
-                        },
-                        expanded = actionsExpanded
-                    ) {
-                        actionsExpanded = false
-                    }
+                        expanded = actionsExpanded,
+                        onSetViewpointOperation = { mapViewpointOperation = it },
+                        onDismissRequest = { actionsExpanded = false }
+                    )
                 }
             )
         },
@@ -105,7 +100,7 @@ fun MainScreen() {
             contentAlignment = Alignment.Center
         ) {
             MapView(
-                Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
                 arcGISMap = arcGISMap,
                 viewpointOperation = mapViewpointOperation
             )
@@ -116,14 +111,17 @@ fun MainScreen() {
     }
 }
 
+/**
+ * A drop down menu providing [MapViewpointOperation]s for the composable [MapView].
+ */
 @Composable
 fun SetViewpointDropdownMenu(
-    onSetViewpointOperation: (MapViewpointOperation) -> Unit,
-    modifier: Modifier = Modifier,
     expanded: Boolean,
+    modifier: Modifier = Modifier,
+    onSetViewpointOperation: (MapViewpointOperation) -> Unit,
     onDismissRequest: () -> Unit
 ) {
-    val items = remember {
+    val viewpointOperationsList = remember {
         listOf("Animate", "Center", "Rotate", "Scale", "Set", "SetBookmark", "SetBoundingGeometry")
     }
     val sofia = remember {
@@ -144,12 +142,12 @@ fun SetViewpointDropdownMenu(
         onDismissRequest = onDismissRequest,
         modifier = modifier
     ) {
-        items.forEach {
-            val name = it
+        viewpointOperationsList.forEach {
+            val viewpointOperationName = it
             DropdownMenuItem(
-                text = { Text(text = name) },
+                text = { Text(text = viewpointOperationName) },
                 onClick = {
-                    val viewpointOperation = when (name) {
+                    val viewpointOperation = when (viewpointOperationName) {
                         "Animate" -> MapViewpointOperation.Animate(
                             Viewpoint(sofia, scale),
                             5f,

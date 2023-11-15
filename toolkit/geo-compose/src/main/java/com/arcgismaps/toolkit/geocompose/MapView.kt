@@ -174,7 +174,7 @@ public fun MapView(
 }
 
 /**
- * Updates the viewpoint of the provided [mapView] using the given [viewpointOperation]. This will be
+ * Updates the viewpoint of the provided view-based [mapView] using the given [viewpointOperation]. This will be
  * recomposed when [viewpointOperation] changes.
  *
  * @since 200.3.0
