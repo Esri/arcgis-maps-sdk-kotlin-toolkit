@@ -166,7 +166,7 @@ fun MapListScreen(
             showSignOutProgress
         },
         modifier = Modifier.fillMaxSize(),
-        statusText = "Signing out.."
+        statusText = if (mapListViewModel.getUsername().isEmpty()) "Loading.." else "Signing out.."
     )
 }
 
@@ -308,9 +308,11 @@ fun AppSearchBar(
                         DropdownMenuItem(
                             text = {
                                 Text(
-                                    text = if (username.isEmpty())
+                                    text = if (username.isEmpty()) {
                                         "Not logged in"
-                                    else "Logged in as $username",
+                                    } else {
+                                        "Logged in as $username"
+                                    }
                                 )
                             },
                             onClick = { }
@@ -338,7 +340,15 @@ fun AppSearchBar(
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text(text = "Sign Out") },
+                            text = {
+                                Text(
+                                    text = if (username.isEmpty()) {
+                                        "Sign In"
+                                    } else {
+                                        "Sign Out"
+                                    }
+                                )
+                            },
                             enabled = !isLoading,
                             onClick = {
                                 expanded = false
