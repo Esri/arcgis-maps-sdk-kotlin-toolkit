@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.view.MapView
@@ -13,8 +14,8 @@ import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.toolkit.composablemap.MapState
 import com.arcgismaps.toolkit.featureforms.EditingTransactionState
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
-import com.arcgismaps.toolkit.featureformsapp.domain.PortalItemUseCase
-import com.arcgismaps.toolkit.featureformsapp.domain.PortalItemWithLayer
+import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
+import com.arcgismaps.toolkit.featureformsapp.di.PortalItemRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -27,17 +28,17 @@ import javax.inject.Inject
 @HiltViewModel
 class MapViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    val portalItemUseCase: PortalItemUseCase
+    private val portalItemRepository: PortalItemRepository
 ) : ViewModel(),
     MapState by MapState(),
     FeatureFormState by FeatureFormState() {
     private val itemId: String = savedStateHandle["uri"]!!
-    lateinit var portalItemData: PortalItemWithLayer
+    lateinit var portalItem: PortalItem
 
     init {
         viewModelScope.launch {
-            portalItemData = portalItemUseCase(itemId) ?: return@launch
-            setMap(ArcGISMap(portalItemData.data.portalItem))
+            portalItem = portalItemRepository(itemId) ?: return@launch
+            setMap(ArcGISMap(portalItem))
         }
     }
 

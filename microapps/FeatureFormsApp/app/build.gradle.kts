@@ -62,6 +62,7 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class).all {
 }
 
 dependencies {
+    implementation(project(":authentication"))
     implementation(project(":featureforms"))
     implementation(project(":composable-map"))
     // sdk

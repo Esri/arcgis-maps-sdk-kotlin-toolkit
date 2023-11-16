@@ -9,4 +9,5 @@
     <string name="map_url_range_domain_combo">https://runtimecoretest.maps.arcgis.com/home/item.html?id=bb4c5e81740e4e7296943988c78a7ea6</string>
     <string name="map_url_all_text_state">https://runtimecoretest.maps.arcgis.com/home/item.html?id=5d69e2301ad14ec8a73b568dfc29450a</string>
     <string name="map_url_redlands_hydrants">https://runtimecoretest.maps.arcgis.com/home/item.html?id=0f6864ddc35241649e5ad2ee61a3abe4</string>
+    <string name="agol_portal_url">https://www.arcgis.com</string>
 </resources>
