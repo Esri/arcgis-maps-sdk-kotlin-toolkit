@@ -61,8 +61,8 @@ fun SideSheetLayout(
 
     SubcomposeLayout(modifier = modifier) { constraints ->
         val layoutWidth = if (showAsSideSheet) {
-            // set the max width to the greater of 40% of the available size or the maxWidth
-            Integer.max(constraints.maxWidth * 2/5, maxWidthInPx)
+            // set the max width to 40% of the available size
+            constraints.maxWidth * 2/5
         } else {
             // set the max width to the lesser of the available size or the maxWidth
             Integer.min(constraints.maxWidth, maxWidthInPx)
