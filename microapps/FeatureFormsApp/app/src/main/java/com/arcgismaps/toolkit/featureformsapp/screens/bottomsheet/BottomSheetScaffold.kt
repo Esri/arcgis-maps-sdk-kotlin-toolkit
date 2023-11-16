@@ -26,6 +26,8 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.requiredHeightIn
+import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -50,6 +52,7 @@ import androidx.compose.ui.semantics.dismiss
 import androidx.compose.ui.semantics.expand
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import java.lang.Float.max
 import kotlin.math.roundToInt
@@ -141,6 +144,7 @@ fun BottomSheetScaffold(
                 expansionHeight = sheetExpansionHeight,
                 sheetSwipeEnabled = sheetSwipeEnabled,
                 layoutHeight = layoutHeight.toFloat(),
+                layoutWidth = BottomSheetMaxWidth,
                 shape = sheetShape,
                 containerColor = sheetContainerColor,
                 contentColor = sheetContentColor,
@@ -210,6 +214,7 @@ fun StandardBottomSheet(
     peekHeight: Dp,
     expansionHeight: SheetExpansionHeight,
     layoutHeight: Float,
+    layoutWidth: Dp,
     sheetSwipeEnabled: Boolean = true,
     shape: Shape = BottomSheetDefaults.ExpandedShape,
     containerColor: Color = BottomSheetDefaults.ContainerColor,
@@ -241,8 +246,10 @@ fun StandardBottomSheet(
     }
     Surface(
         modifier = Modifier
-            .widthIn(max = BottomSheetMaxWidth)
-            .fillMaxWidth()
+            //.widthIn(max = BottomSheetMaxWidth)
+            //.fillMaxWidth()
+            .width(layoutWidth)
+            //.fillMaxWidth()
             .requiredHeightIn(min = peekHeight)
             .nestedScroll(
                 remember(state.swipeableState) {

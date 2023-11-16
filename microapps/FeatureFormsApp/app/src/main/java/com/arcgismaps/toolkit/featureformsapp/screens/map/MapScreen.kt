@@ -1,11 +1,17 @@
 package com.arcgismaps.toolkit.featureformsapp.screens.map
 
 import android.content.Context
-import android.content.res.Configuration
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.with
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
@@ -31,9 +37,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.window.core.layout.WindowHeightSizeClass
 import androidx.window.core.layout.WindowSizeClass
-import androidx.window.core.layout.WindowWidthSizeClass
 import androidx.window.layout.WindowMetricsCalculator
 import com.arcgismaps.toolkit.composablemap.ComposableMap
 import com.arcgismaps.toolkit.featureforms.EditingTransactionState
@@ -41,16 +45,14 @@ import com.arcgismaps.toolkit.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureformsapp.R
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetExpansionHeight
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetValue
+import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SideSheetLayout
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.StandardBottomSheet
-import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.StandardBottomSheetLayout
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.rememberStandardBottomSheetState
-import com.arcgismaps.toolkit.featureformsapp.screens.sidesheet.SideSheet
-import com.arcgismaps.toolkit.featureformsapp.screens.sidesheet.SideSheetLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () -> Unit = {}) {
     // only recompose when showing or hiding the bottom sheet
@@ -60,9 +62,6 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
     val context = LocalContext.current
     val configuration = LocalConfiguration.current
     val windowSize = getWindowSize(context)
-    val isExpanded = windowSize.windowWidthSizeClass == WindowWidthSizeClass.EXPANDED
-        && windowSize.windowHeightSizeClass != WindowHeightSizeClass.COMPACT
-        && configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -105,44 +104,37 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                 .fillMaxSize(),
             mapState = mapViewModel
         )
-        if (inEditingMode) {
-            val featureForm = remember {
-                movableContentOf {
+        AnimatedVisibility(
+            visible = inEditingMode,
+            enter = slideInVertically { h -> h },
+            exit = slideOutVertically { h -> h },
+            label = "feature form"
+        ) {
+            val bottomSheetState = rememberStandardBottomSheetState(
+                initialValue = SheetValue.PartiallyExpanded,
+                confirmValueChange = { it != SheetValue.Hidden },
+                skipHiddenState = false
+            )
+            SideSheetLayout(
+                modifier = Modifier.padding(padding),
+                windowSizeClass = windowSize,
+                configuration = configuration,
+                sheetOffset = { bottomSheetState.requireOffset() }
+            ) { layoutWidth, layoutHeight ->
+                StandardBottomSheet(
+                    state = bottomSheetState,
+                    peekHeight = 40.dp,
+                    expansionHeight = SheetExpansionHeight(0.5f),
+                    sheetSwipeEnabled = true,
+                    shape = RoundedCornerShape(5.dp),
+                    layoutHeight = layoutHeight.toFloat(),
+                    layoutWidth = layoutWidth.dp
+                ) {
+                    // set bottom sheet content to the FeatureForm
                     FeatureForm(
                         featureFormState = mapViewModel,
                         modifier = Modifier.fillMaxSize()
                     )
-                }
-            }
-            if (isExpanded) {
-                SideSheetLayout(
-                    modifier = Modifier.padding(padding)
-                ) { layoutWidth ->
-                    SideSheet(layoutWidth = layoutWidth) {
-                        // set side sheet content to the FeatureForm
-                        featureForm()
-                    }
-                }
-            } else {
-                val bottomSheetState = rememberStandardBottomSheetState(
-                    initialValue = SheetValue.PartiallyExpanded,
-                    confirmValueChange = { it != SheetValue.Hidden },
-                    skipHiddenState = false
-                )
-                StandardBottomSheetLayout(
-                    modifier = Modifier.padding(padding),
-                    sheetOffset = { bottomSheetState.requireOffset() }
-                ) { layoutHeight ->
-                    StandardBottomSheet(
-                        state = bottomSheetState,
-                        peekHeight = 40.dp,
-                        expansionHeight = SheetExpansionHeight(0.5f),
-                        sheetSwipeEnabled = true,
-                        layoutHeight = layoutHeight.toFloat()
-                    ) {
-                        // set bottom sheet content to the FeatureForm
-                        featureForm()
-                    }
                 }
             }
         }
