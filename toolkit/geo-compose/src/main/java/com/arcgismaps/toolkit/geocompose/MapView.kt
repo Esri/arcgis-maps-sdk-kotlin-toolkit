@@ -62,6 +62,8 @@ import kotlinx.coroutines.launch
  *
  * @param modifier Modifier to be applied to the composable MapView
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable MapView
+ * @param viewpointOperation a [MapViewpointOperation] that changes this MapView to a new viewpoint
+ * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
  * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable MapView
  * @param locationDisplay the [LocationDisplay] used by the composable MapView
  * @param geometryEditor the [GeometryEditor] used by the composable MapView to create and edit geometries by user interaction.
@@ -77,7 +79,6 @@ import kotlinx.coroutines.launch
  * @param attributionState specifies the attribution bar's visibility, text changed and layout changed events
  * @param timeExtent the [TimeExtent] used by the composable MapView
  * @param onTimeExtentChanged lambda invoked when the composable MapView's [TimeExtent] is changed
- * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
  * @param onNavigationChanged lambda invoked when the navigation status of the composable MapView has changed
  * @param onMapRotationChanged lambda invoked when the rotation of this composable MapView has changed
  * @param onMapScaleChanged lambda invoked when the scale of this composable MapView has changed
@@ -99,6 +100,8 @@ import kotlinx.coroutines.launch
 public fun MapView(
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap? = null,
+    viewpointOperation: MapViewpointOperation? = null,
+    onViewpointChanged: (() -> Unit)? = null,
     graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     geometryEditor: GeometryEditor? = null,
@@ -113,7 +116,6 @@ public fun MapView(
     attributionState: AttributionState = AttributionState(),
     timeExtent: TimeExtent? = null,
     onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
-    onViewpointChanged: (() -> Unit)? = null,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
     onMapRotationChanged: ((Double) -> Unit)? = null,
     onMapScaleChanged: ((Double) -> Unit)? = null,
@@ -159,6 +161,8 @@ public fun MapView(
         }
     }
 
+    ViewpointUpdater(mapView, viewpointOperation)
+
     DisposableEffect(mapViewProxy) {
         mapViewProxy?.setMapView(mapView)
         onDispose {
@@ -201,6 +205,22 @@ public fun MapView(
     )
 
     GraphicsOverlaysUpdater(graphicsOverlays, mapView)
+}
+
+/**
+ * Updates the viewpoint of the provided view-based [mapView] using the given [viewpointOperation]. This will be
+ * recomposed when [viewpointOperation] changes.
+ *
+ * @since 200.3.0
+ */
+@Composable
+private fun ViewpointUpdater(
+    mapView: MapView,
+    viewpointOperation: MapViewpointOperation?
+) {
+    LaunchedEffect(viewpointOperation) {
+        viewpointOperation?.execute(mapView)
+    }
 }
 
 /**
