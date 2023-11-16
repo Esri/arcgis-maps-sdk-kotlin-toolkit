@@ -27,8 +27,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.requiredWidth
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -52,7 +50,6 @@ import androidx.compose.ui.semantics.dismiss
 import androidx.compose.ui.semantics.expand
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import java.lang.Float.max
 import kotlin.math.roundToInt
@@ -144,7 +141,7 @@ fun BottomSheetScaffold(
                 expansionHeight = sheetExpansionHeight,
                 sheetSwipeEnabled = sheetSwipeEnabled,
                 layoutHeight = layoutHeight.toFloat(),
-                layoutWidth = BottomSheetMaxWidth,
+                sheetWidth = BottomSheetMaxWidth,
                 shape = sheetShape,
                 containerColor = sheetContainerColor,
                 contentColor = sheetContentColor,
@@ -214,7 +211,7 @@ fun StandardBottomSheet(
     peekHeight: Dp,
     expansionHeight: SheetExpansionHeight,
     layoutHeight: Float,
-    layoutWidth: Dp,
+    sheetWidth: Dp,
     sheetSwipeEnabled: Boolean = true,
     shape: Shape = BottomSheetDefaults.ExpandedShape,
     containerColor: Color = BottomSheetDefaults.ContainerColor,
@@ -227,7 +224,6 @@ fun StandardBottomSheet(
     val scope = rememberCoroutineScope()
     val peekHeightPx = with(LocalDensity.current) { peekHeight.toPx() }
     val orientation = Orientation.Vertical
-
     // Callback that is invoked when the anchors have changed.
     val anchorChangeHandler = remember(state, scope) {
         BottomSheetScaffoldAnchorChangeHandler(
@@ -246,10 +242,8 @@ fun StandardBottomSheet(
     }
     Surface(
         modifier = Modifier
-            //.widthIn(max = BottomSheetMaxWidth)
-            //.fillMaxWidth()
-            .width(layoutWidth)
-            //.fillMaxWidth()
+            .requiredWidth(sheetWidth)
+            .fillMaxWidth()
             .requiredHeightIn(min = peekHeight)
             .nestedScroll(
                 remember(state.swipeableState) {

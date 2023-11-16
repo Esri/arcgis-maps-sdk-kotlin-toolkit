@@ -17,46 +17,76 @@
 package com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet
 
 import android.content.res.Configuration
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.SubcomposeLayout
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Constraints.Companion.Infinity
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.core.layout.WindowWidthSizeClass
 import kotlin.math.roundToInt
 
+/**
+ * A custom layout that places the [sheetContent] in the center of the screen if the current
+ * orientation is portrait. The [sheetContent] is shown as a side sheet on the right side of the
+ * screen if the orientation is landscape and the [WindowSizeClass.windowWidthSizeClass] is
+ * [WindowWidthSizeClass.EXPANDED] as provided by [windowSizeClass].
+ *
+ * @param windowSizeClass The current [WindowSizeClass].
+ * @param sheetOffsetY An offset in pixels for the [sheetContent] in the Y axis.
+ * @param modifier The [Modifier]
+ * @param maxWidth A maximum width if specified will be enforced only when the orientation is portrait
+ * and the [WindowSizeClass.windowWidthSizeClass] is not [WindowWidthSizeClass.EXPANDED]. Otherwise
+ * this is set to [Infinity] which indicates to the maximum width available.
+ * @param sheetContent The sheet content lambda which is passed the width and height of the layout in pixels.
+ */
 @Composable
 fun SideSheetLayout(
-    modifier: Modifier = Modifier,
     windowSizeClass: WindowSizeClass,
-    configuration: Configuration,
-    sheetOffset: () -> Float,
-    sideSheet: @Composable (Int, Int) -> Unit
+    sheetOffsetY: () -> Float,
+    modifier: Modifier = Modifier,
+    maxWidth: Dp = Infinity.dp,
+    sheetContent: @Composable (Int, Int) -> Unit
 ) {
+    val configuration = LocalConfiguration.current
     val showAsSideSheet = windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.EXPANDED
         && configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    // convert the max width from dp into pixels
+    val maxWidthInPx = with(LocalDensity.current) {
+        maxWidth.roundToPx()
+    }
 
     SubcomposeLayout(modifier = modifier) { constraints ->
         val layoutWidth = if (showAsSideSheet) {
-            constraints.maxWidth / 6
+            // set the max width to the greater of 40% of the available size or the maxWidth
+            Integer.max(constraints.maxWidth * 2/5, maxWidthInPx)
         } else {
-            constraints.maxWidth
+            // set the max width to the lesser of the available size or the maxWidth
+            Integer.min(constraints.maxWidth, maxWidthInPx)
         }
+        // use all the available height
         val layoutHeight = constraints.maxHeight
-
+        // measure the sheet content with the constraints
         val sheetPlaceable = subcompose(0) {
-            sideSheet(layoutWidth, layoutHeight)
-        }[0].measure(constraints)
-
-        val sheetOffsetY = sheetOffset().roundToInt()
+            sheetContent(layoutWidth, layoutHeight)
+        }[0].measure(
+            constraints.copy(
+                maxWidth = layoutWidth,
+                maxHeight = layoutHeight
+            )
+        )
         val sheetOffsetX = if (showAsSideSheet) {
+            // anchor on right edge of the screen
             Integer.max(0, (constraints.maxWidth - sheetPlaceable.width))
         } else {
-            Integer.max(0, (layoutWidth - sheetPlaceable.width) / 2)
+            // anchor in the center of the screen
+            Integer.max(0, (constraints.maxWidth - sheetPlaceable.width) / 2)
         }
-
         layout(layoutWidth, layoutHeight) {
-            sheetPlaceable.place(sheetOffsetX, sheetOffsetY)
+            sheetPlaceable.place(sheetOffsetX, sheetOffsetY().roundToInt())
         }
     }
 }

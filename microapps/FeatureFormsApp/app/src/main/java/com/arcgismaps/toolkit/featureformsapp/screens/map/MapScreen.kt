@@ -3,12 +3,10 @@ package com.arcgismaps.toolkit.featureformsapp.screens.map
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.with
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,12 +24,11 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,6 +40,7 @@ import com.arcgismaps.toolkit.composablemap.ComposableMap
 import com.arcgismaps.toolkit.featureforms.EditingTransactionState
 import com.arcgismaps.toolkit.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureformsapp.R
+import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.BottomSheetMaxWidth
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetExpansionHeight
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetValue
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SideSheetLayout
@@ -60,7 +58,6 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
         remember { mapViewModel.transactionState.map { it is EditingTransactionState.Editing } }
     val inEditingMode by editingFlow.collectAsState(initial = false)
     val context = LocalContext.current
-    val configuration = LocalConfiguration.current
     val windowSize = getWindowSize(context)
 
     Scaffold(
@@ -116,10 +113,10 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                 skipHiddenState = false
             )
             SideSheetLayout(
-                modifier = Modifier.padding(padding),
                 windowSizeClass = windowSize,
-                configuration = configuration,
-                sheetOffset = { bottomSheetState.requireOffset() }
+                sheetOffsetY = { bottomSheetState.requireOffset() },
+                modifier = Modifier.padding(padding),
+                maxWidth = BottomSheetMaxWidth,
             ) { layoutWidth, layoutHeight ->
                 StandardBottomSheet(
                     state = bottomSheetState,
@@ -128,7 +125,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                     sheetSwipeEnabled = true,
                     shape = RoundedCornerShape(5.dp),
                     layoutHeight = layoutHeight.toFloat(),
-                    layoutWidth = layoutWidth.dp
+                    sheetWidth = with(LocalDensity.current) { layoutWidth.toDp() }
                 ) {
                     // set bottom sheet content to the FeatureForm
                     FeatureForm(
