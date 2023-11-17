@@ -226,7 +226,11 @@ internal class FormTextFieldState(
             errorMessages[errorToDisplay] ?: throw IllegalStateException("validation error must have a message")
         } else {
             description.ifEmpty {
-                if (_isFocused.value) helperText else ""
+                if (_isFocused.value && isEditable.value) {
+                    helperText
+                } else {
+                    ""
+                }
             }
         }
         _hasError.value = errors.isNotEmpty()
@@ -328,7 +332,7 @@ internal class FormTextFieldState(
         value: String,
         validationErrors: List<ValidationErrorState>
     ): ValidationErrorState =
-        if (validationErrors.isEmpty()) {
+        if (validationErrors.isEmpty() || !isEditable.value) {
             NoError
         } else if (isFocused.value) {
             if (value.isEmpty()) {

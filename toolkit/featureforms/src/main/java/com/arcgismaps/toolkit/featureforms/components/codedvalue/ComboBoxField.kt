@@ -135,7 +135,9 @@ internal fun ComboBoxField(
         interactionSource.interactions.collect {
             if (it is PressInteraction.Release) {
                 wasFocused = true
-                onDialogRequest()
+                if (isEditable) {
+                    onDialogRequest()
+                }
             }
         }
     }
