@@ -27,13 +27,6 @@ public sealed class EditingTransactionState {
     public object Editing: EditingTransactionState()
     
     /**
-     * The Feature is being updated and the edits are being applied to the Feature's Geodatabase
-     *
-     *  @since 200.2.0
-     */
-    public object Committing: EditingTransactionState()
-    
-    /**
      * Local edits to the Feature's attributes are being discarded.
      *
      *  @since 200.2.0
@@ -75,13 +68,6 @@ public interface FeatureFormState {
      */
     public fun setTransactionState(state: EditingTransactionState)
     
-    /**
-     * Save form edits to the Feature
-     * @param stateAfterCommit the state to put the form into after the commit is completed.
-     *
-     * @since 200.2.0
-     */
-    public suspend fun commitEdits(stateAfterCommit: EditingTransactionState): Result<Unit>
     
     /**
      * Discard form edits to the Feature
@@ -102,28 +88,6 @@ public class FeatureFormStateImpl : FeatureFormState {
     override val transactionState: StateFlow<EditingTransactionState> = _transactionState.asStateFlow()
     override fun setTransactionState(state: EditingTransactionState) {
         _transactionState.value = state
-    }
-    
-    public override suspend fun commitEdits(stateAfterCommit: EditingTransactionState): Result<Unit> {
-        setTransactionState(EditingTransactionState.Committing)
-        val feature = featureForm.value?.feature
-            ?: return Result.failure(IllegalStateException("cannot save feature edit without a Feature"))
-        val serviceFeatureTable =
-            featureForm.value?.feature?.featureTable as? ServiceFeatureTable ?: return Result.failure(
-                IllegalStateException("cannot save feature edit without a ServiceFeatureTable")
-            )
-        
-        val result = serviceFeatureTable.updateFeature(feature)
-            .map {
-                serviceFeatureTable.serviceGeodatabase?.applyEdits()
-                    ?: throw IllegalStateException("cannot apply feature edit without a ServiceGeodatabase")
-                feature.refresh()
-                Unit
-            }
-        
-        // note: this will silently fail and close the form.
-        setTransactionState(stateAfterCommit)
-        return result
     }
     
     override suspend fun rollbackEdits(stateAfterRollback: EditingTransactionState): Result<Unit> {
