@@ -216,7 +216,12 @@ internal fun ComboBoxDialog(
                                 unfocusedIndicatorColor = Color.Transparent
                             ),
                         )
-                        TextButton(onClick = onDismissRequest) {
+                        TextButton(
+                            onClick = onDismissRequest,
+                            modifier = Modifier.semantics {
+                                contentDescription = "combo box done selection"
+                            }
+                        ) {
                             Text(text = stringResource(R.string.done))
                         }
                     }
@@ -237,7 +242,11 @@ internal fun ComboBoxDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                 )
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                LazyColumn(modifier = Modifier
+                    .fillMaxSize()
+                    .semantics {
+                        contentDescription = "ComboBoxDialogLazyColumn"
+                    }) {
                     items(filteredList.count()) {
                         val code = filteredList.keys.elementAt(it)
                         val name = filteredList.getValue(code)
@@ -261,13 +270,20 @@ internal fun ComboBoxDialog(
                                     } else {
                                         onValueChange(name)
                                     }
+                                }
+                                .semantics {
+                                    contentDescription = if (name == noValueLabel) {
+                                        "no value row"
+                                    } else {
+                                        "$name list item"
+                                    }
                                 },
                             trailingContent = {
                                 if (name == initialValue || (name == noValueLabel && initialValue.isEmpty())
                                 ) {
                                     Icon(
                                         imageVector = Icons.Outlined.Check,
-                                        contentDescription = null
+                                        contentDescription = "list item check"
                                     )
                                 }
                             }
