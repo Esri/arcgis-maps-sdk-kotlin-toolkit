@@ -117,7 +117,7 @@ class ComboBoxFieldTests {
         }
         // validate that the pre-populated value shown shown in accurate and as expected
         // assertTextEquals matches the Text(the label) and Editable Text (the actual editable input text)
-        comboBoxField.assertTextEquals(formElement.label, formElement.value.value)
+        comboBoxField.assertTextEquals(formElement.label, formElement.formattedValue)
         // find the clear text node within its children
         val clearButton = comboBoxField.onChildWithContentDescription(clearTextSemanticLabel)
         // validate the clear icon is visible
@@ -196,7 +196,7 @@ class ComboBoxFieldTests {
         }
         // validate that the pre-populated value shown shown in accurate and as expected
         // assertTextEquals matches the Text(the label) and Editable Text (the actual editable input text)
-        comboBoxField.assertTextEquals(formElement.label, formElement.value.value)
+        comboBoxField.assertTextEquals(formElement.label, formElement.formattedValue)
         // tap the value to bring up the picker
         comboBoxField.performClick()
         // find the dialog
@@ -235,7 +235,7 @@ class ComboBoxFieldTests {
         comboBoxField.assertIsNotFocused()
         // validate that the pre-populated value shown shown in accurate and as expected
         // assertTextEquals matches the Text(the label) and Editable Text (the actual editable input text)
-        comboBoxField.assertTextEquals(formElement.label, formElement.value.value)
+        comboBoxField.assertTextEquals(formElement.label, formElement.formattedValue)
         // open the picker
         comboBoxField.performClick()
         // find the dialog
@@ -278,7 +278,7 @@ class ComboBoxFieldTests {
         comboBoxField.assertIsNotFocused()
         // validate that the pre-populated value shown shown in accurate and as expected
         // assertTextEquals matches the Text(the label) and Editable Text (the actual editable input text)
-        comboBoxField.assertTextEquals(requiredLabel, formElement.value.value)
+        comboBoxField.assertTextEquals(requiredLabel, formElement.formattedValue)
         // find the clear text node within its children
         val clearButton = comboBoxField.onChildWithContentDescription(clearTextSemanticLabel)
         // validate the clear icon is visible
