@@ -44,7 +44,7 @@ import kotlin.math.roundToInt
  * @param sheetContent The sheet content lambda which is passed the width and height of the layout in pixels.
  */
 @Composable
-fun SideSheetLayout(
+fun SheetLayout(
     windowSizeClass: WindowSizeClass,
     sheetOffsetY: () -> Float,
     modifier: Modifier = Modifier,

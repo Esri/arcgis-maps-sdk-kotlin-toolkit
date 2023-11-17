@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.fillMaxSize
@@ -43,7 +42,7 @@ import com.arcgismaps.toolkit.featureformsapp.R
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.BottomSheetMaxWidth
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetExpansionHeight
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetValue
-import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SideSheetLayout
+import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetLayout
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.StandardBottomSheet
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.rememberStandardBottomSheetState
 import kotlinx.coroutines.Dispatchers
@@ -112,7 +111,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                 confirmValueChange = { it != SheetValue.Hidden },
                 skipHiddenState = false
             )
-            SideSheetLayout(
+            SheetLayout(
                 windowSizeClass = windowSize,
                 sheetOffsetY = { bottomSheetState.requireOffset() },
                 modifier = Modifier.padding(padding),
