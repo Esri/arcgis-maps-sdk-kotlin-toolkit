@@ -78,6 +78,10 @@ dependencies {
     kapt(libs.room.compiler)
     // coil
     implementation(libs.coil.compose)
+    // jetpack window manager
+    implementation(libs.androidx.window)
+    implementation(libs.androidx.window.core)
+    // compose
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)
