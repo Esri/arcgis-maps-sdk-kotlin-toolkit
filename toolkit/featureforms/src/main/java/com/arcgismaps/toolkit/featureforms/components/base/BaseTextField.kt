@@ -17,7 +17,6 @@
 package com.arcgismaps.toolkit.featureforms.components.base
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
@@ -29,10 +28,11 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Clear
+import androidx.compose.material.icons.rounded.TextFields
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -41,16 +41,80 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.utils.ClearFocus
 import com.arcgismaps.toolkit.featureforms.utils.PlaceholderTransformation
+
+@Composable
+private fun trailingIcon(
+    text: String,
+    isEditable: Boolean,
+    singleLine: Boolean,
+    isFocused: Boolean,
+    trailingIcon: ImageVector?,
+    onValueChange: (String) -> Unit,
+    onDone: () -> Unit
+): (@Composable () -> Unit)? {
+    // single line field and is editable
+    return if (singleLine && isEditable && text.isEmpty() && trailingIcon != null) {
+        {
+            // show a trailing icon if provided when the field is empty
+            Icon(imageVector = trailingIcon, contentDescription = "field icon")
+        }
+    } else if (singleLine && isEditable && text.isNotEmpty()) {
+        {
+            // show a clear icon instead if the field is not empty
+            IconButton(onClick = { onValueChange("") }, modifier = Modifier.semantics {
+                contentDescription = "Clear text button"
+            }) {
+                Icon(
+                    imageVector = Icons.Rounded.Clear, contentDescription = "Clear Text"
+                )
+            }
+        }
+    } else if (singleLine && trailingIcon != null) {
+        // single line field but not editable
+        {
+            // show a trailing icon to indicate field type
+            Icon(imageVector = trailingIcon, contentDescription = "field icon")
+        }
+    } else if (!singleLine && isEditable && isFocused) {
+        // multiline editable field
+        {
+            // show a done button only when focused
+            IconButton(onClick =  { onDone() }, modifier = Modifier.semantics {
+                contentDescription = "Save local edit button"
+            }) {
+                Icon(
+                    imageVector = Icons.Rounded.CheckCircle, contentDescription = "Done"
+                )
+            }
+        }
+        
+    } else if (!singleLine && isEditable && text.isNotEmpty()) {
+        {
+            // show a clear icon instead if the multiline field is not empty
+            IconButton(onClick = { onValueChange("") }, modifier = Modifier.semantics {
+                contentDescription = "Clear text button"
+            }) {
+                Icon(
+                    imageVector = Icons.Rounded.Clear, contentDescription = "Clear Text"
+                )
+            }
+        }
+    } else {
+        null
+    }
+}
 
 /**
  * A base text field component built on top of an [OutlinedTextField] that provides a standard for
@@ -72,27 +136,31 @@ import com.arcgismaps.toolkit.featureforms.utils.PlaceholderTransformation
  * @param placeholder the text to be displayed when the text field input text is empty.
  * @param singleLine when set to true, this text field becomes a single horizontally scrolling
  * text field instead of wrapping onto multiple lines.
+ * @param keyboardType the keyboard type to use depending on the FormFieldElement input type.
  * @param trailingIcon the icon to be displayed at the end of the text field container.
  * @param supportingText supporting text to be displayed below the text field.
  * @param onFocusChange callback that is triggered when the focus state for this text field changes.
  * @param interactionSource the MutableInteractionSource representing the stream of Interactions
  * for this text field.
+ * @param trailingContent a widget to be displayed at the end of the text field container.
  */
 @Composable
 internal fun BaseTextField(
     text: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    readOnly: Boolean,
     isEditable: Boolean,
     label: String,
     placeholder: String,
     singleLine: Boolean,
+    readOnly: Boolean = !isEditable,
+    keyboardType: KeyboardType = KeyboardType.Ascii,
     trailingIcon: ImageVector? = null,
     supportingText: @Composable (ColumnScope.() -> Unit)? = null,
     onFocusChange: ((Boolean) -> Unit)? = null,
-    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
-) {
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    trailingContent: (@Composable () -> Unit)? = null
+    ) {
     var clearFocus by remember { mutableStateOf(false) }
     var isFocused by remember { mutableStateOf(false) }
 
@@ -115,70 +183,26 @@ internal fun BaseTextField(
             onValueChange = onValueChange,
             modifier = Modifier
                 .fillMaxWidth()
-                .focusable(isEditable, interactionSource)
                 .semantics { contentDescription = "outlined text field" },
             readOnly = readOnly,
-            enabled = isEditable,
             label = {
                 Text(
                     text = label,
-                    modifier = Modifier.semantics { contentDescription = "label" })
+                    modifier = Modifier.semantics { contentDescription = "label" },
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1
+                )
             },
-            trailingIcon = {
-                // single line field and is editable
-                if (singleLine && isEditable) {
-                    // show a trailing icon if provided when the field is empty
-                    if (text.isEmpty() && trailingIcon != null) {
-                        Icon(imageVector = trailingIcon, contentDescription = "field icon")
-                    } else if (text.isNotEmpty()) {
-                        // show a clear icon instead if the field is not empty
-                        IconButton(
-                            onClick = { onValueChange("") },
-                            modifier = Modifier.semantics {
-                                contentDescription = "Clear text button"
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.Clear,
-                                contentDescription = "Clear Text"
-                            )
-                        }
-                    }
-                    // single line field but not editable
-                } else if (singleLine && trailingIcon != null) {
-                    // show a trailing icon to indicate field type
-                    Icon(imageVector = trailingIcon, contentDescription = "field icon")
-                    // multiline editable field
-                } else if (!singleLine && isEditable) {
-                    if (isFocused) {
-                        // show a done button only when focused
-                        IconButton(
-                            onClick = { clearFocus = true },
-                            modifier = Modifier.semantics {
-                                contentDescription = "Save local edit button"
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.CheckCircle,
-                                contentDescription = "Done"
-                            )
-                        }
-                    } else if(text.isNotEmpty()) {
-                        // show a clear icon instead if the multiline field is not empty
-                        IconButton(
-                            onClick = { onValueChange("") },
-                            modifier = Modifier.semantics {
-                                contentDescription = "Clear text button"
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.Clear,
-                                contentDescription = "Clear Text"
-                            )
-                        }
-                    }
-                }
-            },
+            trailingIcon = trailingContent
+                ?: trailingIcon(
+                text,
+                isEditable,
+                singleLine,
+                isFocused,
+                trailingIcon,
+                onValueChange = onValueChange,
+                onDone = { clearFocus = true }
+            ),
             supportingText = {
                 Column(
                     modifier = Modifier.clickable {
@@ -195,17 +219,36 @@ internal fun BaseTextField(
                 onDone = { clearFocus = true }
             ),
             keyboardOptions = KeyboardOptions.Default.copy(
-                imeAction = if (singleLine) ImeAction.Done else ImeAction.None
+                imeAction = if (singleLine) ImeAction.Done else ImeAction.None,
+                keyboardType = keyboardType
             ),
             singleLine = singleLine,
             interactionSource = interactionSource,
-            colors = if (text.isEmpty() && placeholder.isNotEmpty())
-                OutlinedTextFieldDefaults.colors(
-                    unfocusedTextColor = Color.Gray,
-                    focusedTextColor = Color.Gray
-                )
-            else
-                OutlinedTextFieldDefaults.colors()
+            colors = baseTextFieldColors(
+                isEditable = isEditable,
+                isEmpty = text.isEmpty(),
+                isPlaceholderEmpty = placeholder.isEmpty()
+            )
+        )
+    }
+}
+
+
+@Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
+@Composable
+private fun BaseTextFieldPreview() {
+    MaterialTheme {
+        BaseTextField(
+            text = "",
+            onValueChange = {},
+            isEditable = true,
+            label = "Title",
+            placeholder = "Enter Value",
+            singleLine = true,
+            trailingIcon = Icons.Rounded.TextFields,
+            supportingText = {
+                Text(text = "A Description")
+            }
         )
     }
 }

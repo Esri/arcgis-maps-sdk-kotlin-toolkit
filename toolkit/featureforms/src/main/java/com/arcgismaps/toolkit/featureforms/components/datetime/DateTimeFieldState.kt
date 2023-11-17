@@ -18,7 +18,6 @@
 
 package com.arcgismaps.toolkit.featureforms.components.datetime
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
@@ -31,29 +30,24 @@ import com.arcgismaps.toolkit.featureforms.components.base.FieldProperties
 import com.arcgismaps.toolkit.featureforms.components.text.FormTextFieldState
 import com.arcgismaps.toolkit.featureforms.components.text.TextFieldProperties
 import com.arcgismaps.toolkit.featureforms.utils.editValue
+import com.arcgismaps.toolkit.featureforms.utils.valueFlow
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeParseException
-import java.util.TimeZone
+import java.time.Instant
 
 internal class DateTimeFieldProperties(
     label: String,
     placeholder: String,
     description: String,
-    value: StateFlow<String>,
+    value: StateFlow<Instant?>,
     required: StateFlow<Boolean>,
     editable: StateFlow<Boolean>,
-    val minEpochMillis: Long?,
-    val maxEpochMillis: Long?,
+    visible: StateFlow<Boolean>,
+    val minEpochMillis: Instant?,
+    val maxEpochMillis: Instant?,
     val shouldShowTime: Boolean
-) : FieldProperties(label, placeholder, description, value, required, editable)
+) : FieldProperties<Instant?>(label, placeholder, description, value, required, editable, visible)
 
 /**
  * A class to handle the state of a [DateTimeField]. Essential properties are inherited from the
@@ -68,34 +62,21 @@ internal class DateTimeFieldProperties(
  */
 internal class DateTimeFieldState(
     properties: DateTimeFieldProperties,
-    initialValue: String = properties.value.value,
+    initialValue: Instant? = properties.value.value,
     scope: CoroutineScope,
     onEditValue: (Any?) -> Unit
-) : BaseFieldState(
+) : BaseFieldState<Instant?>(
     properties = properties,
     initialValue = initialValue,
     scope = scope,
     onEditValue = onEditValue
 ) {
-    val minEpochMillis: Long? = properties.minEpochMillis
+    val minEpochMillis: Instant? = properties.minEpochMillis
 
-    val maxEpochMillis: Long? = properties.maxEpochMillis
+    val maxEpochMillis: Instant? = properties.maxEpochMillis
 
     val shouldShowTime: Boolean = properties.shouldShowTime
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val epochMillis: StateFlow<Long?> = value.mapLatest {
-        if (it.toLongOrNull() != null) {
-            it.toLong()
-        } else {
-            dateTimeFromString(it)
-        }
-    }.stateIn(
-        scope,
-        started = SharingStarted.Eagerly,
-        initialValue = dateTimeFromString(value.value)
-    )
-
+    
     companion object {
         fun Saver(
             field: FieldFormElement,
@@ -112,11 +93,12 @@ internal class DateTimeFieldState(
                         label = field.label,
                         placeholder = field.hint,
                         description = field.description,
-                        value = field.value,
+                        value = field.valueFlow(scope),
                         editable = field.isEditable,
                         required = field.isRequired,
-                        minEpochMillis = input.min?.toEpochMilli(),
-                        maxEpochMillis = input.max?.toEpochMilli(),
+                        visible = field.isVisible,
+                        minEpochMillis = input.min,
+                        maxEpochMillis = input.max,
                         shouldShowTime = input.includeTime
                     ),
                     initialValue = list[0],
@@ -134,8 +116,8 @@ internal class DateTimeFieldState(
 @Composable
 internal fun rememberDateTimeFieldState(
     field: FieldFormElement,
-    minEpochMillis: Long?,
-    maxEpochMillis: Long?,
+    minEpochMillis: Instant?,
+    maxEpochMillis: Instant?,
     shouldShowTime: Boolean,
     form: FeatureForm,
     scope: CoroutineScope
@@ -151,9 +133,10 @@ internal fun rememberDateTimeFieldState(
             label = field.label,
             placeholder = field.hint,
             description = field.description,
-            value = field.value,
+            value = field.valueFlow(scope),
             editable = field.isEditable,
             required = field.isRequired,
+            visible = field.isVisible,
             minEpochMillis = minEpochMillis,
             maxEpochMillis = maxEpochMillis,
             shouldShowTime = shouldShowTime
@@ -166,27 +149,3 @@ internal fun rememberDateTimeFieldState(
     )
 }
 
-/**
- * Maps the [FieldFormElement.value] from a String to Long?
- * Empty strings are made to be null Longs.
- *
- * @since 200.3.0
- */
-internal fun dateTimeFromString(formattedDateTime: String): Long? {
-    return if (formattedDateTime.isNotEmpty()) {
-        try {
-            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
-            LocalDateTime.parse(formattedDateTime, formatter)
-                .atZone(TimeZone.getDefault().toZoneId())
-                .toInstant()
-                .toEpochMilli()
-        } catch (ex: DateTimeParseException) {
-            Log.e(
-                "DateTimeFieldState",
-                "dateTimeFromString: Error parsing $formattedDateTime into a valid date time",
-                ex
-            )
-            null
-        }
-    } else null
-}

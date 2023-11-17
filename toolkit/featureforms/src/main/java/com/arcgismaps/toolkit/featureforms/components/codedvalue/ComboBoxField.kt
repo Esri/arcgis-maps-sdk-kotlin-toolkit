@@ -63,21 +63,26 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.arcgismaps.data.FieldType
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.base.BaseTextField
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
-internal fun ComboBoxField(state: CodedValueFieldState, modifier: Modifier = Modifier) {
+internal fun ComboBoxField(
+    state: CodedValueFieldState,
+    modifier: Modifier = Modifier,
+    onDialogRequest: () -> Unit = {}
+) {
     val value by state.value.collectAsState()
     val isEditable by state.isEditable.collectAsState()
     val isRequired by state.isRequired.collectAsState()
-    var showDialog by rememberSaveable { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
     // to check if the field was ever focused by the user
     var wasFocused by rememberSaveable { mutableStateOf(false) }
@@ -126,28 +131,13 @@ internal fun ComboBoxField(state: CodedValueFieldState, modifier: Modifier = Mod
         interactionSource = interactionSource
     )
 
-    if (showDialog) {
-        ComboBoxDialog(
-            initialValue = value,
-            values = state.codedValues.associateBy({ it.code }, { it.name }),
-            label = state.label,
-            description = state.description,
-            isRequired = isRequired,
-            noValueOption = state.showNoValueOption,
-            noValueLabel = state.noValueLabel.ifEmpty { stringResource(R.string.no_value) },
-            onValueChange = { code ->
-                state.onValueChanged(code?.toString() ?: "")
-            }
-        ) {
-            showDialog = false
-        }
-    }
-
     LaunchedEffect(interactionSource) {
         interactionSource.interactions.collect {
             if (it is PressInteraction.Release) {
                 wasFocused = true
-                showDialog = true
+                if (isEditable) {
+                    onDialogRequest()
+                }
             }
         }
     }
@@ -162,7 +152,8 @@ internal fun ComboBoxDialog(
     isRequired: Boolean,
     noValueOption: FormInputNoValueOption,
     noValueLabel: String,
-    onValueChange: (Any?) -> Unit,
+    keyboardType: KeyboardType,
+    onValueChange: (String) -> Unit,
     onDismissRequest: () -> Unit
 ) {
     var searchText by rememberSaveable { mutableStateOf("") }
@@ -216,7 +207,8 @@ internal fun ComboBoxDialog(
                             },
                             singleLine = true,
                             keyboardOptions = KeyboardOptions.Default.copy(
-                                imeAction = ImeAction.Done
+                                imeAction = ImeAction.Done,
+                                keyboardType = keyboardType
                             ),
                             shape = RoundedCornerShape(15.dp),
                             colors = TextFieldDefaults.colors(
@@ -253,7 +245,7 @@ internal fun ComboBoxDialog(
                 LazyColumn(modifier = Modifier
                     .fillMaxSize()
                     .semantics {
-                    contentDescription = "ComboBoxDialogLazyColumn"
+                        contentDescription = "ComboBoxDialogLazyColumn"
                     }) {
                     items(filteredList.count()) {
                         val code = filteredList.keys.elementAt(it)
@@ -273,7 +265,11 @@ internal fun ComboBoxDialog(
                                 .fillMaxWidth()
                                 .clickable {
                                     // if the no value label was selected, set the value to be empty
-                                    onValueChange(code)
+                                    if (name == noValueLabel) {
+                                        onValueChange("")
+                                    } else {
+                                        onValueChange(name)
+                                    }
                                 }
                                 .semantics {
                                     contentDescription = if (name == noValueLabel) {
@@ -283,8 +279,7 @@ internal fun ComboBoxDialog(
                                     }
                                 },
                             trailingContent = {
-                                if ((code?.toString()
-                                        ?: "") == initialValue || (name == noValueLabel && initialValue.isEmpty())
+                                if (name == initialValue || (name == noValueLabel && initialValue.isEmpty())
                                 ) {
                                     Icon(
                                         imageVector = Icons.Outlined.Check,
@@ -313,6 +308,8 @@ private fun ComboBoxPreview() {
             value = MutableStateFlow(""),
             editable = MutableStateFlow(true),
             required = MutableStateFlow(false),
+            visible = MutableStateFlow(true),
+            fieldType = FieldType.Text,
             codedValues = listOf(),
             showNoValueOption = FormInputNoValueOption.Show,
             noValueLabel = "No value"
@@ -342,6 +339,7 @@ private fun ComboBoxDialogPreview() {
         noValueOption = FormInputNoValueOption.Show,
         noValueLabel = "No Value",
         onValueChange = {},
-        onDismissRequest = {}
+        onDismissRequest = {},
+        keyboardType = KeyboardType.Ascii
     )
 }

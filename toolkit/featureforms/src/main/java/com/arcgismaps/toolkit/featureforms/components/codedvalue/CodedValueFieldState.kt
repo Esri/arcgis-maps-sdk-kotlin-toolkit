@@ -22,6 +22,7 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.data.CodedValue
+import com.arcgismaps.data.FieldType
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
@@ -30,6 +31,8 @@ import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.FieldProperties
 import com.arcgismaps.toolkit.featureforms.components.text.TextFieldProperties
 import com.arcgismaps.toolkit.featureforms.utils.editValue
+import com.arcgismaps.toolkit.featureforms.utils.fieldType
+import com.arcgismaps.toolkit.featureforms.utils.valueFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -41,10 +44,12 @@ internal open class CodedValueFieldProperties(
     value: StateFlow<String>,
     required: StateFlow<Boolean>,
     editable: StateFlow<Boolean>,
+    visible: StateFlow<Boolean>,
+    val fieldType: FieldType,
     val codedValues: List<CodedValue>,
     val showNoValueOption: FormInputNoValueOption,
     val noValueLabel: String
-) : FieldProperties(label, placeholder, description, value, required, editable)
+) : FieldProperties<String>(label, placeholder, description, value, required, editable, visible)
 
 /**
  * A class to handle the state of a [ComboBoxField]. Essential properties are inherited
@@ -63,7 +68,7 @@ internal open class CodedValueFieldState(
     initialValue: String = properties.value.value,
     scope: CoroutineScope,
     onEditValue: ((Any?) -> Unit)
-) : BaseFieldState(
+) : BaseFieldState<String>(
     properties = properties,
     scope = scope,
     initialValue = initialValue,
@@ -84,6 +89,11 @@ internal open class CodedValueFieldState(
      * The custom label to use if [showNoValueOption] is enabled.
      */
     val noValueLabel: String = properties.noValueLabel
+    
+    /**
+     * The FieldType of the element's Field.
+     */
+    val fieldType: FieldType = properties.fieldType
 
     /**
      * Returns the name of the [code] if it is present in [codedValues] else returns null.
@@ -93,9 +103,16 @@ internal open class CodedValueFieldState(
             it.code.toString() == code.toString()
         }?.name
     }
+    
+    override fun onValueChanged(input: String) {
+        val code = codedValues.firstOrNull {
+            it.name == input
+        }?.code
+        onEditValue(code)
+        _value.value = input
+    }
 
     companion object {
-
         /**
          * The default saver for a [CodedValueFieldState] implemented for a [ComboBoxFormInput] type.
          * Hence for [formElement] the [FieldFormElement.input] type must be a [ComboBoxFormInput].
@@ -117,12 +134,14 @@ internal open class CodedValueFieldState(
                         label = formElement.label,
                         placeholder = formElement.hint,
                         description = formElement.description,
-                        value = formElement.value,
+                        value = formElement.valueFlow(scope),
                         editable = formElement.isEditable,
                         required = formElement.isRequired,
+                        visible = formElement.isVisible,
                         codedValues = input.codedValues,
                         showNoValueOption = input.noValueOption,
-                        noValueLabel = input.noValueLabel
+                        noValueLabel = input.noValueLabel,
+                        fieldType = form.fieldType(formElement)
                     ),
                     initialValue = list[0],
                     scope = scope,
@@ -150,12 +169,14 @@ internal fun rememberCodedValueFieldState(
             label = field.label,
             placeholder = field.hint,
             description = field.description,
-            value = field.value,
+            value = field.valueFlow(scope),
             editable = field.isEditable,
             required = field.isRequired,
+            visible = field.isVisible,
             codedValues = input.codedValues,
             showNoValueOption = input.noValueOption,
-            noValueLabel = input.noValueLabel
+            noValueLabel = input.noValueLabel,
+            fieldType = form.fieldType(field)
         ),
         scope = scope,
         onEditValue = {

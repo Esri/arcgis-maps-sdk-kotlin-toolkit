@@ -27,7 +27,6 @@ android {
             useSupportLibrary = true
         }
     }
-
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -63,6 +62,7 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class).all {
 }
 
 dependencies {
+    implementation(project(":authentication"))
     implementation(project(":featureforms"))
     implementation(project(":composable-map"))
     // sdk
@@ -78,6 +78,10 @@ dependencies {
     kapt(libs.room.compiler)
     // coil
     implementation(libs.coil.compose)
+    // jetpack window manager
+    implementation(libs.androidx.window)
+    implementation(libs.androidx.window.core)
+    // compose
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)

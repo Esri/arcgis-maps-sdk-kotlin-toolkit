@@ -28,7 +28,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.input.KeyboardType
 import com.arcgismaps.toolkit.featureforms.components.base.BaseTextField
+import com.arcgismaps.toolkit.featureforms.utils.isNumeric
 
 @Composable
 internal fun FormTextField(
@@ -48,7 +50,7 @@ internal fun FormTextField(
     }
     val supportingText by state.supportingText
     val contentLength = if (state.minLength > 0 || state.maxLength > 0) "${text.length}" else ""
-    val hasError by state.hasError
+    val supportingTextIsErrorMessage by state.supportingTextIsErrorMessage
 
     BaseTextField(
         text = text,
@@ -56,13 +58,13 @@ internal fun FormTextField(
             state.onValueChanged(it)
         },
         modifier = modifier.fillMaxWidth(),
-        readOnly = false,
         isEditable = isEditable,
         label = label,
         placeholder = state.placeholder,
         singleLine = state.singleLine,
+        keyboardType = if (state.fieldType.isNumeric) KeyboardType.Number else KeyboardType.Ascii,
         supportingText = {
-            val textColor = if (hasError) MaterialTheme.colorScheme.error
+            val textColor = if (supportingTextIsErrorMessage) MaterialTheme.colorScheme.error
             else MaterialTheme.colorScheme.onSurface
             Row {
                 if (supportingText.isNotEmpty()) {
@@ -73,7 +75,7 @@ internal fun FormTextField(
                         color = textColor
                     )
                 }
-                if (isFocused) {
+                if (isFocused && isEditable) {
                     Spacer(modifier = Modifier.weight(1f))
                     Text(
                         text = contentLength,

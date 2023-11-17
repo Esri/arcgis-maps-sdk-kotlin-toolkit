@@ -18,19 +18,23 @@ package com.arcgismaps.toolkit.featureforms.components.base
 
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.flattenMerge
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 
-internal open class FieldProperties(
+internal open class FieldProperties<T>(
     val label: String,
     val placeholder: String,
     val description: String,
-    val value: StateFlow<String>,
+    val value: StateFlow<T>,
     val required: StateFlow<Boolean>,
-    val editable: StateFlow<Boolean>
+    val editable: StateFlow<Boolean>,
+    val visible: StateFlow<Boolean>
 )
 
 /**
@@ -44,11 +48,11 @@ internal open class FieldProperties(
  * @param onEditValue a callback to invoke when the user edits result in a change of value. This
  * is called on [BaseFieldState.onValueChanged].
  */
-internal open class BaseFieldState(
-    properties: FieldProperties,
-    initialValue: String = properties.value.value,
+internal open class BaseFieldState<T>(
+    properties: FieldProperties<T>,
+    initialValue: T = properties.value.value,
     scope: CoroutineScope,
-    private val onEditValue: (Any?) -> Unit,
+    protected val onEditValue: (Any?) -> Unit,
 ) {
     /**
      * Title for the field.
@@ -59,31 +63,22 @@ internal open class BaseFieldState(
      * Placeholder hint for the field.
      */
     open val placeholder: String = properties.placeholder
-
+    
     /**
      * Description text for the field.
      */
     val description: String = properties.description
 
     // a state flow to handle user input changes
-    private val _value = MutableStateFlow(initialValue)
+    protected val _value = MutableStateFlow(initialValue)
 
     /**
      * Current value state for the field.
      */
-    val value: StateFlow<String> = combine(
-        _value,
-        properties.value,
-        properties.editable
-    ) { userEdit, exprResult, editable ->
-        // transform the user input value flow with the formElement value and required into a single
-        // value flow based on if the field is editable
-        if (editable) {
-            userEdit
-        } else {
-            exprResult
-        }
-    }.stateIn(scope, SharingStarted.Eagerly, initialValue)
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val value: StateFlow<T> = flowOf(_value, properties.value.drop(1))
+        .flattenMerge()
+        .stateIn(scope, SharingStarted.Eagerly, initialValue)
 
     /**
      * Property that indicates if the field is editable.
@@ -96,9 +91,14 @@ internal open class BaseFieldState(
     val isRequired: StateFlow<Boolean> = properties.required
 
     /**
+     * Property that indicates if the field is visible.
+     */
+    val isVisible: StateFlow<Boolean> = properties.visible
+   
+    /**
      * Callback to update the current value of the FormTextFieldState to the given [input].
      */
-    fun onValueChanged(input: String) {
+    open fun onValueChanged(input: T) {
         onEditValue(input)
         _value.value = input
     }

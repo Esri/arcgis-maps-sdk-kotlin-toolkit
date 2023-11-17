@@ -20,9 +20,10 @@ package com.arcgismaps.toolkit.featureformsapp.di
 
 import android.content.Context
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
+import com.arcgismaps.toolkit.featureformsapp.data.PortalSettings
 import com.arcgismaps.toolkit.featureformsapp.data.local.ItemCacheDao
 import com.arcgismaps.toolkit.featureformsapp.data.network.ItemRemoteDataSource
-import com.arcgismaps.toolkit.featureformsapp.domain.PortalItemUseCase
+import com.arcgismaps.toolkit.featureformsapp.navigation.Navigator
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -43,7 +44,7 @@ annotation class ItemRemoteSource
  * Provide an annotation to inject the PortalItemRepository
  */
 @Qualifier
-@Retention(AnnotationRetention.RUNTIME)
+@Retention(AnnotationRetention.SOURCE)
 annotation class PortalItemRepo
 
 
@@ -63,6 +64,7 @@ class DataModule {
      * The provider of the PortalItemRepository.
      */
     @Provides
+    @Singleton
     @PortalItemRepo
     internal fun providePortalItemRepository(
         @IoDispatcher dispatcher: CoroutineDispatcher,
@@ -71,18 +73,14 @@ class DataModule {
         @ApplicationContext context: Context
     ): PortalItemRepository =
         PortalItemRepository(dispatcher, remoteDataSource, itemCacheDao, context.filesDir.absolutePath)
-    
-    /**
-     * The provider of the PortalItem use case, scoped to the navigation graph lifetime by means of the
-     * `@Singleton` annotation.
-     */
+
     @Singleton
     @Provides
-    fun providePortalItemUseCase(
-        @IoDispatcher dispatcher: CoroutineDispatcher,
-        @PortalItemRepo portalItemRepository: PortalItemRepository
-    ): PortalItemUseCase = PortalItemUseCase(
-        dispatcher,
-        portalItemRepository
-    )
+    internal fun providePortalSettings(
+        @ApplicationContext context: Context,
+    ): PortalSettings = PortalSettings(context = context)
+
+    @Singleton
+    @Provides
+    internal fun provideNavigator(): Navigator = Navigator()
 }

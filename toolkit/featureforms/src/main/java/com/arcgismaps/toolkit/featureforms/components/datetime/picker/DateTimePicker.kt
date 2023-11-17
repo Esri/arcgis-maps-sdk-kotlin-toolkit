@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.featureforms.components.datetime.picker
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -26,6 +27,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
@@ -50,8 +52,11 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -60,9 +65,8 @@ import androidx.compose.ui.window.DialogProperties
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimePicker
 import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimePickerState
-import com.arcgismaps.toolkit.featureforms.components.datetime.toDateMillis
-import com.arcgismaps.toolkit.featureforms.components.datetime.toZonedDateTime
 import java.time.Instant
+import java.util.TimeZone
 
 /**
  * Defines the style of [DateTimePicker].
@@ -107,30 +111,38 @@ internal fun DateTimePicker(
     onCancelled: () -> Unit,
     onConfirmed: () -> Unit
 ) {
+    // if the date time has no value, set a default value
+    if (state.dateTime.value.epochMillis == null) {
+        val now = Instant.now().toEpochMilli()
+        // check if current day and time is a valid timestamp
+        // it should be validated with the current local timestamp hence the added offset
+        if (state.dateTimeValidator(now.plus(now.defaultTimeZoneOffset))) {
+            // set the default timestamp value to the current local time instant
+            state.today(0, 0)
+            state.now()
+        }
+    }
     // calculate the date ranges from the state
     val datePickerRange = IntRange(
-        start = state.minDateTime?.toZonedDateTime()?.year
+        start = state.minDateTime?.atZone(TimeZone.getDefault().toZoneId())?.year
             ?: DatePickerDefaults.YearRange.first,
-        endInclusive = state.maxDateTime?.toZonedDateTime()?.year
+        endInclusive = state.maxDateTime?.atZone(TimeZone.getDefault().toZoneId())?.year
             ?: DatePickerDefaults.YearRange.last
     )
-    
     // The picker input type, date or time.
     val pickerInput by state.activePickerInput
     // DateTime from the state's value
     val dateTime by state.dateTime
-    
     // create and remember a DatePickerState
     val datePickerState = rememberSaveable(dateTime, saver = DatePickerState.Saver()) {
         DatePickerState(
             initialSelectedDateMillis = dateTime.dateForPicker,
             initialDisplayedMonthMillis = dateTime.dateForPicker
-                ?: (state.minDateTime ?: state.maxDateTime),
+                ?: (state.minDateTime?.toEpochMilli() ?: state.maxDateTime?.toEpochMilli()),
             datePickerRange,
             DisplayMode.Picker
         )
     }
-    
     // create a DateTimePickerDialog
     DateTimePickerDialog(
         onDismissRequest = onDismissRequest
@@ -143,7 +155,6 @@ internal fun DateTimePicker(
                 is24Hour = false,
             )
         }
-    
         PickerContent(
             label = state.label,
             description = state.description,
@@ -164,20 +175,10 @@ internal fun DateTimePicker(
             } ?: false,
             pickerInput = pickerInput,
             onToday = {
-                val now = Instant.now().toEpochMilli()
-                state.setDateTime(
-                    now.plus(now.defaultTimeZoneOffset).toDateMillis(),
-                    timePickerState.hour,
-                    timePickerState.minute
-                )
+                state.today(timePickerState.hour, timePickerState.minute)
             },
             onNow = {
-                val now = Instant.now().toEpochMilli().toZonedDateTime()
-                state.setDateTime(
-                    state.dateTime.value.dateForPicker,
-                    now.hour,
-                    now.minute
-                )
+                state.now()
             },
             onCancelled = onCancelled,
             onConfirmed = {
@@ -329,9 +330,10 @@ private fun DateTimePickerDialog(
     ) {
         Surface(
             modifier = Modifier
-                .padding(start = 25.dp, end = 25.dp)
-                .widthIn(DateTimePickerDialogTokens.containerWidth)
-                .height(DateTimePickerDialogTokens.containerHeight),
+                .padding(horizontal = DateTimePickerDialogTokens.horizontalPadding)
+                .widthWithOrientation(DateTimePickerDialogTokens.containerWidth)
+                .height(DateTimePickerDialogTokens.containerHeight)
+                .scaleIfNarrow(DateTimePickerDialogTokens.containerWidth + DateTimePickerDialogTokens.horizontalPadding * 2),
             shape = shape,
             color = MaterialTheme.colorScheme.surface,
             tonalElevation = tonalElevation,
@@ -353,6 +355,33 @@ private fun DateTimePickerDialog(
 private object DateTimePickerDialogTokens {
     val containerHeight = 600.0.dp
     val containerWidth = 360.0.dp
+    val horizontalPadding = 25.dp
+}
+
+/**
+ * Constraints the width of the content based on the orientation and the [width]. If the
+ * current orientation is portrait, [Modifier.requiredWidth] used. If it is landscape then
+ * [Modifier.widthIn] is used. This is useful when different layouts are needed in portrait
+ * and landscape orientations.
+ */
+internal fun Modifier.widthWithOrientation(width: Dp) : Modifier = composed {
+    val configuration = LocalConfiguration.current
+    if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        this.widthIn(width)
+    } else {
+        this.requiredWidth(width)
+    }
+}
+
+/**
+ * Scales the content appropriately if the current screen width is less than the [minWidth].
+ */
+internal fun Modifier.scaleIfNarrow(minWidth: Dp): Modifier = composed {
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val scale = if (screenWidth < minWidth)
+        screenWidth / minWidth
+    else 1f
+    this.scale(scale)
 }
 
 @Preview
@@ -362,7 +391,7 @@ private fun DateTimePickerPreview() {
         style = DateTimePickerStyle.DateTime,
         label = "Next Inspection Date",
         description = "Enter a date in the next six months",
-        pickerInput  = DateTimePickerInput.Date
+        pickerInput = DateTimePickerInput.Date
     )
     DateTimePicker(state = state, {}, {}, {})
 }

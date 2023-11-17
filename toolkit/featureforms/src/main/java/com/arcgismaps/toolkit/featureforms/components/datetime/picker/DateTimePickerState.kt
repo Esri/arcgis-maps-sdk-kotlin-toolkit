@@ -27,6 +27,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.toolkit.featureforms.components.datetime.toDateMillis
 import com.arcgismaps.toolkit.featureforms.components.datetime.toDateTimeInUtcZone
 import com.arcgismaps.toolkit.featureforms.components.datetime.toZonedDateTime
+import java.time.Instant
 import java.util.TimeZone
 
 /**
@@ -119,14 +120,14 @@ internal class UtcDateTime private constructor(
 internal interface DateTimePickerState {
     
     /**
-     * Minimum date time allowed in milliseconds. This should be null if no range restriction is needed.
+     * Minimum date time allowed. This should be null if no range restriction is needed.
      */
-    val minDateTime: Long?
+    val minDateTime: Instant?
     
     /**
-     * Maximum date time allowed in milliseconds. This should be null if no range restriction is needed.
+     * Maximum date time allowed. This should be null if no range restriction is needed.
      */
-    val maxDateTime: Long?
+    val maxDateTime: Instant?
     
     /**
      * The current date time value. Use [setDateTime] to set this state.
@@ -197,6 +198,17 @@ internal interface DateTimePickerState {
      * is returned. Both the [minDateTime] and [maxDateTime] are included in the range.
      */
     fun dateValidator(timeStamp: Long): Boolean
+
+    /**
+     * Sets the [dateTime]'s time value to the current time instant in local time.
+     */
+    fun now()
+
+    /**
+     * Sets the [dateTime]'s day to the current day while persisting the time information
+     * as specified by the [hour] and [minute].
+     */
+    fun today(hour: Int, minute: Int)
 }
 
 /**
@@ -204,22 +216,22 @@ internal interface DateTimePickerState {
  */
 private class DateTimePickerStateImpl(
     override val pickerStyle: DateTimePickerStyle,
-    override val minDateTime: Long?,
-    override val maxDateTime: Long?,
-    initialValue: Long?,
+    override val minDateTime: Instant?,
+    override val maxDateTime: Instant?,
+    initialValue: Instant?,
     override val label: String,
     override val description: String = "",
     pickerInput: DateTimePickerInput
 ) : DateTimePickerState {
     override var dateTime = mutableStateOf(
-        UtcDateTime.create(initialValue)
+        UtcDateTime.create(initialValue?.toEpochMilli())
     )
     override val selectedDateTimeMillis: Long?
         get() = dateTime.value.epochMillis
     
     override val timeZone: TimeZone = TimeZone.getDefault()
     
-    override val timeZoneOffset = initialValue?.let { timeZone.getOffset(it) } ?: 0
+    override val timeZoneOffset = initialValue?.toEpochMilli()?.let { timeZone.getOffset(it) } ?: 0
     
     override val activePickerInput = mutableStateOf(pickerInput)
     
@@ -242,11 +254,11 @@ private class DateTimePickerStateImpl(
         // to UTC.
         val utcDateTime = timeStamp.minus(timeStamp.defaultTimeZoneOffset)
         
-        return minDateTime?.let { min ->
-            maxDateTime?.let { max ->
+        return minDateTime?.toEpochMilli()?.let { min ->
+            maxDateTime?.toEpochMilli()?.let { max ->
                 utcDateTime in min..max
             } ?: (utcDateTime >= min)
-        } ?: maxDateTime?.let {
+        } ?: maxDateTime?.toEpochMilli()?.let {
             utcDateTime <= it
         } ?: true
     }
@@ -257,8 +269,8 @@ private class DateTimePickerStateImpl(
         // To compare it to min and max, the input must be converted
         // to UTC.
         val utcDate = UtcDateTime.create(timeStamp.minus(timeStamp.defaultTimeZoneOffset)).date!!
-        val minDate = UtcDateTime.create(minDateTime).date
-        val maxDate = UtcDateTime.create(maxDateTime).date
+        val minDate = UtcDateTime.create(minDateTime?.toEpochMilli()).date
+        val maxDate = UtcDateTime.create(maxDateTime?.toEpochMilli()).date
 
         return minDate?.let { min ->
             maxDate?.let { max ->
@@ -267,6 +279,24 @@ private class DateTimePickerStateImpl(
         } ?: maxDate?.let {
             utcDate <= it
         } ?: true
+    }
+
+    override fun now() {
+        val now = Instant.now().toEpochMilli().toZonedDateTime()
+        setDateTime(
+            dateTime.value.dateForPicker,
+            now.hour,
+            now.minute
+        )
+    }
+
+    override fun today(hour: Int, minute: Int) {
+        val now = Instant.now().toEpochMilli()
+        setDateTime(
+            now.plus(now.defaultTimeZoneOffset).toDateMillis(),
+            hour,
+            minute
+        )
     }
 }
 
@@ -284,9 +314,9 @@ private class DateTimePickerStateImpl(
  */
 internal fun DateTimePickerState(
     style: DateTimePickerStyle,
-    minDateTime: Long? = null,
-    maxDateTime: Long? = null,
-    initialValue: Long? = null,
+    minDateTime: Instant? = null,
+    maxDateTime: Instant? = null,
+    initialValue: Instant? = null,
     label: String,
     description: String = "",
     pickerInput: DateTimePickerInput
@@ -316,9 +346,9 @@ internal fun DateTimePickerState(
 @Composable
 internal fun rememberDateTimePickerState(
     style: DateTimePickerStyle,
-    minDateTime: Long? = null,
-    maxDateTime: Long? = null,
-    initialValue: Long? = null,
+    minDateTime: Instant? = null,
+    maxDateTime: Instant? = null,
+    initialValue: Instant? = null,
     label: String,
     description: String = "",
     pickerInput: DateTimePickerInput
@@ -343,8 +373,8 @@ internal fun rememberDateTimePickerState(
 internal fun dateTimePickerStateSaver(): Saver<DateTimePickerState, Any> = listSaver(
     save = {
         listOf(it.pickerStyle,
-            it.minDateTime,
-            it.maxDateTime,
+            it.minDateTime?.toEpochMilli(),
+            it.maxDateTime?.toEpochMilli(),
             it.dateTime.value.epochMillis,
             it.label,
             it.description,
@@ -357,9 +387,9 @@ internal fun dateTimePickerStateSaver(): Saver<DateTimePickerState, Any> = listS
         // not on initial conditions.
         DateTimePickerStateImpl(
             it[0] as DateTimePickerStyle,
-            it[1] as Long?,
-            it[2] as Long?,
-            it[3] as Long?,
+            it[1]?.let { Instant.ofEpochMilli(it as Long) },
+            it[2]?.let { Instant.ofEpochMilli(it as Long) },
+            it[3]?.let { Instant.ofEpochMilli(it as Long) },
             it[4] as String,
             it[5] as String,
             it[6] as DateTimePickerInput

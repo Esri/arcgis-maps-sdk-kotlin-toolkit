@@ -22,39 +22,53 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.arcgismaps.toolkit.featureformsapp.AnimatedLoading
 import com.arcgismaps.toolkit.featureformsapp.R
 import java.time.Instant
 import java.time.ZoneId
@@ -74,17 +88,29 @@ fun MapListScreen(
 ) {
     val uiState by mapListViewModel.uiState.collectAsState()
     val lazyListState = rememberLazyListState()
-
-    Scaffold(topBar = {
-        AppBar(uiState.isLoading) {
-            mapListViewModel.refresh(it)
-        }
-    }) { padding ->
+    var showSignOutProgress by rememberSaveable {
+        mutableStateOf(false)
+    }
+    Box(modifier = modifier.fillMaxSize()) {
+        AppSearchBar(
+            uiState.searchText,
+            isLoading = uiState.isLoading,
+            username = mapListViewModel.getUsername(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            onQueryChange = mapListViewModel::filterPortalItems,
+            onRefresh = mapListViewModel::refresh,
+            onSignOut = {
+                showSignOutProgress = true
+                mapListViewModel.signOut()
+            }
+        )
         // use a cross fade animation to show a loading indicator when the data is loading
         // and transition to the list of portalItems once loaded
         AnimatedContent(
             targetState = uiState.isLoading,
-            modifier = Modifier.padding(padding),
+            modifier = Modifier.padding(top = 88.dp),
             transitionSpec = {
                 fadeIn(animationSpec = tween(1000)) with fadeOut()
             },
@@ -102,23 +128,24 @@ fun MapListScreen(
 
                 false -> if (uiState.data.isNotEmpty()) {
                     LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize(),
+                        modifier = Modifier.fillMaxSize(),
                         state = lazyListState,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        items(uiState.data) { item ->
+                        items(
+                            uiState.data
+                        ) { item ->
                             MapListItem(
-                                title = item.data.portalItem.title,
-                                lastModified = item.data.portalItem.modified?.format("MMM dd yyyy")
+                                title = item.portalItem.title,
+                                lastModified = item.portalItem.modified?.format("MMM dd yyyy")
                                     ?: "",
-                                shareType = item.data.portalItem.access.encoding.uppercase(Locale.getDefault()),
-                                thumbnailUri = item.data.thumbnailUri.ifEmpty { null },
+                                shareType = item.portalItem.access.encoding.uppercase(Locale.getDefault()),
+                                thumbnailUri = item.thumbnailUri.ifEmpty { null },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(100.dp)
                             ) {
-                                onItemClick(item.data.portalItem.itemId)
+                                onItemClick(item.portalItem.itemId)
                             }
                         }
                     }
@@ -134,11 +161,17 @@ fun MapListScreen(
             }
         }
     }
+    AnimatedLoading(
+        visibilityProvider = {
+            showSignOutProgress
+        },
+        modifier = Modifier.fillMaxSize(),
+        statusText = if (mapListViewModel.getUsername().isEmpty()) "Loading.." else "Signing out.."
+    )
 }
 
-
 /**
- * A list item row for a PortalItem that shows the [title], [lastModified] and [thumbnail]. Provides
+ * A list item row for a PortalItem that shows the [title], [lastModified] and thumbnail. Provides
  * an [onClick] callback when the item is tapped.
  */
 @Composable
@@ -201,44 +234,155 @@ fun MapListItem(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppBar(isLoading: Boolean, onRefresh: (Boolean) -> Unit = {}) {
+fun AppSearchBar(
+    query: String,
+    isLoading: Boolean,
+    username: String,
+    modifier: Modifier = Modifier,
+    onQueryChange: (String) -> Unit = {},
+    onRefresh: (Boolean) -> Unit = {},
+    onSignOut: () -> Unit = {}
+) {
+    val focusManager = LocalFocusManager.current
+    var active by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
-    TopAppBar(
-        title = {
-            Text(
-                text = "Maps",
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold)
-            )
+
+    TextField(
+        value = query,
+        onValueChange = {
+            onQueryChange(it)
         },
-        actions = {
-            IconButton(onClick = { expanded = true }) {
-                Image(imageVector = Icons.Default.MoreVert, contentDescription = null)
+        modifier = modifier
+            .onFocusChanged {
+                if (it.hasFocus) {
+                    active = true
+                }
             }
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier.width(150.dp),
-                offset = DpOffset((15).dp, 0.dp)
+            .height(56.dp),
+        placeholder = {
+            Text(text = "Search Maps")
+        },
+        leadingIcon = {
+            Icon(imageVector = Icons.Outlined.Search, contentDescription = null)
+        },
+        trailingIcon = {
+            Row(
+                modifier = Modifier
+                    .widthIn(80.dp)
+                    .padding(end = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.End
             ) {
-                DropdownMenuItem(
-                    text = { Text(text = "Refresh") },
-                    enabled = !isLoading,
-                    onClick = {
-                        expanded = false
-                        onRefresh(false)
-                    })
-                DropdownMenuItem(
-                    text = { Text(text = "Clear Cache") },
-                    enabled = !isLoading,
-                    onClick = {
-                    expanded = false
-                    onRefresh(true)
-                })
+                if (query.isNotEmpty()) {
+                    IconButton(onClick = { onQueryChange("") }) {
+                        Icon(
+                            imageVector = Icons.Outlined.Close,
+                            contentDescription = null
+                        )
+                    }
+                }
+                IconButton(onClick = {
+                    expanded = !expanded
+                    active = false
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.AccountCircle,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+                MaterialTheme(
+                    shapes = MaterialTheme.shapes.copy(
+                        extraSmall = RoundedCornerShape(
+                            16.dp
+                        )
+                    )
+                ) {
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false },
+                        modifier = Modifier.widthIn(150.dp),
+                        offset = DpOffset(0.dp, 10.dp)
+                    ) {
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = if (username.isEmpty()) {
+                                        "Not logged in"
+                                    } else {
+                                        "Logged in as $username"
+                                    }
+                                )
+                            },
+                            onClick = { }
+                        )
+                        DropdownMenuItem(
+                            text = { Text(text = "Refresh") },
+                            enabled = !isLoading,
+                            onClick = {
+                                expanded = false
+                                onRefresh(false)
+                            },
+                            leadingIcon = {
+                                Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text(text = "Clear Cache") },
+                            enabled = !isLoading,
+                            onClick = {
+                                expanded = false
+                                onRefresh(true)
+                            },
+                            leadingIcon = {
+                                Icon(imageVector = Icons.Default.Delete, contentDescription = null)
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = if (username.isEmpty()) {
+                                        "Sign In"
+                                    } else {
+                                        "Sign Out"
+                                    }
+                                )
+                            },
+                            enabled = !isLoading,
+                            onClick = {
+                                expanded = false
+                                onSignOut()
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.ExitToApp,
+                                    contentDescription = null
+                                )
+                            }
+                        )
+                    }
+                }
             }
-        }
+        },
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+        keyboardActions = KeyboardActions(onSearch = {
+            active = false
+        }),
+        shape = RoundedCornerShape(30.dp),
+        colors = TextFieldDefaults.colors(
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent
+        ),
+        textStyle = MaterialTheme.typography.titleMedium
     )
+
+    LaunchedEffect(active) {
+        if (!active) {
+            focusManager.clearFocus()
+        }
+    }
 }
 
 /**
@@ -256,4 +400,10 @@ fun MapListItemPreview() {
         shareType = "Public",
         modifier = Modifier.size(width = 485.dp, height = 100.dp)
     )
+}
+
+@Composable
+@Preview
+fun AppBarPreview() {
+    AppSearchBar("", false, "User")
 }

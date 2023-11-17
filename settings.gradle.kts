@@ -72,6 +72,7 @@ dependencyResolutionManagement {
 }
 
 var includedProjects = projects.flatMap { listOf(":$it", ":$it-app") }.toTypedArray()
+
 include(*includedProjects)
 include(":bom")
 include(":composable-map")
