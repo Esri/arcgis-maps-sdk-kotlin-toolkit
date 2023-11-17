@@ -34,7 +34,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -43,7 +42,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.contentDescription
@@ -153,10 +151,10 @@ internal fun BaseTextField(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     isEditable: Boolean,
-    readOnly: Boolean = !isEditable,
     label: String,
     placeholder: String,
     singleLine: Boolean,
+    readOnly: Boolean = !isEditable,
     keyboardType: KeyboardType = KeyboardType.Ascii,
     trailingIcon: ImageVector? = null,
     supportingText: @Composable (ColumnScope.() -> Unit)? = null,
@@ -228,16 +226,15 @@ internal fun BaseTextField(
             ),
             singleLine = singleLine,
             interactionSource = interactionSource,
-            colors = if (text.isEmpty() && placeholder.isNotEmpty())
-                OutlinedTextFieldDefaults.colors(
-                    unfocusedTextColor = Color.Gray,
-                    focusedTextColor = Color.Gray
-                )
-            else
-                OutlinedTextFieldDefaults.colors()
+            colors = baseTextFieldColors(
+                isEditable = isEditable,
+                isEmpty = text.isEmpty(),
+                isPlaceholderEmpty = placeholder.isEmpty()
+            )
         )
     }
 }
+
 
 @Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
 @Composable
