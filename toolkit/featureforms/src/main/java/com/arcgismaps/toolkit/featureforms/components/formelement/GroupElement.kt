@@ -33,8 +33,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
@@ -43,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.BaseGroupState
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun GroupElement(
@@ -74,12 +81,19 @@ private fun GroupElement(
     label: String,
     description: String,
     expanded: Boolean,
-    fieldStates: Map<Int, BaseFieldState<*>?>,
+    fieldStates: Map<Int, BaseFieldState<*>>,
     modifier: Modifier = Modifier,
     colors: GroupElementColors,
     onClick: () -> Unit,
     onDialogRequest: ((BaseFieldState<*>, Int) -> Unit)? = null
 ) {
+    var visibleChild by rememberSaveable {
+        // all are visible initially
+        mutableStateOf(fieldStates.keys.toSet())
+    }
+    val anyVisibleChild by remember {
+        derivedStateOf { visibleChild.isNotEmpty() }
+    }
     Card(
         modifier = modifier,
         shape = GroupElementDefaults.containerShape,
@@ -89,6 +103,7 @@ private fun GroupElement(
             modifier = Modifier.fillMaxWidth(),
             title = label,
             description = description,
+            canExpand = anyVisibleChild,
             isExpanded = expanded,
             onClick = onClick
         )
@@ -97,10 +112,21 @@ private fun GroupElement(
                 modifier = Modifier.background(colors.containerColor)
             ) {
                 fieldStates.forEach { (key, state) ->
-                    if (state != null) {
-                        FieldElement(state = state) {
-                            onDialogRequest?.invoke(state, key)
-                        }
+                    FieldElement(state = state) {
+                        onDialogRequest?.invoke(state, key)
+                    }
+                }
+            }
+        }
+    }
+    LaunchedEffect(fieldStates) {
+        fieldStates.forEach {
+            launch {
+                it.value.isVisible.collect { visible ->
+                    visibleChild = if (visible) {
+                        visibleChild + it.key
+                    } else {
+                        visibleChild - it.key
                     }
                 }
             }
@@ -113,14 +139,14 @@ private fun GroupElementHeader(
     modifier: Modifier = Modifier,
     title: String,
     description: String,
+    canExpand: Boolean,
     isExpanded: Boolean,
     onClick: () -> Unit
 ) {
-    Row(modifier = modifier
-        .clickable {
-            onClick()
-        }
-        .padding(15.dp),
+    Row(
+        modifier = modifier
+            .clickable(enabled = canExpand, onClick = onClick)
+            .padding(15.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
@@ -130,20 +156,24 @@ private fun GroupElementHeader(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            Text(
-                text = description,
-                style = MaterialTheme.typography.bodySmall
-            )
+            if (description.isNotEmpty()) {
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
         }
-        Crossfade(targetState = isExpanded, label = "expanded-icon-anim") {
-            Icon(
-                imageVector = if (it) {
-                    Icons.Rounded.ExpandLess
-                } else {
-                    Icons.Rounded.ExpandMore
-                },
-                contentDescription = null
-            )
+        if (canExpand) {
+            Crossfade(targetState = isExpanded, label = "expanded-icon-anim") {
+                Icon(
+                    imageVector = if (it) {
+                        Icons.Rounded.ExpandLess
+                    } else {
+                        Icons.Rounded.ExpandMore
+                    },
+                    contentDescription = null
+                )
+            }
         }
     }
 }
