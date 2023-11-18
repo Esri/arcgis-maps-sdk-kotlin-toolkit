@@ -87,12 +87,12 @@ private fun GroupElement(
     onClick: () -> Unit,
     onDialogRequest: ((BaseFieldState<*>, Int) -> Unit)? = null
 ) {
-    var visibleChild by rememberSaveable {
+    var visibleChildren by rememberSaveable {
         // all are visible initially
         mutableStateOf(fieldStates.keys.toSet())
     }
-    val anyVisibleChild by remember {
-        derivedStateOf { visibleChild.isNotEmpty() }
+    val isAnyChildVisible by remember {
+        derivedStateOf { visibleChildren.isNotEmpty() }
     }
     Card(
         modifier = modifier,
@@ -103,7 +103,7 @@ private fun GroupElement(
             modifier = Modifier.fillMaxWidth(),
             title = label,
             description = description,
-            canExpand = anyVisibleChild,
+            canExpand = isAnyChildVisible,
             isExpanded = expanded,
             onClick = onClick
         )
@@ -120,13 +120,13 @@ private fun GroupElement(
         }
     }
     LaunchedEffect(fieldStates) {
-        fieldStates.forEach {
+        fieldStates.forEach { entry ->
             launch {
-                it.value.isVisible.collect { visible ->
-                    visibleChild = if (visible) {
-                        visibleChild + it.key
+                entry.value.isVisible.collect { visible ->
+                    visibleChildren = if (visible) {
+                        visibleChildren + entry.key
                     } else {
-                        visibleChild - it.key
+                        visibleChildren - entry.key
                     }
                 }
             }
