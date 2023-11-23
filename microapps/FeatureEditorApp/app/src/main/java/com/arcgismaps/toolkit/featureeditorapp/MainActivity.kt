@@ -19,6 +19,7 @@
 package com.arcgismaps.toolkit.featureeditorapp
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.lifecycle.lifecycleScope
@@ -32,6 +33,9 @@ import com.arcgismaps.data.FieldType
 import com.arcgismaps.geometry.GeometryType
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
+import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeHandler
+import com.arcgismaps.httpcore.authentication.PregeneratedTokenCredential
+import com.arcgismaps.httpcore.authentication.TokenCredential
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.layers.FeatureCollectionLayer
@@ -41,20 +45,20 @@ import com.arcgismaps.toolkit.featureeditorapp.screens.FeatureEditorAppState
 import com.arcgismaps.toolkit.featureeditorapp.ui.theme.FeatureEditorAppTheme
 import kotlinx.coroutines.launch
 
+private const val WEB_MAP_URL = "https://runtimecoretest.maps.arcgis.com/home/item.html?id=df0f27f83eee41b0afe4b6216f80b541"
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // authentication with an API key or named user is
-        // required to access basemaps and other location services
-        ArcGISEnvironment.apiKey = ApiKey.create(BuildConfig.API_KEY)
-            ?: throw IllegalStateException("Could not create API key for app.")
-
 
         val state = FeatureEditorAppState(MapState())
 
         lifecycleScope.launch {
 
-            val (map, feature) = createMapWithFeature()
+            ArcGISEnvironment.authenticationManager.arcGISCredentialStore.add(TokenCredential.create(WEB_MAP_URL, BuildConfig.WEB_MAP_USERNAME, BuildConfig.WEB_MAP_PASSWORD).getOrThrow())
+
+            val map = ArcGISMap(WEB_MAP_URL)
+
             state.mapState.setMap(map)
         }
 
@@ -64,26 +68,4 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
-
-private suspend fun createMapWithFeature(): Pair<ArcGISMap, Feature> {
-    val table = FeatureCollectionTable(
-        fields = listOf(
-            Field(FieldType.Text, "name", "ye olde name", 64, isNullable = false),
-            Field(FieldType.Int32, "age", "age", 64, isNullable = false)
-        ),
-        geometryType = GeometryType.Point,
-        spatialReference = SpatialReference.wgs84()
-    )
-    val collection = FeatureCollection(listOf(table))
-
-    val feature = table.createFeature(mapOf("name" to "The Great Tree", "age" to 763), Point(0.0, 0.0, SpatialReference.wgs84()))
-
-    table.addFeature(feature)
-
-    val map =  ArcGISMap(BasemapStyle.ArcGISDarkGray).apply {
-        operationalLayers.add(FeatureCollectionLayer(collection))
-    }
-
-    return Pair(map, feature)
 }
