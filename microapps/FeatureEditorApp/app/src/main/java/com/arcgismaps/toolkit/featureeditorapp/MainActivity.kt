@@ -21,12 +21,25 @@ package com.arcgismaps.toolkit.featureeditorapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.lifecycleScope
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.toolkit.featureeditorapp.screens.MainScreen
+import com.arcgismaps.data.Feature
+import com.arcgismaps.data.FeatureCollection
+import com.arcgismaps.data.FeatureCollectionTable
+import com.arcgismaps.data.Field
+import com.arcgismaps.data.FieldType
+import com.arcgismaps.geometry.GeometryType
+import com.arcgismaps.geometry.Point
+import com.arcgismaps.geometry.SpatialReference
+import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.BasemapStyle
+import com.arcgismaps.mapping.layers.FeatureCollectionLayer
+import com.arcgismaps.toolkit.composablemap.MapState
+import com.arcgismaps.toolkit.featureeditorapp.screens.FeatureEditorApp
+import com.arcgismaps.toolkit.featureeditorapp.screens.FeatureEditorAppState
 import com.arcgismaps.toolkit.featureeditorapp.ui.theme.FeatureEditorAppTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,24 +47,43 @@ class MainActivity : ComponentActivity() {
         // authentication with an API key or named user is
         // required to access basemaps and other location services
         ArcGISEnvironment.apiKey = ApiKey.create(BuildConfig.API_KEY)
-                ?: throw IllegalStateException("Could not create API key for app.")
+            ?: throw IllegalStateException("Could not create API key for app.")
+
+
+        val state = FeatureEditorAppState(MapState())
+
+        lifecycleScope.launch {
+
+            val (map, feature) = createMapWithFeature()
+            state.mapState.setMap(map)
+        }
+
         setContent {
             FeatureEditorAppTheme {
-                FeatureEditorApp()
+                FeatureEditorApp(state)
             }
         }
     }
 }
 
-@Composable
-fun FeatureEditorApp() {
-    MainScreen()
-}
+private suspend fun createMapWithFeature(): Pair<ArcGISMap, Feature> {
+    val table = FeatureCollectionTable(
+        fields = listOf(
+            Field(FieldType.Text, "name", "ye olde name", 64, isNullable = false),
+            Field(FieldType.Int32, "age", "age", 64, isNullable = false)
+        ),
+        geometryType = GeometryType.Point,
+        spatialReference = SpatialReference.wgs84()
+    )
+    val collection = FeatureCollection(listOf(table))
 
-@Preview(showBackground = true)
-@Composable
-fun AppPreview() {
-    FeatureEditorAppTheme {
-        FeatureEditorApp()
+    val feature = table.createFeature(mapOf("name" to "The Great Tree", "age" to 763), Point(0.0, 0.0, SpatialReference.wgs84()))
+
+    table.addFeature(feature)
+
+    val map =  ArcGISMap(BasemapStyle.ArcGISDarkGray).apply {
+        operationalLayers.add(FeatureCollectionLayer(collection))
     }
+
+    return Pair(map, feature)
 }

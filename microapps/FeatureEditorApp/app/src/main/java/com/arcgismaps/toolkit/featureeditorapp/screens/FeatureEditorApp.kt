@@ -19,15 +19,9 @@
 package com.arcgismaps.toolkit.featureeditorapp.screens
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.toolkit.composablemap.ComposableMap
-import com.arcgismaps.toolkit.composablemap.MapState
 
 @Composable
-fun MainScreen() {
-    val map = remember { ArcGISMap(BasemapStyle.ArcGISTopographic) }
-    val state = remember { MapState(map) }
-    ComposableMap(state)
+fun FeatureEditorApp(state: FeatureEditorAppState) {
+    ComposableMap(state.mapState)
 }
