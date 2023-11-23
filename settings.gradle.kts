@@ -22,7 +22,7 @@ import org.gradle.configurationcache.extensions.capitalized
 // and also add a companion micro app(Ex: "newComponent-app").
 // For mismatching toolkit component and microApp names add them individually at end of this file.
 // Refer to "indoors" project with "floor-filter-app" as an example.
-val projects = listOf("template", "featureforms", "authentication", "compass")
+val projects = listOf("template", "featureforms", "authentication", "compass", "featureeditor")
 
 pluginManagement {
     repositories {
