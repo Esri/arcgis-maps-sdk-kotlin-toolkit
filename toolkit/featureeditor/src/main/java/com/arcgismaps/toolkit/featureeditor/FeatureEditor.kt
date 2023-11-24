@@ -94,6 +94,16 @@ public class FeatureEditor(
         if (geometry?.let { !it.isEmpty } == true) geometryEditor.start(geometry)
         else geometryEditor.start(table.geometryType) // TODO: all types supported?
 
+        // IDEA: symbology stuff should be much more organised and handled in a helper method
+        val symbol = (feature.featureTable?.layer as? FeatureLayer)?.renderer?.getSymbol(feature)
+        geometryEditor.tool.style.apply {
+            // TODO: what about lines and stuff
+            vertexSymbol = symbol
+            selectedVertexSymbol = symbol
+            this.feedbackVertexSymbol = symbol
+        }
+        (feature.featureTable?.layer as? FeatureLayer)?.setFeatureVisible(feature, false)
+
         _isStarted.value = true
     }
 
@@ -111,7 +121,7 @@ public class FeatureEditor(
 
         _onFinish.tryEmit(FinishState.Stopped(feature!!))
 
-        resetState()
+        resetState(feature)
     }
 
     public fun discard() {
@@ -140,14 +150,17 @@ public class FeatureEditor(
         feature!!.refresh()
 
         _onFinish.tryEmit(FinishState.Discarded(feature))
-        resetState()
+        resetState(feature)
     }
 
-    private fun resetState() {
+    private fun resetState(feature: ArcGISFeature) {
         featureForm = null
         // Don't need to push the final geometry into the feature because it's done by
         // the collection of the geometry event anyway.
         geometryEditor.stop()
+        // TODO: technically the user could have started editing an invisible feature so we should preserve that when
+        //  the editor stops.
+        (feature.featureTable?.layer as? FeatureLayer)?.setFeatureVisible(feature, true)
         _isStarted.value = false
         currentFeature = null
     }
