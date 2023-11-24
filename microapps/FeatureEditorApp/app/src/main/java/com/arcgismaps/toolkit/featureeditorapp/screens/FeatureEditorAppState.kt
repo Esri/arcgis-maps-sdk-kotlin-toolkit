@@ -26,8 +26,11 @@ import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
 import com.arcgismaps.toolkit.composablemap.MapState
 import com.arcgismaps.toolkit.featureeditor.FeatureEditor
 import com.arcgismaps.toolkit.featureeditor.FeatureEditorState
+import com.arcgismaps.toolkit.featureeditor.FinishState
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -45,6 +48,25 @@ class FeatureEditorAppState : ViewModel(), MapState by MapState() {
             FeatureFormState(),
             viewModelScope,
         )
+
+        viewModelScope.launch(start = CoroutineStart.UNDISPATCHED) {
+            featureEditorState.featureEditor.onFinish.collect {
+                when (it) {
+                    is FinishState.Discarded -> {} // TODO: display a Snackbar
+                    is FinishState.Stopped -> {
+                        val table = it.feature.featureTable
+                        if (table == null) {
+                            // TODO: display something
+                            return@collect
+                        }
+                        // TODO: handle errors here
+                        // TODO: does can't update imply can add?
+                        if (table.canUpdate(it.feature)) table.updateFeature(it.feature)
+                        else table.addFeature(it.feature)
+                    }
+                }
+            }
+        }
     }
 
     context(MapView, CoroutineScope) override fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {
@@ -68,7 +90,7 @@ class FeatureEditorAppState : ViewModel(), MapState by MapState() {
 
             // Wait until the editor is stopped again before allowing more tap events so that we don't accidentally
             // restart the editor by clicking on a new feature.
-            featureEditorState.featureEditor.isStarted.first { isStarted -> !isStarted }
+            featureEditorState.isStarted.first { isStarted -> !isStarted }
         }
     }
 }
