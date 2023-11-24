@@ -22,6 +22,7 @@ import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,13 +30,17 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 public sealed class FinishState(public open val feature: ArcGISFeature) {
     public data class Discarded(override val feature: ArcGISFeature) : FinishState(feature)
     public data class Stopped(override val feature: ArcGISFeature) : FinishState(feature)
 }
 
-public class FeatureEditor(private val geometryEditor: GeometryEditor) {
+public class FeatureEditor(
+    private val geometryEditor: GeometryEditor,
+    scope: CoroutineScope // TODO: Ideally this would not be needed here...
+) {
 
     public var featureForm: FeatureForm? = null
         private set
@@ -45,6 +50,7 @@ public class FeatureEditor(private val geometryEditor: GeometryEditor) {
     private var currentFeature: ArcGISFeature? = null
 
     private val _isStarted = MutableStateFlow(false)
+
     // TODO: can this be defined in terms of whether currentFeature is null?
     public val isStarted: StateFlow<Boolean> = _isStarted.asStateFlow()
 
@@ -52,6 +58,20 @@ public class FeatureEditor(private val geometryEditor: GeometryEditor) {
         replay = 0, extraBufferCapacity = Int.MAX_VALUE, onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
     public val onFinish: SharedFlow<FinishState> = _onFinish.asSharedFlow()
+
+    init {
+        // IDEA: Could we somehow tie this to the start method and use the scope from that, and suspend it until
+        // editing is complete? We would still need the stop method, and that would then have to be called asynchronously
+        // from another coroutine (potentially another thread, so may need to use a custom dispatcher for thread safety).
+        // It makes this class look a bit nicer internally I suppose, but it's just pushing the problem around because then
+        // we need to launch a coroutine to call start. But it's being launched in the viewmodel layer which makes more
+        // sense?...
+        scope.launch {
+            geometryEditor.geometry.collect {
+                if (geometryEditor.isStarted.value) currentFeature?.geometry = it
+            }
+        }
+    }
 
     public fun start(feature: ArcGISFeature) {
         if (isStarted.value) return
@@ -125,12 +145,9 @@ public class FeatureEditor(private val geometryEditor: GeometryEditor) {
 
     private fun resetState() {
         featureForm = null
-        // It's probably not necessary to push this into the feature again because it should be pushed into the feature
-        // regularly in response to the geometry changed event on the geometry editor.
-        // TODO: ^ need to actually consume that event here
-        val newGeometry = geometryEditor.stop()
-        currentFeature?.geometry = newGeometry
-
+        // Don't need to push the final geometry into the feature because it's done by
+        // the collection of the geometry event anyway.
+        geometryEditor.stop()
         _isStarted.value = false
         currentFeature = null
     }

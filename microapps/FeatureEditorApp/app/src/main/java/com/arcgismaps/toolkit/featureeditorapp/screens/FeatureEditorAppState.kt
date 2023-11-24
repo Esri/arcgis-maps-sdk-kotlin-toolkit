@@ -44,7 +44,7 @@ class FeatureEditorAppState : ViewModel(), MapState by MapState() {
         val geoemetryEditor = GeometryEditor()
         setGeometryEditor(geoemetryEditor)
         featureEditorState = FeatureEditorState(
-            FeatureEditor(geoemetryEditor),
+            FeatureEditor(geoemetryEditor, viewModelScope),
             FeatureFormState(),
             viewModelScope,
         )
