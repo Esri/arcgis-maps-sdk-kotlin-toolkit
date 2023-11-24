@@ -28,6 +28,7 @@ import com.arcgismaps.toolkit.featureeditor.FeatureEditor
 import com.arcgismaps.toolkit.featureeditor.FeatureEditorState
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class FeatureEditorAppState : ViewModel(), MapState by MapState() {
@@ -64,6 +65,10 @@ class FeatureEditorAppState : ViewModel(), MapState by MapState() {
             selectedFeature.load().getOrNull() ?: return@launch
 
             featureEditorState.featureEditor.start(selectedFeature)
+
+            // Wait until the editor is stopped again before allowing more tap events so that we don't accidentally
+            // restart the editor by clicking on a new feature.
+            featureEditorState.featureEditor.isStarted.first { isStarted -> !isStarted }
         }
     }
 }
