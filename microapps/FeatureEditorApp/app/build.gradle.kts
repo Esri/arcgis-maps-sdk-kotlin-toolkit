@@ -79,6 +79,7 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class).all {
 
 dependencies {
     implementation(project(":featureeditor"))
+    implementation(project(":featureforms"))
     implementation(project(":composable-map"))
     implementation(arcgis.mapsSdk)
     implementation(libs.bundles.composeCore)
