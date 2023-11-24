@@ -38,7 +38,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val state = FeatureEditorAppState(MapState())
+        val state = FeatureEditorAppState()
 
         lifecycleScope.launch {
 
@@ -52,7 +52,7 @@ class MainActivity : ComponentActivity() {
 
             val map = ArcGISMap(WEB_MAP_URL)
 
-            state.mapState.setMap(map)
+            state.setMap(map)
         }
 
         setContent {

@@ -16,8 +16,54 @@
 
 package com.arcgismaps.toolkit.featureeditorapp.screens
 
-import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.BasemapStyle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.arcgismaps.data.ArcGISFeature
+import com.arcgismaps.mapping.layers.FeatureLayer
+import com.arcgismaps.mapping.view.MapView
+import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
+import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
 import com.arcgismaps.toolkit.composablemap.MapState
+import com.arcgismaps.toolkit.featureeditor.FeatureEditor
+import com.arcgismaps.toolkit.featureeditor.FeatureEditorState
+import com.arcgismaps.toolkit.featureforms.FeatureFormState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
-class FeatureEditorAppState(val mapState: MapState = MapState())
+class FeatureEditorAppState : ViewModel(), MapState by MapState() {
+
+    // NOTE: has to be initialized here rather than in constructor so that we
+    // can access the viewmodel scope to pass to the editor
+    val featureEditorState: FeatureEditorState
+
+    init {
+        val geoemetryEditor = GeometryEditor()
+        setGeometryEditor(geoemetryEditor)
+        featureEditorState = FeatureEditorState(
+            FeatureEditor(geoemetryEditor),
+            FeatureFormState(),
+            viewModelScope,
+        )
+    }
+
+    context(MapView, CoroutineScope) override fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {
+        launch {
+            val identifyResult = identifyLayers(
+                screenCoordinate = singleTapEvent.screenCoordinate,
+                tolerance = 22.0,
+                returnPopupsOnly = false
+            ).getOrNull() ?: return@launch
+
+            val selectedFeature = identifyResult.firstNotNullOfOrNull { result ->
+                    result.geoElements.filterIsInstance<ArcGISFeature>()
+                        .firstOrNull { feature ->
+                            (feature.featureTable?.layer as? FeatureLayer)?.featureFormDefinition != null
+                        }
+            } ?: return@launch
+
+            selectedFeature.load().getOrNull() ?: return@launch
+
+            featureEditorState.featureEditor.start(selectedFeature)
+        }
+    }
+}

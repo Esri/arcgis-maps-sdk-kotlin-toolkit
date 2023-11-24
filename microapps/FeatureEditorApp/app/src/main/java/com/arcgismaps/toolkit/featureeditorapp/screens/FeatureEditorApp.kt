@@ -18,10 +18,28 @@
 
 package com.arcgismaps.toolkit.featureeditorapp.screens
 
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import com.arcgismaps.toolkit.composablemap.ComposableMap
+import com.arcgismaps.toolkit.featureeditor.FeatureEditorView
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeatureEditorApp(state: FeatureEditorAppState) {
-    ComposableMap(state.mapState)
+    Scaffold(topBar = { TopAppBar(title = { Text("Feature Editor App") }) }) {
+
+        FeatureEditorView(
+            featureEditorState = state.featureEditorState,
+            modifier = Modifier.padding(it)
+        ) {
+            // TODO: would be nice to set insets here so editor's stuff doesn't get in way of map content
+            ComposableMap(mapState = state)
+        }
+
+    }
 }
