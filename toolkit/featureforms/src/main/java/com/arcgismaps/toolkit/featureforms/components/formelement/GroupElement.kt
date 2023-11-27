@@ -115,10 +115,10 @@ private fun GroupElementHeader(
     onClick: () -> Unit
 ) {
     Row(modifier = modifier
-            .clickable {
-                onClick()
-            }
-            .padding(15.dp),
+        .clickable {
+            onClick()
+        }
+        .padding(15.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
