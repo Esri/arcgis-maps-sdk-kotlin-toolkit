@@ -16,9 +16,15 @@
 
 package com.arcgismaps.toolkit.featureeditor
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
@@ -30,6 +36,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.modifier.modifierLocalConsumer
+import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.FeatureForm
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,32 +50,50 @@ public fun FeatureEditorView(
     map: @Composable () -> Unit,
 ) {
     var isBottomSheetVisible by remember { mutableStateOf(false) }
-    val isStarted by featureEditorState.isStarted.collectAsState()
 
-    Box(modifier = modifier.fillMaxSize()) {
+    Column(modifier = modifier) {
 
-        map()
+        Toolbar(
+            onAttributeButtonPress = { isBottomSheetVisible = !isBottomSheetVisible },
+            featureEditorState = featureEditorState
+        )
 
-        Row {
-            Button(
-                onClick = { isBottomSheetVisible = !isBottomSheetVisible },
-                enabled = isStarted
-            ) { Text("Attributes/Geometry") }
-            Button(
-                onClick = { featureEditorState.featureEditor.stop() },
-                enabled = isStarted
-            ) { Text("Stop") }
-            Button(
-                onClick = { featureEditorState.featureEditor.discard() },
-                enabled = isStarted
-            ) { Text("Discard") }
-        }
+        Box(modifier = Modifier.fillMaxSize()) {
+
+            map()
 
 
-        if (isBottomSheetVisible) {
-            ModalBottomSheet(onDismissRequest = { isBottomSheetVisible = false }) {
-                FeatureForm(featureFormState = featureEditorState.featureFormState)
+            if (isBottomSheetVisible) {
+                ModalBottomSheet(onDismissRequest = { isBottomSheetVisible = false }) {
+                    FeatureForm(featureFormState = featureEditorState.featureFormState)
+                }
             }
         }
+
+    }
+}
+
+@Composable
+private fun Toolbar(onAttributeButtonPress: () -> Unit, featureEditorState: FeatureEditorState) {
+    val isStarted by featureEditorState.isStarted.collectAsState()
+    Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
+        Button(
+            onClick = onAttributeButtonPress,
+            enabled = isStarted,
+            shape = RectangleShape,
+            modifier = Modifier.padding(horizontal = 1.dp),
+        ) { Text("Attr / Geom") }
+        Button(
+            onClick = { featureEditorState.featureEditor.stop() },
+            enabled = isStarted,
+            shape = RectangleShape,
+            modifier = Modifier.padding(horizontal = 1.dp),
+        ) { Text("Stop") }
+        Button(
+            onClick = { featureEditorState.featureEditor.discard() },
+            enabled = isStarted,
+            shape = RectangleShape,
+            modifier = Modifier.padding(horizontal = 1.dp),
+        ) { Text("Discard") }
     }
 }
