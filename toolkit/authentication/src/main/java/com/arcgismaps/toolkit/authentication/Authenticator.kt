@@ -54,6 +54,16 @@ public fun Authenticator(
     modifier: Modifier = Modifier.fillMaxSize(),
     onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)? = null
 ) {
+    Shareable(authenticatorState = authenticatorState, modifier = modifier, onPendingOAuthUserSignIn = onPendingOAuthUserSignIn)
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun Shareable(
+    displayOnDialog: Boolean = false, authenticatorState: AuthenticatorState,
+    modifier: Modifier = Modifier.fillMaxSize(),
+    onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)? = null
+) {
     // If the back button is pressed, this ensures that any prompts get dismissed.
     BackHandler {
         authenticatorState.dismissAll()
@@ -70,14 +80,26 @@ public fun Authenticator(
         authenticatorState.pendingServerTrustChallenge.collectAsStateWithLifecycle().value
 
     pendingServerTrustChallenge?.let {
-        ServerTrustAuthenticator(it, modifier)
+        if (displayOnDialog) {
+            AlertDialog(onDismissRequest = { /*TODO*/ }) {
+                ServerTrustAuthenticator(it, modifier)        
+            }
+        } else {
+            ServerTrustAuthenticator(it, modifier)
+        }
     }
 
     val pendingUsernamePasswordChallenge =
         authenticatorState.pendingUsernamePasswordChallenge.collectAsStateWithLifecycle().value
 
     pendingUsernamePasswordChallenge?.let {
-        UsernamePasswordAuthenticator(it, modifier)
+        if (displayOnDialog) {
+            AlertDialog(onDismissRequest = { /*TODO*/ }) {
+                UsernamePasswordAuthenticator(it, modifier)
+            }
+        } else {
+            UsernamePasswordAuthenticator(it, modifier)
+        }
     }
 
     val pendingClientCertificateChallenge =
@@ -120,11 +142,7 @@ private fun Context.findActivity(): Activity {
 public fun DialogAuthenticator(authenticatorState: AuthenticatorState, onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)? = null) {
     val showDialog = authenticatorState.isDisplayed.collectAsStateWithLifecycle(initialValue = false).value
     if (showDialog) {
-        AlertDialog(
-            onDismissRequest = { authenticatorState.dismissAll() },
-            modifier = Modifier.clip(MaterialTheme.shapes.extraLarge),
-        ) {
-            Authenticator(authenticatorState = authenticatorState, modifier = Modifier.fillMaxWidth(), onPendingOAuthUserSignIn)
-        }
+        val modifier =  Modifier.clip(MaterialTheme.shapes.extraLarge)
+        Shareable(displayOnDialog = true, authenticatorState = authenticatorState, modifier = modifier, onPendingOAuthUserSignIn)
     }
 }
