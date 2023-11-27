@@ -114,8 +114,7 @@ private fun GroupElementHeader(
     isExpanded: Boolean,
     onClick: () -> Unit
 ) {
-    Row(
-        modifier = modifier
+    Row(modifier = modifier
             .clickable {
                 onClick()
             }
