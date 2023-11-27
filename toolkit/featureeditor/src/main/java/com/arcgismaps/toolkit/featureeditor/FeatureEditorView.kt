@@ -25,9 +25,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -51,49 +53,53 @@ public fun FeatureEditorView(
 ) {
     var isBottomSheetVisible by remember { mutableStateOf(false) }
 
-    Column(modifier = modifier) {
+    Box(modifier = modifier.fillMaxSize()) {
+        map()
 
         Toolbar(
             onAttributeButtonPress = { isBottomSheetVisible = !isBottomSheetVisible },
             featureEditorState = featureEditorState
         )
 
-        Box(modifier = Modifier.fillMaxSize()) {
-
-            map()
-
-
-            if (isBottomSheetVisible) {
-                ModalBottomSheet(onDismissRequest = { isBottomSheetVisible = false }) {
-                    FeatureForm(featureFormState = featureEditorState.featureFormState)
-                }
+        if (isBottomSheetVisible) {
+            ModalBottomSheet(onDismissRequest = { isBottomSheetVisible = false }) {
+                FeatureForm(featureFormState = featureEditorState.featureFormState)
             }
         }
-
     }
 }
 
 @Composable
 private fun Toolbar(onAttributeButtonPress: () -> Unit, featureEditorState: FeatureEditorState) {
     val isStarted by featureEditorState.isStarted.collectAsState()
-    Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
-        Button(
-            onClick = onAttributeButtonPress,
-            enabled = isStarted,
-            shape = RectangleShape,
-            modifier = Modifier.padding(horizontal = 1.dp),
-        ) { Text("Attr / Geom") }
-        Button(
-            onClick = { featureEditorState.featureEditor.stop() },
-            enabled = isStarted,
-            shape = RectangleShape,
-            modifier = Modifier.padding(horizontal = 1.dp),
-        ) { Text("Stop") }
-        Button(
-            onClick = { featureEditorState.featureEditor.discard() },
-            enabled = isStarted,
-            shape = RectangleShape,
-            modifier = Modifier.padding(horizontal = 1.dp),
-        ) { Text("Discard") }
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Surface(shape = RoundedCornerShape(bottomStart = 3.dp, bottomEnd = 3.dp)) {
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.padding(2.dp)
+                ) {
+                Button(
+                    onClick = onAttributeButtonPress,
+                    enabled = isStarted,
+                    shape = RectangleShape,
+                    modifier = Modifier.padding(1.dp),
+                ) { Text("Attr / Geom") }
+                Button(
+                    onClick = { featureEditorState.featureEditor.stop() },
+                    enabled = isStarted,
+                    shape = RectangleShape,
+                    modifier = Modifier.padding(1.dp),
+                ) { Text("Stop") }
+                Button(
+                    onClick = { featureEditorState.featureEditor.discard() },
+                    enabled = isStarted,
+                    shape = RectangleShape,
+                    modifier = Modifier.padding(1.dp),
+                ) { Text("Discard") }
+            }
+        }
     }
 }
