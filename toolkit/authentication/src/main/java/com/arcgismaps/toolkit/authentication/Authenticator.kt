@@ -24,7 +24,6 @@ import android.content.ContextWrapper
 import android.security.KeyChain
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -57,6 +56,26 @@ public fun Authenticator(
     Shareable(authenticatorState = authenticatorState, modifier = modifier, onPendingOAuthUserSignIn = onPendingOAuthUserSignIn)
 }
 
+
+/**
+ * Displays the [Authenticator] in an [AlertDialog]. See the Authenticator component for more details.
+ *
+ * @param authenticatorState an [AuthenticatorState]. See [AuthenticatorState.Companion.Factory].
+ * @param onPendingOAuthUserSignIn if not null, this will be called when an OAuth challenge is pending
+ * and the browser should be launched. Use this if you wish to handle OAuth challenges from your own
+ * activity rather than using the [OAuthUserSignInActivity].
+ * @since 200.2.0
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+public fun DialogAuthenticator(authenticatorState: AuthenticatorState, onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)? = null) {
+    val showDialog = authenticatorState.isDisplayed.collectAsStateWithLifecycle(initialValue = false).value
+    if (showDialog) {
+        val modifier =  Modifier.clip(MaterialTheme.shapes.extraLarge)
+        Shareable(displayOnDialog = true, authenticatorState = authenticatorState, modifier = modifier, onPendingOAuthUserSignIn)
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Shareable(
@@ -82,7 +101,7 @@ private fun Shareable(
     pendingServerTrustChallenge?.let {
         if (displayOnDialog) {
             AlertDialog(onDismissRequest = { /*TODO*/ }) {
-                ServerTrustAuthenticator(it, modifier)        
+                ServerTrustAuthenticator(it, modifier)
             }
         } else {
             ServerTrustAuthenticator(it, modifier)
@@ -126,23 +145,4 @@ private fun Context.findActivity(): Activity {
         context = context.baseContext
     }
     throw IllegalStateException("Could not find an activity from which to launch client certificate picker.")
-}
-
-/**
- * Displays the [Authenticator] in an [AlertDialog]. See the Authenticator component for more details.
- *
- * @param authenticatorState an [AuthenticatorState]. See [AuthenticatorState.Companion.Factory].
- * @param onPendingOAuthUserSignIn if not null, this will be called when an OAuth challenge is pending
- * and the browser should be launched. Use this if you wish to handle OAuth challenges from your own
- * activity rather than using the [OAuthUserSignInActivity].
- * @since 200.2.0
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-public fun DialogAuthenticator(authenticatorState: AuthenticatorState, onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)? = null) {
-    val showDialog = authenticatorState.isDisplayed.collectAsStateWithLifecycle(initialValue = false).value
-    if (showDialog) {
-        val modifier =  Modifier.clip(MaterialTheme.shapes.extraLarge)
-        Shareable(displayOnDialog = true, authenticatorState = authenticatorState, modifier = modifier, onPendingOAuthUserSignIn)
-    }
 }
