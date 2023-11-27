@@ -33,14 +33,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
@@ -49,7 +43,6 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.BaseGroupState
-import kotlinx.coroutines.launch
 
 @Composable
 internal fun GroupElement(
@@ -87,13 +80,6 @@ private fun GroupElement(
     onClick: () -> Unit,
     onDialogRequest: ((BaseFieldState<*>, Int) -> Unit)? = null
 ) {
-    var visibleChildren by rememberSaveable {
-        // all are visible initially
-        mutableStateOf(fieldStates.keys.toSet())
-    }
-    val isAnyChildVisible by remember {
-        derivedStateOf { visibleChildren.isNotEmpty() }
-    }
     Card(
         modifier = modifier,
         shape = GroupElementDefaults.containerShape,
@@ -103,7 +89,6 @@ private fun GroupElement(
             modifier = Modifier.fillMaxWidth(),
             title = label,
             description = description,
-            canExpand = isAnyChildVisible,
             isExpanded = expanded,
             onClick = onClick
         )
@@ -119,19 +104,6 @@ private fun GroupElement(
             }
         }
     }
-    LaunchedEffect(fieldStates) {
-        fieldStates.forEach { entry ->
-            launch {
-                entry.value.isVisible.collect { visible ->
-                    visibleChildren = if (visible) {
-                        visibleChildren + entry.key
-                    } else {
-                        visibleChildren - entry.key
-                    }
-                }
-            }
-        }
-    }
 }
 
 @Composable
@@ -139,13 +111,14 @@ private fun GroupElementHeader(
     modifier: Modifier = Modifier,
     title: String,
     description: String,
-    canExpand: Boolean,
     isExpanded: Boolean,
     onClick: () -> Unit
 ) {
     Row(
         modifier = modifier
-            .clickable(enabled = canExpand, onClick = onClick)
+            .clickable {
+                onClick()
+            }
             .padding(15.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -163,17 +136,15 @@ private fun GroupElementHeader(
                 )
             }
         }
-        if (canExpand) {
-            Crossfade(targetState = isExpanded, label = "expanded-icon-anim") {
-                Icon(
-                    imageVector = if (it) {
-                        Icons.Rounded.ExpandLess
-                    } else {
-                        Icons.Rounded.ExpandMore
-                    },
-                    contentDescription = null
-                )
-            }
+        Crossfade(targetState = isExpanded, label = "expanded-icon-anim") {
+            Icon(
+                imageVector = if (it) {
+                    Icons.Rounded.ExpandLess
+                } else {
+                    Icons.Rounded.ExpandMore
+                },
+                contentDescription = null
+            )
         }
     }
 }
