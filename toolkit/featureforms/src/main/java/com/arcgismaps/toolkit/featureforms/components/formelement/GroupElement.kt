@@ -74,7 +74,7 @@ private fun GroupElement(
     label: String,
     description: String,
     expanded: Boolean,
-    fieldStates: Map<Int, BaseFieldState<*>?>,
+    fieldStates: Map<Int, BaseFieldState<*>>,
     modifier: Modifier = Modifier,
     colors: GroupElementColors,
     onClick: () -> Unit,
@@ -97,10 +97,8 @@ private fun GroupElement(
                 modifier = Modifier.background(colors.containerColor)
             ) {
                 fieldStates.forEach { (key, state) ->
-                    if (state != null) {
-                        FieldElement(state = state) {
-                            onDialogRequest?.invoke(state, key)
-                        }
+                    FieldElement(state = state) {
+                        onDialogRequest?.invoke(state, key)
                     }
                 }
             }
@@ -130,10 +128,12 @@ private fun GroupElementHeader(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            Text(
-                text = description,
-                style = MaterialTheme.typography.bodySmall
-            )
+            if (description.isNotEmpty()) {
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
         }
         Crossfade(targetState = isExpanded, label = "expanded-icon-anim") {
             Icon(
