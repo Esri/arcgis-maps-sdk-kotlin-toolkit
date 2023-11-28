@@ -19,6 +19,7 @@ package com.arcgismaps.toolkit.featureeditor
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -35,16 +36,38 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.featureforms.EditingTransactionState
 import com.arcgismaps.toolkit.featureforms.FeatureForm
+
+// TODO: should name contain "view"?
+@Composable
+public fun FeatureEditorView(
+    featureEditorState: FeatureEditorState,
+    modifier: Modifier = Modifier,
+    useSideBySideView: Boolean = false,
+    map: @Composable () -> Unit,
+) {
+    if (useSideBySideView) SideBySideFeatureEditorView(
+        featureEditorState = featureEditorState,
+        modifier = modifier,
+        map = map,
+    ) else CompactFeatureEditorView(
+        featureEditorState = featureEditorState,
+        modifier = modifier,
+        map = map,
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-public fun FeatureEditorView(
-    // TODO: name?
+private fun CompactFeatureEditorView(
     featureEditorState: FeatureEditorState,
     modifier: Modifier = Modifier,
     map: @Composable () -> Unit,
@@ -57,7 +80,8 @@ public fun FeatureEditorView(
         Toolbar(
             onAttributeButtonPress = { isBottomSheetVisible = !isBottomSheetVisible },
             featureEditorState = featureEditorState,
-            attributesVisible = isBottomSheetVisible,
+            attributeButtonState =
+                if (isBottomSheetVisible) AttributeButtonState.SHOW_GEOMETRY else AttributeButtonState.SHOW_ATTRIBUTES,
         )
 
         if (isBottomSheetVisible) {
@@ -69,9 +93,42 @@ public fun FeatureEditorView(
 }
 
 @Composable
+private fun SideBySideFeatureEditorView(
+    featureEditorState: FeatureEditorState,
+    modifier: Modifier = Modifier,
+    map: @Composable () -> Unit,
+) {
+    val isStarted by featureEditorState.isStarted.collectAsState()
+    Row(modifier = modifier) { // TODO: is it correct to use the incoming modifier here and nowhere else?
+        Box(modifier = Modifier
+            .fillMaxHeight()
+            .fillMaxWidth(0.5f)) {
+            map()
+
+            Toolbar(
+                onAttributeButtonPress = {},
+                featureEditorState = featureEditorState,
+                attributeButtonState = AttributeButtonState.HIDE,
+            )
+        }
+
+        if (isStarted) FeatureForm(
+            featureFormState = featureEditorState.featureFormState,
+            modifier = Modifier.fillMaxSize()
+        ) else Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxSize()) {
+            Text(
+                text = "Select a feature to begin editing!",
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
 private fun Toolbar(
     onAttributeButtonPress: () -> Unit,
-    attributesVisible: Boolean,
+    attributeButtonState: AttributeButtonState,
     featureEditorState: FeatureEditorState
 ) {
     val isStarted by featureEditorState.isStarted.collectAsState()
@@ -84,18 +141,21 @@ private fun Toolbar(
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.padding(2.dp)
             ) {
-                Button(
-                    onClick = onAttributeButtonPress,
-                    enabled = isStarted,
-                    shape = RectangleShape,
-                    modifier = Modifier.padding(1.dp),
-                ) {
-                    Icon(
-                        painter = painterResource(
-                            id = if (attributesVisible) R.drawable.baseline_edit_24 else R.drawable.baseline_notes_24
-                        ),
-                        contentDescription = if (attributesVisible) "Edit geometry" else "Edit attributes"
-                    )
+                if (attributeButtonState != AttributeButtonState.HIDE) {
+                    val useGeometryIcon = attributeButtonState == AttributeButtonState.SHOW_GEOMETRY
+                    Button(
+                        onClick = onAttributeButtonPress,
+                        enabled = isStarted,
+                        shape = RectangleShape,
+                        modifier = Modifier.padding(1.dp),
+                    ) {
+                        Icon(
+                            painter = painterResource(
+                                id = if (useGeometryIcon) R.drawable.baseline_edit_note_24 else R.drawable.baseline_notes_24
+                            ),
+                            contentDescription = if (useGeometryIcon) "Edit geometry" else "Edit attributes"
+                        )
+                    }
                 }
                 Button(
                     onClick = { featureEditorState.featureEditor.discard() },
@@ -123,3 +183,5 @@ private fun Toolbar(
         }
     }
 }
+
+private enum class AttributeButtonState { SHOW_ATTRIBUTES, SHOW_GEOMETRY, HIDE }
