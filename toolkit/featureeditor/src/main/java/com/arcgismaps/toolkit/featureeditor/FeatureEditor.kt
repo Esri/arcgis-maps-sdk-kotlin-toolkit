@@ -71,7 +71,12 @@ public class FeatureEditor(
         // sense?...
         scope.launch {
             geometryEditor.geometry.collect {
-                if (geometryEditor.isStarted.value) currentFeature?.geometry = it
+                // Only act when editor is started to avoid spurious updates based on the state of the editor
+                // when it's not being used.
+                if (geometryEditor.isStarted.value) {
+                    currentFeature?.geometry = it
+                    featureForm?.evaluateExpressions() // TODO: error handling?
+                }
             }
         }
     }
