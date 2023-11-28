@@ -58,6 +58,8 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -294,7 +296,8 @@ private fun PickerFooter(
                 // i.e. offset from UTC.
                 enabled = state.dateValidator(
                     UtcDateTime.create(Instant.now().toEpochMilli()).dateForPicker!!
-                )
+                ),
+                modifier = Modifier.semantics { contentDescription = "current date or time button" }
             ) {
                 Text(stringResource(R.string.today))
             }
@@ -333,7 +336,8 @@ private fun DateTimePickerDialog(
                 .padding(horizontal = DateTimePickerDialogTokens.horizontalPadding)
                 .widthWithOrientation(DateTimePickerDialogTokens.containerWidth)
                 .height(DateTimePickerDialogTokens.containerHeight)
-                .scaleIfNarrow(DateTimePickerDialogTokens.containerWidth + DateTimePickerDialogTokens.horizontalPadding * 2),
+                .scaleIfNarrow(DateTimePickerDialogTokens.containerWidth + DateTimePickerDialogTokens.horizontalPadding * 2)
+                .semantics { contentDescription = "DateTimePickerDialogSurface" },
             shape = shape,
             color = MaterialTheme.colorScheme.surface,
             tonalElevation = tonalElevation,
