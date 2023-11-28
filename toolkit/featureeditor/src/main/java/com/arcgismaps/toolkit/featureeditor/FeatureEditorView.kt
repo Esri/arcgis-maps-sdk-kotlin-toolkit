@@ -18,16 +18,14 @@ package com.arcgismaps.toolkit.featureeditor
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -39,7 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.modifier.modifierLocalConsumer
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.FeatureForm
 
@@ -80,7 +78,7 @@ private fun Toolbar(onAttributeButtonPress: () -> Unit, featureEditorState: Feat
             Row(
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.padding(2.dp)
-                ) {
+            ) {
                 Button(
                     onClick = onAttributeButtonPress,
                     enabled = isStarted,
@@ -88,17 +86,27 @@ private fun Toolbar(onAttributeButtonPress: () -> Unit, featureEditorState: Feat
                     modifier = Modifier.padding(1.dp),
                 ) { Text("Attr / Geom") }
                 Button(
-                    onClick = { featureEditorState.featureEditor.stop() },
-                    enabled = isStarted,
-                    shape = RectangleShape,
-                    modifier = Modifier.padding(1.dp),
-                ) { Text("Stop") }
-                Button(
                     onClick = { featureEditorState.featureEditor.discard() },
                     enabled = isStarted,
                     shape = RectangleShape,
                     modifier = Modifier.padding(1.dp),
-                ) { Text("Discard") }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_delete_forever_24),
+                        contentDescription = "Discard"
+                    )
+                }
+                Button(
+                    onClick = { featureEditorState.featureEditor.stop() },
+                    enabled = isStarted,
+                    shape = RectangleShape,
+                    modifier = Modifier.padding(1.dp),
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_check_circle_24),
+                        contentDescription = "Stop"
+                    )
+                }
             }
         }
     }
