@@ -56,7 +56,8 @@ public fun FeatureEditorView(
 
         Toolbar(
             onAttributeButtonPress = { isBottomSheetVisible = !isBottomSheetVisible },
-            featureEditorState = featureEditorState
+            featureEditorState = featureEditorState,
+            attributesVisible = isBottomSheetVisible,
         )
 
         if (isBottomSheetVisible) {
@@ -68,7 +69,11 @@ public fun FeatureEditorView(
 }
 
 @Composable
-private fun Toolbar(onAttributeButtonPress: () -> Unit, featureEditorState: FeatureEditorState) {
+private fun Toolbar(
+    onAttributeButtonPress: () -> Unit,
+    attributesVisible: Boolean,
+    featureEditorState: FeatureEditorState
+) {
     val isStarted by featureEditorState.isStarted.collectAsState()
     Row(
         horizontalArrangement = Arrangement.Center,
@@ -84,7 +89,14 @@ private fun Toolbar(onAttributeButtonPress: () -> Unit, featureEditorState: Feat
                     enabled = isStarted,
                     shape = RectangleShape,
                     modifier = Modifier.padding(1.dp),
-                ) { Text("Attr / Geom") }
+                ) {
+                    Icon(
+                        painter = painterResource(
+                            id = if (attributesVisible) R.drawable.baseline_edit_24 else R.drawable.baseline_notes_24
+                        ),
+                        contentDescription = if (attributesVisible) "Edit geometry" else "Edit attributes"
+                    )
+                }
                 Button(
                     onClick = { featureEditorState.featureEditor.discard() },
                     enabled = isStarted,
