@@ -19,6 +19,9 @@
 package com.arcgismaps.toolkit.featureeditor
 
 import com.arcgismaps.data.ArcGISFeature
+import com.arcgismaps.geometry.GeometryType
+import com.arcgismaps.geometry.Multipoint
+import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
@@ -91,17 +94,25 @@ public class FeatureEditor(
         featureForm = FeatureForm(feature, formDefinition)
 
         val geometry = feature.geometry
+        val isPointGeometry =  if (geometry?.let { !it.isEmpty } == true) geometry is Point || geometry is Multipoint
+            else table.geometryType == GeometryType.Point || table.geometryType == GeometryType.Multipoint
+
         if (geometry?.let { !it.isEmpty } == true) geometryEditor.start(geometry)
         else geometryEditor.start(table.geometryType) // TODO: all types supported?
 
         // IDEA: symbology stuff should be much more organised and handled in a helper method
-        val symbol = (feature.featureTable?.layer as? FeatureLayer)?.renderer?.getSymbol(feature)
-        geometryEditor.tool.style.apply {
-            // TODO: what about lines and stuff
-            vertexSymbol = symbol
-            selectedVertexSymbol = symbol
-            this.feedbackVertexSymbol = symbol
+
+        // Custom symbology currently only supported for point geometries.
+        if (isPointGeometry) {
+            val symbol = (feature.featureTable?.layer as? FeatureLayer)?.renderer?.getSymbol(feature)
+            geometryEditor.tool.style.apply {
+                // TODO: what about lines and stuff
+                vertexSymbol = symbol
+                selectedVertexSymbol = symbol
+                this.feedbackVertexSymbol = symbol
+            }
         }
+
         (feature.featureTable?.layer as? FeatureLayer)?.setFeatureVisible(feature, false)
 
         _isStarted.value = true
