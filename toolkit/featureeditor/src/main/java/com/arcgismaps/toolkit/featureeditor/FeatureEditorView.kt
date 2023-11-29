@@ -18,13 +18,19 @@ package com.arcgismaps.toolkit.featureeditor
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.BottomAppBarDefaults.ContentPadding
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
@@ -43,7 +49,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.toolkit.featureforms.EditingTransactionState
 import com.arcgismaps.toolkit.featureforms.FeatureForm
 
 // TODO: should name contain "view"?
@@ -77,7 +82,7 @@ private fun CompactFeatureEditorView(
     Box(modifier = modifier.fillMaxSize()) {
         map()
 
-        Toolbar(
+        FeatureEditorToolbar(
             onAttributeButtonPress = { isBottomSheetVisible = !isBottomSheetVisible },
             featureEditorState = featureEditorState,
             attributeButtonState =
@@ -105,7 +110,7 @@ private fun SideBySideFeatureEditorView(
             .fillMaxWidth(0.5f)) {
             map()
 
-            Toolbar(
+            FeatureEditorToolbar(
                 onAttributeButtonPress = {},
                 featureEditorState = featureEditorState,
                 attributeButtonState = AttributeButtonState.HIDE,
@@ -126,11 +131,23 @@ private fun SideBySideFeatureEditorView(
 }
 
 @Composable
-private fun Toolbar(
+private fun FeatureEditorToolbar(
     onAttributeButtonPress: () -> Unit,
     attributeButtonState: AttributeButtonState,
     featureEditorState: FeatureEditorState
 ) {
+    @Composable
+    fun ToolbarButton(onClick: () -> Unit, enabled: Boolean,  content: @Composable RowScope.() -> Unit) {
+        Button(
+            onClick = onClick,
+            enabled = enabled,
+            shape = RectangleShape,
+            modifier = Modifier.padding(1.dp),
+            contentPadding = PaddingValues(8.dp),
+            content = content,
+        )
+    }
+
     val isStarted by featureEditorState.isStarted.collectAsState()
     Row(
         horizontalArrangement = Arrangement.Center,
@@ -143,36 +160,30 @@ private fun Toolbar(
             ) {
                 if (attributeButtonState != AttributeButtonState.HIDE) {
                     val useGeometryIcon = attributeButtonState == AttributeButtonState.SHOW_GEOMETRY
-                    Button(
+                    ToolbarButton(
                         onClick = onAttributeButtonPress,
                         enabled = isStarted,
-                        shape = RectangleShape,
-                        modifier = Modifier.padding(1.dp),
                     ) {
                         Icon(
                             painter = painterResource(
-                                id = if (useGeometryIcon) R.drawable.baseline_edit_note_24 else R.drawable.baseline_notes_24
+                                id = if (useGeometryIcon) R.drawable.baseline_edit_24 else R.drawable.baseline_edit_note_24
                             ),
                             contentDescription = if (useGeometryIcon) "Edit geometry" else "Edit attributes"
                         )
                     }
                 }
-                Button(
+                ToolbarButton(
                     onClick = { featureEditorState.featureEditor.discard() },
                     enabled = isStarted,
-                    shape = RectangleShape,
-                    modifier = Modifier.padding(1.dp),
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.baseline_delete_forever_24),
                         contentDescription = "Discard"
                     )
                 }
-                Button(
+                ToolbarButton(
                     onClick = { featureEditorState.featureEditor.stop() },
                     enabled = isStarted,
-                    shape = RectangleShape,
-                    modifier = Modifier.padding(1.dp),
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.baseline_check_circle_24),
