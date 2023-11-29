@@ -16,21 +16,24 @@
 
 package com.arcgismaps.toolkit.featureeditor
 
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.BottomAppBarDefaults.ContentPadding
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
@@ -44,6 +47,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -136,63 +140,149 @@ private fun FeatureEditorToolbar(
     attributeButtonState: AttributeButtonState,
     featureEditorState: FeatureEditorState
 ) {
-    @Composable
-    fun ToolbarButton(onClick: () -> Unit, enabled: Boolean,  content: @Composable RowScope.() -> Unit) {
-        Button(
-            onClick = onClick,
-            enabled = enabled,
-            shape = RectangleShape,
-            modifier = Modifier.padding(1.dp),
-            contentPadding = PaddingValues(8.dp),
-            content = content,
-        )
-    }
 
+    var showGeometryButtonGroup by remember { mutableStateOf(false) }
     val isStarted by featureEditorState.isStarted.collectAsState()
     Row(
         horizontalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min),
     ) {
         Surface(shape = RoundedCornerShape(bottomStart = 3.dp, bottomEnd = 3.dp)) {
             Row(
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.padding(2.dp)
             ) {
-                if (attributeButtonState != AttributeButtonState.HIDE) {
-                    val useGeometryIcon = attributeButtonState == AttributeButtonState.SHOW_GEOMETRY
-                    ToolbarButton(
-                        onClick = onAttributeButtonPress,
-                        enabled = isStarted,
-                    ) {
-                        Icon(
-                            painter = painterResource(
-                                id = if (useGeometryIcon) R.drawable.baseline_edit_24 else R.drawable.baseline_edit_note_24
-                            ),
-                            contentDescription = if (useGeometryIcon) "Edit geometry" else "Edit attributes"
-                        )
-                    }
-                }
+
                 ToolbarButton(
-                    onClick = { featureEditorState.featureEditor.discard() },
+                    onClick = { showGeometryButtonGroup = !showGeometryButtonGroup },
                     enabled = isStarted,
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.baseline_delete_forever_24),
-                        contentDescription = "Discard"
+                        painter = painterResource(id = R.drawable.baseline_swap_vert_24),
+                        contentDescription = "Swap toolbar"
                     )
                 }
-                ToolbarButton(
-                    onClick = { featureEditorState.featureEditor.stop() },
-                    enabled = isStarted,
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.baseline_check_circle_24),
-                        contentDescription = "Stop"
-                    )
-                }
+
+                Divider(
+                    color = Color.Transparent,
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .width(10.dp)
+                        .padding(1.dp)
+                )
+
+                if (showGeometryButtonGroup && isStarted) GeometryButtonGroup(
+                    featureEditorState = featureEditorState,
+                    attributeButtonState = attributeButtonState,
+                ) else ControlButtonGroup(
+                    isStarted = isStarted,
+                    onAttributeButtonPress = onAttributeButtonPress,
+                    attributeButtonState = attributeButtonState,
+                    featureEditorState = featureEditorState,
+                )
             }
         }
     }
+}
+
+@Composable
+private fun ControlButtonGroup(
+    isStarted: Boolean,
+    onAttributeButtonPress: () -> Unit,
+    attributeButtonState: AttributeButtonState,
+    featureEditorState: FeatureEditorState,
+) {
+    if (attributeButtonState != AttributeButtonState.HIDE) {
+        val useGeometryIcon = attributeButtonState == AttributeButtonState.SHOW_GEOMETRY
+        ToolbarButton(
+            onClick = onAttributeButtonPress,
+            enabled = isStarted,
+        ) {
+            Icon(
+                painter = painterResource(
+                    id = if (useGeometryIcon) R.drawable.baseline_edit_24 else R.drawable.baseline_edit_note_24
+                ),
+                contentDescription = if (useGeometryIcon) "Edit geometry" else "Edit attributes"
+            )
+        }
+    }
+    ToolbarButton(
+        onClick = { featureEditorState.featureEditor.discard() },
+        enabled = isStarted,
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.baseline_delete_forever_24),
+            contentDescription = "Discard"
+        )
+    }
+    ToolbarButton(
+        onClick = { featureEditorState.featureEditor.stop() },
+        enabled = isStarted,
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.baseline_check_circle_24),
+            contentDescription = "Stop"
+        )
+    }
+}
+
+@Composable
+private fun GeometryButtonGroup(
+    featureEditorState: FeatureEditorState,
+    attributeButtonState: AttributeButtonState,
+) {
+    ToolbarButton(
+        onClick = { featureEditorState.featureEditor.geometryEditor.undo() },
+        enabled = featureEditorState.featureEditor.geometryEditor.canUndo.collectAsState().value
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.baseline_undo_24),
+            contentDescription = "Undo"
+        )
+    }
+
+    ToolbarButton(
+        onClick = { featureEditorState.featureEditor.geometryEditor.redo() },
+        enabled = featureEditorState.featureEditor.geometryEditor.canRedo.collectAsState().value
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.baseline_redo_24),
+            contentDescription = "Redo"
+        )
+    }
+
+    if (attributeButtonState != AttributeButtonState.HIDE) {
+        ToolbarButton(
+            onClick = {},
+            enabled = false
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.baseline_local_hotel_24),
+                contentDescription =
+                "Local hotel we need to have the same number of buttons in both toolbars or else they don't align"
+            )
+        }
+    }
+}
+
+@Composable
+private fun ToolbarButton(
+    onClick: () -> Unit,
+    enabled: Boolean,
+    contentPadding: PaddingValues = PaddingValues(8.dp),
+    content: @Composable RowScope.() -> Unit
+) {
+    Button(
+        onClick = onClick,
+        enabled = enabled,
+        shape = RectangleShape,
+        modifier = Modifier.padding(1.dp),
+        contentPadding = contentPadding,
+        content = content,
+    )
 }
 
 private enum class AttributeButtonState { SHOW_ATTRIBUTES, SHOW_GEOMETRY, HIDE }
