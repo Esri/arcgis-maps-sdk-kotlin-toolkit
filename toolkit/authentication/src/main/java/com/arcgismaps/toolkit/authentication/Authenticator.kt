@@ -24,6 +24,7 @@ import android.content.ContextWrapper
 import android.security.KeyChain
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +36,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
+
 /**
  * Displays appropriate Authentication UI when issued a challenge. For example, if an [ArcGISAuthenticationChallenge]
  * is issued and the [AuthenticatorState] has a corresponding [OAuthUserConfiguration],
@@ -52,13 +54,12 @@ public fun Authenticator(
     modifier: Modifier = Modifier,
     onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)? = null
 ) {
-    Shareable(
+    AuthenticatorImpl(
         authenticatorState = authenticatorState,
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier,
         onPendingOAuthUserSignIn = onPendingOAuthUserSignIn
     )
 }
-
 
 /**
  * Displays the [Authenticator] in an [AlertDialog]. See the Authenticator component for more details.
@@ -77,22 +78,34 @@ public fun DialogAuthenticator(
 ) {
     val showDialog = authenticatorState.isDisplayed.collectAsStateWithLifecycle(initialValue = false).value
     if (showDialog) {
-        val modifier =  Modifier.clip(MaterialTheme.shapes.extraLarge)
-        Shareable(
+        AuthenticatorImpl(
             authenticatorState = authenticatorState,
-            modifier = modifier,
+            modifier = Modifier.fillMaxWidth(),
             onPendingOAuthUserSignIn,
-            container = {
-                AlertDialog(onDismissRequest = {authenticatorState.dismissAll() }) {
-                    it()
-                }
+        ) {
+            AlertDialog(
+                onDismissRequest = authenticatorState::dismissAll,
+                modifier = Modifier.clip(MaterialTheme.shapes.extraLarge),
+            ) {
+                it()
             }
-        )
+        }
     }
 }
 
+/**
+ * Listens for state changes and displays the appropriate authentication composable.
+ *
+ * @param authenticatorState an [AuthenticatorState]. See [AuthenticatorState.Companion.Factory].
+ * @param onPendingOAuthUserSignIn if not null, this will be called when an OAuth challenge is pending
+ * and the browser should be launched. Use this if you wish to handle OAuth challenges from your own
+ * activity rather than using the [OAuthUserSignInActivity].
+ * @param container if not null, the passed composable will be used as a container for [ServerTrustAuthenticator] and
+ * [UsernamePasswordAuthenticator].
+ * @since 200.4.0
+ */
 @Composable
-private fun Shareable(
+private fun AuthenticatorImpl(
     authenticatorState: AuthenticatorState,
     modifier: Modifier = Modifier.fillMaxSize(),
     onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)? = null,
@@ -103,7 +116,7 @@ private fun Shareable(
         authenticatorState.dismissAll()
     }
 
-    val pendingOAuthUserSignIn: OAuthUserSignIn? =
+    val pendingOAuthUserSignIn =
         authenticatorState.pendingOAuthUserSignIn.collectAsStateWithLifecycle().value
 
     pendingOAuthUserSignIn?.let {
@@ -119,7 +132,7 @@ private fun Shareable(
                 ServerTrustAuthenticator(it, modifier)
             }
         } else {
-                ServerTrustAuthenticator(it, modifier)
+            ServerTrustAuthenticator(it, modifier)
         }
     }
 
@@ -136,7 +149,7 @@ private fun Shareable(
         }
     }
 
-    val pendingClientCertificateChallenge: ClientCertificateChallenge? =
+    val pendingClientCertificateChallenge =
         authenticatorState.pendingClientCertificateChallenge.collectAsStateWithLifecycle().value
     pendingClientCertificateChallenge?.let {
         KeyChain.choosePrivateKeyAlias(
