@@ -35,7 +35,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
-
 /**
  * Displays appropriate Authentication UI when issued a challenge. For example, if an [ArcGISAuthenticationChallenge]
  * is issued and the [AuthenticatorState] has a corresponding [OAuthUserConfiguration],
@@ -50,10 +49,14 @@ import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 @Composable
 public fun Authenticator(
     authenticatorState: AuthenticatorState,
-    modifier: Modifier = Modifier.fillMaxSize(),
+    modifier: Modifier = Modifier,
     onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)? = null
 ) {
-    Shareable(authenticatorState = authenticatorState, modifier = modifier, onPendingOAuthUserSignIn = onPendingOAuthUserSignIn)
+    Shareable(
+        authenticatorState = authenticatorState,
+        modifier = modifier.fillMaxSize(),
+        onPendingOAuthUserSignIn = onPendingOAuthUserSignIn
+    )
 }
 
 
@@ -68,27 +71,39 @@ public fun Authenticator(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-public fun DialogAuthenticator(authenticatorState: AuthenticatorState, onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)? = null) {
+public fun DialogAuthenticator(
+    authenticatorState: AuthenticatorState,
+    onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)? = null,
+) {
     val showDialog = authenticatorState.isDisplayed.collectAsStateWithLifecycle(initialValue = false).value
     if (showDialog) {
         val modifier =  Modifier.clip(MaterialTheme.shapes.extraLarge)
-        Shareable(displayOnDialog = true, authenticatorState = authenticatorState, modifier = modifier, onPendingOAuthUserSignIn)
+        Shareable(
+            authenticatorState = authenticatorState,
+            modifier = modifier,
+            onPendingOAuthUserSignIn,
+            container = {
+                AlertDialog(onDismissRequest = {authenticatorState.dismissAll() }) {
+                    it()
+                }
+            }
+        )
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Shareable(
-    displayOnDialog: Boolean = false, authenticatorState: AuthenticatorState,
+    authenticatorState: AuthenticatorState,
     modifier: Modifier = Modifier.fillMaxSize(),
-    onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)? = null
+    onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)? = null,
+    container: (@Composable (@Composable () -> Unit) -> Unit)? = null
 ) {
     // If the back button is pressed, this ensures that any prompts get dismissed.
     BackHandler {
         authenticatorState.dismissAll()
     }
 
-    val pendingOAuthUserSignIn =
+    val pendingOAuthUserSignIn: OAuthUserSignIn? =
         authenticatorState.pendingOAuthUserSignIn.collectAsStateWithLifecycle().value
 
     pendingOAuthUserSignIn?.let {
@@ -99,12 +114,12 @@ private fun Shareable(
         authenticatorState.pendingServerTrustChallenge.collectAsStateWithLifecycle().value
 
     pendingServerTrustChallenge?.let {
-        if (displayOnDialog) {
-            AlertDialog(onDismissRequest = { /*TODO*/ }) {
+        if (container != null) {
+            container {
                 ServerTrustAuthenticator(it, modifier)
             }
         } else {
-            ServerTrustAuthenticator(it, modifier)
+                ServerTrustAuthenticator(it, modifier)
         }
     }
 
@@ -112,8 +127,8 @@ private fun Shareable(
         authenticatorState.pendingUsernamePasswordChallenge.collectAsStateWithLifecycle().value
 
     pendingUsernamePasswordChallenge?.let {
-        if (displayOnDialog) {
-            AlertDialog(onDismissRequest = { /*TODO*/ }) {
+        if (container != null) {
+            container {
                 UsernamePasswordAuthenticator(it, modifier)
             }
         } else {
@@ -121,7 +136,7 @@ private fun Shareable(
         }
     }
 
-    val pendingClientCertificateChallenge =
+    val pendingClientCertificateChallenge: ClientCertificateChallenge? =
         authenticatorState.pendingClientCertificateChallenge.collectAsStateWithLifecycle().value
     pendingClientCertificateChallenge?.let {
         KeyChain.choosePrivateKeyAlias(
