@@ -37,6 +37,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.toggleableState
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -86,7 +90,11 @@ private fun GroupElement(
         border = BorderStroke(GroupElementDefaults.borderThickness, colors.borderColor)
     ) {
         GroupElementHeader(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .semantics {
+                    toggleableState = if (expanded) ToggleableState.On else ToggleableState.Off
+                },
             title = label,
             description = description,
             isExpanded = expanded,
