@@ -41,7 +41,7 @@ public sealed class FinishState(public open val feature: ArcGISFeature) {
 }
 
 public class FeatureEditor(
-    private val geometryEditor: GeometryEditor,
+    public val geometryEditor: GeometryEditor,
     scope: CoroutineScope // TODO: Ideally this would not be needed here...
 ) {
 
