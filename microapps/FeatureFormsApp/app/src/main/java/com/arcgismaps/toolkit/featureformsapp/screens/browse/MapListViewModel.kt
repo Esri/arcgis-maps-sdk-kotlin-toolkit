@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.toolkit.authentication.AuthenticatorState
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemData
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
 import com.arcgismaps.toolkit.featureformsapp.data.PortalSettings
@@ -37,8 +36,6 @@ class MapListViewModel @Inject constructor(
     private val navigator: Navigator
 ) : ViewModel() {
 
-    private val authenticatorState = AuthenticatorState()
-
     // State flow to keep track of current loading state
     private val _isLoading = MutableStateFlow(false)
 
@@ -70,11 +67,6 @@ class MapListViewModel @Inject constructor(
             // this is used to identify first launch
             if (portalItemRepository.getItemCount() == 0) {
                 refresh(false)
-            }
-        }
-        viewModelScope.launch {
-            authenticatorState.pendingServerTrustChallenge.collect {
-                it?.trust()
             }
         }
     }
