@@ -1,0 +1,25 @@
+<!--
+  ~
+  ~  Copyright 2023 Esri
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  ~
+  --><resources>
+    <string name="server_trust_message">é_The certificate provided by %1$s is not signed by a trusted authority____________________________________È.</string>
+    <string name="cancel">é_Cancel_____________È</string>
+    <string name="allow_connection">é_Dangerous: Allow Connection____________________________È</string>
+    <string name="username_password_login_message">é_Please login to %1$s_____________________È</string>
+    <string name="username_label">é_Username_________________È</string>
+    <string name="password_label">é_Password_________________È</string>
+    <string name="login">é_Login___________È</string>
+</resources>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="floor_filter_view_filter_hint_sites">須_Filter sites…______________鷗</string>
+    <string name="floor_filter_view_filter_hint_facilities">須_Filter facilities…___________________鷗</string>
+    <string name="floor_filter_select_site">須_Select a site______________鷗</string>
+    <string name="floor_filter_select_facility">須_Select a facility__________________鷗</string>
+    <string name="floor_filter_no_results">須_No results found__________________鷗.</string>
+    <string name="floor_filter_site_selector_top_bar">須_Site\u0020-\u0020__________________鷗</string>
+</resources>
