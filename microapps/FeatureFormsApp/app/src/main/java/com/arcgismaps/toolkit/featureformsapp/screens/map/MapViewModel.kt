@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arcgismaps.data.ArcGISFeature
+import com.arcgismaps.data.ServiceFeatureTable
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.mapping.featureforms.FeatureForm
@@ -15,7 +16,6 @@ import com.arcgismaps.toolkit.composablemap.MapState
 import com.arcgismaps.toolkit.featureforms.EditingTransactionState
 import com.arcgismaps.toolkit.featureforms.FeatureFormState
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
-import com.arcgismaps.toolkit.featureformsapp.di.PortalItemRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -40,6 +40,30 @@ class MapViewModel @Inject constructor(
             portalItem = portalItemRepository(itemId) ?: return@launch
             setMap(ArcGISMap(portalItem))
         }
+    }
+    
+    /**
+     * Apply attribute edits to the Geodatabase backing
+     * the ServiceFeatureTable and refresh the local feature.
+     *
+     * Persisting changes to attributes is not part of the FeatureForm API.
+     *
+     * @return a Result indicating success, or any error encountered.
+     */
+    suspend fun commitEdits(): Result<Unit> {
+        val feature = featureForm.value?.feature as ArcGISFeature
+        val serviceFeatureTable =
+            feature.featureTable as? ServiceFeatureTable ?: return Result.failure(
+                IllegalStateException("cannot save feature edit without a ServiceFeatureTable")
+            )
+    
+        return serviceFeatureTable.updateFeature(feature)
+            .map {
+                serviceFeatureTable.serviceGeodatabase?.applyEdits()
+                    ?: throw IllegalStateException("cannot apply feature edit without a ServiceGeodatabase")
+                feature.refresh()
+                Unit
+            }
     }
 
     context(MapView, CoroutineScope) override fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {

@@ -35,19 +35,38 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
+import com.arcgismaps.data.Feature
+import com.arcgismaps.data.ServiceFeatureTable
 import com.arcgismaps.toolkit.composablemap.ComposableMap
 import com.arcgismaps.toolkit.featureforms.EditingTransactionState
 import com.arcgismaps.toolkit.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureformsapp.R
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.BottomSheetMaxWidth
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetExpansionHeight
-import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetValue
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetLayout
+import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetValue
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.StandardBottomSheet
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.rememberStandardBottomSheetState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+
+internal suspend fun commitEdits(feature: Feature): Result<Unit> {
+    val serviceFeatureTable =
+        feature.featureTable as? ServiceFeatureTable ?: return Result.failure(
+            IllegalStateException("cannot save feature edit without a ServiceFeatureTable")
+        )
+    
+    val result = serviceFeatureTable.updateFeature(feature)
+        .map {
+            serviceFeatureTable.serviceGeodatabase?.applyEdits()
+                ?: throw IllegalStateException("cannot apply feature edit without a ServiceGeodatabase")
+            feature.refresh()
+            Unit
+        }
+    
+    return result
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,7 +92,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                 },
                 onSave = {
                     scope.launch {
-                        mapViewModel.commitEdits(EditingTransactionState.NotEditing)
+                        mapViewModel.commitEdits()
                             .onFailure {
                                 Log.w(
                                     "Forms",
@@ -88,6 +107,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                                 }
                             }
                     }
+                    mapViewModel.setTransactionState(EditingTransactionState.NotEditing)
                 }) {
                 onBackPressed()
             }
