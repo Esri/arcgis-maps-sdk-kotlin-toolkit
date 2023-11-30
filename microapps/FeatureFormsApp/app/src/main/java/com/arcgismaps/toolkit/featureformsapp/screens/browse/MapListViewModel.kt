@@ -37,8 +37,6 @@ class MapListViewModel @Inject constructor(
     private val navigator: Navigator
 ) : ViewModel() {
 
-    private val authenticatorState = AuthenticatorState()
-
     // State flow to keep track of current loading state
     private val _isLoading = MutableStateFlow(false)
 
@@ -70,11 +68,6 @@ class MapListViewModel @Inject constructor(
             // this is used to identify first launch
             if (portalItemRepository.getItemCount() == 0) {
                 refresh(false)
-            }
-        }
-        viewModelScope.launch {
-            authenticatorState.pendingServerTrustChallenge.collect {
-                it?.trust()
             }
         }
     }
