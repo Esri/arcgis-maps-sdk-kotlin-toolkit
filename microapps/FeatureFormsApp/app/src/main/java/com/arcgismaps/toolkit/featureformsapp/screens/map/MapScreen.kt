@@ -92,24 +92,22 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                 },
                 onSave = {
                     scope.launch {
-                        mapViewModel.featureForm.value?.let { featureForm ->
-                            commitEdits(featureForm.feature)
-                                .onFailure {
-                                    Log.w(
-                                        "Forms",
-                                        "applying edits from feature form failed with ${it.message}"
-                                    )
-                                    launch(Dispatchers.Main) {
-                                        Toast.makeText(
-                                            context,
-                                            "applying edits from feature form failed with ${it.message}",
-                                            Toast.LENGTH_LONG
-                                        ).show()
-                                    }
+                        mapViewModel.commitEdits()
+                            .onFailure {
+                                Log.w(
+                                    "Forms",
+                                    "applying edits from feature form failed with ${it.message}"
+                                )
+                                launch(Dispatchers.Main) {
+                                    Toast.makeText(
+                                        context,
+                                        "applying edits from feature form failed with ${it.message}",
+                                        Toast.LENGTH_LONG
+                                    ).show()
                                 }
-                        }
-                        mapViewModel.setTransactionState(EditingTransactionState.NotEditing)
+                            }
                     }
+                    mapViewModel.setTransactionState(EditingTransactionState.NotEditing)
                 }) {
                 onBackPressed()
             }
