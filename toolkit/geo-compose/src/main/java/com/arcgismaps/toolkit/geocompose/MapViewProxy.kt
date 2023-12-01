@@ -91,4 +91,12 @@ public class MapViewProxy : GeoViewProxy() {
             null
         }
     }
+
+    /**
+     * Returns the map view's current units per DIP
+     *
+     * @return the map view's current units per DIP
+     * @since 200.3.0
+     */
+    public fun unitsPerDip(): Double? = mapView?.unitsPerDip
 }
