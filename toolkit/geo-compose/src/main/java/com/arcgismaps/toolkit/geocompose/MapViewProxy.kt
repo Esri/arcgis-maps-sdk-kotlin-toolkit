@@ -96,6 +96,7 @@ public class MapViewProxy : GeoViewProxy() {
     /**
      * Returns the map view's visible area.
      *
+     * @return the map view's visible area
      * @since 200.3.0
      */
     public fun visibleArea(): Polygon? = mapView?.visibleArea
