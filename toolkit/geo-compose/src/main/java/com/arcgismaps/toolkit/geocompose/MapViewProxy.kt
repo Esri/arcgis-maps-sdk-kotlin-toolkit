@@ -18,6 +18,7 @@
 package com.arcgismaps.toolkit.geocompose
 
 import com.arcgismaps.geometry.Point
+import com.arcgismaps.geometry.Polygon
 import com.arcgismaps.mapping.view.ScreenCoordinate
 
 
@@ -91,4 +92,11 @@ public class MapViewProxy : GeoViewProxy() {
             null
         }
     }
+
+    /**
+     * Returns the map view's visible area.
+     *
+     * @since 200.3.0
+     */
+    public fun visibleArea(): Polygon? = mapView?.visibleArea
 }
