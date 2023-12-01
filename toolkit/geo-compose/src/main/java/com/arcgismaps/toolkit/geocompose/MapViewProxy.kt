@@ -91,4 +91,12 @@ public class MapViewProxy : GeoViewProxy() {
             null
         }
     }
+
+    /**
+     * Returns whether wraparound is enabled on mapview.
+     *
+     * @return True if the mapview currently has wraparound turned on, false otherwise
+     * @since 200.3.0
+     */
+    public fun isWrapAroundEnabled(): Boolean? = mapView?.isWrapAroundEnabled
 }
