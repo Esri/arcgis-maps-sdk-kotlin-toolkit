@@ -83,6 +83,7 @@ class LoginViewModel @Inject constructor(
         credentials = null
         _loginState.value = LoginState.Loading
         viewModelScope.launch(Dispatchers.IO) {
+            portalSettings.addRecentUrl(url)
             authenticatorState.oAuthUserConfiguration = null
             portalSettings.setPortalUrl(url)
             portalSettings.setPortalConnection(Portal.Connection.Authenticated)
@@ -101,6 +102,14 @@ class LoginViewModel @Inject constructor(
             portalSettings.setPortalConnection(Portal.Connection.Anonymous)
             _loginState.value = LoginState.Success
         }
+    }
+
+    fun getRecentUrls() : List<String> {
+        return portalSettings.getRecentUrls()
+    }
+
+    fun deleteRecentUrl(url: String) = viewModelScope.launch {
+        portalSettings.deleteRecentUrl(url)
     }
 }
 
