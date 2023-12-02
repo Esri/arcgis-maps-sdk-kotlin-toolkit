@@ -186,7 +186,7 @@ fun EnterpriseLogin(
         Authenticator(authenticatorState = loginViewModel.authenticatorState)
         if (showPortalUrlForm) {
             PortalURLForm(
-                recents = loginViewModel.getRecentUrls(),
+                recents = loginViewModel.urlHistory.collectAsState().value,
                 onSubmit = {
                     showPortalUrlForm = false
                     loginViewModel.loginWithArcGISEnterprise(it)
@@ -225,7 +225,7 @@ fun PortalURLForm(
                 verticalArrangement = Arrangement.spacedBy(20.dp),
             ) {
                 Text(
-                    text = "ArcGIS Enterprise",
+                    text = "Enter a URL ArcGIS Enterprise",
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center
@@ -276,7 +276,7 @@ fun TextFieldWithHistory(
         leadingIcon = {
             Icon(
                 painter = painterResource(id = R.drawable.ic_world),
-                contentDescription = null
+                contentDescription = null,
             )
         },
         trailingIcon = {

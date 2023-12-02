@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.room.Room
 import com.arcgismaps.toolkit.featureformsapp.data.local.ItemCacheDao
 import com.arcgismaps.toolkit.featureformsapp.data.local.ItemCacheDatabase
+import com.arcgismaps.toolkit.featureformsapp.data.local.UrlHistoryDao
+import com.arcgismaps.toolkit.featureformsapp.data.local.UrlHistoryDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,6 +20,10 @@ import javax.inject.Singleton
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
 annotation class ItemCache
+
+@Qualifier
+@Retention(AnnotationRetention.SOURCE)
+annotation class UrlHistory
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -41,6 +47,21 @@ object PersistenceModule {
             context,
             ItemCacheDatabase::class.java,
             "portal_items.db"
+        ).build()
+    }
+
+    @Singleton
+    @Provides
+    @UrlHistory
+    fun provideUrlHistoryDao(database: UrlHistoryDatabase) : UrlHistoryDao = database.urlHistoryDao()
+
+    @Singleton
+    @Provides
+    fun provideUrlHistoryDatabase(@ApplicationContext context: Context): UrlHistoryDatabase {
+        return Room.databaseBuilder(
+            context,
+            UrlHistoryDatabase::class.java,
+            "url_history.db"
         ).build()
     }
 }

@@ -22,22 +22,44 @@ import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.authentication.AuthenticatorState
 import com.arcgismaps.toolkit.featureformsapp.BuildConfig
 import com.arcgismaps.toolkit.featureformsapp.data.PortalSettings
+import com.arcgismaps.toolkit.featureformsapp.data.local.UrlEntry
+import com.arcgismaps.toolkit.featureformsapp.data.local.UrlHistoryDao
+import com.arcgismaps.toolkit.featureformsapp.screens.browse.MapListUIState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val portalSettings: PortalSettings
+    private val portalSettings: PortalSettings,
+    private val urlHistoryDao: UrlHistoryDao
 ) : ViewModel() {
 
     private data class Credentials(val username: String = "", val password: String = "")
 
     val authenticatorState = AuthenticatorState()
+
+    val urlHistory: StateFlow<List<String>> = combine(urlHistoryDao.observeAll()) { res ->
+        res.first().map {
+            it.url
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(1000),
+        initialValue = emptyList()
+    )
 
     private val _loginState: MutableStateFlow<LoginState> = MutableStateFlow(LoginState.NotLoggedIn)
     val loginState = _loginState.asStateFlow()
@@ -83,7 +105,9 @@ class LoginViewModel @Inject constructor(
         credentials = null
         _loginState.value = LoginState.Loading
         viewModelScope.launch(Dispatchers.IO) {
-            portalSettings.addRecentUrl(url)
+            if (url.isNotEmpty()) {
+                urlHistoryDao.insert(UrlEntry(url))
+            }
             authenticatorState.oAuthUserConfiguration = null
             portalSettings.setPortalUrl(url)
             portalSettings.setPortalConnection(Portal.Connection.Authenticated)
@@ -104,12 +128,10 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun getRecentUrls() : List<String> {
-        return portalSettings.getRecentUrls()
-    }
-
     fun deleteRecentUrl(url: String) = viewModelScope.launch {
-        portalSettings.deleteRecentUrl(url)
+        withContext(Dispatchers.IO) {
+            urlHistoryDao.delete(UrlEntry(url))
+        }
     }
 }
 

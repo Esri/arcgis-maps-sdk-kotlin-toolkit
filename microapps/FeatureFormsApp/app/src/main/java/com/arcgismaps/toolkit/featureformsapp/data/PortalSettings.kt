@@ -36,7 +36,6 @@ class PortalSettings(
 
     private val urlKey = "url"
     private val connectionKey = "connection"
-    private val recentsKey = "recents"
 
     fun getPortalConnection() : Portal.Connection {
         val connection = preferences.getInt(connectionKey, 0)
@@ -44,33 +43,6 @@ class PortalSettings(
             Portal.Connection.Authenticated
         } else {
             Portal.Connection.Anonymous
-        }
-    }
-
-    fun getRecentUrls() : List<String> {
-        return preferences.getStringSet(recentsKey, emptySet())?.map {
-            it
-        } ?: emptyList()
-    }
-
-    suspend fun addRecentUrl(url: String) = withContext(Dispatchers.IO) {
-        val recents = getRecentUrls()
-        with(preferences.edit()) {
-            val set = HashSet<String>()
-            set.addAll(recents + url)
-            putStringSet(recentsKey, set)
-            commit()
-        }
-    }
-
-    suspend fun deleteRecentUrl(url: String) = withContext(Dispatchers.IO) {
-        val recents = getRecentUrls().toMutableList()
-        recents.remove(url)
-        with(preferences.edit()) {
-            val set = HashSet<String>()
-            set.addAll(recents + url)
-            putStringSet(recentsKey, set)
-            commit()
         }
     }
 
