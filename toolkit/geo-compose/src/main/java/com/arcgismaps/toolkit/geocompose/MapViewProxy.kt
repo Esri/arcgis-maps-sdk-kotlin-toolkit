@@ -55,6 +55,14 @@ public class MapViewProxy : GeoViewProxy() {
     }
 
     /**
+     * The map view's visible area.
+     *
+     * @since 200.3.0
+     */
+    public val visibleArea: Polygon?
+        get() = mapView?.visibleArea
+
+    /**
      * Converts a screen coordinate (in pixels) to a coordinate within the mapview's spatial reference.
      *
      * May return null in some circumstances, such as if the mapview's spatial reference has not been
@@ -92,12 +100,4 @@ public class MapViewProxy : GeoViewProxy() {
             null
         }
     }
-
-    /**
-     * Returns the map view's visible area.
-     *
-     * @return the map view's visible area
-     * @since 200.3.0
-     */
-    public fun visibleArea(): Polygon? = mapView?.visibleArea
 }
