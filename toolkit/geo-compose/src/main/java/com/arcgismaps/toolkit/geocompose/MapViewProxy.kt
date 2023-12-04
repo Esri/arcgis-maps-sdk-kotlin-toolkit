@@ -18,6 +18,7 @@
 package com.arcgismaps.toolkit.geocompose
 
 import com.arcgismaps.geometry.Point
+import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.ScreenCoordinate
 
 
@@ -42,6 +43,10 @@ public class MapViewProxy : GeoViewProxy() {
      * @since 200.3.0
      */
     private var mapView: com.arcgismaps.mapping.view.MapView? = null
+        set(value) {
+            setGeoView(value)
+            mapView = value
+        }
 
     /**
      * Sets the [mapView] parameter on this operator. This should be called by the composable [MapView]
