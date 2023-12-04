@@ -34,9 +34,9 @@ import com.arcgismaps.mapping.view.ScreenCoordinate
  */
 public sealed class GeoViewProxy {
 
-    private var geoView: GeoView? = null
+    protected var geoView: GeoView? = null
 
-    protected fun setGeoView(geoView: GeoView?) {
+    internal fun setGeoView(geoView: GeoView?) {
         this.geoView = geoView
         // The first time it's not null, we will set this to the appropriate class name
         geoView?.let {

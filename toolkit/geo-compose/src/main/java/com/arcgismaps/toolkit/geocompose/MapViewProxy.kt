@@ -36,26 +36,16 @@ import com.arcgismaps.mapping.view.ScreenCoordinate
 public class MapViewProxy : GeoViewProxy() {
 
     /**
-     * The [com.arcgismaps.mapping.view.MapView] that this MapViewProxy will operate on. This should
+     * The [MapView] that this MapViewProxy will operate on. This should
      * be initialized by the composable [MapView] when it enters the composition and set to null when
-     * it is disposed by calling [setMapView].
+     * it is disposed by calling [setGeoView].
      *
      * @since 200.3.0
      */
-    private var mapView: com.arcgismaps.mapping.view.MapView? = null
-        set(value) {
-            setGeoView(value)
+    private var mapView: MapView? = null
+        get() {
+            return this.geoView as MapView
         }
-
-    /**
-     * Sets the [mapView] parameter on this operator. This should be called by the composable [MapView]
-     * when it enters the composition and set to null when it is disposed.
-     *
-     * @since 200.3.0
-     */
-    internal fun setMapView(mapView: com.arcgismaps.mapping.view.MapView?) {
-        this.mapView = mapView
-    }
 
     /**
      * Converts a screen coordinate (in pixels) to a coordinate within the mapview's spatial reference.
