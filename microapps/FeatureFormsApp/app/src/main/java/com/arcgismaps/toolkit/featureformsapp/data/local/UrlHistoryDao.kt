@@ -20,7 +20,6 @@ import androidx.room.Dao
 import androidx.room.Database
 import androidx.room.Delete
 import androidx.room.Entity
-import androidx.room.Insert
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.RoomDatabase
@@ -41,7 +40,7 @@ interface UrlHistoryDao {
     /**
      * Insert an item into the url entry table.
      *
-     * @param entry the ItemCacheEntry type to insert.
+     * @param entry the url to insert.
      */
     @Upsert
     suspend fun insert(entry: UrlEntry) : Long
