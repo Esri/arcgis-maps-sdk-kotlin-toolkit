@@ -24,7 +24,6 @@ import com.arcgismaps.toolkit.featureformsapp.BuildConfig
 import com.arcgismaps.toolkit.featureformsapp.data.PortalSettings
 import com.arcgismaps.toolkit.featureformsapp.data.local.UrlEntry
 import com.arcgismaps.toolkit.featureformsapp.data.local.UrlHistoryDao
-import com.arcgismaps.toolkit.featureformsapp.screens.browse.MapListUIState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,12 +31,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.transform
-import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 
@@ -125,12 +120,6 @@ class LoginViewModel @Inject constructor(
             portalSettings.setPortalUrl(portalSettings.defaultPortalUrl)
             portalSettings.setPortalConnection(Portal.Connection.Anonymous)
             _loginState.value = LoginState.Success
-        }
-    }
-
-    fun deleteRecentUrl(url: String) = viewModelScope.launch {
-        withContext(Dispatchers.IO) {
-            urlHistoryDao.delete(UrlEntry(url))
         }
     }
 }

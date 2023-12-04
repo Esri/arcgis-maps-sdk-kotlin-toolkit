@@ -24,6 +24,7 @@ import androidx.room.Insert
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.RoomDatabase
+import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -42,7 +43,7 @@ interface UrlHistoryDao {
      *
      * @param entry the ItemCacheEntry type to insert.
      */
-    @Insert
+    @Upsert
     suspend fun insert(entry: UrlEntry) : Long
 
     /**
