@@ -81,16 +81,16 @@ public sealed class GeoViewProxy {
      * @return A [Result] containing an [IdentifyGraphicsOverlayResult], or failure
      * @since 200.0.0
      */
-    public suspend fun identifyGraphicsOverlay(
-        graphicsOverlay: GraphicsOverlay, // TODO: Match swift by having two `identify` overloads
+    public suspend fun identify(
+        graphicsOverlay: GraphicsOverlay,
         screenCoordinate: ScreenCoordinate,
         tolerance: Dp,
-        returnPopupsOnly: Boolean,
+        returnPopupsOnly: Boolean = false,
         maximumResults: Int = 1
     ) : Result<IdentifyGraphicsOverlayResult> {
         return geoView?.identifyGraphicsOverlay(
             graphicsOverlay, screenCoordinate, tolerance.value.toDouble(), returnPopupsOnly, maximumResults
-        ) ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage)) // TODO: put these on GeoViewProxy
+        ) ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
     }
 
     /**
@@ -121,7 +121,7 @@ public sealed class GeoViewProxy {
     public suspend fun identifyGraphicsOverlays(
         screenCoordinate: ScreenCoordinate,
         tolerance: Double,
-        returnPopupsOnly: Boolean,
+        returnPopupsOnly: Boolean = false,
         maximumResults: Int = 1
     ) : Result<List<IdentifyGraphicsOverlayResult>> {
         return geoView?.identifyGraphicsOverlays(
@@ -154,11 +154,11 @@ public sealed class GeoViewProxy {
      * @return A [Result] containing an [IdentifyLayerResult], or failure
      * @since 200.0.0
      */
-    public suspend fun identifyLayer(
+    public suspend fun identify(
         layer: Layer,
         screenCoordinate: ScreenCoordinate,
         tolerance: Double,
-        returnPopupsOnly: Boolean,
+        returnPopupsOnly: Boolean = false,
         maximumResults: Int = 1
     ) : Result<IdentifyLayerResult> {
         return geoView?.identifyLayer(
@@ -194,7 +194,7 @@ public sealed class GeoViewProxy {
     public suspend fun identifyLayers(
         screenCoordinate: ScreenCoordinate,
         tolerance: Double,
-        returnPopupsOnly: Boolean,
+        returnPopupsOnly: Boolean = false,
         maximumResults: Int = 1
     ): Result<List<IdentifyLayerResult>> {
         return geoView?.identifyLayers(
