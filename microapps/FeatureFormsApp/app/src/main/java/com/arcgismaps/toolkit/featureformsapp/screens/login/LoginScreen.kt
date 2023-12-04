@@ -78,6 +78,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -112,7 +113,7 @@ fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "FeatureForms Micro-App",
+                text = stringResource(R.string.app_name),
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontWeight = FontWeight.Bold
                 )
@@ -133,7 +134,7 @@ fun LoginScreen(
                         AnimatedLoading(
                             { true },
                             modifier = Modifier.fillMaxSize(),
-                            statusText = "Signing in.."
+                            statusText = stringResource(R.string.signing_in)
                         )
                     } else {
                         Spacer(modifier = Modifier.weight(1f))
@@ -219,7 +220,7 @@ fun PortalURLForm(
                 verticalArrangement = Arrangement.spacedBy(20.dp),
             ) {
                 Text(
-                    text = "Enter a URL for ArcGIS Enterprise",
+                    text = stringResource(R.string.enter_enterprise_url),
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center
@@ -237,13 +238,13 @@ fun PortalURLForm(
                     horizontalArrangement = Arrangement.End,
                 ) {
                     Button(onClick = onCancel) {
-                        Text(text = "Cancel")
+                        Text(text = stringResource(R.string.cancel))
                     }
                     Spacer(modifier = Modifier.width(25.dp))
                     Button(onClick = {
                         onSubmit(url)
                     }) {
-                        Text(text = "Login")
+                        Text(text = stringResource(R.string.login))
                     }
                 }
             }
@@ -373,7 +374,7 @@ fun LoginOptions(
                 .padding(horizontal = 40.dp)
         ) {
             Text(
-                text = "Sign in using built-in Credentials",
+                text = stringResource(R.string.sign_in_with_default_credentials),
                 modifier = Modifier.padding(5.dp),
             )
         }
@@ -384,12 +385,12 @@ fun LoginOptions(
                 .padding(horizontal = 40.dp)
         ) {
             Text(
-                text = "Sign in with ArcGIS Enterprise",
+                text = stringResource(R.string.sign_in_with_enterprise),
                 modifier = Modifier.padding(5.dp)
             )
         }
         TextButton(onClick = skipSignInTapped) {
-            Text(text = "Skip sign in")
+            Text(text = stringResource(R.string.skin_sign_in))
         }
     }
 }
@@ -436,9 +437,9 @@ fun Modifier.verticalScrollbar(
 fun EnterpriseLoginPreview() {
     PortalURLForm(
         recents = listOf(
-            "one",
-            "two",
-            "Note that you don't need to create an instance of any animation class, or h"
+            "https://url1.com/portal",
+            "https://url2.com/portal",
+            "https://url3.com/portal"
         ),
         onSubmit = { a ->
         }
