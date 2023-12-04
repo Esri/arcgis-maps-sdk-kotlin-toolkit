@@ -42,9 +42,9 @@ public class MapViewProxy : GeoViewProxy() {
      *
      * @since 200.3.0
      */
-    private var mapView: MapView? = null
+    private val mapView: MapView?
         get() {
-            return this.geoView as MapView
+            return this.geoView as MapView?
         }
 
     /**
