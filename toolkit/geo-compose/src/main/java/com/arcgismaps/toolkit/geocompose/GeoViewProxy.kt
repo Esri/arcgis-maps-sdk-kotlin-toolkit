@@ -76,8 +76,9 @@ public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
      * @param screenCoordinate location at which to run identify in screen coordinates
      * @param tolerance extent of the region used during the identify operation
      * @param returnPopupsOnly whether the graphics property of the result is populated
-     * @param maximumResults maximum size of the result set of ref@Graphic to return. -1 indicates unlimited results
+     * @param maximumResults maximum size of the result set of graphics to return. A null value indicates unlimited results
      * @return A [Result] containing an [IdentifyGraphicsOverlayResult], or failure
+     * @throws IllegalArgumentException if [maximumResults] is less than zero
      * @since 200.4.0
      */
     public suspend fun identify(
@@ -85,10 +86,15 @@ public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
         screenCoordinate: ScreenCoordinate,
         tolerance: Dp,
         returnPopupsOnly: Boolean = false,
-        maximumResults: Int = 1
+        maximumResults: Int? = 1
     ) : Result<IdentifyGraphicsOverlayResult> {
+        if (maximumResults != null) {
+            require(maximumResults >= 0) {
+                "maximumResults must not be less than 0. Use null for unlimited results."
+            }
+        }
         return geoView?.identifyGraphicsOverlay(
-            graphicsOverlay, screenCoordinate, tolerance.value.toDouble(), returnPopupsOnly, maximumResults
+            graphicsOverlay, screenCoordinate, tolerance.value.toDouble(), returnPopupsOnly, maximumResults ?: -1
         ) ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
     }
 
@@ -113,18 +119,25 @@ public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
      * @param screenCoordinate location on which to run identify in screen coordinates
      * @param tolerance extent of the region used during the identify operation
      * @param returnPopupsOnly whether the graphics property of the results are populated
+     * @param maximumResults maximum size of the result set of graphics to return. A null value indicates unlimited results
      * @return A [Result] containing a [List] of [IdentifyGraphicsOverlayResult] containing one entry for each
      * overlay in the view, or failure. Each entry holds a [GraphicsOverlay] and a [List] of [com.arcgismaps.mapview.Graphic]s
+     * @throws IllegalArgumentException if [maximumResults] is less than zero
      * @since 200.4.0
      */
     public suspend fun identifyGraphicsOverlays(
         screenCoordinate: ScreenCoordinate,
         tolerance: Dp,
         returnPopupsOnly: Boolean = false,
-        maximumResults: Int = 1
+        maximumResults: Int? = 1
     ) : Result<List<IdentifyGraphicsOverlayResult>> {
+        if (maximumResults != null) {
+            require(maximumResults >= 0) {
+                "maximumResults must not be less than 0. Use null for unlimited results."
+            }
+        }
         return geoView?.identifyGraphicsOverlays(
-            screenCoordinate, tolerance.value.toDouble(), returnPopupsOnly, maximumResults
+            screenCoordinate, tolerance.value.toDouble(), returnPopupsOnly, maximumResults ?: -1
         ) ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
     }
 
@@ -149,8 +162,9 @@ public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
      * @param tolerance extent of the region used during the identify operation
      * @param returnPopupsOnly whether the [IdentifyLayerResult.geoElements] property of the result is populated
      * @param maximumResults maximum size of the result set of GeoElements (element type dependent on target layer) to
-     * return per layer or sublayer. -1 indicates unlimited results
+     * return per layer or sublayer. A null value indicates unlimited results
      * @return A [Result] containing an [IdentifyLayerResult], or failure
+     * @throws IllegalArgumentException if [maximumResults] is less than zero
      * @since 200.4.0
      */
     public suspend fun identify(
@@ -158,10 +172,15 @@ public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
         screenCoordinate: ScreenCoordinate,
         tolerance: Dp,
         returnPopupsOnly: Boolean = false,
-        maximumResults: Int = 1
+        maximumResults: Int? = 1
     ) : Result<IdentifyLayerResult> {
+        if (maximumResults != null) {
+            require(maximumResults >= 0) {
+                "maximumResults must not be less than 0. Use null for unlimited results."
+            }
+        }
         return geoView?.identifyLayer(
-            layer, screenCoordinate, tolerance.value.toDouble(), returnPopupsOnly, maximumResults
+            layer, screenCoordinate, tolerance.value.toDouble(), returnPopupsOnly, maximumResults ?: -1
         ) ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
     }
 
@@ -183,21 +202,27 @@ public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
      * @param screenCoordinate location on which to run identify in screen coordinates
      * @param tolerance extent of the region used during the identify operation
      * @param returnPopupsOnly whether the [IdentifyLayerResult.geoElements] property of the results are populated
-     * @param maximumResults maximum number of GeoElements to return per layer or sublayer. -1 indicates
+     * @param maximumResults maximum number of GeoElements to return per layer or sublayer. A null value indicates
      * unlimited results
      * @return A [Result] containing a [List] of [IdentifyLayerResult], containing one entry for each layer in the
      * view that supports identify, or failure. Each entry contains a [Layer] and a [List] of elements of the type
      * contained by the layer (e.g. [com.arcgismaps.data.Feature] for an [com.arcgismaps.mapping.layers.FeatureLayer])
+     * @throws IllegalArgumentException if [maximumResults] is less than zero
      * @since 200.4.0
      */
     public suspend fun identifyLayers(
         screenCoordinate: ScreenCoordinate,
         tolerance: Dp,
         returnPopupsOnly: Boolean = false,
-        maximumResults: Int = 1
+        maximumResults: Int? = 1
     ): Result<List<IdentifyLayerResult>> {
+        if (maximumResults != null) {
+            require(maximumResults >= 0) {
+                "maximumResults must not be less than 0. Use null for unlimited results."
+            }
+        }
         return geoView?.identifyLayers(
-            screenCoordinate, tolerance.value.toDouble(), returnPopupsOnly, maximumResults
+            screenCoordinate, tolerance.value.toDouble(), returnPopupsOnly, maximumResults ?: -1
         ) ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
     }
 }

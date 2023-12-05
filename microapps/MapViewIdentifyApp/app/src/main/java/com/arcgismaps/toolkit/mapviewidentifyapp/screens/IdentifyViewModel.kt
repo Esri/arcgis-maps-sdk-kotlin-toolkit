@@ -3,6 +3,7 @@ package com.arcgismaps.toolkit.mapviewidentifyapp.screens
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arcgismaps.data.Feature
@@ -79,7 +80,7 @@ class IdentifyViewModel : ViewModel() {
             identifiedAttributes = emptyMap()
             featureLayer.clearSelection()
             val result =
-                mapViewProxy.identify(featureLayer, singleTapConfirmedEvent.screenCoordinate, 20.0)
+                mapViewProxy.identify(featureLayer, singleTapConfirmedEvent.screenCoordinate, 20.dp)
             // yielding here will ensure that if the job gets cancelled, we don't try to set the
             // identified attributes
             yield()
