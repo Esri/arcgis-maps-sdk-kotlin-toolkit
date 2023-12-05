@@ -61,7 +61,7 @@ fun MainScreen() {
     }
     BottomSheetScaffold(
         sheetContent = {
-            EventDetails(identifyViewModel.showProgressIndicator, identifyViewModel.identifiedAttributes)
+            IdentifyDetails(identifyViewModel.showProgressIndicator, identifyViewModel.identifiedAttributes)
         },
         scaffoldState = bottomSheetScaffoldState,
         topBar = {
@@ -94,7 +94,7 @@ fun MainScreen() {
  * @since 200.4.0
  */
 @Composable
-private fun EventDetails(
+private fun IdentifyDetails(
     showProgressIndicator: Boolean,
     identifiedAttributes: Map<String, Any?>
 ) {
