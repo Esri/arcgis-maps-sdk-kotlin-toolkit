@@ -18,7 +18,6 @@
 
 package com.arcgismaps.toolkit.mapviewidentifyapp.screens
 
-import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -39,86 +38,36 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.data.Feature
-import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.BasemapStyle
-import com.arcgismaps.mapping.PortalItem
-import com.arcgismaps.mapping.layers.FeatureLayer
-import com.arcgismaps.mapping.view.SelectionProperties
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.toolkit.geocompose.MapView
-import com.arcgismaps.toolkit.geocompose.MapViewProxy
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
-    val mapViewProxy = remember {
-        MapViewProxy()
-    }
-    val scope = rememberCoroutineScope()
-    var showProgressIndicator by remember { mutableStateOf(false) }
-    val sheetState = rememberBottomSheetScaffoldState()
-    var identifiedAttributes: Map<String, Any?> = remember { emptyMap() }
-    val featureLayer = remember {
-        FeatureLayer.createWithItem(PortalItem("https://www.arcgis.com/home/item.html?id=9e2f2b544c954fda9cd13b7f3e6eebce"))
-    }
-    LaunchedEffect(key1 = featureLayer) {
-        showProgressIndicator = true
-        featureLayer.load().onSuccess {
-            sheetState.bottomSheetState.expand()
-            showProgressIndicator = false
-        }
-    }
-    val arcGISMap by remember {
-        mutableStateOf(ArcGISMap(BasemapStyle.ArcGISImagery).apply {
-            operationalLayers.add(featureLayer)
-        })
+    val identifyViewModel: IdentifyViewModel = viewModel()
+    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
+    LaunchedEffect(key1 = identifyViewModel.identifiedAttributes) {
+        bottomSheetScaffoldState.bottomSheetState.expand()
     }
     BottomSheetScaffold(
-        scaffoldState = sheetState,
-        sheetPeekHeight = 64.dp,
+        scaffoldState = bottomSheetScaffoldState,
         sheetContent = {
-            EventDetails(showProgressIndicator, identifiedAttributes)
+            EventDetails(identifyViewModel.showProgressIndicator, identifyViewModel.identifiedAttributes)
         }
     ) { paddingValues ->
         MapView(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            arcGISMap = arcGISMap,
-            mapViewProxy = mapViewProxy,
-            selectionProperties = SelectionProperties(color = com.arcgismaps.Color.white),
-            onSingleTapConfirmed = {
-                scope.launch {
-                    showProgressIndicator = true
-                    identifiedAttributes = emptyMap()
-                    featureLayer.clearSelection()
-                    val result = mapViewProxy.identify(featureLayer, it.screenCoordinate, 20.0)
-                    result.onSuccess {
-                        val geoElement = it.geoElements.firstOrNull()
-                        Log.e("Identify", "Identify found a geoelement")
-                        geoElement?.attributes?.let {
-                            identifiedAttributes = it
-                        }
-                        sheetState.bottomSheetState.expand()
-                        (geoElement as? Feature)?.let {
-                            featureLayer.selectFeature(it)
-                        }
-                    }
-                    showProgressIndicator = false
-                }
-            }
+            arcGISMap = identifyViewModel.arcGISMap,
+            mapViewProxy = identifyViewModel.mapViewProxy,
+            onSingleTapConfirmed = identifyViewModel::identify
         )
     }
 }
