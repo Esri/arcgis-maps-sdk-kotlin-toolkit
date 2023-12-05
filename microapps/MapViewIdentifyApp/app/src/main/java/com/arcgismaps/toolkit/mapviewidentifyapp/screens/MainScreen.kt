@@ -35,12 +35,13 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -57,10 +58,19 @@ fun MainScreen() {
         bottomSheetScaffoldState.bottomSheetState.expand()
     }
     BottomSheetScaffold(
-        scaffoldState = bottomSheetScaffoldState,
         sheetContent = {
             EventDetails(identifyViewModel.showProgressIndicator, identifyViewModel.identifiedAttributes)
-        }
+        },
+        scaffoldState = bottomSheetScaffoldState,
+        topBar = {
+            TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
+                ),
+                title = { Text("MapView Identify App") }
+            )
+        },
     ) { paddingValues ->
         MapView(
             modifier = Modifier
@@ -132,7 +142,7 @@ private fun AttributeRow(entry: Map.Entry<String, Any?>) {
         Text(
             entry.key,
             Modifier
-                .border(Dp.Hairline, Color.Black)
+                .border(Dp.Hairline, MaterialTheme.colorScheme.primary)
                 .weight(0.3f)
                 .padding(8.dp)
                 .fillMaxHeight(),
@@ -141,7 +151,7 @@ private fun AttributeRow(entry: Map.Entry<String, Any?>) {
         Text(
             entry.value.toString(),
             Modifier
-                .border(Dp.Hairline, Color.Black)
+                .border(Dp.Hairline, MaterialTheme.colorScheme.primary)
                 .weight(0.7f)
                 .padding(8.dp)
                 .fillMaxHeight()
