@@ -18,7 +18,6 @@
 package com.arcgismaps.toolkit.geocompose
 
 import com.arcgismaps.geometry.Point
-import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.ScreenCoordinate
 
 /**
@@ -41,9 +40,9 @@ public class MapViewProxy : GeoViewProxy() {
      *
      * @since 200.3.0
      */
-    private val mapView: MapView?
+    private val mapView: com.arcgismaps.mapping.view.MapView?
         get() {
-            return this.geoView as MapView?
+            return this.geoView as com.arcgismaps.mapping.view.MapView?
         }
 
     /**
