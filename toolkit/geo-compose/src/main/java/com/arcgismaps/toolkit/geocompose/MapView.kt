@@ -164,9 +164,9 @@ public fun MapView(
     ViewpointUpdater(mapView, viewpointOperation)
 
     DisposableEffect(mapViewProxy) {
-        mapViewProxy?.setGeoView(mapView)
+        mapViewProxy?.setMapView(mapView)
         onDispose {
-            mapViewProxy?.setGeoView(null)
+            mapViewProxy?.setMapView(null)
         }
     }
 

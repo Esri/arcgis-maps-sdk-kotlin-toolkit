@@ -39,7 +39,7 @@ public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
      *
      * @since 200.3.0
      */
-    protected var geoView: GeoView? = null
+    private var geoView: GeoView? = null
 
     /**
      * Sets the [geoView] parameter on this operator. This should be called by the composable component
@@ -47,7 +47,7 @@ public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
      *
      * @since 200.3.0
      */
-    internal fun setGeoView(geoView: GeoView?) {
+    protected fun setGeoView(geoView: GeoView?) {
         this.geoView = geoView
     }
 
