@@ -18,8 +18,8 @@
 package com.arcgismaps.toolkit.geocompose
 
 import com.arcgismaps.geometry.Point
+import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.ScreenCoordinate
-
 
 /**
  * Used to perform operations on a [MapView].
@@ -37,21 +37,14 @@ public class MapViewProxy : GeoViewProxy() {
     /**
      * The [com.arcgismaps.mapping.view.MapView] that this MapViewProxy will operate on. This should
      * be initialized by the composable [MapView] when it enters the composition and set to null when
-     * it is disposed by calling [setMapView].
+     * it is disposed by calling [setGeoView].
      *
      * @since 200.3.0
      */
-    private var mapView: com.arcgismaps.mapping.view.MapView? = null
-
-    /**
-     * Sets the [mapView] parameter on this operator. This should be called by the composable [MapView]
-     * when it enters the composition and set to null when it is disposed.
-     *
-     * @since 200.3.0
-     */
-    internal fun setMapView(mapView: com.arcgismaps.mapping.view.MapView?) {
-        this.mapView = mapView
-    }
+    private val mapView: MapView?
+        get() {
+            return this.geoView as MapView?
+        }
 
     /**
      * Converts a screen coordinate (in pixels) to a coordinate within the mapview's spatial reference.
@@ -91,12 +84,4 @@ public class MapViewProxy : GeoViewProxy() {
             null
         }
     }
-
-    /**
-     * Returns whether wraparound is enabled on mapview.
-     *
-     * @return True if the mapview currently has wraparound turned on, false otherwise
-     * @since 200.3.0
-     */
-    public fun isWrapAroundEnabled(): Boolean? = mapView?.isWrapAroundEnabled
 }

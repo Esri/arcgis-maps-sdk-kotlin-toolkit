@@ -17,10 +17,32 @@
 
 package com.arcgismaps.toolkit.geocompose
 
+import com.arcgismaps.mapping.view.GeoView
+
 /**
  * Used to perform operations on a composable MapView or SceneView.
  *
  * @since 200.3.0
  */
 public sealed class GeoViewProxy {
+
+    protected var geoView: GeoView? = null
+
+    /**
+     * Sets the [geoView] parameter on this operator. This should be called by the composable [geoView]
+     * when it enters the composition and set to null when it is disposed.
+     *
+     * @since 200.3.0
+     */
+    internal fun setGeoView(geoView: GeoView?) {
+        this.geoView = geoView
+    }
+
+    /**
+     * True if continuous panning across the international date line is enabled in the GeoView, false otherwise.
+     *
+     * @since 200.3.0
+     */
+    public val isWrapAroundEnabled: Boolean?
+        get() = geoView?.isWrapAroundEnabled
 }
