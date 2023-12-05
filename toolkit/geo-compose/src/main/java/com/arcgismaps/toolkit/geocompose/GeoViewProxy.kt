@@ -51,11 +51,8 @@ public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
         this.geoView = geoView
     }
 
-    private val nullGeoViewErrorMessage: String
-        // use a get() here so that this gets recalculated after the geoView is sete
-        get() {
-            return "$classNameForErrorMessage must be part of the composition when this member is called."
-        }
+    private val nullGeoViewErrorMessage: String =
+        "$classNameForErrorMessage must be part of the composition when this member is called."
 
 
     /**
