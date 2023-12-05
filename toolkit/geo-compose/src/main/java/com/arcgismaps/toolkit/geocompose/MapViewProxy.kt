@@ -53,7 +53,7 @@ public class MapViewProxy : GeoViewProxy("MapView") {
      *
      * @since 200.3.0
      */
-    internal fun setMapView(mapView: com.arcgismaps.mapping.view.MapView?) {
+    internal fun setMapView(mapView: MapView?) {
         this.mapView = mapView
     }
 
