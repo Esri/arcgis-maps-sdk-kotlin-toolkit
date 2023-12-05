@@ -12,7 +12,9 @@ import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.toolkit.geocompose.MapViewProxy
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.yield
 
 /**
  * Holds state and business logic for the identify app's [MainScreen].
@@ -59,27 +61,32 @@ class IdentifyViewModel : ViewModel() {
         operationalLayers.add(featureLayer)
     }
 
+    private var currentIdentifyJob: Job? = null
+
     /**
      * Identifies the tapped screen coordinate in the provided [singleTapConfirmedEvent]. The attributes
      * of the identified geoelement are set to [identifiedAttributes] and the geoelement is selected.
      *
      * @since 200.4.0
      */
-    fun identify(singleTapConfirmedEvent: SingleTapConfirmedEvent) = viewModelScope.launch {
-        showProgressIndicator = true
-        identifiedAttributes = emptyMap()
-        featureLayer.clearSelection()
-        val result =
-            mapViewProxy.identify(featureLayer, singleTapConfirmedEvent.screenCoordinate, 20.0)
-        result.onSuccess {
-            val geoElement = it.geoElements.firstOrNull()
-            geoElement?.attributes?.let {
-                identifiedAttributes = it
+    fun identify(singleTapConfirmedEvent: SingleTapConfirmedEvent) {
+        currentIdentifyJob?.cancel()
+        currentIdentifyJob = viewModelScope.launch {
+            showProgressIndicator = true
+            identifiedAttributes = emptyMap()
+            featureLayer.clearSelection()
+            val result =
+                mapViewProxy.identify(featureLayer, singleTapConfirmedEvent.screenCoordinate, 20.0)
+            // yielding here will ensure that if the job gets cancelled, we don't try to set the
+            // identified attributes
+            yield()
+            result.onSuccess { identifyLayerResult ->
+                (identifyLayerResult.geoElements.firstOrNull() as? Feature)?.let {
+                    identifiedAttributes = it.attributes
+                    featureLayer.selectFeature(it)
+                }
             }
-            (geoElement as? Feature)?.let {
-                featureLayer.selectFeature(it)
-            }
+            showProgressIndicator = false
         }
-        showProgressIndicator = false
     }
 }
