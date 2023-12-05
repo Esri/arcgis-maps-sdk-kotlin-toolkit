@@ -119,12 +119,12 @@ public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
      */
     public suspend fun identifyGraphicsOverlays(
         screenCoordinate: ScreenCoordinate,
-        tolerance: Double,
+        tolerance: Dp,
         returnPopupsOnly: Boolean = false,
         maximumResults: Int = 1
     ) : Result<List<IdentifyGraphicsOverlayResult>> {
         return geoView?.identifyGraphicsOverlays(
-            screenCoordinate, tolerance, returnPopupsOnly, maximumResults
+            screenCoordinate, tolerance.value.toDouble(), returnPopupsOnly, maximumResults
         ) ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
     }
 
@@ -156,12 +156,12 @@ public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
     public suspend fun identify(
         layer: Layer,
         screenCoordinate: ScreenCoordinate,
-        tolerance: Double,
+        tolerance: Dp,
         returnPopupsOnly: Boolean = false,
         maximumResults: Int = 1
     ) : Result<IdentifyLayerResult> {
         return geoView?.identifyLayer(
-            layer, screenCoordinate, tolerance, returnPopupsOnly, maximumResults
+            layer, screenCoordinate, tolerance.value.toDouble(), returnPopupsOnly, maximumResults
         ) ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
     }
 
@@ -192,12 +192,12 @@ public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
      */
     public suspend fun identifyLayers(
         screenCoordinate: ScreenCoordinate,
-        tolerance: Double,
+        tolerance: Dp,
         returnPopupsOnly: Boolean = false,
         maximumResults: Int = 1
     ): Result<List<IdentifyLayerResult>> {
         return geoView?.identifyLayers(
-            screenCoordinate, tolerance, returnPopupsOnly, maximumResults
+            screenCoordinate, tolerance.value.toDouble(), returnPopupsOnly, maximumResults
         ) ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
     }
 }
