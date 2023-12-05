@@ -6,7 +6,7 @@ This micro-app demonstrates the use of `MapViewProxy` to identify features with 
 
 ## Usage
 
-The application starts with a MapView and displays a map with recent global earthquake events. A bottom sheet displays information about the last identified feature. Tap a feature to populate the bottom sheet with information about the event at that location.
+The application starts with a MapView and displays a map with recent global earthquake events. A bottom sheet displays information about the last identified feature. Tap a feature in the MapView to populate the bottom sheet with information about the earthquake event at that location.
 
 For more information on the composable `MapView` component and how it works, see it's [Readme](../../toolkit/geo-compose/README.md).
 
