@@ -34,8 +34,21 @@ import com.arcgismaps.mapping.view.ScreenCoordinate
  */
 public sealed class GeoViewProxy {
 
+    /**
+     * The [com.arcgismaps.mapping.view.GeoView] that this GeoViewProxy will operate on. This should
+     * be initialized by the composable component when it enters the composition and set to null when
+     * it is disposed by calling [setGeoView].
+     *
+     * @since 200.3.0
+     */
     protected var geoView: GeoView? = null
 
+    /**
+     * Sets the [geoView] parameter on this operator. This should be called by the composable component
+     * when it enters the composition and set to null when it is disposed.
+     *
+     * @since 200.3.0
+     */
     internal fun setGeoView(geoView: GeoView?) {
         this.geoView = geoView
         // The first time it's not null, we will set this to the appropriate class name
@@ -79,7 +92,7 @@ public sealed class GeoViewProxy {
      * @param returnPopupsOnly whether the graphics property of the result is populated
      * @param maximumResults maximum size of the result set of ref@Graphic to return. -1 indicates unlimited results
      * @return A [Result] containing an [IdentifyGraphicsOverlayResult], or failure
-     * @since 200.0.0
+     * @since 200.4.0
      */
     public suspend fun identify(
         graphicsOverlay: GraphicsOverlay,
@@ -116,7 +129,7 @@ public sealed class GeoViewProxy {
      * @param returnPopupsOnly whether the graphics property of the results are populated
      * @return A [Result] containing a [List] of [IdentifyGraphicsOverlayResult] containing one entry for each
      * overlay in the view, or failure. Each entry holds a [GraphicsOverlay] and a [List] of [com.arcgismaps.mapview.Graphic]s
-     * @since 200.0.0
+     * @since 200.4.0
      */
     public suspend fun identifyGraphicsOverlays(
         screenCoordinate: ScreenCoordinate,
@@ -152,7 +165,7 @@ public sealed class GeoViewProxy {
      * @param maximumResults maximum size of the result set of GeoElements (element type dependent on target layer) to
      * return per layer or sublayer. -1 indicates unlimited results
      * @return A [Result] containing an [IdentifyLayerResult], or failure
-     * @since 200.0.0
+     * @since 200.4.0
      */
     public suspend fun identify(
         layer: Layer,
@@ -189,7 +202,7 @@ public sealed class GeoViewProxy {
      * @return A [Result] containing a [List] of [IdentifyLayerResult], containing one entry for each layer in the
      * view that supports identify, or failure. Each entry contains a [Layer] and a [List] of elements of the type
      * contained by the layer (e.g. [com.arcgismaps.data.Feature] for an [com.arcgismaps.mapping.layers.FeatureLayer])
-     * @since 200.0.0
+     * @since 200.4.0
      */
     public suspend fun identifyLayers(
         screenCoordinate: ScreenCoordinate,

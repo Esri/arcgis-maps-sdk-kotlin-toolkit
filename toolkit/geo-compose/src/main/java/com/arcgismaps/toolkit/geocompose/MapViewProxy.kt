@@ -36,10 +36,9 @@ import com.arcgismaps.mapping.view.ScreenCoordinate
 public class MapViewProxy : GeoViewProxy() {
 
     /**
-     * The [MapView] that this MapViewProxy will operate on. This should
-     * be initialized by the composable [MapView] when it enters the composition and set to null when
-     * it is disposed by calling [setGeoView].
+     * Exposes the [geoView] property on this proxy as a [MapView].
      *
+     * @see geoView
      * @since 200.3.0
      */
     private val mapView: MapView?
