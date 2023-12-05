@@ -33,7 +33,7 @@ import com.arcgismaps.mapping.view.ScreenCoordinate
  *
  * @since 200.3.0
  */
-public class MapViewProxy : GeoViewProxy() {
+public class MapViewProxy : GeoViewProxy("MapView") {
 
     /**
      * Exposes the [geoView] property on this proxy as a [MapView].

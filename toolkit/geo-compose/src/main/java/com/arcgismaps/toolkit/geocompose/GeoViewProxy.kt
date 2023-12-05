@@ -23,8 +23,6 @@ import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.IdentifyGraphicsOverlayResult
 import com.arcgismaps.mapping.view.IdentifyLayerResult
-import com.arcgismaps.mapping.view.MapView
-import com.arcgismaps.mapping.view.SceneView
 import com.arcgismaps.mapping.view.ScreenCoordinate
 
 /**
@@ -32,7 +30,7 @@ import com.arcgismaps.mapping.view.ScreenCoordinate
  *
  * @since 200.3.0
  */
-public sealed class GeoViewProxy {
+public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
 
     /**
      * The [com.arcgismaps.mapping.view.GeoView] that this GeoViewProxy will operate on. This should
@@ -51,21 +49,12 @@ public sealed class GeoViewProxy {
      */
     internal fun setGeoView(geoView: GeoView?) {
         this.geoView = geoView
-        // The first time it's not null, we will set this to the appropriate class name
-        geoView?.let {
-            classNameForErrorMessage = when (it) {
-                is MapView -> "MapView"
-                is SceneView -> "SceneView"
-            }
-        }
     }
-
-    private var classNameForErrorMessage = "GeoView"
 
     private val nullGeoViewErrorMessage: String
         // use a get() here so that this gets recalculated after the geoView is sete
         get() {
-            return "$classNameForErrorMessage must be part of the composition when this function is called."
+            return "$classNameForErrorMessage must be part of the composition when this member is called."
         }
 
 

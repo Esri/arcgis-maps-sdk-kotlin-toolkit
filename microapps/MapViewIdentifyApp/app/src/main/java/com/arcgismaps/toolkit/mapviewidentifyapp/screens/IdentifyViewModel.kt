@@ -12,7 +12,6 @@ import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.toolkit.geocompose.MapViewProxy
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
@@ -57,13 +56,7 @@ class IdentifyViewModel : ViewModel() {
      * @since 200.4.0
      */
     val arcGISMap = ArcGISMap(BasemapStyle.ArcGISDarkGray).apply {
-        viewModelScope.launch(Dispatchers.Main) {
-            // Show a loading indicator while the feature layer loads
-            showProgressIndicator = true
-            featureLayer.load()
-            operationalLayers.add(featureLayer)
-            showProgressIndicator = false
-        }
+        operationalLayers.add(featureLayer)
     }
 
     /**

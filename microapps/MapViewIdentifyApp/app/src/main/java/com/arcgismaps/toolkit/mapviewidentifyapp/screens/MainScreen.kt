@@ -42,11 +42,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.toolkit.geocompose.MapView
+import com.arcgismaps.toolkit.mapviewidentifyapp.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -102,7 +104,7 @@ private fun EventDetails(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Event Details",
+            text = stringResource(R.string.event_details),
             Modifier.padding(16.dp),
             style = MaterialTheme.typography.headlineMedium,
             textAlign = TextAlign.Center
@@ -111,7 +113,7 @@ private fun EventDetails(
             CircularProgressIndicator(Modifier.padding(8.dp))
         } else if (identifiedAttributes.isEmpty()) {
             Text(
-                "No attributes found.",
+                stringResource(R.string.no_attributes_text),
                 Modifier.padding(8.dp)
             )
         } else {
