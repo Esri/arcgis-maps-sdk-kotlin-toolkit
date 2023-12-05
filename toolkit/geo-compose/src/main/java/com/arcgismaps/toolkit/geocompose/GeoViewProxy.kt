@@ -87,14 +87,16 @@ public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
         tolerance: Dp,
         returnPopupsOnly: Boolean = false,
         maximumResults: Int? = 1
-    ) : Result<IdentifyGraphicsOverlayResult> {
-        if (maximumResults != null) {
-            require(maximumResults >= 0) {
-                "maximumResults must not be less than 0. Use null for unlimited results."
-            }
-        }
+    ): Result<IdentifyGraphicsOverlayResult> {
+        val maximumResultsSanitized = if (maximumResults == null || maximumResults < 0) {
+            -1
+        } else maximumResults
         return geoView?.identifyGraphicsOverlay(
-            graphicsOverlay, screenCoordinate, tolerance.value.toDouble(), returnPopupsOnly, maximumResults ?: -1
+            graphicsOverlay,
+            screenCoordinate,
+            tolerance.value.toDouble(),
+            returnPopupsOnly,
+            maximumResultsSanitized
         ) ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
     }
 
@@ -130,14 +132,15 @@ public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
         tolerance: Dp,
         returnPopupsOnly: Boolean = false,
         maximumResults: Int? = 1
-    ) : Result<List<IdentifyGraphicsOverlayResult>> {
-        if (maximumResults != null) {
-            require(maximumResults >= 0) {
-                "maximumResults must not be less than 0. Use null for unlimited results."
-            }
-        }
+    ): Result<List<IdentifyGraphicsOverlayResult>> {
+        val maximumResultsSanitized = if (maximumResults == null || maximumResults < 0) {
+            -1
+        } else maximumResults
         return geoView?.identifyGraphicsOverlays(
-            screenCoordinate, tolerance.value.toDouble(), returnPopupsOnly, maximumResults ?: -1
+            screenCoordinate,
+            tolerance.value.toDouble(),
+            returnPopupsOnly,
+            maximumResultsSanitized
         ) ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
     }
 
@@ -173,14 +176,16 @@ public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
         tolerance: Dp,
         returnPopupsOnly: Boolean = false,
         maximumResults: Int? = 1
-    ) : Result<IdentifyLayerResult> {
-        if (maximumResults != null) {
-            require(maximumResults >= 0) {
-                "maximumResults must not be less than 0. Use null for unlimited results."
-            }
-        }
+    ): Result<IdentifyLayerResult> {
+        val maximumResultsSanitized = if (maximumResults == null || maximumResults < 0) {
+            -1
+        } else maximumResults
         return geoView?.identifyLayer(
-            layer, screenCoordinate, tolerance.value.toDouble(), returnPopupsOnly, maximumResults ?: -1
+            layer,
+            screenCoordinate,
+            tolerance.value.toDouble(),
+            returnPopupsOnly,
+            maximumResultsSanitized
         ) ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
     }
 
@@ -216,13 +221,14 @@ public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
         returnPopupsOnly: Boolean = false,
         maximumResults: Int? = 1
     ): Result<List<IdentifyLayerResult>> {
-        if (maximumResults != null) {
-            require(maximumResults >= 0) {
-                "maximumResults must not be less than 0. Use null for unlimited results."
-            }
-        }
+        val maximumResultsSanitized = if (maximumResults == null || maximumResults < 0) {
+            -1
+        } else maximumResults
         return geoView?.identifyLayers(
-            screenCoordinate, tolerance.value.toDouble(), returnPopupsOnly, maximumResults ?: -1
+            screenCoordinate,
+            tolerance.value.toDouble(),
+            returnPopupsOnly,
+            maximumResultsSanitized
         ) ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
     }
 }
