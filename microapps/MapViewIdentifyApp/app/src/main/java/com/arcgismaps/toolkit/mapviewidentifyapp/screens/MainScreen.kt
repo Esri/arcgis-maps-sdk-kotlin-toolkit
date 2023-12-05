@@ -99,7 +99,10 @@ private fun EventDetails(
     identifiedAttributes: Map<String, Any?>
 ) {
     Column(
-        Modifier.fillMaxWidth(),
+        Modifier
+            .fillMaxWidth()
+            // ensures the bottom sheet does not cover the screen
+            .height(350.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {

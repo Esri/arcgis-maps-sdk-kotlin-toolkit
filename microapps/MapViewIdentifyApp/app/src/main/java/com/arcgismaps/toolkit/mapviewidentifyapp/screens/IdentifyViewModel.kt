@@ -9,6 +9,7 @@ import com.arcgismaps.data.Feature
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.PortalItem
+import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.toolkit.geocompose.MapViewProxy
@@ -59,6 +60,8 @@ class IdentifyViewModel : ViewModel() {
      */
     val arcGISMap = ArcGISMap(BasemapStyle.ArcGISDarkGray).apply {
         operationalLayers.add(featureLayer)
+        // centers on Southeast Asia where there is a high frequency of earthquakes
+        initialViewpoint = Viewpoint(0.8, 130.0, 10e7)
     }
 
     private var currentIdentifyJob: Job? = null
