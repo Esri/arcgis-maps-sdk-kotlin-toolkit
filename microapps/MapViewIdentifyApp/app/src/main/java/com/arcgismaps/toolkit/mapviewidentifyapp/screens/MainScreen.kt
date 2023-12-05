@@ -52,6 +52,7 @@ import com.arcgismaps.toolkit.geocompose.MapView
 fun MainScreen() {
     val identifyViewModel: IdentifyViewModel = viewModel()
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
+    // Expand the bottom sheet whenever the attributes to display are changed
     LaunchedEffect(key1 = identifyViewModel.identifiedAttributes) {
         bottomSheetScaffoldState.bottomSheetState.expand()
     }
@@ -72,6 +73,14 @@ fun MainScreen() {
     }
 }
 
+/**
+ * Shows the [identifiedAttributes] as a table, or a progress indicator if [showProgressIndicator] is
+ * set to true.
+ *
+ * @param showProgressIndicator whether to show a progress indicator instead of the attributes
+ * @param identifiedAttributes the attributes to display in a table
+ * @since 200.4.0
+ */
 @Composable
 private fun EventDetails(
     showProgressIndicator: Boolean,
@@ -107,6 +116,12 @@ private fun EventDetails(
     }
 }
 
+/**
+ * Displays a single attribute entry as a row in a table.
+ *
+ * @param entry the attribute to display
+ * @since 200.4.0
+ */
 @Composable
 private fun AttributeRow(entry: Map.Entry<String, Any?>) {
     Row(
