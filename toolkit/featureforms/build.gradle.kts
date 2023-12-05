@@ -52,6 +52,8 @@ android {
 
 dependencies {
     api(arcgis.mapsSdk)
+    implementation(libs.androidx.window)
+    implementation(libs.androidx.window.core)
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)

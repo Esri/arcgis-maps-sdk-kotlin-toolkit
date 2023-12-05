@@ -16,6 +16,8 @@
 
 package com.arcgismaps.toolkit.featureforms.components.codedvalue
 
+import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -25,7 +27,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -40,6 +45,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -56,7 +62,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -68,10 +77,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.window.core.layout.WindowHeightSizeClass
+import androidx.window.core.layout.WindowWidthSizeClass
 import com.arcgismaps.data.FieldType
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.base.BaseTextField
+import com.arcgismaps.toolkit.featureforms.utils.computeWindowSizeClasses
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
@@ -156,6 +168,8 @@ internal fun ComboBoxDialog(
     onValueChange: (String) -> Unit,
     onDismissRequest: () -> Unit
 ) {
+    val configuration = LocalConfiguration.current
+    val windowSizeClass = computeWindowSizeClasses(LocalContext.current)
     var searchText by rememberSaveable { mutableStateOf("") }
     val codedValues = if (!isRequired) {
         if (noValueOption == FormInputNoValueOption.Show) {
@@ -171,129 +185,185 @@ internal fun ComboBoxDialog(
         }
     }
 
+    val showAsFullScreen = when (configuration.orientation) {
+        Configuration.ORIENTATION_PORTRAIT -> {
+            windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT
+        }
+
+        Configuration.ORIENTATION_LANDSCAPE -> {
+            windowSizeClass.windowHeightSizeClass == WindowHeightSizeClass.COMPACT
+        }
+
+        else -> {
+            true
+        }
+    }
+
     Dialog(
         onDismissRequest = onDismissRequest,
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
-        Scaffold(
-            topBar = {
+        Surface(
+            modifier = Modifier
+                .maxSize(showAsFullScreen)
+                .wrapContentSize(),
+            shape = RoundedCornerShape(10.dp)
+        ) {
+            Scaffold(
+                topBar = {
+                    Column(
+                        modifier = Modifier
+                            .padding(start = 15.dp, top = 15.dp, bottom = 10.dp, end = 10.dp)
+                            .fillMaxWidth(),
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            TextField(
+                                value = searchText,
+                                onValueChange = {
+                                    searchText = it
+                                },
+                                modifier = Modifier.weight(1f),
+                                placeholder = {
+                                    Text(text = stringResource(R.string.filter, label))
+                                },
+                                trailingIcon = {
+                                    if (searchText.isNotEmpty()) {
+                                        IconButton(onClick = { searchText = "" }) {
+                                            Icon(
+                                                imageVector = Icons.Outlined.Close,
+                                                contentDescription = null
+                                            )
+                                        }
+                                    }
+                                },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions.Default.copy(
+                                    imeAction = ImeAction.Done,
+                                    keyboardType = keyboardType
+                                ),
+                                shape = RoundedCornerShape(15.dp),
+                                colors = TextFieldDefaults.colors(
+                                    focusedIndicatorColor = Color.Transparent,
+                                    unfocusedIndicatorColor = Color.Transparent
+                                ),
+                            )
+                            TextButton(
+                                onClick = onDismissRequest,
+                                modifier = Modifier.semantics {
+                                    contentDescription = "combo box done selection"
+                                }
+                            ) {
+                                Text(text = stringResource(R.string.done))
+                            }
+                        }
+                        if (description.isNotEmpty()) {
+                            Text(
+                                text = description,
+                                modifier = Modifier.padding(top = 10.dp),
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        }
+                    }
+                }
+            ) { padding ->
                 Column(
                     modifier = Modifier
-                        .padding(start = 15.dp, top = 15.dp, bottom = 10.dp, end = 10.dp)
-                        .fillMaxWidth(),
+                        .fillMaxSize()
+                        .padding(padding)
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        TextField(
-                            value = searchText,
-                            onValueChange = {
-                                searchText = it
-                            },
-                            modifier = Modifier.weight(1f),
-                            placeholder = {
-                                Text(text = stringResource(R.string.filter, label))
-                            },
-                            trailingIcon = {
-                                if (searchText.isNotEmpty()) {
-                                    IconButton(onClick = { searchText = "" }) {
+                    Divider(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    )
+                    LazyColumn(modifier = Modifier
+                        .fillMaxSize()
+                        .semantics {
+                            contentDescription = "ComboBoxDialogLazyColumn"
+                        }) {
+                        items(filteredList.count()) {
+                            val code = filteredList.keys.elementAt(it)
+                            val name = filteredList.getValue(code)
+                            ListItem(
+                                headlineContent = {
+                                    Text(
+                                        text = name,
+                                        style = if (name == noValueLabel) LocalTextStyle.current.copy(
+                                            fontStyle = FontStyle.Italic,
+                                            fontWeight = FontWeight.Light
+                                        )
+                                        else LocalTextStyle.current
+                                    )
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        // if the no value label was selected, set the value to be empty
+                                        if (name == noValueLabel) {
+                                            onValueChange("")
+                                        } else {
+                                            onValueChange(name)
+                                        }
+                                    }
+                                    .semantics {
+                                        contentDescription = if (name == noValueLabel) {
+                                            "no value row"
+                                        } else {
+                                            "$name list item"
+                                        }
+                                    },
+                                trailingContent = {
+                                    if (name == initialValue || (name == noValueLabel && initialValue.isEmpty())
+                                    ) {
                                         Icon(
-                                            imageVector = Icons.Outlined.Close,
-                                            contentDescription = null
+                                            imageVector = Icons.Outlined.Check,
+                                            contentDescription = "list item check"
                                         )
                                     }
                                 }
-                            },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions.Default.copy(
-                                imeAction = ImeAction.Done,
-                                keyboardType = keyboardType
-                            ),
-                            shape = RoundedCornerShape(15.dp),
-                            colors = TextFieldDefaults.colors(
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent
-                            ),
-                        )
-                        TextButton(
-                            onClick = onDismissRequest,
-                            modifier = Modifier.semantics {
-                                contentDescription = "combo box done selection"
-                            }
-                        ) {
-                            Text(text = stringResource(R.string.done))
+                            )
                         }
                     }
-                    Text(
-                        text = description,
-                        modifier = Modifier.padding(top = 10.dp),
-                        style = MaterialTheme.typography.labelSmall
-                    )
+                    Spacer(modifier = Modifier.weight(1f))
                 }
-            }
-        ) { padding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-            ) {
-                Divider(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                )
-                LazyColumn(modifier = Modifier
-                    .fillMaxSize()
-                    .semantics {
-                        contentDescription = "ComboBoxDialogLazyColumn"
-                    }) {
-                    items(filteredList.count()) {
-                        val code = filteredList.keys.elementAt(it)
-                        val name = filteredList.getValue(code)
-                        ListItem(
-                            headlineContent = {
-                                Text(
-                                    text = name,
-                                    style = if (name == noValueLabel) LocalTextStyle.current.copy(
-                                        fontStyle = FontStyle.Italic,
-                                        fontWeight = FontWeight.Light
-                                    )
-                                    else LocalTextStyle.current
-                                )
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    // if the no value label was selected, set the value to be empty
-                                    if (name == noValueLabel) {
-                                        onValueChange("")
-                                    } else {
-                                        onValueChange(name)
-                                    }
-                                }
-                                .semantics {
-                                    contentDescription = if (name == noValueLabel) {
-                                        "no value row"
-                                    } else {
-                                        "$name list item"
-                                    }
-                                },
-                            trailingContent = {
-                                if (name == initialValue || (name == noValueLabel && initialValue.isEmpty())
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.Check,
-                                        contentDescription = "list item check"
-                                    )
-                                }
-                            }
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.weight(1f))
             }
         }
     }
+}
+
+private fun Modifier.maxSize(fullScreen: Boolean): Modifier = composed {
+    val configuration = LocalConfiguration.current
+    if (fullScreen) {
+        fillMaxSize()
+    } else {
+        widthIn(max = 640.dp).heightIn(max = (configuration.screenHeightDp * 0.8).dp)
+    }
+}
+
+@Preview
+@Composable
+private fun ComboBoxDialogPreview() {
+    ComboBoxDialog(
+        initialValue = "x",
+        values = mapOf(
+            "Birch" to "Birch",
+            "Maple" to "Maple",
+            "Oak" to "Oak",
+            "Spruce" to "Spruce",
+            "Hickory" to "Hickory",
+            "Hemlock" to "Hemlock"
+        ),
+        label = "Types",
+        description = "Select the tree species",
+        isRequired = false,
+        noValueOption = FormInputNoValueOption.Show,
+        noValueLabel = "No Value",
+        onValueChange = {},
+        onDismissRequest = {},
+        keyboardType = KeyboardType.Ascii
+    )
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
@@ -320,26 +390,4 @@ private fun ComboBoxPreview() {
     ComboBoxField(state = state)
 }
 
-@Preview
-@Composable
-private fun ComboBoxDialogPreview() {
-    ComboBoxDialog(
-        initialValue = "x",
-        values = mapOf(
-            "Birch" to "Birch",
-            "Maple" to "Maple",
-            "Oak" to "Oak",
-            "Spruce" to "Spruce",
-            "Hickory" to "Hickory",
-            "Hemlock" to "Hemlock"
-        ),
-        label = "Types",
-        description = "Select the tree species",
-        isRequired = false,
-        noValueOption = FormInputNoValueOption.Show,
-        noValueLabel = "No Value",
-        onValueChange = {},
-        onDismissRequest = {},
-        keyboardType = KeyboardType.Ascii
-    )
-}
+

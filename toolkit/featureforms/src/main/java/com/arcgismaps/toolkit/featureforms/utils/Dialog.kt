@@ -16,11 +16,14 @@
 
 package com.arcgismaps.toolkit.featureforms.utils
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.window.core.layout.WindowSizeClass
+import androidx.window.layout.WindowMetricsCalculator
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.CodedValueFieldState
@@ -153,4 +156,12 @@ internal fun FeatureFormDialog(
             }
         }
     }
+}
+
+internal fun computeWindowSizeClasses(context: Context): WindowSizeClass {
+    val metrics = WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(context)
+    val width = metrics.bounds.width()
+    val height = metrics.bounds.height()
+    val density = context.resources.displayMetrics.density
+    return WindowSizeClass.compute(width / density, height / density)
 }
