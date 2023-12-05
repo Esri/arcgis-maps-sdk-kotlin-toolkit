@@ -41,6 +41,7 @@ interface UrlHistoryDao {
      * Insert an item into the url entry table.
      *
      * @param entry the url to insert.
+     * @return the rowId for the inserted item.
      */
     @Upsert
     suspend fun insert(entry: UrlEntry) : Long

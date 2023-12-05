@@ -30,7 +30,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
@@ -46,8 +46,8 @@ class LoginViewModel @Inject constructor(
 
     val authenticatorState = AuthenticatorState()
 
-    val urlHistory: StateFlow<List<String>> = combine(urlHistoryDao.observeAll()) { res ->
-        res.first().map {
+    val urlHistory: StateFlow<List<String>> = urlHistoryDao.observeAll().map { urlEntries ->
+        urlEntries.map {
             it.url
         }
     }.stateIn(
