@@ -158,6 +158,9 @@ internal fun FeatureFormDialog(
     }
 }
 
+/**
+ * Computes the [WindowSizeClass] of the device.
+ */
 internal fun computeWindowSizeClasses(context: Context): WindowSizeClass {
     val metrics = WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(context)
     val width = metrics.bounds.width()

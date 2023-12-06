@@ -46,6 +46,10 @@ internal class PlaceholderTransformation(private val placeholder: String) : Visu
     }
 }
 
+/**
+ * Applies the specified [modifier] only if the [condition] evaluates to true.
+ *
+ */
 internal fun Modifier.conditional(condition: Boolean, modifier: Modifier.() -> Modifier) : Modifier {
     return if (condition) {
         then(modifier(Modifier))
