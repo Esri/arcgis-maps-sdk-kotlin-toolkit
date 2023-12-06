@@ -88,15 +88,13 @@ public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
         returnPopupsOnly: Boolean = false,
         maximumResults: Int? = 1
     ): Result<IdentifyGraphicsOverlayResult> {
-        val maximumResultsSanitized = if (maximumResults == null || maximumResults < 0) {
-            -1
-        } else maximumResults
+        val maximumResultsClamped = clampMaximumResults(maximumResults)
         return geoView?.identifyGraphicsOverlay(
             graphicsOverlay,
             screenCoordinate,
             tolerance.value.toDouble(),
             returnPopupsOnly,
-            maximumResultsSanitized
+            maximumResultsClamped
         ) ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
     }
 
@@ -133,14 +131,12 @@ public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
         returnPopupsOnly: Boolean = false,
         maximumResults: Int? = 1
     ): Result<List<IdentifyGraphicsOverlayResult>> {
-        val maximumResultsSanitized = if (maximumResults == null || maximumResults < 0) {
-            -1
-        } else maximumResults
+        val maximumResultsClamped = clampMaximumResults(maximumResults)
         return geoView?.identifyGraphicsOverlays(
             screenCoordinate,
             tolerance.value.toDouble(),
             returnPopupsOnly,
-            maximumResultsSanitized
+            maximumResultsClamped
         ) ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
     }
 
@@ -177,15 +173,13 @@ public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
         returnPopupsOnly: Boolean = false,
         maximumResults: Int? = 1
     ): Result<IdentifyLayerResult> {
-        val maximumResultsSanitized = if (maximumResults == null || maximumResults < 0) {
-            -1
-        } else maximumResults
+        val maximumResultsClamped = clampMaximumResults(maximumResults)
         return geoView?.identifyLayer(
             layer,
             screenCoordinate,
             tolerance.value.toDouble(),
             returnPopupsOnly,
-            maximumResultsSanitized
+            maximumResultsClamped
         ) ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
     }
 
@@ -221,14 +215,18 @@ public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
         returnPopupsOnly: Boolean = false,
         maximumResults: Int? = 1
     ): Result<List<IdentifyLayerResult>> {
-        val maximumResultsSanitized = if (maximumResults == null || maximumResults < 0) {
-            -1
-        } else maximumResults
+        val maximumResultsClamped = clampMaximumResults(maximumResults)
         return geoView?.identifyLayers(
             screenCoordinate,
             tolerance.value.toDouble(),
             returnPopupsOnly,
-            maximumResultsSanitized
+            maximumResultsClamped
         ) ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
+    }
+
+    private fun clampMaximumResults(maximumResults: Int?): Int {
+        return if (maximumResults == null || maximumResults < 0) {
+            -1
+        } else maximumResults
     }
 }
