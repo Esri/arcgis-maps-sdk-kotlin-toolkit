@@ -78,7 +78,6 @@ public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
      * @param returnPopupsOnly whether the graphics property of the result is populated
      * @param maximumResults maximum size of the result set of graphics to return. A null value indicates unlimited results
      * @return A [Result] containing an [IdentifyGraphicsOverlayResult], or failure
-     * @throws IllegalArgumentException if [maximumResults] is less than zero
      * @since 200.4.0
      */
     public suspend fun identify(
@@ -122,7 +121,6 @@ public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
      * @param maximumResults maximum size of the result set of graphics to return. A null value indicates unlimited results
      * @return A [Result] containing a [List] of [IdentifyGraphicsOverlayResult] containing one entry for each
      * overlay in the view, or failure. Each entry holds a [GraphicsOverlay] and a [List] of [com.arcgismaps.mapview.Graphic]s
-     * @throws IllegalArgumentException if [maximumResults] is less than zero
      * @since 200.4.0
      */
     public suspend fun identifyGraphicsOverlays(
@@ -163,7 +161,6 @@ public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
      * @param maximumResults maximum size of the result set of GeoElements (element type dependent on target layer) to
      * return per layer or sublayer. A null value indicates unlimited results
      * @return A [Result] containing an [IdentifyLayerResult], or failure
-     * @throws IllegalArgumentException if [maximumResults] is less than zero
      * @since 200.4.0
      */
     public suspend fun identify(
@@ -206,7 +203,6 @@ public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
      * @return A [Result] containing a [List] of [IdentifyLayerResult], containing one entry for each layer in the
      * view that supports identify, or failure. Each entry contains a [Layer] and a [List] of elements of the type
      * contained by the layer (e.g. [com.arcgismaps.data.Feature] for an [com.arcgismaps.mapping.layers.FeatureLayer])
-     * @throws IllegalArgumentException if [maximumResults] is less than zero
      * @since 200.4.0
      */
     public suspend fun identifyLayers(
