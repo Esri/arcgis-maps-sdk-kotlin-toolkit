@@ -1,4 +1,4 @@
-# Location Display Micro-app
+# MapView Location Display Micro-app
 
 This micro-app demonstrates the use of `LocationDisplay` with a composable `MapView`.
 

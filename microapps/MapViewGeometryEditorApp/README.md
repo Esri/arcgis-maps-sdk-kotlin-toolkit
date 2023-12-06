@@ -1,4 +1,4 @@
-# Geometry Editor Micro-app
+# MapView Geometry Editor Micro-app
 
 This micro-app demonstrates the use of `GeometryEditor` and `GraphicsOverlay` with a composable `MapView`.
 
