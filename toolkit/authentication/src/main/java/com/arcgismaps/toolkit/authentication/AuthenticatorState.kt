@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.authentication
 
+import android.content.Intent
 import android.security.KeyChainAliasCallback
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
@@ -390,6 +391,21 @@ private suspend fun OAuthUserConfiguration.handleOAuthChallenge(
     OAuthUserCredential.create(this) { oAuthUserSignIn ->
         onPendingSignIn(oAuthUserSignIn)
     }
+
+/**
+ * Completes the current [AuthenticatorState.pendingOAuthUserSignIn] with data from the provided [intent].
+ *
+ * The [intent.data] should contain a string representing the redirect URI that came from a browser
+ * where the OAuth sign-in was performed. If the data is null, the sign-in will be cancelled.
+ *
+ * @since 200.3.0
+ */
+public fun AuthenticatorState.completeOAuthSignIn(intent: Intent?) {
+    intent?.data?.let {
+        val uriString = it.toString()
+        pendingOAuthUserSignIn.value?.complete(uriString)
+    } ?: pendingOAuthUserSignIn.value?.cancel()
+}
 
 /**
  * Represents a username and password pair.

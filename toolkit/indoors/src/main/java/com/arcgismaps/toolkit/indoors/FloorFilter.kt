@@ -139,15 +139,10 @@ public fun FloorFilter(
             var isFacilitiesSelectorVisible by rememberSaveable { mutableStateOf(false) }
 
             // get the current selected facility
-            var selectedFacility = floorFilterState.onFacilityChanged.collectAsStateWithLifecycle().value
+            val selectedFacility = floorFilterState.onFacilityChanged.collectAsStateWithLifecycle().value
 
             // get the selected level ID
             val selectedLevelID = floorFilterState.onLevelChanged.collectAsStateWithLifecycle().value?.id
-
-            // get the selected facility if the level was set programmatically
-            if (selectedFacility == null) {
-                selectedFacility = floorFilterState.getSelectedFacility()
-            }
 
             // if no facility is selected, only display site-facility selector button
             if (selectedFacility == null) {
@@ -212,11 +207,14 @@ public fun FloorFilter(
                     )
 
                 } else {
+                    val selectedLevelName = selectedFacility.levels.find { it.id == selectedLevelID }?.let {
+                        it.shortName.ifBlank { it.levelNumber }
+                    }
                     // display only the selected floor level
                     FloorLevelSelectButton(
                         index = 0,
                         selected = true,
-                        floorText = selectedFacility.levels.find { it.id == selectedLevelID }?.shortName.toString(),
+                        floorText = selectedLevelName.toString(),
                         uiProperties = uiProperties,
                         onFloorLevelSelected = {
                             // display all floor levels when clicked
@@ -291,7 +289,7 @@ internal fun FloorListColumn(
                 index = index,
                 selected = currentFacility.levels[index].id == selectedLevelID,
                 onFloorLevelSelected = onFloorLevelSelected,
-                floorText = currentFacility.levels[index].shortName,
+                floorText = currentFacility.levels[index].shortName.ifBlank { currentFacility.levels[index].levelNumber.toString() },
                 uiProperties = uiProperties,
             )
         }

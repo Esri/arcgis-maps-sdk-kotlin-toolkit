@@ -18,10 +18,10 @@
 
 package com.arcgismaps.toolkit.authenticationapp
 
-import android.app.Application
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,36 +44,32 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.toolkit.authentication.AuthenticatorState
 import com.arcgismaps.toolkit.authentication.DialogAuthenticator
 import com.arcgismaps.toolkit.authenticationapp.ui.theme.AuthenticationAppTheme
 
 class MainActivity : ComponentActivity() {
+    private val authenticationAppViewModel: AuthenticationAppViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Application context must be set for client certificate authentication.
         ArcGISEnvironment.applicationContext = applicationContext
         setContent {
             AuthenticationAppTheme {
-                AuthenticationApp()
+                AuthenticationApp(authenticationAppViewModel)
+                DialogAuthenticator(authenticatorState = authenticationAppViewModel.authenticatorState)
             }
         }
     }
 }
 
 @Composable
-private fun AuthenticationApp() {
-    val application = LocalContext.current.applicationContext as Application
-    val authenticationAppViewModel = viewModel { AuthenticationAppViewModel(application) }
-    val authenticatorState: AuthenticatorState = authenticationAppViewModel.authenticatorState
+private fun AuthenticationApp(authenticationAppViewModel: AuthenticationAppViewModel) {
     Column {
         val infoText = authenticationAppViewModel.infoText.collectAsState().value
         val isLoading = authenticationAppViewModel.isLoading.collectAsState().value
@@ -87,7 +83,6 @@ private fun AuthenticationApp() {
         )
         InfoScreen(text = infoText, isLoading = isLoading)
     }
-    DialogAuthenticator(authenticatorState = authenticatorState)
 }
 
 /**
