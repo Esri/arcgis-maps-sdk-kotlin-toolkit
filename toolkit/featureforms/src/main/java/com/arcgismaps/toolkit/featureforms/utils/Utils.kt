@@ -3,6 +3,7 @@ package com.arcgismaps.toolkit.featureforms.utils
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.AnnotatedString
@@ -42,5 +43,13 @@ internal class PlaceholderTransformation(private val placeholder: String) : Visu
     
     override fun filter(text: AnnotatedString): TransformedText {
         return TransformedText(AnnotatedString(placeholder), mapping)
+    }
+}
+
+internal fun Modifier.conditional(condition: Boolean, modifier: Modifier.() -> Modifier) : Modifier {
+    return if (condition) {
+        then(modifier(Modifier))
+    } else {
+        this
     }
 }
