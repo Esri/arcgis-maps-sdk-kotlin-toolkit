@@ -96,12 +96,12 @@ public fun DialogAuthenticator(
             authenticatorState = authenticatorState,
             modifier = modifier,
             onPendingOAuthUserSignIn,
-        ) { authenticationComponent ->
+        ) { authenticationPrompt ->
             AlertDialog(
                 onDismissRequest = authenticatorState::dismissAll,
                 modifier = Modifier.clip(MaterialTheme.shapes.extraLarge),
             ) {
-                authenticationComponent()
+                authenticationPrompt()
             }
         }
     }
@@ -120,7 +120,7 @@ public fun DialogAuthenticator(
  * and the browser should be launched. Use this if you wish to handle OAuth challenges from your own
  * activity rather than using the [OAuthUserSignInActivity].
  * @param container if not null, the passed component will be used as a container for [ServerTrustAuthenticator] and
- * [UsernamePasswordAuthenticator].
+ * [UsernamePasswordAuthenticator]. This lambda passes a component which must be called in the content of the container.
  * @since 200.4.0
  */
 @Composable
