@@ -18,7 +18,6 @@
 package com.arcgismaps.toolkit.geocompose
 
 import com.arcgismaps.geometry.Point
-import com.arcgismaps.geometry.Polygon
 import com.arcgismaps.mapping.view.ScreenCoordinate
 
 
@@ -53,14 +52,6 @@ public class MapViewProxy : GeoViewProxy() {
     internal fun setMapView(mapView: com.arcgismaps.mapping.view.MapView?) {
         this.mapView = mapView
     }
-
-    /**
-     * The map view's visible area.
-     *
-     * @since 200.3.0
-     */
-    public val visibleArea: Polygon?
-        get() = mapView?.visibleArea
 
     /**
      * Converts a screen coordinate (in pixels) to a coordinate within the mapview's spatial reference.
