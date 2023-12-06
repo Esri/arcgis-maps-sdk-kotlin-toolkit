@@ -81,9 +81,6 @@ class IdentifyViewModel : ViewModel() {
             featureLayer.clearSelection()
             val result =
                 mapViewProxy.identify(featureLayer, singleTapConfirmedEvent.screenCoordinate, 20.dp)
-            // yielding here will ensure that if the job gets cancelled, we don't try to set the
-            // identified attributes
-            yield()
             result.onSuccess { identifyLayerResult ->
                 (identifyLayerResult.geoElements.firstOrNull() as? Feature)?.let {
                     identifiedAttributes = it.attributes
