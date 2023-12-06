@@ -26,7 +26,9 @@ import kotlinx.coroutines.yield
 class IdentifyViewModel : ViewModel() {
 
     /**
-     * The [MapViewProxy] that this viewmodel will operate on.
+     * The [MapViewProxy] that this viewmodel will use to identify features in the MapView.
+     *
+     * Pass this object to the composable `MapView()` function that this view model is associated with.
      *
      * @since 200.4.0
      */

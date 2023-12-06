@@ -62,8 +62,8 @@ public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
      * that intersect this test region when rendered are returned, up to the [maximumResults] limit. A tolerance
      * of 0 tests just the physical pixel at [screenCoordinate].
      * Tolerance values above 0 are in [Dp] and specify a circular region centered on [screenCoordinate], with radius equal
-     * to [tolerance]. The maximum allowed tolerance value is 100 [Dp], resulting in an identify circle of diameter
-     * 200 [Dp].
+     * to [tolerance]. The maximum allowed tolerance value is 100 Dp, resulting in an identify circle of diameter
+     * 200 Dp.
      *
      * The [returnPopupsOnly] parameter controls what properties are populated in the [IdentifyGraphicsOverlayResult]
      * instance that is returned by the identify operation:
@@ -109,7 +109,7 @@ public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
      * intersect this test region when rendered are returned, up to the [maximumResults] limit. A tolerance of
      * 0 tests just the physical pixel at [screenCoordinate]. Tolerance values above 0 are in [Dp] and specify a
      * circular region centered on [screenCoordinate], with radius equal to [tolerance]. The maximum allowed tolerance
-     * value is 100 [Dp], resulting in an identify circle of diameter 200 [Dp].
+     * value is 100 Dp, resulting in an identify circle of diameter 200 Dp.
      *
      * The [returnPopupsOnly] parameter controls what properties are populated in the [IdentifyGraphicsOverlayResult]
      * instances that are returned by the identify operation:
@@ -150,8 +150,8 @@ public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
      * The [tolerance] parameter determines the extent of the region used during the identify operation. Any GeoElements
      * that intersect this test region when rendered are returned, up to the [maximumResults] limit. A tolerance of
      * 0 tests just the physical pixel at [screenCoordinate]. Tolerance values above 0 are in [Dp] and specify a circular
-     * region centered on [screenCoordinate], with radius equal to [tolerance]. The maximum allowed tolerance value is 100 [Dp],
-     * resulting in an identify circle of diameter 200 [Dp]. The [returnPopupsOnly] parameter controls what properties
+     * region centered on [screenCoordinate], with radius equal to [tolerance]. The maximum allowed tolerance value is 100 Dp,
+     * resulting in an identify circle of diameter 200 Dp. The [returnPopupsOnly] parameter controls what properties
      * are populated in the [IdentifyLayerResult] instance that is returned by the identify operation:
      *
      * * true: only the [IdentifyLayerResult.popups] property will be populated with results.
@@ -197,8 +197,8 @@ public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
      * The [tolerance] parameter determines the extent of the region used during the identify operation. Any GeoElements
      * that intersect this test region when rendered are returned, up to the [maximumResults] limit. A tolerance of 0 tests just the
      * physical pixel at [screenCoordinate]. Tolerance values above 0 are in [Dp] and specify a circular region centered on
-     * [screenCoordinate], with radius equal to [tolerance]. The maximum allowed tolerance value is 100 [Dp], resulting in an
-     * identify circle of diameter 200 [Dp]. The [returnPopupsOnly] parameter controls what properties are populated in
+     * [screenCoordinate], with radius equal to [tolerance]. The maximum allowed tolerance value is 100 Dp, resulting in an
+     * identify circle of diameter 200 Dp. The [returnPopupsOnly] parameter controls what properties are populated in
      * the [IdentifyLayerResult] instances that are returned by the identify operation:
      * * true: each [IdentifyLayerResult.popups] property will be populated with results. Layers without
      * popups will be omitted.
