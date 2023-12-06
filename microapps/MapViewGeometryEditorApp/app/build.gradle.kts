@@ -28,11 +28,11 @@ secrets {
 }
 
 android {
-    namespace = "com.arcgismaps.toolkit.geometryeditorapp"
+    namespace = "com.arcgismaps.toolkit.mapviewgeometryeditorapp"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId ="com.arcgismaps.toolkit.geometryeditorapp"
+        applicationId ="com.arcgismaps.toolkit.mapviewgeometryeditorapp"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.compileSdk.get().toInt()
         versionCode = 1

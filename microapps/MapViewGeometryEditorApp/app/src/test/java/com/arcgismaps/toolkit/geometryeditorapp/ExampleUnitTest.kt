@@ -16,7 +16,7 @@
  *
  */
 
-package com.arcgismaps.toolkit.geometryeditorapp
+package com.arcgismaps.toolkit.mapviewgeometryeditorapp
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

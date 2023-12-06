@@ -19,5 +19,5 @@
 
 <resources>
 
-    <style name="Theme.LocationDisplayApp" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.MapViewLocationDisplayApp" parent="android:Theme.Material.Light.NoActionBar" />
 </resources>

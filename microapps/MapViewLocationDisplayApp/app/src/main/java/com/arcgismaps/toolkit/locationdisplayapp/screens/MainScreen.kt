@@ -16,7 +16,7 @@
  *
  */
 
-package com.arcgismaps.toolkit.locationdisplayapp.screens
+package com.arcgismaps.toolkit.mapviewlocationdisplayapp.screens
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -84,7 +84,7 @@ fun MainScreen() {
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
                 title = {
-                    Text("Location Display App")
+                    Text("MapView Location Display App")
                 },
                 actions = {
                     Column {

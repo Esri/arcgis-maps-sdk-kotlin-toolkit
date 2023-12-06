@@ -16,7 +16,7 @@
  *
  */
 
-package com.arcgismaps.toolkit.geometryeditorapp
+package com.arcgismaps.toolkit.mapviewgeometryeditorapp
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -25,8 +25,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.toolkit.geometryeditorapp.screens.MainScreen
-import com.arcgismaps.toolkit.geometryeditorapp.ui.theme.GeometryEditorAppTheme
+import com.arcgismaps.toolkit.mapviewgeometryeditorapp.screens.MainScreen
+import com.arcgismaps.toolkit.mapviewgeometryeditorapp.ui.theme.MapViewGeometryEditorAppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,22 +34,22 @@ class MainActivity : ComponentActivity() {
         ArcGISEnvironment.apiKey = ApiKey.create(BuildConfig.API_KEY)
 
         setContent {
-            GeometryEditorAppTheme {
-                GeometryEditorApp()
+            MapViewGeometryEditorAppTheme {
+                MapViewGeometryEditorApp()
             }
         }
     }
 }
 
 @Composable
-fun GeometryEditorApp() {
+fun MapViewGeometryEditorApp() {
     MainScreen()
 }
 
 @Preview(showBackground = true)
 @Composable
 fun AppPreview() {
-    GeometryEditorAppTheme {
-        GeometryEditorApp()
+    MapViewGeometryEditorAppTheme {
+        MapViewGeometryEditorApp()
     }
 }

@@ -19,5 +19,5 @@
 
 <resources>
 
-    <style name="Theme.GeometryEditorApp" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.MapViewGeometryEditorApp" parent="android:Theme.Material.Light.NoActionBar" />
 </resources>

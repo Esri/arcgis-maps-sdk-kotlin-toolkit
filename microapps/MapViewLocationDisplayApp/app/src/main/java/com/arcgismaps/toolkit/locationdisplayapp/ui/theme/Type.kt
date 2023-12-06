@@ -16,7 +16,7 @@
  *
  */
 
-package com.arcgismaps.toolkit.locationdisplayapp.ui.theme
+package com.arcgismaps.toolkit.mapviewlocationdisplayapp.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

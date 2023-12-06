@@ -28,11 +28,11 @@ secrets {
 }
 
 android {
-    namespace = "com.arcgismaps.toolkit.locationdisplayapp"
+    namespace = "com.arcgismaps.toolkit.mapviewlocationdisplayapp"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId ="com.arcgismaps.toolkit.locationdisplayapp"
+        applicationId ="com.arcgismaps.toolkit.mapviewlocationdisplayapp"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.compileSdk.get().toInt()
         versionCode = 1

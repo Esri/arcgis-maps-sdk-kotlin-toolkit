@@ -17,5 +17,5 @@
   -->
 
 <resources>
-    <string name="app_name">GeometryEditorApp</string>
+    <string name="app_name">MapviewGeometryEditorApp</string>
 </resources>

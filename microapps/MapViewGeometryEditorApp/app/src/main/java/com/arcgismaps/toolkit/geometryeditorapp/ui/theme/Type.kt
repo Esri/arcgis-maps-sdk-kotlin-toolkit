@@ -16,7 +16,7 @@
  *
  */
 
-package com.arcgismaps.toolkit.geometryeditorapp.ui.theme
+package com.arcgismaps.toolkit.mapviewgeometryeditorapp.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

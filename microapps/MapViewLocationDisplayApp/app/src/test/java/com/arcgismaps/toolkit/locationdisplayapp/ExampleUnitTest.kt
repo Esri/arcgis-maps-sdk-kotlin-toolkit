@@ -16,7 +16,7 @@
  *
  */
 
-package com.arcgismaps.toolkit.locationdisplayapp
+package com.arcgismaps.toolkit.mapviewlocationdisplayapp
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

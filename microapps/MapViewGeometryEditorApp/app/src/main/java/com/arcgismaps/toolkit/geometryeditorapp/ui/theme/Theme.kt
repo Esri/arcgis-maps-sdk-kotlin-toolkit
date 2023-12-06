@@ -16,7 +16,7 @@
  *
  */
 
-package com.arcgismaps.toolkit.geometryeditorapp.ui.theme
+package com.arcgismaps.toolkit.mapviewgeometryeditorapp.ui.theme
 
 import android.app.Activity
 import android.os.Build
@@ -56,7 +56,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun GeometryEditorAppTheme(
+fun MapViewGeometryEditorAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,

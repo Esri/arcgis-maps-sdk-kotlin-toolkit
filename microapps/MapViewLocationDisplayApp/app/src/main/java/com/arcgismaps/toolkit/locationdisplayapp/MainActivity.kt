@@ -16,7 +16,7 @@
  *
  */
 
-package com.arcgismaps.toolkit.locationdisplayapp
+package com.arcgismaps.toolkit.mapviewlocationdisplayapp
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -25,8 +25,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.toolkit.locationdisplayapp.screens.MainScreen
-import com.arcgismaps.toolkit.locationdisplayapp.ui.theme.LocationDisplayAppTheme
+import com.arcgismaps.toolkit.mapviewlocationdisplayapp.screens.MainScreen
+import com.arcgismaps.toolkit.mapviewlocationdisplayapp.ui.theme.MapViewLocationDisplayAppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,22 +34,22 @@ class MainActivity : ComponentActivity() {
         ArcGISEnvironment.apiKey = ApiKey.create(BuildConfig.API_KEY)
 
         setContent {
-            LocationDisplayAppTheme {
-                LocationDisplayApp()
+            MapViewLocationDisplayAppTheme {
+                MapViewLocationDisplayApp()
             }
         }
     }
 }
 
 @Composable
-fun LocationDisplayApp() {
+fun MapViewLocationDisplayApp() {
     MainScreen()
 }
 
 @Preview(showBackground = true)
 @Composable
 fun AppPreview() {
-    LocationDisplayAppTheme {
-        LocationDisplayApp()
+    MapViewLocationDisplayAppTheme {
+        MapViewLocationDisplayApp()
     }
 }

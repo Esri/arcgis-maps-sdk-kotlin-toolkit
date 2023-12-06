@@ -16,7 +16,7 @@
  *
  */
 
-package com.arcgismaps.toolkit.geometryeditorapp.screens
+package com.arcgismaps.toolkit.mapviewgeometryeditorapp.screens
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -98,7 +98,7 @@ fun MainScreen() {
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
-                title = { Text("Geometry Editor App") },
+                title = { Text("MapView Geometry Editor App") },
                 actions = {
                     Switch(
                         checked = isDrawingEnabled,
