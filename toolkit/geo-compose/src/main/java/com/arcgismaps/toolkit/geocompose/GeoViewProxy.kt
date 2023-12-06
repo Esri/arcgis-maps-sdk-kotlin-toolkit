@@ -225,7 +225,7 @@ public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
     }
 
     private fun clampMaximumResults(maximumResults: Int?): Int {
-        return if (maximumResults == null || maximumResults < 0) {
+        return if (maximumResults == null || maximumResults <= 0) {
             -1
         } else maximumResults
     }
