@@ -35,6 +35,8 @@ import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.TimeExtent
+import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.mapping.ViewpointType
 import com.arcgismaps.mapping.view.BackgroundGrid
 import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
@@ -102,6 +104,7 @@ public fun MapView(
     arcGISMap: ArcGISMap? = null,
     viewpointOperation: MapViewpointOperation? = null,
     onViewpointChanged: (() -> Unit)? = null,
+    viewpointChangedEvents: Map<ViewpointType, ((Viewpoint) -> Unit)>? = null,
     graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     geometryEditor: GeometryEditor? = null,
@@ -162,6 +165,7 @@ public fun MapView(
     }
 
     ViewpointUpdater(mapView, viewpointOperation)
+    ViewpointChangedEventHandler(mapView, viewpointChangedEvents)
 
     DisposableEffect(mapViewProxy) {
         mapViewProxy?.setMapView(mapView)
@@ -220,6 +224,28 @@ private fun ViewpointUpdater(
 ) {
     LaunchedEffect(viewpointOperation) {
         viewpointOperation?.execute(mapView)
+    }
+}
+
+/**
+ * Sets up the ViewpointChangedState's property and event.
+ *
+ * @since 200.4.0
+ */
+@Composable
+private fun ViewpointChangedEventHandler(mapView: MapView, viewpointChangedEvents: Map<ViewpointType, ((Viewpoint) -> Unit)>?) {
+    LaunchedEffect(viewpointChangedEvents) {
+        launch {
+            mapView.viewpointChanged.collect {
+                viewpointChangedEvents?.forEach {
+                    it.value.invoke(
+                        mapView.getCurrentViewpoint(
+                            it.key
+                        ) ?: throw IllegalStateException("Viewpoint should not be null")
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -449,4 +475,14 @@ public inline fun rememberGraphicsOverlayCollection(
     crossinline init: GraphicsOverlayCollection.() -> Unit = {}
 ): GraphicsOverlayCollection = remember(key) {
     GraphicsOverlayCollection().apply(init)
+}
+
+@Composable
+public fun rememberViewpointChangedEvents(
+    type: ViewpointType = ViewpointType.BoundingGeometry,
+    onViewpointChanged: ((Viewpoint) -> Unit)
+): Map<ViewpointType, ((Viewpoint) -> Unit)> {
+    return hashMapOf(
+        type to onViewpointChanged
+    )
 }
