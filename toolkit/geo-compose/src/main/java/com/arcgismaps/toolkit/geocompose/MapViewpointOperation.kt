@@ -30,7 +30,7 @@ import kotlinx.coroutines.CompletableDeferred
 /**
  * Defines operations for setting the viewpoint of a composable [MapView].
  *
- * @since 200.3.0
+ * @since 200.4.0
  */
 @Stable
 public sealed class MapViewpointOperation {
@@ -41,7 +41,7 @@ public sealed class MapViewpointOperation {
      * Awaits the completion of this MapViewpointOperation.
      *
      * @return a Result returning a boolean used to indicate if the operation completed successfully or not
-     * @since 200.3.0
+     * @since 200.4.0
      */
     public suspend fun await(): Result<Boolean> = deferred.await()
 
@@ -53,7 +53,7 @@ public sealed class MapViewpointOperation {
      * Changes the map view to the new viewpoint. The viewpoint is updated instantaneously.
      *
      * @property viewpoint the new viewpoint
-     * @since 200.3.0
+     * @since 200.4.0
      */
     public class Set(public val viewpoint: Viewpoint) :
         MapViewpointOperation()
@@ -65,7 +65,7 @@ public sealed class MapViewpointOperation {
      * @property viewpoint the new viewpoint
      * @property durationSeconds the duration of the animation in seconds
      * @property curve the animation curve to apply
-     * @since 200.3.0
+     * @since 200.4.0
      */
     public class Animate(
         public val viewpoint: Viewpoint,
@@ -78,7 +78,7 @@ public sealed class MapViewpointOperation {
      *
      * @property center the location on which the map should be centered
      * @property scale the new map scale
-     * @since 200.3.0
+     * @since 200.4.0
      */
     public class Center(
         public val center: Point,
@@ -92,7 +92,7 @@ public sealed class MapViewpointOperation {
      * different to that of the composable [MapView], it will be reprojected appropriately
      * @property paddingInDips a distance around the geometry to include in the Viewpoint when zooming,
      * in density-independent pixels
-     * @since 200.3.0
+     * @since 200.4.0
      */
     public class SetBoundingGeometry(
         public val boundingGeometry: Geometry,
@@ -103,7 +103,7 @@ public sealed class MapViewpointOperation {
      * Animates the rotation of the map view to the provided angle.
      *
      * @property angleDegrees the new map rotation angle, in degrees counter-clockwise
-     * @since 200.3.0
+     * @since 200.4.0
      */
     public class Rotate(
         public val angleDegrees: Double
@@ -113,7 +113,7 @@ public sealed class MapViewpointOperation {
      * Animates the map view to zoom to a scale.
      *
      * @property scale the new map scale
-     * @since 200.3.0
+     * @since 200.4.0
      */
     public class Scale(
         public val scale: Double
@@ -123,7 +123,7 @@ public sealed class MapViewpointOperation {
      * Animates the map view's viewpoint to the viewpoint of the bookmark.
      *
      * @property bookmark bookmark to set
-     * @since 200.3.0
+     * @since 200.4.0
      */
     public class SetBookmark(
         public val bookmark: Bookmark
@@ -138,7 +138,7 @@ public sealed class MapViewpointOperation {
  * to complete.
  *
  * @param mapView the view-based MapView to execute this operation on
- * @since 200.3.0
+ * @since 200.4.0
  */
 internal suspend fun MapViewpointOperation.execute(mapView: com.arcgismaps.mapping.view.MapView) {
     when (this) {

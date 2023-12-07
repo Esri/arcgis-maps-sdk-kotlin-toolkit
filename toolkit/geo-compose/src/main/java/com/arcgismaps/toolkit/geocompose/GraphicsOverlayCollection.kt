@@ -27,7 +27,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 /**
  * A collection class to encapsulate the [GraphicsOverlay] list used by the [com.arcgismaps.toolkit.geocompose.MapView]
  *
- * @since 200.3.0
+ * @since 200.4.0
  */
 @Stable
 public class GraphicsOverlayCollection : Iterable<GraphicsOverlay> {
@@ -52,7 +52,7 @@ public class GraphicsOverlayCollection : Iterable<GraphicsOverlay> {
      * Add a [graphicsOverlay] to this GraphicsOverlayCollection.
      *
      * @return if the add operation succeeds, return true.
-     * @since 200.3.0
+     * @since 200.4.0
      */
     public fun add(graphicsOverlay: GraphicsOverlay): Boolean {
         return if (graphicsOverlays.add(graphicsOverlay)) {
@@ -65,7 +65,7 @@ public class GraphicsOverlayCollection : Iterable<GraphicsOverlay> {
      * Remove a [graphicsOverlay] from this GraphicsOverlayCollection.
      *
      * @return if the remove operation succeeds, return true.
-     * @since 200.3.0
+     * @since 200.4.0
      */
     public fun remove(graphicsOverlay: GraphicsOverlay): Boolean {
         return if (graphicsOverlays.remove(graphicsOverlay)) {
@@ -77,7 +77,7 @@ public class GraphicsOverlayCollection : Iterable<GraphicsOverlay> {
     /**
      * Returns the number of graphics overlays in this GraphicsOverlayCollection.
      *
-     * @since 200.3.0
+     * @since 200.4.0
      */
     public val size: Int
         get() = graphicsOverlays.size
@@ -85,7 +85,7 @@ public class GraphicsOverlayCollection : Iterable<GraphicsOverlay> {
     /**
      * Clears all graphics overlays from this GraphicsOverlayCollection.
      *
-     * @since 200.3.0
+     * @since 200.4.0
      */
     public fun clear() {
         graphicsOverlays.clear()
@@ -96,7 +96,7 @@ public class GraphicsOverlayCollection : Iterable<GraphicsOverlay> {
      * Sealed class used to notify the compose MapView to update the GraphicOverlays on the
      * type of [ChangedEvent].
      *
-     * @since 200.3.0
+     * @since 200.4.0
      */
     internal sealed class ChangedEvent() {
         class Added(val element: GraphicsOverlay) : ChangedEvent()

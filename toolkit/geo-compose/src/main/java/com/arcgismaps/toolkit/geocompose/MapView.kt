@@ -94,7 +94,7 @@ import kotlinx.coroutines.launch
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable MapView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable MapView
  * @param onDrawStatusChanged lambda invoked when the draw status of the composable MapView is changes
- * @since 200.3.0
+ * @since 200.4.0
  */
 @Composable
 public fun MapView(
@@ -211,7 +211,7 @@ public fun MapView(
  * Updates the viewpoint of the provided view-based [mapView] using the given [viewpointOperation]. This will be
  * recomposed when [viewpointOperation] changes.
  *
- * @since 200.3.0
+ * @since 200.4.0
  */
 @Composable
 private fun ViewpointUpdater(
@@ -419,7 +419,7 @@ private fun GraphicsOverlaysUpdater(
  *
  * @param key invalidates the remembered LocationDisplay if different from the previous composition
  * @param init called when the [LocationDisplay] is created to configure its initial state
- * @since 200.3.0
+ * @since 200.4.0
  */
 @Composable
 public inline fun rememberLocationDisplay(
@@ -441,7 +441,7 @@ public inline fun rememberLocationDisplay(
  *
  * @param key invalidates the remembered GraphicsOverlayCollection if different from the previous composition
  * @param init called when the [GraphicsOverlayCollection] is created to configure its initial state
- * @since 200.3.0
+ * @since 200.4.0
  */
 @Composable
 public inline fun rememberGraphicsOverlayCollection(

@@ -20,7 +20,7 @@ package com.arcgismaps.toolkit.geocompose
 /**
  * Used to perform operations on a composable MapView or SceneView.
  *
- * @since 200.3.0
+ * @since 200.4.0
  */
 public sealed class GeoViewProxy {
 }
