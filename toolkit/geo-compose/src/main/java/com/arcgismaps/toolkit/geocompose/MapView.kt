@@ -66,7 +66,8 @@ import kotlinx.coroutines.launch
  * @param modifier Modifier to be applied to the composable MapView
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable MapView
  * @param viewpointOperation a [MapViewpointOperation] that changes this MapView to a new viewpoint
- * @param viewpointChangedState specifies the viewpointType and viewpoint changed lambda
+ * @param viewpointChangedState specifies a lambda invoked when the viewpoint of the composable MapView
+ * has changed as well as the [ViewpointType] of the viewpoint to be passed to the lambda
  * @param onVisibleAreaChanged lambda invoked when the viewpoint of the composable MapView has changed
  * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable MapView
  * @param locationDisplay the [LocationDisplay] used by the composable MapView
@@ -105,8 +106,8 @@ public fun MapView(
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap? = null,
     viewpointOperation: MapViewpointOperation? = null,
-    viewpointChangedState: ViewpointChangedState = ViewpointChangedState(),
-    onVisibleAreaChanged: ((Polygon?) -> Unit)? = null,
+    viewpointChangedState: ViewpointChangedState? = null,
+    onVisibleAreaChanged: ((Polygon) -> Unit)? = null,
     graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     geometryEditor: GeometryEditor? = null,
@@ -258,14 +259,14 @@ private fun AttributionStateHandler(mapView: MapView, attributionState: Attribut
  * @since 200.4.0
  */
 @Composable
-private fun ViewpointChangedStateHandler(mapView: MapView, viewpointChangedState: ViewpointChangedState) {
+private fun ViewpointChangedStateHandler(mapView: MapView, viewpointChangedState: ViewpointChangedState?) {
     LaunchedEffect(viewpointChangedState) {
         launch {
             mapView.viewpointChanged.collect {
-                viewpointChangedState.onViewpointChanged?.invoke(
+                viewpointChangedState?.onViewpointChanged?.invoke(
                     mapView.getCurrentViewpoint(
                         viewpointChangedState.viewpointType
-                    )
+                    ) ?: throw IllegalStateException("Viewpoint should not be null")
                 )
             }
         }
@@ -279,7 +280,7 @@ private fun ViewpointChangedStateHandler(mapView: MapView, viewpointChangedState
 private fun MapViewEventHandler(
     mapView: MapView,
     onTimeExtentChanged: ((TimeExtent?) -> Unit)?,
-    onVisibleAreaChanged: ((Polygon?) -> Unit)?,
+    onVisibleAreaChanged: ((Polygon) -> Unit)?,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)?,
     onMapRotationChanged: ((Double) -> Unit)?,
     onMapScaleChanged: ((Double) -> Unit)?,
@@ -322,7 +323,10 @@ private fun MapViewEventHandler(
         }
         launch {
             mapView.viewpointChanged.collect {
-                currentVisibleAreaChanged?.invoke(mapView.visibleArea)
+                currentVisibleAreaChanged?.invoke(
+                    mapView.visibleArea
+                        ?: throw IllegalStateException("Mapview visible area should not be null")
+                )
             }
         }
         launch {

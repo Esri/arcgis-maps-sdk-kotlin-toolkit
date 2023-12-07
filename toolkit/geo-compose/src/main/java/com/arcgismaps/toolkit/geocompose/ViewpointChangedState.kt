@@ -17,15 +17,18 @@
 
 package com.arcgismaps.toolkit.geocompose
 
+import androidx.compose.runtime.Stable
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.ViewpointType
 
 /**
- * State holder for Viewpoint related properties/events on the [com.arcgismaps.toolkit.geocompose.MapView].
+ * State holder for a lambda invoked when the viewpoint of a composable [MapView] has changed
+ * as well as the [ViewpointType] of the viewpoint to be passed to the lambda.
  *
  * @since 200.3.0
  */
+@Stable
 public data class ViewpointChangedState (
     val viewpointType: ViewpointType = ViewpointType.BoundingGeometry,
-    val onViewpointChanged: ((Viewpoint?) -> Unit)? = null
+    val onViewpointChanged: ((Viewpoint) -> Unit)?
 )
