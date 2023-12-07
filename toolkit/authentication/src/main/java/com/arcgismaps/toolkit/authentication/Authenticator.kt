@@ -37,14 +37,14 @@ import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
 /**
- * Displays appropriate Authentication UI when a challenge is issued.
+ * Displays appropriate Authentication UI when an authentication challenge is issued.
  *
  * For example, when an [ArcGISAuthenticationChallenge] is issued and the [AuthenticatorState] has a corresponding
  * [OAuthUserConfiguration], then a Custom Tab will be launched to complete the OAuth sign in.
  *
  * All Authentication components will be displayed in full screen. See [DialogAuthenticator] for alternate behavior.
  *
- * @param authenticatorState the application viewModel's [AuthenticatorState].
+ * @param authenticatorState the object that holds the state to handle authentication challenges.
  * @param modifier the [Modifier] to apply to this Authenticator.
  * @param onPendingOAuthUserSignIn if not null, this will be called when an OAuth challenge is pending
  * and the browser should be launched. Use this if you wish to handle OAuth challenges from your own
@@ -66,21 +66,22 @@ public fun Authenticator(
 }
 
 /**
- * Displays appropriate Authentication UI when a challenge is issued.
+ * Displays appropriate Authentication UI when an authentication challenge is issued.
  *
  * For example, when an [ArcGISAuthenticationChallenge] is issued and the [AuthenticatorState] has a corresponding
  * [OAuthUserConfiguration], then a Custom Tab will be launched to complete the OAuth sign in.
  *
- * The [ServerTrustAuthenticator] and [UsernamePasswordAuthenticator] components will be displayed in an [AlertDialog].
- * All other components are displayed in full screen.
+ * Server trust prompts and username/password prompts will be displayed in an [AlertDialog].
+ * All other prompts are displayed in full screen.
  *
  * For alternate behavior, see the [Authenticator] component.
  *
- * @param authenticatorState the application viewModel's [AuthenticatorState].
+ * @param authenticatorState the object that holds the state to handle authentication challenges.
  * @param modifier the [Modifier] to be applied to this DialogAuthenticator.
  * @param onPendingOAuthUserSignIn if not null, this will be called when an OAuth challenge is pending
  * and the browser should be launched. Use this if you wish to handle OAuth challenges from your own
  * activity rather than using the [OAuthUserSignInActivity].
+ * @see Authenticator
  * @since 200.2.0
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -115,7 +116,7 @@ public fun DialogAuthenticator(
  * otherwise this will not work.
  *
  * @sample [DialogAuthenticator]
- * @param authenticatorState the application viewModel's [AuthenticatorState].
+ * @param authenticatorState the object that holds the state to handle authentication challenges.
  * @param onPendingOAuthUserSignIn if not null, this will be called when an OAuth challenge is pending
  * and the browser should be launched. Use this if you wish to handle OAuth challenges from your own
  * activity rather than using the [OAuthUserSignInActivity].
