@@ -22,24 +22,33 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SheetState
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -54,14 +63,27 @@ import com.arcgismaps.toolkit.mapviewidentifyapp.R
 @Composable
 fun MainScreen() {
     val identifyViewModel: IdentifyViewModel = viewModel()
-    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
+    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(SheetState(skipPartiallyExpanded = false, initialValue = SheetValue.Expanded, skipHiddenState = true))
     // Expand the bottom sheet whenever the attributes to display are changed
     LaunchedEffect(key1 = identifyViewModel.identifiedAttributes) {
         bottomSheetScaffoldState.bottomSheetState.expand()
     }
+    // Update the insets whenever the bottom sheet expands or is hidden
+    var insets by remember { mutableStateOf(PaddingValues(bottom = 200.dp)) }
+    LaunchedEffect(key1 = Unit) {
+        snapshotFlow { bottomSheetScaffoldState.bottomSheetState.currentValue }.collect {
+            insets = when (it) {
+                SheetValue.Expanded -> PaddingValues(bottom = 200.dp)
+                else -> PaddingValues(bottom = 0.dp)
+            }
+        }
+    }
     BottomSheetScaffold(
         sheetContent = {
-            IdentifyDetails(identifyViewModel.showProgressIndicator, identifyViewModel.identifiedAttributes)
+            IdentifyDetails(
+                identifyViewModel.showProgressIndicator,
+                identifyViewModel.identifiedAttributes
+            )
         },
         scaffoldState = bottomSheetScaffoldState,
         topBar = {
@@ -80,6 +102,7 @@ fun MainScreen() {
                 .padding(paddingValues),
             arcGISMap = identifyViewModel.arcGISMap,
             mapViewProxy = identifyViewModel.mapViewProxy,
+            insets = insets,
             onSingleTapConfirmed = identifyViewModel::identify
         )
     }
@@ -101,8 +124,8 @@ private fun IdentifyDetails(
     Column(
         Modifier
             .fillMaxWidth()
-            // ensures the bottom sheet does not cover the screen
-            .height(350.dp),
+            // ensures the bottom sheet doesn't cover the whole screen
+            .heightIn(max = 200.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
