@@ -81,6 +81,7 @@ include(":location-display-app")
 include(":map-view-insets-app")
 include(":geometry-editor-app")
 include(":map-view-set-viewpoint-app")
+include(":map-view-identify-app")
 
 projects.forEach {
     project(":$it").projectDir = File(rootDir, "toolkit/$it")
@@ -97,3 +98,4 @@ project(":location-display-app").projectDir = File(rootDir, "microapps/locationd
 project(":map-view-insets-app").projectDir = File(rootDir, "microapps/mapviewinsetsapp/app")
 project(":geometry-editor-app").projectDir = File(rootDir, "microapps/geometryeditorapp/app")
 project(":map-view-set-viewpoint-app").projectDir = File(rootDir, "microapps/mapviewsetviewpointapp/app")
+project(":map-view-identify-app").projectDir = File(rootDir, "microapps/mapviewidentifyapp/app")

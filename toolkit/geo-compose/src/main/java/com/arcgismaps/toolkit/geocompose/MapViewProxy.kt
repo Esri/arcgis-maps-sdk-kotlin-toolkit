@@ -18,6 +18,7 @@
 package com.arcgismaps.toolkit.geocompose
 
 import com.arcgismaps.geometry.Point
+import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.ScreenCoordinate
 
 
@@ -32,16 +33,19 @@ import com.arcgismaps.mapping.view.ScreenCoordinate
  *
  * @since 200.3.0
  */
-public class MapViewProxy : GeoViewProxy() {
+public class MapViewProxy : GeoViewProxy("MapView") {
 
     /**
-     * The [com.arcgismaps.mapping.view.MapView] that this MapViewProxy will operate on. This should
+     * The [MapView] that this MapViewProxy will operate on. This should
      * be initialized by the composable [MapView] when it enters the composition and set to null when
      * it is disposed by calling [setMapView].
      *
      * @since 200.3.0
      */
-    private var mapView: com.arcgismaps.mapping.view.MapView? = null
+    private var mapView: MapView? = null
+        set(value) {
+            setGeoView(value)
+        }
 
     /**
      * Sets the [mapView] parameter on this operator. This should be called by the composable [MapView]
@@ -49,7 +53,7 @@ public class MapViewProxy : GeoViewProxy() {
      *
      * @since 200.3.0
      */
-    internal fun setMapView(mapView: com.arcgismaps.mapping.view.MapView?) {
+    internal fun setMapView(mapView: MapView?) {
         this.mapView = mapView
     }
 
