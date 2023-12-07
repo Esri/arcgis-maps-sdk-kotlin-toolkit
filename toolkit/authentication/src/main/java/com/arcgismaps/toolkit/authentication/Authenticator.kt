@@ -60,6 +60,7 @@ public fun Authenticator(
 ) {
     AuthenticatorDelegate(
         authenticatorState = authenticatorState,
+        // `fillMaxSize()` is needed, otherwise the prompts are displayed at the top of the screen.
         modifier = modifier.fillMaxSize(),
         onPendingOAuthUserSignIn = onPendingOAuthUserSignIn
     )
