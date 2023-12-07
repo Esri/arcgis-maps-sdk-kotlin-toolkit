@@ -202,15 +202,16 @@ internal fun ComboBoxDialog(
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         Surface(
-            modifier = Modifier
-                .conditional(showAsFullScreen) {
+            modifier = Modifier.conditional(
+                condition = showAsFullScreen,
+                ifTrue = {
                     fillMaxSize()
-                }
-                .conditional(!showAsFullScreen) {
+                },
+                ifFalse = {
                     width(600.dp)
                         .heightIn(max = (configuration.screenHeightDp * 0.8).dp)
                         .wrapContentHeight()
-                },
+                }),
             shape = RoundedCornerShape(10.dp)
         ) {
             Column(
