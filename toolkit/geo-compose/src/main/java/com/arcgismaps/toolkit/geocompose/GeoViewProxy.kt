@@ -56,19 +56,6 @@ public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
         "$classNameForErrorMessage must be part of the composition when this member is called."
 
     /**
-     * Retrieve the layer's [LayerViewState].
-     *
-     * @param layer the layer to retrieve the view state from
-     * @return the [LayerViewState] of the provided layer, or null if this proxy's GeoView is not
-     * part of the composition
-     * @since 200.4.0
-     */
-    public fun getLayerViewState(layer: Layer) : LayerViewState? {
-        return geoView?.getLayerViewState(layer)
-    }
-
-
-    /**
      * Initiate an Identify operation on the specified [graphicsOverlay].
      *
      * The [tolerance] parameter determines the extent of the region used during the identify operation. Any graphics
@@ -237,5 +224,17 @@ public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
         return if (maximumResults == null || maximumResults <= 0) {
             -1
         } else maximumResults
+    }
+
+    /**
+     * Retrieve the layer's [LayerViewState].
+     *
+     * @param layer the layer to retrieve the view state from
+     * @return the [LayerViewState] of the provided layer, or null if this proxy's GeoView is not
+     * part of the composition
+     * @since 200.4.0
+     */
+    public fun getLayerViewState(layer: Layer) : LayerViewState? {
+        return geoView?.getLayerViewState(layer)
     }
 }
