@@ -66,6 +66,8 @@ import kotlinx.coroutines.launch
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable MapView
  * @param viewpointOperation a [MapViewpointOperation] that changes this MapView to a new viewpoint
  * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
+ * @param viewpointChangedEvents specifies lambdas invoked when the viewpoint of the composable MapView
+ * has changed as well as the [ViewpointType] of the viewpoint to be passed to the lambdas
  * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable MapView
  * @param locationDisplay the [LocationDisplay] used by the composable MapView
  * @param geometryEditor the [GeometryEditor] used by the composable MapView to create and edit geometries by user interaction.
@@ -228,16 +230,16 @@ private fun ViewpointUpdater(
 }
 
 /**
- * Sets up the ViewpointChangedState's property and event.
+ * Sets up the ViewPointChanged events.
  *
  * @since 200.4.0
  */
 @Composable
 private fun ViewpointChangedEventHandler(mapView: MapView, viewpointChangedEvents: Map<ViewpointType, ((Viewpoint) -> Unit)>?) {
     LaunchedEffect(viewpointChangedEvents) {
-        launch {
+        viewpointChangedEvents?.let { events ->
             mapView.viewpointChanged.collect {
-                viewpointChangedEvents?.forEach {
+                events.forEach {
                     it.value.invoke(
                         mapView.getCurrentViewpoint(
                             it.key
@@ -477,12 +479,19 @@ public inline fun rememberGraphicsOverlayCollection(
     GraphicsOverlayCollection().apply(init)
 }
 
+/**
+ * Create and [remember] a [HashMap] of ViewpointType and lambda to be executed when the viewpoint changes.
+ *
+ * @param key invalidates the remembered hashmap if different from the previous composition
+ * @param type the type of viewpoint to be returned in the [onViewpointChanged] lambda
+ * @param onViewpointChanged called when the composable MapView's viewpoint changes
+ * @since 200.3.0
+ */
 @Composable
 public fun rememberViewpointChangedEvents(
+    key: Any? = null,
     type: ViewpointType = ViewpointType.BoundingGeometry,
     onViewpointChanged: ((Viewpoint) -> Unit)
-): Map<ViewpointType, ((Viewpoint) -> Unit)> {
-    return hashMapOf(
-        type to onViewpointChanged
-    )
+): Map<ViewpointType, ((Viewpoint) -> Unit)> = remember(key) {
+    hashMapOf(type to onViewpointChanged)
 }
