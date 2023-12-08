@@ -33,7 +33,7 @@ import com.arcgismaps.mapping.view.ScreenCoordinate
 public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
 
     /**
-     * The [GeoView] that this GeoViewProxy will operate on. This should
+     * The view-based [GeoView] that this GeoViewProxy will operate on. This should
      * be initialized by the composable component when it enters the composition and set to null when
      * it is disposed by calling [setGeoView].
      *
