@@ -22,7 +22,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -44,11 +43,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -63,20 +57,16 @@ import com.arcgismaps.toolkit.mapviewidentifyapp.R
 @Composable
 fun MainScreen() {
     val identifyViewModel: IdentifyViewModel = viewModel()
-    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(SheetState(skipPartiallyExpanded = false, initialValue = SheetValue.Expanded, skipHiddenState = true))
+    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
+        SheetState(
+            skipPartiallyExpanded = false,
+            initialValue = SheetValue.Expanded,
+            skipHiddenState = true
+        )
+    )
     // Expand the bottom sheet whenever the attributes to display are changed
     LaunchedEffect(key1 = identifyViewModel.identifiedAttributes) {
         bottomSheetScaffoldState.bottomSheetState.expand()
-    }
-    // Update the insets whenever the bottom sheet expands or is hidden
-    var insets by remember { mutableStateOf(PaddingValues(bottom = 200.dp)) }
-    LaunchedEffect(key1 = Unit) {
-        snapshotFlow { bottomSheetScaffoldState.bottomSheetState.currentValue }.collect {
-            insets = when (it) {
-                SheetValue.Expanded -> PaddingValues(bottom = 200.dp)
-                else -> PaddingValues(bottom = 0.dp)
-            }
-        }
     }
     BottomSheetScaffold(
         sheetContent = {
@@ -102,7 +92,6 @@ fun MainScreen() {
                 .padding(paddingValues),
             arcGISMap = identifyViewModel.arcGISMap,
             mapViewProxy = identifyViewModel.mapViewProxy,
-            insets = insets,
             onSingleTapConfirmed = identifyViewModel::identify
         )
     }
