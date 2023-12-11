@@ -22,7 +22,7 @@ import com.arcgismaps.mapping.view.ScreenCoordinate
 
 
 /**
- * Used to perform operations on a [MapView].
+ * Used to perform operations on a composable [MapView].
  *
  * There should be a one-to-one relationship between a MapViewProxy and a composable [MapView]. This
  * relationship is established by passing an instance of MapViewProxy to the composable [MapView] function.
@@ -32,16 +32,19 @@ import com.arcgismaps.mapping.view.ScreenCoordinate
  *
  * @since 200.4.0
  */
-public class MapViewProxy : GeoViewProxy() {
+public class MapViewProxy : GeoViewProxy("MapView") {
 
     /**
-     * The [com.arcgismaps.mapping.view.MapView] that this MapViewProxy will operate on. This should
+     * The view-based [com.arcgismaps.mapping.view.MapView] that this MapViewProxy will operate on. This should
      * be initialized by the composable [MapView] when it enters the composition and set to null when
      * it is disposed by calling [setMapView].
      *
      * @since 200.4.0
      */
     private var mapView: com.arcgismaps.mapping.view.MapView? = null
+        set(value) {
+            setGeoView(value)
+        }
 
     /**
      * Sets the [mapView] parameter on this operator. This should be called by the composable [MapView]
