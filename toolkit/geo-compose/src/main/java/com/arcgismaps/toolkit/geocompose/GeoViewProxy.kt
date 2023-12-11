@@ -55,6 +55,14 @@ public sealed class GeoViewProxy(className: String) {
         "$className must be part of the composition when this member is called."
 
     /**
+     * True if continuous panning across the international date line is enabled in the GeoView, false otherwise.
+     *
+     * @since 200.3.0
+     */
+    public val isWrapAroundEnabled: Boolean?
+        get() = geoView?.isWrapAroundEnabled
+
+    /**
      * Initiate an Identify operation on the specified [graphicsOverlay].
      *
      * The [tolerance] parameter determines the extent of the region used during the identify operation. Any graphics
