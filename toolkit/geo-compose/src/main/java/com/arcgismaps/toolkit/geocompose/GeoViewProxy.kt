@@ -30,7 +30,7 @@ import com.arcgismaps.mapping.view.ScreenCoordinate
  *
  * @since 200.4.0
  */
-public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
+public sealed class GeoViewProxy(className: String) {
 
     /**
      * The view-based [GeoView] that this GeoViewProxy will operate on. This should
@@ -52,7 +52,7 @@ public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
     }
 
     private val nullGeoViewErrorMessage: String =
-        "$classNameForErrorMessage must be part of the composition when this member is called."
+        "$className must be part of the composition when this member is called."
 
     /**
      * Initiate an Identify operation on the specified [graphicsOverlay].
