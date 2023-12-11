@@ -57,7 +57,7 @@ public sealed class GeoViewProxy(className: String) {
     /**
      * True if continuous panning across the international date line is enabled in the GeoView, false otherwise.
      *
-     * @since 200.3.0
+     * @since 200.4.0
      */
     public val isWrapAroundEnabled: Boolean?
         get() = geoView?.isWrapAroundEnabled
