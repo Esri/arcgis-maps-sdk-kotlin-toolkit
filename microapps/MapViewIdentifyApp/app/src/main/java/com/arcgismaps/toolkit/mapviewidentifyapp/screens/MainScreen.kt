@@ -53,6 +53,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.toolkit.geocompose.MapView
 import com.arcgismaps.toolkit.mapviewidentifyapp.R
 
+private const val DETAILS_HEIGHT = 200.dp
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
@@ -114,7 +116,7 @@ private fun IdentifyDetails(
         Modifier
             .fillMaxWidth()
             // ensures the bottom sheet doesn't cover the whole screen
-            .heightIn(max = 200.dp),
+            .heightIn(max = DETAILS_HEIGHT),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
