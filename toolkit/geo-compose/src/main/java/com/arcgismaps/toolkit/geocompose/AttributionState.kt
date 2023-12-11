@@ -23,7 +23,7 @@ import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
 /**
  * State holder for attribution bar related properties/events on the [com.arcgismaps.toolkit.geocompose.MapView].
  *
- * @since 200.3.0
+ * @since 200.4.0
  */
 @Stable
 public data class AttributionState(

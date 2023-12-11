@@ -29,16 +29,16 @@ import com.arcgismaps.mapping.view.ScreenCoordinate
 /**
  * Used to perform operations on a composable MapView or SceneView.
  *
- * @since 200.3.0
+ * @since 200.4.0
  */
-public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
+public sealed class GeoViewProxy(className: String) {
 
     /**
-     * The [GeoView] that this GeoViewProxy will operate on. This should
+     * The view-based [GeoView] that this GeoViewProxy will operate on. This should
      * be initialized by the composable component when it enters the composition and set to null when
      * it is disposed by calling [setGeoView].
      *
-     * @since 200.3.0
+     * @since 200.4.0
      */
     private var geoView: GeoView? = null
 
@@ -46,14 +46,14 @@ public sealed class GeoViewProxy(private val classNameForErrorMessage: String) {
      * Sets the [geoView] parameter on this operator. This should be called by the composable component
      * when it enters the composition and set to null when it is disposed.
      *
-     * @since 200.3.0
+     * @since 200.4.0
      */
     protected fun setGeoView(geoView: GeoView?) {
         this.geoView = geoView
     }
 
     private val nullGeoViewErrorMessage: String =
-        "$classNameForErrorMessage must be part of the composition when this member is called."
+        "$className must be part of the composition when this member is called."
 
     /**
      * Initiate an Identify operation on the specified [graphicsOverlay].
