@@ -32,9 +32,11 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.geometry.Polygon
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.TimeExtent
+import com.arcgismaps.mapping.ViewpointType
 import com.arcgismaps.mapping.view.BackgroundGrid
 import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
@@ -63,8 +65,8 @@ import kotlinx.coroutines.launch
  * @param modifier Modifier to be applied to the composable MapView
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable MapView
  * @param viewpointOperation a [MapViewpointOperation] that changes this MapView to a new viewpoint
- * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
  * @param viewpointChangedState specifies lambdas invoked when the viewpoint of the composable MapView has changed
+ * @param onVisibleAreaChanged lambda invoked when the visible area of the composable MapView has changed
  * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable MapView
  * @param locationDisplay the [LocationDisplay] used by the composable MapView
  * @param geometryEditor the [GeometryEditor] used by the composable MapView to create and edit geometries by user interaction.
@@ -102,8 +104,8 @@ public fun MapView(
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap? = null,
     viewpointOperation: MapViewpointOperation? = null,
-    onViewpointChanged: (() -> Unit)? = null,
     viewpointChangedState: ViewpointChangedState? = null,
+    onVisibleAreaChanged: ((Polygon) -> Unit)? = null,
     graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     geometryEditor: GeometryEditor? = null,
@@ -189,7 +191,7 @@ public fun MapView(
     MapViewEventHandler(
         mapView,
         onTimeExtentChanged,
-        onViewpointChanged,
+        onVisibleAreaChanged,
         onNavigationChanged,
         onMapRotationChanged,
         onMapScaleChanged,
@@ -237,8 +239,10 @@ private fun ViewpointChangedStateHandler(
     viewpointChangedState: ViewpointChangedState?
 ) {
     LaunchedEffect(viewpointChangedState) {
-        mapView.viewpointChanged.collect {
-            viewpointChangedState?.invoke(mapView)
+        viewpointChangedState?.let {
+            mapView.viewpointChanged.collect {
+                viewpointChangedState.invoke(mapView)
+            }
         }
     }
 }
@@ -273,7 +277,7 @@ private fun AttributionStateHandler(mapView: MapView, attributionState: Attribut
 private fun MapViewEventHandler(
     mapView: MapView,
     onTimeExtentChanged: ((TimeExtent?) -> Unit)?,
-    onViewpointChanged: (() -> Unit)?,
+    onVisibleAreaChanged: ((Polygon) -> Unit)?,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)?,
     onMapRotationChanged: ((Double) -> Unit)?,
     onMapScaleChanged: ((Double) -> Unit)?,
@@ -291,7 +295,7 @@ private fun MapViewEventHandler(
     onDrawStatusChanged: ((DrawStatus) -> Unit)?
 ) {
     val currentTimeExtentChanged by rememberUpdatedState(onTimeExtentChanged)
-    val currentViewPointChanged by rememberUpdatedState(onViewpointChanged)
+    val currentVisibleAreaChanged by rememberUpdatedState(onVisibleAreaChanged)
     val currentOnNavigationChanged by rememberUpdatedState(onNavigationChanged)
     val currentOnMapRotationChanged by rememberUpdatedState(onMapRotationChanged)
     val currentOnMapScaleChanged by rememberUpdatedState(onMapScaleChanged)
@@ -316,7 +320,10 @@ private fun MapViewEventHandler(
         }
         launch {
             mapView.viewpointChanged.collect {
-                currentViewPointChanged?.invoke()
+                currentVisibleAreaChanged?.invoke(
+                    mapView.visibleArea
+                        ?: throw IllegalStateException("Mapview visible area should not be null")
+                )
             }
         }
         launch {
@@ -469,4 +476,24 @@ public inline fun rememberGraphicsOverlayCollection(
     crossinline init: GraphicsOverlayCollection.() -> Unit = {}
 ): GraphicsOverlayCollection = remember(key) {
     GraphicsOverlayCollection().apply(init)
+}
+
+/**
+ * Provides a invoke extension on [ViewpointChangedState] which calls the [ViewpointChangedState.onViewpointChangedForCenterAndScale]
+ * and [ViewpointChangedState.onViewpointChangedForBoundingGeometry] lambdas with the current viewpoints
+ * on mapview of the corresponding viewpoint types.
+ *
+ * @since 200.4.0
+ */
+private fun ViewpointChangedState.invoke(mapView: MapView) {
+    onViewpointChangedForCenterAndScale?.let { lambda ->
+        mapView.getCurrentViewpoint(ViewpointType.CenterAndScale)?.let {
+            lambda.invoke(it)
+        }
+    }
+    onViewpointChangedForBoundingGeometry?.let { lambda ->
+        mapView.getCurrentViewpoint(ViewpointType.BoundingGeometry)?.let {
+            lambda.invoke(it)
+        }
+    }
 }

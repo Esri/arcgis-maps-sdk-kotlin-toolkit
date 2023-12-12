@@ -24,8 +24,16 @@ import com.arcgismaps.mapping.view.MapView
 import androidx.compose.runtime.remember
 
 /**
- * State holder for a lambdas invoked when the viewpoint of a composable [MapView] has changed.
+ * State holder for lambdas invoked when the viewpoint of a composable [MapView] has changed.
+ * Depending on the [ViewpointType] you need to be notified about, you can create a ViewpointChangedState
+ * instance to be notified about viewpoint changes for viewpoints of type [ViewpointType.CenterAndScale]
+ * or [ViewpointType.BoundingGeometry] or both.
+ * Use the provided factory functions [rememberViewpointChangedStateForCenterAndScale], [rememberViewpointChangedStateForBoundingGeometry]
+ * or [rememberViewpointChangedState] to create the appropriate ViewpointChangedState.
  *
+ * @see rememberViewpointChangedStateForCenterAndScale
+ * @see rememberViewpointChangedStateForBoundingGeometry
+ * @see rememberViewpointChangedState
  * @since 200.4.0
  */
 @Stable
@@ -72,7 +80,7 @@ public fun rememberViewpointChangedStateForBoundingGeometry(
 }
 
 /**
- * Create and [remember] a [ViewpointChangedState] with the lambdas that returns the viewpoint of the
+ * Create and [remember] a [ViewpointChangedState] with the lambdas that return the viewpoint of the
  * type [ViewpointType.CenterAndScale] and [ViewpointType.BoundingGeometry].
  *
  * @param key invalidates the remembered ViewpointChangedState if different from the previous composition
@@ -89,17 +97,4 @@ public fun rememberViewpointChangedState(
         onViewpointChangedForCenterAndScale,
         onViewpointChangedForBoundingGeometry
     )
-}
-
-internal fun ViewpointChangedState.invoke(mapView: MapView) {
-    onViewpointChangedForCenterAndScale?.let { lambda ->
-        mapView.getCurrentViewpoint(ViewpointType.CenterAndScale)?.let {
-            lambda.invoke(it)
-        }
-    }
-    onViewpointChangedForBoundingGeometry?.let { lambda ->
-        mapView.getCurrentViewpoint(ViewpointType.BoundingGeometry)?.let {
-            lambda.invoke(it)
-        }
-    }
 }
