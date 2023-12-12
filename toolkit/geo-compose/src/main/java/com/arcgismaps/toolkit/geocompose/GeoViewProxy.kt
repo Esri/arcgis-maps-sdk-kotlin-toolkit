@@ -17,6 +17,7 @@
 
 package com.arcgismaps.toolkit.geocompose
 
+import android.graphics.drawable.BitmapDrawable
 import androidx.compose.ui.unit.Dp
 import com.arcgismaps.mapping.layers.Layer
 import com.arcgismaps.mapping.view.GeoView
@@ -53,6 +54,15 @@ public sealed class GeoViewProxy(className: String) {
 
     private val nullGeoViewErrorMessage: String =
         "$className must be part of the composition when this member is called."
+
+    /**
+     * Exports the current view to the provided buffer.
+     *
+     * @return A [Result] containing an [BitmapDrawable], or failure
+     * @since 200.4.0
+     */
+    public suspend fun exportImage(): Result<BitmapDrawable> =
+        geoView?.exportImage() ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
 
     /**
      * Initiate an Identify operation on the specified [graphicsOverlay].
