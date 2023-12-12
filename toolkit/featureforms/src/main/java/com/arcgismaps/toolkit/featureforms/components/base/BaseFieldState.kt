@@ -48,7 +48,7 @@ internal open class FieldProperties<T>(
  * @param onEditValue a callback to invoke when the user edits result in a change of value. This
  * is called on [BaseFieldState.onValueChanged].
  */
-internal open class BaseFieldState<T>(
+public open class BaseFieldState<T> internal constructor(
     properties: FieldProperties<T>,
     initialValue: T = properties.value.value,
     scope: CoroutineScope,
@@ -57,48 +57,48 @@ internal open class BaseFieldState<T>(
     /**
      * Title for the field.
      */
-    open val label: String = properties.label
+    public open val label: String = properties.label
 
     /**
      * Placeholder hint for the field.
      */
-    open val placeholder: String = properties.placeholder
+    public open val placeholder: String = properties.placeholder
     
     /**
      * Description text for the field.
      */
-    val description: String = properties.description
+    public val description: String = properties.description
 
     // a state flow to handle user input changes
-    protected val _value = MutableStateFlow(initialValue)
+    protected val _value : MutableStateFlow<T> = MutableStateFlow(initialValue)
 
     /**
      * Current value state for the field.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    val value: StateFlow<T> = flowOf(_value, properties.value.drop(1))
+    public val value: StateFlow<T> = flowOf(_value, properties.value.drop(1))
         .flattenMerge()
         .stateIn(scope, SharingStarted.Eagerly, initialValue)
 
     /**
      * Property that indicates if the field is editable.
      */
-    val isEditable: StateFlow<Boolean> = properties.editable
+    public val isEditable: StateFlow<Boolean> = properties.editable
 
     /**
      * Property that indicates if the field is required.
      */
-    val isRequired: StateFlow<Boolean> = properties.required
+    public val isRequired: StateFlow<Boolean> = properties.required
 
     /**
      * Property that indicates if the field is visible.
      */
-    val isVisible: StateFlow<Boolean> = properties.visible
+    public val isVisible: StateFlow<Boolean> = properties.visible
    
     /**
      * Callback to update the current value of the FormTextFieldState to the given [input].
      */
-    open fun onValueChanged(input: T) {
+    public open fun onValueChanged(input: T) {
         onEditValue(input)
         _value.value = input
     }

@@ -31,23 +31,23 @@ internal class GroupProperties(
     val expanded: Boolean
 )
 
-internal class BaseGroupState(
+public class BaseGroupState internal constructor(
     properties: GroupProperties,
-    val fieldStates: Map<Int, BaseFieldState<*>>
+    public val fieldStates: Map<Int, BaseFieldState<*>>
 ) {
-    val label = properties.label
+    public val label : String = properties.label
 
-    val description = properties.description
+    public val description : String = properties.description
 
     private val _expanded = mutableStateOf(properties.expanded)
-    val expanded : State<Boolean> = _expanded
+    public val expanded : State<Boolean> = _expanded
 
-    fun setExpanded(value : Boolean) {
+    public fun setExpanded(value : Boolean) {
         _expanded.value = value
     }
 
-    companion object {
-        fun Saver(fieldStates: Map<Int, BaseFieldState<*>>): Saver<BaseGroupState, Any> = listSaver(
+    public companion object {
+        public fun Saver(fieldStates: Map<Int, BaseFieldState<*>>): Saver<BaseGroupState, Any> = listSaver(
             save = {
                 listOf(it.label, it.description, it.expanded.value)
             },

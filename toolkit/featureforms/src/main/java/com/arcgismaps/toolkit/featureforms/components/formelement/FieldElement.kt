@@ -32,7 +32,7 @@ import com.arcgismaps.toolkit.featureforms.components.text.FormTextField
 import com.arcgismaps.toolkit.featureforms.components.text.FormTextFieldState
 
 @Composable
-internal fun <T> FieldElement(
+public fun <T> FieldElement(
     state: BaseFieldState<T>,
     onDialogRequest: () -> Unit = {}
 ) {

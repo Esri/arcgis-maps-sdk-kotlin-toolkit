@@ -48,7 +48,7 @@ import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.BaseGroupState
 
 @Composable
-internal fun GroupElement(
+public fun GroupElement(
     groupElement: GroupFormElement,
     state: BaseGroupState,
     modifier: Modifier = Modifier,

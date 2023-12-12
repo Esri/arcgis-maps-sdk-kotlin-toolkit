@@ -7,12 +7,21 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,9 +46,14 @@ import androidx.window.core.layout.WindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
 import com.arcgismaps.data.Feature
 import com.arcgismaps.data.ServiceFeatureTable
+import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.toolkit.composablemap.ComposableMap
 import com.arcgismaps.toolkit.featureforms.EditingTransactionState
 import com.arcgismaps.toolkit.featureforms.FeatureForm
+import com.arcgismaps.toolkit.featureforms.components.formelement.FieldElement
+import com.arcgismaps.toolkit.featureforms.components.formelement.GroupElement
+import com.arcgismaps.toolkit.featureforms.id
 import com.arcgismaps.toolkit.featureformsapp.R
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.BottomSheetMaxWidth
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetExpansionHeight
@@ -147,10 +161,51 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                     sheetWidth = with(LocalDensity.current) { layoutWidth.toDp() }
                 ) {
                     // set bottom sheet content to the FeatureForm
+//                    FeatureForm(
+//                        featureFormState = mapViewModel,
+//                        modifier = Modifier.fillMaxSize()
+//                    )
                     FeatureForm(
                         featureFormState = mapViewModel,
                         modifier = Modifier.fillMaxSize()
-                    )
+                    ) { states ->
+                        Divider()
+                        LazyVerticalStaggeredGrid(columns = StaggeredGridCells.Fixed(2)) {
+                            items(elements) { formElement ->
+                                when (formElement) {
+                                    is FieldFormElement -> {
+                                        val state = states.fieldStates[formElement.id]
+                                        if (state != null) {
+                                            FieldElement(
+                                                state = state,
+                                                onDialogRequest = {}
+                                            )
+                                        }
+                                    }
+
+                                    is GroupFormElement -> {
+                                        val state = states.groupStates[formElement.id]
+                                        if (state != null) {
+                                            GroupElement(
+                                                formElement,
+                                                state,
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(
+                                                        start = 15.dp,
+                                                        end = 15.dp,
+                                                        top = 10.dp,
+                                                        bottom = 10.dp
+                                                    ),
+                                                onDialogRequest = { baseFieldState, key ->
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

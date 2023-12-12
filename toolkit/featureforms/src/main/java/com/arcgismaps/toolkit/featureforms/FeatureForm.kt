@@ -30,6 +30,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -67,6 +68,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import java.util.Objects
 
+public data class FormElementStates(
+    val fieldStates: Map<Int, BaseFieldState<*>>,
+    val groupStates: Map<Int, BaseGroupState>
+)
+
 /**
  * A composable Form toolkit component that enables users to edit field values of features in a
  * layer using forms that have been configured externally (using either in the the Web Map Viewer
@@ -87,6 +93,40 @@ public fun FeatureForm(
             initialEvaluation
         }
         FeatureFormContent(form = it, modifier = modifier)
+    } ?: run {
+        NoDataToDisplay(modifier)
+    }
+
+    LaunchedEffect(featureForm) {
+        // ensure expressions are evaluated before state objects are created.
+        featureForm?.evaluateExpressions()
+        // add an artificial delay of 300ms to avoid the slight flicker if the
+        // expressions are evaluated quickly
+        delay(300)
+        initialEvaluation = true
+    }
+}
+
+@Composable
+public fun FeatureForm(
+    featureFormState: FeatureFormState,
+    modifier: Modifier,
+    content: @Composable FeatureForm.(FormElementStates) -> Unit
+) {
+    val featureForm by featureFormState.featureForm.collectAsState()
+    var initialEvaluation by rememberSaveable(featureForm) { mutableStateOf(false) }
+    val contentProvider by rememberUpdatedState(content)
+
+    featureForm?.let {
+        InitializingExpressions(modifier) {
+            initialEvaluation
+        }
+        FeatureFormContent(
+            form = it,
+            modifier = modifier
+        ) { states ->
+            contentProvider(it, states)
+        }
     } ?: run {
         NoDataToDisplay(modifier)
     }
@@ -153,7 +193,8 @@ internal fun NoDataToDisplay(modifier: Modifier = Modifier) {
 @Composable
 internal fun FeatureFormContent(
     form: FeatureForm,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    content: (@Composable (FormElementStates) -> Unit)? = null
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -171,16 +212,20 @@ internal fun FeatureFormContent(
     var dialogType: DialogType by rememberSaveable {
         mutableStateOf(DialogType.NoDialog)
     }
-    FeatureFormBody(
-        form = form,
-        fieldStateMap = fieldStateMap,
-        groupStateMap = groupStateMap,
-        modifier = modifier
-    ) { state, id ->
-        if (state is DateTimeFieldState) {
-            dialogType = DialogType.DatePickerDialog(id)
-        } else if (state is CodedValueFieldState) {
-            dialogType = DialogType.ComboBoxDialog(id)
+    if (content != null) {
+        content(FormElementStates(fieldStates = fieldStateMap, groupStates = groupStateMap))
+    } else {
+        FeatureFormBody(
+            form = form,
+            fieldStateMap = fieldStateMap,
+            groupStateMap = groupStateMap,
+            modifier = modifier
+        ) { state, id ->
+            if (state is DateTimeFieldState) {
+                dialogType = DialogType.DatePickerDialog(id)
+            } else if (state is CodedValueFieldState) {
+                dialogType = DialogType.ComboBoxDialog(id)
+            }
         }
     }
     FeatureFormDialog(
@@ -292,7 +337,7 @@ internal fun rememberFieldStates(
     scope: CoroutineScope
 ): Map<Int, BaseFieldState<*>> {
     val stateMap = mutableMapOf<Int, BaseFieldState<*>>()
-    elements.forEach {  element ->
+    elements.forEach { element ->
         if (element is FieldFormElement) {
             val state = when (element.input) {
                 is TextBoxFormInput, is TextAreaFormInput -> {
@@ -386,7 +431,7 @@ private fun NoDataPreview() {
 /**
  * Unique id for each form element.
  */
-internal val FieldFormElement.id: Int
+public val FieldFormElement.id: Int
     get() {
         return Objects.hash(fieldName, label, description, hint)
     }
@@ -394,7 +439,7 @@ internal val FieldFormElement.id: Int
 /**
  * Unique id for each form element.
  */
-internal val GroupFormElement.id: Int
+public val GroupFormElement.id: Int
     get() {
         return Objects.hash(
             formElements.forEach { if (it is FieldFormElement) it.id },
