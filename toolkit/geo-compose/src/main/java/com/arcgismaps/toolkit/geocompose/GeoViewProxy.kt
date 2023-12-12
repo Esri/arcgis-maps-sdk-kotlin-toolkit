@@ -56,7 +56,7 @@ public sealed class GeoViewProxy(className: String) {
         "$className must be part of the composition when this member is called."
 
     /**
-     * Exports the current view to the provided buffer.
+     * Exports an image snapshot of the current composable MapView or SceneView.
      *
      * @return A [Result] containing an [BitmapDrawable], or failure
      * @since 200.4.0
