@@ -58,7 +58,7 @@ public sealed class GeoViewProxy(className: String) {
     /**
      * Exports an image snapshot of the current composable MapView or SceneView.
      *
-     * @return A [Result] containing an [BitmapDrawable], or failure
+     * @return A [Result] containing a [BitmapDrawable], or failure
      * @since 200.4.0
      */
     public suspend fun exportImage(): Result<BitmapDrawable> =
