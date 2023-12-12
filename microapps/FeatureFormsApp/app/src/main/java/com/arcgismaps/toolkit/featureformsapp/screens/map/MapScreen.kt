@@ -178,7 +178,9 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                                         if (state != null) {
                                             FieldElement(
                                                 state = state,
-                                                onDialogRequest = {}
+                                                onDialogRequest = {
+                                                    // TODO: add dialog support
+                                                }
                                             )
                                         }
                                     }
@@ -198,6 +200,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                                                         bottom = 10.dp
                                                     ),
                                                 onDialogRequest = { baseFieldState, key ->
+                                                    // TODO: add dialog support
                                                 }
                                             )
                                         }
