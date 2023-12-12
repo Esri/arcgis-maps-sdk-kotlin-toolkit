@@ -28,6 +28,7 @@ import com.arcgismaps.mapping.view.PanChangeEvent
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
+import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -125,6 +126,9 @@ public interface MapEvents {
      * Sets the given [map] on the [ComposableMap]
      */
     public fun setMap(map: ArcGISMap)
+
+    // Don't know if it makes sense to have this on a MapEvents interface, but setMap is here...
+    public fun setGeometryEditor(geometryEditor: GeometryEditor?)
 }
 
 /**
@@ -136,6 +140,8 @@ public interface MapState : MapEvents {
      * The model for [ComposableMap]
      */
     public val map: StateFlow<ArcGISMap?>
+
+    public val geometryEditor: StateFlow<GeometryEditor?>
 
     /**
      * Insets to apply to the Box which contains the [ComposableMap]
@@ -180,6 +186,9 @@ public class MapStateImpl(
     private val _mapRotation: MutableDuplexFlow<Double> = MutableDuplexFlow(0.0)
     override val mapRotation: DuplexFlow<Double> = _mapRotation
 
+    private val _geometryEditor = MutableStateFlow<GeometryEditor?>(null)
+    override val geometryEditor: StateFlow<GeometryEditor?> = _geometryEditor.asStateFlow()
+
     override fun setViewpoint(viewpoint: Viewpoint) {
         // set the property value using the WRITE flow type
         _viewpoint.setValue(viewpoint, DuplexFlow.Type.Write)
@@ -206,5 +215,9 @@ public class MapStateImpl(
 
     override fun setMap(map: ArcGISMap) {
         _map.value = map
+    }
+
+    override fun setGeometryEditor(geometryEditor: GeometryEditor?) {
+        _geometryEditor.value = geometryEditor
     }
 }

@@ -128,6 +128,11 @@ public fun ComposableMap(
                 }
             }
         }
+        launch {
+            mapState.geometryEditor.collect {
+                mapView.geometryEditor = it
+            }
+        }
     }
     
     DisposableEffect(Unit) {
