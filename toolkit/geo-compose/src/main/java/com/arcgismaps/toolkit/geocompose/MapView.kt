@@ -64,6 +64,7 @@ import kotlinx.coroutines.launch
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable MapView
  * @param viewpointOperation a [MapViewpointOperation] that changes this MapView to a new viewpoint
  * @param onViewpointChanged lambda invoked when the viewpoint of the composable MapView has changed
+ * @param viewpointChangedState specifies lambdas invoked when the viewpoint of the composable MapView has changed
  * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable MapView
  * @param locationDisplay the [LocationDisplay] used by the composable MapView
  * @param geometryEditor the [GeometryEditor] used by the composable MapView to create and edit geometries by user interaction.
@@ -102,6 +103,7 @@ public fun MapView(
     arcGISMap: ArcGISMap? = null,
     viewpointOperation: MapViewpointOperation? = null,
     onViewpointChanged: (() -> Unit)? = null,
+    viewpointChangedState: ViewpointChangedState? = null,
     graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     geometryEditor: GeometryEditor? = null,
@@ -182,6 +184,7 @@ public fun MapView(
     }
 
     AttributionStateHandler(mapView, attributionState)
+    ViewpointChangedStateHandler(mapView, viewpointChangedState)
 
     MapViewEventHandler(
         mapView,
@@ -220,6 +223,23 @@ private fun ViewpointUpdater(
 ) {
     LaunchedEffect(viewpointOperation) {
         viewpointOperation?.execute(mapView)
+    }
+}
+
+/**
+ * Sets up the ViewpointChangedState's property and event.
+ *
+ * @since 200.4.0
+ */
+@Composable
+private fun ViewpointChangedStateHandler(
+    mapView: MapView,
+    viewpointChangedState: ViewpointChangedState?
+) {
+    LaunchedEffect(viewpointChangedState) {
+        mapView.viewpointChanged.collect {
+            viewpointChangedState?.invoke(mapView)
+        }
     }
 }
 
