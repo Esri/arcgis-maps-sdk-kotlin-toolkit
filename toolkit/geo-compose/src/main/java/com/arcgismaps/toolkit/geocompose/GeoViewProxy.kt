@@ -17,6 +17,7 @@
 
 package com.arcgismaps.toolkit.geocompose
 
+import android.graphics.drawable.BitmapDrawable
 import androidx.compose.ui.unit.Dp
 import com.arcgismaps.mapping.layers.Layer
 import com.arcgismaps.mapping.view.GeoView
@@ -61,6 +62,15 @@ public sealed class GeoViewProxy(className: String) {
      */
     public val isWrapAroundEnabled: Boolean?
         get() = geoView?.isWrapAroundEnabled
+
+    /**
+     * Exports an image snapshot of the current composable MapView or SceneView.
+     *
+     * @return A [Result] containing a [BitmapDrawable], or failure
+     * @since 200.4.0
+     */
+    public suspend fun exportImage(): Result<BitmapDrawable> =
+        geoView?.exportImage() ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
 
     /**
      * Initiate an Identify operation on the specified [graphicsOverlay].

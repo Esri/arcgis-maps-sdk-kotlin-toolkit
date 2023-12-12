@@ -82,6 +82,7 @@ import kotlinx.coroutines.launch
  * @param onNavigationChanged lambda invoked when the navigation status of the composable MapView has changed
  * @param onMapRotationChanged lambda invoked when the rotation of this composable MapView has changed
  * @param onMapScaleChanged lambda invoked when the scale of this composable MapView has changed
+ * @param onUnitsPerDipChanged lambda invoked when the Units per DIP of this composable MapView has changed
  * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the composable MapView has changed
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable MapView
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable MapView
@@ -119,6 +120,7 @@ public fun MapView(
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
     onMapRotationChanged: ((Double) -> Unit)? = null,
     onMapScaleChanged: ((Double) -> Unit)? = null,
+    onUnitsPerDipChanged: ((Double) -> Unit)? = null,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
@@ -130,7 +132,7 @@ public fun MapView(
     onLongPress: ((LongPressEvent) -> Unit)? = null,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
-    onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
+    onDrawStatusChanged: ((DrawStatus) -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
@@ -190,6 +192,7 @@ public fun MapView(
         onNavigationChanged,
         onMapRotationChanged,
         onMapScaleChanged,
+        onUnitsPerDipChanged,
         onSpatialReferenceChanged,
         onInteractingChanged,
         onRotate,
@@ -257,6 +260,7 @@ private fun MapViewEventHandler(
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)?,
     onMapRotationChanged: ((Double) -> Unit)?,
     onMapScaleChanged: ((Double) -> Unit)?,
+    onUnitsPerDipChanged: ((Double) -> Unit)?,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)?,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)?,
     onRotate: ((RotationChangeEvent) -> Unit)?,
@@ -275,6 +279,7 @@ private fun MapViewEventHandler(
     val currentOnNavigationChanged by rememberUpdatedState(onNavigationChanged)
     val currentOnMapRotationChanged by rememberUpdatedState(onMapRotationChanged)
     val currentOnMapScaleChanged by rememberUpdatedState(onMapScaleChanged)
+    val currentOnUnitsPerDipChanged by rememberUpdatedState(onUnitsPerDipChanged)
     val currentOnSpatialReferenceChanged by rememberUpdatedState(onSpatialReferenceChanged)
     val currentOnInteractingChanged by rememberUpdatedState(onInteractingChanged)
     val currentOnRotate by rememberUpdatedState(onRotate)
@@ -307,6 +312,7 @@ private fun MapViewEventHandler(
         launch {
             mapView.mapScale.collect { mapScale ->
                 currentOnMapScaleChanged?.invoke(mapScale)
+                currentOnUnitsPerDipChanged?.invoke(mapView.unitsPerDip)
             }
         }
         launch {
