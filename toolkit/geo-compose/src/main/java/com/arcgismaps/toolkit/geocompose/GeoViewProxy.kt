@@ -57,6 +57,7 @@ public sealed class GeoViewProxy(className: String) {
 
     /**
      * True if continuous panning across the international date line is enabled in the GeoView, false otherwise.
+     * A null value represents that it is currently undetermined.
      *
      * @since 200.4.0
      */
