@@ -56,6 +56,15 @@ public sealed class GeoViewProxy(className: String) {
         "$className must be part of the composition when this member is called."
 
     /**
+     * True if continuous panning across the international date line is enabled in the GeoView, false otherwise.
+     * A null value represents that it is currently undetermined.
+     *
+     * @since 200.4.0
+     */
+    public val isWrapAroundEnabled: Boolean?
+        get() = geoView?.isWrapAroundEnabled
+
+    /**
      * Exports an image snapshot of the current composable MapView or SceneView.
      *
      * @return A [Result] containing a [BitmapDrawable], or failure
