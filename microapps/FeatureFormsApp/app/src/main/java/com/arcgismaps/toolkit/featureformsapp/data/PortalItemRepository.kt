@@ -1,7 +1,6 @@
 package com.arcgismaps.toolkit.featureformsapp.data
 
 import android.graphics.Bitmap
-import android.os.FileUtils
 import android.util.Log
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.mapping.PortalItem
@@ -24,11 +23,10 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
-import kotlin.system.measureTimeMillis
 
 data class PortalItemData(
     val portalItem: PortalItem,
-    val thumbnailUri: String
+    var thumbnailUri: String
 )
 
 /**
@@ -37,7 +35,7 @@ data class PortalItemData(
  * mechanism.
  */
 class PortalItemRepository(
-    private val scope: CoroutineScope,
+    scope: CoroutineScope,
     private val dispatcher: CoroutineDispatcher,
     private val remoteDataSource: ItemRemoteDataSource,
     private val itemCacheDao: ItemCacheDao,
@@ -66,6 +64,8 @@ class PortalItemRepository(
         }.flowOn(dispatcher)
 
     init {
+        // create the thumbnails directory if it does not exist
+        // and save its absolute path
         scope.launch(Dispatchers.IO) {
             val thumbsDir = File("$filesDir/thumbs")
             if (!thumbsDir.exists()) thumbsDir.mkdirs()
@@ -92,24 +92,19 @@ class PortalItemRepository(
         mutex.withLock {
             // get local items
             val localItems = getListOfMaps().map { ItemData(it) }
-            val remoteItems: List<ItemData>
             // get network items
-            val fetchTime = measureTimeMillis {
-                remoteItems = remoteDataSource.fetchItemData(portalUri, connection)
-            }
-            Log.e("TAG", "refresh: got remote items $fetchTime")
+            val remoteItems = remoteDataSource.fetchItemData(portalUri, connection)
             // load the portal items and add them to cache
-            val cacheTime = measureTimeMillis {
-                // call your function here
-                loadAndCachePortalItems(localItems + remoteItems)
-            }
-            Log.e("TAG", "refresh: caching complete in $cacheTime")
+            loadAndCachePortalItems(localItems + remoteItems)
         }
     }
 
-    suspend fun deleteAll() = withContext(dispatcher) {
+    /**
+     * Deletes all the portal items from the local cache storage.
+     */
+    suspend fun deleteAll() = withContext(Dispatchers.IO) {
         mutex.withLock {
-            deleteAllCacheEntries()
+            itemCacheDao.deleteAll()
             portalItems.clear()
         }
     }
@@ -125,52 +120,50 @@ class PortalItemRepository(
      * Loads the list of [items] into loaded portal items and adds them to the Cache.
      */
     private suspend fun loadAndCachePortalItems(items: List<ItemData>) = withContext(dispatcher) {
-        val portalItems = items.map { PortalItem(it.url) }
-        portalItems.map { portalItem ->
+        // create PortalItems from the urls
+        val portalItemData = items.map {
+            PortalItemData(PortalItem(it.url), "")
+        }
+        portalItemData.map { data ->
+            // load each portal item and its thumbnail in a new coroutine
             launch {
-                portalItem.load().onFailure {
+                data.portalItem.load().onFailure {
                     Log.e("PortalItemRepository", "loadAndCachePortalItems: $it")
                 }
-                portalItem.thumbnail?.let { thumbnail ->
+                data.portalItem.thumbnail?.let { thumbnail ->
                     thumbnail.load()
                     thumbnail.image?.bitmap?.let { bitmap ->
-                        createThumbnail(portalItem.itemId, bitmap)
+                        data.thumbnailUri = createThumbnail(data.portalItem.itemId, bitmap)
                     }
                 }
             }
+            // suspend till all the portal loading jobs are complete
         }.joinAll()
-
-        val entries = portalItems.mapNotNull { portalItem ->
-            // ignore if the portal items fails to load
-            if (portalItem.loadStatus.value is LoadStatus.FailedToLoad || portalItem.loadStatus.value is LoadStatus.NotLoaded) {
+        // create entries to be inserted into the local cache storage.
+        val entries = portalItemData.mapNotNull { data ->
+            // ignore if the portal item fails to load
+            if (data.portalItem.loadStatus.value is LoadStatus.FailedToLoad) {
                 null
             } else {
                 ItemCacheEntry(
-                    portalItem.itemId,
-                    portalItem.toJson(),
-                    getThumbnailUri(portalItem.itemId),
-                    portalItem.portal.url
+                    itemId = data.portalItem.itemId,
+                    json = data.portalItem.toJson(),
+                    thumbnailUri = data.thumbnailUri,
+                    portalUrl = data.portalItem.portal.url
                 )
             }
         }
-        // add all the items into the local cache storage
-        createCacheEntries(entries)
+        // insert all the items into the local cache storage
+        insertCacheEntries(entries)
     }
 
     /**
      * Deletes and inserts the list of [entries] using the [ItemCacheDao].
      */
-    private suspend fun createCacheEntries(entries: List<ItemCacheEntry>) =
+    private suspend fun insertCacheEntries(entries: List<ItemCacheEntry>) =
         withContext(dispatcher) {
             itemCacheDao.deleteAndInsert(entries)
         }
-
-    /**
-     * Deletes all entries in the database using the [ItemCacheDao].
-     */
-    private suspend fun deleteAllCacheEntries() = withContext(Dispatchers.IO) {
-        itemCacheDao.deleteAll()
-    }
 
     /**
      * Creates a JPEG thumbnail using the [bitmap] with [itemId].jpg filename in the local files
@@ -185,17 +178,6 @@ class PortalItemRepository(
             }
             file.absolutePath
         }
-
-    /**
-     * Returns the thumbnail file path for a portal item with the [itemId]. An empty string
-     * is returned if a thumbnail does not exist.
-     */
-    private suspend fun getThumbnailUri(itemId: String): String = withContext(Dispatchers.IO) {
-        val file = File("${thumbsDirPath}/${itemId}.jpg")
-        return@withContext if (file.exists()) {
-            file.absolutePath
-        } else ""
-    }
 
     operator fun invoke(itemId: String): PortalItem? = portalItems[itemId]
 }
