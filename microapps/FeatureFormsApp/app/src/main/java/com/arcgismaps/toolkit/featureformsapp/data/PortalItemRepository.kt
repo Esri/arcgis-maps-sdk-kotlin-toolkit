@@ -62,26 +62,26 @@ class PortalItemRepository(
     fun observe(): Flow<List<PortalItemData>> = portalItemsFlow
 
     /**
-     * Refreshes the underlying data source to fetch the latest content. [forceUpdate] when set to
-     * true, will clear the existing cache.
+     * Refreshes the underlying data source to fetch the latest content.
      *
      * This operation is suspending and will wait until the underlying data source has finished
      * AND the repository has finished loading the portal items.
      */
     suspend fun refresh(
         portalUri: String,
-        connection: Portal.Connection,
-        forceUpdate: Boolean = false
+        connection: Portal.Connection
     ) = withContext(dispatcher) {
         mutex.withLock {
-            if (forceUpdate) deleteAllCacheEntries()
             portalItems.clear()
             // get local items
             val localItems = getListOfMaps().map { ItemData(it) }
             // get network items
+            Log.e("TAG", "refresh: started remote items load", )
             val remoteItems = remoteDataSource.fetchItemData(portalUri, connection)
+            Log.e("TAG", "refresh: got remote items", )
             // load the portal items and add them to cache
             loadAndCachePortalItems(localItems + remoteItems)
+            Log.e("TAG", "refresh: caching complete", )
         }
     }
 
@@ -113,7 +113,7 @@ class PortalItemRepository(
                 null
             } else {
                 val thumbnailUri = portalItem.thumbnail?.let { thumbnail ->
-                    thumbnail.load()
+                    //thumbnail.load()
                     thumbnail.image?.bitmap?.let { bitmap ->
                         createThumbnail(
                             portalItem.itemId,

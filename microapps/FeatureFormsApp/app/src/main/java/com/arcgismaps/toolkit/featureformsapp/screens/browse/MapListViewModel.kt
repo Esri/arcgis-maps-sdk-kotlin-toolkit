@@ -66,7 +66,7 @@ class MapListViewModel @Inject constructor(
             // if the data is empty, refresh it
             // this is used to identify first launch
             if (portalItemRepository.getItemCount() == 0) {
-                refresh(false)
+                refresh()
             }
         }
     }
@@ -80,16 +80,15 @@ class MapListViewModel @Inject constructor(
     }
 
     /**
-     * Refreshes the data. [forceUpdate] clears the local cache.
+     * Refreshes the data.
      */
-    fun refresh(forceUpdate: Boolean) {
+    fun refresh() {
         if (!_isLoading.value) {
             viewModelScope.launch {
                 _isLoading.emit(true)
                 portalItemRepository.refresh(
                     portalSettings.getPortalUrl(),
-                    portalSettings.getPortalConnection(),
-                    forceUpdate
+                    portalSettings.getPortalConnection()
                 )
                 _isLoading.emit(false)
             }

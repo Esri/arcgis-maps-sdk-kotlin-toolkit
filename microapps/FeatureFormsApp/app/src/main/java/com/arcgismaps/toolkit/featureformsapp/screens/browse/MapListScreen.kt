@@ -241,7 +241,7 @@ fun AppSearchBar(
     username: String,
     modifier: Modifier = Modifier,
     onQueryChange: (String) -> Unit = {},
-    onRefresh: (Boolean) -> Unit = {},
+    onRefresh: () -> Unit = {},
     onSignOut: () -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
@@ -322,21 +322,10 @@ fun AppSearchBar(
                             enabled = !isLoading,
                             onClick = {
                                 expanded = false
-                                onRefresh(false)
+                                onRefresh()
                             },
                             leadingIcon = {
                                 Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text(text = "Clear Cache") },
-                            enabled = !isLoading,
-                            onClick = {
-                                expanded = false
-                                onRefresh(true)
-                            },
-                            leadingIcon = {
-                                Icon(imageVector = Icons.Default.Delete, contentDescription = null)
                             }
                         )
                         DropdownMenuItem(
