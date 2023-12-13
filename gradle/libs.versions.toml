@@ -19,7 +19,6 @@ kotlinxSerializationJson = "1.5.1"
 truth = "1.1.4"
 
 [libraries]
-android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidxActivity" }
 androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "androidXBrowser"}
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidxCore" }
