@@ -30,6 +30,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
@@ -67,12 +68,13 @@ class DataModule {
     @Singleton
     @PortalItemRepo
     internal fun providePortalItemRepository(
+        @ApplicationScope scope: CoroutineScope,
         @IoDispatcher dispatcher: CoroutineDispatcher,
         @ItemRemoteSource remoteDataSource: ItemRemoteDataSource,
         @ItemCache itemCacheDao: ItemCacheDao,
         @ApplicationContext context: Context
     ): PortalItemRepository =
-        PortalItemRepository(dispatcher, remoteDataSource, itemCacheDao, context.filesDir.absolutePath)
+        PortalItemRepository(scope, dispatcher, remoteDataSource, itemCacheDao, context.filesDir.absolutePath)
 
     @Singleton
     @Provides

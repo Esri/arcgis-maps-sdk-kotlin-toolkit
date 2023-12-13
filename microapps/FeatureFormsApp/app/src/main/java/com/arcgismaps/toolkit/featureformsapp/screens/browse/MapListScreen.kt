@@ -6,7 +6,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.with
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -32,7 +31,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.Close
@@ -140,7 +138,7 @@ fun MapListScreen(
                                 lastModified = item.portalItem.modified?.format("MMM dd yyyy")
                                     ?: "",
                                 shareType = item.portalItem.access.encoding.uppercase(Locale.getDefault()),
-                                thumbnailUri = item.thumbnailUri.ifEmpty { null },
+                                thumbnailUri = item.thumbnailUri,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(100.dp)
@@ -179,8 +177,8 @@ fun MapListItem(
     title: String,
     lastModified: String,
     shareType: String,
+    thumbnailUri: String,
     modifier: Modifier = Modifier,
-    thumbnailUri: String? = null,
     onClick: () -> Unit = {}
 ) {
     Row(
@@ -190,26 +188,17 @@ fun MapListItem(
     ) {
         Spacer(modifier = Modifier.width(20.dp))
         Box {
-            thumbnailUri?.let {
-                AsyncImage(
-                    model = it,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxHeight(0.8f)
-                        .aspectRatio(16 / 9f)
-                        .clip(RoundedCornerShape(15.dp)),
-                    contentScale = ContentScale.Crop
-                )
-            } // if thumbnail is empty then use the default map placeholder
-                ?: Image(
-                    painter = painterResource(id = R.drawable.ic_default_map),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxHeight(0.8f)
-                        .aspectRatio(16 / 9f)
-                        .clip(RoundedCornerShape(15.dp)),
-                    contentScale = ContentScale.Crop
-                )
+            AsyncImage(
+                model = thumbnailUri,
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxHeight(0.8f)
+                    .aspectRatio(16 / 9f)
+                    .clip(RoundedCornerShape(15.dp)),
+                contentScale = ContentScale.Crop,
+                placeholder = painterResource(id = R.drawable.ic_default_map),
+                error = painterResource(id = R.drawable.ic_default_map)
+            )
             Box(
                 modifier = Modifier
                     .padding(5.dp)
@@ -289,7 +278,7 @@ fun AppSearchBar(
                     Icon(
                         imageVector = Icons.Default.AccountCircle,
                         contentDescription = null,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(35.dp)
                     )
                 }
                 MaterialTheme(
@@ -387,7 +376,8 @@ fun MapListItemPreview() {
         title = "Water Utility",
         lastModified = "June 1 2023",
         shareType = "Public",
-        modifier = Modifier.size(width = 485.dp, height = 100.dp)
+        modifier = Modifier.size(width = 485.dp, height = 100.dp),
+        thumbnailUri = ""
     )
 }
 
