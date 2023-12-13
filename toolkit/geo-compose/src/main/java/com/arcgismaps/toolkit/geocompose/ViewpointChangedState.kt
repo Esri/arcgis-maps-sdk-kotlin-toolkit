@@ -24,7 +24,7 @@ import com.arcgismaps.mapping.view.MapView
 import androidx.compose.runtime.remember
 
 /**
- * State holder for lambdas invoked when the viewpoint of a composable [MapView] has changed.
+ * State holder for lambdas invoked when the viewpoint of a composable MapView has changed.
  * Depending on the [ViewpointType] you need to be notified about, you can create a ViewpointChangedState
  * instance to be notified about viewpoint changes for viewpoints of type [ViewpointType.CenterAndScale]
  * or [ViewpointType.BoundingGeometry] or both.

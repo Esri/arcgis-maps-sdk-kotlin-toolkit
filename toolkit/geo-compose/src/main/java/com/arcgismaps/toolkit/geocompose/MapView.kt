@@ -229,7 +229,7 @@ private fun ViewpointUpdater(
 }
 
 /**
- * Sets up the ViewpointChangedState's property and event.
+ * Invokes the ViewpointChangedState's lambdas when a [MapView.viewpointChanged] event is collected.
  *
  * @since 200.4.0
  */
@@ -322,7 +322,7 @@ private fun MapViewEventHandler(
             mapView.viewpointChanged.collect {
                 currentVisibleAreaChanged?.invoke(
                     mapView.visibleArea
-                        ?: throw IllegalStateException("Mapview visible area should not be null")
+                        ?: throw IllegalStateException("MapView visible area should not be null")
                 )
             }
         }
