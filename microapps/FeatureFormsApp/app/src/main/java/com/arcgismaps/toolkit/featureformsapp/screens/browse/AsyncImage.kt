@@ -22,7 +22,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.DefaultAlpha
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.Painter
@@ -36,14 +39,20 @@ import kotlinx.coroutines.launch
 fun AsyncImage(
     imageLoader: ImageLoader,
     modifier: Modifier = Modifier,
-    contentScale: ContentScale = ContentScale.Fit
+    alignment: Alignment = Alignment.Center,
+    contentScale: ContentScale = ContentScale.Fit,
+    alpha: Float = DefaultAlpha,
+    colorFilter: ColorFilter? = null
 ) {
     val painter = imageLoader.image.value
     Image(
         painter = painter,
         contentDescription = null,
         modifier = modifier,
-        contentScale = contentScale
+        alignment = alignment,
+        contentScale = contentScale,
+        alpha = alpha,
+        colorFilter = colorFilter
     )
 }
 
