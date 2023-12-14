@@ -19,6 +19,7 @@ package com.arcgismaps.toolkit.geocompose
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -34,12 +35,14 @@ import com.arcgismaps.mapping.view.SceneView
  *
  * @param modifier Modifier to be applied to the composable SceneView
  * @param arcGISScene the [ArcGISScene] to be rendered by this composable SceneView
+ * @param viewpointOperation a [SceneViewpointOperation] that changes this SceneView to a new viewpoint
  * @since 200.4.0
  */
 @Composable
 public fun SceneView(
     modifier: Modifier = Modifier,
-    arcGISScene: ArcGISScene? = null
+    arcGISScene: ArcGISScene? = null,
+    viewpointOperation: SceneViewpointOperation? = null,
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
@@ -58,5 +61,23 @@ public fun SceneView(
             lifecycleOwner.lifecycle.removeObserver(sceneView)
             sceneView.onDestroy(lifecycleOwner)
         }
+    }
+
+    ViewpointUpdater(sceneView = sceneView, viewpointOperation = viewpointOperation)
+}
+
+/**
+ * Updates the viewpoint of the provided view-based [sceneView] using the given [viewpointOperation]. This will be
+ * recomposed when [viewpointOperation] changes.
+ *
+ * @since 200.4.0
+ */
+@Composable
+private fun ViewpointUpdater(
+    sceneView: SceneView,
+    viewpointOperation: SceneViewpointOperation?
+) {
+    LaunchedEffect(viewpointOperation) {
+        viewpointOperation?.execute(sceneView)
     }
 }

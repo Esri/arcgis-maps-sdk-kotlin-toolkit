@@ -1,6 +1,7 @@
 package com.arcgismaps.toolkit.geocompose
 
 import androidx.compose.runtime.Stable
+import com.arcgismaps.mapping.view.SceneView
 import kotlinx.coroutines.CompletableDeferred
 
 
@@ -24,4 +25,8 @@ public sealed class SceneViewpointOperation {
     internal fun complete(result: Result<Boolean>) {
         deferred.complete(result)
     }
+}
+
+internal suspend fun SceneViewpointOperation.execute(sceneView: SceneView) {
+    TODO()
 }
