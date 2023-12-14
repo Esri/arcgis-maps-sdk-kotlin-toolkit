@@ -30,19 +30,67 @@ public sealed class SceneViewpointOperation {
         deferred.complete(result)
     }
 
+    /**
+     * Changes the scene view to the new viewpoint. The viewpoint is updated instantaneously.
+     *
+     * @property viewpoint the new viewpoint
+     * @since 200.4.0
+     */
     public class Set(public val viewpoint: Viewpoint) : SceneViewpointOperation()
+
+    /**
+     * Animates the scene view to the new viewpoint, taking the given number of seconds to complete the
+     * navigation.
+     *
+     * @property viewpoint the new viewpoint
+     * @property durationSeconds the duration of the animation in seconds
+     * @since 200.4.0
+     */
     public class Animate(
         public val viewpoint: Viewpoint,
         public val durationSeconds: Float = 0.25f
     ) : SceneViewpointOperation()
+
+    /**
+     * Updates the display to the viewpoint specified by the given camera.
+     *
+     * @property camera the new camera
+     * @since 200.4.0
+     */
     public class SetCamera(public val camera: Camera) : SceneViewpointOperation()
+
+    /**
+     * Animates the display to the viewpoint specified by the given camera using the specified duration
+     * to arrive.
+     *
+     * @property camera the new camera
+     * @property duration the duration of the animation in seconds
+     * @since 200.4.0
+     */
     public class AnimateCamera(
         public val camera: Camera,
         public val durationSeconds: Float = 0.25f
     ) : SceneViewpointOperation()
+
+    /**
+     * Animates the scene view's viewpoint to the viewpoint of the bookmark.
+     *
+     * @property bookmark bookmark to set
+     * @since 200.4.0
+     */
     public class SetBookmark(public val bookmark: Bookmark) : SceneViewpointOperation()
 }
 
+/**
+ * Executes the [SceneViewpointOperation] on the given view-based [SceneView]. The operation can be awaited using
+ * [SceneViewpointOperation.await]. If the coroutine on which the viewpoint operation is executed is cancelled,
+ * for example due to another viewpoint operation being executed, the [SceneViewpointOperation.await] call
+ * will return a Result with a boolean set to `false`, indicating that the viewpoint operation failed
+ * to complete.
+ *
+ * @param sceneView the view-based SceneView to execute this operation on
+ * @since 200.4.0
+ */
 internal suspend fun SceneViewpointOperation.execute(sceneView: SceneView) {
     when (this) {
         is SceneViewpointOperation.Set -> {
