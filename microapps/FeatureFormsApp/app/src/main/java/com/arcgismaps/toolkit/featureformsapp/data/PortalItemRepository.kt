@@ -130,12 +130,7 @@ class PortalItemRepository(
                 data.portalItem.load().onFailure {
                     Log.e("PortalItemRepository", "loadAndCachePortalItems: $it")
                 }
-                data.portalItem.thumbnail?.let { thumbnail ->
-                    thumbnail.load()
-                    thumbnail.image?.bitmap?.let { bitmap ->
-                        data.thumbnailUri = createThumbnail(data.portalItem.itemId, bitmap)
-                    }
-                }
+                data.portalItem.thumbnail?.load()
             }
             // suspend till all the portal loading jobs are complete
         }.joinAll()

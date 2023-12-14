@@ -6,6 +6,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.with
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -50,6 +51,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -57,6 +59,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
@@ -65,7 +68,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
+import com.arcgismaps.portal.LoadableImage
 import com.arcgismaps.toolkit.featureformsapp.AnimatedLoading
 import com.arcgismaps.toolkit.featureformsapp.R
 import java.time.Instant
@@ -125,6 +128,7 @@ fun MapListScreen(
                 }
 
                 false -> if (uiState.data.isNotEmpty()) {
+                    val itemThumbnailPlaceholder = painterResource(id = R.drawable.ic_default_map)
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         state = lazyListState,
@@ -138,7 +142,8 @@ fun MapListScreen(
                                 lastModified = item.portalItem.modified?.format("MMM dd yyyy")
                                     ?: "",
                                 shareType = item.portalItem.access.encoding.uppercase(Locale.getDefault()),
-                                thumbnailUri = item.thumbnailUri,
+                                thumbnail = item.portalItem.thumbnail,
+                                placeholder = itemThumbnailPlaceholder,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(100.dp)
@@ -177,7 +182,8 @@ fun MapListItem(
     title: String,
     lastModified: String,
     shareType: String,
-    thumbnailUri: String,
+    thumbnail: LoadableImage?,
+    placeholder: Painter,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
@@ -188,16 +194,14 @@ fun MapListItem(
     ) {
         Spacer(modifier = Modifier.width(20.dp))
         Box {
-            AsyncImage(
-                model = thumbnailUri,
-                contentDescription = null,
+            MapListItemThumbnail(
+                loadableImage = thumbnail,
+                placeholder = placeholder,
                 modifier = Modifier
                     .fillMaxHeight(0.8f)
                     .aspectRatio(16 / 9f)
                     .clip(RoundedCornerShape(15.dp)),
-                contentScale = ContentScale.Crop,
-                placeholder = painterResource(id = R.drawable.ic_default_map),
-                error = painterResource(id = R.drawable.ic_default_map)
+                contentScale = ContentScale.Crop
             )
             Box(
                 modifier = Modifier
@@ -221,6 +225,32 @@ fun MapListItem(
             Text(text = "Last Updated: $lastModified", style = MaterialTheme.typography.labelSmall)
         }
     }
+}
+
+@Composable
+fun MapListItemThumbnail(
+    loadableImage: LoadableImage?,
+    placeholder: Painter,
+    modifier: Modifier,
+    contentScale: ContentScale
+) {
+    val scope = rememberCoroutineScope()
+    loadableImage?.let {
+        AsyncImage(
+            imageLoader = ImageLoader(
+                loadable = it,
+                scope = scope,
+                placeholder = placeholder,
+            ),
+            modifier = modifier,
+            contentScale = contentScale
+        )
+    } ?: Image(
+        painter = placeholder,
+        contentDescription = null,
+        modifier = modifier,
+        contentScale = contentScale
+    )
 }
 
 @Composable
@@ -377,7 +407,8 @@ fun MapListItemPreview() {
         lastModified = "June 1 2023",
         shareType = "Public",
         modifier = Modifier.size(width = 485.dp, height = 100.dp),
-        thumbnailUri = ""
+        thumbnail = null,
+        placeholder = painterResource(id = R.drawable.ic_default_map)
     )
 }
 
