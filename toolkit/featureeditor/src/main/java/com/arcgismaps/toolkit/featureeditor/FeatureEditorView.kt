@@ -16,8 +16,7 @@
 
 package com.arcgismaps.toolkit.featureeditor
 
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -90,7 +89,7 @@ private fun CompactFeatureEditorView(
             onAttributeButtonPress = { isBottomSheetVisible = !isBottomSheetVisible },
             featureEditorState = featureEditorState,
             attributeButtonState =
-                if (isBottomSheetVisible) AttributeButtonState.SHOW_GEOMETRY else AttributeButtonState.SHOW_ATTRIBUTES,
+            if (isBottomSheetVisible) AttributeButtonState.SHOW_GEOMETRY else AttributeButtonState.SHOW_ATTRIBUTES,
         )
 
         if (isBottomSheetVisible) {
@@ -109,9 +108,11 @@ private fun SideBySideFeatureEditorView(
 ) {
     val isStarted by featureEditorState.isStarted.collectAsState()
     Row(modifier = modifier) { // TODO: is it correct to use the incoming modifier here and nowhere else?
-        Box(modifier = Modifier
-            .fillMaxHeight()
-            .fillMaxWidth(0.5f)) {
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .fillMaxWidth(0.5f)
+        ) {
             map()
 
             FeatureEditorToolbar(
@@ -143,46 +144,61 @@ private fun FeatureEditorToolbar(
 
     var showGeometryButtonGroup by remember { mutableStateOf(false) }
     val isStarted by featureEditorState.isStarted.collectAsState()
+    // This first row creates a space at the top of the screen where content can be centered.
     Row(
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Min),
     ) {
-        Surface(shape = RoundedCornerShape(bottomStart = 3.dp, bottomEnd = 3.dp)) {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.padding(2.dp)
-            ) {
-
-                ToolbarButton(
-                    onClick = { showGeometryButtonGroup = !showGeometryButtonGroup },
-                    enabled = isStarted,
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+        // This second row creates another space within the first (meaning it is centered), which is limited to
+        // a fraction of the screen width. Items fill the space starting from the left because we haven't sent a
+        // horizontal arrangement for the row.
+        Row(modifier = Modifier.fillMaxWidth(0.8f)) {
+            // This surface creates the background for whatever content occupying the space. It doesn't necessarily
+            // fill the whole space defined above because we haven't used `fillMaxWidth`.
+            Surface(shape = RoundedCornerShape(bottomStart = 3.dp, bottomEnd = 3.dp)) {
+                // This third row lets just place items horizontally within the surface.
+                Row(
+                    modifier = Modifier.padding(2.dp)
                 ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.baseline_swap_vert_24),
-                        contentDescription = "Swap toolbar"
+                    ToolbarButton(
+                        onClick = { showGeometryButtonGroup = !showGeometryButtonGroup },
+                        enabled = isStarted,
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_swap_vert_24),
+                            contentDescription = "Swap toolbar"
+                        )
+                    }
+
+                    Divider(
+                        color = Color.Transparent,
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .width(10.dp)
+                            .padding(1.dp)
                     )
+
+                    // This row makes the sub-toolbar (which one is being displayed) scrollable if it
+                    // exceeds the maximum space available.
+                    Row(
+                        modifier = Modifier.horizontalScroll(rememberScrollState())
+                    ) {
+                        if (showGeometryButtonGroup && isStarted) GeometryButtonGroup(
+                            featureEditorState = featureEditorState,
+                            attributeButtonState = attributeButtonState,
+                        ) else {
+                            ControlButtonGroup(
+                                isStarted = isStarted,
+                                onAttributeButtonPress = onAttributeButtonPress,
+                                attributeButtonState = attributeButtonState,
+                                featureEditorState = featureEditorState,
+                            )
+                        }
+                    }
                 }
-
-                Divider(
-                    color = Color.Transparent,
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .width(10.dp)
-                        .padding(1.dp)
-                )
-
-                if (showGeometryButtonGroup && isStarted) GeometryButtonGroup(
-                    featureEditorState = featureEditorState,
-                    attributeButtonState = attributeButtonState,
-                ) else ControlButtonGroup(
-                    isStarted = isStarted,
-                    onAttributeButtonPress = onAttributeButtonPress,
-                    attributeButtonState = attributeButtonState,
-                    featureEditorState = featureEditorState,
-                )
             }
         }
     }
@@ -252,19 +268,6 @@ private fun GeometryButtonGroup(
             painter = painterResource(id = R.drawable.baseline_redo_24),
             contentDescription = "Redo"
         )
-    }
-
-    if (attributeButtonState != AttributeButtonState.HIDE) {
-        ToolbarButton(
-            onClick = {},
-            enabled = false
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.baseline_local_hotel_24),
-                contentDescription =
-                "Local hotel we need to have the same number of buttons in both toolbars or else they don't align"
-            )
-        }
     }
 }
 
