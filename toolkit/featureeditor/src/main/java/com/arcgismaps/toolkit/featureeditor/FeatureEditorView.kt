@@ -19,20 +19,16 @@ package com.arcgismaps.toolkit.featureeditor
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
@@ -46,11 +42,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.FeatureForm
 
@@ -149,53 +146,67 @@ private fun FeatureEditorToolbar(
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier
             .fillMaxWidth()
-            .height(IntrinsicSize.Min),
     ) {
-        // This second row creates another space within the first (meaning it is centered), which is limited to
-        // a fraction of the screen width. Items fill the space starting from the left because we haven't sent a
-        // horizontal arrangement for the row.
-        Row(modifier = Modifier.fillMaxWidth(0.8f)) {
-            // This surface creates the background for whatever content occupying the space. It doesn't necessarily
-            // fill the whole space defined above because we haven't used `fillMaxWidth`.
-            Surface(shape = RoundedCornerShape(bottomStart = 3.dp, bottomEnd = 3.dp)) {
-                // This third row lets just place items horizontally within the surface.
-                Row(
-                    modifier = Modifier.padding(2.dp)
+        // This surface creates the background for whatever content occupying the space. It doesn't necessarily
+        // fill the whole space defined above because we haven't used `fillMaxWidth`.
+        Surface(shape = RoundedCornerShape(bottomStart = 3.dp, bottomEnd = 3.dp)) {
+            // This second row lets just place items horizontally within the surface.
+            Row(
+                modifier = Modifier.padding(2.dp)
+            ) {
+                ToolbarButton(
+                    onClick = { showGeometryButtonGroup = !showGeometryButtonGroup },
+                    enabled = isStarted,
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                    modifier = Modifier.padding(top = 1.dp, start = 1.dp, bottom = 1.dp, end = 12.dp)
                 ) {
-                    ToolbarButton(
-                        onClick = { showGeometryButtonGroup = !showGeometryButtonGroup },
-                        enabled = isStarted,
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.baseline_swap_vert_24),
-                            contentDescription = "Swap toolbar"
-                        )
-                    }
-
-                    Divider(
-                        color = Color.Transparent,
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .width(10.dp)
-                            .padding(1.dp)
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_swap_vert_24),
+                        contentDescription = "Swap toolbar"
                     )
+                }
 
-                    // This row makes the sub-toolbar (which one is being displayed) scrollable if it
-                    // exceeds the maximum space available.
-                    Row(
-                        modifier = Modifier.horizontalScroll(rememberScrollState())
-                    ) {
-                        if (showGeometryButtonGroup && isStarted) GeometryButtonGroup(
-                            featureEditorState = featureEditorState,
-                            attributeButtonState = attributeButtonState,
-                        ) else {
+                // Here we are using SubcomposeLayout so that we can measure the control toolbar
+                // and use that to set the width of the geometry toolbar, so that they take up the same
+                // area of the screen, so there's no moving around when switching between them.
+                SubcomposeLayout { constraints ->
+                    val controlPlaceables = subcompose(0) {
+                        Row {
                             ControlButtonGroup(
                                 isStarted = isStarted,
                                 onAttributeButtonPress = onAttributeButtonPress,
                                 attributeButtonState = attributeButtonState,
                                 featureEditorState = featureEditorState,
                             )
+                        }
+                    }.map { it.measure(Constraints()) }
+
+                    // The control placeables define the width the geometry placeables -- any larger
+                    // and the geometry placeables will scroll to accommodate.
+                    // The control placeables and the geometry placeables are assumed to have the same height.
+                    // Therefore we only look at the control placeables when deciding the dimensions of the component.
+                    val width = controlPlaceables.maxBy { it.width }.width
+                    val height = controlPlaceables.maxBy { it.height }.height
+
+                    val geometryPlaceables = subcompose(1) {
+                        Row(
+                            modifier = Modifier.horizontalScroll(rememberScrollState())
+                        ) {
+                            GeometryButtonGroup(
+                                featureEditorState = featureEditorState,
+                                attributeButtonState = attributeButtonState,
+                            )
+                        }
+                    }.map { it.measure(Constraints(maxWidth = width)) }
+
+                    if (showGeometryButtonGroup && isStarted) {
+                        layout(width, height) {
+                            // Note we're expecting there only to be one placeable.
+                            geometryPlaceables.first().placeRelative(0, 0)
+                        }
+                    } else {
+                        layout(width, height) {
+                            controlPlaceables.first().placeRelative(0, 0)
                         }
                     }
                 }
@@ -275,14 +286,15 @@ private fun GeometryButtonGroup(
 private fun ToolbarButton(
     onClick: () -> Unit,
     enabled: Boolean,
+    modifier: Modifier = Modifier.padding(1.dp),
     contentPadding: PaddingValues = PaddingValues(8.dp),
-    content: @Composable RowScope.() -> Unit
+    content: @Composable RowScope.() -> Unit,
 ) {
     Button(
         onClick = onClick,
         enabled = enabled,
         shape = RectangleShape,
-        modifier = Modifier.padding(1.dp),
+        modifier = modifier.padding(1.dp),
         contentPadding = contentPadding,
         content = content,
     )
