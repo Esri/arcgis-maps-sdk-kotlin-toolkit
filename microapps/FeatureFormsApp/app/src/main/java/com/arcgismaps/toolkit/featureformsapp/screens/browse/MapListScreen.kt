@@ -1,11 +1,6 @@
 package com.arcgismaps.toolkit.featureformsapp.screens.browse
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.with
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -80,7 +75,6 @@ import java.util.Locale
  * Displays a list of PortalItems using the [mapListViewModel]. Provides a callback [onItemClick]
  * when an item is tapped.
  */
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun MapListScreen(
     modifier: Modifier = Modifier,
@@ -109,12 +103,9 @@ fun MapListScreen(
         )
         // use a cross fade animation to show a loading indicator when the data is loading
         // and transition to the list of portalItems once loaded
-        AnimatedContent(
+        Crossfade(
             targetState = uiState.isLoading,
             modifier = Modifier.padding(top = 88.dp),
-            transitionSpec = {
-                fadeIn(animationSpec = tween(1000)) with fadeOut()
-            },
             label = "list fade"
         ) { state ->
             when (state) {
@@ -138,17 +129,17 @@ fun MapListScreen(
                             uiState.data
                         ) { item ->
                             MapListItem(
-                                title = item.portalItem.title,
-                                lastModified = item.portalItem.modified?.format("MMM dd yyyy")
+                                title = item.title,
+                                lastModified = item.modified?.format("MMM dd yyyy")
                                     ?: "",
-                                shareType = item.portalItem.access.encoding.uppercase(Locale.getDefault()),
-                                thumbnail = item.portalItem.thumbnail,
+                                shareType = item.access.encoding.uppercase(Locale.getDefault()),
+                                thumbnail = item.thumbnail,
                                 placeholder = itemThumbnailPlaceholder,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(100.dp)
                             ) {
-                                onItemClick(item.portalItem.itemId)
+                                onItemClick(item.itemId)
                             }
                         }
                     }
@@ -243,7 +234,7 @@ fun MapListItemThumbnail(
                 placeholder = placeholder,
             ),
             modifier = modifier,
-            contentScale = contentScale
+            contentScale =contentScale
         )
     } ?: Image(
         painter = placeholder,

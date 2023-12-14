@@ -1,6 +1,5 @@
 package com.arcgismaps.toolkit.featureformsapp.data
 
-import android.graphics.Bitmap
 import android.util.Log
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.mapping.PortalItem
@@ -21,13 +20,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.FileOutputStream
-
-data class PortalItemData(
-    val portalItem: PortalItem,
-    var thumbnailUri: String
-)
 
 /**
  * A repository to map the data source items into loaded PortalItems. This is the primary repository
@@ -47,36 +39,25 @@ class PortalItemRepository(
     // to protect shared state of portalItems
     private val mutex = Mutex()
 
-    private lateinit var thumbsDirPath: String
-
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val portalItemsFlow: Flow<List<PortalItemData>> =
+    private val portalItemsFlow: Flow<List<PortalItem>> =
         itemCacheDao.observeAll().mapLatest { entries ->
             // map the cache entries into loaded portal items
             entries.mapNotNull { entry ->
                 val portal = Portal(entry.portalUrl)
                 val portalItem = PortalItem.fromJsonOrNull(entry.json, portal)
                 portalItem?.let {
-                    portalItems[portalItem.itemId] = portalItem
-                    PortalItemData(portalItem, entry.thumbnailUri)
+                    portalItem.also {
+                        portalItems[portalItem.itemId] = it
+                    }
                 }
             }
         }.flowOn(dispatcher)
 
-    init {
-        // create the thumbnails directory if it does not exist
-        // and save its absolute path
-        scope.launch(Dispatchers.IO) {
-            val thumbsDir = File("$filesDir/thumbs")
-            if (!thumbsDir.exists()) thumbsDir.mkdirs()
-            thumbsDirPath = thumbsDir.absolutePath
-        }
-    }
-
     /**
      * Returns the list of loaded PortalItemData as a flow.
      */
-    fun observe(): Flow<List<PortalItemData>> = portalItemsFlow
+    fun observe(): Flow<List<PortalItem>> = portalItemsFlow
 
     /**
      * Refreshes the underlying data source to fetch the latest content.
@@ -121,30 +102,29 @@ class PortalItemRepository(
      */
     private suspend fun loadAndCachePortalItems(items: List<ItemData>) = withContext(dispatcher) {
         // create PortalItems from the urls
-        val portalItemData = items.map {
-            PortalItemData(PortalItem(it.url), "")
+        val portalItems = items.map {
+            PortalItem(it.url)
         }
-        portalItemData.map { data ->
+        portalItems.map { item ->
             // load each portal item and its thumbnail in a new coroutine
             launch {
-                data.portalItem.load().onFailure {
+                item.load().onFailure {
                     Log.e("PortalItemRepository", "loadAndCachePortalItems: $it")
                 }
-                data.portalItem.thumbnail?.load()
+                item.thumbnail?.load()
             }
             // suspend till all the portal loading jobs are complete
         }.joinAll()
         // create entries to be inserted into the local cache storage.
-        val entries = portalItemData.mapNotNull { data ->
-            // ignore if the portal item fails to load
-            if (data.portalItem.loadStatus.value is LoadStatus.FailedToLoad) {
+        val entries = portalItems.mapNotNull { item ->
+            // ignore if the portal item failed to load
+            if (item.loadStatus.value is LoadStatus.FailedToLoad) {
                 null
             } else {
                 ItemCacheEntry(
-                    itemId = data.portalItem.itemId,
-                    json = data.portalItem.toJson(),
-                    thumbnailUri = data.thumbnailUri,
-                    portalUrl = data.portalItem.portal.url
+                    itemId = item.itemId,
+                    json = item.toJson(),
+                    portalUrl = item.portal.url
                 )
             }
         }
@@ -158,20 +138,6 @@ class PortalItemRepository(
     private suspend fun insertCacheEntries(entries: List<ItemCacheEntry>) =
         withContext(dispatcher) {
             itemCacheDao.deleteAndInsert(entries)
-        }
-
-    /**
-     * Creates a JPEG thumbnail using the [bitmap] with [itemId].jpg filename in the local files
-     * directory and returns the absolute path to the file.
-     */
-    private suspend fun createThumbnail(itemId: String, bitmap: Bitmap): String =
-        withContext(Dispatchers.IO) {
-            val file = File("${thumbsDirPath}/${itemId}.jpg")
-            file.createNewFile()
-            FileOutputStream(file).use {
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it)
-            }
-            file.absolutePath
         }
 
     operator fun invoke(itemId: String): PortalItem? = portalItems[itemId]

@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.Flow
 data class ItemCacheEntry(
     @PrimaryKey val itemId: String,
     val json: String,
-    val thumbnailUri: String,
     val portalUrl: String
 )
 
@@ -83,7 +82,7 @@ interface ItemCacheDao {
 /**
  * The room database that contains the ItemCacheEntry table.
  */
-@Database(entities = [ItemCacheEntry::class], version = 1, exportSchema = false)
+@Database(entities = [ItemCacheEntry::class], version = 2, exportSchema = false)
 abstract class ItemCacheDatabase : RoomDatabase() {
     abstract fun itemCacheDao() : ItemCacheDao
 }
