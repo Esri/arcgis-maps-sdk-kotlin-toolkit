@@ -35,6 +35,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart.UNDISPATCHED
 import kotlinx.coroutines.launch
 
+/**
+ * Loads an image asynchronously using the [ImageLoader].
+ */
 @Composable
 fun AsyncImage(
     imageLoader: ImageLoader,
@@ -56,6 +59,14 @@ fun AsyncImage(
     )
 }
 
+/**
+ * A model to asynchronously load the image from a [LoadableImage]. Once the loading is complete
+ * the loaded image is presented via [image] State.
+ *
+ * @param loadable the [LoadableImage] to load.
+ * @param scope the CoroutineScope to run the loading job on.
+ * @param placeholder the placeholder image to show until the loading is complete.
+ */
 class ImageLoader(
     private val loadable: LoadableImage,
     scope: CoroutineScope,
@@ -73,11 +84,8 @@ class ImageLoader(
     private suspend fun load() {
         loadable.load().onSuccess {
             loadable.image?.let {
-                _image.value = it.toPainter()
+                _image.value = BitmapPainter(it.bitmap.asImageBitmap())
             }
         }
     }
 }
-
-fun BitmapDrawable.toPainter() = BitmapPainter(bitmap.asImageBitmap())
-
