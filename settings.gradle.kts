@@ -16,14 +16,6 @@
  *
  */
 
-import org.gradle.configurationcache.extensions.capitalized
-
-// add new module to this list will declare a new toolkit module(Ex: "newComponent") with that name
-// and also add a companion micro app(Ex: "newComponent-app").
-// For mismatching toolkit component and microApp names add them individually at end of this file.
-// Refer to "indoors" project with "floor-filter-app" as an example.
-val projects = listOf("template", "authentication", "compass")
-
 pluginManagement {
     repositories {
         gradlePluginPortal()
@@ -63,25 +55,31 @@ dependencyResolutionManagement {
             } else {
                 sdkVersionNumber
             }
-            version("mapsSdk", "$versionAndBuild")
+            version("mapsSdk", versionAndBuild)
             library("mapsSdk", "com.esri", "arcgis-maps-kotlin").versionRef("mapsSdk")
         }
     }
 }
 
-var includedProjects = projects.flatMap { listOf(":$it", ":$it-app") }.toTypedArray()
-include(*includedProjects)
 include(":bom")
+include(":template")
+include(":template-app")
+include(":authentication")
+include(":authentication-app")
+include(":compass")
+include(":compass-app")
 include(":composable-map")
 include(":indoors")
 include(":floor-filter-app")
 
-projects.forEach {
-    project(":$it").projectDir = File(rootDir, "toolkit/$it")
-    project(":$it-app").projectDir = File(rootDir, "microapps/${it.capitalized()}App/app")
-}
-
+project(":authentication").projectDir = File(rootDir, "toolkit/authentication")
+project(":authentication-app").projectDir = File(rootDir, "microapps/AuthenticationApp/app")
 project(":bom").projectDir = File(rootDir, "bom")
+project(":compass").projectDir = File(rootDir, "toolkit/compass")
+project(":compass-app").projectDir = File(rootDir, "microapps/CompassApp/app")
 project(":composable-map").projectDir = File(rootDir, "toolkit/composable-map")
 project(":indoors").projectDir = File(rootDir, "toolkit/indoors")
 project(":floor-filter-app").projectDir = File(rootDir, "microapps/FloorFilterApp/app")
+project(":template").projectDir = File(rootDir, "toolkit/template")
+project(":template-app").projectDir = File(rootDir, "microapps/TemplateApp/app")
+
