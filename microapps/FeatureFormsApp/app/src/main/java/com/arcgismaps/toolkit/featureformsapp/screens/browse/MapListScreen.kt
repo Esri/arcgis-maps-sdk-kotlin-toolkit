@@ -227,12 +227,15 @@ fun MapListItemThumbnail(
 ) {
     val scope = rememberCoroutineScope()
     loadableImage?.let {
-        AsyncImage(
-            imageLoader = ImageLoader(
+        val imageLoader = remember {
+            ImageLoader(
                 loadable = it,
                 scope = scope,
                 placeholder = placeholder,
-            ),
+            )
+        }
+        AsyncImage(
+            imageLoader = imageLoader,
             modifier = modifier,
             contentScale =contentScale
         )
