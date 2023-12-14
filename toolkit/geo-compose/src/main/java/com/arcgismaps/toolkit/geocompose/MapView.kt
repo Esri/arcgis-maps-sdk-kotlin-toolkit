@@ -194,6 +194,7 @@ public fun MapView(
         onMapRotationChanged,
         onMapScaleChanged,
         onSpatialReferenceChanged,
+        onLayerViewStateChanged,
         onInteractingChanged,
         onRotate,
         onScale,
@@ -204,8 +205,7 @@ public fun MapView(
         onLongPress,
         onTwoPointerTap,
         onPan,
-        onDrawStatusChanged,
-        onLayerViewStateChanged
+        onDrawStatusChanged
     )
 
     GraphicsOverlaysUpdater(graphicsOverlays, mapView)
@@ -262,6 +262,7 @@ private fun MapViewEventHandler(
     onMapRotationChanged: ((Double) -> Unit)?,
     onMapScaleChanged: ((Double) -> Unit)?,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)?,
+    onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)?,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)?,
     onRotate: ((RotationChangeEvent) -> Unit)?,
     onScale: ((ScaleChangeEvent) -> Unit)?,
@@ -272,8 +273,7 @@ private fun MapViewEventHandler(
     onLongPress: ((LongPressEvent) -> Unit)?,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)?,
     onPan: ((PanChangeEvent) -> Unit)?,
-    onDrawStatusChanged: ((DrawStatus) -> Unit)?,
-    onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)?
+    onDrawStatusChanged: ((DrawStatus) -> Unit)?
 ) {
     val currentTimeExtentChanged by rememberUpdatedState(onTimeExtentChanged)
     val currentViewPointChanged by rememberUpdatedState(onViewpointChanged)
