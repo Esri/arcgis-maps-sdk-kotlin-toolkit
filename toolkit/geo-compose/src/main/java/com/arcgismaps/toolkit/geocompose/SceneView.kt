@@ -48,16 +48,16 @@ import kotlinx.coroutines.launch
  *
  * @param modifier Modifier to be applied to the composable SceneView
  * @param arcGISScene the [ArcGISScene] to be rendered by this composable SceneView
- *  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable SceneView
- *  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable SceneView
- *  * @param onScale lambda invoked when a user performs a pinch gesture on the composable SceneView
- *  * @param onUp lambda invoked when the user removes all their pointers from the composable SceneView
- *  * @param onDown lambda invoked when the user first presses on the composable SceneView
- *  * @param onSingleTapConfirmed lambda invoked when the user taps once on the composable SceneView
- *  * @param onDoubleTap lambda invoked the user double taps on the composable SceneView
- *  * @param onLongPress lambda invoked when a user holds a pointer on the composable SceneView
- *  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable SceneView
- *  * @param onPan lambda invoked when a user drags a pointer or pointers across composable SceneView
+ * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable SceneView
+ * @param onRotate lambda invoked when a user performs a rotation gesture on the composable SceneView
+ * @param onScale lambda invoked when a user performs a pinch gesture on the composable SceneView
+ * @param onUp lambda invoked when the user removes all their pointers from the composable SceneView
+ * @param onDown lambda invoked when the user first presses on the composable SceneView
+ * @param onSingleTapConfirmed lambda invoked when the user taps once on the composable SceneView
+ * @param onDoubleTap lambda invoked the user double taps on the composable SceneView
+ * @param onLongPress lambda invoked when a user holds a pointer on the composable SceneView
+ * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable SceneView
+ * @param onPan lambda invoked when a user drags a pointer or pointers across composable SceneView
  * @since 200.4.0
  */
 @Composable
