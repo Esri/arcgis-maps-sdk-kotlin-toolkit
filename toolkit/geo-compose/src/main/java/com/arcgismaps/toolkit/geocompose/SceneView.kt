@@ -27,9 +27,10 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.mapping.ArcGISScene
+import com.arcgismaps.mapping.view.SceneView
 
 /**
- * A compose equivalent of the view-based [com.arcgismaps.mapping.view.SceneView].
+ * A compose equivalent of the view-based [SceneView].
  *
  * @param modifier Modifier to be applied to the composable SceneView
  * @param arcGISScene the [ArcGISScene] to be rendered by this composable SceneView
@@ -42,7 +43,7 @@ public fun SceneView(
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
-    val sceneView = remember { com.arcgismaps.mapping.view.SceneView(context) }
+    val sceneView = remember { SceneView(context) }
 
     AndroidView(
         modifier = modifier.semantics { contentDescription = "SceneView" },
