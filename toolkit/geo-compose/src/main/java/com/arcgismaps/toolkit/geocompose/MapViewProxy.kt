@@ -22,7 +22,7 @@ import com.arcgismaps.mapping.view.ScreenCoordinate
 
 
 /**
- * Used to perform operations on a [MapView].
+ * Used to perform operations on a composable [MapView].
  *
  * There should be a one-to-one relationship between a MapViewProxy and a composable [MapView]. This
  * relationship is established by passing an instance of MapViewProxy to the composable [MapView] function.
@@ -30,24 +30,27 @@ import com.arcgismaps.mapping.view.ScreenCoordinate
  * Operations performed when the associated composable MapView is not in the composition will fail gracefully,
  * i.e. won't throw exceptions but won't return a successful result.
  *
- * @since 200.3.0
+ * @since 200.4.0
  */
-public class MapViewProxy : GeoViewProxy() {
+public class MapViewProxy : GeoViewProxy("MapView") {
 
     /**
-     * The [com.arcgismaps.mapping.view.MapView] that this MapViewProxy will operate on. This should
+     * The view-based [com.arcgismaps.mapping.view.MapView] that this MapViewProxy will operate on. This should
      * be initialized by the composable [MapView] when it enters the composition and set to null when
      * it is disposed by calling [setMapView].
      *
-     * @since 200.3.0
+     * @since 200.4.0
      */
     private var mapView: com.arcgismaps.mapping.view.MapView? = null
+        set(value) {
+            setGeoView(value)
+        }
 
     /**
      * Sets the [mapView] parameter on this operator. This should be called by the composable [MapView]
      * when it enters the composition and set to null when it is disposed.
      *
-     * @since 200.3.0
+     * @since 200.4.0
      */
     internal fun setMapView(mapView: com.arcgismaps.mapping.view.MapView?) {
         this.mapView = mapView
@@ -61,7 +64,7 @@ public class MapViewProxy : GeoViewProxy() {
      *
      * @param screenCoordinate the screen point, in pixels
      * @return a [Point] object, or null if the location could not be determined or an error occurs
-     * @since 200.3.0
+     * @since 200.4.0
      */
     public fun screenToLocationOrNull(screenCoordinate: ScreenCoordinate): Point? {
         return try {
@@ -79,7 +82,7 @@ public class MapViewProxy : GeoViewProxy() {
      *
      * @param mapPoint a [Point] object representing a coordinate on the map
      * @return A [ScreenCoordinate] for the screen in pixels. Returns null if an error occurs
-     * @since 200.3.0
+     * @since 200.4.0
      */
     public fun locationToScreenOrNull(mapPoint: Point): ScreenCoordinate? {
         return try {
