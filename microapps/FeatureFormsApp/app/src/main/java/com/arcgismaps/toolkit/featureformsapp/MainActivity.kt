@@ -22,6 +22,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.ArcGISCredentialStore
+import com.arcgismaps.httpcore.authentication.NetworkCredentialStore
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.featureformsapp.data.PortalSettings
 import com.arcgismaps.toolkit.featureformsapp.navigation.AppNavigation
@@ -77,6 +78,9 @@ class MainActivity : ComponentActivity() {
             // create and set a ArcGISCredentialStore that persists
             val arcGISCredentialStore = ArcGISCredentialStore.createWithPersistence().getOrThrow()
             ArcGISEnvironment.authenticationManager.arcGISCredentialStore = arcGISCredentialStore
+            // create and set a NetworkCredentialStore that persists
+            val networkCredentialStore = NetworkCredentialStore.createWithPersistence().getOrThrow()
+            ArcGISEnvironment.authenticationManager.networkCredentialStore = networkCredentialStore
             // get the portal settings url
             val url = portalSettings.getPortalUrl()
             // check if any credentials are present for this portal
