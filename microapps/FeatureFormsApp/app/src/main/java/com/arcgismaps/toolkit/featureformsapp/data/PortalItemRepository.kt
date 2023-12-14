@@ -67,8 +67,10 @@ class PortalItemRepository(
         portalUri: String,
         connection: Portal.Connection
     ) = withContext(dispatcher) {
-        deleteAll()
         mutex.withLock {
+            // delete existing cache items
+            itemCacheDao.deleteAll()
+            portalItems.clear()
             // get local items
             val localItems = getListOfMaps().map { ItemData(it) }
             // get network items
