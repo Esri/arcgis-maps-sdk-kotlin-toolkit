@@ -9,7 +9,6 @@ import com.arcgismaps.toolkit.featureformsapp.data.local.ItemCacheEntry
 import com.arcgismaps.toolkit.featureformsapp.data.local.ItemData
 import com.arcgismaps.toolkit.featureformsapp.data.network.ItemRemoteDataSource
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -27,7 +26,6 @@ import kotlinx.coroutines.withContext
  * mechanism.
  */
 class PortalItemRepository(
-    scope: CoroutineScope,
     private val dispatcher: CoroutineDispatcher,
     private val remoteDataSource: ItemRemoteDataSource,
     private val itemCacheDao: ItemCacheDao,
