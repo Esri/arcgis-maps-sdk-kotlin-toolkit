@@ -34,12 +34,14 @@ import com.arcgismaps.mapping.view.SceneView
  *
  * @param modifier Modifier to be applied to the composable SceneView
  * @param arcGISScene the [ArcGISScene] to be rendered by this composable SceneView
+ * @param sceneViewProxy the [SceneViewProxy] to associate with the composable SceneView
  * @since 200.4.0
  */
 @Composable
 public fun SceneView(
     modifier: Modifier = Modifier,
-    arcGISScene: ArcGISScene? = null
+    arcGISScene: ArcGISScene? = null,
+    sceneViewProxy: SceneViewProxy? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
@@ -57,6 +59,13 @@ public fun SceneView(
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(sceneView)
             sceneView.onDestroy(lifecycleOwner)
+        }
+    }
+
+    DisposableEffect(sceneViewProxy) {
+        sceneViewProxy?.setSceneView(sceneView)
+        onDispose {
+            sceneViewProxy?.setSceneView(null)
         }
     }
 }
