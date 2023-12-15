@@ -5,8 +5,8 @@ import com.arcgismaps.mapping.Bookmark
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.SceneView
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
-import kotlin.coroutines.cancellation.CancellationException
 
 
 /**
