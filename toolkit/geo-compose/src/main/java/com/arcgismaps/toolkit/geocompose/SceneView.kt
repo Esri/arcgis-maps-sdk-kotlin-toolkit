@@ -63,7 +63,7 @@ public fun SceneView(
         }
     }
 
-    ViewpointUpdater(sceneView = sceneView, viewpointOperation = viewpointOperation)
+    ViewpointUpdater(sceneView, viewpointOperation)
 }
 
 /**
