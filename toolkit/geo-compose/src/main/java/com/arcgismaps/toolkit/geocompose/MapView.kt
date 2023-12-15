@@ -41,6 +41,7 @@ import com.arcgismaps.mapping.view.BackgroundGrid
 import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
 import com.arcgismaps.mapping.view.DrawStatus
+import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.mapping.view.Grid
 import com.arcgismaps.mapping.view.LocationDisplay
 import com.arcgismaps.mapping.view.LongPressEvent
@@ -87,6 +88,7 @@ import kotlinx.coroutines.launch
  * @param onMapScaleChanged lambda invoked when the scale of this composable MapView has changed
  * @param onUnitsPerDipChanged lambda invoked when the Units per DIP of this composable MapView has changed
  * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the composable MapView has changed
+ * @param onLayerViewStateChanged lambda invoked when the composable MapView's layer view state is changed
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable MapView
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable MapView
  * @param onScale lambda invoked when a user performs a pinch gesture on the composable MapView
@@ -126,6 +128,7 @@ public fun MapView(
     onMapScaleChanged: ((Double) -> Unit)? = null,
     onUnitsPerDipChanged: ((Double) -> Unit)? = null,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
+    onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)? = null,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
     onScale: ((ScaleChangeEvent) -> Unit)? = null,
@@ -199,6 +202,7 @@ public fun MapView(
         onMapScaleChanged,
         onUnitsPerDipChanged,
         onSpatialReferenceChanged,
+        onLayerViewStateChanged,
         onInteractingChanged,
         onRotate,
         onScale,
@@ -286,6 +290,7 @@ private fun MapViewEventHandler(
     onMapScaleChanged: ((Double) -> Unit)?,
     onUnitsPerDipChanged: ((Double) -> Unit)?,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)?,
+    onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)?,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)?,
     onRotate: ((RotationChangeEvent) -> Unit)?,
     onScale: ((ScaleChangeEvent) -> Unit)?,
@@ -316,11 +321,17 @@ private fun MapViewEventHandler(
     val currentOnTwoPointerTap by rememberUpdatedState(onTwoPointerTap)
     val currentOnPan by rememberUpdatedState(onPan)
     val currentOnDrawStatusChanged by rememberUpdatedState(onDrawStatusChanged)
+    val currentOnLayerViewStateChanged by rememberUpdatedState(onLayerViewStateChanged)
 
     LaunchedEffect(Unit) {
         launch {
             mapView.timeExtent.collect { currentTimeExtent ->
                 currentTimeExtentChanged?.invoke(currentTimeExtent)
+            }
+        }
+        launch {
+            mapView.layerViewStateChanged.collect { currentLayerViewState ->
+                currentOnLayerViewStateChanged?.invoke(currentLayerViewState)
             }
         }
         launch {
