@@ -34,12 +34,14 @@ import com.arcgismaps.mapping.view.SceneView
  *
  * @param modifier Modifier to be applied to the composable SceneView
  * @param arcGISScene the [ArcGISScene] to be rendered by this composable SceneView
+ * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable SceneView
  * @since 200.4.0
  */
 @Composable
 public fun SceneView(
     modifier: Modifier = Modifier,
-    arcGISScene: ArcGISScene? = null
+    arcGISScene: ArcGISScene? = null,
+    graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection()
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
@@ -59,4 +61,6 @@ public fun SceneView(
             sceneView.onDestroy(lifecycleOwner)
         }
     }
+
+    GraphicsOverlaysUpdater(graphicsOverlays, sceneView)
 }
