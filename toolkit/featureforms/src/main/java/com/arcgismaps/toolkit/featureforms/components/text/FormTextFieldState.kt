@@ -153,15 +153,15 @@ internal class FormTextFieldState(
         }
         
         mutableMapOf(
-            ValidationErrorState.Required to context.getString(R.string.required),
-            ValidationErrorState.MaxCharConstraint to context.getString(R.string.maximum_n_chars, if (maxLength > 0) maxLength else 254),
-            ValidationErrorState.ExactCharConstraint to context.getString(R.string.enter_n_chars, minLength),
-            ValidationErrorState.MinMaxCharConstraint to context.getString(R.string.enter_min_to_max_chars, minLength, maxLength),
-            ValidationErrorState.MinNumericConstraint to context.getString(R.string.less_than_min_value, min),
-            ValidationErrorState.MaxNumericConstraint to context.getString(R.string.exceeds_max_value, max),
-            ValidationErrorState.MinMaxNumericConstraint to context.getString(R.string.numeric_range_helper_text, min, max),
-            ValidationErrorState.NotANumber to context.getString(R.string.value_must_be_a_number),
-            ValidationErrorState.NotAWholeNumber to context.getString(R.string.value_must_be_a_whole_number)
+            Required to context.getString(R.string.required),
+            MaxCharConstraint to context.getString(R.string.maximum_n_chars, if (maxLength > 0) maxLength else 254),
+            ExactCharConstraint to context.getString(R.string.enter_n_chars, minLength),
+            MinMaxCharConstraint to context.getString(R.string.enter_min_to_max_chars, minLength, maxLength),
+            MinNumericConstraint to context.getString(R.string.less_than_min_value, min),
+            MaxNumericConstraint to context.getString(R.string.exceeds_max_value, max),
+            MinMaxNumericConstraint to context.getString(R.string.numeric_range_helper_text, min, max),
+            NotANumber to context.getString(R.string.value_must_be_a_number),
+            NotAWholeNumber to context.getString(R.string.value_must_be_a_whole_number)
         )
     }
     
@@ -234,38 +234,6 @@ internal class FormTextFieldState(
         }
         _hasError.value = errors.isNotEmpty()
     }
-    
-    private fun validateTextRange(value: String): ValidationErrorState =
-        if (value.length !in minLength..maxLength) {
-            if (minLength > 0 && maxLength > 0) {
-                if (minLength == maxLength) {
-                    ExactCharConstraint
-                } else {
-                    MinMaxCharConstraint
-                }
-            } else {
-                MaxCharConstraint
-            }
-        } else {
-            NoError
-        }
-    
-    private fun validateNumber(value: String): ValidationErrorState =
-        if (fieldType.isIntegerType) {
-            val numberVal = value.toIntOrNull()
-            if (numberVal == null) {
-                NotAWholeNumber
-            } else {
-                validateNumericRange(numberVal)
-            }
-        } else {
-            val numberVal = value.toDoubleOrNull()
-            if (numberVal == null) {
-                NotANumber
-            } else {
-                validateNumericRange(numberVal)
-            }
-        }
     
     private fun validateNumericRange(numberVal: Int): ValidationErrorState {
         require(fieldType.isIntegerType)
@@ -363,13 +331,6 @@ internal class FormTextFieldState(
     
     private fun validate(value: String): List<ValidationErrorState> {
         val errors = validate.invoke()
-        errors.forEach {
-            println("$label error: $it")
-            if (it !is FeatureFormValidationException) {
-                println("unknown error $it with cause ${it.message} ${it.cause}")
-            }
-        
-        }
         val ret = mutableListOf<ValidationErrorState>()
         if (errors.any { it is FeatureFormValidationException.RequiredException }) {
             ret += Required
@@ -391,7 +352,6 @@ internal class FormTextFieldState(
             }
         } else {
             if (fieldType.isIntegerType) {
-                println("integer $value as int ${value.toIntOrNull()}")
                 val numberVal = value.toIntOrNull()
                 if (numberVal == null) {
                     ret += NotAWholeNumber
@@ -402,7 +362,6 @@ internal class FormTextFieldState(
                     }
                 }
             } else {
-                println("float $value as float ${value.toDoubleOrNull()}")
                 val numberVal = value.toDoubleOrNull()
                 if (numberVal == null) {
                     ret += NotANumber
@@ -519,12 +478,3 @@ private fun Number.format(digits: Int = 2): String =
         is Float -> "%.${digits}f".format(this)
         else -> "$this"
     }
-
-private fun Throwable.exceptionToValidationError(): ValidationErrorState {
-    println("got throwable $this")
-    println("cause ${this.cause}")
-    println("message ${this.message}")
-    return Required
-}
-
-
