@@ -49,7 +49,7 @@ import kotlinx.coroutines.launch
  *
  * @param modifier Modifier to be applied to the composable SceneView
  * @param arcGISScene the [ArcGISScene] to be rendered by this composable SceneView
- * @param viewLabelProperties the [ViewLabelProperties] used by the composable MapView
+ * @param viewLabelProperties the [ViewLabelProperties] used by the composable SceneView
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable SceneView
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable SceneView
  * @param onScale lambda invoked when a user performs a pinch gesture on the composable SceneView
