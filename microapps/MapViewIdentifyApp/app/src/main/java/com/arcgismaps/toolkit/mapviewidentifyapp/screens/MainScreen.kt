@@ -53,7 +53,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.toolkit.geocompose.MapView
 import com.arcgismaps.toolkit.mapviewidentifyapp.R
 
-private const val DETAILS_HEIGHT = 200.dp
+private val DETAILS_HEIGHT = 200.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
