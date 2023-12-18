@@ -25,6 +25,9 @@ import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.SceneView
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.DurationUnit
 
 
 /**
@@ -61,12 +64,12 @@ public sealed class SceneViewpointOperation {
      * navigation.
      *
      * @property viewpoint the new viewpoint
-     * @property durationSeconds the duration of the animation in seconds
+     * @property durationSeconds the duration of the animation
      * @since 200.4.0
      */
     public class Animate(
         public val viewpoint: Viewpoint,
-        public val durationSeconds: Float = 0.25f
+        public val durationSeconds: Duration = 0.25.seconds
     ) : SceneViewpointOperation()
 
     /**
@@ -82,12 +85,12 @@ public sealed class SceneViewpointOperation {
      * to arrive.
      *
      * @property camera the new camera
-     * @property duration the duration of the animation in seconds
+     * @property duration the duration of the animation
      * @since 200.4.0
      */
     public class AnimateCamera(
         public val camera: Camera,
-        public val durationSeconds: Float = 0.25f
+        public val durationSeconds: Duration = 0.25.seconds
     ) : SceneViewpointOperation()
 
     /**
@@ -117,7 +120,7 @@ internal suspend fun SceneViewpointOperation.execute(sceneView: SceneView) {
         }
         is SceneViewpointOperation.Animate -> {
             try {
-                val result = sceneView.setViewpointAnimated(this.viewpoint, this.durationSeconds)
+                val result = sceneView.setViewpointAnimated(this.viewpoint, this.durationSeconds.toDouble(DurationUnit.SECONDS).toFloat())
                 this.complete(result)
             } catch (e: CancellationException) {
                 this.complete(Result.success(false))
@@ -126,7 +129,7 @@ internal suspend fun SceneViewpointOperation.execute(sceneView: SceneView) {
         }
         is SceneViewpointOperation.AnimateCamera -> {
             try {
-                val result = sceneView.setViewpointCameraAnimated(this.camera, this.durationSeconds)
+                val result = sceneView.setViewpointCameraAnimated(this.camera, this.durationSeconds.toDouble(DurationUnit.SECONDS).toFloat())
                 this.complete(result)
             } catch (e: CancellationException) {
                 this.complete(Result.success(false))

@@ -26,6 +26,9 @@ import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.view.AnimationCurve
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.DurationUnit
 
 /**
  * Defines operations for setting the viewpoint of a composable [MapView].
@@ -63,13 +66,13 @@ public sealed class MapViewpointOperation {
      * navigation.
      *
      * @property viewpoint the new viewpoint
-     * @property durationSeconds the duration of the animation in seconds
+     * @property durationSeconds the duration of the animation
      * @property curve the animation curve to apply
      * @since 200.4.0
      */
     public class Animate(
         public val viewpoint: Viewpoint,
-        public val durationSeconds: Float = 0.25f,
+        public val durationSeconds: Duration = 0.25.seconds,
         public val curve: AnimationCurve? = null
     ) : MapViewpointOperation()
 
@@ -152,13 +155,13 @@ internal suspend fun MapViewpointOperation.execute(mapView: com.arcgismaps.mappi
                 val result = if (this.curve != null) {
                     mapView.setViewpointAnimated(
                         this.viewpoint,
-                        this.durationSeconds,
+                        this.durationSeconds.toDouble(DurationUnit.SECONDS).toFloat(),
                         this.curve
                     )
                 } else {
                     mapView.setViewpointAnimated(
                         this.viewpoint,
-                        this.durationSeconds
+                        this.durationSeconds.toDouble(DurationUnit.SECONDS).toFloat()
                     )
                 }
                 this.complete(result)
