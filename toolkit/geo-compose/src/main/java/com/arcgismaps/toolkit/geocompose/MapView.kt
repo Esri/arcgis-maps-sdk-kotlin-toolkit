@@ -255,29 +255,6 @@ private fun ViewpointChangedStateHandler(
 }
 
 /**
- * Sets up the attribution bar's property and events.
- */
-@Composable
-private fun AttributionStateHandler(mapView: MapView, attributionState: AttributionState) {
-    LaunchedEffect(attributionState) {
-        // isAttributionBarVisible does not take effect if applied in the AndroidView update callback
-        mapView.isAttributionBarVisible = attributionState.isAttributionBarVisible
-        launch {
-            mapView.attributionText.collect {
-                attributionState.onAttributionTextChanged?.invoke(it)
-            }
-        }
-        launch {
-            mapView.onAttributionBarLayoutChanged.collect { attributionBarLayoutChangedEvent ->
-                attributionState.onAttributionBarLayoutChanged?.invoke(
-                    attributionBarLayoutChangedEvent
-                )
-            }
-        }
-    }
-}
-
-/**
  * Sets up the callbacks for all the view-based [mapView] events.
  */
 @Composable
