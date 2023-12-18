@@ -40,6 +40,7 @@ import com.arcgismaps.mapping.view.SceneView
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
+import com.arcgismaps.mapping.view.ViewLabelProperties
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -48,6 +49,7 @@ import kotlinx.coroutines.launch
  *
  * @param modifier Modifier to be applied to the composable SceneView
  * @param arcGISScene the [ArcGISScene] to be rendered by this composable SceneView
+ * @param viewLabelProperties the [ViewLabelProperties] used by the composable MapView
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable SceneView
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable SceneView
  * @param onScale lambda invoked when a user performs a pinch gesture on the composable SceneView
@@ -64,6 +66,7 @@ import kotlinx.coroutines.launch
 public fun SceneView(
     modifier: Modifier = Modifier,
     arcGISScene: ArcGISScene? = null,
+    viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
     onScale: ((ScaleChangeEvent) -> Unit)? = null,
@@ -84,6 +87,7 @@ public fun SceneView(
         factory = { sceneView },
         update = {
             it.scene = arcGISScene
+            it.labeling = viewLabelProperties
         })
 
     DisposableEffect(Unit) {
