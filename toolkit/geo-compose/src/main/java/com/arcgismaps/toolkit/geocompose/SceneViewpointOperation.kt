@@ -73,7 +73,7 @@ public sealed class SceneViewpointOperation {
     ) : SceneViewpointOperation()
 
     /**
-     * Updates the display to the viewpoint specified by the given camera.
+     * Changes the scene view to the viewpoint specified by the given camera. The viewpoint is updated instantaneously.
      *
      * @property camera the new camera
      * @since 200.4.0
@@ -81,8 +81,7 @@ public sealed class SceneViewpointOperation {
     public class SetCamera(public val camera: Camera) : SceneViewpointOperation()
 
     /**
-     * Animates the display to the viewpoint specified by the given camera using the specified duration
-     * to arrive.
+     * Animates the scene view to the viewpoint specified by the given camera using the specified duration.
      *
      * @property camera the new camera
      * @property duration the duration of the animation
