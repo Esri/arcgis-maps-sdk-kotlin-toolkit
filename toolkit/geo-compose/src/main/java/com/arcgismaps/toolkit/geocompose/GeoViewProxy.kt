@@ -24,6 +24,7 @@ import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.IdentifyGraphicsOverlayResult
 import com.arcgismaps.mapping.view.IdentifyLayerResult
+import com.arcgismaps.mapping.view.LayerViewState
 import com.arcgismaps.mapping.view.ScreenCoordinate
 
 /**
@@ -242,5 +243,17 @@ public sealed class GeoViewProxy(className: String) {
         return if (maximumResults == null || maximumResults <= 0) {
             -1
         } else maximumResults
+    }
+
+    /**
+     * Retrieve the layer's [LayerViewState].
+     *
+     * @param layer the layer to retrieve the view state from
+     * @return the [LayerViewState] of the provided layer, or null if this proxy's GeoView is not
+     * part of the composition
+     * @since 200.4.0
+     */
+    public fun getLayerViewState(layer: Layer) : LayerViewState? {
+        return geoView?.getLayerViewState(layer)
     }
 }
