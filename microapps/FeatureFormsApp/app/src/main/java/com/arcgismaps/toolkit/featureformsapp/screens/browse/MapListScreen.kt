@@ -1,11 +1,6 @@
 package com.arcgismaps.toolkit.featureformsapp.screens.browse
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.with
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -32,7 +27,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.Close
@@ -52,6 +46,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -59,6 +54,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
@@ -67,7 +63,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
+import com.arcgismaps.portal.LoadableImage
 import com.arcgismaps.toolkit.featureformsapp.AnimatedLoading
 import com.arcgismaps.toolkit.featureformsapp.R
 import java.time.Instant
@@ -79,7 +75,6 @@ import java.util.Locale
  * Displays a list of PortalItems using the [mapListViewModel]. Provides a callback [onItemClick]
  * when an item is tapped.
  */
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun MapListScreen(
     modifier: Modifier = Modifier,
@@ -108,12 +103,9 @@ fun MapListScreen(
         )
         // use a cross fade animation to show a loading indicator when the data is loading
         // and transition to the list of portalItems once loaded
-        AnimatedContent(
+        Crossfade(
             targetState = uiState.isLoading,
             modifier = Modifier.padding(top = 88.dp),
-            transitionSpec = {
-                fadeIn(animationSpec = tween(1000)) with fadeOut()
-            },
             label = "list fade"
         ) { state ->
             when (state) {
@@ -127,6 +119,7 @@ fun MapListScreen(
                 }
 
                 false -> if (uiState.data.isNotEmpty()) {
+                    val itemThumbnailPlaceholder = painterResource(id = R.drawable.ic_default_map)
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         state = lazyListState,
@@ -136,16 +129,17 @@ fun MapListScreen(
                             uiState.data
                         ) { item ->
                             MapListItem(
-                                title = item.portalItem.title,
-                                lastModified = item.portalItem.modified?.format("MMM dd yyyy")
+                                title = item.title,
+                                lastModified = item.modified?.format("MMM dd yyyy")
                                     ?: "",
-                                shareType = item.portalItem.access.encoding.uppercase(Locale.getDefault()),
-                                thumbnailUri = item.thumbnailUri.ifEmpty { null },
+                                shareType = item.access.encoding.uppercase(Locale.getDefault()),
+                                thumbnail = item.thumbnail,
+                                placeholder = itemThumbnailPlaceholder,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(100.dp)
                             ) {
-                                onItemClick(item.portalItem.itemId)
+                                onItemClick(item.itemId)
                             }
                         }
                     }
@@ -179,8 +173,9 @@ fun MapListItem(
     title: String,
     lastModified: String,
     shareType: String,
+    thumbnail: LoadableImage?,
+    placeholder: Painter,
     modifier: Modifier = Modifier,
-    thumbnailUri: String? = null,
     onClick: () -> Unit = {}
 ) {
     Row(
@@ -190,26 +185,15 @@ fun MapListItem(
     ) {
         Spacer(modifier = Modifier.width(20.dp))
         Box {
-            thumbnailUri?.let {
-                AsyncImage(
-                    model = it,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxHeight(0.8f)
-                        .aspectRatio(16 / 9f)
-                        .clip(RoundedCornerShape(15.dp)),
-                    contentScale = ContentScale.Crop
-                )
-            } // if thumbnail is empty then use the default map placeholder
-                ?: Image(
-                    painter = painterResource(id = R.drawable.ic_default_map),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxHeight(0.8f)
-                        .aspectRatio(16 / 9f)
-                        .clip(RoundedCornerShape(15.dp)),
-                    contentScale = ContentScale.Crop
-                )
+            MapListItemThumbnail(
+                loadableImage = thumbnail,
+                placeholder = placeholder,
+                modifier = Modifier
+                    .fillMaxHeight(0.8f)
+                    .aspectRatio(16 / 9f)
+                    .clip(RoundedCornerShape(15.dp)),
+                contentScale = ContentScale.Crop
+            )
             Box(
                 modifier = Modifier
                     .padding(5.dp)
@@ -235,13 +219,42 @@ fun MapListItem(
 }
 
 @Composable
+fun MapListItemThumbnail(
+    loadableImage: LoadableImage?,
+    placeholder: Painter,
+    modifier: Modifier,
+    contentScale: ContentScale
+) {
+    val scope = rememberCoroutineScope()
+    loadableImage?.let {
+        val imageLoader = remember {
+            ImageLoader(
+                loadable = it,
+                scope = scope,
+                placeholder = placeholder,
+            )
+        }
+        AsyncImage(
+            imageLoader = imageLoader,
+            modifier = modifier,
+            contentScale =contentScale
+        )
+    } ?: Image(
+        painter = placeholder,
+        contentDescription = null,
+        modifier = modifier,
+        contentScale = contentScale
+    )
+}
+
+@Composable
 fun AppSearchBar(
     query: String,
     isLoading: Boolean,
     username: String,
     modifier: Modifier = Modifier,
     onQueryChange: (String) -> Unit = {},
-    onRefresh: (Boolean) -> Unit = {},
+    onRefresh: () -> Unit = {},
     onSignOut: () -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
@@ -289,7 +302,7 @@ fun AppSearchBar(
                     Icon(
                         imageVector = Icons.Default.AccountCircle,
                         contentDescription = null,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(30.dp)
                     )
                 }
                 MaterialTheme(
@@ -322,21 +335,10 @@ fun AppSearchBar(
                             enabled = !isLoading,
                             onClick = {
                                 expanded = false
-                                onRefresh(false)
+                                onRefresh()
                             },
                             leadingIcon = {
                                 Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text(text = "Clear Cache") },
-                            enabled = !isLoading,
-                            onClick = {
-                                expanded = false
-                                onRefresh(true)
-                            },
-                            leadingIcon = {
-                                Icon(imageVector = Icons.Default.Delete, contentDescription = null)
                             }
                         )
                         DropdownMenuItem(
@@ -398,7 +400,9 @@ fun MapListItemPreview() {
         title = "Water Utility",
         lastModified = "June 1 2023",
         shareType = "Public",
-        modifier = Modifier.size(width = 485.dp, height = 100.dp)
+        modifier = Modifier.size(width = 485.dp, height = 100.dp),
+        thumbnail = null,
+        placeholder = painterResource(id = R.drawable.ic_default_map)
     )
 }
 

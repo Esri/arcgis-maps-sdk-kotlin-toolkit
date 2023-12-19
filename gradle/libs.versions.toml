@@ -14,7 +14,6 @@ androidxMaterialIcons = "1.4.3"
 androidxTestExt = "1.1.2"
 androidxViewmodelCompose = "2.6.1"
 androidxWindow = "1.2.0"
-coil = "2.4.0"
 compileSdk = "34"
 compose-material3 = "1.1.0"
 compose-navigation = "2.7.5"
@@ -50,7 +49,6 @@ androidx-test-ext = { group = "androidx.test.ext", name = "junit-ktx", version.r
 androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidxEspresso" }
 androidx-window-core = { group = "androidx.window", name = "window-core", version.ref = "androidxWindow" }
 androidx-window = { group = "androidx.window", name = "window", version.ref = "androidxWindow" }
-coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 hilt-android-core = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 hilt-ext-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "hiltExt" }

@@ -4,7 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.toolkit.featureformsapp.data.PortalItemData
+import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
 import com.arcgismaps.toolkit.featureformsapp.data.PortalSettings
 import com.arcgismaps.toolkit.featureformsapp.navigation.NavigationRoute
@@ -22,7 +22,7 @@ import javax.inject.Inject
 data class MapListUIState(
     val isLoading: Boolean,
     val searchText: String,
-    val data: List<PortalItemData>
+    val data: List<PortalItem>
 )
 
 /**
@@ -51,8 +51,8 @@ class MapListViewModel @Inject constructor(
         ) { isLoading, searchText, portalItemData ->
             val data = portalItemData.filter {
                 searchText.isEmpty()
-                    || it.portalItem.title.uppercase().contains(searchText.uppercase())
-                    || it.portalItem.itemId.contains(searchText)
+                    || it.title.uppercase().contains(searchText.uppercase())
+                    || it.itemId.contains(searchText)
             }
             MapListUIState(isLoading, searchText, data)
         }.stateIn(
@@ -66,7 +66,7 @@ class MapListViewModel @Inject constructor(
             // if the data is empty, refresh it
             // this is used to identify first launch
             if (portalItemRepository.getItemCount() == 0) {
-                refresh(false)
+                refresh()
             }
         }
     }
@@ -80,16 +80,15 @@ class MapListViewModel @Inject constructor(
     }
 
     /**
-     * Refreshes the data. [forceUpdate] clears the local cache.
+     * Refreshes the data.
      */
-    fun refresh(forceUpdate: Boolean) {
+    fun refresh() {
         if (!_isLoading.value) {
             viewModelScope.launch {
                 _isLoading.emit(true)
                 portalItemRepository.refresh(
                     portalSettings.getPortalUrl(),
-                    portalSettings.getPortalConnection(),
-                    forceUpdate
+                    portalSettings.getPortalConnection()
                 )
                 _isLoading.emit(false)
             }

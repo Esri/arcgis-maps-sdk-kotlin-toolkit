@@ -76,8 +76,6 @@ dependencies {
     annotationProcessor(libs.room.compiler)
     implementation(libs.room.ext)
     kapt(libs.room.compiler)
-    // coil
-    implementation(libs.coil.compose)
     // jetpack window manager
     implementation(libs.androidx.window)
     implementation(libs.androidx.window.core)
