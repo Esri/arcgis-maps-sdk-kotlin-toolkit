@@ -17,7 +17,10 @@
 
 package com.arcgismaps.toolkit.geocompose
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
+import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -105,3 +108,39 @@ public class GraphicsOverlayCollection : Iterable<GraphicsOverlay> {
     }
 }
 
+
+/**
+ * Update the view-based [geoView]'s graphicsOverlays property to reflect changes made to the
+ * [graphicsOverlayCollection] based on the type of [GraphicsOverlayCollection.ChangedEvent]
+ *
+ * @since 200.4.0
+ */
+@Composable
+internal fun GraphicsOverlaysUpdater(
+    graphicsOverlayCollection: GraphicsOverlayCollection,
+    geoView: GeoView
+) {
+    LaunchedEffect(graphicsOverlayCollection) {
+        // sync up the GeoView with the new graphics overlays
+        geoView.graphicsOverlays.clear()
+        graphicsOverlayCollection.forEach {
+            geoView.graphicsOverlays.add(it)
+        }
+        // start observing graphicsOverlays for subsequent changes
+        graphicsOverlayCollection.changed.collect { changedEvent ->
+            when (changedEvent) {
+                // On GraphicsOverlay added:
+                is GraphicsOverlayCollection.ChangedEvent.Added ->
+                    geoView.graphicsOverlays.add(changedEvent.element)
+
+                // On GraphicsOverlay removed:
+                is GraphicsOverlayCollection.ChangedEvent.Removed ->
+                    geoView.graphicsOverlays.remove(changedEvent.element)
+
+                // On GraphicsOverlays cleared:
+                is GraphicsOverlayCollection.ChangedEvent.Cleared ->
+                    geoView.graphicsOverlays.clear()
+            }
+        }
+    }
+}
