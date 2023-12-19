@@ -48,6 +48,7 @@ import kotlinx.coroutines.launch
  *
  * @param modifier Modifier to be applied to the composable SceneView
  * @param arcGISScene the [ArcGISScene] to be rendered by this composable SceneView
+ * @param viewpointOperation a [SceneViewpointOperation] that changes this SceneView to a new viewpoint
  * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable SceneView
  * @param sceneViewProxy the [SceneViewProxy] to associate with the composable SceneView
  * @param onNavigationChanged lambda invoked when the navigation status of the composable SceneView has changed
@@ -67,6 +68,7 @@ import kotlinx.coroutines.launch
 public fun SceneView(
     modifier: Modifier = Modifier,
     arcGISScene: ArcGISScene? = null,
+    viewpointOperation: SceneViewpointOperation? = null,
     graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
     sceneViewProxy: SceneViewProxy? = null,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
@@ -107,6 +109,8 @@ public fun SceneView(
         }
     }
 
+    ViewpointUpdater(sceneView, viewpointOperation)
+
     GraphicsOverlaysUpdater(graphicsOverlays, sceneView)
 
     SceneViewEventHandler(
@@ -123,6 +127,22 @@ public fun SceneView(
         onTwoPointerTap,
         onPan,
     )
+}
+
+/**
+ * Updates the viewpoint of the provided view-based [sceneView] using the given [viewpointOperation]. This will be
+ * recomposed when [viewpointOperation] changes.
+ *
+ * @since 200.4.0
+ */
+@Composable
+private fun ViewpointUpdater(
+    sceneView: SceneView,
+    viewpointOperation: SceneViewpointOperation?
+) {
+    LaunchedEffect(viewpointOperation) {
+        viewpointOperation?.execute(sceneView)
+    }
 }
 
 /**
