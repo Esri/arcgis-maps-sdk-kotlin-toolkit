@@ -66,13 +66,13 @@ public sealed class MapViewpointOperation {
      * navigation.
      *
      * @property viewpoint the new viewpoint
-     * @property durationSeconds the duration of the animation
+     * @property duration the duration of the animation
      * @property curve the animation curve to apply
      * @since 200.4.0
      */
     public class Animate(
         public val viewpoint: Viewpoint,
-        public val durationSeconds: Duration = 0.25.seconds,
+        public val duration: Duration = 0.25.seconds,
         public val curve: AnimationCurve? = null
     ) : MapViewpointOperation()
 
@@ -155,13 +155,13 @@ internal suspend fun MapViewpointOperation.execute(mapView: com.arcgismaps.mappi
                 val result = if (this.curve != null) {
                     mapView.setViewpointAnimated(
                         this.viewpoint,
-                        this.durationSeconds.toDouble(DurationUnit.SECONDS).toFloat(),
+                        this.duration.toDouble(DurationUnit.SECONDS).toFloat(),
                         this.curve
                     )
                 } else {
                     mapView.setViewpointAnimated(
                         this.viewpoint,
-                        this.durationSeconds.toDouble(DurationUnit.SECONDS).toFloat()
+                        this.duration.toDouble(DurationUnit.SECONDS).toFloat()
                     )
                 }
                 this.complete(result)

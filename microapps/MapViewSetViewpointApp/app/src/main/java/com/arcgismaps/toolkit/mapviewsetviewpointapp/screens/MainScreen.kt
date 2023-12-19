@@ -52,6 +52,7 @@ import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.view.AnimationCurve
 import com.arcgismaps.toolkit.geocompose.MapView
 import com.arcgismaps.toolkit.geocompose.MapViewpointOperation
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Displays a composable [MapView] and permits setting the viewpoint using options in a dropdown menu.
@@ -150,7 +151,7 @@ fun SetViewpointDropdownMenu(
                     val viewpointOperation = when (viewpointOperationName) {
                         "Animate" -> MapViewpointOperation.Animate(
                             Viewpoint(sofia, scale),
-                            5f,
+                            5.0.seconds,
                             AnimationCurve.EaseOutCubic
                         )
 

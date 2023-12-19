@@ -64,12 +64,12 @@ public sealed class SceneViewpointOperation {
      * navigation.
      *
      * @property viewpoint the new viewpoint
-     * @property durationSeconds the duration of the animation
+     * @property duration the duration of the animation
      * @since 200.4.0
      */
     public class Animate(
         public val viewpoint: Viewpoint,
-        public val durationSeconds: Duration = 0.25.seconds
+        public val duration: Duration = 0.25.seconds
     ) : SceneViewpointOperation()
 
     /**
@@ -89,7 +89,7 @@ public sealed class SceneViewpointOperation {
      */
     public class AnimateCamera(
         public val camera: Camera,
-        public val durationSeconds: Duration = 0.25.seconds
+        public val duration: Duration = 0.25.seconds
     ) : SceneViewpointOperation()
 
     /**
@@ -119,7 +119,7 @@ internal suspend fun SceneViewpointOperation.execute(sceneView: SceneView) {
         }
         is SceneViewpointOperation.Animate -> {
             try {
-                val result = sceneView.setViewpointAnimated(this.viewpoint, this.durationSeconds.toDouble(DurationUnit.SECONDS).toFloat())
+                val result = sceneView.setViewpointAnimated(this.viewpoint, this.duration.toDouble(DurationUnit.SECONDS).toFloat())
                 this.complete(result)
             } catch (e: CancellationException) {
                 this.complete(Result.success(false))
@@ -128,7 +128,7 @@ internal suspend fun SceneViewpointOperation.execute(sceneView: SceneView) {
         }
         is SceneViewpointOperation.AnimateCamera -> {
             try {
-                val result = sceneView.setViewpointCameraAnimated(this.camera, this.durationSeconds.toDouble(DurationUnit.SECONDS).toFloat())
+                val result = sceneView.setViewpointCameraAnimated(this.camera, this.duration.toDouble(DurationUnit.SECONDS).toFloat())
                 this.complete(result)
             } catch (e: CancellationException) {
                 this.complete(Result.success(false))
