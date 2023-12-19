@@ -48,6 +48,7 @@ import kotlinx.coroutines.launch
  *
  * @param modifier Modifier to be applied to the composable SceneView
  * @param arcGISScene the [ArcGISScene] to be rendered by this composable SceneView
+ * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable SceneView
  * @param sceneViewProxy the [SceneViewProxy] to associate with the composable SceneView
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable SceneView
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable SceneView
@@ -65,6 +66,7 @@ import kotlinx.coroutines.launch
 public fun SceneView(
     modifier: Modifier = Modifier,
     arcGISScene: ArcGISScene? = null,
+    graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
     sceneViewProxy: SceneViewProxy? = null,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
@@ -102,6 +104,8 @@ public fun SceneView(
             sceneViewProxy?.setSceneView(null)
         }
     }
+
+    GraphicsOverlaysUpdater(graphicsOverlays, sceneView)
 
     SceneViewEventHandler(
         sceneView,
