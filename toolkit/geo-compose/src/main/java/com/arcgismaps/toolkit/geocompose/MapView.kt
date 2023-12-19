@@ -399,40 +399,6 @@ private fun MapViewEventHandler(
 }
 
 /**
- * Update the view-based [mapView]'s graphicsOverlays property to reflect changes made to the
- * [graphicsOverlayCollection] based on the type of [GraphicsOverlayCollection.ChangedEvent]
- */
-@Composable
-private fun GraphicsOverlaysUpdater(
-    graphicsOverlayCollection: GraphicsOverlayCollection,
-    mapView: MapView
-) {
-    LaunchedEffect(graphicsOverlayCollection) {
-        // sync up the MapView with the new graphics overlays
-        mapView.graphicsOverlays.clear()
-        graphicsOverlayCollection.forEach {
-            mapView.graphicsOverlays.add(it)
-        }
-        // start observing graphicsOverlays for subsequent changes
-        graphicsOverlayCollection.changed.collect { changedEvent ->
-            when (changedEvent) {
-                // On GraphicsOverlay added:
-                is GraphicsOverlayCollection.ChangedEvent.Added ->
-                    mapView.graphicsOverlays.add(changedEvent.element)
-
-                // On GraphicsOverlay removed:
-                is GraphicsOverlayCollection.ChangedEvent.Removed ->
-                    mapView.graphicsOverlays.remove(changedEvent.element)
-
-                // On GraphicsOverlays cleared:
-                is GraphicsOverlayCollection.ChangedEvent.Cleared ->
-                    mapView.graphicsOverlays.clear()
-            }
-        }
-    }
-}
-
-/**
  * Create and [remember] a [LocationDisplay].
  * Checks that [ArcGISEnvironment.applicationContext] is set and if not, sets one.
  * [init] will be called when the [LocationDisplay] is first created to configure its

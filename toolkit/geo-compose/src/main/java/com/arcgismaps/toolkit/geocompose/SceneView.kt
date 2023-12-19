@@ -48,6 +48,8 @@ import kotlinx.coroutines.launch
  *
  * @param modifier Modifier to be applied to the composable SceneView
  * @param arcGISScene the [ArcGISScene] to be rendered by this composable SceneView
+ * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable SceneView
+ * @param sceneViewProxy the [SceneViewProxy] to associate with the composable SceneView
  * @param attributionState specifies the attribution bar's visibility, text changed and layout changed events
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable SceneView
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable SceneView
@@ -65,6 +67,8 @@ import kotlinx.coroutines.launch
 public fun SceneView(
     modifier: Modifier = Modifier,
     arcGISScene: ArcGISScene? = null,
+    graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
+    sceneViewProxy: SceneViewProxy? = null,
     attributionState: AttributionState = AttributionState(),
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
@@ -95,6 +99,15 @@ public fun SceneView(
             sceneView.onDestroy(lifecycleOwner)
         }
     }
+
+    DisposableEffect(sceneViewProxy) {
+        sceneViewProxy?.setSceneView(sceneView)
+        onDispose {
+            sceneViewProxy?.setSceneView(null)
+        }
+    }
+
+    GraphicsOverlaysUpdater(graphicsOverlays, sceneView)
 
     AttributionStateHandler(sceneView, attributionState)
 
