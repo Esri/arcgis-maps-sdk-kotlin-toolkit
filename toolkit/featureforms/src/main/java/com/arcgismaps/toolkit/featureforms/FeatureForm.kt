@@ -2,12 +2,9 @@ package com.arcgismaps.toolkit.featureforms
 
 import android.content.Context
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.with
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -26,7 +23,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
@@ -70,30 +66,27 @@ import java.util.Objects
 /**
  * A composable Form toolkit component that enables users to edit field values of features in a
  * layer using forms that have been configured externally (using either in the the Web Map Viewer
- * or the Fields Maps web app). The composable uses the [featureFormState] as the UI state.
+ * or the Fields Maps web app).
+ *
+ * @param featureForm The [FeatureForm] configuration.
+ * @param modifier The [Modifier] to be applied to layout corresponding to the content of this
+ * FeatureForm.
  *
  * @since 200.2.0
  */
 @Composable
 public fun FeatureForm(
-    featureFormState: FeatureFormState,
+    featureForm: FeatureForm,
     modifier: Modifier = Modifier
 ) {
-    val featureForm by featureFormState.featureForm.collectAsState()
     var initialEvaluation by rememberSaveable(featureForm) { mutableStateOf(false) }
-
-    featureForm?.let {
-        InitializingExpressions(modifier) {
-            initialEvaluation
-        }
-        FeatureFormContent(form = it, modifier = modifier)
-    } ?: run {
-        NoDataToDisplay(modifier)
+    InitializingExpressions(modifier) {
+        initialEvaluation
     }
-
+    FeatureFormContent(form = featureForm, modifier = modifier)
     LaunchedEffect(featureForm) {
         // ensure expressions are evaluated before state objects are created.
-        featureForm?.evaluateExpressions()
+        featureForm.evaluateExpressions()
         // add an artificial delay of 300ms to avoid the slight flicker if the
         // expressions are evaluated quickly
         delay(300)
@@ -101,7 +94,6 @@ public fun FeatureForm(
     }
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 internal fun InitializingExpressions(
     modifier: Modifier = Modifier,
@@ -110,10 +102,7 @@ internal fun InitializingExpressions(
     AnimatedContent(
         targetState = evaluationProvider(),
         transitionSpec = {
-            slideInVertically() with
-                slideOutVertically(
-                    animationSpec = tween()
-                ) { 0 } + fadeOut()
+            fadeIn() togetherWith fadeOut()
         },
         label = "evaluation loading animation"
     ) { evaluated ->
@@ -138,15 +127,6 @@ internal fun InitializingExpressions(
                 }
             }
         }
-    }
-}
-
-@Composable
-internal fun NoDataToDisplay(modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier.fillMaxSize()
-    ) {
-        Text(text = "No information to display.")
     }
 }
 
@@ -292,7 +272,7 @@ internal fun rememberFieldStates(
     scope: CoroutineScope
 ): Map<Int, BaseFieldState<*>> {
     val stateMap = mutableMapOf<Int, BaseFieldState<*>>()
-    elements.forEach {  element ->
+    elements.forEach { element ->
         if (element is FieldFormElement) {
             val state = when (element.input) {
                 is TextBoxFormInput, is TextAreaFormInput -> {
@@ -374,13 +354,6 @@ internal fun rememberFieldStates(
 @Composable
 private fun InitializingExpressionsPreview() {
     InitializingExpressions { false }
-}
-
-
-@Preview
-@Composable
-private fun NoDataPreview() {
-    NoDataToDisplay()
 }
 
 /**
