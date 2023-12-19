@@ -49,6 +49,7 @@ import kotlinx.coroutines.launch
  * @param modifier Modifier to be applied to the composable SceneView
  * @param arcGISScene the [ArcGISScene] to be rendered by this composable SceneView
  * @param viewpointOperation a [SceneViewpointOperation] that changes this SceneView to a new viewpoint
+ * @param sceneViewProxy the [SceneViewProxy] to associate with the composable SceneView
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable SceneView
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable SceneView
  * @param onScale lambda invoked when a user performs a pinch gesture on the composable SceneView
@@ -66,6 +67,7 @@ public fun SceneView(
     modifier: Modifier = Modifier,
     arcGISScene: ArcGISScene? = null,
     viewpointOperation: SceneViewpointOperation? = null,
+    sceneViewProxy: SceneViewProxy? = null,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
     onScale: ((ScaleChangeEvent) -> Unit)? = null,
@@ -93,6 +95,13 @@ public fun SceneView(
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(sceneView)
             sceneView.onDestroy(lifecycleOwner)
+        }
+    }
+
+    DisposableEffect(sceneViewProxy) {
+        sceneViewProxy?.setSceneView(sceneView)
+        onDispose {
+            sceneViewProxy?.setSceneView(null)
         }
     }
 
