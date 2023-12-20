@@ -17,6 +17,8 @@
 
 package com.arcgismaps.toolkit.geocompose
 
+import com.arcgismaps.mapping.view.Camera
+
 /**
  * Used to perform operations on a composable [SceneView].
  *
@@ -49,5 +51,15 @@ public class SceneViewProxy : GeoViewProxy("SceneView") {
      */
     internal fun setSceneView(sceneView: com.arcgismaps.mapping.view.SceneView?) {
         this.sceneView = sceneView
+    }
+
+    /**
+     * Retrieve the camera displaying the current viewpoint, or return null if none is available.
+     *
+     * @return a [Camera]
+     * @since 200.4.0
+     */
+    public fun getCurrentViewpointCameraOrNull(): Camera? {
+      return this.sceneView?.getCurrentViewpointCamera()
     }
 }
