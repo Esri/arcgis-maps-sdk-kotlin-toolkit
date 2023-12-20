@@ -40,6 +40,7 @@ import com.arcgismaps.mapping.view.SceneView
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
+import com.arcgismaps.mapping.view.ViewLabelProperties
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -51,6 +52,7 @@ import kotlinx.coroutines.launch
  * @param viewpointOperation a [SceneViewpointOperation] that changes this SceneView to a new viewpoint
  * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable SceneView
  * @param sceneViewProxy the [SceneViewProxy] to associate with the composable SceneView
+ * @param viewLabelProperties the [ViewLabelProperties] used by the composable SceneView
  * @param onNavigationChanged lambda invoked when the navigation status of the composable SceneView has changed
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable SceneView
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable SceneView
@@ -71,6 +73,7 @@ public fun SceneView(
     viewpointOperation: SceneViewpointOperation? = null,
     graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
     sceneViewProxy: SceneViewProxy? = null,
+    viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
@@ -92,6 +95,7 @@ public fun SceneView(
         factory = { sceneView },
         update = {
             it.scene = arcGISScene
+            it.labeling = viewLabelProperties
         })
 
     DisposableEffect(Unit) {
