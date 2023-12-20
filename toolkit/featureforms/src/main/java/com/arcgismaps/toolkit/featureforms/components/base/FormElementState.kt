@@ -17,9 +17,10 @@
 package com.arcgismaps.toolkit.featureforms.components.base
 
 import kotlinx.coroutines.flow.StateFlow
+import com.arcgismaps.mapping.featureforms.FormElement
 
 /**
- * Base state class for a [com.arcgismaps.mapping.featureforms.FormElement].
+ * Base state class for a [FormElement].
  *
  * @param label Title for the field.
  * @param description Description text for the field.

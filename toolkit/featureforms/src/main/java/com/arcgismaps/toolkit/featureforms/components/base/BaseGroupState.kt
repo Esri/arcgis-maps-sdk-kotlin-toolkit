@@ -47,7 +47,7 @@ internal class BaseGroupState(
         fun Saver(
             groupElement: GroupFormElement,
             fieldStates: Map<Int, BaseFieldState<*>>
-        ): Saver<BaseGroupState, Any> = Saver(
+        ): Saver<BaseGroupState, Boolean> = Saver(
             save = {
                 it.expanded.value
             },
@@ -56,7 +56,7 @@ internal class BaseGroupState(
                     label = groupElement.label,
                     description = groupElement.description,
                     isVisible = groupElement.isVisible,
-                    expanded = it as Boolean,
+                    expanded = it,
                     fieldStates = fieldStates
                 )
             }
