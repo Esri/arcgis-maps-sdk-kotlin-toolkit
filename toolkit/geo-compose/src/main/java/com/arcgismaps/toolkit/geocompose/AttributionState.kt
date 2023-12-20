@@ -38,6 +38,8 @@ public data class AttributionState(
 
 /**
  * Sets up the attribution bar's property and events.
+ *
+ * @since 200.4.0
  */
 @Composable
 internal fun AttributionStateHandler(geoView: GeoView, attributionState: AttributionState) {
