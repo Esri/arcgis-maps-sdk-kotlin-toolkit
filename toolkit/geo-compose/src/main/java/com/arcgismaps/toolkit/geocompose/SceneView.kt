@@ -41,6 +41,7 @@ import com.arcgismaps.mapping.view.SceneViewInteractionOptions
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
+import com.arcgismaps.mapping.view.ViewLabelProperties
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -53,6 +54,9 @@ import kotlinx.coroutines.launch
  * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable SceneView
  * @param sceneViewProxy the [SceneViewProxy] to associate with the composable SceneView
  * @param sceneViewInteractionOptions the [SceneViewInteractionOptions] used by this composable SceneView
+ * @param viewLabelProperties the [ViewLabelProperties] used by the composable SceneView
+ * @param attributionState specifies the attribution bar's visibility, text changed and layout changed events
+ * @param onNavigationChanged lambda invoked when the navigation status of the composable SceneView has changed
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable SceneView
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable SceneView
  * @param onScale lambda invoked when a user performs a pinch gesture on the composable SceneView
@@ -73,6 +77,9 @@ public fun SceneView(
     graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
     sceneViewProxy: SceneViewProxy? = null,
     sceneViewInteractionOptions: SceneViewInteractionOptions = SceneViewInteractionOptions(),
+    viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
+    attributionState: AttributionState = AttributionState(),
+    onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
     onScale: ((ScaleChangeEvent) -> Unit)? = null,
@@ -94,6 +101,7 @@ public fun SceneView(
         update = {
             it.scene = arcGISScene
             it.interactionOptions = sceneViewInteractionOptions
+            it.labeling = viewLabelProperties
         })
 
     DisposableEffect(Unit) {
@@ -115,8 +123,11 @@ public fun SceneView(
 
     GraphicsOverlaysUpdater(graphicsOverlays, sceneView)
 
+    AttributionStateHandler(sceneView, attributionState)
+
     SceneViewEventHandler(
         sceneView,
+        onNavigationChanged,
         onInteractingChanged,
         onRotate,
         onScale,
@@ -152,6 +163,7 @@ private fun ViewpointUpdater(
 @Composable
 private fun SceneViewEventHandler(
     sceneView: SceneView,
+    onNavigationChanged: ((isNavigating: Boolean) -> Unit)?,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)?,
     onRotate: ((RotationChangeEvent) -> Unit)?,
     onScale: ((ScaleChangeEvent) -> Unit)?,
@@ -163,6 +175,7 @@ private fun SceneViewEventHandler(
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)?,
     onPan: ((PanChangeEvent) -> Unit)?,
 ) {
+    val currentOnNavigationChanged by rememberUpdatedState(onNavigationChanged)
     val currentOnInteractingChanged by rememberUpdatedState(onInteractingChanged)
     val currentOnRotate by rememberUpdatedState(onRotate)
     val currentOnScale by rememberUpdatedState(onScale)
@@ -175,6 +188,11 @@ private fun SceneViewEventHandler(
     val currentOnPan by rememberUpdatedState(onPan)
 
     LaunchedEffect(Unit) {
+        launch {
+            sceneView.navigationChanged.collect {
+                currentOnNavigationChanged?.invoke(it)
+            }
+        }
         launch(Dispatchers.Main.immediate) {
             sceneView.isInteracting.collect { isInteracting ->
                 currentOnInteractingChanged?.invoke(isInteracting)
