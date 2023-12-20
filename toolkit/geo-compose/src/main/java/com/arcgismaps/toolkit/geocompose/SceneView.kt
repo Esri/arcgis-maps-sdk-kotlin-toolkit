@@ -37,6 +37,7 @@ import com.arcgismaps.mapping.view.PanChangeEvent
 import com.arcgismaps.mapping.view.RotationChangeEvent
 import com.arcgismaps.mapping.view.ScaleChangeEvent
 import com.arcgismaps.mapping.view.SceneView
+import com.arcgismaps.mapping.view.SceneViewInteractionOptions
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
@@ -52,6 +53,7 @@ import kotlinx.coroutines.launch
  * @param viewpointOperation a [SceneViewpointOperation] that changes this SceneView to a new viewpoint
  * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable SceneView
  * @param sceneViewProxy the [SceneViewProxy] to associate with the composable SceneView
+ * @param sceneViewInteractionOptions the [SceneViewInteractionOptions] used by this composable SceneView
  * @param viewLabelProperties the [ViewLabelProperties] used by the composable SceneView
  * @param attributionState specifies the attribution bar's visibility, text changed and layout changed events
  * @param onNavigationChanged lambda invoked when the navigation status of the composable SceneView has changed
@@ -74,6 +76,7 @@ public fun SceneView(
     viewpointOperation: SceneViewpointOperation? = null,
     graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
     sceneViewProxy: SceneViewProxy? = null,
+    sceneViewInteractionOptions: SceneViewInteractionOptions = SceneViewInteractionOptions(),
     viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
     attributionState: AttributionState = AttributionState(),
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
@@ -97,6 +100,7 @@ public fun SceneView(
         factory = { sceneView },
         update = {
             it.scene = arcGISScene
+            it.interactionOptions = sceneViewInteractionOptions
             it.labeling = viewLabelProperties
         })
 
