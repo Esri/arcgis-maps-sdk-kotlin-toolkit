@@ -37,6 +37,7 @@ import com.arcgismaps.mapping.view.PanChangeEvent
 import com.arcgismaps.mapping.view.RotationChangeEvent
 import com.arcgismaps.mapping.view.ScaleChangeEvent
 import com.arcgismaps.mapping.view.SceneView
+import com.arcgismaps.mapping.view.SceneViewInteractionOptions
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
@@ -51,6 +52,7 @@ import kotlinx.coroutines.launch
  * @param viewpointOperation a [SceneViewpointOperation] that changes this SceneView to a new viewpoint
  * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable SceneView
  * @param sceneViewProxy the [SceneViewProxy] to associate with the composable SceneView
+ * @param sceneViewInteractionOptions a [SceneViewInteractionOptions] that configures the interaction options for the composable SceneView
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable SceneView
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable SceneView
  * @param onScale lambda invoked when a user performs a pinch gesture on the composable SceneView
@@ -70,6 +72,7 @@ public fun SceneView(
     viewpointOperation: SceneViewpointOperation? = null,
     graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
     sceneViewProxy: SceneViewProxy? = null,
+    sceneViewInteractionOptions: SceneViewInteractionOptions = SceneViewInteractionOptions(),
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
     onScale: ((ScaleChangeEvent) -> Unit)? = null,
@@ -90,6 +93,7 @@ public fun SceneView(
         factory = { sceneView },
         update = {
             it.scene = arcGISScene
+            it.interactionOptions = sceneViewInteractionOptions
         })
 
     DisposableEffect(Unit) {
