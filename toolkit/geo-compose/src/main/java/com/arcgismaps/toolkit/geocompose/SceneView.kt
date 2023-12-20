@@ -52,7 +52,7 @@ import kotlinx.coroutines.launch
  * @param viewpointOperation a [SceneViewpointOperation] that changes this SceneView to a new viewpoint
  * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable SceneView
  * @param sceneViewProxy the [SceneViewProxy] to associate with the composable SceneView
- * @param sceneViewInteractionOptions a [SceneViewInteractionOptions] that configures the interaction options for the composable SceneView
+ * @param sceneViewInteractionOptions the [SceneViewInteractionOptions] used by this composable SceneView
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable SceneView
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable SceneView
  * @param onScale lambda invoked when a user performs a pinch gesture on the composable SceneView
