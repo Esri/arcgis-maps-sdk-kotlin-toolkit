@@ -39,26 +39,61 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.time.Instant
 
+/**
+ * Local containing the default [DialogRequester] for providing the same instance in the
+ * compose hierarchy.
+ */
 internal val LocalDialogRequester = staticCompositionLocalOf { DialogRequester() }
 
+/**
+ * A handler that handles dialog requests during the lifetime of a FeatureForm.
+ */
 internal class DialogRequester {
+
     private val _requestFlow: MutableStateFlow<DialogType?> = MutableStateFlow(null)
+
+    /**
+     * Observe this state flow to receive dialog requests.
+     */
     val requestFlow: StateFlow<DialogType?> = _requestFlow.asStateFlow()
 
+    /**
+     * Request a dialog with the specified [dialogType].
+     */
     fun requestDialog(dialogType: DialogType) {
         _requestFlow.value = dialogType
     }
 
+    /**
+     * Dismiss any active dialog.
+     */
     fun dismissDialog() {
         _requestFlow.value = null
     }
 }
 
+/**
+ * Specifies the type of dialog to use for a [FeatureFormDialog].
+ */
 internal sealed class DialogType {
+    /**
+     * Indicates a [ComboBoxDialog].
+     *
+     * @param state The [CodedValueFieldState] to use for the dialog.
+     */
     data class ComboBoxDialog(val state: CodedValueFieldState) : DialogType()
+
+    /**
+     * Indicates a [DateTimePicker].
+     *
+     * @param state The [DateTimeFieldState] to use for the dialog.
+     */
     data class DateTimeDialog(val state: DateTimeFieldState) : DialogType()
 }
 
+/**
+ * Shows the appropriate dialogs as requested by the [LocalDialogRequester].
+ */
 @Composable
 internal fun FeatureFormDialog() {
     val dialogRequester = LocalDialogRequester.current
