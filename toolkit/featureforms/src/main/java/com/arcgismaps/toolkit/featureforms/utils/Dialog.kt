@@ -19,13 +19,14 @@ package com.arcgismaps.toolkit.featureforms.utils
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
 import com.arcgismaps.toolkit.featureforms.R
-import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.CodedValueFieldState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.ComboBoxDialog
 import com.arcgismaps.toolkit.featureforms.components.datetime.DateTimeFieldState
@@ -33,128 +34,127 @@ import com.arcgismaps.toolkit.featureforms.components.datetime.picker.DateTimePi
 import com.arcgismaps.toolkit.featureforms.components.datetime.picker.DateTimePickerInput
 import com.arcgismaps.toolkit.featureforms.components.datetime.picker.DateTimePickerStyle
 import com.arcgismaps.toolkit.featureforms.components.datetime.picker.rememberDateTimePickerState
-import java.io.Serializable
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.time.Instant
 
 /**
- * Specifies the type of dialog to use for a [FeatureFormDialog].
+ * Local containing the default [DialogRequester] for providing the same instance in the
+ * compose hierarchy.
  */
-internal sealed class DialogType : Serializable {
-    /**
-     * Indicates no dialog should be shown.
-     */
-    object NoDialog : DialogType()
+internal val LocalDialogRequester = staticCompositionLocalOf { DialogRequester() }
+
+/**
+ * A handler that handles dialog requests during the lifetime of a FeatureForm.
+ */
+internal class DialogRequester {
+
+    private val _requestFlow: MutableStateFlow<DialogType?> = MutableStateFlow(null)
 
     /**
-     * Indicates a [DatePickerDialog] should be shown.
-     *
-     * @param stateKey the key for a [DateTimeFieldState].
+     * Observe this state flow to receive dialog requests.
      */
-    data class DatePickerDialog(val stateKey: Int) : DialogType()
+    val requestFlow: StateFlow<DialogType?> = _requestFlow.asStateFlow()
 
     /**
-     * Indicates a [ComboBoxDialog]
-     *
-     * @param stateKey the key for a [CodedValueFieldState].
+     * Request a dialog with the specified [dialogType].
      */
-    data class ComboBoxDialog(val stateKey: Int) : DialogType()
+    fun requestDialog(dialogType: DialogType) {
+        _requestFlow.value = dialogType
+    }
 
     /**
-     * Returns the key for this dialog type state. Null is returned if its a [NoDialog].
+     * Dismiss any active dialog.
      */
-    fun getStateKey(): Int? {
-        return when (this) {
-            is DatePickerDialog -> {
-                stateKey
-            }
-
-            is ComboBoxDialog -> {
-                stateKey
-            }
-
-            is NoDialog -> {
-                null
-            }
-        }
+    fun dismissDialog() {
+        _requestFlow.value = null
     }
 }
 
 /**
- * A dialog container for different field types.
- *
- * @param dialogType the [DialogType] to show.
- * @param state the [BaseFieldState] associated with the field element. This will be cast to its
- * appropriate subtype based on the [dialogType].
- * @param onDismissRequest a callback invoked to dismiss the dialog when the user clicks outside
- * the dialog or on the back button.
+ * Specifies the type of dialog to use for a [FeatureFormDialog].
+ */
+internal sealed class DialogType {
+    /**
+     * Indicates a [ComboBoxDialog].
+     *
+     * @param state The [CodedValueFieldState] to use for the dialog.
+     */
+    data class ComboBoxDialog(val state: CodedValueFieldState) : DialogType()
+
+    /**
+     * Indicates a [DateTimePicker].
+     *
+     * @param state The [DateTimeFieldState] to use for the dialog.
+     */
+    data class DateTimeDialog(val state: DateTimeFieldState) : DialogType()
+}
+
+/**
+ * Shows the appropriate dialogs as requested by the [LocalDialogRequester].
  */
 @Composable
-internal fun FeatureFormDialog(
-    dialogType: DialogType,
-    state: BaseFieldState<*>?,
-    onDismissRequest: () -> Unit
-) {
+internal fun FeatureFormDialog() {
+    val dialogRequester = LocalDialogRequester.current
+    val dialogType by dialogRequester.requestFlow.collectAsState()
     when (dialogType) {
-        is DialogType.NoDialog -> {
-            /* show nothing */
-        }
-
-        is DialogType.DatePickerDialog -> {
-            if (state is DateTimeFieldState) {
-                val shouldShowTime = remember {
-                    state.shouldShowTime
-                }
-                val pickerStyle = if (shouldShowTime) {
-                    DateTimePickerStyle.DateTime
-                } else {
-                    DateTimePickerStyle.Date
-                }
-                val pickerState = rememberDateTimePickerState(
-                    pickerStyle,
-                    state.minEpochMillis,
-                    state.maxEpochMillis,
-                    state.value.collectAsState().value,
-                    state.label,
-                    state.description,
-                    DateTimePickerInput.Date
-                )
-                // the picker dialog
-                DateTimePicker(
-                    state = pickerState,
-                    onDismissRequest = onDismissRequest,
-                    onCancelled = onDismissRequest,
-                    onConfirmed = {
-                        state.onValueChanged(pickerState.selectedDateTimeMillis?.let {
-                            Instant.ofEpochMilli(it)
-                        })
-                        onDismissRequest()
-                    }
-                )
-            }
-        }
-
         is DialogType.ComboBoxDialog -> {
-            if (state is CodedValueFieldState) {
-                ComboBoxDialog(
-                    initialValue = state.value.collectAsState().value,
-                    values = state.codedValues.associateBy({ it.code }, { it.name }),
-                    label = state.label,
-                    description = state.description,
-                    isRequired = state.isRequired.collectAsState().value,
-                    noValueOption = state.showNoValueOption,
-                    keyboardType = if (state.fieldType.isNumeric) {
-                        KeyboardType.Number
-                    } else {
-                        KeyboardType.Ascii
-                    },
-                    noValueLabel = state.noValueLabel.ifEmpty { stringResource(R.string.no_value) },
-                    onValueChange = { nameOrEmpty ->
-                        state.onValueChanged(nameOrEmpty)
-                    },
-                    onDismissRequest = onDismissRequest
-                )
-            }
+            val state = (dialogType as DialogType.ComboBoxDialog).state
+            ComboBoxDialog(
+                initialValue = state.value.collectAsState().value,
+                values = state.codedValues.associateBy({ it.code }, { it.name }),
+                label = state.label,
+                description = state.description,
+                isRequired = state.isRequired.collectAsState().value,
+                noValueOption = state.showNoValueOption,
+                keyboardType = if (state.fieldType.isNumeric) {
+                    KeyboardType.Number
+                } else {
+                    KeyboardType.Ascii
+                },
+                noValueLabel = state.noValueLabel.ifEmpty { stringResource(R.string.no_value) },
+                onValueChange = { nameOrEmpty ->
+                    state.onValueChanged(nameOrEmpty)
+                },
+                onDismissRequest = { dialogRequester.dismissDialog() }
+            )
         }
+
+        is DialogType.DateTimeDialog -> {
+            val state = (dialogType as DialogType.DateTimeDialog).state
+            val shouldShowTime = remember {
+                state.shouldShowTime
+            }
+            val pickerStyle = if (shouldShowTime) {
+                DateTimePickerStyle.DateTime
+            } else {
+                DateTimePickerStyle.Date
+            }
+            val pickerState = rememberDateTimePickerState(
+                pickerStyle,
+                state.minEpochMillis,
+                state.maxEpochMillis,
+                state.value.collectAsState().value,
+                state.label,
+                state.description,
+                DateTimePickerInput.Date
+            )
+            // the picker dialog
+            DateTimePicker(
+                state = pickerState,
+                onDismissRequest = { dialogRequester.dismissDialog() },
+                onCancelled = { dialogRequester.dismissDialog() },
+                onConfirmed = {
+                    state.onValueChanged(pickerState.selectedDateTimeMillis?.let {
+                        Instant.ofEpochMilli(it)
+                    })
+                    dialogRequester.dismissDialog()
+                }
+            )
+        }
+
+        else -> {}
     }
 }
 

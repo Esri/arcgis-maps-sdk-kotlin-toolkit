@@ -32,10 +32,7 @@ import com.arcgismaps.toolkit.featureforms.components.text.FormTextField
 import com.arcgismaps.toolkit.featureforms.components.text.FormTextFieldState
 
 @Composable
-internal fun <T> FieldElement(
-    state: BaseFieldState<T>,
-    onDialogRequest: () -> Unit = {}
-) {
+internal fun <T> FieldElement(state: BaseFieldState<T>) {
     val visible by state.isVisible.collectAsState()
     if (visible) {
         when (state) {
@@ -44,20 +41,14 @@ internal fun <T> FieldElement(
             }
 
             is DateTimeFieldState -> {
-                DateTimeField(
-                    state = state,
-                    onDialogRequest = onDialogRequest
-                )
+                DateTimeField(state = state)
             }
 
             is SwitchFieldState -> {
                 if (!state.fallback) {
                     SwitchField(state = state)
                 } else {
-                    ComboBoxField(
-                        state = state,
-                        onDialogRequest = onDialogRequest
-                    )
+                    ComboBoxField(state = state)
                 }
             }
 
@@ -70,10 +61,7 @@ internal fun <T> FieldElement(
             }
 
             is CodedValueFieldState -> {
-                ComboBoxField(
-                    state = state,
-                    onDialogRequest = onDialogRequest
-                )
+                ComboBoxField(state = state)
             }
 
             else -> { /* TO-DO: add support for other input types */
