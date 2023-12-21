@@ -52,6 +52,8 @@ import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.BaseGroupState
 import com.arcgismaps.toolkit.featureforms.components.base.FormElementState
+import com.arcgismaps.toolkit.featureforms.components.base.StateCollection
+import com.arcgismaps.toolkit.featureforms.components.base.getState
 import com.arcgismaps.toolkit.featureforms.components.base.rememberBaseGroupState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberCodedValueFieldState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberRadioButtonFieldState
@@ -177,7 +179,7 @@ internal fun FeatureFormContent(
 @Composable
 private fun FeatureFormBody(
     form: FeatureForm,
-    states: Map<Int, FormElementState>,
+    states: StateCollection,
     modifier: Modifier = Modifier
 ) {
     val lazyListState = rememberLazyListState()
@@ -198,28 +200,19 @@ private fun FeatureFormBody(
             modifier = Modifier.fillMaxSize(),
             state = lazyListState
         ) {
-            items(form.elements) { formElement ->
-                when (formElement) {
-                    is FieldFormElement -> {
-                        val state = states[formElement.id] as? BaseFieldState<*>
-                        if (state != null) {
-                            FieldElement(state = state)
+            states.forEach { entry ->
+                item {
+                    when (entry.formElement) {
+                        is FieldFormElement -> {
+                            FieldElement(state = entry.getState<BaseFieldState<*>>())
                         }
-                    }
 
-                    is GroupFormElement -> {
-                        val state = states[formElement.id] as? BaseGroupState
-                        if (state != null) {
+                        is GroupFormElement -> {
                             GroupElement(
-                                state,
+                                state = entry.getState(),
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(
-                                        start = 15.dp,
-                                        end = 15.dp,
-                                        top = 10.dp,
-                                        bottom = 10.dp
-                                    )
+                                    .padding(horizontal = 15.dp, vertical = 10.dp)
                             )
                         }
                     }
