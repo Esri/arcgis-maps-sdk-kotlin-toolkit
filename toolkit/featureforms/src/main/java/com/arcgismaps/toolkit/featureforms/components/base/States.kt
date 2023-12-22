@@ -30,10 +30,11 @@ internal interface MutableStateCollection : StateCollection {
     fun add(formElement: FormElement, state: FormElementState)
 }
 
+internal fun MutableStateCollection(): MutableStateCollection = MutableStateCollectionImpl()
 
 private class MutableStateCollectionImpl : MutableStateCollection {
 
-    private val entries : MutableList<StateCollection.Entry> = mutableListOf()
+    private val entries: MutableList<StateCollection.Entry> = mutableListOf()
 
     private val map = mutableMapOf<Int, Int>()
 
@@ -51,10 +52,10 @@ private class MutableStateCollectionImpl : MutableStateCollection {
     ) : StateCollection.Entry
 }
 
-internal inline fun <reified T : FormElementState> StateCollection.Entry.getState() : T {
+internal inline fun <reified T : FormElementState> StateCollection.Entry.getState(): T {
     if (state is T) {
         return state as T
     } else {
-        throw Exception()
+        throw ClassCastException("${state::class} cannot be cast into ${T::class}")
     }
 }

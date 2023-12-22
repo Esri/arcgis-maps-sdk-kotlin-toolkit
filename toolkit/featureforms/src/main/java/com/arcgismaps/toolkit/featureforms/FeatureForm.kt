@@ -52,6 +52,7 @@ import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.BaseGroupState
 import com.arcgismaps.toolkit.featureforms.components.base.FormElementState
+import com.arcgismaps.toolkit.featureforms.components.base.MutableStateCollection
 import com.arcgismaps.toolkit.featureforms.components.base.StateCollection
 import com.arcgismaps.toolkit.featureforms.components.base.getState
 import com.arcgismaps.toolkit.featureforms.components.base.rememberBaseGroupState
@@ -61,6 +62,7 @@ import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberSwitchF
 import com.arcgismaps.toolkit.featureforms.components.datetime.rememberDateTimeFieldState
 import com.arcgismaps.toolkit.featureforms.components.formelement.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.formelement.GroupElement
+import com.arcgismaps.toolkit.featureforms.components.text.FormTextFieldState
 import com.arcgismaps.toolkit.featureforms.components.text.rememberFormTextFieldState
 import com.arcgismaps.toolkit.featureforms.utils.FeatureFormDialog
 import kotlinx.coroutines.CoroutineScope
@@ -168,9 +170,32 @@ internal fun FeatureFormContent(
         context = context,
         scope = scope
     )
+    val states = MutableStateCollection()
+    fieldStateMap.forEach { (i, baseFieldState) ->
+        val formElement = form.elements.first {
+            if (it is FieldFormElement) {
+                it.id == i
+            } else if (it is GroupFormElement) {
+                it.id == i
+            } else {
+                false
+            }
+        }
+        states.add(formElement, baseFieldState)
+    }
+    groupStateMap.forEach { entry ->
+        val groupElement = form.elements.first {
+            if (it is GroupFormElement) {
+                it.id == it.id
+            } else {
+                false
+            }
+        }
+        states.add(groupElement, entry.value)
+    }
     FeatureFormBody(
         form = form,
-        states = fieldStateMap + groupStateMap,
+        states = states,
         modifier = modifier
     )
     FeatureFormDialog()
