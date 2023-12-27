@@ -47,6 +47,15 @@ public class MapViewProxy : GeoViewProxy("MapView") {
         }
 
     /**
+     * True if continuous panning across the international date line is enabled in the GeoView, false otherwise.
+     * A null value represents that it is currently undetermined.
+     *
+     * @since 200.4.0
+     */
+    public val isWrapAroundEnabled: Boolean?
+        get() = this.mapView?.isWrapAroundEnabled
+
+    /**
      * Sets the [mapView] parameter on this operator. This should be called by the composable [MapView]
      * when it enters the composition and set to null when it is disposed.
      *
