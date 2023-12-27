@@ -56,8 +56,6 @@ public sealed class GeoViewProxy(className: String) {
     private val nullGeoViewErrorMessage: String =
         "$className must be part of the composition when this member is called."
 
-
-
     /**
      * Exports an image snapshot of the current composable MapView or SceneView.
      *
