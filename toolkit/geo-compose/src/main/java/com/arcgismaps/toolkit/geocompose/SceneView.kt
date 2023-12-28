@@ -51,6 +51,7 @@ import kotlinx.coroutines.launch
  * @param modifier Modifier to be applied to the composable SceneView
  * @param arcGISScene the [ArcGISScene] to be rendered by this composable SceneView
  * @param viewpointOperation a [SceneViewpointOperation] that changes this SceneView to a new viewpoint
+ * @param viewpointChangedState specifies lambdas invoked when the viewpoint of the composable SceneView has changed
  * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable SceneView
  * @param sceneViewProxy the [SceneViewProxy] to associate with the composable SceneView
  * @param sceneViewInteractionOptions the [SceneViewInteractionOptions] used by this composable SceneView
@@ -74,6 +75,7 @@ public fun SceneView(
     modifier: Modifier = Modifier,
     arcGISScene: ArcGISScene? = null,
     viewpointOperation: SceneViewpointOperation? = null,
+    viewpointChangedState: ViewpointChangedState? = null,
     graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
     sceneViewProxy: SceneViewProxy? = null,
     sceneViewInteractionOptions: SceneViewInteractionOptions = SceneViewInteractionOptions(),
@@ -124,6 +126,7 @@ public fun SceneView(
     GraphicsOverlaysUpdater(graphicsOverlays, sceneView)
 
     AttributionStateHandler(sceneView, attributionState)
+    ViewpointChangedStateHandler(sceneView, viewpointChangedState)
 
     SceneViewEventHandler(
         sceneView,
