@@ -30,6 +30,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.mapping.ArcGISScene
+import com.arcgismaps.mapping.TimeExtent
 import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
 import com.arcgismaps.mapping.view.LongPressEvent
@@ -56,6 +57,8 @@ import kotlinx.coroutines.launch
  * @param sceneViewInteractionOptions the [SceneViewInteractionOptions] used by this composable SceneView
  * @param viewLabelProperties the [ViewLabelProperties] used by the composable SceneView
  * @param attributionState specifies the attribution bar's visibility, text changed and layout changed events
+ * @param timeExtent the [TimeExtent] used by the composable SceneView
+ * @param onTimeExtentChanged lambda invoked when the composable SceneView's [TimeExtent] is changed
  * @param onNavigationChanged lambda invoked when the navigation status of the composable SceneView has changed
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable SceneView
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable SceneView
@@ -79,6 +82,8 @@ public fun SceneView(
     sceneViewInteractionOptions: SceneViewInteractionOptions = SceneViewInteractionOptions(),
     viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
     attributionState: AttributionState = AttributionState(),
+    timeExtent: TimeExtent? = null,
+    onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
@@ -102,6 +107,7 @@ public fun SceneView(
             it.scene = arcGISScene
             it.interactionOptions = sceneViewInteractionOptions
             it.labeling = viewLabelProperties
+            it.setTimeExtent(timeExtent)
         })
 
     DisposableEffect(Unit) {
@@ -127,6 +133,7 @@ public fun SceneView(
 
     SceneViewEventHandler(
         sceneView,
+        onTimeExtentChanged,
         onNavigationChanged,
         onInteractingChanged,
         onRotate,
@@ -163,6 +170,7 @@ private fun ViewpointUpdater(
 @Composable
 private fun SceneViewEventHandler(
     sceneView: SceneView,
+    onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)?,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)?,
     onRotate: ((RotationChangeEvent) -> Unit)?,
@@ -175,6 +183,7 @@ private fun SceneViewEventHandler(
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)?,
     onPan: ((PanChangeEvent) -> Unit)?,
 ) {
+    val currentOnTimeExtentChanged by rememberUpdatedState(onTimeExtentChanged)
     val currentOnNavigationChanged by rememberUpdatedState(onNavigationChanged)
     val currentOnInteractingChanged by rememberUpdatedState(onInteractingChanged)
     val currentOnRotate by rememberUpdatedState(onRotate)
@@ -188,6 +197,11 @@ private fun SceneViewEventHandler(
     val currentOnPan by rememberUpdatedState(onPan)
 
     LaunchedEffect(Unit) {
+        launch {
+            sceneView.timeExtent.collect {
+                currentOnTimeExtentChanged?.invoke(it)
+            }
+        }
         launch {
             sceneView.navigationChanged.collect {
                 currentOnNavigationChanged?.invoke(it)
