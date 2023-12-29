@@ -29,6 +29,7 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.viewinterop.AndroidView
+import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
@@ -58,6 +59,7 @@ import kotlinx.coroutines.launch
  * @param attributionState specifies the attribution bar's visibility, text changed and layout changed events
  * @param onNavigationChanged lambda invoked when the navigation status of the composable SceneView has changed
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable SceneView
+ * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the composable SceneView has changed
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable SceneView
  * @param onScale lambda invoked when a user performs a pinch gesture on the composable SceneView
  * @param onUp lambda invoked when the user removes all their pointers from the composable SceneView
@@ -80,6 +82,7 @@ public fun SceneView(
     viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
     attributionState: AttributionState = AttributionState(),
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
+    onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
     onScale: ((ScaleChangeEvent) -> Unit)? = null,
@@ -129,6 +132,7 @@ public fun SceneView(
         sceneView,
         onNavigationChanged,
         onInteractingChanged,
+        onSpatialReferenceChanged,
         onRotate,
         onScale,
         onUp,
@@ -165,6 +169,7 @@ private fun SceneViewEventHandler(
     sceneView: SceneView,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)?,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)?,
+    onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)?,
     onScale: ((ScaleChangeEvent) -> Unit)?,
     onUp: ((UpEvent) -> Unit)?,
@@ -177,6 +182,7 @@ private fun SceneViewEventHandler(
 ) {
     val currentOnNavigationChanged by rememberUpdatedState(onNavigationChanged)
     val currentOnInteractingChanged by rememberUpdatedState(onInteractingChanged)
+    val currentOnSpatialReferenceChanged by rememberUpdatedState(onSpatialReferenceChanged)
     val currentOnRotate by rememberUpdatedState(onRotate)
     val currentOnScale by rememberUpdatedState(onScale)
     val currentOnUp by rememberUpdatedState(onUp)
@@ -191,6 +197,11 @@ private fun SceneViewEventHandler(
         launch {
             sceneView.navigationChanged.collect {
                 currentOnNavigationChanged?.invoke(it)
+            }
+        }
+        launch {
+            sceneView.spatialReference.collect {
+                currentOnSpatialReferenceChanged?.invoke(it)
             }
         }
         launch(Dispatchers.Main.immediate) {
