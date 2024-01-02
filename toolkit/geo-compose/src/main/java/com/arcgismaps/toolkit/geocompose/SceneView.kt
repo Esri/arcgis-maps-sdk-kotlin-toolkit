@@ -169,7 +169,7 @@ private fun SceneViewEventHandler(
     sceneView: SceneView,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)?,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)?,
-    onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
+    onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)?,
     onRotate: ((RotationChangeEvent) -> Unit)?,
     onScale: ((ScaleChangeEvent) -> Unit)?,
     onUp: ((UpEvent) -> Unit)?,
