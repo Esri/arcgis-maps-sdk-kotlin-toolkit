@@ -200,7 +200,9 @@ private fun SceneViewEventHandler(
             }
         }
         launch {
-            sceneView.spatialReference.collect {
+            sceneView.spatialReference.collect { spatialReference ->
+                currentOnSpatialReferenceChanged?.invoke(spatialReference)
+            }
                 currentOnSpatialReferenceChanged?.invoke(it)
             }
         }
