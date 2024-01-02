@@ -209,6 +209,16 @@ private fun FeatureFormBody(
     }
 }
 
+/**
+ * Creates and remembers state objects for all the supported element types that are part of the
+ * provided FeatureForm. These state objects are returned as part of a [StateCollection].
+ *
+ * @param form the [FeatureForm] to create the states for.
+ * @param context a [Context].
+ * @param scope a [CoroutineScope] to run collectors and calculations on.
+ *
+ * @return returns the [StateCollection] created.
+ */
 @Composable
 internal fun rememberStates(
     form: FeatureForm,
@@ -251,6 +261,16 @@ internal fun rememberStates(
     return states
 }
 
+/**
+ * Creates and remembers a [BaseFieldState] for the provided [element].
+ *
+ * @param element the [FieldFormElement] to create the state for.
+ * @param form the [FeatureForm] the [element] is part of.
+ * @param context a [Context].
+ * @param scope a [CoroutineScope] to run collectors and calculations on.
+ *
+ * @return returns the [BaseFieldState] created.
+ */
 @Composable
 internal fun rememberFieldState(
     element: FieldFormElement,
