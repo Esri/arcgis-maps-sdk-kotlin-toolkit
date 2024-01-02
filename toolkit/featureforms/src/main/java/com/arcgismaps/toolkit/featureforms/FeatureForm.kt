@@ -1,5 +1,6 @@
 package com.arcgismaps.toolkit.featureforms
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -17,7 +18,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
@@ -43,15 +43,12 @@ import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
-import com.arcgismaps.mapping.featureforms.FormElement
 import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.featureforms.RadioButtonsFormInput
 import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
-import com.arcgismaps.toolkit.featureforms.components.base.BaseGroupState
-import com.arcgismaps.toolkit.featureforms.components.base.FormElementState
 import com.arcgismaps.toolkit.featureforms.components.base.MutableStateCollection
 import com.arcgismaps.toolkit.featureforms.components.base.StateCollection
 import com.arcgismaps.toolkit.featureforms.components.base.getState
@@ -62,7 +59,6 @@ import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberSwitchF
 import com.arcgismaps.toolkit.featureforms.components.datetime.rememberDateTimeFieldState
 import com.arcgismaps.toolkit.featureforms.components.formelement.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.formelement.GroupElement
-import com.arcgismaps.toolkit.featureforms.components.text.FormTextFieldState
 import com.arcgismaps.toolkit.featureforms.components.text.rememberFormTextFieldState
 import com.arcgismaps.toolkit.featureforms.utils.FeatureFormDialog
 import kotlinx.coroutines.CoroutineScope
@@ -159,40 +155,7 @@ internal fun FeatureFormContent(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val fieldStateMap = rememberFieldStates(
-        form = form,
-        elements = form.elements,
-        context = context,
-        scope = scope
-    )
-    val groupStateMap = rememberGroupStates(
-        form = form,
-        context = context,
-        scope = scope
-    )
-    val states = MutableStateCollection()
-    fieldStateMap.forEach { (i, baseFieldState) ->
-        val formElement = form.elements.first {
-            if (it is FieldFormElement) {
-                it.id == i
-            } else if (it is GroupFormElement) {
-                it.id == i
-            } else {
-                false
-            }
-        }
-        states.add(formElement, baseFieldState)
-    }
-    groupStateMap.forEach { entry ->
-        val groupElement = form.elements.first {
-            if (it is GroupFormElement) {
-                it.id == it.id
-            } else {
-                false
-            }
-        }
-        states.add(groupElement, entry.value)
-    }
+    val states = rememberStates(form = form, context = context, scope = scope)
     FeatureFormBody(
         form = form,
         states = states,
@@ -248,111 +211,123 @@ private fun FeatureFormBody(
 }
 
 @Composable
-internal fun rememberGroupStates(
+internal fun rememberStates(
     form: FeatureForm,
-    context: Context,
-    scope: CoroutineScope,
-): Map<Int, BaseGroupState> {
-    return form.elements.filterIsInstance<GroupFormElement>().associateBy(
-        { groupElement ->
-            groupElement.id
-        },
-        { groupElement ->
-            val fieldStates = rememberFieldStates(
-                form = form,
-                elements = groupElement.formElements,
-                context = context,
-                scope = scope
-            )
-            rememberBaseGroupState(groupElement = groupElement, fieldStates = fieldStates)
-        }
-    )
-}
-
-@Composable
-internal fun rememberFieldStates(
-    form: FeatureForm,
-    elements: List<FormElement>,
     context: Context,
     scope: CoroutineScope
-): Map<Int, BaseFieldState<*>> {
-    val stateMap = mutableMapOf<Int, BaseFieldState<*>>()
-    elements.forEach { element ->
-        if (element is FieldFormElement) {
-            val state = when (element.input) {
-                is TextBoxFormInput, is TextAreaFormInput -> {
-                    val minLength = if (element.input is TextBoxFormInput) {
-                        (element.input as TextBoxFormInput).minLength.toInt()
-                    } else {
-                        (element.input as TextAreaFormInput).minLength.toInt()
-                    }
-                    val maxLength = if (element.input is TextBoxFormInput) {
-                        (element.input as TextBoxFormInput).maxLength.toInt()
-                    } else {
-                        (element.input as TextAreaFormInput).maxLength.toInt()
-                    }
-                    rememberFormTextFieldState(
-                        field = element,
-                        minLength = minLength,
-                        maxLength = maxLength,
-                        form = form,
-                        context = context,
-                        scope = scope
-                    )
-                }
-
-                is DateTimePickerFormInput -> {
-                    val input = element.input as DateTimePickerFormInput
-                    rememberDateTimeFieldState(
-                        field = element,
-                        minEpochMillis = input.min,
-                        maxEpochMillis = input.max,
-                        shouldShowTime = input.includeTime,
-                        form = form,
-                        scope = scope
-                    )
-                }
-
-                is ComboBoxFormInput -> {
-                    rememberCodedValueFieldState(
-                        field = element,
-                        form = form,
-                        scope = scope
-                    )
-                }
-
-                is SwitchFormInput -> {
-                    val input = element.input as SwitchFormInput
-                    val initialValue = element.formattedValue
-                    val fallback = initialValue.isEmpty()
-                        || (element.value.value != input.onValue.code && element.value.value != input.offValue.code)
-                    rememberSwitchFieldState(
-                        field = element,
-                        form = form,
-                        fallback = fallback,
-                        scope = scope,
-                        noValueString = context.getString(R.string.no_value)
-                    )
-                }
-
-                is RadioButtonsFormInput -> {
-                    rememberRadioButtonFieldState(
-                        field = element,
-                        form = form,
-                        scope = scope
-                    )
-                }
-
-                else -> {
-                    null
+): StateCollection {
+    val states = MutableStateCollection()
+    form.elements.forEach { element ->
+        when (element) {
+            is FieldFormElement -> {
+                val state = rememberFieldState(element, form, context, scope)
+                if (state != null) {
+                    states.add(element, state)
                 }
             }
-            if (state != null) {
-                stateMap[element.id] = state
+
+            is GroupFormElement -> {
+                val fieldStateCollection = MutableStateCollection()
+                element.formElements.forEach {
+                    if (it is FieldFormElement) {
+                        val state = rememberFieldState(
+                            element = it,
+                            form = form,
+                            context = context,
+                            scope = scope
+                        )
+                        if (state != null) {
+                            fieldStateCollection.add(it, state)
+                        }
+                    }
+                }
+                val groupState = rememberBaseGroupState(
+                    groupElement = element,
+                    fieldStates = fieldStateCollection
+                )
+                states.add(element, groupState)
             }
         }
     }
-    return stateMap
+    return states
+}
+
+@SuppressLint("StateFlowValueCalledInComposition")
+@Composable
+internal fun rememberFieldState(
+    element: FieldFormElement,
+    form: FeatureForm,
+    context: Context,
+    scope: CoroutineScope
+): BaseFieldState<out Any?>? {
+    return when (element.input) {
+        is TextBoxFormInput, is TextAreaFormInput -> {
+            val minLength = if (element.input is TextBoxFormInput) {
+                (element.input as TextBoxFormInput).minLength.toInt()
+            } else {
+                (element.input as TextAreaFormInput).minLength.toInt()
+            }
+            val maxLength = if (element.input is TextBoxFormInput) {
+                (element.input as TextBoxFormInput).maxLength.toInt()
+            } else {
+                (element.input as TextAreaFormInput).maxLength.toInt()
+            }
+            rememberFormTextFieldState(
+                field = element,
+                minLength = minLength,
+                maxLength = maxLength,
+                form = form,
+                context = context,
+                scope = scope
+            )
+        }
+
+        is DateTimePickerFormInput -> {
+            val input = element.input as DateTimePickerFormInput
+            rememberDateTimeFieldState(
+                field = element,
+                minEpochMillis = input.min,
+                maxEpochMillis = input.max,
+                shouldShowTime = input.includeTime,
+                form = form,
+                scope = scope
+            )
+        }
+
+        is ComboBoxFormInput -> {
+            rememberCodedValueFieldState(
+                field = element,
+                form = form,
+                scope = scope
+            )
+        }
+
+        is SwitchFormInput -> {
+            val input = element.input as SwitchFormInput
+            val initialValue = element.formattedValue
+            val fallback = initialValue.isEmpty()
+                || (element.value.value != input.onValue.code && element.value.value != input.offValue.code)
+            rememberSwitchFieldState(
+                field = element,
+                form = form,
+                fallback = fallback,
+                scope = scope,
+                noValueString = context.getString(R.string.no_value)
+            )
+        }
+
+        is RadioButtonsFormInput -> {
+            rememberRadioButtonFieldState(
+                field = element,
+                form = form,
+                scope = scope
+            )
+        }
+
+        else -> {
+            null
+        }
+    }
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFFFFFF)

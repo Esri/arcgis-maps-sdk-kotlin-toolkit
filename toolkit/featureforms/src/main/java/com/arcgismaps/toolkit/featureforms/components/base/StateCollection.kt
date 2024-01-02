@@ -19,7 +19,6 @@ package com.arcgismaps.toolkit.featureforms.components.base
 import com.arcgismaps.mapping.featureforms.FormElement
 
 internal interface StateCollection : Iterable<StateCollection.Entry> {
-
     interface Entry {
         val formElement: FormElement
         val state: FormElementState
@@ -35,8 +34,6 @@ internal fun MutableStateCollection(): MutableStateCollection = MutableStateColl
 private class MutableStateCollectionImpl : MutableStateCollection {
 
     private val entries: MutableList<StateCollection.Entry> = mutableListOf()
-
-    private val map = mutableMapOf<Int, Int>()
 
     override fun iterator(): Iterator<StateCollection.Entry> {
         return entries.iterator()
