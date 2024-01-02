@@ -32,6 +32,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
+import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.mapping.view.LongPressEvent
 import com.arcgismaps.mapping.view.PanChangeEvent
 import com.arcgismaps.mapping.view.RotationChangeEvent
@@ -57,6 +58,7 @@ import kotlinx.coroutines.launch
  * @param viewLabelProperties the [ViewLabelProperties] used by the composable SceneView
  * @param attributionState specifies the attribution bar's visibility, text changed and layout changed events
  * @param onNavigationChanged lambda invoked when the navigation status of the composable SceneView has changed
+ * @param onLayerViewStateChanged lambda invoked when the composable SceneView's layer view state is changed
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable SceneView
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable SceneView
  * @param onScale lambda invoked when a user performs a pinch gesture on the composable SceneView
@@ -80,6 +82,7 @@ public fun SceneView(
     viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
     attributionState: AttributionState = AttributionState(),
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
+    onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)? = null,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
     onScale: ((ScaleChangeEvent) -> Unit)? = null,
@@ -128,6 +131,7 @@ public fun SceneView(
     SceneViewEventHandler(
         sceneView,
         onNavigationChanged,
+        onLayerViewStateChanged,
         onInteractingChanged,
         onRotate,
         onScale,
@@ -164,6 +168,7 @@ private fun ViewpointUpdater(
 private fun SceneViewEventHandler(
     sceneView: SceneView,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)?,
+    onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)?,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)?,
     onRotate: ((RotationChangeEvent) -> Unit)?,
     onScale: ((ScaleChangeEvent) -> Unit)?,
@@ -176,6 +181,7 @@ private fun SceneViewEventHandler(
     onPan: ((PanChangeEvent) -> Unit)?,
 ) {
     val currentOnNavigationChanged by rememberUpdatedState(onNavigationChanged)
+    val currentOnLayerViewStateChanged by rememberUpdatedState(onLayerViewStateChanged)
     val currentOnInteractingChanged by rememberUpdatedState(onInteractingChanged)
     val currentOnRotate by rememberUpdatedState(onRotate)
     val currentOnScale by rememberUpdatedState(onScale)
@@ -191,6 +197,11 @@ private fun SceneViewEventHandler(
         launch {
             sceneView.navigationChanged.collect {
                 currentOnNavigationChanged?.invoke(it)
+            }
+        }
+        launch {
+            sceneView.layerViewStateChanged.collect { currentLayerViewState ->
+                currentOnLayerViewStateChanged?.invoke(currentLayerViewState)
             }
         }
         launch(Dispatchers.Main.immediate) {
