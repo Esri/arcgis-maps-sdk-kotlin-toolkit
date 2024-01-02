@@ -203,8 +203,6 @@ private fun SceneViewEventHandler(
             sceneView.spatialReference.collect { spatialReference ->
                 currentOnSpatialReferenceChanged?.invoke(spatialReference)
             }
-                currentOnSpatialReferenceChanged?.invoke(it)
-            }
         }
         launch(Dispatchers.Main.immediate) {
             sceneView.isInteracting.collect { isInteracting ->
