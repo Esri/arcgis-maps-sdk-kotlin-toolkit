@@ -18,6 +18,10 @@ package com.arcgismaps.toolkit.featureforms.components.base
 
 import com.arcgismaps.mapping.featureforms.FormElement
 
+/**
+ * An iterable collection that provides a [FormElement] and its [FormElementState] as a
+ * [StateCollection.Entry].
+ */
 internal interface StateCollection : Iterable<StateCollection.Entry> {
     interface Entry {
         val formElement: FormElement
@@ -25,12 +29,28 @@ internal interface StateCollection : Iterable<StateCollection.Entry> {
     }
 }
 
+/**
+ * A mutable [StateCollection].
+ */
 internal interface MutableStateCollection : StateCollection {
+
+    /**
+     * Adds a new [StateCollection.Entry].
+     *
+     * @param formElement the [FormElement] to add.
+     * @param state the [FormElementState] to add.
+     */
     fun add(formElement: FormElement, state: FormElementState)
 }
 
+/**
+ * Creates a new [MutableStateCollection].
+ */
 internal fun MutableStateCollection(): MutableStateCollection = MutableStateCollectionImpl()
 
+/**
+ * Default implementation for a [MutableStateCollection].
+ */
 private class MutableStateCollectionImpl : MutableStateCollection {
 
     private val entries: MutableList<StateCollection.Entry> = mutableListOf()
@@ -43,12 +63,21 @@ private class MutableStateCollectionImpl : MutableStateCollection {
         entries.add(EntryImpl(formElement, state))
     }
 
+    /**
+     * Default implementation for a [StateCollection.Entry].
+     */
     class EntryImpl(
         override val formElement: FormElement,
         override val state: FormElementState
     ) : StateCollection.Entry
 }
 
+/**
+ * Casts and returns the [StateCollection.Entry.state] into the specified type. The type specified
+ * must be a sub-class of a [FormElementState].
+ *
+ * @throws ClassCastException Throws an exception if the cast fails.
+ */
 internal inline fun <reified T : FormElementState> StateCollection.Entry.getState(): T {
     if (state is T) {
         return state as T
