@@ -1,6 +1,5 @@
 package com.arcgismaps.toolkit.featureforms
 
-import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -252,7 +251,6 @@ internal fun rememberStates(
     return states
 }
 
-@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 internal fun rememberFieldState(
     element: FieldFormElement,
@@ -303,14 +301,9 @@ internal fun rememberFieldState(
         }
 
         is SwitchFormInput -> {
-            val input = element.input as SwitchFormInput
-            val initialValue = element.formattedValue
-            val fallback = initialValue.isEmpty()
-                || (element.value.value != input.onValue.code && element.value.value != input.offValue.code)
             rememberSwitchFieldState(
                 field = element,
                 form = form,
-                fallback = fallback,
                 scope = scope,
                 noValueString = context.getString(R.string.no_value)
             )
