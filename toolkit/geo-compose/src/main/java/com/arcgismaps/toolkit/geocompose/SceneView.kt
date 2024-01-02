@@ -198,8 +198,8 @@ private fun SceneViewEventHandler(
 
     LaunchedEffect(Unit) {
         launch {
-            sceneView.timeExtent.collect {
-                currentOnTimeExtentChanged?.invoke(it)
+            sceneView.timeExtent.collect { currentTimeExtent ->
+                currentOnTimeExtentChanged?.invoke(currentTimeExtent)
             }
         }
         launch {
