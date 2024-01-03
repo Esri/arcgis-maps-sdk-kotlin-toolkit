@@ -34,6 +34,7 @@ import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.TimeExtent
 import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
+import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.mapping.view.LongPressEvent
 import com.arcgismaps.mapping.view.PanChangeEvent
@@ -77,6 +78,7 @@ import kotlinx.coroutines.launch
  * @param onLongPress lambda invoked when a user holds a pointer on the composable SceneView
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable SceneView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable SceneView
+ * @param onDrawStatusChanged lambda invoked when the draw status of the composable SceneView is changed
  * @since 200.4.0
  */
 @Composable
@@ -106,6 +108,7 @@ public fun SceneView(
     onLongPress: ((LongPressEvent) -> Unit)? = null,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
+    onDrawStatusChanged: ((DrawStatus) -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
@@ -160,6 +163,7 @@ public fun SceneView(
         onLongPress,
         onTwoPointerTap,
         onPan,
+        onDrawStatusChanged
     )
 }
 
@@ -199,6 +203,7 @@ private fun SceneViewEventHandler(
     onLongPress: ((LongPressEvent) -> Unit)?,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)?,
     onPan: ((PanChangeEvent) -> Unit)?,
+    onDrawStatusChanged: ((DrawStatus) -> Unit)?,
 ) {
     val currentOnTimeExtentChanged by rememberUpdatedState(onTimeExtentChanged)
     val currentOnNavigationChanged by rememberUpdatedState(onNavigationChanged)
@@ -214,6 +219,7 @@ private fun SceneViewEventHandler(
     val currentOnLongPress by rememberUpdatedState(onLongPress)
     val currentOnTwoPointerTap by rememberUpdatedState(onTwoPointerTap)
     val currentOnPan by rememberUpdatedState(onPan)
+    val currentOnDrawStatusChanged by rememberUpdatedState(onDrawStatusChanged)
 
     LaunchedEffect(Unit) {
         launch {
@@ -284,6 +290,11 @@ private fun SceneViewEventHandler(
         launch(Dispatchers.Main.immediate) {
             sceneView.onPan.collect { panChangeEvent ->
                 currentOnPan?.invoke(panChangeEvent)
+            }
+        }
+        launch {
+            sceneView.drawStatus.collect { drawStatus ->
+                currentOnDrawStatusChanged?.invoke(drawStatus)
             }
         }
     }
