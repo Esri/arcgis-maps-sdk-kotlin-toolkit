@@ -28,4 +28,3 @@ internal sealed class ValidationErrorState {
     object NotANumber: ValidationErrorState()
     object NotAWholeNumber: ValidationErrorState()
 }
-

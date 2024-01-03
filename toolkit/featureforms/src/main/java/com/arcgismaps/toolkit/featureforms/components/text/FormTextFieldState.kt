@@ -243,7 +243,7 @@ internal class FormTextFieldState(
         require(fieldType.isIntegerType)
         return if (domain != null && domain is RangeDomain) {
             val (min, max) = domain.asLongTuple
-          if (min != null && max != null) {
+            if (min != null && max != null) {
                 if (numberVal in min..max) {
                     NoError
                 } else {
@@ -311,7 +311,6 @@ internal class FormTextFieldState(
                 validationErrors.firstOrNull { it != Required && it != NotANumber && it != NotAWholeNumber } ?: NoError
             } else {
                 // if non empty, focused, show any error other than required (the Required error shouldn't be in the list)
-                //check (!validationErrors.contains(Required))
                 validationErrors.first()
             }
         } else if (hasBeenFocused) {
@@ -325,7 +324,6 @@ internal class FormTextFieldState(
                 }
             } else {
                 // if non empty, unfocused, show any error other than required (the Required error shouldn't be in the list)
-                //check (!validationErrors.contains(Required))
                 validationErrors.first()
             }
         } else {
