@@ -39,6 +39,7 @@ import com.arcgismaps.mapping.view.RotationChangeEvent
 import com.arcgismaps.mapping.view.ScaleChangeEvent
 import com.arcgismaps.mapping.view.SceneView
 import com.arcgismaps.mapping.view.SceneViewInteractionOptions
+import com.arcgismaps.mapping.view.SelectionProperties
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
@@ -56,6 +57,7 @@ import kotlinx.coroutines.launch
  * @param sceneViewProxy the [SceneViewProxy] to associate with the composable SceneView
  * @param sceneViewInteractionOptions the [SceneViewInteractionOptions] used by this composable SceneView
  * @param viewLabelProperties the [ViewLabelProperties] used by the composable SceneView
+ * @param selectionProperties the [SelectionProperties] used by the composable SceneView
  * @param attributionState specifies the attribution bar's visibility, text changed and layout changed events
  * @param timeExtent the [TimeExtent] used by the composable SceneView
  * @param onTimeExtentChanged lambda invoked when the composable SceneView's [TimeExtent] is changed
@@ -81,6 +83,7 @@ public fun SceneView(
     sceneViewProxy: SceneViewProxy? = null,
     sceneViewInteractionOptions: SceneViewInteractionOptions = SceneViewInteractionOptions(),
     viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
+    selectionProperties: SelectionProperties = SelectionProperties(),
     attributionState: AttributionState = AttributionState(),
     timeExtent: TimeExtent? = null,
     onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
@@ -107,6 +110,7 @@ public fun SceneView(
             it.scene = arcGISScene
             it.interactionOptions = sceneViewInteractionOptions
             it.labeling = viewLabelProperties
+            it.selectionProperties = selectionProperties
             it.setTimeExtent(timeExtent)
         })
 
