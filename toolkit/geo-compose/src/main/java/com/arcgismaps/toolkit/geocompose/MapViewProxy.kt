@@ -44,6 +44,7 @@ public class MapViewProxy : GeoViewProxy("MapView") {
     private var mapView: com.arcgismaps.mapping.view.MapView? = null
         set(value) {
             setGeoView(value)
+            field = value
         }
 
     /**

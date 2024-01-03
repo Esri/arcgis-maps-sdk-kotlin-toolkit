@@ -39,6 +39,7 @@ public class SceneViewProxy : GeoViewProxy("SceneView") {
     private var sceneView: com.arcgismaps.mapping.view.SceneView? = null
         set(value) {
             setGeoView(value)
+            field = value
         }
 
     /**
