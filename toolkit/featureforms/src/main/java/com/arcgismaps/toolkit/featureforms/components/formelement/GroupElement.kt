@@ -43,19 +43,17 @@ import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.BaseGroupState
 
 @Composable
 internal fun GroupElement(
-    groupElement: GroupFormElement,
     state: BaseGroupState,
     modifier: Modifier = Modifier,
     colors: GroupElementColors = GroupElementDefaults.colors(),
     onDialogRequest: (BaseFieldState<*>, Int) -> Unit
 ) {
-    val visible by groupElement.isVisible.collectAsState()
+    val visible by state.isVisible.collectAsState()
     if (visible) {
         GroupElement(
             label = state.label,
