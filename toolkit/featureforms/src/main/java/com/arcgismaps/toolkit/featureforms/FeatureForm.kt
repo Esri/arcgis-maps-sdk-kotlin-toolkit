@@ -355,23 +355,3 @@ private fun InitializingExpressionsPreview() {
 private fun NoDataPreview() {
     NoDataToDisplay()
 }
-
-/**
- * Unique id for each form element.
- */
-internal val FieldFormElement.id: Int
-    get() {
-        return Objects.hash(fieldName, label, description, hint)
-    }
-
-/**
- * Unique id for each form element.
- */
-internal val GroupFormElement.id: Int
-    get() {
-        return Objects.hash(
-            formElements.forEach { if (it is FieldFormElement) it.id },
-            label,
-            description
-        )
-    }
