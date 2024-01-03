@@ -47,7 +47,7 @@ You will also need to declare the `OAuthUserSignInActivity` in your app's manife
 	android:name="com.arcgismaps.toolkit.authentication.OAuthUserSignInActivity"
 	android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
 	android:exported="true"
-	android:launchMode="singleTop" >
+	android:launchMode="singleTask" >
 	<intent-filter>
 		<action android:name="android.intent.action.VIEW" />
 
@@ -143,7 +143,7 @@ override fun onResume() {
 }
 ```
 
-Please note that your app's activity must have a `launchMode` of `singleTop` for OAuth authentication to work.
+Please note that your app's activity must have a `launchMode` of `singleTask` for OAuth authentication to work.
 
 ### Launch OAuth Prompts in Incognito Mode
 
