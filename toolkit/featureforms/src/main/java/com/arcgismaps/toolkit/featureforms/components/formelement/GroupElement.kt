@@ -37,22 +37,23 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.toggleableState
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.BaseGroupState
 
 @Composable
 internal fun GroupElement(
-    groupElement: GroupFormElement,
     state: BaseGroupState,
     modifier: Modifier = Modifier,
     colors: GroupElementColors = GroupElementDefaults.colors(),
     onDialogRequest: (BaseFieldState<*>, Int) -> Unit
 ) {
-    val visible by groupElement.isVisible.collectAsState()
+    val visible by state.isVisible.collectAsState()
     if (visible) {
         GroupElement(
             label = state.label,
@@ -74,7 +75,7 @@ private fun GroupElement(
     label: String,
     description: String,
     expanded: Boolean,
-    fieldStates: Map<Int, BaseFieldState<*>?>,
+    fieldStates: Map<Int, BaseFieldState<*>>,
     modifier: Modifier = Modifier,
     colors: GroupElementColors,
     onClick: () -> Unit,
@@ -86,7 +87,11 @@ private fun GroupElement(
         border = BorderStroke(GroupElementDefaults.borderThickness, colors.borderColor)
     ) {
         GroupElementHeader(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .semantics {
+                    toggleableState = if (expanded) ToggleableState.On else ToggleableState.Off
+                },
             title = label,
             description = description,
             isExpanded = expanded,
@@ -97,10 +102,8 @@ private fun GroupElement(
                 modifier = Modifier.background(colors.containerColor)
             ) {
                 fieldStates.forEach { (key, state) ->
-                    if (state != null) {
-                        FieldElement(state = state) {
-                            onDialogRequest?.invoke(state, key)
-                        }
+                    FieldElement(state = state) {
+                        onDialogRequest?.invoke(state, key)
                     }
                 }
             }
@@ -130,10 +133,12 @@ private fun GroupElementHeader(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            Text(
-                text = description,
-                style = MaterialTheme.typography.bodySmall
-            )
+            if (description.isNotEmpty()) {
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
         }
         Crossfade(targetState = isExpanded, label = "expanded-icon-anim") {
             Icon(

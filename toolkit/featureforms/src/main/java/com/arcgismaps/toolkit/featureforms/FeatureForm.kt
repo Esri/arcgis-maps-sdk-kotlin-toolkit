@@ -51,6 +51,7 @@ import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.BaseGroupState
+import com.arcgismaps.toolkit.featureforms.components.base.FormElementState
 import com.arcgismaps.toolkit.featureforms.components.base.rememberBaseGroupState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.CodedValueFieldState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberCodedValueFieldState
@@ -173,8 +174,7 @@ internal fun FeatureFormContent(
     }
     FeatureFormBody(
         form = form,
-        fieldStateMap = fieldStateMap,
-        groupStateMap = groupStateMap,
+        states = fieldStateMap + groupStateMap,
         modifier = modifier
     ) { state, id ->
         if (state is DateTimeFieldState) {
@@ -199,8 +199,7 @@ internal fun FeatureFormContent(
 @Composable
 private fun FeatureFormBody(
     form: FeatureForm,
-    fieldStateMap: Map<Int, BaseFieldState<*>>,
-    groupStateMap: Map<Int, BaseGroupState>,
+    states: Map<Int, FormElementState>,
     modifier: Modifier = Modifier,
     onFieldDialogRequest: ((BaseFieldState<*>, Int) -> Unit)? = null
 ) {
@@ -225,7 +224,7 @@ private fun FeatureFormBody(
             items(form.elements) { formElement ->
                 when (formElement) {
                     is FieldFormElement -> {
-                        val state = fieldStateMap[formElement.id]
+                        val state = states[formElement.id] as? BaseFieldState<*>
                         if (state != null) {
                             FieldElement(
                                 state = state,
@@ -237,10 +236,9 @@ private fun FeatureFormBody(
                     }
 
                     is GroupFormElement -> {
-                        val state = groupStateMap[formElement.id]
+                        val state = states[formElement.id] as? BaseGroupState
                         if (state != null) {
                             GroupElement(
-                                formElement,
                                 state,
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -292,7 +290,7 @@ internal fun rememberFieldStates(
     scope: CoroutineScope
 ): Map<Int, BaseFieldState<*>> {
     val stateMap = mutableMapOf<Int, BaseFieldState<*>>()
-    elements.forEach {  element ->
+    elements.forEach { element ->
         if (element is FieldFormElement) {
             val state = when (element.input) {
                 is TextBoxFormInput, is TextAreaFormInput -> {

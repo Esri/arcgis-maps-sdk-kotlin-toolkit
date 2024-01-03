@@ -58,7 +58,6 @@ internal fun FormTextField(
             state.onValueChanged(it)
         },
         modifier = modifier.fillMaxWidth(),
-        readOnly = false,
         isEditable = isEditable,
         label = label,
         placeholder = state.placeholder,
@@ -76,7 +75,7 @@ internal fun FormTextField(
                         color = textColor
                     )
                 }
-                if (isFocused) {
+                if (isFocused && isEditable) {
                     Spacer(modifier = Modifier.weight(1f))
                     Text(
                         text = contentLength,

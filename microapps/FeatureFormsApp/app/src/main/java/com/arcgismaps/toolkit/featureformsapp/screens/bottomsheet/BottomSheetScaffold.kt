@@ -26,7 +26,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.requiredHeightIn
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -141,6 +141,7 @@ fun BottomSheetScaffold(
                 expansionHeight = sheetExpansionHeight,
                 sheetSwipeEnabled = sheetSwipeEnabled,
                 layoutHeight = layoutHeight.toFloat(),
+                sheetWidth = BottomSheetMaxWidth,
                 shape = sheetShape,
                 containerColor = sheetContainerColor,
                 contentColor = sheetContentColor,
@@ -210,6 +211,7 @@ fun StandardBottomSheet(
     peekHeight: Dp,
     expansionHeight: SheetExpansionHeight,
     layoutHeight: Float,
+    sheetWidth: Dp,
     sheetSwipeEnabled: Boolean = true,
     shape: Shape = BottomSheetDefaults.ExpandedShape,
     containerColor: Color = BottomSheetDefaults.ContainerColor,
@@ -222,7 +224,6 @@ fun StandardBottomSheet(
     val scope = rememberCoroutineScope()
     val peekHeightPx = with(LocalDensity.current) { peekHeight.toPx() }
     val orientation = Orientation.Vertical
-
     // Callback that is invoked when the anchors have changed.
     val anchorChangeHandler = remember(state, scope) {
         BottomSheetScaffoldAnchorChangeHandler(
@@ -241,7 +242,7 @@ fun StandardBottomSheet(
     }
     Surface(
         modifier = Modifier
-            .widthIn(max = BottomSheetMaxWidth)
+            .requiredWidth(sheetWidth)
             .fillMaxWidth()
             .requiredHeightIn(min = peekHeight)
             .nestedScroll(

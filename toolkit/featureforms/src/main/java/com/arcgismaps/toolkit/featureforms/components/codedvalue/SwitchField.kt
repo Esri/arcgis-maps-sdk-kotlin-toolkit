@@ -78,14 +78,16 @@ internal fun SwitchField(state: SwitchFieldState, modifier: Modifier = Modifier)
     
     LaunchedEffect(codeName) {
         interactionSource.interactions.collect {
-            if (it is PressInteraction.Release) {
-                val newValue = (
-                    if (checkedState)
-                        state.offValue.name
-                    else
-                        state.onValue.name
-                    )
-                state.onValueChanged(newValue)
+            if (isEditable) {
+                if (it is PressInteraction.Release) {
+                    val newValue = (
+                        if (checkedState)
+                            state.offValue.name
+                        else
+                            state.onValue.name
+                        )
+                    state.onValueChanged(newValue)
+                }
             }
         }
     }

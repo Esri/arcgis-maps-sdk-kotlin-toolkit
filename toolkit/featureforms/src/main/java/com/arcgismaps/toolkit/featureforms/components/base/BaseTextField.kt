@@ -17,7 +17,6 @@
 package com.arcgismaps.toolkit.featureforms.components.base
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
@@ -34,7 +33,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -43,7 +41,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.contentDescription
@@ -152,11 +149,11 @@ internal fun BaseTextField(
     text: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    readOnly: Boolean,
     isEditable: Boolean,
     label: String,
     placeholder: String,
     singleLine: Boolean,
+    readOnly: Boolean = !isEditable,
     keyboardType: KeyboardType = KeyboardType.Ascii,
     trailingIcon: ImageVector? = null,
     supportingText: @Composable (ColumnScope.() -> Unit)? = null,
@@ -186,10 +183,8 @@ internal fun BaseTextField(
             onValueChange = onValueChange,
             modifier = Modifier
                 .fillMaxWidth()
-                .focusable(isEditable, interactionSource)
                 .semantics { contentDescription = "outlined text field" },
             readOnly = readOnly,
-            enabled = isEditable,
             label = {
                 Text(
                     text = label,
@@ -229,16 +224,15 @@ internal fun BaseTextField(
             ),
             singleLine = singleLine,
             interactionSource = interactionSource,
-            colors = if (text.isEmpty() && placeholder.isNotEmpty())
-                OutlinedTextFieldDefaults.colors(
-                    unfocusedTextColor = Color.Gray,
-                    focusedTextColor = Color.Gray
-                )
-            else
-                OutlinedTextFieldDefaults.colors()
+            colors = baseTextFieldColors(
+                isEditable = isEditable,
+                isEmpty = text.isEmpty(),
+                isPlaceholderEmpty = placeholder.isEmpty()
+            )
         )
     }
 }
+
 
 @Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
 @Composable
@@ -247,7 +241,6 @@ private fun BaseTextFieldPreview() {
         BaseTextField(
             text = "",
             onValueChange = {},
-            readOnly = false,
             isEditable = true,
             label = "Title",
             placeholder = "Enter Value",
