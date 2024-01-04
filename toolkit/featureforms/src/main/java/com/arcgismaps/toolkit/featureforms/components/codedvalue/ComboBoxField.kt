@@ -79,6 +79,8 @@ import com.arcgismaps.data.FieldType
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.base.BaseTextField
+import com.arcgismaps.toolkit.featureforms.utils.DialogType
+import com.arcgismaps.toolkit.featureforms.utils.LocalDialogRequester
 import com.arcgismaps.toolkit.featureforms.utils.computeWindowSizeClasses
 import com.arcgismaps.toolkit.featureforms.utils.conditional
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -86,9 +88,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 @Composable
 internal fun ComboBoxField(
     state: CodedValueFieldState,
-    modifier: Modifier = Modifier,
-    onDialogRequest: () -> Unit = {}
+    modifier: Modifier = Modifier
 ) {
+    val dialogRequester = LocalDialogRequester.current
     val value by state.value.collectAsState()
     val isEditable by state.isEditable.collectAsState()
     val isRequired by state.isRequired.collectAsState()
@@ -145,7 +147,7 @@ internal fun ComboBoxField(
             if (it is PressInteraction.Release) {
                 wasFocused = true
                 if (isEditable) {
-                    onDialogRequest()
+                    dialogRequester.requestDialog(DialogType.ComboBoxDialog(state))
                 }
             }
         }

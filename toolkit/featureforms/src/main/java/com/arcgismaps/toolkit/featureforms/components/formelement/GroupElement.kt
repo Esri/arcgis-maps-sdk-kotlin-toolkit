@@ -50,8 +50,7 @@ import com.arcgismaps.toolkit.featureforms.components.base.BaseGroupState
 internal fun GroupElement(
     state: BaseGroupState,
     modifier: Modifier = Modifier,
-    colors: GroupElementColors = GroupElementDefaults.colors(),
-    onDialogRequest: (BaseFieldState<*>, Int) -> Unit
+    colors: GroupElementColors = GroupElementDefaults.colors()
 ) {
     val visible by state.isVisible.collectAsState()
     if (visible) {
@@ -64,8 +63,7 @@ internal fun GroupElement(
             colors = colors,
             onClick = {
                 state.setExpanded(!state.expanded.value)
-            },
-            onDialogRequest = onDialogRequest
+            }
         )
     }
 }
@@ -78,8 +76,7 @@ private fun GroupElement(
     fieldStates: Map<Int, BaseFieldState<*>>,
     modifier: Modifier = Modifier,
     colors: GroupElementColors,
-    onClick: () -> Unit,
-    onDialogRequest: ((BaseFieldState<*>, Int) -> Unit)? = null
+    onClick: () -> Unit
 ) {
     Card(
         modifier = modifier,
@@ -102,9 +99,7 @@ private fun GroupElement(
                 modifier = Modifier.background(colors.containerColor)
             ) {
                 fieldStates.forEach { (key, state) ->
-                    FieldElement(state = state) {
-                        onDialogRequest?.invoke(state, key)
-                    }
+                    FieldElement(state = state)
                 }
             }
         }
