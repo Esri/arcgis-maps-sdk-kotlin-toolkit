@@ -62,6 +62,7 @@ import kotlinx.coroutines.launch
  * @param viewLabelProperties the [ViewLabelProperties] used by the composable SceneView
  * @param selectionProperties the [SelectionProperties] used by the composable SceneView
  * @param attributionState specifies the attribution bar's visibility, text changed and layout changed events
+ * @param analysisOverlays a collection of analysis overlays that render the results of 3D visual analysis on the SceneView
  * @param timeExtent the [TimeExtent] used by the composable SceneView
  * @param onTimeExtentChanged lambda invoked when the composable SceneView's [TimeExtent] is changed
  * @param onNavigationChanged lambda invoked when the navigation status of the composable SceneView has changed
