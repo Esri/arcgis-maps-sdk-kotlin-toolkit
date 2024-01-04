@@ -45,6 +45,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.BaseGroupState
+import com.arcgismaps.toolkit.featureforms.components.base.MutableStateCollection
+import com.arcgismaps.toolkit.featureforms.components.base.FormStateCollection
+import com.arcgismaps.toolkit.featureforms.components.base.getState
 
 @Composable
 internal fun GroupElement(
@@ -73,7 +76,7 @@ private fun GroupElement(
     label: String,
     description: String,
     expanded: Boolean,
-    fieldStates: Map<Int, BaseFieldState<*>>,
+    fieldStates: FormStateCollection,
     modifier: Modifier = Modifier,
     colors: GroupElementColors,
     onClick: () -> Unit
@@ -98,8 +101,8 @@ private fun GroupElement(
             Column(
                 modifier = Modifier.background(colors.containerColor)
             ) {
-                fieldStates.forEach { (key, state) ->
-                    FieldElement(state = state)
+                fieldStates.forEach {
+                    FieldElement(state = it.getState<BaseFieldState<*>>())
                 }
             }
         }
@@ -155,7 +158,7 @@ private fun GroupElementPreview() {
         label = "Title",
         description = "Description",
         expanded = false,
-        fieldStates = mutableMapOf(),
+        fieldStates = MutableStateCollection(),
         modifier = Modifier.padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 10.dp),
         colors = GroupElementDefaults.colors(),
         onClick = {}
