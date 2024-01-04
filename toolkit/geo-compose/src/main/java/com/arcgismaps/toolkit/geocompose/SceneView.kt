@@ -69,7 +69,7 @@ import kotlinx.coroutines.launch
  * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the composable SceneView has changed
  * @param onLayerViewStateChanged lambda invoked when the composable SceneView's layer view state is changed
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable SceneView
- * @param onCurrentViewpointCameraChanged lambda invoked when the viewpoint Camera of the composable SceneView has changed
+ * @param onCurrentViewpointCameraChanged lambda invoked when the viewpoint camera of the composable SceneView has changed
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable SceneView
  * @param onScale lambda invoked when a user performs a pinch gesture on the composable SceneView
  * @param onUp lambda invoked when the user removes all their pointers from the composable SceneView
