@@ -30,7 +30,7 @@ internal class BaseGroupState(
     description: String,
     isVisible: StateFlow<Boolean>,
     expanded: Boolean,
-    val fieldStates: StateCollection
+    val fieldStates: FormStateCollection
 ) : FormElementState(
     label = label,
     description = description,
@@ -46,7 +46,7 @@ internal class BaseGroupState(
     companion object {
         fun Saver(
             groupElement: GroupFormElement,
-            fieldStates: StateCollection
+            fieldStates: FormStateCollection
         ): Saver<BaseGroupState, Boolean> = Saver(
             save = {
                 it.expanded.value
@@ -67,7 +67,7 @@ internal class BaseGroupState(
 @Composable
 internal fun rememberBaseGroupState(
     groupElement: GroupFormElement,
-    fieldStates: StateCollection
+    fieldStates: FormStateCollection
 ): BaseGroupState = rememberSaveable(
     saver = BaseGroupState.Saver(groupElement, fieldStates)
 ) {

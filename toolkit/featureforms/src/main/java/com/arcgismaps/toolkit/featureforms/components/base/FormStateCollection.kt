@@ -20,9 +20,9 @@ import com.arcgismaps.mapping.featureforms.FormElement
 
 /**
  * An iterable collection that provides a [FormElement] and its [FormElementState] as a
- * [StateCollection.Entry].
+ * [FormStateCollection.Entry].
  */
-internal interface StateCollection : Iterable<StateCollection.Entry> {
+internal interface FormStateCollection : Iterable<FormStateCollection.Entry> {
     interface Entry {
         val formElement: FormElement
         val state: FormElementState
@@ -30,12 +30,12 @@ internal interface StateCollection : Iterable<StateCollection.Entry> {
 }
 
 /**
- * A mutable [StateCollection].
+ * A mutable [FormStateCollection].
  */
-internal interface MutableStateCollection : StateCollection {
+internal interface MutableFormStateCollection : FormStateCollection {
 
     /**
-     * Adds a new [StateCollection.Entry].
+     * Adds a new [FormStateCollection.Entry].
      *
      * @param formElement the [FormElement] to add.
      * @param state the [FormElementState] to add.
@@ -44,18 +44,18 @@ internal interface MutableStateCollection : StateCollection {
 }
 
 /**
- * Creates a new [MutableStateCollection].
+ * Creates a new [MutableFormStateCollection].
  */
-internal fun MutableStateCollection(): MutableStateCollection = MutableStateCollectionImpl()
+internal fun MutableFormStateCollection(): MutableFormStateCollection = MutableFormStateCollectionImpl()
 
 /**
- * Default implementation for a [MutableStateCollection].
+ * Default implementation for a [MutableFormStateCollection].
  */
-private class MutableStateCollectionImpl : MutableStateCollection {
+private class MutableFormStateCollectionImpl : MutableFormStateCollection {
 
-    private val entries: MutableList<StateCollection.Entry> = mutableListOf()
+    private val entries: MutableList<FormStateCollection.Entry> = mutableListOf()
 
-    override fun iterator(): Iterator<StateCollection.Entry> {
+    override fun iterator(): Iterator<FormStateCollection.Entry> {
         return entries.iterator()
     }
 
@@ -64,21 +64,21 @@ private class MutableStateCollectionImpl : MutableStateCollection {
     }
 
     /**
-     * Default implementation for a [StateCollection.Entry].
+     * Default implementation for a [FormStateCollection.Entry].
      */
     class EntryImpl(
         override val formElement: FormElement,
         override val state: FormElementState
-    ) : StateCollection.Entry
+    ) : FormStateCollection.Entry
 }
 
 /**
- * Casts and returns the [StateCollection.Entry.state] into the specified type. The type specified
+ * Casts and returns the [FormStateCollection.Entry.state] into the specified type. The type specified
  * must be a sub-class of a [FormElementState].
  *
  * @throws ClassCastException Throws an exception if the cast fails.
  */
-internal inline fun <reified T : FormElementState> StateCollection.Entry.getState(): T {
+internal inline fun <reified T : FormElementState> FormStateCollection.Entry.getState(): T {
     if (state is T) {
         return state as T
     } else {

@@ -45,7 +45,7 @@ import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.MutableStateCollection
-import com.arcgismaps.toolkit.featureforms.components.base.StateCollection
+import com.arcgismaps.toolkit.featureforms.components.base.FormStateCollection
 import com.arcgismaps.toolkit.featureforms.components.base.getState
 import com.arcgismaps.toolkit.featureforms.components.base.rememberBaseGroupState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberCodedValueFieldState
@@ -58,7 +58,6 @@ import com.arcgismaps.toolkit.featureforms.components.text.rememberFormTextField
 import com.arcgismaps.toolkit.featureforms.utils.FeatureFormDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import java.util.Objects
 
 /**
  * A composable Form toolkit component that enables users to edit field values of features in a
@@ -146,7 +145,7 @@ internal fun FeatureFormContent(
 @Composable
 private fun FeatureFormBody(
     form: FeatureForm,
-    states: StateCollection,
+    states: FormStateCollection,
     modifier: Modifier = Modifier
 ) {
     val lazyListState = rememberLazyListState()
@@ -191,20 +190,20 @@ private fun FeatureFormBody(
 
 /**
  * Creates and remembers state objects for all the supported element types that are part of the
- * provided FeatureForm. These state objects are returned as part of a [StateCollection].
+ * provided FeatureForm. These state objects are returned as part of a [FormStateCollection].
  *
  * @param form the [FeatureForm] to create the states for.
  * @param context a [Context].
  * @param scope a [CoroutineScope] to run collectors and calculations on.
  *
- * @return returns the [StateCollection] created.
+ * @return returns the [FormStateCollection] created.
  */
 @Composable
 internal fun rememberStates(
     form: FeatureForm,
     context: Context,
     scope: CoroutineScope
-): StateCollection {
+): FormStateCollection {
     val states = MutableStateCollection()
     form.elements.forEach { element ->
         when (element) {

@@ -46,7 +46,7 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.BaseGroupState
 import com.arcgismaps.toolkit.featureforms.components.base.MutableStateCollection
-import com.arcgismaps.toolkit.featureforms.components.base.StateCollection
+import com.arcgismaps.toolkit.featureforms.components.base.FormStateCollection
 import com.arcgismaps.toolkit.featureforms.components.base.getState
 
 @Composable
@@ -76,7 +76,7 @@ private fun GroupElement(
     label: String,
     description: String,
     expanded: Boolean,
-    fieldStates: StateCollection,
+    fieldStates: FormStateCollection,
     modifier: Modifier = Modifier,
     colors: GroupElementColors,
     onClick: () -> Unit
