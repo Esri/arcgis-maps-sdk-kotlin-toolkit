@@ -332,7 +332,7 @@ internal class FormTextFieldState(
         }
     
     private fun validate(value: String): List<ValidationErrorState> {
-        val errors = validate.invoke()
+        val errors = validate()
         val ret = mutableListOf<ValidationErrorState>()
         if (errors.any { it is FeatureFormValidationException.RequiredException }) {
             ret += Required

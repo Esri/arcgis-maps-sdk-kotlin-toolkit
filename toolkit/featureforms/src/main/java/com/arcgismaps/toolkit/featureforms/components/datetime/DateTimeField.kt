@@ -42,7 +42,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.base.BaseTextField
 import kotlinx.coroutines.flow.MutableStateFlow
-import java.time.Instant
 
 @Composable
 internal fun DateTimeField(
