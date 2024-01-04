@@ -44,7 +44,7 @@ import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
-import com.arcgismaps.toolkit.featureforms.components.base.MutableStateCollection
+import com.arcgismaps.toolkit.featureforms.components.base.MutableFormStateCollection
 import com.arcgismaps.toolkit.featureforms.components.base.FormStateCollection
 import com.arcgismaps.toolkit.featureforms.components.base.getState
 import com.arcgismaps.toolkit.featureforms.components.base.rememberBaseGroupState
@@ -204,7 +204,7 @@ internal fun rememberStates(
     context: Context,
     scope: CoroutineScope
 ): FormStateCollection {
-    val states = MutableStateCollection()
+    val states = MutableFormStateCollection()
     form.elements.forEach { element ->
         when (element) {
             is FieldFormElement -> {
@@ -215,7 +215,7 @@ internal fun rememberStates(
             }
 
             is GroupFormElement -> {
-                val fieldStateCollection = MutableStateCollection()
+                val fieldStateCollection = MutableFormStateCollection()
                 element.formElements.forEach {
                     if (it is FieldFormElement) {
                         val state = rememberFieldState(
