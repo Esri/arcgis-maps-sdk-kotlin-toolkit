@@ -21,9 +21,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -35,10 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
-import com.arcgismaps.data.Feature
-import com.arcgismaps.data.ServiceFeatureTable
 import com.arcgismaps.toolkit.composablemap.ComposableMap
-import com.arcgismaps.toolkit.featureforms.EditingTransactionState
 import com.arcgismaps.toolkit.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureformsapp.R
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.BottomSheetMaxWidth
@@ -48,33 +43,12 @@ import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetValue
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.StandardBottomSheet
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.rememberStandardBottomSheetState
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-
-internal suspend fun commitEdits(feature: Feature): Result<Unit> {
-    val serviceFeatureTable =
-        feature.featureTable as? ServiceFeatureTable ?: return Result.failure(
-            IllegalStateException("cannot save feature edit without a ServiceFeatureTable")
-        )
-    
-    val result = serviceFeatureTable.updateFeature(feature)
-        .map {
-            serviceFeatureTable.serviceGeodatabase?.applyEdits()
-                ?: throw IllegalStateException("cannot apply feature edit without a ServiceGeodatabase")
-            feature.refresh()
-            Unit
-        }
-    
-    return result
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () -> Unit = {}) {
-    // only recompose when showing or hiding the bottom sheet
-    val editingFlow =
-        remember { mapViewModel.transactionState.map { it is EditingTransactionState.Editing } }
-    val inEditingMode by editingFlow.collectAsState(initial = false)
+    val uiState by mapViewModel.uiState
     val context = LocalContext.current
     val windowSize = getWindowSize(context)
 
@@ -86,9 +60,9 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
             // being shown and is in edit mode
             TopFormBar(
                 title = mapViewModel.portalItem.title,
-                editingMode = inEditingMode,
+                editingMode = uiState is UIState.Editing,
                 onClose = {
-                    scope.launch { mapViewModel.rollbackEdits(EditingTransactionState.NotEditing) }
+                    scope.launch { mapViewModel.rollbackEdits() }
                 },
                 onSave = {
                     scope.launch {
@@ -107,7 +81,6 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                                 }
                             }
                     }
-                    mapViewModel.setTransactionState(EditingTransactionState.NotEditing)
                 }) {
                 onBackPressed()
             }
@@ -121,7 +94,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
             mapState = mapViewModel
         )
         AnimatedVisibility(
-            visible = inEditingMode,
+            visible = uiState is UIState.Editing,
             enter = slideInVertically { h -> h },
             exit = slideOutVertically { h -> h },
             label = "feature form"
@@ -147,10 +120,12 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                     sheetWidth = with(LocalDensity.current) { layoutWidth.toDp() }
                 ) {
                     // set bottom sheet content to the FeatureForm
-                    FeatureForm(
-                        featureFormState = mapViewModel,
-                        modifier = Modifier.fillMaxSize()
-                    )
+                    if (uiState is UIState.Editing) {
+                        FeatureForm(
+                            featureForm = (uiState as UIState.Editing).featureForm,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
                 }
             }
         }
