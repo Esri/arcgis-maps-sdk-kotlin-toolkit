@@ -36,7 +36,6 @@ import com.arcgismaps.geometry.Polygon
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.TimeExtent
-import com.arcgismaps.mapping.ViewpointType
 import com.arcgismaps.mapping.view.BackgroundGrid
 import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
@@ -236,25 +235,6 @@ private fun ViewpointUpdater(
 }
 
 /**
- * Invokes the ViewpointChangedState's lambdas when a [MapView.viewpointChanged] event is collected.
- *
- * @since 200.4.0
- */
-@Composable
-private fun ViewpointChangedStateHandler(
-    mapView: MapView,
-    viewpointChangedState: ViewpointChangedState?
-) {
-    LaunchedEffect(viewpointChangedState) {
-        viewpointChangedState?.let {
-            mapView.viewpointChanged.collect {
-                viewpointChangedState.invoke(mapView)
-            }
-        }
-    }
-}
-
-/**
  * Sets up the callbacks for all the view-based [mapView] events.
  */
 @Composable
@@ -436,24 +416,4 @@ public inline fun rememberGraphicsOverlayCollection(
     crossinline init: GraphicsOverlayCollection.() -> Unit = {}
 ): GraphicsOverlayCollection = remember(key) {
     GraphicsOverlayCollection().apply(init)
-}
-
-/**
- * Provides a invoke extension on [ViewpointChangedState] which calls the [ViewpointChangedState.onViewpointChangedForCenterAndScale]
- * and [ViewpointChangedState.onViewpointChangedForBoundingGeometry] lambdas with the current viewpoints
- * on mapview of the corresponding viewpoint types.
- *
- * @since 200.4.0
- */
-private fun ViewpointChangedState.invoke(mapView: MapView) {
-    onViewpointChangedForCenterAndScale?.let { lambda ->
-        mapView.getCurrentViewpoint(ViewpointType.CenterAndScale)?.let {
-            lambda.invoke(it)
-        }
-    }
-    onViewpointChangedForBoundingGeometry?.let { lambda ->
-        mapView.getCurrentViewpoint(ViewpointType.BoundingGeometry)?.let {
-            lambda.invoke(it)
-        }
-    }
 }

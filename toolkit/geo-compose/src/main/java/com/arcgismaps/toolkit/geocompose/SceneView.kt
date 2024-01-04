@@ -29,16 +29,20 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.viewinterop.AndroidView
+import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.view.Camera
+import com.arcgismaps.mapping.TimeExtent
 import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
+import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.mapping.view.LongPressEvent
 import com.arcgismaps.mapping.view.PanChangeEvent
 import com.arcgismaps.mapping.view.RotationChangeEvent
 import com.arcgismaps.mapping.view.ScaleChangeEvent
 import com.arcgismaps.mapping.view.SceneView
 import com.arcgismaps.mapping.view.SceneViewInteractionOptions
+import com.arcgismaps.mapping.view.SelectionProperties
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
@@ -52,12 +56,18 @@ import kotlinx.coroutines.launch
  * @param modifier Modifier to be applied to the composable SceneView
  * @param arcGISScene the [ArcGISScene] to be rendered by this composable SceneView
  * @param viewpointOperation a [SceneViewpointOperation] that changes this SceneView to a new viewpoint
+ * @param viewpointChangedState specifies lambdas invoked when the viewpoint of the composable SceneView has changed
  * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable SceneView
  * @param sceneViewProxy the [SceneViewProxy] to associate with the composable SceneView
  * @param sceneViewInteractionOptions the [SceneViewInteractionOptions] used by this composable SceneView
  * @param viewLabelProperties the [ViewLabelProperties] used by the composable SceneView
+ * @param selectionProperties the [SelectionProperties] used by the composable SceneView
  * @param attributionState specifies the attribution bar's visibility, text changed and layout changed events
+ * @param timeExtent the [TimeExtent] used by the composable SceneView
+ * @param onTimeExtentChanged lambda invoked when the composable SceneView's [TimeExtent] is changed
  * @param onNavigationChanged lambda invoked when the navigation status of the composable SceneView has changed
+ * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the composable SceneView has changed
+ * @param onLayerViewStateChanged lambda invoked when the composable SceneView's layer view state is changed
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable SceneView
  * @param onCurrentViewpointCameraChanged lambda invoked when the viewpoint Camera of the composable SceneView has changed
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable SceneView
@@ -76,12 +86,18 @@ public fun SceneView(
     modifier: Modifier = Modifier,
     arcGISScene: ArcGISScene? = null,
     viewpointOperation: SceneViewpointOperation? = null,
+    viewpointChangedState: ViewpointChangedState? = null,
     graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
     sceneViewProxy: SceneViewProxy? = null,
     sceneViewInteractionOptions: SceneViewInteractionOptions = SceneViewInteractionOptions(),
     viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
+    selectionProperties: SelectionProperties = SelectionProperties(),
     attributionState: AttributionState = AttributionState(),
+    timeExtent: TimeExtent? = null,
+    onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
+    onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
+    onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)? = null,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
     onCurrentViewpointCameraChanged: ((camera: Camera) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
@@ -105,6 +121,8 @@ public fun SceneView(
             it.scene = arcGISScene
             it.interactionOptions = sceneViewInteractionOptions
             it.labeling = viewLabelProperties
+            it.selectionProperties = selectionProperties
+            it.setTimeExtent(timeExtent)
         })
 
     DisposableEffect(Unit) {
@@ -127,10 +145,14 @@ public fun SceneView(
     GraphicsOverlaysUpdater(graphicsOverlays, sceneView)
 
     AttributionStateHandler(sceneView, attributionState)
+    ViewpointChangedStateHandler(sceneView, viewpointChangedState)
 
     SceneViewEventHandler(
         sceneView,
+        onTimeExtentChanged,
         onNavigationChanged,
+        onSpatialReferenceChanged,
+        onLayerViewStateChanged,
         onInteractingChanged,
         onCurrentViewpointCameraChanged,
         onRotate,
@@ -167,7 +189,10 @@ private fun ViewpointUpdater(
 @Composable
 private fun SceneViewEventHandler(
     sceneView: SceneView,
+    onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)?,
+    onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)?,
+    onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)?,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)?,
     onCurrentViewpointCameraChanged: ((camera: Camera) -> Unit)?,
     onRotate: ((RotationChangeEvent) -> Unit)?,
@@ -180,7 +205,10 @@ private fun SceneViewEventHandler(
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)?,
     onPan: ((PanChangeEvent) -> Unit)?,
 ) {
+    val currentOnTimeExtentChanged by rememberUpdatedState(onTimeExtentChanged)
     val currentOnNavigationChanged by rememberUpdatedState(onNavigationChanged)
+    val currentOnSpatialReferenceChanged by rememberUpdatedState(onSpatialReferenceChanged)
+    val currentOnLayerViewStateChanged by rememberUpdatedState(onLayerViewStateChanged)
     val currentOnInteractingChanged by rememberUpdatedState(onInteractingChanged)
     val currentOnViewpointCameraChanged by rememberUpdatedState(onCurrentViewpointCameraChanged)
     val currentOnRotate by rememberUpdatedState(onRotate)
@@ -195,8 +223,23 @@ private fun SceneViewEventHandler(
 
     LaunchedEffect(Unit) {
         launch {
+            sceneView.timeExtent.collect { currentTimeExtent ->
+                currentOnTimeExtentChanged?.invoke(currentTimeExtent)
+            }
+        }
+        launch {
             sceneView.navigationChanged.collect {
                 currentOnNavigationChanged?.invoke(it)
+            }
+        }
+        launch {
+            sceneView.spatialReference.collect { spatialReference ->
+                currentOnSpatialReferenceChanged?.invoke(spatialReference)
+            }
+        }
+        launch {
+            sceneView.layerViewStateChanged.collect { currentLayerViewState ->
+                currentOnLayerViewStateChanged?.invoke(currentLayerViewState)
             }
         }
         launch {
