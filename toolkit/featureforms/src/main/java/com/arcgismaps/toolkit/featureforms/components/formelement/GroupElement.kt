@@ -45,7 +45,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.BaseGroupState
-import com.arcgismaps.toolkit.featureforms.components.base.MutableStateCollection
+import com.arcgismaps.toolkit.featureforms.components.base.MutableFormStateCollection
 import com.arcgismaps.toolkit.featureforms.components.base.FormStateCollection
 import com.arcgismaps.toolkit.featureforms.components.base.getState
 
@@ -158,7 +158,7 @@ private fun GroupElementPreview() {
         label = "Title",
         description = "Description",
         expanded = false,
-        fieldStates = MutableStateCollection(),
+        fieldStates = MutableFormStateCollection(),
         modifier = Modifier.padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 10.dp),
         colors = GroupElementDefaults.colors(),
         onClick = {}
