@@ -91,6 +91,7 @@ public fun SceneView(
     viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
     selectionProperties: SelectionProperties = SelectionProperties(),
     attributionState: AttributionState = AttributionState(),
+    analysisOverlays: AnalysisOverlayCollection = rememberAnalysisOverlayCollection(),
     timeExtent: TimeExtent? = null,
     onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
@@ -140,6 +141,7 @@ public fun SceneView(
     ViewpointUpdater(sceneView, viewpointOperation)
 
     GraphicsOverlaysUpdater(graphicsOverlays, sceneView)
+    AnalysisOverlaysUpdater(analysisOverlays, sceneView)
 
     AttributionStateHandler(sceneView, attributionState)
     ViewpointChangedStateHandler(sceneView, viewpointChangedState)
