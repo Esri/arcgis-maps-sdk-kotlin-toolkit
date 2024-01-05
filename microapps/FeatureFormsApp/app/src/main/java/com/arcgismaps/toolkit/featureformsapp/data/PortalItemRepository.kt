@@ -1,7 +1,7 @@
 package com.arcgismaps.toolkit.featureformsapp.data
 
-import android.graphics.Bitmap
 import android.util.Log
+import com.arcgismaps.LoadStatus
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.featureformsapp.data.local.ItemCacheDao
@@ -14,16 +14,11 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.FileOutputStream
-
-data class PortalItemData(
-    val portalItem: PortalItem,
-    val thumbnailUri: String
-)
 
 /**
  * A repository to map the data source items into loaded PortalItems. This is the primary repository
@@ -43,15 +38,16 @@ class PortalItemRepository(
     private val mutex = Mutex()
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val portalItemsFlow: Flow<List<PortalItemData>> =
+    private val portalItemsFlow: Flow<List<PortalItem>> =
         itemCacheDao.observeAll().mapLatest { entries ->
             // map the cache entries into loaded portal items
             entries.mapNotNull { entry ->
                 val portal = Portal(entry.portalUrl)
                 val portalItem = PortalItem.fromJsonOrNull(entry.json, portal)
                 portalItem?.let {
-                    portalItems[portalItem.itemId] = portalItem
-                    PortalItemData(portalItem, entry.thumbnailUri)
+                    portalItem.also {
+                        portalItems[portalItem.itemId] = it
+                    }
                 }
             }
         }.flowOn(dispatcher)
@@ -59,22 +55,21 @@ class PortalItemRepository(
     /**
      * Returns the list of loaded PortalItemData as a flow.
      */
-    fun observe(): Flow<List<PortalItemData>> = portalItemsFlow
+    fun observe(): Flow<List<PortalItem>> = portalItemsFlow
 
     /**
-     * Refreshes the underlying data source to fetch the latest content. [forceUpdate] when set to
-     * true, will clear the existing cache.
+     * Refreshes the underlying data source to fetch the latest content.
      *
      * This operation is suspending and will wait until the underlying data source has finished
      * AND the repository has finished loading the portal items.
      */
     suspend fun refresh(
         portalUri: String,
-        connection: Portal.Connection,
-        forceUpdate: Boolean = false
+        connection: Portal.Connection
     ) = withContext(dispatcher) {
         mutex.withLock {
-            if (forceUpdate) deleteAllCacheEntries()
+            // delete existing cache items
+            itemCacheDao.deleteAll()
             portalItems.clear()
             // get local items
             val localItems = getListOfMaps().map { ItemData(it) }
@@ -85,9 +80,12 @@ class PortalItemRepository(
         }
     }
 
-    suspend fun deleteAll() = withContext(dispatcher) {
+    /**
+     * Deletes all the portal items from the local cache storage.
+     */
+    suspend fun deleteAll() = withContext(Dispatchers.IO) {
         mutex.withLock {
-            deleteAllCacheEntries()
+            itemCacheDao.deleteAll()
             portalItems.clear()
         }
     }
@@ -102,69 +100,44 @@ class PortalItemRepository(
     /**
      * Loads the list of [items] into loaded portal items and adds them to the Cache.
      */
-    private suspend fun loadAndCachePortalItems(items: List<ItemData>) {
-        val entries = items.mapNotNull { itemData ->
-            val portalItem = PortalItem(itemData.url)
-            // ignore if the portal items fails to load
-            val result = portalItem.load().onFailure {
-                Log.e("PortalItemRepository", "loadAndCachePortalItems: $it")
+    private suspend fun loadAndCachePortalItems(items: List<ItemData>) = withContext(dispatcher) {
+        // create PortalItems from the urls
+        val portalItems = items.map {
+            PortalItem(it.url)
+        }
+        portalItems.map { item ->
+            // load each portal item and its thumbnail in a new coroutine
+            launch {
+                item.load().onFailure {
+                    Log.e("PortalItemRepository", "loadAndCachePortalItems: $it")
+                }
+                item.thumbnail?.load()
             }
-            if (result.isFailure) {
+            // suspend till all the portal loading jobs are complete
+        }.joinAll()
+        // create entries to be inserted into the local cache storage.
+        val entries = portalItems.mapNotNull { item ->
+            // ignore if the portal item failed to load
+            if (item.loadStatus.value is LoadStatus.FailedToLoad) {
                 null
             } else {
-                val thumbnailUri = portalItem.thumbnail?.let { thumbnail ->
-                    thumbnail.load()
-                    thumbnail.image?.bitmap?.let { bitmap ->
-                        createThumbnail(
-                            portalItem.itemId,
-                            bitmap
-                        )
-                    }
-                } ?: ""
                 ItemCacheEntry(
-                    itemData.url,
-                    portalItem.toJson(),
-                    thumbnailUri,
-                    portalItem.portal.url
+                    itemId = item.itemId,
+                    json = item.toJson(),
+                    portalUrl = item.portal.url
                 )
             }
         }
-        // purge existing items and add the updated items
-        createCacheEntries(entries)
+        // insert all the items into the local cache storage
+        insertCacheEntries(entries)
     }
 
     /**
      * Deletes and inserts the list of [entries] using the [ItemCacheDao].
      */
-    private suspend fun createCacheEntries(entries: List<ItemCacheEntry>) =
+    private suspend fun insertCacheEntries(entries: List<ItemCacheEntry>) =
         withContext(dispatcher) {
             itemCacheDao.deleteAndInsert(entries)
-        }
-
-    /**
-     * Deletes all entries in the database using the [ItemCacheDao].
-     */
-    private suspend fun deleteAllCacheEntries() =
-        withContext(Dispatchers.IO) {
-            itemCacheDao.deleteAll()
-            val thumbsDir = File("$filesDir/thumbs")
-            if (thumbsDir.exists()) thumbsDir.deleteRecursively()
-        }
-
-    /**
-     * Creates a JPEG thumbnail using the [bitmap] with [name] filename in the local files
-     * directory and returns the absolute path to the file.
-     */
-    private suspend fun createThumbnail(name: String, bitmap: Bitmap): String =
-        withContext(Dispatchers.IO) {
-            val thumbsDir = File("$filesDir/thumbs")
-            if (!thumbsDir.exists()) thumbsDir.mkdirs()
-            val file = File("${thumbsDir.absolutePath}/${name}.jpg")
-            file.createNewFile()
-            FileOutputStream(file).use {
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it)
-            }
-            file.absolutePath
         }
 
     operator fun invoke(itemId: String): PortalItem? = portalItems[itemId]

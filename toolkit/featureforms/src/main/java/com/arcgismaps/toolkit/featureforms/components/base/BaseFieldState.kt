@@ -53,21 +53,16 @@ internal open class BaseFieldState<T>(
     initialValue: T = properties.value.value,
     scope: CoroutineScope,
     protected val onEditValue: (Any?) -> Unit,
+    val validate: () -> List<Throwable> = {listOf()}
+) : FormElementState(
+    label = properties.label,
+    description = properties.description,
+    isVisible = properties.visible
 ) {
-    /**
-     * Title for the field.
-     */
-    open val label: String = properties.label
-
     /**
      * Placeholder hint for the field.
      */
     open val placeholder: String = properties.placeholder
-    
-    /**
-     * Description text for the field.
-     */
-    val description: String = properties.description
 
     // a state flow to handle user input changes
     protected val _value = MutableStateFlow(initialValue)
@@ -89,11 +84,6 @@ internal open class BaseFieldState<T>(
      * Property that indicates if the field is required.
      */
     val isRequired: StateFlow<Boolean> = properties.required
-
-    /**
-     * Property that indicates if the field is visible.
-     */
-    val isVisible: StateFlow<Boolean> = properties.visible
    
     /**
      * Callback to update the current value of the FormTextFieldState to the given [input].

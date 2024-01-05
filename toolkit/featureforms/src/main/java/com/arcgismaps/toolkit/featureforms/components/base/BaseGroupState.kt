@@ -20,45 +20,43 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.mapping.featureforms.FormGroupState
 import com.arcgismaps.mapping.featureforms.GroupFormElement
-
-internal class GroupProperties(
-    val label: String,
-    val description: String,
-    val expanded: Boolean
-)
+import kotlinx.coroutines.flow.StateFlow
 
 internal class BaseGroupState(
-    properties: GroupProperties,
-    val fieldStates: Map<Int, BaseFieldState<*>?>
+    label: String,
+    description: String,
+    isVisible: StateFlow<Boolean>,
+    expanded: Boolean,
+    val fieldStates: FormStateCollection
+) : FormElementState(
+    label = label,
+    description = description,
+    isVisible = isVisible
 ) {
-    val label = properties.label
+    private val _expanded = mutableStateOf(expanded)
+    val expanded: State<Boolean> = _expanded
 
-    val description = properties.description
-
-    private val _expanded = mutableStateOf(properties.expanded)
-    val expanded : State<Boolean> = _expanded
-
-    fun setExpanded(value : Boolean) {
+    fun setExpanded(value: Boolean) {
         _expanded.value = value
     }
 
     companion object {
-        fun Saver(fieldStates: Map<Int, BaseFieldState<*>?>): Saver<BaseGroupState, Any> = listSaver(
+        fun Saver(
+            groupElement: GroupFormElement,
+            fieldStates: FormStateCollection
+        ): Saver<BaseGroupState, Boolean> = Saver(
             save = {
-                listOf(it.label, it.description, it.expanded.value)
+                it.expanded.value
             },
             restore = {
-                val properties = GroupProperties(
-                    label = it[0] as String,
-                    description = it[1] as String,
-                    expanded = it[2] as Boolean
-                )
                 BaseGroupState(
-                    properties = properties,
+                    label = groupElement.label,
+                    description = groupElement.description,
+                    isVisible = groupElement.isVisible,
+                    expanded = it,
                     fieldStates = fieldStates
                 )
             }
@@ -69,16 +67,15 @@ internal class BaseGroupState(
 @Composable
 internal fun rememberBaseGroupState(
     groupElement: GroupFormElement,
-    fieldStates: Map<Int, BaseFieldState<*>?>
+    fieldStates: FormStateCollection
 ): BaseGroupState = rememberSaveable(
-    saver = BaseGroupState.Saver(fieldStates)
+    saver = BaseGroupState.Saver(groupElement, fieldStates)
 ) {
     BaseGroupState(
-        properties = GroupProperties(
-            label = groupElement.label,
-            description = groupElement.description,
-            expanded = groupElement.initialState == FormGroupState.Expanded
-        ),
+        label = groupElement.label,
+        description = groupElement.description,
+        isVisible = groupElement.isVisible,
+        expanded = groupElement.initialState == FormGroupState.Expanded,
         fieldStates = fieldStates
     )
 }

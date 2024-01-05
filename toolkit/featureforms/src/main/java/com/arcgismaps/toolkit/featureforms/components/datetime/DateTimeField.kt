@@ -41,14 +41,16 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.base.BaseTextField
+import com.arcgismaps.toolkit.featureforms.utils.DialogType
+import com.arcgismaps.toolkit.featureforms.utils.LocalDialogRequester
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 internal fun DateTimeField(
     state: DateTimeFieldState,
-    modifier: Modifier = Modifier,
-    onDialogRequest: () -> Unit
+    modifier: Modifier = Modifier
 ) {
+    val dialogRequester = LocalDialogRequester.current
     val isEditable by state.isEditable.collectAsState()
     val isRequired by state.isRequired.collectAsState()
     val instant by state.value.collectAsState()
@@ -99,8 +101,9 @@ internal fun DateTimeField(
                 wasFocused = true
                 // request to show the date picker dialog only when the touch is released
                 // the dialog is responsible for updating the value on the state
-                if (isEditable)
-                    onDialogRequest()
+                if (isEditable) {
+                    dialogRequester.requestDialog(DialogType.DateTimeDialog(state))
+                }
             }
         }
     }
@@ -127,6 +130,6 @@ private fun DateTimeFieldPreview() {
             scope = scope,
             onEditValue = {}
         )
-        DateTimeField(state = state) {}
+        DateTimeField(state = state)
     }
 }

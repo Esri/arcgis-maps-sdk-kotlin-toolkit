@@ -16,16 +16,19 @@
 
 package com.arcgismaps.toolkit.featureforms.components.codedvalue
 
+import android.content.res.Configuration
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -39,7 +42,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -57,6 +60,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -68,18 +73,24 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.window.core.layout.WindowHeightSizeClass
+import androidx.window.core.layout.WindowWidthSizeClass
 import com.arcgismaps.data.FieldType
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.base.BaseTextField
+import com.arcgismaps.toolkit.featureforms.utils.DialogType
+import com.arcgismaps.toolkit.featureforms.utils.LocalDialogRequester
+import com.arcgismaps.toolkit.featureforms.utils.computeWindowSizeClasses
+import com.arcgismaps.toolkit.featureforms.utils.conditional
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 internal fun ComboBoxField(
     state: CodedValueFieldState,
-    modifier: Modifier = Modifier,
-    onDialogRequest: () -> Unit = {}
+    modifier: Modifier = Modifier
 ) {
+    val dialogRequester = LocalDialogRequester.current
     val value by state.value.collectAsState()
     val isEditable by state.isEditable.collectAsState()
     val isRequired by state.isRequired.collectAsState()
@@ -136,7 +147,7 @@ internal fun ComboBoxField(
             if (it is PressInteraction.Release) {
                 wasFocused = true
                 if (isEditable) {
-                    onDialogRequest()
+                    dialogRequester.requestDialog(DialogType.ComboBoxDialog(state))
                 }
             }
         }
@@ -156,6 +167,8 @@ internal fun ComboBoxDialog(
     onValueChange: (String) -> Unit,
     onDismissRequest: () -> Unit
 ) {
+    val configuration = LocalConfiguration.current
+    val windowSizeClass = computeWindowSizeClasses(LocalContext.current)
     var searchText by rememberSaveable { mutableStateOf("") }
     val codedValues = if (!isRequired) {
         if (noValueOption == FormInputNoValueOption.Show) {
@@ -170,13 +183,42 @@ internal fun ComboBoxDialog(
             }
         }
     }
+    // show the dialog as fullscreen for devices which are classified as compact window size
+    // like most phones, otherwise as a windowed dialog for expanded screens like tablets
+    val showAsFullScreen = when (configuration.orientation) {
+        Configuration.ORIENTATION_PORTRAIT -> {
+            windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT
+        }
+
+        Configuration.ORIENTATION_LANDSCAPE -> {
+            windowSizeClass.windowHeightSizeClass == WindowHeightSizeClass.COMPACT
+        }
+
+        else -> {
+            true
+        }
+    }
 
     Dialog(
         onDismissRequest = onDismissRequest,
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
-        Scaffold(
-            topBar = {
+        Surface(
+            modifier = Modifier.conditional(
+                condition = showAsFullScreen,
+                ifTrue = {
+                    fillMaxSize()
+                },
+                ifFalse = {
+                    width(600.dp)
+                        .heightIn(max = (configuration.screenHeightDp * 0.8).dp)
+                        .wrapContentHeight()
+                }),
+            shape = RoundedCornerShape(10.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Column(
                     modifier = Modifier
                         .padding(start = 15.dp, top = 15.dp, bottom = 10.dp, end = 10.dp)
@@ -225,25 +267,17 @@ internal fun ComboBoxDialog(
                             Text(text = stringResource(R.string.done))
                         }
                     }
-                    Text(
-                        text = description,
-                        modifier = Modifier.padding(top = 10.dp),
-                        style = MaterialTheme.typography.labelSmall
-                    )
+                    if (description.isNotEmpty()) {
+                        Text(
+                            text = description,
+                            modifier = Modifier.padding(top = 10.dp),
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
                 }
-            }
-        ) { padding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-            ) {
-                Divider(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                )
+                Divider(modifier = Modifier.fillMaxWidth())
                 LazyColumn(modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth()
                     .semantics {
                         contentDescription = "ComboBoxDialogLazyColumn"
                     }) {
@@ -279,8 +313,7 @@ internal fun ComboBoxDialog(
                                     }
                                 },
                             trailingContent = {
-                                if (name == initialValue || (name == noValueLabel && initialValue.isEmpty())
-                                ) {
+                                if (name == initialValue || (name == noValueLabel && initialValue.isEmpty())) {
                                     Icon(
                                         imageVector = Icons.Outlined.Check,
                                         contentDescription = "list item check"
@@ -290,10 +323,33 @@ internal fun ComboBoxDialog(
                         )
                     }
                 }
-                Spacer(modifier = Modifier.weight(1f))
             }
         }
     }
+}
+
+@Preview
+@Composable
+private fun ComboBoxDialogPreview() {
+    ComboBoxDialog(
+        initialValue = "x",
+        values = mapOf(
+            "Birch" to "Birch",
+            "Maple" to "Maple",
+            "Oak" to "Oak",
+            "Spruce" to "Spruce",
+            "Hickory" to "Hickory",
+            "Hemlock" to "Hemlock"
+        ),
+        label = "Types",
+        description = "Select the tree species",
+        isRequired = false,
+        noValueOption = FormInputNoValueOption.Show,
+        noValueLabel = "No Value",
+        onValueChange = {},
+        onDismissRequest = {},
+        keyboardType = KeyboardType.Ascii
+    )
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
@@ -320,26 +376,4 @@ private fun ComboBoxPreview() {
     ComboBoxField(state = state)
 }
 
-@Preview
-@Composable
-private fun ComboBoxDialogPreview() {
-    ComboBoxDialog(
-        initialValue = "x",
-        values = mapOf(
-            "Birch" to "Birch",
-            "Maple" to "Maple",
-            "Oak" to "Oak",
-            "Spruce" to "Spruce",
-            "Hickory" to "Hickory",
-            "Hemlock" to "Hemlock"
-        ),
-        label = "Types",
-        description = "Select the tree species",
-        isRequired = false,
-        noValueOption = FormInputNoValueOption.Show,
-        noValueLabel = "No Value",
-        onValueChange = {},
-        onDismissRequest = {},
-        keyboardType = KeyboardType.Ascii
-    )
-}
+

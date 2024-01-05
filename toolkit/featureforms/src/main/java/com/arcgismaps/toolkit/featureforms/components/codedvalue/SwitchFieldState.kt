@@ -154,13 +154,15 @@ internal class SwitchFieldState(
 internal fun rememberSwitchFieldState(
     field: FieldFormElement,
     form: FeatureForm,
-    fallback: Boolean,
     scope: CoroutineScope,
     noValueString: String
 ): SwitchFieldState = rememberSaveable(
     saver = SwitchFieldState.Saver(field, form, scope, noValueString)
 ) {
     val input = field.input as SwitchFormInput
+    val initialValue = field.formattedValue
+    val fallback = initialValue.isEmpty()
+        || (field.value.value != input.onValue.code && field.value.value != input.offValue.code)
     SwitchFieldState(
         properties = SwitchFieldProperties(
             label = field.label,
