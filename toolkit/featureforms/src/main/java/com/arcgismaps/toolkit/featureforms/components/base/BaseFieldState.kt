@@ -170,14 +170,26 @@ internal open class BaseFieldState<T>(
     private fun filter(errors: List<ValidationErrorState>): ValidationErrorState {
         Log.e("TAG", "filtering: $errors with wasfocused:$wasFocused")
         return if (errors.isNotEmpty()) {
-            if (wasFocused) {
-                if (errors.any { it is ValidationErrorState.Required }) {
-                    ValidationErrorState.Required
+            if (!isEditable.value) {
+                ValidationErrorState.NoError
+            } else {
+                if (wasFocused) {
+                    if (!isFocused.value) {
+                        if (errors.any { it is ValidationErrorState.Required }) {
+                            ValidationErrorState.Required
+                        } else {
+                            errors.first()
+                        }
+                    } else {
+                        if (errors.any { it !is ValidationErrorState.Required }) {
+                            errors.first()
+                        } else {
+                            ValidationErrorState.NoError
+                        }
+                    }
                 } else {
                     ValidationErrorState.NoError
                 }
-            } else {
-                ValidationErrorState.NoError
             }
         } else {
             ValidationErrorState.NoError

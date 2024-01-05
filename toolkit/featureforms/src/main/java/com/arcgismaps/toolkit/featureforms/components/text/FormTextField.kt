@@ -30,6 +30,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import com.arcgismaps.toolkit.featureforms.components.base.BaseTextField
+import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState
 import com.arcgismaps.toolkit.featureforms.utils.isNumeric
 
 @Composable
@@ -37,7 +38,7 @@ internal fun FormTextField(
     state: FormTextFieldState,
     modifier: Modifier = Modifier,
 ) {
-    val text by state.value.collectAsState()
+    val value by state.value.collectAsState()
     val isEditable by state.isEditable.collectAsState()
     val isRequired by state.isRequired.collectAsState()
     val isFocused by state.isFocused.collectAsState()
@@ -48,12 +49,14 @@ internal fun FormTextField(
             state.label
         }
     }
-    val supportingText by state.supportingText
-    val contentLength = if (state.minLength > 0 || state.maxLength > 0) "${text.data.length}" else ""
-    val supportingTextIsErrorMessage by state.supportingTextIsErrorMessage
+    //val supportingText by state.supportingText
+    val contentLength =
+        if (state.minLength > 0 || state.maxLength > 0) "${value.data.length}" else ""
+    //val errorText = state.getErrorMessage(value.error)
+    //val supportingTextIsErrorMessage by state.supportingTextIsErrorMessage
 
     BaseTextField(
-        text = text.data,
+        text = value.data,
         onValueChange = {
             state.onValueChanged(it)
         },
@@ -64,15 +67,22 @@ internal fun FormTextField(
         singleLine = state.singleLine,
         keyboardType = if (state.fieldType.isNumeric) KeyboardType.Number else KeyboardType.Ascii,
         supportingText = {
-            val textColor = if (supportingTextIsErrorMessage) MaterialTheme.colorScheme.error
-            else MaterialTheme.colorScheme.onSurface
+            val textColor =
+                if (value.error is ValidationErrorState.NoError) MaterialTheme.colorScheme.onSurface
+                else MaterialTheme.colorScheme.error
             Row {
-                if (supportingText.isNotEmpty()) {
+                // show the validation error if it exists
+                if (value.error is ValidationErrorState.NoError) {
                     Text(
-                        text = supportingText,
+                        text = state.description,
+                        modifier = Modifier.semantics { contentDescription = "description" },
+                    )
+                } else {
+                    Text(
+                        text = value.error.getString(),
+                        color = textColor,
                         modifier = Modifier
-                            .semantics { contentDescription = "helper" },
-                        color = textColor
+                            .semantics { contentDescription = "helper" }
                     )
                 }
                 if (isFocused && isEditable) {
@@ -90,3 +100,18 @@ internal fun FormTextField(
         }
     )
 }
+
+//@Composable
+//private fun (FormTextFieldState).getErrorMessage(error: ValidationErrorState): String {
+//    return when (error) {
+//        is ValidationErrorState.Required -> {
+//            error.getString()
+//        }
+//
+//        is
+//
+//        else -> {
+//            description
+//        }
+//    }
+//}

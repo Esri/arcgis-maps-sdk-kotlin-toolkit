@@ -64,6 +64,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
+import kotlin.math.min
 
 internal class TextFieldProperties(
     label: String,
@@ -116,17 +117,17 @@ internal class FormTextFieldState(
     // fetch the maxLength based on the featureFormElement.inputType
     val maxLength = properties.maxLength
     
-    private var hasBeenFocused: Boolean = false
+    //private var hasBeenFocused: Boolean = false
     
     // supporting text will depend on multiple other states. If there is an error, it will display
     // error message. Otherwise description is displayed, unless it is empty in which case
     // the helper text is displayed when the field is focused.
-    private val _supportingText: MutableState<String> = mutableStateOf(description)
-    val supportingText: State<String> = _supportingText
+//    private val _supportingText: MutableState<String> = mutableStateOf(description)
+//    val supportingText: State<String> = _supportingText
     
-    private val _hasError = mutableStateOf(false)
-    private val _supportingTextIsErrorMessage = mutableStateOf(false)
-    val supportingTextIsErrorMessage: State<Boolean> = _supportingTextIsErrorMessage
+//    private val _hasError = mutableStateOf(false)
+//    private val _supportingTextIsErrorMessage = mutableStateOf(false)
+//    val supportingTextIsErrorMessage: State<Boolean> = _supportingTextIsErrorMessage
     /**
      * The domain of the element's field.
      */
@@ -137,105 +138,105 @@ internal class FormTextFieldState(
      */
     val fieldType: FieldType = properties.fieldType
     
-    private val errorMessages: MutableMap<ValidationErrorState, String> by lazy {
-        val min = if (domain is RangeDomain) {
-            (domain.minValue as? Number)?.format()
-        } else {
-            ""
-        }
-        
-        val max = if (domain is RangeDomain) {
-            (domain.maxValue as? Number)?.format()
-        } else {
-            ""
-        }
-        
-        mutableMapOf(
-            Required to context.getString(R.string.required),
-            MaxCharConstraint to context.getString(R.string.maximum_n_chars, if (maxLength > 0) maxLength else 254),
-            ExactCharConstraint to context.getString(R.string.enter_n_chars, minLength),
-            MinMaxCharConstraint to context.getString(R.string.enter_min_to_max_chars, minLength, maxLength),
-            MinNumericConstraint to context.getString(R.string.less_than_min_value, min),
-            MaxNumericConstraint to context.getString(R.string.exceeds_max_value, max),
-            MinMaxNumericConstraint to context.getString(R.string.numeric_range_helper_text, min, max),
-            NotANumber to context.getString(R.string.value_must_be_a_number),
-            NotAWholeNumber to context.getString(R.string.value_must_be_a_whole_number)
-        )
-    }
+//    private val errorMessages: MutableMap<ValidationErrorState, String> by lazy {
+//        val min = if (domain is RangeDomain) {
+//            (domain.minValue as? Number)?.format()
+//        } else {
+//            ""
+//        }
+//
+//        val max = if (domain is RangeDomain) {
+//            (domain.maxValue as? Number)?.format()
+//        } else {
+//            ""
+//        }
+//
+//        mutableMapOf(
+//            Required to context.getString(R.string.required),
+//            MaxCharConstraint to context.getString(R.string.maximum_n_chars, if (maxLength > 0) maxLength else 254),
+//            ExactCharConstraint to context.getString(R.string.enter_n_chars, minLength),
+//            MinMaxCharConstraint(minLength, maxLength) to context.getString(R.string.enter_min_to_max_chars, minLength, maxLength),
+//            MinNumericConstraint to context.getString(R.string.less_than_min_value, min),
+//            MaxNumericConstraint to context.getString(R.string.exceeds_max_value, max),
+//            MinMaxNumericConstraint to context.getString(R.string.numeric_range_helper_text, min, max),
+//            NotANumber to context.getString(R.string.value_must_be_a_number),
+//            NotAWholeNumber to context.getString(R.string.value_must_be_a_whole_number)
+//        )
+//    }
     
     // build helper text
-    private val helperText =
-        if (fieldType.isNumeric) {
-            if (domain != null && domain is RangeDomain) {
-                val min = domain.minValue
-                val max = domain.maxValue
-                // to format the range of either integer or floating point
-                // values without a lot of logic, they are formatted as strings.
-                if (min is Number && max is Number) {
-                    context.getString(R.string.numeric_range_helper_text, min.format(), max.format())
-                } else if (min is Number) {
-                    context.getString(R.string.less_than_min_value, min.format())
-                } else if (max is Number) {
-                    context.getString(R.string.exceeds_max_value, max.format())
-                } else {
-                    // not likely to happen.
-                    ""
-                }
-            } else {
-                ""
-            }
-        } else {
-            if (minLength > 0 && maxLength > 0) {
-                if (minLength == maxLength) {
-                    context.getString(R.string.enter_n_chars, minLength)
-                } else {
-                    context.getString(R.string.enter_min_to_max_chars, minLength, maxLength)
-                }
-            } else if (maxLength > 0) {
-                context.getString(R.string.maximum_n_chars, maxLength)
-            } else {
-                context.getString(R.string.maximum_n_chars, 254)
-            }
-        }
+//    private val helperText =
+//        if (fieldType.isNumeric) {
+//            if (domain != null && domain is RangeDomain) {
+//                val min = domain.minValue
+//                val max = domain.maxValue
+//                // to format the range of either integer or floating point
+//                // values without a lot of logic, they are formatted as strings.
+//                if (min is Number && max is Number) {
+//                    context.getString(R.string.numeric_range_helper_text, min.format(), max.format())
+//                } else if (min is Number) {
+//                    context.getString(R.string.less_than_min_value, min.format())
+//                } else if (max is Number) {
+//                    context.getString(R.string.exceeds_max_value, max.format())
+//                } else {
+//                    // not likely to happen.
+//                    ""
+//                }
+//            } else {
+//                ""
+//            }
+//        } else {
+//            if (minLength > 0 && maxLength > 0) {
+//                if (minLength == maxLength) {
+//                    context.getString(R.string.enter_n_chars, minLength)
+//                } else {
+//                    context.getString(R.string.enter_min_to_max_chars, minLength, maxLength)
+//                }
+//            } else if (maxLength > 0) {
+//                context.getString(R.string.maximum_n_chars, maxLength)
+//            } else {
+//                context.getString(R.string.maximum_n_chars, 254)
+//            }
+//        }
     
-    init {
-        scope.launch {
-            value.drop(1).collect { newValue ->
-                updateValidation(newValue.data)
-            }
-        }
-        scope.launch {
-            isRequired.drop(1).collect {
-                updateValidation(value.value.data)
-            }
-        }
-        scope.launch {
-            isFocused.drop(1).collect {
-                if (it) {
-                    hasBeenFocused = true
-                }
-                updateValidation(value.value.data)
-            }
-        }
-    }
+//    init {
+//        scope.launch {
+//            value.drop(1).collect { newValue ->
+//                updateValidation(newValue.data)
+//            }
+//        }
+//        scope.launch {
+//            isRequired.drop(1).collect {
+//                updateValidation(value.value.data)
+//            }
+//        }
+//        scope.launch {
+//            isFocused.drop(1).collect {
+//                if (it) {
+//                    hasBeenFocused = true
+//                }
+//                updateValidation(value.value.data)
+//            }
+//        }
+//    }
     
-    private fun updateValidation(value: String) {
-        val errors = validate(value)
-        val errorToDisplay = errorMessageToDisplay(value, errors)
-        _supportingTextIsErrorMessage.value = errorToDisplay != NoError
-        _supportingText.value = if (errorToDisplay != NoError) {
-            errorMessages[errorToDisplay] ?: throw IllegalStateException("validation error must have a message")
-        } else {
-            description.ifEmpty {
-                if (isFocused.value && isEditable.value) {
-                    helperText
-                } else {
-                    ""
-                }
-            }
-        }
-        _hasError.value = errors.isNotEmpty()
-    }
+//    private fun updateValidation(value: String) {
+//        val errors = validate(value)
+//        val errorToDisplay = errorMessageToDisplay(value, errors)
+////        _supportingTextIsErrorMessage.value = errorToDisplay != NoError
+////        _supportingText.value = if (errorToDisplay != NoError) {
+////            errorMessages[errorToDisplay] ?: throw IllegalStateException("validation error must have a message")
+////        } else {
+////            description.ifEmpty {
+////                if (isFocused.value && isEditable.value) {
+////                    helperText
+////                } else {
+////                    ""
+////                }
+////            }
+////        }
+////        _hasError.value = errors.isNotEmpty()
+//    }
     
     private fun validateNumericRange(numberVal: Int): ValidationErrorState {
         require(fieldType.isIntegerType)
@@ -245,19 +246,19 @@ internal class FormTextFieldState(
                 if (numberVal in min..max) {
                     NoError
                 } else {
-                    MinMaxNumericConstraint
+                    MinMaxNumericConstraint(min.toString(), max.toString())
                 }
             } else if (min != null) {
                 if (min <= numberVal) {
                     NoError
                 } else {
-                    MinNumericConstraint
+                    MinNumericConstraint(min.toString())
                 }
             } else if (max != null) {
                 if (numberVal <= max) {
                     NoError
                 } else {
-                    MaxNumericConstraint
+                    MaxNumericConstraint(max.toString())
                 }
             } else {
                 NoError
@@ -275,19 +276,19 @@ internal class FormTextFieldState(
                 if (numberVal in min..max) {
                     NoError
                 } else {
-                    MinMaxNumericConstraint
+                    MinMaxNumericConstraint(min.toString(), max.toString())
                 }
             } else if (min != null) {
                 if (min <= numberVal) {
                     NoError
                 } else {
-                    MinNumericConstraint
+                    MinNumericConstraint(min.toString())
                 }
             } else if (max != null) {
                 if (numberVal <= max) {
                     NoError
                 } else {
-                    MaxNumericConstraint
+                    MaxNumericConstraint(max.toString())
                 }
             } else {
                 NoError
@@ -297,37 +298,37 @@ internal class FormTextFieldState(
         }
     }
     
-    private fun errorMessageToDisplay(
-        value: String,
-        validationErrors: List<ValidationErrorState>
-    ): ValidationErrorState =
-        if (validationErrors.isEmpty() || !isEditable.value) {
-            NoError
-        } else if (isFocused.value) {
-            if (value.isEmpty()) {
-                // if focused and empty, don't show the "Required" error or numeric parse errors
-                validationErrors.firstOrNull { it != Required && it != NotANumber && it != NotAWholeNumber } ?: NoError
-            } else {
-                // if non empty, focused, show any error other than required (the Required error shouldn't be in the list)
-                validationErrors.first()
-            }
-        } else if (hasBeenFocused) {
-            if (value.isEmpty()) {
-                if (validationErrors.contains(Required)) {
-                    // show any non required and non parse error before showing a Required error
-                    validationErrors.firstOrNull { it != Required && it != NotANumber && it != NotAWholeNumber  } ?: Required
-                } else {
-                    // don't show parse errors when empty and not required (and when required, show required as above)
-                    validationErrors.firstOrNull { it != NotANumber && it != NotAWholeNumber  } ?: NoError
-                }
-            } else {
-                // if non empty, unfocused, show any error other than required (the Required error shouldn't be in the list)
-                validationErrors.first()
-            }
-        } else {
-            // never been focused
-            NoError
-        }
+//    private fun errorMessageToDisplay(
+//        value: String,
+//        validationErrors: List<ValidationErrorState>
+//    ): ValidationErrorState =
+//        if (validationErrors.isEmpty() || !isEditable.value) {
+//            NoError
+//        } else if (isFocused.value) {
+//            if (value.isEmpty()) {
+//                // if focused and empty, don't show the "Required" error or numeric parse errors
+//                validationErrors.firstOrNull { it != Required && it != NotANumber && it != NotAWholeNumber } ?: NoError
+//            } else {
+//                // if non empty, focused, show any error other than required (the Required error shouldn't be in the list)
+//                validationErrors.first()
+//            }
+//        } else if (hasBeenFocused) {
+//            if (value.isEmpty()) {
+//                if (validationErrors.contains(Required)) {
+//                    // show any non required and non parse error before showing a Required error
+//                    validationErrors.firstOrNull { it != Required && it != NotANumber && it != NotAWholeNumber  } ?: Required
+//                } else {
+//                    // don't show parse errors when empty and not required (and when required, show required as above)
+//                    validationErrors.firstOrNull { it != NotANumber && it != NotAWholeNumber  } ?: NoError
+//                }
+//            } else {
+//                // if non empty, unfocused, show any error other than required (the Required error shouldn't be in the list)
+//                validationErrors.first()
+//            }
+//        } else {
+//            // never been focused
+//            NoError
+//        }
 
     override fun validate(value: String): List<ValidationErrorState> {
         val errors = defaultValidator()
@@ -343,12 +344,12 @@ internal class FormTextFieldState(
             ) {
                 if (minLength > 0 && maxLength > 0) {
                     if (minLength == maxLength) {
-                        ret += ExactCharConstraint
+                        ret += ExactCharConstraint(minLength)
                     } else {
-                        ret += MinMaxCharConstraint
+                        ret += MinMaxCharConstraint(minLength, maxLength)
                     }
                 } else {
-                    ret += MaxCharConstraint
+                    ret += MaxCharConstraint(maxLength)
                 }
             }
         } else {
@@ -388,7 +389,7 @@ internal class FormTextFieldState(
             save = {
                 listOf(
                     it.value.value.data,
-                    it.hasBeenFocused
+                    it.wasFocused
                 )
             },
             restore = { list ->
@@ -419,8 +420,7 @@ internal class FormTextFieldState(
                     validate = { formElement.getValidationErrors() }
                 ).apply {
                     // focus is lost on rotation. https://devtopia.esri.com/runtime/apollo/issues/230
-                    hasBeenFocused = list[1] as Boolean
-                    updateValidation(list[0] as String)
+                    onFocusChanged(list[1] as Boolean)
                 }
             }
         )
