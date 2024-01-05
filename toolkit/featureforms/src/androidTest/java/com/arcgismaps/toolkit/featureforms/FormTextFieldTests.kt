@@ -112,7 +112,8 @@ class FormTextFieldTests {
                     onEditValue = {
                         featureForm.editValue(field, it)
                         scope.launch { featureForm.evaluateExpressions() }
-                    }
+                    },
+                    validate = {field.getValidationErrors()}
                 )
             )
         }
