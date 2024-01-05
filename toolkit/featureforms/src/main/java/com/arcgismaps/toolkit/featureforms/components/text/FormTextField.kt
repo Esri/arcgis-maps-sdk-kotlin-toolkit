@@ -49,11 +49,11 @@ internal fun FormTextField(
         }
     }
     val supportingText by state.supportingText
-    val contentLength = if (state.minLength > 0 || state.maxLength > 0) "${text.length}" else ""
+    val contentLength = if (state.minLength > 0 || state.maxLength > 0) "${text.data.length}" else ""
     val supportingTextIsErrorMessage by state.supportingTextIsErrorMessage
 
     BaseTextField(
-        text = text,
+        text = text.data,
         onValueChange = {
             state.onValueChanged(it)
         },

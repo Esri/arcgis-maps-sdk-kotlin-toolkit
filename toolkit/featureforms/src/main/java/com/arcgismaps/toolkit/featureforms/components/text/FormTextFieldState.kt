@@ -17,6 +17,7 @@
 package com.arcgismaps.toolkit.featureforms.components.text
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
@@ -104,7 +105,7 @@ internal class FormTextFieldState(
     initialValue = initialValue,
     scope = scope,
     onEditValue = onEditValue,
-    validate = validate
+    defaultValidator = validate
 ) {
     // indicates singleLine only if TextBoxFeatureFormInput
     val singleLine = properties.singleLine
@@ -122,9 +123,6 @@ internal class FormTextFieldState(
     // the helper text is displayed when the field is focused.
     private val _supportingText: MutableState<String> = mutableStateOf(description)
     val supportingText: State<String> = _supportingText
-    
-    private val _isFocused: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val isFocused: StateFlow<Boolean> = _isFocused.asStateFlow()
     
     private val _hasError = mutableStateOf(false)
     private val _supportingTextIsErrorMessage = mutableStateOf(false)
@@ -203,12 +201,12 @@ internal class FormTextFieldState(
     init {
         scope.launch {
             value.drop(1).collect { newValue ->
-                updateValidation(newValue)
+                updateValidation(newValue.data)
             }
         }
         scope.launch {
             isRequired.drop(1).collect {
-                updateValidation(value.value)
+                updateValidation(value.value.data)
             }
         }
         scope.launch {
@@ -216,7 +214,7 @@ internal class FormTextFieldState(
                 if (it) {
                     hasBeenFocused = true
                 }
-                updateValidation(value.value)
+                updateValidation(value.value.data)
             }
         }
     }
@@ -229,7 +227,7 @@ internal class FormTextFieldState(
             errorMessages[errorToDisplay] ?: throw IllegalStateException("validation error must have a message")
         } else {
             description.ifEmpty {
-                if (_isFocused.value && isEditable.value) {
+                if (isFocused.value && isEditable.value) {
                     helperText
                 } else {
                     ""
@@ -330,9 +328,10 @@ internal class FormTextFieldState(
             // never been focused
             NoError
         }
-    
-    private fun validate(value: String): List<ValidationErrorState> {
-        val errors = validate()
+
+    override fun validate(value: String): List<ValidationErrorState> {
+        val errors = defaultValidator()
+        Log.e("TAG", "validate: $errors", )
         val ret = mutableListOf<ValidationErrorState>()
         if (errors.any { it is FeatureFormValidationException.RequiredException }) {
             ret += Required
@@ -379,10 +378,6 @@ internal class FormTextFieldState(
         return ret
     }
     
-    fun onFocusChanged(focus: Boolean) {
-        _isFocused.value = focus
-    }
-    
     companion object {
         fun Saver(
             formElement: FieldFormElement,
@@ -392,7 +387,7 @@ internal class FormTextFieldState(
         ): Saver<FormTextFieldState, Any> = listSaver(
             save = {
                 listOf(
-                    it.value.value,
+                    it.value.value.data,
                     it.hasBeenFocused
                 )
             },
@@ -443,6 +438,7 @@ internal fun rememberFormTextFieldState(
 ): FormTextFieldState = rememberSaveable(
     saver = FormTextFieldState.Saver(field, form, context, scope)
 ) {
+    Log.e("TAG", "rememberFormTextFieldState: ${form.fieldType(field)}")
     FormTextFieldState(
         properties = TextFieldProperties(
             label = field.label,

@@ -16,16 +16,21 @@
 
 package com.arcgismaps.toolkit.featureforms.components.base
 
+import android.util.Log
+import com.arcgismaps.exceptions.FeatureFormValidationException
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.flattenMerge
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 internal open class FieldProperties<T>(
     val label: String,
@@ -35,6 +40,11 @@ internal open class FieldProperties<T>(
     val required: StateFlow<Boolean>,
     val editable: StateFlow<Boolean>,
     val visible: StateFlow<Boolean>
+)
+
+internal data class Value<T>(
+    val data: T,
+    val error: ValidationErrorState = ValidationErrorState.NoError
 )
 
 /**
@@ -53,7 +63,7 @@ internal open class BaseFieldState<T>(
     initialValue: T = properties.value.value,
     scope: CoroutineScope,
     protected val onEditValue: (Any?) -> Unit,
-    val validate: () -> List<Throwable> = {listOf()}
+    protected val defaultValidator: () -> List<Throwable>
 ) : FormElementState(
     label = properties.label,
     description = properties.description,
@@ -67,13 +77,31 @@ internal open class BaseFieldState<T>(
     // a state flow to handle user input changes
     protected val _value = MutableStateFlow(initialValue)
 
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val _mergedValue: StateFlow<T> = flowOf(_value, properties.value.drop(1))
+        .flattenMerge()
+        .stateIn(
+            scope = scope,
+            started = SharingStarted.Eagerly,
+            initialValue = initialValue
+        )
+
+    private val _validationError: MutableStateFlow<ValidationErrorState> =
+        MutableStateFlow(ValidationErrorState.NoError)
+
     /**
      * Current value state for the field.
+     *
+     * ---validation behavior---
      */
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val value: StateFlow<T> = flowOf(_value, properties.value.drop(1))
-        .flattenMerge()
-        .stateIn(scope, SharingStarted.Eagerly, initialValue)
+    val value: StateFlow<Value<T>> = combine(_mergedValue, _validationError) { newValue, error ->
+        Value(newValue, error)
+    }.stateIn(
+        scope = scope,
+        started = SharingStarted.Eagerly,
+        initialValue = Value(_mergedValue.value)
+    )
 
     /**
      * Property that indicates if the field is editable.
@@ -84,12 +112,79 @@ internal open class BaseFieldState<T>(
      * Property that indicates if the field is required.
      */
     val isRequired: StateFlow<Boolean> = properties.required
-   
+
+    private val _isFocused: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val isFocused: StateFlow<Boolean> = _isFocused.asStateFlow()
+
+    protected var wasFocused = false
+
+    init {
+        scope.launch {
+            // validate when focus changes
+            isFocused.collect {
+                updateValidation(_mergedValue.value)
+            }
+        }
+        scope.launch {
+            // validate when required property changes
+            isRequired.collect {
+                updateValidation(_mergedValue.value)
+            }
+        }
+        scope.launch {
+            // validate when the editable property changes
+            isEditable.collect {
+                updateValidation(_mergedValue.value)
+            }
+        }
+        scope.launch {
+            // validate when the value changes
+            _mergedValue.collect {
+                updateValidation(_mergedValue.value)
+            }
+        }
+    }
+
     /**
      * Callback to update the current value of the FormTextFieldState to the given [input].
      */
     open fun onValueChanged(input: T) {
         onEditValue(input)
         _value.value = input
+    }
+
+    fun onFocusChanged(focus: Boolean) {
+        if (focus) wasFocused = true
+        _isFocused.value = focus
+    }
+
+    open fun validate(value: T): List<ValidationErrorState> {
+        val errors = defaultValidator()
+        return buildList {
+            if (errors.any { it is FeatureFormValidationException.RequiredException }) {
+                add(ValidationErrorState.Required)
+            }
+        }
+    }
+
+    private fun filter(errors: List<ValidationErrorState>): ValidationErrorState {
+        Log.e("TAG", "filtering: $errors with wasfocused:$wasFocused")
+        return if (errors.isNotEmpty()) {
+            if (wasFocused) {
+                if (errors.any { it is ValidationErrorState.Required }) {
+                    ValidationErrorState.Required
+                } else {
+                    ValidationErrorState.NoError
+                }
+            } else {
+                ValidationErrorState.NoError
+            }
+        } else {
+            ValidationErrorState.NoError
+        }
+    }
+
+    private fun updateValidation(value: T) {
+        _validationError.value = filter(validate(value))
     }
 }

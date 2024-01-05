@@ -67,12 +67,14 @@ internal open class CodedValueFieldState(
     properties: CodedValueFieldProperties,
     initialValue: String = properties.value.value,
     scope: CoroutineScope,
-    onEditValue: ((Any?) -> Unit)
+    onEditValue: ((Any?) -> Unit),
+    validate: () -> List<Throwable>
 ) : BaseFieldState<String>(
     properties = properties,
     scope = scope,
     initialValue = initialValue,
-    onEditValue = onEditValue
+    onEditValue = onEditValue,
+    defaultValidator = validate
 ) {
     /**
      * The list of coded values associated with this field.
@@ -124,7 +126,8 @@ internal open class CodedValueFieldState(
         ): Saver<CodedValueFieldState, Any> = listSaver(
             save = {
                 listOf(
-                    it.value.value
+                    it.value.value.data,
+                    it.wasFocused
                 )
             },
             restore = { list ->
@@ -143,13 +146,16 @@ internal open class CodedValueFieldState(
                         noValueLabel = input.noValueLabel,
                         fieldType = form.fieldType(formElement)
                     ),
-                    initialValue = list[0],
+                    initialValue = list[0] as String,
                     scope = scope,
                     onEditValue = { newValue ->
                         form.editValue(formElement, newValue)
                         scope.launch { form.evaluateExpressions() }
-                    }
-                )
+                    },
+                    validate = formElement::getValidationErrors
+                ).apply {
+                    onFocusChanged(list[1] as Boolean)
+                }
             }
         )
     }
@@ -182,6 +188,7 @@ internal fun rememberCodedValueFieldState(
         onEditValue = {
             form.editValue(field, it)
             scope.launch { form.evaluateExpressions() }
-        }
+        },
+        validate = field::getValidationErrors
     )
 }

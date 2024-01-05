@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.featureforms.components.datetime
 
+import android.util.Log
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.material.icons.Icons
@@ -29,11 +30,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -41,6 +39,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.base.BaseTextField
+import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState
 import com.arcgismaps.toolkit.featureforms.utils.DialogType
 import com.arcgismaps.toolkit.featureforms.utils.LocalDialogRequester
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -56,18 +55,20 @@ internal fun DateTimeField(
     val instant by state.value.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
     // to check if the field was ever focused by the user
-    var wasFocused by rememberSaveable { mutableStateOf(false) }
     val label = if (isRequired) {
         "${state.label} *"
     } else {
         state.label
     }
 
+    Log.e("TAG", "DateTimeField: value is ${instant.data} and ${instant.error}", )
+
     BaseTextField(
-        text = instant?.formattedDateTime(state.shouldShowTime) ?: "",
+        text = instant.data?.formattedDateTime(state.shouldShowTime) ?: "",
         onValueChange = {
             // the only allowable change is to clear the text
             if (it.isEmpty()) {
+                state.onFocusChanged(true)
                 state.onValueChanged(null)
             }
         },
@@ -80,10 +81,10 @@ internal fun DateTimeField(
         interactionSource = interactionSource,
         trailingIcon = if (isEditable) Icons.Rounded.EditCalendar else Icons.Rounded.CalendarMonth,
         supportingText = {
-            // if the field was focused and is required, validate the current value
-            if (wasFocused && isRequired && instant == null) {
+            // show the validation error if it exists
+            if (instant.error is ValidationErrorState.Required) {
                 Text(
-                    text = stringResource(id = R.string.required),
+                    text = instant.error.getString(),
                     color = MaterialTheme.colorScheme.error
                 )
             } else {
@@ -92,13 +93,15 @@ internal fun DateTimeField(
                     modifier = Modifier.semantics { contentDescription = "description" },
                 )
             }
+        },
+        onFocusChange = {
+            state.onFocusChanged(it)
         }
     )
 
     LaunchedEffect(interactionSource) {
         interactionSource.interactions.collect {
             if (it is PressInteraction.Release) {
-                wasFocused = true
                 // request to show the date picker dialog only when the touch is released
                 // the dialog is responsible for updating the value on the state
                 if (isEditable) {
@@ -128,7 +131,8 @@ private fun DateTimeFieldPreview() {
                 shouldShowTime = true
             ),
             scope = scope,
-            onEditValue = {}
+            onEditValue = {},
+            validate = { emptyList() }
         )
         DateTimeField(state = state)
     }

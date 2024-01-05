@@ -64,12 +64,14 @@ internal class DateTimeFieldState(
     properties: DateTimeFieldProperties,
     initialValue: Instant? = properties.value.value,
     scope: CoroutineScope,
-    onEditValue: (Any?) -> Unit
+    onEditValue: (Any?) -> Unit,
+    validate: () -> List<Throwable>
 ) : BaseFieldState<Instant?>(
     properties = properties,
     initialValue = initialValue,
     scope = scope,
-    onEditValue = onEditValue
+    onEditValue = onEditValue,
+    defaultValidator = validate
 ) {
     val minEpochMillis: Instant? = properties.minEpochMillis
 
@@ -84,7 +86,7 @@ internal class DateTimeFieldState(
             scope: CoroutineScope
         ): Saver<DateTimeFieldState, Any> = listSaver(
             save = {
-                listOf(it.value.value)
+                listOf(it.value.value.data, it.wasFocused)
             },
             restore = { list ->
                 val input = field.input as DateTimePickerFormInput
@@ -101,13 +103,18 @@ internal class DateTimeFieldState(
                         maxEpochMillis = input.max,
                         shouldShowTime = input.includeTime
                     ),
-                    initialValue = list[0],
+                    initialValue = list[0] as Instant?,
                     scope = scope,
                     onEditValue = {
                         form.editValue(field, it)
                         scope.launch { form.evaluateExpressions() }
+                    },
+                    validate = {
+                        field.getValidationErrors()
                     }
-                )
+                ).apply {
+                    onFocusChanged(list[1] as Boolean)
+                }
             }
         )
     }
@@ -145,6 +152,9 @@ internal fun rememberDateTimeFieldState(
         onEditValue = {
             form.editValue(field, it)
             scope.launch { form.evaluateExpressions() }
+        },
+        validate = {
+            field.getValidationErrors()
         }
     )
 }

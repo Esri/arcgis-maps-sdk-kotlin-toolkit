@@ -55,7 +55,7 @@ internal fun RadioButtonField(
     RadioButtonField(
         label = state.label,
         description = state.description,
-        value = value,
+        value = value.data,
         editable = editable,
         required = required,
         codedValues = state.codedValues.associateBy({ it.code }, { it.name }),

@@ -35,12 +35,14 @@ internal class RadioButtonFieldState(
     properties: RadioButtonFieldProperties,
     initialValue: String = properties.value.value,
     scope: CoroutineScope,
-    onEditValue: ((Any?) -> Unit)
+    onEditValue: ((Any?) -> Unit),
+    validate: () -> List<Throwable>
 ) : CodedValueFieldState(
     properties = properties,
     initialValue = initialValue,
     scope = scope,
-    onEditValue = onEditValue
+    onEditValue = onEditValue,
+    validate = validate
 ) {
 
     /**
@@ -48,11 +50,11 @@ internal class RadioButtonFieldState(
      * trigger a fallback to a ComboBox. If the [value] is empty then this returns false.
      */
     fun shouldFallback(): Boolean {
-        return if (value.value.isEmpty()) {
+        return if (value.value.data.isEmpty()) {
             false
         } else {
             !codedValues.any {
-                it.name == value.value
+                it.name == value.value.data
             }
         }
     }
@@ -69,7 +71,7 @@ internal class RadioButtonFieldState(
         ): Saver<RadioButtonFieldState, Any> = listSaver(
             save = {
                 listOf(
-                    it.value.value
+                    it.value.value.data
                 )
             },
             restore = { list ->
@@ -93,7 +95,8 @@ internal class RadioButtonFieldState(
                     onEditValue = { newValue ->
                         form.editValue(formElement, newValue)
                         scope.launch { form.evaluateExpressions() }
-                    }
+                    },
+                    validate = formElement::getValidationErrors
                 )
             }
         )
@@ -127,6 +130,7 @@ internal fun rememberRadioButtonFieldState(
         onEditValue = {
             form.editValue(field, it)
             scope.launch { form.evaluateExpressions() }
-        }
+        },
+        validate = field::getValidationErrors
     )
 }

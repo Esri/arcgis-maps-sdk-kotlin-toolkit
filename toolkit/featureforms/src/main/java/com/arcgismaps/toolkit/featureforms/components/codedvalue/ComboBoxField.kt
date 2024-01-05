@@ -17,6 +17,7 @@
 package com.arcgismaps.toolkit.featureforms.components.codedvalue
 
 import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -79,6 +80,7 @@ import com.arcgismaps.data.FieldType
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.base.BaseTextField
+import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState
 import com.arcgismaps.toolkit.featureforms.utils.DialogType
 import com.arcgismaps.toolkit.featureforms.utils.LocalDialogRequester
 import com.arcgismaps.toolkit.featureforms.utils.computeWindowSizeClasses
@@ -95,8 +97,6 @@ internal fun ComboBoxField(
     val isEditable by state.isEditable.collectAsState()
     val isRequired by state.isRequired.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
-    // to check if the field was ever focused by the user
-    var wasFocused by rememberSaveable { mutableStateOf(false) }
     val label = remember(isRequired) {
         if (isRequired) {
             "${state.label} *"
@@ -111,12 +111,12 @@ internal fun ComboBoxField(
     } else ""
 
     BaseTextField(
-        text = state.getCodedValueNameOrNull(value) ?: value,
+        text = state.getCodedValueNameOrNull(value.data) ?: value.data,
         onValueChange = {
             state.onValueChanged(it)
             // consider a "clear" operation to be a focused state even though the clear icon
             // is not part of the field's focus target
-            if (it.isEmpty()) wasFocused = true
+            if (it.isEmpty()) state.onFocusChanged(true)
         },
         modifier = modifier,
         readOnly = true,
@@ -126,10 +126,10 @@ internal fun ComboBoxField(
         singleLine = true,
         trailingIcon = Icons.Outlined.List,
         supportingText = {
-            // if the field was focused and is required, validate the current value
-            if (wasFocused && isRequired && value.isEmpty()) {
+            // show the validation error if it exists
+            if (value.error is ValidationErrorState.Required) {
                 Text(
-                    text = stringResource(id = R.string.required),
+                    text = value.error.getString(),
                     color = MaterialTheme.colorScheme.error
                 )
             } else {
@@ -139,13 +139,15 @@ internal fun ComboBoxField(
                 )
             }
         },
-        interactionSource = interactionSource
+        interactionSource = interactionSource,
+        onFocusChange = {
+            state.onFocusChanged(it)
+        }
     )
 
     LaunchedEffect(interactionSource) {
         interactionSource.interactions.collect {
             if (it is PressInteraction.Release) {
-                wasFocused = true
                 if (isEditable) {
                     dialogRequester.requestDialog(DialogType.ComboBoxDialog(state))
                 }
@@ -371,7 +373,8 @@ private fun ComboBoxPreview() {
             noValueLabel = "No value"
         ),
         scope = scope,
-        onEditValue = {}
+        onEditValue = {},
+        validate = { emptyList() }
     )
     ComboBoxField(state = state)
 }
