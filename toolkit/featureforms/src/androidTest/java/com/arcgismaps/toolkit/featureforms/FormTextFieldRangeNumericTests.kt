@@ -100,7 +100,8 @@ class FormTextFieldRangeNumericTests {
                     onEditValue = {
                         featureForm.editValue(integerField, it)
                         scope.launch { featureForm.evaluateExpressions() }
-                    }
+                    },
+                    validate = {integerField.getValidationErrors()}
                 )
             )
         }

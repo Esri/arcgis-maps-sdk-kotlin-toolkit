@@ -107,7 +107,8 @@ class FormTextFieldNumericTests {
                     onEditValue = {
                         featureForm.editValue(integerField, it)
                         scope.launch { featureForm.evaluateExpressions() }
-                    }
+                    },
+                    validate = {integerField.getValidationErrors()}
                 )
             )
         }
@@ -152,7 +153,8 @@ class FormTextFieldNumericTests {
                     onEditValue = {
                         featureForm.editValue(floatingPointField, it)
                         scope.launch { featureForm.evaluateExpressions() }
-                    }
+                    },
+                    validate = {floatingPointField.getValidationErrors()}
                 )
             )
         }
