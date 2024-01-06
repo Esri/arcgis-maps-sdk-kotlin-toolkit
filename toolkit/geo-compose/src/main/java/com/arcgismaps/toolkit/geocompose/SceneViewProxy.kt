@@ -89,7 +89,7 @@ public class SceneViewProxy : GeoViewProxy("SceneView") {
      *
      * @param screenCoordinate a pixel coordinate relative to the upper-left corner of the screen.
      * @return A [Result] containing a [Point] or an exception.
-     * @since 200.1.0
+     * @since 200.4.0
      */
     public suspend fun screenToLocation(screenCoordinate: ScreenCoordinate): Result<Point> =
         sceneView?.screenToLocation(screenCoordinate) ?: Result.failure(IllegalStateException(nullSceneViewErrorMessage))
