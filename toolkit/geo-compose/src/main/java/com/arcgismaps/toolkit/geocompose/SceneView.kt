@@ -38,6 +38,7 @@ import com.arcgismaps.mapping.view.DownEvent
 import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.mapping.view.GlobeCameraController
+import com.arcgismaps.mapping.view.LightingMode
 import com.arcgismaps.mapping.view.LongPressEvent
 import com.arcgismaps.mapping.view.PanChangeEvent
 import com.arcgismaps.mapping.view.RotationChangeEvent
@@ -51,6 +52,7 @@ import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.time.Instant
 
 /**
  * A compose equivalent of the view-based [SceneView].
@@ -67,6 +69,8 @@ import kotlinx.coroutines.launch
  * @param attributionState specifies the attribution bar's visibility, text changed and layout changed events
  * @param cameraController the [CameraController] to manage the position, orientation, and movement of the camera
  * @param timeExtent the [TimeExtent] used by the composable SceneView
+ * @param sunTime the position of the sun in the SceneView based on a specific date and time
+ * @param sunLighting the type of ambient sunlight and shadows in the scene view
  * @param onTimeExtentChanged lambda invoked when the composable SceneView's [TimeExtent] is changed
  * @param onNavigationChanged lambda invoked when the navigation status of the composable SceneView has changed
  * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the composable SceneView has changed
@@ -99,6 +103,8 @@ public fun SceneView(
     cameraController: CameraController = GlobeCameraController(),
     timeExtent: TimeExtent? = null,
     onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
+    sunTime: Instant = Instant.parse("2000-09-22T12:00:00Z"),
+    sunLighting: LightingMode = LightingMode.NoLight,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
     onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)? = null,
@@ -128,6 +134,8 @@ public fun SceneView(
             it.selectionProperties = selectionProperties
             it.setTimeExtent(timeExtent)
             it.cameraController = cameraController
+            it.sunTime = sunTime
+            it.sunLighting = sunLighting
         })
 
     DisposableEffect(Unit) {
