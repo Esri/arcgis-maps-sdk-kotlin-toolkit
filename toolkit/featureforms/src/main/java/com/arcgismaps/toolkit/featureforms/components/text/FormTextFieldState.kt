@@ -116,18 +116,7 @@ internal class FormTextFieldState(
     
     // fetch the maxLength based on the featureFormElement.inputType
     val maxLength = properties.maxLength
-    
-    //private var hasBeenFocused: Boolean = false
-    
-    // supporting text will depend on multiple other states. If there is an error, it will display
-    // error message. Otherwise description is displayed, unless it is empty in which case
-    // the helper text is displayed when the field is focused.
-//    private val _supportingText: MutableState<String> = mutableStateOf(description)
-//    val supportingText: State<String> = _supportingText
-    
-//    private val _hasError = mutableStateOf(false)
-//    private val _supportingTextIsErrorMessage = mutableStateOf(false)
-//    val supportingTextIsErrorMessage: State<Boolean> = _supportingTextIsErrorMessage
+
     /**
      * The domain of the element's field.
      */
@@ -137,32 +126,6 @@ internal class FormTextFieldState(
      * The FieldType of the element's field.
      */
     val fieldType: FieldType = properties.fieldType
-    
-//    private val errorMessages: MutableMap<ValidationErrorState, String> by lazy {
-//        val min = if (domain is RangeDomain) {
-//            (domain.minValue as? Number)?.format()
-//        } else {
-//            ""
-//        }
-//
-//        val max = if (domain is RangeDomain) {
-//            (domain.maxValue as? Number)?.format()
-//        } else {
-//            ""
-//        }
-//
-//        mutableMapOf(
-//            Required to context.getString(R.string.required),
-//            MaxCharConstraint to context.getString(R.string.maximum_n_chars, if (maxLength > 0) maxLength else 254),
-//            ExactCharConstraint to context.getString(R.string.enter_n_chars, minLength),
-//            MinMaxCharConstraint(minLength, maxLength) to context.getString(R.string.enter_min_to_max_chars, minLength, maxLength),
-//            MinNumericConstraint to context.getString(R.string.less_than_min_value, min),
-//            MaxNumericConstraint to context.getString(R.string.exceeds_max_value, max),
-//            MinMaxNumericConstraint to context.getString(R.string.numeric_range_helper_text, min, max),
-//            NotANumber to context.getString(R.string.value_must_be_a_number),
-//            NotAWholeNumber to context.getString(R.string.value_must_be_a_whole_number)
-//        )
-//    }
     
     // build helper text
 //    private val helperText =
@@ -198,27 +161,7 @@ internal class FormTextFieldState(
 //                context.getString(R.string.maximum_n_chars, 254)
 //            }
 //        }
-    
-//    init {
-//        scope.launch {
-//            value.drop(1).collect { newValue ->
-//                updateValidation(newValue.data)
-//            }
-//        }
-//        scope.launch {
-//            isRequired.drop(1).collect {
-//                updateValidation(value.value.data)
-//            }
-//        }
-//        scope.launch {
-//            isFocused.drop(1).collect {
-//                if (it) {
-//                    hasBeenFocused = true
-//                }
-//                updateValidation(value.value.data)
-//            }
-//        }
-//    }
+
     
 //    private fun updateValidation(value: String) {
 //        val errors = validate(value)

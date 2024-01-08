@@ -130,7 +130,8 @@ internal fun ComboBoxField(
             if (value.error is ValidationErrorState.Required) {
                 Text(
                     text = value.error.getString(),
-                    color = MaterialTheme.colorScheme.error
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.semantics { contentDescription = "helper" }
                 )
             } else {
                 Text(

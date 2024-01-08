@@ -169,29 +169,34 @@ internal open class BaseFieldState<T>(
 
     private fun filter(errors: List<ValidationErrorState>): ValidationErrorState {
         Log.e("TAG", "filtering: $errors with wasfocused:$wasFocused")
-        return if (errors.isNotEmpty()) {
-            if (!isEditable.value) {
-                ValidationErrorState.NoError
-            } else {
-                if (wasFocused) {
-                    if (!isFocused.value) {
-                        if (errors.any { it is ValidationErrorState.Required }) {
-                            ValidationErrorState.Required
-                        } else {
-                            errors.first()
-                        }
+        // if editable
+        return if (errors.isNotEmpty() && isEditable.value) {
+            // if it has been focused
+            if (wasFocused) {
+                // if not in focus show any required errors
+                if (!isFocused.value) {
+                    if (errors.any { it is ValidationErrorState.Required }) {
+                        ValidationErrorState.Required
                     } else {
-                        if (errors.any { it !is ValidationErrorState.Required }) {
-                            errors.first()
-                        } else {
-                            ValidationErrorState.NoError
-                        }
+                        errors.first()
                     }
                 } else {
-                    ValidationErrorState.NoError
+                    // if focused and empty, don't show the "Required" error or numeric parse errors
+                    if (_mergedValue.value is String) {
+
+                    }
+                    if (errors.any { it !is ValidationErrorState.Required }) {
+                        errors.first()
+                    } else {
+                        ValidationErrorState.NoError
+                    }
                 }
+            } else {
+                // never been focused
+                ValidationErrorState.NoError
             }
         } else {
+            // not editable
             ValidationErrorState.NoError
         }
     }

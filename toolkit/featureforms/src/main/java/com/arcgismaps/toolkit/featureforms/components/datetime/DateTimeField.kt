@@ -54,7 +54,6 @@ internal fun DateTimeField(
     val isRequired by state.isRequired.collectAsState()
     val instant by state.value.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
-    // to check if the field was ever focused by the user
     val label = if (isRequired) {
         "${state.label} *"
     } else {
@@ -85,7 +84,8 @@ internal fun DateTimeField(
             if (instant.error is ValidationErrorState.Required) {
                 Text(
                     text = instant.error.getString(),
-                    color = MaterialTheme.colorScheme.error
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.semantics { contentDescription = "helper" }
                 )
             } else {
                 Text(

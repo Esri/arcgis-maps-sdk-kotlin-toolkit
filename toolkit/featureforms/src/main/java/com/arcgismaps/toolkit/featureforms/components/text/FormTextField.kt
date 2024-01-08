@@ -49,16 +49,21 @@ internal fun FormTextField(
             state.label
         }
     }
-    //val supportingText by state.supportingText
     val contentLength =
         if (state.minLength > 0 || state.maxLength > 0) "${value.data.length}" else ""
-    //val errorText = state.getErrorMessage(value.error)
-    //val supportingTextIsErrorMessage by state.supportingTextIsErrorMessage
+    val supportingTextColor = if (value.error is ValidationErrorState.NoError) {
+        MaterialTheme.colorScheme.onSurface
+    } else {
+        MaterialTheme.colorScheme.error
+    }
 
     BaseTextField(
         text = value.data,
         onValueChange = {
             state.onValueChanged(it)
+            // consider a "clear" operation to be a focused state even though the clear icon
+            // is not part of the field's focus target
+            if (it.isEmpty()) state.onFocusChanged(true)
         },
         modifier = modifier.fillMaxWidth(),
         isEditable = isEditable,
@@ -67,9 +72,6 @@ internal fun FormTextField(
         singleLine = state.singleLine,
         keyboardType = if (state.fieldType.isNumeric) KeyboardType.Number else KeyboardType.Ascii,
         supportingText = {
-            val textColor =
-                if (value.error is ValidationErrorState.NoError) MaterialTheme.colorScheme.onSurface
-                else MaterialTheme.colorScheme.error
             Row {
                 // show the validation error if it exists
                 if (value.error is ValidationErrorState.NoError) {
@@ -80,17 +82,17 @@ internal fun FormTextField(
                 } else {
                     Text(
                         text = value.error.getString(),
-                        color = textColor,
-                        modifier = Modifier
-                            .semantics { contentDescription = "helper" }
+                        color = supportingTextColor,
+                        modifier = Modifier.semantics { contentDescription = "helper" }
                     )
                 }
+                // show character count
                 if (isFocused && isEditable) {
                     Spacer(modifier = Modifier.weight(1f))
                     Text(
                         text = contentLength,
                         modifier = Modifier.semantics { contentDescription = "char count" },
-                        color = textColor
+                        color = supportingTextColor
                     )
                 }
             }
@@ -100,18 +102,3 @@ internal fun FormTextField(
         }
     )
 }
-
-//@Composable
-//private fun (FormTextFieldState).getErrorMessage(error: ValidationErrorState): String {
-//    return when (error) {
-//        is ValidationErrorState.Required -> {
-//            error.getString()
-//        }
-//
-//        is
-//
-//        else -> {
-//            description
-//        }
-//    }
-//}
