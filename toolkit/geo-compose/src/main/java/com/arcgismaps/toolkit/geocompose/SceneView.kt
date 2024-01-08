@@ -291,3 +291,21 @@ private fun SceneViewEventHandler(
         }
     }
 }
+
+
+/**
+ * Create and [remember] a [ImageOverlayCollection].
+ * [init] will be called when the [ImageOverlayCollection] is first created to configure its
+ * initial state.
+ *
+ * @param key invalidates the remembered ImageOverlayCollection if different from the previous composition
+ * @param init called when the [ImageOverlayCollection] is created to configure its initial state
+ * @since 200.4.0
+ */
+@Composable
+public inline fun rememberImageOverlayCollection(
+    key: Any? = null,
+    crossinline init: ImageOverlayCollection.() -> Unit = {}
+): ImageOverlayCollection = remember(key) {
+    ImageOverlayCollection().apply(init)
+}
