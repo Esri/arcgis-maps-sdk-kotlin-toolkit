@@ -149,6 +149,9 @@ internal open class BaseFieldState<T>(
      * Callback to update the current value of the FormTextFieldState to the given [input].
      */
     open fun onValueChanged(input: T) {
+        // infer that a value change event comes from a user interaction and hence treat it as a
+        // focus event
+        wasFocused = true
         onEditValue(input)
         _value.value = input
     }
@@ -182,9 +185,9 @@ internal open class BaseFieldState<T>(
                     }
                 } else {
                     // if focused and empty, don't show the "Required" error or numeric parse errors
-                    if (_mergedValue.value is String) {
-
-                    }
+//                    if (_mergedValue.value is String) {
+//
+//                    }
                     if (errors.any { it !is ValidationErrorState.Required }) {
                         errors.first()
                     } else {

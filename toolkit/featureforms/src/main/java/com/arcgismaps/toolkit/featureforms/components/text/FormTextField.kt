@@ -26,6 +26,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
@@ -51,20 +52,15 @@ internal fun FormTextField(
     }
     val contentLength =
         if (state.minLength > 0 || state.maxLength > 0) "${value.data.length}" else ""
-    val supportingTextColor = if (value.error is ValidationErrorState.NoError) {
-        MaterialTheme.colorScheme.onSurface
+    val (supportingText, supportingTextColor) = if (value.error is ValidationErrorState.NoError) {
+        Pair(state.description, Color.Unspecified)
     } else {
-        MaterialTheme.colorScheme.error
+        Pair(value.error.getString(), MaterialTheme.colorScheme.error)
     }
 
     BaseTextField(
         text = value.data,
-        onValueChange = {
-            state.onValueChanged(it)
-            // consider a "clear" operation to be a focused state even though the clear icon
-            // is not part of the field's focus target
-            if (it.isEmpty()) state.onFocusChanged(true)
-        },
+        onValueChange = state::onValueChanged,
         modifier = modifier.fillMaxWidth(),
         isEditable = isEditable,
         label = label,
@@ -73,19 +69,11 @@ internal fun FormTextField(
         keyboardType = if (state.fieldType.isNumeric) KeyboardType.Number else KeyboardType.Ascii,
         supportingText = {
             Row {
-                // show the validation error if it exists
-                if (value.error is ValidationErrorState.NoError) {
-                    Text(
-                        text = state.description,
-                        modifier = Modifier.semantics { contentDescription = "description" },
-                    )
-                } else {
-                    Text(
-                        text = value.error.getString(),
-                        color = supportingTextColor,
-                        modifier = Modifier.semantics { contentDescription = "helper" }
-                    )
-                }
+                Text(
+                    text = supportingText,
+                    color = supportingTextColor,
+                    modifier = Modifier.semantics { contentDescription = "helper" }
+                )
                 // show character count
                 if (isFocused && isEditable) {
                     Spacer(modifier = Modifier.weight(1f))
@@ -97,8 +85,6 @@ internal fun FormTextField(
                 }
             }
         },
-        onFocusChange = {
-            state.onFocusChanged(it)
-        }
+        onFocusChange = state::onFocusChanged
     )
 }

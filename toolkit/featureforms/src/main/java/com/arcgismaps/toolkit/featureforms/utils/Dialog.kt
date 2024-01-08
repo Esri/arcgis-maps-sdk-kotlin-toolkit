@@ -154,7 +154,12 @@ internal fun FeatureFormDialog() {
             )
         }
 
-        else -> {}
+        else -> {
+            // clear focus from the originating tapped field
+            if (dialogType == null) {
+                ClearFocus(true)
+            }
+        }
     }
 }
 

@@ -33,6 +33,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -52,22 +53,24 @@ internal fun DateTimeField(
     val dialogRequester = LocalDialogRequester.current
     val isEditable by state.isEditable.collectAsState()
     val isRequired by state.isRequired.collectAsState()
-    val instant by state.value.collectAsState()
+    val value by state.value.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
     val label = if (isRequired) {
         "${state.label} *"
     } else {
         state.label
     }
-
-    Log.e("TAG", "DateTimeField: value is ${instant.data} and ${instant.error}", )
+    val (supportingText, supportingTextColor) = if (value.error is ValidationErrorState.NoError) {
+        Pair(state.description, Color.Unspecified)
+    } else {
+        Pair(value.error.getString(), MaterialTheme.colorScheme.error)
+    }
 
     BaseTextField(
-        text = instant.data?.formattedDateTime(state.shouldShowTime) ?: "",
+        text = value.data?.formattedDateTime(state.shouldShowTime) ?: "",
         onValueChange = {
             // the only allowable change is to clear the text
             if (it.isEmpty()) {
-                state.onFocusChanged(true)
                 state.onValueChanged(null)
             }
         },
@@ -80,23 +83,15 @@ internal fun DateTimeField(
         interactionSource = interactionSource,
         trailingIcon = if (isEditable) Icons.Rounded.EditCalendar else Icons.Rounded.CalendarMonth,
         supportingText = {
-            // show the validation error if it exists
-            if (instant.error is ValidationErrorState.Required) {
-                Text(
-                    text = instant.error.getString(),
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.semantics { contentDescription = "helper" }
-                )
-            } else {
-                Text(
-                    text = state.description,
-                    modifier = Modifier.semantics { contentDescription = "description" },
-                )
-            }
+            Text(
+                text = supportingText,
+                color = supportingTextColor,
+                modifier = Modifier.semantics {
+                    contentDescription = "helper"
+                }
+            )
         },
-        onFocusChange = {
-            state.onFocusChanged(it)
-        }
+        onFocusChange = state::onFocusChanged
     )
 
     LaunchedEffect(interactionSource) {

@@ -110,14 +110,15 @@ internal fun ComboBoxField(
         state.noValueLabel.ifEmpty { stringResource(R.string.no_value) }
     } else ""
 
+    val (supportingText, supportingTextColor) = if (value.error is ValidationErrorState.NoError) {
+        Pair(state.description, Color.Unspecified)
+    } else {
+        Pair(value.error.getString(), MaterialTheme.colorScheme.error)
+    }
+
     BaseTextField(
         text = state.getCodedValueNameOrNull(value.data) ?: value.data,
-        onValueChange = {
-            state.onValueChanged(it)
-            // consider a "clear" operation to be a focused state even though the clear icon
-            // is not part of the field's focus target
-            if (it.isEmpty()) state.onFocusChanged(true)
-        },
+        onValueChange = state::onValueChanged,
         modifier = modifier,
         readOnly = true,
         isEditable = isEditable,
@@ -126,24 +127,14 @@ internal fun ComboBoxField(
         singleLine = true,
         trailingIcon = Icons.Outlined.List,
         supportingText = {
-            // show the validation error if it exists
-            if (value.error is ValidationErrorState.Required) {
-                Text(
-                    text = value.error.getString(),
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.semantics { contentDescription = "helper" }
-                )
-            } else {
-                Text(
-                    text = state.description,
-                    modifier = Modifier.semantics { contentDescription = "description" },
-                )
-            }
+            Text(
+                text = supportingText,
+                color = supportingTextColor,
+                modifier = Modifier.semantics { contentDescription = "helper" }
+            )
         },
         interactionSource = interactionSource,
-        onFocusChange = {
-            state.onFocusChanged(it)
-        }
+        onFocusChange = state::onFocusChanged
     )
 
     LaunchedEffect(interactionSource) {
