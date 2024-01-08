@@ -41,7 +41,6 @@ private fun isOfColor(color: Color): SemanticsMatcher = SemanticsMatcher(
     }
 }
 
-
 private fun SemanticsNodeInteractionCollection.onChildWithText(value: String, recurse: Boolean = false): SemanticsNodeInteraction? {
     val count = fetchSemanticsNodes().count()
     
@@ -88,6 +87,7 @@ internal fun SemanticsNodeInteraction.onChildWithText(value: String, recurse: Bo
  * @param recurse if true will recurse through the whole semantic node hierarchy.
  * @throws AssertionError if the child with the content description does not exist.
  */
+@Throws(AssertionError::class)
 internal fun SemanticsNodeInteraction.onChildWithContentDescription(
     value: String,
     recurse: Boolean = false

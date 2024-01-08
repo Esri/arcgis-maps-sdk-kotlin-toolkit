@@ -81,6 +81,7 @@ class DateTimeFieldTests {
     @After
     fun closeDialog() {
         try {
+            // this is needed for running successive tests that open the date time picker dialog.
             val dialogSurface =
                 composeTestRule.onNodeWithContentDescription("DateTimePickerDialogSurface", useUnmergedTree = true)
             dialogSurface.assertIsDisplayed()
