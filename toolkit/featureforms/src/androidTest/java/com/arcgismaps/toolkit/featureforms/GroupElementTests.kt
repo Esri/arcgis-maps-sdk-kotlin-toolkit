@@ -64,9 +64,7 @@ class GroupElementTests {
     @Before
     fun setContent() {
         composeTestRule.setContent {
-            val state = FeatureFormState()
-            state.setFeatureForm(featureForm)
-            FeatureForm(featureFormState = state)
+            FeatureForm(featureForm = featureForm)
         }
     }
 

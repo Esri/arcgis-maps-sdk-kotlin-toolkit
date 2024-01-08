@@ -86,9 +86,7 @@ class ComboBoxFieldTests {
     fun setContent() {
         composeTestRule.setContent {
             errorTextColor = MaterialTheme.colorScheme.error
-            val state = FeatureFormState()
-            state.setFeatureForm(featureForm)
-            FeatureForm(featureFormState = state)
+            FeatureForm(featureForm = featureForm)
         }
     }
 
