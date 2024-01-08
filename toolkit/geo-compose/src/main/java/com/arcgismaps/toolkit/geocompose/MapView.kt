@@ -98,7 +98,7 @@ import kotlinx.coroutines.launch
  * @param onLongPress lambda invoked when a user holds a pointer on the composable MapView
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable MapView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable MapView
- * @param onDrawStatusChanged lambda invoked when the draw status of the composable MapView is changes
+ * @param onDrawStatusChanged lambda invoked when the draw status of the composable MapView is changed
  * @since 200.4.0
  */
 @Composable
