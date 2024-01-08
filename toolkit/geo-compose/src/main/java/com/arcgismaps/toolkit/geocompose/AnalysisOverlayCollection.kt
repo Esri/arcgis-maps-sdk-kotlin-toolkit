@@ -79,7 +79,7 @@ public class AnalysisOverlayCollection : Iterable<AnalysisOverlay> {
     }
 
     /**
-     * Returns the number of graphics overlays in this AnalysisOverlayCollection.
+     * Returns the number of analysis overlays in this AnalysisOverlayCollection.
      *
      * @since 200.4.0
      */
@@ -87,7 +87,7 @@ public class AnalysisOverlayCollection : Iterable<AnalysisOverlay> {
         get() = analysisOverlays.size
 
     /**
-     * Clears all graphics overlays from this AnalysisOverlayCollection.
+     * Clears all analysis overlays from this AnalysisOverlayCollection.
      *
      * @since 200.4.0
      */
@@ -97,7 +97,7 @@ public class AnalysisOverlayCollection : Iterable<AnalysisOverlay> {
     }
 
     /**
-     * Sealed class used to notify the compose SceneView to update the GraphicOverlays on the
+     * Sealed class used to notify the compose SceneView to update the AnalysisOverlays on the
      * type of [ChangedEvent].
      *
      * @since 200.4.0
