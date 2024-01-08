@@ -62,6 +62,7 @@ import kotlinx.coroutines.launch
  * @param viewLabelProperties the [ViewLabelProperties] used by the composable SceneView
  * @param selectionProperties the [SelectionProperties] used by the composable SceneView
  * @param attributionState specifies the attribution bar's visibility, text changed and layout changed events
+ * @param imageOverlays a collection of overlays for displaying images in the SceneView
  * @param timeExtent the [TimeExtent] used by the composable SceneView
  * @param onTimeExtentChanged lambda invoked when the composable SceneView's [TimeExtent] is changed
  * @param onNavigationChanged lambda invoked when the navigation status of the composable SceneView has changed
@@ -91,6 +92,7 @@ public fun SceneView(
     viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
     selectionProperties: SelectionProperties = SelectionProperties(),
     attributionState: AttributionState = AttributionState(),
+    imageOverlays: ImageOverlayCollection = rememberImageOverlayCollection(),
     timeExtent: TimeExtent? = null,
     onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
@@ -140,6 +142,7 @@ public fun SceneView(
     ViewpointUpdater(sceneView, viewpointOperation)
 
     GraphicsOverlaysUpdater(graphicsOverlays, sceneView)
+    ImageOverlaysUpdater(imageOverlays, sceneView)
 
     AttributionStateHandler(sceneView, attributionState)
     ViewpointChangedStateHandler(sceneView, viewpointChangedState)
