@@ -41,6 +41,7 @@ private fun isOfColor(color: Color): SemanticsMatcher = SemanticsMatcher(
     }
 }
 
+
 private fun SemanticsNodeInteractionCollection.onChildWithText(value: String, recurse: Boolean = false): SemanticsNodeInteraction? {
     val count = fetchSemanticsNodes().count()
     
@@ -70,8 +71,8 @@ private fun SemanticsNodeInteractionCollection.onChildWithText(value: String, re
 /**
  * Returns the child node with the given text [value].
  *
- * @param value the string to search for
- * @param recurse if true will recurse through the whole semantic node hierarchy
+ * @param value the text string for which to search.
+ * @param recurse if true will recurse through the whole semantic node hierarchy.
  * @throws AssertionError if the child with the content description does not exist.
  */
 @Throws(AssertionError::class)
@@ -81,21 +82,66 @@ internal fun SemanticsNodeInteraction.onChildWithText(value: String, recurse: Bo
 }
 
 /**
- * Returns the child node with the given content description [value]. This only checks for the
- * children with a depth of 1. An exception is thrown if the child with the content description
- * does not exist.
+ * Returns the child node with the given content description [value].
+ *
+ * @param value the content description string for which to search.
+ * @param recurse if true will recurse through the whole semantic node hierarchy.
+ * @throws AssertionError if the child with the content description does not exist.
  */
-internal fun SemanticsNodeInteraction.onChildWithContentDescription(value: String): SemanticsNodeInteraction {
-    val nodes = onChildren()
-    val count = nodes.fetchSemanticsNodes().count()
+internal fun SemanticsNodeInteraction.onChildWithContentDescription(
+    value: String,
+    recurse: Boolean = false
+): SemanticsNodeInteraction = onChildren().onChildWithContentDescription(value, recurse)
+    ?: throw AssertionError("No node exists with the given content description : $value")
+
+private fun SemanticsNodeInteractionCollection.onChildWithContentDescription(value: String, recurse: Boolean = false): SemanticsNodeInteraction? {
+    val count = fetchSemanticsNodes().count()
     
     for (i in 0 until count) {
-        val semanticsNode = nodes[i].fetchSemanticsNode()
+        var node: SemanticsNodeInteraction? = null
+        val semanticsNodeInteraction = get(i)
+        val semanticsNode = semanticsNodeInteraction.fetchSemanticsNode()
         if (semanticsNode.config.getOrNull(SemanticsProperties.ContentDescription)?.contains(value) == true) {
-            return nodes[i]
+            node =  semanticsNodeInteraction
+        } else if (recurse) {
+            node = semanticsNodeInteraction.onChildren().onChildWithContentDescription(value, true)
+        }
+        
+        if (node != null) {
+            return node
         }
     }
-    throw AssertionError("No node exists with the given content description : $value")
+    
+    return null
 }
 
+/**
+ * Asserts equality with the editable text
+ * @param value the expected editable text
+ */
+internal fun SemanticsNodeInteraction.assertEditableTextEquals(
+    value: String
+): SemanticsNodeInteraction =
+    assert(hasEditableText(value))
 
+/**
+ * Creates a semantic matcher to match equality with the editable text
+ *
+ * @param textValue the text to match
+ * @return a SemanticsMatcher to match the editable text of a SemanticsNodeInteraction.
+ */
+internal fun hasEditableText(
+    textValue: String
+): SemanticsMatcher {
+    val propertyName = "${SemanticsProperties.Text.name} + ${SemanticsProperties.EditableText.name}"
+
+    return SemanticsMatcher(
+        "$propertyName = [${SemanticsProperties.EditableText.name}]"
+    ) { node ->
+        var actual = ""
+        node.config.getOrNull(SemanticsProperties.EditableText) ?.let { actual = it.text }
+            ?: throw IllegalStateException("expected an editable text in the semantics node")
+
+        actual == textValue
+    }
+}

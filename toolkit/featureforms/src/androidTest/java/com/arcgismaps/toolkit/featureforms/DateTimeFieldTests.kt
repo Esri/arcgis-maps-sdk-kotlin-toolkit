@@ -17,15 +17,18 @@
 package com.arcgismaps.toolkit.featureforms
 
 import android.content.Context
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
-import androidx.compose.ui.test.printToLog
+import androidx.compose.ui.test.performTextClearance
 import androidx.test.platform.app.InstrumentationRegistry
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.data.QueryParameters
@@ -36,6 +39,7 @@ import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.layers.FeatureLayer
 import junit.framework.TestCase
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Rule
@@ -68,11 +72,22 @@ class DateTimeFieldTests {
     @Before
     fun setContent() {
         composeTestRule.setContent {
-            val state = FeatureFormState()
-            state.setFeatureForm(featureForm)
             FeatureForm(
-                featureFormState = state
+                featureForm = featureForm
             )
+        }
+    }
+    
+    @After
+    fun closeDialog() {
+        try {
+            val dialogSurface =
+                composeTestRule.onNodeWithContentDescription("DateTimePickerDialogSurface", useUnmergedTree = true)
+            dialogSurface.assertIsDisplayed()
+            val cancel = dialogSurface.onChildWithContentDescription("cancel")
+            cancel.performClick()
+        } catch (t: Throwable) {
+            // dialog wasn't open.
         }
     }
     
@@ -81,7 +96,8 @@ class DateTimeFieldTests {
      * when it is not focused
      * the text values are as expected
      * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-21-unfocused-and-focused-state-no-value-date-required
-     * (slightly modified because the field has a value and the table cannot be edited)
+     * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-22-focused-and-unfocused-state-with-value-populated
+     * (the test is a hybrid of 2 tests because the field has a value and the table cannot be edited)
      */
     @Test
     fun testRequiredUnfocusedValue() {
@@ -90,19 +106,20 @@ class DateTimeFieldTests {
         val col = composeTestRule.onNodeWithContentDescription("lazy column")
         col.performScrollToIndex(8)
         val dateTimeField = composeTestRule.onNodeWithText("${formElement.label} *")
-        val textMatcher = hasText("Nov 02, 2023 1:01 PM")
+
+        val textMatcher = hasText("No value")
         assert(textMatcher.matches(dateTimeField.fetchSemanticsNode())) {
-            "expected text Nov 02, 2023 1:01 PM"
+            "expected text: No value."
         }
         dateTimeField.assertIsDisplayed()
-        dateTimeField.performClick()
         val helper = dateTimeField.onChildWithContentDescription("supporting text")
         val helperMatcher = hasText("Date Entry is Required")
         assert(helperMatcher.matches(helper.fetchSemanticsNode())) {
             "expected helper text: Date Entry is Required"
+            
         }
-        val clearButton = dateTimeField.onChildWithContentDescription("Clear text button")
-        clearButton.assertIsDisplayed()
+        val iconMatcher = hasContentDescription("field icon")
+        assert(iconMatcher.matches(dateTimeField.fetchSemanticsNode()))
     }
     
     /**
@@ -110,7 +127,8 @@ class DateTimeFieldTests {
      * when it is not focused
      * the text values are as expected
      * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-21-unfocused-and-focused-state-no-value-date-required
-     * (slightly modified because the field has a value and the table cannot be edited)
+     * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-22-focused-and-unfocused-state-with-value-populated
+     * (the test is a hybrid of 2 tests because the field has a value and the table cannot be edited)
      */
     @Test
     fun testRequiredFocusedValue() {
@@ -119,32 +137,93 @@ class DateTimeFieldTests {
         val col = composeTestRule.onNodeWithContentDescription("lazy column")
         col.performScrollToIndex(8)
         val dateTimeField = composeTestRule.onNodeWithText("${formElement.label} *")
-        val textMatcher = hasText("Nov 02, 2023 1:01 PM")
-        assert(textMatcher.matches(dateTimeField.fetchSemanticsNode())) {
-            "expected text Nov 02, 2023 1:01 PM"
-        }
-        dateTimeField.assertIsDisplayed()
-        
-        val helper = dateTimeField.onChildWithContentDescription("supporting text")
-        val helperMatcher = hasText("Date Entry is Required")
-        assert(helperMatcher.matches(helper.fetchSemanticsNode())) {
-          "expected helper text: Date Entry is Required"
-        }
-        val clearButton = dateTimeField.onChildWithContentDescription("Clear text button")
-        clearButton.assertIsDisplayed()
-    
+        val iconMatcher = hasContentDescription("field icon")
+        assert(iconMatcher.matches(dateTimeField.fetchSemanticsNode()))
+        dateTimeField.assertHasClickAction()
         dateTimeField.performClick()
-        dateTimeField.assertIsFocused()
     
         val dialogSurface =
             composeTestRule.onNodeWithContentDescription("DateTimePickerDialogSurface", useUnmergedTree = true)
         dialogSurface.assertIsDisplayed()
-        dialogSurface.printToLog("TAGGGG", maxDepth = 100000)
+        saveScreenshot("xx",  dialogSurface.captureToImage().asAndroidBitmap())
         val today = dialogSurface.onChildWithContentDescription("current date or time button")
         today.assertIsDisplayed()
         val helperTextInDialog = dialogSurface.onChildWithText("Date Entry is Required", true)
         helperTextInDialog.assertIsDisplayed()
     }
+    
+    
+    /**
+     * Given a FieldFormElement with an editable datetime input
+     * When the date value is displayed
+     * Then it has a clear button, and tapping it clears the field
+     * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-26-clear-date
+     */
+    @Test
+    fun testClearEditableDateTime() = runTest {
+        val formElement = getFormElementWithLabel("Launch Date and Time for Apollo 11")
+        val dateTimeField = composeTestRule.onNodeWithText(formElement.label)
+        dateTimeField.assertIsDisplayed()
+        
+        // assert the text is non empty before asserting the clear button.
+        assert(
+            try {
+                dateTimeField.assertEditableTextEquals("No value")
+                false
+            } catch (t: Throwable) {
+                true
+            }
+        )
+        val clearButton = dateTimeField.onChildWithContentDescription("Clear text button", true)
+        clearButton.assertIsDisplayed()
+        clearButton.performClick()
+        
+        // now assert the field has the placeholder text because it is empty.
+        dateTimeField.assertEditableTextEquals("No value")
+    }
+    
+    /**
+     * Given a FieldFormElement with a date time input, and dateOnly set to true
+     * When the date value is displayed
+     * Then it has no time component
+     * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-23-date-only-no-time
+     */
+    @Test
+    fun testDateOnly() = runTest {
+        val formElement = getFormElementWithLabel("Launch Date for Apollo 11")
+        // find the field with the the label
+        val dateTimeField = composeTestRule.onNodeWithText(formElement.label)
+        dateTimeField.assertIsDisplayed()
+        dateTimeField.performTextClearance()
+        
+        val helper = dateTimeField.onChildWithContentDescription("supporting text")
+        val helperMatcher = hasText("Enter the Date for the Apollo 11 launch")
+        assert(helperMatcher.matches(helper.fetchSemanticsNode())) {
+            "expected helper text: Enter the Date for the Apollo 11 launch"
+        }
+        val clearButton = dateTimeField.onChildWithContentDescription("Clear text button", true)
+        clearButton.assertIsDisplayed()
+        
+        dateTimeField.performClick()
+        
+        val dialogSurface =
+            composeTestRule.onNodeWithContentDescription("DateTimePickerDialogSurface", useUnmergedTree = true)
+        dialogSurface.assertIsDisplayed()
+        val today = dialogSurface.onChildWithContentDescription("current date or time button")
+        today.assertIsDisplayed()
+        val helperTextInDialog = dialogSurface.onChildWithText("Enter the Date for the Apollo 11 launch", true)
+        helperTextInDialog.assertIsDisplayed()
+        
+        assert(
+            try {
+                dialogSurface.onChildWithContentDescription("toggle date and time")
+                false
+            } catch (e: Throwable) {
+                true
+            }
+        )
+    }
+    
     
     companion object {
         var sharedFeatureFormDefinition: FeatureFormDefinition? = null

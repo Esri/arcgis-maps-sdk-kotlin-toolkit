@@ -265,7 +265,7 @@ private fun PickerTitle(
             IconButton(onClick = onIconTap) {
                 Icon(
                     imageVector = it,
-                    contentDescription = "Set Time"
+                    contentDescription = "toggle date and time"
                 )
             }
         }
@@ -307,7 +307,7 @@ private fun PickerFooter(
             }
         }
         Spacer(modifier = Modifier.weight(1f))
-        TextButton(onClick = onCancelled) {
+        TextButton(onClick = onCancelled, modifier = Modifier.semantics { contentDescription = "cancel" }) {
             Text(stringResource(R.string.cancel))
         }
         TextButton(onClick = onConfirmed, enabled = confirmEnabled) {
