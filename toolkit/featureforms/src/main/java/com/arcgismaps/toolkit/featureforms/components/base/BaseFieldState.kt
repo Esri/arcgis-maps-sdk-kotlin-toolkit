@@ -59,6 +59,8 @@ internal data class Value<T>(
  * @param scope a [CoroutineScope] to start [StateFlow] collectors on.
  * @param onEditValue a callback to invoke when the user edits result in a change of value. This
  * is called on [BaseFieldState.onValueChanged].
+ * @param defaultValidator the default validator that returns the list of validation errors. This
+ * is called in [BaseFieldState.validate].
  */
 internal open class BaseFieldState<T>(
     properties: FieldProperties<T>,

@@ -59,19 +59,21 @@ internal class DateTimeFieldProperties(
  * @param scope a [CoroutineScope] to start [StateFlow] collectors on.
  * @param onEditValue a callback to invoke when the user edits result in a change of value. This
  * is called on [FormTextFieldState.onValueChanged].
+ * @param defaultValidator the default validator that returns the list of validation errors. This
+ * is called in [DateTimeFieldState.validate].
  */
 internal class DateTimeFieldState(
     properties: DateTimeFieldProperties,
     initialValue: Instant? = properties.value.value,
     scope: CoroutineScope,
     onEditValue: (Any?) -> Unit,
-    validate: () -> List<Throwable>
+    defaultValidator: () -> List<Throwable>
 ) : BaseFieldState<Instant?>(
     properties = properties,
     initialValue = initialValue,
     scope = scope,
     onEditValue = onEditValue,
-    defaultValidator = validate
+    defaultValidator = defaultValidator
 ) {
     val minEpochMillis: Instant? = properties.minEpochMillis
 
@@ -109,7 +111,7 @@ internal class DateTimeFieldState(
                         form.editValue(field, it)
                         scope.launch { form.evaluateExpressions() }
                     },
-                    validate = {
+                    defaultValidator = {
                         field.getValidationErrors()
                     }
                 ).apply {
@@ -153,7 +155,7 @@ internal fun rememberDateTimeFieldState(
             form.editValue(field, it)
             scope.launch { form.evaluateExpressions() }
         },
-        validate = {
+        defaultValidator = {
             field.getValidationErrors()
         }
     )

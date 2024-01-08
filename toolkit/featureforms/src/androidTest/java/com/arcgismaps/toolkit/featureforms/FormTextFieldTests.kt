@@ -20,7 +20,6 @@ package com.arcgismaps.toolkit.featureforms
 
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotFocused
@@ -108,12 +107,11 @@ class FormTextFieldTests {
                 state = FormTextFieldState(
                     textFieldProperties,
                     scope = scope,
-                    context = LocalContext.current,
                     onEditValue = {
                         featureForm.editValue(field, it)
                         scope.launch { featureForm.evaluateExpressions() }
                     },
-                    validate = {field.getValidationErrors()}
+                    defaultValidator = {field.getValidationErrors()}
                 )
             )
         }

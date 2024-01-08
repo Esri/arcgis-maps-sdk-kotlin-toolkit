@@ -365,7 +365,7 @@ private fun ComboBoxPreview() {
         ),
         scope = scope,
         onEditValue = {},
-        validate = { emptyList() }
+        defaultValidator = { emptyList() }
     )
     ComboBoxField(state = state)
 }

@@ -36,13 +36,13 @@ internal class RadioButtonFieldState(
     initialValue: String = properties.value.value,
     scope: CoroutineScope,
     onEditValue: ((Any?) -> Unit),
-    validate: () -> List<Throwable>
+    defaultValidator: () -> List<Throwable>
 ) : CodedValueFieldState(
     properties = properties,
     initialValue = initialValue,
     scope = scope,
     onEditValue = onEditValue,
-    validate = validate
+    defaultValidator = defaultValidator
 ) {
 
     /**
@@ -96,7 +96,7 @@ internal class RadioButtonFieldState(
                         form.editValue(formElement, newValue)
                         scope.launch { form.evaluateExpressions() }
                     },
-                    validate = formElement::getValidationErrors
+                    defaultValidator = formElement::getValidationErrors
                 )
             }
         )
@@ -131,6 +131,6 @@ internal fun rememberRadioButtonFieldState(
             form.editValue(field, it)
             scope.launch { form.evaluateExpressions() }
         },
-        validate = field::getValidationErrors
+        defaultValidator = field::getValidationErrors
     )
 }

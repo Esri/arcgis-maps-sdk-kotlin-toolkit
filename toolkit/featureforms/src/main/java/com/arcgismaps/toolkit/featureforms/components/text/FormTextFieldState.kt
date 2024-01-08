@@ -42,6 +42,7 @@ import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.
 import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.NoError
 import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.NotANumber
 import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.NotAWholeNumber
+import com.arcgismaps.toolkit.featureforms.components.datetime.DateTimeFieldState
 import com.arcgismaps.toolkit.featureforms.utils.asDoubleTuple
 import com.arcgismaps.toolkit.featureforms.utils.asLongTuple
 import com.arcgismaps.toolkit.featureforms.utils.domain
@@ -80,21 +81,22 @@ internal class TextFieldProperties(
  * @param scope a [CoroutineScope] to start [StateFlow] collectors on.
  * @param onEditValue a callback to invoke when the user edits result in a change of value. This
  * is called on [FormTextFieldState.onValueChanged].
+ * @param defaultValidator the default validator that returns the list of validation errors. This
+ * is called in [FormTextFieldState.validate].
  */
 @Stable
 internal class FormTextFieldState(
     properties: TextFieldProperties,
     initialValue: String = properties.value.value,
     scope: CoroutineScope,
-    //private val context: Context,
     onEditValue: (Any?) -> Unit,
-    validate: () -> List<Throwable>
+    defaultValidator: () -> List<Throwable>
 ) : BaseFieldState<String>(
     properties = properties,
     initialValue = initialValue,
     scope = scope,
     onEditValue = onEditValue,
-    defaultValidator = validate
+    defaultValidator = defaultValidator
 ) {
     // indicates singleLine only if TextBoxFeatureFormInput
     val singleLine = properties.singleLine
@@ -261,7 +263,7 @@ internal class FormTextFieldState(
                         form.editValue(formElement, newValue)
                         scope.launch { form.evaluateExpressions() }
                     },
-                    validate = { formElement.getValidationErrors() }
+                    defaultValidator = { formElement.getValidationErrors() }
                 ).apply {
                     // focus is lost on rotation. https://devtopia.esri.com/runtime/apollo/issues/230
                     onFocusChanged(list[1] as Boolean)
@@ -302,7 +304,7 @@ internal fun rememberFormTextFieldState(
             form.editValue(field, it)
             scope.launch { form.evaluateExpressions() }
         },
-        validate = { field.getValidationErrors() }
+        defaultValidator = { field.getValidationErrors() }
     )
 }
 
