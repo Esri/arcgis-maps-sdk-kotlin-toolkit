@@ -291,3 +291,20 @@ private fun SceneViewEventHandler(
         }
     }
 }
+
+/**
+ * Create and [remember] a [AnalysisOverlayCollection].
+ * [init] will be called when the [AnalysisOverlayCollection] is first created to configure its
+ * initial state.
+ *
+ * @param key invalidates the remembered AnalysisOverlayCollection if different from the previous composition
+ * @param init called when the [AnalysisOverlayCollection] is created to configure its initial state
+ * @since 200.4.0
+ */
+@Composable
+public inline fun rememberAnalysisOverlayCollection(
+    key: Any? = null,
+    crossinline init: AnalysisOverlayCollection.() -> Unit = {}
+): AnalysisOverlayCollection = remember(key) {
+    AnalysisOverlayCollection().apply(init)
+}
