@@ -17,7 +17,6 @@
 package com.arcgismaps.toolkit.featureforms.components.codedvalue
 
 import android.content.res.Configuration
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -109,7 +108,7 @@ internal fun ComboBoxField(
     } else if (state.showNoValueOption == FormInputNoValueOption.Show) {
         state.noValueLabel.ifEmpty { stringResource(R.string.no_value) }
     } else ""
-
+    // show if any errors are present as the supporting text with the error color
     val (supportingText, supportingTextColor) = if (value.error is ValidationErrorState.NoError) {
         Pair(state.description, Color.Unspecified)
     } else {

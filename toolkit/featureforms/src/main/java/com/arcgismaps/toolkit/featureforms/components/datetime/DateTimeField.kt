@@ -18,7 +18,6 @@
 
 package com.arcgismaps.toolkit.featureforms.components.datetime
 
-import android.util.Log
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.material.icons.Icons
@@ -60,6 +59,7 @@ internal fun DateTimeField(
     } else {
         state.label
     }
+    // show if any errors are present as the supporting text with the error color
     val (supportingText, supportingTextColor) = if (value.error is ValidationErrorState.NoError) {
         Pair(state.description, Color.Unspecified)
     } else {

@@ -1,6 +1,5 @@
 package com.arcgismaps.toolkit.featureforms
 
-import android.content.Context
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -29,7 +28,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -44,8 +43,8 @@ import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
-import com.arcgismaps.toolkit.featureforms.components.base.MutableFormStateCollection
 import com.arcgismaps.toolkit.featureforms.components.base.FormStateCollection
+import com.arcgismaps.toolkit.featureforms.components.base.MutableFormStateCollection
 import com.arcgismaps.toolkit.featureforms.components.base.getState
 import com.arcgismaps.toolkit.featureforms.components.base.rememberBaseGroupState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberCodedValueFieldState
@@ -131,9 +130,8 @@ internal fun FeatureFormContent(
     form: FeatureForm,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val states = rememberStates(form = form, context = context, scope = scope)
+    val states = rememberStates(form = form, scope = scope)
     FeatureFormBody(
         form = form,
         states = states,
@@ -193,7 +191,6 @@ private fun FeatureFormBody(
  * provided FeatureForm. These state objects are returned as part of a [FormStateCollection].
  *
  * @param form the [FeatureForm] to create the states for.
- * @param context a [Context].
  * @param scope a [CoroutineScope] to run collectors and calculations on.
  *
  * @return returns the [FormStateCollection] created.
@@ -201,14 +198,13 @@ private fun FeatureFormBody(
 @Composable
 internal fun rememberStates(
     form: FeatureForm,
-    context: Context,
     scope: CoroutineScope
 ): FormStateCollection {
     val states = MutableFormStateCollection()
     form.elements.forEach { element ->
         when (element) {
             is FieldFormElement -> {
-                val state = rememberFieldState(element, form, context, scope)
+                val state = rememberFieldState(element, form, scope)
                 if (state != null) {
                     states.add(element, state)
                 }
@@ -221,7 +217,6 @@ internal fun rememberStates(
                         val state = rememberFieldState(
                             element = it,
                             form = form,
-                            context = context,
                             scope = scope
                         )
                         if (state != null) {
@@ -245,7 +240,6 @@ internal fun rememberStates(
  *
  * @param element the [FieldFormElement] to create the state for.
  * @param form the [FeatureForm] the [element] is part of.
- * @param context a [Context].
  * @param scope a [CoroutineScope] to run collectors and calculations on.
  *
  * @return returns the [BaseFieldState] created.
@@ -254,7 +248,7 @@ internal fun rememberStates(
 internal fun rememberFieldState(
     element: FieldFormElement,
     form: FeatureForm,
-    context: Context,
+    //context: Context,
     scope: CoroutineScope
 ): BaseFieldState<out Any?>? {
     return when (element.input) {
@@ -274,7 +268,6 @@ internal fun rememberFieldState(
                 minLength = minLength,
                 maxLength = maxLength,
                 form = form,
-                context = context,
                 scope = scope
             )
         }
@@ -304,7 +297,7 @@ internal fun rememberFieldState(
                 field = element,
                 form = form,
                 scope = scope,
-                noValueString = context.getString(R.string.no_value)
+                noValueString = stringResource(R.string.no_value)
             )
         }
 

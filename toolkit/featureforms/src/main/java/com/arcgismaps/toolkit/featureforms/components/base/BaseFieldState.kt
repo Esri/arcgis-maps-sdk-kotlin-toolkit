@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms.components.base
 
-import android.util.Log
 import com.arcgismaps.exceptions.FeatureFormValidationException
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import kotlinx.coroutines.CoroutineScope
@@ -42,6 +41,9 @@ internal open class FieldProperties<T>(
     val visible: StateFlow<Boolean>
 )
 
+/**
+ * A class that provides a validation error [error] for the value of [data].
+ */
 internal data class Value<T>(
     val data: T,
     val error: ValidationErrorState = ValidationErrorState.NoError
@@ -74,12 +76,16 @@ internal open class BaseFieldState<T>(
      */
     open val placeholder: String = properties.placeholder
 
-    // a state flow to handle user input changes
+    /**
+     * A mutable state flow to handle user input changes.
+     */
     protected val _value = MutableStateFlow(initialValue)
 
-
+    /**
+     * A state flow that combines the user input [_value] and calculated property callbacks.
+     */
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val _mergedValue: StateFlow<T> = flowOf(_value, properties.value.drop(1))
+    protected val _mergedValue: StateFlow<T> = flowOf(_value, properties.value.drop(1))
         .flattenMerge()
         .stateIn(
             scope = scope,
@@ -87,13 +93,13 @@ internal open class BaseFieldState<T>(
             initialValue = initialValue
         )
 
+    // a state flow for sending validation errors
     private val _validationError: MutableStateFlow<ValidationErrorState> =
         MutableStateFlow(ValidationErrorState.NoError)
 
     /**
-     * Current value state for the field.
-     *
-     * ---validation behavior---
+     * Current value for this field state. The actual data of this type is wrapped in a [Value]
+     * object. The [Value.error] provides the current validation error for the [Value.data].
      */
     val value: StateFlow<Value<T>> = combine(_mergedValue, _validationError) { newValue, error ->
         Value(newValue, error)
@@ -113,7 +119,13 @@ internal open class BaseFieldState<T>(
      */
     val isRequired: StateFlow<Boolean> = properties.required
 
+
     private val _isFocused: MutableStateFlow<Boolean> = MutableStateFlow(false)
+
+    /**
+     * Property that indicates if the field for this state currently has focus. Use [onFocusChanged]
+     * to set this value.
+     */
     val isFocused: StateFlow<Boolean> = _isFocused.asStateFlow()
 
     protected var wasFocused = false
@@ -122,27 +134,85 @@ internal open class BaseFieldState<T>(
         scope.launch {
             // validate when focus changes
             isFocused.collect {
-                updateValidation(_mergedValue.value)
+                updateValidation()
             }
         }
         scope.launch {
             // validate when required property changes
             isRequired.collect {
-                updateValidation(_mergedValue.value)
+                updateValidation()
             }
         }
         scope.launch {
             // validate when the editable property changes
             isEditable.collect {
-                updateValidation(_mergedValue.value)
+                updateValidation()
             }
         }
         scope.launch {
             // validate when the value changes
             _mergedValue.collect {
-                updateValidation(_mergedValue.value)
+                updateValidation()
             }
         }
+    }
+
+    /**
+     * Changes the current focus state for the field. Use [isFocused] to read the value.
+     */
+    fun onFocusChanged(focus: Boolean) {
+        if (focus) wasFocused = true
+        _isFocused.value = focus
+    }
+
+    /**
+     * Filters a list of validation errors using the "field validation ui messaging algorithm"
+     * and returns a single validation error based on the current focus state, editable state
+     * and the value.
+     *
+     * @param errors the list of validation errors
+     * @return A single validation error
+     */
+    private fun filter(errors: List<ValidationErrorState>): ValidationErrorState {
+        // if editable
+        return if (errors.isNotEmpty() && isEditable.value) {
+            // if it has been focused
+            if (wasFocused) {
+                // if not in focus
+                if (!isFocused.value) {
+                    // show a required error if it is present
+                    if (errors.any { it is ValidationErrorState.Required }) {
+                        ValidationErrorState.Required
+                    } else {
+                        // show any other error
+                        errors.first()
+                    }
+                } else {
+                    // if focused and empty, don't show the "Required" error or numeric parse errors
+                    if (_mergedValue.value is String && (_mergedValue.value as String).isEmpty()) {
+                        ValidationErrorState.NoError
+                    } else {
+                        // show the first non-required error
+                        errors.firstOrNull { it !is ValidationErrorState.Required }
+                            // if none is found, do not show any error
+                            ?: ValidationErrorState.NoError
+                    }
+                }
+            } else {
+                // never been focused
+                ValidationErrorState.NoError
+            }
+        } else {
+            // not editable
+            ValidationErrorState.NoError
+        }
+    }
+
+    /**
+     * Runs and updates the validation using [validate] and [filter].
+     */
+    private fun updateValidation() {
+        _validationError.value = filter(validate())
     }
 
     /**
@@ -156,55 +226,17 @@ internal open class BaseFieldState<T>(
         _value.value = input
     }
 
-    fun onFocusChanged(focus: Boolean) {
-        if (focus) wasFocused = true
-        _isFocused.value = focus
-    }
-
-    open fun validate(value: T): List<ValidationErrorState> {
+    /**
+     * Validates the current value using the [defaultValidator].
+     *
+     * @return Returns the list of validation errors.
+     */
+    open fun validate(): List<ValidationErrorState> {
         val errors = defaultValidator()
         return buildList {
             if (errors.any { it is FeatureFormValidationException.RequiredException }) {
                 add(ValidationErrorState.Required)
             }
         }
-    }
-
-    private fun filter(errors: List<ValidationErrorState>): ValidationErrorState {
-        Log.e("TAG", "filtering: $errors with wasfocused:$wasFocused")
-        // if editable
-        return if (errors.isNotEmpty() && isEditable.value) {
-            // if it has been focused
-            if (wasFocused) {
-                // if not in focus show any required errors
-                if (!isFocused.value) {
-                    if (errors.any { it is ValidationErrorState.Required }) {
-                        ValidationErrorState.Required
-                    } else {
-                        errors.first()
-                    }
-                } else {
-                    // if focused and empty, don't show the "Required" error or numeric parse errors
-//                    if (_mergedValue.value is String) {
-//
-//                    }
-                    if (errors.any { it !is ValidationErrorState.Required }) {
-                        errors.first()
-                    } else {
-                        ValidationErrorState.NoError
-                    }
-                }
-            } else {
-                // never been focused
-                ValidationErrorState.NoError
-            }
-        } else {
-            // not editable
-            ValidationErrorState.NoError
-        }
-    }
-
-    private fun updateValidation(value: T) {
-        _validationError.value = filter(validate(value))
     }
 }

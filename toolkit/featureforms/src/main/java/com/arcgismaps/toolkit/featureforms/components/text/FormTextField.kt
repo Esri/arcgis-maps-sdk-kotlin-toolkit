@@ -50,8 +50,12 @@ internal fun FormTextField(
             state.label
         }
     }
-    val contentLength =
-        if (state.minLength > 0 || state.maxLength > 0) "${value.data.length}" else ""
+    val contentLength = if (state.minLength > 0 || state.maxLength > 0) {
+        "${value.data.length}"
+    } else {
+        ""
+    }
+    // show if any errors are present as the supporting text with the error color
     val (supportingText, supportingTextColor) = if (value.error is ValidationErrorState.NoError) {
         Pair(state.description, Color.Unspecified)
     } else {
