@@ -21,6 +21,7 @@ import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.LocationToScreenResult
 import com.arcgismaps.mapping.view.ScreenCoordinate
+import com.arcgismaps.mapping.view.DeviceOrientation
 
 /**
  * Used to perform operations on a composable [SceneView].
@@ -109,4 +110,83 @@ public class SceneViewProxy : GeoViewProxy("SceneView") {
     public fun screenToBaseSurface(screenCoordinate: ScreenCoordinate): Point? =
         sceneView?.screenToBaseSurface(screenCoordinate)
 
+    /**
+     * The horizontal field of view of the scene view in degrees.
+     *
+     * The value of the field of view is influenced by the size and orientation of the device screen.
+     * A landscape orientation has a larger field of view value than a portrait orientation.
+     *
+     * A null value represents that it is currently undetermined.
+     *
+     * @since 200.4.0
+     */
+    public val fieldOfView: Double?
+        get() = sceneView?.fieldOfView
+
+    /**
+     * The ratio indicates how much the vertical field of view is distorted.
+     *
+     * A distortion factor less than 1.0 causes the visuals to be stretched taller in comparison to their width.
+     * A distortion factor greater than 1.0 causes the visuals to be shrunk shorter in comparison to their width.
+     *
+     * The default value is 1.0.
+     * A null value represents that it is currently undetermined.
+     * @since 200.4.0
+     */
+    public val fieldOfViewDistortionRatio: Double?
+        get() = sceneView?.fieldOfViewDistortionRatio
+
+    /**
+     * Sets the field of view on the scene view in degrees and determines how much the vertical field of view is distorted.
+     *
+     * A distortion ratio less than 1.0 will cause the visuals to be stretched taller in comparison to their
+     * width. A distortion ratio greater than 1.0 will cause the visuals to be shrunk shorter in comparison to
+     * their width.
+     *
+     * The default distortion ratio is 1.0.
+     *
+     * @param angle the field of view on the scene view in degrees. This value must be greater than 0 and less than or equal to 120
+     * @param distortionRatio the field of view vertical distortion ratio. This value must be between 0.1 and 10
+     * @since 200.4.0
+     */
+    public fun setFieldOfView(angle: Double, distortionRatio: Double = 1.0) {
+        sceneView?.setFieldOfViewAndDistortionRatio(angle, distortionRatio)
+    }
+
+    /**
+     * Matches the field of view of the scene view to the field of view of a camera lens using the lens characteristics.
+     * All parameter values must be greater than 0.
+     *
+     * @param xFocalLength the pixel focal length along the x-axis. The units are in pixels.
+     * xFocal and yFocal should be identical for square pixels
+     * @param yFocalLength the pixel focal length along the y-axis. The units are in pixels.
+     * xFocal and yFocal should be identical for square pixels
+     * @param xPrincipal the distance along the x-axis between the principal point and the top-left corner of the
+     * image frame. The units are in pixels. This must also be less than xImageSize
+     * @param yPrincipal the distance along the y-axis between the principal point and the top-left corner of the
+     * image frame. The units are in pixels. This must also be less than yImageSize.
+     * @param xImageSize the x value of the image size captured by the camera. The units are in pixels
+     * @param yImageSize the y value of the image size captured by the camera. The units are in pixels
+     * @param deviceOrientation the orientation of the device
+     * @since 200.4.0
+     */
+    public fun setFieldOfViewFromLensIntrinsics(
+        xFocalLength: Float,
+        yFocalLength: Float,
+        xPrincipal: Float,
+        yPrincipal: Float,
+        xImageSize: Float,
+        yImageSize: Float,
+        deviceOrientation: DeviceOrientation
+    ) {
+        sceneView?.setFieldOfViewFromLensIntrinsics(
+            xFocalLength,
+            yFocalLength,
+            xPrincipal,
+            yPrincipal,
+            xImageSize,
+            yImageSize,
+            deviceOrientation
+        )
+    }
 }
