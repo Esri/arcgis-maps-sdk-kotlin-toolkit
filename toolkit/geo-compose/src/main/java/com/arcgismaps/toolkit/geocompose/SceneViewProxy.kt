@@ -81,6 +81,43 @@ public class SceneViewProxy : GeoViewProxy("SceneView") {
         get() = sceneView?.fieldOfViewDistortionRatio
 
     /**
+     * Indicates whether manual rendering is enabled or not. A null value indicates that the SceneView
+     * is not currently initialized.
+     *
+     * @see setManualRenderingEnabled
+     * @since 200.4.0
+     */
+    public val isManualRenderingEnabled: Boolean?
+        get() = sceneView?.isManualRenderingEnabled
+
+    /**
+     * Sets whether manual rendering is enabled or not.
+     *
+     * If set to true, the SceneView won't use its own pulse mechanism to draw the scene. The user of
+     * the SceneView will have to call renderFrame to cause the SceneView to draw.
+     *
+     * Note that once this property has been set to true on a SceneView it is not possible to revert
+     * back to the default pulse mechanism. If you intend to set this property to true for a SceneView
+     * then it is advisable to do so as soon as possible after the SceneView has been initialized
+     *
+     * @since 200.4.0
+     */
+    public fun setManualRenderingEnabled(isManualRenderingEnabled: Boolean) {
+        sceneView?.isManualRenderingEnabled = isManualRenderingEnabled
+    }
+
+    /**
+     * Draws the scene based on a user-defined pulse.
+     * In order for this method to have any effect, [isManualRenderingEnabled] has to be set to true
+     *
+     * @see setManualRenderingEnabled
+     * @since 200.4.0
+     */
+    public fun renderFrame() {
+        sceneView?.renderFrame()
+    }
+
+    /**
      * Sets the field of view on the scene view in degrees and determines how much the vertical field of view is distorted.
      *
      * A distortion ratio less than 1.0 will cause the visuals to be stretched taller in comparison to their
