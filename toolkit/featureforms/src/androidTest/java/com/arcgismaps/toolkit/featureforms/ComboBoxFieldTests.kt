@@ -31,9 +31,7 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.printToLog
 import androidx.test.platform.app.InstrumentationRegistry
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.data.ArcGISFeature
@@ -98,7 +96,8 @@ class ComboBoxFieldTests {
      * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-31-pre-existing-value-description-clear-button-no-value-label
      */
     @Test
-    fun testClearValueNoValueLabel() {
+    fun testClearValueNoValueLabel() = runTest {
+        featureForm.evaluateExpressions().exceptionOrNull()
         val formElement = getFormElementWithLabel("Combo String")
         val input = formElement.input as ComboBoxFormInput
         // find the field with the the label
@@ -115,7 +114,7 @@ class ComboBoxFieldTests {
         }
         // validate that the pre-populated value shown shown in accurate and as expected
         // assertTextEquals matches the Text(the label) and Editable Text (the actual editable input text)
-        comboBoxField.assertTextEquals(formElement.label, formElement.formattedValue)
+        comboBoxField.assertTextEquals(formElement.label, formElement.value.value.toString())
         // find the clear text node within its children
         val clearButton = comboBoxField.onChildWithContentDescription(clearTextSemanticLabel)
         // validate the clear icon is visible
@@ -194,7 +193,7 @@ class ComboBoxFieldTests {
         }
         // validate that the pre-populated value shown shown in accurate and as expected
         // assertTextEquals matches the Text(the label) and Editable Text (the actual editable input text)
-        comboBoxField.assertTextEquals(formElement.label, formElement.formattedValue)
+        comboBoxField.assertTextEquals(formElement.label, formElement.value.value.toString())
         // tap the value to bring up the picker
         comboBoxField.performClick()
         // find the dialog
@@ -283,7 +282,6 @@ class ComboBoxFieldTests {
         clearButton.assertIsDisplayed()
         // clear the value
         clearButton.performClick()
-        composeTestRule.onRoot().printToLog("TAG")
         // assert "Enter Value" placeholder is visible
         comboBoxField.assertTextEquals(requiredLabel, context.getString(R.string.enter_value))
         // validate required text is visible and is in error color
