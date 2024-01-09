@@ -73,8 +73,8 @@ import java.time.Instant
  * @param atmosphereEffect the effect applied to the scene's atmosphere
  * @param timeExtent the [TimeExtent] used by the composable SceneView
  * @param onTimeExtentChanged lambda invoked when the composable SceneView's [TimeExtent] is changed
- * @param sunTime the position of the sun in the scene view based on a specific date and time
- * @param sunLighting the type of ambient sunlight and shadows in the scene view
+ * @param sunTime the position of the sun in the composable SceneView based on a specific date and time
+ * @param sunLighting the type of ambient sunlight and shadows in the composable SceneView
  * @param onNavigationChanged lambda invoked when the navigation status of the composable SceneView has changed
  * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the composable SceneView has changed
  * @param onLayerViewStateChanged lambda invoked when the composable SceneView's layer view state is changed
