@@ -109,6 +109,7 @@ internal open class CodedValueFieldState(
     }
     
     override fun onValueChanged(input: String) {
+        wasFocused = true
         val code = codedValues.firstOrNull {
             it.name == input
         }?.code
