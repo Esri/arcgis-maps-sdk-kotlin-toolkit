@@ -32,6 +32,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.TimeExtent
+import com.arcgismaps.mapping.view.AtmosphereEffect
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.CameraController
 import com.arcgismaps.mapping.view.DoubleTapEvent
@@ -69,10 +70,11 @@ import java.time.Instant
  * @param selectionProperties the [SelectionProperties] used by the composable SceneView
  * @param attributionState specifies the attribution bar's visibility, text changed and layout changed events
  * @param cameraController the [CameraController] to manage the position, orientation, and movement of the camera
+ * @param atmosphereEffect the effect applied to the scene's atmosphere
  * @param timeExtent the [TimeExtent] used by the composable SceneView
+ * @param onTimeExtentChanged lambda invoked when the composable SceneView's [TimeExtent] is changed
  * @param sunTime the position of the sun in the scene view based on a specific date and time
  * @param sunLighting the type of ambient sunlight and shadows in the scene view
- * @param onTimeExtentChanged lambda invoked when the composable SceneView's [TimeExtent] is changed
  * @param onNavigationChanged lambda invoked when the navigation status of the composable SceneView has changed
  * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the composable SceneView has changed
  * @param onLayerViewStateChanged lambda invoked when the composable SceneView's layer view state is changed
@@ -103,6 +105,7 @@ public fun SceneView(
     selectionProperties: SelectionProperties = SelectionProperties(),
     attributionState: AttributionState = AttributionState(),
     cameraController: CameraController = GlobeCameraController(),
+    atmosphereEffect: AtmosphereEffect = AtmosphereEffect.HorizonOnly,
     timeExtent: TimeExtent? = null,
     onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
     sunTime: Instant = Instant.parse("2000-09-22T12:00:00Z"),
@@ -137,6 +140,7 @@ public fun SceneView(
             it.selectionProperties = selectionProperties
             it.setTimeExtent(timeExtent)
             it.cameraController = cameraController
+            it.atmosphereEffect = atmosphereEffect
             it.sunTime = sunTime
             it.sunLighting = sunLighting
         })
