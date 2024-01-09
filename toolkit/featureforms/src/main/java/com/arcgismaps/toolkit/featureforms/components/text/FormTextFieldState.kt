@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms.components.text
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.saveable.Saver
@@ -180,7 +179,6 @@ internal class FormTextFieldState(
     override fun validate(): List<ValidationErrorState> {
         val currentValue = _mergedValue.value
         val coreErrors = defaultValidator()
-        Log.e("TAG", "validate: $coreErrors")
         val errors = mutableListOf<ValidationErrorState>()
         errors += super.validate()
 
@@ -283,7 +281,6 @@ internal fun rememberFormTextFieldState(
 ): FormTextFieldState = rememberSaveable(
     saver = FormTextFieldState.Saver(field, form, scope)
 ) {
-    Log.e("TAG", "rememberFormTextFieldState: ${form.fieldType(field)}")
     FormTextFieldState(
         properties = TextFieldProperties(
             label = field.label,
