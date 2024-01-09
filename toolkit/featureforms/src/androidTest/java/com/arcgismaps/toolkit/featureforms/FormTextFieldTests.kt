@@ -56,7 +56,6 @@ import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class FormTextFieldTests {
     private val labelSemanticLabel = "label"
     private val helperSemanticLabel = "helper"

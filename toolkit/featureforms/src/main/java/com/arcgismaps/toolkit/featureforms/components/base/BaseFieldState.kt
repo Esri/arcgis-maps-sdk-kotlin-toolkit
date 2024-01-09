@@ -87,7 +87,7 @@ internal open class BaseFieldState<T>(
      * A state flow that combines the user input [_value] and calculated property callbacks.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    protected val _mergedValue: StateFlow<T> = flowOf(_value, properties.value.drop(1))
+    protected val _mergedValue: StateFlow<T> = flowOf(_value, properties.value)
         .flattenMerge()
         .stateIn(
             scope = scope,
@@ -121,7 +121,9 @@ internal open class BaseFieldState<T>(
      */
     val isRequired: StateFlow<Boolean> = properties.required
 
-
+    /**
+     * A mutable state flow to handle current focus state.
+     */
     private val _isFocused: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     /**
@@ -133,27 +135,29 @@ internal open class BaseFieldState<T>(
     protected var wasFocused = false
 
     init {
+        // ignore the first values for all the flows since validate() is open and must
+        // NOT be called during initialization due to any derived class initialization order
         scope.launch {
             // validate when focus changes
-            isFocused.collect {
+            isFocused.drop(1).collect {
                 updateValidation()
             }
         }
         scope.launch {
             // validate when required property changes
-            isRequired.collect {
+            isRequired.drop(1).collect {
                 updateValidation()
             }
         }
         scope.launch {
             // validate when the editable property changes
-            isEditable.collect {
+            isEditable.drop(1).collect {
                 updateValidation()
             }
         }
         scope.launch {
             // validate when the value changes
-            _mergedValue.collect {
+            _mergedValue.drop(1).collect {
                 updateValidation()
             }
         }
