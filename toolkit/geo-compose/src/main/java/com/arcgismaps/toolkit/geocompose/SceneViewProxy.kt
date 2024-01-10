@@ -81,8 +81,9 @@ public class SceneViewProxy : GeoViewProxy("SceneView") {
         get() = sceneView?.fieldOfViewDistortionRatio
 
     /**
-     * Indicates whether manual rendering is enabled or not. A null value indicates that the SceneView
-     * is not currently initialized.
+     * Indicates whether manual rendering is enabled or not.
+     *
+     * A null value indicates that the composable SceneView is not currently initialized.
      *
      * @see setManualRenderingEnabled
      * @since 200.4.0
