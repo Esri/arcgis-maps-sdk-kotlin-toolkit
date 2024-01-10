@@ -29,7 +29,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onParent
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
-import androidx.compose.ui.test.printToLog
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.data.QueryParameters
@@ -117,10 +116,7 @@ class GroupElementTests {
         // assert only the header is visible and other field elements are not
         assert(groupElement.onParent().onChildren().fetchSemanticsNodes().count() == 1)
         // find and click on the radio button option
-        val formElementWithExpr = composeTestRule.onNodeWithText("show invisible form element")
-        formElementWithExpr.assertIsDisplayed()
-        formElementWithExpr.performClick()
-        groupElement.onParent().printToLog("TAG")
+        composeTestRule.onNodeWithText("show invisible form element").performClick()
         // assert the and other field elements are visible
         assert(groupElement.onParent().onChildren().fetchSemanticsNodes().count() > 1)
     }
