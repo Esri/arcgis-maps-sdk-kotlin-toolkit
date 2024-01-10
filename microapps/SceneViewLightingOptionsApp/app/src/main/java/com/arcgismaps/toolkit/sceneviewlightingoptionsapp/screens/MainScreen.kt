@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,8 +31,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,6 +49,9 @@ import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.toolkit.geocompose.SceneView
 import com.arcgismaps.toolkit.geocompose.SceneViewpointOperation
+import java.time.Instant
+import java.time.OffsetDateTime
+import java.time.ZoneId
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,6 +62,8 @@ fun MainScreen() {
     }
     val camera = remember { Camera(sofia, 10000.0, 0.0, 80.0, 0.0) }
     val viewpointOperation = SceneViewpointOperation.SetCamera(camera)
+
+    var sunTime by remember { mutableStateOf(Instant.parse("2000-09-22T15:00:00Z")) }
 
     Scaffold(
         topBar = {
@@ -76,7 +85,8 @@ fun MainScreen() {
                     }
                     OptionsDropDownMenu(
                         expanded = optionsExpanded,
-                        onDismissRequest = { optionsExpanded = false }
+                        onDismissRequest = { optionsExpanded = false },
+                        onSetSunTime = { sunTime = it }
                     )
                 }
             )
@@ -87,7 +97,8 @@ fun MainScreen() {
                 .padding(innerPadding)
                 .fillMaxSize(),
             arcGISScene = arcGISScene,
-            viewpointOperation = viewpointOperation
+            viewpointOperation = viewpointOperation,
+            sunTime = sunTime
         )
     }
 }
@@ -99,7 +110,8 @@ fun MainScreen() {
 fun OptionsDropDownMenu(
     modifier: Modifier = Modifier,
     expanded: Boolean = false,
-    onDismissRequest: (() -> Unit) = {}
+    onDismissRequest: (() -> Unit) = {},
+    onSetSunTime: (Instant) -> Unit
 ) {
     val items = remember {
         listOf(
@@ -110,6 +122,7 @@ fun OptionsDropDownMenu(
             "Space Effect"
         )
     }
+    var showSunTimeOptions by remember { mutableStateOf(false) }
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest,
@@ -121,7 +134,40 @@ fun OptionsDropDownMenu(
                     Text(text = it)
                 },
                 onClick = {
+                    when (it) {
+                        "Sun Time" -> showSunTimeOptions = true
+                    }
                 })
         }
     }
+    if (showSunTimeOptions) {
+        SunTimeOptions(setTime = onSetSunTime) {
+            showSunTimeOptions = false
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SunTimeOptions(setTime: (Instant) -> Unit, onDismissRequest: () -> Unit) {
+    val timePickerState = rememberTimePickerState()
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        confirmButton = {
+            TextButton(onClick = {
+                setTime(
+                    OffsetDateTime.now(ZoneId.systemDefault())
+                        .withHour(timePickerState.hour)
+                        .withMinute(timePickerState.minute)
+                        .toInstant()
+                )
+                onDismissRequest()
+            }) {
+                Text("Confirm")
+            }
+        },
+        text = {
+            TimePicker(state = timePickerState)
+        }
+    )
 }
