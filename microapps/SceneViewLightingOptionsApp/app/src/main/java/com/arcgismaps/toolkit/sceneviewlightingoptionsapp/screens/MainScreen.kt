@@ -69,6 +69,7 @@ import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.view.AtmosphereEffect
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.LightingMode
+import com.arcgismaps.mapping.view.SpaceEffect
 import com.arcgismaps.toolkit.geocompose.SceneView
 import com.arcgismaps.toolkit.geocompose.SceneViewpointOperation
 import java.time.Instant
@@ -89,6 +90,7 @@ fun MainScreen() {
     var sunLighting: LightingMode by remember { mutableStateOf(LightingMode.LightAndShadows) }
     var ambientLightColor: Color by remember { mutableStateOf(Color(220, 220, 220, 255)) }
     var atmosphereEffect: AtmosphereEffect by remember { mutableStateOf(AtmosphereEffect.HorizonOnly) }
+    var spaceEffect: SpaceEffect by remember { mutableStateOf(SpaceEffect.Stars) }
 
     Scaffold(
         topBar = {
@@ -117,7 +119,9 @@ fun MainScreen() {
                         currentAmbientLightColor = ambientLightColor,
                         onSetAmbientLightColor = { ambientLightColor = it },
                         currentAtmosphereEffect = atmosphereEffect,
-                        onSetAtmosphereEffect = { atmosphereEffect = it }
+                        onSetAtmosphereEffect = { atmosphereEffect = it },
+                        currentSpaceEffect = spaceEffect,
+                        onSetSpaceEffect = { spaceEffect = it}
                     )
                 }
             )
@@ -132,7 +136,8 @@ fun MainScreen() {
             sunTime = sunTime,
             sunLighting = sunLighting,
             ambientLightColor = ambientLightColor,
-            atmosphereEffect = atmosphereEffect
+            atmosphereEffect = atmosphereEffect,
+            spaceEffect = spaceEffect
         )
     }
 }
@@ -151,7 +156,9 @@ fun OptionsDropDownMenu(
     currentAmbientLightColor: Color,
     onSetAmbientLightColor: (Color) -> Unit,
     currentAtmosphereEffect: AtmosphereEffect,
-    onSetAtmosphereEffect: (AtmosphereEffect) -> Unit
+    onSetAtmosphereEffect: (AtmosphereEffect) -> Unit,
+    currentSpaceEffect: SpaceEffect,
+    onSetSpaceEffect: (SpaceEffect) -> Unit
 ) {
     val items = remember {
         listOf(
@@ -166,6 +173,7 @@ fun OptionsDropDownMenu(
     var showSunLightingOptions by remember { mutableStateOf(false) }
     var showAmbientLightColorOptions by remember { mutableStateOf(false) }
     var showAtmosphereEffectOptions by remember { mutableStateOf(false) }
+    var showSpaceEffectOptions by remember { mutableStateOf(false) }
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest,
@@ -182,6 +190,7 @@ fun OptionsDropDownMenu(
                         "Sun Lighting" -> showSunLightingOptions = true
                         "Ambient Light Color" -> showAmbientLightColorOptions = true
                         "Atmosphere Effect" -> showAtmosphereEffectOptions = true
+                        "Space Effect" -> showSpaceEffectOptions = true
                     }
                 })
         }
@@ -213,6 +222,12 @@ fun OptionsDropDownMenu(
     if (showAtmosphereEffectOptions) {
         AtmosphereEffectOptions(currentAtmosphereEffect, onSetAtmosphereEffect) {
             showAtmosphereEffectOptions = false
+            onDismissRequest()
+        }
+    }
+    if (showSpaceEffectOptions) {
+        SpaceEffectOptions(currentSpaceEffect, onSetSpaceEffect) {
+            showSpaceEffectOptions = false
             onDismissRequest()
         }
     }
@@ -329,6 +344,33 @@ fun AtmosphereEffectOptions(
                 else -> AtmosphereEffect.None
             }
             onSetAtmosphereEffect(atmosphereEffect)
+            onDismissRequest()
+        }
+    )
+}
+
+@Composable
+fun SpaceEffectOptions(
+    currentSpaceEffect: SpaceEffect,
+    onSetSpaceEffect: (SpaceEffect) -> Unit,
+    onDismissRequest: () -> Unit
+) {
+    val spaceEffects = listOf("Transparent", "Stars")
+    DropdownMenuAlertDialog(
+        itemList = spaceEffects,
+        currentSelectedIndex = when (currentSpaceEffect) {
+            SpaceEffect.Transparent -> 0
+            SpaceEffect.Stars -> 1
+        },
+        title = "Select a Space Effect",
+        onDismissRequest = onDismissRequest,
+        onConfirm = {
+            val spaceEffect = when (it) {
+                0 -> SpaceEffect.Transparent
+                1 -> SpaceEffect.Stars
+                else -> SpaceEffect.Transparent
+            }
+            onSetSpaceEffect(spaceEffect)
             onDismissRequest()
         }
     )
