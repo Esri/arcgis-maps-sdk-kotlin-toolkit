@@ -18,10 +18,10 @@
 package com.arcgismaps.toolkit.geocompose
 
 import com.arcgismaps.geometry.Point
+import com.arcgismaps.mapping.view.DeviceOrientation
 import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.LocationToScreenResult
 import com.arcgismaps.mapping.view.ScreenCoordinate
-import com.arcgismaps.mapping.view.DeviceOrientation
 
 /**
  * Used to perform operations on a composable [SceneView].
