@@ -32,6 +32,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.TimeExtent
+import com.arcgismaps.mapping.view.AtmosphereEffect
+import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.CameraController
 import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
@@ -69,14 +71,16 @@ import java.time.Instant
  * @param attributionState specifies the attribution bar's visibility, text changed and layout changed events
  * @param cameraController the [CameraController] to manage the position, orientation, and movement of the camera
  * @param analysisOverlays a collection of analysis overlays that render the results of 3D visual analysis on the composable SceneView
+ * @param atmosphereEffect the effect applied to the scene's atmosphere
  * @param timeExtent the [TimeExtent] used by the composable SceneView
+ * @param onTimeExtentChanged lambda invoked when the composable SceneView's [TimeExtent] is changed
  * @param sunTime the position of the sun in the scene view based on a specific date and time
  * @param sunLighting the type of ambient sunlight and shadows in the scene view
- * @param onTimeExtentChanged lambda invoked when the composable SceneView's [TimeExtent] is changed
  * @param onNavigationChanged lambda invoked when the navigation status of the composable SceneView has changed
  * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the composable SceneView has changed
  * @param onLayerViewStateChanged lambda invoked when the composable SceneView's layer view state is changed
  * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the composable SceneView
+ * @param onCurrentViewpointCameraChanged lambda invoked when the viewpoint camera of the composable SceneView has changed
  * @param onRotate lambda invoked when a user performs a rotation gesture on the composable SceneView
  * @param onScale lambda invoked when a user performs a pinch gesture on the composable SceneView
  * @param onUp lambda invoked when the user removes all their pointers from the composable SceneView
@@ -103,6 +107,7 @@ public fun SceneView(
     attributionState: AttributionState = AttributionState(),
     cameraController: CameraController = GlobeCameraController(),
     analysisOverlays: AnalysisOverlayCollection = rememberAnalysisOverlayCollection(),
+    atmosphereEffect: AtmosphereEffect = AtmosphereEffect.HorizonOnly,
     timeExtent: TimeExtent? = null,
     onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
     sunTime: Instant = Instant.parse("2000-09-22T12:00:00Z"),
@@ -111,6 +116,7 @@ public fun SceneView(
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
     onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)? = null,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
+    onCurrentViewpointCameraChanged: ((camera: Camera) -> Unit)? = null,
     onRotate: ((RotationChangeEvent) -> Unit)? = null,
     onScale: ((ScaleChangeEvent) -> Unit)? = null,
     onUp: ((UpEvent) -> Unit)? = null,
@@ -136,6 +142,7 @@ public fun SceneView(
             it.selectionProperties = selectionProperties
             it.setTimeExtent(timeExtent)
             it.cameraController = cameraController
+            it.atmosphereEffect = atmosphereEffect
             it.sunTime = sunTime
             it.sunLighting = sunLighting
         })
@@ -170,6 +177,7 @@ public fun SceneView(
         onSpatialReferenceChanged,
         onLayerViewStateChanged,
         onInteractingChanged,
+        onCurrentViewpointCameraChanged,
         onRotate,
         onScale,
         onUp,
@@ -246,6 +254,7 @@ private fun SceneViewEventHandler(
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)?,
     onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)?,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)?,
+    onCurrentViewpointCameraChanged: ((camera: Camera) -> Unit)?,
     onRotate: ((RotationChangeEvent) -> Unit)?,
     onScale: ((ScaleChangeEvent) -> Unit)?,
     onUp: ((UpEvent) -> Unit)?,
@@ -262,6 +271,7 @@ private fun SceneViewEventHandler(
     val currentOnSpatialReferenceChanged by rememberUpdatedState(onSpatialReferenceChanged)
     val currentOnLayerViewStateChanged by rememberUpdatedState(onLayerViewStateChanged)
     val currentOnInteractingChanged by rememberUpdatedState(onInteractingChanged)
+    val currentOnViewpointCameraChanged by rememberUpdatedState(onCurrentViewpointCameraChanged)
     val currentOnRotate by rememberUpdatedState(onRotate)
     val currentOnScale by rememberUpdatedState(onScale)
     val currentOnUp by rememberUpdatedState(onUp)
@@ -292,6 +302,11 @@ private fun SceneViewEventHandler(
         launch {
             sceneView.layerViewStateChanged.collect { currentLayerViewState ->
                 currentOnLayerViewStateChanged?.invoke(currentLayerViewState)
+            }
+        }
+        launch {
+            sceneView.viewpointChanged.collect {
+                currentOnViewpointCameraChanged?.invoke(sceneView.getCurrentViewpointCamera())
             }
         }
         launch(Dispatchers.Main.immediate) {
