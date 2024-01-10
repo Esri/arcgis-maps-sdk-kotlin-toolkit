@@ -51,6 +51,7 @@ import com.arcgismaps.mapping.view.SceneView
 import com.arcgismaps.mapping.view.SceneViewInteractionOptions
 import com.arcgismaps.mapping.view.SelectionProperties
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
+import com.arcgismaps.mapping.view.SpaceEffect
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
@@ -75,6 +76,7 @@ import java.time.Instant
  * @param atmosphereEffect the effect applied to the scene's atmosphere
  * @param timeExtent the [TimeExtent] used by the composable SceneView
  * @param onTimeExtentChanged lambda invoked when the composable SceneView's [TimeExtent] is changed
+ * @param spaceEffect the visual effect of outer space in the composable SceneView
  * @param sunTime the position of the sun in the scene view based on a specific date and time
  * @param sunLighting the type of ambient sunlight and shadows in the scene view
  * @param ambientLightColor the color of the composable SceneView's ambient light.
@@ -111,6 +113,7 @@ public fun SceneView(
     atmosphereEffect: AtmosphereEffect = AtmosphereEffect.HorizonOnly,
     timeExtent: TimeExtent? = null,
     onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
+    spaceEffect: SpaceEffect = SpaceEffect.Stars,
     sunTime: Instant = Instant.parse("2000-09-22T12:00:00Z"),
     sunLighting: LightingMode = LightingMode.NoLight,
     ambientLightColor: Color = Color(220, 220, 220, 255),
@@ -145,6 +148,7 @@ public fun SceneView(
             it.setTimeExtent(timeExtent)
             it.cameraController = cameraController
             it.atmosphereEffect = atmosphereEffect
+            it.spaceEffect = spaceEffect
             it.sunTime = sunTime
             it.sunLighting = sunLighting
             it.ambientLightColor = com.arcgismaps.Color(ambientLightColor.toArgb())
