@@ -25,12 +25,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.MoreVert
@@ -44,16 +44,23 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
@@ -78,7 +85,8 @@ fun MainScreen() {
     val viewpointOperation = SceneViewpointOperation.SetCamera(camera)
 
     var sunTime by remember { mutableStateOf(Instant.parse("2000-09-22T15:00:00Z")) }
-    var sunLighting: LightingMode by remember { mutableStateOf(LightingMode.NoLight) }
+    var sunLighting: LightingMode by remember { mutableStateOf(LightingMode.LightAndShadows) }
+    var ambientLightColor: Color by remember { mutableStateOf(Color(220, 220, 220, 255)) }
 
     Scaffold(
         topBar = {
@@ -103,7 +111,9 @@ fun MainScreen() {
                         onDismissRequest = { optionsExpanded = false },
                         onSetSunTime = { sunTime = it },
                         currentLightingMode = sunLighting,
-                        onSetSunLighting = { sunLighting = it }
+                        onSetSunLighting = { sunLighting = it },
+                        currentAmbientLightColor = ambientLightColor,
+                        onSetAmbientLightColor = { ambientLightColor = it }
                     )
                 }
             )
@@ -116,7 +126,8 @@ fun MainScreen() {
             arcGISScene = arcGISScene,
             viewpointOperation = viewpointOperation,
             sunTime = sunTime,
-            sunLighting = sunLighting
+            sunLighting = sunLighting,
+            ambientLightColor = ambientLightColor
         )
     }
 }
@@ -131,7 +142,9 @@ fun OptionsDropDownMenu(
     onDismissRequest: (() -> Unit) = {},
     onSetSunTime: (Instant) -> Unit,
     currentLightingMode: LightingMode,
-    onSetSunLighting: (LightingMode) -> Unit
+    onSetSunLighting: (LightingMode) -> Unit,
+    currentAmbientLightColor: Color,
+    onSetAmbientLightColor: (Color) -> Unit
 ) {
     val items = remember {
         listOf(
@@ -144,6 +157,7 @@ fun OptionsDropDownMenu(
     }
     var showSunTimeOptions by remember { mutableStateOf(false) }
     var showSunLightingOptions by remember { mutableStateOf(false) }
+    var showAmbientLightColorOptions by remember { mutableStateOf(false) }
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest,
@@ -158,6 +172,7 @@ fun OptionsDropDownMenu(
                     when (it) {
                         "Sun Time" -> showSunTimeOptions = true
                         "Sun Lighting" -> showSunLightingOptions = true
+                        "Ambient Light Color" -> showAmbientLightColorOptions = true
                     }
                 })
         }
@@ -173,6 +188,14 @@ fun OptionsDropDownMenu(
             setSunLighting = onSetSunLighting
         ) {
             showSunLightingOptions = false
+        }
+    }
+    if (showAmbientLightColorOptions) {
+        AmbientLightColorOptions(
+            currentColor = currentAmbientLightColor,
+            onSetColor = onSetAmbientLightColor
+        ) {
+            showAmbientLightColorOptions = false
         }
     }
 }
@@ -229,60 +252,124 @@ fun SunLightingOptions(
                 Text("Confirm")
             }
         },
+        title = {
+            Text("Select a lighting mode:")
+        },
         text = {
-            Column {
-                Text("Select a lighting mode:")
-                Spacer(modifier = Modifier.height(16.dp))
-                Box(
-                    modifier = Modifier
-                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
-                        .background(MaterialTheme.colorScheme.primaryContainer)
-                        .clickable {
-                            dropdownExpanded = !dropdownExpanded
-                        }
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            getLightingModeName(selectedLightingMode),
-                            modifier = Modifier.padding(8.dp)
-                        )
-                        Icon(
-                            Icons.Default.ArrowDropDown,
-                            "Select Item",
-                            modifier = Modifier.padding(8.dp)
-                        )
+            Box(
+                modifier = Modifier
+                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .clickable {
+                        dropdownExpanded = !dropdownExpanded
                     }
-                }
-                DropdownMenu(
-                    expanded = dropdownExpanded,
-                    onDismissRequest = { dropdownExpanded = false }
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    DropdownMenuItem(
-                        text = { Text(getLightingModeName(LightingMode.NoLight)) },
-                        onClick = {
-                            selectedLightingMode = LightingMode.NoLight
-                            dropdownExpanded = false
-                        }
+                    Text(
+                        getLightingModeName(selectedLightingMode),
+                        modifier = Modifier.padding(8.dp)
                     )
-                    DropdownMenuItem(
-                        text = { Text(getLightingModeName(LightingMode.Light)) },
-                        onClick = {
-                            selectedLightingMode = LightingMode.Light
-                            dropdownExpanded = false
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text(getLightingModeName(LightingMode.LightAndShadows)) },
-                        onClick = {
-                            selectedLightingMode = LightingMode.LightAndShadows
-                            dropdownExpanded = false
-                        }
+                    Icon(
+                        Icons.Default.ArrowDropDown,
+                        "Select Item",
+                        modifier = Modifier.padding(8.dp)
                     )
                 }
             }
+            DropdownMenu(
+                expanded = dropdownExpanded,
+                onDismissRequest = { dropdownExpanded = false }
+            ) {
+                DropdownMenuItem(
+                    text = { Text(getLightingModeName(LightingMode.NoLight)) },
+                    onClick = {
+                        selectedLightingMode = LightingMode.NoLight
+                        dropdownExpanded = false
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text(getLightingModeName(LightingMode.Light)) },
+                    onClick = {
+                        selectedLightingMode = LightingMode.Light
+                        dropdownExpanded = false
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text(getLightingModeName(LightingMode.LightAndShadows)) },
+                    onClick = {
+                        selectedLightingMode = LightingMode.LightAndShadows
+                        dropdownExpanded = false
+                    }
+                )
+            }
         }
     )
+}
+
+@Composable
+fun AmbientLightColorOptions(
+    currentColor: Color,
+    onSetColor: (Color) -> Unit,
+    onDismissRequest: () -> Unit
+) {
+    var r by remember { mutableIntStateOf(currentColor.red.toColorComponentInt()) }
+    var g by remember { mutableIntStateOf(currentColor.green.toColorComponentInt()) }
+    var b by remember { mutableIntStateOf(currentColor.blue.toColorComponentInt()) }
+    var a by remember { mutableIntStateOf(currentColor.alpha.toColorComponentInt()) }
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        confirmButton = {
+            TextButton(onClick = {
+                onSetColor(Color(r, g, b, a)); onDismissRequest()
+            }) {
+                Text("Confirm")
+            }
+        },
+        title = {
+            Text("Input an RGBA color")
+        },
+        text = {
+            Column {
+                RgbaTextField(value = r, onValueChange = { r = it }, label = "Red")
+                RgbaTextField(value = g, onValueChange = { g = it }, label = "Green")
+                RgbaTextField(value = b, onValueChange = { b = it }, label = "Blue")
+                RgbaTextField(value = a, onValueChange = { a = it }, label = "Alpha")
+            }
+        }
+    )
+}
+
+@Composable
+fun RgbaTextField(
+    value: Int,
+    onValueChange: (Int) -> Unit,
+    label: String
+) {
+    val focusManager = LocalFocusManager.current
+    TextField(
+        value = value.toString(),
+        onValueChange = {
+            val valueAsInt = (it.toIntOrNull() ?: 0)
+                .coerceAtLeast(0)
+                .coerceAtMost(255)
+            onValueChange(valueAsInt)
+        },
+        modifier = Modifier
+            .padding(8.dp),
+        label = { Text(label) },
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Decimal,
+            imeAction = ImeAction.Next
+        ),
+        keyboardActions = KeyboardActions {
+            focusManager.moveFocus(FocusDirection.Next)
+        },
+    )
+}
+
+private fun Float.toColorComponentInt(): Int {
+    return (this * 255).toInt()
 }
