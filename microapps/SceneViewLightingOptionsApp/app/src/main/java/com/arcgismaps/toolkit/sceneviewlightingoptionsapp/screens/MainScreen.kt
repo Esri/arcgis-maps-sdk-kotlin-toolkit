@@ -66,6 +66,7 @@ import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.BasemapStyle
+import com.arcgismaps.mapping.view.AtmosphereEffect
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.LightingMode
 import com.arcgismaps.toolkit.geocompose.SceneView
@@ -87,6 +88,7 @@ fun MainScreen() {
     var sunTime by remember { mutableStateOf(Instant.parse("2000-09-22T15:00:00Z")) }
     var sunLighting: LightingMode by remember { mutableStateOf(LightingMode.LightAndShadows) }
     var ambientLightColor: Color by remember { mutableStateOf(Color(220, 220, 220, 255)) }
+    var atmosphereEffect: AtmosphereEffect by remember { mutableStateOf(AtmosphereEffect.HorizonOnly) }
 
     Scaffold(
         topBar = {
@@ -113,7 +115,9 @@ fun MainScreen() {
                         currentLightingMode = sunLighting,
                         onSetSunLighting = { sunLighting = it },
                         currentAmbientLightColor = ambientLightColor,
-                        onSetAmbientLightColor = { ambientLightColor = it }
+                        onSetAmbientLightColor = { ambientLightColor = it },
+                        currentAtmosphereEffect = atmosphereEffect,
+                        onSetAtmosphereEffect = { atmosphereEffect = it }
                     )
                 }
             )
@@ -127,7 +131,8 @@ fun MainScreen() {
             viewpointOperation = viewpointOperation,
             sunTime = sunTime,
             sunLighting = sunLighting,
-            ambientLightColor = ambientLightColor
+            ambientLightColor = ambientLightColor,
+            atmosphereEffect = atmosphereEffect
         )
     }
 }
@@ -144,7 +149,9 @@ fun OptionsDropDownMenu(
     currentLightingMode: LightingMode,
     onSetSunLighting: (LightingMode) -> Unit,
     currentAmbientLightColor: Color,
-    onSetAmbientLightColor: (Color) -> Unit
+    onSetAmbientLightColor: (Color) -> Unit,
+    currentAtmosphereEffect: AtmosphereEffect,
+    onSetAtmosphereEffect: (AtmosphereEffect) -> Unit
 ) {
     val items = remember {
         listOf(
@@ -158,6 +165,7 @@ fun OptionsDropDownMenu(
     var showSunTimeOptions by remember { mutableStateOf(false) }
     var showSunLightingOptions by remember { mutableStateOf(false) }
     var showAmbientLightColorOptions by remember { mutableStateOf(false) }
+    var showAtmosphereEffectOptions by remember { mutableStateOf(false) }
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest,
@@ -173,6 +181,7 @@ fun OptionsDropDownMenu(
                         "Sun Time" -> showSunTimeOptions = true
                         "Sun Lighting" -> showSunLightingOptions = true
                         "Ambient Light Color" -> showAmbientLightColorOptions = true
+                        "Atmosphere Effect" -> showAtmosphereEffectOptions = true
                     }
                 })
         }
@@ -180,6 +189,7 @@ fun OptionsDropDownMenu(
     if (showSunTimeOptions) {
         SunTimeOptions(setTime = onSetSunTime) {
             showSunTimeOptions = false
+            onDismissRequest()
         }
     }
     if (showSunLightingOptions) {
@@ -188,6 +198,7 @@ fun OptionsDropDownMenu(
             setSunLighting = onSetSunLighting
         ) {
             showSunLightingOptions = false
+            onDismissRequest()
         }
     }
     if (showAmbientLightColorOptions) {
@@ -196,6 +207,13 @@ fun OptionsDropDownMenu(
             onSetColor = onSetAmbientLightColor
         ) {
             showAmbientLightColorOptions = false
+            onDismissRequest()
+        }
+    }
+    if (showAtmosphereEffectOptions) {
+        AtmosphereEffectOptions(currentAtmosphereEffect, onSetAtmosphereEffect) {
+            showAtmosphereEffectOptions = false
+            onDismissRequest()
         }
     }
 }
@@ -231,80 +249,25 @@ fun SunLightingOptions(
     setSunLighting: (LightingMode) -> Unit,
     onDismissRequest: () -> Unit
 ) {
-    var dropdownExpanded by remember { mutableStateOf(false) }
-    var selectedLightingMode by remember { mutableStateOf(currentLightingMode) }
-    val getLightingModeName: (LightingMode) -> String = remember {
-        {
-            when (it) {
-                LightingMode.NoLight -> "No Light"
-                LightingMode.Light -> "Light"
-                LightingMode.LightAndShadows -> "Light and Shadows"
-            }
-        }
-    }
-    AlertDialog(
+    val lightingModes = listOf("No Light", "Light", "Light and Shadows")
+    DropdownMenuAlertDialog(
+        itemList = lightingModes,
+        currentSelectedIndex = when (currentLightingMode) {
+            LightingMode.NoLight -> 0
+            LightingMode.Light -> 1
+            LightingMode.LightAndShadows -> 2
+        },
+        title = "Select a lighting mode",
         onDismissRequest = onDismissRequest,
-        confirmButton = {
-            TextButton(onClick = {
-                setSunLighting(selectedLightingMode)
-                onDismissRequest()
-            }) {
-                Text("Confirm")
+        onConfirm = {
+            val lightingMode = when (it) {
+                0 -> LightingMode.NoLight
+                1 -> LightingMode.Light
+                2 -> LightingMode.LightAndShadows
+                else -> LightingMode.NoLight
             }
-        },
-        title = {
-            Text("Select a lighting mode:")
-        },
-        text = {
-            Box(
-                modifier = Modifier
-                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
-                    .background(MaterialTheme.colorScheme.primaryContainer)
-                    .clickable {
-                        dropdownExpanded = !dropdownExpanded
-                    }
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        getLightingModeName(selectedLightingMode),
-                        modifier = Modifier.padding(8.dp)
-                    )
-                    Icon(
-                        Icons.Default.ArrowDropDown,
-                        "Select Item",
-                        modifier = Modifier.padding(8.dp)
-                    )
-                }
-            }
-            DropdownMenu(
-                expanded = dropdownExpanded,
-                onDismissRequest = { dropdownExpanded = false }
-            ) {
-                DropdownMenuItem(
-                    text = { Text(getLightingModeName(LightingMode.NoLight)) },
-                    onClick = {
-                        selectedLightingMode = LightingMode.NoLight
-                        dropdownExpanded = false
-                    }
-                )
-                DropdownMenuItem(
-                    text = { Text(getLightingModeName(LightingMode.Light)) },
-                    onClick = {
-                        selectedLightingMode = LightingMode.Light
-                        dropdownExpanded = false
-                    }
-                )
-                DropdownMenuItem(
-                    text = { Text(getLightingModeName(LightingMode.LightAndShadows)) },
-                    onClick = {
-                        selectedLightingMode = LightingMode.LightAndShadows
-                        dropdownExpanded = false
-                    }
-                )
-            }
+            setSunLighting(lightingMode)
+            onDismissRequest()
         }
     )
 }
@@ -337,6 +300,100 @@ fun AmbientLightColorOptions(
                 RgbaTextField(value = g, onValueChange = { g = it }, label = "Green")
                 RgbaTextField(value = b, onValueChange = { b = it }, label = "Blue")
                 RgbaTextField(value = a, onValueChange = { a = it }, label = "Alpha")
+            }
+        }
+    )
+}
+
+@Composable
+fun AtmosphereEffectOptions(
+    currentAtmosphereEffect: AtmosphereEffect,
+    onSetAtmosphereEffect: (AtmosphereEffect) -> Unit,
+    onDismissRequest: () -> Unit
+) {
+    val atmosphereEffects = listOf("None", "Horizon Only", "Realistic")
+    DropdownMenuAlertDialog(
+        itemList = atmosphereEffects,
+        currentSelectedIndex = when (currentAtmosphereEffect) {
+            AtmosphereEffect.None -> 0
+            AtmosphereEffect.HorizonOnly -> 1
+            AtmosphereEffect.Realistic -> 2
+        },
+        title = "Select an Atmosphere Effect",
+        onDismissRequest = onDismissRequest,
+        onConfirm = {
+            val atmosphereEffect = when (it) {
+                0 -> AtmosphereEffect.None
+                1 -> AtmosphereEffect.HorizonOnly
+                2 -> AtmosphereEffect.Realistic
+                else -> AtmosphereEffect.None
+            }
+            onSetAtmosphereEffect(atmosphereEffect)
+            onDismissRequest()
+        }
+    )
+}
+
+@Composable
+fun DropdownMenuAlertDialog(
+    itemList: List<String>,
+    currentSelectedIndex: Int,
+    title: String,
+    onDismissRequest: () -> Unit,
+    onConfirm: (Int) -> Unit
+) {
+    var dropdownExpanded by remember { mutableStateOf(false) }
+    var selectedIndex by remember { mutableIntStateOf(currentSelectedIndex) }
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        confirmButton = {
+            TextButton(onClick = {
+                onConfirm(selectedIndex)
+            }) {
+                Text("Confirm")
+            }
+        },
+        title = {
+            Text(title)
+        },
+        text = {
+            Box(
+                modifier = Modifier
+                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .clickable {
+                        dropdownExpanded = !dropdownExpanded
+                    }
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        itemList[selectedIndex] ?: "Unexpected index",
+                        modifier = Modifier.padding(8.dp)
+                    )
+                    Icon(
+                        Icons.Default.ArrowDropDown,
+                        "Select Item",
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
+            }
+            DropdownMenu(
+                expanded = dropdownExpanded,
+                onDismissRequest = { dropdownExpanded = false }
+            ) {
+                itemList.forEachIndexed { idx, name ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(name)
+                        },
+                        onClick = {
+                            selectedIndex = idx
+                            dropdownExpanded = false
+                        })
+                }
             }
         }
     )
