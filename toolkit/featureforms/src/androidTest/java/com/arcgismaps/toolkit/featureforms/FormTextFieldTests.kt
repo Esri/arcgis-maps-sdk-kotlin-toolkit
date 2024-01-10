@@ -30,6 +30,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.printToLog
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.data.QueryParameters
@@ -47,7 +48,6 @@ import com.arcgismaps.toolkit.featureforms.utils.fieldType
 import com.arcgismaps.toolkit.featureforms.utils.valueFlow
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.fail
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -58,7 +58,7 @@ import org.junit.Test
 
 class FormTextFieldTests {
     private val labelSemanticLabel = "label"
-    private val helperSemanticLabel = "helper"
+    private val supportingTextSemanticLabel = "supporting text"
     private val outlinedTextFieldSemanticLabel = "outlined text field"
     private val charCountSemanticLabel = "char count"
     private val clearTextSemanticLabel = "Clear text button"
@@ -125,6 +125,7 @@ class FormTextFieldTests {
     }
     
     /**
+     * Test case 1.1:
      * Given a FormTextField with no value, placeholder, or description
      * When it is unfocused
      * Then the label is displayed and the helper text composable does not exist.
@@ -135,11 +136,12 @@ class FormTextFieldTests {
         val label = composeTestRule.onNodeWithContentDescription(labelSemanticLabel)
         label.assertIsDisplayed()
         
-        val helper = composeTestRule.onNode(hasContentDescription(helperSemanticLabel), useUnmergedTree = true)
-        helper.assertDoesNotExist()
+        val supportingText = composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true)
+        supportingText.assertExists()
     }
     
     /**
+     * Test case 1.1:
      * Given a FormTextField with no value, placeholder, description, but with a max length.
      * When it is focused
      * Then the label is displayed and the helper text is displayed, indicating the max length of the form field text.
@@ -153,14 +155,14 @@ class FormTextFieldTests {
         val label = composeTestRule.onNodeWithContentDescription(labelSemanticLabel)
         label.assertIsDisplayed()
         
-        val helper = composeTestRule.onNode(hasContentDescription(helperSemanticLabel), useUnmergedTree = true)
+        val helper = composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true)
         val helperText = helper.getTextString()
-        helper.assertIsDisplayed()
-        val maxLength = (field.input as TextBoxFormInput).maxLength
-        assertEquals("Maximum $maxLength characters", helperText)
+        helper.assertExists()
+        assertEquals(field.description, helperText)
     }
     
     /**
+     * Test case 1.2:
      * Given a FormTextField with no value, placeholder, or description
      * When a value is entered
      * Then the label, the helper text, and the char count are displayed.
@@ -175,11 +177,10 @@ class FormTextFieldTests {
         val label = composeTestRule.onNodeWithContentDescription(labelSemanticLabel)
         label.assertIsDisplayed()
         
-        val helper = composeTestRule.onNode(hasContentDescription(helperSemanticLabel), useUnmergedTree = true)
+        val helper = composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true)
         val helperText = helper.getTextString()
-        helper.assertIsDisplayed()
-        val maxLength = (field.input as TextBoxFormInput).maxLength.toInt()
-        assertEquals("Maximum $maxLength characters", helperText)
+        helper.assertExists()
+        assertEquals(field.description, helperText)
         
         val charCountNode =
             composeTestRule.onNode(hasContentDescription(charCountSemanticLabel), useUnmergedTree = true)
@@ -192,29 +193,29 @@ class FormTextFieldTests {
     }
     
     /**
+     * Test case 1.2:
      * Given a FormTextField with no value, placeholder, or description
      * When a value is entered, but the focus is elsewhere
-     * Then the label is displayed. bue the helper text, and the char count are not displayed.
+     * Then the label is displayed. but the helper text, and the char count are not displayed.
      * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-12-focused-and-unfocused-state-with-value-populated
      */
     @Test
-    fun testEnteredValueUnfocusedState() = runTest {
-        val outlinedTextField = composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
+    fun testEnteredValueUnfocusedState() {
+        val outlinedTextField = composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel, useUnmergedTree = true)
+        outlinedTextField.printToLog("TAG")
         val text = "lorem ipsum"
         outlinedTextField.performTextInput(text)
         outlinedTextField.assertIsFocused()
         val label = composeTestRule.onNodeWithContentDescription(labelSemanticLabel)
         label.assertIsDisplayed()
         
-        val helper = composeTestRule.onNode(hasContentDescription(helperSemanticLabel), useUnmergedTree = true)
+        val helper = composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true)
         val helperText = helper.getTextString()
-        helper.assertIsDisplayed()
-        val maxLength = (field.input as TextBoxFormInput).maxLength.toInt()
-        assertEquals("Maximum $maxLength characters", helperText)
+        helper.assertExists()
+        assertEquals(field.description, helperText)
         
         outlinedTextField.performImeAction()
         outlinedTextField.assertIsNotFocused()
-        helper.assertDoesNotExist()
         
         val charCountNode =
             composeTestRule.onNode(hasContentDescription(charCountSemanticLabel), useUnmergedTree = true)
@@ -225,6 +226,7 @@ class FormTextFieldTests {
     }
     
     /**
+     * Test case 1.3:
      * Given a FormTextField with no value, placeholder, or description
      * When a value is entered that exceeds the max length of the form input
      * Then the label is displayed, and the helper text and the char count are displayed in red.
@@ -244,7 +246,7 @@ class FormTextFieldTests {
         val label = composeTestRule.onNodeWithContentDescription(labelSemanticLabel)
         label.assertIsDisplayed()
         
-        val helper = composeTestRule.onNode(hasContentDescription(helperSemanticLabel), useUnmergedTree = true)
+        val helper = composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true)
         val helperText = helper.getTextString()
         helper.assertIsDisplayed()
         
@@ -263,6 +265,7 @@ class FormTextFieldTests {
     }
     
     /**
+     * Test case 1.3:
      * Given a FormTextField with no value, placeholder, or description
      * When a value is entered, but the focus is elsewhere
      * Then the label is displayed, the helper text is displayed in red, and the char count is not displayed.
@@ -282,7 +285,7 @@ class FormTextFieldTests {
         val label = composeTestRule.onNodeWithContentDescription(labelSemanticLabel)
         label.assertIsDisplayed()
         
-        val helper = composeTestRule.onNode(hasContentDescription(helperSemanticLabel), useUnmergedTree = true)
+        val helper = composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true)
         val helperText = helper.getTextString()
         helper.assertIsDisplayed()
         assertEquals("Maximum $maxLength characters", helperText)

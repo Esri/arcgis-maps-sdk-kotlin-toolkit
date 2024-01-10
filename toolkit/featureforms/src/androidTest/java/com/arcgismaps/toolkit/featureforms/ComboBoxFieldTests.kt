@@ -50,7 +50,7 @@ import org.junit.Rule
 import org.junit.Test
 
 class ComboBoxFieldTests {
-    private val descriptionSemanticLabel = "helper"
+    private val descriptionSemanticLabel = "supporting text"
     private val clearTextSemanticLabel = "Clear text button"
     private val optionsIconSemanticLabel = "field icon"
     private val comboBoxDialogListSemanticLabel = "ComboBoxDialogLazyColumn"
@@ -96,8 +96,7 @@ class ComboBoxFieldTests {
      * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-31-pre-existing-value-description-clear-button-no-value-label
      */
     @Test
-    fun testClearValueNoValueLabel() = runTest {
-        featureForm.evaluateExpressions().exceptionOrNull()
+    fun testClearValueNoValueLabel() {
         val formElement = getFormElementWithLabel("Combo String")
         val input = formElement.input as ComboBoxFormInput
         // find the field with the the label
@@ -114,7 +113,7 @@ class ComboBoxFieldTests {
         }
         // validate that the pre-populated value shown shown in accurate and as expected
         // assertTextEquals matches the Text(the label) and Editable Text (the actual editable input text)
-        comboBoxField.assertTextEquals(formElement.label, formElement.value.value.toString())
+        comboBoxField.assertTextEquals(formElement.label, formElement.formattedValue)
         // find the clear text node within its children
         val clearButton = comboBoxField.onChildWithContentDescription(clearTextSemanticLabel)
         // validate the clear icon is visible
@@ -193,7 +192,7 @@ class ComboBoxFieldTests {
         }
         // validate that the pre-populated value shown shown in accurate and as expected
         // assertTextEquals matches the Text(the label) and Editable Text (the actual editable input text)
-        comboBoxField.assertTextEquals(formElement.label, formElement.value.value.toString())
+        comboBoxField.assertTextEquals(formElement.label, formElement.formattedValue)
         // tap the value to bring up the picker
         comboBoxField.performClick()
         // find the dialog

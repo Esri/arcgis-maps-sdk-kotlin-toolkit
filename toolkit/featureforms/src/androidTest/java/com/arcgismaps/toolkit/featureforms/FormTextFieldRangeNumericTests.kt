@@ -48,7 +48,7 @@ import org.junit.Test
  * Tests for FormTextFields whose backing FormFeatureElement is associated with a numeric field and attribute type.
  */
 class FormTextFieldRangeNumericTests {
-    private val helperSemanticLabel = "helper"
+    private val supportingTextSemanticLabel = "supporting text"
     private val outlinedTextFieldSemanticLabel = "outlined text field"
     
     private val featureForm by lazy {
@@ -106,7 +106,7 @@ class FormTextFieldRangeNumericTests {
         val outlinedTextField = composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
         val text = "9"
         outlinedTextField.performTextInput(text)
-        val helper = composeTestRule.onNode(hasContentDescription(helperSemanticLabel), useUnmergedTree = true)
+        val helper = composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true)
         val helperText = helper.getTextString()
         helper.assertIsDisplayed()
         TestCase.assertEquals("Enter value from 1 to 7", helperText)
