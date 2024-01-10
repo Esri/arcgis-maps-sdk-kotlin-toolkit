@@ -24,6 +24,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.semantics.contentDescription
@@ -75,6 +77,7 @@ import java.time.Instant
  * @param onTimeExtentChanged lambda invoked when the composable SceneView's [TimeExtent] is changed
  * @param sunTime the position of the sun in the scene view based on a specific date and time
  * @param sunLighting the type of ambient sunlight and shadows in the scene view
+ * @param ambientLightColor the color of the composable SceneView's ambient light.
  * @param onNavigationChanged lambda invoked when the navigation status of the composable SceneView has changed
  * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the composable SceneView has changed
  * @param onLayerViewStateChanged lambda invoked when the composable SceneView's layer view state is changed
@@ -110,6 +113,7 @@ public fun SceneView(
     onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
     sunTime: Instant = Instant.parse("2000-09-22T12:00:00Z"),
     sunLighting: LightingMode = LightingMode.NoLight,
+    ambientLightColor: Color = Color(220, 220, 220, 255),
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
     onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)? = null,
@@ -143,6 +147,7 @@ public fun SceneView(
             it.atmosphereEffect = atmosphereEffect
             it.sunTime = sunTime
             it.sunLighting = sunLighting
+            it.ambientLightColor = com.arcgismaps.Color(ambientLightColor.toArgb())
         })
 
     DisposableEffect(Unit) {
