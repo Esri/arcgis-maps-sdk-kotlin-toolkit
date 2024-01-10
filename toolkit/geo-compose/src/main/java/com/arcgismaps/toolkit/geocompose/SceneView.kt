@@ -200,6 +200,42 @@ private fun ViewpointUpdater(
 }
 
 /**
+ * Update the view-based [SceneView]'s analysisOverlays property to reflect changes made to the
+ * [analysisOverlayCollection] based on the type of [AnalysisOverlayCollection.ChangedEvent]
+ *
+ * @since 200.4.0
+ */
+@Composable
+internal fun AnalysisOverlaysUpdater(
+    analysisOverlayCollection: AnalysisOverlayCollection,
+    sceneView: SceneView
+) {
+    LaunchedEffect(analysisOverlayCollection) {
+        // sync up the GeoView with the new graphics overlays
+        sceneView.analysisOverlays.clear()
+        analysisOverlayCollection.forEach {
+            sceneView.analysisOverlays.add(it)
+        }
+        // start observing analysisOverlays for subsequent changes
+        analysisOverlayCollection.changed.collect { changedEvent ->
+            when (changedEvent) {
+                // On AnalysisOverlay added:
+                is AnalysisOverlayCollection.ChangedEvent.Added ->
+                    sceneView.analysisOverlays.add(changedEvent.element)
+
+                // On AnalysisOverlay removed:
+                is AnalysisOverlayCollection.ChangedEvent.Removed ->
+                    sceneView.analysisOverlays.remove(changedEvent.element)
+
+                // On AnalysisOverlays cleared:
+                is AnalysisOverlayCollection.ChangedEvent.Cleared ->
+                    sceneView.analysisOverlays.clear()
+            }
+        }
+    }
+}
+
+/**
  * Sets up the callbacks for all the view-based [sceneView] events.
  */
 @Composable
