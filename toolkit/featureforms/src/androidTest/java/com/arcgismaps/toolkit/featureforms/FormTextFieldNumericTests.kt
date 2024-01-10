@@ -113,10 +113,9 @@ class FormTextFieldNumericTests {
         val outlinedTextField = composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
         val text = "lorem ipsum"
         outlinedTextField.performTextInput(text)
-        val helper = composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true)
-        val helperText = helper.getTextString()
-        helper.assertIsDisplayed()
-        TestCase.assertEquals("Value must be a whole number", helperText)
+        val supportingText = composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true)
+        supportingText.assertIsDisplayed()
+        TestCase.assertEquals("Value must be a whole number", supportingText.getTextString())
     }
     
     /**
@@ -158,10 +157,9 @@ class FormTextFieldNumericTests {
         val outlinedTextField = composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
         val text = "lorem ipsum"
         outlinedTextField.performTextInput(text)
-        val helper = composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true)
-        val helperText = helper.getTextString()
-        helper.assertIsDisplayed()
-        TestCase.assertEquals("Value must be a number", helperText)
+        val supportingText = composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true)
+        supportingText.assertIsDisplayed()
+        TestCase.assertEquals("Value must be a number", supportingText.getTextString())
     }
     
     companion object {

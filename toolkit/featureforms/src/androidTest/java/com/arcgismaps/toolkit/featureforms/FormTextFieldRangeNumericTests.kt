@@ -106,10 +106,9 @@ class FormTextFieldRangeNumericTests {
         val outlinedTextField = composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
         val text = "9"
         outlinedTextField.performTextInput(text)
-        val helper = composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true)
-        val helperText = helper.getTextString()
-        helper.assertIsDisplayed()
-        TestCase.assertEquals("Enter value from 1 to 7", helperText)
+        val supportingText = composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true)
+        supportingText.assertIsDisplayed()
+        TestCase.assertEquals("Enter value from 1 to 7", supportingText.getTextString())
     }
     
     companion object {

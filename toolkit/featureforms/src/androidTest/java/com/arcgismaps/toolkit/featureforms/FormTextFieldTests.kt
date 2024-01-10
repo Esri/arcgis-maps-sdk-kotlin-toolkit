@@ -155,10 +155,9 @@ class FormTextFieldTests {
         val label = composeTestRule.onNodeWithContentDescription(labelSemanticLabel)
         label.assertIsDisplayed()
         
-        val helper = composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true)
-        val helperText = helper.getTextString()
-        helper.assertExists()
-        assertEquals(field.description, helperText)
+        val supportingText = composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true)
+        supportingText.assertExists()
+        assertEquals(field.description, supportingText.getTextString())
     }
     
     /**
@@ -177,10 +176,9 @@ class FormTextFieldTests {
         val label = composeTestRule.onNodeWithContentDescription(labelSemanticLabel)
         label.assertIsDisplayed()
         
-        val helper = composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true)
-        val helperText = helper.getTextString()
-        helper.assertExists()
-        assertEquals(field.description, helperText)
+        val supportingText = composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true)
+        supportingText.assertExists()
+        assertEquals(field.description, supportingText.getTextString())
         
         val charCountNode =
             composeTestRule.onNode(hasContentDescription(charCountSemanticLabel), useUnmergedTree = true)
@@ -209,10 +207,9 @@ class FormTextFieldTests {
         val label = composeTestRule.onNodeWithContentDescription(labelSemanticLabel)
         label.assertIsDisplayed()
         
-        val helper = composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true)
-        val helperText = helper.getTextString()
-        helper.assertExists()
-        assertEquals(field.description, helperText)
+        val supportingText = composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true)
+        supportingText.assertExists()
+        assertEquals(field.description, supportingText.getTextString())
         
         outlinedTextField.performImeAction()
         outlinedTextField.assertIsNotFocused()
@@ -246,12 +243,11 @@ class FormTextFieldTests {
         val label = composeTestRule.onNodeWithContentDescription(labelSemanticLabel)
         label.assertIsDisplayed()
         
-        val helper = composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true)
-        val helperText = helper.getTextString()
-        helper.assertIsDisplayed()
+        val supportingText = composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true)
+        supportingText.assertIsDisplayed()
         
-        assertEquals("Maximum $maxLength characters", helperText)
-        helper.assertTextColor(errorTextColor)
+        assertEquals("Maximum $maxLength characters", supportingText.getTextString())
+        supportingText.assertTextColor(errorTextColor)
         
         val charCountNode =
             composeTestRule.onNode(hasContentDescription(charCountSemanticLabel), useUnmergedTree = true)
@@ -285,14 +281,13 @@ class FormTextFieldTests {
         val label = composeTestRule.onNodeWithContentDescription(labelSemanticLabel)
         label.assertIsDisplayed()
         
-        val helper = composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true)
-        val helperText = helper.getTextString()
-        helper.assertIsDisplayed()
-        assertEquals("Maximum $maxLength characters", helperText)
+        val supportingText = composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true)
+        supportingText.assertIsDisplayed()
+        assertEquals("Maximum $maxLength characters", supportingText.getTextString())
         
         outlinedTextField.performImeAction()
         outlinedTextField.assertIsNotFocused()
-        helper.assertTextColor(errorTextColor)
+        supportingText.assertTextColor(errorTextColor)
         
         val charCountNode =
             composeTestRule.onNode(hasContentDescription(charCountSemanticLabel), useUnmergedTree = true)
