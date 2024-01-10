@@ -18,17 +18,17 @@
 
 package com.arcgismaps.toolkit.sceneviewlightingoptionsapp.screens
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -44,25 +44,21 @@ import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.toolkit.geocompose.SceneView
-import com.arcgismaps.toolkit.geocompose.SceneViewProxy
 import com.arcgismaps.toolkit.geocompose.SceneViewpointOperation
-import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
     val arcGISScene = remember { ArcGISScene(BasemapStyle.ArcGISImagery) }
-    val camera = Camera(Point(-73.0815, -49.3272, 4059.0, SpatialReference.wgs84()), 11.0, 62.0, 0.0)
-// start up a long animation so we can test renderFrame
-    var viewpointOperation by remember { mutableStateOf<SceneViewpointOperation?>(SceneViewpointOperation.AnimateCamera(camera, 120.0.seconds)) }
-    val sceneViewProxy = remember {
-        SceneViewProxy()
+    val sofia = remember {
+        Point(23.321736, 42.697703, SpatialReference.wgs84())
     }
-    var checked by remember { mutableStateOf(false) }
+    val camera = remember { Camera(sofia, 10000.0, 0.0, 80.0, 0.0) }
+    val viewpointOperation = SceneViewpointOperation.SetCamera(camera)
 
     Scaffold(
         topBar = {
-            var actionsExpanded by remember { mutableStateOf(false) }
+            var optionsExpanded by remember { mutableStateOf(false) }
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -72,19 +68,16 @@ fun MainScreen() {
                     Text("SceneView Lighting Options App")
                 },
                 actions = {
-                    Column {
-                        Switch(
-                            checked,
-                            onCheckedChange = {
-                                checked = it
-                            }
-                        )
-                    }
                     IconButton(
                         onClick = {
+                            optionsExpanded = !optionsExpanded
                         }) {
-                        Icon(Icons.Default.Refresh, "Refresh")
+                        Icon(Icons.Default.MoreVert, "More")
                     }
+                    OptionsDropDownMenu(
+                        expanded = optionsExpanded,
+                        onDismissRequest = { optionsExpanded = false }
+                    )
                 }
             )
         },
@@ -94,8 +87,41 @@ fun MainScreen() {
                 .padding(innerPadding)
                 .fillMaxSize(),
             arcGISScene = arcGISScene,
-            viewpointOperation = viewpointOperation,
-            sceneViewProxy = sceneViewProxy,
+            viewpointOperation = viewpointOperation
         )
+    }
+}
+
+/**
+ * A drop down menu providing auto pan options for which settings to change.
+ */
+@Composable
+fun OptionsDropDownMenu(
+    modifier: Modifier = Modifier,
+    expanded: Boolean = false,
+    onDismissRequest: (() -> Unit) = {}
+) {
+    val items = remember {
+        listOf(
+            "Sun Time",
+            "Sun Lighting",
+            "Ambient Light Color",
+            "Atmosphere Effect",
+            "Space Effect"
+        )
+    }
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+        modifier = modifier
+    ) {
+        items.forEach {
+            DropdownMenuItem(
+                text = {
+                    Text(text = it)
+                },
+                onClick = {
+                })
+        }
     }
 }
