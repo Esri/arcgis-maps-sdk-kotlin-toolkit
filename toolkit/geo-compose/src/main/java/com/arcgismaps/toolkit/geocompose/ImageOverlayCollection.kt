@@ -20,7 +20,6 @@ package com.arcgismaps.toolkit.geocompose
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.remember
 import com.arcgismaps.mapping.view.ImageOverlay
 import com.arcgismaps.mapping.view.SceneView
 import kotlinx.coroutines.channels.BufferOverflow
@@ -29,7 +28,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 
 /**
- * A collection class to encapsulate the [ImageOverlay] list used by the [com.arcgismaps.toolkit.geocompose.MapView]
+ * A collection class to encapsulate the [ImageOverlay] list used by the [com.arcgismaps.toolkit.geocompose.SceneView]
  *
  * @since 200.4.0
  */
@@ -97,7 +96,7 @@ public class ImageOverlayCollection : Iterable<ImageOverlay> {
     }
 
     /**
-     * Sealed class used to notify the compose MapView to update the GraphicOverlays on the
+     * Sealed class used to notify the compose SceneView to update the ImageOverlays on the
      * type of [ChangedEvent].
      *
      * @since 200.4.0
@@ -109,9 +108,8 @@ public class ImageOverlayCollection : Iterable<ImageOverlay> {
     }
 }
 
-
 /**
- * Update the view-based [geoView]'s imageOverlays property to reflect changes made to the
+ * Update the view-based [SceneView]'s imageOverlays property to reflect changes made to the
  * [imageOverlayCollection] based on the type of [ImageOverlayCollection.ChangedEvent]
  *
  * @since 200.4.0
@@ -122,7 +120,7 @@ internal fun ImageOverlaysUpdater(
     sceneView: SceneView
 ) {
     LaunchedEffect(imageOverlayCollection) {
-        // sync up the GeoView with the new graphics overlays
+        // sync up the GeoView with the new image overlays
         sceneView.imageOverlays.clear()
         imageOverlayCollection.forEach {
             sceneView.imageOverlays.add(it)

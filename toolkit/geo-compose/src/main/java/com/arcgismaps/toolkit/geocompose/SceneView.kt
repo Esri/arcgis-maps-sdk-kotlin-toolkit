@@ -68,7 +68,7 @@ import java.time.Instant
  * @param selectionProperties the [SelectionProperties] used by the composable SceneView
  * @param attributionState specifies the attribution bar's visibility, text changed and layout changed events
  * @param cameraController the [CameraController] to manage the position, orientation, and movement of the camera
- * @param imageOverlays a collection of overlays for displaying images in the SceneView
+ * @param imageOverlays a collection of overlays for displaying images in the composable SceneView
  * @param timeExtent the [TimeExtent] used by the composable SceneView
  * @param sunTime the position of the sun in the scene view based on a specific date and time
  * @param sunLighting the type of ambient sunlight and shadows in the scene view
