@@ -18,9 +18,21 @@
 
 package com.arcgismaps.toolkit.sceneviewlightingoptionsapp.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
@@ -42,11 +54,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.view.Camera
+import com.arcgismaps.mapping.view.LightingMode
 import com.arcgismaps.toolkit.geocompose.SceneView
 import com.arcgismaps.toolkit.geocompose.SceneViewpointOperation
 import java.time.Instant
@@ -64,6 +78,7 @@ fun MainScreen() {
     val viewpointOperation = SceneViewpointOperation.SetCamera(camera)
 
     var sunTime by remember { mutableStateOf(Instant.parse("2000-09-22T15:00:00Z")) }
+    var sunLighting: LightingMode by remember { mutableStateOf(LightingMode.NoLight) }
 
     Scaffold(
         topBar = {
@@ -86,7 +101,9 @@ fun MainScreen() {
                     OptionsDropDownMenu(
                         expanded = optionsExpanded,
                         onDismissRequest = { optionsExpanded = false },
-                        onSetSunTime = { sunTime = it }
+                        onSetSunTime = { sunTime = it },
+                        currentLightingMode = sunLighting,
+                        onSetSunLighting = { sunLighting = it }
                     )
                 }
             )
@@ -98,7 +115,8 @@ fun MainScreen() {
                 .fillMaxSize(),
             arcGISScene = arcGISScene,
             viewpointOperation = viewpointOperation,
-            sunTime = sunTime
+            sunTime = sunTime,
+            sunLighting = sunLighting
         )
     }
 }
@@ -111,7 +129,9 @@ fun OptionsDropDownMenu(
     modifier: Modifier = Modifier,
     expanded: Boolean = false,
     onDismissRequest: (() -> Unit) = {},
-    onSetSunTime: (Instant) -> Unit
+    onSetSunTime: (Instant) -> Unit,
+    currentLightingMode: LightingMode,
+    onSetSunLighting: (LightingMode) -> Unit
 ) {
     val items = remember {
         listOf(
@@ -123,6 +143,7 @@ fun OptionsDropDownMenu(
         )
     }
     var showSunTimeOptions by remember { mutableStateOf(false) }
+    var showSunLightingOptions by remember { mutableStateOf(false) }
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest,
@@ -136,6 +157,7 @@ fun OptionsDropDownMenu(
                 onClick = {
                     when (it) {
                         "Sun Time" -> showSunTimeOptions = true
+                        "Sun Lighting" -> showSunLightingOptions = true
                     }
                 })
         }
@@ -143,6 +165,14 @@ fun OptionsDropDownMenu(
     if (showSunTimeOptions) {
         SunTimeOptions(setTime = onSetSunTime) {
             showSunTimeOptions = false
+        }
+    }
+    if (showSunLightingOptions) {
+        SunLightingOptions(
+            currentLightingMode = currentLightingMode,
+            setSunLighting = onSetSunLighting
+        ) {
+            showSunLightingOptions = false
         }
     }
 }
@@ -168,6 +198,91 @@ fun SunTimeOptions(setTime: (Instant) -> Unit, onDismissRequest: () -> Unit) {
         },
         text = {
             TimePicker(state = timePickerState)
+        }
+    )
+}
+
+@Composable
+fun SunLightingOptions(
+    currentLightingMode: LightingMode,
+    setSunLighting: (LightingMode) -> Unit,
+    onDismissRequest: () -> Unit
+) {
+    var dropdownExpanded by remember { mutableStateOf(false) }
+    var selectedLightingMode by remember { mutableStateOf(currentLightingMode) }
+    val getLightingModeName: (LightingMode) -> String = remember {
+        {
+            when (it) {
+                LightingMode.NoLight -> "No Light"
+                LightingMode.Light -> "Light"
+                LightingMode.LightAndShadows -> "Light and Shadows"
+            }
+        }
+    }
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        confirmButton = {
+            TextButton(onClick = {
+                setSunLighting(selectedLightingMode)
+                onDismissRequest()
+            }) {
+                Text("Confirm")
+            }
+        },
+        text = {
+            Column {
+                Text("Select a lighting mode:")
+                Spacer(modifier = Modifier.height(16.dp))
+                Box(
+                    modifier = Modifier
+                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.primaryContainer)
+                        .clickable {
+                            dropdownExpanded = !dropdownExpanded
+                        }
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            getLightingModeName(selectedLightingMode),
+                            modifier = Modifier.padding(8.dp)
+                        )
+                        Icon(
+                            Icons.Default.ArrowDropDown,
+                            "Select Item",
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
+                }
+                DropdownMenu(
+                    expanded = dropdownExpanded,
+                    onDismissRequest = { dropdownExpanded = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text(getLightingModeName(LightingMode.NoLight)) },
+                        onClick = {
+                            selectedLightingMode = LightingMode.NoLight
+                            dropdownExpanded = false
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(getLightingModeName(LightingMode.Light)) },
+                        onClick = {
+                            selectedLightingMode = LightingMode.Light
+                            dropdownExpanded = false
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(getLightingModeName(LightingMode.LightAndShadows)) },
+                        onClick = {
+                            selectedLightingMode = LightingMode.LightAndShadows
+                            dropdownExpanded = false
+                        }
+                    )
+                }
+            }
         }
     )
 }
