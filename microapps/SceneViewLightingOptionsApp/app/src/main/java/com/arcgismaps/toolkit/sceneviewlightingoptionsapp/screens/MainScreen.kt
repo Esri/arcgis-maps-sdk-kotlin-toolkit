@@ -65,7 +65,9 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
+import com.arcgismaps.mapping.ArcGISTiledElevationSource
 import com.arcgismaps.mapping.BasemapStyle
+import com.arcgismaps.mapping.Surface
 import com.arcgismaps.mapping.view.AtmosphereEffect
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.LightingMode
@@ -75,16 +77,25 @@ import com.arcgismaps.toolkit.geocompose.SceneViewpointOperation
 import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneId
+import java.time.ZoneOffset
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
     val arcGISScene = remember { ArcGISScene(BasemapStyle.ArcGISImagery) }
-    val sofia = remember {
-        Point(23.321736, 42.697703, SpatialReference.wgs84())
-    }
-    val camera = remember { Camera(sofia, 10000.0, 0.0, 80.0, 0.0) }
+    val camera =
+        Camera(Point(-73.0815, -49.3272, 4059.0, SpatialReference.wgs84()), 11.0, 82.0, 0.0)
     val viewpointOperation = SceneViewpointOperation.SetCamera(camera)
+
+    // add base surface for elevation data
+    val surface = Surface()
+    surface.elevationSources.add(
+        ArcGISTiledElevationSource(
+            "https://elevation3d.arcgis" +
+                    ".com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer"
+        )
+    )
+    arcGISScene.baseSurface = surface
 
     var sunTime by remember { mutableStateOf(Instant.parse("2000-09-22T15:00:00Z")) }
     var sunLighting: LightingMode by remember { mutableStateOf(LightingMode.LightAndShadows) }
@@ -113,6 +124,7 @@ fun MainScreen() {
                     OptionsDropDownMenu(
                         expanded = optionsExpanded,
                         onDismissRequest = { optionsExpanded = false },
+                        currentSunTime = sunTime,
                         onSetSunTime = { sunTime = it },
                         currentLightingMode = sunLighting,
                         onSetSunLighting = { sunLighting = it },
@@ -121,7 +133,7 @@ fun MainScreen() {
                         currentAtmosphereEffect = atmosphereEffect,
                         onSetAtmosphereEffect = { atmosphereEffect = it },
                         currentSpaceEffect = spaceEffect,
-                        onSetSpaceEffect = { spaceEffect = it}
+                        onSetSpaceEffect = { spaceEffect = it }
                     )
                 }
             )
@@ -150,6 +162,7 @@ fun OptionsDropDownMenu(
     modifier: Modifier = Modifier,
     expanded: Boolean = false,
     onDismissRequest: (() -> Unit) = {},
+    currentSunTime: Instant,
     onSetSunTime: (Instant) -> Unit,
     currentLightingMode: LightingMode,
     onSetSunLighting: (LightingMode) -> Unit,
@@ -196,7 +209,7 @@ fun OptionsDropDownMenu(
         }
     }
     if (showSunTimeOptions) {
-        SunTimeOptions(setTime = onSetSunTime) {
+        SunTimeOptions(currentSunTime, onSetSunTime) {
             showSunTimeOptions = false
             onDismissRequest()
         }
@@ -235,14 +248,23 @@ fun OptionsDropDownMenu(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SunTimeOptions(setTime: (Instant) -> Unit, onDismissRequest: () -> Unit) {
-    val timePickerState = rememberTimePickerState()
+fun SunTimeOptions(
+    currentSunTime: Instant,
+    setTime: (Instant) -> Unit,
+    onDismissRequest: () -> Unit
+) {
+    val currentTime = currentSunTime.atOffset(ZoneOffset.UTC)
+    val timePickerState = rememberTimePickerState(
+        initialHour = currentTime.hour,
+        initialMinute = currentTime.minute,
+        is24Hour = true
+    )
     AlertDialog(
         onDismissRequest = onDismissRequest,
         confirmButton = {
             TextButton(onClick = {
                 setTime(
-                    OffsetDateTime.now(ZoneId.systemDefault())
+                    OffsetDateTime.now(ZoneId.of("UTC"))
                         .withHour(timePickerState.hour)
                         .withMinute(timePickerState.minute)
                         .toInstant()
