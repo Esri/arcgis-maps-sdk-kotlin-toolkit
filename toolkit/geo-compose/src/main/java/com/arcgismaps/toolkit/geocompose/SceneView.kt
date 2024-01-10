@@ -200,6 +200,42 @@ private fun ViewpointUpdater(
 }
 
 /**
+ * Update the view-based [SceneView]'s imageOverlays property to reflect changes made to the
+ * [imageOverlayCollection] based on the type of [ImageOverlayCollection.ChangedEvent]
+ *
+ * @since 200.4.0
+ */
+@Composable
+internal fun ImageOverlaysUpdater(
+    imageOverlayCollection: ImageOverlayCollection,
+    sceneView: SceneView
+) {
+    LaunchedEffect(imageOverlayCollection) {
+        // sync up the GeoView with the new image overlays
+        sceneView.imageOverlays.clear()
+        imageOverlayCollection.forEach {
+            sceneView.imageOverlays.add(it)
+        }
+        // start observing imageOverlays for subsequent changes
+        imageOverlayCollection.changed.collect { changedEvent ->
+            when (changedEvent) {
+                // On ImageOverlay added:
+                is ImageOverlayCollection.ChangedEvent.Added ->
+                    sceneView.imageOverlays.add(changedEvent.element)
+
+                // On ImageOverlay removed:
+                is ImageOverlayCollection.ChangedEvent.Removed ->
+                    sceneView.imageOverlays.remove(changedEvent.element)
+
+                // On ImageOverlays cleared:
+                is ImageOverlayCollection.ChangedEvent.Cleared ->
+                    sceneView.imageOverlays.clear()
+            }
+        }
+    }
+}
+
+/**
  * Sets up the callbacks for all the view-based [sceneView] events.
  */
 @Composable
