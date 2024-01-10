@@ -20,7 +20,6 @@ package com.arcgismaps.toolkit.geocompose
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.remember
 import com.arcgismaps.mapping.view.AnalysisOverlay
 import com.arcgismaps.mapping.view.SceneView
 import kotlinx.coroutines.channels.BufferOverflow
@@ -111,7 +110,7 @@ public class AnalysisOverlayCollection : Iterable<AnalysisOverlay> {
 
 
 /**
- * Update the view-based [geoView]'s analysisOverlays property to reflect changes made to the
+ * Update the view-based [SceneView]'s analysisOverlays property to reflect changes made to the
  * [analysisOverlayCollection] based on the type of [AnalysisOverlayCollection.ChangedEvent]
  *
  * @since 200.4.0
