@@ -29,8 +29,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.MoreVert
@@ -42,9 +40,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -56,12 +54,10 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
@@ -317,10 +313,10 @@ fun AmbientLightColorOptions(
     onSetColor: (Color) -> Unit,
     onDismissRequest: () -> Unit
 ) {
-    var r by remember { mutableIntStateOf(currentColor.red.toColorComponentInt()) }
-    var g by remember { mutableIntStateOf(currentColor.green.toColorComponentInt()) }
-    var b by remember { mutableIntStateOf(currentColor.blue.toColorComponentInt()) }
-    var a by remember { mutableIntStateOf(currentColor.alpha.toColorComponentInt()) }
+    var r by remember { mutableIntStateOf((currentColor.red * 255).toInt()) }
+    var g by remember { mutableIntStateOf((currentColor.green * 255).toInt()) }
+    var b by remember { mutableIntStateOf((currentColor.blue * 255).toInt()) }
+    var a by remember { mutableIntStateOf((currentColor.alpha * 255).toInt()) }
     AlertDialog(
         onDismissRequest = onDismissRequest,
         confirmButton = {
@@ -334,11 +330,11 @@ fun AmbientLightColorOptions(
             Text("Input an RGBA color")
         },
         text = {
-            Column {
-                RgbaTextField(value = r, onValueChange = { r = it }, label = "Red")
-                RgbaTextField(value = g, onValueChange = { g = it }, label = "Green")
-                RgbaTextField(value = b, onValueChange = { b = it }, label = "Blue")
-                RgbaTextField(value = a, onValueChange = { a = it }, label = "Alpha")
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                RgbaSlider(value = r, onValueChange = { r = it }, label = "Red")
+                RgbaSlider(value = g, onValueChange = { g = it }, label = "Green")
+                RgbaSlider(value = b, onValueChange = { b = it }, label = "Blue")
+                RgbaSlider(value = a, onValueChange = { a = it }, label = "Alpha")
             }
         }
     )
@@ -466,35 +462,26 @@ fun DropdownMenuAlertDialog(
 }
 
 @Composable
-fun RgbaTextField(
+fun RgbaSlider(
     value: Int,
     onValueChange: (Int) -> Unit,
     label: String
 ) {
-    val focusManager = LocalFocusManager.current
-    TextField(
-        value = value.toString(),
-        onValueChange = {
-            val valueAsInt = (it.toIntOrNull() ?: 0)
-                .coerceAtLeast(0)
-                .coerceAtMost(255)
-            onValueChange(valueAsInt)
-        },
-        modifier = Modifier
-            .padding(8.dp),
-        label = { Text(label) },
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Decimal,
-            imeAction = ImeAction.Next
-        ),
-        keyboardActions = KeyboardActions {
-            focusManager.moveFocus(FocusDirection.Next)
-        },
-    )
-}
-
-private fun Float.toColorComponentInt(): Int {
-    return (this * 255).toInt()
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(label, Modifier.weight(0.25f))
+        Slider(
+            value = value.toFloat(),
+            onValueChange = { onValueChange(it.toInt()) },
+            modifier = Modifier.weight(0.5f, true),
+            valueRange = 0f..255f,
+            steps = 255
+        )
+        Text(text = value.toString(), Modifier.weight(0.25f), textAlign = TextAlign.End)
+    }
 }
 
 data class LightingOptionsState(
