@@ -48,7 +48,7 @@ internal fun RadioButtonField(
     modifier: Modifier = Modifier,
     colors: RadioButtonFieldColors = RadioButtonFieldDefaults.colors()
 ) {
-    val value by state.value.collectAsState()
+    val value by state.value
     val editable by state.isEditable.collectAsState()
     val required by state.isRequired.collectAsState()
     val noValueLabel = state.noValueLabel.ifEmpty { stringResource(R.string.no_value) }

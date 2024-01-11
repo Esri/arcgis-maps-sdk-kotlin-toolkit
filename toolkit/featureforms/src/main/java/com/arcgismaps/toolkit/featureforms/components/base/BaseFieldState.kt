@@ -16,19 +16,16 @@
 
 package com.arcgismaps.toolkit.featureforms.components.base
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import com.arcgismaps.exceptions.FeatureFormValidationException
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.flattenMerge
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 internal open class FieldProperties<T>(
@@ -79,37 +76,21 @@ internal open class BaseFieldState<T>(
     open val placeholder: String = properties.placeholder
 
     /**
-     * A mutable state flow to handle user input changes.
+     * A state flow to handle calculated value changes.
      */
-    protected val _value = MutableStateFlow(initialValue)
+    private val _calculatedValue = properties.value
 
     /**
-     * A state flow that combines the user input [_value] and calculated property callbacks.
+     * Backing mutable state for the [value].
      */
-    @OptIn(ExperimentalCoroutinesApi::class)
-    protected val _mergedValue: StateFlow<T> = flowOf(_value, properties.value)
-        .flattenMerge()
-        .stateIn(
-            scope = scope,
-            started = SharingStarted.Eagerly,
-            initialValue = initialValue
-        )
-
-    // a state flow for sending validation errors
-    private val _validationError: MutableStateFlow<ValidationErrorState> =
-        MutableStateFlow(ValidationErrorState.NoError)
+    protected val _value : MutableState<Value<T>> = mutableStateOf(Value(initialValue))
 
     /**
      * Current value for this field state. The actual data of this type is wrapped in a [Value]
-     * object. The [Value.error] provides the current validation error for the [Value.data].
+     * object. The [Value.error] provides the current validation error for the [Value.data]. Use
+     * [onValueChanged] to set a value for this state.
      */
-    val value: StateFlow<Value<T>> = combine(_mergedValue, _validationError) { newValue, error ->
-        Value(newValue, error)
-    }.stateIn(
-        scope = scope,
-        started = SharingStarted.Eagerly,
-        initialValue = Value(_mergedValue.value)
-    )
+    val value : State<Value<T>> = _value
 
     /**
      * Property that indicates if the field is editable.
@@ -132,6 +113,9 @@ internal open class BaseFieldState<T>(
      */
     val isFocused: StateFlow<Boolean> = _isFocused.asStateFlow()
 
+    /**
+     * A flag to indicate if the field ever gained focus.
+     */
     protected var wasFocused = false
 
     init {
@@ -156,9 +140,10 @@ internal open class BaseFieldState<T>(
             }
         }
         scope.launch {
-            // validate when the value changes
-            _mergedValue.drop(1).collect {
-                updateValidation()
+            // update the current value when the calculated value changes
+            // calculated properties do not get validated
+            _calculatedValue.collect {
+                _value.value = Value(it)
             }
         }
     }
@@ -169,6 +154,16 @@ internal open class BaseFieldState<T>(
     fun onFocusChanged(focus: Boolean) {
         if (focus) wasFocused = true
         _isFocused.value = focus
+    }
+
+    /**
+     * Runs and updates the validation using [validate] and [filter].
+     */
+    fun updateValidation() {
+        val currentValue = value.value.data
+        val error = filter(validate())
+        // update the value with the validation error.
+        _value.value = Value(currentValue, error)
     }
 
     /**
@@ -195,7 +190,7 @@ internal open class BaseFieldState<T>(
                     }
                 } else {
                     // if focused and empty, don't show the "Required" error or numeric parse errors
-                    if (_mergedValue.value is String && (_mergedValue.value as String).isEmpty()) {
+                    if (value.value.data is String && (value.value.data as String).isEmpty()) {
                         ValidationErrorState.NoError
                     } else {
                         // show the first non-required error
@@ -215,21 +210,17 @@ internal open class BaseFieldState<T>(
     }
 
     /**
-     * Runs and updates the validation using [validate] and [filter].
-     */
-    private fun updateValidation() {
-        _validationError.value = filter(validate())
-    }
-
-    /**
-     * Callback to update the current value of the FormTextFieldState to the given [input].
+     * Callback to update the current value of the FormTextFieldState to the given [input]. This also
+     * sets the value on the feature using [onEditValue] and updates the validation using
+     * [updateValidation].
      */
     open fun onValueChanged(input: T) {
         // infer that a value change event comes from a user interaction and hence treat it as a
         // focus event
         wasFocused = true
         onEditValue(input)
-        _value.value = input
+        _value.value = Value(input)
+        updateValidation()
     }
 
     /**

@@ -41,7 +41,6 @@ import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.
 import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.NoError
 import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.NotANumber
 import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.NotAWholeNumber
-import com.arcgismaps.toolkit.featureforms.components.datetime.DateTimeFieldState
 import com.arcgismaps.toolkit.featureforms.utils.asDoubleTuple
 import com.arcgismaps.toolkit.featureforms.utils.asLongTuple
 import com.arcgismaps.toolkit.featureforms.utils.domain
@@ -177,7 +176,7 @@ internal class FormTextFieldState(
     }
 
     override fun validate(): List<ValidationErrorState> {
-        val currentValue = _mergedValue.value
+        val currentValue = value.value.data
         val coreErrors = defaultValidator()
         val errors = mutableListOf<ValidationErrorState>()
         errors += super.validate()

@@ -102,7 +102,7 @@ internal fun FeatureFormDialog() {
         is DialogType.ComboBoxDialog -> {
             val state = (dialogType as DialogType.ComboBoxDialog).state
             ComboBoxDialog(
-                initialValue = state.value.collectAsState().value.data,
+                initialValue = state.value.value.data,
                 values = state.codedValues.associateBy({ it.code }, { it.name }),
                 label = state.label,
                 description = state.description,
@@ -135,7 +135,7 @@ internal fun FeatureFormDialog() {
                 pickerStyle,
                 state.minEpochMillis,
                 state.maxEpochMillis,
-                state.value.collectAsState().value.data,
+                state.value.value.data,
                 state.label,
                 state.description,
                 DateTimePickerInput.Date

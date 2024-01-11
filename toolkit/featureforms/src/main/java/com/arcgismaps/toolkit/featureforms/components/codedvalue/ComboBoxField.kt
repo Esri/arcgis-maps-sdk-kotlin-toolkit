@@ -92,7 +92,7 @@ internal fun ComboBoxField(
     modifier: Modifier = Modifier
 ) {
     val dialogRequester = LocalDialogRequester.current
-    val value by state.value.collectAsState()
+    val value by state.value
     val isEditable by state.isEditable.collectAsState()
     val isRequired by state.isRequired.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }

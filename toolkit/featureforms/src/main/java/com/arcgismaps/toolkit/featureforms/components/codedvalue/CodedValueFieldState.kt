@@ -29,6 +29,7 @@ import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.FieldProperties
+import com.arcgismaps.toolkit.featureforms.components.base.Value
 import com.arcgismaps.toolkit.featureforms.components.text.TextFieldProperties
 import com.arcgismaps.toolkit.featureforms.utils.editValue
 import com.arcgismaps.toolkit.featureforms.utils.fieldType
@@ -114,7 +115,8 @@ internal open class CodedValueFieldState(
             it.name == input
         }?.code
         onEditValue(code)
-        _value.value = input
+        _value.value = Value(input)
+        updateValidation()
     }
 
     companion object {
