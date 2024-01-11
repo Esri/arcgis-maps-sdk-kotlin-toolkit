@@ -219,7 +219,7 @@ internal fun AnalysisOverlaysUpdater(
     sceneView: SceneView
 ) {
     LaunchedEffect(analysisOverlayCollection) {
-        // sync up the GeoView with the new graphics overlays
+        // sync up the SceneView with the new analysis overlays
         sceneView.analysisOverlays.clear()
         analysisOverlayCollection.forEach {
             sceneView.analysisOverlays.add(it)
