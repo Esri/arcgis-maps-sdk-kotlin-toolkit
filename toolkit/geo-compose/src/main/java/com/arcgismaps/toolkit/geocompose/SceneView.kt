@@ -219,7 +219,7 @@ internal fun ImageOverlaysUpdater(
     sceneView: SceneView
 ) {
     LaunchedEffect(imageOverlayCollection) {
-        // sync up the GeoView with the new image overlays
+        // sync up the SceneView with the new image overlays
         sceneView.imageOverlays.clear()
         imageOverlayCollection.forEach {
             sceneView.imageOverlays.add(it)
