@@ -400,20 +400,3 @@ public inline fun rememberLocationDisplay(
         LocationDisplay().apply(init)
     }
 }
-
-/**
- * Create and [remember] a [GraphicsOverlayCollection].
- * [init] will be called when the [GraphicsOverlayCollection] is first created to configure its
- * initial state.
- *
- * @param key invalidates the remembered GraphicsOverlayCollection if different from the previous composition
- * @param init called when the [GraphicsOverlayCollection] is created to configure its initial state
- * @since 200.4.0
- */
-@Composable
-public inline fun rememberGraphicsOverlayCollection(
-    key: Any? = null,
-    crossinline init: GraphicsOverlayCollection.() -> Unit = {}
-): GraphicsOverlayCollection = remember(key) {
-    GraphicsOverlayCollection().apply(init)
-}
