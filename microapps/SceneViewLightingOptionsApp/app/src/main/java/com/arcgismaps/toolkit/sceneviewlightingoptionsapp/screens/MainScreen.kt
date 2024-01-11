@@ -18,19 +18,10 @@
 
 package com.arcgismaps.toolkit.sceneviewlightingoptionsapp.screens
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
@@ -40,7 +31,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
@@ -57,8 +47,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
@@ -153,7 +141,7 @@ fun MainScreen() {
 }
 
 /**
- * A drop down menu providing auto pan options for which settings to change.
+ * A drop down menu providing a selection of Lighting Options that can be changed
  */
 @Composable
 fun LightingOptionsDropDownMenu(
@@ -176,6 +164,7 @@ fun LightingOptionsDropDownMenu(
     var showAmbientLightColorOptions by remember { mutableStateOf(false) }
     var showAtmosphereEffectOptions by remember { mutableStateOf(false) }
     var showSpaceEffectOptions by remember { mutableStateOf(false) }
+
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest,
@@ -197,6 +186,7 @@ fun LightingOptionsDropDownMenu(
                 })
         }
     }
+
     if (showSunTimeOptions) {
         SunTimeOptions(
             currentSunTime = lightingOptionsState.sunTime.value,
@@ -206,6 +196,7 @@ fun LightingOptionsDropDownMenu(
             onDismissRequest()
         }
     }
+
     if (showSunLightingOptions) {
         SunLightingOptions(
             currentLightingMode = lightingOptionsState.sunLighting.value,
@@ -215,6 +206,7 @@ fun LightingOptionsDropDownMenu(
             onDismissRequest()
         }
     }
+
     if (showAmbientLightColorOptions) {
         AmbientLightColorOptions(
             currentColor = lightingOptionsState.ambientLightColor.value,
@@ -224,6 +216,7 @@ fun LightingOptionsDropDownMenu(
             onDismissRequest()
         }
     }
+
     if (showAtmosphereEffectOptions) {
         AtmosphereEffectOptions(
             currentAtmosphereEffect = lightingOptionsState.atmosphereEffect.value,
@@ -233,6 +226,7 @@ fun LightingOptionsDropDownMenu(
             onDismissRequest()
         }
     }
+
     if (showSpaceEffectOptions) {
         SpaceEffectOptions(
             currentSpaceEffect = lightingOptionsState.spaceEffect.value,
@@ -244,6 +238,9 @@ fun LightingOptionsDropDownMenu(
     }
 }
 
+/**
+ * Displays a time picker in an AlertDialog
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SunTimeOptions(
@@ -278,6 +275,9 @@ fun SunTimeOptions(
     )
 }
 
+/**
+ * Displays an AlertDialog with a dropdown selection of different [LightingMode]s
+ */
 @Composable
 fun SunLightingOptions(
     currentLightingMode: LightingMode,
@@ -307,6 +307,9 @@ fun SunLightingOptions(
     )
 }
 
+/**
+ * Displays an AlertDialog with sliders for selecting the components of an RGBA color
+ */
 @Composable
 fun AmbientLightColorOptions(
     currentColor: Color,
@@ -340,6 +343,9 @@ fun AmbientLightColorOptions(
     )
 }
 
+/**
+ * Displays an AlertDialog with a dropdown selection of different [AtmosphereEffect]s
+ */
 @Composable
 fun AtmosphereEffectOptions(
     currentAtmosphereEffect: AtmosphereEffect,
@@ -369,6 +375,9 @@ fun AtmosphereEffectOptions(
     )
 }
 
+/**
+ * Displays an AlertDialog with a dropdown selection of different [SpaceEffect]s
+ */
 @Composable
 fun SpaceEffectOptions(
     currentSpaceEffect: SpaceEffect,
@@ -394,94 +403,6 @@ fun SpaceEffectOptions(
             onDismissRequest()
         }
     )
-}
-
-@Composable
-fun DropdownMenuAlertDialog(
-    itemList: List<String>,
-    currentSelectedIndex: Int,
-    title: String,
-    onDismissRequest: () -> Unit,
-    onConfirm: (Int) -> Unit
-) {
-    var dropdownExpanded by remember { mutableStateOf(false) }
-    var selectedIndex by remember { mutableIntStateOf(currentSelectedIndex) }
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        confirmButton = {
-            TextButton(onClick = {
-                onConfirm(selectedIndex)
-            }) {
-                Text("Confirm")
-            }
-        },
-        title = {
-            Text(title)
-        },
-        text = {
-            Box(
-                modifier = Modifier
-                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
-                    .background(MaterialTheme.colorScheme.primaryContainer)
-                    .clickable {
-                        dropdownExpanded = !dropdownExpanded
-                    }
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        itemList[selectedIndex] ?: "Unexpected index",
-                        modifier = Modifier.padding(8.dp)
-                    )
-                    Icon(
-                        Icons.Default.ArrowDropDown,
-                        "Select Item",
-                        modifier = Modifier.padding(8.dp)
-                    )
-                }
-            }
-            DropdownMenu(
-                expanded = dropdownExpanded,
-                onDismissRequest = { dropdownExpanded = false }
-            ) {
-                itemList.forEachIndexed { idx, name ->
-                    DropdownMenuItem(
-                        text = {
-                            Text(name)
-                        },
-                        onClick = {
-                            selectedIndex = idx
-                            dropdownExpanded = false
-                        })
-                }
-            }
-        }
-    )
-}
-
-@Composable
-fun RgbaSlider(
-    value: Int,
-    onValueChange: (Int) -> Unit,
-    label: String
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(label, Modifier.weight(0.25f))
-        Slider(
-            value = value.toFloat(),
-            onValueChange = { onValueChange(it.toInt()) },
-            modifier = Modifier.weight(0.5f, true),
-            valueRange = 0f..255f,
-            steps = 255
-        )
-        Text(text = value.toString(), Modifier.weight(0.25f), textAlign = TextAlign.End)
-    }
 }
 
 data class LightingOptionsState(
