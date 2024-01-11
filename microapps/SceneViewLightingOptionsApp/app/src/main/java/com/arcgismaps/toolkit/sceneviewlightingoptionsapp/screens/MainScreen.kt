@@ -50,6 +50,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -82,26 +83,39 @@ import java.time.ZoneOffset
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
-    val arcGISScene = remember { ArcGISScene(BasemapStyle.ArcGISImagery) }
-    val camera =
-        Camera(Point(-73.0815, -49.3272, 4059.0, SpatialReference.wgs84()), 11.0, 82.0, 0.0)
-    val viewpointOperation = SceneViewpointOperation.SetCamera(camera)
-
-    // add base surface for elevation data
-    val surface = Surface()
-    surface.elevationSources.add(
-        ArcGISTiledElevationSource(
-            "https://elevation3d.arcgis" +
-                    ".com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer"
+    val arcGISScene = remember {
+        ArcGISScene(BasemapStyle.ArcGISImagery).apply {
+            // add base surface for elevation data
+            val surface = Surface()
+            surface.elevationSources.add(
+                ArcGISTiledElevationSource(
+                    "https://elevation3d.arcgis" +
+                            ".com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer"
+                )
+            )
+            baseSurface = surface
+        }
+    }
+    val viewpointOperation = SceneViewpointOperation.SetCamera(
+        Camera(
+            Point(
+                -73.0815,
+                -49.3272,
+                4059.0,
+                SpatialReference.wgs84()
+            ), 11.0, 82.0, 0.0
         )
     )
-    arcGISScene.baseSurface = surface
 
-    var sunTime by remember { mutableStateOf(Instant.parse("2000-09-22T15:00:00Z")) }
-    var sunLighting: LightingMode by remember { mutableStateOf(LightingMode.LightAndShadows) }
-    var ambientLightColor: Color by remember { mutableStateOf(Color(220, 220, 220, 255)) }
-    var atmosphereEffect: AtmosphereEffect by remember { mutableStateOf(AtmosphereEffect.HorizonOnly) }
-    var spaceEffect: SpaceEffect by remember { mutableStateOf(SpaceEffect.Stars) }
+    val lightingOptionsState = remember {
+        LightingOptionsState(
+            mutableStateOf(Instant.parse("2000-09-22T15:00:00Z")),
+            mutableStateOf(LightingMode.LightAndShadows),
+            mutableStateOf(Color(220, 220, 220, 255)),
+            mutableStateOf(AtmosphereEffect.HorizonOnly),
+            mutableStateOf(SpaceEffect.Stars)
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -115,25 +129,13 @@ fun MainScreen() {
                     Text("SceneView Lighting Options App")
                 },
                 actions = {
-                    IconButton(
-                        onClick = {
-                            optionsExpanded = !optionsExpanded
-                        }) {
+                    IconButton(onClick = { optionsExpanded = !optionsExpanded }) {
                         Icon(Icons.Default.MoreVert, "More")
                     }
-                    OptionsDropDownMenu(
+                    LightingOptionsDropDownMenu(
                         expanded = optionsExpanded,
+                        lightingOptionsState = lightingOptionsState,
                         onDismissRequest = { optionsExpanded = false },
-                        currentSunTime = sunTime,
-                        onSetSunTime = { sunTime = it },
-                        currentLightingMode = sunLighting,
-                        onSetSunLighting = { sunLighting = it },
-                        currentAmbientLightColor = ambientLightColor,
-                        onSetAmbientLightColor = { ambientLightColor = it },
-                        currentAtmosphereEffect = atmosphereEffect,
-                        onSetAtmosphereEffect = { atmosphereEffect = it },
-                        currentSpaceEffect = spaceEffect,
-                        onSetSpaceEffect = { spaceEffect = it }
                     )
                 }
             )
@@ -145,11 +147,11 @@ fun MainScreen() {
                 .fillMaxSize(),
             arcGISScene = arcGISScene,
             viewpointOperation = viewpointOperation,
-            sunTime = sunTime,
-            sunLighting = sunLighting,
-            ambientLightColor = ambientLightColor,
-            atmosphereEffect = atmosphereEffect,
-            spaceEffect = spaceEffect
+            sunTime = lightingOptionsState.sunTime.value,
+            sunLighting = lightingOptionsState.sunLighting.value,
+            ambientLightColor = lightingOptionsState.ambientLightColor.value,
+            atmosphereEffect = lightingOptionsState.atmosphereEffect.value,
+            spaceEffect = lightingOptionsState.spaceEffect.value
         )
     }
 }
@@ -158,20 +160,11 @@ fun MainScreen() {
  * A drop down menu providing auto pan options for which settings to change.
  */
 @Composable
-fun OptionsDropDownMenu(
+fun LightingOptionsDropDownMenu(
     modifier: Modifier = Modifier,
     expanded: Boolean = false,
     onDismissRequest: (() -> Unit) = {},
-    currentSunTime: Instant,
-    onSetSunTime: (Instant) -> Unit,
-    currentLightingMode: LightingMode,
-    onSetSunLighting: (LightingMode) -> Unit,
-    currentAmbientLightColor: Color,
-    onSetAmbientLightColor: (Color) -> Unit,
-    currentAtmosphereEffect: AtmosphereEffect,
-    onSetAtmosphereEffect: (AtmosphereEffect) -> Unit,
-    currentSpaceEffect: SpaceEffect,
-    onSetSpaceEffect: (SpaceEffect) -> Unit
+    lightingOptionsState: LightingOptionsState
 ) {
     val items = remember {
         listOf(
@@ -209,15 +202,18 @@ fun OptionsDropDownMenu(
         }
     }
     if (showSunTimeOptions) {
-        SunTimeOptions(currentSunTime, onSetSunTime) {
+        SunTimeOptions(
+            currentSunTime = lightingOptionsState.sunTime.value,
+            setTime = { lightingOptionsState.sunTime.value = it }
+        ) {
             showSunTimeOptions = false
             onDismissRequest()
         }
     }
     if (showSunLightingOptions) {
         SunLightingOptions(
-            currentLightingMode = currentLightingMode,
-            setSunLighting = onSetSunLighting
+            currentLightingMode = lightingOptionsState.sunLighting.value,
+            setSunLighting = { lightingOptionsState.sunLighting.value = it }
         ) {
             showSunLightingOptions = false
             onDismissRequest()
@@ -225,21 +221,27 @@ fun OptionsDropDownMenu(
     }
     if (showAmbientLightColorOptions) {
         AmbientLightColorOptions(
-            currentColor = currentAmbientLightColor,
-            onSetColor = onSetAmbientLightColor
+            currentColor = lightingOptionsState.ambientLightColor.value,
+            onSetColor = { lightingOptionsState.ambientLightColor.value = it }
         ) {
             showAmbientLightColorOptions = false
             onDismissRequest()
         }
     }
     if (showAtmosphereEffectOptions) {
-        AtmosphereEffectOptions(currentAtmosphereEffect, onSetAtmosphereEffect) {
+        AtmosphereEffectOptions(
+            currentAtmosphereEffect = lightingOptionsState.atmosphereEffect.value,
+            onSetAtmosphereEffect = { lightingOptionsState.atmosphereEffect.value = it }
+        ) {
             showAtmosphereEffectOptions = false
             onDismissRequest()
         }
     }
     if (showSpaceEffectOptions) {
-        SpaceEffectOptions(currentSpaceEffect, onSetSpaceEffect) {
+        SpaceEffectOptions(
+            currentSpaceEffect = lightingOptionsState.spaceEffect.value,
+            onSetSpaceEffect = { lightingOptionsState.spaceEffect.value = it }
+        ) {
             showSpaceEffectOptions = false
             onDismissRequest()
         }
@@ -494,3 +496,11 @@ fun RgbaTextField(
 private fun Float.toColorComponentInt(): Int {
     return (this * 255).toInt()
 }
+
+data class LightingOptionsState(
+    val sunTime: MutableState<Instant>,
+    val sunLighting: MutableState<LightingMode>,
+    val ambientLightColor: MutableState<Color>,
+    val atmosphereEffect: MutableState<AtmosphereEffect>,
+    val spaceEffect: MutableState<SpaceEffect>
+)
