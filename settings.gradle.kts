@@ -63,7 +63,7 @@ dependencyResolutionManagement {
             } else {
                 sdkVersionNumber
             }
-            version("mapsSdk", "$versionAndBuild")
+            version("mapsSdk", versionAndBuild)
             library("mapsSdk", "com.esri", "arcgis-maps-kotlin").versionRef("mapsSdk")
         }
     }
@@ -72,6 +72,7 @@ dependencyResolutionManagement {
 var includedProjects = projects.flatMap { listOf(":$it", ":$it-app") }.toTypedArray()
 include(*includedProjects)
 include(":bom")
+include(":kdoc")
 include(":composable-map")
 include(":indoors")
 include(":floor-filter-app")
