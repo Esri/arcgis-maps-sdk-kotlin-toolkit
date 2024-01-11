@@ -18,12 +18,27 @@
 
 package com.arcgismaps.toolkit.featureeditor
 
+import com.arcgismaps.Color
 import com.arcgismaps.data.ArcGISFeature
+import com.arcgismaps.geometry.Geometry
 import com.arcgismaps.geometry.GeometryType
 import com.arcgismaps.geometry.Multipoint
 import com.arcgismaps.geometry.Point
+import com.arcgismaps.geometry.Polygon
+import com.arcgismaps.geometry.Polyline
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.layers.FeatureLayer
+import com.arcgismaps.mapping.symbology.LineSymbol
+import com.arcgismaps.mapping.symbology.MultilayerPointSymbol
+import com.arcgismaps.mapping.symbology.MultilayerPolygonSymbol
+import com.arcgismaps.mapping.symbology.MultilayerPolylineSymbol
+import com.arcgismaps.mapping.symbology.PictureMarkerSymbol
+import com.arcgismaps.mapping.symbology.SimpleFillSymbol
+import com.arcgismaps.mapping.symbology.SimpleLineSymbol
+import com.arcgismaps.mapping.symbology.SimpleLineSymbolStyle
+import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
+import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
+import com.arcgismaps.mapping.symbology.StrokeSymbolLayer
 import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.BufferOverflow
@@ -99,24 +114,10 @@ public class FeatureEditor(
         featureForm = FeatureForm(feature, formDefinition)
 
         val geometry = feature.geometry
-        val isPointGeometry =  if (geometry?.let { !it.isEmpty } == true) geometry is Point || geometry is Multipoint
-            else table.geometryType == GeometryType.Point || table.geometryType == GeometryType.Multipoint
-
         if (geometry?.let { !it.isEmpty } == true) geometryEditor.start(geometry)
         else geometryEditor.start(table.geometryType) // TODO: all types supported?
 
-        // IDEA: symbology stuff should be much more organised and handled in a helper method
-
-        // Custom symbology currently only supported for point geometries.
-        if (isPointGeometry) {
-            val symbol = (feature.featureTable?.layer as? FeatureLayer)?.renderer?.getSymbol(feature)
-            geometryEditor.tool.style.apply {
-                // TODO: what about lines and stuff
-                vertexSymbol = symbol
-                selectedVertexSymbol = symbol
-                this.feedbackVertexSymbol = symbol
-            }
-        }
+        updateGeometryEditorStyle(geometryEditor, currentFeature, geometry)
 
         (feature.featureTable?.layer as? FeatureLayer)?.setFeatureVisible(feature, false)
 
@@ -179,5 +180,180 @@ public class FeatureEditor(
         (feature.featureTable?.layer as? FeatureLayer)?.setFeatureVisible(feature, true)
         _isStarted.value = false
         currentFeature = null
+    }
+}
+
+private fun updateGeometryEditorStyle(geometryEditor: GeometryEditor, feature: ArcGISFeature?, geometry: Geometry?) {
+    val isGeometryPoint =  if (geometry?.let { !it.isEmpty } == true) geometry is Point || geometry is Multipoint
+    else feature?.featureTable?.geometryType == GeometryType.Point || feature?.featureTable?.geometryType == GeometryType.Multipoint
+
+    val isGeometryLine = if (geometry?.let { !it.isEmpty } == true) geometry is Polyline
+    else feature?.featureTable?.geometryType == GeometryType.Polyline
+
+    val isGeometryPolygon = if (geometry?.let { !it.isEmpty } == true) geometry is Polygon
+    else feature?.featureTable?.geometryType == GeometryType.Polygon
+
+    val renderer = (feature?.featureTable?.layer as? FeatureLayer)?.renderer
+    val featureSymbol = renderer?.getSymbol(feature, true)
+
+    if (isGeometryPoint) {
+        geometryEditor.tool.style.apply {
+            when (featureSymbol) {
+                is SimpleMarkerSymbol -> {
+                    vertexSymbol = featureSymbol
+                    selectedVertexSymbol = featureSymbol
+                    feedbackVertexSymbol = featureSymbol
+                    vertexTextSymbol = null
+                }
+                is MultilayerPointSymbol -> {
+                    vertexSymbol = featureSymbol
+                    selectedVertexSymbol = featureSymbol
+                    feedbackVertexSymbol = featureSymbol
+                    vertexTextSymbol = null
+                }
+                is PictureMarkerSymbol -> {
+                    vertexSymbol = featureSymbol
+                    selectedVertexSymbol = featureSymbol
+                    feedbackVertexSymbol = featureSymbol
+                    vertexTextSymbol = null
+                }
+                else -> { }
+            }
+        }
+    } else if (isGeometryLine) {
+        geometryEditor.tool.style.apply {
+            val vertexOutlineSymbol = SimpleLineSymbol(SimpleLineSymbolStyle.Solid, color = Color.black)
+            when (featureSymbol) {
+                is SimpleLineSymbol -> {
+                    val vertexWidth = if (featureSymbol.width < 2) featureSymbol.width * 10 else featureSymbol.width * 3
+                    val midVertexWidth = if (featureSymbol.width < 2) featureSymbol.width * 7 else featureSymbol.width * 2
+                    val selectedVertex = SimpleMarkerSymbol(color = Color.white, style = SimpleMarkerSymbolStyle.Circle, size = vertexWidth)
+                    val midVertex = SimpleMarkerSymbol(color = Color.white, style = SimpleMarkerSymbolStyle.Circle, size = midVertexWidth)
+
+                    vertexSymbol = SimpleMarkerSymbol(color = featureSymbol.color, style = SimpleMarkerSymbolStyle.Circle, size = vertexWidth)
+                    selectedVertexSymbol = selectedVertex
+                    feedbackVertexSymbol = selectedVertex
+                    midVertexSymbol = midVertex
+                    selectedMidVertexSymbol = midVertex
+                    feedbackLineSymbol = SimpleLineSymbol(SimpleLineSymbolStyle.Dash, color = featureSymbol.color, width = featureSymbol.width)
+                    lineSymbol = featureSymbol
+
+                    (vertexSymbol as SimpleMarkerSymbol).outline = vertexOutlineSymbol
+                    (selectedVertexSymbol as SimpleMarkerSymbol).outline = vertexOutlineSymbol
+                    (selectedMidVertexSymbol as SimpleMarkerSymbol).outline = vertexOutlineSymbol
+                    (feedbackVertexSymbol as SimpleMarkerSymbol).outline = vertexOutlineSymbol
+                    (midVertexSymbol as SimpleMarkerSymbol).outline = vertexOutlineSymbol
+                    vertexTextSymbol = null
+                }
+                is MultilayerPolylineSymbol -> {
+                    // Can potentially use featureSymbol.width instead
+                    val symbolStrokeWidth = (featureSymbol.symbolLayers[0] as StrokeSymbolLayer).width.toFloat()
+                    val vertexSize = if (symbolStrokeWidth < 2) symbolStrokeWidth * 10 else symbolStrokeWidth * 3
+                    val midVertexSize = if (symbolStrokeWidth < 2) symbolStrokeWidth * 7 else symbolStrokeWidth * 2
+                    val selectedVertex = SimpleMarkerSymbol(color = Color.white, style = SimpleMarkerSymbolStyle.Circle, size = vertexSize)
+                    val midVertex = SimpleMarkerSymbol(color = Color.white, style = SimpleMarkerSymbolStyle.Circle, size = midVertexSize)
+
+                    vertexSymbol = SimpleMarkerSymbol(color = featureSymbol.color, style = SimpleMarkerSymbolStyle.Circle, size = vertexSize)
+                    selectedVertexSymbol = selectedVertex
+                    feedbackVertexSymbol = selectedVertex
+                    midVertexSymbol = midVertex
+                    selectedMidVertexSymbol = midVertex
+                    feedbackLineSymbol = SimpleLineSymbol(SimpleLineSymbolStyle.Dash, color = featureSymbol.color, width = symbolStrokeWidth)
+                    lineSymbol = featureSymbol
+
+                    (vertexSymbol as SimpleMarkerSymbol).outline = vertexOutlineSymbol
+                    (selectedVertexSymbol as SimpleMarkerSymbol).outline = vertexOutlineSymbol
+                    (selectedMidVertexSymbol as SimpleMarkerSymbol).outline = vertexOutlineSymbol
+                    (feedbackVertexSymbol as SimpleMarkerSymbol).outline = vertexOutlineSymbol
+                    (midVertexSymbol as SimpleMarkerSymbol).outline = vertexOutlineSymbol
+                    vertexTextSymbol = null
+                }
+                else -> { }
+            }
+        }
+    } else if (isGeometryPolygon) {
+        geometryEditor.tool.style.apply {
+            val vertexOutlineSymbol = SimpleLineSymbol(SimpleLineSymbolStyle.Solid, color = Color.black)
+            when (featureSymbol) {
+                is SimpleFillSymbol -> {
+                    // Defaults when outline is null
+                    var vertexSize = (vertexSymbol as SimpleMarkerSymbol).size
+                    var midVertexSize = vertexSize / 2
+                    var outlineColor = Color.white
+                    var outlineWidth = (feedbackLineSymbol as SimpleLineSymbol).width
+
+                    if (featureSymbol.outline != null) {
+                        outlineColor = featureSymbol.outline!!.color
+                        outlineWidth = featureSymbol.outline!!.width
+                        vertexSize = if (outlineWidth < 2) outlineWidth * 10 else outlineWidth * 3
+                        midVertexSize = if (outlineWidth < 2) outlineWidth * 7 else outlineWidth * 2
+                    }
+                    val selectedVertex = SimpleMarkerSymbol(color = Color.white , style = SimpleMarkerSymbolStyle.Circle, size = vertexSize)
+                    val midVertex = SimpleMarkerSymbol(color = Color.white, style = SimpleMarkerSymbolStyle.Circle, size = midVertexSize)
+
+                    vertexSymbol = SimpleMarkerSymbol(color = featureSymbol.color, style = SimpleMarkerSymbolStyle.Circle, size = vertexSize)
+                    selectedVertexSymbol = selectedVertex
+                    feedbackVertexSymbol = selectedVertex
+                    midVertexSymbol = midVertex
+                    selectedMidVertexSymbol = midVertex
+                    feedbackLineSymbol = SimpleLineSymbol(SimpleLineSymbolStyle.Dash, color = outlineColor, width = outlineWidth)
+                    lineSymbol = featureSymbol // Could be null (no outline)
+                    fillSymbol = featureSymbol
+
+                    (vertexSymbol as SimpleMarkerSymbol).outline = vertexOutlineSymbol
+                    (selectedVertexSymbol as SimpleMarkerSymbol).outline = vertexOutlineSymbol
+                    (selectedMidVertexSymbol as SimpleMarkerSymbol).outline = vertexOutlineSymbol
+                    (feedbackVertexSymbol as SimpleMarkerSymbol).outline = vertexOutlineSymbol
+                    (midVertexSymbol as SimpleMarkerSymbol).outline = vertexOutlineSymbol
+                    vertexTextSymbol = null
+                }
+                is MultilayerPolygonSymbol -> {
+                    // Check nullability of symbol layers
+                    val symbolStrokeWidth = (featureSymbol.symbolLayers[1] as StrokeSymbolLayer).width.toFloat()
+                    val opaqueFillColor = Color.fromRgba(featureSymbol.color.component2(), featureSymbol.color.component3(), featureSymbol.color.component4())
+                    val vertexSize = if (symbolStrokeWidth < 2) symbolStrokeWidth * 10 else symbolStrokeWidth * 3
+                    val midVertexSize = if (symbolStrokeWidth < 2) symbolStrokeWidth * 7 else symbolStrokeWidth * 2
+
+                    val selectedVertex = SimpleMarkerSymbol(color = Color.white , style = SimpleMarkerSymbolStyle.Circle, size = vertexSize)
+                    val midVertex = SimpleMarkerSymbol(color = Color.white, style = SimpleMarkerSymbolStyle.Circle, size = midVertexSize)
+
+                    vertexSymbol = SimpleMarkerSymbol(color = opaqueFillColor, style = SimpleMarkerSymbolStyle.Circle, size = vertexSize)
+                    selectedVertexSymbol = selectedVertex
+                    feedbackVertexSymbol = selectedVertex
+                    midVertexSymbol = midVertex
+                    selectedMidVertexSymbol = midVertex
+                    feedbackLineSymbol = SimpleLineSymbol(SimpleLineSymbolStyle.Dash, color = opaqueFillColor, width = symbolStrokeWidth)
+                    lineSymbol = featureSymbol // Could be null (no outline)
+                    fillSymbol = featureSymbol
+
+                    (vertexSymbol as SimpleMarkerSymbol).outline = vertexOutlineSymbol
+                    (selectedVertexSymbol as SimpleMarkerSymbol).outline = vertexOutlineSymbol
+                    (selectedMidVertexSymbol as SimpleMarkerSymbol).outline = vertexOutlineSymbol
+                    (feedbackVertexSymbol as SimpleMarkerSymbol).outline = vertexOutlineSymbol
+                    (midVertexSymbol as SimpleMarkerSymbol).outline = vertexOutlineSymbol
+                    vertexTextSymbol = null
+                }
+                is PictureMarkerSymbol -> {
+                    val selectedVertex = SimpleMarkerSymbol(color = Color.white , style = SimpleMarkerSymbolStyle.Circle, size = featureSymbol.toMultilayerSymbol().size)
+                    val midVertex = SimpleMarkerSymbol(color = Color.white , style = SimpleMarkerSymbolStyle.Circle, size = featureSymbol.toMultilayerSymbol().size/3)
+
+                    vertexSymbol = featureSymbol
+                    selectedVertexSymbol = selectedVertex
+                    feedbackVertexSymbol= selectedVertex
+                    midVertexSymbol = midVertex
+                    selectedMidVertexSymbol = midVertex
+                    feedbackLineSymbol = SimpleLineSymbol(SimpleLineSymbolStyle.Dash, featureSymbol.toMultilayerSymbol().color ,width = featureSymbol.toMultilayerSymbol().size/5)
+                    lineSymbol = featureSymbol
+                    fillSymbol = featureSymbol
+
+                    (selectedVertexSymbol as SimpleMarkerSymbol).outline = vertexOutlineSymbol
+                    (selectedMidVertexSymbol as SimpleMarkerSymbol).outline = vertexOutlineSymbol
+                    (feedbackVertexSymbol as SimpleMarkerSymbol).outline = vertexOutlineSymbol
+                    (midVertexSymbol as SimpleMarkerSymbol).outline = vertexOutlineSymbol
+                    vertexTextSymbol = null
+                }
+                else -> { }
+            }
+        }
     }
 }
