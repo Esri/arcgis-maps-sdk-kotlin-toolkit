@@ -37,25 +37,56 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.arcgismaps.Color
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
+import com.arcgismaps.mapping.ArcGISScene
+import com.arcgismaps.mapping.ArcGISTiledElevationSource
+import com.arcgismaps.mapping.BasemapStyle
+import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbol
+import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbolStyle
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.CameraController
 import com.arcgismaps.toolkit.geocompose.SceneView
 import com.arcgismaps.mapping.view.GlobeCameraController
 import com.arcgismaps.mapping.view.Graphic
+import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.OrbitGeoElementCameraController
 import com.arcgismaps.mapping.view.OrbitLocationCameraController
 import com.arcgismaps.toolkit.geocompose.SceneViewpointOperation
 import com.arcgismaps.toolkit.geocompose.rememberGraphicsOverlayCollection
 import kotlin.time.Duration.Companion.seconds
 
-
+/**
+ * Display a composable [SceneView] and demonstrate how to use different [CameraController]s to
+ * navigate viewpoints in the scene view.
+ *
+ * There are three menu actions in the dropdown menu:
+ * - Global: Use [GlobeCameraController] to navigate the scene view.
+ * - Orbit (GeoElement): Use an [OrbitGeoElementCameraController] to navigate the scene view to the desired [GeoElement].
+ * - Orbit (Location): Use an [OrbitLocationCameraController] to navigate the scene view to the desired location.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
-    val sceneViewModel = remember { SceneViewModel() }
+    val arcGISScene = remember { ArcGISScene(BasemapStyle.ArcGISTopographic).apply {
+        val surfaceUrl = "http://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer"
+        val elevationSource = ArcGISTiledElevationSource(surfaceUrl)
+        this.baseSurface.elevationSources.add(elevationSource)
+    } }
+
+    // a red 3D Sphere at the center of a crater
+    val simpleGraphic = remember {
+        Graphic(
+            Point(-109.929589, 38.437304, 5000.0, SpatialReference.wgs84()),
+            SimpleMarkerSceneSymbol(style = SimpleMarkerSceneSymbolStyle.Sphere, color = Color.red)
+        )
+    }
+
+    // a CameraController holder
     var cameraController: CameraController by remember { mutableStateOf(GlobeCameraController()) }
+
+    // a SceneViewpointOperation
     var viewpointOperation: SceneViewpointOperation? by remember { mutableStateOf(null) }
 
     Scaffold (
@@ -73,7 +104,7 @@ fun MainScreen() {
                         expanded = actionsExpanded,
                         onCameraControllerChanged = { cameraController = it },
                         onDismissRequest = { actionsExpanded = false },
-                        targetGeoElement = sceneViewModel.simpleGraphic
+                        targetGeoElement = simpleGraphic
                     )
                 }
             )
@@ -84,11 +115,14 @@ fun MainScreen() {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            arcGISScene = sceneViewModel.arcGISScene,
+            arcGISScene = arcGISScene,
             cameraController = cameraController,
             viewpointOperation = viewpointOperation,
             graphicsOverlays = rememberGraphicsOverlayCollection {
-                add(sceneViewModel.sceneGraphicsOverlay)
+                val sceneGraphicsOverlay = GraphicsOverlay().apply {
+                    this.graphics.add(simpleGraphic)
+                }
+                add(sceneGraphicsOverlay)
             }
         )
 
@@ -116,15 +150,14 @@ fun MainScreen() {
 }
 
 /**
- * Set camera controller dropdown menu
+ * Composable function that displays a dropdown menu for selecting different camera controllers
+ * to manipulate a SceneView.
  *
- * @param expanded
- * @param modifier
- * @param onCameraControllerChanged
- * @param onDismissRequest
- * @param targetGeoElement
- * @receiver
- * @receiver
+ * @param expanded Whether the dropdown menu is expanded or not.
+ * @param modifier Modifier for styling and positioning the dropdown menu.
+ * @param targetGeoElement The target graphic element for camera control.
+ * @param onCameraControllerChanged Callback triggered when the camera controller is changed.
+ * @param onDismissRequest Callback triggered when the dropdown menu is dismissed.
  */
 @Composable
 fun SetCameraControllerDropdownMenu(
