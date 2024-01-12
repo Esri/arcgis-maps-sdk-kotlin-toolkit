@@ -82,6 +82,7 @@ internal class DateTimeFieldState(
     val shouldShowTime: Boolean = properties.shouldShowTime
 
     init {
+        // start observing the properties
         observeProperties()
     }
     

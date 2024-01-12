@@ -116,6 +116,7 @@ internal class FormTextFieldState(
     val fieldType: FieldType = properties.fieldType
 
     init {
+        // start observing the properties
         observeProperties()
     }
 

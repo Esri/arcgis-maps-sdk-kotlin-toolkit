@@ -101,6 +101,7 @@ internal open class CodedValueFieldState(
     val fieldType: FieldType = properties.fieldType
 
     init {
+        // start observing the properties
         observeProperties()
     }
 

@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms.components.base
 
-
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -26,12 +25,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.flattenMerge
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicBoolean
 
 internal open class FieldProperties<T>(
     val label: String,
@@ -54,6 +49,10 @@ internal data class Value<T>(
 /**
  * Base state class for any Field within a feature form. It provides the default set of properties
  * that are common to all [FieldFormElement]'s.
+ *
+ * Run [observeProperties] to start observing the [isEditable], [isRequired] and the calculated
+ * value changed flow from the [FieldProperties.value]. This also runs and generates any
+ * validation errors when any of those properties change.
  *
  * @param properties the [FieldProperties] associated with this state.
  * @param initialValue optional initial value to set for this field. It is set to the value of
@@ -124,35 +123,10 @@ internal abstract class BaseFieldState<T>(
      */
     protected var wasFocused = false
 
-    fun observeProperties() {
-        // ignore the first values for all the flows since validate() is open and must
-        // NOT be called during initialization due to any derived class initialization order
-        scope.launch {
-            // validate when focus changes
-            isFocused.collect {
-                updateValidation()
-            }
-        }
-        scope.launch {
-            // validate when required property changes
-            isRequired.collect {
-                updateValidation()
-            }
-        }
-        scope.launch {
-            // validate when the editable property changes
-            isEditable.collect {
-                updateValidation()
-            }
-        }
-        scope.launch {
-            // update the current value when the calculated value changes
-            // calculated properties do not get validated
-            _calculatedValue.collect {
-                _value.value = Value(it)
-            }
-        }
-    }
+    /**
+     * Current status for [observeProperties].
+     */
+    private var isObserving = AtomicBoolean(false)
 
     /**
      * Changes the current focus state for the field. Use [isFocused] to read the value.
@@ -165,11 +139,47 @@ internal abstract class BaseFieldState<T>(
     /**
      * Runs and updates the validation using [validate] and [filter].
      */
-    fun updateValidation() {
+    protected fun updateValidation() {
         val currentValue = value.value.data
         val error = filter(validate())
         // update the value with the validation error.
         _value.value = Value(currentValue, error)
+    }
+
+    /**
+     * Start observing the [isEditable], [isRequired] and [_calculatedValue] flows and update
+     * the validation to generate any validation errors.
+     */
+    protected fun observeProperties() {
+        // launch coroutines only once using an atomic boolean to check if they have already been
+        // launched
+        if (!isObserving.getAndSet(true)) {
+            scope.launch {
+                // validate when focus changes
+                isFocused.collect {
+                    updateValidation()
+                }
+            }
+            scope.launch {
+                // validate when required property changes
+                isRequired.collect {
+                    updateValidation()
+                }
+            }
+            scope.launch {
+                // validate when the editable property changes
+                isEditable.collect {
+                    updateValidation()
+                }
+            }
+            scope.launch {
+                // update the current value when the calculated value changes
+                // calculated properties do not get validated
+                _calculatedValue.collect {
+                    _value.value = Value(it)
+                }
+            }
+        }
     }
 
     /**

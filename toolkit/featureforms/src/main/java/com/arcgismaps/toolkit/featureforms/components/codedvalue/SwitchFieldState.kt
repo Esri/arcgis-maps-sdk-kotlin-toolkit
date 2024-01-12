@@ -43,7 +43,7 @@ internal class SwitchFieldProperties(
     value: StateFlow<String>,
     editable: StateFlow<Boolean>,
     required: StateFlow<Boolean>,
-    visible : StateFlow<Boolean>,
+    visible: StateFlow<Boolean>,
     fieldType: FieldType,
     val onValue: CodedValue,
     val offValue: CodedValue,
@@ -94,21 +94,22 @@ internal class SwitchFieldState(
      * The CodedValue that represents the "on" state of the Switch.
      */
     val onValue: CodedValue = properties.onValue
-    
+
     /**
      * The CodedValue that represents the "off" state of the Switch.
      */
     val offValue: CodedValue = properties.offValue
-    
+
     /**
      * Whether this Switch should fall back to being displayed as a ComboBox.
      */
     val fallback: Boolean = properties.fallback
 
     init {
+        // start observing the properties
         observeProperties()
     }
-    
+
     companion object {
         fun Saver(
             formElement: FieldFormElement,

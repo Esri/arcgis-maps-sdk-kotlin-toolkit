@@ -45,6 +45,11 @@ internal class RadioButtonFieldState(
     defaultValidator = defaultValidator
 ) {
 
+    init {
+        // start observing the properties
+        observeProperties()
+    }
+
     /**
      * Returns true if the current value of [value] is not in the [codedValues]. This should
      * trigger a fallback to a ComboBox. If the [value] is empty then this returns false.
@@ -57,10 +62,6 @@ internal class RadioButtonFieldState(
                 it.name == value.value.data
             }
         }
-    }
-
-    init {
-        observeProperties()
     }
 
     companion object {
