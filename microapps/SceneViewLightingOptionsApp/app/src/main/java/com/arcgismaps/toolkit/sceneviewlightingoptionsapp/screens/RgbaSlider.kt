@@ -10,6 +10,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 
+/**
+ * Displays a slider with a range of 0 to 255, set to the initial [value].
+ */
 @Composable
 fun RgbaSlider(
     value: Int,

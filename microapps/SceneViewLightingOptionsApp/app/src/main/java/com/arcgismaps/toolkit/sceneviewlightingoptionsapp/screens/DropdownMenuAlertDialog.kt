@@ -25,6 +25,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+/**
+ * Displays an alert dialog with a dropdown containing the items in [itemList].
+ *
+ * The index of the selected item when the user presses the confirm button is passed to [onConfirm].
+ */
 @Composable
 fun DropdownMenuAlertDialog(
     itemList: List<String>,
