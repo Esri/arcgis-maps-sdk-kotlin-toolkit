@@ -40,10 +40,12 @@ rootProject.subprojects.filter {
     evaluationDependsOn(":${it.name}")
 }
 
-// determine the released toolkit components
-val releasedSourceSets = project.rootProject.subprojects.filter {
+val releasedModules = project.rootProject.subprojects.filter {
     it.plugins.findPlugin("artifact-deploy") != null
-}.map { subproject ->
+}
+
+// determine the released toolkit components
+val releasedSourceSets = releasedModules.map { subproject ->
     // add all the intended library projects as sourceSets below
     File(rootDir, "toolkit/${subproject.name}/src/main/java").canonicalPath
 }
@@ -87,6 +89,19 @@ android {
                 }
             }
         }
+    }
+}
+
+dependencies {
+    project.afterEvaluate {
+       releasedModules.forEach { proj ->
+           proj.configurations.forEach { config ->
+               config.allDependencies.forEach {
+                   //add all dependencies as implementation dependencies, no need for api.
+                   project.dependencies.add("implementation", it)
+               }
+           }
+       }
     }
 }
 
