@@ -82,6 +82,7 @@ class ComboBoxFieldTests {
 
     @Before
     fun setContent() {
+        featureForm.discardEdits()
         composeTestRule.setContent {
             errorTextColor = MaterialTheme.colorScheme.error
             FeatureForm(featureForm = featureForm)
