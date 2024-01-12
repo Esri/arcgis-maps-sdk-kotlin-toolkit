@@ -17,11 +17,8 @@
 
 package com.arcgismaps.toolkit.geocompose
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import com.arcgismaps.mapping.view.ImageOverlay
-import com.arcgismaps.mapping.view.SceneView
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -101,9 +98,9 @@ public class ImageOverlayCollection : Iterable<ImageOverlay> {
      *
      * @since 200.4.0
      */
-    internal sealed class ChangedEvent() {
+    internal sealed class ChangedEvent {
         class Added(val element: ImageOverlay) : ChangedEvent()
         class Removed(val element: ImageOverlay) : ChangedEvent()
-        object Cleared : ChangedEvent()
+        data object Cleared : ChangedEvent()
     }
 }
