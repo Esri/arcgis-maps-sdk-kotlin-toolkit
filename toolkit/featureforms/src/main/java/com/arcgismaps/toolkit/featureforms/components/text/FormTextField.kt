@@ -76,7 +76,7 @@ internal fun FormTextField(
                 Text(
                     text = supportingText,
                     color = supportingTextColor,
-                    modifier = Modifier.semantics { contentDescription = "helper" }
+                    modifier = Modifier.semantics { contentDescription = "supporting text" }
                 )
                 // show character count
                 if (isFocused && isEditable) {

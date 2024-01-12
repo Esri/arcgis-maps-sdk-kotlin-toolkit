@@ -48,7 +48,7 @@ import org.junit.Test
  * Tests for FormTextFields whose backing FormFeatureElement is associated with a numeric field and attribute type.
  */
 class FormTextFieldNumericTests {
-    private val helperSemanticLabel = "helper"
+    private val supportingTextSemanticLabel = "supporting text"
     private val outlinedTextFieldSemanticLabel = "outlined text field"
     
     private val featureForm by lazy {
@@ -113,10 +113,9 @@ class FormTextFieldNumericTests {
         val outlinedTextField = composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
         val text = "lorem ipsum"
         outlinedTextField.performTextInput(text)
-        val helper = composeTestRule.onNode(hasContentDescription(helperSemanticLabel), useUnmergedTree = true)
-        val helperText = helper.getTextString()
-        helper.assertIsDisplayed()
-        TestCase.assertEquals("Value must be a whole number", helperText)
+        val supportingText = composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true)
+        supportingText.assertIsDisplayed()
+        TestCase.assertEquals("Value must be a whole number", supportingText.getTextString())
     }
     
     /**
@@ -158,10 +157,9 @@ class FormTextFieldNumericTests {
         val outlinedTextField = composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
         val text = "lorem ipsum"
         outlinedTextField.performTextInput(text)
-        val helper = composeTestRule.onNode(hasContentDescription(helperSemanticLabel), useUnmergedTree = true)
-        val helperText = helper.getTextString()
-        helper.assertIsDisplayed()
-        TestCase.assertEquals("Value must be a number", helperText)
+        val supportingText = composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true)
+        supportingText.assertIsDisplayed()
+        TestCase.assertEquals("Value must be a number", supportingText.getTextString())
     }
     
     companion object {
