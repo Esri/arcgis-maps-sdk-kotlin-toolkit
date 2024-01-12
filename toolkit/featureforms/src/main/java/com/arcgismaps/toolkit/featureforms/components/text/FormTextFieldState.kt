@@ -115,6 +115,10 @@ internal class FormTextFieldState(
      */
     val fieldType: FieldType = properties.fieldType
 
+    init {
+        observeProperties()
+    }
+
     private fun validateNumericRange(numberVal: Int): ValidationErrorState {
         require(fieldType.isIntegerType)
         return if (domain != null && domain is RangeDomain) {

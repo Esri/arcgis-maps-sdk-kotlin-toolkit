@@ -104,6 +104,10 @@ internal class SwitchFieldState(
      * Whether this Switch should fall back to being displayed as a ComboBox.
      */
     val fallback: Boolean = properties.fallback
+
+    init {
+        observeProperties()
+    }
     
     companion object {
         fun Saver(

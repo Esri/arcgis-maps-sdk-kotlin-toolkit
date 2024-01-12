@@ -25,7 +25,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 
 internal open class FieldProperties<T>(
@@ -59,10 +58,10 @@ internal data class Value<T>(
  * @param defaultValidator the default validator that returns the list of validation errors. This
  * is called in [BaseFieldState.validate].
  */
-internal open class BaseFieldState<T>(
+internal abstract class BaseFieldState<T>(
     properties: FieldProperties<T>,
     initialValue: T = properties.value.value,
-    scope: CoroutineScope,
+    private val scope: CoroutineScope,
     protected val onEditValue: (Any?) -> Unit,
     protected val defaultValidator: () -> List<Throwable>
 ) : FormElementState(
@@ -83,6 +82,7 @@ internal open class BaseFieldState<T>(
     /**
      * Backing mutable state for the [value].
      */
+    @Suppress("PropertyName")
     protected val _value : MutableState<Value<T>> = mutableStateOf(Value(initialValue))
 
     /**
@@ -118,24 +118,24 @@ internal open class BaseFieldState<T>(
      */
     protected var wasFocused = false
 
-    init {
+    fun observeProperties() {
         // ignore the first values for all the flows since validate() is open and must
         // NOT be called during initialization due to any derived class initialization order
         scope.launch {
             // validate when focus changes
-            isFocused.drop(1).collect {
+            isFocused.collect {
                 updateValidation()
             }
         }
         scope.launch {
             // validate when required property changes
-            isRequired.drop(1).collect {
+            isRequired.collect {
                 updateValidation()
             }
         }
         scope.launch {
             // validate when the editable property changes
-            isEditable.drop(1).collect {
+            isEditable.collect {
                 updateValidation()
             }
         }

@@ -59,6 +59,10 @@ internal class RadioButtonFieldState(
         }
     }
 
+    init {
+        observeProperties()
+    }
+
     companion object {
 
         /**

@@ -80,6 +80,10 @@ internal class DateTimeFieldState(
     val maxEpochMillis: Instant? = properties.maxEpochMillis
 
     val shouldShowTime: Boolean = properties.shouldShowTime
+
+    init {
+        observeProperties()
+    }
     
     companion object {
         fun Saver(
