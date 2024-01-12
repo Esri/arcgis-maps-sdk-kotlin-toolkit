@@ -81,12 +81,14 @@ internal open class BaseFieldState<T>(
     /**
      * A mutable state flow to handle user input changes.
      */
+    @Suppress("PropertyName")
     protected val _value = MutableStateFlow(initialValue)
 
     /**
      * A state flow that combines the user input [_value] and calculated property callbacks.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
+    @Suppress("PropertyName")
     protected val _mergedValue: StateFlow<T> = flowOf(_value, properties.value)
         .flattenMerge()
         .stateIn(
