@@ -41,7 +41,6 @@ import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
 import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.GeoView
-import com.arcgismaps.mapping.view.GlobeCameraController
 import com.arcgismaps.mapping.view.LightingMode
 import com.arcgismaps.mapping.view.LongPressEvent
 import com.arcgismaps.mapping.view.PanChangeEvent
@@ -110,7 +109,7 @@ public fun SceneView(
     viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
     selectionProperties: SelectionProperties = SelectionProperties(),
     attributionState: AttributionState = AttributionState(),
-    cameraController: CameraController = GlobeCameraController(),
+    cameraController: CameraController? = null,
     analysisOverlays: AnalysisOverlayCollection = rememberAnalysisOverlayCollection(),
     atmosphereEffect: AtmosphereEffect = AtmosphereEffect.HorizonOnly,
     timeExtent: TimeExtent? = null,
@@ -148,7 +147,9 @@ public fun SceneView(
             it.labeling = viewLabelProperties
             it.selectionProperties = selectionProperties
             it.setTimeExtent(timeExtent)
-            it.cameraController = cameraController
+            if (cameraController != null) {
+                it.cameraController = cameraController
+            }
             it.atmosphereEffect = atmosphereEffect
             it.spaceEffect = spaceEffect
             it.sunTime = sunTime
