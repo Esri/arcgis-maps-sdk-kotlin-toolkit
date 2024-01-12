@@ -29,18 +29,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.base.BaseTextField
+import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState
 import com.arcgismaps.toolkit.featureforms.utils.DialogType
 import com.arcgismaps.toolkit.featureforms.utils.LocalDialogRequester
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -53,18 +52,22 @@ internal fun DateTimeField(
     val dialogRequester = LocalDialogRequester.current
     val isEditable by state.isEditable.collectAsState()
     val isRequired by state.isRequired.collectAsState()
-    val instant by state.value.collectAsState()
+    val value by state.value.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
-    // to check if the field was ever focused by the user
-    var wasFocused by rememberSaveable { mutableStateOf(false) }
     val label = if (isRequired) {
         "${state.label} *"
     } else {
         state.label
     }
+    // show if any errors are present as the supporting text with the error color
+    val (supportingText, supportingTextColor) = if (value.error is ValidationErrorState.NoError) {
+        Pair(state.description, Color.Unspecified)
+    } else {
+        Pair(value.error.getString(), MaterialTheme.colorScheme.error)
+    }
 
     BaseTextField(
-        text = instant?.formattedDateTime(state.shouldShowTime) ?: "",
+        text = value.data?.formattedDateTime(state.shouldShowTime) ?: "",
         onValueChange = {
             // the only allowable change is to clear the text
             if (it.isEmpty()) {
@@ -80,25 +83,20 @@ internal fun DateTimeField(
         interactionSource = interactionSource,
         trailingIcon = if (isEditable) Icons.Rounded.EditCalendar else Icons.Rounded.CalendarMonth,
         supportingText = {
-            // if the field was focused and is required, validate the current value
-            if (wasFocused && isRequired && instant == null) {
-                Text(
-                    text = stringResource(id = R.string.required),
-                    color = MaterialTheme.colorScheme.error
-                )
-            } else {
-                Text(
-                    text = state.description,
-                    modifier = Modifier.semantics { contentDescription = "description" },
-                )
-            }
-        }
+            Text(
+                text = supportingText,
+                color = supportingTextColor,
+                modifier = Modifier.semantics {
+                    contentDescription = "helper"
+                }
+            )
+        },
+        onFocusChange = state::onFocusChanged
     )
 
     LaunchedEffect(interactionSource) {
         interactionSource.interactions.collect {
             if (it is PressInteraction.Release) {
-                wasFocused = true
                 // request to show the date picker dialog only when the touch is released
                 // the dialog is responsible for updating the value on the state
                 if (isEditable) {
@@ -128,7 +126,8 @@ private fun DateTimeFieldPreview() {
                 shouldShowTime = true
             ),
             scope = scope,
-            onEditValue = {}
+            onEditValue = {},
+            defaultValidator = { emptyList() }
         )
         DateTimeField(state = state)
     }

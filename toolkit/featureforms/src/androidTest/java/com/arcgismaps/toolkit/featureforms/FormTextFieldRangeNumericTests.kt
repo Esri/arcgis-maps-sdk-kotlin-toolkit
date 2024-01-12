@@ -17,7 +17,6 @@
 package com.arcgismaps.toolkit.featureforms
 
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -96,12 +95,11 @@ class FormTextFieldRangeNumericTests {
                 state = FormTextFieldState(
                     textFieldProperties,
                     scope = scope,
-                    context = LocalContext.current,
                     onEditValue = {
                         featureForm.editValue(integerField, it)
                         scope.launch { featureForm.evaluateExpressions() }
                     },
-                    validate = {integerField.getValidationErrors()}
+                    defaultValidator = {integerField.getValidationErrors()}
                 )
             )
         }

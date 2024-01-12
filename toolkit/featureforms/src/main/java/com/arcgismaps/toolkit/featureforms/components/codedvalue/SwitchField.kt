@@ -35,7 +35,7 @@ import com.arcgismaps.toolkit.featureforms.components.base.BaseTextField
 @Composable
 internal fun SwitchField(state: SwitchFieldState, modifier: Modifier = Modifier) {
     val codeName by state.value.collectAsState()
-    val checkedState = codeName == state.onValue.name
+    val checkedState = codeName.data == state.onValue.name
     val value = if (checkedState) state.onValue.name else state.offValue.name
     val isEditable by state.isEditable.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }

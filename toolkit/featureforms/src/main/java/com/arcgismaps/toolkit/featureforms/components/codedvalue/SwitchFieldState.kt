@@ -73,18 +73,22 @@ internal class SwitchFieldProperties(
  * @param scope a [CoroutineScope] to start [StateFlow] collectors on.
  * @param onEditValue a callback to invoke when the user edits result in a change of value. This
  * is called on [SwitchFieldState.onValueChanged].
+ * @param defaultValidator the default validator that returns the list of validation errors. This
+ * is called in [SwitchFieldState.validate].
  */
 @Stable
 internal class SwitchFieldState(
     properties: SwitchFieldProperties,
     val initialValue: String = properties.value.value,
     scope: CoroutineScope,
-    onEditValue: ((Any?) -> Unit)
+    onEditValue: ((Any?) -> Unit),
+    defaultValidator: () -> List<Throwable>
 ) : CodedValueFieldState(
     properties = properties,
     scope = scope,
     initialValue = initialValue,
-    onEditValue = onEditValue
+    onEditValue = onEditValue,
+    defaultValidator = defaultValidator
 ) {
     /**
      * The CodedValue that represents the "on" state of the Switch.
@@ -110,7 +114,7 @@ internal class SwitchFieldState(
         ): Saver<SwitchFieldState, Any> = listSaver(
             save = {
                 listOf(
-                    it.value.value,
+                    it.value.value.data,
                     it.fallback
                 )
             },
@@ -143,7 +147,8 @@ internal class SwitchFieldState(
                             if (codedValueName == input.onValue.name) input.onValue.code else input.offValue.code
                         )
                         scope.launch { form.evaluateExpressions() }
-                    }
+                    },
+                    defaultValidator = formElement::getValidationErrors
                 )
             }
         )
@@ -186,6 +191,7 @@ internal fun rememberSwitchFieldState(
         onEditValue = {
             form.editValue(field, it)
             scope.launch { form.evaluateExpressions() }
-        }
+        },
+        defaultValidator = field::getValidationErrors
     )
 }

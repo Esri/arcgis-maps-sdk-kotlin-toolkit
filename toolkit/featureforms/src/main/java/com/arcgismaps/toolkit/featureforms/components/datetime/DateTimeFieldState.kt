@@ -59,17 +59,21 @@ internal class DateTimeFieldProperties(
  * @param scope a [CoroutineScope] to start [StateFlow] collectors on.
  * @param onEditValue a callback to invoke when the user edits result in a change of value. This
  * is called on [FormTextFieldState.onValueChanged].
+ * @param defaultValidator the default validator that returns the list of validation errors. This
+ * is called in [DateTimeFieldState.validate].
  */
 internal class DateTimeFieldState(
     properties: DateTimeFieldProperties,
     initialValue: Instant? = properties.value.value,
     scope: CoroutineScope,
-    onEditValue: (Any?) -> Unit
+    onEditValue: (Any?) -> Unit,
+    defaultValidator: () -> List<Throwable>
 ) : BaseFieldState<Instant?>(
     properties = properties,
     initialValue = initialValue,
     scope = scope,
-    onEditValue = onEditValue
+    onEditValue = onEditValue,
+    defaultValidator = defaultValidator
 ) {
     val minEpochMillis: Instant? = properties.minEpochMillis
 
@@ -84,7 +88,7 @@ internal class DateTimeFieldState(
             scope: CoroutineScope
         ): Saver<DateTimeFieldState, Any> = listSaver(
             save = {
-                listOf(it.value.value)
+                listOf(it.value.value.data, it.wasFocused)
             },
             restore = { list ->
                 val input = field.input as DateTimePickerFormInput
@@ -101,13 +105,18 @@ internal class DateTimeFieldState(
                         maxEpochMillis = input.max,
                         shouldShowTime = input.includeTime
                     ),
-                    initialValue = list[0],
+                    initialValue = list[0] as Instant?,
                     scope = scope,
                     onEditValue = {
                         form.editValue(field, it)
                         scope.launch { form.evaluateExpressions() }
+                    },
+                    defaultValidator = {
+                        field.getValidationErrors()
                     }
-                )
+                ).apply {
+                    onFocusChanged(list[1] as Boolean)
+                }
             }
         )
     }
@@ -145,6 +154,9 @@ internal fun rememberDateTimeFieldState(
         onEditValue = {
             form.editValue(field, it)
             scope.launch { form.evaluateExpressions() }
+        },
+        defaultValidator = {
+            field.getValidationErrors()
         }
     )
 }

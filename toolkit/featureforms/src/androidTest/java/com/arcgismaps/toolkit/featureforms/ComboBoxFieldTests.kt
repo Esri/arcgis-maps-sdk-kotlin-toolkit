@@ -52,7 +52,7 @@ import org.junit.Rule
 import org.junit.Test
 
 class ComboBoxFieldTests {
-    private val descriptionSemanticLabel = "description"
+    private val descriptionSemanticLabel = "helper"
     private val clearTextSemanticLabel = "Clear text button"
     private val optionsIconSemanticLabel = "field icon"
     private val comboBoxDialogListSemanticLabel = "ComboBoxDialogLazyColumn"
