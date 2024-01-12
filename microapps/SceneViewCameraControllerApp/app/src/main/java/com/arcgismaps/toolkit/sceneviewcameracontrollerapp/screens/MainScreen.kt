@@ -43,6 +43,7 @@ import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.ArcGISTiledElevationSource
 import com.arcgismaps.mapping.BasemapStyle
+import com.arcgismaps.mapping.GeoElement
 import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbol
 import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbolStyle
 import com.arcgismaps.mapping.view.Camera
@@ -83,10 +84,10 @@ fun MainScreen() {
         )
     }
 
-    // a CameraController holder
+    // remember a CameraController state
     var cameraController: CameraController by remember { mutableStateOf(GlobeCameraController()) }
 
-    // a SceneViewpointOperation
+    // remember a SceneViewpointOperation state
     var viewpointOperation: SceneViewpointOperation? by remember { mutableStateOf(null) }
 
     Scaffold (
@@ -141,7 +142,13 @@ fun MainScreen() {
             )
             ?: (cameraController as? GlobeCameraController)?.apply {
                 viewpointOperation = SceneViewpointOperation.AnimateCamera(
-                    Camera(34.05, -117.19, 10000000.0,0.0,0.0,0.0),
+                    Camera(
+                        latitude = 34.05,
+                        longitude = -117.19,
+                        altitude = 10000000.0,
+                        heading = 0.0,
+                        pitch = 0.0,
+                        roll = 0.0),
                     duration = 5.0.seconds
                     )
             }
