@@ -73,13 +73,14 @@ import java.time.Instant
  * @param selectionProperties the [SelectionProperties] used by the composable SceneView
  * @param attributionState specifies the attribution bar's visibility, text changed and layout changed events
  * @param cameraController the [CameraController] to manage the position, orientation, and movement of the camera
+ * @param analysisOverlays a collection of analysis overlays that render the results of 3D visual analysis on the composable SceneView
  * @param atmosphereEffect the effect applied to the scene's atmosphere
  * @param timeExtent the [TimeExtent] used by the composable SceneView
  * @param onTimeExtentChanged lambda invoked when the composable SceneView's [TimeExtent] is changed
  * @param spaceEffect the visual effect of outer space in the composable SceneView
- * @param sunTime the position of the sun in the scene view based on a specific date and time
- * @param sunLighting the type of ambient sunlight and shadows in the scene view
- * @param ambientLightColor the color of the composable SceneView's ambient light.
+ * @param sunTime the position of the sun in the composable SceneView based on a specific date and time
+ * @param sunLighting the type of ambient sunlight and shadows in the composable SceneView
+ * @param ambientLightColor the color of the composable SceneView's ambient light
  * @param onNavigationChanged lambda invoked when the navigation status of the composable SceneView has changed
  * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the composable SceneView has changed
  * @param onLayerViewStateChanged lambda invoked when the composable SceneView's layer view state is changed
@@ -110,6 +111,7 @@ public fun SceneView(
     selectionProperties: SelectionProperties = SelectionProperties(),
     attributionState: AttributionState = AttributionState(),
     cameraController: CameraController = GlobeCameraController(),
+    analysisOverlays: AnalysisOverlayCollection = rememberAnalysisOverlayCollection(),
     atmosphereEffect: AtmosphereEffect = AtmosphereEffect.HorizonOnly,
     timeExtent: TimeExtent? = null,
     onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
@@ -172,6 +174,7 @@ public fun SceneView(
     ViewpointUpdater(sceneView, viewpointOperation)
 
     GraphicsOverlaysUpdater(graphicsOverlays, sceneView)
+    AnalysisOverlaysUpdater(analysisOverlays, sceneView)
 
     AttributionStateHandler(sceneView, attributionState)
     ViewpointChangedStateHandler(sceneView, viewpointChangedState)
@@ -210,6 +213,42 @@ private fun ViewpointUpdater(
 ) {
     LaunchedEffect(viewpointOperation) {
         viewpointOperation?.execute(sceneView)
+    }
+}
+
+/**
+ * Update the view-based [SceneView]'s analysisOverlays property to reflect changes made to the
+ * [analysisOverlayCollection] based on the type of [AnalysisOverlayCollection.ChangedEvent]
+ *
+ * @since 200.4.0
+ */
+@Composable
+internal fun AnalysisOverlaysUpdater(
+    analysisOverlayCollection: AnalysisOverlayCollection,
+    sceneView: SceneView
+) {
+    LaunchedEffect(analysisOverlayCollection) {
+        // sync up the SceneView with the new analysis overlays
+        sceneView.analysisOverlays.clear()
+        analysisOverlayCollection.forEach {
+            sceneView.analysisOverlays.add(it)
+        }
+        // start observing analysisOverlays for subsequent changes
+        analysisOverlayCollection.changed.collect { changedEvent ->
+            when (changedEvent) {
+                // On AnalysisOverlay added:
+                is AnalysisOverlayCollection.ChangedEvent.Added ->
+                    sceneView.analysisOverlays.add(changedEvent.element)
+
+                // On AnalysisOverlay removed:
+                is AnalysisOverlayCollection.ChangedEvent.Removed ->
+                    sceneView.analysisOverlays.remove(changedEvent.element)
+
+                // On AnalysisOverlays cleared:
+                is AnalysisOverlayCollection.ChangedEvent.Cleared ->
+                    sceneView.analysisOverlays.clear()
+            }
+        }
     }
 }
 
@@ -335,4 +374,21 @@ private fun SceneViewEventHandler(
             }
         }
     }
+}
+
+/**
+ * Create and [remember] a [AnalysisOverlayCollection].
+ * [init] will be called when the [AnalysisOverlayCollection] is first created to configure its
+ * initial state.
+ *
+ * @param key invalidates the remembered AnalysisOverlayCollection if different from the previous composition
+ * @param init called when the [AnalysisOverlayCollection] is created to configure its initial state
+ * @since 200.4.0
+ */
+@Composable
+public inline fun rememberAnalysisOverlayCollection(
+    key: Any? = null,
+    crossinline init: AnalysisOverlayCollection.() -> Unit = {}
+): AnalysisOverlayCollection = remember(key) {
+    AnalysisOverlayCollection().apply(init)
 }
