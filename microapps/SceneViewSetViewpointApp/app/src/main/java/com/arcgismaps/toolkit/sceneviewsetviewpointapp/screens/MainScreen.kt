@@ -42,7 +42,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
@@ -56,9 +55,8 @@ import kotlin.time.Duration.Companion.seconds
 
 /**
  * Displays a composable [SceneView] and permits setting the viewpoint using options in a dropdown menu.
- * The dropdown menu options represent different methods of setting the viewpoint, and all of them center
- * on the same location. A circular progress indicator is displayed over the map while an operation
- * is in progress.
+ * The dropdown menu options represent different methods of setting the viewpoint.
+ * A circular progress indicator is displayed over the map while an operation is in progress.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,7 +76,7 @@ fun MainScreen() {
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
-                title = { Text("MapView Set Viewpoint App") },
+                title = { Text("SceneView Set Viewpoint App") },
                 actions = {
                     var actionsExpanded by remember { mutableStateOf(false) }
                     IconButton(onClick = { actionsExpanded = !actionsExpanded }) {
@@ -113,7 +111,7 @@ fun MainScreen() {
 }
 
 /**
- * A drop down menu providing [MapViewpointOperation]s for the composable [MapView].
+ * A drop down menu providing [SceneViewpointOperation]s for the composable [SceneView].
  */
 @Composable
 fun SetViewpointDropdownMenu(
@@ -126,6 +124,9 @@ fun SetViewpointDropdownMenu(
         listOf("Set", "SetAnimated", "SetCamera", "SetCameraAnimated", "SetBookmark")
     }
     val disneyLand = remember { Point(-117.9190, 33.8121, SpatialReference.wgs84()) }
+    val sofia = remember {
+        Point(23.321736, 42.697703, SpatialReference.wgs84())
+    }
     val catalina = remember {
         Point(
             -118.61832205396796,
@@ -146,7 +147,6 @@ fun SetViewpointDropdownMenu(
     val goldenGateBridgeCamera = remember { Camera(goldenGateBridge, 111.3, 71.7, 0.0) }
 
     val scale = remember { 170000.0 }
-//    val scale = remember { 3000.0 }
     val bookmark = remember {
         Bookmark(
             "disneyLand",
@@ -167,13 +167,15 @@ fun SetViewpointDropdownMenu(
                     val viewpointOperation = when (viewpointOperationName) {
                         "Set" -> SceneViewpointOperation.Set(Viewpoint(disneyLand, scale))
                         "SetAnimated" -> SceneViewpointOperation.Animate(
-                            Viewpoint(disneyLand, scale),
+                            Viewpoint(sofia, scale),
                             5.0.seconds
                         )
 
                         "SetCamera" -> SceneViewpointOperation.SetCamera(catalinaCamera)
-                        "SetCameraAnimated" -> SceneViewpointOperation.AnimateCamera(goldenGateBridgeCamera)
-//                        "SetCameraAnimated" -> SceneViewpointOperation.SetCamera(goldenGateBridgeCamera)
+                        "SetCameraAnimated" -> SceneViewpointOperation.AnimateCamera(
+                            goldenGateBridgeCamera,
+                            5.0.seconds
+                        )
 
                         "SetBookmark" -> SceneViewpointOperation.SetBookmark(bookmark)
 
