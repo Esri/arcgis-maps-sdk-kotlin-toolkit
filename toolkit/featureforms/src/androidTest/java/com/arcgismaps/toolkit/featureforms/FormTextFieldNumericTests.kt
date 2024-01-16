@@ -17,7 +17,6 @@
 package com.arcgismaps.toolkit.featureforms
 
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -49,7 +48,7 @@ import org.junit.Test
  * Tests for FormTextFields whose backing FormFeatureElement is associated with a numeric field and attribute type.
  */
 class FormTextFieldNumericTests {
-    private val helperSemanticLabel = "helper"
+    private val supportingTextSemanticLabel = "supporting text"
     private val outlinedTextFieldSemanticLabel = "outlined text field"
     
     private val featureForm by lazy {
@@ -103,22 +102,20 @@ class FormTextFieldNumericTests {
                 state = FormTextFieldState(
                     textFieldProperties,
                     scope = scope,
-                    context = LocalContext.current,
                     onEditValue = {
                         featureForm.editValue(integerField, it)
                         scope.launch { featureForm.evaluateExpressions() }
                     },
-                    validate = {integerField.getValidationErrors()}
+                    defaultValidator = {integerField.getValidationErrors()}
                 )
             )
         }
         val outlinedTextField = composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
         val text = "lorem ipsum"
         outlinedTextField.performTextInput(text)
-        val helper = composeTestRule.onNode(hasContentDescription(helperSemanticLabel), useUnmergedTree = true)
-        val helperText = helper.getTextString()
-        helper.assertIsDisplayed()
-        TestCase.assertEquals("Value must be a whole number", helperText)
+        val supportingText = composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true)
+        supportingText.assertIsDisplayed()
+        TestCase.assertEquals("Value must be a whole number", supportingText.getTextString())
     }
     
     /**
@@ -149,22 +146,20 @@ class FormTextFieldNumericTests {
                 state = FormTextFieldState(
                     textFieldProperties,
                     scope = scope,
-                    context = LocalContext.current,
                     onEditValue = {
                         featureForm.editValue(floatingPointField, it)
                         scope.launch { featureForm.evaluateExpressions() }
                     },
-                    validate = {floatingPointField.getValidationErrors()}
+                    defaultValidator = {floatingPointField.getValidationErrors()}
                 )
             )
         }
         val outlinedTextField = composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
         val text = "lorem ipsum"
         outlinedTextField.performTextInput(text)
-        val helper = composeTestRule.onNode(hasContentDescription(helperSemanticLabel), useUnmergedTree = true)
-        val helperText = helper.getTextString()
-        helper.assertIsDisplayed()
-        TestCase.assertEquals("Value must be a number", helperText)
+        val supportingText = composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true)
+        supportingText.assertIsDisplayed()
+        TestCase.assertEquals("Value must be a number", supportingText.getTextString())
     }
     
     companion object {

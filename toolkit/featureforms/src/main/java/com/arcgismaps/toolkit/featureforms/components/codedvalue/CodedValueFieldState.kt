@@ -61,18 +61,22 @@ internal open class CodedValueFieldProperties(
  * @param scope a [CoroutineScope] to start [StateFlow] collectors on.
  * @param onEditValue a callback to invoke when the user edits result in a change of value. This
  * is called on [CodedValueFieldState.onValueChanged].
+ * @param defaultValidator the default validator that returns the list of validation errors. This
+ * is called in [CodedValueFieldState.validate].
  */
 @Stable
 internal open class CodedValueFieldState(
     properties: CodedValueFieldProperties,
     initialValue: String = properties.value.value,
     scope: CoroutineScope,
-    onEditValue: ((Any?) -> Unit)
+    onEditValue: ((Any?) -> Unit),
+    defaultValidator: () -> List<Throwable>
 ) : BaseFieldState<String>(
     properties = properties,
     scope = scope,
     initialValue = initialValue,
-    onEditValue = onEditValue
+    onEditValue = onEditValue,
+    defaultValidator = defaultValidator
 ) {
     /**
      * The list of coded values associated with this field.
@@ -105,6 +109,7 @@ internal open class CodedValueFieldState(
     }
     
     override fun onValueChanged(input: String) {
+        wasFocused = true
         val code = codedValues.firstOrNull {
             it.name == input
         }?.code
@@ -124,7 +129,8 @@ internal open class CodedValueFieldState(
         ): Saver<CodedValueFieldState, Any> = listSaver(
             save = {
                 listOf(
-                    it.value.value
+                    it.value.value.data,
+                    it.wasFocused
                 )
             },
             restore = { list ->
@@ -143,13 +149,16 @@ internal open class CodedValueFieldState(
                         noValueLabel = input.noValueLabel,
                         fieldType = form.fieldType(formElement)
                     ),
-                    initialValue = list[0],
+                    initialValue = list[0] as String,
                     scope = scope,
                     onEditValue = { newValue ->
                         form.editValue(formElement, newValue)
                         scope.launch { form.evaluateExpressions() }
-                    }
-                )
+                    },
+                    defaultValidator = formElement::getValidationErrors
+                ).apply {
+                    onFocusChanged(list[1] as Boolean)
+                }
             }
         )
     }
@@ -182,6 +191,7 @@ internal fun rememberCodedValueFieldState(
         onEditValue = {
             form.editValue(field, it)
             scope.launch { form.evaluateExpressions() }
-        }
+        },
+        defaultValidator = field::getValidationErrors
     )
 }

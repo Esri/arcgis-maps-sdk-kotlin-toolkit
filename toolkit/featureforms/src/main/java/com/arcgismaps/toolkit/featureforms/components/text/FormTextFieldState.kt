@@ -16,12 +16,8 @@
 
 package com.arcgismaps.toolkit.featureforms.components.text
 
-import android.content.Context
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -33,7 +29,6 @@ import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
-import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.FieldProperties
 import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState
@@ -46,8 +41,7 @@ import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.
 import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.NoError
 import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.NotANumber
 import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.NotAWholeNumber
-import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.Required
-import com.arcgismaps.toolkit.featureforms.components.formelement.FieldElement
+import com.arcgismaps.toolkit.featureforms.components.datetime.DateTimeFieldState
 import com.arcgismaps.toolkit.featureforms.utils.asDoubleTuple
 import com.arcgismaps.toolkit.featureforms.utils.asLongTuple
 import com.arcgismaps.toolkit.featureforms.utils.domain
@@ -58,10 +52,7 @@ import com.arcgismaps.toolkit.featureforms.utils.isIntegerType
 import com.arcgismaps.toolkit.featureforms.utils.isNumeric
 import com.arcgismaps.toolkit.featureforms.utils.valueFlow
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 
 internal class TextFieldProperties(
@@ -87,158 +78,44 @@ internal class TextFieldProperties(
  * @param initialValue optional initial value to set for this field. It is set to the value of
  * [TextFieldProperties.value] by default.
  * @param scope a [CoroutineScope] to start [StateFlow] collectors on.
- * @param context a Context scoped to the lifetime of a call to the [FieldElement] composable function.
  * @param onEditValue a callback to invoke when the user edits result in a change of value. This
  * is called on [FormTextFieldState.onValueChanged].
+ * @param defaultValidator the default validator that returns the list of validation errors. This
+ * is called in [FormTextFieldState.validate].
  */
 @Stable
 internal class FormTextFieldState(
     properties: TextFieldProperties,
     initialValue: String = properties.value.value,
     scope: CoroutineScope,
-    private val context: Context,
     onEditValue: (Any?) -> Unit,
-    validate: () -> List<Throwable>
+    defaultValidator: () -> List<Throwable>
 ) : BaseFieldState<String>(
     properties = properties,
     initialValue = initialValue,
     scope = scope,
     onEditValue = onEditValue,
-    validate = validate
+    defaultValidator = defaultValidator
 ) {
     // indicates singleLine only if TextBoxFeatureFormInput
     val singleLine = properties.singleLine
-    
+
     // fetch the minLength based on the featureFormElement.inputType
     val minLength = properties.minLength
-    
+
     // fetch the maxLength based on the featureFormElement.inputType
     val maxLength = properties.maxLength
-    
-    private var hasBeenFocused: Boolean = false
-    
-    // supporting text will depend on multiple other states. If there is an error, it will display
-    // error message. Otherwise description is displayed, unless it is empty in which case
-    // the helper text is displayed when the field is focused.
-    private val _supportingText: MutableState<String> = mutableStateOf(description)
-    val supportingText: State<String> = _supportingText
-    
-    private val _isFocused: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val isFocused: StateFlow<Boolean> = _isFocused.asStateFlow()
-    
-    private val _hasError = mutableStateOf(false)
-    private val _supportingTextIsErrorMessage = mutableStateOf(false)
-    val supportingTextIsErrorMessage: State<Boolean> = _supportingTextIsErrorMessage
+
     /**
      * The domain of the element's field.
      */
     val domain: Domain? = properties.domain
-    
+
     /**
      * The FieldType of the element's field.
      */
     val fieldType: FieldType = properties.fieldType
-    
-    private val errorMessages: MutableMap<ValidationErrorState, String> by lazy {
-        val min = if (domain is RangeDomain) {
-            (domain.minValue as? Number)?.format()
-        } else {
-            ""
-        }
-        
-        val max = if (domain is RangeDomain) {
-            (domain.maxValue as? Number)?.format()
-        } else {
-            ""
-        }
-        
-        mutableMapOf(
-            Required to context.getString(R.string.required),
-            MaxCharConstraint to context.getString(R.string.maximum_n_chars, if (maxLength > 0) maxLength else 254),
-            ExactCharConstraint to context.getString(R.string.enter_n_chars, minLength),
-            MinMaxCharConstraint to context.getString(R.string.enter_min_to_max_chars, minLength, maxLength),
-            MinNumericConstraint to context.getString(R.string.less_than_min_value, min),
-            MaxNumericConstraint to context.getString(R.string.exceeds_max_value, max),
-            MinMaxNumericConstraint to context.getString(R.string.numeric_range_helper_text, min, max),
-            NotANumber to context.getString(R.string.value_must_be_a_number),
-            NotAWholeNumber to context.getString(R.string.value_must_be_a_whole_number)
-        )
-    }
-    
-    // build helper text
-    private val helperText =
-        if (fieldType.isNumeric) {
-            if (domain != null && domain is RangeDomain) {
-                val min = domain.minValue
-                val max = domain.maxValue
-                // to format the range of either integer or floating point
-                // values without a lot of logic, they are formatted as strings.
-                if (min is Number && max is Number) {
-                    context.getString(R.string.numeric_range_helper_text, min.format(), max.format())
-                } else if (min is Number) {
-                    context.getString(R.string.less_than_min_value, min.format())
-                } else if (max is Number) {
-                    context.getString(R.string.exceeds_max_value, max.format())
-                } else {
-                    // not likely to happen.
-                    ""
-                }
-            } else {
-                ""
-            }
-        } else {
-            if (minLength > 0 && maxLength > 0) {
-                if (minLength == maxLength) {
-                    context.getString(R.string.enter_n_chars, minLength)
-                } else {
-                    context.getString(R.string.enter_min_to_max_chars, minLength, maxLength)
-                }
-            } else if (maxLength > 0) {
-                context.getString(R.string.maximum_n_chars, maxLength)
-            } else {
-                context.getString(R.string.maximum_n_chars, 254)
-            }
-        }
-    
-    init {
-        scope.launch {
-            value.drop(1).collect { newValue ->
-                updateValidation(newValue)
-            }
-        }
-        scope.launch {
-            isRequired.drop(1).collect {
-                updateValidation(value.value)
-            }
-        }
-        scope.launch {
-            isFocused.drop(1).collect {
-                if (it) {
-                    hasBeenFocused = true
-                }
-                updateValidation(value.value)
-            }
-        }
-    }
-    
-    private fun updateValidation(value: String) {
-        val errors = validate(value)
-        val errorToDisplay = errorMessageToDisplay(value, errors)
-        _supportingTextIsErrorMessage.value = errorToDisplay != NoError
-        _supportingText.value = if (errorToDisplay != NoError) {
-            errorMessages[errorToDisplay] ?: throw IllegalStateException("validation error must have a message")
-        } else {
-            description.ifEmpty {
-                if (_isFocused.value && isEditable.value) {
-                    helperText
-                } else {
-                    ""
-                }
-            }
-        }
-        _hasError.value = errors.isNotEmpty()
-    }
-    
+
     private fun validateNumericRange(numberVal: Int): ValidationErrorState {
         require(fieldType.isIntegerType)
         return if (domain != null && domain is RangeDomain) {
@@ -247,19 +124,19 @@ internal class FormTextFieldState(
                 if (numberVal in min..max) {
                     NoError
                 } else {
-                    MinMaxNumericConstraint
+                    MinMaxNumericConstraint(min.format(), max.format())
                 }
             } else if (min != null) {
                 if (min <= numberVal) {
                     NoError
                 } else {
-                    MinNumericConstraint
+                    MinNumericConstraint(min.format())
                 }
             } else if (max != null) {
                 if (numberVal <= max) {
                     NoError
                 } else {
-                    MaxNumericConstraint
+                    MaxNumericConstraint(max.format())
                 }
             } else {
                 NoError
@@ -268,7 +145,7 @@ internal class FormTextFieldState(
             NoError
         }
     }
-    
+
     private fun validateNumericRange(numberVal: Double): ValidationErrorState {
         require(fieldType.isFloatingPoint)
         return if (domain != null && domain is RangeDomain) {
@@ -277,19 +154,19 @@ internal class FormTextFieldState(
                 if (numberVal in min..max) {
                     NoError
                 } else {
-                    MinMaxNumericConstraint
+                    MinMaxNumericConstraint(min.format(), max.format())
                 }
             } else if (min != null) {
                 if (min <= numberVal) {
                     NoError
                 } else {
-                    MinNumericConstraint
+                    MinNumericConstraint(min.format())
                 }
             } else if (max != null) {
                 if (numberVal <= max) {
                     NoError
                 } else {
-                    MaxNumericConstraint
+                    MaxNumericConstraint(max.format())
                 }
             } else {
                 NoError
@@ -298,107 +175,71 @@ internal class FormTextFieldState(
             NoError
         }
     }
-    
-    private fun errorMessageToDisplay(
-        value: String,
-        validationErrors: List<ValidationErrorState>
-    ): ValidationErrorState =
-        if (validationErrors.isEmpty() || !isEditable.value) {
-            NoError
-        } else if (isFocused.value) {
-            if (value.isEmpty()) {
-                // if focused and empty, don't show the "Required" error or numeric parse errors
-                validationErrors.firstOrNull { it != Required && it != NotANumber && it != NotAWholeNumber } ?: NoError
-            } else {
-                // if non empty, focused, show any error other than required (the Required error shouldn't be in the list)
-                validationErrors.first()
-            }
-        } else if (hasBeenFocused) {
-            if (value.isEmpty()) {
-                if (validationErrors.contains(Required)) {
-                    // show any non required and non parse error before showing a Required error
-                    validationErrors.firstOrNull { it != Required && it != NotANumber && it != NotAWholeNumber  } ?: Required
-                } else {
-                    // don't show parse errors when empty and not required (and when required, show required as above)
-                    validationErrors.firstOrNull { it != NotANumber && it != NotAWholeNumber  } ?: NoError
-                }
-            } else {
-                // if non empty, unfocused, show any error other than required (the Required error shouldn't be in the list)
-                validationErrors.first()
-            }
-        } else {
-            // never been focused
-            NoError
-        }
-    
-    private fun validate(value: String): List<ValidationErrorState> {
-        val errors = validate()
-        val ret = mutableListOf<ValidationErrorState>()
-        if (errors.any { it is FeatureFormValidationException.RequiredException }) {
-            ret += Required
-        }
+
+    override fun validate(): List<ValidationErrorState> {
+        val currentValue = _mergedValue.value
+        val coreErrors = defaultValidator()
+        val errors = mutableListOf<ValidationErrorState>()
+        errors += super.validate()
 
         if (!fieldType.isNumeric) {
-            if (errors.any { it is FeatureFormValidationException.MinCharConstraintException }
-                || errors.any { it is FeatureFormValidationException.MaxCharConstraintException }
+            if (coreErrors.any { it is FeatureFormValidationException.MinCharConstraintException }
+                || coreErrors.any { it is FeatureFormValidationException.MaxCharConstraintException }
             ) {
                 if (minLength > 0 && maxLength > 0) {
                     if (minLength == maxLength) {
-                        ret += ExactCharConstraint
+                        errors += ExactCharConstraint(minLength)
                     } else {
-                        ret += MinMaxCharConstraint
+                        errors += MinMaxCharConstraint(minLength, maxLength)
                     }
                 } else {
-                    ret += MaxCharConstraint
+                    errors += MaxCharConstraint(maxLength)
                 }
             }
         } else {
             if (fieldType.isIntegerType) {
-                val numberVal = value.toIntOrNull()
+                val numberVal = currentValue.toIntOrNull()
                 if (numberVal == null) {
-                    ret += NotAWholeNumber
+                    errors += NotAWholeNumber
                 } else {
                     val error = validateNumericRange(numberVal)
                     if (error != NoError) {
-                        ret += error
+                        errors += error
                     }
                 }
             } else {
-                val numberVal = value.toDoubleOrNull()
+                val numberVal = currentValue.toDoubleOrNull()
                 if (numberVal == null) {
-                    ret += NotANumber
+                    errors += NotANumber
                 } else {
                     val error = validateNumericRange(numberVal)
                     if (error != NoError) {
-                        ret += error
+                        errors += error
                     }
                 }
             }
         }
 
-        return ret
+        return errors
     }
-    
-    fun onFocusChanged(focus: Boolean) {
-        _isFocused.value = focus
-    }
-    
+
     companion object {
         fun Saver(
             formElement: FieldFormElement,
             form: FeatureForm,
-            context: Context,
             scope: CoroutineScope
         ): Saver<FormTextFieldState, Any> = listSaver(
             save = {
                 listOf(
-                    it.value.value,
-                    it.hasBeenFocused
+                    it.value.value.data,
+                    it.wasFocused
                 )
             },
             restore = { list ->
-                val minLength = (formElement.input as? TextBoxFormInput)?.minLength ?: (formElement.input as TextAreaFormInput).minLength
-                val maxLength = (formElement.input as? TextBoxFormInput)?.maxLength ?: (formElement.input as TextAreaFormInput).maxLength
+                val minLength = (formElement.input as? TextBoxFormInput)?.minLength
+                    ?: (formElement.input as TextAreaFormInput).minLength
+                val maxLength = (formElement.input as? TextBoxFormInput)?.maxLength
+                    ?: (formElement.input as TextAreaFormInput).maxLength
                 FormTextFieldState(
                     properties = TextFieldProperties(
                         label = formElement.label,
@@ -416,16 +257,14 @@ internal class FormTextFieldState(
                     ),
                     initialValue = list[0] as String,
                     scope = scope,
-                    context = context,
                     onEditValue = { newValue ->
                         form.editValue(formElement, newValue)
                         scope.launch { form.evaluateExpressions() }
                     },
-                    validate = { formElement.getValidationErrors() }
+                    defaultValidator = { formElement.getValidationErrors() }
                 ).apply {
                     // focus is lost on rotation. https://devtopia.esri.com/runtime/apollo/issues/230
-                    hasBeenFocused = list[1] as Boolean
-                    updateValidation(list[0] as String)
+                    onFocusChanged(list[1] as Boolean)
                 }
             }
         )
@@ -438,10 +277,9 @@ internal fun rememberFormTextFieldState(
     minLength: Int,
     maxLength: Int,
     form: FeatureForm,
-    context: Context,
     scope: CoroutineScope
 ): FormTextFieldState = rememberSaveable(
-    saver = FormTextFieldState.Saver(field, form, context, scope)
+    saver = FormTextFieldState.Saver(field, form, scope)
 ) {
     FormTextFieldState(
         properties = TextFieldProperties(
@@ -459,12 +297,11 @@ internal fun rememberFormTextFieldState(
             maxLength = maxLength
         ),
         scope = scope,
-        context = context,
         onEditValue = {
             form.editValue(field, it)
             scope.launch { form.evaluateExpressions() }
         },
-        validate = { field.getValidationErrors() }
+        defaultValidator = { field.getValidationErrors() }
     )
 }
 
