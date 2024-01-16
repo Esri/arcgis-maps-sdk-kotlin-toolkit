@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Esri
+ * Copyright 2024 Esri
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,30 +20,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
+import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
-import com.arcgismaps.mapping.featureforms.RadioButtonsFormInput
 import com.arcgismaps.toolkit.featureforms.utils.editValue
 import com.arcgismaps.toolkit.featureforms.utils.fieldType
 import com.arcgismaps.toolkit.featureforms.utils.valueFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-internal typealias RadioButtonFieldProperties = CodedValueFieldProperties
-
-internal class RadioButtonFieldState(
-    properties: RadioButtonFieldProperties,
+/**
+ * A concrete class for use with a [ComboBoxField].
+ */
+internal class ComboBoxFieldState(
+    properties: CodedValueFieldProperties,
     initialValue: String = properties.value.value,
     scope: CoroutineScope,
     onEditValue: ((Any?) -> Unit),
     defaultValidator: () -> List<Throwable>
-) : CodedValueFieldState(
-    properties = properties,
-    initialValue = initialValue,
-    scope = scope,
-    onEditValue = onEditValue,
-    defaultValidator = defaultValidator
-) {
+) : CodedValueFieldState(properties, initialValue, scope, onEditValue, defaultValidator) {
 
     init {
         // Start observing the properties. Since this method cannot be invoked from any open base
@@ -51,39 +46,26 @@ internal class RadioButtonFieldState(
         observeProperties()
     }
 
-    /**
-     * Returns true if the current value of [value] is not in the [codedValues]. This should
-     * trigger a fallback to a ComboBox. If the [value] is empty then this returns false.
-     */
-    fun shouldFallback(): Boolean {
-        return if (value.value.data.isEmpty()) {
-            false
-        } else {
-            !codedValues.any {
-                it.name == value.value.data
-            }
-        }
-    }
-
     companion object {
-
         /**
-         * Default saver for the [RadioButtonFieldState].
+         * The default saver for a [ComboBoxFieldState] implemented for a [ComboBoxFormInput] type.
+         * Hence for [formElement] the [FieldFormElement.input] type must be a [ComboBoxFormInput].
          */
         fun Saver(
             formElement: FieldFormElement,
             form: FeatureForm,
             scope: CoroutineScope
-        ): Saver<RadioButtonFieldState, Any> = listSaver(
+        ): Saver<ComboBoxFieldState, Any> = listSaver(
             save = {
                 listOf(
-                    it.value.value.data
+                    it.value.value.data,
+                    it.wasFocused
                 )
             },
             restore = { list ->
-                val input = formElement.input as RadioButtonsFormInput
-                RadioButtonFieldState(
-                    properties = RadioButtonFieldProperties(
+                val input = formElement.input as ComboBoxFormInput
+                ComboBoxFieldState(
+                    properties = CodedValueFieldProperties(
                         label = formElement.label,
                         placeholder = formElement.hint,
                         description = formElement.description,
@@ -91,35 +73,37 @@ internal class RadioButtonFieldState(
                         editable = formElement.isEditable,
                         required = formElement.isRequired,
                         visible = formElement.isVisible,
-                        fieldType = form.fieldType(formElement),
                         codedValues = input.codedValues,
                         showNoValueOption = input.noValueOption,
-                        noValueLabel = input.noValueLabel
+                        noValueLabel = input.noValueLabel,
+                        fieldType = form.fieldType(formElement)
                     ),
-                    initialValue = list[0],
+                    initialValue = list[0] as String,
                     scope = scope,
                     onEditValue = { newValue ->
                         form.editValue(formElement, newValue)
                         scope.launch { form.evaluateExpressions() }
                     },
                     defaultValidator = formElement::getValidationErrors
-                )
+                ).apply {
+                    onFocusChanged(list[1] as Boolean)
+                }
             }
         )
     }
 }
 
 @Composable
-internal fun rememberRadioButtonFieldState(
+internal fun rememberComboBoxFieldState(
     field: FieldFormElement,
     form: FeatureForm,
     scope: CoroutineScope
-): RadioButtonFieldState = rememberSaveable(
-    saver = RadioButtonFieldState.Saver(field, form, scope)
+): ComboBoxFieldState = rememberSaveable(
+    saver = ComboBoxFieldState.Saver(field, form, scope)
 ) {
-    val input = field.input as RadioButtonsFormInput
-    RadioButtonFieldState(
-        properties = RadioButtonFieldProperties(
+    val input = field.input as ComboBoxFormInput
+    ComboBoxFieldState(
+        properties = CodedValueFieldProperties(
             label = field.label,
             placeholder = field.hint,
             description = field.description,
@@ -127,10 +111,10 @@ internal fun rememberRadioButtonFieldState(
             editable = field.isEditable,
             required = field.isRequired,
             visible = field.isVisible,
-            fieldType = form.fieldType(field),
             codedValues = input.codedValues,
             showNoValueOption = input.noValueOption,
-            noValueLabel = input.noValueLabel
+            noValueLabel = input.noValueLabel,
+            fieldType = form.fieldType(field)
         ),
         scope = scope,
         onEditValue = {

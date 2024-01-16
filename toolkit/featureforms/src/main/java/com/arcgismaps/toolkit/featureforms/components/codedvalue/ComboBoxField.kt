@@ -349,7 +349,7 @@ private fun ComboBoxDialogPreview() {
 @Composable
 private fun ComboBoxPreview() {
     val scope = rememberCoroutineScope()
-    val state = CodedValueFieldState(
+    val state = ComboBoxFieldState(
         properties = CodedValueFieldProperties(
             label = "Types",
             placeholder = "",

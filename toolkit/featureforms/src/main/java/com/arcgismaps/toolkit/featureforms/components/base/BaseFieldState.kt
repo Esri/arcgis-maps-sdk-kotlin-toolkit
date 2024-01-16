@@ -50,9 +50,8 @@ internal data class Value<T>(
  * Base state class for any Field within a feature form. It provides the default set of properties
  * that are common to all [FieldFormElement]'s.
  *
- * Run [observeProperties] to start observing the [isEditable], [isRequired] and the calculated
- * value changed flow from the [FieldProperties.value]. This also runs and generates any
- * validation errors when any of those properties change.
+ * Run [observeProperties] to start observing the [isEditable], [isRequired] and the [isFocused]
+ * flows. This also runs and generates any validation errors when any of those properties change.
  *
  * @param properties the [FieldProperties] associated with this state.
  * @param initialValue optional initial value to set for this field. It is set to the value of
@@ -148,7 +147,8 @@ internal abstract class BaseFieldState<T>(
     }
 
     /**
-     * Runs and updates the validation using [validate] and [filterErrors].
+     * Runs and updates the validation using [validate] and [filterErrors]. Avoid calling this
+     * method in any open/abstract class constructors since it directly invokes open members.
      */
     protected fun updateValidation() {
         val currentValue = value.value.data
@@ -159,7 +159,9 @@ internal abstract class BaseFieldState<T>(
 
     /**
      * Start observing the [isEditable], [isRequired] and [isFocused] flows and update
-     * the validation to generate any validation errors.
+     * the validation to generate any validation errors. This method must NOT be invoked from
+     * any initializer blocks of open/abstract classes since it indirectly invokes an open member
+     * using [updateValidation].
      */
     protected fun observeProperties() {
         // launch coroutines only once using an atomic boolean to check if they have already been

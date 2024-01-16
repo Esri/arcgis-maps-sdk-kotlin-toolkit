@@ -116,7 +116,8 @@ internal class FormTextFieldState(
     val fieldType: FieldType = properties.fieldType
 
     init {
-        // start observing the properties
+        // Start observing the properties. Since this method cannot be invoked from any open base
+        // class initializer blocks, it is safe to invoke it here.
         observeProperties()
     }
 

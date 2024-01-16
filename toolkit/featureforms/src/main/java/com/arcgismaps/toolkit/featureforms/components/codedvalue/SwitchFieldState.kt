@@ -106,7 +106,8 @@ internal class SwitchFieldState(
     val fallback: Boolean = properties.fallback
 
     init {
-        // start observing the properties
+        // Start observing the properties. Since this method cannot be invoked from any open base
+        // class initializer blocks, it is safe to invoke it here.
         observeProperties()
     }
 

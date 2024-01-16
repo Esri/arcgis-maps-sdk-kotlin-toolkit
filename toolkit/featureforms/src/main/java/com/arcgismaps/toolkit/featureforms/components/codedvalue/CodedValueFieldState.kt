@@ -16,27 +16,16 @@
 
 package com.arcgismaps.toolkit.featureforms.components.codedvalue
 
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.listSaver
-import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.data.CodedValue
 import com.arcgismaps.data.FieldType
-import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
-import com.arcgismaps.mapping.featureforms.FeatureForm
-import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.FieldProperties
 import com.arcgismaps.toolkit.featureforms.components.base.Value
 import com.arcgismaps.toolkit.featureforms.components.text.TextFieldProperties
-import com.arcgismaps.toolkit.featureforms.utils.editValue
-import com.arcgismaps.toolkit.featureforms.utils.fieldType
-import com.arcgismaps.toolkit.featureforms.utils.valueFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 
 internal open class CodedValueFieldProperties(
     label: String,
@@ -53,7 +42,7 @@ internal open class CodedValueFieldProperties(
 ) : FieldProperties<String>(label, placeholder, description, value, required, editable, visible)
 
 /**
- * A class to handle the state of a [ComboBoxField]. Essential properties are inherited
+ * A class to handle the state of any coded value type. Essential properties are inherited
  * from the [BaseFieldState].
  *
  * @param properties the [CodedValueFieldProperties] associated with this state.
@@ -66,7 +55,7 @@ internal open class CodedValueFieldProperties(
  * is called in [CodedValueFieldState.validate].
  */
 @Stable
-internal open class CodedValueFieldState(
+internal abstract class CodedValueFieldState(
     properties: CodedValueFieldProperties,
     initialValue: String = properties.value.value,
     scope: CoroutineScope,
@@ -94,16 +83,11 @@ internal open class CodedValueFieldState(
      * The custom label to use if [showNoValueOption] is enabled.
      */
     val noValueLabel: String = properties.noValueLabel
-    
+
     /**
      * The FieldType of the element's Field.
      */
     val fieldType: FieldType = properties.fieldType
-
-    init {
-        // start observing the properties
-        observeProperties()
-    }
 
     /**
      * Returns the name of the [code] if it is present in [codedValues] else returns null.
@@ -113,7 +97,7 @@ internal open class CodedValueFieldState(
             it.code.toString() == code.toString()
         }?.name
     }
-    
+
     override fun onValueChanged(input: String) {
         wasFocused = true
         val code = codedValues.firstOrNull {
@@ -123,82 +107,4 @@ internal open class CodedValueFieldState(
         _value.value = Value(input)
         updateValidation()
     }
-
-    companion object {
-        /**
-         * The default saver for a [CodedValueFieldState] implemented for a [ComboBoxFormInput] type.
-         * Hence for [formElement] the [FieldFormElement.input] type must be a [ComboBoxFormInput].
-         */
-        fun Saver(
-            formElement: FieldFormElement,
-            form: FeatureForm,
-            scope: CoroutineScope
-        ): Saver<CodedValueFieldState, Any> = listSaver(
-            save = {
-                listOf(
-                    it.value.value.data,
-                    it.wasFocused
-                )
-            },
-            restore = { list ->
-                val input = formElement.input as ComboBoxFormInput
-                CodedValueFieldState(
-                    properties = CodedValueFieldProperties(
-                        label = formElement.label,
-                        placeholder = formElement.hint,
-                        description = formElement.description,
-                        value = formElement.valueFlow(scope),
-                        editable = formElement.isEditable,
-                        required = formElement.isRequired,
-                        visible = formElement.isVisible,
-                        codedValues = input.codedValues,
-                        showNoValueOption = input.noValueOption,
-                        noValueLabel = input.noValueLabel,
-                        fieldType = form.fieldType(formElement)
-                    ),
-                    initialValue = list[0] as String,
-                    scope = scope,
-                    onEditValue = { newValue ->
-                        form.editValue(formElement, newValue)
-                        scope.launch { form.evaluateExpressions() }
-                    },
-                    defaultValidator = formElement::getValidationErrors
-                ).apply {
-                    onFocusChanged(list[1] as Boolean)
-                }
-            }
-        )
-    }
-}
-
-@Composable
-internal fun rememberCodedValueFieldState(
-    field: FieldFormElement,
-    form: FeatureForm,
-    scope: CoroutineScope
-): CodedValueFieldState = rememberSaveable(
-    saver = CodedValueFieldState.Saver(field, form, scope)
-) {
-    val input = field.input as ComboBoxFormInput
-    CodedValueFieldState(
-        properties = CodedValueFieldProperties(
-            label = field.label,
-            placeholder = field.hint,
-            description = field.description,
-            value = field.valueFlow(scope),
-            editable = field.isEditable,
-            required = field.isRequired,
-            visible = field.isVisible,
-            codedValues = input.codedValues,
-            showNoValueOption = input.noValueOption,
-            noValueLabel = input.noValueLabel,
-            fieldType = form.fieldType(field)
-        ),
-        scope = scope,
-        onEditValue = {
-            form.editValue(field, it)
-            scope.launch { form.evaluateExpressions() }
-        },
-        defaultValidator = field::getValidationErrors
-    )
 }

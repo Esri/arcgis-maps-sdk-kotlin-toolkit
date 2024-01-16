@@ -82,7 +82,8 @@ internal class DateTimeFieldState(
     val shouldShowTime: Boolean = properties.shouldShowTime
 
     init {
-        // start observing the properties
+        // Start observing the properties. Since this method cannot be invoked from any open base
+        // class initializer blocks, it is safe to invoke it here.
         observeProperties()
     }
     
