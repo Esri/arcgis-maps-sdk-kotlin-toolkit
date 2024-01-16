@@ -128,6 +128,17 @@ internal abstract class BaseFieldState<T>(
      */
     private var isObserving = AtomicBoolean(false)
 
+    init {
+        // start listening to calculated value updates immediately
+        scope.launch {
+            // update the current value when the calculated value changes
+            // calculated properties do not get validated
+            _calculatedValue.collect {
+                _value.value = Value(it)
+            }
+        }
+    }
+
     /**
      * Changes the current focus state for the field. Use [isFocused] to read the value.
      */
@@ -137,17 +148,17 @@ internal abstract class BaseFieldState<T>(
     }
 
     /**
-     * Runs and updates the validation using [validate] and [filter].
+     * Runs and updates the validation using [validate] and [filterErrors].
      */
     protected fun updateValidation() {
         val currentValue = value.value.data
-        val error = filter(validate())
+        val error = filterErrors(validate())
         // update the value with the validation error.
         _value.value = Value(currentValue, error)
     }
 
     /**
-     * Start observing the [isEditable], [isRequired] and [_calculatedValue] flows and update
+     * Start observing the [isEditable], [isRequired] and [isFocused] flows and update
      * the validation to generate any validation errors.
      */
     protected fun observeProperties() {
@@ -172,13 +183,6 @@ internal abstract class BaseFieldState<T>(
                     updateValidation()
                 }
             }
-            scope.launch {
-                // update the current value when the calculated value changes
-                // calculated properties do not get validated
-                _calculatedValue.collect {
-                    _value.value = Value(it)
-                }
-            }
         }
     }
 
@@ -190,7 +194,7 @@ internal abstract class BaseFieldState<T>(
      * @param errors the list of validation errors
      * @return A single validation error
      */
-    private fun filter(errors: List<ValidationErrorState>): ValidationErrorState {
+    private fun filterErrors(errors: List<ValidationErrorState>): ValidationErrorState {
         // if editable
         return if (errors.isNotEmpty() && isEditable.value) {
             // if it has been focused
