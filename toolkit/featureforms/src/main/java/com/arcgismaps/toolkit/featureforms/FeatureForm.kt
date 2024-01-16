@@ -161,7 +161,9 @@ private fun FeatureFormBody(
         Divider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
         // form content
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .semantics { contentDescription = "lazy column" },
             state = lazyListState
         ) {
             states.forEach { entry ->
