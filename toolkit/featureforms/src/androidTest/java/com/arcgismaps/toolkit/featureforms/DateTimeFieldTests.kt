@@ -17,10 +17,8 @@
 package com.arcgismaps.toolkit.featureforms
 
 import android.content.Context
-import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -146,7 +144,6 @@ class DateTimeFieldTests {
         val dialogSurface =
             composeTestRule.onNodeWithContentDescription("DateTimePickerDialogSurface", useUnmergedTree = true)
         dialogSurface.assertIsDisplayed()
-        saveScreenshot("xx",  dialogSurface.captureToImage().asAndroidBitmap())
         val today = dialogSurface.onChildWithContentDescription("current date or time button")
         today.assertIsDisplayed()
         val helperTextInDialog = dialogSurface.onChildWithText("Date Entry is Required", true)
