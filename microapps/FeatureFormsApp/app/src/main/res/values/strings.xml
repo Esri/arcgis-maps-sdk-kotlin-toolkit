@@ -28,4 +28,8 @@
     <string name="value_must_be_within_domain">Value must be within domain</string>
     <string name="required">Required</string>
     <string name="unknown_error">Unknown Error</string>
+    <string name="the_form_has_errors">The Form has errors</string>
+    <string name="errors_must_be_fixed_to_submit_this_form">Errors must be fixed to submit this form</string>
+    <string name="attributes_failed">%1$s attributes failed.</string>
+    <string name="view">View</string>
 </resources>

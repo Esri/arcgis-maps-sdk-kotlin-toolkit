@@ -2,6 +2,7 @@ package com.arcgismaps.toolkit.featureformsapp.screens.map
 
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -14,10 +15,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,6 +38,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -45,7 +47,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
@@ -60,7 +61,6 @@ import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetLayout
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetValue
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.StandardBottomSheet
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.rememberStandardBottomSheetState
-import com.arcgismaps.toolkit.featureformsapp.screens.login.verticalScrollbar
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -97,7 +97,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
             // being shown and is in edit mode
             TopFormBar(
                 title = mapViewModel.portalItem.title,
-                editingMode = uiState is UIState.Editing,
+                editingMode = uiState !is UIState.NotEditing,
                 onClose = {
                     scope.launch { mapViewModel.rollbackEdits() }
                 },
@@ -105,7 +105,12 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                     //SubmitForm(mapViewModel = mapViewModel, featureForm = (uiState as UIState.Editing).featureForm)
                     scope.launch {
                         mapViewModel.commitEdits().onFailure {
-                            Log.e("TAG", "MapScreen: $it")
+                            Log.w("Forms", "Applying edits failed : ${it.message}")
+                            Toast.makeText(
+                                context,
+                                "Applying edits failed : ${it.message}",
+                                Toast.LENGTH_LONG
+                            ).show()
                         }
                     }
                 }) {
@@ -159,7 +164,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
         }
     }
     if (uiState is UIState.Committing) {
-        SubmitForm(errors = (uiState as UIState.Committing).errors) {
+        SubmitForm(uiState = (uiState as UIState.Committing)) {
             mapViewModel.cancelCommit()
         }
     }
@@ -207,10 +212,29 @@ fun TopFormBar(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SubmitForm(errors: List<ErrorInfo>, onDismissRequest: () -> Unit) {
-    if (errors.isNotEmpty()) {
-        val lazyListState = rememberLazyListState()
+private fun SubmitForm(uiState: UIState.Committing, onDismissRequest: () -> Unit) {
+    val errors = uiState.errors
+    if (errors.isEmpty()) {
+        // show a progress dialog if no errors are present
+        AlertDialog(
+            onDismissRequest = { /* cannot be dismissed */ },
+        ) {
+            Card(modifier = Modifier.wrapContentSize()) {
+                Column(
+                    modifier = Modifier.padding(15.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    CircularProgressIndicator(modifier = Modifier.size(50.dp), strokeWidth = 5.dp)
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(text = "Saving..")
+                }
+            }
+        }
+    } else {
+        // show all the validation errors in a dialog
         AlertDialog(
             onDismissRequest = onDismissRequest,
             modifier = Modifier.heightIn(max = 600.dp),
@@ -220,18 +244,18 @@ private fun SubmitForm(errors: List<ErrorInfo>, onDismissRequest: () -> Unit) {
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Button(onClick = onDismissRequest) {
-                        Text(text = "View")
+                        Text(text = stringResource(R.string.view))
                     }
                 }
             },
             title = {
                 Column {
                     Text(
-                        text = "The Form has errors",
+                        text = stringResource(R.string.the_form_has_errors),
                         style = MaterialTheme.typography.titleLarge
                     )
                     Text(
-                        text = "Errors must be fixed to submit this form",
+                        text = stringResource(R.string.errors_must_be_fixed_to_submit_this_form),
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.titleSmall
                     )
@@ -243,20 +267,18 @@ private fun SubmitForm(errors: List<ErrorInfo>, onDismissRequest: () -> Unit) {
                 ) {
                     Column(modifier = Modifier.padding(25.dp)) {
                         Text(
-                            text = "${errors.count()} attributes failed.",
+                            text = stringResource(R.string.attributes_failed, errors.count()),
                             color = MaterialTheme.colorScheme.error
                         )
                         Spacer(modifier = Modifier.height(10.dp))
                         LazyColumn(
                             modifier = Modifier,
-                            state = lazyListState,
                             verticalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            errors.forEach {
-                                item {
-                                    val errorString = "${it.fieldName} : ${getErrorString(error = it.error as FeatureFormValidationException)}"
-                                    Text(text = errorString, color = MaterialTheme.colorScheme.error)
-                                }
+                            items(errors.count()) { index ->
+                                val errorString =
+                                    "${errors[index].fieldName} : ${errors[index].error.getString()}"
+                                Text(text = errorString, color = MaterialTheme.colorScheme.error)
                             }
                         }
                     }
@@ -267,8 +289,8 @@ private fun SubmitForm(errors: List<ErrorInfo>, onDismissRequest: () -> Unit) {
 }
 
 @Composable
-fun getErrorString(error: FeatureFormValidationException): String {
-    return when (error) {
+fun FeatureFormValidationException.getString(): String {
+    return when (this) {
         is FeatureFormValidationException.IncorrectValueTypeError -> {
             stringResource(id = R.string.value_must_be_of_correct_type)
         }

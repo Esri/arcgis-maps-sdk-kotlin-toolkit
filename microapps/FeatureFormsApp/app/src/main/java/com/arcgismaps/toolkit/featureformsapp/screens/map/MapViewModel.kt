@@ -35,19 +35,27 @@ sealed class UIState {
     object NotEditing : UIState()
 
     /**
-     * In editing state with the [featureForm].
+     * In editing state with the [featureForm] with the validation error visibility given by
+     * [validationErrorVisibility].
      */
     data class Editing(
         val featureForm: FeatureForm,
         val validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.OnlyAfterFocus
     ) : UIState()
 
+    /**
+     * Commit in progress state for the [featureForm] with validation errors [errors].
+     */
     data class Committing(
         val featureForm: FeatureForm,
         val errors: List<ErrorInfo>
     ) : UIState()
 }
 
+/**
+ * Class that provides a validation error [error] for the field with name [fieldName]. To fetch
+ * the actual message string use [FeatureFormValidationException.getString] in the composition.
+ */
 data class ErrorInfo(val fieldName: String, val error: FeatureFormValidationException)
 
 /**
@@ -85,6 +93,7 @@ class MapViewModel @Inject constructor(
     suspend fun commitEdits(): Result<Unit> {
         val state = (_uiState.value as? UIState.Editing)
             ?: return Result.failure(IllegalStateException("Not in editing state"))
+        // build the list of errors
         val errors = mutableListOf<ErrorInfo>()
         val featureForm = state.featureForm
         featureForm.getValidationErrors().forEach { entry ->
@@ -96,10 +105,12 @@ class MapViewModel @Inject constructor(
                 }
             }
         }
+        // set the state to committing with the errors if any
         _uiState.value = UIState.Committing(
             featureForm = state.featureForm,
             errors = errors
         )
+        // if there are no errors then update the feature
         return if (errors.isEmpty()) {
             val feature = state.featureForm.feature
             val serviceFeatureTable =
@@ -112,17 +123,26 @@ class MapViewModel @Inject constructor(
                 feature.refresh()
                 Unit
             }
+            // set the state to not editing since the feature was updated successfully
             _uiState.value = UIState.NotEditing
             result
         } else {
-            Result.failure(Exception("Form has validation errors"))
+            // even though there are errors send a success result since the operation was successful
+            // and the control is back with the UI
+            Result.success(Unit)
         }
     }
 
+    /**
+     * Cancels the commit if the current state is [UIState.Committing] and sets the ui state to
+     * [UIState.Editing].
+     */
     fun cancelCommit(): Result<Unit> {
         val previousState = (_uiState.value as? UIState.Committing) ?: return Result.failure(
             IllegalStateException("Not in committing state")
         )
+        // set the state back to an editing state while showing all errors using
+        // ValidationErrorVisibility.Always
         _uiState.value = UIState.Editing(
             previousState.featureForm,
             validationErrorVisibility = ValidationErrorVisibility.Always
@@ -186,6 +206,10 @@ class MapViewModel @Inject constructor(
     }
 }
 
+/**
+ * Returns the [FieldFormElement] with the given [fieldName] in the [FeatureForm]. If none exists
+ * null is returned.
+ */
 fun FeatureForm.getFormElement(fieldName: String): FieldFormElement? {
     return elements.firstNotNullOfOrNull {
         if (it is FieldFormElement && it.fieldName == fieldName) {
