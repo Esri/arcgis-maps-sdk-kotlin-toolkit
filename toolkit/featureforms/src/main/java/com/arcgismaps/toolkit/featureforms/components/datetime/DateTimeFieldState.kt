@@ -80,6 +80,12 @@ internal class DateTimeFieldState(
     val maxEpochMillis: Instant? = properties.maxEpochMillis
 
     val shouldShowTime: Boolean = properties.shouldShowTime
+
+    init {
+        // Start observing the properties. Since this method cannot be invoked from any open base
+        // class initializer blocks, it is safe to invoke it here.
+        observeProperties()
+    }
     
     companion object {
         fun Saver(

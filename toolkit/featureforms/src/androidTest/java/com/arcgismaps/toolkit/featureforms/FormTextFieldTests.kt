@@ -41,14 +41,9 @@ import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.toolkit.featureforms.components.text.FormTextField
-import com.arcgismaps.toolkit.featureforms.components.text.FormTextFieldState
-import com.arcgismaps.toolkit.featureforms.components.text.TextFieldProperties
-import com.arcgismaps.toolkit.featureforms.utils.editValue
-import com.arcgismaps.toolkit.featureforms.utils.fieldType
-import com.arcgismaps.toolkit.featureforms.utils.valueFlow
+import com.arcgismaps.toolkit.featureforms.components.text.rememberFormTextFieldState
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.fail
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -88,30 +83,15 @@ class FormTextFieldTests {
     fun setContent()  = runTest {
         composeTestRule.setContent {
             val scope = rememberCoroutineScope()
-            val textFieldProperties = TextFieldProperties(
-                label = field.label,
-                placeholder = field.hint,
-                description = field.description,
-                value = field.valueFlow(scope),
-                editable = field.isEditable,
-                required = field.isRequired,
-                singleLine = field.input is TextBoxFormInput,
-                domain = field.domain,
-                fieldType = featureForm.fieldType(field),
+            val state = rememberFormTextFieldState(
+                field = field,
                 minLength = (field.input as TextBoxFormInput).minLength.toInt(),
                 maxLength = (field.input as TextBoxFormInput).maxLength.toInt(),
-                visible = field.isVisible
+                form = featureForm,
+                scope = scope,
             )
             FormTextField(
-                state = FormTextFieldState(
-                    textFieldProperties,
-                    scope = scope,
-                    onEditValue = {
-                        featureForm.editValue(field, it)
-                        scope.launch { featureForm.evaluateExpressions() }
-                    },
-                    defaultValidator = {field.getValidationErrors()}
-                )
+                state = state
             )
         }
         featureForm.evaluateExpressions()

@@ -22,6 +22,7 @@ import androidx.compose.runtime.getValue
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.CodedValueFieldState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.ComboBoxField
+import com.arcgismaps.toolkit.featureforms.components.codedvalue.ComboBoxFieldState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.RadioButtonField
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.RadioButtonFieldState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.SwitchField
@@ -60,7 +61,7 @@ internal fun <T> FieldElement(state: BaseFieldState<T>) {
                 }
             }
 
-            is CodedValueFieldState -> {
+            is ComboBoxFieldState -> {
                 ComboBoxField(state = state)
             }
 
