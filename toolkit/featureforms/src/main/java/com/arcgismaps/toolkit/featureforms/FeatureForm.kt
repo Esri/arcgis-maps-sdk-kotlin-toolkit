@@ -29,6 +29,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,6 +45,7 @@ import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
+import com.arcgismaps.toolkit.featureforms.components.base.BaseGroupState
 import com.arcgismaps.toolkit.featureforms.components.base.FormStateCollection
 import com.arcgismaps.toolkit.featureforms.components.base.MutableFormStateCollection
 import com.arcgismaps.toolkit.featureforms.components.base.getState
@@ -78,7 +81,7 @@ public sealed class ValidationErrorVisibility {
 public fun FeatureForm(
     featureForm: FeatureForm,
     modifier: Modifier = Modifier,
-    validationErrorVisibility : ValidationErrorVisibility = ValidationErrorVisibility.OnlyAfterFocus
+    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.OnlyAfterFocus
 ) {
     var initialEvaluation by rememberSaveable(featureForm) { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
@@ -98,10 +101,14 @@ public fun FeatureForm(
     }
     LaunchedEffect(validationErrorVisibility) {
         if (validationErrorVisibility == ValidationErrorVisibility.Always) {
-            states.forEach {
-                if (it.formElement is FieldFormElement) {
-                    val state = it.getState<BaseFieldState<Any>>()
-                    state.onFocusChanged(true)
+            states.forEach { entry ->
+                if (entry.formElement is FieldFormElement) {
+                    entry.getState<BaseFieldState<*>>().forceValidation()
+                }
+                if (entry.formElement is GroupFormElement) {
+                    entry.getState<BaseGroupState>().fieldStates.forEach { childEntry ->
+                        childEntry.getState<BaseFieldState<*>>().forceValidation()
+                    }
                 }
             }
         }
