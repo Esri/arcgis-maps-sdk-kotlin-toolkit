@@ -49,6 +49,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
+import com.arcgismaps.exceptions.FeatureFormValidationException
 import com.arcgismaps.toolkit.composablemap.ComposableMap
 import com.arcgismaps.toolkit.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
@@ -76,7 +77,10 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
             }
 
             is UIState.Committing -> {
-                Pair((uiState as UIState.Committing).featureForm, ValidationErrorVisibility.OnlyAfterFocus)
+                Pair(
+                    (uiState as UIState.Committing).featureForm,
+                    ValidationErrorVisibility.OnlyAfterFocus
+                )
             }
 
             else -> {
@@ -204,7 +208,7 @@ fun TopFormBar(
 }
 
 @Composable
-private fun SubmitForm(errors: List<String>, onDismissRequest: () -> Unit) {
+private fun SubmitForm(errors: List<ErrorInfo>, onDismissRequest: () -> Unit) {
     if (errors.isNotEmpty()) {
         val lazyListState = rememberLazyListState()
         AlertDialog(
@@ -245,12 +249,14 @@ private fun SubmitForm(errors: List<String>, onDismissRequest: () -> Unit) {
                         Spacer(modifier = Modifier.height(10.dp))
                         LazyColumn(
                             modifier = Modifier,
-                            //.verticalScrollbar(lazyListState, autoHide = false),
                             state = lazyListState,
                             verticalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            items(errors.count()) {
-                                Text(text = errors[it], color = MaterialTheme.colorScheme.error)
+                            errors.forEach {
+                                item {
+                                    val errorString = "${it.fieldName} : ${getErrorString(error = it.error as FeatureFormValidationException)}"
+                                    Text(text = errorString, color = MaterialTheme.colorScheme.error)
+                                }
                             }
                         }
                     }
@@ -260,22 +266,59 @@ private fun SubmitForm(errors: List<String>, onDismissRequest: () -> Unit) {
     }
 }
 
-@Preview
 @Composable
-fun TopFormBarPreview() {
-    TopFormBar("Map", false)
+fun getErrorString(error: FeatureFormValidationException): String {
+    return when (error) {
+        is FeatureFormValidationException.IncorrectValueTypeError -> {
+            stringResource(id = R.string.value_must_be_of_correct_type)
+        }
+
+        is FeatureFormValidationException.LessThanMinimumDateTimeException -> {
+            stringResource(id = R.string.date_less_than_minimum)
+        }
+
+        is FeatureFormValidationException.MaxCharConstraintException -> {
+            stringResource(id = R.string.maximum_character_length_exceeded)
+        }
+
+        is FeatureFormValidationException.MaxDateTimeConstraintException -> {
+            stringResource(id = R.string.date_exceeds_maximum)
+        }
+
+        is FeatureFormValidationException.MaxNumericConstraintException -> {
+            stringResource(id = R.string.exceeds_maximum_value)
+        }
+
+        is FeatureFormValidationException.MinCharConstraintException -> {
+            stringResource(id = R.string.minimum_character_length_not_met)
+        }
+
+        is FeatureFormValidationException.MinNumericConstraintException -> {
+            stringResource(id = R.string.less_than_minimum_value)
+        }
+
+        is FeatureFormValidationException.NullNotAllowedException -> {
+            stringResource(id = R.string.value_must_not_be_empty)
+        }
+
+        is FeatureFormValidationException.OutOfDomainException -> {
+            stringResource(id = R.string.value_must_be_within_domain)
+        }
+
+        is FeatureFormValidationException.RequiredException -> {
+            stringResource(id = R.string.required)
+        }
+
+        is FeatureFormValidationException.UnknownFeatureFormException -> {
+            stringResource(id = R.string.unknown_error)
+        }
+    }
 }
 
 @Preview
 @Composable
-fun SubmitFormPreview() {
-    SubmitForm(
-        errors = listOf(
-            "field is required",
-            "field has a min constraint",
-            "field is required"
-        )
-    ) { }
+fun TopFormBarPreview() {
+    TopFormBar("Map", false)
 }
 
 fun getWindowSize(context: Context): WindowSizeClass {

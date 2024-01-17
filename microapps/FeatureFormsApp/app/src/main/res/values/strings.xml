@@ -17,4 +17,15 @@
     <string name="sign_in_with_default_credentials">Sign in using built-in Credentials</string>
     <string name="sign_in_with_enterprise">Sign in with ArcGIS Enterprise</string>
     <string name="skin_sign_in">Skip sign in</string>
+    <string name="maximum_character_length_exceeded">Maximum character length exceeded</string>
+    <string name="date_less_than_minimum">Date less than minimum</string>
+    <string name="value_must_be_of_correct_type">Value must be of correct type.</string>
+    <string name="date_exceeds_maximum">Date exceeds maximum</string>
+    <string name="exceeds_maximum_value">Exceeds maximum value</string>
+    <string name="minimum_character_length_not_met">Minimum character length not met</string>
+    <string name="less_than_minimum_value">Less than minimum value</string>
+    <string name="value_must_not_be_empty">Value must not be empty</string>
+    <string name="value_must_be_within_domain">Value must be within domain</string>
+    <string name="required">Required</string>
+    <string name="unknown_error">Unknown Error</string>
 </resources>

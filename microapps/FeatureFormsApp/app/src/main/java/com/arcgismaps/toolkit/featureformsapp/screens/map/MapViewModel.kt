@@ -1,6 +1,5 @@
 package com.arcgismaps.toolkit.featureformsapp.screens.map
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -10,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.data.ServiceFeatureTable
+import com.arcgismaps.exceptions.FeatureFormValidationException
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.mapping.featureforms.FeatureForm
@@ -37,11 +37,18 @@ sealed class UIState {
     /**
      * In editing state with the [featureForm].
      */
-    data class Editing(val featureForm: FeatureForm, val validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.OnlyAfterFocus) : UIState()
+    data class Editing(
+        val featureForm: FeatureForm,
+        val validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.OnlyAfterFocus
+    ) : UIState()
 
-    data class Committing(val featureForm: FeatureForm, val errors: List<String>) :
-        UIState()
+    data class Committing(
+        val featureForm: FeatureForm,
+        val errors: List<ErrorInfo>
+    ) : UIState()
 }
+
+data class ErrorInfo(val fieldName: String, val error: FeatureFormValidationException)
 
 /**
  * A view model for the FeatureForms MapView UI
@@ -78,11 +85,15 @@ class MapViewModel @Inject constructor(
     suspend fun commitEdits(): Result<Unit> {
         val state = (_uiState.value as? UIState.Editing)
             ?: return Result.failure(IllegalStateException("Not in editing state"))
-        val errors = mutableListOf<String>()
+        val errors = mutableListOf<ErrorInfo>()
         val featureForm = state.featureForm
         featureForm.getValidationErrors().forEach { entry ->
-            entry.value.forEach { throwable ->
-                errors.add("${featureForm.getLabelForField(entry.key)} : ${throwable.message}")
+            entry.value.forEach { error ->
+                featureForm.getFormElement(entry.key)?.let { formElement ->
+                    if (formElement.isEditable.value) {
+                        errors.add(ErrorInfo(formElement.label, error as FeatureFormValidationException))
+                    }
+                }
             }
         }
         _uiState.value = UIState.Committing(
@@ -90,13 +101,13 @@ class MapViewModel @Inject constructor(
             errors = errors
         )
         return if (errors.isEmpty()) {
-            val feature = state.featureForm.feature as ArcGISFeature
+            val feature = state.featureForm.feature
             val serviceFeatureTable =
                 feature.featureTable as? ServiceFeatureTable ?: return Result.failure(
                     IllegalStateException("cannot save feature edit without a ServiceFeatureTable")
                 )
             val result = serviceFeatureTable.updateFeature(feature).map {
-                 serviceFeatureTable.serviceGeodatabase?.applyEdits()
+                serviceFeatureTable.serviceGeodatabase?.applyEdits()
                     ?: throw IllegalStateException("cannot apply feature edit without a ServiceGeodatabase")
                 feature.refresh()
                 Unit
@@ -112,7 +123,10 @@ class MapViewModel @Inject constructor(
         val previousState = (_uiState.value as? UIState.Committing) ?: return Result.failure(
             IllegalStateException("Not in committing state")
         )
-        _uiState.value = UIState.Editing(previousState.featureForm, validationErrorVisibility = ValidationErrorVisibility.Always)
+        _uiState.value = UIState.Editing(
+            previousState.featureForm,
+            validationErrorVisibility = ValidationErrorVisibility.Always
+        )
         return Result.success(Unit)
     }
 
@@ -172,12 +186,12 @@ class MapViewModel @Inject constructor(
     }
 }
 
-fun FeatureForm.getLabelForField(fieldName : String) : String {
+fun FeatureForm.getFormElement(fieldName: String): FieldFormElement? {
     return elements.firstNotNullOfOrNull {
         if (it is FieldFormElement && it.fieldName == fieldName) {
-            it.label
+            it
         } else {
             null
         }
-    } ?: ""
+    }
 }
