@@ -39,7 +39,7 @@ internal fun FormTextField(
     state: FormTextFieldState,
     modifier: Modifier = Modifier,
 ) {
-    val value by state.value.collectAsState()
+    val value by state.value
     val isEditable by state.isEditable.collectAsState()
     val isRequired by state.isRequired.collectAsState()
     val isFocused by state.isFocused.collectAsState()

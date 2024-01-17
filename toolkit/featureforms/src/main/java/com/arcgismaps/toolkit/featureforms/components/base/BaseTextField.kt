@@ -148,11 +148,11 @@ private fun trailingIcon(
 internal fun BaseTextField(
     text: String,
     onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
     isEditable: Boolean,
     label: String,
     placeholder: String,
     singleLine: Boolean,
+    modifier: Modifier = Modifier,
     readOnly: Boolean = !isEditable,
     keyboardType: KeyboardType = KeyboardType.Ascii,
     trailingIcon: ImageVector? = null,
@@ -207,7 +207,7 @@ internal fun BaseTextField(
                 Column(
                     modifier = Modifier.clickable {
                         clearFocus = true
-                    }
+                    }.semantics { contentDescription = "supporting text" }
                 ) {
                     supportingText?.invoke(this)
                 }

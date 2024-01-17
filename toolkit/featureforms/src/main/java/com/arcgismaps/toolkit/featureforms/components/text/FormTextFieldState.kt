@@ -41,7 +41,6 @@ import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.
 import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.NoError
 import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.NotANumber
 import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.NotAWholeNumber
-import com.arcgismaps.toolkit.featureforms.components.datetime.DateTimeFieldState
 import com.arcgismaps.toolkit.featureforms.utils.asDoubleTuple
 import com.arcgismaps.toolkit.featureforms.utils.asLongTuple
 import com.arcgismaps.toolkit.featureforms.utils.domain
@@ -116,6 +115,12 @@ internal class FormTextFieldState(
      */
     val fieldType: FieldType = properties.fieldType
 
+    init {
+        // Start observing the properties. Since this method cannot be invoked from any open base
+        // class initializer blocks, it is safe to invoke it here.
+        observeProperties()
+    }
+
     private fun validateNumericRange(numberVal: Int): ValidationErrorState {
         require(fieldType.isIntegerType)
         return if (domain != null && domain is RangeDomain) {
@@ -177,7 +182,7 @@ internal class FormTextFieldState(
     }
 
     override fun validate(): List<ValidationErrorState> {
-        val currentValue = _mergedValue.value
+        val currentValue = value.value.data
         val coreErrors = defaultValidator()
         val errors = mutableListOf<ValidationErrorState>()
         errors += super.validate()

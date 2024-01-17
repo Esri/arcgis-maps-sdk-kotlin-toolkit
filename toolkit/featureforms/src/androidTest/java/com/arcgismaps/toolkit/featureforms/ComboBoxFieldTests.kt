@@ -19,8 +19,6 @@ package com.arcgismaps.toolkit.featureforms
 import android.content.Context
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertContentDescriptionContains
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotFocused
@@ -28,7 +26,6 @@ import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
-import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -396,44 +393,4 @@ class ComboBoxFieldTests {
             }
         }
     }
-}
-
-/**
- * Returns the child node with the given text [value]. This only checks for the
- * children with a depth of 1. An exception is thrown if the child with the content description
- * does not exist.
- */
-internal fun SemanticsNodeInteraction.onChildWithText(value: String): SemanticsNodeInteraction {
-    val nodes = onChildren()
-    val count = nodes.fetchSemanticsNodes().count()
-
-    for (i in 0 until count) {
-        val semanticsNode = nodes[i].fetchSemanticsNode()
-        if (semanticsNode.config[SemanticsProperties.Text].toList().map
-            {
-                it.text
-            }.contains(value)
-        ) {
-            return nodes[i]
-        }
-    }
-    throw AssertionError("No node exists with the given content description : $value")
-}
-
-/**
- * Returns the child node with the given content description [value]. This only checks for the
- * children with a depth of 1. An exception is thrown if the child with the content description
- * does not exist.
- */
-internal fun SemanticsNodeInteraction.onChildWithContentDescription(value: String): SemanticsNodeInteraction {
-    val nodes = onChildren()
-    val count = nodes.fetchSemanticsNodes().count()
-
-    for (i in 0 until count) {
-        val semanticsNode = nodes[i].fetchSemanticsNode()
-        if (semanticsNode.config[SemanticsProperties.ContentDescription].contains(value)) {
-            return nodes[i]
-        }
-    }
-    throw AssertionError("No node exists with the given content description : $value")
 }

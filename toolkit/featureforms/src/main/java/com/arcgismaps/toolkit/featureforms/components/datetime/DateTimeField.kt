@@ -52,7 +52,7 @@ internal fun DateTimeField(
     val dialogRequester = LocalDialogRequester.current
     val isEditable by state.isEditable.collectAsState()
     val isRequired by state.isRequired.collectAsState()
-    val value by state.value.collectAsState()
+    val value by state.value
     val interactionSource = remember { MutableInteractionSource() }
     val label = if (isRequired) {
         "${state.label} *"
