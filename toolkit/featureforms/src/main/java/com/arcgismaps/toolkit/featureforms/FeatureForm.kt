@@ -66,13 +66,17 @@ import kotlinx.coroutines.delay
  * @param featureForm The [FeatureForm] configuration.
  * @param modifier The [Modifier] to be applied to layout corresponding to the content of this
  * FeatureForm.
+ * @param forceValidation Default behavior for when "property" is "x" validation errors are visible for fields that receive focus.
+ *
+ * When set to "x" runs validates on the values of fields that were never focused and shows the errors if any.
  *
  * @since 200.2.0
  */
 @Composable
 public fun FeatureForm(
     featureForm: FeatureForm,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    forceValidation : Boolean = false
 ) {
     var initialEvaluation by rememberSaveable(featureForm) { mutableStateOf(false) }
     InitializingExpressions(modifier) {
@@ -86,6 +90,7 @@ public fun FeatureForm(
         // expressions are evaluated quickly
         delay(300)
         initialEvaluation = true
+        featureForm.getValidationErrors()
     }
 }
 

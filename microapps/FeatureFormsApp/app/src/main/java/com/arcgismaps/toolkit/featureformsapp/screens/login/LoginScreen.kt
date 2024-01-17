@@ -397,9 +397,14 @@ fun LoginOptions(
 
 fun Modifier.verticalScrollbar(
     state: LazyListState,
-    width: Dp = 5.dp
+    width: Dp = 5.dp,
+    autoHide : Boolean = false,
 ): Modifier = composed {
-    val targetAlpha = if (state.isScrollInProgress) 1f else 0f
+    val targetAlpha = if (autoHide) {
+        if (state.isScrollInProgress) 1f else 0f
+    } else {
+        1f
+    }
     val duration = if (state.isScrollInProgress) 150 else 500
     val color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
 

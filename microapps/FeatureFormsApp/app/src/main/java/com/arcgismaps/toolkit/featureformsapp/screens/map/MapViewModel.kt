@@ -1,5 +1,6 @@
 package com.arcgismaps.toolkit.featureformsapp.screens.map
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -36,10 +37,8 @@ sealed class UIState {
      */
     data class Editing(val featureForm: FeatureForm) : UIState()
 
-    /**
-     * Loading state.
-     */
-    object Loading : UIState()
+    data class Committing(val featureForm: FeatureForm, val errors: List<String>) :
+        UIState()
 }
 
 /**
@@ -77,20 +76,38 @@ class MapViewModel @Inject constructor(
     suspend fun commitEdits(): Result<Unit> {
         val state = (_uiState.value as? UIState.Editing)
             ?: return Result.failure(IllegalStateException("Not in editing state"))
-        _uiState.value = UIState.Loading
-        val feature = state.featureForm.feature as ArcGISFeature
-        val serviceFeatureTable =
-            feature.featureTable as? ServiceFeatureTable ?: return Result.failure(
-                IllegalStateException("cannot save feature edit without a ServiceFeatureTable")
-            )
-
-        return serviceFeatureTable.updateFeature(feature)
-            .map {
-                serviceFeatureTable.serviceGeodatabase?.applyEdits()
+        val errors = state.featureForm.getValidationErrors()
+        _uiState.value = UIState.Committing(
+            featureForm = state.featureForm,
+            errors = errors.map {
+                "${it.key} : ${it.value}"
+            }
+        )
+        return if (errors.isEmpty()) {
+            val feature = state.featureForm.feature as ArcGISFeature
+            val serviceFeatureTable =
+                feature.featureTable as? ServiceFeatureTable ?: return Result.failure(
+                    IllegalStateException("cannot save feature edit without a ServiceFeatureTable")
+                )
+            val result = serviceFeatureTable.updateFeature(feature).map {
+                 serviceFeatureTable.serviceGeodatabase?.applyEdits()
                     ?: throw IllegalStateException("cannot apply feature edit without a ServiceGeodatabase")
                 feature.refresh()
-                _uiState.value = UIState.NotEditing
+                Unit
             }
+            _uiState.value = UIState.NotEditing
+            result
+        } else {
+            Result.failure(Exception("Form has validation errors"))
+        }
+    }
+
+    fun cancelCommit(): Result<Unit> {
+        val previousState = (_uiState.value as? UIState.Committing) ?: return Result.failure(
+            IllegalStateException("Not in committing state")
+        )
+        _uiState.value = UIState.Editing(previousState.featureForm)
+        return Result.success(Unit)
     }
 
     suspend fun rollbackEdits(): Result<Unit> {

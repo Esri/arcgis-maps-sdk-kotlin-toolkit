@@ -2,17 +2,30 @@ package com.arcgismaps.toolkit.featureformsapp.screens.map
 
 import android.content.Context
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -22,14 +35,17 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
@@ -42,7 +58,7 @@ import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetLayout
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetValue
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.StandardBottomSheet
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.rememberStandardBottomSheetState
-import kotlinx.coroutines.Dispatchers
+import com.arcgismaps.toolkit.featureformsapp.screens.login.verticalScrollbar
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -51,6 +67,22 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
     val uiState by mapViewModel.uiState
     val context = LocalContext.current
     val windowSize = getWindowSize(context)
+    Log.e("TAG", "MapScreen: $uiState")
+    val featureForm = remember(uiState) {
+        when (uiState) {
+            is UIState.Editing -> {
+                (uiState as UIState.Editing).featureForm
+            }
+
+            is UIState.Committing -> {
+                (uiState as UIState.Committing).featureForm
+            }
+
+            else -> {
+                null
+            }
+        }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -65,21 +97,11 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                     scope.launch { mapViewModel.rollbackEdits() }
                 },
                 onSave = {
+                    //SubmitForm(mapViewModel = mapViewModel, featureForm = (uiState as UIState.Editing).featureForm)
                     scope.launch {
-                        mapViewModel.commitEdits()
-                            .onFailure {
-                                Log.w(
-                                    "Forms",
-                                    "applying edits from feature form failed with ${it.message}"
-                                )
-                                launch(Dispatchers.Main) {
-                                    Toast.makeText(
-                                        context,
-                                        "applying edits from feature form failed with ${it.message}",
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                }
-                            }
+                        mapViewModel.commitEdits().onFailure {
+                            Log.e("TAG", "MapScreen: $it")
+                        }
                     }
                 }) {
                 onBackPressed()
@@ -94,7 +116,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
             mapState = mapViewModel
         )
         AnimatedVisibility(
-            visible = uiState is UIState.Editing,
+            visible = featureForm != null,
             enter = slideInVertically { h -> h },
             exit = slideOutVertically { h -> h },
             label = "feature form"
@@ -120,14 +142,19 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                     sheetWidth = with(LocalDensity.current) { layoutWidth.toDp() }
                 ) {
                     // set bottom sheet content to the FeatureForm
-                    if (uiState is UIState.Editing) {
+                    if (featureForm != null) {
                         FeatureForm(
-                            featureForm = (uiState as UIState.Editing).featureForm,
+                            featureForm = featureForm,
                             modifier = Modifier.fillMaxSize()
                         )
                     }
                 }
             }
+        }
+    }
+    if (uiState is UIState.Committing) {
+        SubmitForm(errors = (uiState as UIState.Committing).errors) {
+            mapViewModel.cancelCommit()
         }
     }
 }
@@ -174,16 +201,76 @@ fun TopFormBar(
     )
 }
 
-fun getWindowSize(context: Context): WindowSizeClass {
-    val metrics = WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(context)
-    val width = metrics.bounds.width()
-    val height = metrics.bounds.height()
-    val density = context.resources.displayMetrics.density
-    return WindowSizeClass.compute(width / density, height / density)
+@Composable
+private fun SubmitForm(errors: List<String>, onDismissRequest: () -> Unit) {
+    if (errors.isNotEmpty()) {
+        val lazyListState = rememberLazyListState()
+        AlertDialog(
+            onDismissRequest = onDismissRequest,
+            modifier = Modifier.heightIn(max = 600.dp),
+            confirmButton = {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                    Button(onClick = onDismissRequest) {
+                        Text(text = "View")
+                    }
+                }
+            },
+            title = {
+                Column {
+                    Text(
+                        text = "The Form has errors",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Text(
+                        text = "Errors must be fixed to submit this form",
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                }
+            },
+            text = {
+                Card(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(25.dp)) {
+                        Text(
+                            text = "${errors.count()} attributes failed.",
+                            color = MaterialTheme.colorScheme.error
+                        )
+                        LazyColumn(
+                            modifier = Modifier,
+                            //.verticalScrollbar(lazyListState, autoHide = false),
+                            state = lazyListState
+                        ) {
+                            items(errors.count()) {
+                                Text(text = errors[it], color = MaterialTheme.colorScheme.error)
+                            }
+                        }
+                    }
+                }
+            }
+        )
+    }
 }
 
 @Preview
 @Composable
 fun TopFormBarPreview() {
     TopFormBar("Map", false)
+}
+
+@Preview
+@Composable
+fun SubmitFormPreview() {
+    SubmitForm(errors = listOf("1", "1", "1", "1", "1")) {
+
+    }
+}
+
+fun getWindowSize(context: Context): WindowSizeClass {
+    val metrics = WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(context)
+    val width = metrics.bounds.width()
+    val height = metrics.bounds.height()
+    val density = context.resources.displayMetrics.density
+    return WindowSizeClass.compute(width / density, height / density)
 }
