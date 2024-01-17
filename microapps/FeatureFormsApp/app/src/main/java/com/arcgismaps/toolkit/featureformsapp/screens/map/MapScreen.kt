@@ -51,6 +51,7 @@ import androidx.window.core.layout.WindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
 import com.arcgismaps.toolkit.composablemap.ComposableMap
 import com.arcgismaps.toolkit.featureforms.FeatureForm
+import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
 import com.arcgismaps.toolkit.featureformsapp.R
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.BottomSheetMaxWidth
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetExpansionHeight
@@ -67,19 +68,19 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
     val uiState by mapViewModel.uiState
     val context = LocalContext.current
     val windowSize = getWindowSize(context)
-    Log.e("TAG", "MapScreen: $uiState")
-    val featureForm = remember(uiState) {
+    val (featureForm, errorVisibility) = remember(uiState) {
         when (uiState) {
             is UIState.Editing -> {
-                (uiState as UIState.Editing).featureForm
+                val state = (uiState as UIState.Editing)
+                Pair(state.featureForm, state.validationErrorVisibility)
             }
 
             is UIState.Committing -> {
-                (uiState as UIState.Committing).featureForm
+                Pair((uiState as UIState.Committing).featureForm, ValidationErrorVisibility.OnlyAfterFocus)
             }
 
             else -> {
-                null
+                Pair(null, ValidationErrorVisibility.OnlyAfterFocus)
             }
         }
     }
@@ -145,7 +146,8 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                     if (featureForm != null) {
                         FeatureForm(
                             featureForm = featureForm,
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier.fillMaxSize(),
+                            validationErrorVisibility = errorVisibility
                         )
                     }
                 }

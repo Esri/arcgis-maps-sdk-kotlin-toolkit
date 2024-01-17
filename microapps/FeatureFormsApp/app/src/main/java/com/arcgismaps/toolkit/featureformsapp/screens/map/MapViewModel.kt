@@ -18,6 +18,7 @@ import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.toolkit.composablemap.MapState
+import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -36,7 +37,7 @@ sealed class UIState {
     /**
      * In editing state with the [featureForm].
      */
-    data class Editing(val featureForm: FeatureForm) : UIState()
+    data class Editing(val featureForm: FeatureForm, val validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.OnlyAfterFocus) : UIState()
 
     data class Committing(val featureForm: FeatureForm, val errors: List<String>) :
         UIState()
@@ -111,7 +112,7 @@ class MapViewModel @Inject constructor(
         val previousState = (_uiState.value as? UIState.Committing) ?: return Result.failure(
             IllegalStateException("Not in committing state")
         )
-        _uiState.value = UIState.Editing(previousState.featureForm)
+        _uiState.value = UIState.Editing(previousState.featureForm, validationErrorVisibility = ValidationErrorVisibility.Always)
         return Result.success(Unit)
     }
 

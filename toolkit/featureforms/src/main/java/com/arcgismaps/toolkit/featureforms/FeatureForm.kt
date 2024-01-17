@@ -58,6 +58,11 @@ import com.arcgismaps.toolkit.featureforms.utils.FeatureFormDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 
+public sealed class ValidationErrorVisibility {
+    public object OnlyAfterFocus : ValidationErrorVisibility()
+    public object Always : ValidationErrorVisibility()
+}
+
 /**
  * A composable Form toolkit component that enables users to edit field values of features in a
  * layer using forms that have been configured externally (using either in the the Web Map Viewer
@@ -66,9 +71,6 @@ import kotlinx.coroutines.delay
  * @param featureForm The [FeatureForm] configuration.
  * @param modifier The [Modifier] to be applied to layout corresponding to the content of this
  * FeatureForm.
- * @param forceValidation Default behavior for when "property" is "x" validation errors are visible for fields that receive focus.
- *
- * When set to "x" runs validates on the values of fields that were never focused and shows the errors if any.
  *
  * @since 200.2.0
  */
@@ -76,13 +78,16 @@ import kotlinx.coroutines.delay
 public fun FeatureForm(
     featureForm: FeatureForm,
     modifier: Modifier = Modifier,
-    forceValidation : Boolean = false
+    validationErrorVisibility : ValidationErrorVisibility = ValidationErrorVisibility.OnlyAfterFocus
 ) {
     var initialEvaluation by rememberSaveable(featureForm) { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
     InitializingExpressions(modifier) {
         initialEvaluation
     }
-    FeatureFormContent(form = featureForm, modifier = modifier)
+    val states = rememberStates(form = featureForm, scope = scope)
+    FeatureFormBody(form = featureForm, states = states, modifier = modifier)
+    FeatureFormDialog()
     LaunchedEffect(featureForm) {
         // ensure expressions are evaluated before state objects are created.
         featureForm.evaluateExpressions()
@@ -90,7 +95,16 @@ public fun FeatureForm(
         // expressions are evaluated quickly
         delay(300)
         initialEvaluation = true
-        featureForm.getValidationErrors()
+    }
+    LaunchedEffect(validationErrorVisibility) {
+        if (validationErrorVisibility == ValidationErrorVisibility.Always) {
+            states.forEach {
+                if (it.formElement is FieldFormElement) {
+                    val state = it.getState<BaseFieldState<Any>>()
+                    state.onFocusChanged(true)
+                }
+            }
+        }
     }
 }
 
@@ -128,21 +142,6 @@ internal fun InitializingExpressions(
             }
         }
     }
-}
-
-@Composable
-internal fun FeatureFormContent(
-    form: FeatureForm,
-    modifier: Modifier = Modifier
-) {
-    val scope = rememberCoroutineScope()
-    val states = rememberStates(form = form, scope = scope)
-    FeatureFormBody(
-        form = form,
-        states = states,
-        modifier = modifier
-    )
-    FeatureFormDialog()
 }
 
 @Composable
