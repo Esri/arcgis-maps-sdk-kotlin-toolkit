@@ -30,6 +30,10 @@ import androidx.compose.ui.text.style.TextAlign
 
 /**
  * Displays a slider with a range of 0 to 255, set to the initial [value].
+ *
+ * @param value the current value of the slider between 0 and 255
+ * @param onValueChange called when slider has been set to a new value
+ * @param label the label to display next to the slider
  */
 @Composable
 fun RgbaSlider(
