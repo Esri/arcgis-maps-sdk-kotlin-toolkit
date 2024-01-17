@@ -13,6 +13,7 @@ import com.arcgismaps.data.ServiceFeatureTable
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.mapping.featureforms.FeatureForm
+import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
@@ -76,12 +77,16 @@ class MapViewModel @Inject constructor(
     suspend fun commitEdits(): Result<Unit> {
         val state = (_uiState.value as? UIState.Editing)
             ?: return Result.failure(IllegalStateException("Not in editing state"))
-        val errors = state.featureForm.getValidationErrors()
+        val errors = mutableListOf<String>()
+        val featureForm = state.featureForm
+        featureForm.getValidationErrors().forEach { entry ->
+            entry.value.forEach { throwable ->
+                errors.add("${featureForm.getLabelForField(entry.key)} : ${throwable.message}")
+            }
+        }
         _uiState.value = UIState.Committing(
             featureForm = state.featureForm,
-            errors = errors.map {
-                "${it.key} : ${it.value}"
-            }
+            errors = errors
         )
         return if (errors.isEmpty()) {
             val feature = state.featureForm.feature as ArcGISFeature
@@ -164,4 +169,14 @@ class MapViewModel @Inject constructor(
             }.onFailure { println("tap was not on a feature") }
         }
     }
+}
+
+fun FeatureForm.getLabelForField(fieldName : String) : String {
+    return elements.firstNotNullOfOrNull {
+        if (it is FieldFormElement && it.fieldName == fieldName) {
+            it.label
+        } else {
+            null
+        }
+    } ?: ""
 }

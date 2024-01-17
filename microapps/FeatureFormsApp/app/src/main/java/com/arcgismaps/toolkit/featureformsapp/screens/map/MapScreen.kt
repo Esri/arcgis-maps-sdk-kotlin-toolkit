@@ -209,7 +209,10 @@ private fun SubmitForm(errors: List<String>, onDismissRequest: () -> Unit) {
             onDismissRequest = onDismissRequest,
             modifier = Modifier.heightIn(max = 600.dp),
             confirmButton = {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
                     Button(onClick = onDismissRequest) {
                         Text(text = "View")
                     }
@@ -237,10 +240,12 @@ private fun SubmitForm(errors: List<String>, onDismissRequest: () -> Unit) {
                             text = "${errors.count()} attributes failed.",
                             color = MaterialTheme.colorScheme.error
                         )
+                        Spacer(modifier = Modifier.height(10.dp))
                         LazyColumn(
                             modifier = Modifier,
                             //.verticalScrollbar(lazyListState, autoHide = false),
-                            state = lazyListState
+                            state = lazyListState,
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
                             items(errors.count()) {
                                 Text(text = errors[it], color = MaterialTheme.colorScheme.error)
@@ -262,9 +267,13 @@ fun TopFormBarPreview() {
 @Preview
 @Composable
 fun SubmitFormPreview() {
-    SubmitForm(errors = listOf("1", "1", "1", "1", "1")) {
-
-    }
+    SubmitForm(
+        errors = listOf(
+            "field is required",
+            "field has a min constraint",
+            "field is required"
+        )
+    ) { }
 }
 
 fun getWindowSize(context: Context): WindowSizeClass {
