@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.dp
  * @param title the title of this alert dialog
  * @param onDismissRequest called when the dialog should be dismissed
  * @param onConfirm called when the user presses the confirm button, indicating a new item to select
+ * @since 200.4.0
  */
 @Composable
 fun DropdownMenuAlertDialog(

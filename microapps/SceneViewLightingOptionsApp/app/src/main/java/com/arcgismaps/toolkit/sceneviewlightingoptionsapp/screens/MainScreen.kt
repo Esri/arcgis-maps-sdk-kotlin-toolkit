@@ -142,6 +142,11 @@ fun MainScreen() {
 
 /**
  * A drop down menu providing a selection of Lighting Options that can be changed
+ *
+ * @param expanded whether the dropdown is currently expanded
+ * @param onDismissRequest called when the menu should be dismissed
+ * @param lightingOptionsState the [LightingOptionsState] that will be modified when lighting options are selected
+ * @since 200.4.0
  */
 @Composable
 fun LightingOptionsDropDownMenu(
@@ -190,7 +195,7 @@ fun LightingOptionsDropDownMenu(
     if (showSunTimeOptions) {
         SunTimeOptions(
             currentSunTime = lightingOptionsState.sunTime.value,
-            setTime = { lightingOptionsState.sunTime.value = it }
+            onSetSunTime = { lightingOptionsState.sunTime.value = it }
         ) {
             showSunTimeOptions = false
             onDismissRequest()
@@ -240,12 +245,17 @@ fun LightingOptionsDropDownMenu(
 
 /**
  * Displays a time picker in an AlertDialog
+ *
+ * @param currentSunTime the current sun time the composable SceneView is set to
+ * @param onSetSunTime called when the sun time should be changed
+ * @param onDismissRequest called when the dialog should be dismissed
+ * @since 200.4.0
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SunTimeOptions(
     currentSunTime: Instant,
-    setTime: (Instant) -> Unit,
+    onSetSunTime: (Instant) -> Unit,
     onDismissRequest: () -> Unit
 ) {
     val currentTime = currentSunTime.atOffset(ZoneOffset.UTC)
@@ -258,7 +268,7 @@ fun SunTimeOptions(
         onDismissRequest = onDismissRequest,
         confirmButton = {
             TextButton(onClick = {
-                setTime(
+                onSetSunTime(
                     OffsetDateTime.now(ZoneId.of("UTC"))
                         .withHour(timePickerState.hour)
                         .withMinute(timePickerState.minute)
@@ -277,6 +287,11 @@ fun SunTimeOptions(
 
 /**
  * Displays an AlertDialog with a dropdown selection of different [LightingMode]s
+ *
+ * @param currentLightingMode the current sun lighting mode set on the composable SceneView
+ * @param setSunLighting called when the sun lighting mode should be changed
+ * @param onDismissRequest called when the dialog should be dismissed
+ * @since 200.4.9
  */
 @Composable
 fun SunLightingOptions(
@@ -309,6 +324,11 @@ fun SunLightingOptions(
 
 /**
  * Displays an AlertDialog with sliders for selecting the components of an RGBA color
+ *
+ * @param currentColor the current ambient light color set on the composable SceneView
+ * @param onSetColor called when the ambient light color should be changed
+ * @param onDismissRequest called when this dialog should be dismissed
+ * @since 200.4.0
  */
 @Composable
 fun AmbientLightColorOptions(
@@ -345,6 +365,11 @@ fun AmbientLightColorOptions(
 
 /**
  * Displays an AlertDialog with a dropdown selection of different [AtmosphereEffect]s
+ *
+ * @param currentAtmosphereEffect the current atmosphere effect set on the composable SceneView
+ * @param onSetAtmosphereEffect called when the atmosphere effect should be changed
+ * @param onDismissRequest called when this dialog should be dismissed
+ * @since 200.4.0
  */
 @Composable
 fun AtmosphereEffectOptions(
@@ -377,6 +402,11 @@ fun AtmosphereEffectOptions(
 
 /**
  * Displays an AlertDialog with a dropdown selection of different [SpaceEffect]s
+ *
+ * @param currentSpaceEffect the current space effect set on the composable SceneView
+ * @param onSetSpaceEffect called when the space effect should be changed
+ * @param onDismissRequest called when this dialog should be dismissed
+ * @since 200.4.0
  */
 @Composable
 fun SpaceEffectOptions(
@@ -405,6 +435,16 @@ fun SpaceEffectOptions(
     )
 }
 
+/**
+ * Represents various lighting options that can be used to configure a composable [SceneView]
+ *
+ * @property sunTime defines the position of the sun in the scene
+ * @property sunLighting configures how light and shadows are displayed in the scene
+ * @property ambientLightColor defines the color of the ambient light when the scene uses lighting
+ * @property atmosphereEffect configures how the atmosphere in the scene is displayed
+ * @property spaceEffect configures how outer space is displayed in the scene
+ * @since 200.4.0
+ */
 data class LightingOptionsState(
     val sunTime: MutableState<Instant>,
     val sunLighting: MutableState<LightingMode>,
