@@ -74,6 +74,7 @@ import java.time.Instant
  * @param attributionState specifies the attribution bar's visibility, text changed and layout changed events
  * @param cameraController the [CameraController] to manage the position, orientation, and movement of the camera
  * @param analysisOverlays a collection of analysis overlays that render the results of 3D visual analysis on the composable SceneView
+ * @param imageOverlays a collection of overlays for displaying images in the composable SceneView
  * @param atmosphereEffect the effect applied to the scene's atmosphere
  * @param timeExtent the [TimeExtent] used by the composable SceneView
  * @param onTimeExtentChanged lambda invoked when the composable SceneView's [TimeExtent] is changed
@@ -112,6 +113,7 @@ public fun SceneView(
     attributionState: AttributionState = AttributionState(),
     cameraController: CameraController = GlobeCameraController(),
     analysisOverlays: AnalysisOverlayCollection = rememberAnalysisOverlayCollection(),
+    imageOverlays: ImageOverlayCollection = rememberImageOverlayCollection(),
     atmosphereEffect: AtmosphereEffect = AtmosphereEffect.HorizonOnly,
     timeExtent: TimeExtent? = null,
     onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
@@ -175,6 +177,7 @@ public fun SceneView(
 
     GraphicsOverlaysUpdater(graphicsOverlays, sceneView)
     AnalysisOverlaysUpdater(analysisOverlays, sceneView)
+    ImageOverlaysUpdater(imageOverlays, sceneView)
 
     AttributionStateHandler(sceneView, attributionState)
     ViewpointChangedStateHandler(sceneView, viewpointChangedState)
@@ -247,6 +250,42 @@ internal fun AnalysisOverlaysUpdater(
                 // On AnalysisOverlays cleared:
                 is AnalysisOverlayCollection.ChangedEvent.Cleared ->
                     sceneView.analysisOverlays.clear()
+            }
+        }
+    }
+}
+
+/**
+ * Update the view-based [SceneView]'s imageOverlays property to reflect changes made to the
+ * [imageOverlayCollection] based on the type of [ImageOverlayCollection.ChangedEvent]
+ *
+ * @since 200.4.0
+ */
+@Composable
+internal fun ImageOverlaysUpdater(
+    imageOverlayCollection: ImageOverlayCollection,
+    sceneView: SceneView
+) {
+    LaunchedEffect(imageOverlayCollection) {
+        // sync up the SceneView with the new image overlays
+        sceneView.imageOverlays.clear()
+        imageOverlayCollection.forEach {
+            sceneView.imageOverlays.add(it)
+        }
+        // start observing imageOverlays for subsequent changes
+        imageOverlayCollection.changed.collect { changedEvent ->
+            when (changedEvent) {
+                // On ImageOverlay added:
+                is ImageOverlayCollection.ChangedEvent.Added ->
+                    sceneView.imageOverlays.add(changedEvent.element)
+
+                // On ImageOverlay removed:
+                is ImageOverlayCollection.ChangedEvent.Removed ->
+                    sceneView.imageOverlays.remove(changedEvent.element)
+
+                // On ImageOverlays cleared:
+                is ImageOverlayCollection.ChangedEvent.Cleared ->
+                    sceneView.imageOverlays.clear()
             }
         }
     }
@@ -391,4 +430,22 @@ public inline fun rememberAnalysisOverlayCollection(
     crossinline init: AnalysisOverlayCollection.() -> Unit = {}
 ): AnalysisOverlayCollection = remember(key) {
     AnalysisOverlayCollection().apply(init)
+}
+
+
+/**
+ * Create and [remember] a [ImageOverlayCollection].
+ * [init] will be called when the [ImageOverlayCollection] is first created to configure its
+ * initial state.
+ *
+ * @param key invalidates the remembered ImageOverlayCollection if different from the previous composition
+ * @param init called when the [ImageOverlayCollection] is created to configure its initial state
+ * @since 200.4.0
+ */
+@Composable
+public inline fun rememberImageOverlayCollection(
+    key: Any? = null,
+    crossinline init: ImageOverlayCollection.() -> Unit = {}
+): ImageOverlayCollection = remember(key) {
+    ImageOverlayCollection().apply(init)
 }
