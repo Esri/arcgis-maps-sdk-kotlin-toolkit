@@ -192,7 +192,7 @@ private fun updateGeometryEditorStyle(geometryEditor: GeometryEditor, feature: A
     else feature.featureTable?.geometryType == GeometryType.Polygon
 
     val renderer = (feature.featureTable?.layer as? FeatureLayer)?.renderer
-    val featureSymbol = renderer?.getSymbol(feature, true)
+    val featureSymbol = renderer?.getSymbol(feature, true) ?: return
 
     if (isGeometryPoint) {
         geometryEditor.tool.style.apply {
