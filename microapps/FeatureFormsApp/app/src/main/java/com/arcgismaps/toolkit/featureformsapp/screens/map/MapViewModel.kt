@@ -102,47 +102,50 @@ class MapViewModel @Inject constructor(
     }
 
     context(MapView, CoroutineScope) override fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {
-        launch {
-            this@MapView.identifyLayers(
-                screenCoordinate = singleTapEvent.screenCoordinate,
-                tolerance = 22.0,
-                returnPopupsOnly = false
-            ).onSuccess { results ->
-                results.firstNotNullOfOrNull { result ->
-                    try {
-                        result.geoElements.filterIsInstance<ArcGISFeature>()
-                            .firstOrNull { feature ->
-                                (feature.featureTable?.layer as? FeatureLayer)?.featureFormDefinition != null
-                            }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        Toast.makeText(
-                            context,
-                            "failed to load the FeatureFormDefinition for the feature",
-                            Toast.LENGTH_LONG
-                        ).show()
-                        null
-                    }
-                }?.let { feature ->
-                    feature.load().onSuccess {
+        // do not process any taps on a different feature when a feature is being edited
+        if (_uiState.value is UIState.NotEditing) {
+            launch {
+                this@MapView.identifyLayers(
+                    screenCoordinate = singleTapEvent.screenCoordinate,
+                    tolerance = 22.0,
+                    returnPopupsOnly = false
+                ).onSuccess { results ->
+                    results.firstNotNullOfOrNull { result ->
                         try {
-                            val featureForm = FeatureForm(
-                                feature,
-                                (feature.featureTable?.layer as FeatureLayer).featureFormDefinition!!
-                            )
-                            // set the UI to an editing state and set the FeatureForm
-                            _uiState.value = UIState.Editing(featureForm)
+                            result.geoElements.filterIsInstance<ArcGISFeature>()
+                                .firstOrNull { feature ->
+                                    (feature.featureTable?.layer as? FeatureLayer)?.featureFormDefinition != null
+                                }
                         } catch (e: Exception) {
-                            e.printStackTrace() // for debugging core issues
+                            e.printStackTrace()
                             Toast.makeText(
                                 context,
-                                "failed to create a FeatureForm for the feature and layer",
+                                "failed to load the FeatureFormDefinition for the feature",
                                 Toast.LENGTH_LONG
                             ).show()
+                            null
                         }
-                    }.onFailure { println("failed to load tapped Feature") }
-                } ?: println("identified features do not have feature forms defined")
-            }.onFailure { println("tap was not on a feature") }
+                    }?.let { feature ->
+                        feature.load().onSuccess {
+                            try {
+                                val featureForm = FeatureForm(
+                                    feature,
+                                    (feature.featureTable?.layer as FeatureLayer).featureFormDefinition!!
+                                )
+                                // set the UI to an editing state and set the FeatureForm
+                                _uiState.value = UIState.Editing(featureForm)
+                            } catch (e: Exception) {
+                                e.printStackTrace() // for debugging core issues
+                                Toast.makeText(
+                                    context,
+                                    "failed to create a FeatureForm for the feature and layer",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        }.onFailure { println("failed to load tapped Feature") }
+                    } ?: println("identified features do not have feature forms defined")
+                }.onFailure { println("tap was not on a feature") }
+            }
         }
     }
 }
