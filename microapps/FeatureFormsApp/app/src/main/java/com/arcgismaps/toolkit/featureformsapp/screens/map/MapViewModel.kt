@@ -93,11 +93,9 @@ class MapViewModel @Inject constructor(
             }
     }
 
-    suspend fun rollbackEdits(): Result<Unit> {
+    fun rollbackEdits(): Result<Unit> {
         (_uiState.value as? UIState.Editing)?.let {
-            val feature = it.featureForm.feature
-            (feature.featureTable as? ServiceFeatureTable)?.undoLocalEdits()
-            feature.refresh()
+            it.featureForm.discardEdits()
             _uiState.value = UIState.NotEditing
             return Result.success(Unit)
         } ?: return Result.failure(IllegalStateException("Not in editing state"))

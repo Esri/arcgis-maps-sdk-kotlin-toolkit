@@ -17,4 +17,7 @@
     <string name="sign_in_with_default_credentials">Sign in using built-in Credentials</string>
     <string name="sign_in_with_enterprise">Sign in with ArcGIS Enterprise</string>
     <string name="skin_sign_in">Skip sign in</string>
+    <string name="discard">Discard</string>
+    <string name="discard_edits">Discard Edits?</string>
+    <string name="all_changes_will_be_lost">All changes made will be lost.</string>
 </resources>

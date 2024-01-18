@@ -13,6 +13,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -22,7 +24,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -51,6 +56,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
     val uiState by mapViewModel.uiState
     val context = LocalContext.current
     val windowSize = getWindowSize(context)
+    var showDiscardEditsDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -62,7 +68,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                 title = mapViewModel.portalItem.title,
                 editingMode = uiState is UIState.Editing,
                 onClose = {
-                    scope.launch { mapViewModel.rollbackEdits() }
+                    showDiscardEditsDialog = true
                 },
                 onSave = {
                     scope.launch {
@@ -130,6 +136,40 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
             }
         }
     }
+    if (showDiscardEditsDialog) {
+        DiscardEditsDialog(
+            onConfirm = {
+                mapViewModel.rollbackEdits()
+                showDiscardEditsDialog = false
+            },
+            onCancel = {
+                showDiscardEditsDialog = false
+            }
+        )
+    }
+}
+
+@Composable
+fun DiscardEditsDialog(onConfirm: () -> Unit, onCancel: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onCancel,
+        confirmButton = {
+            Button(onClick = onConfirm) {
+                Text(text = stringResource(R.string.discard))
+            }
+        },
+        dismissButton = {
+            Button(onClick = onCancel) {
+                Text(text = stringResource(R.string.cancel))
+            }
+        },
+        title = {
+            Text(text = stringResource(R.string.discard_edits))
+        },
+        text = {
+            Text(text = stringResource(R.string.all_changes_will_be_lost))
+        }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
