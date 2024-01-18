@@ -40,7 +40,7 @@ sealed class UIState {
      */
     data class Editing(
         val featureForm: FeatureForm,
-        val validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.OnlyAfterFocus
+        val validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic
     ) : UIState()
 
     /**
@@ -145,7 +145,7 @@ class MapViewModel @Inject constructor(
         // ValidationErrorVisibility.Always
         _uiState.value = UIState.Editing(
             previousState.featureForm,
-            validationErrorVisibility = ValidationErrorVisibility.Always
+            validationErrorVisibility = ValidationErrorVisibility.Visible
         )
         return Result.success(Unit)
     }
