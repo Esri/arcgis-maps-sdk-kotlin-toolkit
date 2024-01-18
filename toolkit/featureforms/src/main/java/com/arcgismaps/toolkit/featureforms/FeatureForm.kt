@@ -61,8 +61,21 @@ import com.arcgismaps.toolkit.featureforms.utils.FeatureFormDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 
+/**
+ * The "property" determines the behavior of when the validation errors are visible.
+ */
 public sealed class ValidationErrorVisibility {
+
+    /**
+     * Indicates that the validation errors are only visible for editable fields that have
+     * received focus.
+     */
     public object OnlyAfterFocus : ValidationErrorVisibility()
+
+    /**
+     * Indicates the validation is run for all the editable fields regardless of their focus state,
+     * and any errors are shown.
+     */
     public object Always : ValidationErrorVisibility()
 }
 
@@ -74,6 +87,9 @@ public sealed class ValidationErrorVisibility {
  * @param featureForm The [FeatureForm] configuration.
  * @param modifier The [Modifier] to be applied to layout corresponding to the content of this
  * FeatureForm.
+ * @param validationErrorVisibility The [ValidationErrorVisibility] that determines the behavior of
+ * when the validation errors are visible. Default is [ValidationErrorVisibility.OnlyAfterFocus] which
+ * indicates errors are only visible once the respective field gains focus.
  *
  * @since 200.2.0
  */
