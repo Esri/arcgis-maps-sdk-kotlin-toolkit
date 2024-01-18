@@ -39,7 +39,7 @@ import com.arcgismaps.mapping.ViewpointType
 import com.arcgismaps.mapping.view.MapView
 import kotlinx.coroutines.launch
 
-@Deprecated("Use the new composable MapView fun available in the geo-compose toolkit component instead")
+@Deprecated("Use the new composable MapView function available in the geo-compose toolkit component instead")
 @Composable
 public fun ComposableMap(
     mapInterface: MapInterface,
