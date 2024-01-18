@@ -164,7 +164,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
         }
     }
     if (uiState is UIState.Committing) {
-        SubmitForm(uiState = (uiState as UIState.Committing)) {
+        SubmitForm(errors = (uiState as UIState.Committing).errors) {
             mapViewModel.cancelCommit()
         }
     }
@@ -214,8 +214,7 @@ fun TopFormBar(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SubmitForm(uiState: UIState.Committing, onDismissRequest: () -> Unit) {
-    val errors = uiState.errors
+private fun SubmitForm(errors : List<ErrorInfo>, onDismissRequest: () -> Unit) {
     if (errors.isEmpty()) {
         // show a progress dialog if no errors are present
         AlertDialog(
@@ -265,7 +264,7 @@ private fun SubmitForm(uiState: UIState.Committing, onDismissRequest: () -> Unit
                 Card(
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Column(modifier = Modifier.padding(25.dp)) {
+                    Column(modifier = Modifier.padding(15.dp)) {
                         Text(
                             text = stringResource(R.string.attributes_failed, errors.count()),
                             color = MaterialTheme.colorScheme.error
