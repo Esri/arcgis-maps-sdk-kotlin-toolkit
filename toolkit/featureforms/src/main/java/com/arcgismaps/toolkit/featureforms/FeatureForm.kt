@@ -70,13 +70,13 @@ public sealed class ValidationErrorVisibility {
      * Indicates that the validation errors are only visible for editable fields that have
      * received focus.
      */
-    public object OnlyAfterFocus : ValidationErrorVisibility()
+    public object Automatic : ValidationErrorVisibility()
 
     /**
      * Indicates the validation is run for all the editable fields regardless of their focus state,
      * and any errors are shown.
      */
-    public object Always : ValidationErrorVisibility()
+    public object Visible : ValidationErrorVisibility()
 }
 
 /**
@@ -88,7 +88,7 @@ public sealed class ValidationErrorVisibility {
  * @param modifier The [Modifier] to be applied to layout corresponding to the content of this
  * FeatureForm.
  * @param validationErrorVisibility The [ValidationErrorVisibility] that determines the behavior of
- * when the validation errors are visible. Default is [ValidationErrorVisibility.OnlyAfterFocus] which
+ * when the validation errors are visible. Default is [ValidationErrorVisibility.Automatic] which
  * indicates errors are only visible once the respective field gains focus.
  *
  * @since 200.2.0
@@ -97,7 +97,7 @@ public sealed class ValidationErrorVisibility {
 public fun FeatureForm(
     featureForm: FeatureForm,
     modifier: Modifier = Modifier,
-    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.OnlyAfterFocus
+    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic
 ) {
     var initialEvaluation by rememberSaveable(featureForm) { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
@@ -118,7 +118,7 @@ public fun FeatureForm(
     // launch a new side effect in a launched effect when validationErrorVisibility changes
     LaunchedEffect(validationErrorVisibility) {
         // if it set to always show errors force each field to validate itself and show any errors
-        if (validationErrorVisibility == ValidationErrorVisibility.Always) {
+        if (validationErrorVisibility == ValidationErrorVisibility.Visible) {
             states.forEach { entry ->
                 // validate all fields
                 if (entry.formElement is FieldFormElement) {

@@ -79,12 +79,12 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
             is UIState.Committing -> {
                 Pair(
                     (uiState as UIState.Committing).featureForm,
-                    ValidationErrorVisibility.OnlyAfterFocus
+                    ValidationErrorVisibility.Automatic
                 )
             }
 
             else -> {
-                Pair(null, ValidationErrorVisibility.OnlyAfterFocus)
+                Pair(null, ValidationErrorVisibility.Automatic)
             }
         }
     }
