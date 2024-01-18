@@ -115,12 +115,16 @@ public fun FeatureForm(
         delay(300)
         initialEvaluation = true
     }
+    // launch a new side effect in a launched effect when validationErrorVisibility changes
     LaunchedEffect(validationErrorVisibility) {
+        // if it set to always show errors force each field to validate itself and show any errors
         if (validationErrorVisibility == ValidationErrorVisibility.Always) {
             states.forEach { entry ->
+                // validate all fields
                 if (entry.formElement is FieldFormElement) {
                     entry.getState<BaseFieldState<*>>().forceValidation()
                 }
+                // validate any fields that are within a group
                 if (entry.formElement is GroupFormElement) {
                     entry.getState<BaseGroupState>().fieldStates.forEach { childEntry ->
                         childEntry.getState<BaseFieldState<*>>().forceValidation()
