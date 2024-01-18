@@ -34,4 +34,6 @@
     <string name="exceeds_max_value">Exceeds maximum value %1$s</string>
     <string name="value_must_be_a_whole_number">Value must be a whole number</string>
     <string name="value_must_be_a_number">Value must be a number</string>
+    <string name="value_must_be_within_domain">Value must be within domain</string>
+    <string name="value_must_not_be_empty">Value must not be empty</string>
 </resources>

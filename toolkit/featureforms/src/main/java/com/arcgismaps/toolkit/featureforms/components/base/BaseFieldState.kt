@@ -263,8 +263,20 @@ internal abstract class BaseFieldState<T>(
     open fun validate(): List<ValidationErrorState> {
         val errors = defaultValidator()
         return buildList {
-            if (errors.any { it is FeatureFormValidationException.RequiredException }) {
-                add(ValidationErrorState.Required)
+            errors.forEach {
+                when(it) {
+                    is FeatureFormValidationException.RequiredException -> {
+                        add(ValidationErrorState.Required)
+                    }
+
+                    is FeatureFormValidationException.OutOfDomainException -> {
+                        add(ValidationErrorState.NotInCodedValueDomain)
+                    }
+
+                    is FeatureFormValidationException.NullNotAllowedException -> {
+                        add(ValidationErrorState.NullNotAllowed)
+                    }
+                }
             }
         }
     }
