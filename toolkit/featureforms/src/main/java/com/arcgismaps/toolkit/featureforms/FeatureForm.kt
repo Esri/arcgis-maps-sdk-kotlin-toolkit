@@ -108,7 +108,7 @@ public fun FeatureForm(
     FeatureFormBody(form = featureForm, states = states, modifier = modifier)
     FeatureFormDialog()
     LaunchedEffect(featureForm) {
-        // ensure expressions are evaluated before state objects are created.
+        // ensure expressions are evaluated
         featureForm.evaluateExpressions()
         // add an artificial delay of 300ms to avoid the slight flicker if the
         // expressions are evaluated quickly
