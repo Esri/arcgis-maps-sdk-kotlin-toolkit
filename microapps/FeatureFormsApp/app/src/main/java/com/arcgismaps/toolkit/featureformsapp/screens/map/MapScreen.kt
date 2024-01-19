@@ -36,8 +36,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -88,6 +90,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
             }
         }
     }
+    var showDiscardEditsDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -99,7 +102,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                 title = mapViewModel.portalItem.title,
                 editingMode = uiState !is UIState.NotEditing,
                 onClose = {
-                    scope.launch { mapViewModel.rollbackEdits() }
+                    showDiscardEditsDialog = true
                 },
                 onSave = {
                     //SubmitForm(mapViewModel = mapViewModel, featureForm = (uiState as UIState.Editing).featureForm)
@@ -168,6 +171,40 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
             mapViewModel.cancelCommit()
         }
     }
+    if (showDiscardEditsDialog) {
+        DiscardEditsDialog(
+            onConfirm = {
+                mapViewModel.rollbackEdits()
+                showDiscardEditsDialog = false
+            },
+            onCancel = {
+                showDiscardEditsDialog = false
+            }
+        )
+    }
+}
+
+@Composable
+fun DiscardEditsDialog(onConfirm: () -> Unit, onCancel: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onCancel,
+        confirmButton = {
+            Button(onClick = onConfirm) {
+                Text(text = stringResource(R.string.discard))
+            }
+        },
+        dismissButton = {
+            Button(onClick = onCancel) {
+                Text(text = stringResource(R.string.cancel))
+            }
+        },
+        title = {
+            Text(text = stringResource(R.string.discard_edits))
+        },
+        text = {
+            Text(text = stringResource(R.string.all_changes_will_be_lost))
+        }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
