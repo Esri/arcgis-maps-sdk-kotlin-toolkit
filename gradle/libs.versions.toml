@@ -8,6 +8,7 @@ androidxEspresso = "3.5.1"
 androidxLifecycle = "2.6.2"
 androidxTestExt = "1.1.5"
 compileSdk = "34"
+dokka = "1.9.10"
 junit = "4.13.2"
 kotlin = "1.9.21"
 minSdk = "26"
@@ -43,6 +44,7 @@ truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
 android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 gradle-secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version = "2.0.1"}
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
