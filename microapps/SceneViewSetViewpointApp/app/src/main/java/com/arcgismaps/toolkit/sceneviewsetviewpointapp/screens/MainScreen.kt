@@ -63,12 +63,7 @@ import kotlin.time.Duration.Companion.seconds
 fun MainScreen() {
     val arcGISScene by remember { mutableStateOf(ArcGISScene(BasemapStyle.ArcGISImagery)) }
     var sceneViewpointOperation: SceneViewpointOperation? by remember { mutableStateOf(null) }
-    var showProgressIndicator by remember { mutableStateOf(false) }
-    LaunchedEffect(key1 = sceneViewpointOperation) {
-        showProgressIndicator = true
-        sceneViewpointOperation?.await()
-        showProgressIndicator = false
-    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -103,9 +98,6 @@ fun MainScreen() {
                 arcGISScene = arcGISScene,
                 viewpointOperation = sceneViewpointOperation
             )
-            if (showProgressIndicator) {
-                CircularProgressIndicator()
-            }
         }
     }
 }
