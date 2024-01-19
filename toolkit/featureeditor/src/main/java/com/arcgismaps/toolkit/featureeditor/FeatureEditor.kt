@@ -47,6 +47,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlin.math.max
 
 public sealed class FinishState(public open val feature: ArcGISFeature) {
     public data class Discarded(override val feature: ArcGISFeature) : FinishState(feature)
@@ -206,12 +207,20 @@ private fun updateGeometryEditorStyle(geometryEditor: GeometryEditor, feature: A
             val vertexOutlineSymbol = SimpleLineSymbol(SimpleLineSymbolStyle.Solid, color = Color.black)
             when (featureSymbol) {
                 is SimpleLineSymbol -> {
-                    val vertexWidth = if (featureSymbol.width < 2) featureSymbol.width * 10 else featureSymbol.width * 3
-                    val midVertexWidth = if (featureSymbol.width < 2) featureSymbol.width * 7 else featureSymbol.width * 2
+                    val vertexSize = max(featureSymbol.width, 3f) * 3
+                    val midVertexSize = max(featureSymbol.width, 3f) * 2
 
-                    val vertex = SimpleMarkerSymbol(color = featureSymbol.color, style = SimpleMarkerSymbolStyle.Circle, size = vertexWidth)
+                    val vertex = SimpleMarkerSymbol(
+                        color = featureSymbol.color.opaque,
+                        style = SimpleMarkerSymbolStyle.Circle,
+                        size = vertexSize
+                    )
                     vertex.outline = vertexOutlineSymbol
-                    val midVertex = SimpleMarkerSymbol(color = Color.white, style = SimpleMarkerSymbolStyle.Circle, size = midVertexWidth)
+                    val midVertex = SimpleMarkerSymbol(
+                        color = Color.white,
+                        style = SimpleMarkerSymbolStyle.Circle,
+                        size = midVertexSize
+                    )
                     midVertex.outline = vertexOutlineSymbol
 
                     vertexSymbol = vertex
@@ -219,29 +228,48 @@ private fun updateGeometryEditorStyle(geometryEditor: GeometryEditor, feature: A
                     feedbackVertexSymbol = vertex
                     midVertexSymbol = midVertex
                     selectedMidVertexSymbol = midVertex
-                    feedbackLineSymbol = SimpleLineSymbol(SimpleLineSymbolStyle.Dash, color = featureSymbol.color, width = featureSymbol.width)
+                    feedbackLineSymbol = SimpleLineSymbol(
+                        SimpleLineSymbolStyle.Dash,
+                        color = featureSymbol.color.opaque,
+                        width = featureSymbol.width
+                    )
                     lineSymbol = featureSymbol
                     vertexTextSymbol = null
                 }
                 is MultilayerPolylineSymbol -> {
-                    // Can potentially use featureSymbol.width instead
-                    val symbolStrokeWidth = (featureSymbol.symbolLayers[0] as StrokeSymbolLayer).width.toFloat()
-                    val vertexSize = if (symbolStrokeWidth < 2) symbolStrokeWidth * 10 else symbolStrokeWidth * 3
-                    val midVertexSize = if (symbolStrokeWidth < 2) symbolStrokeWidth * 7 else symbolStrokeWidth * 2
+                    // Find the first stroke symbol layer in the list of layers, if any.
+                    val strokeSymbolLayer = featureSymbol.symbolLayers.filterIsInstance<StrokeSymbolLayer>().firstOrNull()
+                    if (strokeSymbolLayer != null) {
+                        val symbolStrokeWidth = strokeSymbolLayer.width.toFloat()
+                        val vertexSize = max(symbolStrokeWidth, 3f) * 3
+                        val midVertexSize = max(symbolStrokeWidth, 3f) * 2
 
-                    val vertex = SimpleMarkerSymbol(color = featureSymbol.color, style = SimpleMarkerSymbolStyle.Circle, size = vertexSize)
-                    vertex.outline = vertexOutlineSymbol
-                    val midVertex = SimpleMarkerSymbol(color = Color.white, style = SimpleMarkerSymbolStyle.Circle, size = midVertexSize)
-                    midVertex.outline = vertexOutlineSymbol
+                        val vertex = SimpleMarkerSymbol(
+                            color = featureSymbol.color.opaque,
+                            style = SimpleMarkerSymbolStyle.Circle,
+                            size = vertexSize
+                        )
+                        vertex.outline = vertexOutlineSymbol
+                        val midVertex = SimpleMarkerSymbol(
+                            color = Color.white,
+                            style = SimpleMarkerSymbolStyle.Circle,
+                            size = midVertexSize
+                        )
+                        midVertex.outline = vertexOutlineSymbol
 
-                    vertexSymbol = vertex
-                    selectedVertexSymbol = vertex
-                    feedbackVertexSymbol = vertex
-                    midVertexSymbol = midVertex
-                    selectedMidVertexSymbol = midVertex
-                    feedbackLineSymbol = SimpleLineSymbol(SimpleLineSymbolStyle.Dash, color = featureSymbol.color, width = symbolStrokeWidth)
-                    lineSymbol = featureSymbol
-                    vertexTextSymbol = null
+                        vertexSymbol = vertex
+                        selectedVertexSymbol = vertex
+                        feedbackVertexSymbol = vertex
+                        midVertexSymbol = midVertex
+                        selectedMidVertexSymbol = midVertex
+                        feedbackLineSymbol = SimpleLineSymbol(
+                            SimpleLineSymbolStyle.Dash,
+                            color = featureSymbol.color.opaque,
+                            width = symbolStrokeWidth
+                        )
+                        lineSymbol = featureSymbol
+                        vertexTextSymbol = null
+                    }
                 }
                 else -> {} // Use default symbology
             }
@@ -252,22 +280,30 @@ private fun updateGeometryEditorStyle(geometryEditor: GeometryEditor, feature: A
             when (featureSymbol) {
                 is SimpleFillSymbol -> {
                     // Defaults when outline is null
-                    var vertexSize = (vertexSymbol as? SimpleMarkerSymbol)?.size ?: 2f
+                    var vertexSize = (vertexSymbol as? SimpleMarkerSymbol)?.size ?: 3f
                     var midVertexSize = vertexSize / 2
                     var outlineColor = Color.white
-                    var outlineWidth = (feedbackLineSymbol as? SimpleLineSymbol)?.width ?: 2f
+                    var outlineWidth = (feedbackLineSymbol as? SimpleLineSymbol)?.width ?: 3f
 
                     featureSymbol.outline?.let {
                         outlineColor = it.color
                         outlineWidth = it.width
-                        vertexSize = if (outlineWidth < 2) outlineWidth * 10 else outlineWidth * 3
-                        midVertexSize = if (outlineWidth < 2) outlineWidth * 7 else outlineWidth * 2
+                        vertexSize = max(outlineWidth, 3f) * 3
+                        midVertexSize = max(outlineWidth, 3f) * 2
                     }
 
                     // Color can be null (no fill)
-                    val vertex = SimpleMarkerSymbol(color = featureSymbol.color, style = SimpleMarkerSymbolStyle.Circle, size = vertexSize)
+                    val vertex = SimpleMarkerSymbol(
+                        color = featureSymbol.color.opaque,
+                        style = SimpleMarkerSymbolStyle.Circle,
+                        size = vertexSize
+                    )
                     vertex.outline = vertexOutlineSymbol
-                    val midVertex = SimpleMarkerSymbol(color = Color.white, style = SimpleMarkerSymbolStyle.Circle, size = midVertexSize)
+                    val midVertex = SimpleMarkerSymbol(
+                        color = Color.white,
+                        style = SimpleMarkerSymbolStyle.Circle,
+                        size = midVertexSize
+                    )
                     midVertex.outline = vertexOutlineSymbol
 
                     vertexSymbol = vertex
@@ -275,43 +311,74 @@ private fun updateGeometryEditorStyle(geometryEditor: GeometryEditor, feature: A
                     feedbackVertexSymbol = vertex
                     midVertexSymbol = midVertex
                     selectedMidVertexSymbol = midVertex
-                    feedbackLineSymbol = SimpleLineSymbol(SimpleLineSymbolStyle.Dash, color = outlineColor, width = outlineWidth)
+                    feedbackLineSymbol = SimpleLineSymbol(
+                        SimpleLineSymbolStyle.Dash,
+                        color = outlineColor,
+                        width = outlineWidth
+                    )
                     lineSymbol = featureSymbol // Could be null (no outline)
                     fillSymbol = featureSymbol
                     vertexTextSymbol = null
                 }
                 is MultilayerPolygonSymbol -> {
-                    val symbolStrokeWidth = (featureSymbol.symbolLayers[1] as StrokeSymbolLayer).width.toFloat()
-                    val opaqueFillColor = Color.fromRgba(featureSymbol.color.red, featureSymbol.color.green, featureSymbol.color.blue)
-                    val vertexSize = if (symbolStrokeWidth < 2) symbolStrokeWidth * 10 else symbolStrokeWidth * 3
-                    val midVertexSize = if (symbolStrokeWidth < 2) symbolStrokeWidth * 7 else symbolStrokeWidth * 2
+                    // Find the first stroke symbol layer in the list of layers, if any.
+                    val strokeSymbolLayer = featureSymbol.symbolLayers.filterIsInstance<StrokeSymbolLayer>().firstOrNull()
+                    if (strokeSymbolLayer != null) {
+                        val symbolStrokeWidth = strokeSymbolLayer.width.toFloat()
+                        val vertexSize = max(symbolStrokeWidth, 3f) * 3
+                        val midVertexSize = max(symbolStrokeWidth, 3f) * 2
 
-                    val vertex = SimpleMarkerSymbol(color = opaqueFillColor, style = SimpleMarkerSymbolStyle.Circle, size = vertexSize)
-                    vertex.outline = vertexOutlineSymbol
-                    val midVertex = SimpleMarkerSymbol(color = Color.white, style = SimpleMarkerSymbolStyle.Circle, size = midVertexSize)
-                    midVertex.outline = vertexOutlineSymbol
+                        val vertex = SimpleMarkerSymbol(
+                            color = featureSymbol.color.opaque ,
+                            style = SimpleMarkerSymbolStyle.Circle,
+                            size = vertexSize
+                        )
+                        vertex.outline = vertexOutlineSymbol
+                        val midVertex = SimpleMarkerSymbol(
+                            color = Color.white,
+                            style = SimpleMarkerSymbolStyle.Circle,
+                            size = midVertexSize
+                        )
+                        midVertex.outline = vertexOutlineSymbol
 
-                    vertexSymbol = vertex
-                    selectedVertexSymbol = vertex
-                    feedbackVertexSymbol = vertex
-                    midVertexSymbol = midVertex
-                    selectedMidVertexSymbol = midVertex
-                    feedbackLineSymbol = SimpleLineSymbol(SimpleLineSymbolStyle.Dash, color = opaqueFillColor, width = symbolStrokeWidth)
-                    lineSymbol = featureSymbol // Could be null (no outline)
-                    fillSymbol = featureSymbol
-                    vertexTextSymbol = null
+                        vertexSymbol = vertex
+                        selectedVertexSymbol = vertex
+                        feedbackVertexSymbol = vertex
+                        midVertexSymbol = midVertex
+                        selectedMidVertexSymbol = midVertex
+                        feedbackLineSymbol = SimpleLineSymbol(
+                            SimpleLineSymbolStyle.Dash,
+                            color = featureSymbol.color.opaque,
+                            width = symbolStrokeWidth
+                        )
+                        lineSymbol = featureSymbol // Could be null (no outline)
+                        fillSymbol = featureSymbol
+                        vertexTextSymbol = null
+                    }
                 }
                 is PictureMarkerSymbol -> {
-                    val midVertex = SimpleMarkerSymbol(color = Color.white, style = SimpleMarkerSymbolStyle.Circle, size = featureSymbol.toMultilayerSymbol().size/3)
+                    val midVertex = SimpleMarkerSymbol(
+                        color = Color.white,
+                        style = SimpleMarkerSymbolStyle.Circle,
+                        size = featureSymbol.toMultilayerSymbol().size / 3
+                    )
                     midVertex.outline = vertexOutlineSymbol
 
                     vertexSymbol = featureSymbol
                     selectedVertexSymbol = featureSymbol
-                    feedbackVertexSymbol= featureSymbol
+                    feedbackVertexSymbol = featureSymbol
                     midVertexSymbol = midVertex
                     selectedMidVertexSymbol = midVertex
-                    feedbackLineSymbol = SimpleLineSymbol(SimpleLineSymbolStyle.Dash, featureSymbol.toMultilayerSymbol().color, width = featureSymbol.toMultilayerSymbol().size/5)
-                    lineSymbol = SimpleLineSymbol(SimpleLineSymbolStyle.Dash, featureSymbol.toMultilayerSymbol().color, width = featureSymbol.toMultilayerSymbol().size/5)
+                    feedbackLineSymbol = SimpleLineSymbol(
+                        SimpleLineSymbolStyle.Dash,
+                        featureSymbol.toMultilayerSymbol().color.opaque,
+                        width = featureSymbol.toMultilayerSymbol().size / 5
+                    )
+                    lineSymbol = SimpleLineSymbol(
+                        SimpleLineSymbolStyle.Dash,
+                        featureSymbol.toMultilayerSymbol().color.opaque,
+                        width = featureSymbol.toMultilayerSymbol().size / 5
+                    )
                     fillSymbol = featureSymbol
                     vertexTextSymbol = null
                 }
@@ -320,3 +387,6 @@ private fun updateGeometryEditorStyle(geometryEditor: GeometryEditor, feature: A
         }
     }
 }
+
+private val Color.opaque: Color
+    get() = Color.fromRgba(red, green, blue)
