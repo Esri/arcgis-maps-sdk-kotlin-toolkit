@@ -19,5 +19,5 @@
 
 <resources>
 
-    <style name="Theme.SceneViewTestApp" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.SceneViewCameraControllerApp" parent="android:Theme.Material.Light.NoActionBar" />
 </resources>

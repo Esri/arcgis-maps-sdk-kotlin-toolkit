@@ -35,14 +35,14 @@ class MainActivity : ComponentActivity() {
             ApiKey.create(BuildConfig.API_KEY)
         setContent {
             SceneViewTestAppTheme {
-                SceneViewTestApp()
+                SceneViewCameraControllerApp()
             }
         }
     }
 }
 
 @Composable
-fun SceneViewTestApp() {
+fun SceneViewCameraControllerApp() {
     MainScreen()
 }
 
@@ -50,6 +50,6 @@ fun SceneViewTestApp() {
 @Composable
 fun AppPreview() {
     SceneViewTestAppTheme {
-        SceneViewTestApp()
+        SceneViewCameraControllerApp()
     }
 }

@@ -30,12 +30,12 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.SceneViewTestApp"
+        android:theme="@style/Theme.SceneViewCameraControllerApp"
         tools:targetApi="31">
         <activity
             android:name="com.arcgismaps.toolkit.sceneviewcameracontrollerapp.MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.SceneViewTestApp">
+            android:theme="@style/Theme.SceneViewCameraControllerApp">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
