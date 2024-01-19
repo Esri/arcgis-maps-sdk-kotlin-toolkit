@@ -9,13 +9,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.data.ServiceFeatureTable
+import com.arcgismaps.exceptions.FeatureFormValidationException
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.mapping.featureforms.FeatureForm
+import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.toolkit.composablemap.MapState
+import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -32,15 +35,28 @@ sealed class UIState {
     object NotEditing : UIState()
 
     /**
-     * In editing state with the [featureForm].
+     * In editing state with the [featureForm] with the validation error visibility given by
+     * [validationErrorVisibility].
      */
-    data class Editing(val featureForm: FeatureForm) : UIState()
+    data class Editing(
+        val featureForm: FeatureForm,
+        val validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic
+    ) : UIState()
 
     /**
-     * Loading state.
+     * Commit in progress state for the [featureForm] with validation errors [errors].
      */
-    object Loading : UIState()
+    data class Committing(
+        val featureForm: FeatureForm,
+        val errors: List<ErrorInfo>
+    ) : UIState()
 }
+
+/**
+ * Class that provides a validation error [error] for the field with name [fieldName]. To fetch
+ * the actual message string use [FeatureFormValidationException.getString] in the composition.
+ */
+data class ErrorInfo(val fieldName: String, val error: FeatureFormValidationException)
 
 /**
  * A view model for the FeatureForms MapView UI
@@ -77,20 +93,61 @@ class MapViewModel @Inject constructor(
     suspend fun commitEdits(): Result<Unit> {
         val state = (_uiState.value as? UIState.Editing)
             ?: return Result.failure(IllegalStateException("Not in editing state"))
-        _uiState.value = UIState.Loading
-        val feature = state.featureForm.feature as ArcGISFeature
-        val serviceFeatureTable =
-            feature.featureTable as? ServiceFeatureTable ?: return Result.failure(
-                IllegalStateException("cannot save feature edit without a ServiceFeatureTable")
-            )
-
-        return serviceFeatureTable.updateFeature(feature)
-            .map {
+        // build the list of errors
+        val errors = mutableListOf<ErrorInfo>()
+        val featureForm = state.featureForm
+        featureForm.getValidationErrors().forEach { entry ->
+            entry.value.forEach { error ->
+                featureForm.getFormElement(entry.key)?.let { formElement ->
+                    if (formElement.isEditable.value) {
+                        errors.add(ErrorInfo(formElement.label, error as FeatureFormValidationException))
+                    }
+                }
+            }
+        }
+        // set the state to committing with the errors if any
+        _uiState.value = UIState.Committing(
+            featureForm = state.featureForm,
+            errors = errors
+        )
+        // if there are no errors then update the feature
+        return if (errors.isEmpty()) {
+            val feature = state.featureForm.feature
+            val serviceFeatureTable =
+                feature.featureTable as? ServiceFeatureTable ?: return Result.failure(
+                    IllegalStateException("cannot save feature edit without a ServiceFeatureTable")
+                )
+            val result = serviceFeatureTable.updateFeature(feature).map {
                 serviceFeatureTable.serviceGeodatabase?.applyEdits()
                     ?: throw IllegalStateException("cannot apply feature edit without a ServiceGeodatabase")
                 feature.refresh()
-                _uiState.value = UIState.NotEditing
+                Unit
             }
+            // set the state to not editing since the feature was updated successfully
+            _uiState.value = UIState.NotEditing
+            result
+        } else {
+            // even though there are errors send a success result since the operation was successful
+            // and the control is back with the UI
+            Result.success(Unit)
+        }
+    }
+
+    /**
+     * Cancels the commit if the current state is [UIState.Committing] and sets the ui state to
+     * [UIState.Editing].
+     */
+    fun cancelCommit(): Result<Unit> {
+        val previousState = (_uiState.value as? UIState.Committing) ?: return Result.failure(
+            IllegalStateException("Not in committing state")
+        )
+        // set the state back to an editing state while showing all errors using
+        // ValidationErrorVisibility.Always
+        _uiState.value = UIState.Editing(
+            previousState.featureForm,
+            validationErrorVisibility = ValidationErrorVisibility.Visible
+        )
+        return Result.success(Unit)
     }
 
     fun rollbackEdits(): Result<Unit> {
@@ -146,6 +203,20 @@ class MapViewModel @Inject constructor(
                     } ?: println("identified features do not have feature forms defined")
                 }.onFailure { println("tap was not on a feature") }
             }
+        }
+    }
+}
+
+/**
+ * Returns the [FieldFormElement] with the given [fieldName] in the [FeatureForm]. If none exists
+ * null is returned.
+ */
+fun FeatureForm.getFormElement(fieldName: String): FieldFormElement? {
+    return elements.firstNotNullOfOrNull {
+        if (it is FieldFormElement && it.fieldName == fieldName) {
+            it
+        } else {
+            null
         }
     }
 }
