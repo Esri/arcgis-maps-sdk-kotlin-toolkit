@@ -18,21 +18,21 @@
 package com.arcgismaps.toolkit.geocompose
 
 import androidx.compose.runtime.Stable
-import com.arcgismaps.mapping.view.AnalysisOverlay
+import com.arcgismaps.mapping.view.ImageOverlay
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 
 /**
- * A collection class to encapsulate the [AnalysisOverlay] list used by the [com.arcgismaps.toolkit.geocompose.SceneView]
+ * A collection class to encapsulate the [ImageOverlay] list used by the [com.arcgismaps.toolkit.geocompose.SceneView]
  *
  * @since 200.4.0
  */
 @Stable
-public class AnalysisOverlayCollection : Iterable<AnalysisOverlay> {
+public class ImageOverlayCollection : Iterable<ImageOverlay> {
 
-    private val analysisOverlays = mutableListOf<AnalysisOverlay>()
+    private val imageOverlays = mutableListOf<ImageOverlay>()
 
     private val _changed: MutableSharedFlow<ChangedEvent> = MutableSharedFlow(
         extraBufferCapacity = Int.MAX_VALUE,
@@ -40,67 +40,67 @@ public class AnalysisOverlayCollection : Iterable<AnalysisOverlay> {
     )
 
     /**
-     * [SharedFlow] used to emit changes made to the [analysisOverlays] list
+     * [SharedFlow] used to emit changes made to the [imageOverlays] list
      */
     internal val changed: SharedFlow<ChangedEvent> = _changed.asSharedFlow()
 
-    override fun iterator(): Iterator<AnalysisOverlay> {
-        return analysisOverlays.iterator()
+    override fun iterator(): Iterator<ImageOverlay> {
+        return imageOverlays.iterator()
     }
 
     /**
-     * Add a [analysisOverlay] to this AnalysisOverlayCollection.
+     * Add a [imageOverlay] to this ImageOverlayCollection.
      *
      * @return if the add operation succeeds, return true.
      * @since 200.4.0
      */
-    public fun add(analysisOverlay: AnalysisOverlay): Boolean {
-        return if (analysisOverlays.add(analysisOverlay)) {
-            _changed.tryEmit(ChangedEvent.Added(analysisOverlay))
+    public fun add(imageOverlay: ImageOverlay): Boolean {
+        return if (imageOverlays.add(imageOverlay)) {
+            _changed.tryEmit(ChangedEvent.Added(imageOverlay))
             true
         } else false
     }
 
     /**
-     * Remove a [analysisOverlay] from this AnalysisOverlayCollection.
+     * Remove a [imageOverlay] from this ImageOverlayCollection.
      *
      * @return if the remove operation succeeds, return true.
      * @since 200.4.0
      */
-    public fun remove(analysisOverlay: AnalysisOverlay): Boolean {
-        return if (analysisOverlays.remove(analysisOverlay)) {
-            _changed.tryEmit(ChangedEvent.Removed(analysisOverlay))
+    public fun remove(imageOverlay: ImageOverlay): Boolean {
+        return if (imageOverlays.remove(imageOverlay)) {
+            _changed.tryEmit(ChangedEvent.Removed(imageOverlay))
             true
         } else false
     }
 
     /**
-     * Returns the number of analysis overlays in this AnalysisOverlayCollection.
+     * Returns the number of graphics overlays in this ImageOverlayCollection.
      *
      * @since 200.4.0
      */
     public val size: Int
-        get() = analysisOverlays.size
+        get() = imageOverlays.size
 
     /**
-     * Clears all analysis overlays from this AnalysisOverlayCollection.
+     * Clears all graphics overlays from this ImageOverlayCollection.
      *
      * @since 200.4.0
      */
     public fun clear() {
-        analysisOverlays.clear()
+        imageOverlays.clear()
         _changed.tryEmit(ChangedEvent.Cleared)
     }
 
     /**
-     * Sealed class used to notify the compose SceneView to update the AnalysisOverlays on the
+     * Sealed class used to notify the compose SceneView to update the ImageOverlays on the
      * type of [ChangedEvent].
      *
      * @since 200.4.0
      */
     internal sealed class ChangedEvent {
-        class Added(val element: AnalysisOverlay) : ChangedEvent()
-        class Removed(val element: AnalysisOverlay) : ChangedEvent()
+        class Added(val element: ImageOverlay) : ChangedEvent()
+        class Removed(val element: ImageOverlay) : ChangedEvent()
         data object Cleared : ChangedEvent()
     }
 }
