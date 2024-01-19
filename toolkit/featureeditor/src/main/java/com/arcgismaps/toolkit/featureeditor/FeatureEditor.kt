@@ -211,14 +211,12 @@ private fun updateGeometryEditorStyle(geometryEditor: GeometryEditor, feature: A
 
                     val vertex = SimpleMarkerSymbol(color = featureSymbol.color, style = SimpleMarkerSymbolStyle.Circle, size = vertexWidth)
                     vertex.outline = vertexOutlineSymbol
-                    val selectedVertex = SimpleMarkerSymbol(color = Color.white, style = SimpleMarkerSymbolStyle.Circle, size = vertexWidth)
-                    selectedVertex.outline = vertexOutlineSymbol
                     val midVertex = SimpleMarkerSymbol(color = Color.white, style = SimpleMarkerSymbolStyle.Circle, size = midVertexWidth)
                     midVertex.outline = vertexOutlineSymbol
 
                     vertexSymbol = vertex
-                    selectedVertexSymbol = selectedVertex
-                    feedbackVertexSymbol = selectedVertex
+                    selectedVertexSymbol = vertex
+                    feedbackVertexSymbol = vertex
                     midVertexSymbol = midVertex
                     selectedMidVertexSymbol = midVertex
                     feedbackLineSymbol = SimpleLineSymbol(SimpleLineSymbolStyle.Dash, color = featureSymbol.color, width = featureSymbol.width)
@@ -233,14 +231,12 @@ private fun updateGeometryEditorStyle(geometryEditor: GeometryEditor, feature: A
 
                     val vertex = SimpleMarkerSymbol(color = featureSymbol.color, style = SimpleMarkerSymbolStyle.Circle, size = vertexSize)
                     vertex.outline = vertexOutlineSymbol
-                    val selectedVertex = SimpleMarkerSymbol(color = Color.white, style = SimpleMarkerSymbolStyle.Circle, size = vertexSize)
-                    selectedVertex.outline = vertexOutlineSymbol
                     val midVertex = SimpleMarkerSymbol(color = Color.white, style = SimpleMarkerSymbolStyle.Circle, size = midVertexSize)
                     midVertex.outline = vertexOutlineSymbol
 
                     vertexSymbol = vertex
-                    selectedVertexSymbol = selectedVertex
-                    feedbackVertexSymbol = selectedVertex
+                    selectedVertexSymbol = vertex
+                    feedbackVertexSymbol = vertex
                     midVertexSymbol = midVertex
                     selectedMidVertexSymbol = midVertex
                     feedbackLineSymbol = SimpleLineSymbol(SimpleLineSymbolStyle.Dash, color = featureSymbol.color, width = symbolStrokeWidth)
@@ -271,14 +267,12 @@ private fun updateGeometryEditorStyle(geometryEditor: GeometryEditor, feature: A
                     // Color can be null (no fill)
                     val vertex = SimpleMarkerSymbol(color = featureSymbol.color, style = SimpleMarkerSymbolStyle.Circle, size = vertexSize)
                     vertex.outline = vertexOutlineSymbol
-                    val selectedVertex = SimpleMarkerSymbol(color = Color.white , style = SimpleMarkerSymbolStyle.Circle, size = vertexSize)
-                    selectedVertex.outline = vertexOutlineSymbol
                     val midVertex = SimpleMarkerSymbol(color = Color.white, style = SimpleMarkerSymbolStyle.Circle, size = midVertexSize)
                     midVertex.outline = vertexOutlineSymbol
 
                     vertexSymbol = vertex
-                    selectedVertexSymbol = selectedVertex
-                    feedbackVertexSymbol = selectedVertex
+                    selectedVertexSymbol = vertex
+                    feedbackVertexSymbol = vertex
                     midVertexSymbol = midVertex
                     selectedMidVertexSymbol = midVertex
                     feedbackLineSymbol = SimpleLineSymbol(SimpleLineSymbolStyle.Dash, color = outlineColor, width = outlineWidth)
@@ -294,14 +288,12 @@ private fun updateGeometryEditorStyle(geometryEditor: GeometryEditor, feature: A
 
                     val vertex = SimpleMarkerSymbol(color = opaqueFillColor, style = SimpleMarkerSymbolStyle.Circle, size = vertexSize)
                     vertex.outline = vertexOutlineSymbol
-                    val selectedVertex = SimpleMarkerSymbol(color = Color.white , style = SimpleMarkerSymbolStyle.Circle, size = vertexSize)
-                    selectedVertex.outline = vertexOutlineSymbol
                     val midVertex = SimpleMarkerSymbol(color = Color.white, style = SimpleMarkerSymbolStyle.Circle, size = midVertexSize)
                     midVertex.outline = vertexOutlineSymbol
 
                     vertexSymbol = vertex
-                    selectedVertexSymbol = selectedVertex
-                    feedbackVertexSymbol = selectedVertex
+                    selectedVertexSymbol = vertex
+                    feedbackVertexSymbol = vertex
                     midVertexSymbol = midVertex
                     selectedMidVertexSymbol = midVertex
                     feedbackLineSymbol = SimpleLineSymbol(SimpleLineSymbolStyle.Dash, color = opaqueFillColor, width = symbolStrokeWidth)
@@ -310,14 +302,12 @@ private fun updateGeometryEditorStyle(geometryEditor: GeometryEditor, feature: A
                     vertexTextSymbol = null
                 }
                 is PictureMarkerSymbol -> {
-                    val selectedVertex = SimpleMarkerSymbol(color = Color.white, style = SimpleMarkerSymbolStyle.Circle, size = featureSymbol.toMultilayerSymbol().size)
-                    selectedVertex.outline = vertexOutlineSymbol
                     val midVertex = SimpleMarkerSymbol(color = Color.white, style = SimpleMarkerSymbolStyle.Circle, size = featureSymbol.toMultilayerSymbol().size/3)
                     midVertex.outline = vertexOutlineSymbol
 
                     vertexSymbol = featureSymbol
-                    selectedVertexSymbol = selectedVertex
-                    feedbackVertexSymbol= selectedVertex
+                    selectedVertexSymbol = featureSymbol
+                    feedbackVertexSymbol= featureSymbol
                     midVertexSymbol = midVertex
                     selectedMidVertexSymbol = midVertex
                     feedbackLineSymbol = SimpleLineSymbol(SimpleLineSymbolStyle.Dash, featureSymbol.toMultilayerSymbol().color, width = featureSymbol.toMultilayerSymbol().size/5)
