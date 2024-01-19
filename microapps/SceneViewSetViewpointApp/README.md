@@ -1,4 +1,4 @@
-# MapView Set Viewpoint Micro-app
+# SceneView Set Viewpoint Micro-app
 
 This micro-app demonstrates the use of `SceneViewpointOperation` with a composable `SceneView`.
 
