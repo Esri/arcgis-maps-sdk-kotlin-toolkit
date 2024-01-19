@@ -1,6 +1,6 @@
 # SceneView Lighting Options Micro-app
 
-This micro-app demonstrates the the use of various lighting and rendering options for the composable `SceneView`
+This micro-app demonstrates the use of various lighting and rendering options for the composable `SceneView`
 
 ![Screenshot](screenshot.png)
 
