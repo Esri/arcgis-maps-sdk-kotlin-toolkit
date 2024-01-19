@@ -45,6 +45,7 @@ import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
+import com.arcgismaps.toolkit.featureforms.components.base.BaseGroupState
 import com.arcgismaps.toolkit.featureforms.components.base.FormStateCollection
 import com.arcgismaps.toolkit.featureforms.components.base.MutableFormStateCollection
 import com.arcgismaps.toolkit.featureforms.components.base.getState
@@ -61,6 +62,24 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 
 /**
+ * The "property" determines the behavior of when the validation errors are visible.
+ */
+public sealed class ValidationErrorVisibility {
+
+    /**
+     * Indicates that the validation errors are only visible for editable fields that have
+     * received focus.
+     */
+    public object Automatic : ValidationErrorVisibility()
+
+    /**
+     * Indicates the validation is run for all the editable fields regardless of their focus state,
+     * and any errors are shown.
+     */
+    public object Visible : ValidationErrorVisibility()
+}
+
+/**
  * A composable Form toolkit component that enables users to edit field values of features in a
  * layer using forms that have been configured externally (using either in the the Web Map Viewer
  * or the Fields Maps web app).
@@ -68,26 +87,51 @@ import kotlinx.coroutines.delay
  * @param featureForm The [FeatureForm] configuration.
  * @param modifier The [Modifier] to be applied to layout corresponding to the content of this
  * FeatureForm.
+ * @param validationErrorVisibility The [ValidationErrorVisibility] that determines the behavior of
+ * when the validation errors are visible. Default is [ValidationErrorVisibility.Automatic] which
+ * indicates errors are only visible once the respective field gains focus.
  *
  * @since 200.2.0
  */
 @Composable
 public fun FeatureForm(
     featureForm: FeatureForm,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic
 ) {
     var initialEvaluation by rememberSaveable(featureForm) { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
     InitializingExpressions(modifier) {
         initialEvaluation
     }
-    FeatureFormContent(form = featureForm, modifier = modifier)
+    val states = rememberStates(form = featureForm, scope = scope)
+    FeatureFormBody(form = featureForm, states = states, modifier = modifier)
+    FeatureFormDialog()
     LaunchedEffect(featureForm) {
-        // ensure expressions are evaluated before state objects are created.
+        // ensure expressions are evaluated
         featureForm.evaluateExpressions()
         // add an artificial delay of 300ms to avoid the slight flicker if the
         // expressions are evaluated quickly
         delay(300)
         initialEvaluation = true
+    }
+    // launch a new side effect in a launched effect when validationErrorVisibility changes
+    LaunchedEffect(validationErrorVisibility) {
+        // if it set to always show errors force each field to validate itself and show any errors
+        if (validationErrorVisibility == ValidationErrorVisibility.Visible) {
+            states.forEach { entry ->
+                // validate all fields
+                if (entry.formElement is FieldFormElement) {
+                    entry.getState<BaseFieldState<*>>().forceValidation()
+                }
+                // validate any fields that are within a group
+                if (entry.formElement is GroupFormElement) {
+                    entry.getState<BaseGroupState>().fieldStates.forEach { childEntry ->
+                        childEntry.getState<BaseFieldState<*>>().forceValidation()
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -125,21 +169,6 @@ internal fun InitializingExpressions(
             }
         }
     }
-}
-
-@Composable
-internal fun FeatureFormContent(
-    form: FeatureForm,
-    modifier: Modifier = Modifier
-) {
-    val scope = rememberCoroutineScope()
-    val states = rememberStates(form = form, scope = scope)
-    FeatureFormBody(
-        form = form,
-        states = states,
-        modifier = modifier
-    )
-    FeatureFormDialog()
 }
 
 @Composable

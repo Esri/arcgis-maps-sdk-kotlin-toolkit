@@ -147,6 +147,16 @@ internal abstract class BaseFieldState<T>(
     }
 
     /**
+     * Forces the validation of this field irrespective of the current focus state [isFocused] and
+     * generates any validation errors via the [value] property. Avoid calling this method in any
+     * open/abstract class constructors since it indirectly invokes open members.
+     */
+    fun forceValidation() {
+        wasFocused = true
+        updateValidation()
+    }
+
+    /**
      * Runs and updates the validation using [validate] and [filterErrors]. Avoid calling this
      * method in any open/abstract class constructors since it directly invokes open members.
      */
@@ -253,8 +263,20 @@ internal abstract class BaseFieldState<T>(
     open fun validate(): List<ValidationErrorState> {
         val errors = defaultValidator()
         return buildList {
-            if (errors.any { it is FeatureFormValidationException.RequiredException }) {
-                add(ValidationErrorState.Required)
+            errors.forEach {
+                when(it) {
+                    is FeatureFormValidationException.RequiredException -> {
+                        add(ValidationErrorState.Required)
+                    }
+
+                    is FeatureFormValidationException.OutOfDomainException -> {
+                        add(ValidationErrorState.NotInCodedValueDomain)
+                    }
+
+                    is FeatureFormValidationException.NullNotAllowedException -> {
+                        add(ValidationErrorState.NullNotAllowed)
+                    }
+                }
             }
         }
     }

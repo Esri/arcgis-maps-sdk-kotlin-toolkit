@@ -30,9 +30,11 @@ internal sealed class ValidationErrorState(
     class MaxCharConstraint(max: Int) : ValidationErrorState(max)
     class MinNumericConstraint(min: String) : ValidationErrorState(min)
     class MaxNumericConstraint(max: String) : ValidationErrorState(max)
-    class MinMaxNumericConstraint(min : String, max: String) : ValidationErrorState(min, max)
+    class MinMaxNumericConstraint(min: String, max: String) : ValidationErrorState(min, max)
     object NotANumber : ValidationErrorState()
     object NotAWholeNumber : ValidationErrorState()
+    object NotInCodedValueDomain : ValidationErrorState()
+    object NullNotAllowed : ValidationErrorState()
 
     @Composable
     open fun getString(): String {
@@ -75,6 +77,14 @@ internal sealed class ValidationErrorState(
 
             is NotAWholeNumber -> {
                 stringResource(id = R.string.value_must_be_a_whole_number)
+            }
+
+            NotInCodedValueDomain -> {
+                stringResource(R.string.value_must_be_within_domain)
+            }
+
+            NullNotAllowed -> {
+                stringResource(R.string.value_must_not_be_empty)
             }
         }
     }
