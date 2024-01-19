@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright 2023 Esri
+ *  Copyright 2024 Esri
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -90,7 +90,7 @@ fun MainScreen() {
     // remember a SceneViewpointOperation state
     var viewpointOperation: SceneViewpointOperation? by remember { mutableStateOf(null) }
 
-    Scaffold (
+    Scaffold(
         modifier = Modifier,
         topBar = {
             TopAppBar(
@@ -133,14 +133,12 @@ fun MainScreen() {
                 headingDelta = 5.0,
                 pitchDelta = 5.0,
                 duration = 6f
-            )
-            ?: (cameraController as? OrbitGeoElementCameraController)?.moveCamera(
+            ) ?: (cameraController as? OrbitGeoElementCameraController)?.moveCamera(
                 pitchDelta = 30.0,
                 distanceDelta = 6000.0,
                 headingDelta = 150.0,
                 duration = 10f
-            )
-            ?: (cameraController as? GlobeCameraController)?.apply {
+            ) ?: (cameraController as? GlobeCameraController)?.apply {
                 viewpointOperation = SceneViewpointOperation.AnimateCamera(
                     Camera(
                         latitude = 34.05,
@@ -148,9 +146,10 @@ fun MainScreen() {
                         altitude = 10000000.0,
                         heading = 0.0,
                         pitch = 0.0,
-                        roll = 0.0),
+                        roll = 0.0
+                    ),
                     duration = 5.0.seconds
-                    )
+                )
             }
         }
     }
@@ -160,11 +159,11 @@ fun MainScreen() {
  * Composable function that displays a dropdown menu for selecting different camera controllers
  * to manipulate a SceneView.
  *
- * @param expanded Whether the dropdown menu is expanded or not.
- * @param modifier Modifier for styling and positioning the dropdown menu.
- * @param targetGeoElement The target graphic element for camera control.
- * @param onCameraControllerChanged Callback triggered when the camera controller is changed.
- * @param onDismissRequest Callback triggered when the dropdown menu is dismissed.
+ * @param expanded Whether the dropdown menu is expanded or not
+ * @param modifier Modifier for styling and positioning the dropdown menu
+ * @param targetGeoElement The target graphic element for camera control
+ * @param onCameraControllerChanged Callback triggered when the camera controller is changed
+ * @param onDismissRequest Callback triggered when the dropdown menu is dismissed200
  */
 @Composable
 fun SetCameraControllerDropdownMenu(

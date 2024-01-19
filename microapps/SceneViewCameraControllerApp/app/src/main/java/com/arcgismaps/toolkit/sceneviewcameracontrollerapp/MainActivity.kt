@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright 2023 Esri
+ *  Copyright 2024 Esri
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.toolkit.sceneviewcameracontrollerapp.screens.MainScreen
 import com.arcgismaps.toolkit.sceneviewcameracontrollerapp.ui.theme.SceneViewTestAppTheme
-import com.arcgismaps.toolkit.sceneviewtestapp.BuildConfig
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
