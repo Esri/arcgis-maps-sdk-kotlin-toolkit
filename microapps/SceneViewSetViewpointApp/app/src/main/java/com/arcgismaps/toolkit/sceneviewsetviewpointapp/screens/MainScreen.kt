@@ -56,7 +56,6 @@ import kotlin.time.Duration.Companion.seconds
 /**
  * Displays a composable [SceneView] and permits setting the viewpoint using options in a dropdown menu.
  * The dropdown menu options represent different methods of setting the viewpoint.
- * A circular progress indicator is displayed over the map while an operation is in progress.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
