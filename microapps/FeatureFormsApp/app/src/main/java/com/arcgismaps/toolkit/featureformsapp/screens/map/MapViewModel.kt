@@ -100,7 +100,12 @@ class MapViewModel @Inject constructor(
             entry.value.forEach { error ->
                 featureForm.getFormElement(entry.key)?.let { formElement ->
                     if (formElement.isEditable.value) {
-                        errors.add(ErrorInfo(formElement.label, error as FeatureFormValidationException))
+                        errors.add(
+                            ErrorInfo(
+                                formElement.label,
+                                error as FeatureFormValidationException
+                            )
+                        )
                     }
                 }
             }
@@ -121,7 +126,8 @@ class MapViewModel @Inject constructor(
                 serviceFeatureTable.serviceGeodatabase?.applyEdits()
                     ?: throw IllegalStateException("cannot apply feature edit without a ServiceGeodatabase")
                 feature.refresh()
-                Unit
+                // unselect the feature after the edits have been saved
+                (feature.featureTable?.layer as FeatureLayer).clearSelection()
             }
             // set the state to not editing since the feature was updated successfully
             _uiState.value = UIState.NotEditing
@@ -153,6 +159,8 @@ class MapViewModel @Inject constructor(
     fun rollbackEdits(): Result<Unit> {
         (_uiState.value as? UIState.Editing)?.let {
             it.featureForm.discardEdits()
+            // unselect the feature
+            (it.featureForm.feature.featureTable?.layer as FeatureLayer).clearSelection()
             _uiState.value = UIState.NotEditing
             return Result.success(Unit)
         } ?: return Result.failure(IllegalStateException("Not in editing state"))
@@ -167,41 +175,30 @@ class MapViewModel @Inject constructor(
                     tolerance = 22.0,
                     returnPopupsOnly = false
                 ).onSuccess { results ->
-                    results.firstNotNullOfOrNull { result ->
-                        try {
-                            result.geoElements.filterIsInstance<ArcGISFeature>()
-                                .firstOrNull { feature ->
-                                    (feature.featureTable?.layer as? FeatureLayer)?.featureFormDefinition != null
-                                }
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            Toast.makeText(
-                                context,
-                                "failed to load the FeatureFormDefinition for the feature",
-                                Toast.LENGTH_LONG
-                            ).show()
-                            null
-                        }
-                    }?.let { feature ->
-                        feature.load().onSuccess {
-                            try {
-                                val featureForm = FeatureForm(
-                                    feature,
-                                    (feature.featureTable?.layer as FeatureLayer).featureFormDefinition!!
-                                )
-                                // set the UI to an editing state and set the FeatureForm
+                    try {
+                        results.forEach { result ->
+                            result.geoElements.firstOrNull {
+                                it is ArcGISFeature && (it.featureTable?.layer as? FeatureLayer)?.featureFormDefinition != null
+                            }?.let {
+                                val feature = it as ArcGISFeature
+                                val layer = feature.featureTable!!.layer as FeatureLayer
+                                val featureForm =
+                                    FeatureForm(feature, layer.featureFormDefinition!!)
+                                // select the feature
+                                layer.selectFeature(feature)
+                                // set the UI to an editing state with the FeatureForm
                                 _uiState.value = UIState.Editing(featureForm)
-                            } catch (e: Exception) {
-                                e.printStackTrace() // for debugging core issues
-                                Toast.makeText(
-                                    context,
-                                    "failed to create a FeatureForm for the feature and layer",
-                                    Toast.LENGTH_LONG
-                                ).show()
                             }
-                        }.onFailure { println("failed to load tapped Feature") }
-                    } ?: println("identified features do not have feature forms defined")
-                }.onFailure { println("tap was not on a feature") }
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        Toast.makeText(
+                            context,
+                            "failed to create a FeatureForm for the feature",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
             }
         }
     }
