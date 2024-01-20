@@ -75,6 +75,7 @@ var includedProjects = projects.flatMap { listOf(":$it", ":$it-app") }.toTypedAr
 
 include(*includedProjects)
 include(":bom")
+include(":kdoc")
 include(":composable-map")
 include(":indoors")
 include(":floor-filter-app")
