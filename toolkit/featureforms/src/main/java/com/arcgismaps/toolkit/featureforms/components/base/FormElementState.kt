@@ -26,8 +26,8 @@ import com.arcgismaps.mapping.featureforms.FormElement
  * @param description Description text for the field.
  * @param isVisible Property that indicates if the field is visible.
  */
-public abstract class FormElementState(
-    public val label : String,
-    public val description: String,
-    public val isVisible : StateFlow<Boolean>
+internal abstract class FormElementState(
+    val label : String,
+    val description: String,
+    val isVisible : StateFlow<Boolean>
 )
