@@ -47,7 +47,7 @@ fun MainScreen() {
     // show a composable map using the mapViewModel
     ComposableMap(
         modifier = Modifier.fillMaxSize(),
-        mapInterface = mapViewModel
+        mapState = mapViewModel
     ) {
         Row(modifier = Modifier
             .height(IntrinsicSize.Max)

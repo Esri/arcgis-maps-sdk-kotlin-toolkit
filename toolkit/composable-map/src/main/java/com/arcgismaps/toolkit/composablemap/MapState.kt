@@ -131,11 +131,11 @@ public interface MapEvents {
  * An interface for consumption by [ComposableMap]. This interface represents the state needed
  * for [ComposableMap] to re/compose.
  */
-public interface MapInterface : MapEvents {
+public interface MapState : MapEvents {
     /**
      * The model for [ComposableMap]
      */
-    public val map: StateFlow<ArcGISMap>
+    public val map: StateFlow<ArcGISMap?>
 
     /**
      * Insets to apply to the Box which contains the [ComposableMap]
@@ -154,22 +154,22 @@ public interface MapInterface : MapEvents {
 }
 
 /**
- * Factory function for the default implementation of [MapInterface]
+ * Factory function for the default implementation of [MapState]
  */
-public fun MapInterface(arcGISMap: ArcGISMap, mapInsets: MapInsets = MapInsets()): MapInterface =
-    MapInterfaceImpl(arcGISMap, mapInsets)
+public fun MapState(map: ArcGISMap? = null, mapInsets: MapInsets = MapInsets()): MapState =
+    MapStateImpl(map, mapInsets)
 
 /**
- * A default implementation for the [MapInterface]
+ * A default implementation for the [MapState]
  */
 
-public class MapInterfaceImpl(
-    arcGISMap: ArcGISMap,
+public class MapStateImpl(
+    map: ArcGISMap?,
     mapInsets: MapInsets = MapInsets()
-) : MapInterface {
+) : MapState {
 
-    private val _map: MutableStateFlow<ArcGISMap> = MutableStateFlow(arcGISMap)
-    override val map: StateFlow<ArcGISMap> = _map.asStateFlow()
+    private val _map: MutableStateFlow<ArcGISMap?> = MutableStateFlow(map)
+    override val map: StateFlow<ArcGISMap?> = _map.asStateFlow()
 
     private val _insets: MutableStateFlow<MapInsets> = MutableStateFlow(mapInsets)
     override val insets: StateFlow<MapInsets> = _insets.asStateFlow()

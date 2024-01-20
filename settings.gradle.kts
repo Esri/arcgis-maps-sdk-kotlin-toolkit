@@ -22,10 +22,11 @@ import org.gradle.configurationcache.extensions.capitalized
 // and also add a companion micro app(Ex: "newComponent-app").
 // For mismatching toolkit component and microApp names add them individually at end of this file.
 // Refer to "indoors" project with "floor-filter-app" as an example.
-val projects = listOf("template", "authentication", "compass")
+val projects = listOf("template", "featureforms", "authentication", "compass")
 
 pluginManagement {
     repositories {
+        mavenLocal()
         gradlePluginPortal()
         google()
         mavenCentral()
@@ -42,6 +43,7 @@ dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     @Suppress("UnstableApiUsage")
     repositories {
+        mavenLocal()
         google()
         mavenCentral()
         maven {
@@ -63,13 +65,14 @@ dependencyResolutionManagement {
             } else {
                 sdkVersionNumber
             }
-            version("mapsSdk", "$versionAndBuild")
+            version("mapsSdk", versionAndBuild)
             library("mapsSdk", "com.esri", "arcgis-maps-kotlin").versionRef("mapsSdk")
         }
     }
 }
 
 var includedProjects = projects.flatMap { listOf(":$it", ":$it-app") }.toTypedArray()
+
 include(*includedProjects)
 include(":bom")
 include(":kdoc")
