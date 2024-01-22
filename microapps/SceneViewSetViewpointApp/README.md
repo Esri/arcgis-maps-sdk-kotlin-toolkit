@@ -6,8 +6,6 @@ This micro-app demonstrates the use of `SceneViewpointOperation` with a composab
 |:--:|
 |![image](screenshot.png)|
 
-![Screenshot](screenshot.png)
-
 ## Usage
 
 The application starts with a SceneView and displays a scene. Use the overflow action button in the app bar to choose between different `SceneViewpointOperation`s to be performed on the composable SceneView.
