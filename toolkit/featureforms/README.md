@@ -30,14 +30,17 @@ A `FeatureForm` composable can be created using a `FeatureForm` object as follow
 #### Creating a FeatureForm object
 
 ```kotlin
+// get the feature layer
 val layer = feature.featureTable.layer as FeatureLayer  
-val featureFormDefinition = layer.featureFormDefinition  
+// grab the FeatureFormDefinition from the layer
+val featureFormDefinition = layer.featureFormDefinition
+// create the FeatureForm from the Feature and the FeatureFormDefinition
 val featureForm = FeatureForm(feature, featureFormDefinition)
 ```
 
 #### Creating a FeatureForm in Compose
 
-A `FeatureForm` can be created within a composition by simply calling the `FeatureForm` composable. The FeatureForm should be displayed in a Container. It's visibility and the container are external and should be controlled by the calling Composable.
+A `FeatureForm` can be created within a composition by simply calling the `FeatureForm` composable with the `FeaureForm` object. The FeatureForm should be displayed in a container. It's visibility and the container are external and should be controlled by the calling Composable.
 
 ```kotlin  
 @Composable  
