@@ -2,6 +2,10 @@
 
 This micro-app demonstrates the use of `SceneViewpointOperation` with a composable `SceneView`.
 
+|SceneView Set Viewpoin|
+|:--:|
+|![image](screenshot.png)|
+
 ![Screenshot](screenshot.png)
 
 ## Usage
