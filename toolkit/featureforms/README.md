@@ -83,7 +83,7 @@ fun MyComposable(viewModel : MyViewModel) {
 By default validation errors for any fields are only visible after the fields gain focus. But this can be customized using the `validationErrorVisibility` parameter of the `FeatureForm`. This property can be changed at any time to show all the errors. It supports two modes of visibility.
 
 - **ValidationErrorVisibility.Automatic** : *Indicates that the validation errors are only visible for editable fields that have received focus.*
-- **ValidationErrorVisibility.Visible** : *Indicates the validation is run for all the editable fields regardless of their focus state and any errors are shown immediately.*
+- **ValidationErrorVisibility.Visible** : *Indicates the validation is run for all the editable fields, and errors are displayed regardless of the focus state.*
 
 ```kotlin
 @Composable
