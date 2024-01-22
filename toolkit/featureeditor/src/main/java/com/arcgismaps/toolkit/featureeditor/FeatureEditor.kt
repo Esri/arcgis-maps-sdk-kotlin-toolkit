@@ -207,8 +207,8 @@ private fun updateGeometryEditorStyle(geometryEditor: GeometryEditor, feature: A
             val vertexOutlineSymbol = SimpleLineSymbol(SimpleLineSymbolStyle.Solid, color = Color.black)
             when (featureSymbol) {
                 is SimpleLineSymbol -> {
-                    val vertexSize = max(featureSymbol.width, 3f) * 3
-                    val midVertexSize = max(featureSymbol.width, 3f) * 2
+                    val vertexSize = max(featureSymbol.width, 1f) * 5
+                    val midVertexSize = max(featureSymbol.width, 1f) * 4
 
                     val vertex = SimpleMarkerSymbol(
                         color = featureSymbol.color.opaque,
@@ -241,8 +241,8 @@ private fun updateGeometryEditorStyle(geometryEditor: GeometryEditor, feature: A
                     val strokeSymbolLayer = featureSymbol.symbolLayers.filterIsInstance<StrokeSymbolLayer>().firstOrNull()
                     if (strokeSymbolLayer != null) {
                         val symbolStrokeWidth = strokeSymbolLayer.width.toFloat()
-                        val vertexSize = max(symbolStrokeWidth, 3f) * 3
-                        val midVertexSize = max(symbolStrokeWidth, 3f) * 2
+                        val vertexSize = max(symbolStrokeWidth, 1f) * 5
+                        val midVertexSize = max(symbolStrokeWidth, 1f) * 4
 
                         val vertex = SimpleMarkerSymbol(
                             color = featureSymbol.color.opaque,
@@ -288,8 +288,8 @@ private fun updateGeometryEditorStyle(geometryEditor: GeometryEditor, feature: A
                     featureSymbol.outline?.let {
                         outlineColor = it.color
                         outlineWidth = it.width
-                        vertexSize = max(outlineWidth, 3f) * 3
-                        midVertexSize = max(outlineWidth, 3f) * 2
+                        vertexSize = max(outlineWidth, 1f) * 5
+                        midVertexSize = max(outlineWidth, 1f) * 4
                     }
 
                     // Color can be null (no fill)
@@ -325,8 +325,8 @@ private fun updateGeometryEditorStyle(geometryEditor: GeometryEditor, feature: A
                     val strokeSymbolLayer = featureSymbol.symbolLayers.filterIsInstance<StrokeSymbolLayer>().firstOrNull()
                     if (strokeSymbolLayer != null) {
                         val symbolStrokeWidth = strokeSymbolLayer.width.toFloat()
-                        val vertexSize = max(symbolStrokeWidth, 3f) * 3
-                        val midVertexSize = max(symbolStrokeWidth, 3f) * 2
+                        val vertexSize = max(symbolStrokeWidth, 1f) * 5
+                        val midVertexSize = max(symbolStrokeWidth, 1f) * 4
 
                         val vertex = SimpleMarkerSymbol(
                             color = featureSymbol.color.opaque ,
