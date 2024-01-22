@@ -183,6 +183,11 @@ public class FeatureEditor(
 }
 
 private fun updateGeometryEditorStyle(geometryEditor: GeometryEditor, feature: ArcGISFeature, geometry: Geometry?) {
+    // Get the feature symbol from the renderer or return if null.
+    val renderer = (feature.featureTable?.layer as? FeatureLayer)?.renderer
+    val featureSymbol = renderer?.getSymbol(feature, true) ?: return
+
+    // Determine the geometry of the feature.
     val isGeometryPoint =  if (geometry?.let { !it.isEmpty } == true) geometry is Point || geometry is Multipoint
     else feature.featureTable?.geometryType == GeometryType.Point || feature.featureTable?.geometryType == GeometryType.Multipoint
 
@@ -192,9 +197,7 @@ private fun updateGeometryEditorStyle(geometryEditor: GeometryEditor, feature: A
     val isGeometryPolygon = if (geometry?.let { !it.isEmpty } == true) geometry is Polygon
     else feature.featureTable?.geometryType == GeometryType.Polygon
 
-    val renderer = (feature.featureTable?.layer as? FeatureLayer)?.renderer
-    val featureSymbol = renderer?.getSymbol(feature, true) ?: return
-
+    // Apply symbology to the editor for the geometry types.
     if (isGeometryPoint) {
         geometryEditor.tool.style.apply {
             vertexSymbol = featureSymbol
@@ -280,7 +283,7 @@ private fun updateGeometryEditorStyle(geometryEditor: GeometryEditor, feature: A
             when (featureSymbol) {
                 is SimpleFillSymbol -> {
                     // Defaults when outline is null
-                    var vertexSize = (vertexSymbol as? SimpleMarkerSymbol)?.size ?: 3f
+                    var vertexSize = (vertexSymbol as? SimpleMarkerSymbol)?.size ?: 5f
                     var midVertexSize = vertexSize / 2
                     var outlineColor = Color.white
                     var outlineWidth = (feedbackLineSymbol as? SimpleLineSymbol)?.width ?: 3f
