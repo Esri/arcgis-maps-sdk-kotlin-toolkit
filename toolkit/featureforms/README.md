@@ -44,16 +44,17 @@ A `FeatureForm` can be created within a composition by simply calling the `Featu
 
 ```kotlin  
 @Composable  
-fun MainScreen() {  
+fun MyComposable(featureForm : FeatureForm) {  
     // a container  
-    MyContainer(modifier = Modifier) {  
-	    FeatureForm(  
-		    // pass in the FeatureForm object  
-			featureForm = featureForm,  
-			// control the layout using the modifier property  
-			modifier = Modifier.fillMaxSize()  
-		)  
-	}  
+    MyContainer(modifier = Modifier) {
+	// create a FeatureForm Composable
+        FeatureForm(  
+	    // pass in the FeatureForm object  
+	    featureForm = featureForm,  
+	    // control the layout using the modifier property  
+	    modifier = Modifier.fillMaxSize()  
+	)  
+    }  
 } 
 ```  
 
@@ -63,16 +64,17 @@ To display a new `FeatureForm`  object, simply trigger a recomposition with the 
 
 ```kotlin  
 @Composable  
-fun MainScreen(viewModel : MyViewModel) {  
-	// use a state object that will recompose this composable when the featureForm changes  
-	val featureForm : State by viewModel.featureForm  
-	// a container  
-	MyContainer(modifier = Modifier) {  
-		FeatureForm(    
-			featureForm = featureForm,  
-			modifier = Modifier.fillMaxSize()  
-		)  
-	}  
+fun MyComposable(viewModel : MyViewModel) {  
+    // use a state object that will recompose this composable when the featureForm changes
+    // in this example, the FeatureForm object is hoisted in the ViewModel
+    val featureForm : State by viewModel.featureForm  
+    // a container  
+    MyContainer(modifier = Modifier) {
+        FeatureForm(    
+	    featureForm = featureForm,  
+	    modifier = Modifier.fillMaxSize()  
+	)  
+    }  
 }
 ```  
 
@@ -86,9 +88,9 @@ By default validation errors for any fields are only visible after the fields ga
 ```kotlin
 @Composable
 FeatureForm(  
-	featureForm = featureForm,  
-	modifier = Modifier.fillMaxSize(),  
-	validationErrorVisibility = ValidationErrorVisibility.Visible  
+    featureForm = featureForm,  
+    modifier = Modifier.fillMaxSize(),  
+    validationErrorVisibility = ValidationErrorVisibility.Visible  
 )
 ```
 *Note* : Once the `validationErrorVisibility`  is set to `Visible`, changing it back to `Automatic` will have no effect since all the fields have now gained focus to show any errors.
