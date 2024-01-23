@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,7 +34,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -115,6 +113,7 @@ fun SetViewpointDropdownMenu(
         listOf("Set", "SetAnimated", "SetCamera", "SetCameraAnimated", "SetBookmark")
     }
     val disneyLand = remember { Point(-117.9190, 33.8121, SpatialReference.wgs84()) }
+    val rotterdam = remember { Point(4.4777, 51.9244, SpatialReference.wgs84()) }
     val sofia = remember {
         Point(23.321736, 42.697703, SpatialReference.wgs84())
     }
@@ -140,8 +139,8 @@ fun SetViewpointDropdownMenu(
     val scale = remember { 170000.0 }
     val bookmark = remember {
         Bookmark(
-            "disneyLand",
-            Viewpoint(disneyLand, scale)
+            "Rotterdam",
+            Viewpoint(rotterdam, scale)
         )
     }
 
