@@ -2,6 +2,7 @@
 androidGradlePlugin = "8.2.0"
 androidXBrowser = "1.7.0"
 composeBOM = "2023.10.01"
+dokka = "1.9.10"
 androidxComposeCompiler = "1.5.6"
 androidxCore = "1.12.0"
 androidxEspresso = "3.5.1"
@@ -43,6 +44,7 @@ truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
 android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 gradle-secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version = "2.0.1"}
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

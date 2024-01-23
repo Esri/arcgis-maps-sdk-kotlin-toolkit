@@ -72,6 +72,7 @@ dependencyResolutionManagement {
 var includedProjects = projects.flatMap { listOf(":$it", ":$it-app") }.toTypedArray()
 include(*includedProjects)
 include(":bom")
+include(":kdoc")
 include(":composable-map")
 include(":indoors")
 include(":floor-filter-app")
@@ -82,6 +83,8 @@ include(":map-view-geometry-editor-app")
 include(":map-view-set-viewpoint-app")
 include(":map-view-identify-app")
 include(":scene-view-set-viewpoint-app")
+include(":scene-view-camera-controller-app")
+include(":scene-view-lighting-options-app")
 
 projects.forEach {
     project(":$it").projectDir = File(rootDir, "toolkit/$it")
@@ -99,3 +102,5 @@ project(":map-view-geometry-editor-app").projectDir = File(rootDir, "microapps/m
 project(":map-view-set-viewpoint-app").projectDir = File(rootDir, "microapps/mapviewsetviewpointapp/app")
 project(":map-view-identify-app").projectDir = File(rootDir, "microapps/mapviewidentifyapp/app")
 project(":scene-view-set-viewpoint-app").projectDir = File(rootDir, "microapps/sceneviewsetviewpointapp/app")
+project(":scene-view-camera-controller-app").projectDir = File(rootDir, "microapps/sceneviewcameracontrollerapp/app")
+project(":scene-view-lighting-options-app").projectDir = File(rootDir, "microapps/sceneviewlightingoptionsapp/app")

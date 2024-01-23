@@ -102,10 +102,10 @@ public class GraphicsOverlayCollection : Iterable<GraphicsOverlay> {
      *
      * @since 200.4.0
      */
-    internal sealed class ChangedEvent() {
+    internal sealed class ChangedEvent {
         class Added(val element: GraphicsOverlay) : ChangedEvent()
         class Removed(val element: GraphicsOverlay) : ChangedEvent()
-        object Cleared : ChangedEvent()
+        data object Cleared : ChangedEvent()
     }
 }
 
