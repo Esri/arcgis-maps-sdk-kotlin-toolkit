@@ -27,6 +27,11 @@ import kotlinx.coroutines.launch
 /**
  * State holder for attribution bar related properties/events on the [com.arcgismaps.toolkit.geocompose.MapView].
  *
+ * @property isAttributionBarVisible true if the attribution bar is visible in the GeoView, false otherwise
+ * @property onAttributionTextChanged called when the attribution text for the data that is currently
+ * displayed in the GeoView changes
+ * @property onAttributionBarLayoutChanged called when the attribution bar's position or size changes
+ * due to expanding, collapsing, or inset changes.
  * @since 200.4.0
  */
 @Stable
