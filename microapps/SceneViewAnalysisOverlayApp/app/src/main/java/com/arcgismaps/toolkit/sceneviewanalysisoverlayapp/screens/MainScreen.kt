@@ -34,6 +34,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.arcgismaps.Color
 import com.arcgismaps.analysis.LocationViewshed
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISScene
@@ -41,9 +42,14 @@ import com.arcgismaps.mapping.ArcGISTiledElevationSource
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Surface
 import com.arcgismaps.mapping.layers.ArcGISSceneLayer
+import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
+import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
 import com.arcgismaps.mapping.view.AnalysisOverlay
 import com.arcgismaps.mapping.view.Camera
+import com.arcgismaps.mapping.view.Graphic
+import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.OrbitLocationCameraController
+import com.arcgismaps.toolkit.geocompose.GraphicsOverlayCollection
 import com.arcgismaps.toolkit.geocompose.SceneView
 import com.arcgismaps.toolkit.geocompose.SceneViewpointOperation
 import com.arcgismaps.toolkit.geocompose.rememberAnalysisOverlayCollection
@@ -68,30 +74,54 @@ fun MainScreen() {
         }
     }
 
-    var checked by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf("") }
+    var checked by remember { mutableStateOf(true) }
 
-    val initLocation = Point(-4.50, 48.4, 1000.0)
-    val camera: Camera = Camera(initLocation, 20000000.0, 0.0, 55.0, 0.0)
-    val cameraController: OrbitLocationCameraController =
-        OrbitLocationCameraController(initLocation, 5000.0)
+    val initLocation = remember { Point(-4.50, 48.4, 1000.0) }
+    val cameraController = remember { OrbitLocationCameraController(initLocation, 5000.0) }
 
-    val analysisOverlayCollection = rememberAnalysisOverlayCollection()
-    val analysisOverlay = remember { AnalysisOverlay().apply { isVisible = false } }
     val viewshed = remember {
         LocationViewshed(
             initLocation,
             82.0,
             60.0,
-            75.0,
-            90.0,
+            120.0,
+            120.0,
             0.0,
             1500.0
         )
     }
-    analysisOverlay.analyses.add(viewshed)
+    val analysisOverlay = remember { AnalysisOverlay(listOf(viewshed)).apply { isVisible = true } }
+    val analysisOverlayCollection = rememberAnalysisOverlayCollection()
     analysisOverlayCollection.add(analysisOverlay)
-    val viewpointOperation = remember { SceneViewpointOperation.SetCamera(camera) }
+    val viewpointOperation = remember {
+        SceneViewpointOperation.SetCamera(
+            Camera(
+                initLocation,
+                20000000.0,
+                0.0,
+                55.0,
+                0.0
+            )
+        )
+    }
+
+    val graphicsOverlayCollection = remember {
+        GraphicsOverlayCollection().apply {
+            val viewpointSymbol = SimpleMarkerSymbol(
+                    SimpleMarkerSymbolStyle.Diamond,
+                    color = Color.cyan,
+                    size = 32f
+                )
+            val graphicsOverlay = GraphicsOverlay(
+                listOf(
+                    Graphic(initLocation).apply {
+                        symbol = viewpointSymbol
+                    }
+                )
+            )
+            add(graphicsOverlay)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -101,24 +131,17 @@ fun MainScreen() {
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
                 title = {
-                    Text("MapView Location Display App")
+                    Text("SceneView Analysis Overlay App")
                 },
                 actions = {
                     Column {
                         Switch(
                             checked,
                             onCheckedChange = {
-                                if (it) {
-                                    analysisOverlay.isVisible = true
-                                } else {
-                                    analysisOverlay.isVisible = false
-                                }
+                                analysisOverlay.isVisible = it
                                 checked = it
                             }
                         )
-                        if (errorMessage.isNotEmpty()) {
-                            Text(errorMessage)
-                        }
                     }
                 }
             )
@@ -130,6 +153,8 @@ fun MainScreen() {
                 .fillMaxSize(),
             arcGISScene = arcGISScene,
             viewpointOperation = viewpointOperation,
+            cameraController = cameraController,
+            graphicsOverlays = graphicsOverlayCollection,
             analysisOverlays = analysisOverlayCollection
         )
     }
