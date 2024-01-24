@@ -23,7 +23,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
@@ -37,10 +36,12 @@ fun MainScreen() {
     MapView(
         modifier = Modifier.fillMaxSize(),
         arcGISMap = arcGISMap,
-        viewpointOperation = MapViewpointOperation.Set(Viewpoint(
-            latitude = 39.8,
-            longitude = -98.6,
-            scale = 10e7
-        ))
+        viewpointOperation = MapViewpointOperation.Set(
+            Viewpoint(
+                latitude = 39.8,
+                longitude = -98.6,
+                scale = 10e7
+            )
+        )
     )
 }
