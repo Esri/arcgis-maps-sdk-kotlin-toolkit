@@ -19,21 +19,28 @@ package com.arcgismaps.toolkit.featureforms.components.base
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material.icons.rounded.TextFields
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,10 +48,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
@@ -91,7 +101,7 @@ private fun trailingIcon(
         // multiline editable field
         {
             // show a done button only when focused
-            IconButton(onClick =  { onDone() }, modifier = Modifier.semantics {
+            IconButton(onClick = { onDone() }, modifier = Modifier.semantics {
                 contentDescription = "Save local edit button"
             }) {
                 Icon(
@@ -99,7 +109,7 @@ private fun trailingIcon(
                 )
             }
         }
-        
+
     } else if (!singleLine && isEditable && text.isNotEmpty()) {
         {
             // show a clear icon instead if the multiline field is not empty
@@ -145,7 +155,7 @@ private fun trailingIcon(
  * @param trailingContent a widget to be displayed at the end of the text field container.
  */
 @Composable
-internal fun BaseTextField(
+internal fun BaseTextFieldOld(
     text: String,
     onValueChange: (String) -> Unit,
     isEditable: Boolean,
@@ -160,7 +170,7 @@ internal fun BaseTextField(
     onFocusChange: ((Boolean) -> Unit)? = null,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     trailingContent: (@Composable () -> Unit)? = null
-    ) {
+) {
     var clearFocus by remember { mutableStateOf(false) }
     var isFocused by remember { mutableStateOf(false) }
 
@@ -195,19 +205,21 @@ internal fun BaseTextField(
             },
             trailingIcon = trailingContent
                 ?: trailingIcon(
-                text,
-                isEditable,
-                singleLine,
-                isFocused,
-                trailingIcon,
-                onValueChange = onValueChange,
-                onDone = { clearFocus = true }
-            ),
+                    text,
+                    isEditable,
+                    singleLine,
+                    isFocused,
+                    trailingIcon,
+                    onValueChange = onValueChange,
+                    onDone = { clearFocus = true }
+                ),
             supportingText = {
                 Column(
-                    modifier = Modifier.clickable {
-                        clearFocus = true
-                    }.semantics { contentDescription = "supporting text" }
+                    modifier = Modifier
+                        .clickable {
+                            clearFocus = true
+                        }
+                        .semantics { contentDescription = "supporting text" }
                 ) {
                     supportingText?.invoke(this)
                 }
@@ -227,7 +239,8 @@ internal fun BaseTextField(
             colors = baseTextFieldColors(
                 isEditable = isEditable,
                 isEmpty = text.isEmpty(),
-                isPlaceholderEmpty = placeholder.isEmpty()
+                isPlaceholderEmpty = placeholder.isEmpty(),
+                interactionSource
             )
         )
     }
@@ -238,7 +251,7 @@ internal fun BaseTextField(
 @Composable
 private fun BaseTextFieldPreview() {
     MaterialTheme {
-        BaseTextField(
+        BaseTextFieldOld(
             text = "",
             onValueChange = {},
             isEditable = true,
@@ -251,4 +264,152 @@ private fun BaseTextFieldPreview() {
             }
         )
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun BaseTextField(
+    text: String,
+    onValueChange: (String) -> Unit,
+    isEditable: Boolean,
+    label: String,
+    placeholder: String,
+    singleLine: Boolean,
+    modifier: Modifier = Modifier,
+    readOnly: Boolean = !isEditable,
+    keyboardType: KeyboardType = KeyboardType.Ascii,
+    textStyle: TextStyle = LocalTextStyle.current,
+    trailingIcon: ImageVector? = null,
+    supportingText: @Composable (ColumnScope.() -> Unit)? = null,
+    onFocusChange: ((Boolean) -> Unit)? = null,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    trailingContent: (@Composable () -> Unit)? = null
+) {
+    var clearFocus by remember { mutableStateOf(false) }
+    var isFocused by remember { mutableStateOf(false) }
+    val visualTransformation = if (text.isEmpty())
+        PlaceholderTransformation(placeholder.ifEmpty { " " })
+    else VisualTransformation.None
+    // if the keyboard is gone clear focus from the field as a side-effect
+    ClearFocus(clearFocus) { clearFocus = false }
+    val colors = baseTextFieldColors(
+        isEditable = isEditable,
+        isEmpty = text.isEmpty(),
+        isPlaceholderEmpty = placeholder.isEmpty(),
+        interactionSource
+    )
+    val focused by interactionSource.collectIsFocusedAsState()
+    // If color is not provided via the text style, use content color as a default
+    //val textColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+    //val mergedTextStyle = textStyle.merge(TextStyle(color = textColor))
+
+    Column(modifier = modifier
+        .onFocusChanged {
+            isFocused = it.hasFocus
+            onFocusChange?.invoke(it.hasFocus)
+        }
+        .pointerInput(Unit) {
+            // any tap on a blank space will also dismiss the keyboard and clear focus
+            detectTapGestures { clearFocus = true }
+        }
+        .padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 10.dp)
+    ) {
+        LocalView.current
+        BasicTextField(
+            value = text,
+            onValueChange = onValueChange,
+            modifier = Modifier
+                // Merge semantics at the beginning of the modifier chain to ensure padding is
+                // considered part of the text field.
+                .semantics(mergeDescendants = true) {}
+                .padding(top = 8.dp)
+                .defaultMinSize(
+                    minWidth = OutlinedTextFieldDefaults.MinWidth,
+                    minHeight = OutlinedTextFieldDefaults.MinHeight
+                )
+                .fillMaxWidth()
+                .semantics { contentDescription = "outlined text field" },
+            enabled = true,
+            readOnly = readOnly,
+            textStyle = textStyle,
+            visualTransformation = visualTransformation,
+            keyboardActions = KeyboardActions(
+                onDone = { clearFocus = true }
+            ),
+            keyboardOptions = KeyboardOptions.Default.copy(
+                imeAction = if (singleLine) ImeAction.Done else ImeAction.None,
+                keyboardType = keyboardType
+            ),
+            interactionSource = interactionSource,
+            singleLine = singleLine,
+            decorationBox = @Composable { innerTextField ->
+                OutlinedTextFieldDefaults.DecorationBox(
+                    value = text,
+                    visualTransformation = visualTransformation,
+                    innerTextField = innerTextField,
+                    label = {
+                        Text(
+                            text = label,
+                            modifier = Modifier.semantics { contentDescription = "label" },
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1
+                        )
+                    },
+                    trailingIcon = trailingContent
+                        ?: trailingIcon(
+                            text,
+                            isEditable,
+                            singleLine,
+                            isFocused,
+                            trailingIcon,
+                            onValueChange = onValueChange,
+                            onDone = { clearFocus = true }
+                        ),
+                    supportingText = {
+                        Column(
+                            modifier = Modifier
+                                .clickable {
+                                    clearFocus = true
+                                }
+                                .semantics { contentDescription = "supporting text" }
+                        ) {
+                            supportingText?.invoke(this)
+                        }
+                    },
+                    singleLine = singleLine,
+                    enabled = true,
+                    isError = false,
+                    interactionSource = interactionSource,
+                    colors = colors,
+                    container = {
+                        OutlinedTextFieldDefaults.ContainerBox(
+                            enabled = true,
+                            isError = false,
+                            interactionSource,
+                            colors,
+                            OutlinedTextFieldDefaults.shape,
+                            focusedBorderThickness = if (isEditable) 2.dp else 1.dp
+                        )
+                    }
+                )
+            }
+        )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
+@Composable
+private fun BaseTextFieldV2Preview() {
+    BaseTextField(
+        text = "",
+        onValueChange = {},
+        isEditable = true,
+        label = "Title",
+        placeholder = "Enter Value",
+        singleLine = true,
+        trailingIcon = Icons.Rounded.TextFields,
+        supportingText = {
+            Text(text = "A Description")
+        }
+    )
 }

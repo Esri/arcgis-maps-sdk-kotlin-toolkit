@@ -16,19 +16,30 @@
 
 package com.arcgismaps.toolkit.featureforms.components.base
 
+import androidx.compose.foundation.interaction.InteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 
 @Composable
-internal fun baseTextFieldColors(isEditable: Boolean, isEmpty: Boolean, isPlaceholderEmpty: Boolean): TextFieldColors {
+internal fun baseTextFieldColors(
+    isEditable: Boolean,
+    isEmpty: Boolean,
+    isPlaceholderEmpty: Boolean,
+    interactionSource: InteractionSource
+): TextFieldColors {
+    val focused by interactionSource.collectIsFocusedAsState()
     val textColor = BaseTextFieldColors.textColor(
         isEditable = isEditable,
         isEmpty = isEmpty,
-        isPlaceHolderEmpty = isPlaceholderEmpty
+        isPlaceHolderEmpty = isPlaceholderEmpty,
+        focused
     )
+
     val borderColor = BaseTextFieldColors.borderColor(
         isEditable = isEditable
     )
@@ -36,12 +47,13 @@ internal fun baseTextFieldColors(isEditable: Boolean, isEmpty: Boolean, isPlaceh
         isEditable = isEditable
     )
     return OutlinedTextFieldDefaults.colors(
-        focusedTextColor = textColor,
-        unfocusedTextColor = textColor,
+        focusedTextColor = if (focused) textColor else textColor.copy(0.5f),
+        unfocusedTextColor = textColor.copy(0.5f),
         focusedBorderColor = borderColor,
         focusedLabelColor = labelColor
     )
 }
+
 /**
  * Color properties of a base text field.
  */
@@ -52,22 +64,22 @@ internal object BaseTextFieldColors {
             MaterialTheme.colorScheme.primary
         else
             MaterialTheme.colorScheme.secondary.copy(alpha = 0.8f)
-    
+
     @Composable
     fun labelColor(isEditable: Boolean) =
         if (isEditable)
             MaterialTheme.colorScheme.primary
         else
             MaterialTheme.colorScheme.secondary.copy(alpha = 0.8f)
-    
+
     @Composable
-    fun textColor(isEditable: Boolean, isEmpty: Boolean, isPlaceHolderEmpty: Boolean): Color {
+    fun textColor(isEditable: Boolean, isEmpty: Boolean, isPlaceHolderEmpty: Boolean, isFocused: Boolean): Color {
         val color = if (isEmpty && !isPlaceHolderEmpty) {
             Color.Gray
         } else {
             MaterialTheme.colorScheme.secondary
         }
-        
+
         return if (isEditable) color else color.copy(alpha = 0.6f)
     }
 }
