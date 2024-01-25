@@ -17,19 +17,33 @@
 
 package com.arcgismaps.toolkit.geocompose
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.geometry.Polygon
@@ -49,6 +63,7 @@ import com.arcgismaps.mapping.view.MapViewInteractionOptions
 import com.arcgismaps.mapping.view.PanChangeEvent
 import com.arcgismaps.mapping.view.RotationChangeEvent
 import com.arcgismaps.mapping.view.ScaleChangeEvent
+import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.mapping.view.SelectionProperties
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
@@ -113,6 +128,7 @@ public fun MapView(
     geometryEditor: GeometryEditor? = null,
     mapViewProxy: MapViewProxy? = null,
     mapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptions(),
+    calloutPlacementOperation: CalloutPlacementOperation? = null,
     viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
     selectionProperties: SelectionProperties = SelectionProperties(),
     insets: PaddingValues = PaddingValues(),
@@ -138,28 +154,57 @@ public fun MapView(
     onLongPress: ((LongPressEvent) -> Unit)? = null,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
-    onDrawStatusChanged: ((DrawStatus) -> Unit)? = null
+    onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
+//    content: ((Callout) -> Unit)? = null,
+    callout: Callout? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val mapView = remember { MapView(context) }
     val layoutDirection = LocalLayoutDirection.current
+//    val calloutScreenCoordinate: ScreenCoordinate? = callout?.let { mapView.locationToScreen(it.location) }
+    var updateCalloutPosition by remember { mutableStateOf(false) }
 
-    AndroidView(
-        modifier = modifier.semantics { contentDescription = "MapView" },
-        factory = { mapView },
-        update = {
-            it.map = arcGISMap
-            it.selectionProperties = selectionProperties
-            it.interactionOptions = mapViewInteractionOptions
-            it.locationDisplay = locationDisplay
-            it.labeling = viewLabelProperties
-            it.wrapAroundMode = wrapAroundMode
-            it.geometryEditor = geometryEditor
-            it.grid = grid
-            it.backgroundGrid = backgroundGrid
-            it.setTimeExtent(timeExtent)
-        })
+    Box(modifier = modifier.semantics {
+        contentDescription = "MapContainer"
+    }) {
+        AndroidView(
+            modifier = modifier.semantics { contentDescription = "MapView" },
+            factory = { mapView },
+            update = {
+                it.map = arcGISMap
+                it.selectionProperties = selectionProperties
+                it.interactionOptions = mapViewInteractionOptions
+                it.locationDisplay = locationDisplay
+                it.labeling = viewLabelProperties
+                it.wrapAroundMode = wrapAroundMode
+                it.geometryEditor = geometryEditor
+                it.grid = grid
+                it.backgroundGrid = backgroundGrid
+                it.setTimeExtent(timeExtent)
+            })
+        if (callout != null) {
+            val calloutScreenCoordinate: ScreenCoordinate = callout.let { mapView.locationToScreen(it.location) }
+            ShowCallout(mapView, callout, updateCalloutPosition)
+//            Box(
+////                modifier = Modifier.offset(x = calloutScreenCoordinate.x.dp, y = calloutScreenCoordinate.y.dp)
+////                modifier = Modifier.offset(x = 186.dp, y = 50.dp)
+//                modifier = Modifier.offset(
+//                    x = with(LocalDensity.current) { calloutScreenCoordinate.x.toFloat().toDp() },
+//                    y = with(LocalDensity.current) { calloutScreenCoordinate.y.toFloat().toDp() })
+//                    .wrapContentSize()
+////                    .padding(30.dp)
+//                    .background(Color.White)
+//                    .border(
+//                        border = BorderStroke(2.dp, Color.LightGray),
+//                        shape = MaterialTheme.shapes.medium
+//                    )
+//            )
+//            {
+//                callout.content?.invoke()
+//            }
+        }
+    }
 
     DisposableEffect(Unit) {
         lifecycleOwner.lifecycle.addObserver(mapView)
@@ -171,10 +216,19 @@ public fun MapView(
 
     ViewpointUpdater(mapView, viewpointOperation)
 
+    CalloutUpdater(mapView, calloutPlacementOperation)
+
     DisposableEffect(mapViewProxy) {
         mapViewProxy?.setMapView(mapView)
         onDispose {
             mapViewProxy?.setMapView(null)
+        }
+    }
+    LaunchedEffect(Unit) {
+        launch {
+            mapView.viewpointChanged.collect {
+                updateCalloutPosition = !updateCalloutPosition
+            }
         }
     }
 
@@ -231,6 +285,43 @@ private fun ViewpointUpdater(
 ) {
     LaunchedEffect(viewpointOperation) {
         viewpointOperation?.execute(mapView)
+    }
+}
+
+@Composable
+private fun CalloutUpdater(
+    mapView: MapView,
+    calloutPlacementOperation: CalloutPlacementOperation?
+) {
+    LaunchedEffect(calloutPlacementOperation) {
+        calloutPlacementOperation?.execute(mapView)
+    }
+}
+
+@Composable
+private fun ShowCallout(
+    mapView: MapView,
+    callout: Callout,
+//    calloutScreenCoordinate: ScreenCoordinate,
+    updateCalloutPosition: Boolean
+) {
+    val calloutScreenCoordinate: ScreenCoordinate = callout.let { mapView.locationToScreen(it.location) }
+    Box(
+//        modifier = Modifier.offset(x = calloutScreenCoordinate.x.dp, y = calloutScreenCoordinate.y.dp)
+//        modifier = Modifier.offset(x = 186.dp, y = 50.dp)
+        modifier = Modifier.offset(
+            x = with(LocalDensity.current) { calloutScreenCoordinate.x.toFloat().toDp() },
+            y = with(LocalDensity.current) { calloutScreenCoordinate.y.toFloat().toDp() })
+            .wrapContentSize()
+//          .padding(30.dp)
+            .background(Color.White)
+            .border(
+                border = BorderStroke(2.dp, Color.LightGray),
+                shape = MaterialTheme.shapes.medium
+            )
+    )
+    {
+        callout.content?.invoke()
     }
 }
 
