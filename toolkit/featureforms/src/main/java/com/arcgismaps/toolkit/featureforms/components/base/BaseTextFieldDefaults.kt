@@ -23,7 +23,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 /**
- *  Color properties of a base text field.
+ *  Color properties of a base text field. Since non editable fields are rendered as read-only
+ *  text fields, the colors actually match disabled fields.
+ *
  *  Taken from the material 3 design :https://m3.material.io/components/text-fields/specs.
  */
 @Composable
