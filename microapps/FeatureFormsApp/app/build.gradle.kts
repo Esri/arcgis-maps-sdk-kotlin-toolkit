@@ -65,6 +65,8 @@ dependencies {
     implementation(project(":authentication"))
     implementation(project(":featureforms"))
     implementation(project(":composable-map"))
+    implementation(platform(libs.arcgis.toolkit.bom))
+    implementation(libs.arcgis.toolkit.geocompose)
     // sdk
     implementation(arcgis.mapsSdk)
     // hilt

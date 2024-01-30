@@ -55,6 +55,10 @@ dependencyResolutionManagement {
             url = java.net.URI(
                 "https://olympus.esri.com/artifactory/arcgisruntime-repo/"
             )
+            
+            content {
+                includeGroup("com.esri")
+            }
         }
     }
     

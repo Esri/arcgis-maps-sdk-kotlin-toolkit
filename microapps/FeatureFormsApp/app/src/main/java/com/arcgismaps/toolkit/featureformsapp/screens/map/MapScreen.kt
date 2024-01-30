@@ -53,7 +53,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
 import com.arcgismaps.exceptions.FeatureFormValidationException
-import com.arcgismaps.toolkit.composablemap.ComposableMap
 import com.arcgismaps.toolkit.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
 import com.arcgismaps.toolkit.featureformsapp.R
@@ -63,6 +62,8 @@ import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetLayout
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetValue
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.StandardBottomSheet
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.rememberStandardBottomSheetState
+import com.arcgismaps.toolkit.geocompose.MapView
+import com.arcgismaps.toolkit.geocompose.rememberViewpointChangedState
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -121,12 +122,22 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
             }
         }
     ) { padding ->
-        // show the composable map using the mapViewModel
-        ComposableMap(
+        val viewpointChangedState = rememberViewpointChangedState(
+            onViewpointChangedForCenterAndScale = mapViewModel::onViewpointChanged,
+            onViewpointChangedForBoundingGeometry = mapViewModel::onViewpointChanged
+        )
+        MapView(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize(),
-            mapState = mapViewModel
+            arcGISMap = mapViewModel.map,
+            mapViewProxy = mapViewModel.proxy,
+            onDown = { mapViewModel.onDown(it) },
+            onUp = { mapViewModel.onUp(it) },
+            onSingleTapConfirmed = { mapViewModel.onSingleTapConfirmed(it) },
+            viewpointChangedState = viewpointChangedState,
+            onMapRotationChanged = { mapViewModel.onViewpointRotationChanged(it) },
+            onMapScaleChanged = {}
         )
         AnimatedVisibility(
             visible = featureForm != null,

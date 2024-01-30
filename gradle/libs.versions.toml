@@ -1,6 +1,7 @@
 [versions]
 androidGradlePlugin = "8.2.0"
 androidXBrowser = "1.7.0"
+arcgisToolkit = "200.4.0-holistic-02"
 composeBOM = "2023.10.01"
 dokka = "1.9.10"
 androidxComposeCompiler = "1.5.6"
@@ -47,6 +48,10 @@ androidx-test-ext = { group = "androidx.test.ext", name = "junit-ktx", version.r
 androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidxEspresso" }
 androidx-window = { group = "androidx.window", name = "window", version.ref = "androidxWindow" }
 androidx-window-core = { group = "androidx.window", name = "window-core", version.ref = "androidxWindow" }
+
+arcgis-toolkit-bom = { group = "com.esri", name = "arcgis-maps-kotlin-toolkit-bom", version.ref = "arcgisToolkit" }
+arcgis-toolkit-geocompose = { group = "com.esri", name = "arcgis-maps-kotlin-toolkit-geo-compose" }
+
 hilt-android-core = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 hilt-ext-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "hiltExt" }

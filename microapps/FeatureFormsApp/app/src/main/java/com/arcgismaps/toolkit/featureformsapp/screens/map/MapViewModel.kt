@@ -1,9 +1,10 @@
 package com.arcgismaps.toolkit.featureformsapp.screens.map
 
-import android.widget.Toast
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,13 +16,12 @@ import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.layers.FeatureLayer
-import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.toolkit.composablemap.MapState
 import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
+import com.arcgismaps.toolkit.geocompose.MapViewProxy
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -65,21 +65,19 @@ data class ErrorInfo(val fieldName: String, val error: FeatureFormValidationExce
 @HiltViewModel
 class MapViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val portalItemRepository: PortalItemRepository
+    portalItemRepository: PortalItemRepository,
+    val proxy: MapViewProxy
 ) : ViewModel(),
     MapState by MapState() {
     private val itemId: String = savedStateHandle["uri"]!!
-    lateinit var portalItem: PortalItem
-
+    var portalItem: PortalItem = portalItemRepository(itemId) ?: throw IllegalStateException("portal item not found with id $itemId")
+    
     private val _uiState: MutableState<UIState> = mutableStateOf(UIState.NotEditing)
     val uiState: State<UIState>
         get() = _uiState
 
     init {
-        viewModelScope.launch {
-            portalItem = portalItemRepository(itemId) ?: return@launch
-            setMap(ArcGISMap(portalItem))
-        }
+        setMap(ArcGISMap(portalItem))
     }
 
     /**
@@ -166,13 +164,13 @@ class MapViewModel @Inject constructor(
         } ?: return Result.failure(IllegalStateException("Not in editing state"))
     }
 
-    context(MapView, CoroutineScope) override fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {
+    override fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {
         // do not process any taps on a different feature when a feature is being edited
         if (_uiState.value is UIState.NotEditing) {
-            launch {
-                this@MapView.identifyLayers(
+            viewModelScope.launch {
+                proxy.identifyLayers(
                     screenCoordinate = singleTapEvent.screenCoordinate,
-                    tolerance = 22.0,
+                    tolerance = 22.0.dp,
                     returnPopupsOnly = false
                 ).onSuccess { results ->
                     try {
@@ -192,11 +190,7 @@ class MapViewModel @Inject constructor(
                         }
                     } catch (e: Exception) {
                         e.printStackTrace()
-                        Toast.makeText(
-                            context,
-                            "failed to create a FeatureForm for the feature",
-                            Toast.LENGTH_LONG
-                        ).show()
+                        Log.d("HOLISTIC", "failed to create a FeatureForm for the feature and cannot toast")
                     }
                 }
             }

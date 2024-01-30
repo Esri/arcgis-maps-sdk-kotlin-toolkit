@@ -20,15 +20,14 @@ package com.arcgismaps.toolkit.composablemap
 
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.mapping.ViewpointType
 import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
 import com.arcgismaps.mapping.view.LongPressEvent
-import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.PanChangeEvent
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,58 +41,42 @@ public data class MapInsets(
 
 /**
  * An interface for providing business logic to ComposableMap touch events.
- * These methods are called in the [ComposableMap] function in the context of
- * a [MapView] and a `CoroutineScope`, their public API are available
- * to use in implementations of these functions with no reference required.
- *
- * ```
- * context(MapView, CoroutineScope) override fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {
- *     // launch will be called on the CoroutineScope provided by context. This CoroutineScope will be cancelled
- *     // when the ComposableMap leaves the composition.
- *     launch {
- *         // setBookmark will be called on the MapView provided by context.
- *         setBookmark(null)
- *     }
- * }
- * ```
- *
- * @see ComposableMap
  */
 public interface MapEvents {
     /**
      * Support for down events on [ComposableMap]
      */
-    context(MapView, CoroutineScope) public fun onDown(downEvent: DownEvent) {}
+    public fun onDown(downEvent: DownEvent) {}
 
     /**
      * Support for up events on [ComposableMap]
      */
-    context(MapView, CoroutineScope) public fun onUp(upEvent: UpEvent) {}
+    public fun onUp(upEvent: UpEvent) {}
 
     /**
      * Support for single tap events on [ComposableMap]
      */
-    context(MapView, CoroutineScope) public fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {}
+    public fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {}
 
     /**
      * Support for double tap events on [ComposableMap]
      */
-    context(MapView, CoroutineScope) public fun onDoubleTap(doubleTapEvent: DoubleTapEvent) {}
+    public fun onDoubleTap(doubleTapEvent: DoubleTapEvent) {}
 
     /**
      * Support for long press events on [ComposableMap]
      */
-    context(MapView, CoroutineScope) public fun onLongPress(longPressEvent: LongPressEvent) {}
+    public fun onLongPress(longPressEvent: LongPressEvent) {}
 
     /**
      * Support for two pointer tap events on [ComposableMap]
      */
-    context(MapView, CoroutineScope) public fun onTwoPointerTap(twoPointerTapEvent: TwoPointerTapEvent) {}
+    public fun onTwoPointerTap(twoPointerTapEvent: TwoPointerTapEvent) {}
 
     /**
      * Support for pan events on [ComposableMap]
      */
-    context(MapView, CoroutineScope) public fun onPan(panEvent: PanChangeEvent) {}
+    public fun onPan(panEvent: PanChangeEvent) {}
 
     /**
      * Sets the [ComposableMap] current viewpoint to the given [viewpoint]
@@ -135,7 +118,7 @@ public interface MapState : MapEvents {
     /**
      * The model for [ComposableMap]
      */
-    public val map: StateFlow<ArcGISMap?>
+    public val map: ArcGISMap?
 
     /**
      * Insets to apply to the Box which contains the [ComposableMap]
@@ -167,9 +150,10 @@ public class MapStateImpl(
     map: ArcGISMap?,
     mapInsets: MapInsets = MapInsets()
 ) : MapState {
-
-    private val _map: MutableStateFlow<ArcGISMap?> = MutableStateFlow(map)
-    override val map: StateFlow<ArcGISMap?> = _map.asStateFlow()
+    
+    protected var _map: ArcGISMap? = map
+    override val map: ArcGISMap?
+        get() = _map
 
     private val _insets: MutableStateFlow<MapInsets> = MutableStateFlow(mapInsets)
     override val insets: StateFlow<MapInsets> = _insets.asStateFlow()
@@ -181,13 +165,17 @@ public class MapStateImpl(
     override val mapRotation: DuplexFlow<Double> = _mapRotation
 
     override fun setViewpoint(viewpoint: Viewpoint) {
+        _map?.initialViewpoint = viewpoint
         // set the property value using the WRITE flow type
         _viewpoint.setValue(viewpoint, DuplexFlow.Type.Write)
     }
 
     override fun onViewpointChanged(viewpoint: Viewpoint) {
-        // update the property value on the READ flow type
-        _viewpoint.setValue(viewpoint, DuplexFlow.Type.Read)
+        if (viewpoint.viewpointType == ViewpointType.CenterAndScale) {
+            _map?.initialViewpoint = viewpoint
+            // update the property value on the READ flow type
+            _viewpoint.setValue(viewpoint, DuplexFlow.Type.Read)
+        }
     }
 
     override fun setViewpointRotation(angleDegrees: Double) {
@@ -205,6 +193,6 @@ public class MapStateImpl(
     }
 
     override fun setMap(map: ArcGISMap) {
-        _map.value = map
+        _map = map
     }
 }
