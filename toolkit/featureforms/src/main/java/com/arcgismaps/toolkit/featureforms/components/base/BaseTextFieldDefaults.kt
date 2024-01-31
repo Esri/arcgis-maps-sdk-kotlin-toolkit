@@ -22,52 +22,53 @@ import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-@Composable
-internal fun baseTextFieldColors(isEditable: Boolean, isEmpty: Boolean, isPlaceholderEmpty: Boolean): TextFieldColors {
-    val textColor = BaseTextFieldColors.textColor(
-        isEditable = isEditable,
-        isEmpty = isEmpty,
-        isPlaceHolderEmpty = isPlaceholderEmpty
-    )
-    val borderColor = BaseTextFieldColors.borderColor(
-        isEditable = isEditable
-    )
-    val labelColor = BaseTextFieldColors.labelColor(
-        isEditable = isEditable
-    )
-    return OutlinedTextFieldDefaults.colors(
-        focusedTextColor = textColor,
-        unfocusedTextColor = textColor,
-        focusedBorderColor = borderColor,
-        focusedLabelColor = labelColor
-    )
-}
 /**
- * Color properties of a base text field.
+ *  Color properties of a base text field. Since non editable fields are rendered as read-only
+ *  text fields, the colors actually match disabled fields.
+ *
+ *  Taken from the material 3 design :https://m3.material.io/components/text-fields/specs.
  */
-internal object BaseTextFieldColors {
-    @Composable
-    fun borderColor(isEditable: Boolean) =
-        if (isEditable)
-            MaterialTheme.colorScheme.primary
-        else
-            MaterialTheme.colorScheme.secondary.copy(alpha = 0.8f)
-    
-    @Composable
-    fun labelColor(isEditable: Boolean) =
-        if (isEditable)
-            MaterialTheme.colorScheme.primary
-        else
-            MaterialTheme.colorScheme.secondary.copy(alpha = 0.8f)
-    
-    @Composable
-    fun textColor(isEditable: Boolean, isEmpty: Boolean, isPlaceHolderEmpty: Boolean): Color {
-        val color = if (isEmpty && !isPlaceHolderEmpty) {
-            Color.Gray
-        } else {
-            MaterialTheme.colorScheme.secondary
-        }
-        
-        return if (isEditable) color else color.copy(alpha = 0.6f)
+@Composable
+internal fun baseTextFieldColors(
+    isEditable: Boolean,
+): TextFieldColors {
+    return if (isEditable) {
+        OutlinedTextFieldDefaults.colors()
+    } else {
+        // non editable field colors are similar to disabled field colors.
+        val disabledColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+        val outlineColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+        OutlinedTextFieldDefaults.colors(
+            focusedLabelColor = disabledColor,
+            unfocusedLabelColor = disabledColor,
+            focusedSupportingTextColor = disabledColor,
+            unfocusedSupportingTextColor = disabledColor,
+            focusedTextColor = disabledColor,
+            unfocusedTextColor = disabledColor,
+            focusedBorderColor = outlineColor,
+            unfocusedBorderColor = outlineColor,
+        )
+    }
+}
+
+/**
+ * Specifies the text color based on if the field is editable or a placeholder is being shown.
+ */
+@Composable
+internal fun defaultTextColor(
+    isEditable: Boolean,
+    isEmpty: Boolean,
+    isPlaceholderEmpty: Boolean,
+) : Color {
+    val baseColor = MaterialTheme.colorScheme.onSurface
+    return if ((isEmpty && !isPlaceholderEmpty)) {
+        // if placeholder is visible, make it lighter than the actual input text color
+        baseColor.copy(alpha = 0.6f)
+    } else if (!isEditable) {
+        // if disabled
+        baseColor.copy(alpha = 0.38f)
+    } else {
+        // input text color
+        baseColor
     }
 }

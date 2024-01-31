@@ -30,7 +30,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.test.printToLog
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.data.QueryParameters
@@ -180,7 +179,6 @@ class FormTextFieldTests {
     @Test
     fun testEnteredValueUnfocusedState() {
         val outlinedTextField = composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel, useUnmergedTree = true)
-        outlinedTextField.printToLog("TAG")
         val text = "lorem ipsum"
         outlinedTextField.performTextInput(text)
         outlinedTextField.assertIsFocused()
