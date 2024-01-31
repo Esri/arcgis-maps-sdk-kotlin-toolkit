@@ -250,7 +250,6 @@ internal fun BaseTextField(
                                 .clickable {
                                     clearFocus = true
                                 }
-                                .semantics { contentDescription = "supporting text" }
                         ) {
                             supportingText?.invoke(this)
                         }
