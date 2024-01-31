@@ -44,6 +44,11 @@ public class ImageOverlayCollection : Iterable<ImageOverlay> {
      */
     internal val changed: SharedFlow<ChangedEvent> = _changed.asSharedFlow()
 
+    /**
+     * Returns an iterator over the elements in this collection
+     *
+     * @since 200.4.0
+     */
     override fun iterator(): Iterator<ImageOverlay> {
         return imageOverlays.iterator()
     }

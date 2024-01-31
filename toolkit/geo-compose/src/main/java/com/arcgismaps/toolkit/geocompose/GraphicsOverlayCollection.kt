@@ -48,6 +48,11 @@ public class GraphicsOverlayCollection : Iterable<GraphicsOverlay> {
      */
     internal val changed: SharedFlow<ChangedEvent> = _changed.asSharedFlow()
 
+    /**
+     * Returns an iterator over the elements in this collection
+     *
+     * @since 200.4.0
+     */
     override fun iterator(): Iterator<GraphicsOverlay> {
         return graphicsOverlays.iterator()
     }

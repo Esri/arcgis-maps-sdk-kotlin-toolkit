@@ -35,6 +35,11 @@ import com.arcgismaps.mapping.view.GeoView
  * @see rememberViewpointChangedStateForCenterAndScale
  * @see rememberViewpointChangedStateForBoundingGeometry
  * @see rememberViewpointChangedState
+ *
+ * @property onViewpointChangedForCenterAndScale called when the viewpoint changes, passing a viewpoint
+ * type of [ViewpointType.CenterAndScale]
+ * @property onViewpointChangedForBoundingGeometry called when the viewpoint changes, passing a viewpoint
+ * type of [ViewpointType.BoundingGeometry]
  * @since 200.4.0
  */
 @Stable
