@@ -29,6 +29,7 @@ androidx-activity-compose = { group = "androidx.activity", name = "activity-comp
 androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "androidXBrowser"}
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidxCore" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBOM" }
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
 androidx-compose-ui = { group = "androidx.compose.ui", name = "ui"}
 androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime"}
 androidx-compose-material3 = { module = "androidx.compose.material3:material3"}

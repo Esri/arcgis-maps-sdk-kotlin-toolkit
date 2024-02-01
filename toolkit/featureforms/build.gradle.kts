@@ -53,6 +53,7 @@ android {
 dependencies {
     api(arcgis.mapsSdk)
     implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.window)
     implementation(libs.androidx.window.core)
     implementation(libs.bundles.composeCore)
