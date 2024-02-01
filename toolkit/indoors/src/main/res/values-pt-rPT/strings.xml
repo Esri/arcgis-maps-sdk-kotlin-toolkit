@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
-    <string name="floor_filter_view_filter_hint_sites">ã_Filter sites…______________Ç</string>
-    <string name="floor_filter_view_filter_hint_facilities">ã_Filter facilities…___________________Ç</string>
-    <string name="floor_filter_select_site">ã_Select a site______________Ç</string>
-    <string name="floor_filter_select_facility">ã_Select a facility__________________Ç</string>
-    <string name="floor_filter_no_results">ã_No results found__________________Ç.</string>
-    <string name="floor_filter_site_selector_top_bar">ã_Site\u0020-\u0020__________________Ç</string>
+    <string name="floor_filter_view_filter_hint_sites">õ_Filter sites…______________ç</string>
+    <string name="floor_filter_view_filter_hint_facilities">õ_Filter facilities…___________________ç</string>
+    <string name="floor_filter_select_site">õ_Select a site______________ç</string>
+    <string name="floor_filter_select_facility">õ_Select a facility__________________ç</string>
+    <string name="floor_filter_no_results">õ_No results found__________________ç.</string>
+    <string name="floor_filter_site_selector_top_bar">õ_Site\u0020-\u0020__________________ç</string>
 </resources>
