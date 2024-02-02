@@ -27,6 +27,7 @@ internal object AttachmentElementDefaults {
     val buttonBorderThickness = 2.dp
     val borderThickness = 1.dp
     val containerShape = RoundedCornerShape(5.dp)
+    val attachmentDetailShape = RoundedCornerShape(10.dp)
     val attachmentShape = RoundedCornerShape(10.dp)
     
     @Composable
