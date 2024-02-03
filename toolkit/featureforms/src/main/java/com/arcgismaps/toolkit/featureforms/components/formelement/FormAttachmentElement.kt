@@ -5,9 +5,11 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -15,26 +17,24 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PageSize
-import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AddAPhoto
-import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material.icons.sharp.Close
 import androidx.compose.material.icons.sharp.Delete
 import androidx.compose.material.icons.sharp.Done
 import androidx.compose.material.icons.sharp.Edit
 import androidx.compose.material3.Card
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -49,28 +49,34 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontWeight.Companion.W300
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
+import com.arcgismaps.toolkit.featureforms.R
 import kotlinx.coroutines.job
+import java.time.Instant
 
-private data class AttachmentFormElement(val name: String, val size: Long)
+private data class FakeAttachment(val name: String = "front of ship.jpg", val size: Long = 1234L)
 
-private val elements = mutableListOf(
-    AttachmentFormElement("Bow point of collision", 1234),
-    AttachmentFormElement("Portside listing", 3456),
-    AttachmentFormElement("Hull shearing", 8675309),
-    AttachmentFormElement("the iceberg", 90210)
-)
-
+private val attachments = buildList<FakeAttachment> {
+    repeat(40) {
+        add(FakeAttachment("Bow point of collision.jpeg", 1234))
+    }
+}
 private fun Modifier.feedbackClickable(
     enabled: Boolean = true,
     currentAlpha: Float = 1f,
@@ -78,9 +84,7 @@ private fun Modifier.feedbackClickable(
 ) = composed {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
-    
     val animationTransition = updateTransition(isPressed, label = "BouncingClickableTransition")
-    
     val opacity by animationTransition.animateFloat(
         targetValueByState = { pressed -> if (pressed) currentAlpha * 0.4f else currentAlpha },
         label = "ClickableOpacityTransition"
@@ -111,18 +115,11 @@ private fun Modifier.feedbackClickable(
         )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
-private val maxThreePagesPerViewport = object : PageSize {
-    override fun Density.calculateMainAxisPageSize(
-        availableSpace: Int,
-        pageSpacing: Int
-    ): Int {
-        return ((availableSpace - 2 * pageSpacing) / 3).coerceAtLeast(100)
-    }
-}
-
 @Composable
 public fun AttachmentFormElement(modifier: Modifier = Modifier, colors: AttachmentElementColors) {
+    val editable = true
+    var displayDetails by remember { mutableStateOf(false) }
+    var displayedAttachment: FakeAttachment? by remember { mutableStateOf(null) }
     Card(
         modifier = Modifier,
         shape = AttachmentElementDefaults.containerShape,
@@ -133,59 +130,96 @@ public fun AttachmentFormElement(modifier: Modifier = Modifier, colors: Attachme
         ) {
             AttachmentElementHeader(
                 title = "Titanic",
-                description = "Take pictures of the iceberg point of impact.",
-                keyword = "Point of impact"
+                description = "Take pictures of damage to the boat.",
+                keyword = "Point of impact",
+                editable = editable
             )
-            if (true) {
-                ImageAttachmentDetail()
+            if (displayDetails && editable) {
+                ImageAttachmentDetail(displayedAttachment!!) {
+                    displayDetails = false
+                    displayedAttachment = null
+                }
             } else {
-                Pager()
+                ThumbnailCarousel {
+                    displayedAttachment = it
+                    displayDetails = true
+                }
             }
         }
     }
 }
 
-
-@OptIn(ExperimentalFoundationApi::class)
+@Preview
 @Composable
-private fun Pager() {
-    val pagerState = rememberPagerState(pageCount = {
-        4
-    })
-    HorizontalPager(
-        state = pagerState,
-        pageSize = maxThreePagesPerViewport,
-        contentPadding = PaddingValues(horizontal = 12.dp),
-        //modifier = modifier.align(Alignment.CenterVertically)
-    ) { page ->
-        
-        Column(
-            Modifier
-                .size(80.dp)
-                .alpha(0.4f)
-                .feedbackClickable { },
-            
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Icon(
-                Icons.Rounded.Image,
-                contentDescription = "attachment",
-                modifier = Modifier.fillMaxSize()
-            )
+private fun ProtoCarousel() {
+    ThumbnailCarousel()
+}
+
+@Composable
+private fun ThumbnailCarousel(onThumbnailTap: (FakeAttachment) -> Unit = {}) {
+    Row(
+        Modifier
+            .horizontalScroll(rememberScrollState())
+            .height(intrinsicSize = IntrinsicSize.Max),
+        horizontalArrangement = Arrangement.spacedBy(3.dp)
+    ) {
+        attachments.forEach {
+            Thumbnail(it.name, it.size) {
+                onThumbnailTap(it)
+            }
         }
     }
 }
 
 @Composable
+private fun Thumbnail(name: String, size: Long, onTap: () -> Unit) {
+    Column(
+        Modifier
+            .feedbackClickable { onTap() }
+            .width(80.dp)
+            .border(
+                border = BorderStroke(
+                    AttachmentElementDefaults.borderThickness,
+                    AttachmentElementDefaults.colors().borderColor
+                ),
+                shape = RoundedCornerShape(10.dp)
+            ),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Image(
+            painter = rememberAsyncImagePainter(
+                ImageRequest.Builder(LocalContext.current)
+                    .data("https://i.postimg.cc/65yws9mR/Screenshot-2024-02-02-at-6-20-49-PM.png").apply {
+                    placeholder(
+                        LocalContext.current.getDrawable(R.drawable.baseline_cloud_download_24)
+                    )
+                }.build()
+            ),
+            contentScale = ContentScale.Crop,
+            contentDescription = "some description",
+            modifier = Modifier
+                .size(80.dp)
+                .alpha(0.4f)
+                .clip(shape = RoundedCornerShape(15.dp, 15.dp, 0.dp, 0.dp))
+        
+        )
+        Divider()
+        ThumbnailDetails(name, size)
+    }
+}
+
+@Composable
 private fun AttachmentTextDetails(
+    attachment: FakeAttachment,
     modifier: Modifier = Modifier
 ) {
     var editable by remember { mutableStateOf(false) }
-    Column {
-        Row(modifier = Modifier.padding(vertical = 5.dp)) {
+    Column(
+        modifier = modifier
+    ) {
+        Row {
             val focusRequester = remember { FocusRequester() }
-            var textFieldValue by remember { mutableStateOf(TextFieldValue("front of shippppppp.jpeg")) }
+            var textFieldValue by remember { mutableStateOf(TextFieldValue(attachment.name)) }
             val interactionSource = remember { MutableInteractionSource() }
             val isFocused by interactionSource.collectIsFocusedAsState()
             
@@ -219,6 +253,7 @@ private fun AttachmentTextDetails(
                 ),
                 modifier = modifier
                     .focusRequester(focusRequester)
+                    .padding(horizontal = 1.dp)
             )
             Icon(
                 imageVector = Icons.Sharp.Edit,
@@ -227,22 +262,61 @@ private fun AttachmentTextDetails(
                     .feedbackClickable { editable = true }
                     .size(20.dp)
                     .padding(1.dp)
+                    .alpha(0.4f)
             )
         }
-        Text(text = "1234 KB", style = MaterialTheme.typography.labelSmall)
+        Text(
+            text = "${attachment.size} KB",
+            style = MaterialTheme.typography.labelSmall,
+            modifier = modifier
+                .padding(horizontal = 1.dp)
+        )
+    }
+}
+
+
+@Composable
+private fun ThumbnailDetails(
+    name: String = "frontgvfrjuaengjranjkadjkvnadefr.jpg",
+    size: Long,
+    lastModified: Instant = Instant.ofEpochMilli(0),
+    modifier: Modifier = Modifier
+) {
+    Column {
+        Text(
+            text = name,
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.W600
+            ),
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(horizontal = 1.dp)
+        )
+        Text(
+            text = "$size KB",
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = W300
+            ),
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .padding(horizontal = 1.dp)
+                .align(Alignment.CenterHorizontally)
+        
+        )
     }
 }
 
 @Preview
 @Composable
 private fun PreviewImageAttachmentDetail() {
-    ImageAttachmentDetail(modifier = Modifier.height(200.dp))
+    ImageAttachmentDetail(FakeAttachment(), modifier = Modifier.height(200.dp))
 }
 
 @Composable
 private fun ImageAttachmentDetail(
+    attachment: FakeAttachment,
     modifier: Modifier = Modifier,
-    colors: AttachmentElementColors = AttachmentElementDefaults.colors()
+    colors: AttachmentElementColors = AttachmentElementDefaults.colors(),
+    onClose: ()->Unit = {}
 ) {
     Card(
         modifier = modifier
@@ -262,7 +336,7 @@ private fun ImageAttachmentDetail(
         ) {
             val focusRequester = remember { FocusRequester() }
             ImageAttachment()
-            AttachmentTextDetails()
+            AttachmentTextDetails(attachment, modifier = Modifier.padding(vertical = 5.dp, horizontal = 2.dp))
             Spacer(modifier = modifier.weight(1f))
             Box(
                 modifier = Modifier
@@ -273,7 +347,7 @@ private fun ImageAttachmentDetail(
                     imageVector = Icons.Sharp.Close,
                     contentDescription = "attachment name field",
                     modifier = Modifier
-                        .feedbackClickable {}
+                        .feedbackClickable { onClose() }
                         .size(20.dp)
                 )
             }
@@ -327,10 +401,20 @@ private fun ImageAttachment() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Icon(
-            Icons.Rounded.Image,
-            contentDescription = "attachment",
-            modifier = Modifier.fillMaxSize()
+        Image(
+            painter = rememberAsyncImagePainter(
+                ImageRequest.Builder(LocalContext.current)
+                    .data("https://i.postimg.cc/65yws9mR/Screenshot-2024-02-02-at-6-20-49-PM.png").apply {
+                        placeholder(
+                            LocalContext.current.getDrawable(R.drawable.baseline_cloud_download_24)
+                        )
+                    }.build()
+            ),
+            contentScale = ContentScale.Crop,
+            contentDescription = "some description",
+            modifier = Modifier
+                .clip(shape = RoundedCornerShape(15.dp))
+                
         )
     }
 }
@@ -339,7 +423,7 @@ private fun ImageAttachment() {
 @Preview
 @Composable
 public fun PreviewAttachmentTextDetails() {
-    AttachmentTextDetails()
+    AttachmentTextDetails(FakeAttachment())
 }
 
 @Composable
@@ -347,7 +431,7 @@ private fun AddPicture() {
     Box(
         modifier = Modifier
             .size(80.dp)
-            .feedbackClickable {  }
+            .feedbackClickable { }
     ) {
         Icon(
             Icons.Rounded.AddAPhoto,
@@ -365,13 +449,14 @@ private fun AttachmentElementHeader(
     title: String,
     description: String,
     modifier: Modifier = Modifier,
-    keyword: String = ""
+    keyword: String = "",
+    editable: Boolean = true
 ) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(modifier = Modifier.weight(1f)) {
+        Column {
             Text(
                 text = title,
                 style = MaterialTheme.typography.bodyMedium,
@@ -381,12 +466,16 @@ private fun AttachmentElementHeader(
             if (description.isNotEmpty()) {
                 Text(
                     text = description,
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }
         Spacer(modifier = Modifier.weight(1f))
-        AddPicture()
+        if (editable) {
+            AddPicture()
+        }
     }
 }
 
@@ -397,7 +486,7 @@ private fun PreviewFormAttachmentElement() {
     AttachmentFormElement(
         modifier = Modifier
             .fillMaxWidth(),
-            //.height(200.dp),
+        //.height(200.dp),
         colors = AttachmentElementDefaults.colors()
     )
 }
