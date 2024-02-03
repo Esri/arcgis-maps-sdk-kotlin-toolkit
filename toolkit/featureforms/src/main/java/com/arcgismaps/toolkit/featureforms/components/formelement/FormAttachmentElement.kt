@@ -140,7 +140,7 @@ public fun AttachmentFormElement(modifier: Modifier = Modifier, colors: Attachme
                     displayedAttachment = null
                 }
             } else {
-                ThumbnailCarousel {
+                Carousel {
                     displayedAttachment = it
                     displayDetails = true
                 }
@@ -152,11 +152,11 @@ public fun AttachmentFormElement(modifier: Modifier = Modifier, colors: Attachme
 @Preview
 @Composable
 private fun ProtoCarousel() {
-    ThumbnailCarousel()
+    Carousel()
 }
 
 @Composable
-private fun ThumbnailCarousel(onThumbnailTap: (FakeAttachment) -> Unit = {}) {
+private fun Carousel(onThumbnailTap: (FakeAttachment) -> Unit = {}) {
     Row(
         Modifier
             .horizontalScroll(rememberScrollState())
@@ -164,7 +164,7 @@ private fun ThumbnailCarousel(onThumbnailTap: (FakeAttachment) -> Unit = {}) {
         horizontalArrangement = Arrangement.spacedBy(3.dp)
     ) {
         attachments.forEach {
-            Thumbnail(it.name, it.size) {
+            CarouselThumbnail(it.name, it.size) {
                 onThumbnailTap(it)
             }
         }
@@ -172,7 +172,7 @@ private fun ThumbnailCarousel(onThumbnailTap: (FakeAttachment) -> Unit = {}) {
 }
 
 @Composable
-private fun Thumbnail(name: String, size: Long, onTap: () -> Unit) {
+private fun CarouselThumbnail(name: String, size: Long, onTap: () -> Unit) {
     Column(
         Modifier
             .feedbackClickable { onTap() }
@@ -204,16 +204,16 @@ private fun Thumbnail(name: String, size: Long, onTap: () -> Unit) {
         
         )
         Divider()
-        ThumbnailDetails(name, size)
+        CarouselText(name, size)
     }
 }
 
 @Composable
-private fun AttachmentTextDetails(
+private fun DetailsText(
     attachment: FakeAttachment,
     modifier: Modifier = Modifier
 ) {
-    var editable by remember { mutableStateOf(false) }
+    var editable by remember(attachment) { mutableStateOf(true) }
     Column(
         modifier = modifier
     ) {
@@ -276,7 +276,7 @@ private fun AttachmentTextDetails(
 
 
 @Composable
-private fun ThumbnailDetails(
+private fun CarouselText(
     name: String = "frontgvfrjuaengjranjkadjkvnadefr.jpg",
     size: Long,
     lastModified: Instant = Instant.ofEpochMilli(0),
@@ -329,14 +329,13 @@ private fun ImageAttachmentDetail(
         )
     ) {
         Row(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(5.dp)
                 .weight(1f)
         ) {
-            val focusRequester = remember { FocusRequester() }
-            ImageAttachment()
-            AttachmentTextDetails(attachment, modifier = Modifier.padding(vertical = 5.dp, horizontal = 2.dp))
+            DetailsThumbnail()
+            DetailsText(attachment, modifier = Modifier.padding(vertical = 5.dp, horizontal = 2.dp))
             Spacer(modifier = modifier.weight(1f))
             Box(
                 modifier = Modifier
@@ -354,7 +353,7 @@ private fun ImageAttachmentDetail(
         }
         
         Row(
-            modifier
+            Modifier
                 .fillMaxWidth()
                 .height(40.dp)
                 .background(color = DividerDefaults.color)
@@ -391,7 +390,7 @@ private fun ImageAttachmentDetail(
 }
 
 @Composable
-private fun ImageAttachment() {
+private fun DetailsThumbnail() {
     Column(
         Modifier
             .size(80.dp)
@@ -423,7 +422,7 @@ private fun ImageAttachment() {
 @Preview
 @Composable
 public fun PreviewAttachmentTextDetails() {
-    AttachmentTextDetails(FakeAttachment())
+    DetailsText(FakeAttachment())
 }
 
 @Composable
@@ -478,7 +477,6 @@ private fun AttachmentElementHeader(
         }
     }
 }
-
 
 @Preview
 @Composable
