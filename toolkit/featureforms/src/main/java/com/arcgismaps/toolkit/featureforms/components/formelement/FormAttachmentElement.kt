@@ -121,7 +121,7 @@ public fun AttachmentFormElement(modifier: Modifier = Modifier, colors: Attachme
     var displayDetails by remember { mutableStateOf(false) }
     var displayedAttachment: FakeAttachment? by remember { mutableStateOf(null) }
     Card(
-        modifier = Modifier,
+        modifier = modifier,
         shape = AttachmentElementDefaults.containerShape,
         border = BorderStroke(AttachmentElementDefaults.borderThickness, colors.borderColor)
     ) {
