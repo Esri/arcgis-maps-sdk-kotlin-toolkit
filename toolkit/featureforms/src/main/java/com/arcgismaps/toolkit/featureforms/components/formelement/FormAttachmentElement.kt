@@ -1,5 +1,7 @@
 package com.arcgismaps.toolkit.featureforms.components.formelement
 
+import android.content.Intent
+import android.provider.MediaStore
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.spring
@@ -28,6 +30,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.AddAPhoto
 import androidx.compose.material.icons.sharp.Close
 import androidx.compose.material.icons.sharp.Delete
@@ -191,7 +194,7 @@ private fun CarouselThumbnail(name: String, size: Long, onTap: () -> Unit) {
                 ImageRequest.Builder(LocalContext.current)
                     .data("https://i.postimg.cc/65yws9mR/Screenshot-2024-02-02-at-6-20-49-PM.png").apply {
                     placeholder(
-                        LocalContext.current.getDrawable(R.drawable.baseline_cloud_download_24)
+                        LocalContext.current.getDrawable(R.drawable.baseline_cloud_download_16)
                     )
                 }.build()
             ),
@@ -232,7 +235,7 @@ private fun DetailsText(
                 )
                 if (editable) {
                     this.coroutineContext.job.invokeOnCompletion {
-                        focusRequester.requestFocus()
+                       // focusRequester.requestFocus()
                     }
                 }
             }
@@ -279,8 +282,8 @@ private fun DetailsText(
 private fun CarouselText(
     name: String = "frontgvfrjuaengjranjkadjkvnadefr.jpg",
     size: Long,
-    lastModified: Instant = Instant.ofEpochMilli(0),
-    modifier: Modifier = Modifier
+    lastModified: Instant = Instant.ofEpochMilli(0)
+
 ) {
     Column {
         Text(
@@ -427,19 +430,44 @@ public fun PreviewAttachmentTextDetails() {
 
 @Composable
 private fun AddPicture() {
-    Box(
-        modifier = Modifier
-            .size(80.dp)
-            .feedbackClickable { }
-    ) {
-        Icon(
-            Icons.Rounded.AddAPhoto,
-            contentDescription = "attachment",
+    Row(modifier = Modifier.padding(4.dp)) {
+        val context = LocalContext.current
+        Box(
             modifier = Modifier
-                .align(Alignment.Center)
-                .size(32.dp)
-        
-        )
+                .size(80.dp)
+                .feedbackClickable {
+                    val intent = Intent()
+                    intent.setType("image/*")
+                    intent.setAction(Intent.ACTION_GET_CONTENT)
+                    context.startActivity(Intent.createChooser(intent, "Select Picture"))
+                }
+        ) {
+            Icon(
+                Icons.Rounded.Add,
+                contentDescription = "attachment",
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(32.dp)
+            )
+        }
+        Box(
+            modifier = Modifier
+                .size(80.dp)
+                .feedbackClickable {
+                    val intent = Intent()
+                    intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE)
+                    context.startActivity(Intent.createChooser(intent, "Take a picture of damage to the boat"))
+                }
+        ) {
+            Icon(
+                Icons.Rounded.AddAPhoto,
+                contentDescription = "attachment",
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(32.dp)
+            
+            )
+        }
     }
 }
 
