@@ -36,6 +36,7 @@ import com.arcgismaps.geometry.Polygon
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.TimeExtent
+import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
 import com.arcgismaps.mapping.view.BackgroundGrid
 import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
@@ -79,7 +80,9 @@ import kotlinx.coroutines.launch
  * @param grid represents the display of a coordinate system [Grid] on the composable MapView
  * @param backgroundGrid the default color and context grid behind the map surface
  * @param wrapAroundMode the [WrapAroundMode] to specify whether continuous panning across the international date line is enabled
- * @param attributionState specifies the attribution bar's visibility, text changed and layout changed events
+ * @param isAttributionBarVisible true if attribution bar is visible in the composable MapView, false otherwise
+ * @param onAttributionTextChanged lambda invoked when the attribution text of the composable MapView has changed
+ * @param onAttributionBarLayoutChanged lambda invoked when the attribution bar's position or size changes
  * @param timeExtent the [TimeExtent] used by the composable MapView
  * @param onTimeExtentChanged lambda invoked when the composable MapView's [TimeExtent] is changed
  * @param onNavigationChanged lambda invoked when the navigation status of the composable MapView has changed
@@ -119,7 +122,9 @@ public fun MapView(
     grid: Grid? = null,
     backgroundGrid: BackgroundGrid = BackgroundGrid(),
     wrapAroundMode: WrapAroundMode = WrapAroundMode.EnabledWhenSupported,
-    attributionState: AttributionState = AttributionState(),
+    isAttributionBarVisible: Boolean = true,
+    onAttributionTextChanged: ((String) -> Unit)? = null,
+    onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)? = null,
     timeExtent: TimeExtent? = null,
     onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
@@ -158,6 +163,7 @@ public fun MapView(
             it.geometryEditor = geometryEditor
             it.grid = grid
             it.backgroundGrid = backgroundGrid
+            it.isAttributionBarVisible = isAttributionBarVisible
             it.setTimeExtent(timeExtent)
         })
 
@@ -189,7 +195,6 @@ public fun MapView(
         )
     }
 
-    AttributionStateHandler(mapView, attributionState)
     ViewpointChangedStateHandler(mapView, viewpointChangedState)
 
     MapViewEventHandler(
@@ -212,7 +217,9 @@ public fun MapView(
         onLongPress,
         onTwoPointerTap,
         onPan,
-        onDrawStatusChanged
+        onDrawStatusChanged,
+        onAttributionTextChanged,
+        onAttributionBarLayoutChanged
     )
 
     GraphicsOverlaysUpdater(graphicsOverlays, mapView)
@@ -258,7 +265,9 @@ private fun MapViewEventHandler(
     onLongPress: ((LongPressEvent) -> Unit)?,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)?,
     onPan: ((PanChangeEvent) -> Unit)?,
-    onDrawStatusChanged: ((DrawStatus) -> Unit)?
+    onDrawStatusChanged: ((DrawStatus) -> Unit)?,
+    onAttributionTextChanged: ((String) -> Unit)?,
+    onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)?
 ) {
     val currentTimeExtentChanged by rememberUpdatedState(onTimeExtentChanged)
     val currentVisibleAreaChanged by rememberUpdatedState(onVisibleAreaChanged)
@@ -279,6 +288,8 @@ private fun MapViewEventHandler(
     val currentOnPan by rememberUpdatedState(onPan)
     val currentOnDrawStatusChanged by rememberUpdatedState(onDrawStatusChanged)
     val currentOnLayerViewStateChanged by rememberUpdatedState(onLayerViewStateChanged)
+    val currentOnAttributionTextChanged by rememberUpdatedState(onAttributionTextChanged)
+    val currentOnAttributionBarLayoutChanged by rememberUpdatedState(onAttributionBarLayoutChanged)
 
     LaunchedEffect(Unit) {
         launch {
@@ -373,6 +384,16 @@ private fun MapViewEventHandler(
         launch {
             mapView.drawStatus.collect { drawStatus ->
                 currentOnDrawStatusChanged?.invoke(drawStatus)
+            }
+        }
+        launch {
+            mapView.attributionText.collect { attributionText ->
+                currentOnAttributionTextChanged?.invoke(attributionText)
+            }
+        }
+        launch {
+            mapView.onAttributionBarLayoutChanged.collect { attributionBarLayoutChangeEvent ->
+                currentOnAttributionBarLayoutChanged?.invoke(attributionBarLayoutChangeEvent)
             }
         }
     }
