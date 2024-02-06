@@ -58,7 +58,7 @@ public sealed class GeoViewProxy(className: String) {
         this.geoView = geoView
     }
 
-    private val nullGeoViewErrorMessage: String =
+    protected val nullGeoViewErrorMessage: String =
         "$className must be part of the composition when this member is called."
 
     /**
@@ -245,12 +245,11 @@ public sealed class GeoViewProxy(className: String) {
     }
 
     /**
-     * Sets the GeoView's viewpoint with the bookmark's value.
-     * Applies the viewpoint of the bookmark to the GeoView.
+     * Animate the geo view's viewpoint to the viewpoint of the bookmark.
      *
      * @param bookmark bookmark to set
      * @return a [Result] indicating whether the viewpoint was successfully set.
-     * A success result with a value of [false] may indicate the operation was cancelled.
+     * A success result with a value of false may indicate the operation was cancelled.
      * @since 200.4.0
      */
     public suspend fun setBookmark(bookmark: Bookmark): Result<Boolean> {
@@ -269,10 +268,12 @@ public sealed class GeoViewProxy(className: String) {
     }
 
     /**
-     * Change the GeoView to the new viewpoint with animation, taking the given duration to complete the navigation.
+     * Animate the geo view to the new viewpoint, taking the given duration to complete the navigation.
      *
      * @param viewpoint the new viewpoint
      * @param duration the duration of the animation
+     * @return a [Result] indicating whether the viewpoint was successfully set.
+     * A success result with a value of false may indicate the operation was cancelled.
      * @since 200.4.0
      */
     public suspend fun setViewpointAnimated(
