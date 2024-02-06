@@ -64,7 +64,6 @@ import kotlinx.coroutines.launch
  *
  * @param modifier Modifier to be applied to the composable MapView
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable MapView
- * @param viewpointOperation a [MapViewpointOperation] that changes this MapView to a new viewpoint
  * @param viewpointChangedState specifies lambdas invoked when the viewpoint of the composable MapView has changed
  * @param onVisibleAreaChanged lambda invoked when the visible area of the composable MapView has changed
  * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable MapView
@@ -105,7 +104,6 @@ import kotlinx.coroutines.launch
 public fun MapView(
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap? = null,
-    viewpointOperation: MapViewpointOperation? = null,
     viewpointChangedState: ViewpointChangedState? = null,
     onVisibleAreaChanged: ((Polygon) -> Unit)? = null,
     graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
@@ -169,8 +167,6 @@ public fun MapView(
         }
     }
 
-    ViewpointUpdater(mapView, viewpointOperation)
-
     DisposableEffect(mapViewProxy) {
         mapViewProxy?.setMapView(mapView)
         onDispose {
@@ -216,22 +212,6 @@ public fun MapView(
     )
 
     GraphicsOverlaysUpdater(graphicsOverlays, mapView)
-}
-
-/**
- * Updates the viewpoint of the provided view-based [mapView] using the given [viewpointOperation]. This will be
- * recomposed when [viewpointOperation] changes.
- *
- * @since 200.4.0
- */
-@Composable
-private fun ViewpointUpdater(
-    mapView: MapView,
-    viewpointOperation: MapViewpointOperation?
-) {
-    LaunchedEffect(viewpointOperation) {
-        viewpointOperation?.execute(mapView)
-    }
 }
 
 /**
