@@ -120,7 +120,7 @@ private fun Modifier.feedbackClickable(
 
 @Composable
 public fun AttachmentFormElement(modifier: Modifier = Modifier, colors: AttachmentElementColors) {
-    val editable = true
+    val editable = false
     var displayDetails by remember { mutableStateOf(false) }
     var displayedAttachment: FakeAttachment? by remember { mutableStateOf(null) }
     Card(
@@ -135,7 +135,8 @@ public fun AttachmentFormElement(modifier: Modifier = Modifier, colors: Attachme
                 title = "Titanic",
                 description = "Take pictures of damage to the boat.",
                 keyword = "Point of impact",
-                editable = editable
+                editable = editable,
+                showingDetails = displayDetails
             )
             if (displayDetails && editable) {
                 ImageAttachmentDetail(displayedAttachment!!) {
@@ -475,12 +476,14 @@ private fun AddPicture() {
 private fun AttachmentElementHeader(
     title: String,
     description: String,
+    showingDetails: Boolean = false,
+    editable: Boolean = true,
     modifier: Modifier = Modifier,
     keyword: String = "",
-    editable: Boolean = true
+    
 ) {
     Row(
-        modifier = modifier,
+        modifier = modifier.height(84.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column {
@@ -500,7 +503,7 @@ private fun AttachmentElementHeader(
             }
         }
         Spacer(modifier = Modifier.weight(1f))
-        if (editable) {
+        if (editable && !showingDetails) {
             AddPicture()
         }
     }
