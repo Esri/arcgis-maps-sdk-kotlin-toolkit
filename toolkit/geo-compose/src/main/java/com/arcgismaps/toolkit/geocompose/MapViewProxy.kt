@@ -152,7 +152,10 @@ public class MapViewProxy : GeoViewProxy("MapView") {
      * A success result with a value of false may indicate the operation was cancelled.
      * @since 200.4.0
      */
-    public suspend fun setViewpointGeometry(boundingGeometry: Geometry, paddingInDips: Double? = null): Result<Boolean> {
+    public suspend fun setViewpointGeometry(
+        boundingGeometry: Geometry,
+        paddingInDips: Double? = null
+    ): Result<Boolean> {
         val result = if (paddingInDips != null) {
             mapView?.setViewpointGeometry(boundingGeometry, paddingInDips)
         } else {
@@ -170,7 +173,11 @@ public class MapViewProxy : GeoViewProxy("MapView") {
      * @since 200.4.0
      */
     public suspend fun setViewpointRotation(angleDegrees: Double): Result<Boolean> {
-        return mapView?.setViewpointRotation(angleDegrees) ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
+        return mapView?.setViewpointRotation(angleDegrees) ?: Result.failure(
+            IllegalStateException(
+                nullGeoViewErrorMessage
+            )
+        )
     }
 
     /**
@@ -182,6 +189,10 @@ public class MapViewProxy : GeoViewProxy("MapView") {
      * @since 200.4.0
      */
     public suspend fun setViewpointScale(scale: Double): Result<Boolean> {
-        return mapView?.setViewpointScale(scale) ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
+        return mapView?.setViewpointScale(scale) ?: Result.failure(
+            IllegalStateException(
+                nullGeoViewErrorMessage
+            )
+        )
     }
 }
