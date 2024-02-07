@@ -102,6 +102,11 @@ import kotlinx.coroutines.launch
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable MapView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable MapView
  * @param onDrawStatusChanged lambda invoked when the draw status of the composable MapView is changed
+ * @sample com.arcgismaps.toolkit.geocompose.samples.MapViewSample
+ * @see
+ * - <a href="https://developers.arcgis.com/kotlin/maps-2d/tutorials/display-a-map/">Display a map tutorial</a>
+ * - <a href="https://developers.arcgis.com/kotlin/maps-2d/tutorials/display-a-web-map/">Display a web map tutorial</a>
+ * - <a href="https://developers.arcgis.com/kotlin/maps-2d/tutorials/add-a-point-line-and-polygon/">Add a point, line, and polygon tutorial</a>
  * @since 200.4.0
  */
 @Composable
