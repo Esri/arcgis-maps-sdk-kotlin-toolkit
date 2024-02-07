@@ -195,7 +195,11 @@ internal class FormAttachment(
     suspend fun createFullImage(): Result<BitmapDrawable> = withContext(Dispatchers.IO) {
         return@withContext if (filePath.isNotEmpty()) {
             val bitmap = BitmapFactory.decodeFile(filePath)
-            Result.success(BitmapDrawable(bitmap))
+            if (bitmap != null) {
+                Result.success(BitmapDrawable(bitmap))
+            } else {
+                Result.failure(Exception("Unable to create an image"))
+            }
         } else {
             Result.failure(Exception("Attachment is not loaded"))
         }
@@ -206,8 +210,12 @@ internal class FormAttachment(
         withContext(Dispatchers.IO) {
             return@withContext if (filePath.isNotEmpty()) {
                 val bitmap = BitmapFactory.decodeFile(filePath)
-                val thumbnail = ThumbnailUtils.extractThumbnail(bitmap, width, height)
-                Result.success(BitmapDrawable(thumbnail))
+                if (bitmap != null) {
+                    val thumbnail = ThumbnailUtils.extractThumbnail(bitmap, width, height)
+                    Result.success(BitmapDrawable(thumbnail))
+                } else {
+                    Result.failure(Exception("Unable to create an image"))
+                }
             } else {
                 Result.failure(Exception("Attachment is not loaded"))
             }
