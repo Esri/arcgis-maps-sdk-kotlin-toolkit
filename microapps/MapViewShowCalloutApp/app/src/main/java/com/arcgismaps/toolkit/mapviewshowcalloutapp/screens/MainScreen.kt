@@ -55,10 +55,12 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Bookmark
 import com.arcgismaps.mapping.Viewpoint
+//import com.arcgismaps.mapping.view.Callout
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.toolkit.geocompose.Callout
 import com.arcgismaps.toolkit.geocompose.CalloutPlacementOperation
 import com.arcgismaps.toolkit.geocompose.MapView
+import com.arcgismaps.toolkit.geocompose.MapViewProxy
 import com.arcgismaps.toolkit.geocompose.MapViewpointOperation
 import com.arcgismaps.toolkit.geocompose.SceneView
 import com.arcgismaps.toolkit.geocompose.SceneViewpointOperation
@@ -70,10 +72,17 @@ import com.arcgismaps.toolkit.geocompose.SceneViewpointOperation
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
+    val disneyLand = remember { Point(-117.9190, 33.8121, SpatialReference.wgs84()) }
     val arcGISMap by remember { mutableStateOf(ArcGISMap(BasemapStyle.ArcGISImagery)) }
     var calloutPlacementOperation: CalloutPlacementOperation? by remember { mutableStateOf(null) }
-    var callout: Callout? by remember { mutableStateOf(null) }
-    val disneyLand = remember { Point(-117.9190, 33.8121, SpatialReference.wgs84()) }
+//    var callout: Callout? by remember { mutableStateOf(null) }
+    var callout: @Composable (() -> Unit)? by remember {
+        mutableStateOf(
+            null
+//            { Callout(location = disneyLand) { Text("Hello, World!", color = Color.Green) } }
+        )
+    }
+
 
     Scaffold(
         topBar = {
@@ -91,7 +100,7 @@ fun MainScreen() {
 
                     ShowCalloutDropdownMenu(
                         expanded = actionsExpanded,
-                        onSetCalloutPlacementOperation = { calloutPlacementOperation = it },
+//                        onSetCalloutPlacementOperation = { calloutPlacementOperation = it },
                         onSetCallout = { callout = it },
                         onDismissRequest = { actionsExpanded = false }
                     )
@@ -105,60 +114,24 @@ fun MainScreen() {
                 .fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
+
             MapView(
                 modifier = Modifier.fillMaxSize(),
                 arcGISMap = arcGISMap,
+                mapViewProxy = MapViewProxy(),
                 calloutPlacementOperation = calloutPlacementOperation,
-                callout = callout
+//                callout = callout
 //                callout = Callout(location = disneyLand) {
 //                    Text("Hello, World!", color = Color.Green)
 //                }
+                content = callout
             )
-//            Row(
-//                modifier = Modifier
-//                    .height(IntrinsicSize.Max)
-//                    .fillMaxWidth()
-//                    .padding(25.dp)
-//            ) {
-//                // show the compass and pass the mapRotation state data
-//                ShowText()
-//            }
-            
+//            {
+//               Callout(it, location = disneyLand) { Text("Hello, World!", color = Color.Green) }
         }
     }
-
-    MapView(arcGISMap,
-        {
-            if (showCallout) {
-                Callout(Point(0.0,0.0),
-                {
-                    Text("Hello")
-                })
-            }
-        })
 }
 
-@Composable
-fun Callout(
-    location: Point,
-    content: @Composable () -> Unit
-) {
-    
-}
-
-@Composable
-fun MapView(
-    arcGISMap: ArcGISMap,
-    content: @Composable () -> Unit
-) {
-
-    content()
-}
-
-@Composable
-fun ShowText() {
-    Text("Hello, World!", color = Color.Green)
-}
 
 /**
  * A drop down menu providing [SceneViewpointOperation]s for the composable [SceneView].
@@ -167,8 +140,8 @@ fun ShowText() {
 fun ShowCalloutDropdownMenu(
     expanded: Boolean,
     modifier: Modifier = Modifier,
-    onSetCalloutPlacementOperation: (CalloutPlacementOperation) -> Unit,
-    onSetCallout: (Callout?) -> Unit,
+//    onSetCalloutPlacementOperation: (CalloutPlacementOperation) -> Unit,
+    onSetCallout: (@Composable ()-> Unit) -> Unit,
     onDismissRequest: () -> Unit
 ) {
     val calloutOperationsList = remember {
@@ -222,14 +195,16 @@ fun ShowCalloutDropdownMenu(
                 onClick = {
                     val calloutPlacementOperation = when (calloutOperationName) {
 //                        "Show Callout Location" -> CalloutPlacementOperation.ShowTextAtLocation(context, "lorem ipsum", disneyLand)
-                        "Show Callout Location" -> onSetCallout(Callout(location = disneyLand) {
-                            Text("Hello, World!", color = Color.Green)
-                        })
-//                        "Show Callout Geoelement" -> CalloutPlacementOperation.ShowAtGeoElement(
-//                        )
-
+                        "Show Callout Location" -> onSetCallout {
+                            Callout(location = disneyLand) {
+                                Text(
+                                    "Hello, World!",
+                                    color = Color.Green
+                                )
+                            }
+                        }
 //                        "Dismiss Callout" -> CalloutPlacementOperation.Dismiss()
-                        "Dismiss Callout" -> onSetCallout(null)
+                        "Dismiss Callout" -> onSetCallout{ null }
 
                         else -> error("Unexpected MapViewpointOperation")
                     }

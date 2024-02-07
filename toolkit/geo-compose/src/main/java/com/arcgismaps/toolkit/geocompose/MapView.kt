@@ -17,6 +17,7 @@
 
 package com.arcgismaps.toolkit.geocompose
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -28,8 +29,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -73,6 +77,13 @@ import com.arcgismaps.mapping.view.WrapAroundMode
 import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+
+//@SuppressLint("StaticFieldLeak")
+//internal val context = LocalContext.current
+//@SuppressLint("StaticFieldLeak")
+@SuppressLint("StaticFieldLeak")
+internal var mapView: MapView? = null
+internal val LocalMapView = compositionLocalOf<MapView?> { mapView }
 
 /**
  * A compose equivalent of the view-based [MapView].
@@ -155,37 +166,49 @@ public fun MapView(
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
-//    content: ((Callout) -> Unit)? = null,
-    callout: Callout? = null
+//    content: @Composable ((mapView: MapView) -> Unit)? = null,
+//    content: @Composable ((mapViewProxy: MapViewProxy?) -> Unit)? = null,
+    content: @Composable (() -> Unit)? = null,
+//    callout: Callout? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
-    val mapView = remember { MapView(context) }
+//    val mapView = remember { MapView(context) }
+    mapView = remember { MapView(context) }
     val layoutDirection = LocalLayoutDirection.current
 //    val calloutScreenCoordinate: ScreenCoordinate? = callout?.let { mapView.locationToScreen(it.location) }
     var updateCalloutPosition by remember { mutableStateOf(false) }
 
-    Box(modifier = modifier.semantics {
-        contentDescription = "MapContainer"
-    }) {
-        AndroidView(
-            modifier = modifier.semantics { contentDescription = "MapView" },
-            factory = { mapView },
-            update = {
-                it.map = arcGISMap
-                it.selectionProperties = selectionProperties
-                it.interactionOptions = mapViewInteractionOptions
-                it.locationDisplay = locationDisplay
-                it.labeling = viewLabelProperties
-                it.wrapAroundMode = wrapAroundMode
-                it.geometryEditor = geometryEditor
-                it.grid = grid
-                it.backgroundGrid = backgroundGrid
-                it.setTimeExtent(timeExtent)
-            })
-        if (callout != null) {
-            val calloutScreenCoordinate: ScreenCoordinate = callout.let { mapView.locationToScreen(it.location) }
-            ShowCallout(mapView, callout, updateCalloutPosition)
+    CompositionLocalProvider(LocalMapView provides mapView) {
+
+        Box(modifier = modifier.semantics {
+            contentDescription = "MapContainer"
+        }) {
+            AndroidView(
+                modifier = modifier.semantics { contentDescription = "MapView" },
+                factory = { mapView!! },
+                update = {
+                    it.map = arcGISMap
+                    it.selectionProperties = selectionProperties
+                    it.interactionOptions = mapViewInteractionOptions
+                    it.locationDisplay = locationDisplay
+                    it.labeling = viewLabelProperties
+                    it.wrapAroundMode = wrapAroundMode
+                    it.geometryEditor = geometryEditor
+                    it.grid = grid
+                    it.backgroundGrid = backgroundGrid
+                    it.setTimeExtent(timeExtent)
+//                    if (content != null) {
+//
+//                        content(mapView)
+//                    }
+                })
+
+            if (content != null) {
+                content()
+            }
+
+//            ShowCallout(mapView, callout, updateCalloutPosition)
 //            Box(
 ////                modifier = Modifier.offset(x = calloutScreenCoordinate.x.dp, y = calloutScreenCoordinate.y.dp)
 ////                modifier = Modifier.offset(x = 186.dp, y = 50.dp)
@@ -204,72 +227,72 @@ public fun MapView(
 //                callout.content?.invoke()
 //            }
         }
-    }
 
-    DisposableEffect(Unit) {
-        lifecycleOwner.lifecycle.addObserver(mapView)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(mapView)
-            mapView.onDestroy(lifecycleOwner)
-        }
-    }
-
-    ViewpointUpdater(mapView, viewpointOperation)
-
-    CalloutUpdater(mapView, calloutPlacementOperation)
-
-    DisposableEffect(mapViewProxy) {
-        mapViewProxy?.setMapView(mapView)
-        onDispose {
-            mapViewProxy?.setMapView(null)
-        }
-    }
-    LaunchedEffect(Unit) {
-        launch {
-            mapView.viewpointChanged.collect {
-                updateCalloutPosition = !updateCalloutPosition
+        DisposableEffect(Unit) {
+            lifecycleOwner.lifecycle.addObserver(mapView!!)
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(mapView!!)
+                mapView!!.onDestroy(lifecycleOwner)
             }
         }
-    }
 
-    LaunchedEffect(insets) {
-        // When this call is made in the AndroidView's update callback, ViewInsets are not applied
-        // on the mapview on initial load. So we set the ViewInsets here.
-        mapView.setViewInsets(
-            insets.calculateLeftPadding(layoutDirection).value.toDouble(),
-            insets.calculateRightPadding(layoutDirection).value.toDouble(),
-            insets.calculateTopPadding().value.toDouble(),
-            insets.calculateBottomPadding().value.toDouble()
+        ViewpointUpdater(mapView!!, viewpointOperation)
+
+//    CalloutUpdater(mapView, calloutPlacementOperation)
+
+        DisposableEffect(mapViewProxy) {
+            mapViewProxy?.setMapView(mapView)
+            onDispose {
+                mapViewProxy?.setMapView(null)
+            }
+        }
+        LaunchedEffect(Unit) {
+            launch {
+                mapView!!.viewpointChanged.collect {
+                    updateCalloutPosition = !updateCalloutPosition
+                }
+            }
+        }
+
+        LaunchedEffect(insets) {
+            // When this call is made in the AndroidView's update callback, ViewInsets are not applied
+            // on the mapview on initial load. So we set the ViewInsets here.
+            mapView!!.setViewInsets(
+                insets.calculateLeftPadding(layoutDirection).value.toDouble(),
+                insets.calculateRightPadding(layoutDirection).value.toDouble(),
+                insets.calculateTopPadding().value.toDouble(),
+                insets.calculateBottomPadding().value.toDouble()
+            )
+        }
+
+        AttributionStateHandler(mapView!!, attributionState)
+        ViewpointChangedStateHandler(mapView!!, viewpointChangedState)
+
+        MapViewEventHandler(
+            mapView!!,
+            onTimeExtentChanged,
+            onVisibleAreaChanged,
+            onNavigationChanged,
+            onMapRotationChanged,
+            onMapScaleChanged,
+            onUnitsPerDipChanged,
+            onSpatialReferenceChanged,
+            onLayerViewStateChanged,
+            onInteractingChanged,
+            onRotate,
+            onScale,
+            onUp,
+            onDown,
+            onSingleTapConfirmed,
+            onDoubleTap,
+            onLongPress,
+            onTwoPointerTap,
+            onPan,
+            onDrawStatusChanged
         )
+
+        GraphicsOverlaysUpdater(graphicsOverlays, mapView!!)
     }
-
-    AttributionStateHandler(mapView, attributionState)
-    ViewpointChangedStateHandler(mapView, viewpointChangedState)
-
-    MapViewEventHandler(
-        mapView,
-        onTimeExtentChanged,
-        onVisibleAreaChanged,
-        onNavigationChanged,
-        onMapRotationChanged,
-        onMapScaleChanged,
-        onUnitsPerDipChanged,
-        onSpatialReferenceChanged,
-        onLayerViewStateChanged,
-        onInteractingChanged,
-        onRotate,
-        onScale,
-        onUp,
-        onDown,
-        onSingleTapConfirmed,
-        onDoubleTap,
-        onLongPress,
-        onTwoPointerTap,
-        onPan,
-        onDrawStatusChanged
-    )
-
-    GraphicsOverlaysUpdater(graphicsOverlays, mapView)
 }
 
 /**
@@ -298,32 +321,32 @@ private fun CalloutUpdater(
     }
 }
 
-@Composable
-private fun ShowCallout(
-    mapView: MapView,
-    callout: Callout,
-//    calloutScreenCoordinate: ScreenCoordinate,
-    updateCalloutPosition: Boolean
-) {
-    val calloutScreenCoordinate: ScreenCoordinate = callout.let { mapView.locationToScreen(it.location) }
-    Box(
-//        modifier = Modifier.offset(x = calloutScreenCoordinate.x.dp, y = calloutScreenCoordinate.y.dp)
-//        modifier = Modifier.offset(x = 186.dp, y = 50.dp)
-        modifier = Modifier.offset(
-            x = with(LocalDensity.current) { calloutScreenCoordinate.x.toFloat().toDp() },
-            y = with(LocalDensity.current) { calloutScreenCoordinate.y.toFloat().toDp() })
-            .wrapContentSize()
-//          .padding(30.dp)
-            .background(Color.White)
-            .border(
-                border = BorderStroke(2.dp, Color.LightGray),
-                shape = MaterialTheme.shapes.medium
-            )
-    )
-    {
-        callout.content?.invoke()
-    }
-}
+//@Composable
+//private fun ShowCallout(
+//    mapView: MapView,
+//    callout: Callout,
+////    calloutScreenCoordinate: ScreenCoordinate,
+//    updateCalloutPosition: Boolean
+//) {
+//    val calloutScreenCoordinate: ScreenCoordinate = callout.let { mapView.locationToScreen(it.location) }
+//    Box(
+////        modifier = Modifier.offset(x = calloutScreenCoordinate.x.dp, y = calloutScreenCoordinate.y.dp)
+////        modifier = Modifier.offset(x = 186.dp, y = 50.dp)
+//        modifier = Modifier.offset(
+//            x = with(LocalDensity.current) { calloutScreenCoordinate.x.toFloat().toDp() },
+//            y = with(LocalDensity.current) { calloutScreenCoordinate.y.toFloat().toDp() })
+//            .wrapContentSize()
+////          .padding(30.dp)
+//            .background(Color.White)
+//            .border(
+//                border = BorderStroke(2.dp, Color.LightGray),
+//                shape = MaterialTheme.shapes.medium
+//            )
+//    )
+//    {
+//        callout.content?.invoke()
+//    }
+//}
 
 /**
  * Sets up the callbacks for all the view-based [mapView] events.
