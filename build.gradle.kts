@@ -28,6 +28,10 @@ plugins {
 
 buildscript {
     dependencies {
+        // there doesn't appear to be a better way to provide this to subprojects.
+        // this is what lets us put the version number dropdown list in the generated dokka.
+        // it is a "dokka plugin" which is not a gradle plugin, it needs to be on the classpath
+        // before any dependent subproject uses its symbols to configure a dokka task.
         classpath(libs.dokka.versioning)
     }
 }
