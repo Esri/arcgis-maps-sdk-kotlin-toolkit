@@ -35,10 +35,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,7 +51,9 @@ import com.arcgismaps.mapping.Bookmark
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.view.AnimationCurve
 import com.arcgismaps.toolkit.geocompose.MapView
-import com.arcgismaps.toolkit.geocompose.MapViewpointOperation
+import com.arcgismaps.toolkit.geocompose.MapViewProxy
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -64,13 +66,8 @@ import kotlin.time.Duration.Companion.seconds
 @Composable
 fun MainScreen() {
     val arcGISMap by remember { mutableStateOf(ArcGISMap(BasemapStyle.ArcGISStreets)) }
-    var mapViewpointOperation: MapViewpointOperation? by remember { mutableStateOf(null) }
+    val mapViewProxy = remember { MapViewProxy() }
     var showProgressIndicator by remember { mutableStateOf(false) }
-    LaunchedEffect(key1 = mapViewpointOperation) {
-        showProgressIndicator = true
-        mapViewpointOperation?.await()
-        showProgressIndicator = false
-    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -87,8 +84,9 @@ fun MainScreen() {
 
                     SetViewpointDropdownMenu(
                         expanded = actionsExpanded,
-                        onSetViewpointOperation = { mapViewpointOperation = it },
-                        onDismissRequest = { actionsExpanded = false }
+                        mapViewProxy = mapViewProxy,
+                        onDismissRequest = { actionsExpanded = false },
+                        onSetLoading = { showProgressIndicator = it }
                     )
                 }
             )
@@ -103,7 +101,7 @@ fun MainScreen() {
             MapView(
                 modifier = Modifier.fillMaxSize(),
                 arcGISMap = arcGISMap,
-                viewpointOperation = mapViewpointOperation
+                mapViewProxy = mapViewProxy
             )
             if (showProgressIndicator) {
                 CircularProgressIndicator()
@@ -113,17 +111,18 @@ fun MainScreen() {
 }
 
 /**
- * A drop down menu providing [MapViewpointOperation]s for the composable [MapView].
+ * A drop down menu providing methods of setting the viewpoint on a composable [MapView]
  */
 @Composable
 fun SetViewpointDropdownMenu(
     expanded: Boolean,
+    mapViewProxy: MapViewProxy,
     modifier: Modifier = Modifier,
-    onSetViewpointOperation: (MapViewpointOperation) -> Unit,
-    onDismissRequest: () -> Unit
+    onDismissRequest: () -> Unit,
+    onSetLoading: (Boolean) -> Unit
 ) {
     val viewpointOperationsList = remember {
-        listOf("Animate", "Center", "Rotate", "Scale", "Set", "SetBookmark", "SetBoundingGeometry")
+        listOf("setViewpointAnimated", "setViewpointCenter", "setViewpointRotation", "setViewpointScale", "setViewpoint", "setBookmark", "setViewpointGeometry")
     }
     val sofia = remember {
         Point(23.321736, 42.697703, SpatialReference.wgs84())
@@ -138,6 +137,8 @@ fun SetViewpointDropdownMenu(
     val sofiaBounds = remember {
         GeometryEngine.bufferOrNull(sofia, 0.083) ?: error("Couldn't buffer point")
     }
+    val coroutineScope = rememberCoroutineScope()
+    var setViewpointJob: Job by remember { mutableStateOf(Job()) }
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest,
@@ -148,25 +149,36 @@ fun SetViewpointDropdownMenu(
             DropdownMenuItem(
                 text = { Text(text = viewpointOperationName) },
                 onClick = {
-                    val viewpointOperation = when (viewpointOperationName) {
-                        "Animate" -> MapViewpointOperation.Animate(
-                            Viewpoint(sofia, scale),
-                            5.0.seconds,
-                            AnimationCurve.EaseOutCubic
-                        )
+                    setViewpointJob.cancel()
+                    setViewpointJob = coroutineScope.launch {
+                        try {
+                            onSetLoading(true)
+                            when (viewpointOperationName) {
+                                "setViewpointAnimated" -> mapViewProxy.setViewpointAnimated(
+                                    Viewpoint(sofia, scale),
+                                    5.0.seconds,
+                                    AnimationCurve.EaseOutCubic
+                                )
 
-                        "Center" -> MapViewpointOperation.Center(sofia, scale)
-                        "Rotate" -> MapViewpointOperation.Rotate(0.0)
-                        "Scale" -> MapViewpointOperation.Scale(scale)
-                        "Set" -> MapViewpointOperation.Set(Viewpoint(sofia, scale))
-                        "SetBookmark" -> MapViewpointOperation.SetBookmark(bookmark)
-                        "SetBoundingGeometry" -> MapViewpointOperation.SetBoundingGeometry(
-                            sofiaBounds
-                        )
+                                "setViewpointCenter" -> mapViewProxy.setViewpointCenter(
+                                    sofia,
+                                    scale
+                                )
 
-                        else -> error("Unexpected MapViewpointOperation")
+                                "setViewpointRotation" -> mapViewProxy.setViewpointRotation(0.0)
+                                "setViewpointScale" -> mapViewProxy.setViewpointScale(scale)
+                                "setViewpoint" -> mapViewProxy.setViewpoint(Viewpoint(sofia, scale))
+                                "setBookmark" -> mapViewProxy.setBookmark(bookmark)
+                                "setViewpointGeometry" -> mapViewProxy.setViewpointGeometry(
+                                    sofiaBounds
+                                )
+
+                                else -> error("Unexpected MapViewpointOperation")
+                            }
+                        } finally {
+                            onSetLoading(false)
+                        }
                     }
-                    onSetViewpointOperation(viewpointOperation)
                     onDismissRequest()
                 }
             )
