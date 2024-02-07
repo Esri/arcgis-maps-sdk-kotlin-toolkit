@@ -78,6 +78,7 @@ internal class AttachmentFormElement private constructor(
             val attachment = feature.addAttachment(name, contentType, data).getOrNull()
             return if (attachment != null) {
                 val formAttachment = FormAttachment(attachment, filesDir)
+                formAttachment.load()
                 _attachments.add(formAttachment)
                 Result.success(formAttachment)
             } else {
