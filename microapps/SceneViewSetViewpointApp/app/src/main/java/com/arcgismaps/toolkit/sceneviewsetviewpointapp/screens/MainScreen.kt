@@ -37,6 +37,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,7 +49,8 @@ import com.arcgismaps.mapping.Bookmark
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.toolkit.geocompose.SceneView
-import com.arcgismaps.toolkit.geocompose.SceneViewpointOperation
+import com.arcgismaps.toolkit.geocompose.SceneViewProxy
+import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -59,7 +61,8 @@ import kotlin.time.Duration.Companion.seconds
 @Composable
 fun MainScreen() {
     val arcGISScene by remember { mutableStateOf(ArcGISScene(BasemapStyle.ArcGISImagery)) }
-    var sceneViewpointOperation: SceneViewpointOperation? by remember { mutableStateOf(null) }
+    val sceneViewProxy = remember { SceneViewProxy() }
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -77,7 +80,11 @@ fun MainScreen() {
 
                     SetViewpointDropdownMenu(
                         expanded = actionsExpanded,
-                        onSetViewpointOperation = { sceneViewpointOperation = it },
+                        onSelectMethod = {
+                            coroutineScope.launch {
+                                it.method.invoke(sceneViewProxy)
+                            }
+                        },
                         onDismissRequest = { actionsExpanded = false }
                     )
                 }
@@ -93,88 +100,114 @@ fun MainScreen() {
             SceneView(
                 modifier = Modifier.fillMaxSize(),
                 arcGISScene = arcGISScene,
-                viewpointOperation = sceneViewpointOperation
+                sceneViewProxy = sceneViewProxy
             )
         }
     }
 }
 
 /**
- * A drop down menu providing [SceneViewpointOperation]s for the composable [SceneView].
+ * A drop down menu providing methods of setting the viewpoint for the composable [SceneView].
  */
 @Composable
 fun SetViewpointDropdownMenu(
     expanded: Boolean,
     modifier: Modifier = Modifier,
-    onSetViewpointOperation: (SceneViewpointOperation) -> Unit,
+    onSelectMethod: (SetViewpointMethod) -> Unit,
     onDismissRequest: () -> Unit
 ) {
-    val viewpointOperationsList = remember {
-        listOf("Set", "SetAnimated", "SetCamera", "SetCameraAnimated", "SetBookmark")
-    }
-    val disneyLand = remember { Point(-117.9190, 33.8121, SpatialReference.wgs84()) }
-    val rotterdam = remember { Point(4.4777, 51.9244, SpatialReference.wgs84()) }
-    val sofia = remember {
-        Point(23.321736, 42.697703, SpatialReference.wgs84())
-    }
-    val catalina = remember {
-        Point(
-            -118.61832205396796,
-            33.48526535148485,
-            803.4239338943735,
-            SpatialReference.wgs84()
-        )
-    }
-    val goldenGateBridge = remember {
-        Point(
-            -122.529736915401,
-            37.83466841571218,
-            1485.2682057125494,
-            SpatialReference.wgs84()
-        )
-    }
-    val catalinaCamera = remember { Camera(catalina, 122.5, 77.0, 0.0) }
-    val goldenGateBridgeCamera = remember { Camera(goldenGateBridge, 111.3, 71.7, 0.0) }
-
-    val scale = remember { 170000.0 }
-    val bookmark = remember {
-        Bookmark(
-            "Rotterdam",
-            Viewpoint(rotterdam, scale)
-        )
-    }
-
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest,
         modifier = modifier
     ) {
-        viewpointOperationsList.forEach {
-            val viewpointOperationName = it
+        SetViewpointMethod.entries.forEach { setViewpointMethod ->
             DropdownMenuItem(
-                text = { Text(text = viewpointOperationName) },
-                onClick = {
-                    val viewpointOperation = when (viewpointOperationName) {
-                        "Set" -> SceneViewpointOperation.Set(Viewpoint(disneyLand, scale))
-                        "SetAnimated" -> SceneViewpointOperation.Animate(
-                            Viewpoint(sofia, scale),
-                            5.0.seconds
-                        )
-
-                        "SetCamera" -> SceneViewpointOperation.SetCamera(catalinaCamera)
-                        "SetCameraAnimated" -> SceneViewpointOperation.AnimateCamera(
-                            goldenGateBridgeCamera,
-                            5.0.seconds
-                        )
-
-                        "SetBookmark" -> SceneViewpointOperation.SetBookmark(bookmark)
-
-                        else -> error("Unexpected MapViewpointOperation")
-                    }
-                    onSetViewpointOperation(viewpointOperation)
-                    onDismissRequest()
-                }
+                text = { Text(text = setViewpointMethod.label) },
+                onClick = { onSelectMethod(setViewpointMethod) }
             )
         }
     }
+}
+
+/**
+ * An enum class representing different methods of setting the viewpoint on a composable [SceneView].
+ *
+ * Each entry has a [label] for displaying in a drop down along with a [method] property that calls
+ * the matching method on the passed-in [SceneViewProxy].
+ */
+enum class SetViewpointMethod(val label: String, val method: suspend (SceneViewProxy) -> Unit) {
+    SET_VIEWPOINT(
+        "setViewpoint",
+        { sceneViewProxy ->
+            sceneViewProxy.setViewpoint(
+                // Disneyland
+                Viewpoint(
+                    Point(
+                        -117.9190,
+                        33.8121,
+                        SpatialReference.wgs84()
+                    ), 170000.0
+                )
+            )
+        }
+    ),
+
+    SET_VIEWPOINT_ANIMATED(
+        "setViewpointAnimated",
+        { sceneViewProxy ->
+            sceneViewProxy.setViewpointAnimated(
+                // Sofia, Bulgaria
+                Viewpoint(Point(23.321736, 42.697703, SpatialReference.wgs84()), 170000.0),
+                5.0.seconds
+            )
+        }
+    ),
+
+    SET_VIEWPOINT_CAMERA(
+        "setViewpointCamera",
+        { sceneViewProxy ->
+            sceneViewProxy.setViewpointCamera(
+                // Catalina
+                Camera(
+                    Point(
+                        -118.61832205396796,
+                        33.48526535148485,
+                        803.4239338943735,
+                        SpatialReference.wgs84()
+                    ), 122.5, 77.0, 0.0
+                )
+            )
+        }
+    ),
+
+    SET_VIEWPOINT_CAMERA_ANIMATED(
+        "setViewpointCameraAnimated",
+        { sceneViewProxy ->
+            sceneViewProxy.setViewpointCameraAnimated(
+                // Golden Gate Bridge
+                Camera(
+                    Point(
+                        -122.529736915401,
+                        37.83466841571218,
+                        1485.2682057125494,
+                        SpatialReference.wgs84()
+                    ), 111.3, 71.7, 0.0
+                ),
+                5.0.seconds
+            )
+        }
+    ),
+
+    SET_BOOKMARK(
+        "setBookmark",
+        { sceneViewProxy ->
+            sceneViewProxy.setBookmark(
+                Bookmark(
+                    "Rotterdam",
+                    Viewpoint(Point(4.4777, 51.9244, SpatialReference.wgs84()), 170000.0)
+                )
+            )
+        }
+    )
 }
