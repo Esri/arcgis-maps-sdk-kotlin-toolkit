@@ -42,25 +42,21 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.arcgismaps.geometry.GeometryEngine
+import com.arcgismaps.geometry.Envelope
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
-import com.arcgismaps.mapping.Bookmark
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.view.AnimationCurve
 import com.arcgismaps.toolkit.geocompose.MapView
 import com.arcgismaps.toolkit.geocompose.MapViewProxy
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
 /**
  * Displays a composable [MapView] and permits setting the viewpoint using options in a dropdown menu.
- * The dropdown menu options represent different methods of setting the viewpoint, and all of them center
- * on the same location. A circular progress indicator is displayed over the map while an operation
- * is in progress.
+ * The dropdown menu options represent different methods of setting the viewpoint.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,6 +64,7 @@ fun MainScreen() {
     val arcGISMap by remember { mutableStateOf(ArcGISMap(BasemapStyle.ArcGISStreets)) }
     val mapViewProxy = remember { MapViewProxy() }
     var showProgressIndicator by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
     Scaffold(
         topBar = {
             TopAppBar(
@@ -84,9 +81,15 @@ fun MainScreen() {
 
                     SetViewpointDropdownMenu(
                         expanded = actionsExpanded,
-                        mapViewProxy = mapViewProxy,
-                        onDismissRequest = { actionsExpanded = false },
-                        onSetLoading = { showProgressIndicator = it }
+                        onSelectViewpointMethod = {
+                            actionsExpanded = false
+                            coroutineScope.launch {
+                                showProgressIndicator = true
+                                it.method(mapViewProxy)
+                                showProgressIndicator = false
+                            }
+                        },
+                        onDismissRequest = { actionsExpanded = false }
                     )
                 }
             )
@@ -111,77 +114,124 @@ fun MainScreen() {
 }
 
 /**
- * A drop down menu providing methods of setting the viewpoint on a composable [MapView]
+ * A drop down menu providing methods of setting the viewpoint for the composable [MapView].
  */
 @Composable
 fun SetViewpointDropdownMenu(
     expanded: Boolean,
-    mapViewProxy: MapViewProxy,
     modifier: Modifier = Modifier,
+    onSelectViewpointMethod: (SetViewpointMethod) -> Unit,
     onDismissRequest: () -> Unit,
-    onSetLoading: (Boolean) -> Unit
 ) {
-    val viewpointOperationsList = remember {
-        listOf("setViewpointAnimated", "setViewpointCenter", "setViewpointRotation", "setViewpointScale", "setViewpoint", "setBookmark", "setViewpointGeometry")
-    }
-    val sofia = remember {
-        Point(23.321736, 42.697703, SpatialReference.wgs84())
-    }
-    val scale = remember { 170000.0 }
-    val bookmark = remember {
-        Bookmark(
-            "Sofia",
-            Viewpoint(sofia, scale)
-        )
-    }
-    val sofiaBounds = remember {
-        GeometryEngine.bufferOrNull(sofia, 0.083) ?: error("Couldn't buffer point")
-    }
-    val coroutineScope = rememberCoroutineScope()
-    var setViewpointJob: Job by remember { mutableStateOf(Job()) }
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest,
         modifier = modifier
     ) {
-        viewpointOperationsList.forEach {
-            val viewpointOperationName = it
+        SetViewpointMethod.entries.forEach {
             DropdownMenuItem(
-                text = { Text(text = viewpointOperationName) },
-                onClick = {
-                    setViewpointJob.cancel()
-                    setViewpointJob = coroutineScope.launch {
-                        try {
-                            onSetLoading(true)
-                            when (viewpointOperationName) {
-                                "setViewpointAnimated" -> mapViewProxy.setViewpointAnimated(
-                                    Viewpoint(sofia, scale),
-                                    5.0.seconds,
-                                    AnimationCurve.EaseOutCubic
-                                )
-
-                                "setViewpointCenter" -> mapViewProxy.setViewpointCenter(
-                                    sofia,
-                                    scale
-                                )
-
-                                "setViewpointRotation" -> mapViewProxy.setViewpointRotation(0.0)
-                                "setViewpointScale" -> mapViewProxy.setViewpointScale(scale)
-                                "setViewpoint" -> mapViewProxy.setViewpoint(Viewpoint(sofia, scale))
-                                "setBookmark" -> mapViewProxy.setBookmark(bookmark)
-                                "setViewpointGeometry" -> mapViewProxy.setViewpointGeometry(
-                                    sofiaBounds
-                                )
-
-                                else -> error("Unexpected MapViewpointOperation")
-                            }
-                        } finally {
-                            onSetLoading(false)
-                        }
-                    }
-                    onDismissRequest()
-                }
+                text = { Text(text = it.label) },
+                onClick = { onSelectViewpointMethod(it) }
             )
         }
     }
+}
+
+/**
+ * An enum class representing different methods of setting the viewpoint on a composable [MapView].
+ *
+ * Each entry has a [label] for displaying in a drop down along with a [method] property that calls
+ * the matching method on the passed-in [MapViewProxy].
+ */
+enum class SetViewpointMethod(val label: String, val method: suspend (MapViewProxy) -> Unit) {
+    SET_VIEWPOINT(
+        "setViewpoint",
+        { mapViewProxy ->
+            mapViewProxy.setViewpoint(
+                // Disneyland
+                Viewpoint(
+                    Point(
+                        -117.9190,
+                        33.8121,
+                        SpatialReference.wgs84()
+                    ), 170000.0
+                )
+            )
+        }
+    ),
+
+    SET_VIEWPOINT_ANIMATED(
+        "setViewpointAnimated",
+        { mapViewProxy ->
+            mapViewProxy.setViewpointAnimated(
+                // Sofia, Bulgaria
+                Viewpoint(
+                    Point(
+                        23.321736,
+                        42.697703,
+                        SpatialReference.wgs84()
+                    ), 170000.0
+                ),
+                5.0.seconds,
+                AnimationCurve.EaseOutCubic
+            )
+        }
+    ),
+
+    SET_VIEWPOINT_CENTER(
+        "setViewpointCenter",
+        { mapViewProxy ->
+            mapViewProxy.setViewpointCenter(
+                // Catalina
+                Point(
+                    -118.61832205396796,
+                    33.48526535148485,
+                    SpatialReference.wgs84()
+                ),
+                170000.0
+            )
+        }
+    ),
+
+    SET_VIEWPOINT_ROTATION(
+        "setViewpointRotation (to North)",
+        { mapViewProxy ->
+            mapViewProxy.setViewpointRotation(0.0)
+        }
+    ),
+
+    SET_VIEWPOINT_SCALE(
+        "setViewpointScale (to 170,000)",
+        { mapViewProxy ->
+            mapViewProxy.setViewpointScale(170000.0)
+        }
+    ),
+
+    SET_VIEWPOINT_GEOMETRY(
+        "setViewpointGeometry",
+        { mapViewProxy ->
+            // Golden gate bridge
+            mapViewProxy.setViewpointGeometry(
+                Envelope(
+                    -122.612736915401,
+                    37.75166841571218,
+                    -122.446736915401,
+                    37.91766841571218,
+                    spatialReference = SpatialReference.wgs84()
+                )
+            )
+        }
+    ),
+
+    SET_BOOKMARK(
+        "setBookmark",
+        { mapViewProxy ->
+            mapViewProxy.setBookmark(
+                com.arcgismaps.mapping.Bookmark(
+                    "Rotterdam",
+                    Viewpoint(Point(4.4777, 51.9244, SpatialReference.wgs84()), 170000.0)
+                )
+            )
+        }
+    )
 }
