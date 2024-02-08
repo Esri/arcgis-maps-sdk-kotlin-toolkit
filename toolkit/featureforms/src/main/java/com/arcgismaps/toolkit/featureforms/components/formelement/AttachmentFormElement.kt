@@ -13,7 +13,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,6 +35,7 @@ import androidx.compose.material.icons.sharp.Close
 import androidx.compose.material.icons.sharp.Delete
 import androidx.compose.material.icons.sharp.Done
 import androidx.compose.material.icons.sharp.Edit
+import androidx.compose.material.icons.sharp.Undo
 import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DividerDefaults
@@ -58,6 +58,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontWeight.Companion.W300
@@ -83,10 +84,14 @@ private val attachments = buildList<FakeAttachment> {
 private fun Modifier.feedbackClickable(
     enabled: Boolean = true,
     currentAlpha: Float = 1f,
-    onClick: () -> Unit
+    interactionSource: MutableInteractionSource? = null,
+    onClick: () -> Unit = {}
 ) = composed {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
+    
+    val source = interactionSource ?: remember {
+        MutableInteractionSource()
+    }
+    val isPressed by source.collectIsPressedAsState()
     val animationTransition = updateTransition(isPressed, label = "BouncingClickableTransition")
     val opacity by animationTransition.animateFloat(
         targetValueByState = { pressed -> if (pressed) currentAlpha * 0.4f else currentAlpha },
@@ -111,7 +116,7 @@ private fun Modifier.feedbackClickable(
             this.alpha = opacity
         }
         .clickable(
-            interactionSource = interactionSource,
+            interactionSource = source,
             indication = null,
             enabled = enabled,
             onClick = onClick
@@ -120,7 +125,7 @@ private fun Modifier.feedbackClickable(
 
 @Composable
 public fun AttachmentFormElement(modifier: Modifier = Modifier, colors: AttachmentElementColors) {
-    val editable = false
+    val editable = true
     var displayDetails by remember { mutableStateOf(false) }
     var displayedAttachment: FakeAttachment? by remember { mutableStateOf(null) }
     Card(
@@ -144,10 +149,12 @@ public fun AttachmentFormElement(modifier: Modifier = Modifier, colors: Attachme
                     displayedAttachment = null
                 }
             } else {
-                Carousel {
-                    displayedAttachment = it
-                    displayDetails = true
-                }
+                Carousel(
+                    onDetailsTap = {
+                        displayedAttachment = it
+                        displayDetails = true
+                    }
+                )
             }
         }
     }
@@ -156,11 +163,13 @@ public fun AttachmentFormElement(modifier: Modifier = Modifier, colors: Attachme
 @Preview
 @Composable
 private fun ProtoCarousel() {
-    Carousel()
+    Carousel {
+    
+    }
 }
 
 @Composable
-private fun Carousel(onThumbnailTap: (FakeAttachment) -> Unit = {}) {
+private fun Carousel(onThumbnailTap: (FakeAttachment) -> Unit = {}, onDetailsTap: (FakeAttachment) -> Unit) {
     Row(
         Modifier
             .horizontalScroll(rememberScrollState())
@@ -168,18 +177,23 @@ private fun Carousel(onThumbnailTap: (FakeAttachment) -> Unit = {}) {
         horizontalArrangement = Arrangement.spacedBy(3.dp)
     ) {
         attachments.forEach {
-            CarouselThumbnail(it.name, it.size) {
-                onThumbnailTap(it)
-            }
+            CarouselThumbnail(
+                it.name,
+                it.size,
+                onThumbnailTap = { onThumbnailTap(it) },
+                onDetailsTap = { onDetailsTap(it) }
+            )
         }
     }
 }
 
 @Composable
-private fun CarouselThumbnail(name: String, size: Long, onTap: () -> Unit) {
+private fun CarouselThumbnail(name: String, size: Long, onThumbnailTap: () -> Unit, onDetailsTap: () -> Unit) {
+    val interactionSource = remember { MutableInteractionSource() }
+    //val coroutineScope = rememberCoroutineScope()
     Column(
         Modifier
-            .feedbackClickable { onTap() }
+            .feedbackClickable(interactionSource = interactionSource)
             .width(80.dp)
             .border(
                 border = BorderStroke(
@@ -205,10 +219,15 @@ private fun CarouselThumbnail(name: String, size: Long, onTap: () -> Unit) {
                 .size(80.dp)
                 .alpha(0.4f)
                 .clip(shape = RoundedCornerShape(15.dp, 15.dp, 0.dp, 0.dp))
+                .clickable(interactionSource, null) {
+                    onThumbnailTap()
+                }
         
         )
         Divider()
-        CarouselText(name, size)
+        CarouselText(name, size, interactionSource) {
+            onDetailsTap()
+        }
     }
 }
 
@@ -217,7 +236,8 @@ private fun DetailsText(
     attachment: FakeAttachment,
     modifier: Modifier = Modifier
 ) {
-    var editable by remember(attachment) { mutableStateOf(true) }
+    var editing by remember(attachment) { mutableStateOf(false) }
+    var attachmentName by remember(attachment.name) { mutableStateOf(attachment.name) }
     Column(
         modifier = modifier
     ) {
@@ -225,31 +245,43 @@ private fun DetailsText(
             val focusRequester = remember { FocusRequester() }
             var textFieldValue by remember { mutableStateOf(TextFieldValue(attachment.name)) }
             val interactionSource = remember { MutableInteractionSource() }
-            val isFocused by interactionSource.collectIsFocusedAsState()
+            val focusManager = LocalFocusManager.current
             
-            LaunchedEffect(editable) {
-                textFieldValue = textFieldValue.copy(
-                    selection = TextRange(
-                        start = 0,
-                        end = if (editable) textFieldValue.text.length else 0
+            LaunchedEffect(editing) {
+                
+                if (editing) {
+                    textFieldValue = textFieldValue.copy(
+                        selection = TextRange(
+                            start = 0,
+                            end = textFieldValue.text.length
+                        )
                     )
-                )
-                if (editable) {
+                    
                     this.coroutineContext.job.invokeOnCompletion {
-                       // focusRequester.requestFocus()
+                        focusRequester.requestFocus()
+                    }
+                } else {
+                    textFieldValue = textFieldValue.copy(
+                        selection = TextRange(
+                            start = 0,
+                            end = 0
+                        )
+                    )
+                    this.coroutineContext.job.invokeOnCompletion {
+                        focusManager.clearFocus()
                     }
                 }
             }
             
-            LaunchedEffect(isFocused) {
-                if (!isFocused) editable = false
-            }
             BasicTextField(
                 value = textFieldValue,
-                onValueChange = { textFieldValue = it },
+                onValueChange = {
+                    textFieldValue = it
+                    attachmentName = it.text
+                },
                 interactionSource = interactionSource,
                 enabled = true,
-                readOnly = editable,
+                readOnly = !editing,
                 singleLine = true,
                 textStyle = MaterialTheme.typography.bodyMedium.copy(
                     textAlign = TextAlign.Start,
@@ -259,15 +291,35 @@ private fun DetailsText(
                     .focusRequester(focusRequester)
                     .padding(horizontal = 1.dp)
             )
-            Icon(
-                imageVector = Icons.Sharp.Edit,
-                contentDescription = "attachment name field",
-                modifier = Modifier
-                    .feedbackClickable { editable = true }
-                    .size(20.dp)
-                    .padding(1.dp)
-                    .alpha(0.4f)
-            )
+            
+            if (!editing) {
+                Icon(
+                    imageVector = Icons.Sharp.Edit,
+                    contentDescription = "attachment name field",
+                    modifier = Modifier
+                        .feedbackClickable {
+                            editing = true
+                            //focusRequester.requestFocus()
+                        }
+                        .size(20.dp)
+                        .padding(1.dp)
+                        .alpha(0.4f)
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Sharp.Undo,
+                    contentDescription = "attachment name field",
+                    modifier = Modifier
+                        .feedbackClickable {
+                            editing = false
+                            attachmentName = attachment.name
+                            textFieldValue = TextFieldValue(attachment.name)
+                        }
+                        .size(20.dp)
+                        .padding(1.dp)
+                        .alpha(0.4f)
+                )
+            }
         }
         Text(
             text = "${attachment.size} KB",
@@ -283,10 +335,17 @@ private fun DetailsText(
 private fun CarouselText(
     name: String = "frontgvfrjuaengjranjkadjkvnadefr.jpg",
     size: Long,
-    lastModified: Instant = Instant.ofEpochMilli(0)
-
+    interactionSource: MutableInteractionSource,
+    lastModified: Instant = Instant.ofEpochMilli(0),
+    onDetailsTap: () -> Unit
 ) {
-    Column {
+    Column(
+        modifier = Modifier.clickable(
+            interactionSource,
+            null
+        ) {
+            onDetailsTap()
+        }) {
         Text(
             text = name,
             style = MaterialTheme.typography.labelSmall.copy(
@@ -476,11 +535,10 @@ private fun AddPicture() {
 private fun AttachmentElementHeader(
     title: String,
     description: String,
+    modifier: Modifier = Modifier,
     showingDetails: Boolean = false,
     editable: Boolean = true,
-    modifier: Modifier = Modifier,
-    keyword: String = "",
-    
+    keyword: String = ""
 ) {
     Row(
         modifier = modifier.height(84.dp),
