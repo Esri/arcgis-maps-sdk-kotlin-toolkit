@@ -37,6 +37,7 @@ import com.arcgismaps.mapping.TimeExtent
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.ViewpointType
 import com.arcgismaps.mapping.view.AtmosphereEffect
+import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.CameraController
 import com.arcgismaps.mapping.view.DoubleTapEvent
@@ -76,7 +77,9 @@ import java.time.Instant
  * @param sceneViewInteractionOptions the [SceneViewInteractionOptions] used by this composable SceneView
  * @param viewLabelProperties the [ViewLabelProperties] used by the composable SceneView
  * @param selectionProperties the [SelectionProperties] used by the composable SceneView
- * @param attributionState specifies the attribution bar's visibility, text changed and layout changed events
+ * @param isAttributionBarVisible true if attribution bar is visible in the composable SceneView, false otherwise
+ * @param onAttributionTextChanged lambda invoked when the attribution text of the composable SceneView has changed
+ * @param onAttributionBarLayoutChanged lambda invoked when the attribution bar's position or size changes
  * @param cameraController the [CameraController] to manage the position, orientation, and movement of the camera
  * @param analysisOverlays a collection of analysis overlays that render the results of 3D visual analysis on the composable SceneView
  * @param imageOverlays a collection of overlays for displaying images in the composable SceneView
@@ -116,7 +119,9 @@ public fun SceneView(
     sceneViewInteractionOptions: SceneViewInteractionOptions = SceneViewInteractionOptions(),
     viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
     selectionProperties: SelectionProperties = SelectionProperties(),
-    attributionState: AttributionState = AttributionState(),
+    isAttributionBarVisible: Boolean = true,
+    onAttributionTextChanged: ((String) -> Unit)? = null,
+    onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)? = null,
     cameraController: CameraController = GlobeCameraController(),
     analysisOverlays: AnalysisOverlayCollection = rememberAnalysisOverlayCollection(),
     imageOverlays: ImageOverlayCollection = rememberImageOverlayCollection(),
@@ -162,6 +167,7 @@ public fun SceneView(
             it.sunTime = sunTime
             it.sunLighting = sunLighting
             it.ambientLightColor = com.arcgismaps.Color(ambientLightColor.toArgb())
+            it.isAttributionBarVisible = isAttributionBarVisible
         })
 
     DisposableEffect(Unit) {
@@ -185,8 +191,6 @@ public fun SceneView(
     AnalysisOverlaysUpdater(analysisOverlays, sceneView)
     ImageOverlaysUpdater(imageOverlays, sceneView)
 
-    AttributionStateHandler(sceneView, attributionState)
-
     SceneViewEventHandler(
         sceneView,
         onViewpointChangedForCenterAndScale,
@@ -206,7 +210,9 @@ public fun SceneView(
         onLongPress,
         onTwoPointerTap,
         onPan,
-        onDrawStatusChanged
+        onDrawStatusChanged,
+        onAttributionTextChanged,
+        onAttributionBarLayoutChanged
     )
 }
 
@@ -322,6 +328,8 @@ private fun SceneViewEventHandler(
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)?,
     onPan: ((PanChangeEvent) -> Unit)?,
     onDrawStatusChanged: ((DrawStatus) -> Unit)?,
+    onAttributionTextChanged: ((String) -> Unit)?,
+    onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)?,
 ) {
     val currentOnViewpointChangedForCenterAndScale by rememberUpdatedState(
         onViewpointChangedForCenterAndScale
@@ -345,6 +353,8 @@ private fun SceneViewEventHandler(
     val currentOnTwoPointerTap by rememberUpdatedState(onTwoPointerTap)
     val currentOnPan by rememberUpdatedState(onPan)
     val currentOnDrawStatusChanged by rememberUpdatedState(onDrawStatusChanged)
+    val currentOnAttributionTextChanged by rememberUpdatedState(onAttributionTextChanged)
+    val currentOnAttributionBarLayoutChanged by rememberUpdatedState(onAttributionBarLayoutChanged)
 
     LaunchedEffect(Unit) {
         launch {
@@ -435,6 +445,16 @@ private fun SceneViewEventHandler(
         launch {
             sceneView.drawStatus.collect { drawStatus ->
                 currentOnDrawStatusChanged?.invoke(drawStatus)
+            }
+        }
+        launch {
+            sceneView.attributionText.collect { attributionText ->
+                currentOnAttributionTextChanged?.invoke(attributionText)
+            }
+        }
+        launch {
+            sceneView.onAttributionBarLayoutChanged.collect { attributionBarLayoutChangeEvent ->
+                currentOnAttributionBarLayoutChanged?.invoke(attributionBarLayoutChangeEvent)
             }
         }
     }
