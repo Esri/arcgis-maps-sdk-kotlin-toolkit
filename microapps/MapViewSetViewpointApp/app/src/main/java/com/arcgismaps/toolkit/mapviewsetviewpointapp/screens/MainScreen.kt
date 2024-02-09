@@ -184,11 +184,11 @@ enum class SetViewpointMethod(val label: String, val method: suspend (MapViewPro
             mapViewProxy.setViewpointCenter(
                 // Catalina
                 Point(
-                    -118.61832205396796,
-                    33.48526535148485,
+                    -118.419710,
+                    33.432245,
                     SpatialReference.wgs84()
                 ),
-                170000.0
+                1000000.0
             )
         }
     ),

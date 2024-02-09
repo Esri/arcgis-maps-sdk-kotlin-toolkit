@@ -258,7 +258,7 @@ public sealed class GeoViewProxy(className: String) {
     }
 
     /**
-     * Change the GeoView to the new viewpoint. The viewpoint is updated instantaneously.
+     * Change the geo view to the new viewpoint. The viewpoint is updated instantaneously.
      *
      * @param viewpoint the new viewpoint
      * @since 200.4.0
