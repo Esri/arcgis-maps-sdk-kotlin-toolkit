@@ -68,9 +68,9 @@ public fun SceneViewSample() {
  */
 @Composable
 public fun MapViewSample() {
-    // Display a feature layer MapView using a service feature table
+    // Display a feature layer in a MapView using a service feature table
 
-    // map used to display a feature layer
+    // create a map to display a feature layer
     val map = ArcGISMap(BasemapStyle.ArcGISTopographic).apply {
         initialViewpoint = Viewpoint( // USA viewpoint
             center = Point(-11e6, 5e6, SpatialReference.webMercator()),
@@ -78,7 +78,7 @@ public fun MapViewSample() {
         )
     }
 
-    // create a service feature table and a feature layer from it
+    // create a service feature table (which will be used to create a feature layer)
     val serviceFeatureTable = ServiceFeatureTable(
         uri = "https://services.arcgis.com/jIL9msH9OI208GCb/arcgis/rest/services/USA_Daytime_Population_2016/FeatureServer/0"
     )
@@ -86,7 +86,7 @@ public fun MapViewSample() {
     // create the feature layer using the service feature table
     val featureLayer: FeatureLayer = FeatureLayer.createWithFeatureTable(serviceFeatureTable)
 
-    // use symbol to show U.S. states with a black outline
+    // create symbol to show U.S. states with a black outline
     val lineSymbol = SimpleLineSymbol(
         style = SimpleLineSymbolStyle.Solid,
         color = Color.black,
