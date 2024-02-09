@@ -36,6 +36,8 @@ import com.arcgismaps.geometry.Polygon
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.TimeExtent
+import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.mapping.ViewpointType
 import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
 import com.arcgismaps.mapping.view.BackgroundGrid
 import com.arcgismaps.mapping.view.DoubleTapEvent
@@ -66,7 +68,10 @@ import kotlinx.coroutines.launch
  * @param modifier Modifier to be applied to the composable MapView
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable MapView
  * @param viewpointOperation a [MapViewpointOperation] that changes this MapView to a new viewpoint
- * @param viewpointChangedState specifies lambdas invoked when the viewpoint of the composable MapView has changed
+ * @param onViewpointChangedForCenterAndScale lambda invoked when the viewpoint changes, passing a viewpoint
+ * type of [ViewpointType.CenterAndScale]
+ * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a viewpoint
+ * type of [ViewpointType.BoundingGeometry]
  * @param onVisibleAreaChanged lambda invoked when the visible area of the composable MapView has changed
  * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable MapView
  * @param locationDisplay the [LocationDisplay] used by the composable MapView
@@ -109,7 +114,8 @@ public fun MapView(
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap? = null,
     viewpointOperation: MapViewpointOperation? = null,
-    viewpointChangedState: ViewpointChangedState? = null,
+    onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
+    onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
     onVisibleAreaChanged: ((Polygon) -> Unit)? = null,
     graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
@@ -195,10 +201,10 @@ public fun MapView(
         )
     }
 
-    ViewpointChangedStateHandler(mapView, viewpointChangedState)
-
     MapViewEventHandler(
         mapView,
+        onViewpointChangedForCenterAndScale,
+        onViewpointChangedForBoundingGeometry,
         onTimeExtentChanged,
         onVisibleAreaChanged,
         onNavigationChanged,
@@ -247,6 +253,8 @@ private fun ViewpointUpdater(
 @Composable
 private fun MapViewEventHandler(
     mapView: MapView,
+    onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)?,
+    onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)?,
     onTimeExtentChanged: ((TimeExtent?) -> Unit)?,
     onVisibleAreaChanged: ((Polygon) -> Unit)?,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)?,
@@ -269,6 +277,12 @@ private fun MapViewEventHandler(
     onAttributionTextChanged: ((String) -> Unit)?,
     onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)?
 ) {
+    val currentOnViewpointChangedForCenterAndScale by rememberUpdatedState(
+        onViewpointChangedForCenterAndScale
+    )
+    val currentOnViewpointChangedForBoundingGeometry by rememberUpdatedState(
+        onViewpointChangedForBoundingGeometry
+    )
     val currentTimeExtentChanged by rememberUpdatedState(onTimeExtentChanged)
     val currentVisibleAreaChanged by rememberUpdatedState(onVisibleAreaChanged)
     val currentOnNavigationChanged by rememberUpdatedState(onNavigationChanged)
@@ -292,6 +306,16 @@ private fun MapViewEventHandler(
     val currentOnAttributionBarLayoutChanged by rememberUpdatedState(onAttributionBarLayoutChanged)
 
     LaunchedEffect(Unit) {
+        launch {
+            mapView.viewpointChanged.collect {
+                currentOnViewpointChangedForCenterAndScale?.let { callback ->
+                    mapView.getCurrentViewpoint(ViewpointType.CenterAndScale)?.let(callback)
+                }
+                currentOnViewpointChangedForBoundingGeometry?.let { callback ->
+                    mapView.getCurrentViewpoint(ViewpointType.BoundingGeometry)?.let(callback)
+                }
+            }
+        }
         launch {
             mapView.timeExtent.collect { currentTimeExtent ->
                 currentTimeExtentChanged?.invoke(currentTimeExtent)

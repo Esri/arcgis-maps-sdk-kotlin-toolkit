@@ -34,6 +34,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.TimeExtent
+import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.mapping.ViewpointType
 import com.arcgismaps.mapping.view.AtmosphereEffect
 import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
 import com.arcgismaps.mapping.view.Camera
@@ -66,7 +68,10 @@ import java.time.Instant
  * @param modifier Modifier to be applied to the composable SceneView
  * @param arcGISScene the [ArcGISScene] to be rendered by this composable SceneView
  * @param viewpointOperation a [SceneViewpointOperation] that changes this SceneView to a new viewpoint
- * @param viewpointChangedState specifies lambdas invoked when the viewpoint of the composable SceneView has changed
+ * @param onViewpointChangedForCenterAndScale lambda invoked when the viewpoint changes, passing a viewpoint
+ * type of [ViewpointType.CenterAndScale]
+ * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a viewpoint
+ * type of [ViewpointType.BoundingGeometry]
  * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable SceneView
  * @param sceneViewProxy the [SceneViewProxy] to associate with the composable SceneView
  * @param sceneViewInteractionOptions the [SceneViewInteractionOptions] used by this composable SceneView
@@ -107,7 +112,8 @@ public fun SceneView(
     modifier: Modifier = Modifier,
     arcGISScene: ArcGISScene? = null,
     viewpointOperation: SceneViewpointOperation? = null,
-    viewpointChangedState: ViewpointChangedState? = null,
+    onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
+    onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
     graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
     sceneViewProxy: SceneViewProxy? = null,
     sceneViewInteractionOptions: SceneViewInteractionOptions = SceneViewInteractionOptions(),
@@ -185,10 +191,10 @@ public fun SceneView(
     AnalysisOverlaysUpdater(analysisOverlays, sceneView)
     ImageOverlaysUpdater(imageOverlays, sceneView)
 
-    ViewpointChangedStateHandler(sceneView, viewpointChangedState)
-
     SceneViewEventHandler(
         sceneView,
+        onViewpointChangedForCenterAndScale,
+        onViewpointChangedForBoundingGeometry,
         onTimeExtentChanged,
         onNavigationChanged,
         onSpatialReferenceChanged,
@@ -304,6 +310,8 @@ internal fun ImageOverlaysUpdater(
 @Composable
 private fun SceneViewEventHandler(
     sceneView: SceneView,
+    onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)?,
+    onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)?,
     onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)?,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)?,
@@ -323,6 +331,12 @@ private fun SceneViewEventHandler(
     onAttributionTextChanged: ((String) -> Unit)?,
     onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)?,
 ) {
+    val currentOnViewpointChangedForCenterAndScale by rememberUpdatedState(
+        onViewpointChangedForCenterAndScale
+    )
+    val currentOnViewpointChangedForBoundingGeometry by rememberUpdatedState(
+        onViewpointChangedForBoundingGeometry
+    )
     val currentOnTimeExtentChanged by rememberUpdatedState(onTimeExtentChanged)
     val currentOnNavigationChanged by rememberUpdatedState(onNavigationChanged)
     val currentOnSpatialReferenceChanged by rememberUpdatedState(onSpatialReferenceChanged)
@@ -343,6 +357,16 @@ private fun SceneViewEventHandler(
     val currentOnAttributionBarLayoutChanged by rememberUpdatedState(onAttributionBarLayoutChanged)
 
     LaunchedEffect(Unit) {
+        launch {
+            sceneView.viewpointChanged.collect {
+                currentOnViewpointChangedForCenterAndScale?.let { callback ->
+                    sceneView.getCurrentViewpoint(ViewpointType.CenterAndScale)?.let(callback)
+                }
+                currentOnViewpointChangedForBoundingGeometry?.let { callback ->
+                    sceneView.getCurrentViewpoint(ViewpointType.BoundingGeometry)?.let(callback)
+                }
+            }
+        }
         launch {
             sceneView.timeExtent.collect { currentTimeExtent ->
                 currentOnTimeExtentChanged?.invoke(currentTimeExtent)
