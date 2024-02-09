@@ -34,7 +34,10 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.TimeExtent
+import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.mapping.ViewpointType
 import com.arcgismaps.mapping.view.AtmosphereEffect
+import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.CameraController
 import com.arcgismaps.mapping.view.DoubleTapEvent
@@ -64,13 +67,18 @@ import java.time.Instant
  *
  * @param modifier Modifier to be applied to the composable SceneView
  * @param arcGISScene the [ArcGISScene] to be rendered by this composable SceneView
- * @param viewpointChangedState specifies lambdas invoked when the viewpoint of the composable SceneView has changed
+ * @param onViewpointChangedForCenterAndScale lambda invoked when the viewpoint changes, passing a viewpoint
+ * type of [ViewpointType.CenterAndScale]
+ * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a viewpoint
+ * type of [ViewpointType.BoundingGeometry]
  * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable SceneView
  * @param sceneViewProxy the [SceneViewProxy] to associate with the composable SceneView
  * @param sceneViewInteractionOptions the [SceneViewInteractionOptions] used by this composable SceneView
  * @param viewLabelProperties the [ViewLabelProperties] used by the composable SceneView
  * @param selectionProperties the [SelectionProperties] used by the composable SceneView
- * @param attributionState specifies the attribution bar's visibility, text changed and layout changed events
+ * @param isAttributionBarVisible true if attribution bar is visible in the composable SceneView, false otherwise
+ * @param onAttributionTextChanged lambda invoked when the attribution text of the composable SceneView has changed
+ * @param onAttributionBarLayoutChanged lambda invoked when the attribution bar's position or size changes
  * @param cameraController the [CameraController] to manage the position, orientation, and movement of the camera
  * @param analysisOverlays a collection of analysis overlays that render the results of 3D visual analysis on the composable SceneView
  * @param imageOverlays a collection of overlays for displaying images in the composable SceneView
@@ -102,13 +110,16 @@ import java.time.Instant
 public fun SceneView(
     modifier: Modifier = Modifier,
     arcGISScene: ArcGISScene? = null,
-    viewpointChangedState: ViewpointChangedState? = null,
+    onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
+    onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
     graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
     sceneViewProxy: SceneViewProxy? = null,
     sceneViewInteractionOptions: SceneViewInteractionOptions = SceneViewInteractionOptions(),
     viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
     selectionProperties: SelectionProperties = SelectionProperties(),
-    attributionState: AttributionState = AttributionState(),
+    isAttributionBarVisible: Boolean = true,
+    onAttributionTextChanged: ((String) -> Unit)? = null,
+    onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)? = null,
     cameraController: CameraController = GlobeCameraController(),
     analysisOverlays: AnalysisOverlayCollection = rememberAnalysisOverlayCollection(),
     imageOverlays: ImageOverlayCollection = rememberImageOverlayCollection(),
@@ -154,6 +165,7 @@ public fun SceneView(
             it.sunTime = sunTime
             it.sunLighting = sunLighting
             it.ambientLightColor = com.arcgismaps.Color(ambientLightColor.toArgb())
+            it.isAttributionBarVisible = isAttributionBarVisible
         })
 
     DisposableEffect(Unit) {
@@ -175,11 +187,10 @@ public fun SceneView(
     AnalysisOverlaysUpdater(analysisOverlays, sceneView)
     ImageOverlaysUpdater(imageOverlays, sceneView)
 
-    AttributionStateHandler(sceneView, attributionState)
-    ViewpointChangedStateHandler(sceneView, viewpointChangedState)
-
     SceneViewEventHandler(
         sceneView,
+        onViewpointChangedForCenterAndScale,
+        onViewpointChangedForBoundingGeometry,
         onTimeExtentChanged,
         onNavigationChanged,
         onSpatialReferenceChanged,
@@ -195,7 +206,9 @@ public fun SceneView(
         onLongPress,
         onTwoPointerTap,
         onPan,
-        onDrawStatusChanged
+        onDrawStatusChanged,
+        onAttributionTextChanged,
+        onAttributionBarLayoutChanged
     )
 }
 
@@ -277,6 +290,8 @@ internal fun ImageOverlaysUpdater(
 @Composable
 private fun SceneViewEventHandler(
     sceneView: SceneView,
+    onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)?,
+    onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)?,
     onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)?,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)?,
@@ -293,7 +308,15 @@ private fun SceneViewEventHandler(
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)?,
     onPan: ((PanChangeEvent) -> Unit)?,
     onDrawStatusChanged: ((DrawStatus) -> Unit)?,
+    onAttributionTextChanged: ((String) -> Unit)?,
+    onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)?,
 ) {
+    val currentOnViewpointChangedForCenterAndScale by rememberUpdatedState(
+        onViewpointChangedForCenterAndScale
+    )
+    val currentOnViewpointChangedForBoundingGeometry by rememberUpdatedState(
+        onViewpointChangedForBoundingGeometry
+    )
     val currentOnTimeExtentChanged by rememberUpdatedState(onTimeExtentChanged)
     val currentOnNavigationChanged by rememberUpdatedState(onNavigationChanged)
     val currentOnSpatialReferenceChanged by rememberUpdatedState(onSpatialReferenceChanged)
@@ -310,8 +333,20 @@ private fun SceneViewEventHandler(
     val currentOnTwoPointerTap by rememberUpdatedState(onTwoPointerTap)
     val currentOnPan by rememberUpdatedState(onPan)
     val currentOnDrawStatusChanged by rememberUpdatedState(onDrawStatusChanged)
+    val currentOnAttributionTextChanged by rememberUpdatedState(onAttributionTextChanged)
+    val currentOnAttributionBarLayoutChanged by rememberUpdatedState(onAttributionBarLayoutChanged)
 
     LaunchedEffect(Unit) {
+        launch {
+            sceneView.viewpointChanged.collect {
+                currentOnViewpointChangedForCenterAndScale?.let { callback ->
+                    sceneView.getCurrentViewpoint(ViewpointType.CenterAndScale)?.let(callback)
+                }
+                currentOnViewpointChangedForBoundingGeometry?.let { callback ->
+                    sceneView.getCurrentViewpoint(ViewpointType.BoundingGeometry)?.let(callback)
+                }
+            }
+        }
         launch {
             sceneView.timeExtent.collect { currentTimeExtent ->
                 currentOnTimeExtentChanged?.invoke(currentTimeExtent)
@@ -390,6 +425,16 @@ private fun SceneViewEventHandler(
         launch {
             sceneView.drawStatus.collect { drawStatus ->
                 currentOnDrawStatusChanged?.invoke(drawStatus)
+            }
+        }
+        launch {
+            sceneView.attributionText.collect { attributionText ->
+                currentOnAttributionTextChanged?.invoke(attributionText)
+            }
+        }
+        launch {
+            sceneView.onAttributionBarLayoutChanged.collect { attributionBarLayoutChangeEvent ->
+                currentOnAttributionBarLayoutChanged?.invoke(attributionBarLayoutChangeEvent)
             }
         }
     }
