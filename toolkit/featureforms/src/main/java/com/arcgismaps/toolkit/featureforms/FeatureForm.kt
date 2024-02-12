@@ -254,7 +254,7 @@ internal fun rememberStates(
 
             is GroupFormElement -> {
                 val fieldStateCollection = MutableFormStateCollection()
-                element.formElements.forEach {
+                element.elements.forEach {
                     if (it is FieldFormElement) {
                         val state = rememberFieldState(
                             element = it,

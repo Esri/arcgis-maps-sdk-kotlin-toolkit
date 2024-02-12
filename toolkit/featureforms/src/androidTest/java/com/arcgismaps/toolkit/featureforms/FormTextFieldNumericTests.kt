@@ -29,16 +29,10 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FeatureFormDefinition
 import com.arcgismaps.mapping.featureforms.FieldFormElement
-import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.toolkit.featureforms.components.text.FormTextField
 import com.arcgismaps.toolkit.featureforms.components.text.FormTextFieldState
-import com.arcgismaps.toolkit.featureforms.components.text.TextFieldProperties
-import com.arcgismaps.toolkit.featureforms.utils.editValue
-import com.arcgismaps.toolkit.featureforms.utils.fieldType
-import com.arcgismaps.toolkit.featureforms.utils.valueFlow
 import junit.framework.TestCase
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.BeforeClass
 import org.junit.Rule
@@ -84,31 +78,8 @@ class FormTextFieldNumericTests {
     fun testEnterNonNumericValueIntegerField() = runTest {
         composeTestRule.setContent {
             val scope = rememberCoroutineScope()
-            val textFieldProperties = TextFieldProperties(
-                label = integerField.label,
-                placeholder = integerField.hint,
-                description = integerField.description,
-                value = integerField.valueFlow(scope),
-                editable = integerField.isEditable,
-                required = integerField.isRequired,
-                singleLine = integerField.input is TextBoxFormInput,
-                domain = integerField.domain,
-                fieldType = featureForm.fieldType(integerField),
-                minLength = (integerField.input as TextBoxFormInput).minLength.toInt(),
-                maxLength = (integerField.input as TextBoxFormInput).maxLength.toInt(),
-                visible = integerField.isVisible
-            )
-            FormTextField(
-                state = FormTextFieldState(
-                    textFieldProperties,
-                    scope = scope,
-                    onEditValue = {
-                        featureForm.editValue(integerField, it)
-                        scope.launch { featureForm.evaluateExpressions() }
-                    },
-                    defaultValidator = {integerField.getValidationErrors()}
-                )
-            )
+            val state = rememberFieldState(element = integerField, form = featureForm, scope = scope) as FormTextFieldState
+            FormTextField(state = state)
         }
         val outlinedTextField = composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
         val text = "lorem ipsum"
@@ -128,31 +99,8 @@ class FormTextFieldNumericTests {
     fun testEnterNonNumericValueFloatingPointField() = runTest {
         composeTestRule.setContent {
             val scope = rememberCoroutineScope()
-            val textFieldProperties = TextFieldProperties(
-                label = floatingPointField.label,
-                placeholder = floatingPointField.hint,
-                description = floatingPointField.description,
-                value = floatingPointField.valueFlow(scope),
-                editable = floatingPointField.isEditable,
-                required = floatingPointField.isRequired,
-                singleLine = floatingPointField.input is TextBoxFormInput,
-                domain = floatingPointField.domain,
-                fieldType = featureForm.fieldType(floatingPointField),
-                minLength = (floatingPointField.input as TextBoxFormInput).minLength.toInt(),
-                maxLength = (floatingPointField.input as TextBoxFormInput).maxLength.toInt(),
-                visible = floatingPointField.isVisible
-            )
-            FormTextField(
-                state = FormTextFieldState(
-                    textFieldProperties,
-                    scope = scope,
-                    onEditValue = {
-                        featureForm.editValue(floatingPointField, it)
-                        scope.launch { featureForm.evaluateExpressions() }
-                    },
-                    defaultValidator = {floatingPointField.getValidationErrors()}
-                )
-            )
+            val state = rememberFieldState(element = floatingPointField, form = featureForm, scope = scope) as FormTextFieldState
+            FormTextField(state = state)
         }
         val outlinedTextField = composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
         val text = "lorem ipsum"

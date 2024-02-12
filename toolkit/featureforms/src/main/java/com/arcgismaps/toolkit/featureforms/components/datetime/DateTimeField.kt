@@ -87,7 +87,7 @@ internal fun DateTimeField(
                 text = supportingText,
                 color = supportingTextColor,
                 modifier = Modifier.semantics {
-                    contentDescription = "helper"
+                    contentDescription = "supporting text"
                 }
             )
         },
