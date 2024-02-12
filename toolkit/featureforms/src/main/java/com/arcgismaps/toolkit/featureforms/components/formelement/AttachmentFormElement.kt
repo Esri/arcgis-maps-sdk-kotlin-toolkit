@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -197,7 +198,11 @@ private fun CarouselThumbnail(name: String, size: Long, onThumbnailTap: () -> Un
             ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(modifier = Modifier.alpha(0.4f)) {
+        Box(
+            modifier = Modifier
+                .alpha(0.4f)
+                .aspectRatio(1.0f)
+        ) {
             var showMenu by rememberSaveable { mutableStateOf(false) }
             ThumbnailMenu(showMenu) {
                 showMenu = false
