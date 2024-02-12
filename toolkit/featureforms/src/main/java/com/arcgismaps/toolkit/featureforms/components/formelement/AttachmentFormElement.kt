@@ -1,14 +1,11 @@
 package com.arcgismaps.toolkit.featureforms.components.formelement
 
-import android.content.Intent
-import android.provider.MediaStore
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -27,70 +24,72 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.AddAPhoto
-import androidx.compose.material.icons.sharp.Close
-import androidx.compose.material.icons.sharp.Delete
-import androidx.compose.material.icons.sharp.Done
-import androidx.compose.material.icons.sharp.Edit
-import androidx.compose.material.icons.sharp.Undo
+import androidx.compose.material.icons.rounded.AddPhotoAlternate
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.LibraryAdd
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
-import androidx.compose.material3.DividerDefaults
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontWeight.Companion.W300
-import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.arcgismaps.toolkit.featureforms.R
-import kotlinx.coroutines.job
-import java.time.Instant
 
-private data class FakeAttachment(val name: String = "front of ship.jpg", val size: Long = 1234L)
 
-private val attachments = buildList<FakeAttachment> {
-    repeat(40) {
-        add(FakeAttachment("Bow point of collision.jpeg", 1234))
+internal data class FakeAttachmentElementState(
+    val attachments: List<FakeAttachment>,
+    val editable: Boolean = true,
+    val title: String = "Titanic",
+    val description: String = "Take pictures of damage to the boat.",
+    val keyword: String = "point of impact",// not used
+    val input: String = "123",// not used
+    var selectedAttachment: FakeAttachment? = null
+)
+
+internal data class FakeAttachment(val name: String = "front of ship.jpg", val size: Long = 1234L)
+
+private val attachments =
+    buildList {
+        repeat(40) {
+            add(FakeAttachment("Bow point of collision.jpeg", 1234))
+        }
     }
-}
+
 private fun Modifier.feedbackClickable(
     enabled: Boolean = true,
     currentAlpha: Float = 1f,
-    interactionSource: MutableInteractionSource? = null,
     onClick: () -> Unit = {}
 ) = composed {
     
-    val source = interactionSource ?: remember {
-        MutableInteractionSource()
-    }
+    val source = remember { MutableInteractionSource() }
     val isPressed by source.collectIsPressedAsState()
     val animationTransition = updateTransition(isPressed, label = "BouncingClickableTransition")
     val opacity by animationTransition.animateFloat(
@@ -124,10 +123,22 @@ private fun Modifier.feedbackClickable(
 }
 
 @Composable
-public fun AttachmentFormElement(modifier: Modifier = Modifier, colors: AttachmentElementColors) {
-    val editable = true
-    var displayDetails by remember { mutableStateOf(false) }
-    var displayedAttachment: FakeAttachment? by remember { mutableStateOf(null) }
+public fun AttachmentFormElement(modifier: Modifier = Modifier) {
+    AttachmentFormElement(
+        state = FakeAttachmentElementState(attachments = attachments, selectedAttachment = null),
+        modifier = modifier
+    )
+}
+
+/**
+ * Todo: make public with a proper state object, and call from FeatureFormBody.
+ */
+@Composable
+private fun AttachmentFormElement(
+    state: FakeAttachmentElementState,
+    modifier: Modifier = Modifier,
+    colors: AttachmentElementColors = AttachmentElementDefaults.colors()
+) {
     Card(
         modifier = modifier,
         shape = AttachmentElementDefaults.containerShape,
@@ -137,34 +148,17 @@ public fun AttachmentFormElement(modifier: Modifier = Modifier, colors: Attachme
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
         ) {
             AttachmentElementHeader(
-                title = "Titanic",
-                description = "Take pictures of damage to the boat.",
-                keyword = "Point of impact",
-                editable = editable,
-                showingDetails = displayDetails
+                title = state.title,
+                description = state.description,
+                keyword = state.keyword,
+                editable = state.editable
             )
-            if (displayDetails && editable) {
-                ImageAttachmentDetail(displayedAttachment!!) {
-                    displayDetails = false
-                    displayedAttachment = null
+            Carousel(
+                onDetailsTap = {
+                    state.selectedAttachment = it
                 }
-            } else {
-                Carousel(
-                    onDetailsTap = {
-                        displayedAttachment = it
-                        displayDetails = true
-                    }
-                )
-            }
+            )
         }
-    }
-}
-
-@Preview
-@Composable
-private fun ProtoCarousel() {
-    Carousel {
-    
     }
 }
 
@@ -189,11 +183,10 @@ private fun Carousel(onThumbnailTap: (FakeAttachment) -> Unit = {}, onDetailsTap
 
 @Composable
 private fun CarouselThumbnail(name: String, size: Long, onThumbnailTap: () -> Unit, onDetailsTap: () -> Unit) {
-    val interactionSource = remember { MutableInteractionSource() }
-    //val coroutineScope = rememberCoroutineScope()
+    var downloaded by rememberSaveable { mutableStateOf(false) }
     Column(
         Modifier
-            .feedbackClickable(interactionSource = interactionSource)
+            .feedbackClickable { onThumbnailTap() }
             .width(80.dp)
             .border(
                 border = BorderStroke(
@@ -204,148 +197,103 @@ private fun CarouselThumbnail(name: String, size: Long, onThumbnailTap: () -> Un
             ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Image(
-            painter = rememberAsyncImagePainter(
-                ImageRequest.Builder(LocalContext.current)
-                    .data("https://i.postimg.cc/65yws9mR/Screenshot-2024-02-02-at-6-20-49-PM.png").apply {
-                    placeholder(
-                        LocalContext.current.getDrawable(R.drawable.baseline_cloud_download_16)
-                    )
-                }.build()
-            ),
-            contentScale = ContentScale.Crop,
-            contentDescription = "some description",
-            modifier = Modifier
-                .size(80.dp)
-                .alpha(0.4f)
-                .clip(shape = RoundedCornerShape(15.dp, 15.dp, 0.dp, 0.dp))
-                .clickable(interactionSource, null) {
-                    onThumbnailTap()
-                }
-        
-        )
-        Divider()
-        CarouselText(name, size, interactionSource) {
-            onDetailsTap()
-        }
-    }
-}
-
-@Composable
-private fun DetailsText(
-    attachment: FakeAttachment,
-    modifier: Modifier = Modifier
-) {
-    var editing by remember(attachment) { mutableStateOf(false) }
-    var attachmentName by remember(attachment.name) { mutableStateOf(attachment.name) }
-    Column(
-        modifier = modifier
-    ) {
-        Row {
-            val focusRequester = remember { FocusRequester() }
-            var textFieldValue by remember { mutableStateOf(TextFieldValue(attachment.name)) }
-            val interactionSource = remember { MutableInteractionSource() }
-            val focusManager = LocalFocusManager.current
-            
-            LaunchedEffect(editing) {
-                
-                if (editing) {
-                    textFieldValue = textFieldValue.copy(
-                        selection = TextRange(
-                            start = 0,
-                            end = textFieldValue.text.length
-                        )
-                    )
-                    
-                    this.coroutineContext.job.invokeOnCompletion {
-                        focusRequester.requestFocus()
-                    }
-                } else {
-                    textFieldValue = textFieldValue.copy(
-                        selection = TextRange(
-                            start = 0,
-                            end = 0
-                        )
-                    )
-                    this.coroutineContext.job.invokeOnCompletion {
-                        focusManager.clearFocus()
-                    }
-                }
+        Box(modifier = Modifier.alpha(0.4f)) {
+            var showMenu by rememberSaveable { mutableStateOf(false) }
+            ThumbnailMenu(showMenu) {
+                showMenu = false
             }
             
-            BasicTextField(
-                value = textFieldValue,
-                onValueChange = {
-                    textFieldValue = it
-                    attachmentName = it.text
-                },
-                interactionSource = interactionSource,
-                enabled = true,
-                readOnly = !editing,
-                singleLine = true,
-                textStyle = MaterialTheme.typography.bodyMedium.copy(
-                    textAlign = TextAlign.Start,
-                    textDecoration = TextDecoration.Underline
-                ),
-                modifier = modifier
-                    .focusRequester(focusRequester)
-                    .padding(horizontal = 1.dp)
-            )
-            
-            if (!editing) {
-                Icon(
-                    imageVector = Icons.Sharp.Edit,
-                    contentDescription = "attachment name field",
+            if (downloaded) {
+                Image(
+                    painter = rememberAsyncImagePainter(
+                        ImageRequest.Builder(LocalContext.current)
+                            .data("https://i.postimg.cc/65yws9mR/Screenshot-2024-02-02-at-6-20-49-PM.png").apply {
+                                placeholder(
+                                    LocalContext.current.getDrawable(R.drawable.baseline_cloud_download_16)
+                                )
+                            }.build()
+                    ),
+                    contentScale = ContentScale.Crop,
+                    contentDescription = "Thumbnail image",
                     modifier = Modifier
-                        .feedbackClickable {
-                            editing = true
-                            //focusRequester.requestFocus()
+                        .size(80.dp)
+                        .clip(shape = RoundedCornerShape(15.dp, 15.dp, 0.dp, 0.dp))
+                )
+                Icon(
+                    Icons.Rounded.MoreVert,
+                    "more",
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(vertical = 3.dp)
+                        .clickable {
+                            showMenu = true
+                            onDetailsTap()
                         }
-                        .size(20.dp)
-                        .padding(1.dp)
-                        .alpha(0.4f)
                 )
             } else {
                 Icon(
-                    imageVector = Icons.Sharp.Undo,
-                    contentDescription = "attachment name field",
+                    Icons.Rounded.Download,
+                    contentDescription = "Download attachment",
                     modifier = Modifier
-                        .feedbackClickable {
-                            editing = false
-                            attachmentName = attachment.name
-                            textFieldValue = TextFieldValue(attachment.name)
-                        }
-                        .size(20.dp)
-                        .padding(1.dp)
-                        .alpha(0.4f)
+                        .size(80.dp)
+                        .clip(shape = RoundedCornerShape(15.dp, 15.dp, 0.dp, 0.dp))
+                        .clickable { downloaded = true }
+                
                 )
             }
         }
-        Text(
-            text = "${attachment.size} KB",
-            style = MaterialTheme.typography.labelSmall,
-            modifier = modifier
-                .padding(horizontal = 1.dp)
-        )
+        
+        Divider()
+        CarouselText(name, size)
     }
 }
 
+@Composable
+private fun ThumbnailMenu(expanded: Boolean, onDismiss: () -> Unit = {}) {
+    MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(8.dp))) {
+        DropdownMenu(
+            expanded = expanded,
+            offset = DpOffset(15.dp, (-5).dp),
+            onDismissRequest = onDismiss
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 3.dp),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = "Rename")
+                Spacer(modifier = Modifier.weight(1f))
+                Icon(
+                    imageVector = Icons.Rounded.Edit,
+                    contentDescription = "Rename attachment",
+                    modifier = Modifier.alpha(0.4f)
+                )
+            }
+            Divider(modifier = Modifier.padding(vertical = 5.dp))
+            Row(
+                modifier = Modifier.padding(horizontal = 3.dp),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = "Delete")
+                Spacer(modifier = Modifier.weight(1f))
+                Icon(
+                    imageVector = Icons.Rounded.Delete,
+                    contentDescription = "Delete attachment",
+                    modifier = Modifier.alpha(0.4f)
+                )
+            }
+            
+        }
+    }
+}
 
 @Composable
 private fun CarouselText(
-    name: String = "frontgvfrjuaengjranjkadjkvnadefr.jpg",
-    size: Long,
-    interactionSource: MutableInteractionSource,
-    lastModified: Instant = Instant.ofEpochMilli(0),
-    onDetailsTap: () -> Unit
+    name: String,
+    size: Long
 ) {
-    Column(
-        modifier = Modifier.clickable(
-            interactionSource,
-            null
-        ) {
-            onDetailsTap()
-        }) {
+    Column {
         Text(
             text = name,
             style = MaterialTheme.typography.labelSmall.copy(
@@ -368,166 +316,84 @@ private fun CarouselText(
     }
 }
 
-@Preview
 @Composable
-private fun PreviewImageAttachmentDetail() {
-    ImageAttachmentDetail(FakeAttachment(), modifier = Modifier.height(200.dp))
-}
-
-@Composable
-private fun ImageAttachmentDetail(
-    attachment: FakeAttachment,
-    modifier: Modifier = Modifier,
-    colors: AttachmentElementColors = AttachmentElementDefaults.colors(),
-    onClose: ()->Unit = {}
-) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(IntrinsicSize.Max),
-        shape = AttachmentElementDefaults.attachmentDetailShape,
-        border = BorderStroke(
-            AttachmentElementDefaults.borderThickness,
-            colors.borderColor
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(5.dp)
-                .weight(1f)
+private fun AddAttachmentMenu(expanded: Boolean, onDismiss: () -> Unit = {}) {
+    MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(8.dp))) {
+        DropdownMenu(
+            expanded = expanded,
+            offset = DpOffset.Zero,
+            onDismissRequest = onDismiss
         ) {
-            DetailsThumbnail()
-            DetailsText(attachment, modifier = Modifier.padding(vertical = 5.dp, horizontal = 2.dp))
-            Spacer(modifier = modifier.weight(1f))
-            Box(
-                modifier = Modifier
-                    .padding(horizontal = 10.dp, vertical = 10.dp)
-                    .align(Alignment.Top)
+            Row(
+                modifier = Modifier.padding(horizontal = 3.dp),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                Text(text = "Take Photo")
+                Spacer(modifier = Modifier.weight(1f))
                 Icon(
-                    imageVector = Icons.Sharp.Close,
-                    contentDescription = "attachment name field",
-                    modifier = Modifier
-                        .feedbackClickable { onClose() }
-                        .size(20.dp)
+                    imageVector = Icons.Rounded.AddAPhoto,
+                    contentDescription = "Add a photo",
+                    modifier = Modifier.alpha(0.4f)
                 )
             }
-        }
-        
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .height(40.dp)
-                .background(color = DividerDefaults.color)
-        ) {
-            Spacer(modifier = Modifier.weight(.66f))
-            Box(
-                modifier = Modifier
-                    .padding(horizontal = 10.dp, vertical = 10.dp)
-                    .align(Alignment.CenterVertically)
+            Divider(modifier = Modifier.padding(vertical = 5.dp))
+            Row(
+                modifier = Modifier.padding(horizontal = 3.dp),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                Text(text = "Add photo from gallery")
+                Spacer(modifier = Modifier.weight(1f))
                 Icon(
-                    imageVector = Icons.Sharp.Delete,
-                    contentDescription = "attachment name field",
-                    modifier = Modifier
-                        .feedbackClickable {}
-                        .size(20.dp)
+                    imageVector = Icons.Rounded.AddPhotoAlternate,
+                    contentDescription = "Add photo from gallery",
+                    modifier = Modifier.alpha(0.4f)
                 )
             }
-            Box(
-                modifier = Modifier
-                    .padding(horizontal = 10.dp, vertical = 10.dp)
-                    .align(Alignment.CenterVertically)
+            Divider(modifier = Modifier.padding(vertical = 5.dp))
+            Row(
+                modifier = Modifier.padding(horizontal = 3.dp),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                Text(text = "Add File")
+                Spacer(modifier = Modifier.weight(1f))
                 Icon(
-                    imageVector = Icons.Sharp.Done,
-                    contentDescription = "attachment name field",
-                    modifier = Modifier
-                        .feedbackClickable {}
-                        .size(20.dp)
+                    imageVector = Icons.Rounded.LibraryAdd,
+                    contentDescription = "Add File",
+                    modifier = Modifier.alpha(0.4f)
                 )
             }
+            
         }
     }
-}
-
-@Composable
-private fun DetailsThumbnail() {
-    Column(
-        Modifier
-            .size(80.dp)
-            .alpha(0.4f)
-            .feedbackClickable { },
-        
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Image(
-            painter = rememberAsyncImagePainter(
-                ImageRequest.Builder(LocalContext.current)
-                    .data("https://i.postimg.cc/65yws9mR/Screenshot-2024-02-02-at-6-20-49-PM.png").apply {
-                        placeholder(
-                            LocalContext.current.getDrawable(R.drawable.baseline_cloud_download_24)
-                        )
-                    }.build()
-            ),
-            contentScale = ContentScale.Crop,
-            contentDescription = "some description",
-            modifier = Modifier
-                .clip(shape = RoundedCornerShape(15.dp))
-                
-        )
-    }
+    
 }
 
 
-@Preview
 @Composable
-public fun PreviewAttachmentTextDetails() {
-    DetailsText(FakeAttachment())
-}
-
-@Composable
-private fun AddPicture() {
+private fun AddAttachment() {
+    var showMenu by remember { mutableStateOf(false) }
+    
     Row(modifier = Modifier.padding(4.dp)) {
-        val context = LocalContext.current
         Box(
             modifier = Modifier
                 .size(80.dp)
                 .feedbackClickable {
-                    val intent = Intent()
-                    intent.setType("image/*")
-                    intent.setAction(Intent.ACTION_GET_CONTENT)
-                    context.startActivity(Intent.createChooser(intent, "Select Picture"))
+                    showMenu = true
                 }
         ) {
+            AddAttachmentMenu(expanded = showMenu, onDismiss = { showMenu = false })
             Icon(
                 Icons.Rounded.Add,
-                contentDescription = "attachment",
+                contentDescription = "Add attachment",
                 modifier = Modifier
                     .align(Alignment.Center)
                     .size(32.dp)
             )
         }
-        Box(
-            modifier = Modifier
-                .size(80.dp)
-                .feedbackClickable {
-                    val intent = Intent()
-                    intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE)
-                    context.startActivity(Intent.createChooser(intent, "Take a picture of damage to the boat"))
-                }
-        ) {
-            Icon(
-                Icons.Rounded.AddAPhoto,
-                contentDescription = "attachment",
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .size(32.dp)
-            
-            )
-        }
+        
     }
 }
 
@@ -562,7 +428,7 @@ private fun AttachmentElementHeader(
         }
         Spacer(modifier = Modifier.weight(1f))
         if (editable && !showingDetails) {
-            AddPicture()
+            AddAttachment()
         }
     }
 }
@@ -572,8 +438,6 @@ private fun AttachmentElementHeader(
 private fun PreviewFormAttachmentElement() {
     AttachmentFormElement(
         modifier = Modifier
-            .fillMaxWidth(),
-        //.height(200.dp),
-        colors = AttachmentElementDefaults.colors()
+            .fillMaxWidth()
     )
 }
