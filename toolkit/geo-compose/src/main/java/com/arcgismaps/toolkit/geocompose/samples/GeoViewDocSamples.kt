@@ -2,6 +2,8 @@ package com.arcgismaps.toolkit.geocompose.samples
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.arcgismaps.Color
@@ -54,11 +56,11 @@ public fun SceneViewSample() {
     )
 
     // create a scene to display the elevation source
-    val scene = remember {
-        ArcGISScene(BasemapStyle.ArcGISImagery).apply {
+    val scene by remember {
+        mutableStateOf(ArcGISScene(BasemapStyle.ArcGISImagery).apply {
             baseSurface = surface
             initialViewpoint = Viewpoint(cameraLocation, camera)
-        }
+        })
     }
 
     // display the Composable SceneView
@@ -77,13 +79,13 @@ public fun MapViewSample() {
     // Display a feature layer in a MapView using a service feature table
 
     // create a map to display a feature layer
-    val map = remember {
-        ArcGISMap(BasemapStyle.ArcGISTopographic).apply {
+    val map by remember {
+        mutableStateOf(ArcGISMap(BasemapStyle.ArcGISTopographic).apply {
             initialViewpoint = Viewpoint( // USA viewpoint
                 center = Point(-11e6, 5e6, SpatialReference.webMercator()),
                 scale = 1e8
             )
-        }
+        })
     }
 
     // create a service feature table (which will be used to create a feature layer)
