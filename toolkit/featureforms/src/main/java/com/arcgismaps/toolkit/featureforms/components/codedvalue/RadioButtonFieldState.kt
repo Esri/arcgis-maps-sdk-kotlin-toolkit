@@ -115,6 +115,7 @@ internal fun rememberRadioButtonFieldState(
     form: FeatureForm,
     scope: CoroutineScope
 ): RadioButtonFieldState = rememberSaveable(
+    inputs = arrayOf(form),
     saver = RadioButtonFieldState.Saver(field, form, scope)
 ) {
     val input = field.input as RadioButtonsFormInput

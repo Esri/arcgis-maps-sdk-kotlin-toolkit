@@ -167,8 +167,6 @@ class MapViewModel @Inject constructor(
     }
 
     context(MapView, CoroutineScope) override fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {
-        // do not process any taps on a different feature when a feature is being edited
-        if (_uiState.value is UIState.NotEditing) {
             launch {
                 this@MapView.identifyLayers(
                     screenCoordinate = singleTapEvent.screenCoordinate,
@@ -180,6 +178,13 @@ class MapViewModel @Inject constructor(
                             result.geoElements.firstOrNull {
                                 it is ArcGISFeature && (it.featureTable?.layer as? FeatureLayer)?.featureFormDefinition != null
                             }?.let {
+                                (_uiState.value as? UIState.Editing)?.run {
+                                    val feature = featureForm.feature
+                                    val layer = feature.featureTable?.layer as? FeatureLayer
+                                    layer?.unselectFeature(feature)
+                                    featureForm.discardEdits()
+                                }
+                                
                                 val feature = it as ArcGISFeature
                                 val layer = feature.featureTable!!.layer as FeatureLayer
                                 val featureForm =
@@ -201,7 +206,6 @@ class MapViewModel @Inject constructor(
                 }
             }
         }
-    }
 }
 
 /**

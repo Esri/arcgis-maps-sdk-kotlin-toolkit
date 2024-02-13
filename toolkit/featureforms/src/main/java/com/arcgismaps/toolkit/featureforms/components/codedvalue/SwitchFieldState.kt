@@ -168,6 +168,7 @@ internal fun rememberSwitchFieldState(
     scope: CoroutineScope,
     noValueString: String
 ): SwitchFieldState = rememberSaveable(
+    inputs = arrayOf(form),
     saver = SwitchFieldState.Saver(field, form, scope, noValueString)
 ) {
     val input = field.input as SwitchFormInput

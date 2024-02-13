@@ -99,6 +99,7 @@ internal fun rememberComboBoxFieldState(
     form: FeatureForm,
     scope: CoroutineScope
 ): ComboBoxFieldState = rememberSaveable(
+    inputs = arrayOf(form),
     saver = ComboBoxFieldState.Saver(field, form, scope)
 ) {
     val input = field.input as ComboBoxFormInput

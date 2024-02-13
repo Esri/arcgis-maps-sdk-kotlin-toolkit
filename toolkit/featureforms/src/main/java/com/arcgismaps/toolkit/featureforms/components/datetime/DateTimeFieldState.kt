@@ -137,6 +137,7 @@ internal fun rememberDateTimeFieldState(
     form: FeatureForm,
     scope: CoroutineScope
 ): DateTimeFieldState = rememberSaveable(
+    inputs = arrayOf(form),
     saver = DateTimeFieldState.Saver(
         field = field,
         form = form,
