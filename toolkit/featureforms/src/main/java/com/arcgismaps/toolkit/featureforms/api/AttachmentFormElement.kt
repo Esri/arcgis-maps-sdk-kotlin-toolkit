@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.featureforms.api
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
@@ -23,7 +24,9 @@ import android.media.ThumbnailUtils
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.Loadable
 import com.arcgismaps.data.ArcGISFeature
+import com.arcgismaps.data.ArcGISFeatureTable
 import com.arcgismaps.data.Attachment
+import com.arcgismaps.toolkit.featureforms.api.AttachmentFormElement.Companion.createOrNull
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,10 +36,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
-import android.content.Context
 
 /**
  * A FormElement type representing an Attachment. Use the factory method [createOrNull] to create
@@ -66,53 +67,6 @@ internal class AttachmentFormElement private constructor(
     private val mutex = Mutex()
 
     /**
-     * Adds the specified [data] as an attachment with the specified [name] and content [contentType].
-     *  This method is thread-safe.
-     */
-    suspend fun addAttachment(
-        name: String,
-        contentType: String,
-        data: ByteArray
-    ): Result<FormAttachment> {
-        mutex.withLock {
-            val attachment = feature.addAttachment(name, contentType, data).getOrNull()
-            return if (attachment != null) {
-                val formAttachment = FormAttachment(attachment, filesDir)
-                formAttachment.load()
-                _attachments.add(formAttachment)
-                Result.success(formAttachment)
-            } else {
-                Result.failure(Exception("Unable to create attachment"))
-            }
-        }
-    }
-
-    /**
-     * Loads and adds the specified [uri] as a [File] as an attachment with the specified [name].
-     */
-    suspend fun addAttachment(
-        name: String,
-        contentType: String,
-        uri: String
-    ): Result<FormAttachment> {
-        try {
-            var bytes: ByteArray?
-            FileInputStream(File((uri))).use {
-                bytes = it.readBytes()
-            }
-            bytes?.let {
-                return addAttachment(name, contentType, it)
-            }
-            return Result.failure(Exception("Unable to read from $uri"))
-        } catch (ex: Exception) {
-            if (ex is CancellationException) {
-                throw ex
-            }
-            return Result.failure(ex)
-        }
-    }
-
-    /**
      * Adds the specified [bitmapDrawable] as an attachment with the specified [name].
      */
     suspend fun addAttachment(
@@ -121,23 +75,40 @@ internal class AttachmentFormElement private constructor(
         bitmapDrawable: BitmapDrawable
     ): Result<FormAttachment> {
         val byteArray = bitmapDrawable.bitmap.toByteArray()
-        return addAttachment(name, contentType, byteArray)
+        val attachment = feature.addAttachment(name, contentType, byteArray).getOrNull()
+        return if (attachment != null) {
+            val formAttachment = FormAttachment(attachment, filesDir)
+            Result.success(formAttachment)
+        } else {
+            Result.failure(Exception("Unable to create attachment"))
+        }
     }
 
     /**
-     * Deletes the specified [attachment]. This method is thread-safe.
+     * Deletes the specified [attachment].
      */
     suspend fun deleteAttachment(attachment: FormAttachment): Result<Unit> {
+        feature.deleteAttachment(attachment.attachment).onFailure {
+            return Result.failure(it)
+        }
+        return Result.success(Unit)
+    }
+
+    /**
+     * Fetches the Attachments from the feature and populates [attachments] property. This method
+     * is thread safe.
+     */
+    suspend fun fetchAttachments(): Result<Unit> {
         mutex.withLock {
-            if (_attachments.contains(attachment)) {
-                feature.deleteAttachment(attachment.attachment).onFailure {
-                    return Result.failure(it)
-                }
-                _attachments.remove(attachment)
-                return Result.success(Unit)
-            } else {
-                return Result.failure(NoSuchElementException())
+            val featureAttachments = feature.fetchAttachments().onFailure {
+                return Result.failure(it)
+            }.getOrNull()!!
+            val formAttachments = featureAttachments.map {
+                FormAttachment(it, filesDir)
             }
+            _attachments.clear()
+            _attachments.addAll(formAttachments)
+            return Result.success(Unit)
         }
     }
 
@@ -153,14 +124,12 @@ internal class AttachmentFormElement private constructor(
          */
         suspend fun createOrNull(feature: ArcGISFeature, filesDir: String): AttachmentFormElement? {
             feature.load().onFailure { return null }
-            val featureAttachments = feature.fetchAttachments().onFailure {
-                return null
-            }.getOrNull()!!
-            val formAttachments = featureAttachments.map {
-                FormAttachment(it, filesDir)
-            }
-            return AttachmentFormElement(feature, filesDir).apply {
-                _attachments.addAll(formAttachments)
+            val featureTable = feature.featureTable as? ArcGISFeatureTable ?: return null
+            featureTable.load()
+            return if (featureTable.hasAttachments) {
+                AttachmentFormElement(feature, filesDir)
+            } else {
+                null
             }
         }
     }
@@ -184,7 +153,8 @@ internal class FormAttachment(
     var isLocal: Boolean = false
         private set
 
-    val name: String = attachment.name
+    var name: String = attachment.name
+        private set
 
     val size: Int = attachment.size
 
@@ -220,6 +190,10 @@ internal class FormAttachment(
                 Result.failure(Exception("Attachment is not loaded"))
             }
         }
+
+    fun setName(name: String) {
+        this.name = name
+    }
 
     override fun cancelLoad() {
         /** does nothing in this mock api **/
