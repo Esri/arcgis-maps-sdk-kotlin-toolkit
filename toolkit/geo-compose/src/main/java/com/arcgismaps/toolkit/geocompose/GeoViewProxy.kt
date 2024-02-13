@@ -18,6 +18,7 @@
 package com.arcgismaps.toolkit.geocompose
 
 import android.graphics.drawable.BitmapDrawable
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.unit.Dp
 import com.arcgismaps.mapping.layers.Layer
 import com.arcgismaps.mapping.view.GeoView
@@ -32,6 +33,7 @@ import com.arcgismaps.mapping.view.ScreenCoordinate
  *
  * @since 200.4.0
  */
+@Stable
 public sealed class GeoViewProxy(className: String) {
 
     /**

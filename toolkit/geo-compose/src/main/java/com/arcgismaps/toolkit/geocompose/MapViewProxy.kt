@@ -17,6 +17,7 @@
 
 package com.arcgismaps.toolkit.geocompose
 
+import androidx.compose.runtime.Stable
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.view.ScreenCoordinate
 
@@ -32,6 +33,7 @@ import com.arcgismaps.mapping.view.ScreenCoordinate
  *
  * @since 200.4.0
  */
+@Stable
 public class MapViewProxy : GeoViewProxy("MapView") {
 
     /**
