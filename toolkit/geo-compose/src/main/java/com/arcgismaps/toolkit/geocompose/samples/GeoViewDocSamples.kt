@@ -35,6 +35,7 @@ public fun SceneViewSample() {
     val elevationSource = ArcGISTiledElevationSource(
         uri = "https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer"
     )
+
     val surface = Surface().apply {
         elevationSources.add(elevationSource)
         // add an exaggeration factor to increase the 3D effect of the elevation.
@@ -110,6 +111,7 @@ public fun MapViewSample() {
         opacity = 0.8f
         maxScale = 10000.0
     }
+
     // add the feature layer to the map's operational layers
     map.operationalLayers.add(featureLayer)
 
