@@ -72,9 +72,15 @@ public fun Activity.launchCustomTabs(pendingSignIn: OAuthUserSignIn?): Unit {
  * @since 200.2.0
  */
 internal fun Activity.launchCustomTabs(authorizeUrl: String, useIncognito: Boolean?) {
+    var updatedAuthorizeUrl = authorizeUrl
     CustomTabsIntent.Builder().build().apply {
         if (useIncognito == true) {
             intent.putExtra("com.google.android.apps.chrome.EXTRA_OPEN_NEW_INCOGNITO_TAB", true)
+            updatedAuthorizeUrl = Uri.parse(authorizeUrl)
+                .buildUpon()
+                .appendQueryParameter("force_login", "true")
+                .build()
+                .toString()
         }
-    }.launchUrl(this, Uri.parse(authorizeUrl))
+    }.launchUrl(this, Uri.parse(updatedAuthorizeUrl))
 }
