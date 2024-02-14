@@ -55,7 +55,6 @@ import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.OrbitGeoElementCameraController
 import com.arcgismaps.mapping.view.OrbitLocationCameraController
 import com.arcgismaps.toolkit.geocompose.SceneViewpointOperation
-import com.arcgismaps.toolkit.geocompose.rememberGraphicsOverlayCollection
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -81,6 +80,14 @@ fun MainScreen() {
         Graphic(
             Point(-109.929589, 38.437304, 5000.0, SpatialReference.wgs84()),
             SimpleMarkerSceneSymbol(style = SimpleMarkerSceneSymbolStyle.Sphere, color = Color.red)
+        )
+    }
+
+    val graphicsOverlayArray = remember {
+        arrayOf(
+            GraphicsOverlay().apply {
+                graphics.add(simpleGraphic)
+            }
         )
     }
 
@@ -119,12 +126,7 @@ fun MainScreen() {
             arcGISScene = arcGISScene,
             cameraController = cameraController,
             viewpointOperation = viewpointOperation,
-            graphicsOverlays = rememberGraphicsOverlayCollection {
-                val sceneGraphicsOverlay = GraphicsOverlay().apply {
-                    this.graphics.add(simpleGraphic)
-                }
-                add(sceneGraphicsOverlay)
-            }
+            graphicsOverlays = graphicsOverlayArray
         )
 
         LaunchedEffect(cameraController) {

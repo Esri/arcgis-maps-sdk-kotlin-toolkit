@@ -74,7 +74,7 @@ import kotlinx.coroutines.launch
  * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a viewpoint
  * type of [ViewpointType.BoundingGeometry]
  * @param onVisibleAreaChanged lambda invoked when the visible area of the composable MapView has changed
- * @param graphicsOverlays the List of GraphicsOverlays used by this composable MapView
+ * @param graphicsOverlays the [Array] of GraphicsOverlays used by this composable MapView
  * @param locationDisplay the [LocationDisplay] used by the composable MapView
  * @param geometryEditor the [GeometryEditor] used by the composable MapView to create and edit geometries by user interaction.
  * @param mapViewProxy the [MapViewProxy] to associate with the composable MapView
@@ -118,7 +118,7 @@ public fun MapView(
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
     onVisibleAreaChanged: ((Polygon) -> Unit)? = null,
-    graphicsOverlays: List<GraphicsOverlay> = emptyList(),
+    graphicsOverlays: Array<GraphicsOverlay> = emptyArray(),
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     geometryEditor: GeometryEditor? = null,
     mapViewProxy: MapViewProxy? = null,
@@ -172,9 +172,11 @@ public fun MapView(
             it.backgroundGrid = backgroundGrid
             it.isAttributionBarVisible = isAttributionBarVisible
             it.setTimeExtent(timeExtent)
-            it.graphicsOverlays.apply {
-                clear()
-                addAll(graphicsOverlays)
+            if (!mapView.graphicsOverlays.toTypedArray().contentEquals(graphicsOverlays)) {
+                it.graphicsOverlays.apply {
+                    clear()
+                    addAll(graphicsOverlays)
+                }
             }
         })
 
