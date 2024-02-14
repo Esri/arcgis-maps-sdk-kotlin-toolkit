@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  *
- * Modifications copyright (C) 2023 Esri Inc
+ * Modifications copyright (C) 2024 Esri Inc
  */
 
 package com.arcgismaps.toolkit.featureforms.components.datetime.picker.time

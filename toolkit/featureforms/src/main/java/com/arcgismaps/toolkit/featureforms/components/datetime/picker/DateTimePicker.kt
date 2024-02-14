@@ -325,7 +325,6 @@ private fun DateTimePickerDialog(
 ) {
     Dialog(
         onDismissRequest = onDismissRequest,
-        //modifier = modifier.wrapContentHeight(),
         properties = properties
     ) {
         Surface(
