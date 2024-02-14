@@ -31,9 +31,15 @@ import androidx.compose.ui.graphics.Color
 @Composable
 internal fun baseTextFieldColors(
     isEditable: Boolean,
+    isEmpty: Boolean,
+    isPlaceholderEmpty: Boolean,
 ): TextFieldColors {
+    val textColor = defaultTextColor(isEditable = isEditable, isEmpty = isEmpty, isPlaceholderEmpty = isPlaceholderEmpty)
     return if (isEditable) {
-        OutlinedTextFieldDefaults.colors()
+        OutlinedTextFieldDefaults.colors(
+            focusedTextColor = textColor,
+            unfocusedTextColor = textColor
+        )
     } else {
         // non editable field colors are similar to disabled field colors.
         val disabledColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
@@ -43,8 +49,8 @@ internal fun baseTextFieldColors(
             unfocusedLabelColor = disabledColor,
             focusedSupportingTextColor = disabledColor,
             unfocusedSupportingTextColor = disabledColor,
-            focusedTextColor = disabledColor,
-            unfocusedTextColor = disabledColor,
+            focusedTextColor = textColor,
+            unfocusedTextColor = textColor,
             focusedBorderColor = outlineColor,
             unfocusedBorderColor = outlineColor,
         )
