@@ -67,7 +67,6 @@ import java.time.Instant
  *
  * @param modifier Modifier to be applied to the composable SceneView
  * @param arcGISScene the [ArcGISScene] to be rendered by this composable SceneView
- * @param viewpointOperation a [SceneViewpointOperation] that changes this SceneView to a new viewpoint
  * @param onViewpointChangedForCenterAndScale lambda invoked when the viewpoint changes, passing a viewpoint
  * type of [ViewpointType.CenterAndScale]
  * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a viewpoint
@@ -111,7 +110,6 @@ import java.time.Instant
 public fun SceneView(
     modifier: Modifier = Modifier,
     arcGISScene: ArcGISScene? = null,
-    viewpointOperation: SceneViewpointOperation? = null,
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
     graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
@@ -185,8 +183,6 @@ public fun SceneView(
         }
     }
 
-    ViewpointUpdater(sceneView, viewpointOperation)
-
     GraphicsOverlaysUpdater(graphicsOverlays, sceneView)
     AnalysisOverlaysUpdater(analysisOverlays, sceneView)
     ImageOverlaysUpdater(imageOverlays, sceneView)
@@ -214,22 +210,6 @@ public fun SceneView(
         onAttributionTextChanged,
         onAttributionBarLayoutChanged
     )
-}
-
-/**
- * Updates the viewpoint of the provided view-based [sceneView] using the given [viewpointOperation]. This will be
- * recomposed when [viewpointOperation] changes.
- *
- * @since 200.4.0
- */
-@Composable
-private fun ViewpointUpdater(
-    sceneView: SceneView,
-    viewpointOperation: SceneViewpointOperation?
-) {
-    LaunchedEffect(viewpointOperation) {
-        viewpointOperation?.execute(sceneView)
-    }
 }
 
 /**
