@@ -49,14 +49,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerBasedShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -1387,7 +1386,6 @@ private fun timeInputOnChange(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TimePickerTextField(
     modifier: Modifier,
@@ -1427,7 +1425,7 @@ private fun TimePickerTextField(
         )
 
         Box(Modifier.visible(selected)) {
-            BasicTextField(
+            OutlinedTextField(
                 value = value,
                 onValueChange = onValueChange,
                 modifier = Modifier
@@ -1442,35 +1440,9 @@ private fun TimePickerTextField(
                 textStyle = LocalTextStyle.current,
                 enabled = true,
                 singleLine = true,
-                cursorBrush = Brush.verticalGradient(
-                    0.00f to Color.Transparent,
-                    0.10f to Color.Transparent,
-                    0.10f to MaterialTheme.colorScheme.primary,
-                    0.90f to MaterialTheme.colorScheme.primary,
-                    0.90f to Color.Transparent,
-                    1.00f to Color.Transparent
-                )
-            ) {
-                OutlinedTextFieldDefaults.DecorationBox(
-                    value = value.text,
-                    visualTransformation = VisualTransformation.None,
-                    innerTextField = it,
-                    singleLine = true,
-                    colors = textFieldColors,
-                    enabled = true,
-                    interactionSource = interactionSource,
-                    contentPadding = PaddingValues(0.dp),
-                    container = {
-                        OutlinedTextFieldDefaults.ContainerBox(
-                            enabled = true,
-                            isError = false,
-                            interactionSource = interactionSource,
-                            shape = TimeInputTokens.TimeFieldContainerShape.toShape(),
-                            colors = textFieldColors,
-                        )
-                    }
-                )
-            }
+                shape = TimeInputTokens.TimeFieldContainerShape.toShape(),
+                colors = textFieldColors
+            )
         }
 
         Text(
