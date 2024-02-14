@@ -1,22 +1,16 @@
 package com.arcgismaps.toolkit.featureforms
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,12 +22,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
@@ -59,7 +53,6 @@ import com.arcgismaps.toolkit.featureforms.components.formelement.GroupElement
 import com.arcgismaps.toolkit.featureforms.components.text.rememberFormTextFieldState
 import com.arcgismaps.toolkit.featureforms.utils.FeatureFormDialog
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 
 /**
  * The "property" determines the behavior of when the validation errors are visible.
@@ -99,22 +92,10 @@ public fun FeatureForm(
     modifier: Modifier = Modifier,
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic
 ) {
-    var initialEvaluation by rememberSaveable(featureForm) { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-    InitializingExpressions(modifier) {
-        initialEvaluation
-    }
     val states = rememberStates(form = featureForm, scope = scope)
     FeatureFormBody(form = featureForm, states = states, modifier = modifier)
     FeatureFormDialog()
-    LaunchedEffect(featureForm) {
-        // ensure expressions are evaluated
-        featureForm.evaluateExpressions()
-        // add an artificial delay of 300ms to avoid the slight flicker if the
-        // expressions are evaluated quickly
-        delay(300)
-        initialEvaluation = true
-    }
     // launch a new side effect in a launched effect when validationErrorVisibility changes
     LaunchedEffect(validationErrorVisibility) {
         // if it set to always show errors force each field to validate itself and show any errors
@@ -136,47 +117,12 @@ public fun FeatureForm(
 }
 
 @Composable
-internal fun InitializingExpressions(
-    modifier: Modifier = Modifier,
-    evaluationProvider: () -> Boolean
-) {
-    AnimatedContent(
-        targetState = evaluationProvider(),
-        transitionSpec = {
-            fadeIn() togetherWith fadeOut()
-        },
-        label = "evaluation loading animation"
-    ) { evaluated ->
-        if (!evaluated) {
-            Surface(modifier = modifier.fillMaxSize()) {
-                Column(
-                    verticalArrangement = Arrangement.Top,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .width(60.dp)
-                            .height(60.dp)
-                    )
-                    Spacer(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(20.dp)
-                    )
-                    Text(text = "Initializing", style = MaterialTheme.typography.titleMedium)
-                }
-            }
-        }
-    }
-}
-
-@Composable
 private fun FeatureFormBody(
     form: FeatureForm,
     states: FormStateCollection,
     modifier: Modifier = Modifier
 ) {
+    var initialEvaluation by rememberSaveable(form) { mutableStateOf(false) }
     val lazyListState = rememberLazyListState()
     Column(
         modifier = modifier.fillMaxSize(),
@@ -189,6 +135,9 @@ private fun FeatureFormBody(
                 .fillMaxWidth()
                 .height(15.dp)
         )
+        InitializingExpressions(modifier = Modifier.fillMaxWidth()) {
+            initialEvaluation
+        }
         Divider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
         // form content
         LazyColumn(
@@ -216,6 +165,29 @@ private fun FeatureFormBody(
                 }
             }
         }
+    }
+    LaunchedEffect(form) {
+        // ensure expressions are evaluated
+        form.evaluateExpressions()
+        initialEvaluation = true
+    }
+}
+
+@Composable
+internal fun InitializingExpressions(
+    modifier: Modifier = Modifier,
+    evaluationProvider: () -> Boolean
+) {
+    val alpha by animateFloatAsState(
+        if (evaluationProvider()) 0f else 1f,
+        label = "evaluation loading alpha"
+    )
+    Surface(
+        modifier = modifier.graphicsLayer {
+            this.alpha = alpha
+        }
+    ) {
+        LinearProgressIndicator(modifier)
     }
 }
 
@@ -345,10 +317,4 @@ internal fun rememberFieldState(
             null
         }
     }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFFFFFF)
-@Composable
-private fun InitializingExpressionsPreview() {
-    InitializingExpressions { false }
 }
