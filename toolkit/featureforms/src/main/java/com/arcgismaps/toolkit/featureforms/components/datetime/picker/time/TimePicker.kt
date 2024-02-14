@@ -16,10 +16,10 @@
  *
  * Modifications copyright (C) 2023 Esri Inc
  */
-@file:OptIn(ExperimentalMaterial3Api::class)
 
 package com.arcgismaps.toolkit.featureforms.components.datetime.picker.time
 
+import android.annotation.SuppressLint
 import android.text.format.DateFormat.is24HourFormat
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.Animatable
@@ -132,6 +132,16 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.center
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.material3.Strings
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.material3.bottom
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.material3.copyAndSetFontPadding
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.material3.end
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.material3.fromToken
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.material3.getString
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.material3.start
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.material3.toColor
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.material3.toShape
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.material3.top
 import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimeInputTokens.PeriodSelectorContainerHeight
 import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimeInputTokens.PeriodSelectorContainerWidth
 import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimeInputTokens.TimeFieldContainerHeight
@@ -187,7 +197,6 @@ import kotlin.math.sin
  * it will change the position and sizing of different components of the timepicker.
  */
 @Composable
-@ExperimentalMaterial3Api
 internal fun TimePicker(
     state: TimePickerState,
     modifier: Modifier = Modifier,
@@ -229,7 +238,6 @@ internal fun TimePicker(
  * time input in different states. See [TimePickerDefaults.colors].
  */
 @Composable
-@ExperimentalMaterial3Api
 internal fun TimeInput(
     state: TimePickerState,
     modifier: Modifier = Modifier,
@@ -241,7 +249,6 @@ internal fun TimeInput(
 /**
  * Contains the default values used by [TimePicker]
  */
-@ExperimentalMaterial3Api
 @Stable
 internal object TimePickerDefaults {
 
@@ -326,7 +333,6 @@ internal object TimePickerDefaults {
  * specifications.
  */
 @Immutable
-@ExperimentalMaterial3Api
 internal class TimePickerColors internal constructor(
     internal val clockDialColor: Color,
     internal val selectorColor: Color,
@@ -437,7 +443,6 @@ internal class TimePickerColors internal constructor(
  * or `true` for 24 hour format without toggle. Defaults to follow system setting.
  */
 @Composable
-@ExperimentalMaterial3Api
 internal fun rememberTimePickerState(
     initialHour: Int = 0,
     initialMinute: Int = 0,
@@ -457,7 +462,6 @@ internal fun rememberTimePickerState(
  */
 @Immutable
 @JvmInline
-@ExperimentalMaterial3Api
 internal value class TimePickerLayoutType internal constructor(internal val value: Int) {
 
     companion object {
@@ -490,7 +494,6 @@ internal value class TimePickerLayoutType internal constructor(internal val valu
  *  or `true` for 24 hour format without toggle.
  */
 @Stable
-@ExperimentalMaterial3Api
 internal class TimePickerState(
     initialHour: Int,
     initialMinute: Int,
@@ -661,7 +664,6 @@ internal class TimePickerState(
 }
 
 @Composable
-@ExperimentalMaterial3Api
 internal fun VerticalTimePicker(
     state: TimePickerState,
     modifier: Modifier = Modifier,
@@ -1070,7 +1072,6 @@ private fun DisplaySeparator(modifier: Modifier) {
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 private fun TimeSelector(
     modifier: Modifier,
     value: Int,
@@ -1241,6 +1242,7 @@ private fun Modifier.drawSelector(
     )
 }
 
+@SuppressLint("ModifierFactoryUnreferencedReceiver")
 private fun Modifier.clockDial(state: TimePickerState, autoSwitchToMinute: Boolean): Modifier =
     composed(debugInspectorInfo {
         name = "clockDial"
@@ -1590,7 +1592,6 @@ private enum class LayoutId {
     Selector, InnerCircle,
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 internal val defaultTimePickerLayoutType: TimePickerLayoutType
     @Composable
     @ReadOnlyComposable get() = with(LocalConfiguration.current) {
