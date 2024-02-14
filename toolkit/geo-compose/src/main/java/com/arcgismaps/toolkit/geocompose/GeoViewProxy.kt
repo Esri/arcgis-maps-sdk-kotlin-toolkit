@@ -283,8 +283,7 @@ public sealed class GeoViewProxy(className: String) {
         return geoView?.setViewpointAnimated(
             viewpoint,
             duration.toDouble(DurationUnit.SECONDS).toFloat()
-        )
-            ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
+        ) ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
     }
 
     private fun clampMaximumResults(maximumResults: Int?): Int {

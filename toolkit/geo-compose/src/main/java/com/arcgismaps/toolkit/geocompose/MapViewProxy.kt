@@ -133,12 +133,11 @@ public class MapViewProxy : GeoViewProxy("MapView") {
      * @since 200.4.0
      */
     public suspend fun setViewpointCenter(center: Point, scale: Double? = null): Result<Boolean> {
-        val result = if (scale != null) {
+        return if (scale != null) {
             mapView?.setViewpointCenter(center, scale)
         } else {
             mapView?.setViewpointCenter(center)
         } ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
-        return result
     }
 
     /**
@@ -156,12 +155,11 @@ public class MapViewProxy : GeoViewProxy("MapView") {
         boundingGeometry: Geometry,
         paddingInDips: Double? = null
     ): Result<Boolean> {
-        val result = if (paddingInDips != null) {
+        return if (paddingInDips != null) {
             mapView?.setViewpointGeometry(boundingGeometry, paddingInDips)
         } else {
             mapView?.setViewpointGeometry(boundingGeometry)
         } ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
-        return result
     }
 
     /**
