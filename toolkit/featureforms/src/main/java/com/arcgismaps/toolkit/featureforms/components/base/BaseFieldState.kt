@@ -81,7 +81,7 @@ internal abstract class BaseFieldState<T>(
     /**
      * A state flow to handle calculated value changes.
      */
-    private val _calculatedValue = properties.value
+    private val _attributeValue = properties.value
 
     /**
      * Backing mutable state for the [value].
@@ -130,9 +130,8 @@ internal abstract class BaseFieldState<T>(
     init {
         // start listening to calculated value updates immediately
         scope.launch {
-            // update the current value when the calculated value changes
-            // calculated properties do not get validated
-            _calculatedValue.collect {
+            // update the current value state when the attribute value changes
+            _attributeValue.collect {
                 _value.value = Value(it)
             }
         }
@@ -161,7 +160,7 @@ internal abstract class BaseFieldState<T>(
      * method in any open/abstract class constructors since it directly invokes open members.
      */
     protected fun updateValidation() {
-        val currentValue = value.value.data
+        val currentValue = _value.value.data
         val error = filterErrors(validate())
         // update the value with the validation error.
         _value.value = Value(currentValue, error)
@@ -195,12 +194,9 @@ internal abstract class BaseFieldState<T>(
                     updateValidation()
                 }
             }
-            // start listening to calculated value updates immediately
             scope.launch {
-                // update the current value when the calculated value changes
-                // calculated properties do not get validated
-                _calculatedValue.collect {
-                    _value.value = Value(it)
+                // validate when the attribute value changes
+                _attributeValue.collect {
                     updateValidation()
                 }
             }
@@ -259,9 +255,12 @@ internal abstract class BaseFieldState<T>(
         // infer that a value change event comes from a user interaction and hence treat it as a
         // focus event
         wasFocused = true
+        // set the ui state immediately
+        _value.value = Value(input)
+        // update the attributes
         onEditValue(input)
-        //_value.value = Value(input)
-        //updateValidation()
+        // run validation
+        updateValidation()
     }
 
     /**
