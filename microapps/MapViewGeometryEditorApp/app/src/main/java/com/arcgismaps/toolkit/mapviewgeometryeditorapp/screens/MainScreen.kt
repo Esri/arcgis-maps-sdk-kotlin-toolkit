@@ -52,9 +52,7 @@ import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
 import com.arcgismaps.mapping.view.geometryeditor.VertexTool
-import com.arcgismaps.toolkit.geocompose.GraphicsOverlayCollection
 import com.arcgismaps.toolkit.geocompose.MapView
-import com.arcgismaps.toolkit.geocompose.rememberGraphicsOverlayCollection
 
 // line symbol of the graphic sketched on the map
 private val lineSymbol: SimpleLineSymbol by lazy {
@@ -84,8 +82,8 @@ private val fillSymbol: SimpleFillSymbol by lazy {
 @Composable
 fun MainScreen() {
     val arcGISMap by remember { mutableStateOf(ArcGISMap(BasemapStyle.ArcGISStreets)) }
-    // the collection of graphics overlays used by the MapView
-    val graphicsOverlays = rememberGraphicsOverlayCollection()
+    // the array of graphics overlays used by the MapView
+    var graphicsOverlays by remember { mutableStateOf(emptyArray<GraphicsOverlay>()) }
     // the geometry editor used to manage the editing session
     val geometryEditor = remember { GeometryEditor() }
     // track the status if geometry editor is started or stopped
@@ -111,7 +109,7 @@ fun MainScreen() {
                                         currentGraphicsOverlay = this
                                     )
                                     // update list of graphics overlays with this graphics overlay
-                                    graphicsOverlays.add(this)
+                                    graphicsOverlays = graphicsOverlays.plus(this)
                                 }
                                 // on checked change, stop the geometry editor
                                 stopGeometryEditor(geometryEditor)
@@ -165,7 +163,7 @@ fun GeometryEditorDropDownMenu(
     expanded: Boolean = false,
     geometryEditor: GeometryEditor,
     onDismissRequest: () -> Unit = {},
-    graphicsOverlays: GraphicsOverlayCollection,
+    graphicsOverlays: Array<GraphicsOverlay>,
     onResetAllGraphics: () -> Unit = {}
 ) {
     val items = remember {
@@ -187,7 +185,7 @@ fun GeometryEditorDropDownMenu(
 
                         it.contains("Reset all graphics") -> {
                             stopGeometryEditor(geometryEditor)
-                            graphicsOverlays.clear()
+                            graphicsOverlays.forEach { it.graphics.clear() }
                             onResetAllGraphics()
                         }
 
