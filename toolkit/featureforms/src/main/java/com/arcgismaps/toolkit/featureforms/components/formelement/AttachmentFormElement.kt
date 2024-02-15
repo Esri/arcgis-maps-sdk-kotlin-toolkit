@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -37,6 +38,7 @@ import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -56,10 +58,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontWeight.Companion.W300
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.arcgismaps.toolkit.featureforms.R
@@ -146,14 +150,14 @@ private fun AttachmentFormElement(
         border = BorderStroke(AttachmentElementDefaults.borderThickness, colors.borderColor)
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp)
         ) {
             AttachmentElementHeader(
                 title = state.title,
                 description = state.description,
-                keyword = state.keyword,
                 editable = state.editable
             )
+            Spacer(modifier = Modifier)
             Carousel(
                 onDetailsTap = {
                     state.selectedAttachment = it
@@ -169,7 +173,7 @@ private fun Carousel(onThumbnailTap: (FakeAttachment) -> Unit = {}, onDetailsTap
         Modifier
             .horizontalScroll(rememberScrollState())
             .height(intrinsicSize = IntrinsicSize.Max),
-        horizontalArrangement = Arrangement.spacedBy(3.dp)
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         attachments.forEach {
             CarouselThumbnail(
@@ -261,34 +265,45 @@ private fun ThumbnailMenu(expanded: Boolean, onDismiss: () -> Unit = {}) {
             offset = DpOffset(15.dp, (-5).dp),
             onDismissRequest = onDismiss
         ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 3.dp),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(text = "Rename")
-                Spacer(modifier = Modifier.weight(1f))
-                Icon(
-                    imageVector = Icons.Rounded.Edit,
-                    contentDescription = "Rename attachment",
-                    modifier = Modifier.alpha(0.4f)
-                )
-            }
+            DropdownMenuItem(
+                text = { Text(text = "Rename") },
+                trailingIcon = {
+                    Icon(
+                        imageVector = Icons.Rounded.Edit,
+                        contentDescription = "Rename attachment",
+                        modifier = Modifier.alpha(0.4f)
+                    )
+                },
+                contentPadding = PaddingValues(horizontal = 3.dp),
+                onClick = {}
+            )
             Divider(modifier = Modifier.padding(vertical = 5.dp))
-            Row(
-                modifier = Modifier.padding(horizontal = 3.dp),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(text = "Delete")
-                Spacer(modifier = Modifier.weight(1f))
-                Icon(
-                    imageVector = Icons.Rounded.Delete,
-                    contentDescription = "Delete attachment",
-                    modifier = Modifier.alpha(0.4f)
-                )
-            }
-            
+            DropdownMenuItem(
+                text = { Text(text = "Delete") },
+                trailingIcon = {
+                    Icon(
+                        imageVector = Icons.Rounded.Delete,
+                        contentDescription = "Delete attachment",
+                        modifier = Modifier.alpha(0.4f)
+                    )
+                },
+                contentPadding = PaddingValues(horizontal = 3.dp),
+                onClick = {}
+            )
+//            Row(
+//                modifier = Modifier.padding(horizontal = 3.dp),
+//                horizontalArrangement = Arrangement.Start,
+//                verticalAlignment = Alignment.CenterVertically
+//            ) {
+//                Text(text = "Delete")
+//                Spacer(modifier = Modifier.weight(1f))
+//                Icon(
+//                    imageVector = Icons.Rounded.Delete,
+//                    contentDescription = "Delete attachment",
+//                    modifier = Modifier.alpha(0.4f)
+//                )
+//            }
+//
         }
     }
 }
@@ -304,13 +319,15 @@ private fun CarouselText(
             style = MaterialTheme.typography.labelSmall.copy(
                 fontWeight = FontWeight.W600
             ),
+            textAlign = TextAlign.Center,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.padding(horizontal = 1.dp)
         )
         Text(
             text = "$size KB",
             style = MaterialTheme.typography.labelSmall.copy(
-                fontWeight = W300
+                fontWeight = W300,
+                fontSize = 9.sp
             ),
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
@@ -318,6 +335,7 @@ private fun CarouselText(
                 .align(Alignment.CenterHorizontally)
         
         )
+        Spacer(modifier = Modifier.height(5.dp))
     }
 }
 
@@ -329,48 +347,41 @@ private fun AddAttachmentMenu(expanded: Boolean, onDismiss: () -> Unit = {}) {
             offset = DpOffset.Zero,
             onDismissRequest = onDismiss
         ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 3.dp),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(text = "Take Photo")
-                Spacer(modifier = Modifier.weight(1f))
-                Icon(
-                    imageVector = Icons.Rounded.AddAPhoto,
-                    contentDescription = "Add a photo",
-                    modifier = Modifier.alpha(0.4f)
-                )
-            }
+            DropdownMenuItem(
+                text= { Text(text = "Take Photo") },
+                trailingIcon = {
+                    Icon(
+                        imageVector = Icons.Rounded.AddAPhoto,
+                        contentDescription = "Add a photo",
+                        modifier = Modifier.alpha(0.4f)
+                    )
+                },
+                onClick = {}
+            )
             Divider(modifier = Modifier.padding(vertical = 5.dp))
-            Row(
-                modifier = Modifier.padding(horizontal = 3.dp),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(text = "Add photo from gallery")
-                Spacer(modifier = Modifier.weight(1f))
-                Icon(
-                    imageVector = Icons.Rounded.AddPhotoAlternate,
-                    contentDescription = "Add photo from gallery",
-                    modifier = Modifier.alpha(0.4f)
-                )
-            }
+            DropdownMenuItem(
+                text= { Text(text = "Add Photo From Gallery") },
+                trailingIcon = {
+                    Icon(
+                        imageVector = Icons.Rounded.AddPhotoAlternate,
+                        contentDescription = "Add photo from gallery",
+                        modifier = Modifier.alpha(0.4f)
+                    )
+                },
+                onClick = {}
+            )
             Divider(modifier = Modifier.padding(vertical = 5.dp))
-            Row(
-                modifier = Modifier.padding(horizontal = 3.dp),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(text = "Add File")
-                Spacer(modifier = Modifier.weight(1f))
-                Icon(
-                    imageVector = Icons.Rounded.LibraryAdd,
-                    contentDescription = "Add File",
-                    modifier = Modifier.alpha(0.4f)
-                )
-            }
-            
+            DropdownMenuItem(
+                text= { Text(text = "Add File") },
+                trailingIcon = {
+                    Icon(
+                        imageVector = Icons.Rounded.LibraryAdd,
+                        contentDescription = "Add File",
+                        modifier = Modifier.alpha(0.4f)
+                    )
+                },
+                onClick = {}
+            )
         }
     }
     
@@ -381,10 +392,10 @@ private fun AddAttachmentMenu(expanded: Boolean, onDismiss: () -> Unit = {}) {
 private fun AddAttachment() {
     var showMenu by remember { mutableStateOf(false) }
     
-    Row(modifier = Modifier.padding(4.dp)) {
+    Row {
         Box(
             modifier = Modifier
-                .size(80.dp)
+                .size(40.dp)
                 .feedbackClickable {
                     showMenu = true
                 }
@@ -408,8 +419,7 @@ private fun AttachmentElementHeader(
     description: String,
     modifier: Modifier = Modifier,
     showingDetails: Boolean = false,
-    editable: Boolean = true,
-    keyword: String = ""
+    editable: Boolean = true
 ) {
     Row(
         modifier = modifier.height(84.dp),
@@ -418,14 +428,14 @@ private fun AttachmentElementHeader(
         Column {
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyLarge,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
             if (description.isNotEmpty()) {
                 Text(
                     text = description,
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodyMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
