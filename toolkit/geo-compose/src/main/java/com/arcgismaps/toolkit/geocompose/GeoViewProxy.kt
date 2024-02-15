@@ -20,6 +20,8 @@ package com.arcgismaps.toolkit.geocompose
 import android.graphics.drawable.BitmapDrawable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.unit.Dp
+import com.arcgismaps.mapping.Bookmark
+import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.layers.Layer
 import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.mapping.view.GraphicsOverlay
@@ -27,6 +29,9 @@ import com.arcgismaps.mapping.view.IdentifyGraphicsOverlayResult
 import com.arcgismaps.mapping.view.IdentifyLayerResult
 import com.arcgismaps.mapping.view.LayerViewState
 import com.arcgismaps.mapping.view.ScreenCoordinate
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.DurationUnit
 
 /**
  * Used to perform operations on a composable MapView or SceneView.
@@ -55,7 +60,7 @@ public sealed class GeoViewProxy(className: String) {
         this.geoView = geoView
     }
 
-    private val nullGeoViewErrorMessage: String =
+    protected val nullGeoViewErrorMessage: String =
         "$className must be part of the composition when this member is called."
 
     /**
@@ -241,6 +246,48 @@ public sealed class GeoViewProxy(className: String) {
         ) ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
     }
 
+    /**
+     * Animate the geo view's viewpoint to the viewpoint of the bookmark.
+     *
+     * @param bookmark bookmark to set
+     * @return a [Result] indicating whether the viewpoint was successfully set.
+     * A success result with a value of false may indicate the operation was cancelled.
+     * @since 200.4.0
+     */
+    public suspend fun setBookmark(bookmark: Bookmark): Result<Boolean> {
+        return geoView?.setBookmark(bookmark)
+            ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
+    }
+
+    /**
+     * Change the geo view to the new viewpoint. The viewpoint is updated instantaneously.
+     *
+     * @param viewpoint the new viewpoint
+     * @since 200.4.0
+     */
+    public fun setViewpoint(viewpoint: Viewpoint) {
+        geoView?.setViewpoint(viewpoint)
+    }
+
+    /**
+     * Animate the geo view to the new viewpoint, taking the given duration to complete the navigation.
+     *
+     * @param viewpoint the new viewpoint
+     * @param duration the duration of the animation
+     * @return a [Result] indicating whether the viewpoint was successfully set.
+     * A success result with a value of false may indicate the operation was cancelled.
+     * @since 200.4.0
+     */
+    public suspend fun setViewpointAnimated(
+        viewpoint: Viewpoint,
+        duration: Duration = 0.25.seconds
+    ): Result<Boolean> {
+        return geoView?.setViewpointAnimated(
+            viewpoint,
+            duration.toDouble(DurationUnit.SECONDS).toFloat()
+        ) ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
+    }
+
     private fun clampMaximumResults(maximumResults: Int?): Int {
         return if (maximumResults == null || maximumResults <= 0) {
             -1
@@ -255,7 +302,7 @@ public sealed class GeoViewProxy(className: String) {
      * part of the composition
      * @since 200.4.0
      */
-    public fun getLayerViewState(layer: Layer) : LayerViewState? {
+    public fun getLayerViewState(layer: Layer): LayerViewState? {
         return geoView?.getLayerViewState(layer)
     }
 }
