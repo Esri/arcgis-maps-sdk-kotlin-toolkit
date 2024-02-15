@@ -43,9 +43,7 @@ import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.
 import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.NotAWholeNumber
 import com.arcgismaps.toolkit.featureforms.utils.asDoubleTuple
 import com.arcgismaps.toolkit.featureforms.utils.asLongTuple
-import com.arcgismaps.toolkit.featureforms.utils.domain
 import com.arcgismaps.toolkit.featureforms.utils.editValue
-import com.arcgismaps.toolkit.featureforms.utils.fieldType
 import com.arcgismaps.toolkit.featureforms.utils.isFloatingPoint
 import com.arcgismaps.toolkit.featureforms.utils.isIntegerType
 import com.arcgismaps.toolkit.featureforms.utils.isNumeric
@@ -254,8 +252,8 @@ internal class FormTextFieldState(
                         required = formElement.isRequired,
                         editable = formElement.isEditable,
                         visible = formElement.isVisible,
-                        domain = form.domain(formElement) as? RangeDomain,
-                        fieldType = form.fieldType(formElement),
+                        domain = formElement.domain as? RangeDomain,
+                        fieldType = formElement.fieldType,
                         singleLine = formElement.input is TextBoxFormInput,
                         minLength = minLength.toInt(),
                         maxLength = maxLength.toInt()
@@ -263,7 +261,7 @@ internal class FormTextFieldState(
                     initialValue = list[0] as String,
                     scope = scope,
                     onEditValue = { newValue ->
-                        form.editValue(formElement, newValue)
+                        formElement.editValue(newValue)
                         scope.launch { form.evaluateExpressions() }
                     },
                     defaultValidator = { formElement.getValidationErrors() }
@@ -296,14 +294,14 @@ internal fun rememberFormTextFieldState(
             required = field.isRequired,
             visible = field.isVisible,
             singleLine = field.input is TextBoxFormInput,
-            fieldType = form.fieldType(field),
-            domain = form.domain(field) as? RangeDomain,
+            fieldType = field.fieldType,
+            domain = field.domain as? RangeDomain,
             minLength = minLength,
             maxLength = maxLength
         ),
         scope = scope,
-        onEditValue = {
-            form.editValue(field, it)
+        onEditValue = { newValue ->
+            field.editValue(newValue)
             scope.launch { form.evaluateExpressions() }
         },
         defaultValidator = { field.getValidationErrors() }

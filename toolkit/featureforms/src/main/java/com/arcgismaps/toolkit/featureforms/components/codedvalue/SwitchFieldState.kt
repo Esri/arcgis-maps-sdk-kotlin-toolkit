@@ -30,7 +30,6 @@ import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.utils.editValue
 import com.arcgismaps.toolkit.featureforms.utils.fieldIsNullable
-import com.arcgismaps.toolkit.featureforms.utils.fieldType
 import com.arcgismaps.toolkit.featureforms.utils.valueFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
@@ -135,7 +134,7 @@ internal class SwitchFieldState(
                         editable = formElement.isEditable,
                         required = formElement.isRequired,
                         visible = formElement.isVisible,
-                        fieldType = form.fieldType(formElement),
+                        fieldType = formElement.fieldType,
                         onValue = input.onValue,
                         offValue = input.offValue,
                         fallback = list[1] as Boolean,
@@ -148,10 +147,7 @@ internal class SwitchFieldState(
                     initialValue = list[0] as String,
                     scope = scope,
                     onEditValue = { codedValueName ->
-                        form.editValue(
-                            formElement,
-                            if (codedValueName == input.onValue.name) input.onValue.code else input.offValue.code
-                        )
+                        formElement.editValue(if (codedValueName == input.onValue.name) input.onValue.code else input.offValue.code)
                         scope.launch { form.evaluateExpressions() }
                     },
                     defaultValidator = formElement::getValidationErrors
@@ -183,7 +179,7 @@ internal fun rememberSwitchFieldState(
             editable = field.isEditable,
             required = field.isRequired,
             visible = field.isVisible,
-            fieldType = form.fieldType(field),
+            fieldType = field.fieldType,
             onValue = input.onValue,
             offValue = input.offValue,
             fallback = fallback,
@@ -195,7 +191,7 @@ internal fun rememberSwitchFieldState(
         ),
         scope = scope,
         onEditValue = {
-            form.editValue(field, it)
+            field.editValue(it)
             scope.launch { form.evaluateExpressions() }
         },
         defaultValidator = field::getValidationErrors

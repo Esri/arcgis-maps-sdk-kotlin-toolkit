@@ -114,7 +114,7 @@ internal class DateTimeFieldState(
                     initialValue = list[0] as Instant?,
                     scope = scope,
                     onEditValue = {
-                        form.editValue(field, it)
+                        field.editValue(it)
                         scope.launch { form.evaluateExpressions() }
                     },
                     defaultValidator = {
@@ -158,7 +158,7 @@ internal fun rememberDateTimeFieldState(
         ),
         scope = scope,
         onEditValue = {
-            form.editValue(field, it)
+            field.editValue(it)
             scope.launch { form.evaluateExpressions() }
         },
         defaultValidator = {

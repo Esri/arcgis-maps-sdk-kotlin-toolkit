@@ -24,7 +24,6 @@ import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.RadioButtonsFormInput
 import com.arcgismaps.toolkit.featureforms.utils.editValue
-import com.arcgismaps.toolkit.featureforms.utils.fieldType
 import com.arcgismaps.toolkit.featureforms.utils.valueFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -91,7 +90,7 @@ internal class RadioButtonFieldState(
                         editable = formElement.isEditable,
                         required = formElement.isRequired,
                         visible = formElement.isVisible,
-                        fieldType = form.fieldType(formElement),
+                        fieldType = formElement.fieldType,
                         codedValues = input.codedValues,
                         showNoValueOption = input.noValueOption,
                         noValueLabel = input.noValueLabel
@@ -99,7 +98,8 @@ internal class RadioButtonFieldState(
                     initialValue = list[0],
                     scope = scope,
                     onEditValue = { newValue ->
-                        form.editValue(formElement, newValue)
+                        //form.editValue(formElement, newValue)
+                        formElement.editValue(newValue)
                         scope.launch { form.evaluateExpressions() }
                     },
                     defaultValidator = formElement::getValidationErrors
@@ -127,14 +127,14 @@ internal fun rememberRadioButtonFieldState(
             editable = field.isEditable,
             required = field.isRequired,
             visible = field.isVisible,
-            fieldType = form.fieldType(field),
+            fieldType = field.fieldType,
             codedValues = input.codedValues,
             showNoValueOption = input.noValueOption,
             noValueLabel = input.noValueLabel
         ),
         scope = scope,
         onEditValue = {
-            form.editValue(field, it)
+            field.editValue(it)
             scope.launch { form.evaluateExpressions() }
         },
         defaultValidator = field::getValidationErrors

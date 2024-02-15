@@ -24,7 +24,6 @@ import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.toolkit.featureforms.utils.editValue
-import com.arcgismaps.toolkit.featureforms.utils.fieldType
 import com.arcgismaps.toolkit.featureforms.utils.valueFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -76,12 +75,12 @@ internal class ComboBoxFieldState(
                         codedValues = input.codedValues,
                         showNoValueOption = input.noValueOption,
                         noValueLabel = input.noValueLabel,
-                        fieldType = form.fieldType(formElement)
+                        fieldType = formElement.fieldType
                     ),
                     initialValue = list[0] as String,
                     scope = scope,
                     onEditValue = { newValue ->
-                        form.editValue(formElement, newValue)
+                        formElement.editValue(newValue)
                         scope.launch { form.evaluateExpressions() }
                     },
                     defaultValidator = formElement::getValidationErrors
@@ -114,11 +113,11 @@ internal fun rememberComboBoxFieldState(
             codedValues = input.codedValues,
             showNoValueOption = input.noValueOption,
             noValueLabel = input.noValueLabel,
-            fieldType = form.fieldType(field)
+            fieldType = field.fieldType
         ),
         scope = scope,
         onEditValue = {
-            form.editValue(field, it)
+            field.editValue(it)
             scope.launch { form.evaluateExpressions() }
         },
         defaultValidator = field::getValidationErrors

@@ -195,6 +195,15 @@ internal abstract class BaseFieldState<T>(
                     updateValidation()
                 }
             }
+            // start listening to calculated value updates immediately
+            scope.launch {
+                // update the current value when the calculated value changes
+                // calculated properties do not get validated
+                _calculatedValue.collect {
+                    _value.value = Value(it)
+                    updateValidation()
+                }
+            }
         }
     }
 
@@ -251,8 +260,8 @@ internal abstract class BaseFieldState<T>(
         // focus event
         wasFocused = true
         onEditValue(input)
-        _value.value = Value(input)
-        updateValidation()
+        //_value.value = Value(input)
+        //updateValidation()
     }
 
     /**
