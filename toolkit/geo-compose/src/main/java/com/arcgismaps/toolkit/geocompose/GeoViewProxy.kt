@@ -18,6 +18,7 @@
 package com.arcgismaps.toolkit.geocompose
 
 import android.graphics.drawable.BitmapDrawable
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.unit.Dp
 import com.arcgismaps.mapping.Bookmark
 import com.arcgismaps.mapping.Viewpoint
@@ -37,6 +38,7 @@ import kotlin.time.DurationUnit
  *
  * @since 200.4.0
  */
+@Stable
 public sealed class GeoViewProxy(className: String) {
 
     /**

@@ -17,6 +17,7 @@
 
 package com.arcgismaps.toolkit.geocompose
 
+import androidx.compose.runtime.Stable
 import com.arcgismaps.geometry.Geometry
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.Viewpoint
@@ -37,6 +38,7 @@ import kotlin.time.DurationUnit
  *
  * @since 200.4.0
  */
+@Stable
 public class MapViewProxy : GeoViewProxy("MapView") {
 
     /**

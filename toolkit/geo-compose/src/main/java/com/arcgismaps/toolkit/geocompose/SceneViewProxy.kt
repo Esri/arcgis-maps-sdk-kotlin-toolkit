@@ -17,6 +17,7 @@
 
 package com.arcgismaps.toolkit.geocompose
 
+import androidx.compose.runtime.Stable
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.DeviceOrientation
@@ -38,6 +39,7 @@ import kotlin.time.DurationUnit
  *
  * @since 200.4.0
  */
+@Stable
 public class SceneViewProxy : GeoViewProxy("SceneView") {
     /**
      * The view-based [com.arcgismaps.mapping.view.SceneView] that this SceneViewProxy will operate on. This should
