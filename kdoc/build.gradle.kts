@@ -54,6 +54,9 @@ tasks {
     //./gradlew :documentation:dokkaHtml
     // doc output will be under `documentation/build/dokka/html`.
     dokkaHtml {
+        pluginConfiguration<org.jetbrains.dokka.versioning.VersioningPlugin, org.jetbrains.dokka.versioning.VersioningConfiguration> {
+            version = versionNumber
+        }
         moduleName.set("arcgis-maps-kotlin-toolkit")
         dokkaSourceSets {
             configureEach {
@@ -93,6 +96,9 @@ android {
 }
 
 dependencies {
+    // Puts the version in the KDoc
+    dokkaPlugin(libs.dokka.versioning)
+
     project.afterEvaluate {
        releasedModules.forEach { proj ->
            proj.configurations.forEach { config ->
