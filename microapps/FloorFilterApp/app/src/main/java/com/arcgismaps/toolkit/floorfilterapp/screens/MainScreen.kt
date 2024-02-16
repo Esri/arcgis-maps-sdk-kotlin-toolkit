@@ -25,7 +25,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -36,7 +35,7 @@ import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.geocompose.MapView
-import com.arcgismaps.toolkit.geocompose.MapViewpointOperation
+import com.arcgismaps.toolkit.geocompose.MapViewProxy
 import com.arcgismaps.toolkit.indoors.FloorFilter
 import com.arcgismaps.toolkit.indoors.FloorFilterSelection
 import com.arcgismaps.toolkit.indoors.FloorFilterState
@@ -54,7 +53,7 @@ fun MainScreen() {
         )
     }
 
-    var mapViewpointOperation: MapViewpointOperation? by remember { mutableStateOf(null) }
+    val mapViewProxy = remember { MapViewProxy() }
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -69,8 +68,7 @@ fun MainScreen() {
                     val floorFilterSelectionType =
                         floorFilterSelection.type as FloorFilterSelection.Type.FloorSite
                     floorFilterSelectionType.site.geometry?.let {
-                        mapViewpointOperation =
-                            MapViewpointOperation.Set(Viewpoint(getEnvelopeWithBuffer(it)))
+                        mapViewProxy.setViewpoint(Viewpoint(getEnvelopeWithBuffer(it)))
                     }
                 }
 
@@ -78,8 +76,7 @@ fun MainScreen() {
                     val floorFilterSelectionType =
                         floorFilterSelection.type as FloorFilterSelection.Type.FloorFacility
                     floorFilterSelectionType.facility.geometry?.let {
-                        mapViewpointOperation =
-                            MapViewpointOperation.Set(Viewpoint(getEnvelopeWithBuffer(it)))
+                        mapViewProxy.setViewpoint(Viewpoint(getEnvelopeWithBuffer(it)))
                     }
                 }
 
@@ -91,7 +88,7 @@ fun MainScreen() {
     MapView(
         modifier = Modifier.fillMaxSize(),
         arcGISMap = floorAwareWebMap,
-        viewpointOperation = mapViewpointOperation
+        mapViewProxy = mapViewProxy
     )
     Box(
         modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 40.dp),

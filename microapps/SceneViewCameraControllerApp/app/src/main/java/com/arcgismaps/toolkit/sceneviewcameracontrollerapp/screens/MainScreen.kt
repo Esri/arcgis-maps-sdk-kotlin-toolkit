@@ -54,7 +54,7 @@ import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.OrbitGeoElementCameraController
 import com.arcgismaps.mapping.view.OrbitLocationCameraController
-import com.arcgismaps.toolkit.geocompose.SceneViewpointOperation
+import com.arcgismaps.toolkit.geocompose.SceneViewProxy
 import com.arcgismaps.toolkit.geocompose.rememberGraphicsOverlayCollection
 import kotlin.time.Duration.Companion.seconds
 
@@ -87,8 +87,8 @@ fun MainScreen() {
     // remember a CameraController state
     var cameraController: CameraController by remember { mutableStateOf(GlobeCameraController()) }
 
-    // remember a SceneViewpointOperation state
-    var viewpointOperation: SceneViewpointOperation? by remember { mutableStateOf(null) }
+    // remember a SceneViewProxy
+    val sceneViewProxy = remember { SceneViewProxy() }
 
     Scaffold(
         modifier = Modifier,
@@ -118,7 +118,7 @@ fun MainScreen() {
                 .padding(paddingValues),
             arcGISScene = arcGISScene,
             cameraController = cameraController,
-            viewpointOperation = viewpointOperation,
+            sceneViewProxy = sceneViewProxy,
             graphicsOverlays = rememberGraphicsOverlayCollection {
                 val sceneGraphicsOverlay = GraphicsOverlay().apply {
                     this.graphics.add(simpleGraphic)
@@ -139,7 +139,7 @@ fun MainScreen() {
                 headingDelta = 150.0,
                 duration = 10f
             ) ?: (cameraController as? GlobeCameraController)?.apply {
-                viewpointOperation = SceneViewpointOperation.AnimateCamera(
+                sceneViewProxy.setViewpointCameraAnimated(
                     Camera(
                         latitude = 34.05,
                         longitude = -117.19,
