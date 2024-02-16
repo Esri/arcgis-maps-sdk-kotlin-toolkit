@@ -131,11 +131,11 @@ fun MainScreen() {
                     GeometryEditorDropDownMenu(
                         expanded = actionsExpanded,
                         geometryEditor = geometryEditor,
-                        graphicsOverlays = graphicsOverlays,
                         onDismissRequest = {
                             actionsExpanded = false
                         },
                         onResetAllGraphics = {
+                            graphicsOverlays = emptyArray()
                             isDrawingEnabled = false
                         }
                     )
@@ -163,7 +163,6 @@ fun GeometryEditorDropDownMenu(
     expanded: Boolean = false,
     geometryEditor: GeometryEditor,
     onDismissRequest: () -> Unit = {},
-    graphicsOverlays: Array<GraphicsOverlay>,
     onResetAllGraphics: () -> Unit = {}
 ) {
     val items = remember {
@@ -185,7 +184,6 @@ fun GeometryEditorDropDownMenu(
 
                         it.contains("Reset all graphics") -> {
                             stopGeometryEditor(geometryEditor)
-                            graphicsOverlays.forEach { it.graphics.clear() }
                             onResetAllGraphics()
                         }
 
