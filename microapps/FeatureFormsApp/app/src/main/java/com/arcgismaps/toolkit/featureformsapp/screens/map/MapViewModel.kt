@@ -33,6 +33,14 @@ sealed class UIState {
      * Currently not editing.
      */
     object NotEditing : UIState()
+    
+    /**
+     * Currently selecting a new Feature
+     */
+    data class Switching(
+        val oldState: Editing,
+        val newFeature: ArcGISFeature
+    ): UIState()
 
     /**
      * In editing state with the [featureForm] with the validation error visibility given by
@@ -155,6 +163,23 @@ class MapViewModel @Inject constructor(
         )
         return Result.success(Unit)
     }
+    
+    fun selectNewFeature() {
+        require(_uiState.value is UIState.Switching)
+        val currentState = _uiState.value as UIState.Switching
+        currentState.oldState.featureForm.discardEdits()
+        val layer = currentState.oldState.featureForm.feature.featureTable?.layer as FeatureLayer
+        layer.clearSelection()
+        layer.selectFeature(currentState.newFeature)
+        _uiState.value =
+            UIState.Editing(featureForm = FeatureForm(currentState.newFeature, layer.featureFormDefinition!!))
+    }
+    
+    fun continueEditing() {
+        require(_uiState.value is UIState.Switching)
+        val currentState = _uiState.value as UIState.Switching
+        _uiState.value = currentState.oldState
+    }
 
     fun rollbackEdits(): Result<Unit> {
         (_uiState.value as? UIState.Editing)?.let {
@@ -178,21 +203,25 @@ class MapViewModel @Inject constructor(
                             result.geoElements.firstOrNull {
                                 it is ArcGISFeature && (it.featureTable?.layer as? FeatureLayer)?.featureFormDefinition != null
                             }?.let {
-                                (_uiState.value as? UIState.Editing)?.run {
-                                    val feature = featureForm.feature
-                                    val layer = feature.featureTable?.layer as? FeatureLayer
-                                    layer?.unselectFeature(feature)
-                                    featureForm.discardEdits()
+                                if (_uiState.value is UIState.Editing) {
+                                    val currentState = _uiState.value as UIState.Editing
+                                    //set state to trigger DiscardEditsDialog with lambdas to discard edits and unselect the old feature and select the new one
+                                    // or just cancel and do nothing
+                                    val newFeature = it as ArcGISFeature
+                                    _uiState.value = UIState.Switching(
+                                        oldState = currentState,
+                                        newFeature = newFeature
+                                    )
+                                } else if (_uiState.value is UIState.NotEditing) {
+                                    val feature = it as ArcGISFeature
+                                    val layer = feature.featureTable!!.layer as FeatureLayer
+                                    val featureForm =
+                                        FeatureForm(feature, layer.featureFormDefinition!!)
+                                    // select the feature
+                                    layer.selectFeature(feature)
+                                    // set the UI to an editing state with the FeatureForm
+                                    _uiState.value = UIState.Editing(featureForm)
                                 }
-                                
-                                val feature = it as ArcGISFeature
-                                val layer = feature.featureTable!!.layer as FeatureLayer
-                                val featureForm =
-                                    FeatureForm(feature, layer.featureFormDefinition!!)
-                                // select the feature
-                                layer.selectFeature(feature)
-                                // set the UI to an editing state with the FeatureForm
-                                _uiState.value = UIState.Editing(featureForm)
                             }
                         }
                     } catch (e: Exception) {
