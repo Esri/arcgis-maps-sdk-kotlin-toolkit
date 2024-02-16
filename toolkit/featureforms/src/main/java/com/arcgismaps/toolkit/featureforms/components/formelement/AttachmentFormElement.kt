@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -157,7 +158,7 @@ private fun AttachmentFormElement(
                 description = state.description,
                 editable = state.editable
             )
-            Spacer(modifier = Modifier)
+            Spacer(modifier = Modifier.height(10.dp))
             Carousel(
                 onDetailsTap = {
                     state.selectedAttachment = it
@@ -422,7 +423,7 @@ private fun AttachmentElementHeader(
     editable: Boolean = true
 ) {
     Row(
-        modifier = modifier.height(84.dp),
+        modifier = modifier.wrapContentHeight(),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column {
