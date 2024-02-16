@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.featureforms.utils
 
+import android.util.Log
 import com.arcgismaps.data.FieldType
 import com.arcgismaps.data.RangeDomain
 import com.arcgismaps.mapping.featureforms.FeatureForm
@@ -49,31 +50,11 @@ internal fun FeatureForm.fieldIsNullable(element: FieldFormElement): Boolean {
  *
  * @return returns a result with failure if the update has failed, else a success result is returned.
  */
-internal fun FieldFormElement.editValue(value: Any?) : Result<Unit> {
-    /*
-     1. if value is null then -> set element.updateValue(null)
-     2. if value is a string that is empty then
-     3.      -> if fieldType is Text
-     4.           updateValue("" )
-     5.         else
-     6.           updateValue(null)
-     7. else -> if casting returns null
-     8.           updateValue(value : Any?)
-     9.         else
-     10.          updateValue(cast value)
-     */
-    return runCatching {
-        if (value == null) {
+internal fun FieldFormElement.editValue(value: Any?) {
+    runCatching {
+        if (value.isNullOrEmptyString()) {
             updateValue(null)
-        }
-        else if (value.isEmptyString()) {
-            if (fieldType == FieldType.Text) {
-                updateValue(value)
-            } else {
-                updateValue(null)
-            }
-        }
-        else {
+        } else {
             val castValue = cast(value, fieldType)
             if (castValue == null) {
                 updateValue(value)
@@ -81,25 +62,33 @@ internal fun FieldFormElement.editValue(value: Any?) : Result<Unit> {
                 updateValue(castValue)
             }
         }
-        Result.success(Unit)
+    }.onFailure {
+        //TODO: remove when updateValue is no longer throwing. (and also the runCatching)
+        Log.w(
+            "Form.editValue",
+            "caught ${it.message} while updating value of field $label to $value"
+        )
     }
 }
 
-internal fun Any?.isEmptyString() : Boolean {
-    return if (this is String) {
-        isEmpty()
+/**
+ * Utility function that returns true if the type is null or if it is an empty string.
+ */
+internal fun Any?.isNullOrEmptyString(): Boolean {
+    return if (this is String?) {
+        isNullOrEmpty()
     } else {
         false
     }
 }
 
 internal inline fun <reified T> FieldFormElement.valueFlow(scope: CoroutineScope): StateFlow<T> =
-    if (value.value is T) {
-        value.map { it as T }.stateIn(scope, SharingStarted.Eagerly, value.value as T)
-    } else if (formattedValue is T) {
+    if (formattedValue is T) {
         // T is String
         value.map { formattedValue as T }
             .stateIn(scope, SharingStarted.Eagerly, formattedValue as T)
+    } else if (value.value is T) {
+        value.map { it as T }.stateIn(scope, SharingStarted.Eagerly, value.value as T)
     } else {
         // usage error.
         throw IllegalStateException("the generic parameterization of the state object must match either the value or the formattedValue.")
