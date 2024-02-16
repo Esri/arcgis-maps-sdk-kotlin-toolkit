@@ -205,8 +205,6 @@ class MapViewModel @Inject constructor(
                             }?.let {
                                 if (_uiState.value is UIState.Editing) {
                                     val currentState = _uiState.value as UIState.Editing
-                                    //set state to trigger DiscardEditsDialog with lambdas to discard edits and unselect the old feature and select the new one
-                                    // or just cancel and do nothing
                                     val newFeature = it as ArcGISFeature
                                     _uiState.value = UIState.Switching(
                                         oldState = currentState,
