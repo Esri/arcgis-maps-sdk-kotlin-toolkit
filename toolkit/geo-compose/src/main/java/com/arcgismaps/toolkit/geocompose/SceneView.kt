@@ -84,7 +84,6 @@ import java.time.Instant
  * @param analysisOverlays a collection of analysis overlays that render the results of 3D visual analysis on the composable SceneView
  * @param imageOverlays a collection of overlays for displaying images in the composable SceneView
  * @param atmosphereEffect the effect applied to the scene's atmosphere
- * @param timeExtent the [TimeExtent] used by the composable SceneView
  * @param onTimeExtentChanged lambda invoked when the composable SceneView's [TimeExtent] is changed
  * @param spaceEffect the visual effect of outer space in the composable SceneView
  * @param sunTime the position of the sun in the composable SceneView based on a specific date and time
@@ -126,7 +125,6 @@ public fun SceneView(
     analysisOverlays: AnalysisOverlayCollection = rememberAnalysisOverlayCollection(),
     imageOverlays: ImageOverlayCollection = rememberImageOverlayCollection(),
     atmosphereEffect: AtmosphereEffect = AtmosphereEffect.HorizonOnly,
-    timeExtent: TimeExtent? = null,
     onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
     spaceEffect: SpaceEffect = SpaceEffect.Stars,
     sunTime: Instant = Instant.parse("2000-09-22T12:00:00Z"),
@@ -160,7 +158,6 @@ public fun SceneView(
             it.interactionOptions = sceneViewInteractionOptions
             it.labeling = viewLabelProperties
             it.selectionProperties = selectionProperties
-            it.setTimeExtent(timeExtent)
             it.cameraController = cameraController
             it.atmosphereEffect = atmosphereEffect
             it.spaceEffect = spaceEffect

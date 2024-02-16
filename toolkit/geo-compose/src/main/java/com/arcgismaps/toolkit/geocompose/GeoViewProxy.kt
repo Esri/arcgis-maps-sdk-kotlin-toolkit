@@ -19,6 +19,7 @@ package com.arcgismaps.toolkit.geocompose
 
 import android.graphics.drawable.BitmapDrawable
 import androidx.compose.ui.unit.Dp
+import com.arcgismaps.mapping.TimeExtent
 import com.arcgismaps.mapping.layers.Layer
 import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.mapping.view.GraphicsOverlay
@@ -64,6 +65,17 @@ public sealed class GeoViewProxy(className: String) {
      */
     public val isWrapAroundEnabled: Boolean?
         get() = geoView?.isWrapAroundEnabled
+
+    /**
+     * Sets the timeExtent value on the GeoView.
+     * It defines how time-enabled data is displayed in the GeoView.
+     *
+     * @param timeExtent The [TimeExtent] to set on the GeoView. This can be null.
+     * @since 200.4.0
+     */
+    public fun setTimeExtent(timeExtent: TimeExtent?): Unit {
+        geoView?.setTimeExtent(timeExtent)
+    }
 
     /**
      * Exports an image snapshot of the current composable MapView or SceneView.

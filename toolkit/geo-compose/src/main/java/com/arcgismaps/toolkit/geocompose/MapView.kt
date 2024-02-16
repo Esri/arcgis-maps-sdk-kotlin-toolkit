@@ -88,7 +88,6 @@ import kotlinx.coroutines.launch
  * @param isAttributionBarVisible true if attribution bar is visible in the composable MapView, false otherwise
  * @param onAttributionTextChanged lambda invoked when the attribution text of the composable MapView has changed
  * @param onAttributionBarLayoutChanged lambda invoked when the attribution bar's position or size changes
- * @param timeExtent the [TimeExtent] used by the composable MapView
  * @param onTimeExtentChanged lambda invoked when the composable MapView's [TimeExtent] is changed
  * @param onNavigationChanged lambda invoked when the navigation status of the composable MapView has changed
  * @param onMapRotationChanged lambda invoked when the rotation of this composable MapView has changed
@@ -131,7 +130,6 @@ public fun MapView(
     isAttributionBarVisible: Boolean = true,
     onAttributionTextChanged: ((String) -> Unit)? = null,
     onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)? = null,
-    timeExtent: TimeExtent? = null,
     onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
     onMapRotationChanged: ((Double) -> Unit)? = null,
@@ -170,7 +168,6 @@ public fun MapView(
             it.grid = grid
             it.backgroundGrid = backgroundGrid
             it.isAttributionBarVisible = isAttributionBarVisible
-            it.setTimeExtent(timeExtent)
         })
 
     DisposableEffect(Unit) {
