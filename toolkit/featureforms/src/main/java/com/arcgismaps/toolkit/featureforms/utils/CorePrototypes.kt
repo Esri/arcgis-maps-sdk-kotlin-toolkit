@@ -52,10 +52,12 @@ internal fun FeatureForm.fieldIsNullable(element: FieldFormElement): Boolean {
  */
 internal fun FieldFormElement.editValue(value: Any?) {
     runCatching {
+        // set the value to null, if the incoming value is null or an empty string
         if (value.isNullOrEmptyString()) {
             updateValue(null)
         } else {
             val castValue = cast(value, fieldType)
+            // if the cast failed, let core coerce the value
             if (castValue == null) {
                 updateValue(value)
             } else {
