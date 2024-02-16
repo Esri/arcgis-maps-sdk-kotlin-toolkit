@@ -56,6 +56,7 @@ dependencies {
     implementation(libs.androidx.window)
     implementation(libs.androidx.window.core)
     implementation(libs.bundles.composeCore)
+    implementation(libs.androidx.compose.ui.util)
     implementation(libs.bundles.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

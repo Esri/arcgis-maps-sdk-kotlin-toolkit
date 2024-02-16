@@ -35,11 +35,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDefaults
-import androidx.compose.material3.DatePickerState
-import androidx.compose.material3.DisplayMode
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -63,8 +58,13 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.arcgismaps.toolkit.featureforms.R
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.date.DatePicker
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.date.DatePickerDefaults
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.date.DatePickerState
+import com.arcgismaps.toolkit.featureforms.components.datetime.picker.date.DisplayMode
 import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimePicker
 import com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.TimePickerState
 import java.time.Instant
@@ -105,7 +105,6 @@ internal enum class DateTimePickerInput {
  * @param onDismissRequest Dismiss the dialog when the user clicks outside the dialog or on the back button.
  *
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun DateTimePicker(
     state: DateTimePickerState,
@@ -195,7 +194,6 @@ internal fun DateTimePicker(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun (ColumnScope).PickerContent(
     label: String,
@@ -316,7 +314,6 @@ private fun PickerFooter(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DateTimePickerDialog(
     onDismissRequest: () -> Unit,
@@ -326,9 +323,8 @@ private fun DateTimePickerDialog(
     properties: DialogProperties = DialogProperties(usePlatformDefaultWidth = false),
     content: @Composable ColumnScope.() -> Unit
 ) {
-    AlertDialog(
+    Dialog(
         onDismissRequest = onDismissRequest,
-        modifier = modifier.wrapContentHeight(),
         properties = properties
     ) {
         Surface(
