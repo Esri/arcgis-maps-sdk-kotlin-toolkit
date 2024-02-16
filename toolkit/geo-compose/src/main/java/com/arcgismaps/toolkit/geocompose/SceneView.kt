@@ -67,7 +67,6 @@ import java.time.Instant
  *
  * @param modifier Modifier to be applied to the composable SceneView
  * @param arcGISScene the [ArcGISScene] to be rendered by this composable SceneView
- * @param viewpointOperation a [SceneViewpointOperation] that changes this SceneView to a new viewpoint
  * @param onViewpointChangedForCenterAndScale lambda invoked when the viewpoint changes, passing a viewpoint
  * type of [ViewpointType.CenterAndScale]
  * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a viewpoint
@@ -104,13 +103,16 @@ import java.time.Instant
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable SceneView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable SceneView
  * @param onDrawStatusChanged lambda invoked when the draw status of the composable SceneView is changed
+ * @sample com.arcgismaps.toolkit.geocompose.samples.SceneViewSample
+ * @see
+ * - <a href="https://developers.arcgis.com/kotlin/scenes-3d/tutorials/display-a-scene/">Display a scene tutorial</a>
+ * - <a href="https://developers.arcgis.com/kotlin/scenes-3d/tutorials/display-a-web-scene/">Display a web scene tutorial</a>
  * @since 200.4.0
  */
 @Composable
 public fun SceneView(
     modifier: Modifier = Modifier,
     arcGISScene: ArcGISScene? = null,
-    viewpointOperation: SceneViewpointOperation? = null,
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
     graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
@@ -182,8 +184,6 @@ public fun SceneView(
         }
     }
 
-    ViewpointUpdater(sceneView, viewpointOperation)
-
     GraphicsOverlaysUpdater(graphicsOverlays, sceneView)
     AnalysisOverlaysUpdater(analysisOverlays, sceneView)
     ImageOverlaysUpdater(imageOverlays, sceneView)
@@ -211,22 +211,6 @@ public fun SceneView(
         onAttributionTextChanged,
         onAttributionBarLayoutChanged
     )
-}
-
-/**
- * Updates the viewpoint of the provided view-based [sceneView] using the given [viewpointOperation]. This will be
- * recomposed when [viewpointOperation] changes.
- *
- * @since 200.4.0
- */
-@Composable
-private fun ViewpointUpdater(
-    sceneView: SceneView,
-    viewpointOperation: SceneViewpointOperation?
-) {
-    LaunchedEffect(viewpointOperation) {
-        viewpointOperation?.execute(sceneView)
-    }
 }
 
 /**

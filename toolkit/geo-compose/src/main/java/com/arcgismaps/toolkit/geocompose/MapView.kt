@@ -67,7 +67,6 @@ import kotlinx.coroutines.launch
  *
  * @param modifier Modifier to be applied to the composable MapView
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable MapView
- * @param viewpointOperation a [MapViewpointOperation] that changes this MapView to a new viewpoint
  * @param onViewpointChangedForCenterAndScale lambda invoked when the viewpoint changes, passing a viewpoint
  * type of [ViewpointType.CenterAndScale]
  * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a viewpoint
@@ -106,13 +105,17 @@ import kotlinx.coroutines.launch
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable MapView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable MapView
  * @param onDrawStatusChanged lambda invoked when the draw status of the composable MapView is changed
+ * @sample com.arcgismaps.toolkit.geocompose.samples.MapViewSample
+ * @see
+ * - <a href="https://developers.arcgis.com/kotlin/maps-2d/tutorials/display-a-map/">Display a map tutorial</a>
+ * - <a href="https://developers.arcgis.com/kotlin/maps-2d/tutorials/display-a-web-map/">Display a web map tutorial</a>
+ * - <a href="https://developers.arcgis.com/kotlin/maps-2d/tutorials/add-a-point-line-and-polygon/">Add a point, line, and polygon tutorial</a>
  * @since 200.4.0
  */
 @Composable
 public fun MapView(
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap? = null,
-    viewpointOperation: MapViewpointOperation? = null,
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
     onVisibleAreaChanged: ((Polygon) -> Unit)? = null,
@@ -178,8 +181,6 @@ public fun MapView(
         }
     }
 
-    ViewpointUpdater(mapView, viewpointOperation)
-
     DisposableEffect(mapViewProxy) {
         mapViewProxy?.setMapView(mapView)
         onDispose {
@@ -226,22 +227,6 @@ public fun MapView(
     )
 
     GraphicsOverlaysUpdater(graphicsOverlays, mapView)
-}
-
-/**
- * Updates the viewpoint of the provided view-based [mapView] using the given [viewpointOperation]. This will be
- * recomposed when [viewpointOperation] changes.
- *
- * @since 200.4.0
- */
-@Composable
-private fun ViewpointUpdater(
-    mapView: MapView,
-    viewpointOperation: MapViewpointOperation?
-) {
-    LaunchedEffect(viewpointOperation) {
-        viewpointOperation?.execute(mapView)
-    }
 }
 
 /**
