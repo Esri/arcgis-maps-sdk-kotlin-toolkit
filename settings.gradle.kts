@@ -63,7 +63,7 @@ dependencyResolutionManagement {
             } else {
                 sdkVersionNumber
             }
-            version("mapsSdk", "$versionAndBuild")
+            version("mapsSdk", versionAndBuild)
             library("mapsSdk", "com.esri", "arcgis-maps-kotlin").versionRef("mapsSdk")
         }
     }
