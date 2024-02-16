@@ -54,7 +54,6 @@ import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberComboBo
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberRadioButtonFieldState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberSwitchFieldState
 import com.arcgismaps.toolkit.featureforms.components.datetime.rememberDateTimeFieldState
-import com.arcgismaps.toolkit.featureforms.components.formelement.AttachmentFormElement
 import com.arcgismaps.toolkit.featureforms.components.formelement.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.formelement.GroupElement
 import com.arcgismaps.toolkit.featureforms.components.text.rememberFormTextFieldState
@@ -198,14 +197,6 @@ private fun FeatureFormBody(
                 .semantics { contentDescription = "lazy column" },
             state = lazyListState
         ) {
-            item {
-                AttachmentFormElement(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 15.dp, vertical = 10.dp),
-                )
-            }
-            
             states.forEach { entry ->
                 item {
                     when (entry.formElement) {
