@@ -86,6 +86,8 @@ internal class DateTimeFieldState(
         // class initializer blocks, it is safe to invoke it here.
         observeProperties()
     }
+
+    override fun typeConverter(input: Instant?): Any? = input
     
     companion object {
         fun Saver(

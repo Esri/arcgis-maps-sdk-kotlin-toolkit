@@ -41,6 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.toolkit.featureforms.R
+import com.arcgismaps.toolkit.featureforms.utils.isNullOrEmptyString
 
 @Composable
 internal fun RadioButtonField(
@@ -72,7 +73,7 @@ internal fun RadioButtonField(
 private fun RadioButtonField(
     label: String,
     description: String,
-    value: String,
+    value: Any?,
     editable: Boolean,
     required: Boolean,
     codedValues: Map<Any?, String>,
@@ -119,7 +120,7 @@ private fun RadioButtonField(
                 options.forEach { (_, name) ->
                     RadioButtonRow(
                         value = name,
-                        selected = name == value || (name == noValueLabel && value.isEmpty()),
+                        selected = name == value || (name == noValueLabel && value.isNullOrEmptyString()),
                         enabled = editable,
                         onClick = { onValueChanged(name) }
                     )

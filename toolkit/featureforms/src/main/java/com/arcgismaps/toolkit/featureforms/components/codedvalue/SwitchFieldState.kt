@@ -78,7 +78,7 @@ internal class SwitchFieldProperties(
 @Stable
 internal class SwitchFieldState(
     properties: SwitchFieldProperties,
-    val initialValue: String = properties.value.value,
+    val initialValue: Any? = properties.value.value,
     scope: CoroutineScope,
     onEditValue: ((Any?) -> Unit),
     defaultValidator: () -> List<Throwable>
@@ -108,6 +108,10 @@ internal class SwitchFieldState(
         // Start observing the properties. Since this method cannot be invoked from any open base
         // class initializer blocks, it is safe to invoke it here.
         observeProperties()
+    }
+
+    override fun typeConverter(input: Any?): Any? {
+        TODO("Not yet implemented")
     }
 
     companion object {

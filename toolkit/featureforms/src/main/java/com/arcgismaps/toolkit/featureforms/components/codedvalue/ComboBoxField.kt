@@ -116,7 +116,7 @@ internal fun ComboBoxField(
     }
 
     BaseTextField(
-        text = state.getCodedValueNameOrNull(value.data) ?: value.data,
+        text = state.getCodedValueNameOrNull(value.data) ?: "",
         onValueChange = state::onValueChanged,
         modifier = modifier,
         readOnly = true,

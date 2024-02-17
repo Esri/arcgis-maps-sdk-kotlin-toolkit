@@ -51,6 +51,9 @@ import com.arcgismaps.toolkit.featureforms.utils.valueFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.time.Instant
+import kotlin.math.roundToInt
+import kotlin.math.roundToLong
 
 internal class TextFieldProperties(
     label: String,
@@ -177,6 +180,21 @@ internal class FormTextFieldState(
         } else {
             NoError
         }
+    }
+
+    override fun typeConverter(input: String): Any? {
+        if (input.isEmpty() && fieldType.isNumeric) {
+            return null
+        }
+        return when (fieldType) {
+            FieldType.Int16 -> input.toIntOrNull()?.toShort()
+            FieldType.Int32 -> input.toIntOrNull()
+            FieldType.Int64 -> input.toLongOrNull()
+            FieldType.Float32 -> input.toFloatOrNull()
+            FieldType.Float64 -> input.toDoubleOrNull()
+            FieldType.Text -> input
+            else -> null
+        } ?: input
     }
 
     override fun validate(): List<ValidationErrorState> {

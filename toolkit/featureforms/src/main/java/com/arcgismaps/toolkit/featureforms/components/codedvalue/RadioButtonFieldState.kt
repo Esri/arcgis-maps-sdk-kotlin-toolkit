@@ -24,6 +24,7 @@ import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.RadioButtonsFormInput
 import com.arcgismaps.toolkit.featureforms.utils.editValue
+import com.arcgismaps.toolkit.featureforms.utils.isNullOrEmptyString
 import com.arcgismaps.toolkit.featureforms.utils.valueFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -32,7 +33,7 @@ internal typealias RadioButtonFieldProperties = CodedValueFieldProperties
 
 internal class RadioButtonFieldState(
     properties: RadioButtonFieldProperties,
-    initialValue: String = properties.value.value,
+    initialValue: Any? = properties.value.value,
     scope: CoroutineScope,
     onEditValue: ((Any?) -> Unit),
     defaultValidator: () -> List<Throwable>
@@ -55,13 +56,17 @@ internal class RadioButtonFieldState(
      * trigger a fallback to a ComboBox. If the [value] is empty then this returns false.
      */
     fun shouldFallback(): Boolean {
-        return if (value.value.data.isEmpty()) {
+        return if (value.value.data.isNullOrEmptyString()) {
             false
         } else {
             !codedValues.any {
                 it.name == value.value.data
             }
         }
+    }
+
+    override fun typeConverter(input: Any?): Any? {
+        TODO("Not yet implemented")
     }
 
     companion object {

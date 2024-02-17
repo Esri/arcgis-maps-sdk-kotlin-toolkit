@@ -51,26 +51,31 @@ internal fun FeatureForm.fieldIsNullable(element: FieldFormElement): Boolean {
  * @return returns a result with failure if the update has failed, else a success result is returned.
  */
 internal fun FieldFormElement.editValue(value: Any?) {
-    runCatching {
-        // set the value to null, if the incoming value is null or an empty string
-        if (value.isNullOrEmptyString()) {
-            updateValue(null)
-        } else {
-            val castValue = cast(value, fieldType)
-            // if the cast failed, let core coerce the value
-            if (castValue == null) {
-                updateValue(value)
-            } else {
-                updateValue(castValue)
-            }
-        }
-    }.onFailure {
-        //TODO: remove when updateValue is no longer throwing. (and also the runCatching)
-        Log.w(
-            "Form.editValue",
-            "caught ${it.message} while updating value of field $label to $value"
-        )
-    }
+    updateValue(value)
+//    runCatching {
+//        // set the value to null, if the incoming value is null or an empty string
+//        if (value.isNullOrEmptyString()) {
+//            if (fieldType == FieldType.Text) {
+//                updateValue("")
+//            } else {
+//                updateValue(null)
+//            }
+//        } else {
+//            val castValue = cast(value, fieldType)
+//            // if the cast failed, let core coerce the value
+//            if (castValue == null) {
+//                updateValue(value)
+//            } else {
+//                updateValue(castValue)
+//            }
+//        }
+//    }.onFailure {
+//        //TODO: remove when updateValue is no longer throwing. (and also the runCatching)
+//        Log.w(
+//            "Form.editValue",
+//            "caught ${it.message} while updating value of field $label to $value"
+//        )
+//    }
 }
 
 /**
@@ -85,12 +90,12 @@ internal fun Any?.isNullOrEmptyString(): Boolean {
 }
 
 internal inline fun <reified T> FieldFormElement.valueFlow(scope: CoroutineScope): StateFlow<T> =
-    if (formattedValue is T) {
+    if (value.value is T) {
+        value.map { it as T }.stateIn(scope, SharingStarted.Eagerly, value.value as T)
+    } else if (formattedValue is T) {
         // T is String
         value.map { formattedValue as T }
             .stateIn(scope, SharingStarted.Eagerly, formattedValue as T)
-    } else if (value.value is T) {
-        value.map { it as T }.stateIn(scope, SharingStarted.Eagerly, value.value as T)
     } else {
         // usage error.
         throw IllegalStateException("the generic parameterization of the state object must match either the value or the formattedValue.")

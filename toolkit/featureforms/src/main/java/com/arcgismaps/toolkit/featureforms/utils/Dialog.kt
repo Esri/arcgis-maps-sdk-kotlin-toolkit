@@ -102,7 +102,7 @@ internal fun FeatureFormDialog() {
         is DialogType.ComboBoxDialog -> {
             val state = (dialogType as DialogType.ComboBoxDialog).state
             ComboBoxDialog(
-                initialValue = state.value.value.data,
+                initialValue = state.value.value.toString(),
                 values = state.codedValues.associateBy({ it.code }, { it.name }),
                 label = state.label,
                 description = state.description,

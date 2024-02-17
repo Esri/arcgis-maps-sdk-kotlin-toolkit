@@ -33,7 +33,7 @@ import kotlinx.coroutines.launch
  */
 internal class ComboBoxFieldState(
     properties: CodedValueFieldProperties,
-    initialValue: String = properties.value.value,
+    initialValue: Any? = properties.value.value,
     scope: CoroutineScope,
     onEditValue: ((Any?) -> Unit),
     defaultValidator: () -> List<Throwable>
@@ -89,6 +89,10 @@ internal class ComboBoxFieldState(
                 }
             }
         )
+    }
+
+    override fun typeConverter(input: Any?): Any? {
+        TODO("Not yet implemented")
     }
 }
 
