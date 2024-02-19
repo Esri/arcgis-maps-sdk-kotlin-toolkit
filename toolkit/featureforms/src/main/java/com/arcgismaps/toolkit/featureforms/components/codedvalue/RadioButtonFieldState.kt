@@ -24,7 +24,6 @@ import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.RadioButtonsFormInput
 import com.arcgismaps.toolkit.featureforms.utils.editValue
-import com.arcgismaps.toolkit.featureforms.utils.isNullOrEmptyString
 import com.arcgismaps.toolkit.featureforms.utils.valueFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -52,16 +51,14 @@ internal class RadioButtonFieldState(
     }
 
     /**
-     * Returns true if the current value of [value] is not in the [codedValues]. This should
-     * trigger a fallback to a ComboBox. If the [value] is empty then this returns false.
+     * Returns true if the initial value is not in the [codedValues]. This should
+     * trigger a fallback to a ComboBox. If the [value] is false then this returns false.
      */
-    fun shouldFallback(): Boolean {
-        return if (value.value.data == null) {
-            false
-        } else {
-            !codedValues.any {
-                it.name == value.value.data
-            }
+    val shouldFallback = if (initialValue == null) {
+        false
+    } else {
+        !codedValues.any {
+            it.name == value.value.data
         }
     }
 
