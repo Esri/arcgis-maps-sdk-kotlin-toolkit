@@ -53,12 +53,12 @@ import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.ArcGISTiledElevationSource
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Surface
+import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.view.AtmosphereEffect
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.LightingMode
 import com.arcgismaps.mapping.view.SpaceEffect
 import com.arcgismaps.toolkit.geocompose.SceneView
-import com.arcgismaps.toolkit.geocompose.SceneViewpointOperation
 import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneId
@@ -78,18 +78,24 @@ fun MainScreen() {
                 )
             )
             baseSurface = surface
-        }
-    }
-    val viewpointOperation = SceneViewpointOperation.SetCamera(
-        Camera(
-            Point(
+            val point = Point(
                 -73.0815,
                 -49.3272,
                 4059.0,
                 SpatialReference.wgs84()
-            ), 11.0, 82.0, 0.0
-        )
-    )
+            )
+            initialViewpoint = Viewpoint(
+                center = point,
+                scale = 17000.0,
+                camera = Camera(
+                    locationPoint = point,
+                    heading = 11.0,
+                    pitch = 82.0,
+                    roll = 0.0
+                )
+            )
+        }
+    }
 
     val lightingOptionsState = remember {
         LightingOptionsState(
@@ -130,7 +136,6 @@ fun MainScreen() {
                 .padding(innerPadding)
                 .fillMaxSize(),
             arcGISScene = arcGISScene,
-            viewpointOperation = viewpointOperation,
             sunTime = lightingOptionsState.sunTime.value,
             sunLighting = lightingOptionsState.sunLighting.value,
             ambientLightColor = lightingOptionsState.ambientLightColor.value,
