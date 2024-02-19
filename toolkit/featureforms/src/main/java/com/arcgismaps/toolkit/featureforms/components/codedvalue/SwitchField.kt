@@ -34,8 +34,8 @@ import com.arcgismaps.toolkit.featureforms.components.base.BaseTextField
 
 @Composable
 internal fun SwitchField(state: SwitchFieldState, modifier: Modifier = Modifier) {
-    val codeName by state.value
-    val checkedState = codeName.data == state.onValue.name
+    val codeValue by state.value
+    val checkedState = codeValue.data == state.onValue.code
     val value = if (checkedState) state.onValue.name else state.offValue.name
     val isEditable by state.isEditable.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
@@ -63,9 +63,9 @@ internal fun SwitchField(state: SwitchFieldState, modifier: Modifier = Modifier)
             onCheckedChange = { newState ->
                 val newValue = (
                     if (newState)
-                        state.onValue.name
+                        state.onValue.code
                     else
-                        state.offValue.name
+                        state.offValue.code
                     )
                 state.onValueChanged(newValue)
             },
@@ -76,15 +76,15 @@ internal fun SwitchField(state: SwitchFieldState, modifier: Modifier = Modifier)
         )
     }
     
-    LaunchedEffect(codeName) {
+    LaunchedEffect(codeValue) {
         interactionSource.interactions.collect {
             if (isEditable) {
                 if (it is PressInteraction.Release) {
                     val newValue = (
                         if (checkedState)
-                            state.offValue.name
+                            state.offValue.code
                         else
-                            state.onValue.name
+                            state.onValue.code
                         )
                     state.onValueChanged(newValue)
                 }

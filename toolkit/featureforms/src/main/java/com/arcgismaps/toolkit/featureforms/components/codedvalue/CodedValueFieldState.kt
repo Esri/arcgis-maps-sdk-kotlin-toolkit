@@ -23,6 +23,7 @@ import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.FieldProperties
 import com.arcgismaps.toolkit.featureforms.components.text.TextFieldProperties
+import com.arcgismaps.toolkit.featureforms.utils.isNullOrEmptyString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
@@ -89,21 +90,19 @@ internal abstract class CodedValueFieldState(
     val fieldType: FieldType = properties.fieldType
 
     /**
-     * Returns the name of the [code] if it is present in [codedValues] else returns null.
+     * Returns the name of the [code] if it is present in [codedValues] else returns an empty string.
      */
-    fun getCodedValueNameOrNull(code: Any?): String? {
+    fun getNameForCodedValue(code: Any?): String {
         return codedValues.find {
             it.code.toString() == code.toString()
-        }?.name
+        }?.name ?: ""
     }
 
-//    override fun onValueChanged(input: Any?) {
-//        wasFocused = true
-//        val code = codedValues.firstOrNull {
-//            it.name == input
-//        }?.code
-//        onEditValue(code)
-//        _value.value = Value(input)
-//        updateValidation(input)
-//    }
+    override fun typeConverter(input: Any?): Any? {
+        return if (input.isNullOrEmptyString()) {
+            null
+        } else {
+            input
+        }
+    }
 }

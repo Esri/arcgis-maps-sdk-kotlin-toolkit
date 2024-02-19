@@ -86,8 +86,7 @@ internal abstract class BaseFieldState<T>(
     /**
      * Backing mutable state for the [value].
      */
-    @Suppress("PropertyName")
-    protected val _value : MutableState<Value<T>> = mutableStateOf(Value(initialValue))
+    private val _value : MutableState<Value<T>> = mutableStateOf(Value(initialValue))
 
     /**
      * Current value for this field state. The actual data of this type is wrapped in a [Value]

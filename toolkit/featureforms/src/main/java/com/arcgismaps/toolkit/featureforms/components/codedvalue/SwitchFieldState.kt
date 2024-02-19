@@ -39,7 +39,7 @@ internal class SwitchFieldProperties(
     label: String,
     placeholder: String,
     description: String,
-    value: StateFlow<String>,
+    value: StateFlow<Any?>,
     editable: StateFlow<Boolean>,
     required: StateFlow<Boolean>,
     visible: StateFlow<Boolean>,
@@ -110,10 +110,6 @@ internal class SwitchFieldState(
         observeProperties()
     }
 
-    override fun typeConverter(input: Any?): Any? {
-        TODO("Not yet implemented")
-    }
-
     companion object {
         fun Saver(
             formElement: FieldFormElement,
@@ -148,7 +144,7 @@ internal class SwitchFieldState(
                             FormInputNoValueOption.Hide,
                         noValueLabel = noValueString
                     ),
-                    initialValue = list[0] as String,
+                    initialValue = list[0],
                     scope = scope,
                     onEditValue = { codedValueName ->
                         formElement.editValue(if (codedValueName == input.onValue.name) input.onValue.code else input.offValue.code)

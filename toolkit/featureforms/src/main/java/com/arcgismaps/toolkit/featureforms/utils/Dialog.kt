@@ -102,7 +102,7 @@ internal fun FeatureFormDialog() {
         is DialogType.ComboBoxDialog -> {
             val state = (dialogType as DialogType.ComboBoxDialog).state
             ComboBoxDialog(
-                initialValue = state.value.value.toString(),
+                initialValue = state.value.value.data,
                 values = state.codedValues.associateBy({ it.code }, { it.name }),
                 label = state.label,
                 description = state.description,
@@ -114,8 +114,8 @@ internal fun FeatureFormDialog() {
                     KeyboardType.Ascii
                 },
                 noValueLabel = state.noValueLabel.ifEmpty { stringResource(R.string.no_value) },
-                onValueChange = { nameOrEmpty ->
-                    state.onValueChanged(nameOrEmpty)
+                onValueChange = { code ->
+                    state.onValueChanged(code)
                 },
                 onDismissRequest = { dialogRequester.dismissDialog() }
             )

@@ -56,17 +56,13 @@ internal class RadioButtonFieldState(
      * trigger a fallback to a ComboBox. If the [value] is empty then this returns false.
      */
     fun shouldFallback(): Boolean {
-        return if (value.value.data.isNullOrEmptyString()) {
+        return if (value.value.data == null) {
             false
         } else {
             !codedValues.any {
                 it.name == value.value.data
             }
         }
-    }
-
-    override fun typeConverter(input: Any?): Any? {
-        TODO("Not yet implemented")
     }
 
     companion object {

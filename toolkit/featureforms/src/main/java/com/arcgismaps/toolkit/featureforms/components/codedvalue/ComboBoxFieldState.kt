@@ -77,7 +77,7 @@ internal class ComboBoxFieldState(
                         noValueLabel = input.noValueLabel,
                         fieldType = formElement.fieldType
                     ),
-                    initialValue = list[0] as String,
+                    initialValue = list[0],
                     scope = scope,
                     onEditValue = { newValue ->
                         formElement.editValue(newValue)
@@ -89,10 +89,6 @@ internal class ComboBoxFieldState(
                 }
             }
         )
-    }
-
-    override fun typeConverter(input: Any?): Any? {
-        TODO("Not yet implemented")
     }
 }
 
