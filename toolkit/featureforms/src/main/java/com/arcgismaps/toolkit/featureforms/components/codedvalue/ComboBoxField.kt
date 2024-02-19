@@ -17,7 +17,6 @@
 package com.arcgismaps.toolkit.featureforms.components.codedvalue
 
 import android.content.res.Configuration
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -312,10 +311,6 @@ internal fun ComboBoxDialog(
                                     }
                                 },
                             trailingContent = {
-                                Log.e(
-                                    "TAG",
-                                    "ComboBoxDialog: $label, code:$code, init:$initialValue, name:$name",
-                                )
                                 if ((code == initialValue) || ((name == noValueLabel) && (initialValue == null))) {
                                     Icon(
                                         imageVector = Icons.Outlined.Check,
@@ -379,5 +374,3 @@ private fun ComboBoxPreview() {
     )
     ComboBoxField(state = state)
 }
-
-

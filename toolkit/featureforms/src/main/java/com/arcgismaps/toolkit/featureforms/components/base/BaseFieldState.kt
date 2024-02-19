@@ -288,5 +288,12 @@ internal abstract class BaseFieldState<T>(
         }
     }
 
+    /**
+     * Implement this method to that provides the proper type conversion from [T] to an Any?. This
+     * method is used by [onValueChanged] to cast the [input] before calling
+     * [FieldFormElement.updateValue]
+     *
+     * @param input The value to convert
+     */
     abstract fun typeConverter(input: T) : Any?
 }
