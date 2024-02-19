@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms.utils
 
-import android.util.Log
 import com.arcgismaps.data.FieldType
 import com.arcgismaps.data.RangeDomain
 import com.arcgismaps.mapping.featureforms.FeatureForm
@@ -26,9 +25,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import java.time.Instant
-import kotlin.math.roundToInt
-import kotlin.math.roundToLong
 
 /**
  * This file contains logic which will eventually be provided by core. Do not add anything to this file that isn't
@@ -41,41 +37,6 @@ internal fun FeatureForm.fieldIsNullable(element: FieldFormElement): Boolean {
         "expected feature table to have field with name ${element.fieldName}"
     }
     return isNullable
-}
-
-/**
- * Set the value in the feature's attribute map using [FieldFormElement.updateValue].
- *
- * @param value the value to be set on the attribute represented by this FieldFormElement.
- *
- * @return returns a result with failure if the update has failed, else a success result is returned.
- */
-internal fun FieldFormElement.editValue(value: Any?) {
-    updateValue(value)
-//    runCatching {
-//        // set the value to null, if the incoming value is null or an empty string
-//        if (value.isNullOrEmptyString()) {
-//            if (fieldType == FieldType.Text) {
-//                updateValue("")
-//            } else {
-//                updateValue(null)
-//            }
-//        } else {
-//            val castValue = cast(value, fieldType)
-//            // if the cast failed, let core coerce the value
-//            if (castValue == null) {
-//                updateValue(value)
-//            } else {
-//                updateValue(castValue)
-//            }
-//        }
-//    }.onFailure {
-//        //TODO: remove when updateValue is no longer throwing. (and also the runCatching)
-//        Log.w(
-//            "Form.editValue",
-//            "caught ${it.message} while updating value of field $label to $value"
-//        )
-//    }
 }
 
 /**
@@ -190,67 +151,3 @@ internal val RangeDomain.asLongTuple: MinMax<Long>
     }
 
 internal data class MinMax<T : Number>(val min: T?, val max: T?)
-
-private fun cast(value: Any?, fieldType: FieldType): Any? =
-    when (fieldType) {
-        FieldType.Int16 -> {
-            when (value) {
-                is String -> value.toIntOrNull()?.toShort()
-                is Int -> value.toShort()
-                is Double -> value.roundToInt().toShort()
-                else -> null
-            }
-        }
-
-        FieldType.Int32 -> {
-            when (value) {
-                is String -> value.toIntOrNull()
-                is Int -> value
-                is Double -> value.roundToInt()
-                else -> null
-            }
-        }
-
-        FieldType.Int64 -> {
-            when (value) {
-                is String -> value.toLongOrNull()
-                is Int -> value.toLong()
-                is Double -> value.roundToLong()
-                else -> null
-            }
-        }
-
-        FieldType.Float32 -> {
-            when (value) {
-                is String -> value.toFloatOrNull()
-                is Int -> value.toFloat()
-                is Double -> value.toFloat()
-                else -> null
-            }
-        }
-
-        FieldType.Float64 -> {
-            when (value) {
-                is String -> value.toDoubleOrNull()
-                is Int -> value.toDouble()
-                is Float -> value.toDouble()
-                is Double -> value.toDouble()
-                else -> null
-            }
-        }
-
-        FieldType.Date -> {
-            when (value) {
-                is String -> value.toLongOrNull()?.let { Instant.ofEpochMilli(it) }
-                is Long -> Instant.ofEpochMilli(value)
-                is Instant -> value
-                else -> null
-            }
-        }
-
-        FieldType.Text -> {
-            value?.toString()
-        }
-
-        else -> throw IllegalArgumentException("casting FieldFormElement value to $fieldType is not allowed")
-    }

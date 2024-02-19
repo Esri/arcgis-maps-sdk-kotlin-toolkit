@@ -23,7 +23,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
-import com.arcgismaps.toolkit.featureforms.utils.editValue
 import com.arcgismaps.toolkit.featureforms.utils.valueFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -80,7 +79,7 @@ internal class ComboBoxFieldState(
                     initialValue = list[0],
                     scope = scope,
                     onEditValue = { newValue ->
-                        formElement.editValue(newValue)
+                        formElement.updateValue(newValue)
                         scope.launch { form.evaluateExpressions() }
                     },
                     defaultValidator = formElement::getValidationErrors
@@ -117,7 +116,7 @@ internal fun rememberComboBoxFieldState(
         ),
         scope = scope,
         onEditValue = {
-            field.editValue(it)
+            field.updateValue(it)
             scope.launch { form.evaluateExpressions() }
         },
         defaultValidator = field::getValidationErrors

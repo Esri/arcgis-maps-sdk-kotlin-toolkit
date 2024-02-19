@@ -28,7 +28,6 @@ import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
-import com.arcgismaps.toolkit.featureforms.utils.editValue
 import com.arcgismaps.toolkit.featureforms.utils.fieldIsNullable
 import com.arcgismaps.toolkit.featureforms.utils.valueFlow
 import kotlinx.coroutines.CoroutineScope
@@ -146,8 +145,9 @@ internal class SwitchFieldState(
                     ),
                     initialValue = list[0],
                     scope = scope,
-                    onEditValue = { codedValueName ->
-                        formElement.editValue(if (codedValueName == input.onValue.name) input.onValue.code else input.offValue.code)
+                    onEditValue = { code ->
+                        formElement.updateValue(code)
+                        //formElement.editValue(if (codedValueName == input.onValue.name) input.onValue.code else input.offValue.code)
                         scope.launch { form.evaluateExpressions() }
                     },
                     defaultValidator = formElement::getValidationErrors
@@ -191,7 +191,7 @@ internal fun rememberSwitchFieldState(
         ),
         scope = scope,
         onEditValue = {
-            field.editValue(it)
+            field.updateValue(it)
             scope.launch { form.evaluateExpressions() }
         },
         defaultValidator = field::getValidationErrors

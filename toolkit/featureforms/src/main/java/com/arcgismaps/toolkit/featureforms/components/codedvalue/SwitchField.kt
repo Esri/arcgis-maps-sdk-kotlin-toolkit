@@ -42,7 +42,7 @@ internal fun SwitchField(state: SwitchFieldState, modifier: Modifier = Modifier)
     BaseTextField(
         text = value,
         onValueChange = {
-            state.onValueChanged(it)
+            // nothing happens here. state.onValueChange is triggered by the switch control
         },
         modifier = modifier,
         readOnly = true,
@@ -61,13 +61,12 @@ internal fun SwitchField(state: SwitchFieldState, modifier: Modifier = Modifier)
         Switch(
             checked = checkedState,
             onCheckedChange = { newState ->
-                val newValue = (
-                    if (newState)
-                        state.onValue.code
-                    else
-                        state.offValue.code
-                    )
-                state.onValueChanged(newValue)
+                val code = if (newState) {
+                    state.onValue.code
+                } else {
+                    state.offValue.code
+                }
+                state.onValueChanged(code)
             },
             modifier = Modifier
                 .semantics { contentDescription = "switch" }
@@ -75,18 +74,17 @@ internal fun SwitchField(state: SwitchFieldState, modifier: Modifier = Modifier)
             enabled = isEditable
         )
     }
-    
+
     LaunchedEffect(codeValue) {
         interactionSource.interactions.collect {
             if (isEditable) {
                 if (it is PressInteraction.Release) {
-                    val newValue = (
-                        if (checkedState)
-                            state.offValue.code
-                        else
-                            state.onValue.code
-                        )
-                    state.onValueChanged(newValue)
+                    val code = if (checkedState) {
+                        state.offValue.code
+                    } else {
+                        state.onValue.code
+                    }
+                    state.onValueChanged(code)
                 }
             }
         }

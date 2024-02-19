@@ -43,7 +43,6 @@ import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.
 import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.NotAWholeNumber
 import com.arcgismaps.toolkit.featureforms.utils.asDoubleTuple
 import com.arcgismaps.toolkit.featureforms.utils.asLongTuple
-import com.arcgismaps.toolkit.featureforms.utils.editValue
 import com.arcgismaps.toolkit.featureforms.utils.isFloatingPoint
 import com.arcgismaps.toolkit.featureforms.utils.isIntegerType
 import com.arcgismaps.toolkit.featureforms.utils.isNumeric
@@ -51,9 +50,6 @@ import com.arcgismaps.toolkit.featureforms.utils.valueFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.time.Instant
-import kotlin.math.roundToInt
-import kotlin.math.roundToLong
 
 internal class TextFieldProperties(
     label: String,
@@ -279,7 +275,7 @@ internal class FormTextFieldState(
                     initialValue = list[0] as String,
                     scope = scope,
                     onEditValue = { newValue ->
-                        formElement.editValue(newValue)
+                        formElement.updateValue(newValue)
                         scope.launch { form.evaluateExpressions() }
                     },
                     defaultValidator = { formElement.getValidationErrors() }
@@ -319,7 +315,7 @@ internal fun rememberFormTextFieldState(
         ),
         scope = scope,
         onEditValue = { newValue ->
-            field.editValue(newValue)
+            field.updateValue(newValue)
             scope.launch { form.evaluateExpressions() }
         },
         defaultValidator = { field.getValidationErrors() }
