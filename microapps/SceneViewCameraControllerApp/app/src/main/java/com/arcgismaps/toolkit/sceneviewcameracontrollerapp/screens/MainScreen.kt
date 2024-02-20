@@ -126,7 +126,7 @@ fun MainScreen() {
             arcGISScene = arcGISScene,
             cameraController = cameraController,
             graphicsOverlays = graphicsOverlayArray,
-            sceneViewProxy = sceneViewProxy,
+            sceneViewProxy = sceneViewProxy
         )
 
         LaunchedEffect(cameraController) {
