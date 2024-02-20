@@ -147,7 +147,6 @@ internal class SwitchFieldState(
                     scope = scope,
                     onEditValue = { code ->
                         formElement.updateValue(code)
-                        //formElement.editValue(if (codedValueName == input.onValue.name) input.onValue.code else input.offValue.code)
                         scope.launch { form.evaluateExpressions() }
                     },
                     defaultValidator = formElement::getValidationErrors
