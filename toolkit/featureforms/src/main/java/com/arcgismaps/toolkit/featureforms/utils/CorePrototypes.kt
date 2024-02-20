@@ -50,18 +50,33 @@ internal fun Any?.isNullOrEmptyString(): Boolean {
     }
 }
 
-internal inline fun <reified T> FieldFormElement.valueFlow(scope: CoroutineScope): StateFlow<T> =
+/**
+ * Transforms the state flow [FieldFormElement.value] into a state flow of type [T].
+ * This function creates a new [StateFlow].
+ *
+ * @throws IllegalStateException if the [FieldFormElement.value] cannot be cast to [T].
+ */
+internal inline fun <reified T> FieldFormElement.mapValueAsStateFlow(scope: CoroutineScope): StateFlow<T> =
     if (value.value is T) {
         value.map { it as T }.stateIn(scope, SharingStarted.Eagerly, value.value as T)
-    } else if (formattedValue is T) {
-        // T is String
-        value.map { formattedValue as T }
-            .stateIn(scope, SharingStarted.Eagerly, formattedValue as T)
     } else {
         // usage error.
-        throw IllegalStateException("the generic parameterization of the state object must match either the value or the formattedValue.")
+        throw IllegalStateException("the generic parameterization of the state object must match the type specified.")
     }
 
+/**
+ * Creates and returns a new [StateFlow] of type [String] that emits the [FieldFormElement.formattedValue]
+ * whenever the [FieldFormElement.value] emits.
+ */
+internal fun FieldFormElement.formattedValueAsStateFlow(scope: CoroutineScope): StateFlow<String> {
+    return value.map {
+        formattedValue
+    }.stateIn(
+        scope,
+        SharingStarted.Eagerly,
+        formattedValue
+    )
+}
 
 internal val FieldType.isNumeric: Boolean
     get() {
