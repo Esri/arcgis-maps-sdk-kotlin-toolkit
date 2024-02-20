@@ -176,7 +176,6 @@ internal abstract class BaseFieldState<T>(
      * method in any open/abstract class constructors since it directly invokes open members.
      */
     private fun updateValidation(value : T) {
-        //val currentValue = _value.value.data
         val error = filterErrors(validate())
         // update the value with the validation error.
         _value.value = Value(value, error)
