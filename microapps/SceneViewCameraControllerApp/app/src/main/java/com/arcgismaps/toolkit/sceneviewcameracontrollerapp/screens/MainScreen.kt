@@ -82,8 +82,8 @@ fun MainScreen() {
             SimpleMarkerSceneSymbol(style = SimpleMarkerSceneSymbolStyle.Sphere, color = Color.red)
         )
     }
-
-    val graphicsOverlayArray = remember {
+    // a list of GraphicsOverlays used by the SceneView
+    val graphicsOverlays = remember {
         listOf(
             GraphicsOverlay().apply {
                 graphics.add(simpleGraphic)
@@ -125,7 +125,7 @@ fun MainScreen() {
                 .padding(paddingValues),
             arcGISScene = arcGISScene,
             cameraController = cameraController,
-            graphicsOverlays = graphicsOverlayArray,
+            graphicsOverlays = graphicsOverlays,
             sceneViewProxy = sceneViewProxy
         )
 
