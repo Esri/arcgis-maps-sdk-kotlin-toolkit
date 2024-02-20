@@ -74,7 +74,7 @@ private val fillSymbol: SimpleFillSymbol by lazy {
 
 /**
  * Displays a composable [MapView] to add graphics with the [GeometryEditor] using [VertexTool]
- * on a [GraphicsOverlayCollection]. The editing of graphics can be started/stopped using a [Switch].
+ * on a [GraphicsOverlay]. The editing of graphics can be started/stopped using a [Switch].
  * Each new sketch is added as a new [GraphicsOverlay]. An action button provides a choice of options
  * to undo, redo, clear sketch or reset all the graphics overlays.
  */
@@ -82,7 +82,7 @@ private val fillSymbol: SimpleFillSymbol by lazy {
 @Composable
 fun MainScreen() {
     val arcGISMap by remember { mutableStateOf(ArcGISMap(BasemapStyle.ArcGISStreets)) }
-    // the array of graphics overlays used by the MapView
+    // the list of graphics overlays used by the MapView
     var graphicsOverlays by remember { mutableStateOf(emptyList<GraphicsOverlay>()) }
     // the geometry editor used to manage the editing session
     val geometryEditor = remember { GeometryEditor() }
