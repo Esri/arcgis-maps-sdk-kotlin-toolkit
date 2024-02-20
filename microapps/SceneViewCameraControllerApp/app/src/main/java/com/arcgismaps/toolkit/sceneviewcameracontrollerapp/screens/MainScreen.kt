@@ -84,7 +84,7 @@ fun MainScreen() {
     }
 
     val graphicsOverlayArray = remember {
-        arrayOf(
+        listOf(
             GraphicsOverlay().apply {
                 graphics.add(simpleGraphic)
             }

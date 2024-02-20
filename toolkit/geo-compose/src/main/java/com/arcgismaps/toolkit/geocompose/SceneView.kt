@@ -74,7 +74,7 @@ import java.time.Instant
  * type of [ViewpointType.CenterAndScale]
  * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a viewpoint
  * type of [ViewpointType.BoundingGeometry]
- * @param graphicsOverlays the [Array] of GraphicsOverlays used by this composable SceneView
+ * @param graphicsOverlays graphics overlays used by this composable SceneView
  * @param sceneViewProxy the [SceneViewProxy] to associate with the composable SceneView
  * @param sceneViewInteractionOptions the [SceneViewInteractionOptions] used by this composable SceneView
  * @param viewLabelProperties the [ViewLabelProperties] used by the composable SceneView
@@ -83,8 +83,8 @@ import java.time.Instant
  * @param onAttributionTextChanged lambda invoked when the attribution text of the composable SceneView has changed
  * @param onAttributionBarLayoutChanged lambda invoked when the attribution bar's position or size changes
  * @param cameraController the [CameraController] to manage the position, orientation, and movement of the camera
- * @param analysisOverlays an [Array] of analysis overlays that render the results of 3D visual analysis on the composable SceneView
- * @param imageOverlays an [Array] of image overlays for displaying images in the composable SceneView
+ * @param analysisOverlays analysis overlays that render the results of 3D visual analysis on the composable SceneView
+ * @param imageOverlays image overlays for displaying images in the composable SceneView
  * @param atmosphereEffect the effect applied to the scene's atmosphere
  * @param timeExtent the [TimeExtent] used by the composable SceneView
  * @param onTimeExtentChanged lambda invoked when the composable SceneView's [TimeExtent] is changed
@@ -119,7 +119,7 @@ public fun SceneView(
     arcGISScene: ArcGISScene? = null,
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
-    graphicsOverlays: Array<GraphicsOverlay> = emptyArray(),
+    graphicsOverlays: List<GraphicsOverlay> = emptyList(),
     sceneViewProxy: SceneViewProxy? = null,
     sceneViewInteractionOptions: SceneViewInteractionOptions = SceneViewInteractionOptions(),
     viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
@@ -128,8 +128,8 @@ public fun SceneView(
     onAttributionTextChanged: ((String) -> Unit)? = null,
     onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)? = null,
     cameraController: CameraController = GlobeCameraController(),
-    analysisOverlays: Array<AnalysisOverlay> = emptyArray(),
-    imageOverlays: Array<ImageOverlay> = emptyArray(),
+    analysisOverlays: List<AnalysisOverlay> = emptyList(),
+    imageOverlays: List<ImageOverlay> = emptyList(),
     atmosphereEffect: AtmosphereEffect = AtmosphereEffect.HorizonOnly,
     timeExtent: TimeExtent? = null,
     onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
@@ -173,19 +173,19 @@ public fun SceneView(
             it.sunLighting = sunLighting
             it.ambientLightColor = com.arcgismaps.Color(ambientLightColor.toArgb())
             it.isAttributionBarVisible = isAttributionBarVisible
-            if (!sceneView.graphicsOverlays.toTypedArray().contentEquals(graphicsOverlays)) {
+            if (sceneView.graphicsOverlays != graphicsOverlays) {
                 it.graphicsOverlays.apply {
                     clear()
                     addAll(graphicsOverlays)
                 }
             }
-            if (!sceneView.analysisOverlays.toTypedArray().contentEquals(analysisOverlays)) {
+            if (sceneView.analysisOverlays != analysisOverlays) {
                 it.analysisOverlays.apply {
                     clear()
                     addAll(analysisOverlays)
                 }
             }
-            if (!sceneView.imageOverlays.toTypedArray().contentEquals(imageOverlays)) {
+            if (sceneView.imageOverlays != imageOverlays) {
                 it.imageOverlays.apply {
                     clear()
                     addAll(imageOverlays)

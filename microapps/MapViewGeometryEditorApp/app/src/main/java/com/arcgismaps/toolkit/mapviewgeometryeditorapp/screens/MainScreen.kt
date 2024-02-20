@@ -83,7 +83,7 @@ private val fillSymbol: SimpleFillSymbol by lazy {
 fun MainScreen() {
     val arcGISMap by remember { mutableStateOf(ArcGISMap(BasemapStyle.ArcGISStreets)) }
     // the array of graphics overlays used by the MapView
-    var graphicsOverlays by remember { mutableStateOf(emptyArray<GraphicsOverlay>()) }
+    var graphicsOverlays by remember { mutableStateOf(emptyList<GraphicsOverlay>()) }
     // the geometry editor used to manage the editing session
     val geometryEditor = remember { GeometryEditor() }
     // track the status if geometry editor is started or stopped
@@ -135,7 +135,7 @@ fun MainScreen() {
                             actionsExpanded = false
                         },
                         onResetAllGraphics = {
-                            graphicsOverlays = emptyArray()
+                            graphicsOverlays = emptyList()
                             isDrawingEnabled = false
                         }
                     )
