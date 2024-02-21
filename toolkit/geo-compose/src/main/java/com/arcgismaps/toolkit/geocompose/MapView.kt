@@ -127,7 +127,7 @@ public fun MapView(
     mapViewInteractionOptions: MapViewInteractionOptions = remember { MapViewInteractionOptions() },
     viewLabelProperties: ViewLabelProperties = remember { ViewLabelProperties() },
     selectionProperties: SelectionProperties = remember { SelectionProperties() },
-    insets: PaddingValues = remember { PaddingValues() },
+    insets: PaddingValues = MapViewDefaults.DefaultInsets,
     grid: Grid? = null,
     backgroundGrid: BackgroundGrid = remember { BackgroundGrid() },
     wrapAroundMode: WrapAroundMode = WrapAroundMode.EnabledWhenSupported,
@@ -429,4 +429,8 @@ public inline fun rememberLocationDisplay(
     return remember(key) {
         LocationDisplay().apply(init)
     }
+}
+
+public object MapViewDefaults {
+    public val DefaultInsets: PaddingValues = PaddingValues()
 }
