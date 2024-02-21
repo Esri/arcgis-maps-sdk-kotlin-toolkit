@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+@Deprecated("Deprecated without replacement")
 public data class MapInsets(
     var start: Double = 0.0,
     var end: Double = 0.0,
@@ -59,6 +60,7 @@ public data class MapInsets(
  *
  * @see ComposableMap
  */
+@Deprecated("Deprecated without replacement")
 public interface MapEvents {
     /**
      * Support for down events on [ComposableMap]
@@ -131,6 +133,7 @@ public interface MapEvents {
  * An interface for consumption by [ComposableMap]. This interface represents the state needed
  * for [ComposableMap] to re/compose.
  */
+@Deprecated("Deprecated without replacement")
 public interface MapState : MapEvents {
     /**
      * The model for [ComposableMap]
@@ -156,13 +159,14 @@ public interface MapState : MapEvents {
 /**
  * Factory function for the default implementation of [MapState]
  */
+@Deprecated("Deprecated without replacement")
 public fun MapState(map: ArcGISMap? = null, mapInsets: MapInsets = MapInsets()): MapState =
     MapStateImpl(map, mapInsets)
 
 /**
  * A default implementation for the [MapState]
  */
-
+@Deprecated("Deprecated without replacement")
 public class MapStateImpl(
     map: ArcGISMap?,
     mapInsets: MapInsets = MapInsets()
