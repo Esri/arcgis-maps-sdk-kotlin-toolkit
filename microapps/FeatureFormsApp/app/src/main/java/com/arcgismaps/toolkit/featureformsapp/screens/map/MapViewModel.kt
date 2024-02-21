@@ -164,22 +164,20 @@ class MapViewModel @Inject constructor(
         return Result.success(Unit)
     }
     
-    fun selectNewFeature() {
-        require(_uiState.value is UIState.Switching)
-        val currentState = _uiState.value as UIState.Switching
-        currentState.oldState.featureForm.discardEdits()
-        val layer = currentState.oldState.featureForm.feature.featureTable?.layer as FeatureLayer
-        layer.clearSelection()
-        layer.selectFeature(currentState.newFeature)
-        _uiState.value =
-            UIState.Editing(featureForm = FeatureForm(currentState.newFeature, layer.featureFormDefinition!!))
-    }
+    fun selectNewFeature() =
+        (_uiState.value as? UIState.Switching)?.let { prevState ->
+            prevState.oldState.featureForm.discardEdits()
+            val layer = prevState.oldState.featureForm.feature.featureTable?.layer as FeatureLayer
+            layer.clearSelection()
+            layer.selectFeature(prevState.newFeature)
+            _uiState.value =
+                UIState.Editing(featureForm = FeatureForm(prevState.newFeature, layer.featureFormDefinition!!))
+        }
     
-    fun continueEditing() {
-        require(_uiState.value is UIState.Switching)
-        val currentState = _uiState.value as UIState.Switching
-        _uiState.value = currentState.oldState
-    }
+    fun continueEditing() =
+        (_uiState.value as? UIState.Switching)?.let { prevState ->
+            _uiState.value = prevState.oldState
+        }
 
     fun rollbackEdits(): Result<Unit> {
         (_uiState.value as? UIState.Editing)?.let {
