@@ -431,6 +431,18 @@ public inline fun rememberLocationDisplay(
     }
 }
 
+/**
+ * Contains default values for the composable MapView.
+ *
+ * @see com.arcgismaps.toolkit.geocompose.MapView
+ * @since 200.4.0
+ */
 public object MapViewDefaults {
+
+    /**
+     * Default insets for the composable MapView, set to 0 on all sides.
+     *
+     * @since 200.4.0
+     */
     public val DefaultInsets: PaddingValues = PaddingValues()
 }

@@ -479,7 +479,24 @@ public inline fun rememberImageOverlayCollection(
     ImageOverlayCollection().apply(init)
 }
 
+/**
+ * Contains default values for the SceneView.
+ *
+ * @see com.arcgismaps.toolkit.geocompose.SceneView
+ * @since 200.4.0
+ */
 public object SceneViewDefaults {
+    /**
+     * Default time for the sun position in the SceneView, set to 12:00 on 22 September 2000.
+     *
+     * @since 200.4.0
+     */
     public val DefaultSunTime: Instant = Instant.parse("2000-09-22T12:00:00Z")
+
+    /**
+     * Default color for the ambient light in the SceneView, set to a neutral gray value.
+     *
+     * @since 200.4.0
+     */
     public val DefaultAmbientLightColor: Color = Color(220, 220, 220, 255)
 }
