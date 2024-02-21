@@ -116,8 +116,13 @@ internal fun ComboBoxField(
     }
 
     BaseTextField(
-        text = state.getCodedValueNameOrNull(value.data) ?: value.data,
-        onValueChange = state::onValueChanged,
+        text = state.getNameForCodedValue(value.data),
+        onValueChange = {
+            // usually only triggered on a "clear" action
+            // this value will be an empty string and the type conversion must be handled
+            // by the state object
+            state.onValueChanged(it)
+        },
         modifier = modifier,
         readOnly = true,
         isEditable = isEditable,
@@ -149,7 +154,7 @@ internal fun ComboBoxField(
 
 @Composable
 internal fun ComboBoxDialog(
-    initialValue: String,
+    initialValue: Any?,
     values: Map<Any?, String>,
     label: String,
     description: String,
@@ -157,7 +162,7 @@ internal fun ComboBoxDialog(
     noValueOption: FormInputNoValueOption,
     noValueLabel: String,
     keyboardType: KeyboardType,
-    onValueChange: (String) -> Unit,
+    onValueChange: (Any?) -> Unit,
     onDismissRequest: () -> Unit
 ) {
     val configuration = LocalConfiguration.current
@@ -165,7 +170,7 @@ internal fun ComboBoxDialog(
     var searchText by rememberSaveable { mutableStateOf("") }
     val codedValues = if (!isRequired) {
         if (noValueOption == FormInputNoValueOption.Show) {
-            mapOf("" to noValueLabel) + values
+            mapOf(null to noValueLabel) + values
         } else values
     } else values
 
@@ -293,9 +298,9 @@ internal fun ComboBoxDialog(
                                 .clickable {
                                     // if the no value label was selected, set the value to be empty
                                     if (name == noValueLabel) {
-                                        onValueChange("")
+                                        onValueChange(null)
                                     } else {
-                                        onValueChange(name)
+                                        onValueChange(code)
                                     }
                                 }
                                 .semantics {
@@ -306,7 +311,7 @@ internal fun ComboBoxDialog(
                                     }
                                 },
                             trailingContent = {
-                                if (name == initialValue || (name == noValueLabel && initialValue.isEmpty())) {
+                                if ((code == initialValue) || ((name == noValueLabel) && (initialValue == null))) {
                                     Icon(
                                         imageVector = Icons.Outlined.Check,
                                         contentDescription = "list item check"
@@ -369,5 +374,3 @@ private fun ComboBoxPreview() {
     )
     ComboBoxField(state = state)
 }
-
-

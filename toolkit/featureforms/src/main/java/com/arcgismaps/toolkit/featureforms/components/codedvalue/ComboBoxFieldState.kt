@@ -23,9 +23,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
-import com.arcgismaps.toolkit.featureforms.utils.editValue
-import com.arcgismaps.toolkit.featureforms.utils.fieldType
-import com.arcgismaps.toolkit.featureforms.utils.valueFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -34,7 +31,7 @@ import kotlinx.coroutines.launch
  */
 internal class ComboBoxFieldState(
     properties: CodedValueFieldProperties,
-    initialValue: String = properties.value.value,
+    initialValue: Any? = properties.value.value,
     scope: CoroutineScope,
     onEditValue: ((Any?) -> Unit),
     defaultValidator: () -> List<Throwable>
@@ -69,19 +66,19 @@ internal class ComboBoxFieldState(
                         label = formElement.label,
                         placeholder = formElement.hint,
                         description = formElement.description,
-                        value = formElement.valueFlow(scope),
+                        value = formElement.value,
                         editable = formElement.isEditable,
                         required = formElement.isRequired,
                         visible = formElement.isVisible,
                         codedValues = input.codedValues,
                         showNoValueOption = input.noValueOption,
                         noValueLabel = input.noValueLabel,
-                        fieldType = form.fieldType(formElement)
+                        fieldType = formElement.fieldType
                     ),
-                    initialValue = list[0] as String,
+                    initialValue = list[0],
                     scope = scope,
                     onEditValue = { newValue ->
-                        form.editValue(formElement, newValue)
+                        formElement.updateValue(newValue)
                         scope.launch { form.evaluateExpressions() }
                     },
                     defaultValidator = formElement::getValidationErrors
@@ -99,6 +96,7 @@ internal fun rememberComboBoxFieldState(
     form: FeatureForm,
     scope: CoroutineScope
 ): ComboBoxFieldState = rememberSaveable(
+    inputs = arrayOf(form),
     saver = ComboBoxFieldState.Saver(field, form, scope)
 ) {
     val input = field.input as ComboBoxFormInput
@@ -107,18 +105,18 @@ internal fun rememberComboBoxFieldState(
             label = field.label,
             placeholder = field.hint,
             description = field.description,
-            value = field.valueFlow(scope),
+            value = field.value,
             editable = field.isEditable,
             required = field.isRequired,
             visible = field.isVisible,
             codedValues = input.codedValues,
             showNoValueOption = input.noValueOption,
             noValueLabel = input.noValueLabel,
-            fieldType = form.fieldType(field)
+            fieldType = field.fieldType
         ),
         scope = scope,
         onEditValue = {
-            form.editValue(field, it)
+            field.updateValue(it)
             scope.launch { form.evaluateExpressions() }
         },
         defaultValidator = field::getValidationErrors

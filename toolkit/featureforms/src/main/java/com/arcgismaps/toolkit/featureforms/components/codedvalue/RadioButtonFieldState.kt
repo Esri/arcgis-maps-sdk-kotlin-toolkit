@@ -23,9 +23,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.RadioButtonsFormInput
-import com.arcgismaps.toolkit.featureforms.utils.editValue
-import com.arcgismaps.toolkit.featureforms.utils.fieldType
-import com.arcgismaps.toolkit.featureforms.utils.valueFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -33,7 +30,7 @@ internal typealias RadioButtonFieldProperties = CodedValueFieldProperties
 
 internal class RadioButtonFieldState(
     properties: RadioButtonFieldProperties,
-    initialValue: String = properties.value.value,
+    initialValue: Any? = properties.value.value,
     scope: CoroutineScope,
     onEditValue: ((Any?) -> Unit),
     defaultValidator: () -> List<Throwable>
@@ -52,16 +49,14 @@ internal class RadioButtonFieldState(
     }
 
     /**
-     * Returns true if the current value of [value] is not in the [codedValues]. This should
-     * trigger a fallback to a ComboBox. If the [value] is empty then this returns false.
+     * Returns true if the initial value is not in the [codedValues]. This should
+     * trigger a fallback to a ComboBox. If the [value] is false then this returns false.
      */
-    fun shouldFallback(): Boolean {
-        return if (value.value.data.isEmpty()) {
-            false
-        } else {
-            !codedValues.any {
-                it.name == value.value.data
-            }
+    val shouldFallback = if (initialValue == null) {
+        false
+    } else {
+        !codedValues.any {
+            it.name == value.value.data
         }
     }
 
@@ -87,11 +82,11 @@ internal class RadioButtonFieldState(
                         label = formElement.label,
                         placeholder = formElement.hint,
                         description = formElement.description,
-                        value = formElement.valueFlow(scope),
+                        value = formElement.value,
                         editable = formElement.isEditable,
                         required = formElement.isRequired,
                         visible = formElement.isVisible,
-                        fieldType = form.fieldType(formElement),
+                        fieldType = formElement.fieldType,
                         codedValues = input.codedValues,
                         showNoValueOption = input.noValueOption,
                         noValueLabel = input.noValueLabel
@@ -99,7 +94,7 @@ internal class RadioButtonFieldState(
                     initialValue = list[0],
                     scope = scope,
                     onEditValue = { newValue ->
-                        form.editValue(formElement, newValue)
+                        formElement.updateValue(newValue)
                         scope.launch { form.evaluateExpressions() }
                     },
                     defaultValidator = formElement::getValidationErrors
@@ -115,6 +110,7 @@ internal fun rememberRadioButtonFieldState(
     form: FeatureForm,
     scope: CoroutineScope
 ): RadioButtonFieldState = rememberSaveable(
+    inputs = arrayOf(form),
     saver = RadioButtonFieldState.Saver(field, form, scope)
 ) {
     val input = field.input as RadioButtonsFormInput
@@ -123,18 +119,18 @@ internal fun rememberRadioButtonFieldState(
             label = field.label,
             placeholder = field.hint,
             description = field.description,
-            value = field.valueFlow(scope),
+            value = field.value,
             editable = field.isEditable,
             required = field.isRequired,
             visible = field.isVisible,
-            fieldType = form.fieldType(field),
+            fieldType = field.fieldType,
             codedValues = input.codedValues,
             showNoValueOption = input.noValueOption,
             noValueLabel = input.noValueLabel
         ),
         scope = scope,
         onEditValue = {
-            form.editValue(field, it)
+            field.updateValue(it)
             scope.launch { form.evaluateExpressions() }
         },
         defaultValidator = field::getValidationErrors

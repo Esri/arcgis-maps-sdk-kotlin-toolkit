@@ -54,7 +54,7 @@ internal fun <T> FieldElement(state: BaseFieldState<T>) {
             }
 
             is RadioButtonFieldState -> {
-                if (state.shouldFallback()) {
+                if (state.shouldFallback) {
                     ComboBoxField(state = state)
                 } else {
                     RadioButtonField(state = state)

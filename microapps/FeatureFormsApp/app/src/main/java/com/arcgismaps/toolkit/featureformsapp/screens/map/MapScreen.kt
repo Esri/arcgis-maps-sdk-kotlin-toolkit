@@ -84,6 +84,13 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                     ValidationErrorVisibility.Automatic
                 )
             }
+            
+            is UIState.Switching -> {
+                val state = uiState as UIState.Switching
+                Pair(
+                    state.oldState.featureForm, state.oldState.validationErrorVisibility
+                )
+            }
 
             else -> {
                 Pair(null, ValidationErrorVisibility.Automatic)
@@ -180,6 +187,12 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
             onCancel = {
                 showDiscardEditsDialog = false
             }
+        )
+    }
+    if (uiState is UIState.Switching) {
+        DiscardEditsDialog(
+            onConfirm = { mapViewModel.selectNewFeature() },
+            onCancel = { mapViewModel.continueEditing() }
         )
     }
 }

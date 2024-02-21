@@ -81,13 +81,12 @@ internal abstract class BaseFieldState<T>(
     /**
      * A state flow to handle calculated value changes.
      */
-    private val _calculatedValue = properties.value
+    private val _attributeValue = properties.value
 
     /**
      * Backing mutable state for the [value].
      */
-    @Suppress("PropertyName")
-    protected val _value : MutableState<Value<T>> = mutableStateOf(Value(initialValue))
+    private val _value : MutableState<Value<T>> = mutableStateOf(Value(initialValue))
 
     /**
      * Current value for this field state. The actual data of this type is wrapped in a [Value]
@@ -130,12 +129,28 @@ internal abstract class BaseFieldState<T>(
     init {
         // start listening to calculated value updates immediately
         scope.launch {
-            // update the current value when the calculated value changes
-            // calculated properties do not get validated
-            _calculatedValue.collect {
+            // update the current value state when the attribute value changes
+            _attributeValue.collect {
                 _value.value = Value(it)
             }
         }
+    }
+
+    /**
+     * Callback to update the current value of the FormTextFieldState to the given [input]. This also
+     * sets the value on the feature using [onEditValue] and updates the validation using
+     * [updateValidation].
+     */
+    fun onValueChanged(input: T) {
+        // infer that a value change event comes from a user interaction and hence treat it as a
+        // focus event
+        wasFocused = true
+        // set the ui state immediately
+        _value.value = Value(input)
+        // update the attributes
+        onEditValue(typeConverter(input))
+        // run validation
+        updateValidation(input)
     }
 
     /**
@@ -153,18 +168,17 @@ internal abstract class BaseFieldState<T>(
      */
     fun forceValidation() {
         wasFocused = true
-        updateValidation()
+        updateValidation(_value.value.data)
     }
 
     /**
      * Runs and updates the validation using [validate] and [filterErrors]. Avoid calling this
      * method in any open/abstract class constructors since it directly invokes open members.
      */
-    protected fun updateValidation() {
-        val currentValue = value.value.data
+    private fun updateValidation(value : T) {
         val error = filterErrors(validate())
         // update the value with the validation error.
-        _value.value = Value(currentValue, error)
+        _value.value = Value(value, error)
     }
 
     /**
@@ -180,19 +194,25 @@ internal abstract class BaseFieldState<T>(
             scope.launch {
                 // validate when focus changes
                 isFocused.collect {
-                    updateValidation()
+                    updateValidation(_value.value.data)
                 }
             }
             scope.launch {
                 // validate when required property changes
                 isRequired.collect {
-                    updateValidation()
+                    updateValidation(_value.value.data)
                 }
             }
             scope.launch {
                 // validate when the editable property changes
                 isEditable.collect {
-                    updateValidation()
+                    updateValidation(_value.value.data)
+                }
+            }
+            scope.launch {
+                // validate when the attribute value changes
+                _attributeValue.collect {
+                    updateValidation(_value.value.data)
                 }
             }
         }
@@ -242,20 +262,6 @@ internal abstract class BaseFieldState<T>(
     }
 
     /**
-     * Callback to update the current value of the FormTextFieldState to the given [input]. This also
-     * sets the value on the feature using [onEditValue] and updates the validation using
-     * [updateValidation].
-     */
-    open fun onValueChanged(input: T) {
-        // infer that a value change event comes from a user interaction and hence treat it as a
-        // focus event
-        wasFocused = true
-        onEditValue(input)
-        _value.value = Value(input)
-        updateValidation()
-    }
-
-    /**
      * Validates the current value using the [defaultValidator].
      *
      * @return Returns the list of validation errors.
@@ -280,4 +286,13 @@ internal abstract class BaseFieldState<T>(
             }
         }
     }
+
+    /**
+     * Implement this method to provide the proper type conversion from [T] to an Any?. This
+     * method is used by [onValueChanged] to cast the [input] before calling
+     * [FieldFormElement.updateValue].
+     *
+     * @param input The value to convert
+     */
+    abstract fun typeConverter(input: T) : Any?
 }

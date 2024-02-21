@@ -33,6 +33,14 @@ sealed class UIState {
      * Currently not editing.
      */
     object NotEditing : UIState()
+    
+    /**
+     * Currently selecting a new Feature
+     */
+    data class Switching(
+        val oldState: Editing,
+        val newFeature: ArcGISFeature
+    ): UIState()
 
     /**
      * In editing state with the [featureForm] with the validation error visibility given by
@@ -155,6 +163,21 @@ class MapViewModel @Inject constructor(
         )
         return Result.success(Unit)
     }
+    
+    fun selectNewFeature() =
+        (_uiState.value as? UIState.Switching)?.let { prevState ->
+            prevState.oldState.featureForm.discardEdits()
+            val layer = prevState.oldState.featureForm.feature.featureTable?.layer as FeatureLayer
+            layer.clearSelection()
+            layer.selectFeature(prevState.newFeature)
+            _uiState.value =
+                UIState.Editing(featureForm = FeatureForm(prevState.newFeature, layer.featureFormDefinition!!))
+        }
+    
+    fun continueEditing() =
+        (_uiState.value as? UIState.Switching)?.let { prevState ->
+            _uiState.value = prevState.oldState
+        }
 
     fun rollbackEdits(): Result<Unit> {
         (_uiState.value as? UIState.Editing)?.let {
@@ -167,8 +190,6 @@ class MapViewModel @Inject constructor(
     }
 
     context(MapView, CoroutineScope) override fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {
-        // do not process any taps on a different feature when a feature is being edited
-        if (_uiState.value is UIState.NotEditing) {
             launch {
                 this@MapView.identifyLayers(
                     screenCoordinate = singleTapEvent.screenCoordinate,
@@ -180,14 +201,23 @@ class MapViewModel @Inject constructor(
                             result.geoElements.firstOrNull {
                                 it is ArcGISFeature && (it.featureTable?.layer as? FeatureLayer)?.featureFormDefinition != null
                             }?.let {
-                                val feature = it as ArcGISFeature
-                                val layer = feature.featureTable!!.layer as FeatureLayer
-                                val featureForm =
-                                    FeatureForm(feature, layer.featureFormDefinition!!)
-                                // select the feature
-                                layer.selectFeature(feature)
-                                // set the UI to an editing state with the FeatureForm
-                                _uiState.value = UIState.Editing(featureForm)
+                                if (_uiState.value is UIState.Editing) {
+                                    val currentState = _uiState.value as UIState.Editing
+                                    val newFeature = it as ArcGISFeature
+                                    _uiState.value = UIState.Switching(
+                                        oldState = currentState,
+                                        newFeature = newFeature
+                                    )
+                                } else if (_uiState.value is UIState.NotEditing) {
+                                    val feature = it as ArcGISFeature
+                                    val layer = feature.featureTable!!.layer as FeatureLayer
+                                    val featureForm =
+                                        FeatureForm(feature, layer.featureFormDefinition!!)
+                                    // select the feature
+                                    layer.selectFeature(feature)
+                                    // set the UI to an editing state with the FeatureForm
+                                    _uiState.value = UIState.Editing(featureForm)
+                                }
                             }
                         }
                     } catch (e: Exception) {
@@ -201,7 +231,6 @@ class MapViewModel @Inject constructor(
                 }
             }
         }
-    }
 }
 
 /**
