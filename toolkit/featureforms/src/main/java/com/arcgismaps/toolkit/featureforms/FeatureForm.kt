@@ -230,6 +230,7 @@ internal fun rememberStates(
                     }
                 }
                 val groupState = rememberBaseGroupState(
+                    form = form,
                     groupElement = element,
                     fieldStates = fieldStateCollection
                 )

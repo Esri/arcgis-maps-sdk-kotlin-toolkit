@@ -296,6 +296,7 @@ internal fun rememberFormTextFieldState(
     form: FeatureForm,
     scope: CoroutineScope
 ): FormTextFieldState = rememberSaveable(
+    inputs = arrayOf(form),
     saver = FormTextFieldState.Saver(field, form, scope)
 ) {
     FormTextFieldState(

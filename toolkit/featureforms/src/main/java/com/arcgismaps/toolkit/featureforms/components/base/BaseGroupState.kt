@@ -21,6 +21,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
+import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FormGroupState
 import com.arcgismaps.mapping.featureforms.GroupFormElement
 import kotlinx.coroutines.flow.StateFlow
@@ -66,9 +67,11 @@ internal class BaseGroupState(
 
 @Composable
 internal fun rememberBaseGroupState(
+    form: FeatureForm,
     groupElement: GroupFormElement,
     fieldStates: FormStateCollection
 ): BaseGroupState = rememberSaveable(
+    inputs = arrayOf(form),
     saver = BaseGroupState.Saver(groupElement, fieldStates)
 ) {
     BaseGroupState(
