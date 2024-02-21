@@ -115,8 +115,8 @@ import kotlinx.coroutines.launch
  */
 @Composable
 public fun MapView(
-    modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap,
+    modifier: Modifier = Modifier,
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
     onVisibleAreaChanged: ((Polygon) -> Unit)? = null,

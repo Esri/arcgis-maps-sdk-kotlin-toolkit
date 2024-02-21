@@ -112,8 +112,8 @@ import java.time.Instant
  */
 @Composable
 public fun SceneView(
-    modifier: Modifier = Modifier,
     arcGISScene: ArcGISScene,
+    modifier: Modifier = Modifier,
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
     graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
