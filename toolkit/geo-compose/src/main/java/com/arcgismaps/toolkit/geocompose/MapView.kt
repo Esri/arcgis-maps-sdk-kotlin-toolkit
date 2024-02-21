@@ -121,7 +121,7 @@ public fun MapView(
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
     onVisibleAreaChanged: ((Polygon) -> Unit)? = null,
-    graphicsOverlays: List<GraphicsOverlay> = emptyList(),
+    graphicsOverlays: List<GraphicsOverlay> = remember { emptyList() },
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     geometryEditor: GeometryEditor? = null,
     mapViewProxy: MapViewProxy? = null,
