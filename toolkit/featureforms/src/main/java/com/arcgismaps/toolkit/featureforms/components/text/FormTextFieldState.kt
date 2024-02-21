@@ -43,13 +43,10 @@ import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.
 import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.NotAWholeNumber
 import com.arcgismaps.toolkit.featureforms.utils.asDoubleTuple
 import com.arcgismaps.toolkit.featureforms.utils.asLongTuple
-import com.arcgismaps.toolkit.featureforms.utils.domain
-import com.arcgismaps.toolkit.featureforms.utils.editValue
-import com.arcgismaps.toolkit.featureforms.utils.fieldType
+import com.arcgismaps.toolkit.featureforms.utils.formattedValueAsStateFlow
 import com.arcgismaps.toolkit.featureforms.utils.isFloatingPoint
 import com.arcgismaps.toolkit.featureforms.utils.isIntegerType
 import com.arcgismaps.toolkit.featureforms.utils.isNumeric
-import com.arcgismaps.toolkit.featureforms.utils.valueFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -181,6 +178,21 @@ internal class FormTextFieldState(
         }
     }
 
+    override fun typeConverter(input: String): Any? {
+        if (input.isEmpty() && fieldType.isNumeric) {
+            return null
+        }
+        return when (fieldType) {
+            FieldType.Int16 -> input.toIntOrNull()?.toShort()
+            FieldType.Int32 -> input.toIntOrNull()
+            FieldType.Int64 -> input.toLongOrNull()
+            FieldType.Float32 -> input.toFloatOrNull()
+            FieldType.Float64 -> input.toDoubleOrNull()
+            FieldType.Text -> input
+            else -> null
+        } ?: input
+    }
+
     override fun validate(): List<ValidationErrorState> {
         val currentValue = value.value.data
         val coreErrors = defaultValidator()
@@ -250,12 +262,12 @@ internal class FormTextFieldState(
                         label = formElement.label,
                         placeholder = formElement.hint,
                         description = formElement.description,
-                        value = formElement.valueFlow(scope),
+                        value = formElement.formattedValueAsStateFlow(scope),
                         required = formElement.isRequired,
                         editable = formElement.isEditable,
                         visible = formElement.isVisible,
-                        domain = form.domain(formElement) as? RangeDomain,
-                        fieldType = form.fieldType(formElement),
+                        domain = formElement.domain as? RangeDomain,
+                        fieldType = formElement.fieldType,
                         singleLine = formElement.input is TextBoxFormInput,
                         minLength = minLength.toInt(),
                         maxLength = maxLength.toInt()
@@ -263,7 +275,7 @@ internal class FormTextFieldState(
                     initialValue = list[0] as String,
                     scope = scope,
                     onEditValue = { newValue ->
-                        form.editValue(formElement, newValue)
+                        formElement.updateValue(newValue)
                         scope.launch { form.evaluateExpressions() }
                     },
                     defaultValidator = { formElement.getValidationErrors() }
@@ -291,19 +303,19 @@ internal fun rememberFormTextFieldState(
             label = field.label,
             placeholder = field.hint,
             description = field.description,
-            value = field.valueFlow(scope),
+            value = field.formattedValueAsStateFlow(scope),
             editable = field.isEditable,
             required = field.isRequired,
             visible = field.isVisible,
             singleLine = field.input is TextBoxFormInput,
-            fieldType = form.fieldType(field),
-            domain = form.domain(field) as? RangeDomain,
+            fieldType = field.fieldType,
+            domain = field.domain as? RangeDomain,
             minLength = minLength,
             maxLength = maxLength
         ),
         scope = scope,
-        onEditValue = {
-            form.editValue(field, it)
+        onEditValue = { newValue ->
+            field.updateValue(newValue)
             scope.launch { form.evaluateExpressions() }
         },
         defaultValidator = { field.getValidationErrors() }

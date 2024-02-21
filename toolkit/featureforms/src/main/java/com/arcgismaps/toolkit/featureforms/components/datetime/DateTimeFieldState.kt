@@ -29,8 +29,7 @@ import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.FieldProperties
 import com.arcgismaps.toolkit.featureforms.components.text.FormTextFieldState
 import com.arcgismaps.toolkit.featureforms.components.text.TextFieldProperties
-import com.arcgismaps.toolkit.featureforms.utils.editValue
-import com.arcgismaps.toolkit.featureforms.utils.valueFlow
+import com.arcgismaps.toolkit.featureforms.utils.mapValueAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -86,6 +85,8 @@ internal class DateTimeFieldState(
         // class initializer blocks, it is safe to invoke it here.
         observeProperties()
     }
+
+    override fun typeConverter(input: Instant?): Any? = input
     
     companion object {
         fun Saver(
@@ -103,7 +104,7 @@ internal class DateTimeFieldState(
                         label = field.label,
                         placeholder = field.hint,
                         description = field.description,
-                        value = field.valueFlow(scope),
+                        value = field.mapValueAsStateFlow(scope),
                         editable = field.isEditable,
                         required = field.isRequired,
                         visible = field.isVisible,
@@ -114,7 +115,7 @@ internal class DateTimeFieldState(
                     initialValue = list[0] as Instant?,
                     scope = scope,
                     onEditValue = {
-                        form.editValue(field, it)
+                        field.updateValue(it)
                         scope.launch { form.evaluateExpressions() }
                     },
                     defaultValidator = {
@@ -148,7 +149,7 @@ internal fun rememberDateTimeFieldState(
             label = field.label,
             placeholder = field.hint,
             description = field.description,
-            value = field.valueFlow(scope),
+            value = field.mapValueAsStateFlow(scope),
             editable = field.isEditable,
             required = field.isRequired,
             visible = field.isVisible,
@@ -158,7 +159,7 @@ internal fun rememberDateTimeFieldState(
         ),
         scope = scope,
         onEditValue = {
-            form.editValue(field, it)
+            field.updateValue(it)
             scope.launch { form.evaluateExpressions() }
         },
         defaultValidator = {

@@ -114,8 +114,8 @@ internal fun FeatureFormDialog() {
                     KeyboardType.Ascii
                 },
                 noValueLabel = state.noValueLabel.ifEmpty { stringResource(R.string.no_value) },
-                onValueChange = { nameOrEmpty ->
-                    state.onValueChanged(nameOrEmpty)
+                onValueChange = { code ->
+                    state.onValueChanged(code)
                 },
                 onDismissRequest = { dialogRequester.dismissDialog() }
             )

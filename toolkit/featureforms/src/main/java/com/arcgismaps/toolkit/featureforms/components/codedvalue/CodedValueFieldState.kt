@@ -22,8 +22,8 @@ import com.arcgismaps.data.FieldType
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.FieldProperties
-import com.arcgismaps.toolkit.featureforms.components.base.Value
 import com.arcgismaps.toolkit.featureforms.components.text.TextFieldProperties
+import com.arcgismaps.toolkit.featureforms.utils.isNullOrEmptyString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
@@ -31,7 +31,7 @@ internal open class CodedValueFieldProperties(
     label: String,
     placeholder: String,
     description: String,
-    value: StateFlow<String>,
+    value: StateFlow<Any?>,
     required: StateFlow<Boolean>,
     editable: StateFlow<Boolean>,
     visible: StateFlow<Boolean>,
@@ -39,7 +39,7 @@ internal open class CodedValueFieldProperties(
     val codedValues: List<CodedValue>,
     val showNoValueOption: FormInputNoValueOption,
     val noValueLabel: String
-) : FieldProperties<String>(label, placeholder, description, value, required, editable, visible)
+) : FieldProperties<Any?>(label, placeholder, description, value, required, editable, visible)
 
 /**
  * A class to handle the state of any coded value type. Essential properties are inherited
@@ -57,11 +57,11 @@ internal open class CodedValueFieldProperties(
 @Stable
 internal abstract class CodedValueFieldState(
     properties: CodedValueFieldProperties,
-    initialValue: String = properties.value.value,
+    initialValue: Any? = properties.value.value,
     scope: CoroutineScope,
     onEditValue: ((Any?) -> Unit),
     defaultValidator: () -> List<Throwable>
-) : BaseFieldState<String>(
+) : BaseFieldState<Any?>(
     properties = properties,
     scope = scope,
     initialValue = initialValue,
@@ -90,21 +90,19 @@ internal abstract class CodedValueFieldState(
     val fieldType: FieldType = properties.fieldType
 
     /**
-     * Returns the name of the [code] if it is present in [codedValues] else returns null.
+     * Returns the name of the [code] if it is present in [codedValues] else returns an empty string.
      */
-    fun getCodedValueNameOrNull(code: Any?): String? {
+    fun getNameForCodedValue(code: Any?): String {
         return codedValues.find {
             it.code.toString() == code.toString()
-        }?.name
+        }?.name ?: ""
     }
 
-    override fun onValueChanged(input: String) {
-        wasFocused = true
-        val code = codedValues.firstOrNull {
-            it.name == input
-        }?.code
-        onEditValue(code)
-        _value.value = Value(input)
-        updateValidation()
+    override fun typeConverter(input: Any?): Any? {
+        return if (input.isNullOrEmptyString()) {
+            null
+        } else {
+            input
+        }
     }
 }

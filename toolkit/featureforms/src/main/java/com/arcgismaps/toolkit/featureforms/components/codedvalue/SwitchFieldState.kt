@@ -28,10 +28,7 @@ import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
-import com.arcgismaps.toolkit.featureforms.utils.editValue
 import com.arcgismaps.toolkit.featureforms.utils.fieldIsNullable
-import com.arcgismaps.toolkit.featureforms.utils.fieldType
-import com.arcgismaps.toolkit.featureforms.utils.valueFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -40,7 +37,7 @@ internal class SwitchFieldProperties(
     label: String,
     placeholder: String,
     description: String,
-    value: StateFlow<String>,
+    value: StateFlow<Any?>,
     editable: StateFlow<Boolean>,
     required: StateFlow<Boolean>,
     visible: StateFlow<Boolean>,
@@ -79,7 +76,7 @@ internal class SwitchFieldProperties(
 @Stable
 internal class SwitchFieldState(
     properties: SwitchFieldProperties,
-    val initialValue: String = properties.value.value,
+    val initialValue: Any? = properties.value.value,
     scope: CoroutineScope,
     onEditValue: ((Any?) -> Unit),
     defaultValidator: () -> List<Throwable>
@@ -131,11 +128,11 @@ internal class SwitchFieldState(
                         label = formElement.label,
                         placeholder = formElement.hint,
                         description = formElement.description,
-                        value = formElement.valueFlow(scope),
+                        value = formElement.value,
                         editable = formElement.isEditable,
                         required = formElement.isRequired,
                         visible = formElement.isVisible,
-                        fieldType = form.fieldType(formElement),
+                        fieldType = formElement.fieldType,
                         onValue = input.onValue,
                         offValue = input.offValue,
                         fallback = list[1] as Boolean,
@@ -145,13 +142,10 @@ internal class SwitchFieldState(
                             FormInputNoValueOption.Hide,
                         noValueLabel = noValueString
                     ),
-                    initialValue = list[0] as String,
+                    initialValue = list[0],
                     scope = scope,
-                    onEditValue = { codedValueName ->
-                        form.editValue(
-                            formElement,
-                            if (codedValueName == input.onValue.name) input.onValue.code else input.offValue.code
-                        )
+                    onEditValue = { code ->
+                        formElement.updateValue(code)
                         scope.launch { form.evaluateExpressions() }
                     },
                     defaultValidator = formElement::getValidationErrors
@@ -179,11 +173,11 @@ internal fun rememberSwitchFieldState(
             label = field.label,
             placeholder = field.hint,
             description = field.description,
-            value = field.valueFlow(scope),
+            value = field.value,
             editable = field.isEditable,
             required = field.isRequired,
             visible = field.isVisible,
-            fieldType = form.fieldType(field),
+            fieldType = field.fieldType,
             onValue = input.onValue,
             offValue = input.offValue,
             fallback = fallback,
@@ -195,7 +189,7 @@ internal fun rememberSwitchFieldState(
         ),
         scope = scope,
         onEditValue = {
-            form.editValue(field, it)
+            field.updateValue(it)
             scope.launch { form.evaluateExpressions() }
         },
         defaultValidator = field::getValidationErrors

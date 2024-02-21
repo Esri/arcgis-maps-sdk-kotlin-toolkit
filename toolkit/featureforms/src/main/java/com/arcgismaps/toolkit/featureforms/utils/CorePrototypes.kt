@@ -16,8 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms.utils
 
-import android.util.Log
-import com.arcgismaps.data.Domain
 import com.arcgismaps.data.FieldType
 import com.arcgismaps.data.RangeDomain
 import com.arcgismaps.mapping.featureforms.FeatureForm
@@ -27,9 +25,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import java.time.Instant
-import kotlin.math.roundToInt
-import kotlin.math.roundToLong
 
 /**
  * This file contains logic which will eventually be provided by core. Do not add anything to this file that isn't
@@ -45,44 +40,43 @@ internal fun FeatureForm.fieldIsNullable(element: FieldFormElement): Boolean {
 }
 
 /**
- * Set the value in the feature's attribute map. This call can only be made when a transaction is open.
- * Catches and swallows exceptions. Remove this function when [FieldFormElement.updateValue] no longer throws.
- *
- * @param value the value to be set on the attribute represented by this FieldFormElement.
+ * Utility function that returns true if the type is null or if it is an empty string.
  */
-internal fun FeatureForm.editValue(element: FieldFormElement, value: Any?) {
-    try {
-        element.updateValue(cast(value, fieldType(element)))
-    } catch (e: Exception) {
-        //TODO: remove before release. (and also the try catch)
-        Log.w(
-            "Form.editValue", "caught ${e.message} while updating value of field ${element.label} to $value"
-        )
+internal fun Any?.isNullOrEmptyString(): Boolean {
+    return if (this is String?) {
+        isNullOrEmpty()
+    } else {
+        false
     }
 }
 
-internal fun FeatureForm.fieldType(element: FieldFormElement): FieldType {
-    val fieldType = feature.featureTable?.getField(element.fieldName)?.fieldType
-    require(fieldType != null) {
-        "expected feature table to have field with name ${element.fieldName}"
-    }
-    return fieldType
-}
-
-internal fun FeatureForm.domain(element: FieldFormElement): Domain? =
-    feature.featureTable?.getField(element.fieldName)?.domain
-
-internal inline fun <reified T> FieldFormElement.valueFlow(scope: CoroutineScope): StateFlow<T> =
+/**
+ * Transforms the state flow [FieldFormElement.value] into a state flow of type [T].
+ * This function creates a new [StateFlow].
+ *
+ * @throws IllegalStateException if the [FieldFormElement.value] cannot be cast to [T].
+ */
+internal inline fun <reified T> FieldFormElement.mapValueAsStateFlow(scope: CoroutineScope): StateFlow<T> =
     if (value.value is T) {
         value.map { it as T }.stateIn(scope, SharingStarted.Eagerly, value.value as T)
-    } else if (formattedValue is T) {
-        // T is String
-        value.map { formattedValue as T }.stateIn(scope, SharingStarted.Eagerly, formattedValue as T)
     } else {
         // usage error.
-        throw IllegalStateException("the generic parameterization of the state object must match either the value or the formattedValue.")
+        throw IllegalStateException("the generic parameterization of the state object must match the type specified.")
     }
 
+/**
+ * Creates and returns a new [StateFlow] of type [String] that emits the [FieldFormElement.formattedValue]
+ * whenever the [FieldFormElement.value] emits.
+ */
+internal fun FieldFormElement.formattedValueAsStateFlow(scope: CoroutineScope): StateFlow<String> {
+    return value.map {
+        formattedValue
+    }.stateIn(
+        scope,
+        SharingStarted.Eagerly,
+        formattedValue
+    )
+}
 
 internal val FieldType.isNumeric: Boolean
     get() {
@@ -115,25 +109,30 @@ internal val FieldType.isIntegerType: Boolean
 
 internal val RangeDomain.asDoubleTuple: MinMax<Double>
     get() {
-    return when (fieldType) {
-        FieldType.Int16 -> {
-            MinMax((minValue as? Int)?.toDouble(), (maxValue as? Int)?.toDouble())
+        return when (fieldType) {
+            FieldType.Int16 -> {
+                MinMax((minValue as? Int)?.toDouble(), (maxValue as? Int)?.toDouble())
+            }
+
+            FieldType.Int32 -> {
+                MinMax((minValue as? Int)?.toDouble(), (maxValue as? Int)?.toDouble())
+            }
+
+            FieldType.Int64 -> {
+                MinMax((minValue as? Long)?.toDouble(), (maxValue as? Long)?.toDouble())
+            }
+
+            FieldType.Float32 -> {
+                MinMax((minValue as? Float)?.toDouble(), (maxValue as? Float)?.toDouble())
+            }
+
+            FieldType.Float64 -> {
+                MinMax(minValue as? Double, maxValue as? Double)
+            }
+
+            else -> throw IllegalArgumentException("RangeDomain must have a numeric field type")
         }
-        FieldType.Int32 -> {
-            MinMax((minValue as? Int)?.toDouble(), (maxValue as? Int)?.toDouble())  
-        }
-        FieldType.Int64 -> {
-            MinMax((minValue as? Long)?.toDouble(), (maxValue as? Long)?.toDouble())
-        }
-        FieldType.Float32 -> {
-            MinMax((minValue as? Float)?.toDouble(), (maxValue as? Float)?.toDouble())
-        }
-        FieldType.Float64 -> {
-            MinMax(minValue as? Double, maxValue as? Double)
-        }
-        else -> throw IllegalArgumentException("RangeDomain must have a numeric field type")
     }
-}
 
 /**
  * cast the min and max values to the type indicated by the RangeDomain.fieldType
@@ -145,77 +144,25 @@ internal val RangeDomain.asLongTuple: MinMax<Long>
             FieldType.Int16 -> {
                 MinMax((minValue as? Int)?.toLong(), (maxValue as? Int)?.toLong())
             }
+
             FieldType.Int32 -> {
                 MinMax((minValue as? Int)?.toLong(), (maxValue as? Int)?.toLong())
             }
+
             FieldType.Int64 -> {
                 MinMax(minValue as? Long, maxValue as? Long)
             }
+
             FieldType.Float32 -> {
                 MinMax((minValue as? Float)?.toLong(), (maxValue as? Float)?.toLong())
             }
+
             FieldType.Float64 -> {
                 MinMax((minValue as? Double)?.toLong(), (maxValue as? Double)?.toLong())
             }
+
             else -> throw IllegalArgumentException("RangeDomain must have a numeric field type")
         }
     }
 
-internal data class MinMax<T: Number>(val min: T?, val max: T?)
-
-private fun cast(value: Any?, fieldType: FieldType): Any? =
-   when (fieldType) {
-        FieldType.Int16 -> {
-            when (value) {
-                is String -> value.toIntOrNull()?.toShort()
-                is Int -> value.toShort()
-                is Double -> value.roundToInt().toShort()
-                else -> null
-            }
-        }
-        FieldType.Int32 -> {
-            when (value) {
-                is String -> value.toIntOrNull()
-                is Int -> value
-                is Double -> value.roundToInt()
-                else -> null
-            }
-        }
-        FieldType.Int64 -> {
-            when (value) {
-                is String -> value.toLongOrNull()
-                is Int -> value.toLong()
-                is Double -> value.roundToLong()
-                else -> null
-            }
-        }
-        FieldType.Float32 -> {
-            when (value) {
-                is String -> value.toFloatOrNull()
-                is Int -> value.toFloat()
-                is Double -> value.toFloat()
-                else -> null
-            }
-        }
-        FieldType.Float64 -> {
-            when (value) {
-                is String -> value.toDoubleOrNull()
-                is Int -> value.toDouble()
-                is Float -> value.toDouble()
-                is Double -> value.toDouble()
-                else -> null
-            }
-        }
-        FieldType.Date -> {
-            when (value) {
-                is String -> value.toLongOrNull()?.let { Instant.ofEpochMilli(it) }
-                is Long -> Instant.ofEpochMilli(value)
-                is Instant -> value
-                else -> null
-            }
-        }
-       FieldType.Text -> {
-           value?.toString()
-       }
-       else -> throw IllegalArgumentException("casting FieldFormElement value to $fieldType is not allowed")
-    }
+internal data class MinMax<T : Number>(val min: T?, val max: T?)

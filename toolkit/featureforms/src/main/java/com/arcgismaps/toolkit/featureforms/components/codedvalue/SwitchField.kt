@@ -34,15 +34,15 @@ import com.arcgismaps.toolkit.featureforms.components.base.BaseTextField
 
 @Composable
 internal fun SwitchField(state: SwitchFieldState, modifier: Modifier = Modifier) {
-    val codeName by state.value
-    val checkedState = codeName.data == state.onValue.name
+    val codeValue by state.value
+    val checkedState = codeValue.data == state.onValue.code
     val value = if (checkedState) state.onValue.name else state.offValue.name
     val isEditable by state.isEditable.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
     BaseTextField(
         text = value,
         onValueChange = {
-            state.onValueChanged(it)
+            // nothing happens here. state.onValueChange is triggered by the switch control
         },
         modifier = modifier,
         readOnly = true,
@@ -61,13 +61,12 @@ internal fun SwitchField(state: SwitchFieldState, modifier: Modifier = Modifier)
         Switch(
             checked = checkedState,
             onCheckedChange = { newState ->
-                val newValue = (
-                    if (newState)
-                        state.onValue.name
-                    else
-                        state.offValue.name
-                    )
-                state.onValueChanged(newValue)
+                val code = if (newState) {
+                    state.onValue.code
+                } else {
+                    state.offValue.code
+                }
+                state.onValueChanged(code)
             },
             modifier = Modifier
                 .semantics { contentDescription = "switch" }
@@ -75,18 +74,17 @@ internal fun SwitchField(state: SwitchFieldState, modifier: Modifier = Modifier)
             enabled = isEditable
         )
     }
-    
-    LaunchedEffect(codeName) {
+
+    LaunchedEffect(codeValue) {
         interactionSource.interactions.collect {
             if (isEditable) {
                 if (it is PressInteraction.Release) {
-                    val newValue = (
-                        if (checkedState)
-                            state.offValue.name
-                        else
-                            state.onValue.name
-                        )
-                    state.onValueChanged(newValue)
+                    val code = if (checkedState) {
+                        state.offValue.code
+                    } else {
+                        state.onValue.code
+                    }
+                    state.onValueChanged(code)
                 }
             }
         }

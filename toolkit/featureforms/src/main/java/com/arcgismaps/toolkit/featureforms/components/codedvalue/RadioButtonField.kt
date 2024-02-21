@@ -48,14 +48,13 @@ internal fun RadioButtonField(
     modifier: Modifier = Modifier,
     colors: RadioButtonFieldColors = RadioButtonFieldDefaults.colors()
 ) {
-    val value by state.value
     val editable by state.isEditable.collectAsState()
     val required by state.isRequired.collectAsState()
     val noValueLabel = state.noValueLabel.ifEmpty { stringResource(R.string.no_value) }
     RadioButtonField(
         label = state.label,
         description = state.description,
-        value = value.data,
+        valueProvider = { state.value.value.data },
         editable = editable,
         required = required,
         codedValues = state.codedValues.associateBy({ it.code }, { it.name }),
@@ -72,7 +71,7 @@ internal fun RadioButtonField(
 private fun RadioButtonField(
     label: String,
     description: String,
-    value: String,
+    valueProvider: () -> Any?,
     editable: Boolean,
     required: Boolean,
     codedValues: Map<Any?, String>,
@@ -80,11 +79,12 @@ private fun RadioButtonField(
     noValueLabel: String,
     modifier: Modifier = Modifier,
     colors: RadioButtonFieldColors = RadioButtonFieldDefaults.colors(),
-    onValueChanged: (String) -> Unit = {}
+    onValueChanged: (Any?) -> Unit = {}
 ) {
+    val value = valueProvider()
     val options = if (!required) {
         if (showNoValueOption == FormInputNoValueOption.Show) {
-            mapOf("" to noValueLabel) + codedValues
+            mapOf(null to noValueLabel) + codedValues
         } else codedValues
     } else codedValues
 
@@ -116,12 +116,12 @@ private fun RadioButtonField(
             CompositionLocalProvider(
                 LocalContentColor provides colors.textColor
             ) {
-                options.forEach { (_, name) ->
+                options.forEach { (code, name) ->
                     RadioButtonRow(
                         value = name,
-                        selected = name == value || (name == noValueLabel && value.isEmpty()),
+                        selected = code == value || (name == noValueLabel && value == null),
                         enabled = editable,
-                        onClick = { onValueChanged(name) }
+                        onClick = { onValueChanged(code) }
                     )
                 }
             }
@@ -177,7 +177,7 @@ private fun RadioButtonFieldPreview() {
         RadioButtonField(
             label = "A list of values",
             description = "Description",
-            value = "",
+            valueProvider = { "" },
             editable = true,
             required = true,
             codedValues = mapOf(
