@@ -43,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
@@ -51,7 +52,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.toolkit.featureforms.utils.ClearFocus
 import com.arcgismaps.toolkit.featureforms.utils.PlaceholderTransformation
 
 @Composable
@@ -161,7 +161,7 @@ internal fun BaseTextField(
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     trailingContent: (@Composable () -> Unit)? = null
 ) {
-    var clearFocus by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
     var isFocused by remember { mutableStateOf(false) }
     val visualTransformation = if (text.isEmpty())
         PlaceholderTransformation(placeholder.ifEmpty { " " })
@@ -178,7 +178,7 @@ internal fun BaseTextField(
         }
         .pointerInput(Unit) {
             // any tap on a blank space will also dismiss the keyboard and clear focus
-            detectTapGestures { clearFocus = true }
+            detectTapGestures { focusManager.clearFocus() }
         }
         .padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 10.dp)
     ) {
@@ -206,13 +206,13 @@ internal fun BaseTextField(
                     isFocused,
                     trailingIcon,
                     onValueChange = onValueChange,
-                    onDone = { clearFocus = true }
+                    onDone = { focusManager.clearFocus() }
                 ),
             supportingText = {
                 Column(
                     modifier = Modifier
                         .clickable {
-                            clearFocus = true
+                            focusManager.clearFocus()
                         }
                 ) {
                     supportingText?.invoke(this)
@@ -220,7 +220,7 @@ internal fun BaseTextField(
             },
             visualTransformation = visualTransformation,
             keyboardActions = KeyboardActions(
-                onDone = { clearFocus = true }
+                onDone = { focusManager.clearFocus() }
             ),
             keyboardOptions = KeyboardOptions.Default.copy(
                 imeAction = if (singleLine) ImeAction.Done else ImeAction.None,
@@ -231,8 +231,6 @@ internal fun BaseTextField(
             colors = colors
         )
     }
-    // if the keyboard is gone clear focus from the field as a side-effect
-    ClearFocus(clearFocus) { clearFocus = false }
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)

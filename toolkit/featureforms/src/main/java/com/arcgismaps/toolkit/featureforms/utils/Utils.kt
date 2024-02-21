@@ -1,33 +1,10 @@
 package com.arcgismaps.toolkit.featureforms.utils
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
-
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-internal fun ClearFocus(key: Boolean, onComplete: () -> Unit = {}) {
-    val focusManager = LocalFocusManager.current
-    val keyboardController = LocalSoftwareKeyboardController.current
-    DisposableEffect(key) {
-        if (key) {
-            // hides the keyboard only if visible
-            keyboardController?.hide()
-            focusManager.clearFocus()
-        }
-        onDispose {
-            onComplete()
-        }
-    }
-}
-
 
 /**
  * Changes the visual output of the placeholder and label properties of a TextField. Using this
