@@ -131,9 +131,9 @@ public fun SceneView(
     timeExtent: TimeExtent? = null,
     onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
     spaceEffect: SpaceEffect = SpaceEffect.Stars,
-    sunTime: Instant = remember { Instant.parse("2000-09-22T12:00:00Z") },
+    sunTime: Instant = SceneViewDefaults.DefaultSunTime,
     sunLighting: LightingMode = LightingMode.NoLight,
-    ambientLightColor: Color = Color(220, 220, 220, 255),
+    ambientLightColor: Color = SceneViewDefaults.DefaultAmbientLightColor,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
     onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)? = null,
@@ -477,4 +477,9 @@ public inline fun rememberImageOverlayCollection(
     crossinline init: ImageOverlayCollection.() -> Unit = {}
 ): ImageOverlayCollection = remember(key) {
     ImageOverlayCollection().apply(init)
+}
+
+public object SceneViewDefaults {
+    public val DefaultSunTime: Instant = Instant.parse("2000-09-22T12:00:00Z")
+    public val DefaultAmbientLightColor: Color = Color(220, 220, 220, 255)
 }
