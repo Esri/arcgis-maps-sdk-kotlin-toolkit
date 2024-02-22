@@ -179,7 +179,7 @@ public fun SceneView(
                     addAll(graphicsOverlays)
                 }
             }
-            if (sceneView.analysisOverlays != analysisOverlays) {
+            if (it.analysisOverlays != analysisOverlays) {
                 it.analysisOverlays.apply {
                     clear()
                     addAll(analysisOverlays)
