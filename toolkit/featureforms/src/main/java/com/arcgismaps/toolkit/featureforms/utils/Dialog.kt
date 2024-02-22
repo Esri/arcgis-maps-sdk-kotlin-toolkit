@@ -22,6 +22,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.window.core.layout.WindowSizeClass
@@ -96,6 +97,7 @@ internal sealed class DialogType {
  */
 @Composable
 internal fun FeatureFormDialog() {
+    val focusManager = LocalFocusManager.current
     val dialogRequester = LocalDialogRequester.current
     val dialogType by dialogRequester.requestFlow.collectAsState()
     when (dialogType) {
@@ -157,7 +159,7 @@ internal fun FeatureFormDialog() {
         else -> {
             // clear focus from the originating tapped field
             if (dialogType == null) {
-                ClearFocus(true)
+                focusManager.clearFocus()
             }
         }
     }
