@@ -173,7 +173,7 @@ public fun SceneView(
             it.sunLighting = sunLighting
             it.ambientLightColor = com.arcgismaps.Color(ambientLightColor.toArgb())
             it.isAttributionBarVisible = isAttributionBarVisible
-            if (sceneView.graphicsOverlays != graphicsOverlays) {
+            if (it.graphicsOverlays != graphicsOverlays) {
                 it.graphicsOverlays.apply {
                     clear()
                     addAll(graphicsOverlays)
