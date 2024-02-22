@@ -185,7 +185,7 @@ public fun SceneView(
                     addAll(analysisOverlays)
                 }
             }
-            if (sceneView.imageOverlays != imageOverlays) {
+            if (it.imageOverlays != imageOverlays) {
                 it.imageOverlays.apply {
                     clear()
                     addAll(imageOverlays)
