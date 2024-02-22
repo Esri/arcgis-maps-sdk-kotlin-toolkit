@@ -175,7 +175,7 @@ public fun MapView(
             it.backgroundGrid = backgroundGrid
             it.isAttributionBarVisible = isAttributionBarVisible
             it.setTimeExtent(timeExtent)
-            if (mapView.graphicsOverlays != graphicsOverlays) {
+            if (it.graphicsOverlays != graphicsOverlays) {
                 it.graphicsOverlays.apply {
                     clear()
                     addAll(graphicsOverlays)
