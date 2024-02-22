@@ -36,6 +36,7 @@ import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.TimeExtent
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.ViewpointType
+import com.arcgismaps.mapping.view.AnalysisOverlay
 import com.arcgismaps.mapping.view.AtmosphereEffect
 import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
 import com.arcgismaps.mapping.view.Camera
@@ -45,6 +46,8 @@ import com.arcgismaps.mapping.view.DownEvent
 import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.mapping.view.GlobeCameraController
+import com.arcgismaps.mapping.view.GraphicsOverlay
+import com.arcgismaps.mapping.view.ImageOverlay
 import com.arcgismaps.mapping.view.LightingMode
 import com.arcgismaps.mapping.view.LongPressEvent
 import com.arcgismaps.mapping.view.PanChangeEvent
@@ -71,7 +74,7 @@ import java.time.Instant
  * type of [ViewpointType.CenterAndScale]
  * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a viewpoint
  * type of [ViewpointType.BoundingGeometry]
- * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable SceneView
+ * @param graphicsOverlays graphics overlays used by this composable SceneView
  * @param sceneViewProxy the [SceneViewProxy] to associate with the composable SceneView
  * @param sceneViewInteractionOptions the [SceneViewInteractionOptions] used by this composable SceneView
  * @param viewLabelProperties the [ViewLabelProperties] used by the composable SceneView
@@ -80,8 +83,8 @@ import java.time.Instant
  * @param onAttributionTextChanged lambda invoked when the attribution text of the composable SceneView has changed
  * @param onAttributionBarLayoutChanged lambda invoked when the attribution bar's position or size changes
  * @param cameraController the [CameraController] to manage the position, orientation, and movement of the camera
- * @param analysisOverlays a collection of analysis overlays that render the results of 3D visual analysis on the composable SceneView
- * @param imageOverlays a collection of overlays for displaying images in the composable SceneView
+ * @param analysisOverlays analysis overlays that render the results of 3D visual analysis on the composable SceneView
+ * @param imageOverlays image overlays for displaying images in the composable SceneView
  * @param atmosphereEffect the effect applied to the scene's atmosphere
  * @param timeExtent the [TimeExtent] used by the composable SceneView
  * @param onTimeExtentChanged lambda invoked when the composable SceneView's [TimeExtent] is changed
@@ -116,7 +119,7 @@ public fun SceneView(
     arcGISScene: ArcGISScene? = null,
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
-    graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
+    graphicsOverlays: List<GraphicsOverlay> = remember { emptyList() },
     sceneViewProxy: SceneViewProxy? = null,
     sceneViewInteractionOptions: SceneViewInteractionOptions = SceneViewInteractionOptions(),
     viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
@@ -125,8 +128,8 @@ public fun SceneView(
     onAttributionTextChanged: ((String) -> Unit)? = null,
     onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)? = null,
     cameraController: CameraController = GlobeCameraController(),
-    analysisOverlays: AnalysisOverlayCollection = rememberAnalysisOverlayCollection(),
-    imageOverlays: ImageOverlayCollection = rememberImageOverlayCollection(),
+    analysisOverlays: List<AnalysisOverlay> = remember { emptyList() },
+    imageOverlays: List<ImageOverlay> = remember { emptyList() },
     atmosphereEffect: AtmosphereEffect = AtmosphereEffect.HorizonOnly,
     timeExtent: TimeExtent? = null,
     onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
@@ -170,6 +173,24 @@ public fun SceneView(
             it.sunLighting = sunLighting
             it.ambientLightColor = com.arcgismaps.Color(ambientLightColor.toArgb())
             it.isAttributionBarVisible = isAttributionBarVisible
+            if (it.graphicsOverlays != graphicsOverlays) {
+                it.graphicsOverlays.apply {
+                    clear()
+                    addAll(graphicsOverlays)
+                }
+            }
+            if (it.analysisOverlays != analysisOverlays) {
+                it.analysisOverlays.apply {
+                    clear()
+                    addAll(analysisOverlays)
+                }
+            }
+            if (it.imageOverlays != imageOverlays) {
+                it.imageOverlays.apply {
+                    clear()
+                    addAll(imageOverlays)
+                }
+            }
         })
 
     DisposableEffect(Unit) {
@@ -186,10 +207,6 @@ public fun SceneView(
             sceneViewProxy?.setSceneView(null)
         }
     }
-
-    GraphicsOverlaysUpdater(graphicsOverlays, sceneView)
-    AnalysisOverlaysUpdater(analysisOverlays, sceneView)
-    ImageOverlaysUpdater(imageOverlays, sceneView)
 
     SceneViewEventHandler(
         sceneView,
@@ -214,78 +231,6 @@ public fun SceneView(
         onAttributionTextChanged,
         onAttributionBarLayoutChanged
     )
-}
-
-/**
- * Update the view-based [SceneView]'s analysisOverlays property to reflect changes made to the
- * [analysisOverlayCollection] based on the type of [AnalysisOverlayCollection.ChangedEvent]
- *
- * @since 200.4.0
- */
-@Composable
-internal fun AnalysisOverlaysUpdater(
-    analysisOverlayCollection: AnalysisOverlayCollection,
-    sceneView: SceneView
-) {
-    LaunchedEffect(analysisOverlayCollection) {
-        // sync up the SceneView with the new analysis overlays
-        sceneView.analysisOverlays.clear()
-        analysisOverlayCollection.forEach {
-            sceneView.analysisOverlays.add(it)
-        }
-        // start observing analysisOverlays for subsequent changes
-        analysisOverlayCollection.changed.collect { changedEvent ->
-            when (changedEvent) {
-                // On AnalysisOverlay added:
-                is AnalysisOverlayCollection.ChangedEvent.Added ->
-                    sceneView.analysisOverlays.add(changedEvent.element)
-
-                // On AnalysisOverlay removed:
-                is AnalysisOverlayCollection.ChangedEvent.Removed ->
-                    sceneView.analysisOverlays.remove(changedEvent.element)
-
-                // On AnalysisOverlays cleared:
-                is AnalysisOverlayCollection.ChangedEvent.Cleared ->
-                    sceneView.analysisOverlays.clear()
-            }
-        }
-    }
-}
-
-/**
- * Update the view-based [SceneView]'s imageOverlays property to reflect changes made to the
- * [imageOverlayCollection] based on the type of [ImageOverlayCollection.ChangedEvent]
- *
- * @since 200.4.0
- */
-@Composable
-internal fun ImageOverlaysUpdater(
-    imageOverlayCollection: ImageOverlayCollection,
-    sceneView: SceneView
-) {
-    LaunchedEffect(imageOverlayCollection) {
-        // sync up the SceneView with the new image overlays
-        sceneView.imageOverlays.clear()
-        imageOverlayCollection.forEach {
-            sceneView.imageOverlays.add(it)
-        }
-        // start observing imageOverlays for subsequent changes
-        imageOverlayCollection.changed.collect { changedEvent ->
-            when (changedEvent) {
-                // On ImageOverlay added:
-                is ImageOverlayCollection.ChangedEvent.Added ->
-                    sceneView.imageOverlays.add(changedEvent.element)
-
-                // On ImageOverlay removed:
-                is ImageOverlayCollection.ChangedEvent.Removed ->
-                    sceneView.imageOverlays.remove(changedEvent.element)
-
-                // On ImageOverlays cleared:
-                is ImageOverlayCollection.ChangedEvent.Cleared ->
-                    sceneView.imageOverlays.clear()
-            }
-        }
-    }
 }
 
 /**
@@ -442,39 +387,4 @@ private fun SceneViewEventHandler(
             }
         }
     }
-}
-
-/**
- * Create and [remember] a [AnalysisOverlayCollection].
- * [init] will be called when the [AnalysisOverlayCollection] is first created to configure its
- * initial state.
- *
- * @param key invalidates the remembered AnalysisOverlayCollection if different from the previous composition
- * @param init called when the [AnalysisOverlayCollection] is created to configure its initial state
- * @since 200.4.0
- */
-@Composable
-public inline fun rememberAnalysisOverlayCollection(
-    key: Any? = null,
-    crossinline init: AnalysisOverlayCollection.() -> Unit = {}
-): AnalysisOverlayCollection = remember(key) {
-    AnalysisOverlayCollection().apply(init)
-}
-
-
-/**
- * Create and [remember] a [ImageOverlayCollection].
- * [init] will be called when the [ImageOverlayCollection] is first created to configure its
- * initial state.
- *
- * @param key invalidates the remembered ImageOverlayCollection if different from the previous composition
- * @param init called when the [ImageOverlayCollection] is created to configure its initial state
- * @since 200.4.0
- */
-@Composable
-public inline fun rememberImageOverlayCollection(
-    key: Any? = null,
-    crossinline init: ImageOverlayCollection.() -> Unit = {}
-): ImageOverlayCollection = remember(key) {
-    ImageOverlayCollection().apply(init)
 }

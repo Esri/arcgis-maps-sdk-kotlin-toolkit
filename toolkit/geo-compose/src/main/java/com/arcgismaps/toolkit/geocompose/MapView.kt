@@ -44,6 +44,7 @@ import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
 import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.GeoView
+import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.Grid
 import com.arcgismaps.mapping.view.LocationDisplay
 import com.arcgismaps.mapping.view.LongPressEvent
@@ -72,7 +73,7 @@ import kotlinx.coroutines.launch
  * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a viewpoint
  * type of [ViewpointType.BoundingGeometry]
  * @param onVisibleAreaChanged lambda invoked when the visible area of the composable MapView has changed
- * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable MapView
+ * @param graphicsOverlays graphics overlays used by this composable MapView
  * @param locationDisplay the [LocationDisplay] used by the composable MapView
  * @param geometryEditor the [GeometryEditor] used by the composable MapView to create and edit geometries by user interaction.
  * @param mapViewProxy the [MapViewProxy] to associate with the composable MapView
@@ -120,7 +121,7 @@ public fun MapView(
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
     onVisibleAreaChanged: ((Polygon) -> Unit)? = null,
-    graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
+    graphicsOverlays: List<GraphicsOverlay> = remember { emptyList() },
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     geometryEditor: GeometryEditor? = null,
     mapViewProxy: MapViewProxy? = null,
@@ -174,6 +175,12 @@ public fun MapView(
             it.backgroundGrid = backgroundGrid
             it.isAttributionBarVisible = isAttributionBarVisible
             it.setTimeExtent(timeExtent)
+            if (it.graphicsOverlays != graphicsOverlays) {
+                it.graphicsOverlays.apply {
+                    clear()
+                    addAll(graphicsOverlays)
+                }
+            }
         })
 
     DisposableEffect(Unit) {
@@ -228,8 +235,6 @@ public fun MapView(
         onAttributionTextChanged,
         onAttributionBarLayoutChanged
     )
-
-    GraphicsOverlaysUpdater(graphicsOverlays, mapView)
 }
 
 /**
