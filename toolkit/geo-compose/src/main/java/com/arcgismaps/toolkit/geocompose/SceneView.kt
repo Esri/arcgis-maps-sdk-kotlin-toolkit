@@ -121,22 +121,22 @@ public fun SceneView(
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
     graphicsOverlays: List<GraphicsOverlay> = remember { emptyList() },
     sceneViewProxy: SceneViewProxy? = null,
-    sceneViewInteractionOptions: SceneViewInteractionOptions = SceneViewInteractionOptions(),
-    viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
-    selectionProperties: SelectionProperties = SelectionProperties(),
+    sceneViewInteractionOptions: SceneViewInteractionOptions = remember { SceneViewInteractionOptions() },
+    viewLabelProperties: ViewLabelProperties = remember { ViewLabelProperties() },
+    selectionProperties: SelectionProperties = remember { SelectionProperties() },
     isAttributionBarVisible: Boolean = true,
     onAttributionTextChanged: ((String) -> Unit)? = null,
     onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)? = null,
-    cameraController: CameraController = GlobeCameraController(),
+    cameraController: CameraController = remember { GlobeCameraController() },
     analysisOverlays: List<AnalysisOverlay> = remember { emptyList() },
     imageOverlays: List<ImageOverlay> = remember { emptyList() },
     atmosphereEffect: AtmosphereEffect = AtmosphereEffect.HorizonOnly,
     timeExtent: TimeExtent? = null,
     onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
     spaceEffect: SpaceEffect = SpaceEffect.Stars,
-    sunTime: Instant = Instant.parse("2000-09-22T12:00:00Z"),
+    sunTime: Instant = SceneViewDefaults.DefaultSunTime,
     sunLighting: LightingMode = LightingMode.NoLight,
-    ambientLightColor: Color = Color(220, 220, 220, 255),
+    ambientLightColor: Color = SceneViewDefaults.DefaultAmbientLightColor,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
     onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)? = null,
@@ -387,4 +387,26 @@ private fun SceneViewEventHandler(
             }
         }
     }
+}
+
+/**
+ * Contains default values for the SceneView.
+ *
+ * @see com.arcgismaps.toolkit.geocompose.SceneView
+ * @since 200.4.0
+ */
+public object SceneViewDefaults {
+    /**
+     * Default time for the sun position in the SceneView, set to 12:00 on 22 September 2000.
+     *
+     * @since 200.4.0
+     */
+    public val DefaultSunTime: Instant = Instant.parse("2000-09-22T12:00:00Z")
+
+    /**
+     * Default color for the ambient light in the SceneView, set to a neutral gray value.
+     *
+     * @since 200.4.0
+     */
+    public val DefaultAmbientLightColor: Color = Color(220, 220, 220, 255)
 }

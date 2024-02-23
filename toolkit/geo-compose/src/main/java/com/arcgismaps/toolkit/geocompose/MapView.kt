@@ -125,12 +125,12 @@ public fun MapView(
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     geometryEditor: GeometryEditor? = null,
     mapViewProxy: MapViewProxy? = null,
-    mapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptions(),
-    viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
-    selectionProperties: SelectionProperties = SelectionProperties(),
-    insets: PaddingValues = PaddingValues(),
+    mapViewInteractionOptions: MapViewInteractionOptions = remember { MapViewInteractionOptions() },
+    viewLabelProperties: ViewLabelProperties = remember { ViewLabelProperties() },
+    selectionProperties: SelectionProperties = remember { SelectionProperties() },
+    insets: PaddingValues = MapViewDefaults.DefaultInsets,
     grid: Grid? = null,
-    backgroundGrid: BackgroundGrid = BackgroundGrid(),
+    backgroundGrid: BackgroundGrid = remember { BackgroundGrid() },
     wrapAroundMode: WrapAroundMode = WrapAroundMode.EnabledWhenSupported,
     isAttributionBarVisible: Boolean = true,
     onAttributionTextChanged: ((String) -> Unit)? = null,
@@ -434,4 +434,20 @@ public inline fun rememberLocationDisplay(
     return remember(key) {
         LocationDisplay().apply(init)
     }
+}
+
+/**
+ * Contains default values for the composable MapView.
+ *
+ * @see com.arcgismaps.toolkit.geocompose.MapView
+ * @since 200.4.0
+ */
+public object MapViewDefaults {
+
+    /**
+     * Default insets for the composable MapView, set to 0 on all sides.
+     *
+     * @since 200.4.0
+     */
+    public val DefaultInsets: PaddingValues = PaddingValues()
 }

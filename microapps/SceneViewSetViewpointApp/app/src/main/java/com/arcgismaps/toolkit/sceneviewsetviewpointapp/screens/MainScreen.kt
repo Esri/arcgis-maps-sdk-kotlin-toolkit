@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -63,6 +64,7 @@ fun MainScreen() {
     val arcGISScene by remember { mutableStateOf(ArcGISScene(BasemapStyle.ArcGISImagery)) }
     val sceneViewProxy = remember { SceneViewProxy() }
     val coroutineScope = rememberCoroutineScope()
+    var displayProgressIndicator by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -83,7 +85,9 @@ fun MainScreen() {
                         onSelectMethod = {
                             actionsExpanded = false
                             coroutineScope.launch {
+                                displayProgressIndicator = true
                                 it.method(sceneViewProxy)
+                                displayProgressIndicator = false
                             }
                         },
                         onDismissRequest = { actionsExpanded = false }
@@ -103,6 +107,9 @@ fun MainScreen() {
                 arcGISScene = arcGISScene,
                 sceneViewProxy = sceneViewProxy
             )
+            if (displayProgressIndicator) {
+                CircularProgressIndicator()
+            }
         }
     }
 }
