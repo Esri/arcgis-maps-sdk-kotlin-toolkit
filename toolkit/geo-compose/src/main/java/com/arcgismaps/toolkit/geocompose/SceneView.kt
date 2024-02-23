@@ -65,8 +65,8 @@ import java.time.Instant
 /**
  * A compose equivalent of the view-based [SceneView].
  *
- * @param modifier Modifier to be applied to the composable SceneView
  * @param arcGISScene the [ArcGISScene] to be rendered by this composable SceneView
+ * @param modifier Modifier to be applied to the composable SceneView
  * @param onViewpointChangedForCenterAndScale lambda invoked when the viewpoint changes, passing a viewpoint
  * type of [ViewpointType.CenterAndScale]
  * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a viewpoint

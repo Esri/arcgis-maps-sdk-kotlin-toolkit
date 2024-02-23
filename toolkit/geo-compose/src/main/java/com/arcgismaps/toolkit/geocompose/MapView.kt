@@ -65,8 +65,8 @@ import kotlinx.coroutines.launch
 /**
  * A compose equivalent of the view-based [MapView].
  *
- * @param modifier Modifier to be applied to the composable MapView
  * @param arcGISMap the [ArcGISMap] to be rendered by this composable MapView
+ * @param modifier Modifier to be applied to the composable MapView
  * @param onViewpointChangedForCenterAndScale lambda invoked when the viewpoint changes, passing a viewpoint
  * type of [ViewpointType.CenterAndScale]
  * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a viewpoint
