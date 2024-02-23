@@ -24,6 +24,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 internal open class FieldProperties<T>(
@@ -121,43 +122,32 @@ internal abstract class BaseFieldState<T>(
 
     init {
         scope.launch {
-            _attributeValue.collect {
-                // update the current value state along with validation errors when the attribute value changes
-                //_value.value = Value(it)
-                updateValidation(it, validationErrors.value)
-                // validate when the attribute value changes
-                // updateValidation(_value.value.data, validationErrors.value)
-            }
-        }
-        scope.launch {
-            validationErrors.collect {
-                updateValidation(_value.value.data, it)
+            // combine the attribute and validation errors flow so that we always have the latest
+            // value for both
+            combine(_attributeValue, validationErrors) { newValue, errors ->
+                Pair(newValue, errors)
+            }.collect {
+                // validate with the latest value and validation errors
+                updateValueWithValidation(it.first, it.second)
             }
         }
         scope.launch {
             // validate when focus changes
             isFocused.collect {
-                updateValidation(_value.value.data, validationErrors.value)
-            }
-        }
-        scope.launch {
-            // validate when required property changes
-            isRequired.collect {
-                updateValidation(_value.value.data, validationErrors.value)
+                updateValueWithValidation(_value.value.data, validationErrors.value)
             }
         }
         scope.launch {
             // validate when the editable property changes
             isEditable.collect {
-                updateValidation(_value.value.data, validationErrors.value)
+                updateValueWithValidation(_value.value.data, validationErrors.value)
             }
         }
     }
 
     /**
-     * Callback to update the current value of the FormTextFieldState to the given [input]. This also
-     * sets the value on the feature using [onEditValue] and updates the validation using
-     * [updateValidation].
+     * Callback to update the current value of this state object to the given [input]. This also
+     * sets the value on the feature using [onEditValue].
      */
     fun onValueChanged(input: T) {
         // infer that a value change event comes from a user interaction and hence treat it as a
@@ -167,8 +157,6 @@ internal abstract class BaseFieldState<T>(
         _value.value = Value(input)
         // update the attributes
         onEditValue(typeConverter(input))
-        // run validation
-        //updateValidation(input)
     }
 
     /**
@@ -186,14 +174,13 @@ internal abstract class BaseFieldState<T>(
      */
     fun forceValidation() {
         wasFocused = true
-        updateValidation(_value.value.data, validationErrors.value)
+        updateValueWithValidation(_value.value.data, validationErrors.value)
     }
 
     /**
-     * Runs and updates the validation using [validate] and [filterErrors]. Avoid calling this
-     * method in any open/abstract class constructors since it directly invokes open members.
+     * Updates the [value] with a validation error if any, using [filterErrors].
      */
-    private fun updateValidation(value: T, errors: List<ValidationErrorState>) {
+    private fun updateValueWithValidation(value: T, errors: List<ValidationErrorState>) {
         val error = filterErrors(errors)
         // update the value with the validation error.
         _value.value = Value(value, error)
