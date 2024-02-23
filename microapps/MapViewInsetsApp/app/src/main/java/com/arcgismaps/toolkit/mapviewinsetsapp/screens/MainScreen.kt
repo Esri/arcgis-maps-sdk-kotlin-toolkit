@@ -122,8 +122,8 @@ fun MainScreen() {
         }
 
         MapView(
+            arcGISMap,
             modifier = Modifier.fillMaxSize(),
-            arcGISMap = arcGISMap,
             insets = insets
         )
     }

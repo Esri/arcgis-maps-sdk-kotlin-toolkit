@@ -34,8 +34,8 @@ import com.arcgismaps.toolkit.geocompose.MapViewpointOperation
 fun MainScreen() {
     val arcGISMap by remember { mutableStateOf(ArcGISMap(BasemapStyle.ArcGISTopographic)) }
     MapView(
+        arcGISMap,
         modifier = Modifier.fillMaxSize(),
-        arcGISMap = arcGISMap,
         viewpointOperation = MapViewpointOperation.Set(
             Viewpoint(
                 latitude = 39.8,

@@ -102,8 +102,8 @@ fun MainScreen() {
             contentAlignment = Alignment.Center
         ) {
             MapView(
+                arcGISMap,
                 modifier = Modifier.fillMaxSize(),
-                arcGISMap = arcGISMap,
                 mapViewProxy = mapViewProxy
             )
             if (showProgressIndicator) {

@@ -99,8 +99,8 @@ fun MainScreen() {
             contentAlignment = Alignment.Center
         ) {
             SceneView(
+                arcGISScene,
                 modifier = Modifier.fillMaxSize(),
-                arcGISScene = arcGISScene,
                 sceneViewProxy = sceneViewProxy
             )
         }

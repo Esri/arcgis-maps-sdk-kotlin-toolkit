@@ -126,10 +126,10 @@ fun MainScreen() {
         },
     ) { innerPadding ->
         MapView(
+            arcGISMap,
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize(),
-            arcGISMap = arcGISMap,
             locationDisplay = locationDisplay
         )
     }

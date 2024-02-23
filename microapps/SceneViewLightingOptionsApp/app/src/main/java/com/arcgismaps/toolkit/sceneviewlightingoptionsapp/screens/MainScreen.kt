@@ -126,10 +126,10 @@ fun MainScreen() {
         },
     ) { innerPadding ->
         SceneView(
+            arcGISScene,
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize(),
-            arcGISScene = arcGISScene,
             viewpointOperation = viewpointOperation,
             sunTime = lightingOptionsState.sunTime.value,
             sunLighting = lightingOptionsState.sunLighting.value,

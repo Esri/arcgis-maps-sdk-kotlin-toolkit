@@ -66,8 +66,8 @@ public fun SceneViewSample() {
 
     // display the Composable SceneView
     SceneView(
+        scene,
         modifier = Modifier.fillMaxSize(),
-        arcGISScene = scene
     )
 }
 
@@ -117,7 +117,7 @@ public fun MapViewSample() {
 
     // display the Composable MapView
     MapView(
+        map,
         modifier = Modifier.fillMaxSize(),
-        arcGISMap = map
     )
 }
