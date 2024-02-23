@@ -76,7 +76,6 @@ internal class ComboBoxFieldState(
                         formElement.updateValue(newValue)
                         scope.launch { form.evaluateExpressions() }
                     },
-                    //defaultValidator = formElement.validationErrors
                 ).apply {
                     onFocusChanged(list[1] as Boolean)
                 }
@@ -115,6 +114,5 @@ internal fun rememberComboBoxFieldState(
             field.updateValue(it)
             scope.launch { form.evaluateExpressions() }
         },
-        //defaultValidator = field::getValidationErrors
     )
 }

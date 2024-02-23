@@ -67,25 +67,17 @@ internal class DateTimeFieldState(
     initialValue: Instant? = properties.value.value,
     scope: CoroutineScope,
     onEditValue: (Any?) -> Unit,
-    //defaultValidator: () -> List<Throwable>
 ) : BaseFieldState<Instant?>(
     properties = properties,
     initialValue = initialValue,
     scope = scope,
     onEditValue = onEditValue,
-    //defaultValidator = defaultValidator
 ) {
     val minEpochMillis: Instant? = properties.minEpochMillis
 
     val maxEpochMillis: Instant? = properties.maxEpochMillis
 
     val shouldShowTime: Boolean = properties.shouldShowTime
-
-    init {
-        // Start observing the properties. Since this method cannot be invoked from any open base
-        // class initializer blocks, it is safe to invoke it here.
-        //observeProperties()
-    }
 
     override fun typeConverter(input: Instant?): Any? = input
     
@@ -120,9 +112,6 @@ internal class DateTimeFieldState(
                         field.updateValue(it)
                         scope.launch { form.evaluateExpressions() }
                     },
-//                    defaultValidator = {
-//                        field.getValidationErrors()
-//                    }
                 ).apply {
                     onFocusChanged(list[1] as Boolean)
                 }
@@ -166,8 +155,5 @@ internal fun rememberDateTimeFieldState(
             field.updateValue(it)
             scope.launch { form.evaluateExpressions() }
         },
-//        defaultValidator = {
-//            field.getValidationErrors()
-//        }
     )
 }

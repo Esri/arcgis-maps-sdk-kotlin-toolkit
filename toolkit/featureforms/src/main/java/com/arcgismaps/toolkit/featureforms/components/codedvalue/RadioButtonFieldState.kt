@@ -90,7 +90,7 @@ internal class RadioButtonFieldState(
                     onEditValue = { newValue ->
                         formElement.updateValue(newValue)
                         scope.launch { form.evaluateExpressions() }
-                    }
+                    },
                 )
             }
         )
@@ -126,6 +126,6 @@ internal fun rememberRadioButtonFieldState(
         onEditValue = {
             field.updateValue(it)
             scope.launch { form.evaluateExpressions() }
-        }
+        },
     )
 }

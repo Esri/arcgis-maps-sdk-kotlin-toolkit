@@ -128,7 +128,6 @@ private fun DateTimeFieldPreview() {
             ),
             scope = scope,
             onEditValue = {},
-            //defaultValidator = { emptyList() }
         )
         DateTimeField(state = state)
     }

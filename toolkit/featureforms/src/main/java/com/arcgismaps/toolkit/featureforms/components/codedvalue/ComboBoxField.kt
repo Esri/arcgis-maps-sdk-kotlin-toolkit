@@ -370,7 +370,7 @@ private fun ComboBoxPreview() {
             noValueLabel = "No value"
         ),
         scope = scope,
-        onEditValue = {}
+        onEditValue = {},
     )
     ComboBoxField(state = state)
 }

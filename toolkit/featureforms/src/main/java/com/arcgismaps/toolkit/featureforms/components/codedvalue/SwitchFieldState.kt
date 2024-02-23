@@ -142,7 +142,7 @@ internal class SwitchFieldState(
                     onEditValue = { code ->
                         formElement.updateValue(code)
                         scope.launch { form.evaluateExpressions() }
-                    }
+                    },
                 )
             }
         )
@@ -187,6 +187,6 @@ internal fun rememberSwitchFieldState(
         onEditValue = {
             field.updateValue(it)
             scope.launch { form.evaluateExpressions() }
-        }
+        },
     )
 }

@@ -16,30 +16,15 @@
 
 package com.arcgismaps.toolkit.featureforms.components.base
 
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import com.arcgismaps.data.RangeDomain
-import com.arcgismaps.exceptions.FeatureFormValidationException
 import com.arcgismaps.mapping.featureforms.FieldFormElement
-import com.arcgismaps.mapping.featureforms.TextAreaFormInput
-import com.arcgismaps.mapping.featureforms.TextBoxFormInput
-import com.arcgismaps.toolkit.featureforms.utils.asDoubleTuple
-import com.arcgismaps.toolkit.featureforms.utils.asLongTuple
-import com.arcgismaps.toolkit.featureforms.utils.format
-import com.arcgismaps.toolkit.featureforms.utils.isFloatingPoint
-import com.arcgismaps.toolkit.featureforms.utils.isIntegerType
-import com.arcgismaps.toolkit.featureforms.utils.isNumeric
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlin.system.measureTimeMillis
 
 internal open class FieldProperties<T>(
     val label: String,

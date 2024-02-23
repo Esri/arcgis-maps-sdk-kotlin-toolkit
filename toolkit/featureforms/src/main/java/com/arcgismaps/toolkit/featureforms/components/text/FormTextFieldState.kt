@@ -149,7 +149,7 @@ internal class FormTextFieldState(
                     onEditValue = { newValue ->
                         formElement.updateValue(newValue)
                         scope.launch { form.evaluateExpressions() }
-                    }
+                    },
                 ).apply {
                     // focus is lost on rotation. https://devtopia.esri.com/runtime/apollo/issues/230
                     onFocusChanged(list[1] as Boolean)
@@ -190,6 +190,6 @@ internal fun rememberFormTextFieldState(
         onEditValue = { newValue ->
             field.updateValue(newValue)
             scope.launch { form.evaluateExpressions() }
-        }
+        },
     )
 }

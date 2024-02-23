@@ -59,12 +59,12 @@ internal abstract class CodedValueFieldState(
     properties: CodedValueFieldProperties,
     initialValue: Any? = properties.value.value,
     scope: CoroutineScope,
-    onEditValue: ((Any?) -> Unit)
+    onEditValue: ((Any?) -> Unit),
 ) : BaseFieldState<Any?>(
     properties = properties,
     scope = scope,
     initialValue = initialValue,
-    onEditValue = onEditValue
+    onEditValue = onEditValue,
 ) {
     /**
      * The list of coded values associated with this field.
