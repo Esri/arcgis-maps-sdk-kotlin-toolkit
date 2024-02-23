@@ -21,8 +21,10 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.media.ThumbnailUtils
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.Loadable
 import com.arcgismaps.data.ArcGISFeature
@@ -39,14 +41,13 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
-import java.io.Serializable
 import java.nio.ByteBuffer
 
 /**
  * A FormElement type representing an Attachment. Use the factory method [createOrNull] to create
  * an instance.
  */
-internal class AttachmentFormElement private constructor(
+internal class AttachmentFormElement(
     private val feature: ArcGISFeature,
     private val filesDir: String
 ) {
@@ -60,7 +61,7 @@ internal class AttachmentFormElement private constructor(
      */
     val isEditable: Boolean = feature.canEditAttachments
 
-    private val _attachments: MutableList<FormAttachment> = mutableListOf()
+    internal val _attachments: MutableList<FormAttachment> = mutableListOf()
 
     /**
      * Returns all the current attachments.
@@ -135,11 +136,6 @@ internal class AttachmentFormElement private constructor(
                 null
             }
         }
-        
-//        fun Saver(
-//            form: FeatureForm
-//        ): Saver<AttachmentFormElement, Any> = listSaver(
-//        )
     }
 }
 
@@ -240,15 +236,11 @@ internal class FormAttachment(
     companion object {
         fun Saver(attachment: Attachment, filesDir: String): Saver<FormAttachment, Any> = listSaver(
             save = {
-                
-                var list = mutableListOf(
+                listOf(
                     it.filePath,
                     it.isLocal,
                     it._loadStatus.value.isTerminal
                 )
-                
-                
-                list
             },
             restore = {
                 FormAttachment(attachment, filesDir).apply {
@@ -256,18 +248,25 @@ internal class FormAttachment(
                     isLocal = it[1] as Boolean
                     (it[2] as Boolean).let { terminal ->
                         if (terminal && filePath.isEmpty()) {
-                            _loadStatus.value = LoadStatus.FailedToLoad()
+                            _loadStatus.value = LoadStatus.FailedToLoad(IllegalStateException("TODO: use the real API"))
+                        } else if (terminal) {
+                            _loadStatus.value = LoadStatus.Loaded
+                        } else {
+                            _loadStatus.value = LoadStatus.NotLoaded
                         }
-                        
                     }
-                    
-
                 }
             }
         )
-            
-            //fileName: String, isLocal: Boolean, name: String, size: Int)
     }
+}
+
+@Composable
+internal fun rememberFormAttachment(attachment: Attachment, filesDir: String)  = rememberSaveable(
+inputs = arrayOf(attachment),
+saver = FormAttachment.Saver(attachment, filesDir)
+) {
+    FormAttachment(attachment, filesDir)
 }
 
 internal sealed class AttachmentFormInput {
