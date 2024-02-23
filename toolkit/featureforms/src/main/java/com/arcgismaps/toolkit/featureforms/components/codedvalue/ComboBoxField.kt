@@ -360,6 +360,7 @@ private fun ComboBoxPreview() {
             placeholder = "",
             description = "Select the tree species",
             value = MutableStateFlow(""),
+            validationErrors = MutableStateFlow(emptyList()),
             editable = MutableStateFlow(true),
             required = MutableStateFlow(false),
             visible = MutableStateFlow(true),
@@ -369,8 +370,7 @@ private fun ComboBoxPreview() {
             noValueLabel = "No value"
         ),
         scope = scope,
-        onEditValue = {},
-        defaultValidator = { emptyList() }
+        onEditValue = {}
     )
     ComboBoxField(state = state)
 }

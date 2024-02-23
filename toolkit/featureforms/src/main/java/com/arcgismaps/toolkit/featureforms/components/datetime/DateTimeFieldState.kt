@@ -27,9 +27,11 @@ import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.FieldProperties
+import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState
+import com.arcgismaps.toolkit.featureforms.components.base.mapValidationErrors
 import com.arcgismaps.toolkit.featureforms.components.text.FormTextFieldState
 import com.arcgismaps.toolkit.featureforms.components.text.TextFieldProperties
-import com.arcgismaps.toolkit.featureforms.utils.mapValueAsStateFlow
+import com.arcgismaps.toolkit.featureforms.components.base.mapValueAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -40,13 +42,14 @@ internal class DateTimeFieldProperties(
     placeholder: String,
     description: String,
     value: StateFlow<Instant?>,
+    validationErrors : StateFlow<List<ValidationErrorState>>,
     required: StateFlow<Boolean>,
     editable: StateFlow<Boolean>,
     visible: StateFlow<Boolean>,
     val minEpochMillis: Instant?,
     val maxEpochMillis: Instant?,
     val shouldShowTime: Boolean
-) : FieldProperties<Instant?>(label, placeholder, description, value, required, editable, visible)
+) : FieldProperties<Instant?>(label, placeholder, description, value, validationErrors, required, editable, visible)
 
 /**
  * A class to handle the state of a [DateTimeField]. Essential properties are inherited from the
@@ -57,22 +60,20 @@ internal class DateTimeFieldProperties(
  * [DateTimeFieldProperties.value] by default.
  * @param scope a [CoroutineScope] to start [StateFlow] collectors on.
  * @param onEditValue a callback to invoke when the user edits result in a change of value. This
- * is called on [FormTextFieldState.onValueChanged].
- * @param defaultValidator the default validator that returns the list of validation errors. This
- * is called in [DateTimeFieldState.validate].
+ * is called on [FormTextFieldState.onValueChanged]
  */
 internal class DateTimeFieldState(
     properties: DateTimeFieldProperties,
     initialValue: Instant? = properties.value.value,
     scope: CoroutineScope,
     onEditValue: (Any?) -> Unit,
-    defaultValidator: () -> List<Throwable>
+    //defaultValidator: () -> List<Throwable>
 ) : BaseFieldState<Instant?>(
     properties = properties,
     initialValue = initialValue,
     scope = scope,
     onEditValue = onEditValue,
-    defaultValidator = defaultValidator
+    //defaultValidator = defaultValidator
 ) {
     val minEpochMillis: Instant? = properties.minEpochMillis
 
@@ -83,7 +84,7 @@ internal class DateTimeFieldState(
     init {
         // Start observing the properties. Since this method cannot be invoked from any open base
         // class initializer blocks, it is safe to invoke it here.
-        observeProperties()
+        //observeProperties()
     }
 
     override fun typeConverter(input: Instant?): Any? = input
@@ -105,6 +106,7 @@ internal class DateTimeFieldState(
                         placeholder = field.hint,
                         description = field.description,
                         value = field.mapValueAsStateFlow(scope),
+                        validationErrors = field.mapValidationErrors(scope),
                         editable = field.isEditable,
                         required = field.isRequired,
                         visible = field.isVisible,
@@ -118,9 +120,9 @@ internal class DateTimeFieldState(
                         field.updateValue(it)
                         scope.launch { form.evaluateExpressions() }
                     },
-                    defaultValidator = {
-                        field.getValidationErrors()
-                    }
+//                    defaultValidator = {
+//                        field.getValidationErrors()
+//                    }
                 ).apply {
                     onFocusChanged(list[1] as Boolean)
                 }
@@ -151,6 +153,7 @@ internal fun rememberDateTimeFieldState(
             placeholder = field.hint,
             description = field.description,
             value = field.mapValueAsStateFlow(scope),
+            validationErrors = field.mapValidationErrors(scope),
             editable = field.isEditable,
             required = field.isRequired,
             visible = field.isVisible,
@@ -163,8 +166,8 @@ internal fun rememberDateTimeFieldState(
             field.updateValue(it)
             scope.launch { form.evaluateExpressions() }
         },
-        defaultValidator = {
-            field.getValidationErrors()
-        }
+//        defaultValidator = {
+//            field.getValidationErrors()
+//        }
     )
 }

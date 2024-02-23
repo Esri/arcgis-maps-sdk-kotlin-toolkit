@@ -28,6 +28,8 @@ import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
+import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState
+import com.arcgismaps.toolkit.featureforms.components.base.mapValidationErrors
 import com.arcgismaps.toolkit.featureforms.utils.fieldIsNullable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
@@ -38,6 +40,7 @@ internal class SwitchFieldProperties(
     placeholder: String,
     description: String,
     value: StateFlow<Any?>,
+    validationErrors : StateFlow<List<ValidationErrorState>>,
     editable: StateFlow<Boolean>,
     required: StateFlow<Boolean>,
     visible: StateFlow<Boolean>,
@@ -52,6 +55,7 @@ internal class SwitchFieldProperties(
     placeholder,
     description,
     value,
+    validationErrors,
     required,
     editable,
     visible,
@@ -70,22 +74,18 @@ internal class SwitchFieldProperties(
  * @param scope a [CoroutineScope] to start [StateFlow] collectors on.
  * @param onEditValue a callback to invoke when the user edits result in a change of value. This
  * is called on [SwitchFieldState.onValueChanged].
- * @param defaultValidator the default validator that returns the list of validation errors. This
- * is called in [SwitchFieldState.validate].
  */
 @Stable
 internal class SwitchFieldState(
     properties: SwitchFieldProperties,
     val initialValue: Any? = properties.value.value,
     scope: CoroutineScope,
-    onEditValue: ((Any?) -> Unit),
-    defaultValidator: () -> List<Throwable>
+    onEditValue: ((Any?) -> Unit)
 ) : CodedValueFieldState(
     properties = properties,
     scope = scope,
     initialValue = initialValue,
-    onEditValue = onEditValue,
-    defaultValidator = defaultValidator
+    onEditValue = onEditValue
 ) {
     /**
      * The CodedValue that represents the "on" state of the Switch.
@@ -101,12 +101,6 @@ internal class SwitchFieldState(
      * Whether this Switch should fall back to being displayed as a ComboBox.
      */
     val fallback: Boolean = properties.fallback
-
-    init {
-        // Start observing the properties. Since this method cannot be invoked from any open base
-        // class initializer blocks, it is safe to invoke it here.
-        observeProperties()
-    }
 
     companion object {
         fun Saver(
@@ -129,6 +123,7 @@ internal class SwitchFieldState(
                         placeholder = formElement.hint,
                         description = formElement.description,
                         value = formElement.value,
+                        validationErrors = formElement.mapValidationErrors(scope),
                         editable = formElement.isEditable,
                         required = formElement.isRequired,
                         visible = formElement.isVisible,
@@ -147,8 +142,7 @@ internal class SwitchFieldState(
                     onEditValue = { code ->
                         formElement.updateValue(code)
                         scope.launch { form.evaluateExpressions() }
-                    },
-                    defaultValidator = formElement::getValidationErrors
+                    }
                 )
             }
         )
@@ -175,6 +169,7 @@ internal fun rememberSwitchFieldState(
             placeholder = field.hint,
             description = field.description,
             value = field.value,
+            validationErrors = field.mapValidationErrors(scope),
             editable = field.isEditable,
             required = field.isRequired,
             visible = field.isVisible,
@@ -192,7 +187,6 @@ internal fun rememberSwitchFieldState(
         onEditValue = {
             field.updateValue(it)
             scope.launch { form.evaluateExpressions() }
-        },
-        defaultValidator = field::getValidationErrors
+        }
     )
 }

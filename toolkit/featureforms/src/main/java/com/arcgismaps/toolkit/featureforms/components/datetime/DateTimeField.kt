@@ -118,6 +118,7 @@ private fun DateTimeFieldPreview() {
                 placeholder = "",
                 description = "Enter the date for apollo 11 launch",
                 value = MutableStateFlow(null),
+                validationErrors = MutableStateFlow(emptyList()),
                 editable = MutableStateFlow(true),
                 required = MutableStateFlow(false),
                 visible = MutableStateFlow(true),
@@ -127,7 +128,7 @@ private fun DateTimeFieldPreview() {
             ),
             scope = scope,
             onEditValue = {},
-            defaultValidator = { emptyList() }
+            //defaultValidator = { emptyList() }
         )
         DateTimeField(state = state)
     }

@@ -22,6 +22,7 @@ import com.arcgismaps.data.FieldType
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.FieldProperties
+import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState
 import com.arcgismaps.toolkit.featureforms.components.text.TextFieldProperties
 import com.arcgismaps.toolkit.featureforms.utils.isNullOrEmptyString
 import kotlinx.coroutines.CoroutineScope
@@ -32,6 +33,7 @@ internal open class CodedValueFieldProperties(
     placeholder: String,
     description: String,
     value: StateFlow<Any?>,
+    validationErrors : StateFlow<List<ValidationErrorState>>,
     required: StateFlow<Boolean>,
     editable: StateFlow<Boolean>,
     visible: StateFlow<Boolean>,
@@ -39,7 +41,7 @@ internal open class CodedValueFieldProperties(
     val codedValues: List<CodedValue>,
     val showNoValueOption: FormInputNoValueOption,
     val noValueLabel: String
-) : FieldProperties<Any?>(label, placeholder, description, value, required, editable, visible)
+) : FieldProperties<Any?>(label, placeholder, description, value, validationErrors, required, editable, visible)
 
 /**
  * A class to handle the state of any coded value type. Essential properties are inherited
@@ -50,23 +52,19 @@ internal open class CodedValueFieldProperties(
  * [TextFieldProperties.value] by default.
  * @param scope a [CoroutineScope] to start [StateFlow] collectors on.
  * @param onEditValue a callback to invoke when the user edits result in a change of value. This
- * is called on [CodedValueFieldState.onValueChanged].
- * @param defaultValidator the default validator that returns the list of validation errors. This
- * is called in [CodedValueFieldState.validate].
+ * is called on [CodedValueFieldState.onValueChanged]
  */
 @Stable
 internal abstract class CodedValueFieldState(
     properties: CodedValueFieldProperties,
     initialValue: Any? = properties.value.value,
     scope: CoroutineScope,
-    onEditValue: ((Any?) -> Unit),
-    defaultValidator: () -> List<Throwable>
+    onEditValue: ((Any?) -> Unit)
 ) : BaseFieldState<Any?>(
     properties = properties,
     scope = scope,
     initialValue = initialValue,
-    onEditValue = onEditValue,
-    defaultValidator = defaultValidator
+    onEditValue = onEditValue
 ) {
     /**
      * The list of coded values associated with this field.

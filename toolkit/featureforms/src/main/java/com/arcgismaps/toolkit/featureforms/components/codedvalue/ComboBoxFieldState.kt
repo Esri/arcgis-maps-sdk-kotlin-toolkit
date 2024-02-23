@@ -23,6 +23,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.toolkit.featureforms.components.base.mapValidationErrors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -34,14 +35,7 @@ internal class ComboBoxFieldState(
     initialValue: Any? = properties.value.value,
     scope: CoroutineScope,
     onEditValue: ((Any?) -> Unit),
-    defaultValidator: () -> List<Throwable>
-) : CodedValueFieldState(properties, initialValue, scope, onEditValue, defaultValidator) {
-
-    init {
-        // Start observing the properties. Since this method cannot be invoked from any open base
-        // class initializer blocks, it is safe to invoke it here.
-        observeProperties()
-    }
+) : CodedValueFieldState(properties, initialValue, scope, onEditValue) {
 
     companion object {
         /**
@@ -67,6 +61,7 @@ internal class ComboBoxFieldState(
                         placeholder = formElement.hint,
                         description = formElement.description,
                         value = formElement.value,
+                        validationErrors = formElement.mapValidationErrors(scope),
                         editable = formElement.isEditable,
                         required = formElement.isRequired,
                         visible = formElement.isVisible,
@@ -81,7 +76,7 @@ internal class ComboBoxFieldState(
                         formElement.updateValue(newValue)
                         scope.launch { form.evaluateExpressions() }
                     },
-                    defaultValidator = formElement::getValidationErrors
+                    //defaultValidator = formElement.validationErrors
                 ).apply {
                     onFocusChanged(list[1] as Boolean)
                 }
@@ -106,6 +101,7 @@ internal fun rememberComboBoxFieldState(
             placeholder = field.hint,
             description = field.description,
             value = field.value,
+            validationErrors = field.mapValidationErrors(scope),
             editable = field.isEditable,
             required = field.isRequired,
             visible = field.isVisible,
@@ -119,6 +115,6 @@ internal fun rememberComboBoxFieldState(
             field.updateValue(it)
             scope.launch { form.evaluateExpressions() }
         },
-        defaultValidator = field::getValidationErrors
+        //defaultValidator = field::getValidationErrors
     )
 }
