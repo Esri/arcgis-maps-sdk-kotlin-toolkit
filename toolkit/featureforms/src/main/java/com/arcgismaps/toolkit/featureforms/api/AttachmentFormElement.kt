@@ -21,6 +21,8 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.media.ThumbnailUtils
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.listSaver
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.Loadable
 import com.arcgismaps.data.ArcGISFeature
@@ -37,6 +39,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
+import java.io.Serializable
 import java.nio.ByteBuffer
 
 /**
@@ -132,6 +135,11 @@ internal class AttachmentFormElement private constructor(
                 null
             }
         }
+        
+//        fun Saver(
+//            form: FeatureForm
+//        ): Saver<AttachmentFormElement, Any> = listSaver(
+//        )
     }
 }
 
@@ -227,6 +235,38 @@ internal class FormAttachment(
 
     override suspend fun retryLoad(): Result<Unit> {
         return load()
+    }
+    
+    companion object {
+        fun Saver(attachment: Attachment, filesDir: String): Saver<FormAttachment, Any> = listSaver(
+            save = {
+                
+                var list = mutableListOf(
+                    it.filePath,
+                    it.isLocal,
+                    it._loadStatus.value.isTerminal
+                )
+                
+                
+                list
+            },
+            restore = {
+                FormAttachment(attachment, filesDir).apply {
+                    filePath = it[0] as String
+                    isLocal = it[1] as Boolean
+                    (it[2] as Boolean).let { terminal ->
+                        if (terminal && filePath.isEmpty()) {
+                            _loadStatus.value = LoadStatus.FailedToLoad()
+                        }
+                        
+                    }
+                    
+
+                }
+            }
+        )
+            
+            //fileName: String, isLocal: Boolean, name: String, size: Int)
     }
 }
 

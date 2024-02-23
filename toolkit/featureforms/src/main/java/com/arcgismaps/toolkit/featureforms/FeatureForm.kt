@@ -23,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -38,6 +39,7 @@ import com.arcgismaps.mapping.featureforms.RadioButtonsFormInput
 import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
+import com.arcgismaps.toolkit.featureforms.api.AttachmentFormElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.BaseGroupState
 import com.arcgismaps.toolkit.featureforms.components.base.FormStateCollection
@@ -50,6 +52,7 @@ import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberSwitchF
 import com.arcgismaps.toolkit.featureforms.components.datetime.rememberDateTimeFieldState
 import com.arcgismaps.toolkit.featureforms.components.formelement.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.formelement.GroupElement
+import com.arcgismaps.toolkit.featureforms.components.text.FormTextFieldState
 import com.arcgismaps.toolkit.featureforms.components.text.rememberFormTextFieldState
 import com.arcgismaps.toolkit.featureforms.utils.FeatureFormDialog
 import kotlinx.coroutines.CoroutineScope
@@ -123,6 +126,7 @@ private fun FeatureFormBody(
     modifier: Modifier = Modifier
 ) {
     var initialEvaluation by rememberSaveable(form) { mutableStateOf(false) }
+    var attachmentElements by rememberAttachmentElements(form)
     val lazyListState = rememberLazyListState()
     Column(
         modifier = modifier.fillMaxSize(),
@@ -237,8 +241,23 @@ internal fun rememberStates(
                 states.add(element, groupState)
             }
         }
+        
+//        val state = rememberAttachmentState(
+//            form = form,
+//
+//        )
+        
     }
     return states
+}
+
+@Composable
+internal fun rememberAttachmentElements(form: FeatureForm): List<AttachmentFormElement> =
+    rememberSaveable(
+        inputs = arrayOf(form),
+        saver = AttachmentFormElement.Saver(form)
+    ) {
+    AttachmentFormElement.createOrNull(form.feature, LocalContext.current.filesDir.absolutePath)
 }
 
 /**
