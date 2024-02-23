@@ -30,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -38,19 +39,22 @@ import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.compass.Compass
 import com.arcgismaps.toolkit.geocompose.MapView
-import com.arcgismaps.toolkit.geocompose.MapViewpointOperation
+import com.arcgismaps.toolkit.geocompose.MapViewProxy
+import kotlinx.coroutines.launch
 
 @Composable
 fun MainScreen() {
     // create an ArcGISMap with a Topographic basemap style
-    val arcGISMap by remember { mutableStateOf(ArcGISMap(BasemapStyle.ArcGISTopographic)) }
-    // set the composable map's viewpoint to North America
-    var mapViewpointOperation: MapViewpointOperation? by remember {
+    val arcGISMap by remember {
         mutableStateOf(
-            MapViewpointOperation.Set(Viewpoint(39.8, -98.6, 10e7))
+            ArcGISMap(BasemapStyle.ArcGISTopographic).apply {
+                // set the map's viewpoint to North America
+                initialViewpoint = Viewpoint(39.8, -98.6, 10e7)
+            }
         )
     }
     var mapRotation by remember { mutableDoubleStateOf(0.0) }
+    val mapViewProxy = remember { MapViewProxy() }
     // show composable MapView with compass
     Box(
         modifier = Modifier.fillMaxSize()
@@ -58,7 +62,7 @@ fun MainScreen() {
         MapView(
             arcGISMap,
             modifier = Modifier.fillMaxSize(),
-            viewpointOperation = mapViewpointOperation,
+            mapViewProxy = mapViewProxy,
             onMapRotationChanged = { rotation -> mapRotation = rotation }
         )
         Row(
@@ -67,10 +71,13 @@ fun MainScreen() {
                 .fillMaxWidth()
                 .padding(25.dp)
         ) {
+            val coroutineScope = rememberCoroutineScope()
             // show the compass and pass the mapRotation state data
             Compass(rotation = mapRotation) {
                 // reset the Composable MapView viewpoint rotation to point north
-                mapViewpointOperation = MapViewpointOperation.Rotate(0.0)
+                coroutineScope.launch {
+                    mapViewProxy.setViewpointRotation(0.0)
+                }
             }
         }
     }
