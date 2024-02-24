@@ -15,6 +15,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
@@ -29,6 +30,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.mapping.featureforms.AttachmentFormElement
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
@@ -117,6 +119,12 @@ public fun FeatureForm(
 }
 
 @Composable
+private fun FeatureFormTitle(featureForm: FeatureForm) {
+    val title by featureForm.title.collectAsState()
+    Text(text = title, style = TextStyle(fontWeight = FontWeight.Bold))
+}
+
+@Composable
 private fun FeatureFormBody(
     form: FeatureForm,
     states: FormStateCollection,
@@ -129,7 +137,7 @@ private fun FeatureFormBody(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // title
-        Text(text = form.title, style = TextStyle(fontWeight = FontWeight.Bold))
+        FeatureFormTitle(featureForm = form)
         Spacer(
             modifier = Modifier
                 .fillMaxWidth()
@@ -160,6 +168,10 @@ private fun FeatureFormBody(
                                     .fillMaxWidth()
                                     .padding(horizontal = 15.dp, vertical = 10.dp)
                             )
+                        }
+
+                        else -> {
+                            // other form elements are not created
                         }
                     }
                 }
@@ -236,6 +248,8 @@ internal fun rememberStates(
                 )
                 states.add(element, groupState)
             }
+
+            is AttachmentFormElement -> { }
         }
     }
     return states
