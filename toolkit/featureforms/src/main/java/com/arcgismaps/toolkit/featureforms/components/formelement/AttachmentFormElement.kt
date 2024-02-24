@@ -1,12 +1,16 @@
 package com.arcgismaps.toolkit.featureforms.components.formelement
 
+import android.content.Context
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -18,11 +22,9 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,10 +33,8 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.AddAPhoto
 import androidx.compose.material.icons.rounded.AddPhotoAlternate
 import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.LibraryAdd
-import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
@@ -43,18 +43,25 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.DefaultAlpha
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -64,11 +71,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
-import com.arcgismaps.toolkit.featureforms.R
+import com.arcgismaps.portal.LoadableImage
 import com.arcgismaps.toolkit.featureforms.api.FormAttachment
 import com.arcgismaps.toolkit.featureforms.components.base.BaseAttachmentElementState
+import com.arcgismaps.toolkit.featureforms.components.base.CarouselThumbnail
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 //internal data class FormAttachmentElementState(
@@ -121,9 +129,6 @@ private fun Modifier.feedbackClickable(
         )
 }
 
-/**
- * Todo: make public with a proper state object, and call from FeatureFormBody.
- */
 @Composable
 internal fun AttachmentFormElement(
     state: BaseAttachmentElementState,
@@ -139,9 +144,9 @@ internal fun AttachmentFormElement(
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp)
         ) {
             AttachmentElementHeader(
-                title = state.label,
-                description = state.description,
-                editable = true//state.editable
+                state,
+                editable = true,//state.editable
+            
             )
             Spacer(modifier = Modifier.height(10.dp))
             Carousel(
@@ -165,83 +170,16 @@ private fun Carousel(state: BaseAttachmentElementState, onThumbnailTap: (FormAtt
         val attachments by state.attachments.collectAsState()
         attachments.forEach {
             CarouselThumbnail(
-                it.name,
-                it.size,
-                onThumbnailTap = { onThumbnailTap(it) },
-                onDetailsTap = { onDetailsTap(it) }
+                attachment = it,
+                paddingValues = PaddingValues(
+                    start = if (it == attachments.first()) 16.dp else 8.dp,
+                    end = if (it == attachments.last()) 16.dp else 0.dp,
+                    top = 16.dp,
+                    bottom = 16.dp
+                ),
+                onThumbnailTap = { state.selectedAttachment = it }
             )
         }
-    }
-}
-
-@Composable
-private fun CarouselThumbnail(name: String, size: Int, onThumbnailTap: () -> Unit, onDetailsTap: () -> Unit) {
-    var downloaded by rememberSaveable { mutableStateOf(false) }
-    Column(
-        Modifier
-            .feedbackClickable { onThumbnailTap() }
-            .width(80.dp)
-            .border(
-                border = BorderStroke(
-                    AttachmentElementDefaults.borderThickness,
-                    AttachmentElementDefaults.colors().borderColor
-                ),
-                shape = RoundedCornerShape(10.dp)
-            ),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Box(
-            modifier = Modifier
-                .alpha(0.4f)
-                .aspectRatio(1.0f)
-        ) {
-            var showMenu by rememberSaveable { mutableStateOf(false) }
-            ThumbnailMenu(showMenu) {
-                showMenu = false
-            }
-            
-            if (downloaded) {
-                Image(
-                    painter = rememberAsyncImagePainter(
-                        ImageRequest.Builder(LocalContext.current)
-                            .data("https://i.postimg.cc/65yws9mR/Screenshot-2024-02-02-at-6-20-49-PM.png").apply {
-                                placeholder(
-                                    LocalContext.current.getDrawable(R.drawable.baseline_cloud_download_16)
-                                )
-                            }.build()
-                    ),
-                    contentScale = ContentScale.Crop,
-                    contentDescription = "Thumbnail image",
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(shape = RoundedCornerShape(15.dp, 15.dp, 0.dp, 0.dp))
-                )
-                Icon(
-                    Icons.Rounded.MoreVert,
-                    "more",
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(vertical = 3.dp)
-                        .clickable {
-                            showMenu = true
-                            onDetailsTap()
-                        }
-                )
-            } else {
-                Icon(
-                    Icons.Rounded.Download,
-                    contentDescription = "Download attachment",
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(shape = RoundedCornerShape(15.dp, 15.dp, 0.dp, 0.dp))
-                        .clickable { downloaded = true }
-                
-                )
-            }
-        }
-        
-        Divider()
-        CarouselText(name, size)
     }
 }
 
@@ -278,20 +216,20 @@ private fun ThumbnailMenu(expanded: Boolean, onDismiss: () -> Unit = {}) {
                 contentPadding = PaddingValues(horizontal = 3.dp),
                 onClick = {}
             )
-//            Row(
-//                modifier = Modifier.padding(horizontal = 3.dp),
-//                horizontalArrangement = Arrangement.Start,
-//                verticalAlignment = Alignment.CenterVertically
-//            ) {
-//                Text(text = "Delete")
-//                Spacer(modifier = Modifier.weight(1f))
-//                Icon(
-//                    imageVector = Icons.Rounded.Delete,
-//                    contentDescription = "Delete attachment",
-//                    modifier = Modifier.alpha(0.4f)
-//                )
-//            }
-//
+            Row(
+                modifier = Modifier.padding(horizontal = 3.dp),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = "Delete")
+                Spacer(modifier = Modifier.weight(1f))
+                Icon(
+                    imageVector = Icons.Rounded.Delete,
+                    contentDescription = "Delete attachment",
+                    modifier = Modifier.alpha(0.4f)
+                )
+            }
+            
         }
     }
 }
@@ -328,7 +266,7 @@ private fun CarouselText(
 }
 
 @Composable
-private fun AddAttachmentMenu(expanded: Boolean, onDismiss: () -> Unit = {}) {
+private fun AddAttachmentMenu(expanded: Boolean, onDismiss: () -> Unit = {}, onImageChosen: (Uri?) -> Unit) {
     MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(8.dp))) {
         DropdownMenu(
             expanded = expanded,
@@ -336,7 +274,7 @@ private fun AddAttachmentMenu(expanded: Boolean, onDismiss: () -> Unit = {}) {
             onDismissRequest = onDismiss
         ) {
             DropdownMenuItem(
-                text= { Text(text = "Take Photo") },
+                text = { Text(text = "Take Photo") },
                 trailingIcon = {
                     Icon(
                         imageVector = Icons.Rounded.AddAPhoto,
@@ -347,8 +285,11 @@ private fun AddAttachmentMenu(expanded: Boolean, onDismiss: () -> Unit = {}) {
                 onClick = {}
             )
             Divider(modifier = Modifier.padding(vertical = 5.dp))
+            val launcher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) {
+                onImageChosen(it)
+            }
             DropdownMenuItem(
-                text= { Text(text = "Add Photo From Gallery") },
+                text = { Text(text = "Add Photo From Gallery") },
                 trailingIcon = {
                     Icon(
                         imageVector = Icons.Rounded.AddPhotoAlternate,
@@ -356,7 +297,9 @@ private fun AddAttachmentMenu(expanded: Boolean, onDismiss: () -> Unit = {}) {
                         modifier = Modifier.alpha(0.4f)
                     )
                 },
-                onClick = {}
+                onClick = {
+                    launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                }
             )
             Divider(modifier = Modifier.padding(vertical = 5.dp))
             DropdownMenuItem(
@@ -375,11 +318,14 @@ private fun AddAttachmentMenu(expanded: Boolean, onDismiss: () -> Unit = {}) {
     
 }
 
+private fun readBytes(context: Context, uri: Uri): ByteArray? =
+    context.contentResolver.openInputStream(uri)?.use { it.buffered().readBytes() }
 
 @Composable
-private fun AddAttachment() {
+private fun AddAttachment(state: BaseAttachmentElementState) {
     var showMenu by remember { mutableStateOf(false) }
-    
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     Row {
         Box(
             modifier = Modifier
@@ -388,7 +334,30 @@ private fun AddAttachment() {
                     showMenu = true
                 }
         ) {
-            AddAttachmentMenu(expanded = showMenu, onDismiss = { showMenu = false })
+            var index by remember { mutableIntStateOf(1) }
+            AddAttachmentMenu(expanded = showMenu, onDismiss = { showMenu = false }) {
+                
+                if (it != null) {
+                    println("TAG URI $it")
+                    scope.launch {
+                        val bytes = readBytes(context, it)
+                        if (bytes != null) {
+                            state.feature.addAttachment("Photo-$index.png", "image/*", bytes)
+                                .onSuccess {
+                                    index++
+                                    state.attachmentsUpdated()
+                                }.onFailure {
+                                    println("TAG failed to add attachment")
+                                }
+                        }
+                    }
+                    
+                }
+                scope.launch {
+                    delay (250)
+                    showMenu = false
+                }
+            }
             Icon(
                 Icons.Rounded.Add,
                 contentDescription = "Add attachment",
@@ -403,8 +372,7 @@ private fun AddAttachment() {
 
 @Composable
 private fun AttachmentElementHeader(
-    title: String,
-    description: String,
+    state: BaseAttachmentElementState,
     modifier: Modifier = Modifier,
     showingDetails: Boolean = false,
     editable: Boolean = true
@@ -415,14 +383,14 @@ private fun AttachmentElementHeader(
     ) {
         Column {
             Text(
-                text = title,
+                text = state.label,
                 style = MaterialTheme.typography.bodyLarge,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            if (description.isNotEmpty()) {
+            if (state.description.isNotEmpty()) {
                 Text(
-                    text = description,
+                    text = state.description,
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -431,7 +399,7 @@ private fun AttachmentElementHeader(
         }
         Spacer(modifier = Modifier.weight(1f))
         if (editable && !showingDetails) {
-            AddAttachment()
+            AddAttachment(state)
         }
     }
 }
@@ -444,3 +412,52 @@ private fun AttachmentElementHeader(
 //            .fillMaxWidth()
 //    )
 //}
+
+
+/**
+ * Loads an image asynchronously using the [ImageLoader].
+ */
+@Composable
+internal fun AsyncImage(
+    imageLoader: ImageLoader,
+    modifier: Modifier = Modifier,
+    alignment: Alignment = Alignment.Center,
+    contentScale: ContentScale = ContentScale.Fit,
+    alpha: Float = DefaultAlpha,
+    colorFilter: ColorFilter? = null
+) {
+    val painter = imageLoader.image.value
+    Image(
+        painter = painter,
+        contentDescription = null,
+        modifier = modifier,
+        alignment = alignment,
+        contentScale = contentScale,
+        alpha = alpha,
+        colorFilter = colorFilter
+    )
+}
+
+/**
+ * A model to asynchronously load the image from a [LoadableImage]. Once the loading is complete
+ * the loaded image is presented via [image] State.
+ *
+ * @param loadable the [LoadableImage] to load.
+ * @param scope the CoroutineScope to run the loading job on.
+ * @param placeholder the placeholder image to show until the loading is complete.
+ */
+internal class ImageLoader(
+    private val loadable: FormAttachment,
+    placeholder: Painter
+) {
+    private val _image: MutableState<Painter> = mutableStateOf(placeholder)
+    val image: State<Painter> = _image
+    
+    suspend fun load() {
+        loadable.load().onSuccess {
+            loadable.createThumbnail(64, 64).onSuccess {
+                _image.value = BitmapPainter(it.bitmap.asImageBitmap())
+            }
+        }
+    }
+}

@@ -177,7 +177,7 @@ public class FormAttachment(
     public var isLocal: Boolean = false
         private set
 
-    public var name: String = attachment.name
+    public var name: String = attachment.name.substringBeforeLast(".")
         private set
 
     public val size: Int = attachment.size

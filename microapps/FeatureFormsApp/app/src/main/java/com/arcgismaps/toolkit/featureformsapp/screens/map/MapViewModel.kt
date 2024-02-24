@@ -23,6 +23,7 @@ import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -96,15 +97,22 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    internal fun setUIState(state: UIState, scope: CoroutineScope) {
-        _uiState.value = state
-        if (state is UIState.Editing) {
-            val feature = state.featureForm.feature
-            scope.launch {
-                feature.fetchAttachments().onSuccess { _attachments.value = it }
+    fun onAttachmentsUpdated() {
+        (uiState.value as? UIState.Editing)?.let {
+            val feature = it.featureForm.feature
+            CoroutineScope(Dispatchers.IO).launch {
+                println("TAG fetching ATTACHMENTSS")
+                feature.fetchAttachments().onSuccess {
+                    println("TAG fetched ${it.size} attachments")
+                    _attachments.value = it
+                }
             }
             
         }
+    }
+    internal fun setUIState(state: UIState, scope: CoroutineScope) {
+        _uiState.value = state
+        onAttachmentsUpdated()
     }
     
     /**

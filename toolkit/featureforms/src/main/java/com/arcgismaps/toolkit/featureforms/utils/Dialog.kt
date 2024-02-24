@@ -22,12 +22,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
 import com.arcgismaps.toolkit.featureforms.R
+import com.arcgismaps.toolkit.featureforms.components.base.AttachmentViewerDialog
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.CodedValueFieldState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.ComboBoxDialog
 import com.arcgismaps.toolkit.featureforms.components.datetime.DateTimeFieldState
@@ -90,6 +92,8 @@ internal sealed class DialogType {
      * @param state The [DateTimeFieldState] to use for the dialog.
      */
     data class DateTimeDialog(val state: DateTimeFieldState) : DialogType()
+    
+    data class AttachmentViewerDialog(val image: Painter): DialogType()
 }
 
 /**
@@ -154,6 +158,11 @@ internal fun FeatureFormDialog() {
                     dialogRequester.dismissDialog()
                 }
             )
+        }
+        
+        is DialogType.AttachmentViewerDialog -> {
+            val image = (dialogType as DialogType.AttachmentViewerDialog).image
+            AttachmentViewerDialog(image) { dialogRequester.dismissDialog() }
         }
 
         else -> {

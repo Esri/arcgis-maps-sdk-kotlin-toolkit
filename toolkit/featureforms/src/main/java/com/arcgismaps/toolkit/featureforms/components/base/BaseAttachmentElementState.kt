@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
+import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.data.Attachment
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureforms.api.AttachmentFormElement
@@ -31,19 +32,27 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 internal class BaseAttachmentElementState(
+    val feature: ArcGISFeature,
     label: String,
     description: String,
     isVisible: StateFlow<Boolean>,
     val attachments: StateFlow<List<FormAttachment>>,
-    var selectedAttachment: FormAttachment? = null
+    var selectedAttachment: FormAttachment? = null,
+    private val onAttachmentsUpdated: () -> Unit = {}
 ) : FormElementState(
     label = label,
     description = description,
     isVisible = isVisible
 ) {
+    
+    fun attachmentsUpdated() {
+        onAttachmentsUpdated()
+    }
     companion object {
         fun Saver(
             attachmentFormElement: AttachmentFormElement,
+            feature: ArcGISFeature,
+            onAttachmentsUpdated: () -> Unit
         ): Saver<BaseAttachmentElementState, Any> = listSaver(
             save = {
                 if (it.selectedAttachment != null) {
@@ -54,6 +63,7 @@ internal class BaseAttachmentElementState(
             },
             restore = {
                 BaseAttachmentElementState(
+                    feature,
                     label = attachmentFormElement.label,
                     description = attachmentFormElement.description,
                     isVisible = attachmentFormElement.isVisible,
@@ -62,7 +72,8 @@ internal class BaseAttachmentElementState(
                         it[0] as FormAttachment
                     } else {
                         null
-                    }
+                    },
+                    onAttachmentsUpdated = onAttachmentsUpdated
                 )
             }
         )
@@ -93,17 +104,20 @@ internal fun formAttachmentFlow(
 internal fun rememberBaseAttachmentElementState(
     form: FeatureForm,
     attachmentFormElement: AttachmentFormElement,
+    onAttachmentsUpdated: () -> Unit
 ): BaseAttachmentElementState {
     return rememberSaveable(
         inputs = arrayOf(form),
-        saver = BaseAttachmentElementState.Saver(attachmentFormElement)
+        saver = BaseAttachmentElementState.Saver(attachmentFormElement, form.feature, onAttachmentsUpdated)
     ) {
         BaseAttachmentElementState(
+            feature = form.feature,
             label = attachmentFormElement.label,
             description = attachmentFormElement.description,
             isVisible = attachmentFormElement.isVisible,
             attachments = attachmentFormElement.attachments,
-            selectedAttachment = null
+            selectedAttachment = null,
+            onAttachmentsUpdated = onAttachmentsUpdated
         )
     }
 }

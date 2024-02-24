@@ -99,16 +99,22 @@ public fun FeatureForm(
     featureForm: FeatureForm,
     featureAttachments: StateFlow<List<Attachment>>,
     modifier: Modifier = Modifier,
-    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic
+    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
+    onAttachmentsUpdated: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     var initialEvaluation by rememberSaveable(featureForm) { mutableStateOf(false) }
     val filesDir = LocalContext.current.filesDir.absolutePath
-    val attachmentFormElement = rememberAttachmentElement(featureForm, formAttachmentFlow(scope, featureAttachments, filesDir), filesDir)
+    val attachmentFormElement = rememberAttachmentElement(
+        featureForm,
+        formAttachmentFlow(scope, featureAttachments, filesDir),
+        filesDir
+    )
     val states = rememberStates(
         form = featureForm,
         attachmentFormElement = attachmentFormElement,
-        scope = scope
+        scope = scope,
+        onAttachmentsUpdated
     )
     FeatureFormBody(
         form = featureForm,
@@ -235,10 +241,11 @@ internal fun InitializingExpressions(
 internal fun rememberStates(
     form: FeatureForm,
     attachmentFormElement: AttachmentFormElement,
-    scope: CoroutineScope
+    scope: CoroutineScope,
+    onAttachmentsUpdated: () -> Unit
 ): FormStateCollection {
     val states = MutableFormStateCollection()
-    val attachmentState = rememberBaseAttachmentElementState(form, attachmentFormElement, scope)
+    val attachmentState = rememberBaseAttachmentElementState(form, attachmentFormElement, onAttachmentsUpdated)
     states.addAttachmentElement(attachmentFormElement, attachmentState)
     form.elements.forEach { element ->
         when (element) {
