@@ -95,25 +95,25 @@ FeatureForm(
 ```
 *Note* : Once the `validationErrorVisibility`  is set to `Visible`, changing it back to `Automatic` will have no effect since all the fields have now gained focus to show any errors.
 
-#### Theming and Customization
+## Theming and Customization
 
 `FeatureForm` uses the material3 theming system. The following `colors` and `typography` are used by the respective fields.
 
-##### Text Fields
+#### Text Fields
 - Outline color - `MaterialTheme.colorScheme.outline`
 - Label TextStyle - `MaterialTheme.typography.bodyMedium`
 - Input TextStyle - `MaterialTheme.typography.bodyLarge`
 - SupportingText TextStyle - `MaterialTheme.typography.bodySmall`
 - Error color  = `MaterialTheme.colorScheme.error`
 
-##### Radio Buttons
+#### Radio Buttons
 - Outline color = `MaterialTheme.colorScheme.outline`
 - Label TextStyle - `MaterialTheme.typography.bodyMedium`
 - Options TextStyle - `MaterialTheme.typography.bodyLarge`
 - SupportingText TextStyle - `MaterialTheme.typography.bodySmall`
 - Error color = `MaterialTheme.colorScheme.error`
 
-##### Group Elements
+#### Group Elements
 - Outline Color - `MaterialTheme.colorScheme.outline`
 - Header Color - `MaterialTheme.colorScheme.SurfaceVariant`
 - Content background Color - `MaterialTheme.colorScheme.background`
