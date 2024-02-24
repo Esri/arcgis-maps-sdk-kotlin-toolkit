@@ -104,14 +104,14 @@ FeatureForm(
 - Label TextStyle - `MaterialTheme.typography.bodyMedium`
 - Input TextStyle - `MaterialTheme.typography.bodyLarge`
 - SupportingText TextStyle - `MaterialTheme.typography.bodySmall`
-- Error color  = `MaterialTheme.colorScheme.error`
+- Error color - `MaterialTheme.colorScheme.error`
 
 #### Radio Buttons
-- Outline color = `MaterialTheme.colorScheme.outline`
+- Outline color - `MaterialTheme.colorScheme.outline`
 - Label TextStyle - `MaterialTheme.typography.bodyMedium`
 - Options TextStyle - `MaterialTheme.typography.bodyLarge`
 - SupportingText TextStyle - `MaterialTheme.typography.bodySmall`
-- Error color = `MaterialTheme.colorScheme.error`
+- Error color - `MaterialTheme.colorScheme.error`
 
 #### Group Elements
 - Outline Color - `MaterialTheme.colorScheme.outline`
