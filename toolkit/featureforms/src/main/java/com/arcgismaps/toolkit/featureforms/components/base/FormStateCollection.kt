@@ -17,6 +17,7 @@
 package com.arcgismaps.toolkit.featureforms.components.base
 
 import com.arcgismaps.mapping.featureforms.FormElement
+import com.arcgismaps.toolkit.featureforms.api.AttachmentFormElement
 
 /**
  * An iterable collection that provides a [FormElement] and its [FormElementState] as a
@@ -27,6 +28,9 @@ internal interface FormStateCollection : Iterable<FormStateCollection.Entry> {
         val formElement: FormElement
         val state: FormElementState
     }
+    
+    val attachmentElementState: BaseAttachmentElementState
+    val attachmentFormElement: AttachmentFormElement
 }
 
 /**
@@ -41,6 +45,8 @@ internal interface MutableFormStateCollection : FormStateCollection {
      * @param state the [FormElementState] to add.
      */
     fun add(formElement: FormElement, state: FormElementState)
+    
+    fun addAttachmentElement(element: AttachmentFormElement, state: BaseAttachmentElementState)
 }
 
 /**
@@ -54,7 +60,15 @@ internal fun MutableFormStateCollection(): MutableFormStateCollection = MutableF
 private class MutableFormStateCollectionImpl : MutableFormStateCollection {
 
     private val entries: MutableList<FormStateCollection.Entry> = mutableListOf()
-
+    
+    private lateinit var _attachmentElementState: BaseAttachmentElementState
+    override val attachmentElementState: BaseAttachmentElementState
+        get() = _attachmentElementState
+    
+    private lateinit var _attachmentFormElement: AttachmentFormElement
+    override val attachmentFormElement: AttachmentFormElement
+        get() = _attachmentFormElement
+    
     override fun iterator(): Iterator<FormStateCollection.Entry> {
         return entries.iterator()
     }
@@ -62,7 +76,15 @@ private class MutableFormStateCollectionImpl : MutableFormStateCollection {
     override fun add(formElement: FormElement, state: FormElementState) {
         entries.add(EntryImpl(formElement, state))
     }
-
+    
+    override fun addAttachmentElement(
+        element: AttachmentFormElement,
+        state: BaseAttachmentElementState
+    ) {
+        _attachmentElementState = state
+        _attachmentFormElement = element
+    }
+    
     /**
      * Default implementation for a [FormStateCollection.Entry].
      */

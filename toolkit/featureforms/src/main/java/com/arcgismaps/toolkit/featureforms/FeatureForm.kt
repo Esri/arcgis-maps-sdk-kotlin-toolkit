@@ -1,7 +1,5 @@
 package com.arcgismaps.toolkit.featureforms
 
-import android.content.Context
-import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -17,7 +15,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
@@ -44,18 +41,20 @@ import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.api.AttachmentFormElement
-import com.arcgismaps.toolkit.featureforms.api.FormAttachment
-import com.arcgismaps.toolkit.featureforms.api.rememberFormAttachment
+import com.arcgismaps.toolkit.featureforms.api.rememberAttachmentElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.BaseGroupState
 import com.arcgismaps.toolkit.featureforms.components.base.FormStateCollection
 import com.arcgismaps.toolkit.featureforms.components.base.MutableFormStateCollection
+import com.arcgismaps.toolkit.featureforms.components.base.formAttachmentFlow
 import com.arcgismaps.toolkit.featureforms.components.base.getState
+import com.arcgismaps.toolkit.featureforms.components.base.rememberBaseAttachmentElementState
 import com.arcgismaps.toolkit.featureforms.components.base.rememberBaseGroupState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberComboBoxFieldState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberRadioButtonFieldState
 import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberSwitchFieldState
 import com.arcgismaps.toolkit.featureforms.components.datetime.rememberDateTimeFieldState
+import com.arcgismaps.toolkit.featureforms.components.formelement.AttachmentFormElement
 import com.arcgismaps.toolkit.featureforms.components.formelement.FieldElement
 import com.arcgismaps.toolkit.featureforms.components.formelement.GroupElement
 import com.arcgismaps.toolkit.featureforms.components.text.rememberFormTextFieldState
@@ -100,15 +99,17 @@ public fun FeatureForm(
     featureForm: FeatureForm,
     featureAttachments: StateFlow<List<Attachment>>,
     modifier: Modifier = Modifier,
-    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
-    fetchAttachments: suspend () -> Unit = {}
+    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic
 ) {
     val scope = rememberCoroutineScope()
     var initialEvaluation by rememberSaveable(featureForm) { mutableStateOf(false) }
-    val attachments by featureAttachments.collectAsState()
-    var attachmentFormElement = rememberAttachmentElement(initialEvaluation, featureForm, attachments)
-    Log.d("TAG", "attachmentFormElement has ${attachmentFormElement.attachments.size} attachments")
-    val states = rememberStates(form = featureForm, scope = scope)
+    val filesDir = LocalContext.current.filesDir.absolutePath
+    val attachmentFormElement = rememberAttachmentElement(featureForm, formAttachmentFlow(scope, featureAttachments, filesDir), filesDir)
+    val states = rememberStates(
+        form = featureForm,
+        attachmentFormElement = attachmentFormElement,
+        scope = scope
+    )
     FeatureFormBody(
         form = featureForm,
         states = states,
@@ -178,7 +179,7 @@ private fun FeatureFormBody(
                         is FieldFormElement -> {
                             FieldElement(state = entry.getState<BaseFieldState<*>>())
                         }
-
+                        
                         is GroupFormElement -> {
                             GroupElement(
                                 state = entry.getState(),
@@ -189,6 +190,15 @@ private fun FeatureFormBody(
                         }
                     }
                 }
+            }
+            
+            item {
+                AttachmentFormElement(
+                    states.attachmentElementState,
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 15.dp, vertical = 10.dp)
+                )
             }
         }
     }
@@ -224,9 +234,12 @@ internal fun InitializingExpressions(
 @Composable
 internal fun rememberStates(
     form: FeatureForm,
+    attachmentFormElement: AttachmentFormElement,
     scope: CoroutineScope
 ): FormStateCollection {
     val states = MutableFormStateCollection()
+    val attachmentState = rememberBaseAttachmentElementState(form, attachmentFormElement, scope)
+    states.addAttachmentElement(attachmentFormElement, attachmentState)
     form.elements.forEach { element ->
         when (element) {
             is FieldFormElement -> {
@@ -257,39 +270,22 @@ internal fun rememberStates(
                 )
                 states.add(element, groupState)
             }
+            
         }
-        
-//        val state = rememberAttachmentState(
-//            form = form,
-//
-//        )
-        
     }
     return states
 }
 
-@Composable
-internal fun rememberFormAttachments(
-    attachments: List<Attachment>,
-    context: Context = LocalContext.current
-): List<FormAttachment> {
-    val filesDir = context.filesDir.absolutePath
-    return attachments.map {
-        rememberFormAttachment(attachment = it, filesDir = filesDir)
-    }
-}
-
-@Composable
-internal fun rememberAttachmentElement(initialEvaluation: Boolean,
-                                       form: FeatureForm,
-                                       attachments: List<Attachment>,
-                                       context: Context = LocalContext.current
-): AttachmentFormElement {
-    val formAttachments = rememberFormAttachments(attachments)
-    return AttachmentFormElement(form.feature, context.filesDir.absolutePath).apply {
-            _attachments.addAll(formAttachments)
-    }
-}
+//@Composable
+//internal fun rememberFormAttachments(
+//    attachments: List<Attachment>,
+//    context: Context = LocalContext.current
+//): List<FormAttachment> {
+//    val filesDir = context.filesDir.absolutePath
+//    return attachments.map {
+//        rememberFormAttachment(attachment = it, filesDir = filesDir)
+//    }
+//}
 
 /**
  * Creates and remembers a [BaseFieldState] for the provided [element].

@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -44,6 +43,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,33 +61,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontWeight.Companion.W300
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.arcgismaps.toolkit.featureforms.R
+import com.arcgismaps.toolkit.featureforms.api.FormAttachment
+import com.arcgismaps.toolkit.featureforms.components.base.BaseAttachmentElementState
 
 
-internal data class FakeAttachmentElementState(
-    val attachments: List<FakeAttachment>,
-    val editable: Boolean = true,
-    val title: String = "Titanic",
-    val description: String = "Take pictures of damage to the boat.",
-    val keyword: String = "point of impact",// not used
-    val input: String = "123",// not used
-    var selectedAttachment: FakeAttachment? = null
-)
-
-internal data class FakeAttachment(val name: String = "front of ship.jpg", val size: Long = 1234L)
-
-private val attachments =
-    buildList {
-        repeat(40) {
-            add(FakeAttachment("Bow point of collision.jpeg", 1234))
-        }
-    }
+//internal data class FormAttachmentElementState(
+//    val attachments: List<FormAttachment>,
+//    val editable: Boolean = true,
+//    val title: String = "Titanic",
+//    val description: String = "Take pictures of damage to the boat.",
+//    val keyword: String = "point of impact",// not used
+//    val input: String = "123",// not used
+//    var selectedAttachment: FormAttachment? = null
+//)
+//
 
 private fun Modifier.feedbackClickable(
     enabled: Boolean = true,
@@ -128,20 +121,12 @@ private fun Modifier.feedbackClickable(
         )
 }
 
-@Composable
-public fun AttachmentFormElement(modifier: Modifier = Modifier) {
-    AttachmentFormElement(
-        state = FakeAttachmentElementState(attachments = attachments, selectedAttachment = null),
-        modifier = modifier
-    )
-}
-
 /**
  * Todo: make public with a proper state object, and call from FeatureFormBody.
  */
 @Composable
-private fun AttachmentFormElement(
-    state: FakeAttachmentElementState,
+internal fun AttachmentFormElement(
+    state: BaseAttachmentElementState,
     modifier: Modifier = Modifier,
     colors: AttachmentElementColors = AttachmentElementDefaults.colors()
 ) {
@@ -154,12 +139,13 @@ private fun AttachmentFormElement(
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp)
         ) {
             AttachmentElementHeader(
-                title = state.title,
+                title = state.label,
                 description = state.description,
-                editable = state.editable
+                editable = true//state.editable
             )
             Spacer(modifier = Modifier.height(10.dp))
             Carousel(
+                state = state,
                 onDetailsTap = {
                     state.selectedAttachment = it
                 }
@@ -169,13 +155,14 @@ private fun AttachmentFormElement(
 }
 
 @Composable
-private fun Carousel(onThumbnailTap: (FakeAttachment) -> Unit = {}, onDetailsTap: (FakeAttachment) -> Unit) {
+private fun Carousel(state: BaseAttachmentElementState, onThumbnailTap: (FormAttachment) -> Unit = {}, onDetailsTap: (FormAttachment) -> Unit) {
     Row(
         Modifier
             .horizontalScroll(rememberScrollState())
             .height(intrinsicSize = IntrinsicSize.Max),
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
+        val attachments by state.attachments.collectAsState()
         attachments.forEach {
             CarouselThumbnail(
                 it.name,
@@ -188,7 +175,7 @@ private fun Carousel(onThumbnailTap: (FakeAttachment) -> Unit = {}, onDetailsTap
 }
 
 @Composable
-private fun CarouselThumbnail(name: String, size: Long, onThumbnailTap: () -> Unit, onDetailsTap: () -> Unit) {
+private fun CarouselThumbnail(name: String, size: Int, onThumbnailTap: () -> Unit, onDetailsTap: () -> Unit) {
     var downloaded by rememberSaveable { mutableStateOf(false) }
     Column(
         Modifier
@@ -312,7 +299,7 @@ private fun ThumbnailMenu(expanded: Boolean, onDismiss: () -> Unit = {}) {
 @Composable
 private fun CarouselText(
     name: String,
-    size: Long
+    size: Int
 ) {
     Column {
         Text(
@@ -448,12 +435,12 @@ private fun AttachmentElementHeader(
         }
     }
 }
-
-@Preview
-@Composable
-private fun PreviewFormAttachmentElement() {
-    AttachmentFormElement(
-        modifier = Modifier
-            .fillMaxWidth()
-    )
-}
+//
+//@Preview
+//@Composable
+//private fun PreviewFormAttachmentElement() {
+//    AttachmentFormElement(
+//        modifier = Modifier
+//            .fillMaxWidth()
+//    )
+//}

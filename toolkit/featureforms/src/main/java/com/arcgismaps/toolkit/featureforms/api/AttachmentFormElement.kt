@@ -16,7 +16,7 @@
 
 package com.arcgismaps.toolkit.featureforms.api
 
-import android.content.Context
+
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
@@ -28,48 +28,47 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.Loadable
 import com.arcgismaps.data.ArcGISFeature
-import com.arcgismaps.data.ArcGISFeatureTable
 import com.arcgismaps.data.Attachment
-import com.arcgismaps.toolkit.featureforms.api.AttachmentFormElement.Companion.createOrNull
+import com.arcgismaps.mapping.featureforms.FeatureForm
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
 
 /**
- * A FormElement type representing an Attachment. Use the factory method [createOrNull] to create
- * an instance.
+ * A FormElement type representing an Attachment.
  */
 internal class AttachmentFormElement(
     private val feature: ArcGISFeature,
-    private val filesDir: String
+    private val filesDir: String,
+    val attachments: StateFlow<List<FormAttachment>>
 ) {
+    
+    val label: String = "Attach Photo"
+    
+    val description: String = "some description"
+    
+    private val _isVisible = MutableStateFlow<Boolean>(false)
+    val isVisible = _isVisible.asStateFlow()
+    
     /**
      * The input user interface to use for the element.
      */
     val input: AttachmentFormInput = AttachmentFormInput.AnyAttachmentFormInput
-
+    
     /**
      * True if the element is editable. False if the element is not editable.
      */
     val isEditable: Boolean = feature.canEditAttachments
-
-    internal val _attachments: MutableList<FormAttachment> = mutableListOf()
-
-    /**
-     * Returns all the current attachments.
-     */
-    val attachments: List<FormAttachment> = _attachments
-
+    
     private val mutex = Mutex()
-
+    
     /**
      * Adds the specified [bitmapDrawable] as an attachment with the specified [name].
      */
@@ -87,7 +86,7 @@ internal class AttachmentFormElement(
             Result.failure(Exception("Unable to create attachment"))
         }
     }
-
+    
     /**
      * Deletes the specified [attachment].
      */
@@ -97,46 +96,67 @@ internal class AttachmentFormElement(
         }
         return Result.success(Unit)
     }
-
+    
     /**
      * Fetches the Attachments from the feature and populates [attachments] property. This method
      * is thread safe.
      */
-    suspend fun fetchAttachments(): Result<Unit> {
-        mutex.withLock {
-            val featureAttachments = feature.fetchAttachments().onFailure {
-                return Result.failure(it)
-            }.getOrNull()!!
-            val formAttachments = featureAttachments.map {
-                FormAttachment(it, filesDir)
-            }
-            _attachments.clear()
-            _attachments.addAll(formAttachments)
-            return Result.success(Unit)
-        }
-    }
-
+//    suspend fun fetchAttachments(): Result<Unit> {
+//        mutex.withLock {
+//            val featureAttachments = feature.fetchAttachments().onFailure {
+//                return Result.failure(it)
+//            }.getOrNull()!!
+//            val formAttachments = featureAttachments.map {
+//                FormAttachment(it, filesDir)
+//            }
+//            _attachments.clear()
+//            _attachments.addAll(formAttachments)
+//            return Result.success(Unit)
+//        }
+//    }
+    
     companion object {
-
-        /**
-         * Creates a new [AttachmentFormElement] from the give [feature].
-         *
-         * @param feature The [ArcGISFeature] to create the [AttachmentFormElement] from.
-         * @param filesDir The directory to the cache any attachments. Use [Context.getFilesDir].
-         *
-         * @return Returns null if unable to create a [AttachmentFormElement].
-         */
-        suspend fun createOrNull(feature: ArcGISFeature, filesDir: String): AttachmentFormElement? {
-            feature.load().onFailure { return null }
-            val featureTable = feature.featureTable as? ArcGISFeatureTable ?: return null
-            featureTable.load()
-            return if (featureTable.hasAttachments) {
-                AttachmentFormElement(feature, filesDir)
-            } else {
-                null
+    
+//        /**
+//         * Creates a new [AttachmentFormElement] from the give [feature].
+//         *
+//         * @param feature The [ArcGISFeature] to create the [AttachmentFormElement] from.
+//         * @param filesDir The directory to the cache any attachments. Use [Context.getFilesDir].
+//         *
+//         * @return Returns null if unable to create a [AttachmentFormElement].
+//         */
+//        suspend fun createOrNull(feature: ArcGISFeature, filesDir: String): AttachmentFormElement? {
+//            feature.load().onFailure { return null }
+//            val featureTable = feature.featureTable as? ArcGISFeatureTable ?: return null
+//            featureTable.load()
+//            return if (featureTable.hasAttachments) {
+//                AttachmentFormElement(feature, filesDir)
+//            } else {
+//                null
+//            }
+//        }
+        
+        fun Saver(form: FeatureForm, attachments: StateFlow<List<FormAttachment>>, filesDir: String) = listSaver(
+            save = {
+                listOf(filesDir)
+            },
+            restore = {
+                AttachmentFormElement(form.feature, it[0] as String, attachments)
             }
-        }
+        )
     }
+}
+
+@Composable
+internal fun rememberAttachmentElement(
+    form: FeatureForm,
+    attachments: StateFlow<List<FormAttachment>>,
+    filesDir: String
+): AttachmentFormElement = rememberSaveable(
+    inputs = arrayOf(form),
+    saver = AttachmentFormElement.Saver(form, attachments, filesDir)
+) {
+    AttachmentFormElement(form.feature, filesDir, attachments)
 }
 
 /**
@@ -145,28 +165,28 @@ internal class AttachmentFormElement(
  *
  * The [FormAttachment] must be loaded before calling [createFullImage] or [createThumbnail].
  */
-internal class FormAttachment(
-    val attachment: Attachment,
+public class FormAttachment(
+    public val attachment: Attachment,
     private val filesDir: String
 ) : Loadable {
-    val contentType: String = attachment.contentType
+    public val contentType: String = attachment.contentType
 
-    var filePath: String = ""
+    public var filePath: String = ""
         private set
 
-    var isLocal: Boolean = false
+    public var isLocal: Boolean = false
         private set
 
-    var name: String = attachment.name
+    public var name: String = attachment.name
         private set
 
-    val size: Int = attachment.size
+    public val size: Int = attachment.size
 
     private val _loadStatus: MutableStateFlow<LoadStatus> = MutableStateFlow(LoadStatus.NotLoaded)
     override val loadStatus: StateFlow<LoadStatus> = _loadStatus.asStateFlow()
 
     @Suppress("DEPRECATION")
-    suspend fun createFullImage(): Result<BitmapDrawable> = withContext(Dispatchers.IO) {
+    public suspend fun createFullImage(): Result<BitmapDrawable> = withContext(Dispatchers.IO) {
         return@withContext if (filePath.isNotEmpty()) {
             val bitmap = BitmapFactory.decodeFile(filePath)
             if (bitmap != null) {
@@ -180,7 +200,7 @@ internal class FormAttachment(
     }
 
     @Suppress("DEPRECATION")
-    suspend fun createThumbnail(width: Int, height: Int): Result<BitmapDrawable> =
+    public suspend fun createThumbnail(width: Int, height: Int): Result<BitmapDrawable> =
         withContext(Dispatchers.IO) {
             return@withContext if (filePath.isNotEmpty()) {
                 val bitmap = BitmapFactory.decodeFile(filePath)
@@ -195,7 +215,7 @@ internal class FormAttachment(
             }
         }
 
-    fun setName(name: String) {
+    public fun setName(name: String) {
         this.name = name
     }
 
@@ -233,7 +253,7 @@ internal class FormAttachment(
         return load()
     }
     
-    companion object {
+    internal companion object {
         fun Saver(attachment: Attachment, filesDir: String): Saver<FormAttachment, Any> = listSaver(
             save = {
                 listOf(
