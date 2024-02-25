@@ -24,7 +24,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.data.Domain
 import com.arcgismaps.data.FieldType
 import com.arcgismaps.data.RangeDomain
-import com.arcgismaps.exceptions.FeatureFormValidationException
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
@@ -32,20 +31,8 @@ import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.FieldProperties
 import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState
-import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.ExactCharConstraint
-import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.MaxCharConstraint
-import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.MaxNumericConstraint
-import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.MinMaxCharConstraint
-import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.MinMaxNumericConstraint
-import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.MinNumericConstraint
-import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.NoError
-import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.NotANumber
-import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState.NotAWholeNumber
-import com.arcgismaps.toolkit.featureforms.utils.asDoubleTuple
-import com.arcgismaps.toolkit.featureforms.utils.asLongTuple
-import com.arcgismaps.toolkit.featureforms.utils.formattedValueAsStateFlow
-import com.arcgismaps.toolkit.featureforms.utils.isFloatingPoint
-import com.arcgismaps.toolkit.featureforms.utils.isIntegerType
+import com.arcgismaps.toolkit.featureforms.components.base.formattedValueAsStateFlow
+import com.arcgismaps.toolkit.featureforms.components.base.mapValidationErrors
 import com.arcgismaps.toolkit.featureforms.utils.isNumeric
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
@@ -59,12 +46,13 @@ internal class TextFieldProperties(
     required: StateFlow<Boolean>,
     editable: StateFlow<Boolean>,
     visible: StateFlow<Boolean>,
+    validationErrors : StateFlow<List<ValidationErrorState>>,
     val fieldType: FieldType,
     val domain: Domain?,
     val singleLine: Boolean,
     val minLength: Int,
     val maxLength: Int,
-) : FieldProperties<String>(label, placeholder, description, value, required, editable, visible)
+) : FieldProperties<String>(label, placeholder, description, value, validationErrors, required, editable, visible)
 
 /**
  * A class to handle the state of a [FormTextField]. Essential properties are inherited from the
@@ -75,23 +63,19 @@ internal class TextFieldProperties(
  * [TextFieldProperties.value] by default.
  * @param scope a [CoroutineScope] to start [StateFlow] collectors on.
  * @param onEditValue a callback to invoke when the user edits result in a change of value. This
- * is called on [FormTextFieldState.onValueChanged].
- * @param defaultValidator the default validator that returns the list of validation errors. This
- * is called in [FormTextFieldState.validate].
+ * is called on [FormTextFieldState.onValueChanged]
  */
 @Stable
 internal class FormTextFieldState(
     properties: TextFieldProperties,
     initialValue: String = properties.value.value,
     scope: CoroutineScope,
-    onEditValue: (Any?) -> Unit,
-    defaultValidator: () -> List<Throwable>
+    onEditValue: (Any?) -> Unit
 ) : BaseFieldState<String>(
     properties = properties,
     initialValue = initialValue,
     scope = scope,
-    onEditValue = onEditValue,
-    defaultValidator = defaultValidator
+    onEditValue = onEditValue
 ) {
     // indicates singleLine only if TextBoxFeatureFormInput
     val singleLine = properties.singleLine
@@ -112,72 +96,6 @@ internal class FormTextFieldState(
      */
     val fieldType: FieldType = properties.fieldType
 
-    init {
-        // Start observing the properties. Since this method cannot be invoked from any open base
-        // class initializer blocks, it is safe to invoke it here.
-        observeProperties()
-    }
-
-    private fun validateNumericRange(numberVal: Int): ValidationErrorState {
-        require(fieldType.isIntegerType)
-        return if (domain != null && domain is RangeDomain) {
-            val (min, max) = domain.asLongTuple
-            if (min != null && max != null) {
-                if (numberVal in min..max) {
-                    NoError
-                } else {
-                    MinMaxNumericConstraint(min.format(), max.format())
-                }
-            } else if (min != null) {
-                if (min <= numberVal) {
-                    NoError
-                } else {
-                    MinNumericConstraint(min.format())
-                }
-            } else if (max != null) {
-                if (numberVal <= max) {
-                    NoError
-                } else {
-                    MaxNumericConstraint(max.format())
-                }
-            } else {
-                NoError
-            }
-        } else {
-            NoError
-        }
-    }
-
-    private fun validateNumericRange(numberVal: Double): ValidationErrorState {
-        require(fieldType.isFloatingPoint)
-        return if (domain != null && domain is RangeDomain) {
-            val (min, max) = domain.asDoubleTuple
-            if (min != null && max != null) {
-                if (numberVal in min..max) {
-                    NoError
-                } else {
-                    MinMaxNumericConstraint(min.format(), max.format())
-                }
-            } else if (min != null) {
-                if (min <= numberVal) {
-                    NoError
-                } else {
-                    MinNumericConstraint(min.format())
-                }
-            } else if (max != null) {
-                if (numberVal <= max) {
-                    NoError
-                } else {
-                    MaxNumericConstraint(max.format())
-                }
-            } else {
-                NoError
-            }
-        } else {
-            NoError
-        }
-    }
-
     override fun typeConverter(input: String): Any? {
         if (input.isEmpty() && fieldType.isNumeric) {
             return null
@@ -191,53 +109,6 @@ internal class FormTextFieldState(
             FieldType.Text -> input
             else -> null
         } ?: input
-    }
-
-    override fun validate(): List<ValidationErrorState> {
-        val currentValue = value.value.data
-        val coreErrors = defaultValidator()
-        val errors = mutableListOf<ValidationErrorState>()
-        errors += super.validate()
-
-        if (!fieldType.isNumeric) {
-            if (coreErrors.any { it is FeatureFormValidationException.MinCharConstraintException }
-                || coreErrors.any { it is FeatureFormValidationException.MaxCharConstraintException }
-            ) {
-                if (minLength > 0 && maxLength > 0) {
-                    if (minLength == maxLength) {
-                        errors += ExactCharConstraint(minLength)
-                    } else {
-                        errors += MinMaxCharConstraint(minLength, maxLength)
-                    }
-                } else {
-                    errors += MaxCharConstraint(maxLength)
-                }
-            }
-        } else {
-            if (fieldType.isIntegerType) {
-                val numberVal = currentValue.toIntOrNull()
-                if (numberVal == null) {
-                    errors += NotAWholeNumber
-                } else {
-                    val error = validateNumericRange(numberVal)
-                    if (error != NoError) {
-                        errors += error
-                    }
-                }
-            } else {
-                val numberVal = currentValue.toDoubleOrNull()
-                if (numberVal == null) {
-                    errors += NotANumber
-                } else {
-                    val error = validateNumericRange(numberVal)
-                    if (error != NoError) {
-                        errors += error
-                    }
-                }
-            }
-        }
-
-        return errors
     }
 
     companion object {
@@ -263,6 +134,7 @@ internal class FormTextFieldState(
                         placeholder = formElement.hint,
                         description = formElement.description,
                         value = formElement.formattedValueAsStateFlow(scope),
+                        validationErrors = formElement.mapValidationErrors(scope),
                         required = formElement.isRequired,
                         editable = formElement.isEditable,
                         visible = formElement.isVisible,
@@ -278,7 +150,6 @@ internal class FormTextFieldState(
                         formElement.updateValue(newValue)
                         scope.launch { form.evaluateExpressions() }
                     },
-                    defaultValidator = { formElement.getValidationErrors() }
                 ).apply {
                     // focus is lost on rotation. https://devtopia.esri.com/runtime/apollo/issues/230
                     onFocusChanged(list[1] as Boolean)
@@ -305,6 +176,7 @@ internal fun rememberFormTextFieldState(
             placeholder = field.hint,
             description = field.description,
             value = field.formattedValueAsStateFlow(scope),
+            validationErrors = field.mapValidationErrors(scope),
             editable = field.isEditable,
             required = field.isRequired,
             visible = field.isVisible,
@@ -319,19 +191,5 @@ internal fun rememberFormTextFieldState(
             field.updateValue(newValue)
             scope.launch { form.evaluateExpressions() }
         },
-        defaultValidator = { field.getValidationErrors() }
     )
 }
-
-/**
- * Provide a format string for any numeric type.
- *
- * @param digits: If the number is floating point, restricts the decimal digits
- * @return a formatted string representing the number.
- */
-private fun Number.format(digits: Int = 2): String =
-    when (this) {
-        is Double -> "%.${digits}f".format(this)
-        is Float -> "%.${digits}f".format(this)
-        else -> "$this"
-    }

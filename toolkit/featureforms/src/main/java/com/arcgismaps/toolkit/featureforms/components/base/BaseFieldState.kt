@@ -19,20 +19,20 @@ package com.arcgismaps.toolkit.featureforms.components.base
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import com.arcgismaps.exceptions.FeatureFormValidationException
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
-import java.util.concurrent.atomic.AtomicBoolean
 
 internal open class FieldProperties<T>(
     val label: String,
     val placeholder: String,
     val description: String,
     val value: StateFlow<T>,
+    val validationErrors: StateFlow<List<ValidationErrorState>>,
     val required: StateFlow<Boolean>,
     val editable: StateFlow<Boolean>,
     val visible: StateFlow<Boolean>
@@ -50,24 +50,18 @@ internal data class Value<T>(
  * Base state class for any Field within a feature form. It provides the default set of properties
  * that are common to all [FieldFormElement]'s.
  *
- * Run [observeProperties] to start observing the [isEditable], [isRequired] and the [isFocused]
- * flows. This also runs and generates any validation errors when any of those properties change.
- *
  * @param properties the [FieldProperties] associated with this state.
  * @param initialValue optional initial value to set for this field. It is set to the value of
  * [FieldProperties.value] by default.
  * @param scope a [CoroutineScope] to start [StateFlow] collectors on.
  * @param onEditValue a callback to invoke when the user edits result in a change of value. This
  * is called on [BaseFieldState.onValueChanged].
- * @param defaultValidator the default validator that returns the list of validation errors. This
- * is called in [BaseFieldState.validate].
  */
 internal abstract class BaseFieldState<T>(
     properties: FieldProperties<T>,
     initialValue: T = properties.value.value,
     private val scope: CoroutineScope,
-    protected val onEditValue: (Any?) -> Unit,
-    protected val defaultValidator: () -> List<Throwable>
+    protected val onEditValue: (Any?) -> Unit
 ) : FormElementState(
     label = properties.label,
     description = properties.description,
@@ -86,14 +80,14 @@ internal abstract class BaseFieldState<T>(
     /**
      * Backing mutable state for the [value].
      */
-    private val _value : MutableState<Value<T>> = mutableStateOf(Value(initialValue))
+    private val _value: MutableState<Value<T>> = mutableStateOf(Value(initialValue))
 
     /**
      * Current value for this field state. The actual data of this type is wrapped in a [Value]
      * object. The [Value.error] provides the current validation error for the [Value.data]. Use
      * [onValueChanged] to set a value for this state.
      */
-    val value : State<Value<T>> = _value
+    val value: State<Value<T>> = _value
 
     /**
      * Property that indicates if the field is editable.
@@ -104,6 +98,11 @@ internal abstract class BaseFieldState<T>(
      * Property that indicates if the field is required.
      */
     val isRequired: StateFlow<Boolean> = properties.required
+
+    /**
+     * The validation errors for this field.
+     */
+    val validationErrors: StateFlow<List<ValidationErrorState>> = properties.validationErrors
 
     /**
      * A mutable state flow to handle current focus state.
@@ -121,25 +120,34 @@ internal abstract class BaseFieldState<T>(
      */
     protected var wasFocused = false
 
-    /**
-     * Current status for [observeProperties].
-     */
-    private var isObserving = AtomicBoolean(false)
-
     init {
-        // start listening to calculated value updates immediately
         scope.launch {
-            // update the current value state when the attribute value changes
-            _attributeValue.collect {
-                _value.value = Value(it)
+            // combine the attribute and validation errors flow so that we always have the latest
+            // value for both
+            combine(_attributeValue, validationErrors) { newValue, errors ->
+                Pair(newValue, errors)
+            }.collect {
+                // validate with the latest value and validation errors
+                updateValueWithValidation(it.first, it.second)
+            }
+        }
+        scope.launch {
+            // validate when focus changes
+            isFocused.collect {
+                updateValueWithValidation(_value.value.data, validationErrors.value)
+            }
+        }
+        scope.launch {
+            // validate when the editable property changes
+            isEditable.collect {
+                updateValueWithValidation(_value.value.data, validationErrors.value)
             }
         }
     }
 
     /**
-     * Callback to update the current value of the FormTextFieldState to the given [input]. This also
-     * sets the value on the feature using [onEditValue] and updates the validation using
-     * [updateValidation].
+     * Callback to update the current value of this state object to the given [input]. This also
+     * sets the value on the feature using [onEditValue].
      */
     fun onValueChanged(input: T) {
         // infer that a value change event comes from a user interaction and hence treat it as a
@@ -149,8 +157,6 @@ internal abstract class BaseFieldState<T>(
         _value.value = Value(input)
         // update the attributes
         onEditValue(typeConverter(input))
-        // run validation
-        updateValidation(input)
     }
 
     /**
@@ -168,54 +174,16 @@ internal abstract class BaseFieldState<T>(
      */
     fun forceValidation() {
         wasFocused = true
-        updateValidation(_value.value.data)
+        updateValueWithValidation(_value.value.data, validationErrors.value)
     }
 
     /**
-     * Runs and updates the validation using [validate] and [filterErrors]. Avoid calling this
-     * method in any open/abstract class constructors since it directly invokes open members.
+     * Updates the [value] with a validation error if any, using [filterErrors].
      */
-    private fun updateValidation(value : T) {
-        val error = filterErrors(validate())
+    private fun updateValueWithValidation(value: T, errors: List<ValidationErrorState>) {
+        val error = filterErrors(errors)
         // update the value with the validation error.
         _value.value = Value(value, error)
-    }
-
-    /**
-     * Start observing the [isEditable], [isRequired] and [isFocused] flows and update
-     * the validation to generate any validation errors. This method must NOT be invoked from
-     * any initializer blocks of open/abstract classes since it indirectly invokes an open member
-     * using [updateValidation].
-     */
-    protected fun observeProperties() {
-        // launch coroutines only once using an atomic boolean to check if they have already been
-        // launched
-        if (!isObserving.getAndSet(true)) {
-            scope.launch {
-                // validate when focus changes
-                isFocused.collect {
-                    updateValidation(_value.value.data)
-                }
-            }
-            scope.launch {
-                // validate when required property changes
-                isRequired.collect {
-                    updateValidation(_value.value.data)
-                }
-            }
-            scope.launch {
-                // validate when the editable property changes
-                isEditable.collect {
-                    updateValidation(_value.value.data)
-                }
-            }
-            scope.launch {
-                // validate when the attribute value changes
-                _attributeValue.collect {
-                    updateValidation(_value.value.data)
-                }
-            }
-        }
     }
 
     /**
@@ -247,7 +215,7 @@ internal abstract class BaseFieldState<T>(
                     } else {
                         // show the first non-required error
                         errors.firstOrNull { it !is ValidationErrorState.Required }
-                            // if none is found, do not show any error
+                        // if none is found, do not show any error
                             ?: ValidationErrorState.NoError
                     }
                 }
@@ -262,37 +230,11 @@ internal abstract class BaseFieldState<T>(
     }
 
     /**
-     * Validates the current value using the [defaultValidator].
-     *
-     * @return Returns the list of validation errors.
-     */
-    open fun validate(): List<ValidationErrorState> {
-        val errors = defaultValidator()
-        return buildList {
-            errors.forEach {
-                when(it) {
-                    is FeatureFormValidationException.RequiredException -> {
-                        add(ValidationErrorState.Required)
-                    }
-
-                    is FeatureFormValidationException.OutOfDomainException -> {
-                        add(ValidationErrorState.NotInCodedValueDomain)
-                    }
-
-                    is FeatureFormValidationException.NullNotAllowedException -> {
-                        add(ValidationErrorState.NullNotAllowed)
-                    }
-                }
-            }
-        }
-    }
-
-    /**
      * Implement this method to provide the proper type conversion from [T] to an Any?. This
      * method is used by [onValueChanged] to cast the [input] before calling
      * [FieldFormElement.updateValue].
      *
      * @param input The value to convert
      */
-    abstract fun typeConverter(input: T) : Any?
+    abstract fun typeConverter(input: T): Any?
 }

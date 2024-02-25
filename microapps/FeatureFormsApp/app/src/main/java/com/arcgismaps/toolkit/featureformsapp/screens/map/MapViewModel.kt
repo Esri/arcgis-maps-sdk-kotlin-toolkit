@@ -104,7 +104,7 @@ class MapViewModel @Inject constructor(
         // build the list of errors
         val errors = mutableListOf<ErrorInfo>()
         val featureForm = state.featureForm
-        featureForm.getValidationErrors().forEach { entry ->
+        featureForm.validationErrors.value.forEach { entry ->
             entry.value.forEach { error ->
                 featureForm.getFormElement(entry.key)?.let { formElement ->
                     if (formElement.isEditable.value) {
