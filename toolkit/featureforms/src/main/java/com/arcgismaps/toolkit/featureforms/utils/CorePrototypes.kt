@@ -20,11 +20,6 @@ import com.arcgismaps.data.FieldType
 import com.arcgismaps.data.RangeDomain
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 
 /**
  * This file contains logic which will eventually be provided by core. Do not add anything to this file that isn't
@@ -37,45 +32,6 @@ internal fun FeatureForm.fieldIsNullable(element: FieldFormElement): Boolean {
         "expected feature table to have field with name ${element.fieldName}"
     }
     return isNullable
-}
-
-/**
- * Utility function that returns true if the type is null or if it is an empty string.
- */
-internal fun Any?.isNullOrEmptyString(): Boolean {
-    return if (this is String?) {
-        isNullOrEmpty()
-    } else {
-        false
-    }
-}
-
-/**
- * Transforms the state flow [FieldFormElement.value] into a state flow of type [T].
- * This function creates a new [StateFlow].
- *
- * @throws IllegalStateException if the [FieldFormElement.value] cannot be cast to [T].
- */
-internal inline fun <reified T> FieldFormElement.mapValueAsStateFlow(scope: CoroutineScope): StateFlow<T> =
-    if (value.value is T) {
-        value.map { it as T }.stateIn(scope, SharingStarted.Eagerly, value.value as T)
-    } else {
-        // usage error.
-        throw IllegalStateException("the generic parameterization of the state object must match the type specified.")
-    }
-
-/**
- * Creates and returns a new [StateFlow] of type [String] that emits the [FieldFormElement.formattedValue]
- * whenever the [FieldFormElement.value] emits.
- */
-internal fun FieldFormElement.formattedValueAsStateFlow(scope: CoroutineScope): StateFlow<String> {
-    return value.map {
-        formattedValue
-    }.stateIn(
-        scope,
-        SharingStarted.Eagerly,
-        formattedValue
-    )
 }
 
 internal val FieldType.isNumeric: Boolean

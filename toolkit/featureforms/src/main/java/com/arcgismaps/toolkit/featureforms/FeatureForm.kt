@@ -15,6 +15,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
@@ -103,7 +104,6 @@ public fun FeatureForm(
     onAttachmentsUpdated: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
-    var initialEvaluation by rememberSaveable(featureForm) { mutableStateOf(false) }
     val filesDir = LocalContext.current.filesDir.absolutePath
     val attachmentFormElement = rememberAttachmentElement(
         featureForm,
@@ -119,12 +119,11 @@ public fun FeatureForm(
     FeatureFormBody(
         form = featureForm,
         states = states,
-        initialEvaluation = initialEvaluation,
         modifier = modifier
     )
     FeatureFormDialog()
     // launch a new side effect in a launched effect when validationErrorVisibility changes
-    LaunchedEffect(initialEvaluation, validationErrorVisibility) {
+    LaunchedEffect(validationErrorVisibility) {
         // if it set to always show errors force each field to validate itself and show any errors
         if (validationErrorVisibility == ValidationErrorVisibility.Visible) {
             states.forEach { entry ->
@@ -141,28 +140,28 @@ public fun FeatureForm(
             }
         }
     }
-    LaunchedEffect(featureForm) {
-        // ensure expressions are evaluated
-        featureForm.evaluateExpressions()
-        //fetchAttachments()
-        initialEvaluation = true
-    }
+}
+
+@Composable
+private fun FeatureFormTitle(featureForm: FeatureForm) {
+    val title by featureForm.title.collectAsState()
+    Text(text = title, style = TextStyle(fontWeight = FontWeight.Bold))
 }
 
 @Composable
 private fun FeatureFormBody(
     form: FeatureForm,
     states: FormStateCollection,
-    initialEvaluation: Boolean,
     modifier: Modifier = Modifier
 ) {
+    var initialEvaluation by rememberSaveable(form) { mutableStateOf(false) }
     val lazyListState = rememberLazyListState()
     Column(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // title
-        Text(text = form.title, style = TextStyle(fontWeight = FontWeight.Bold))
+        FeatureFormTitle(featureForm = form)
         Spacer(
             modifier = Modifier
                 .fillMaxWidth()
@@ -185,7 +184,7 @@ private fun FeatureFormBody(
                         is FieldFormElement -> {
                             FieldElement(state = entry.getState<BaseFieldState<*>>())
                         }
-                        
+
                         is GroupFormElement -> {
                             GroupElement(
                                 state = entry.getState(),
@@ -194,10 +193,13 @@ private fun FeatureFormBody(
                                     .padding(horizontal = 15.dp, vertical = 10.dp)
                             )
                         }
+
+                        else -> {
+                            // other form elements are not created
+                        }
                     }
                 }
             }
-            
             item {
                 AttachmentFormElement(
                     states.attachmentElementState,
@@ -207,6 +209,11 @@ private fun FeatureFormBody(
                 )
             }
         }
+    }
+    LaunchedEffect(form) {
+        // ensure expressions are evaluated
+        form.evaluateExpressions()
+        initialEvaluation = true
     }
 }
 
@@ -277,7 +284,8 @@ internal fun rememberStates(
                 )
                 states.add(element, groupState)
             }
-            
+
+            else -> { }
         }
     }
     return states

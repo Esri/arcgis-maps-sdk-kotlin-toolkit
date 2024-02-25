@@ -23,6 +23,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.RadioButtonsFormInput
+import com.arcgismaps.toolkit.featureforms.components.base.mapValidationErrors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -32,21 +33,13 @@ internal class RadioButtonFieldState(
     properties: RadioButtonFieldProperties,
     initialValue: Any? = properties.value.value,
     scope: CoroutineScope,
-    onEditValue: ((Any?) -> Unit),
-    defaultValidator: () -> List<Throwable>
+    onEditValue: ((Any?) -> Unit)
 ) : CodedValueFieldState(
     properties = properties,
     initialValue = initialValue,
     scope = scope,
-    onEditValue = onEditValue,
-    defaultValidator = defaultValidator
+    onEditValue = onEditValue
 ) {
-
-    init {
-        // Start observing the properties. Since this method cannot be invoked from any open base
-        // class initializer blocks, it is safe to invoke it here.
-        observeProperties()
-    }
 
     /**
      * Returns true if the initial value is not in the [codedValues]. This should
@@ -83,6 +76,7 @@ internal class RadioButtonFieldState(
                         placeholder = formElement.hint,
                         description = formElement.description,
                         value = formElement.value,
+                        validationErrors = formElement.mapValidationErrors(scope),
                         editable = formElement.isEditable,
                         required = formElement.isRequired,
                         visible = formElement.isVisible,
@@ -97,7 +91,6 @@ internal class RadioButtonFieldState(
                         formElement.updateValue(newValue)
                         scope.launch { form.evaluateExpressions() }
                     },
-                    defaultValidator = formElement::getValidationErrors
                 )
             }
         )
@@ -120,6 +113,7 @@ internal fun rememberRadioButtonFieldState(
             placeholder = field.hint,
             description = field.description,
             value = field.value,
+            validationErrors = field.mapValidationErrors(scope),
             editable = field.isEditable,
             required = field.isRequired,
             visible = field.isVisible,
@@ -133,6 +127,5 @@ internal fun rememberRadioButtonFieldState(
             field.updateValue(it)
             scope.launch { form.evaluateExpressions() }
         },
-        defaultValidator = field::getValidationErrors
     )
 }
