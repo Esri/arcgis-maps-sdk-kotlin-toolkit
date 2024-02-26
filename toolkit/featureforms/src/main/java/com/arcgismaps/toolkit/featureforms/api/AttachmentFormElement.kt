@@ -77,13 +77,15 @@ internal class AttachmentFormElement(
 @Composable
 internal fun rememberAttachmentElement(
     form: FeatureForm
-): AttachmentFormElement = rememberSaveable(
-    inputs = arrayOf(form),
-    saver = AttachmentFormElement.Saver(form)
-) {
-    AttachmentFormElement(form.feature)
+): AttachmentFormElement? {
+    if (!form.feature.canEditAttachments) return null
+    return rememberSaveable(
+        inputs = arrayOf(form),
+        saver = AttachmentFormElement.Saver(form)
+    ) {
+        AttachmentFormElement(form.feature)
+    }
 }
-
 /**
  * Represents an attachment belonging to a feature form. Wraps the Attachment object and adds additional
  * properties and methods to support displaying attachments in a feature form.

@@ -334,15 +334,12 @@ private fun AddAttachment(state: BaseAttachmentElementState) {
             AddAttachmentMenu(expanded = showMenu, onDismiss = { showMenu = false }) {
                 
                 if (it != null) {
-                    println("TAG URI $it")
                     scope.launch {
                         val bytes = readBytes(context, it)
                         if (bytes != null) {
                             state.addAttachment("Photo-$index.png", "image/*", bytes)
                                 .onSuccess {
                                     index++
-                                }.onFailure {
-                                    println("TAG failed to add attachment")
                                 }
                         }
                     }

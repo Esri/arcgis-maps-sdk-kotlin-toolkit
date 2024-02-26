@@ -29,8 +29,8 @@ internal interface FormStateCollection : Iterable<FormStateCollection.Entry> {
         val state: FormElementState
     }
     
-    val attachmentElementState: BaseAttachmentElementState
-    val attachmentFormElement: AttachmentFormElement
+    val attachmentElementState: BaseAttachmentElementState?
+    val attachmentFormElement: AttachmentFormElement?
 }
 
 /**
@@ -61,12 +61,12 @@ private class MutableFormStateCollectionImpl : MutableFormStateCollection {
 
     private val entries: MutableList<FormStateCollection.Entry> = mutableListOf()
     
-    private lateinit var _attachmentElementState: BaseAttachmentElementState
-    override val attachmentElementState: BaseAttachmentElementState
+    private var _attachmentElementState: BaseAttachmentElementState? = null
+    override val attachmentElementState: BaseAttachmentElementState?
         get() = _attachmentElementState
     
-    private lateinit var _attachmentFormElement: AttachmentFormElement
-    override val attachmentFormElement: AttachmentFormElement
+    private var _attachmentFormElement: AttachmentFormElement? = null
+    override val attachmentFormElement: AttachmentFormElement?
         get() = _attachmentFormElement
     
     override fun iterator(): Iterator<FormStateCollection.Entry> {

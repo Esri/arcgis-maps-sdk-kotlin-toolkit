@@ -190,13 +190,16 @@ private fun FeatureFormBody(
                     }
                 }
             }
-            item {
-                AttachmentFormElement(
-                    states.attachmentElementState,
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 15.dp, vertical = 10.dp)
-                )
+            val attachmentState = states.attachmentElementState
+            if (attachmentState != null) {
+                item {
+                    AttachmentFormElement(
+                        attachmentState,
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 15.dp, vertical = 10.dp)
+                    )
+                }
             }
         }
     }
@@ -237,12 +240,14 @@ internal fun InitializingExpressions(
 @Composable
 internal fun rememberStates(
     form: FeatureForm,
-    attachmentFormElement: AttachmentFormElement,
+    attachmentFormElement: AttachmentFormElement?,
     scope: CoroutineScope
 ): FormStateCollection {
     val states = MutableFormStateCollection()
-    val attachmentState = rememberBaseAttachmentElementState(form, attachmentFormElement)
-    states.addAttachmentElement(attachmentFormElement, attachmentState)
+    if (attachmentFormElement != null) {
+        val attachmentState = rememberBaseAttachmentElementState(form, attachmentFormElement)
+        states.addAttachmentElement(attachmentFormElement, attachmentState)
+    }
     form.elements.forEach { element ->
         when (element) {
             is FieldFormElement -> {
