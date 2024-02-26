@@ -10,7 +10,6 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -43,8 +42,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -56,13 +53,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.DefaultAlpha
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontWeight.Companion.W300
@@ -71,8 +62,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.arcgismaps.portal.LoadableImage
-import com.arcgismaps.toolkit.featureforms.api.FormAttachment
 import com.arcgismaps.toolkit.featureforms.components.base.BaseAttachmentElementState
 import com.arcgismaps.toolkit.featureforms.components.base.CarouselThumbnail
 import kotlinx.coroutines.delay
@@ -150,17 +139,14 @@ internal fun AttachmentFormElement(
             )
             Spacer(modifier = Modifier.height(10.dp))
             Carousel(
-                state = state,
-                onDetailsTap = {
-                    state.selectedAttachment = it
-                }
+                state = state
             )
         }
     }
 }
 
 @Composable
-private fun Carousel(state: BaseAttachmentElementState, onThumbnailTap: (FormAttachment) -> Unit = {}, onDetailsTap: (FormAttachment) -> Unit) {
+private fun Carousel(state: BaseAttachmentElementState) {
     Row(
         Modifier
             .horizontalScroll(rememberScrollState())
@@ -342,10 +328,9 @@ private fun AddAttachment(state: BaseAttachmentElementState) {
                     scope.launch {
                         val bytes = readBytes(context, it)
                         if (bytes != null) {
-                            state.feature.addAttachment("Photo-$index.png", "image/*", bytes)
+                            state.addAttachment("Photo-$index.png", "image/*", bytes)
                                 .onSuccess {
                                     index++
-                                    state.attachmentsUpdated()
                                 }.onFailure {
                                     println("TAG failed to add attachment")
                                 }
@@ -400,64 +385,6 @@ private fun AttachmentElementHeader(
         Spacer(modifier = Modifier.weight(1f))
         if (editable && !showingDetails) {
             AddAttachment(state)
-        }
-    }
-}
-//
-//@Preview
-//@Composable
-//private fun PreviewFormAttachmentElement() {
-//    AttachmentFormElement(
-//        modifier = Modifier
-//            .fillMaxWidth()
-//    )
-//}
-
-
-/**
- * Loads an image asynchronously using the [ImageLoader].
- */
-@Composable
-internal fun AsyncImage(
-    imageLoader: ImageLoader,
-    modifier: Modifier = Modifier,
-    alignment: Alignment = Alignment.Center,
-    contentScale: ContentScale = ContentScale.Fit,
-    alpha: Float = DefaultAlpha,
-    colorFilter: ColorFilter? = null
-) {
-    val painter = imageLoader.image.value
-    Image(
-        painter = painter,
-        contentDescription = null,
-        modifier = modifier,
-        alignment = alignment,
-        contentScale = contentScale,
-        alpha = alpha,
-        colorFilter = colorFilter
-    )
-}
-
-/**
- * A model to asynchronously load the image from a [LoadableImage]. Once the loading is complete
- * the loaded image is presented via [image] State.
- *
- * @param loadable the [LoadableImage] to load.
- * @param scope the CoroutineScope to run the loading job on.
- * @param placeholder the placeholder image to show until the loading is complete.
- */
-internal class ImageLoader(
-    private val loadable: FormAttachment,
-    placeholder: Painter
-) {
-    private val _image: MutableState<Painter> = mutableStateOf(placeholder)
-    val image: State<Painter> = _image
-    
-    suspend fun load() {
-        loadable.load().onSuccess {
-            loadable.createThumbnail(64, 64).onSuccess {
-                _image.value = BitmapPainter(it.bitmap.asImageBitmap())
-            }
         }
     }
 }

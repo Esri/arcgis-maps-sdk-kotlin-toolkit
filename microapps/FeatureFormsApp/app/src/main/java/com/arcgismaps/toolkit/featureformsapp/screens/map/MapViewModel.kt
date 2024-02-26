@@ -8,7 +8,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arcgismaps.data.ArcGISFeature
-import com.arcgismaps.data.Attachment
 import com.arcgismaps.data.ServiceFeatureTable
 import com.arcgismaps.exceptions.FeatureFormValidationException
 import com.arcgismaps.mapping.ArcGISMap
@@ -23,9 +22,6 @@ import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -86,10 +82,7 @@ class MapViewModel @Inject constructor(
     private val _uiState: MutableState<UIState> = mutableStateOf(UIState.NotEditing)
     val uiState: State<UIState>
         get() = _uiState
-    
-    private val _attachments = MutableStateFlow<List<Attachment>>(listOf())
-    internal val attachments = _attachments.asStateFlow()
-
+ 
     init {
         viewModelScope.launch {
             portalItem = portalItemRepository(itemId) ?: return@launch
@@ -97,24 +90,6 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    fun onAttachmentsUpdated() {
-        (uiState.value as? UIState.Editing)?.let {
-            val feature = it.featureForm.feature
-            CoroutineScope(Dispatchers.IO).launch {
-                println("TAG fetching ATTACHMENTSS")
-                feature.fetchAttachments().onSuccess {
-                    println("TAG fetched ${it.size} attachments")
-                    _attachments.value = it
-                }
-            }
-            
-        }
-    }
-    internal fun setUIState(state: UIState, scope: CoroutineScope) {
-        _uiState.value = state
-        onAttachmentsUpdated()
-    }
-    
     /**
      * Apply attribute edits to the Geodatabase backing
      * the ServiceFeatureTable and refresh the local feature.
@@ -241,7 +216,7 @@ class MapViewModel @Inject constructor(
                                     // select the feature
                                     layer.selectFeature(feature)
                                     // set the UI to an editing state with the FeatureForm
-                                    setUIState(UIState.Editing(featureForm), this@launch)
+                                    _uiState.value = UIState.Editing(featureForm)
                                 }
                             }
                         }

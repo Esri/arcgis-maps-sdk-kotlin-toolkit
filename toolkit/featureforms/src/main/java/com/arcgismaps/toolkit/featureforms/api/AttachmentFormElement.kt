@@ -17,7 +17,6 @@
 package com.arcgismaps.toolkit.featureforms.api
 
 
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.media.ThumbnailUtils
@@ -35,113 +34,41 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
-import java.nio.ByteBuffer
 
 /**
  * A FormElement type representing an Attachment.
  */
 internal class AttachmentFormElement(
-    private val feature: ArcGISFeature,
-    private val filesDir: String,
-    val attachments: StateFlow<List<FormAttachment>>
+    feature: ArcGISFeature,
 ) {
-    
     val label: String = "Attach Photo"
-    
+
     val description: String = "some description"
-    
+
     private val _isVisible = MutableStateFlow<Boolean>(false)
     val isVisible = _isVisible.asStateFlow()
-    
+
     /**
      * The input user interface to use for the element.
      */
     val input: AttachmentFormInput = AttachmentFormInput.AnyAttachmentFormInput
-    
+
     /**
      * True if the element is editable. False if the element is not editable.
      */
     val isEditable: Boolean = feature.canEditAttachments
-    
-    private val mutex = Mutex()
-    
-    /**
-     * Adds the specified [bitmapDrawable] as an attachment with the specified [name].
-     */
-    suspend fun addAttachment(
-        name: String,
-        contentType: String,
-        bitmapDrawable: BitmapDrawable
-    ): Result<FormAttachment> {
-        val byteArray = bitmapDrawable.bitmap.toByteArray()
-        val attachment = feature.addAttachment(name, contentType, byteArray).getOrNull()
-        return if (attachment != null) {
-            val formAttachment = FormAttachment(attachment, filesDir)
-            Result.success(formAttachment)
-        } else {
-            Result.failure(Exception("Unable to create attachment"))
-        }
-    }
-    
-    /**
-     * Deletes the specified [attachment].
-     */
-    suspend fun deleteAttachment(attachment: FormAttachment): Result<Unit> {
-        feature.deleteAttachment(attachment.attachment).onFailure {
-            return Result.failure(it)
-        }
-        return Result.success(Unit)
-    }
-    
-    /**
-     * Fetches the Attachments from the feature and populates [attachments] property. This method
-     * is thread safe.
-     */
-//    suspend fun fetchAttachments(): Result<Unit> {
-//        mutex.withLock {
-//            val featureAttachments = feature.fetchAttachments().onFailure {
-//                return Result.failure(it)
-//            }.getOrNull()!!
-//            val formAttachments = featureAttachments.map {
-//                FormAttachment(it, filesDir)
-//            }
-//            _attachments.clear()
-//            _attachments.addAll(formAttachments)
-//            return Result.success(Unit)
-//        }
-//    }
-    
+
+
     companion object {
-    
-//        /**
-//         * Creates a new [AttachmentFormElement] from the give [feature].
-//         *
-//         * @param feature The [ArcGISFeature] to create the [AttachmentFormElement] from.
-//         * @param filesDir The directory to the cache any attachments. Use [Context.getFilesDir].
-//         *
-//         * @return Returns null if unable to create a [AttachmentFormElement].
-//         */
-//        suspend fun createOrNull(feature: ArcGISFeature, filesDir: String): AttachmentFormElement? {
-//            feature.load().onFailure { return null }
-//            val featureTable = feature.featureTable as? ArcGISFeatureTable ?: return null
-//            featureTable.load()
-//            return if (featureTable.hasAttachments) {
-//                AttachmentFormElement(feature, filesDir)
-//            } else {
-//                null
-//            }
-//        }
-        
-        fun Saver(form: FeatureForm, attachments: StateFlow<List<FormAttachment>>, filesDir: String) = listSaver(
+        fun Saver(form: FeatureForm) = listSaver(
             save = {
-                listOf(filesDir)
+                listOf("")
             },
             restore = {
-                AttachmentFormElement(form.feature, it[0] as String, attachments)
+                AttachmentFormElement(form.feature)
             }
         )
     }
@@ -149,14 +76,12 @@ internal class AttachmentFormElement(
 
 @Composable
 internal fun rememberAttachmentElement(
-    form: FeatureForm,
-    attachments: StateFlow<List<FormAttachment>>,
-    filesDir: String
+    form: FeatureForm
 ): AttachmentFormElement = rememberSaveable(
     inputs = arrayOf(form),
-    saver = AttachmentFormElement.Saver(form, attachments, filesDir)
+    saver = AttachmentFormElement.Saver(form)
 ) {
-    AttachmentFormElement(form.feature, filesDir, attachments)
+    AttachmentFormElement(form.feature)
 }
 
 /**
@@ -166,7 +91,7 @@ internal fun rememberAttachmentElement(
  * The [FormAttachment] must be loaded before calling [createFullImage] or [createThumbnail].
  */
 public class FormAttachment(
-    public val attachment: Attachment,
+    private val attachment: Attachment,
     private val filesDir: String
 ) : Loadable {
     public val contentType: String = attachment.contentType
@@ -224,28 +149,30 @@ public class FormAttachment(
     }
 
     override suspend fun load(): Result<Unit> {
-        _loadStatus.value = LoadStatus.Loading
-        try {
-            if (!attachment.hasFetchedData || filePath.isEmpty()) {
-                val data = attachment.fetchData().getOrThrow()
-                val dir = File("$filesDir/attachments")
-                dir.mkdirs()
-                val file = File(dir, attachment.name)
-                file.createNewFile()
-                FileOutputStream(file).use {
-                    it.write(data)
+        if (_loadStatus.value !is LoadStatus.Loaded) {
+            _loadStatus.value = LoadStatus.Loading
+            try {
+                if (!attachment.hasFetchedData || filePath.isEmpty()) {
+                    val data = attachment.fetchData().getOrThrow()
+                    val dir = File("$filesDir/attachments")
+                    dir.mkdirs()
+                    val file = File(dir, attachment.name)
+                    file.createNewFile()
+                    FileOutputStream(file).use {
+                        it.write(data)
+                    }
+                    filePath = file.absolutePath
+                    isLocal = true
                 }
-                filePath = file.absolutePath
-                isLocal = true
+            } catch (ex: Exception) {
+                _loadStatus.value = LoadStatus.FailedToLoad(ex)
+                if (ex is CancellationException) {
+                    throw ex
+                }
+                return Result.failure(ex)
             }
-        } catch (ex: Exception) {
-            _loadStatus.value = LoadStatus.FailedToLoad(ex)
-            if (ex is CancellationException) {
-                throw ex
-            }
-            return Result.failure(ex)
+            _loadStatus.value = LoadStatus.Loaded
         }
-        _loadStatus.value = LoadStatus.Loaded
         return Result.success(Unit)
     }
 
@@ -291,10 +218,4 @@ saver = FormAttachment.Saver(attachment, filesDir)
 
 internal sealed class AttachmentFormInput {
     data object AnyAttachmentFormInput : AttachmentFormInput()
-}
-
-internal fun Bitmap.toByteArray(): ByteArray {
-    val byteBuffer = ByteBuffer.allocate(allocationByteCount)
-    copyPixelsToBuffer(byteBuffer)
-    return byteBuffer.array()
 }

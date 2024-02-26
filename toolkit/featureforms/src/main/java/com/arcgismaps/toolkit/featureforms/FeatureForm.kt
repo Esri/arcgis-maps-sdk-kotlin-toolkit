@@ -24,14 +24,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.data.Attachment
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
@@ -47,7 +45,6 @@ import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.BaseGroupState
 import com.arcgismaps.toolkit.featureforms.components.base.FormStateCollection
 import com.arcgismaps.toolkit.featureforms.components.base.MutableFormStateCollection
-import com.arcgismaps.toolkit.featureforms.components.base.formAttachmentFlow
 import com.arcgismaps.toolkit.featureforms.components.base.getState
 import com.arcgismaps.toolkit.featureforms.components.base.rememberBaseAttachmentElementState
 import com.arcgismaps.toolkit.featureforms.components.base.rememberBaseGroupState
@@ -61,7 +58,6 @@ import com.arcgismaps.toolkit.featureforms.components.formelement.GroupElement
 import com.arcgismaps.toolkit.featureforms.components.text.rememberFormTextFieldState
 import com.arcgismaps.toolkit.featureforms.utils.FeatureFormDialog
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.StateFlow
 
 /**
  * The "property" determines the behavior of when the validation errors are visible.
@@ -98,23 +94,17 @@ public sealed class ValidationErrorVisibility {
 @Composable
 public fun FeatureForm(
     featureForm: FeatureForm,
-    featureAttachments: StateFlow<List<Attachment>>,
     modifier: Modifier = Modifier,
-    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
-    onAttachmentsUpdated: () -> Unit
+    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic
 ) {
     val scope = rememberCoroutineScope()
-    val filesDir = LocalContext.current.filesDir.absolutePath
     val attachmentFormElement = rememberAttachmentElement(
-        featureForm,
-        formAttachmentFlow(scope, featureAttachments, filesDir),
-        filesDir
+        featureForm
     )
     val states = rememberStates(
         form = featureForm,
         attachmentFormElement = attachmentFormElement,
-        scope = scope,
-        onAttachmentsUpdated
+        scope = scope
     )
     FeatureFormBody(
         form = featureForm,
@@ -248,11 +238,10 @@ internal fun InitializingExpressions(
 internal fun rememberStates(
     form: FeatureForm,
     attachmentFormElement: AttachmentFormElement,
-    scope: CoroutineScope,
-    onAttachmentsUpdated: () -> Unit
+    scope: CoroutineScope
 ): FormStateCollection {
     val states = MutableFormStateCollection()
-    val attachmentState = rememberBaseAttachmentElementState(form, attachmentFormElement, onAttachmentsUpdated)
+    val attachmentState = rememberBaseAttachmentElementState(form, attachmentFormElement)
     states.addAttachmentElement(attachmentFormElement, attachmentState)
     form.elements.forEach { element ->
         when (element) {

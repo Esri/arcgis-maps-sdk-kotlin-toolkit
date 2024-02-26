@@ -165,14 +165,9 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                     if (featureForm != null) {
                         FeatureForm(
                             featureForm = featureForm,
-                            featureAttachments = mapViewModel.attachments,
                             modifier = Modifier.fillMaxSize(),
                             validationErrorVisibility = errorVisibility
-                        ) {
-                            mapViewModel.onAttachmentsUpdated()
-                        }
-                        
-                        
+                        )
                     }
                 }
             }
