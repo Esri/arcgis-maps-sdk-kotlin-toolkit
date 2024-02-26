@@ -44,6 +44,7 @@ import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
 import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.GeoView
+import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.Grid
 import com.arcgismaps.mapping.view.LocationDisplay
 import com.arcgismaps.mapping.view.LongPressEvent
@@ -72,7 +73,7 @@ import kotlinx.coroutines.launch
  * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a viewpoint
  * type of [ViewpointType.BoundingGeometry]
  * @param onVisibleAreaChanged lambda invoked when the visible area of the composable MapView has changed
- * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable MapView
+ * @param graphicsOverlays graphics overlays used by this composable MapView
  * @param locationDisplay the [LocationDisplay] used by the composable MapView
  * @param geometryEditor the [GeometryEditor] used by the composable MapView to create and edit geometries by user interaction.
  * @param mapViewProxy the [MapViewProxy] to associate with the composable MapView
@@ -119,16 +120,16 @@ public fun MapView(
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
     onVisibleAreaChanged: ((Polygon) -> Unit)? = null,
-    graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
+    graphicsOverlays: List<GraphicsOverlay> = remember { emptyList() },
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     geometryEditor: GeometryEditor? = null,
     mapViewProxy: MapViewProxy? = null,
-    mapViewInteractionOptions: MapViewInteractionOptions = MapViewInteractionOptions(),
-    viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
-    selectionProperties: SelectionProperties = SelectionProperties(),
-    insets: PaddingValues = PaddingValues(),
+    mapViewInteractionOptions: MapViewInteractionOptions = remember { MapViewInteractionOptions() },
+    viewLabelProperties: ViewLabelProperties = remember { ViewLabelProperties() },
+    selectionProperties: SelectionProperties = remember { SelectionProperties() },
+    insets: PaddingValues = MapViewDefaults.DefaultInsets,
     grid: Grid? = null,
-    backgroundGrid: BackgroundGrid = BackgroundGrid(),
+    backgroundGrid: BackgroundGrid = remember { BackgroundGrid() },
     wrapAroundMode: WrapAroundMode = WrapAroundMode.EnabledWhenSupported,
     isAttributionBarVisible: Boolean = true,
     onAttributionTextChanged: ((String) -> Unit)? = null,
@@ -171,6 +172,12 @@ public fun MapView(
             it.grid = grid
             it.backgroundGrid = backgroundGrid
             it.isAttributionBarVisible = isAttributionBarVisible
+            if (it.graphicsOverlays != graphicsOverlays) {
+                it.graphicsOverlays.apply {
+                    clear()
+                    addAll(graphicsOverlays)
+                }
+            }
         })
 
     DisposableEffect(Unit) {
@@ -225,8 +232,6 @@ public fun MapView(
         onAttributionTextChanged,
         onAttributionBarLayoutChanged
     )
-
-    GraphicsOverlaysUpdater(graphicsOverlays, mapView)
 }
 
 /**
@@ -426,4 +431,20 @@ public inline fun rememberLocationDisplay(
     return remember(key) {
         LocationDisplay().apply(init)
     }
+}
+
+/**
+ * Contains default values for the composable MapView.
+ *
+ * @see com.arcgismaps.toolkit.geocompose.MapView
+ * @since 200.4.0
+ */
+public object MapViewDefaults {
+
+    /**
+     * Default insets for the composable MapView, set to 0 on all sides.
+     *
+     * @since 200.4.0
+     */
+    public val DefaultInsets: PaddingValues = PaddingValues()
 }
