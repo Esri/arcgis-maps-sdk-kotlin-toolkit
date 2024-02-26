@@ -191,14 +191,18 @@ private fun FeatureFormBody(
                 }
             }
             val attachmentState = states.attachmentElementState
+            
             if (attachmentState != null) {
                 item {
-                    AttachmentFormElement(
-                        attachmentState,
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 15.dp, vertical = 10.dp)
-                    )
+                    val visible by attachmentState.isVisible.collectAsState()
+                    if (visible) {
+                        AttachmentFormElement(
+                            attachmentState,
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 15.dp, vertical = 10.dp)
+                        )
+                    }
                 }
             }
         }

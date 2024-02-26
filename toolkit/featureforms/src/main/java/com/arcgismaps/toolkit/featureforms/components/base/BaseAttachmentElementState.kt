@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.featureforms.components.base
 
+import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
@@ -24,12 +25,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.mapping.featureforms.FeatureForm
+import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.toolkit.featureforms.api.AttachmentFormElement
 import com.arcgismaps.toolkit.featureforms.api.FormAttachment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -97,6 +102,7 @@ internal class BaseAttachmentElementState(
             attachmentFormElement: AttachmentFormElement,
             feature: ArcGISFeature,
             scope: CoroutineScope,
+            visibleProxy: StateFlow<Boolean>,
             filesDir: String
         ): Saver<BaseAttachmentElementState, Any> = listSaver(
             save = {
@@ -111,7 +117,7 @@ internal class BaseAttachmentElementState(
                     feature,
                     label = attachmentFormElement.label,
                     description = attachmentFormElement.description,
-                    isVisible = attachmentFormElement.isVisible,
+                    isVisible = visibleProxy,
                     selectedAttachment = if (it.isNotEmpty()) {
                         it[0] as FormAttachment
                     } else {
@@ -125,6 +131,7 @@ internal class BaseAttachmentElementState(
     }
 }
 
+@SuppressLint("FlowOperatorInvokedInComposition")
 @Composable
 internal fun rememberBaseAttachmentElementState(
     form: FeatureForm,
@@ -132,15 +139,26 @@ internal fun rememberBaseAttachmentElementState(
 ): BaseAttachmentElementState {
     val scope = rememberCoroutineScope()
     val filesDir = LocalContext.current.filesDir.absolutePath
+    val isVisibleProxyElement = form.elements.filterIsInstance<FieldFormElement>().firstOrNull() {
+        it.label == "visual_defects"
+    }
+    
+    val visibleProxy = isVisibleProxyElement?.value?.map { if (it is String) {
+        it == "Yes"
+    } else {
+        false
+    }
+    }?.stateIn(scope, SharingStarted.Eagerly, false)
+        ?: MutableStateFlow<Boolean>(false).asStateFlow()
     return rememberSaveable(
         inputs = arrayOf(form),
-        saver = BaseAttachmentElementState.Saver(attachmentFormElement, form.feature, scope, filesDir)
+        saver = BaseAttachmentElementState.Saver(attachmentFormElement, form.feature, scope, visibleProxy, filesDir)
     ) {
         BaseAttachmentElementState(
             feature = form.feature,
             label = attachmentFormElement.label,
             description = attachmentFormElement.description,
-            isVisible = attachmentFormElement.isVisible,
+            isVisible = visibleProxy,
             selectedAttachment = null,
             scope = scope,
             filesDir = filesDir
