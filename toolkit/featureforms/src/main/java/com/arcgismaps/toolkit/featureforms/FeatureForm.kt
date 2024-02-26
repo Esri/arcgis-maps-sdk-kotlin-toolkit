@@ -15,6 +15,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
@@ -117,6 +118,12 @@ public fun FeatureForm(
 }
 
 @Composable
+private fun FeatureFormTitle(featureForm: FeatureForm) {
+    val title by featureForm.title.collectAsState()
+    Text(text = title, style = TextStyle(fontWeight = FontWeight.Bold))
+}
+
+@Composable
 private fun FeatureFormBody(
     form: FeatureForm,
     states: FormStateCollection,
@@ -129,7 +136,7 @@ private fun FeatureFormBody(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // title
-        Text(text = form.title, style = TextStyle(fontWeight = FontWeight.Bold))
+        FeatureFormTitle(featureForm = form)
         Spacer(
             modifier = Modifier
                 .fillMaxWidth()
@@ -160,6 +167,10 @@ private fun FeatureFormBody(
                                     .fillMaxWidth()
                                     .padding(horizontal = 15.dp, vertical = 10.dp)
                             )
+                        }
+
+                        else -> {
+                            // other form elements are not created
                         }
                     }
                 }
@@ -236,6 +247,8 @@ internal fun rememberStates(
                 )
                 states.add(element, groupState)
             }
+
+            else -> { }
         }
     }
     return states
