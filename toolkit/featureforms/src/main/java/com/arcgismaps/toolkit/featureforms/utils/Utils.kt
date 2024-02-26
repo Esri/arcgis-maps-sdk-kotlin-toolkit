@@ -42,3 +42,27 @@ internal fun Modifier.conditional(
         }
     }
 }
+
+/**
+ * Utility function that returns true if the type is null or if it is an empty string.
+ */
+internal fun Any?.isNullOrEmptyString(): Boolean {
+    return if (this is String?) {
+        isNullOrEmpty()
+    } else {
+        false
+    }
+}
+
+/**
+ * Provide a format string for any numeric type.
+ *
+ * @param digits: If the number is floating point, restricts the decimal digits
+ * @return a formatted string representing the number.
+ */
+internal fun Number?.format(digits: Int = 2): String =
+    when (this) {
+        is Double -> "%.${digits}f".format(this)
+        is Float -> "%.${digits}f".format(this)
+        else -> "$this"
+    }
