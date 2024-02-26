@@ -42,6 +42,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -147,13 +148,22 @@ internal fun AttachmentFormElement(
 
 @Composable
 private fun Carousel(state: BaseAttachmentElementState) {
+    val scrollState = rememberScrollState()
     Row(
         Modifier
-            .horizontalScroll(rememberScrollState())
+            .horizontalScroll(scrollState)
             .height(intrinsicSize = IntrinsicSize.Max),
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         val attachments by state.attachments.collectAsState()
+        var size by remember { mutableIntStateOf(attachments.size) }
+        
+        LaunchedEffect(attachments.size) {
+            if (size < attachments.size) {
+                size = attachments.size
+                scrollState.animateScrollTo(scrollState.maxValue)
+            }
+        }
         attachments.forEach {
             CarouselThumbnail(
                 attachment = it,

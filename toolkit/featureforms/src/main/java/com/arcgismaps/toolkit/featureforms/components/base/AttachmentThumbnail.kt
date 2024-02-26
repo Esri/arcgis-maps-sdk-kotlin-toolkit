@@ -51,10 +51,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -74,6 +72,7 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.toolkit.featureforms.api.FormAttachment
 import com.arcgismaps.toolkit.featureforms.utils.DialogType
+import com.arcgismaps.toolkit.featureforms.utils.ImageLoader
 import com.arcgismaps.toolkit.featureforms.utils.LocalDialogRequester
 import kotlinx.coroutines.launch
 
@@ -86,9 +85,24 @@ private fun FormAttachment.sizeText(context: Context): String = Formatter.format
 @Composable
 internal fun CarouselThumbnail(attachment: FormAttachment, paddingValues: PaddingValues = PaddingValues(0.dp), onThumbnailTap: () -> Unit) {
     val scope = rememberCoroutineScope()
-    val placeholder = rememberVectorPainter(image = Icons.Outlined.Image)
+    val placeholder = rememberVectorPainter(Icons.Outlined.Image)
     val dialogRequester = LocalDialogRequester.current
-    var image: Painter by remember(attachment) { mutableStateOf(placeholder) }
+    val image by remember(attachment) {
+        ImageLoader(attachment, scope, placeholder) { attachment ->
+            val drawable = attachment
+                .createFullImage()
+                .getOrNull()
+            if (drawable != null) {
+                BitmapPainter(
+                    drawable.bitmap.rotateIfNecessary(attachment.filePath)
+                        .asImageBitmap()
+                )
+            } else {
+                placeholder
+            }
+        }.image
+    }
+
     Box(
         modifier = Modifier
             .padding(paddingValues)
@@ -103,20 +117,9 @@ internal fun CarouselThumbnail(attachment: FormAttachment, paddingValues: Paddin
                 shape = RoundedCornerShape(8.dp)
             )
             .clickable {
-                if (attachment.loadStatus.value == LoadStatus.NotLoaded || attachment.loadStatus.value is LoadStatus.FailedToLoad) {
+                if (attachment.loadStatus.value is LoadStatus.NotLoaded || attachment.loadStatus.value is LoadStatus.FailedToLoad) {
                     scope.launch {
-                        attachment
-                            .load()
-                            .onSuccess {
-                                attachment
-                                    .createFullImage()
-                                    .onSuccess {
-                                        image = BitmapPainter(
-                                            it.bitmap.rotateIfNecessary(attachment.filePath)
-                                                .asImageBitmap()
-                                        )
-                                    }
-                            }
+                        attachment.load()
                     }
                 } else if (attachment.loadStatus.value == LoadStatus.Loaded) {
                     onThumbnailTap()
@@ -138,7 +141,7 @@ internal fun CarouselThumbnail(attachment: FormAttachment, paddingValues: Paddin
 @Composable
 private fun BoxScope.DownloadableView(attachment: FormAttachment) {
     SizeView(attachment)
-    IconView(attachment)
+    IconView()
     Title(attachment)
 }
 
@@ -254,7 +257,7 @@ internal fun BoxScope.Title(attachment: FormAttachment) {
 }
 
 @Composable
-private fun BoxScope.IconView(attachment: FormAttachment) {
+private fun BoxScope.IconView() {
     Icon(
         Icons.Outlined.Image,
         contentDescription = "downloadable attachment",
