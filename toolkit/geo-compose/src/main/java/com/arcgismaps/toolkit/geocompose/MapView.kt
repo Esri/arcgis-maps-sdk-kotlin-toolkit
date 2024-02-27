@@ -216,10 +216,7 @@ public fun MapView(
 
     MapViewEventHandler(
         mapView,
-        onViewpointChangedForCenterAndScale,
-        onViewpointChangedForBoundingGeometry,
         onTimeExtentChanged,
-        onVisibleAreaChanged,
         onNavigationChanged,
         onMapRotationChanged,
         onMapScaleChanged,
@@ -238,21 +235,25 @@ public fun MapView(
         onPan,
         onDrawStatusChanged,
         onAttributionTextChanged,
-        onAttributionBarLayoutChanged,
-        viewpointPersistence
+        onAttributionBarLayoutChanged
+    )
+
+    ViewpointHandler(
+        mapView = mapView,
+        viewpointPersistence = viewpointPersistence,
+        onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
+        onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
+        onVisibleAreaChanged = onVisibleAreaChanged
     )
 }
 
 /**
- * Sets up the callbacks for all the view-based [mapView] events.
+ * Sets up the callbacks for all the view-based [mapView] events except the viewpoint changed events.
  */
 @Composable
 private fun MapViewEventHandler(
     mapView: MapView,
-    onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)?,
-    onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)?,
     onTimeExtentChanged: ((TimeExtent?) -> Unit)?,
-    onVisibleAreaChanged: ((Polygon) -> Unit)?,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)?,
     onMapRotationChanged: ((Double) -> Unit)?,
     onMapScaleChanged: ((Double) -> Unit)?,
@@ -271,17 +272,9 @@ private fun MapViewEventHandler(
     onPan: ((PanChangeEvent) -> Unit)?,
     onDrawStatusChanged: ((DrawStatus) -> Unit)?,
     onAttributionTextChanged: ((String) -> Unit)?,
-    onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)?,
-    viewpointPersistence: ViewpointPersistence
+    onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)?
 ) {
-    val currentOnViewpointChangedForCenterAndScale by rememberUpdatedState(
-        onViewpointChangedForCenterAndScale
-    )
-    val currentOnViewpointChangedForBoundingGeometry by rememberUpdatedState(
-        onViewpointChangedForBoundingGeometry
-    )
     val currentTimeExtentChanged by rememberUpdatedState(onTimeExtentChanged)
-    val currentVisibleAreaChanged by rememberUpdatedState(onVisibleAreaChanged)
     val currentOnNavigationChanged by rememberUpdatedState(onNavigationChanged)
     val currentOnMapRotationChanged by rememberUpdatedState(onMapRotationChanged)
     val currentOnMapScaleChanged by rememberUpdatedState(onMapScaleChanged)
@@ -302,43 +295,7 @@ private fun MapViewEventHandler(
     val currentOnAttributionTextChanged by rememberUpdatedState(onAttributionTextChanged)
     val currentOnAttributionBarLayoutChanged by rememberUpdatedState(onAttributionBarLayoutChanged)
 
-    val currentViewpointPersistence by rememberUpdatedState(viewpointPersistence)
-    var persistedViewpoint by rememberSaveable(
-        saver = Saver(
-            save = {
-                it.value?.toJson() ?: "null"
-            },
-            restore = {
-                mutableStateOf(Viewpoint.fromJsonOrNull(it))
-            }
-        )
-    ) {
-        mutableStateOf<Viewpoint?>(null)
-    }
-
     LaunchedEffect(Unit) {
-        persistedViewpoint?.let { mapView.setViewpoint(it) }
-        launch {
-            mapView.viewpointChanged.collect {
-                var currentViewpoint = if (currentViewpointPersistence != ViewpointPersistence.None) {
-                    val viewpointType = if (currentViewpointPersistence == ViewpointPersistence.ByCenterAndScale) ViewpointType.CenterAndScale else ViewpointType.BoundingGeometry
-                    mapView.getCurrentViewpoint(viewpointType)
-                } else null
-                currentViewpoint?.let { persistedViewpoint = it }
-                currentOnViewpointChangedForCenterAndScale?.let { callback ->
-                    if (viewpointPersistence != ViewpointPersistence.ByCenterAndScale || currentViewpoint == null) {
-                        currentViewpoint = mapView.getCurrentViewpoint(ViewpointType.CenterAndScale)
-                    }
-                    currentViewpoint?.let(callback)
-                }
-                currentOnViewpointChangedForBoundingGeometry?.let { callback ->
-                    if (viewpointPersistence != ViewpointPersistence.ByBoundingGeometry || currentViewpoint == null) {
-                        currentViewpoint = mapView.getCurrentViewpoint(ViewpointType.BoundingGeometry)
-                    }
-                    currentViewpoint?.let(callback)
-                }
-            }
-        }
         launch {
             mapView.timeExtent.collect { currentTimeExtent ->
                 currentTimeExtentChanged?.invoke(currentTimeExtent)
@@ -347,14 +304,6 @@ private fun MapViewEventHandler(
         launch {
             mapView.layerViewStateChanged.collect { currentLayerViewState ->
                 currentOnLayerViewStateChanged?.invoke(currentLayerViewState)
-            }
-        }
-        launch {
-            mapView.viewpointChanged.collect {
-                currentVisibleAreaChanged?.invoke(
-                    mapView.visibleArea
-                        ?: throw IllegalStateException("MapView visible area should not be null")
-                )
             }
         }
         launch {
@@ -441,6 +390,70 @@ private fun MapViewEventHandler(
         launch {
             mapView.onAttributionBarLayoutChanged.collect { attributionBarLayoutChangeEvent ->
                 currentOnAttributionBarLayoutChanged?.invoke(attributionBarLayoutChangeEvent)
+            }
+        }
+    }
+}
+
+@Composable
+private fun ViewpointHandler(
+    mapView: MapView,
+    viewpointPersistence: ViewpointPersistence,
+    onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)?,
+    onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)?,
+    onVisibleAreaChanged: ((Polygon) -> Unit)?
+) {
+    val currentOnViewpointChangedForCenterAndScale by rememberUpdatedState(
+        onViewpointChangedForCenterAndScale
+    )
+    val currentOnViewpointChangedForBoundingGeometry by rememberUpdatedState(
+        onViewpointChangedForBoundingGeometry
+    )
+    val currentVisibleAreaChanged by rememberUpdatedState(onVisibleAreaChanged)
+    val currentViewpointPersistence by rememberUpdatedState(viewpointPersistence)
+    var persistedViewpoint by rememberSaveable(
+        saver = Saver(
+            save = {
+                it.value?.toJson() ?: "null"
+            },
+            restore = {
+                mutableStateOf(Viewpoint.fromJsonOrNull(it))
+            }
+        )
+    ) {
+        mutableStateOf<Viewpoint?>(null)
+    }
+
+    LaunchedEffect(Unit) {
+        persistedViewpoint?.let { mapView.setViewpoint(it) }
+        launch {
+            mapView.viewpointChanged.collect {
+                var currentViewpoint = if (currentViewpointPersistence != ViewpointPersistence.None) {
+                    val viewpointType = if (currentViewpointPersistence == ViewpointPersistence.ByCenterAndScale) ViewpointType.CenterAndScale else ViewpointType.BoundingGeometry
+                    mapView.getCurrentViewpoint(viewpointType)
+                } else null
+                currentViewpoint?.let { persistedViewpoint = it }
+                currentOnViewpointChangedForCenterAndScale?.let { callback ->
+                    if (viewpointPersistence != ViewpointPersistence.ByCenterAndScale || currentViewpoint == null) {
+                        currentViewpoint = mapView.getCurrentViewpoint(ViewpointType.CenterAndScale)
+                    }
+                    currentViewpoint?.let(callback)
+                }
+                currentOnViewpointChangedForBoundingGeometry?.let { callback ->
+                    if (viewpointPersistence != ViewpointPersistence.ByBoundingGeometry || currentViewpoint == null) {
+                        currentViewpoint = mapView.getCurrentViewpoint(ViewpointType.BoundingGeometry)
+                    }
+                    currentViewpoint?.let(callback)
+                }
+            }
+        }
+
+        launch {
+            mapView.viewpointChanged.collect {
+                currentVisibleAreaChanged?.invoke(
+                    mapView.visibleArea
+                        ?: throw IllegalStateException("MapView visible area should not be null")
+                )
             }
         }
     }
