@@ -97,7 +97,7 @@ internal class FormTextFieldState(
     val fieldType: FieldType = properties.fieldType
 
     override fun typeConverter(input: String): Any? {
-        if (input.isEmpty() && fieldType.isNumeric) {
+        if (input.isEmpty()) {
             return null
         }
         return when (fieldType) {

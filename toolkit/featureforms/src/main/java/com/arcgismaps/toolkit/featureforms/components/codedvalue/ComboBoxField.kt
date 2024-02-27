@@ -138,7 +138,13 @@ internal fun ComboBoxField(
             )
         },
         interactionSource = interactionSource,
-        onFocusChange = state::onFocusChanged
+        onFocusChange = state::onFocusChanged,
+        trailingContent = if (isRequired) {
+            // if required then do not show a clear icon
+            {
+                Icon(imageVector = Icons.Outlined.List, contentDescription = "field icon")
+            }
+        } else null
     )
 
     LaunchedEffect(interactionSource) {
