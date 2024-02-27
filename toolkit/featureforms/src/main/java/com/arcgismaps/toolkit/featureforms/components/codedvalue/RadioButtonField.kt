@@ -26,6 +26,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
@@ -101,8 +102,7 @@ private fun RadioButtonField(
             } else {
                 label
             },
-            style = MaterialTheme.typography.bodyMedium,
-            color = colors.labelColor
+            style = RadioButtonFieldDefaults.labelTextStyle,
         )
         Column(
             modifier = Modifier
@@ -114,7 +114,7 @@ private fun RadioButtonField(
                 )
         ) {
             CompositionLocalProvider(
-                LocalContentColor provides colors.textColor
+                LocalTextStyle provides RadioButtonFieldDefaults.textStyle
             ) {
                 options.forEach { (code, name) ->
                     RadioButtonRow(
@@ -129,8 +129,7 @@ private fun RadioButtonField(
         if (description.isNotEmpty()) {
             Text(
                 text = description,
-                style = MaterialTheme.typography.bodySmall,
-                color = colors.supportingTextColor
+                style = RadioButtonFieldDefaults.supportingTextStyle
             )
         }
     }
@@ -164,8 +163,7 @@ private fun RadioButtonRow(
             enabled = enabled
         )
         Text(
-            text = value,
-            style = MaterialTheme.typography.bodyMedium
+            text = value
         )
     }
 }

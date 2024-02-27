@@ -31,10 +31,12 @@ import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material.icons.rounded.TextFields
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -190,12 +192,14 @@ internal fun BaseTextField(
                 .semantics { contentDescription = "outlined text field" },
             enabled = true,
             readOnly = readOnly,
+            textStyle = MaterialTheme.typography.bodyLarge,
             label = {
                 Text(
                     text = label,
                     modifier = Modifier.semantics { contentDescription = "label" },
                     overflow = TextOverflow.Ellipsis,
-                    maxLines = 1
+                    maxLines = 1,
+                    style = MaterialTheme.typography.bodySmall
                 )
             },
             trailingIcon = trailingContent
@@ -209,13 +213,15 @@ internal fun BaseTextField(
                     onDone = { focusManager.clearFocus() }
                 ),
             supportingText = {
-                Column(
-                    modifier = Modifier
-                        .clickable {
-                            focusManager.clearFocus()
-                        }
-                ) {
-                    supportingText?.invoke(this)
+                CompositionLocalProvider(LocalTextStyle provides MaterialTheme.typography.bodySmall) {
+                    Column(
+                        modifier = Modifier
+                            .clickable {
+                                focusManager.clearFocus()
+                            }
+                    ) {
+                        supportingText?.invoke(this)
+                    }
                 }
             },
             visualTransformation = visualTransformation,

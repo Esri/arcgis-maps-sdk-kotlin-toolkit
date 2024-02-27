@@ -94,3 +94,33 @@ FeatureForm(
 )
 ```
 *Note* : Once the `validationErrorVisibility`  is set to `Visible`, changing it back to `Automatic` will have no effect since all the fields have now gained focus to show any errors.
+
+## Theming and Customization
+
+`FeatureForm` uses the material3 theming system. The following `colors` and `typography` are used by the respective fields.
+
+#### Text Fields
+- Outline color - `MaterialTheme.colorScheme.outline`
+- Label TextStyle - `MaterialTheme.typography.bodyMedium`
+- Input TextStyle - `MaterialTheme.typography.bodyLarge`
+- SupportingText TextStyle - `MaterialTheme.typography.bodySmall`
+- Error color - `MaterialTheme.colorScheme.error`
+
+#### Radio Buttons
+- Outline color - `MaterialTheme.colorScheme.outline`
+- Label TextStyle - `MaterialTheme.typography.bodyMedium`
+- Options TextStyle - `MaterialTheme.typography.bodyLarge`
+- SupportingText TextStyle - `MaterialTheme.typography.bodySmall`
+- Error color - `MaterialTheme.colorScheme.error`
+
+#### Group Elements
+- Outline Color - `MaterialTheme.colorScheme.outline`
+- Header Color - `MaterialTheme.colorScheme.SurfaceVariant`
+- Content background Color - `MaterialTheme.colorScheme.background`
+- Label TextStyle - `MaterialTheme.typography.bodyMedium`
+- Description TextStyle - `MaterialTheme.typography.bodySmall`
+
+#### Read-Only Fields
+Alpha values for read only fields cannot be customized at this time.
+
+More information on the material 3 specs [here](https://m3.material.io/components/text-fields/specs#e4964192-72ad-414f-85b4-4b4357abb83c)

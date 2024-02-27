@@ -16,36 +16,32 @@
 
 package com.arcgismaps.toolkit.featureforms.components.codedvalue
 
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 
 internal object RadioButtonFieldDefaults {
+
+    val textStyle : TextStyle @Composable get() = MaterialTheme.typography.bodyLarge
+    val labelTextStyle : TextStyle @Composable get() = MaterialTheme.typography.bodyMedium
+    val supportingTextStyle : TextStyle @Composable get() = MaterialTheme.typography.bodySmall
+
     @Composable
     fun colors(): RadioButtonFieldColors = RadioButtonFieldColors(
-        labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        supportingTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
         errorColor = MaterialTheme.colorScheme.error,
         containerBorderColor = MaterialTheme.colorScheme.outline,
-        textColor = LocalContentColor.current
     )
 }
 
 /**
  * Color properties of a radio button field.
  *
- * @property labelColor The color used for the label of this radio button field.
- * @property supportingTextColor The color used for the supporting text of this radio button field.
  * @property errorColor The color used for the supporting text of this radio button field when the value is considered
  * invalid.
  * @property containerBorderColor The color used for the container border of this radio button field.
- * @property textColor The color used for the text of this radio button field options.
  */
 internal data class RadioButtonFieldColors(
-    val labelColor: Color,
-    val supportingTextColor: Color,
     val errorColor: Color,
     val containerBorderColor: Color,
-    val textColor: Color
 )
