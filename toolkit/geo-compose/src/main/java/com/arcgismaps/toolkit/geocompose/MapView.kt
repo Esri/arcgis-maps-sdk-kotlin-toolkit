@@ -22,8 +22,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -132,6 +136,7 @@ public fun MapView(
     grid: Grid? = null,
     backgroundGrid: BackgroundGrid = remember { BackgroundGrid() },
     wrapAroundMode: WrapAroundMode = WrapAroundMode.EnabledWhenSupported,
+    viewpointPersistence: ViewpointPersistence = ViewpointPersistence.ByCenterAndScale,
     isAttributionBarVisible: Boolean = true,
     onAttributionTextChanged: ((String) -> Unit)? = null,
     onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)? = null,
@@ -233,7 +238,8 @@ public fun MapView(
         onPan,
         onDrawStatusChanged,
         onAttributionTextChanged,
-        onAttributionBarLayoutChanged
+        onAttributionBarLayoutChanged,
+        viewpointPersistence
     )
 }
 
@@ -265,7 +271,8 @@ private fun MapViewEventHandler(
     onPan: ((PanChangeEvent) -> Unit)?,
     onDrawStatusChanged: ((DrawStatus) -> Unit)?,
     onAttributionTextChanged: ((String) -> Unit)?,
-    onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)?
+    onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)?,
+    viewpointPersistence: ViewpointPersistence
 ) {
     val currentOnViewpointChangedForCenterAndScale by rememberUpdatedState(
         onViewpointChangedForCenterAndScale
@@ -295,14 +302,40 @@ private fun MapViewEventHandler(
     val currentOnAttributionTextChanged by rememberUpdatedState(onAttributionTextChanged)
     val currentOnAttributionBarLayoutChanged by rememberUpdatedState(onAttributionBarLayoutChanged)
 
+    val currentViewpointPersistence by rememberUpdatedState(viewpointPersistence)
+    var persistedViewpoint by rememberSaveable(
+        saver = Saver(
+            save = {
+                it.value?.toJson() ?: "null"
+            },
+            restore = {
+                mutableStateOf(Viewpoint.fromJsonOrNull(it))
+            }
+        )
+    ) {
+        mutableStateOf<Viewpoint?>(null)
+    }
+
     LaunchedEffect(Unit) {
+        persistedViewpoint?.let { mapView.setViewpoint(it) }
         launch {
             mapView.viewpointChanged.collect {
+                var currentViewpoint = if (currentViewpointPersistence != ViewpointPersistence.None) {
+                    val viewpointType = if (currentViewpointPersistence == ViewpointPersistence.ByCenterAndScale) ViewpointType.CenterAndScale else ViewpointType.BoundingGeometry
+                    mapView.getCurrentViewpoint(viewpointType)
+                } else null
+                currentViewpoint?.let { persistedViewpoint = it }
                 currentOnViewpointChangedForCenterAndScale?.let { callback ->
-                    mapView.getCurrentViewpoint(ViewpointType.CenterAndScale)?.let(callback)
+                    if (viewpointPersistence != ViewpointPersistence.ByCenterAndScale || currentViewpoint == null) {
+                        currentViewpoint = mapView.getCurrentViewpoint(ViewpointType.CenterAndScale)
+                    }
+                    currentViewpoint?.let(callback)
                 }
                 currentOnViewpointChangedForBoundingGeometry?.let { callback ->
-                    mapView.getCurrentViewpoint(ViewpointType.BoundingGeometry)?.let(callback)
+                    if (viewpointPersistence != ViewpointPersistence.ByBoundingGeometry || currentViewpoint == null) {
+                        currentViewpoint = mapView.getCurrentViewpoint(ViewpointType.BoundingGeometry)
+                    }
+                    currentViewpoint?.let(callback)
                 }
             }
         }
