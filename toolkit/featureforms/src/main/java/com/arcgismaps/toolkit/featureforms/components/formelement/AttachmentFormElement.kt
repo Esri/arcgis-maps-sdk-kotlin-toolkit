@@ -125,23 +125,26 @@ internal fun AttachmentFormElement(
     modifier: Modifier = Modifier,
     colors: AttachmentElementColors = AttachmentElementDefaults.colors()
 ) {
-    Card(
-        modifier = modifier,
-        shape = AttachmentElementDefaults.containerShape,
-        border = BorderStroke(AttachmentElementDefaults.borderThickness, colors.borderColor)
-    ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp)
+    val visible by state.isVisible.collectAsState()
+    if (visible) {
+        Card(
+            modifier = modifier,
+            shape = AttachmentElementDefaults.containerShape,
+            border = BorderStroke(AttachmentElementDefaults.borderThickness, colors.borderColor)
         ) {
-            AttachmentElementHeader(
-                state,
-                editable = true,//state.editable
-            
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-            Carousel(
-                state = state
-            )
+            Column(
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp)
+            ) {
+                AttachmentElementHeader(
+                    state,
+                    editable = true,//state.editable
+                
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Carousel(
+                    state = state
+                )
+            }
         }
     }
 }
@@ -337,7 +340,7 @@ private fun AddAttachment(state: BaseAttachmentElementState) {
                     scope.launch {
                         val bytes = readBytes(context, it)
                         if (bytes != null) {
-                            state.addAttachment("Photo-$index.png", "image/*", bytes)
+                            state.addAttachment("Photo-$index.png", "image/png", bytes)
                                 .onSuccess {
                                     index++
                                 }

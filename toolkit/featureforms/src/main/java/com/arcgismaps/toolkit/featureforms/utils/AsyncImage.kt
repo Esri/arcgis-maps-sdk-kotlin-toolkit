@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.featureforms.utils
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -29,6 +30,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.Loadable
+import com.arcgismaps.mapping.featureforms.FormAttachment
 import com.arcgismaps.portal.LoadableImage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
@@ -81,6 +83,7 @@ internal class ImageLoader<T: Loadable>(
     init {
         scope.launch {
             loadStatus.collect { status ->
+                Log.d("ATTACH", "${(loadable as FormAttachment).name} has status $status")
                 if (status is LoadStatus.Loaded) {
                     _image.value = acquireImage(loadable)
                 }

@@ -71,7 +71,7 @@ class DateTimeFieldTests {
     fun setContent() {
         composeTestRule.setContent {
             FeatureForm(
-                featureForm = featureForm
+                form = featureForm
             )
         }
     }

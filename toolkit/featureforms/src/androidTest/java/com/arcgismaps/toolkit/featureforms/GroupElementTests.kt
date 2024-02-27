@@ -64,7 +64,7 @@ class GroupElementTests {
     @Before
     fun setContent() {
         composeTestRule.setContent {
-            FeatureForm(featureForm = featureForm)
+            FeatureForm(form = featureForm)
         }
     }
 

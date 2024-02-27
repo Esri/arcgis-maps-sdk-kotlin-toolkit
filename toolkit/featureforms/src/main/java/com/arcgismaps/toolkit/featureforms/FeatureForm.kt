@@ -30,6 +30,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.mapping.featureforms.AttachmentFormElement
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
@@ -39,8 +40,6 @@ import com.arcgismaps.mapping.featureforms.RadioButtonsFormInput
 import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
-import com.arcgismaps.toolkit.featureforms.api.AttachmentFormElement
-import com.arcgismaps.toolkit.featureforms.api.rememberAttachmentElement
 import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.components.base.BaseGroupState
 import com.arcgismaps.toolkit.featureforms.components.base.FormStateCollection
@@ -82,7 +81,7 @@ public sealed class ValidationErrorVisibility {
  * layer using forms that have been configured externally (using either in the the Web Map Viewer
  * or the Fields Maps web app).
  *
- * @param featureForm The [FeatureForm] configuration.
+ * @param form The [FeatureForm] configuration.
  * @param modifier The [Modifier] to be applied to layout corresponding to the content of this
  * FeatureForm.
  * @param validationErrorVisibility The [ValidationErrorVisibility] that determines the behavior of
@@ -93,27 +92,27 @@ public sealed class ValidationErrorVisibility {
  */
 @Composable
 public fun FeatureForm(
-    featureForm: FeatureForm,
+    form: FeatureForm,
     modifier: Modifier = Modifier,
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic
 ) {
     val scope = rememberCoroutineScope()
-    val attachmentFormElement = rememberAttachmentElement(
-        featureForm
-    )
+    var initialEvaluation by rememberSaveable(form) { mutableStateOf(false) }
+
     val states = rememberStates(
-        form = featureForm,
-        attachmentFormElement = attachmentFormElement,
+        initialEvaluation = initialEvaluation,
+        form = form,
         scope = scope
     )
     FeatureFormBody(
-        form = featureForm,
+        form = form,
+        initialEvaluation = initialEvaluation,
         states = states,
         modifier = modifier
     )
     FeatureFormDialog()
     // launch a new side effect in a launched effect when validationErrorVisibility changes
-    LaunchedEffect(validationErrorVisibility) {
+    LaunchedEffect(initialEvaluation, validationErrorVisibility) {
         // if it set to always show errors force each field to validate itself and show any errors
         if (validationErrorVisibility == ValidationErrorVisibility.Visible) {
             states.forEach { entry ->
@@ -130,6 +129,12 @@ public fun FeatureForm(
             }
         }
     }
+    
+    LaunchedEffect(form) {
+        // ensure expressions are evaluated
+        form.evaluateExpressions()
+        initialEvaluation = true
+    }
 }
 
 @Composable
@@ -141,10 +146,10 @@ private fun FeatureFormTitle(featureForm: FeatureForm) {
 @Composable
 private fun FeatureFormBody(
     form: FeatureForm,
+    initialEvaluation: Boolean,
     states: FormStateCollection,
     modifier: Modifier = Modifier
 ) {
-    var initialEvaluation by rememberSaveable(form) { mutableStateOf(false) }
     val lazyListState = rememberLazyListState()
     Column(
         modifier = modifier.fillMaxSize(),
@@ -183,6 +188,15 @@ private fun FeatureFormBody(
                                     .padding(horizontal = 15.dp, vertical = 10.dp)
                             )
                         }
+                        
+                        is AttachmentFormElement -> {
+                            AttachmentFormElement(
+                                state = entry.getState(),
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 15.dp, vertical = 10.dp)
+                            )
+                        }
 
                         else -> {
                             // other form elements are not created
@@ -190,27 +204,7 @@ private fun FeatureFormBody(
                     }
                 }
             }
-            val attachmentState = states.attachmentElementState
-            
-            if (attachmentState != null) {
-                item {
-                    val visible by attachmentState.isVisible.collectAsState()
-                    if (visible) {
-                        AttachmentFormElement(
-                            attachmentState,
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 15.dp, vertical = 10.dp)
-                        )
-                    }
-                }
-            }
         }
-    }
-    LaunchedEffect(form) {
-        // ensure expressions are evaluated
-        form.evaluateExpressions()
-        initialEvaluation = true
     }
 }
 
@@ -243,15 +237,11 @@ internal fun InitializingExpressions(
  */
 @Composable
 internal fun rememberStates(
+    initialEvaluation: Boolean,
     form: FeatureForm,
-    attachmentFormElement: AttachmentFormElement?,
     scope: CoroutineScope
 ): FormStateCollection {
     val states = MutableFormStateCollection()
-    if (attachmentFormElement != null) {
-        val attachmentState = rememberBaseAttachmentElementState(form, attachmentFormElement)
-        states.addAttachmentElement(attachmentFormElement, attachmentState)
-    }
     form.elements.forEach { element ->
         when (element) {
             is FieldFormElement -> {
@@ -282,23 +272,17 @@ internal fun rememberStates(
                 )
                 states.add(element, groupState)
             }
+            
+            is AttachmentFormElement -> {
+                val state = rememberBaseAttachmentElementState(form = form, attachmentFormElement = element)
+                states.add(element, state)
+            }
 
             else -> { }
         }
     }
     return states
 }
-
-//@Composable
-//internal fun rememberFormAttachments(
-//    attachments: List<Attachment>,
-//    context: Context = LocalContext.current
-//): List<FormAttachment> {
-//    val filesDir = context.filesDir.absolutePath
-//    return attachments.map {
-//        rememberFormAttachment(attachment = it, filesDir = filesDir)
-//    }
-//}
 
 /**
  * Creates and remembers a [BaseFieldState] for the provided [element].

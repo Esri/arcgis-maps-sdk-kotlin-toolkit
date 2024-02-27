@@ -19,7 +19,6 @@ package com.arcgismaps.toolkit.featureforms.components.base
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Matrix
-import android.media.ExifInterface
 import android.text.format.Formatter
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -69,8 +68,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.exifinterface.media.ExifInterface
 import com.arcgismaps.LoadStatus
-import com.arcgismaps.toolkit.featureforms.api.FormAttachment
+import com.arcgismaps.mapping.featureforms.FormAttachment
 import com.arcgismaps.toolkit.featureforms.utils.DialogType
 import com.arcgismaps.toolkit.featureforms.utils.ImageLoader
 import com.arcgismaps.toolkit.featureforms.utils.LocalDialogRequester
@@ -80,7 +80,7 @@ private val ColorScheme.attachmentContainer: Color
     @Composable
     get() = if (isSystemInDarkTheme()) Color(0xFF374955) else Color(0xFFEFF4FA)
 
-private fun FormAttachment.sizeText(context: Context): String = Formatter.formatFileSize(context, size.toLong())
+private fun FormAttachment.sizeText(context: Context): String = Formatter.formatFileSize(context, size)
 
 @Composable
 internal fun CarouselThumbnail(attachment: FormAttachment, paddingValues: PaddingValues = PaddingValues(0.dp), onThumbnailTap: () -> Unit) {
@@ -94,7 +94,7 @@ internal fun CarouselThumbnail(attachment: FormAttachment, paddingValues: Paddin
                 .getOrNull()
             if (drawable != null) {
                 BitmapPainter(
-                    drawable.bitmap.rotateIfNecessary(attachment.filePath)
+                    drawable.bitmap.rotateIfNecessary(attachment.filePath!!)
                         .asImageBitmap()
                 )
             } else {

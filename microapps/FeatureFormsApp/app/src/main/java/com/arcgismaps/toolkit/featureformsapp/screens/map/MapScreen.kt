@@ -164,7 +164,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                     // set bottom sheet content to the FeatureForm
                     if (featureForm != null) {
                         FeatureForm(
-                            featureForm = featureForm,
+                            form = featureForm,
                             modifier = Modifier.fillMaxSize(),
                             validationErrorVisibility = errorVisibility
                         )
