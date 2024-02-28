@@ -373,6 +373,11 @@ private fun SceneViewEventHandler(
     }
 }
 
+/**
+ * Handles viewpoint change events and persistence for a [SceneView].
+ *
+ * @since 200.4.0
+ */
 @Composable
 private fun ViewpointHandler(
     sceneView: SceneView,

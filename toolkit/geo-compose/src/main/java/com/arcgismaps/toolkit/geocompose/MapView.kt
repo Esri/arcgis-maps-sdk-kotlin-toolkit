@@ -90,6 +90,8 @@ import kotlinx.coroutines.launch
  * @param grid represents the display of a coordinate system [Grid] on the composable MapView
  * @param backgroundGrid the default color and context grid behind the map surface
  * @param wrapAroundMode the [WrapAroundMode] to specify whether continuous panning across the international date line is enabled
+ * @param viewpointPersistence the [ViewpointPersistence] to specify how the viewpoint of the composable MapView is persisted
+ * across configuration changes.
  * @param isAttributionBarVisible true if attribution bar is visible in the composable MapView, false otherwise
  * @param onAttributionTextChanged lambda invoked when the attribution text of the composable MapView has changed
  * @param onAttributionBarLayoutChanged lambda invoked when the attribution bar's position or size changes
@@ -396,6 +398,11 @@ private fun MapViewEventHandler(
     }
 }
 
+/**
+ * Handles viewpoint change events and persistence for a [MapView].
+ *
+ * @since 200.4.0
+ */
 @Composable
 private fun ViewpointHandler(
     mapView: MapView,
