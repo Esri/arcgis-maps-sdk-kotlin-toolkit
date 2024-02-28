@@ -273,18 +273,18 @@ class ComboBoxFieldTests {
         // validate that the pre-populated value shown shown in accurate and as expected
         // assertTextEquals matches the Text(the label) and Editable Text (the actual editable input text)
         comboBoxField.assertTextEquals(requiredLabel, formElement.formattedValue)
-        // find the clear text node within its children
-        val clearButton = comboBoxField.onChildWithContentDescription(clearTextSemanticLabel)
-        // validate the clear icon is visible
-        clearButton.assertIsDisplayed()
-        // clear the value
-        clearButton.performClick()
+        // set the value to null
+        formElement.updateValue(null)
+        // click on the element to open the dialog picker
+        comboBoxField.performClick()
+        // find and tap the done button
+        val doneButton =
+            composeTestRule.onNodeWithContentDescription(comboBoxDialogDoneButtonSemanticLabel).performClick()
         // assert "Enter Value" placeholder is visible
         comboBoxField.assertTextEquals(requiredLabel, context.getString(R.string.enter_value))
         // validate required text is visible and is in error color
         comboBoxField.onChildWithText(context.getString(R.string.required)).assertTextColor(errorTextColor!!)
-
-        // open the picker
+        // open the picker again
         comboBoxField.performClick()
         // find the dialog
         val comboBoxDialogList =
@@ -301,9 +301,6 @@ class ComboBoxFieldTests {
             comboBoxDialogList.onChildWithContentDescription("$codedValueToSelect list item")
         listItem.assertIsDisplayed()
         listItem.performClick()
-        // find and tap the done button
-        val doneButton =
-            composeTestRule.onNodeWithContentDescription(comboBoxDialogDoneButtonSemanticLabel)
         doneButton.performClick()
         // validate the selection has changed
         comboBoxField.assertTextEquals(requiredLabel, codedValueToSelect)
