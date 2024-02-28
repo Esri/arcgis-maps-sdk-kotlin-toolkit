@@ -28,6 +28,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -428,33 +429,49 @@ private fun ViewpointHandler(
         persistedViewpoint?.let { mapView.setViewpoint(it) }
         launch {
             mapView.viewpointChanged.collect {
-                var currentViewpoint = if (currentViewpointPersistence != ViewpointPersistence.None) {
-                    val viewpointType = if (currentViewpointPersistence == ViewpointPersistence.ByCenterAndScale) ViewpointType.CenterAndScale else ViewpointType.BoundingGeometry
-                    mapView.getCurrentViewpoint(viewpointType)
-                } else null
+                currentVisibleAreaChanged?.invoke(
+                    mapView.visibleArea
+                        ?: throw IllegalStateException("MapView visible area should not be null")
+                )
+                var currentViewpoint =
+                    if (currentViewpointPersistence != ViewpointPersistence.None) {
+                        val viewpointType =
+                            if (currentViewpointPersistence == ViewpointPersistence.ByCenterAndScale) ViewpointType.CenterAndScale else ViewpointType.BoundingGeometry
+                        mapView.getCurrentViewpoint(viewpointType)
+                    } else null
                 currentViewpoint?.let { persistedViewpoint = it }
                 currentOnViewpointChangedForCenterAndScale?.let { callback ->
-                    if (viewpointPersistence != ViewpointPersistence.ByCenterAndScale || currentViewpoint == null) {
+                    if (currentViewpoint?.viewpointType != ViewpointType.CenterAndScale) {
                         currentViewpoint = mapView.getCurrentViewpoint(ViewpointType.CenterAndScale)
                     }
                     currentViewpoint?.let(callback)
                 }
                 currentOnViewpointChangedForBoundingGeometry?.let { callback ->
-                    if (viewpointPersistence != ViewpointPersistence.ByBoundingGeometry || currentViewpoint == null) {
-                        currentViewpoint = mapView.getCurrentViewpoint(ViewpointType.BoundingGeometry)
+                    if (currentViewpoint?.viewpointType != ViewpointType.BoundingGeometry) {
+                        currentViewpoint =
+                            mapView.getCurrentViewpoint(ViewpointType.BoundingGeometry)
                     }
                     currentViewpoint?.let(callback)
                 }
             }
         }
-
         launch {
-            mapView.viewpointChanged.collect {
-                currentVisibleAreaChanged?.invoke(
-                    mapView.visibleArea
-                        ?: throw IllegalStateException("MapView visible area should not be null")
-                )
-            }
+            snapshotFlow { currentViewpointPersistence }
+                .collect {
+                    persistedViewpoint = when (it) {
+                        ViewpointPersistence.None -> {
+                            null
+                        }
+
+                        ViewpointPersistence.ByCenterAndScale -> {
+                            mapView.getCurrentViewpoint(ViewpointType.CenterAndScale)
+                        }
+
+                        ViewpointPersistence.ByBoundingGeometry -> {
+                            mapView.getCurrentViewpoint(ViewpointType.BoundingGeometry)
+                        }
+                    }
+                }
         }
     }
 }
