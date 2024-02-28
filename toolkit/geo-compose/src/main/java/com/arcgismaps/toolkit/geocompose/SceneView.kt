@@ -395,10 +395,10 @@ private fun ViewpointHandler(
             save = {
                 val camera = it.value
                 listOf(
-                    camera.transformationMatrix.quaternionW,
                     camera.transformationMatrix.quaternionX,
                     camera.transformationMatrix.quaternionY,
                     camera.transformationMatrix.quaternionZ,
+                    camera.transformationMatrix.quaternionW,
                     camera.transformationMatrix.translationX,
                     camera.transformationMatrix.translationY,
                     camera.transformationMatrix.translationZ
@@ -407,10 +407,10 @@ private fun ViewpointHandler(
             restore = { data ->
                 val camera = Camera(
                     TransformationMatrix.createWithQuaternionAndTranslation(
-                        quaternionX = data[1],
-                        quaternionY = data[2],
-                        quaternionZ = data[3],
-                        quaternionW = data[0],
+                        quaternionX = data[0],
+                        quaternionY = data[1],
+                        quaternionZ = data[2],
+                        quaternionW = data[3],
                         translationX = data[4],
                         translationY = data[5],
                         translationZ = data[6]
@@ -420,7 +420,20 @@ private fun ViewpointHandler(
             }
         )
     ) {
-        mutableStateOf(sceneView.getCurrentViewpointCamera())
+        mutableStateOf(
+            Camera(
+                // This is the default SceneView matrix
+                TransformationMatrix.createWithQuaternionAndTranslation(
+                    0.0,
+                    -0.0,
+                    -0.0,
+                    1.0,
+                    0.0,
+                    0.0,
+                    5.3969112064275116E7
+                )
+            )
+        )
     }
 
     LaunchedEffect(Unit) {
