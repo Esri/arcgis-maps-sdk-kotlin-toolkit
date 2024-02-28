@@ -17,8 +17,14 @@
 
 package com.arcgismaps.toolkit.geocompose
 
+import androidx.compose.runtime.Stable
+import com.arcgismaps.geometry.Geometry
 import com.arcgismaps.geometry.Point
+import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.mapping.view.AnimationCurve
 import com.arcgismaps.mapping.view.ScreenCoordinate
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
 
 
 /**
@@ -32,6 +38,7 @@ import com.arcgismaps.mapping.view.ScreenCoordinate
  *
  * @since 200.4.0
  */
+@Stable
 public class MapViewProxy : GeoViewProxy("MapView") {
 
     /**
@@ -69,7 +76,7 @@ public class MapViewProxy : GeoViewProxy("MapView") {
      */
     public fun screenToLocationOrNull(screenCoordinate: ScreenCoordinate): Point? {
         return try {
-             mapView?.screenToLocation(screenCoordinate)
+            mapView?.screenToLocation(screenCoordinate)
         } catch (t: Throwable) {
             null
         }
@@ -94,5 +101,98 @@ public class MapViewProxy : GeoViewProxy("MapView") {
         } catch (t: Throwable) {
             null
         }
+    }
+
+    /**
+     * Animates the map view to the new viewpoint, taking the given duration to complete the navigation.
+     *
+     * @param viewpoint the new viewpoint
+     * @param duration the duration of the animation
+     * @param curve the animation curve to apply
+     * @return a [Result] indicating whether the viewpoint was successfully set.
+     * A success result with a value of false may indicate the operation was cancelled.
+     * @since 200.4.0
+     */
+    public suspend fun setViewpointAnimated(
+        viewpoint: Viewpoint,
+        duration: Duration,
+        curve: AnimationCurve
+    ): Result<Boolean> {
+        return mapView?.setViewpointAnimated(
+            viewpoint,
+            duration.toDouble(DurationUnit.SECONDS).toFloat(),
+            curve
+        ) ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
+    }
+
+    /**
+     * Animate the map view to the center point and scale.
+     *
+     * @param center the location on which the map should be centered
+     * @param scale the new map scale
+     * @return a [Result] indicating whether the viewpoint was successfully set.
+     * A success result with a value of false may indicate the operation was cancelled.
+     * @since 200.4.0
+     */
+    public suspend fun setViewpointCenter(center: Point, scale: Double? = null): Result<Boolean> {
+        return if (scale != null) {
+            mapView?.setViewpointCenter(center, scale)
+        } else {
+            mapView?.setViewpointCenter(center)
+        } ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
+    }
+
+    /**
+     * Animate the map view to the bounding geometry with padding applied.
+     *
+     * @param boundingGeometry the geometry to zoom to. If the spatial reference of the geometry is
+     * different to that of the composable [MapView], it will be reprojected appropriately
+     * @param paddingInDips a distance around the geometry to include in the Viewpoint when zooming,
+     * in density-independent pixels
+     * @return a [Result] indicating whether the viewpoint was successfully set.
+     * A success result with a value of false may indicate the operation was cancelled.
+     * @since 200.4.0
+     */
+    public suspend fun setViewpointGeometry(
+        boundingGeometry: Geometry,
+        paddingInDips: Double? = null
+    ): Result<Boolean> {
+        return if (paddingInDips != null) {
+            mapView?.setViewpointGeometry(boundingGeometry, paddingInDips)
+        } else {
+            mapView?.setViewpointGeometry(boundingGeometry)
+        } ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
+    }
+
+    /**
+     * Animate the rotation of the map view to the provided angle.
+     *
+     * @param angleDegrees the new map rotation angle, in degrees counter-clockwise
+     * @return a [Result] indicating whether the viewpoint was successfully set.
+     * A success result with a value of false may indicate the operation was cancelled.
+     * @since 200.4.0
+     */
+    public suspend fun setViewpointRotation(angleDegrees: Double): Result<Boolean> {
+        return mapView?.setViewpointRotation(angleDegrees) ?: Result.failure(
+            IllegalStateException(
+                nullGeoViewErrorMessage
+            )
+        )
+    }
+
+    /**
+     * Animate the map view to zoom to a scale.
+     *
+     * @param scale the new map scale
+     * @return a [Result] indicating whether the viewpoint was successfully set.
+     * A success result with a value of false may indicate the operation was cancelled.
+     * @since 200.4.0
+     */
+    public suspend fun setViewpointScale(scale: Double): Result<Boolean> {
+        return mapView?.setViewpointScale(scale) ?: Result.failure(
+            IllegalStateException(
+                nullGeoViewErrorMessage
+            )
+        )
     }
 }

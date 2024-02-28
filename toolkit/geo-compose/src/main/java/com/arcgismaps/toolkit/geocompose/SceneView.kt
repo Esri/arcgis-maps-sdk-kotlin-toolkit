@@ -34,7 +34,11 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.TimeExtent
+import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.mapping.ViewpointType
+import com.arcgismaps.mapping.view.AnalysisOverlay
 import com.arcgismaps.mapping.view.AtmosphereEffect
+import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.CameraController
 import com.arcgismaps.mapping.view.DoubleTapEvent
@@ -42,6 +46,8 @@ import com.arcgismaps.mapping.view.DownEvent
 import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.mapping.view.GlobeCameraController
+import com.arcgismaps.mapping.view.GraphicsOverlay
+import com.arcgismaps.mapping.view.ImageOverlay
 import com.arcgismaps.mapping.view.LightingMode
 import com.arcgismaps.mapping.view.LongPressEvent
 import com.arcgismaps.mapping.view.PanChangeEvent
@@ -62,19 +68,23 @@ import java.time.Instant
 /**
  * A compose equivalent of the view-based [SceneView].
  *
- * @param modifier Modifier to be applied to the composable SceneView
  * @param arcGISScene the [ArcGISScene] to be rendered by this composable SceneView
- * @param viewpointOperation a [SceneViewpointOperation] that changes this SceneView to a new viewpoint
- * @param viewpointChangedState specifies lambdas invoked when the viewpoint of the composable SceneView has changed
- * @param graphicsOverlays the [GraphicsOverlayCollection] used by this composable SceneView
+ * @param modifier Modifier to be applied to the composable SceneView
+ * @param onViewpointChangedForCenterAndScale lambda invoked when the viewpoint changes, passing a viewpoint
+ * type of [ViewpointType.CenterAndScale]
+ * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a viewpoint
+ * type of [ViewpointType.BoundingGeometry]
+ * @param graphicsOverlays graphics overlays used by this composable SceneView
  * @param sceneViewProxy the [SceneViewProxy] to associate with the composable SceneView
  * @param sceneViewInteractionOptions the [SceneViewInteractionOptions] used by this composable SceneView
  * @param viewLabelProperties the [ViewLabelProperties] used by the composable SceneView
  * @param selectionProperties the [SelectionProperties] used by the composable SceneView
- * @param attributionState specifies the attribution bar's visibility, text changed and layout changed events
+ * @param isAttributionBarVisible true if attribution bar is visible in the composable SceneView, false otherwise
+ * @param onAttributionTextChanged lambda invoked when the attribution text of the composable SceneView has changed
+ * @param onAttributionBarLayoutChanged lambda invoked when the attribution bar's position or size changes
  * @param cameraController the [CameraController] to manage the position, orientation, and movement of the camera
- * @param analysisOverlays a collection of analysis overlays that render the results of 3D visual analysis on the composable SceneView
- * @param imageOverlays a collection of overlays for displaying images in the composable SceneView
+ * @param analysisOverlays analysis overlays that render the results of 3D visual analysis on the composable SceneView
+ * @param imageOverlays image overlays for displaying images in the composable SceneView
  * @param atmosphereEffect the effect applied to the scene's atmosphere
  * @param timeExtent the [TimeExtent] used by the composable SceneView
  * @param onTimeExtentChanged lambda invoked when the composable SceneView's [TimeExtent] is changed
@@ -97,30 +107,36 @@ import java.time.Instant
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable SceneView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable SceneView
  * @param onDrawStatusChanged lambda invoked when the draw status of the composable SceneView is changed
+ * @sample com.arcgismaps.toolkit.geocompose.samples.SceneViewSample
+ * @see
+ * - <a href="https://developers.arcgis.com/kotlin/scenes-3d/tutorials/display-a-scene/">Display a scene tutorial</a>
+ * - <a href="https://developers.arcgis.com/kotlin/scenes-3d/tutorials/display-a-web-scene/">Display a web scene tutorial</a>
  * @since 200.4.0
  */
 @Composable
 public fun SceneView(
+    arcGISScene: ArcGISScene,
     modifier: Modifier = Modifier,
-    arcGISScene: ArcGISScene? = null,
-    viewpointOperation: SceneViewpointOperation? = null,
-    viewpointChangedState: ViewpointChangedState? = null,
-    graphicsOverlays: GraphicsOverlayCollection = rememberGraphicsOverlayCollection(),
+    onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
+    onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
+    graphicsOverlays: List<GraphicsOverlay> = remember { emptyList() },
     sceneViewProxy: SceneViewProxy? = null,
-    sceneViewInteractionOptions: SceneViewInteractionOptions = SceneViewInteractionOptions(),
-    viewLabelProperties: ViewLabelProperties = ViewLabelProperties(),
-    selectionProperties: SelectionProperties = SelectionProperties(),
-    attributionState: AttributionState = AttributionState(),
-    cameraController: CameraController = GlobeCameraController(),
-    analysisOverlays: AnalysisOverlayCollection = rememberAnalysisOverlayCollection(),
-    imageOverlays: ImageOverlayCollection = rememberImageOverlayCollection(),
+    sceneViewInteractionOptions: SceneViewInteractionOptions = remember { SceneViewInteractionOptions() },
+    viewLabelProperties: ViewLabelProperties = remember { ViewLabelProperties() },
+    selectionProperties: SelectionProperties = remember { SelectionProperties() },
+    isAttributionBarVisible: Boolean = true,
+    onAttributionTextChanged: ((String) -> Unit)? = null,
+    onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)? = null,
+    cameraController: CameraController = remember { GlobeCameraController() },
+    analysisOverlays: List<AnalysisOverlay> = remember { emptyList() },
+    imageOverlays: List<ImageOverlay> = remember { emptyList() },
     atmosphereEffect: AtmosphereEffect = AtmosphereEffect.HorizonOnly,
     timeExtent: TimeExtent? = null,
     onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
     spaceEffect: SpaceEffect = SpaceEffect.Stars,
-    sunTime: Instant = Instant.parse("2000-09-22T12:00:00Z"),
+    sunTime: Instant = SceneViewDefaults.DefaultSunTime,
     sunLighting: LightingMode = LightingMode.NoLight,
-    ambientLightColor: Color = Color(220, 220, 220, 255),
+    ambientLightColor: Color = SceneViewDefaults.DefaultAmbientLightColor,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
     onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)? = null,
@@ -156,6 +172,25 @@ public fun SceneView(
             it.sunTime = sunTime
             it.sunLighting = sunLighting
             it.ambientLightColor = com.arcgismaps.Color(ambientLightColor.toArgb())
+            it.isAttributionBarVisible = isAttributionBarVisible
+            if (it.graphicsOverlays != graphicsOverlays) {
+                it.graphicsOverlays.apply {
+                    clear()
+                    addAll(graphicsOverlays)
+                }
+            }
+            if (it.analysisOverlays != analysisOverlays) {
+                it.analysisOverlays.apply {
+                    clear()
+                    addAll(analysisOverlays)
+                }
+            }
+            if (it.imageOverlays != imageOverlays) {
+                it.imageOverlays.apply {
+                    clear()
+                    addAll(imageOverlays)
+                }
+            }
         })
 
     DisposableEffect(Unit) {
@@ -173,17 +208,10 @@ public fun SceneView(
         }
     }
 
-    ViewpointUpdater(sceneView, viewpointOperation)
-
-    GraphicsOverlaysUpdater(graphicsOverlays, sceneView)
-    AnalysisOverlaysUpdater(analysisOverlays, sceneView)
-    ImageOverlaysUpdater(imageOverlays, sceneView)
-
-    AttributionStateHandler(sceneView, attributionState)
-    ViewpointChangedStateHandler(sceneView, viewpointChangedState)
-
     SceneViewEventHandler(
         sceneView,
+        onViewpointChangedForCenterAndScale,
+        onViewpointChangedForBoundingGeometry,
         onTimeExtentChanged,
         onNavigationChanged,
         onSpatialReferenceChanged,
@@ -199,96 +227,10 @@ public fun SceneView(
         onLongPress,
         onTwoPointerTap,
         onPan,
-        onDrawStatusChanged
+        onDrawStatusChanged,
+        onAttributionTextChanged,
+        onAttributionBarLayoutChanged
     )
-}
-
-/**
- * Updates the viewpoint of the provided view-based [sceneView] using the given [viewpointOperation]. This will be
- * recomposed when [viewpointOperation] changes.
- *
- * @since 200.4.0
- */
-@Composable
-private fun ViewpointUpdater(
-    sceneView: SceneView,
-    viewpointOperation: SceneViewpointOperation?
-) {
-    LaunchedEffect(viewpointOperation) {
-        viewpointOperation?.execute(sceneView)
-    }
-}
-
-/**
- * Update the view-based [SceneView]'s analysisOverlays property to reflect changes made to the
- * [analysisOverlayCollection] based on the type of [AnalysisOverlayCollection.ChangedEvent]
- *
- * @since 200.4.0
- */
-@Composable
-internal fun AnalysisOverlaysUpdater(
-    analysisOverlayCollection: AnalysisOverlayCollection,
-    sceneView: SceneView
-) {
-    LaunchedEffect(analysisOverlayCollection) {
-        // sync up the SceneView with the new analysis overlays
-        sceneView.analysisOverlays.clear()
-        analysisOverlayCollection.forEach {
-            sceneView.analysisOverlays.add(it)
-        }
-        // start observing analysisOverlays for subsequent changes
-        analysisOverlayCollection.changed.collect { changedEvent ->
-            when (changedEvent) {
-                // On AnalysisOverlay added:
-                is AnalysisOverlayCollection.ChangedEvent.Added ->
-                    sceneView.analysisOverlays.add(changedEvent.element)
-
-                // On AnalysisOverlay removed:
-                is AnalysisOverlayCollection.ChangedEvent.Removed ->
-                    sceneView.analysisOverlays.remove(changedEvent.element)
-
-                // On AnalysisOverlays cleared:
-                is AnalysisOverlayCollection.ChangedEvent.Cleared ->
-                    sceneView.analysisOverlays.clear()
-            }
-        }
-    }
-}
-
-/**
- * Update the view-based [SceneView]'s imageOverlays property to reflect changes made to the
- * [imageOverlayCollection] based on the type of [ImageOverlayCollection.ChangedEvent]
- *
- * @since 200.4.0
- */
-@Composable
-internal fun ImageOverlaysUpdater(
-    imageOverlayCollection: ImageOverlayCollection,
-    sceneView: SceneView
-) {
-    LaunchedEffect(imageOverlayCollection) {
-        // sync up the SceneView with the new image overlays
-        sceneView.imageOverlays.clear()
-        imageOverlayCollection.forEach {
-            sceneView.imageOverlays.add(it)
-        }
-        // start observing imageOverlays for subsequent changes
-        imageOverlayCollection.changed.collect { changedEvent ->
-            when (changedEvent) {
-                // On ImageOverlay added:
-                is ImageOverlayCollection.ChangedEvent.Added ->
-                    sceneView.imageOverlays.add(changedEvent.element)
-
-                // On ImageOverlay removed:
-                is ImageOverlayCollection.ChangedEvent.Removed ->
-                    sceneView.imageOverlays.remove(changedEvent.element)
-
-                // On ImageOverlays cleared:
-                is ImageOverlayCollection.ChangedEvent.Cleared ->
-                    sceneView.imageOverlays.clear()
-            }
-        }
-    }
 }
 
 /**
@@ -297,6 +239,8 @@ internal fun ImageOverlaysUpdater(
 @Composable
 private fun SceneViewEventHandler(
     sceneView: SceneView,
+    onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)?,
+    onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)?,
     onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)?,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)?,
@@ -313,7 +257,15 @@ private fun SceneViewEventHandler(
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)?,
     onPan: ((PanChangeEvent) -> Unit)?,
     onDrawStatusChanged: ((DrawStatus) -> Unit)?,
+    onAttributionTextChanged: ((String) -> Unit)?,
+    onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)?,
 ) {
+    val currentOnViewpointChangedForCenterAndScale by rememberUpdatedState(
+        onViewpointChangedForCenterAndScale
+    )
+    val currentOnViewpointChangedForBoundingGeometry by rememberUpdatedState(
+        onViewpointChangedForBoundingGeometry
+    )
     val currentOnTimeExtentChanged by rememberUpdatedState(onTimeExtentChanged)
     val currentOnNavigationChanged by rememberUpdatedState(onNavigationChanged)
     val currentOnSpatialReferenceChanged by rememberUpdatedState(onSpatialReferenceChanged)
@@ -330,8 +282,20 @@ private fun SceneViewEventHandler(
     val currentOnTwoPointerTap by rememberUpdatedState(onTwoPointerTap)
     val currentOnPan by rememberUpdatedState(onPan)
     val currentOnDrawStatusChanged by rememberUpdatedState(onDrawStatusChanged)
+    val currentOnAttributionTextChanged by rememberUpdatedState(onAttributionTextChanged)
+    val currentOnAttributionBarLayoutChanged by rememberUpdatedState(onAttributionBarLayoutChanged)
 
     LaunchedEffect(Unit) {
+        launch {
+            sceneView.viewpointChanged.collect {
+                currentOnViewpointChangedForCenterAndScale?.let { callback ->
+                    sceneView.getCurrentViewpoint(ViewpointType.CenterAndScale)?.let(callback)
+                }
+                currentOnViewpointChangedForBoundingGeometry?.let { callback ->
+                    sceneView.getCurrentViewpoint(ViewpointType.BoundingGeometry)?.let(callback)
+                }
+            }
+        }
         launch {
             sceneView.timeExtent.collect { currentTimeExtent ->
                 currentOnTimeExtentChanged?.invoke(currentTimeExtent)
@@ -412,40 +376,37 @@ private fun SceneViewEventHandler(
                 currentOnDrawStatusChanged?.invoke(drawStatus)
             }
         }
+        launch {
+            sceneView.attributionText.collect { attributionText ->
+                currentOnAttributionTextChanged?.invoke(attributionText)
+            }
+        }
+        launch {
+            sceneView.onAttributionBarLayoutChanged.collect { attributionBarLayoutChangeEvent ->
+                currentOnAttributionBarLayoutChanged?.invoke(attributionBarLayoutChangeEvent)
+            }
+        }
     }
 }
 
 /**
- * Create and [remember] a [AnalysisOverlayCollection].
- * [init] will be called when the [AnalysisOverlayCollection] is first created to configure its
- * initial state.
+ * Contains default values for the SceneView.
  *
- * @param key invalidates the remembered AnalysisOverlayCollection if different from the previous composition
- * @param init called when the [AnalysisOverlayCollection] is created to configure its initial state
+ * @see com.arcgismaps.toolkit.geocompose.SceneView
  * @since 200.4.0
  */
-@Composable
-public inline fun rememberAnalysisOverlayCollection(
-    key: Any? = null,
-    crossinline init: AnalysisOverlayCollection.() -> Unit = {}
-): AnalysisOverlayCollection = remember(key) {
-    AnalysisOverlayCollection().apply(init)
-}
+public object SceneViewDefaults {
+    /**
+     * Default time for the sun position in the SceneView, set to 12:00 on 22 September 2000.
+     *
+     * @since 200.4.0
+     */
+    public val DefaultSunTime: Instant = Instant.parse("2000-09-22T12:00:00Z")
 
-
-/**
- * Create and [remember] a [ImageOverlayCollection].
- * [init] will be called when the [ImageOverlayCollection] is first created to configure its
- * initial state.
- *
- * @param key invalidates the remembered ImageOverlayCollection if different from the previous composition
- * @param init called when the [ImageOverlayCollection] is created to configure its initial state
- * @since 200.4.0
- */
-@Composable
-public inline fun rememberImageOverlayCollection(
-    key: Any? = null,
-    crossinline init: ImageOverlayCollection.() -> Unit = {}
-): ImageOverlayCollection = remember(key) {
-    ImageOverlayCollection().apply(init)
+    /**
+     * Default color for the ambient light in the SceneView, set to a neutral gray value.
+     *
+     * @since 200.4.0
+     */
+    public val DefaultAmbientLightColor: Color = Color(220, 220, 220, 255)
 }

@@ -17,11 +17,16 @@
 
 package com.arcgismaps.toolkit.geocompose
 
+import androidx.compose.runtime.Stable
 import com.arcgismaps.geometry.Point
+import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.DeviceOrientation
 import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.LocationToScreenResult
 import com.arcgismaps.mapping.view.ScreenCoordinate
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.DurationUnit
 
 /**
  * Used to perform operations on a composable [SceneView].
@@ -34,6 +39,7 @@ import com.arcgismaps.mapping.view.ScreenCoordinate
  *
  * @since 200.4.0
  */
+@Stable
 public class SceneViewProxy : GeoViewProxy("SceneView") {
     /**
      * The view-based [com.arcgismaps.mapping.view.SceneView] that this SceneViewProxy will operate on. This should
@@ -76,7 +82,8 @@ public class SceneViewProxy : GeoViewProxy("SceneView") {
      * @return A location to screen result object. If an error occurs, null is returned.
      * @since 200.4.0
      */
-    public fun locationToScreen(point: Point): LocationToScreenResult? = sceneView?.locationToScreen(point)
+    public fun locationToScreen(point: Point): LocationToScreenResult? =
+        sceneView?.locationToScreen(point)
 
     /**
      * Asynchronously converts a screen coordinate relative to the upper-left corner of the scene view to a location in map coordinates.
@@ -93,7 +100,11 @@ public class SceneViewProxy : GeoViewProxy("SceneView") {
      * @since 200.4.0
      */
     public suspend fun screenToLocation(screenCoordinate: ScreenCoordinate): Result<Point> =
-        sceneView?.screenToLocation(screenCoordinate) ?: Result.failure(IllegalStateException(nullSceneViewErrorMessage))
+        sceneView?.screenToLocation(screenCoordinate) ?: Result.failure(
+            IllegalStateException(
+                nullSceneViewErrorMessage
+            )
+        )
 
     /**
      * Converts a screen coordinate (in pixels) to a point on the base surface of the scene within the scene view's spatial reference.
@@ -226,5 +237,35 @@ public class SceneViewProxy : GeoViewProxy("SceneView") {
             yImageSize,
             deviceOrientation
         )
+    }
+
+    /**
+     * Change the scene view to the viewpoint specified by the given camera.
+     * The viewpoint is updated instantaneously.
+     *
+     * @param camera the new camera
+     * @since 200.4.0
+     */
+    public fun setViewpointCamera(camera: Camera) {
+        sceneView?.setViewpointCamera(camera)
+    }
+
+    /**
+     * Animate the scene view to the viewpoint specified by the given camera using the specified duration.
+     *
+     * @param camera the new camera
+     * @param duration the duration of the animation
+     * @return a [Result] indicating whether the viewpoint was successfully set.
+     * A success result with a value of false may indicate the operation was cancelled.
+     * @since 200.4.0
+     */
+    public suspend fun setViewpointCameraAnimated(
+        camera: Camera,
+        duration: Duration = 0.25.seconds
+    ): Result<Boolean> {
+        return sceneView?.setViewpointCameraAnimated(
+            camera,
+            duration.toDouble(DurationUnit.SECONDS).toFloat()
+        ) ?: Result.failure(IllegalStateException(nullGeoViewErrorMessage))
     }
 }

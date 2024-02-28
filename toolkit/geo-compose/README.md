@@ -2,7 +2,9 @@
 
 The Geo-Compose module provides `@Composable` implementations of the `MapView` and `SceneView` with a Compose-idiomatic API.
 
-![image](screenshot.png)
+|Geo-Compose|
+|:--:|
+|![image](screenshot.png)|
 
 ## Features
 

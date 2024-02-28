@@ -16,6 +16,8 @@
  *
  */
 
+logger.warn("WARNING: The module composable-map is deprecated. Please use the module geo-compose instead.")
+
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")

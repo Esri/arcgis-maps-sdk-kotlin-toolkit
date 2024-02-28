@@ -76,7 +76,6 @@ android {
 
 dependencies {
     implementation(project(":authentication"))
-    implementation(project(":composable-map"))
     implementation(arcgis.mapsSdk)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
