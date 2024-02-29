@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright 2023 Esri
+ *  Copyright 2024 Esri
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -45,14 +45,10 @@ import com.arcgismaps.mapping.layers.ArcGISSceneLayer
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
 import com.arcgismaps.mapping.view.AnalysisOverlay
-import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.OrbitLocationCameraController
-import com.arcgismaps.toolkit.geocompose.GraphicsOverlayCollection
 import com.arcgismaps.toolkit.geocompose.SceneView
-import com.arcgismaps.toolkit.geocompose.SceneViewpointOperation
-import com.arcgismaps.toolkit.geocompose.rememberAnalysisOverlayCollection
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -91,37 +87,21 @@ fun MainScreen() {
         )
     }
     val analysisOverlay = remember { AnalysisOverlay(listOf(viewshed)).apply { isVisible = true } }
-    val analysisOverlayCollection = rememberAnalysisOverlayCollection()
-    analysisOverlayCollection.add(analysisOverlay)
-    val viewpointOperation = remember {
-        SceneViewpointOperation.SetCamera(
-            Camera(
-                initLocation,
-                20000000.0,
-                0.0,
-                55.0,
-                0.0
-            )
-        )
-    }
+    val analysisOverlayCollection = remember { listOf(analysisOverlay) }
 
-    val graphicsOverlayCollection = remember {
-        GraphicsOverlayCollection().apply {
-            val viewpointSymbol = SimpleMarkerSymbol(
+    val graphicsOverlay = GraphicsOverlay(
+        listOf(
+            Graphic(initLocation).apply {
+                val viewpointSymbol = SimpleMarkerSymbol(
                     SimpleMarkerSymbolStyle.Diamond,
                     color = Color.cyan,
                     size = 32f
                 )
-            val graphicsOverlay = GraphicsOverlay(
-                listOf(
-                    Graphic(initLocation).apply {
-                        symbol = viewpointSymbol
-                    }
-                )
-            )
-            add(graphicsOverlay)
-        }
-    }
+                symbol = viewpointSymbol
+            }
+        )
+    )
+    val graphicsOverlayCollection = remember { listOf(graphicsOverlay) }
 
     Scaffold(
         topBar = {
@@ -152,7 +132,6 @@ fun MainScreen() {
                 .padding(paddingValues)
                 .fillMaxSize(),
             arcGISScene = arcGISScene,
-            viewpointOperation = viewpointOperation,
             cameraController = cameraController,
             graphicsOverlays = graphicsOverlayCollection,
             analysisOverlays = analysisOverlayCollection
