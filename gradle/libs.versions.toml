@@ -11,6 +11,7 @@ androidxLifecycle = "2.6.2"
 androidxMaterialIcons = "1.4.3"
 androidxTestExt = "1.1.5"
 androidxWindow = "1.2.0"
+binaryCompatibilityValidator = "0.14.0"
 compileSdk = "34"
 compose-navigation = "2.7.5"
 dokka = "1.9.10"
@@ -72,6 +73,7 @@ dokka-versioning = { group = "org.jetbrains.dokka", name = "versioning-plugin", 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
 android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
+binary-compatibility-validator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "binaryCompatibilityValidator"}
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }

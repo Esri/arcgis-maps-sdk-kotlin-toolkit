@@ -3,6 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("artifact-deploy")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    alias(libs.plugins.binary.compatibility.validator) apply true
 }
 
 secrets {
@@ -49,6 +50,11 @@ android {
         }
     }
 }
+
+apiValidation {
+    ignoredClasses.add("com.arcgismaps.toolkit.featureforms.BuildConfig")
+}
+
 
 dependencies {
     api(arcgis.mapsSdk)
