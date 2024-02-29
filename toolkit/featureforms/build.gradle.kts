@@ -53,6 +53,19 @@ android {
 
 apiValidation {
     ignoredClasses.add("com.arcgismaps.toolkit.featureforms.BuildConfig")
+    val composableSingletons = listOf(
+        "com.arcgismaps.toolkit.featureforms.components.base.ComposableSingletons\$BaseTextFieldKt",
+        "com.arcgismaps.toolkit.featureforms.components.codedvalue.ComposableSingletons\$ComboBoxFieldKt",
+        "com.arcgismaps.toolkit.featureforms.components.codedvalue.ComposableSingletons\$RadioButtonFieldKt",
+        "com.arcgismaps.toolkit.featureforms.components.datetime.ComposableSingletons\$DateTimeFieldKt",
+        "com.arcgismaps.toolkit.featureforms.components.datetime.picker.ComposableSingletons\$DateTimePickerKt",
+        "com.arcgismaps.toolkit.featureforms.components.datetime.picker.date.ComposableSingletons\$DatePickerKt",
+        "com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.ComposableSingletons\$TimePickerKt",
+        "com.arcgismaps.toolkit.featureforms.components.formelement.ComposableSingletons\$AttachmentFormElementKt",
+        "com.arcgismaps.toolkit.featureforms.components.formelement.ComposableSingletons\$GroupElementKt"
+    )
+    
+    ignoredClasses.addAll(composableSingletons)
 }
 
 
