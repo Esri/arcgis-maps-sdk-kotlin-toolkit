@@ -87,7 +87,7 @@ fun MainScreen() {
         )
     }
     val analysisOverlay = remember { AnalysisOverlay(listOf(viewshed)).apply { isVisible = true } }
-    val analysisOverlayCollection = remember { listOf(analysisOverlay) }
+    val analysisOverlays = remember { listOf(analysisOverlay) }
 
     val graphicsOverlay = GraphicsOverlay(
         listOf(
@@ -101,7 +101,7 @@ fun MainScreen() {
             }
         )
     )
-    val graphicsOverlayCollection = remember { listOf(graphicsOverlay) }
+    val graphicsOverlays = remember { listOf(graphicsOverlay) }
 
     Scaffold(
         topBar = {
@@ -133,8 +133,8 @@ fun MainScreen() {
                 .fillMaxSize(),
             arcGISScene = arcGISScene,
             cameraController = cameraController,
-            graphicsOverlays = graphicsOverlayCollection,
-            analysisOverlays = analysisOverlayCollection
+            graphicsOverlays = graphicsOverlays,
+            analysisOverlays = analysisOverlays
         )
     }
 }

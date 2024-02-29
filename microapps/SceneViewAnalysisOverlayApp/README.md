@@ -1,6 +1,6 @@
 # SceneView Analysis Overlay Micro-app
 
-This micro-app demonstrates the use of `AnalysisOverlayCollection` to display spatial analysis results with a composable `SceneView`.
+This micro-app demonstrates the use of composable `SceneView's` `analysisOverlays` parameter to display spatial analysis results.
 
 ![Screenshot](screenshot.png)
 
