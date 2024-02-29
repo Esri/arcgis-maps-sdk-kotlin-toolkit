@@ -38,7 +38,7 @@ internal object AttachmentElementDefaults {
     )
 }
 
-public data class AttachmentElementColors(
+internal data class AttachmentElementColors(
     val containerColor : Color,
     val carouselContainerColor: Color,
     val borderColor : Color,
