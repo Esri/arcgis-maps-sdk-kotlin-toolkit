@@ -129,7 +129,7 @@ private fun Modifier.feedbackClickable(
 }
 
 @Composable
-public fun AttachmentFormElement(modifier: Modifier = Modifier) {
+internal fun AttachmentFormElement(modifier: Modifier = Modifier) {
     AttachmentFormElement(
         state = FakeAttachmentElementState(attachments = attachments, selectedAttachment = null),
         modifier = modifier
