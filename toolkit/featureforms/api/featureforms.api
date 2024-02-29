@@ -16,23 +16,3 @@ public final class com/arcgismaps/toolkit/featureforms/ValidationErrorVisibility
 	public static final field INSTANCE Lcom/arcgismaps/toolkit/featureforms/ValidationErrorVisibility$Visible;
 }
 
-public final class com/arcgismaps/toolkit/featureforms/components/formelement/AttachmentElementColors {
-	public static final field $stable I
-	public synthetic fun <init> (JJJLkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1-0d7_KjU ()J
-	public final fun component2-0d7_KjU ()J
-	public final fun component3-0d7_KjU ()J
-	public final fun copy-ysEtTa8 (JJJ)Lcom/arcgismaps/toolkit/featureforms/components/formelement/AttachmentElementColors;
-	public static synthetic fun copy-ysEtTa8$default (Lcom/arcgismaps/toolkit/featureforms/components/formelement/AttachmentElementColors;JJJILjava/lang/Object;)Lcom/arcgismaps/toolkit/featureforms/components/formelement/AttachmentElementColors;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getBorderColor-0d7_KjU ()J
-	public final fun getCarouselContainerColor-0d7_KjU ()J
-	public final fun getContainerColor-0d7_KjU ()J
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/arcgismaps/toolkit/featureforms/components/formelement/AttachmentFormElementKt {
-	public static final fun AttachmentFormElement (Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
-}
-
