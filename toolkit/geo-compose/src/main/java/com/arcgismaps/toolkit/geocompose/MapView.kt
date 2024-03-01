@@ -440,12 +440,11 @@ private fun ViewpointHandler(
                     mapView.visibleArea
                         ?: throw IllegalStateException("MapView visible area should not be null")
                 )
-                var currentViewpoint =
-                    if (currentViewpointPersistence != ViewpointPersistence.None) {
-                        val viewpointType =
-                            if (currentViewpointPersistence == ViewpointPersistence.ByCenterAndScale) ViewpointType.CenterAndScale else ViewpointType.BoundingGeometry
-                        mapView.getCurrentViewpoint(viewpointType)
-                    } else null
+                var currentViewpoint = when (currentViewpointPersistence) {
+                    ViewpointPersistence.None -> null
+                    ViewpointPersistence.ByCenterAndScale -> mapView.getCurrentViewpoint(ViewpointType.CenterAndScale)
+                    ViewpointPersistence.ByBoundingGeometry -> mapView.getCurrentViewpoint(ViewpointType.BoundingGeometry)
+                }
                 persistedViewpoint = currentViewpoint
                 currentOnViewpointChangedForCenterAndScale?.let { callback ->
                     if (currentViewpoint?.viewpointType != ViewpointType.CenterAndScale) {
