@@ -446,7 +446,7 @@ private fun ViewpointHandler(
                             if (currentViewpointPersistence == ViewpointPersistence.ByCenterAndScale) ViewpointType.CenterAndScale else ViewpointType.BoundingGeometry
                         mapView.getCurrentViewpoint(viewpointType)
                     } else null
-                currentViewpoint?.let { persistedViewpoint = it }
+                persistedViewpoint = currentViewpoint
                 currentOnViewpointChangedForCenterAndScale?.let { callback ->
                     if (currentViewpoint?.viewpointType != ViewpointType.CenterAndScale) {
                         currentViewpoint = mapView.getCurrentViewpoint(ViewpointType.CenterAndScale)
