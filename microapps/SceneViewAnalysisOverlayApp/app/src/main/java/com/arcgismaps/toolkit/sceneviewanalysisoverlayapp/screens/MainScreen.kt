@@ -58,8 +58,7 @@ fun MainScreen() {
             val surface = Surface()
             surface.elevationSources.add(
                 ArcGISTiledElevationSource(
-                    "https://elevation3d.arcgis" +
-                            ".com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer"
+                    "https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer"
                 )
             )
             baseSurface = surface
