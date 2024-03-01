@@ -33,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -54,16 +55,12 @@ internal fun DateTimeField(
     val isRequired by state.isRequired.collectAsState()
     val value by state.value
     val interactionSource = remember { MutableInteractionSource() }
-    val label = if (isRequired) {
-        "${state.label} *"
+    val isError = value.error !is ValidationErrorState.NoError
+    // if any errors are present, show the error as the supporting text
+    val supportingText = if (!isError) {
+        state.description
     } else {
-        state.label
-    }
-    // show if any errors are present as the supporting text with the error color
-    val (supportingText, supportingTextColor) = if (value.error is ValidationErrorState.NoError) {
-        Pair(state.description, Color.Unspecified)
-    } else {
-        Pair(value.error.getString(), MaterialTheme.colorScheme.error)
+        value.error.getString()
     }
 
     BaseTextField(
@@ -77,20 +74,14 @@ internal fun DateTimeField(
         modifier = modifier,
         readOnly = true,
         isEditable = isEditable,
-        label = label,
+        label = state.label,
         placeholder = state.placeholder.ifEmpty { stringResource(id = R.string.no_value) },
+        supportingText = supportingText,
+        isError = isError,
+        isRequired = isRequired,
         singleLine = true,
         interactionSource = interactionSource,
         trailingIcon = if (isEditable) Icons.Rounded.EditCalendar else Icons.Rounded.CalendarMonth,
-        supportingText = {
-            Text(
-                text = supportingText,
-                color = supportingTextColor,
-                modifier = Modifier.semantics {
-                    contentDescription = "supporting text"
-                }
-            )
-        },
         onFocusChange = state::onFocusChanged
     )
 

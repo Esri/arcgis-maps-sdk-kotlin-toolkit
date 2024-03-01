@@ -42,6 +42,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.toolkit.featureforms.R
+import com.arcgismaps.toolkit.featureforms.components.base.BaseTextField
 
 @Composable
 internal fun RadioButtonField(
@@ -52,19 +53,33 @@ internal fun RadioButtonField(
     val editable by state.isEditable.collectAsState()
     val required by state.isRequired.collectAsState()
     val noValueLabel = state.noValueLabel.ifEmpty { stringResource(R.string.no_value) }
-    RadioButtonField(
-        label = state.label,
-        description = state.description,
-        valueProvider = { state.value.value.data },
-        editable = editable,
-        required = required,
-        codedValues = state.codedValues.associateBy({ it.code }, { it.name }),
-        showNoValueOption = state.showNoValueOption,
-        noValueLabel = noValueLabel,
-        modifier = modifier,
-        colors = colors
-    ) {
-        state.onValueChanged(it)
+    if (editable) {
+        RadioButtonField(
+            label = state.label,
+            description = state.description,
+            valueProvider = { state.value.value.data },
+            editable = editable,
+            required = required,
+            codedValues = state.codedValues.associateBy({ it.code }, { it.name }),
+            showNoValueOption = state.showNoValueOption,
+            noValueLabel = noValueLabel,
+            modifier = modifier,
+            colors = colors
+        ) {
+            state.onValueChanged(it)
+        }
+    } else {
+        BaseTextField(
+            text = state.value.value.data.toString(),
+            onValueChange = {},
+            isEditable = false,
+            label = state.label,
+            placeholder = state.placeholder,
+            supportingText = state.description,
+            isError = false,
+            isRequired = required,
+            singleLine = true
+        )
     }
 }
 

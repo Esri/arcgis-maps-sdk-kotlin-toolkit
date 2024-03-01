@@ -20,7 +20,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -49,13 +48,10 @@ internal fun SwitchField(state: SwitchFieldState, modifier: Modifier = Modifier)
         isEditable = isEditable,
         label = state.label,
         placeholder = state.placeholder,
+        supportingText = state.description,
+        isError = false,
+        isRequired = false,
         singleLine = true,
-        supportingText = {
-            Text(
-                text = state.description,
-                modifier = Modifier.semantics { contentDescription = "description" },
-            )
-        },
         interactionSource = interactionSource
     ) {
         Switch(

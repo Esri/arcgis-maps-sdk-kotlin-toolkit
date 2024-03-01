@@ -16,19 +16,12 @@
 
 package com.arcgismaps.toolkit.featureforms.components.text
 
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import com.arcgismaps.toolkit.featureforms.components.base.BaseTextField
 import com.arcgismaps.toolkit.featureforms.components.base.ValidationErrorState
@@ -42,24 +35,14 @@ internal fun FormTextField(
     val value by state.value
     val isEditable by state.isEditable.collectAsState()
     val isRequired by state.isRequired.collectAsState()
-    val isFocused by state.isFocused.collectAsState()
-    val label = remember(isRequired) {
-        if (isRequired) {
-            "${state.label} *"
-        } else {
-            state.label
-        }
-    }
-    val contentLength = if (state.minLength > 0 || state.maxLength > 0) {
-        "${value.data.length}"
+    val isError = value.error !is ValidationErrorState.NoError
+    // only show character count if there is a min or max length for this field
+    val showCharacterCount = state.minLength > 0 || state.maxLength > 0
+    // if any errors are present, show the error as the supporting text
+    val supportingText = if (!isError) {
+        state.description
     } else {
-        ""
-    }
-    // show if any errors are present as the supporting text with the error color
-    val (supportingText, supportingTextColor) = if (value.error is ValidationErrorState.NoError) {
-        Pair(state.description, Color.Unspecified)
-    } else {
-        Pair(value.error.getString(), MaterialTheme.colorScheme.error)
+       value.error.getString()
     }
 
     BaseTextField(
@@ -67,28 +50,14 @@ internal fun FormTextField(
         onValueChange = state::onValueChanged,
         modifier = modifier.fillMaxWidth(),
         isEditable = isEditable,
-        label = label,
+        label = state.label,
         placeholder = state.placeholder,
+        supportingText = supportingText,
+        isError = isError,
+        isRequired = isRequired,
         singleLine = state.singleLine,
         keyboardType = if (state.fieldType.isNumeric) KeyboardType.Number else KeyboardType.Ascii,
-        supportingText = {
-            Row {
-                Text(
-                    text = supportingText,
-                    color = supportingTextColor,
-                    modifier = Modifier.semantics { contentDescription = "supporting text" }
-                )
-                // show character count
-                if (isFocused && isEditable) {
-                    Spacer(modifier = Modifier.weight(1f))
-                    Text(
-                        text = contentLength,
-                        modifier = Modifier.semantics { contentDescription = "char count" },
-                        color = supportingTextColor
-                    )
-                }
-            }
-        },
+        showCharacterCount = showCharacterCount,
         onFocusChange = state::onFocusChanged
     )
 }
