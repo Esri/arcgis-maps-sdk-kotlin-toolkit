@@ -398,7 +398,7 @@ private fun ViewpointHandler(
     var persistedCamera by rememberSaveable(
         saver = Saver(
             save = {
-                val camera = it.value
+                val camera = it.value ?: return@Saver null
                 listOf(
                     camera.transformationMatrix.quaternionX,
                     camera.transformationMatrix.quaternionY,
@@ -410,6 +410,7 @@ private fun ViewpointHandler(
                 )
             },
             restore = { data ->
+                if (data.isEmpty()) return@Saver mutableStateOf(null)
                 val camera = Camera(
                     TransformationMatrix.createWithQuaternionAndTranslation(
                         quaternionX = data[0],
@@ -425,24 +426,11 @@ private fun ViewpointHandler(
             }
         )
     ) {
-        mutableStateOf(
-            Camera(
-                // This is the default SceneView matrix
-                TransformationMatrix.createWithQuaternionAndTranslation(
-                    0.0,
-                    -0.0,
-                    -0.0,
-                    1.0,
-                    0.0,
-                    0.0,
-                    5.3969112064275116E7
-                )
-            )
-        )
+        mutableStateOf<Camera?>(null)
     }
 
     LaunchedEffect(Unit) {
-        sceneView.setViewpointCamera(persistedCamera)
+        persistedCamera?.let { sceneView.setViewpointCamera(it) }
         launch {
             sceneView.viewpointChanged.collect {
                 val currentViewpointCamera = sceneView.getCurrentViewpointCamera()
