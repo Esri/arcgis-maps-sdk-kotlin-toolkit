@@ -446,8 +446,8 @@ private fun ViewpointHandler(
         launch {
             sceneView.viewpointChanged.collect {
                 val currentViewpointCamera = sceneView.getCurrentViewpointCamera()
-                currentOnCurrentViewpointCameraChanged?.invoke(currentViewpointCamera)
                 persistedCamera = currentViewpointCamera
+                currentOnCurrentViewpointCameraChanged?.invoke(currentViewpointCamera)
                 currentOnViewpointChangedForCenterAndScale?.let { callback ->
                     val currentViewpoint =
                         sceneView.getCurrentViewpoint(ViewpointType.CenterAndScale)

@@ -18,7 +18,7 @@
 package com.arcgismaps.toolkit.geocompose
 
 /**
- * Enum class representing the different types of viewpoint persistence.
+ * Enum class representing the different types of viewpoint persistence on a composable [MapView].
  *
  * Viewpoint persistence determines how the viewpoint of a MapView is saved and restored across activity
  * or process recreation, for example, when the device is rotated or when the app is sent to the background
@@ -30,7 +30,7 @@ package com.arcgismaps.toolkit.geocompose
  *
  * @since 200.4.0
  */
-public enum class ViewpointPersistence {
+public enum class MapViewpointPersistence {
     None,
     ByCenterAndScale,
     ByBoundingGeometry
