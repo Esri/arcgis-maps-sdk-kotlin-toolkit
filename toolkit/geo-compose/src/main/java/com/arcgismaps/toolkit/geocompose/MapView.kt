@@ -436,22 +436,20 @@ private fun ViewpointHandler(
         persistedViewpoint?.let { mapView.setViewpoint(it) }
         launch {
             mapView.viewpointChanged.collect {
-                currentVisibleAreaChanged?.invoke(
-                    mapView.visibleArea
-                        ?: throw IllegalStateException("MapView visible area should not be null")
-                )
                 var currentViewpoint = when (currentViewpointPersistence) {
                     ViewpointPersistence.None -> null
                     ViewpointPersistence.ByCenterAndScale -> mapView.getCurrentViewpoint(ViewpointType.CenterAndScale)
                     ViewpointPersistence.ByBoundingGeometry -> mapView.getCurrentViewpoint(ViewpointType.BoundingGeometry)
                 }
                 persistedViewpoint = currentViewpoint
+
                 currentOnViewpointChangedForCenterAndScale?.let { callback ->
                     if (currentViewpoint?.viewpointType != ViewpointType.CenterAndScale) {
                         currentViewpoint = mapView.getCurrentViewpoint(ViewpointType.CenterAndScale)
                     }
                     currentViewpoint?.let(callback)
                 }
+
                 currentOnViewpointChangedForBoundingGeometry?.let { callback ->
                     if (currentViewpoint?.viewpointType != ViewpointType.BoundingGeometry) {
                         currentViewpoint =
@@ -459,6 +457,11 @@ private fun ViewpointHandler(
                     }
                     currentViewpoint?.let(callback)
                 }
+
+                currentVisibleAreaChanged?.invoke(
+                    mapView.visibleArea
+                        ?: throw IllegalStateException("MapView visible area should not be null")
+                )
             }
         }
         launch {
