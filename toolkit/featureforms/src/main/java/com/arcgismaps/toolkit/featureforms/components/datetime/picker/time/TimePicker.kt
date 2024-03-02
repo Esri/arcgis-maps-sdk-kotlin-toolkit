@@ -1536,7 +1536,6 @@ internal fun numberContentDescription(
 private fun valuesForAnimation(current: Float, new: Float): Pair<Float, Float> {
     var start = current
     var end = new
-
     if (abs(start - end) <= PI) {
         return Pair(start, end)
     }
