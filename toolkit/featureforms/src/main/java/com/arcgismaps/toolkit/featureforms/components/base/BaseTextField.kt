@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.featureforms.components.base
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -58,62 +59,43 @@ import com.arcgismaps.toolkit.featureforms.utils.PlaceholderTransformation
 
 @Composable
 private fun trailingIcon(
-    text: String,
+    isEmpty: Boolean,
     singleLine: Boolean,
     isFocused: Boolean,
     trailingIcon: ImageVector?,
     onValueChange: (String) -> Unit,
     onDone: () -> Unit
-): (@Composable () -> Unit)? {
-    // single line field and is editable
-    return if (singleLine && text.isEmpty() && trailingIcon != null) {
-        {
-            // show a trailing icon if provided when the field is empty
-            Icon(imageVector = trailingIcon, contentDescription = "field icon")
-        }
-    } else if (singleLine && text.isNotEmpty()) {
-        {
-            // show a clear icon instead if the field is not empty
-            IconButton(onClick = { onValueChange("") }, modifier = Modifier.semantics {
-                contentDescription = "Clear text button"
-            }) {
-                Icon(
-                    imageVector = Icons.Rounded.Clear, contentDescription = "Clear Text"
-                )
-            }
-        }
-    } else if (singleLine && trailingIcon != null) {
-        // single line field but not editable
-        {
-            // show a trailing icon to indicate field type
-            Icon(imageVector = trailingIcon, contentDescription = "field icon")
+): @Composable () -> Unit = {
+    if (singleLine && isEmpty && trailingIcon != null) {
+        // show a trailing icon if provided when the field is empty
+        Icon(imageVector = trailingIcon, contentDescription = "field icon")
+    } else if (singleLine && !isEmpty) {
+        // show a clear icon instead if the field is not empty
+        IconButton(onClick = { onValueChange("") }, modifier = Modifier.semantics {
+            contentDescription = "Clear text button"
+        }) {
+            Icon(
+                imageVector = Icons.Rounded.Clear, contentDescription = "Clear Text"
+            )
         }
     } else if (!singleLine && isFocused) {
-        // multiline editable field
-        {
-            // show a done button only when focused
-            IconButton(onClick = { onDone() }, modifier = Modifier.semantics {
-                contentDescription = "Save local edit button"
-            }) {
-                Icon(
-                    imageVector = Icons.Rounded.CheckCircle, contentDescription = "Done"
-                )
-            }
+        // show a done button only when focused
+        IconButton(onClick = { onDone() }, modifier = Modifier.semantics {
+            contentDescription = "Save local edit button"
+        }) {
+            Icon(
+                imageVector = Icons.Rounded.CheckCircle, contentDescription = "Done"
+            )
         }
-
-    } else if (!singleLine && text.isNotEmpty()) {
-        {
-            // show a clear icon instead if the multiline field is not empty
-            IconButton(onClick = { onValueChange("") }, modifier = Modifier.semantics {
-                contentDescription = "Clear text button"
-            }) {
-                Icon(
-                    imageVector = Icons.Rounded.Clear, contentDescription = "Clear Text"
-                )
-            }
+    } else if (!singleLine && !isEmpty) {
+        // show a clear icon instead if the multiline field is not empty
+        IconButton(onClick = { onValueChange("") }, modifier = Modifier.semantics {
+            contentDescription = "Clear text button"
+        }) {
+            Icon(
+                imageVector = Icons.Rounded.Clear, contentDescription = "Clear Text"
+            )
         }
-    } else {
-        null
     }
 }
 
@@ -157,7 +139,7 @@ internal fun BaseTextField(
     placeholder: String,
     supportingText: String,
     isError: Boolean,
-    isRequired : Boolean,
+    isRequired: Boolean,
     singleLine: Boolean,
     modifier: Modifier = Modifier,
     readOnly: Boolean = !isEditable,
@@ -173,10 +155,6 @@ internal fun BaseTextField(
     val visualTransformation = if (text.isEmpty())
         PlaceholderTransformation(placeholder.ifEmpty { " " })
     else VisualTransformation.None
-    val colors = baseTextFieldColors(
-        text.isEmpty(),
-        placeholder.isEmpty()
-    )
     val title = remember(isRequired, isEditable) {
         if (isRequired && isEditable) {
             "$label *"
@@ -186,6 +164,7 @@ internal fun BaseTextField(
     }
     val contentLength = "${text.length}"
     val isSupportingTextAvailable = supportingText.isNotEmpty() || (showCharacterCount && isFocused)
+    val colors = baseTextFieldColors(text.isEmpty(), placeholder.isEmpty())
     Column(modifier = modifier
         .onFocusChanged {
             isFocused = it.hasFocus
@@ -219,7 +198,7 @@ internal fun BaseTextField(
                 },
                 trailingIcon = trailingContent
                     ?: trailingIcon(
-                        text,
+                        text.isEmpty(),
                         singleLine,
                         isFocused,
                         trailingIcon,
