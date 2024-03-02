@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms.components.base
 
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -57,47 +56,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.utils.PlaceholderTransformation
 
-@Composable
-private fun trailingIcon(
-    isEmpty: Boolean,
-    singleLine: Boolean,
-    isFocused: Boolean,
-    trailingIcon: ImageVector?,
-    onValueChange: (String) -> Unit,
-    onDone: () -> Unit
-): @Composable () -> Unit = {
-    if (singleLine && isEmpty && trailingIcon != null) {
-        // show a trailing icon if provided when the field is empty
-        Icon(imageVector = trailingIcon, contentDescription = "field icon")
-    } else if (singleLine && !isEmpty) {
-        // show a clear icon instead if the field is not empty
-        IconButton(onClick = { onValueChange("") }, modifier = Modifier.semantics {
-            contentDescription = "Clear text button"
-        }) {
-            Icon(
-                imageVector = Icons.Rounded.Clear, contentDescription = "Clear Text"
-            )
-        }
-    } else if (!singleLine && isFocused) {
-        // show a done button only when focused
-        IconButton(onClick = { onDone() }, modifier = Modifier.semantics {
-            contentDescription = "Save local edit button"
-        }) {
-            Icon(
-                imageVector = Icons.Rounded.CheckCircle, contentDescription = "Done"
-            )
-        }
-    } else if (!singleLine && !isEmpty) {
-        // show a clear icon instead if the multiline field is not empty
-        IconButton(onClick = { onValueChange("") }, modifier = Modifier.semantics {
-            contentDescription = "Clear text button"
-        }) {
-            Icon(
-                imageVector = Icons.Rounded.Clear, contentDescription = "Clear Text"
-            )
-        }
-    }
-}
 
 /**
  * A base text field component built on top of an [OutlinedTextField] that provides a standard for
@@ -109,20 +67,20 @@ private fun trailingIcon(
  * @param text the input text to be shown in the text field.
  * @param onValueChange the callback that is triggered when the input service updates the text. An
  * updated text comes as a parameter of the callback.
- * be modified. However, a user can focus it and copy text from it. Read-only text fields are
- * usually used to display pre-filled forms that a user cannot edit.
  * @param isEditable controls if the text field can be edited. When false, this component will
- * not respond to user input, and it will appear visually disabled.
+ * not respond to user input, and will be rendered differently without an outline.
  * @param label the title to be displayed for the text field.
  * @param placeholder the text to be displayed when the text field input text is empty.
  * @param supportingText supporting text to be displayed below the text field.
- * @param isError
- * @param isRequired
- * @param singleLine when set to true, this text field becomes a single horizontally scrolling
+ * @param isError indicates if the text field's current value is in error. If set to true, the
+ * label, bottom indicator and trailing icon by default will be displayed in error color.
+ * @param isRequired if true, the [label] will be suffixed with a "*".
+ * @param singleLine when set to true, this text field becomes a single horizontally scrolling text
+ * field instead of wrapping onto multiple lines.
  * @param modifier a [Modifier] for this text field.
  * @param readOnly controls the editable state of the text field. When true, the text field cannot
- * text field instead of wrapping onto multiple lines.
- * @param showCharacterCount
+ * be modified. However, a user can focus it and copy text from it.
+ * @param showCharacterCount if true shows the current character count of the [text].
  * @param keyboardType the keyboard type to use depending on the FormFieldElement input type.
  * @param trailingIcon the icon to be displayed at the end of the text field container.
  * @param onFocusChange callback that is triggered when the focus state for this text field changes.
@@ -253,6 +211,37 @@ internal fun BaseTextField(
 }
 
 @Composable
+private fun trailingIcon(
+    isEmpty: Boolean,
+    singleLine: Boolean,
+    isFocused: Boolean,
+    trailingIcon: ImageVector?,
+    onValueChange: (String) -> Unit,
+    onDone: () -> Unit
+): @Composable () -> Unit = {
+    if (!isEmpty) {
+        // show a clear icon if the field is not empty
+        IconButton(
+            onClick = { onValueChange("") },
+            modifier = Modifier.semantics { contentDescription = "Clear text button" }
+        ) {
+            Icon(imageVector = Icons.Rounded.Clear, contentDescription = "Clear Text")
+        }
+    } else if (singleLine && trailingIcon != null) {
+        // show a trailing icon if provided when the single line field is empty
+        Icon(imageVector = trailingIcon, contentDescription = "field icon")
+    } else if (!singleLine && isFocused) {
+        // show a done button only when focused for a multi line text field
+        IconButton(
+            onClick = onDone,
+            modifier = Modifier.semantics { contentDescription = "Save local edit button" }
+        ) {
+            Icon(imageVector = Icons.Rounded.CheckCircle, contentDescription = "Done")
+        }
+    }
+}
+
+@Composable
 private fun ReadOnlyTextField(
     label: String,
     text: String,
@@ -282,7 +271,7 @@ private fun ReadOnlyTextField(
 private fun ReadOnlyTextFieldPreview() {
     MaterialTheme {
         BaseTextField(
-            text = "This is a text",
+            text = "This is a read-only text field",
             onValueChange = {},
             isEditable = false,
             label = "Title",
@@ -307,7 +296,7 @@ private fun BaseTextFieldPreview() {
             label = "Title",
             placeholder = "Enter Value",
             supportingText = "A Description",
-            isError = true,
+            isError = false,
             isRequired = true,
             singleLine = false,
             trailingIcon = Icons.Rounded.TextFields,
