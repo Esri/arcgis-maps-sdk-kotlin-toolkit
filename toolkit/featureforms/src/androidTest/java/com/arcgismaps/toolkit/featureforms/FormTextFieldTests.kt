@@ -30,7 +30,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.test.printToLog
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.data.QueryParameters
@@ -180,8 +179,6 @@ class FormTextFieldTests {
         outlinedTextField.assertIsFocused()
         val label = composeTestRule.onNodeWithContentDescription(labelSemanticLabel)
         label.assertIsDisplayed()
-
-        outlinedTextField.printToLog("TAG")
         
         composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true).assertDoesNotExist()
         
