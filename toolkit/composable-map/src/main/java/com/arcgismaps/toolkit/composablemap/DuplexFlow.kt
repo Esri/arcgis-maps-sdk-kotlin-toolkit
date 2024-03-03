@@ -41,6 +41,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
  *
  * Use the factory function MutableDuplexFlow(initialValue: T) to create an instance.
  */
+@Deprecated("Deprecated without replacement")
 public interface DuplexFlow<T> {
 
     /**
@@ -72,11 +73,13 @@ public interface DuplexFlow<T> {
 /**
  * A mutable [DuplexFlow] that provides a setter for the value of each [DuplexFlow.Type].
  */
+@Deprecated("Deprecated without replacement")
 public interface MutableDuplexFlow<T> : DuplexFlow<T> {
 
     /**
      * Sets the current value for the [flowType].
      */
+    @Deprecated("Deprecated without replacement")
     public fun setValue(value: T, flowType: DuplexFlow.Type)
 }
 
@@ -84,6 +87,7 @@ public interface MutableDuplexFlow<T> : DuplexFlow<T> {
  * Creates a [MutableDuplexFlow] with the given [initialValue]. The [initialValue] is set for
  * both the [DuplexFlow.Type]'s.
  */
+@Deprecated("Deprecated without replacement")
 @Suppress("FunctionName")
 public fun <T> MutableDuplexFlow(initialValue: T): MutableDuplexFlow<T> = DuplexFlowImpl(initialValue)
 

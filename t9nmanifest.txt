@@ -1,0 +1,2 @@
+toolkit/authentication/src/main/res/values/strings.xml
+toolkit/indoors/src/main/res/values/strings.xml

@@ -56,7 +56,7 @@
 
                 <data
                     android:host="auth"
-                    android:scheme="my-ags-app" />
+                    android:scheme="kotlin-toolkit-authenticator-microapp" />
             </intent-filter>
         </activity>
     </application>

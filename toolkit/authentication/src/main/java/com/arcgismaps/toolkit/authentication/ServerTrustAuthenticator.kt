@@ -48,7 +48,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 internal fun ServerTrustAuthenticator(
     serverTrustChallenge: ServerTrustChallenge,
-    modifier: Modifier
+    modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier

@@ -19,6 +19,7 @@
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
+    id("artifact-deploy")
 }
 
 android {
@@ -63,6 +64,7 @@ android {
 
 dependencies {
     api(arcgis.mapsSdk)
+    implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)

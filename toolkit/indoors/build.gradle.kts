@@ -46,6 +46,7 @@ android {
 
 dependencies {
     api(arcgis.mapsSdk)
+    implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -53,5 +54,6 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
+    androidTestImplementation(project(mapOf("path" to ":composable-map")))
     debugImplementation(libs.bundles.debug)
 }
