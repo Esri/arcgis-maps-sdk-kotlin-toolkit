@@ -23,13 +23,13 @@ import androidx.lifecycle.ViewModelProvider
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
-import com.arcgismaps.toolkit.composablemap.MapState
-import com.arcgismaps.toolkit.composablemap.MapStateImpl
+import com.arcgismaps.toolkit.composablemap.MapInterface
+import com.arcgismaps.toolkit.composablemap.MapInterfaceImpl
 import kotlinx.coroutines.CoroutineScope
 
 class MapViewModel(
     arcGISMap: ArcGISMap
-) : ViewModel(), MapState by MapStateImpl(arcGISMap) {
+) : ViewModel(), MapInterface by MapInterfaceImpl(arcGISMap) {
     
     context(MapView, CoroutineScope) override fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {
         // example of how to add a tap handler with a MapView and CoroutineScope in context.

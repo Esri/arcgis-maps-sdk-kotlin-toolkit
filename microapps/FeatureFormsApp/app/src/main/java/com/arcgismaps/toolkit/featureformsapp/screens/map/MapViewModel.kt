@@ -17,7 +17,8 @@ import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
-import com.arcgismaps.toolkit.composablemap.MapState
+import com.arcgismaps.toolkit.composablemap.MapInterface
+import com.arcgismaps.toolkit.composablemap.MapInterfaceImpl
 import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -75,7 +76,7 @@ class MapViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val portalItemRepository: PortalItemRepository
 ) : ViewModel(),
-    MapState by MapState() {
+    MapInterface by MapInterfaceImpl(ArcGISMap()) {
     private val itemId: String = savedStateHandle["uri"]!!
     lateinit var portalItem: PortalItem
 
