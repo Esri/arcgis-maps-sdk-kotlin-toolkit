@@ -40,10 +40,10 @@ class ComposableMapTests {
 
     @Test
     fun testComposableMapLayout() {
-        val mockMapInterface = MapState(ArcGISMap())
+        val mockMapInterface = MapInterface(ArcGISMap())
 
         composeTestRule.setContent {
-            ComposableMap(mapState = mockMapInterface) {
+            ComposableMap(mapInterface = mockMapInterface) {
                 Card(modifier = Modifier.semantics { contentDescription = "Card" }) {}
             }
         }
