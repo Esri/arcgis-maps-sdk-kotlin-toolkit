@@ -101,7 +101,7 @@ FeatureForm(
 
 #### Text Fields
 - Outline color - `MaterialTheme.colorScheme.outline`
-- Label TextStyle - `MaterialTheme.typography.bodyMedium`
+- Label TextStyle - `MaterialTheme.typography.bodySmall`
 - Input TextStyle - `MaterialTheme.typography.bodyLarge`
 - SupportingText TextStyle - `MaterialTheme.typography.bodySmall`
 - Error color - `MaterialTheme.colorScheme.error`
@@ -121,6 +121,8 @@ FeatureForm(
 - Description TextStyle - `MaterialTheme.typography.bodySmall`
 
 #### Read-Only Fields
-Alpha values for read only fields cannot be customized at this time.
+- Label TextStyle - `MaterialTheme.typography.bodyMedium`
+- Input TextStyle - `MaterialTheme.typography.bodyLarge`
+- SupportingText TextStyle - `MaterialTheme.typography.bodySmall`
 
 More information on the material 3 specs [here](https://m3.material.io/components/text-fields/specs#e4964192-72ad-414f-85b4-4b4357abb83c)

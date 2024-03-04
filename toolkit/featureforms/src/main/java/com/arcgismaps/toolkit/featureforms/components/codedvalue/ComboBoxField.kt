@@ -96,23 +96,17 @@ internal fun ComboBoxField(
     val isEditable by state.isEditable.collectAsState()
     val isRequired by state.isRequired.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
-    val label = remember(isRequired) {
-        if (isRequired) {
-            "${state.label} *"
-        } else {
-            state.label
-        }
-    }
     val placeholder = if (isRequired) {
         stringResource(R.string.enter_value)
     } else if (state.showNoValueOption == FormInputNoValueOption.Show) {
         state.noValueLabel.ifEmpty { stringResource(R.string.no_value) }
     } else ""
-    // show if any errors are present as the supporting text with the error color
-    val (supportingText, supportingTextColor) = if (value.error is ValidationErrorState.NoError) {
-        Pair(state.description, Color.Unspecified)
+    val isError = value.error !is ValidationErrorState.NoError
+    // if any errors are present, show the error as the supporting text
+    val supportingText = if (!isError) {
+        state.description
     } else {
-        Pair(value.error.getString(), MaterialTheme.colorScheme.error)
+        value.error.getString()
     }
 
     BaseTextField(
@@ -126,17 +120,13 @@ internal fun ComboBoxField(
         modifier = modifier,
         readOnly = true,
         isEditable = isEditable,
-        label = label,
+        label = state.label,
         placeholder = placeholder,
+        supportingText = supportingText,
+        isError = isError,
+        isRequired = isRequired,
         singleLine = true,
         trailingIcon = Icons.Outlined.List,
-        supportingText = {
-            Text(
-                text = supportingText,
-                color = supportingTextColor,
-                modifier = Modifier.semantics { contentDescription = "supporting text" }
-            )
-        },
         interactionSource = interactionSource,
         onFocusChange = state::onFocusChanged,
         trailingContent = if (isRequired) {

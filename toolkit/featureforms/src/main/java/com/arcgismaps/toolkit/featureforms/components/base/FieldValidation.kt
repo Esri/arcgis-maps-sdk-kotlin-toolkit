@@ -17,25 +17,27 @@
 package com.arcgismaps.toolkit.featureforms.components.base
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.res.stringResource
 import com.arcgismaps.toolkit.featureforms.R
 
 internal sealed class ValidationErrorState(
     private vararg val formatArgs: Any
 ) {
-    object NoError : ValidationErrorState()
-    object Required : ValidationErrorState()
+    data object NoError : ValidationErrorState()
+    data object Required : ValidationErrorState()
     class MinMaxCharConstraint(min: Int, max: Int) : ValidationErrorState(min, max)
     class ExactCharConstraint(length: Int) : ValidationErrorState(length)
     class MaxCharConstraint(max: Int) : ValidationErrorState(max)
     class MinNumericConstraint(min: String) : ValidationErrorState(min)
     class MaxNumericConstraint(max: String) : ValidationErrorState(max)
     class MinMaxNumericConstraint(min: String, max: String) : ValidationErrorState(min, max)
-    object NotANumber : ValidationErrorState()
-    object NotAWholeNumber : ValidationErrorState()
-    object NotInCodedValueDomain : ValidationErrorState()
-    object NullNotAllowed : ValidationErrorState()
+    data object NotANumber : ValidationErrorState()
+    data object NotAWholeNumber : ValidationErrorState()
+    data object NotInCodedValueDomain : ValidationErrorState()
+    data object NullNotAllowed : ValidationErrorState()
 
+    @ReadOnlyComposable
     @Composable
     open fun getString(): String {
         return when (this) {

@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -42,6 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.toolkit.featureforms.R
+import com.arcgismaps.toolkit.featureforms.components.base.BaseTextField
 
 @Composable
 internal fun RadioButtonField(
@@ -49,22 +49,36 @@ internal fun RadioButtonField(
     modifier: Modifier = Modifier,
     colors: RadioButtonFieldColors = RadioButtonFieldDefaults.colors()
 ) {
+    val value by state.value
     val editable by state.isEditable.collectAsState()
     val required by state.isRequired.collectAsState()
     val noValueLabel = state.noValueLabel.ifEmpty { stringResource(R.string.no_value) }
-    RadioButtonField(
-        label = state.label,
-        description = state.description,
-        valueProvider = { state.value.value.data },
-        editable = editable,
-        required = required,
-        codedValues = state.codedValues.associateBy({ it.code }, { it.name }),
-        showNoValueOption = state.showNoValueOption,
-        noValueLabel = noValueLabel,
-        modifier = modifier,
-        colors = colors
-    ) {
-        state.onValueChanged(it)
+    if (editable) {
+        RadioButtonField(
+            label = state.label,
+            description = state.description,
+            value = value.data,
+            required = required,
+            codedValues = state.codedValues.associateBy({ it.code }, { it.name }),
+            showNoValueOption = state.showNoValueOption,
+            noValueLabel = noValueLabel,
+            modifier = modifier,
+            colors = colors
+        ) {
+            state.onValueChanged(it)
+        }
+    } else {
+        BaseTextField(
+            text = state.getNameForCodedValue(value.data),
+            onValueChange = {},
+            isEditable = false,
+            label = state.label,
+            placeholder = state.placeholder,
+            supportingText = state.description,
+            isError = false,
+            isRequired = required,
+            singleLine = true
+        )
     }
 }
 
@@ -72,8 +86,7 @@ internal fun RadioButtonField(
 private fun RadioButtonField(
     label: String,
     description: String,
-    valueProvider: () -> Any?,
-    editable: Boolean,
+    value: Any?,
     required: Boolean,
     codedValues: Map<Any?, String>,
     showNoValueOption: FormInputNoValueOption,
@@ -82,7 +95,6 @@ private fun RadioButtonField(
     colors: RadioButtonFieldColors = RadioButtonFieldDefaults.colors(),
     onValueChanged: (Any?) -> Unit = {}
 ) {
-    val value = valueProvider()
     val options = if (!required) {
         if (showNoValueOption == FormInputNoValueOption.Show) {
             mapOf(null to noValueLabel) + codedValues
@@ -120,7 +132,6 @@ private fun RadioButtonField(
                     RadioButtonRow(
                         value = name,
                         selected = code == value || (name == noValueLabel && value == null),
-                        enabled = editable,
                         onClick = { onValueChanged(code) }
                     )
                 }
@@ -140,7 +151,6 @@ private fun RadioButtonField(
 private fun RadioButtonRow(
     value: String,
     selected: Boolean,
-    enabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -149,7 +159,6 @@ private fun RadioButtonRow(
             .fillMaxWidth()
             .selectable(
                 selected = selected,
-                enabled = enabled,
                 role = Role.RadioButton,
                 onClick = onClick,
             )
@@ -160,7 +169,6 @@ private fun RadioButtonRow(
         RadioButton(
             selected = selected,
             onClick = null,
-            enabled = enabled
         )
         Text(
             text = value
@@ -175,8 +183,7 @@ private fun RadioButtonFieldPreview() {
         RadioButtonField(
             label = "A list of values",
             description = "Description",
-            valueProvider = { "" },
-            editable = true,
+            value = "One",
             required = true,
             codedValues = mapOf(
                 "One" to "One",

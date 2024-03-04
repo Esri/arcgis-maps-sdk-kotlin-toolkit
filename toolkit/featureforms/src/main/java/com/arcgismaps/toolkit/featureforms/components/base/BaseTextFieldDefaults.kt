@@ -30,31 +30,14 @@ import androidx.compose.ui.graphics.Color
  */
 @Composable
 internal fun baseTextFieldColors(
-    isEditable: Boolean,
     isEmpty: Boolean,
     isPlaceholderEmpty: Boolean,
 ): TextFieldColors {
-    val textColor = defaultTextColor(isEditable = isEditable, isEmpty = isEmpty, isPlaceholderEmpty = isPlaceholderEmpty)
-    return if (isEditable) {
-        OutlinedTextFieldDefaults.colors(
-            focusedTextColor = textColor,
-            unfocusedTextColor = textColor
-        )
-    } else {
-        // non editable field colors are similar to disabled field colors.
-        val disabledColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-        val outlineColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
-        OutlinedTextFieldDefaults.colors(
-            focusedLabelColor = disabledColor,
-            unfocusedLabelColor = disabledColor,
-            focusedSupportingTextColor = disabledColor,
-            unfocusedSupportingTextColor = disabledColor,
-            focusedTextColor = textColor,
-            unfocusedTextColor = textColor,
-            focusedBorderColor = outlineColor,
-            unfocusedBorderColor = outlineColor,
-        )
-    }
+    val textColor = defaultTextColor(isEmpty = isEmpty, isPlaceholderEmpty = isPlaceholderEmpty)
+    return OutlinedTextFieldDefaults.colors(
+        focusedTextColor = textColor,
+        unfocusedTextColor = textColor
+    )
 }
 
 /**
@@ -62,17 +45,13 @@ internal fun baseTextFieldColors(
  */
 @Composable
 internal fun defaultTextColor(
-    isEditable: Boolean,
     isEmpty: Boolean,
     isPlaceholderEmpty: Boolean,
-) : Color {
+): Color {
     val baseColor = MaterialTheme.colorScheme.onSurface
     return if ((isEmpty && !isPlaceholderEmpty)) {
         // if placeholder is visible, make it lighter than the actual input text color
         baseColor.copy(alpha = 0.6f)
-    } else if (!isEditable) {
-        // if disabled
-        baseColor.copy(alpha = 0.38f)
     } else {
         // input text color
         baseColor

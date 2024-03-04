@@ -115,8 +115,7 @@ class FormTextFieldTests {
         val label = composeTestRule.onNodeWithContentDescription(labelSemanticLabel)
         label.assertIsDisplayed()
         
-        val supportingText = composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true)
-        supportingText.assertExists()
+        composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true).assertDoesNotExist()
     }
     
     /**
@@ -134,9 +133,7 @@ class FormTextFieldTests {
         val label = composeTestRule.onNodeWithContentDescription(labelSemanticLabel)
         label.assertIsDisplayed()
         
-        val supportingText = composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true)
-        supportingText.assertExists()
-        assertEquals(field.description, supportingText.getTextString())
+        composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true).assertDoesNotExist()
     }
     
     /**
@@ -155,9 +152,7 @@ class FormTextFieldTests {
         val label = composeTestRule.onNodeWithContentDescription(labelSemanticLabel)
         label.assertIsDisplayed()
         
-        val supportingText = composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true)
-        supportingText.assertExists()
-        assertEquals(field.description, supportingText.getTextString())
+        composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true).assertDoesNotExist()
         
         val charCountNode =
             composeTestRule.onNode(hasContentDescription(charCountSemanticLabel), useUnmergedTree = true)
@@ -185,9 +180,7 @@ class FormTextFieldTests {
         val label = composeTestRule.onNodeWithContentDescription(labelSemanticLabel)
         label.assertIsDisplayed()
         
-        val supportingText = composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true)
-        supportingText.assertExists()
-        assertEquals(field.description, supportingText.getTextString())
+        composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true).assertDoesNotExist()
         
         outlinedTextField.performImeAction()
         outlinedTextField.assertIsNotFocused()
