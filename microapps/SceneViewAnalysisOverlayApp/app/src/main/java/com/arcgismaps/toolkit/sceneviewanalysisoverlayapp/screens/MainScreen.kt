@@ -50,6 +50,12 @@ import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.OrbitLocationCameraController
 import com.arcgismaps.toolkit.geocompose.SceneView
 
+/**
+ * Displays a composable [SceneView] with an [AnalysisOverlay] and a [GraphicsOverlay].
+ * The [AnalysisOverlay] is used to display a [LocationViewshed] and the [GraphicsOverlay]
+ * is used to display a [Graphic] at the location for the observer of the [LocationViewshed]. Using
+ * the [Switch] in the [TopAppBar] the [AnalysisOverlay] can be toggled on and off.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
