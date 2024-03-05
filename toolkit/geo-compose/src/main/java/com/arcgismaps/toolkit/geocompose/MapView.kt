@@ -37,6 +37,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.geometry.GeometryEngine
+import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.Polygon
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISMap
@@ -422,7 +424,16 @@ private fun ViewpointHandler(
     var persistedViewpoint by rememberSaveable(
         saver = Saver(
             save = {
-                it.value?.toJson() ?: "null"
+                val viewpoint = it.value ?: return@Saver null
+                val normalized = GeometryEngine.normalizeCentralMeridian(viewpoint.targetGeometry)
+                    ?.let { center ->
+                        Viewpoint(
+                            center = center as Point,
+                            scale = viewpoint.targetScale,
+                            rotation = viewpoint.rotation
+                        )
+                    }
+                normalized?.toJson()
             },
             restore = {
                 mutableStateOf(Viewpoint.fromJsonOrNull(it))
@@ -438,21 +449,28 @@ private fun ViewpointHandler(
             mapView.viewpointChanged.collect {
                 persistedViewpoint = when (currentViewpointPersistence) {
                     is ViewpointPersistence.None -> null
-                    is ViewpointPersistence.ByCenterAndScale -> mapView.getCurrentViewpoint(ViewpointType.CenterAndScale)
-                    is ViewpointPersistence.ByBoundingGeometry -> mapView.getCurrentViewpoint(ViewpointType.BoundingGeometry)
+                    is ViewpointPersistence.ByCenterAndScale -> mapView.getCurrentViewpoint(
+                        ViewpointType.CenterAndScale
+                    )
+
+                    is ViewpointPersistence.ByBoundingGeometry -> mapView.getCurrentViewpoint(
+                        ViewpointType.BoundingGeometry
+                    )
                 }
 
                 currentOnViewpointChangedForCenterAndScale?.let { callback ->
-                    val currentViewpoint = if (persistedViewpoint?.viewpointType != ViewpointType.CenterAndScale) {
-                        mapView.getCurrentViewpoint(ViewpointType.CenterAndScale)
-                    } else persistedViewpoint
+                    val currentViewpoint =
+                        if (persistedViewpoint?.viewpointType != ViewpointType.CenterAndScale) {
+                            mapView.getCurrentViewpoint(ViewpointType.CenterAndScale)
+                        } else persistedViewpoint
                     currentViewpoint?.let(callback)
                 }
 
                 currentOnViewpointChangedForBoundingGeometry?.let { callback ->
-                    val currentViewpoint = if (persistedViewpoint?.viewpointType != ViewpointType.BoundingGeometry) {
-                        mapView.getCurrentViewpoint(ViewpointType.BoundingGeometry)
-                    } else persistedViewpoint
+                    val currentViewpoint =
+                        if (persistedViewpoint?.viewpointType != ViewpointType.BoundingGeometry) {
+                            mapView.getCurrentViewpoint(ViewpointType.BoundingGeometry)
+                        } else persistedViewpoint
                     currentViewpoint?.let(callback)
                 }
 
