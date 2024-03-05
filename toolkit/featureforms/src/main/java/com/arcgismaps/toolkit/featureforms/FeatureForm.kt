@@ -173,7 +173,6 @@ private fun FeatureFormBody(
                             // other form elements are not created
                         }
                     }
-                    Divider()
                 }
             }
         }
