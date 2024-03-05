@@ -3,6 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("artifact-deploy")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    alias(libs.plugins.binary.compatibility.validator) apply true
 }
 
 secrets {
@@ -49,6 +50,27 @@ android {
         }
     }
 }
+
+apiValidation {
+    ignoredClasses.add("com.arcgismaps.toolkit.featureforms.BuildConfig")
+    // todo: remove when this is resolved https://github.com/Kotlin/binary-compatibility-validator/issues/74
+    // compose compiler generates public singletons for internal compose functions. this may be resolved in the compose
+    // compiler.
+    val composableSingletons = listOf(
+        "com.arcgismaps.toolkit.featureforms.components.base.ComposableSingletons\$BaseTextFieldKt",
+        "com.arcgismaps.toolkit.featureforms.components.codedvalue.ComposableSingletons\$ComboBoxFieldKt",
+        "com.arcgismaps.toolkit.featureforms.components.codedvalue.ComposableSingletons\$RadioButtonFieldKt",
+        "com.arcgismaps.toolkit.featureforms.components.datetime.ComposableSingletons\$DateTimeFieldKt",
+        "com.arcgismaps.toolkit.featureforms.components.datetime.picker.ComposableSingletons\$DateTimePickerKt",
+        "com.arcgismaps.toolkit.featureforms.components.datetime.picker.date.ComposableSingletons\$DatePickerKt",
+        "com.arcgismaps.toolkit.featureforms.components.datetime.picker.time.ComposableSingletons\$TimePickerKt",
+        "com.arcgismaps.toolkit.featureforms.components.formelement.ComposableSingletons\$AttachmentFormElementKt",
+        "com.arcgismaps.toolkit.featureforms.components.formelement.ComposableSingletons\$GroupElementKt"
+    )
+    
+    ignoredClasses.addAll(composableSingletons)
+}
+
 
 dependencies {
     api(arcgis.mapsSdk)
