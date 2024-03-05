@@ -30,8 +30,36 @@ package com.arcgismaps.toolkit.geocompose
  *
  * @since 200.4.0
  */
-public enum class MapViewpointPersistence {
-    None,
-    ByCenterAndScale,
-    ByBoundingGeometry
+public sealed class ViewpointPersistence {
+    public object None : ViewpointPersistence()
+
+    /**
+     * The viewpoint is persisted by its center and scale.
+     *
+     * @see ViewpointPersistence
+     * @since 200.4.0
+     */
+    public class ByCenterAndScale : ViewpointPersistence() {
+        override fun hashCode(): Int {
+            return 1
+        }
+        override fun equals(other: Any?): Boolean {
+            return other is ByCenterAndScale
+        }
+    }
+
+    /**
+     * The viewpoint is persisted by its bounding geometry.
+     *
+     * @see ViewpointPersistence
+     * @since 200.4.0
+     */
+    public class ByBoundingGeometry : ViewpointPersistence() {
+        override fun hashCode(): Int {
+            return 1
+        }
+        override fun equals(other: Any?): Boolean {
+            return other is ByBoundingGeometry
+        }
+    }
 }

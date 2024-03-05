@@ -90,7 +90,7 @@ import kotlinx.coroutines.launch
  * @param grid represents the display of a coordinate system [Grid] on the composable MapView
  * @param backgroundGrid the default color and context grid behind the map surface
  * @param wrapAroundMode the [WrapAroundMode] to specify whether continuous panning across the international date line is enabled
- * @param viewpointPersistence the [MapViewpointPersistence] to specify how the viewpoint of the composable MapView is persisted
+ * @param viewpointPersistence the [ViewpointPersistence] to specify how the viewpoint of the composable MapView is persisted
  * across configuration changes.
  * @param isAttributionBarVisible true if attribution bar is visible in the composable MapView, false otherwise
  * @param onAttributionTextChanged lambda invoked when the attribution text of the composable MapView has changed
@@ -139,7 +139,7 @@ public fun MapView(
     grid: Grid? = null,
     backgroundGrid: BackgroundGrid = remember { BackgroundGrid() },
     wrapAroundMode: WrapAroundMode = WrapAroundMode.EnabledWhenSupported,
-    viewpointPersistence: MapViewpointPersistence = MapViewpointPersistence.ByCenterAndScale,
+    viewpointPersistence: ViewpointPersistence = remember { ViewpointPersistence.ByCenterAndScale() },
     isAttributionBarVisible: Boolean = true,
     onAttributionTextChanged: ((String) -> Unit)? = null,
     onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)? = null,
@@ -406,7 +406,7 @@ private fun MapViewEventHandler(
 @Composable
 private fun ViewpointHandler(
     mapView: MapView,
-    viewpointPersistence: MapViewpointPersistence,
+    viewpointPersistence: ViewpointPersistence,
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)?,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)?,
     onVisibleAreaChanged: ((Polygon) -> Unit)?
@@ -437,9 +437,9 @@ private fun ViewpointHandler(
         launch {
             mapView.viewpointChanged.collect {
                 var currentViewpoint = when (currentViewpointPersistence) {
-                    MapViewpointPersistence.None -> null
-                    MapViewpointPersistence.ByCenterAndScale -> mapView.getCurrentViewpoint(ViewpointType.CenterAndScale)
-                    MapViewpointPersistence.ByBoundingGeometry -> mapView.getCurrentViewpoint(ViewpointType.BoundingGeometry)
+                    is ViewpointPersistence.None -> null
+                    is ViewpointPersistence.ByCenterAndScale -> mapView.getCurrentViewpoint(ViewpointType.CenterAndScale)
+                    is ViewpointPersistence.ByBoundingGeometry -> mapView.getCurrentViewpoint(ViewpointType.BoundingGeometry)
                 }
                 persistedViewpoint = currentViewpoint
 
@@ -468,15 +468,15 @@ private fun ViewpointHandler(
             snapshotFlow { currentViewpointPersistence }
                 .collect {
                     persistedViewpoint = when (it) {
-                        MapViewpointPersistence.None -> {
+                        is ViewpointPersistence.None -> {
                             null
                         }
 
-                        MapViewpointPersistence.ByCenterAndScale -> {
+                        is ViewpointPersistence.ByCenterAndScale -> {
                             mapView.getCurrentViewpoint(ViewpointType.CenterAndScale)
                         }
 
-                        MapViewpointPersistence.ByBoundingGeometry -> {
+                        is ViewpointPersistence.ByBoundingGeometry -> {
                             mapView.getCurrentViewpoint(ViewpointType.BoundingGeometry)
                         }
                     }
