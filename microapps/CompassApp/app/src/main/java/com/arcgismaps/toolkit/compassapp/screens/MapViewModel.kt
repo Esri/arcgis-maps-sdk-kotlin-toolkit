@@ -22,12 +22,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.toolkit.composablemap.MapInsets
-import com.arcgismaps.toolkit.composablemap.MapState
+import com.arcgismaps.toolkit.composablemap.MapInterface
 
 class MapViewModel(
     arcGISMap: ArcGISMap,
     mapInsets: MapInsets = MapInsets()
-) : ViewModel(), MapState by MapState(arcGISMap, mapInsets)
+) : ViewModel(), MapInterface by MapInterface(arcGISMap, mapInsets)
 
 class MapViewModelFactory(
     private val arcGISMap: ArcGISMap,

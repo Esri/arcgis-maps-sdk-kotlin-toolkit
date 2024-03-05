@@ -133,7 +133,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize(),
-            mapState = mapViewModel
+            mapInterface = mapViewModel
         )
         AnimatedVisibility(
             visible = featureForm != null,

@@ -34,7 +34,7 @@ fun MainScreen() {
     val mapViewModel = viewModel<MapViewModel>(factory = MapViewModelFactory(map))
     ComposableMap(
         modifier = Modifier.fillMaxSize(),
-        mapState = mapViewModel
+        mapInterface = mapViewModel
     )
     
     val templateViewModel = viewModel<TemplateViewModel>(
