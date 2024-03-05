@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
-    <string name="floor_filter_view_filter_hint_sites">ґ_Filter sites…______________Ї</string>
-    <string name="floor_filter_view_filter_hint_facilities">ґ_Filter facilities…___________________Ї</string>
-    <string name="floor_filter_select_site">ґ_Select a site______________Ї</string>
-    <string name="floor_filter_select_facility">ґ_Select a facility__________________Ї</string>
-    <string name="floor_filter_no_results">ґ_No results found__________________Ї.</string>
-    <string name="floor_filter_site_selector_top_bar">ґ_Site\u0020-\u0020__________________Ї</string>
+    <string name="floor_filter_view_filter_hint_sites">Фільтр сайтів...</string>
+    <string name="floor_filter_view_filter_hint_facilities">Фільтр пунктів обслуговування...</string>
+    <string name="floor_filter_select_site">Вибрати сайт</string>
+    <string name="floor_filter_select_facility">Вибрати пункт обслуговування</string>
+    <string name="floor_filter_no_results">Результати не знайдено.</string>
+    <string name="floor_filter_site_selector_top_bar">Site\u0020-\u0020</string>
 </resources>

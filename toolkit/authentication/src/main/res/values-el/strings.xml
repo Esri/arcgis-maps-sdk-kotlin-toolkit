@@ -15,11 +15,11 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">π_The certificate provided by %1$s is not signed by a trusted authority____________________________________Ω.</string>
-    <string name="cancel">π_Cancel_____________Ω</string>
-    <string name="allow_connection">π_Dangerous: Allow Connection____________________________Ω</string>
-    <string name="username_password_login_message">π_Please login to %1$s_____________________Ω</string>
-    <string name="username_label">π_Username_________________Ω</string>
-    <string name="password_label">π_Password_________________Ω</string>
-    <string name="login">π_Login___________Ω</string>
+    <string name="server_trust_message">Το παρεχόμενο πιστοποιητικό από το %1$s δεν έχει υπογραφεί από αξιόπιστη αρχή.</string>
+    <string name="cancel">Ακύρωση</string>
+    <string name="allow_connection">Κίνδυνος: Επιτρέψτε τη σύνδεση</string>
+    <string name="username_password_login_message">Συνδεθείτε στο %1$s</string>
+    <string name="username_label">Όνομα χρήστη</string>
+    <string name="password_label">Κωδικός πρόσβασης</string>
+    <string name="login">Σύνδεση</string>
 </resources>

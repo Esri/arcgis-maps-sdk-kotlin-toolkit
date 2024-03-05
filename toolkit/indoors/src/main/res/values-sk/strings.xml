@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
-    <string name="floor_filter_view_filter_hint_sites">ĺ_Filter sites…______________ľ</string>
-    <string name="floor_filter_view_filter_hint_facilities">ĺ_Filter facilities…___________________ľ</string>
-    <string name="floor_filter_select_site">ĺ_Select a site______________ľ</string>
-    <string name="floor_filter_select_facility">ĺ_Select a facility__________________ľ</string>
-    <string name="floor_filter_no_results">ĺ_No results found__________________ľ.</string>
-    <string name="floor_filter_site_selector_top_bar">ĺ_Site\u0020-\u0020__________________ľ</string>
+    <string name="floor_filter_view_filter_hint_sites">Filtrovať lokality...</string>
+    <string name="floor_filter_view_filter_hint_facilities">Filtrovať zariadenia...</string>
+    <string name="floor_filter_select_site">Vyberte lokalitu</string>
+    <string name="floor_filter_select_facility">Vyberte zariadenie</string>
+    <string name="floor_filter_no_results">Neboli nájdené žiadne výsledky.</string>
+    <string name="floor_filter_site_selector_top_bar">Site\u0020-\u0020</string>
 </resources>

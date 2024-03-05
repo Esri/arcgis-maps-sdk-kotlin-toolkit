@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
-    <string name="floor_filter_view_filter_hint_sites">ı_Filter sites…______________İ</string>
-    <string name="floor_filter_view_filter_hint_facilities">ı_Filter facilities…___________________İ</string>
-    <string name="floor_filter_select_site">ı_Select a site______________İ</string>
-    <string name="floor_filter_select_facility">ı_Select a facility__________________İ</string>
-    <string name="floor_filter_no_results">ı_No results found__________________İ.</string>
-    <string name="floor_filter_site_selector_top_bar">ı_Site\u0020-\u0020__________________İ</string>
+    <string name="floor_filter_view_filter_hint_sites">Siteleri filtrele...</string>
+    <string name="floor_filter_view_filter_hint_facilities">Tesisleri filtrele...</string>
+    <string name="floor_filter_select_site">Bir site seç</string>
+    <string name="floor_filter_select_facility">Bir tesis seç</string>
+    <string name="floor_filter_no_results">Herhangi bir sonuç bulunamadı.</string>
+    <string name="floor_filter_site_selector_top_bar">Site\u0020-\u0020</string>
 </resources>

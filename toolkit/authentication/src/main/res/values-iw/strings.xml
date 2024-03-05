@@ -15,11 +15,11 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">כן_The certificate provided by %1$s is not signed by a trusted authority____________________________________ש.</string>
-    <string name="cancel">כן_Cancel_____________ש</string>
-    <string name="allow_connection">כן_Dangerous: Allow Connection____________________________ש</string>
-    <string name="username_password_login_message">כן_Please login to %1$s_____________________ש</string>
-    <string name="username_label">כן_Username_________________ש</string>
-    <string name="password_label">כן_Password_________________ש</string>
-    <string name="login">כן_Login___________ש</string>
+    <string name="server_trust_message">האישור שסופק על ידי %1$s לא חתום על ידי רשות מהימנה.</string>
+    <string name="cancel">ביטול</string>
+    <string name="allow_connection">מסוכן: הרשה חיבור</string>
+    <string name="username_password_login_message">היכנס אל %1$s</string>
+    <string name="username_label">שם משתמש</string>
+    <string name="password_label">סיסמה</string>
+    <string name="login">כניסה</string>
 </resources>

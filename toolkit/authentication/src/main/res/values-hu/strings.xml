@@ -15,11 +15,11 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">í_The certificate provided by %1$s is not signed by a trusted authority____________________________________ő.</string>
-    <string name="cancel">í_Cancel_____________ő</string>
-    <string name="allow_connection">í_Dangerous: Allow Connection____________________________ő</string>
-    <string name="username_password_login_message">í_Please login to %1$s_____________________ő</string>
-    <string name="username_label">í_Username_________________ő</string>
-    <string name="password_label">í_Password_________________ő</string>
-    <string name="login">í_Login___________ő</string>
+    <string name="server_trust_message">%1$s által megadott tanúsítványt nem megbízható hatóság írta alá.</string>
+    <string name="cancel">Mégse</string>
+    <string name="allow_connection">Veszélyes: Engedélyezze a kapcsolatot</string>
+    <string name="username_password_login_message">Kérjük, jelentkezzen be: %1$s</string>
+    <string name="username_label">Felhasználónév</string>
+    <string name="password_label">Jelszó</string>
+    <string name="login">Bejelentkezés</string>
 </resources>

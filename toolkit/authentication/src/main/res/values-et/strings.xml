@@ -15,11 +15,11 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">Š_The certificate provided by %1$s is not signed by a trusted authority____________________________________ä.</string>
-    <string name="cancel">Š_Cancel_____________ä</string>
-    <string name="allow_connection">Š_Dangerous: Allow Connection____________________________ä</string>
-    <string name="username_password_login_message">Š_Please login to %1$s_____________________ä</string>
-    <string name="username_label">Š_Username_________________ä</string>
-    <string name="password_label">Š_Password_________________ä</string>
-    <string name="login">Š_Login___________ä</string>
+    <string name="server_trust_message">Serdil, mida pakub %1$s, pole usaldusväärse sertimiskeskuse allkirja.</string>
+    <string name="cancel">Tühista</string>
+    <string name="allow_connection">Ohtlik: luba ühendus</string>
+    <string name="username_password_login_message">Logige %1$s sisse</string>
+    <string name="username_label">Kasutajanimi</string>
+    <string name="password_label">Parool</string>
+    <string name="login">Sisselogimine</string>
 </resources>

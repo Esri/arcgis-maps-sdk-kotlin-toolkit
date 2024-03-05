@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
-    <string name="floor_filter_view_filter_hint_sites">한_Filter sites…______________빠</string>
-    <string name="floor_filter_view_filter_hint_facilities">한_Filter facilities…___________________빠</string>
-    <string name="floor_filter_select_site">한_Select a site______________빠</string>
-    <string name="floor_filter_select_facility">한_Select a facility__________________빠</string>
-    <string name="floor_filter_no_results">한_No results found__________________빠.</string>
-    <string name="floor_filter_site_selector_top_bar">한_Site\u0020-\u0020__________________빠</string>
+    <string name="floor_filter_view_filter_hint_sites">사이트 필터링…</string>
+    <string name="floor_filter_view_filter_hint_facilities">시설 필터링…</string>
+    <string name="floor_filter_select_site">사이트 선택</string>
+    <string name="floor_filter_select_facility">시설 선택</string>
+    <string name="floor_filter_no_results">결과를 찾을 수 없습니다.</string>
+    <string name="floor_filter_site_selector_top_bar">Site\u0020-\u0020</string>
 </resources>

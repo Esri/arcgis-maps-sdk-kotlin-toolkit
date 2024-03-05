@@ -15,11 +15,11 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">ó_The certificate provided by %1$s is not signed by a trusted authority____________________________________à.</string>
-    <string name="cancel">ó_Cancel_____________à</string>
-    <string name="allow_connection">ó_Dangerous: Allow Connection____________________________à</string>
-    <string name="username_password_login_message">ó_Please login to %1$s_____________________à</string>
-    <string name="username_label">ó_Username_________________à</string>
-    <string name="password_label">ó_Password_________________à</string>
-    <string name="login">ó_Login___________à</string>
+    <string name="server_trust_message">El certificat proporcionat per %1$s no està firmat per una autoritat de confiança.</string>
+    <string name="cancel">Cancel·la</string>
+    <string name="allow_connection">Perill: permeteu la connexió</string>
+    <string name="username_password_login_message">Inicieu la sessió a %1$s</string>
+    <string name="username_label">Nom d'usuari</string>
+    <string name="password_label">Contrasenya</string>
+    <string name="login">Inicia la sessió</string>
 </resources>

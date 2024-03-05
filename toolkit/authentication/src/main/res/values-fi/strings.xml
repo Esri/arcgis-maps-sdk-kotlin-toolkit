@@ -15,11 +15,11 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">Å_The certificate provided by %1$s is not signed by a trusted authority____________________________________ö.</string>
-    <string name="cancel">Å_Cancel_____________ö</string>
-    <string name="allow_connection">Å_Dangerous: Allow Connection____________________________ö</string>
-    <string name="username_password_login_message">Å_Please login to %1$s_____________________ö</string>
-    <string name="username_label">Å_Username_________________ö</string>
-    <string name="password_label">Å_Password_________________ö</string>
-    <string name="login">Å_Login___________ö</string>
+    <string name="server_trust_message">Luotettava valtuuttaja ei ole allekirjoittanut kohteen %1$s varmennetta.</string>
+    <string name="cancel">Peruuta</string>
+    <string name="allow_connection">Vaarallinen: salli yhteys</string>
+    <string name="username_password_login_message">Kirjaudu sisään kohteeseen %1$s</string>
+    <string name="username_label">Käyttäjänimi:</string>
+    <string name="password_label">Salasana</string>
+    <string name="login">Kirjaudu sisään</string>
 </resources>

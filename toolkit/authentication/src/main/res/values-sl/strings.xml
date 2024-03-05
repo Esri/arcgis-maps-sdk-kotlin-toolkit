@@ -15,11 +15,11 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">Š_The certificate provided by %1$s is not signed by a trusted authority____________________________________č.</string>
-    <string name="cancel">Š_Cancel_____________č</string>
-    <string name="allow_connection">Š_Dangerous: Allow Connection____________________________č</string>
-    <string name="username_password_login_message">Š_Please login to %1$s_____________________č</string>
-    <string name="username_label">Š_Username_________________č</string>
-    <string name="password_label">Š_Password_________________č</string>
-    <string name="login">Š_Login___________č</string>
+    <string name="server_trust_message">Certifikata, ki ga zagotavlja '%1$s ni podpisala zaupanja vredna ustanova.</string>
+    <string name="cancel">Prekliči</string>
+    <string name="allow_connection">Nevarno: Dovoli povezavo</string>
+    <string name="username_password_login_message">Prijavite se v %1$s</string>
+    <string name="username_label">Uporabniško ime</string>
+    <string name="password_label">Geslo</string>
+    <string name="login">Prijava</string>
 </resources>

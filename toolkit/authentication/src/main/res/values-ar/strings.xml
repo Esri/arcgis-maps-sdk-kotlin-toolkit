@@ -15,11 +15,11 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">試_The certificate provided by %1$s is not signed by a trusted authority____________________________________驗.</string>
-    <string name="cancel">試_Cancel_____________驗</string>
-    <string name="allow_connection">試_Dangerous: Allow Connection____________________________驗</string>
-    <string name="username_password_login_message">試_Please login to %1$s_____________________驗</string>
-    <string name="username_label">試_Username_________________驗</string>
-    <string name="password_label">試_Password_________________驗</string>
-    <string name="login">試_Login___________驗</string>
+    <string name="server_trust_message">الشهادة المقدمة من %1$s غير موقعة من قبل مرجع مصدق موثوق.</string>
+    <string name="cancel">إلغاء الأمر</string>
+    <string name="allow_connection">خطير: السماح بالاتصال</string>
+    <string name="username_password_login_message">الرجاء تسجيل الدخول إلى %1$s</string>
+    <string name="username_label">اسم المستخدم</string>
+    <string name="password_label">كلمة المرور</string>
+    <string name="login">تسجيل الدخول</string>
 </resources>

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
-    <string name="floor_filter_view_filter_hint_sites">ng_Filter sites…______________ny</string>
-    <string name="floor_filter_view_filter_hint_facilities">ng_Filter facilities…___________________ny</string>
-    <string name="floor_filter_select_site">ng_Select a site______________ny</string>
-    <string name="floor_filter_select_facility">ng_Select a facility__________________ny</string>
-    <string name="floor_filter_no_results">ng_No results found__________________ny.</string>
-    <string name="floor_filter_site_selector_top_bar">ng_Site\u0020-\u0020__________________ny</string>
+    <string name="floor_filter_view_filter_hint_sites">Filter situs...</string>
+    <string name="floor_filter_view_filter_hint_facilities">Filter fasilitas...</string>
+    <string name="floor_filter_select_site">Pilih situs</string>
+    <string name="floor_filter_select_facility">Pilih fasilitas</string>
+    <string name="floor_filter_no_results">Tidak ada hasil yang ditemukan.</string>
+    <string name="floor_filter_site_selector_top_bar">Situs\u0020-\u0020</string>
 </resources>

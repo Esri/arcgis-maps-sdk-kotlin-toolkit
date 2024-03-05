@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
-    <string name="floor_filter_view_filter_hint_sites">Į_Filter sites…______________š</string>
-    <string name="floor_filter_view_filter_hint_facilities">Į_Filter facilities…___________________š</string>
-    <string name="floor_filter_select_site">Į_Select a site______________š</string>
-    <string name="floor_filter_select_facility">Į_Select a facility__________________š</string>
-    <string name="floor_filter_no_results">Į_No results found__________________š.</string>
-    <string name="floor_filter_site_selector_top_bar">Į_Site\u0020-\u0020__________________š</string>
+    <string name="floor_filter_view_filter_hint_sites">Filtruoti vietas...</string>
+    <string name="floor_filter_view_filter_hint_facilities">Filtruoti įrenginius...</string>
+    <string name="floor_filter_select_site">Pasirinkti vietą</string>
+    <string name="floor_filter_select_facility">Pasirinkti įrenginį</string>
+    <string name="floor_filter_no_results">Nieko nerasta.</string>
+    <string name="floor_filter_site_selector_top_bar">Vieta\u0020-\u0020</string>
 </resources>

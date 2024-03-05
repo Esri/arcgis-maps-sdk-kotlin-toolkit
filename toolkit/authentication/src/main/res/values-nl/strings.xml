@@ -15,11 +15,11 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">Ĳ_The certificate provided by %1$s is not signed by a trusted authority____________________________________ä.</string>
-    <string name="cancel">Ĳ_Cancel_____________ä</string>
-    <string name="allow_connection">Ĳ_Dangerous: Allow Connection____________________________ä</string>
-    <string name="username_password_login_message">Ĳ_Please login to %1$s_____________________ä</string>
-    <string name="username_label">Ĳ_Username_________________ä</string>
-    <string name="password_label">Ĳ_Password_________________ä</string>
-    <string name="login">Ĳ_Login___________ä</string>
+    <string name="server_trust_message">Het door %1$s verstrekte certificaat is niet ondertekend door een vertrouwde autoriteit.</string>
+    <string name="cancel">Annuleren</string>
+    <string name="allow_connection">Gevaarlijk: verbinding toestaan</string>
+    <string name="username_password_login_message">Meld u aan bij %1$s</string>
+    <string name="username_label">Gebruikersnaam</string>
+    <string name="password_label">Wachtwoord</string>
+    <string name="login">Aanmelden</string>
 </resources>

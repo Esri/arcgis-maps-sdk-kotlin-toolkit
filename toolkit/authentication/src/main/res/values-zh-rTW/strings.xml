@@ -15,11 +15,11 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">試_The certificate provided by %1$s is not signed by a trusted authority____________________________________驗.</string>
-    <string name="cancel">試_Cancel_____________驗</string>
-    <string name="allow_connection">試_Dangerous: Allow Connection____________________________驗</string>
-    <string name="username_password_login_message">試_Please login to %1$s_____________________驗</string>
-    <string name="username_label">試_Username_________________驗</string>
-    <string name="password_label">試_Password_________________驗</string>
-    <string name="login">試_Login___________驗</string>
+    <string name="server_trust_message">%1$s 提供的憑證未經信任的機構簽署。</string>
+    <string name="cancel">取消</string>
+    <string name="allow_connection">危險: 允許連線</string>
+    <string name="username_password_login_message">請登入到 %1$s</string>
+    <string name="username_label">使用者名稱</string>
+    <string name="password_label">密碼</string>
+    <string name="login">登入</string>
 </resources>
