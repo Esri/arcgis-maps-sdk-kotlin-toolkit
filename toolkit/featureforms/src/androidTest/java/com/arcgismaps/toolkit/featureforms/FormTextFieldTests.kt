@@ -39,8 +39,8 @@ import com.arcgismaps.mapping.featureforms.FeatureFormDefinition
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.mapping.layers.FeatureLayer
-import com.arcgismaps.toolkit.featureforms.components.text.FormTextField
-import com.arcgismaps.toolkit.featureforms.components.text.rememberFormTextFieldState
+import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextField
+import com.arcgismaps.toolkit.featureforms.internal.components.text.rememberFormTextFieldState
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.fail
 import kotlinx.coroutines.test.runTest

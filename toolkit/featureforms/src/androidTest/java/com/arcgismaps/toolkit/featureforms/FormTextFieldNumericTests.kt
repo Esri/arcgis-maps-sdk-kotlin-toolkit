@@ -30,8 +30,8 @@ import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FeatureFormDefinition
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.layers.FeatureLayer
-import com.arcgismaps.toolkit.featureforms.components.text.FormTextField
-import com.arcgismaps.toolkit.featureforms.components.text.FormTextFieldState
+import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextField
+import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextFieldState
 import junit.framework.TestCase
 import kotlinx.coroutines.test.runTest
 import org.junit.BeforeClass

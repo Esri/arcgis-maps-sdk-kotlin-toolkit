@@ -39,20 +39,20 @@ import com.arcgismaps.mapping.featureforms.RadioButtonsFormInput
 import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
-import com.arcgismaps.toolkit.featureforms.components.base.BaseFieldState
-import com.arcgismaps.toolkit.featureforms.components.base.BaseGroupState
-import com.arcgismaps.toolkit.featureforms.components.base.FormStateCollection
-import com.arcgismaps.toolkit.featureforms.components.base.MutableFormStateCollection
-import com.arcgismaps.toolkit.featureforms.components.base.getState
-import com.arcgismaps.toolkit.featureforms.components.base.rememberBaseGroupState
-import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberComboBoxFieldState
-import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberRadioButtonFieldState
-import com.arcgismaps.toolkit.featureforms.components.codedvalue.rememberSwitchFieldState
-import com.arcgismaps.toolkit.featureforms.components.datetime.rememberDateTimeFieldState
-import com.arcgismaps.toolkit.featureforms.components.formelement.FieldElement
-import com.arcgismaps.toolkit.featureforms.components.formelement.GroupElement
-import com.arcgismaps.toolkit.featureforms.components.text.rememberFormTextFieldState
-import com.arcgismaps.toolkit.featureforms.utils.FeatureFormDialog
+import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
+import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseGroupState
+import com.arcgismaps.toolkit.featureforms.internal.components.base.FormStateCollection
+import com.arcgismaps.toolkit.featureforms.internal.components.base.MutableFormStateCollection
+import com.arcgismaps.toolkit.featureforms.internal.components.base.getState
+import com.arcgismaps.toolkit.featureforms.internal.components.base.rememberBaseGroupState
+import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.rememberComboBoxFieldState
+import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.rememberRadioButtonFieldState
+import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.rememberSwitchFieldState
+import com.arcgismaps.toolkit.featureforms.internal.components.datetime.rememberDateTimeFieldState
+import com.arcgismaps.toolkit.featureforms.internal.components.formelement.FieldElement
+import com.arcgismaps.toolkit.featureforms.internal.components.formelement.GroupElement
+import com.arcgismaps.toolkit.featureforms.internal.components.text.rememberFormTextFieldState
+import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
 import kotlinx.coroutines.CoroutineScope
 
 /**
