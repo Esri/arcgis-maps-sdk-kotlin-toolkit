@@ -37,6 +37,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
@@ -104,6 +106,7 @@ private fun RadioButtonField(
     Column(
         modifier = modifier
             .fillMaxWidth()
+            .semantics(mergeDescendants = true) {}
             .padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 10.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
         horizontalAlignment = Alignment.Start
@@ -115,6 +118,7 @@ private fun RadioButtonField(
                 label
             },
             style = RadioButtonFieldDefaults.labelTextStyle,
+            modifier = Modifier.semantics { contentDescription = "label" }
         )
         Column(
             modifier = Modifier
@@ -140,7 +144,10 @@ private fun RadioButtonField(
         if (description.isNotEmpty()) {
             Text(
                 text = description,
-                style = RadioButtonFieldDefaults.supportingTextStyle
+                style = RadioButtonFieldDefaults.supportingTextStyle,
+                modifier = Modifier.semantics {
+                    contentDescription = "supporting text"
+                }
             )
         }
     }
