@@ -21,7 +21,6 @@ package com.arcgismaps.toolkit.featureforms.internal.components.datetime
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.EditCalendar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -77,17 +76,13 @@ internal fun DateTimeField(
         isRequired = isRequired,
         singleLine = true,
         interactionSource = interactionSource,
-        trailingIcon = if (isEditable) Icons.Rounded.EditCalendar else Icons.Rounded.CalendarMonth,
+        trailingIcon = Icons.Rounded.EditCalendar,
         onFocusChange = state::onFocusChanged,
         trailingContent =
         if (isRequired) {
             {
                 Icon(
-                    imageVector = if (isEditable) {
-                        Icons.Rounded.EditCalendar
-                    } else {
-                        Icons.Rounded.CalendarMonth
-                    } ,
+                    imageVector = Icons.Rounded.EditCalendar,
                     contentDescription = "date time picker button"
                 )
             }
