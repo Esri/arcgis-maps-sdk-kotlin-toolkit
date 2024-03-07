@@ -141,7 +141,7 @@ public fun MapView(
     grid: Grid? = null,
     backgroundGrid: BackgroundGrid = remember { BackgroundGrid() },
     wrapAroundMode: WrapAroundMode = WrapAroundMode.EnabledWhenSupported,
-    viewpointPersistence: ViewpointPersistence = remember { ViewpointPersistence.ByCenterAndScale() },
+    viewpointPersistence: ViewpointPersistence = MapViewDefaults.DefaultViewpointPersistence,
     isAttributionBarVisible: Boolean = true,
     onAttributionTextChanged: ((String) -> Unit)? = null,
     onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)? = null,
@@ -546,4 +546,11 @@ public object MapViewDefaults {
      * @since 200.4.0
      */
     public val DefaultInsets: PaddingValues = PaddingValues()
+
+    /**
+     * Default viewpoint persistence for the composable MapView, set to [ViewpointPersistence.ByCenterAndScale].
+     *
+     * @since 200.4.0
+     */
+    public val DefaultViewpointPersistence: ViewpointPersistence = ViewpointPersistence.ByCenterAndScale()
 }
