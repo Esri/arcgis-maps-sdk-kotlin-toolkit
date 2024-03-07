@@ -495,7 +495,7 @@ private fun tryNormalizeViewpoint(viewpoint: Viewpoint): Viewpoint {
     val normalizedGeometry =
         GeometryEngine.normalizeCentralMeridian(viewpoint.targetGeometry) ?: return viewpoint
 
-    val viewpointToPersist = when (viewpoint.viewpointType) {
+    val normalizedViewpoint = when (viewpoint.viewpointType) {
         ViewpointType.CenterAndScale -> {
             Viewpoint(
                 center = normalizedGeometry as Point,
@@ -511,7 +511,7 @@ private fun tryNormalizeViewpoint(viewpoint: Viewpoint): Viewpoint {
             )
         }
     }
-    return viewpointToPersist
+    return normalizedViewpoint
 }
 
 /**
