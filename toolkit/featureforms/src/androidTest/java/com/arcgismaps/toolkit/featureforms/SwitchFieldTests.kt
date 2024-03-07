@@ -176,10 +176,13 @@ class SwitchFieldTests {
                     it.maxFeatures = 1
                 }
                 layer.featureTable?.queryFeatures(parameters)?.onSuccess { featureQueryResult ->
-                    val feature = featureQueryResult.filterIsInstance<ArcGISFeature>().firstOrNull()
+                    val feature = featureQueryResult.find {
+                        it is ArcGISFeature
+                    } as? ArcGISFeature
                     if (feature == null) TestCase.fail("failed to fetch feature")
-                    feature?.load()
-                        ?.onFailure { TestCase.fail("failed to load feature with ${it.message}") }
+                    feature?.load()?.onFailure {
+                        TestCase.fail("failed to load feature with ${it.message}")
+                    }
                     featureForm = FeatureForm(feature!!, featureFormDefinition)
                     featureForm.evaluateExpressions()
                 }?.onFailure {

@@ -76,13 +76,13 @@ class RadioButtonFieldTests {
         radioField.assert(SemanticsMatcher.expectValue(SemanticsProperties.SelectableGroup, Unit))
         // assert "no value" option is visible
         radioField.onChildWithText(input.noValueLabel.ifEmpty { context.getString(R.string.no_value) }).assertExists()
-        // check if the current value of the element is visible selected
+        // check if the current value of the element is visible and selected
         radioField.onChildWithText(radioElement.formattedValue).assertIsSelected()
         // select the "dog" option
         radioField.onChildWithText("dog").performClick()
         // assert that the selected value has persisted
         assert(radioElement.formattedValue == "dog")
-        // check if the current value of the element is visible selected
+        // check if the current value of the element is visible and selected
         radioField.onChildWithText(radioElement.formattedValue).assertIsSelected()
     }
 
@@ -109,10 +109,13 @@ class RadioButtonFieldTests {
                     it.maxFeatures = 1
                 }
                 layer.featureTable?.queryFeatures(parameters)?.onSuccess { featureQueryResult ->
-                    val feature = featureQueryResult.filterIsInstance<ArcGISFeature>().firstOrNull()
+                    val feature = featureQueryResult.find {
+                        it is ArcGISFeature
+                    } as? ArcGISFeature
                     if (feature == null) TestCase.fail("failed to fetch feature")
-                    feature?.load()
-                        ?.onFailure { TestCase.fail("failed to load feature with ${it.message}") }
+                    feature?.load()?.onFailure {
+                        TestCase.fail("failed to load feature with ${it.message}")
+                    }
                     featureForm = FeatureForm(feature!!, featureFormDefinition)
                     featureForm.evaluateExpressions()
                 }?.onFailure {
