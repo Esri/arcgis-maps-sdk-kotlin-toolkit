@@ -89,10 +89,10 @@ fun MainScreen() {
         },
     ) { paddingValues ->
         MapView(
+            identifyViewModel.arcGISMap,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            arcGISMap = identifyViewModel.arcGISMap,
             mapViewProxy = identifyViewModel.mapViewProxy,
             onSingleTapConfirmed = identifyViewModel::identify
         )

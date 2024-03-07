@@ -120,10 +120,10 @@ fun MainScreen() {
     ) { paddingValues ->
 
         SceneView(
+            arcGISScene,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            arcGISScene = arcGISScene,
             cameraController = cameraController,
             graphicsOverlays = graphicsOverlays,
             sceneViewProxy = sceneViewProxy

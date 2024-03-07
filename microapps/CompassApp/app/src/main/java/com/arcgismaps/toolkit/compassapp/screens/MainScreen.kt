@@ -60,8 +60,8 @@ fun MainScreen() {
         modifier = Modifier.fillMaxSize()
     ) {
         MapView(
+            arcGISMap,
             modifier = Modifier.fillMaxSize(),
-            arcGISMap = arcGISMap,
             mapViewProxy = mapViewProxy,
             onMapRotationChanged = { rotation -> mapRotation = rotation }
         )

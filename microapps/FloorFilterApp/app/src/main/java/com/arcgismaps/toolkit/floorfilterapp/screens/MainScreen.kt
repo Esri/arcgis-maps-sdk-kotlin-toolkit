@@ -86,8 +86,8 @@ fun MainScreen() {
     }
 
     MapView(
+        floorAwareWebMap,
         modifier = Modifier.fillMaxSize(),
-        arcGISMap = floorAwareWebMap,
         mapViewProxy = mapViewProxy
     )
     Box(
