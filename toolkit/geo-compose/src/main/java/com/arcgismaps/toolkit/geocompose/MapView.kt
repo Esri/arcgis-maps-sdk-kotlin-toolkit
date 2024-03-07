@@ -459,7 +459,7 @@ private fun ViewpointHandler(
     }
 
     LaunchedEffect(Unit) {
-        // if there is a persisted viewpoint, restore it when the mapView enters the composition
+        // if there is a persisted viewpoint, restore it when the SceneView enters the composition
         persistedViewpoint?.let { mapView.setViewpoint(it) }
         launch {
             mapView.viewpointChanged.collect {

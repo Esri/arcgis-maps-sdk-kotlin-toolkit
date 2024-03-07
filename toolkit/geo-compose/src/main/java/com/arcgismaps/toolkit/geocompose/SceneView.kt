@@ -430,6 +430,7 @@ private fun ViewpointHandler(
     }
 
     LaunchedEffect(Unit) {
+        // if there is a persisted viewpoint, restore it when the SceneView enters the composition
         persistedCamera?.let { sceneView.setViewpointCamera(it) }
         launch {
             sceneView.viewpointChanged.collect {

@@ -36,10 +36,14 @@ public sealed class ViewpointPersistence {
     /**
      * The viewpoint is persisted by its center and scale.
      *
-     * @see ViewpointPersistence
      * @since 200.4.0
      */
     public class ByCenterAndScale : ViewpointPersistence() {
+
+        // Note: ByCenterAndScale and ByBoundingGeometry could have been defined as singletons (object) but we
+        // want to keep the possibility open to add instance state (properties) to these classes in the future,
+        // thus we had to declare them as classes. This meant we had to override hashCode and equals in order to
+        // achieve the same equality behaviour as a singleton would do.
         override fun hashCode(): Int {
             return 1
         }
@@ -51,7 +55,6 @@ public sealed class ViewpointPersistence {
     /**
      * The viewpoint is persisted by its bounding geometry.
      *
-     * @see ViewpointPersistence
      * @since 200.4.0
      */
     public class ByBoundingGeometry : ViewpointPersistence() {
