@@ -521,13 +521,12 @@ public inline fun rememberLocationDisplay(
     }
 }
 
-private fun MapView.getViewpointByPersistence(viewpointPersistence: ViewpointPersistence): Viewpoint? {
-    return when (viewpointPersistence) {
+private fun MapView.getViewpointByPersistence(viewpointPersistence: ViewpointPersistence): Viewpoint? =
+    when (viewpointPersistence) {
         is ViewpointPersistence.None -> null
         is ViewpointPersistence.ByCenterAndScale -> getCurrentViewpoint(ViewpointType.CenterAndScale)
         is ViewpointPersistence.ByBoundingGeometry -> getCurrentViewpoint(ViewpointType.BoundingGeometry)
     }
-}
 
 /**
  * Contains default values for the composable MapView.
