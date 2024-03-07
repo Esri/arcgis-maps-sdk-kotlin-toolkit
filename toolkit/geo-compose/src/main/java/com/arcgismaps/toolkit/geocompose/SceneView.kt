@@ -409,17 +409,17 @@ private fun ViewpointHandler(
                     camera.transformationMatrix.translationZ
                 )
             },
-            restore = { data ->
-                if (data.isEmpty()) return@Saver mutableStateOf(null)
+            restore = { matrixValues ->
+                if (matrixValues.isEmpty()) return@Saver mutableStateOf(null)
                 val camera = Camera(
                     TransformationMatrix.createWithQuaternionAndTranslation(
-                        quaternionX = data[0],
-                        quaternionY = data[1],
-                        quaternionZ = data[2],
-                        quaternionW = data[3],
-                        translationX = data[4],
-                        translationY = data[5],
-                        translationZ = data[6]
+                        quaternionX = matrixValues[0],
+                        quaternionY = matrixValues[1],
+                        quaternionZ = matrixValues[2],
+                        quaternionW = matrixValues[3],
+                        translationX = matrixValues[4],
+                        translationY = matrixValues[5],
+                        translationZ = matrixValues[6]
                     )
                 )
                 mutableStateOf(camera)
