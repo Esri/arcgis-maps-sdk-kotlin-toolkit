@@ -24,13 +24,15 @@ package com.arcgismaps.toolkit.geocompose
  * or process recreation, for example, when the device is rotated or when the app is sent to the background
  * and then brought back to the foreground.
  *
- * - None: No viewpoint persistence is applied. The viewpoint will not be saved or restored.
- * - ByCenterAndScale: The viewpoint is persisted by its center and scale.
- * - ByBoundingGeometry: The viewpoint is persisted by its bounding geometry.
- *
  * @since 200.4.0
  */
 public sealed class ViewpointPersistence {
+
+    /**
+     * The viewpoint is not persisted.
+     *
+     * @since 200.4.0
+     */
     public object None : ViewpointPersistence()
 
     /**
