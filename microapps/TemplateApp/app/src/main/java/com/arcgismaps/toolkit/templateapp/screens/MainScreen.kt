@@ -28,20 +28,22 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.geocompose.MapView
-import com.arcgismaps.toolkit.geocompose.MapViewpointOperation
 
 @Composable
 fun MainScreen() {
-    val arcGISMap by remember { mutableStateOf(ArcGISMap(BasemapStyle.ArcGISTopographic)) }
+    val arcGISMap by remember {
+        mutableStateOf(
+            ArcGISMap(BasemapStyle.ArcGISTopographic).apply {
+                initialViewpoint = Viewpoint(
+                    latitude = 39.8,
+                    longitude = -98.6,
+                    scale = 10e7
+                )
+            }
+        )
+    }
     MapView(
         modifier = Modifier.fillMaxSize(),
-        arcGISMap = arcGISMap,
-        viewpointOperation = MapViewpointOperation.Set(
-            Viewpoint(
-                latitude = 39.8,
-                longitude = -98.6,
-                scale = 10e7
-            )
-        )
+        arcGISMap = arcGISMap
     )
 }
