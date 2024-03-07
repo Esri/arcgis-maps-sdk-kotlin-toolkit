@@ -459,6 +459,7 @@ private fun ViewpointHandler(
     }
 
     LaunchedEffect(Unit) {
+        // if there is a persisted viewpoint, restore it when the mapView enters the composition
         persistedViewpoint?.let { mapView.setViewpoint(it) }
         launch {
             mapView.viewpointChanged.collect {
@@ -496,6 +497,8 @@ private fun ViewpointHandler(
             }
         }
         launch {
+            // For performance reasons we use snapshotFlow instead of LaunchedEffect(viewpointPersistence)
+            // here in order to keep track of changes to currentViewpointPersistence at recomposition
             snapshotFlow { currentViewpointPersistence }
                 .collect {
                     persistedViewpoint = when (it) {
