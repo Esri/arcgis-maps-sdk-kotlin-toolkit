@@ -425,29 +425,9 @@ private fun ViewpointHandler(
         saver = Saver(
             save = {
                 val viewpoint = it.value ?: return@Saver null
-
-                // If the spatial reference is pannable or geographic, normalize the viewpoint's center
-                // If we don't do this, the viewpoint will not be restored correctly after rotation
-                // if the viewpoint has crossed the central meridian. However normalization can
-                // only be done with pannable or geographic spatial references.
-                val sr = viewpoint.targetGeometry.spatialReference
-                val viewpointToPersist = if (sr?.isPannable == true || sr?.isGeographic == true) {
-                    GeometryEngine.normalizeCentralMeridian(viewpoint.targetGeometry)
-                        ?.let { normalizedGeometry ->
-                            if (viewpoint.viewpointType == ViewpointType.CenterAndScale) {
-                                Viewpoint(
-                                    center = normalizedGeometry as Point,
-                                    scale = viewpoint.targetScale,
-                                    rotation = viewpoint.rotation
-                                )
-                            } else {
-                                Viewpoint(
-                                    boundingGeometry = normalizedGeometry,
-                                    rotation = viewpoint.rotation
-                                )
-                            }
-                        } ?: viewpoint
-                } else viewpoint
+                // Normalize the viewpoint before persisting it as restoring it after rotation
+                // may fail if the viewpoint has crossed the central meridian
+                val viewpointToPersist = tryNormalizeViewpoint(viewpoint)
                 viewpointToPersist.toJson()
             },
             restore = {
@@ -499,6 +479,54 @@ private fun ViewpointHandler(
 }
 
 /**
+ * Normalizes the viewpoint's target geometry.
+ *
+ * If the spatial reference is null or not pannable or geographic, the viewpoint is returned as is.
+ * Otherwise, the viewpoint's target geometry is normalized and a new viewpoint is created with the
+ * normalized geometry.
+ *
+ * @since 200.4.0
+ */
+private fun tryNormalizeViewpoint(viewpoint: Viewpoint): Viewpoint {
+    // Normalization should only be done with pannable or geographic spatial references.
+    val sr = viewpoint.targetGeometry.spatialReference
+    val viewpointToPersist = if (sr?.isPannable == true || sr?.isGeographic == true) {
+        GeometryEngine.normalizeCentralMeridian(viewpoint.targetGeometry)
+            ?.let { normalizedGeometry ->
+                when (viewpoint.viewpointType) {
+                    ViewpointType.CenterAndScale -> {
+                        Viewpoint(
+                            center = normalizedGeometry as Point,
+                            scale = viewpoint.targetScale,
+                            rotation = viewpoint.rotation
+                        )
+                    }
+
+                    ViewpointType.BoundingGeometry -> {
+                        Viewpoint(
+                            boundingGeometry = normalizedGeometry,
+                            rotation = viewpoint.rotation
+                        )
+                    }
+                }
+            } ?: viewpoint
+    } else viewpoint
+    return viewpointToPersist
+}
+
+/**
+ * Returns the current viewpoint of the [MapView] with the appropriate [ViewpointType] based on [viewpointPersistence].
+ *
+ * @since 200.4.0
+ */
+private fun MapView.getViewpointByPersistence(viewpointPersistence: ViewpointPersistence): Viewpoint? =
+    when (viewpointPersistence) {
+        is ViewpointPersistence.None -> null
+        is ViewpointPersistence.ByCenterAndScale -> getCurrentViewpoint(ViewpointType.CenterAndScale)
+        is ViewpointPersistence.ByBoundingGeometry -> getCurrentViewpoint(ViewpointType.BoundingGeometry)
+    }
+
+/**
  * Create and [remember] a [LocationDisplay].
  * Checks that [ArcGISEnvironment.applicationContext] is set and if not, sets one.
  * [init] will be called when the [LocationDisplay] is first created to configure its
@@ -520,13 +548,6 @@ public inline fun rememberLocationDisplay(
         LocationDisplay().apply(init)
     }
 }
-
-private fun MapView.getViewpointByPersistence(viewpointPersistence: ViewpointPersistence): Viewpoint? =
-    when (viewpointPersistence) {
-        is ViewpointPersistence.None -> null
-        is ViewpointPersistence.ByCenterAndScale -> getCurrentViewpoint(ViewpointType.CenterAndScale)
-        is ViewpointPersistence.ByBoundingGeometry -> getCurrentViewpoint(ViewpointType.BoundingGeometry)
-    }
 
 /**
  * Contains default values for the composable MapView.
