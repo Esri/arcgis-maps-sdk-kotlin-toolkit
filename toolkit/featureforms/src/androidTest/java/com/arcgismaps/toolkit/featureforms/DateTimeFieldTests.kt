@@ -117,7 +117,7 @@ class DateTimeFieldTests {
             "expected helper text: Date Entry is Required"
             
         }
-        val iconMatcher = hasContentDescription("field icon")
+        val iconMatcher = hasContentDescription("date time picker button")
         assert(iconMatcher.matches(dateTimeField.fetchSemanticsNode()))
     }
     
@@ -136,7 +136,7 @@ class DateTimeFieldTests {
         val col = composeTestRule.onNodeWithContentDescription("lazy column")
         col.performScrollToIndex(8)
         val dateTimeField = composeTestRule.onNodeWithText("${formElement.label} *")
-        val iconMatcher = hasContentDescription("field icon")
+        val iconMatcher = hasContentDescription("date time picker button")
         assert(iconMatcher.matches(dateTimeField.fetchSemanticsNode()))
         dateTimeField.assertHasClickAction()
         dateTimeField.performClick()
@@ -149,7 +149,6 @@ class DateTimeFieldTests {
         val helperTextInDialog = dialogSurface.onChildWithText("Date Entry is Required", true)
         helperTextInDialog.assertIsDisplayed()
     }
-    
     
     /**
      * Given a FieldFormElement with an editable datetime input
