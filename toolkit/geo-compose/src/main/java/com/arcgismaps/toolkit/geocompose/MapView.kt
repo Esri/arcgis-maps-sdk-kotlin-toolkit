@@ -442,7 +442,7 @@ private fun ViewpointHandler(
                                 )
                             } else {
                                 Viewpoint(
-                                    boundingGeometry = normalizedGeometry as Polygon,
+                                    boundingGeometry = normalizedGeometry,
                                     rotation = viewpoint.rotation
                                 )
                             }
