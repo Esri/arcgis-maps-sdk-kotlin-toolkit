@@ -431,7 +431,7 @@ private fun ViewpointHandler(
                 // if the viewpoint has crossed the central meridian. However normalization can
                 // only be done with pannable or geographic spatial references.
                 val sr = viewpoint.targetGeometry.spatialReference
-                val normalized = if (sr?.isPannable == true || sr?.isGeographic == true) {
+                val viewpointToPersist = if (sr?.isPannable == true || sr?.isGeographic == true) {
                     GeometryEngine.normalizeCentralMeridian(viewpoint.targetGeometry)
                         ?.let { normalizedGeometry ->
                             if (viewpoint.viewpointType == ViewpointType.CenterAndScale) {
@@ -446,9 +446,9 @@ private fun ViewpointHandler(
                                     rotation = viewpoint.rotation
                                 )
                             }
-                        }
+                        } ?: viewpoint
                 } else viewpoint
-                normalized?.toJson()
+                viewpointToPersist.toJson()
             },
             restore = {
                 mutableStateOf(Viewpoint.fromJsonOrNull(it))
