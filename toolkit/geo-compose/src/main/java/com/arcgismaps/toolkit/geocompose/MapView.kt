@@ -489,28 +489,28 @@ private fun ViewpointHandler(
  */
 private fun tryNormalizeViewpoint(viewpoint: Viewpoint): Viewpoint {
     // Normalization should only be done with pannable or geographic spatial references.
-    val sr = viewpoint.targetGeometry.spatialReference
-    val viewpointToPersist = if (sr?.isPannable == true || sr?.isGeographic == true) {
-        GeometryEngine.normalizeCentralMeridian(viewpoint.targetGeometry)
-            ?.let { normalizedGeometry ->
-                when (viewpoint.viewpointType) {
-                    ViewpointType.CenterAndScale -> {
-                        Viewpoint(
-                            center = normalizedGeometry as Point,
-                            scale = viewpoint.targetScale,
-                            rotation = viewpoint.rotation
-                        )
-                    }
+    val sr = viewpoint.targetGeometry.spatialReference ?: return viewpoint
+    if (!sr.isPannable && !sr.isGeographic) return viewpoint
+    // if normalization fails, just return the viewpoint as is
+    val normalizedGeometry =
+        GeometryEngine.normalizeCentralMeridian(viewpoint.targetGeometry) ?: return viewpoint
 
-                    ViewpointType.BoundingGeometry -> {
-                        Viewpoint(
-                            boundingGeometry = normalizedGeometry,
-                            rotation = viewpoint.rotation
-                        )
-                    }
-                }
-            } ?: viewpoint
-    } else viewpoint
+    val viewpointToPersist = when (viewpoint.viewpointType) {
+        ViewpointType.CenterAndScale -> {
+            Viewpoint(
+                center = normalizedGeometry as Point,
+                scale = viewpoint.targetScale,
+                rotation = viewpoint.rotation
+            )
+        }
+
+        ViewpointType.BoundingGeometry -> {
+            Viewpoint(
+                boundingGeometry = normalizedGeometry,
+                rotation = viewpoint.rotation
+            )
+        }
+    }
     return viewpointToPersist
 }
 
@@ -569,5 +569,6 @@ public object MapViewDefaults {
      *
      * @since 200.4.0
      */
-    public val DefaultViewpointPersistence: ViewpointPersistence = ViewpointPersistence.ByCenterAndScale()
+    public val DefaultViewpointPersistence: ViewpointPersistence =
+        ViewpointPersistence.ByCenterAndScale()
 }
