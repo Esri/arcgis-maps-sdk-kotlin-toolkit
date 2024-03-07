@@ -433,12 +433,19 @@ private fun ViewpointHandler(
                 val sr = viewpoint.targetGeometry.spatialReference
                 val normalized = if (sr?.isPannable == true || sr?.isGeographic == true) {
                     GeometryEngine.normalizeCentralMeridian(viewpoint.targetGeometry)
-                        ?.let { center ->
-                            Viewpoint(
-                                center = center as Point,
-                                scale = viewpoint.targetScale,
-                                rotation = viewpoint.rotation
-                            )
+                        ?.let { normalizedGeometry ->
+                            if (viewpoint.viewpointType == ViewpointType.CenterAndScale) {
+                                Viewpoint(
+                                    center = normalizedGeometry as Point,
+                                    scale = viewpoint.targetScale,
+                                    rotation = viewpoint.rotation
+                                )
+                            } else {
+                                Viewpoint(
+                                    boundingGeometry = normalizedGeometry as Polygon,
+                                    rotation = viewpoint.rotation
+                                )
+                            }
                         }
                 } else viewpoint
                 normalized?.toJson()
