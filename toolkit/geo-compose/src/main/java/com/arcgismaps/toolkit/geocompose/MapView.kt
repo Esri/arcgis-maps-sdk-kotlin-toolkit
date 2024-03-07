@@ -463,16 +463,7 @@ private fun ViewpointHandler(
         persistedViewpoint?.let { mapView.setViewpoint(it) }
         launch {
             mapView.viewpointChanged.collect {
-                persistedViewpoint = when (currentViewpointPersistence) {
-                    is ViewpointPersistence.None -> null
-                    is ViewpointPersistence.ByCenterAndScale -> mapView.getCurrentViewpoint(
-                        ViewpointType.CenterAndScale
-                    )
-
-                    is ViewpointPersistence.ByBoundingGeometry -> mapView.getCurrentViewpoint(
-                        ViewpointType.BoundingGeometry
-                    )
-                }
+                persistedViewpoint = mapView.getViewpointByPersistence(currentViewpointPersistence)
 
                 currentOnViewpointChangedForCenterAndScale?.let { callback ->
                     val currentViewpoint =
@@ -501,19 +492,7 @@ private fun ViewpointHandler(
             // here in order to keep track of changes to currentViewpointPersistence at recomposition
             snapshotFlow { currentViewpointPersistence }
                 .collect {
-                    persistedViewpoint = when (it) {
-                        is ViewpointPersistence.None -> {
-                            null
-                        }
-
-                        is ViewpointPersistence.ByCenterAndScale -> {
-                            mapView.getCurrentViewpoint(ViewpointType.CenterAndScale)
-                        }
-
-                        is ViewpointPersistence.ByBoundingGeometry -> {
-                            mapView.getCurrentViewpoint(ViewpointType.BoundingGeometry)
-                        }
-                    }
+                    persistedViewpoint = mapView.getViewpointByPersistence(it)
                 }
         }
     }
@@ -539,6 +518,14 @@ public inline fun rememberLocationDisplay(
     }
     return remember(key) {
         LocationDisplay().apply(init)
+    }
+}
+
+private fun MapView.getViewpointByPersistence(viewpointPersistence: ViewpointPersistence): Viewpoint? {
+    return when (viewpointPersistence) {
+        is ViewpointPersistence.None -> null
+        is ViewpointPersistence.ByCenterAndScale -> getCurrentViewpoint(ViewpointType.CenterAndScale)
+        is ViewpointPersistence.ByBoundingGeometry -> getCurrentViewpoint(ViewpointType.BoundingGeometry)
     }
 }
 
