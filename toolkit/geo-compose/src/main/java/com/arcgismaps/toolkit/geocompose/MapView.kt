@@ -80,6 +80,8 @@ import kotlinx.coroutines.launch
  * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a viewpoint
  * type of [ViewpointType.BoundingGeometry]
  * @param onVisibleAreaChanged lambda invoked when the visible area of the composable MapView has changed
+ * @param viewpointPersistence the [ViewpointPersistence] to specify how the viewpoint of the composable MapView is persisted
+ * across configuration changes.
  * @param graphicsOverlays graphics overlays used by this composable MapView
  * @param locationDisplay the [LocationDisplay] used by the composable MapView
  * @param geometryEditor the [GeometryEditor] used by the composable MapView to create and edit geometries by user interaction.
@@ -92,8 +94,6 @@ import kotlinx.coroutines.launch
  * @param grid represents the display of a coordinate system [Grid] on the composable MapView
  * @param backgroundGrid the default color and context grid behind the map surface
  * @param wrapAroundMode the [WrapAroundMode] to specify whether continuous panning across the international date line is enabled
- * @param viewpointPersistence the [ViewpointPersistence] to specify how the viewpoint of the composable MapView is persisted
- * across configuration changes.
  * @param isAttributionBarVisible true if attribution bar is visible in the composable MapView, false otherwise
  * @param onAttributionTextChanged lambda invoked when the attribution text of the composable MapView has changed
  * @param onAttributionBarLayoutChanged lambda invoked when the attribution bar's position or size changes
@@ -130,6 +130,7 @@ public fun MapView(
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
     onVisibleAreaChanged: ((Polygon) -> Unit)? = null,
+    viewpointPersistence: ViewpointPersistence = MapViewDefaults.DefaultViewpointPersistence,
     graphicsOverlays: List<GraphicsOverlay> = remember { emptyList() },
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     geometryEditor: GeometryEditor? = null,
@@ -141,7 +142,6 @@ public fun MapView(
     grid: Grid? = null,
     backgroundGrid: BackgroundGrid = remember { BackgroundGrid() },
     wrapAroundMode: WrapAroundMode = WrapAroundMode.EnabledWhenSupported,
-    viewpointPersistence: ViewpointPersistence = MapViewDefaults.DefaultViewpointPersistence,
     isAttributionBarVisible: Boolean = true,
     onAttributionTextChanged: ((String) -> Unit)? = null,
     onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)? = null,
