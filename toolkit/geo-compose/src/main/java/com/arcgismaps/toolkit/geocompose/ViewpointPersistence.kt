@@ -46,12 +46,8 @@ public sealed class ViewpointPersistence {
         // want to keep the possibility open to add instance state (properties) to these classes in the future,
         // thus we had to declare them as classes. This meant we had to override hashCode and equals in order to
         // achieve the same equality behaviour as a singleton would do.
-        override fun hashCode(): Int {
-            return 1
-        }
-        override fun equals(other: Any?): Boolean {
-            return other is ByCenterAndScale
-        }
+        override fun hashCode(): Int = 1
+        override fun equals(other: Any?): Boolean = other is ByCenterAndScale
     }
 
     /**
@@ -60,11 +56,7 @@ public sealed class ViewpointPersistence {
      * @since 200.4.0
      */
     public class ByBoundingGeometry : ViewpointPersistence() {
-        override fun hashCode(): Int {
-            return 1
-        }
-        override fun equals(other: Any?): Boolean {
-            return other is ByBoundingGeometry
-        }
+        override fun hashCode(): Int = 1
+        override fun equals(other: Any?): Boolean = other is ByBoundingGeometry
     }
 }
