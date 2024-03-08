@@ -22,8 +22,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -32,6 +37,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.geometry.GeometryEngine
+import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.Polygon
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISMap
@@ -73,6 +80,8 @@ import kotlinx.coroutines.launch
  * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a viewpoint
  * type of [ViewpointType.BoundingGeometry]
  * @param onVisibleAreaChanged lambda invoked when the visible area of the composable MapView has changed
+ * @param viewpointPersistence the [ViewpointPersistence] to specify how the viewpoint of the composable MapView is persisted
+ * across configuration changes.
  * @param graphicsOverlays graphics overlays used by this composable MapView
  * @param locationDisplay the [LocationDisplay] used by the composable MapView
  * @param geometryEditor the [GeometryEditor] used by the composable MapView to create and edit geometries by user interaction.
@@ -121,6 +130,7 @@ public fun MapView(
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
     onVisibleAreaChanged: ((Polygon) -> Unit)? = null,
+    viewpointPersistence: ViewpointPersistence = MapViewDefaults.DefaultViewpointPersistence,
     graphicsOverlays: List<GraphicsOverlay> = remember { emptyList() },
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     geometryEditor: GeometryEditor? = null,
@@ -211,10 +221,7 @@ public fun MapView(
 
     MapViewEventHandler(
         mapView,
-        onViewpointChangedForCenterAndScale,
-        onViewpointChangedForBoundingGeometry,
         onTimeExtentChanged,
-        onVisibleAreaChanged,
         onNavigationChanged,
         onMapRotationChanged,
         onMapScaleChanged,
@@ -235,18 +242,23 @@ public fun MapView(
         onAttributionTextChanged,
         onAttributionBarLayoutChanged
     )
+
+    ViewpointHandler(
+        mapView = mapView,
+        viewpointPersistence = viewpointPersistence,
+        onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
+        onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
+        onVisibleAreaChanged = onVisibleAreaChanged
+    )
 }
 
 /**
- * Sets up the callbacks for all the view-based [mapView] events.
+ * Sets up the callbacks for all the view-based [mapView] events except the viewpoint changed events.
  */
 @Composable
 private fun MapViewEventHandler(
     mapView: MapView,
-    onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)?,
-    onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)?,
     onTimeExtentChanged: ((TimeExtent?) -> Unit)?,
-    onVisibleAreaChanged: ((Polygon) -> Unit)?,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)?,
     onMapRotationChanged: ((Double) -> Unit)?,
     onMapScaleChanged: ((Double) -> Unit)?,
@@ -267,14 +279,7 @@ private fun MapViewEventHandler(
     onAttributionTextChanged: ((String) -> Unit)?,
     onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)?
 ) {
-    val currentOnViewpointChangedForCenterAndScale by rememberUpdatedState(
-        onViewpointChangedForCenterAndScale
-    )
-    val currentOnViewpointChangedForBoundingGeometry by rememberUpdatedState(
-        onViewpointChangedForBoundingGeometry
-    )
     val currentTimeExtentChanged by rememberUpdatedState(onTimeExtentChanged)
-    val currentVisibleAreaChanged by rememberUpdatedState(onVisibleAreaChanged)
     val currentOnNavigationChanged by rememberUpdatedState(onNavigationChanged)
     val currentOnMapRotationChanged by rememberUpdatedState(onMapRotationChanged)
     val currentOnMapScaleChanged by rememberUpdatedState(onMapScaleChanged)
@@ -297,16 +302,6 @@ private fun MapViewEventHandler(
 
     LaunchedEffect(Unit) {
         launch {
-            mapView.viewpointChanged.collect {
-                currentOnViewpointChangedForCenterAndScale?.let { callback ->
-                    mapView.getCurrentViewpoint(ViewpointType.CenterAndScale)?.let(callback)
-                }
-                currentOnViewpointChangedForBoundingGeometry?.let { callback ->
-                    mapView.getCurrentViewpoint(ViewpointType.BoundingGeometry)?.let(callback)
-                }
-            }
-        }
-        launch {
             mapView.timeExtent.collect { currentTimeExtent ->
                 currentTimeExtentChanged?.invoke(currentTimeExtent)
             }
@@ -314,14 +309,6 @@ private fun MapViewEventHandler(
         launch {
             mapView.layerViewStateChanged.collect { currentLayerViewState ->
                 currentOnLayerViewStateChanged?.invoke(currentLayerViewState)
-            }
-        }
-        launch {
-            mapView.viewpointChanged.collect {
-                currentVisibleAreaChanged?.invoke(
-                    mapView.visibleArea
-                        ?: throw IllegalStateException("MapView visible area should not be null")
-                )
             }
         }
         launch {
@@ -414,6 +401,132 @@ private fun MapViewEventHandler(
 }
 
 /**
+ * Handles viewpoint change events and persistence for a [MapView].
+ *
+ * @since 200.4.0
+ */
+@Composable
+private fun ViewpointHandler(
+    mapView: MapView,
+    viewpointPersistence: ViewpointPersistence,
+    onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)?,
+    onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)?,
+    onVisibleAreaChanged: ((Polygon) -> Unit)?
+) {
+    val currentOnViewpointChangedForCenterAndScale by rememberUpdatedState(
+        onViewpointChangedForCenterAndScale
+    )
+    val currentOnViewpointChangedForBoundingGeometry by rememberUpdatedState(
+        onViewpointChangedForBoundingGeometry
+    )
+    val currentVisibleAreaChanged by rememberUpdatedState(onVisibleAreaChanged)
+    val currentViewpointPersistence by rememberUpdatedState(viewpointPersistence)
+    var persistedViewpoint by rememberSaveable(
+        saver = Saver(
+            save = {
+                val viewpoint = it.value ?: return@Saver null
+                // Normalize the viewpoint before persisting it as restoring it after rotation
+                // may fail if the viewpoint has crossed the central meridian
+                val viewpointToPersist = viewpoint.tryNormalize()
+                viewpointToPersist.toJson()
+            },
+            restore = {
+                mutableStateOf(Viewpoint.fromJsonOrNull(it))
+            }
+        )
+    ) {
+        mutableStateOf<Viewpoint?>(null)
+    }
+
+    LaunchedEffect(Unit) {
+        // if there is a persisted viewpoint, restore it when the SceneView enters the composition
+        persistedViewpoint?.let { mapView.setViewpoint(it) }
+        launch {
+            mapView.viewpointChanged.collect {
+                persistedViewpoint = mapView.getViewpointByPersistence(currentViewpointPersistence)
+
+                currentOnViewpointChangedForCenterAndScale?.let { callback ->
+                    val currentViewpoint =
+                        if (persistedViewpoint?.viewpointType != ViewpointType.CenterAndScale) {
+                            mapView.getCurrentViewpoint(ViewpointType.CenterAndScale)
+                        } else persistedViewpoint
+                    currentViewpoint?.let(callback)
+                }
+
+                currentOnViewpointChangedForBoundingGeometry?.let { callback ->
+                    val currentViewpoint =
+                        if (persistedViewpoint?.viewpointType != ViewpointType.BoundingGeometry) {
+                            mapView.getCurrentViewpoint(ViewpointType.BoundingGeometry)
+                        } else persistedViewpoint
+                    currentViewpoint?.let(callback)
+                }
+
+                currentVisibleAreaChanged?.invoke(
+                    mapView.visibleArea
+                        ?: throw IllegalStateException("MapView visible area should not be null")
+                )
+            }
+        }
+        launch {
+            // For performance reasons we use snapshotFlow instead of LaunchedEffect(viewpointPersistence)
+            // here in order to keep track of changes to currentViewpointPersistence at recomposition
+            snapshotFlow { currentViewpointPersistence }
+                .collect {
+                    persistedViewpoint = mapView.getViewpointByPersistence(it)
+                }
+        }
+    }
+}
+
+/**
+ * Normalizes this viewpoint's target geometry.
+ *
+ * If the spatial reference is null or not pannable or geographic, the viewpoint is returned as is.
+ * Otherwise, the viewpoint's target geometry is normalized and a new viewpoint is created with the
+ * normalized geometry.
+ *
+ * @since 200.4.0
+ */
+private fun Viewpoint.tryNormalize(): Viewpoint {
+    // Normalization should only be done with pannable or geographic spatial references.
+    val sr = targetGeometry.spatialReference ?: return this
+    if (!sr.isPannable && !sr.isGeographic) return this
+    // if normalization fails, just return the viewpoint as is
+    val normalizedGeometry =
+        GeometryEngine.normalizeCentralMeridian(targetGeometry) ?: return this
+
+    val normalizedViewpoint = when (viewpointType) {
+        ViewpointType.CenterAndScale -> {
+            Viewpoint(
+                center = normalizedGeometry as Point,
+                scale = targetScale,
+                rotation = rotation
+            )
+        }
+
+        ViewpointType.BoundingGeometry -> {
+            Viewpoint(
+                boundingGeometry = normalizedGeometry,
+                rotation = rotation
+            )
+        }
+    }
+    return normalizedViewpoint
+}
+
+/**
+ * Returns the current viewpoint of the [MapView] with the appropriate [ViewpointType] based on [viewpointPersistence].
+ *
+ * @since 200.4.0
+ */
+private fun MapView.getViewpointByPersistence(viewpointPersistence: ViewpointPersistence): Viewpoint? =
+    when (viewpointPersistence) {
+        is ViewpointPersistence.None -> null
+        is ViewpointPersistence.ByCenterAndScale -> getCurrentViewpoint(ViewpointType.CenterAndScale)
+        is ViewpointPersistence.ByBoundingGeometry -> getCurrentViewpoint(ViewpointType.BoundingGeometry)
+    }
+
+/**
  * Create and [remember] a [LocationDisplay].
  * Checks that [ArcGISEnvironment.applicationContext] is set and if not, sets one.
  * [init] will be called when the [LocationDisplay] is first created to configure its
@@ -450,4 +563,12 @@ public object MapViewDefaults {
      * @since 200.4.0
      */
     public val DefaultInsets: PaddingValues = PaddingValues()
+
+    /**
+     * Default viewpoint persistence for the composable MapView, set to [ViewpointPersistence.ByCenterAndScale].
+     *
+     * @since 200.4.0
+     */
+    public val DefaultViewpointPersistence: ViewpointPersistence =
+        ViewpointPersistence.ByCenterAndScale()
 }

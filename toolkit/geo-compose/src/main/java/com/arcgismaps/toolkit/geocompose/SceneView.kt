@@ -21,8 +21,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -58,6 +62,7 @@ import com.arcgismaps.mapping.view.SceneViewInteractionOptions
 import com.arcgismaps.mapping.view.SelectionProperties
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.SpaceEffect
+import com.arcgismaps.mapping.view.TransformationMatrix
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
@@ -210,14 +215,11 @@ public fun SceneView(
 
     SceneViewEventHandler(
         sceneView,
-        onViewpointChangedForCenterAndScale,
-        onViewpointChangedForBoundingGeometry,
         onTimeExtentChanged,
         onNavigationChanged,
         onSpatialReferenceChanged,
         onLayerViewStateChanged,
         onInteractingChanged,
-        onCurrentViewpointCameraChanged,
         onRotate,
         onScale,
         onUp,
@@ -231,6 +233,13 @@ public fun SceneView(
         onAttributionTextChanged,
         onAttributionBarLayoutChanged
     )
+
+    ViewpointHandler(
+        sceneView = sceneView,
+        onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
+        onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
+        onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged
+    )
 }
 
 /**
@@ -239,14 +248,11 @@ public fun SceneView(
 @Composable
 private fun SceneViewEventHandler(
     sceneView: SceneView,
-    onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)?,
-    onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)?,
     onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
     onNavigationChanged: ((isNavigating: Boolean) -> Unit)?,
     onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)?,
     onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)?,
     onInteractingChanged: ((isInteracting: Boolean) -> Unit)?,
-    onCurrentViewpointCameraChanged: ((camera: Camera) -> Unit)?,
     onRotate: ((RotationChangeEvent) -> Unit)?,
     onScale: ((ScaleChangeEvent) -> Unit)?,
     onUp: ((UpEvent) -> Unit)?,
@@ -260,18 +266,11 @@ private fun SceneViewEventHandler(
     onAttributionTextChanged: ((String) -> Unit)?,
     onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)?,
 ) {
-    val currentOnViewpointChangedForCenterAndScale by rememberUpdatedState(
-        onViewpointChangedForCenterAndScale
-    )
-    val currentOnViewpointChangedForBoundingGeometry by rememberUpdatedState(
-        onViewpointChangedForBoundingGeometry
-    )
     val currentOnTimeExtentChanged by rememberUpdatedState(onTimeExtentChanged)
     val currentOnNavigationChanged by rememberUpdatedState(onNavigationChanged)
     val currentOnSpatialReferenceChanged by rememberUpdatedState(onSpatialReferenceChanged)
     val currentOnLayerViewStateChanged by rememberUpdatedState(onLayerViewStateChanged)
     val currentOnInteractingChanged by rememberUpdatedState(onInteractingChanged)
-    val currentOnViewpointCameraChanged by rememberUpdatedState(onCurrentViewpointCameraChanged)
     val currentOnRotate by rememberUpdatedState(onRotate)
     val currentOnScale by rememberUpdatedState(onScale)
     val currentOnUp by rememberUpdatedState(onUp)
@@ -286,16 +285,6 @@ private fun SceneViewEventHandler(
     val currentOnAttributionBarLayoutChanged by rememberUpdatedState(onAttributionBarLayoutChanged)
 
     LaunchedEffect(Unit) {
-        launch {
-            sceneView.viewpointChanged.collect {
-                currentOnViewpointChangedForCenterAndScale?.let { callback ->
-                    sceneView.getCurrentViewpoint(ViewpointType.CenterAndScale)?.let(callback)
-                }
-                currentOnViewpointChangedForBoundingGeometry?.let { callback ->
-                    sceneView.getCurrentViewpoint(ViewpointType.BoundingGeometry)?.let(callback)
-                }
-            }
-        }
         launch {
             sceneView.timeExtent.collect { currentTimeExtent ->
                 currentOnTimeExtentChanged?.invoke(currentTimeExtent)
@@ -314,11 +303,6 @@ private fun SceneViewEventHandler(
         launch {
             sceneView.layerViewStateChanged.collect { currentLayerViewState ->
                 currentOnLayerViewStateChanged?.invoke(currentLayerViewState)
-            }
-        }
-        launch {
-            sceneView.viewpointChanged.collect {
-                currentOnViewpointCameraChanged?.invoke(sceneView.getCurrentViewpointCamera())
             }
         }
         launch(Dispatchers.Main.immediate) {
@@ -388,6 +372,86 @@ private fun SceneViewEventHandler(
         }
     }
 }
+
+/**
+ * Handles viewpoint change events and persistence for a [SceneView].
+ *
+ * @since 200.4.0
+ */
+@Composable
+private fun ViewpointHandler(
+    sceneView: SceneView,
+    onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)?,
+    onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)?,
+    onCurrentViewpointCameraChanged: ((camera: Camera) -> Unit)?
+) {
+    val currentOnViewpointChangedForCenterAndScale by rememberUpdatedState(
+        onViewpointChangedForCenterAndScale
+    )
+    val currentOnViewpointChangedForBoundingGeometry by rememberUpdatedState(
+        onViewpointChangedForBoundingGeometry
+    )
+    val currentOnCurrentViewpointCameraChanged by rememberUpdatedState(
+        onCurrentViewpointCameraChanged
+    )
+
+    var persistedCamera by rememberSaveable(
+        saver = Saver(
+            save = {
+                val camera = it.value ?: return@Saver null
+                listOf(
+                    camera.transformationMatrix.quaternionX,
+                    camera.transformationMatrix.quaternionY,
+                    camera.transformationMatrix.quaternionZ,
+                    camera.transformationMatrix.quaternionW,
+                    camera.transformationMatrix.translationX,
+                    camera.transformationMatrix.translationY,
+                    camera.transformationMatrix.translationZ
+                )
+            },
+            restore = { matrixValues ->
+                if (matrixValues.isEmpty()) return@Saver mutableStateOf(null)
+                val camera = Camera(
+                    TransformationMatrix.createWithQuaternionAndTranslation(
+                        quaternionX = matrixValues[0],
+                        quaternionY = matrixValues[1],
+                        quaternionZ = matrixValues[2],
+                        quaternionW = matrixValues[3],
+                        translationX = matrixValues[4],
+                        translationY = matrixValues[5],
+                        translationZ = matrixValues[6]
+                    )
+                )
+                mutableStateOf(camera)
+            }
+        )
+    ) {
+        mutableStateOf<Camera?>(null)
+    }
+
+    LaunchedEffect(Unit) {
+        // if there is a persisted viewpoint, restore it when the SceneView enters the composition
+        persistedCamera?.let { sceneView.setViewpointCamera(it) }
+        launch {
+            sceneView.viewpointChanged.collect {
+                val currentViewpointCamera = sceneView.getCurrentViewpointCamera()
+                persistedCamera = currentViewpointCamera
+                currentOnCurrentViewpointCameraChanged?.invoke(currentViewpointCamera)
+                currentOnViewpointChangedForCenterAndScale?.let { callback ->
+                    val currentViewpoint =
+                        sceneView.getCurrentViewpoint(ViewpointType.CenterAndScale)
+                    currentViewpoint?.let(callback)
+                }
+                currentOnViewpointChangedForBoundingGeometry?.let { callback ->
+                    val currentViewpoint =
+                        sceneView.getCurrentViewpoint(ViewpointType.BoundingGeometry)
+                    currentViewpoint?.let(callback)
+                }
+            }
+        }
+    }
+}
+
 
 /**
  * Contains default values for the SceneView.
