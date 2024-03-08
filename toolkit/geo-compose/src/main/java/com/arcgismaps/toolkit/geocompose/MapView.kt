@@ -427,7 +427,7 @@ private fun ViewpointHandler(
                 val viewpoint = it.value ?: return@Saver null
                 // Normalize the viewpoint before persisting it as restoring it after rotation
                 // may fail if the viewpoint has crossed the central meridian
-                val viewpointToPersist = tryNormalizeViewpoint(viewpoint)
+                val viewpointToPersist = viewpoint.tryNormalize()
                 viewpointToPersist.toJson()
             },
             restore = {
@@ -479,7 +479,7 @@ private fun ViewpointHandler(
 }
 
 /**
- * Normalizes the viewpoint's target geometry.
+ * Normalizes this viewpoint's target geometry.
  *
  * If the spatial reference is null or not pannable or geographic, the viewpoint is returned as is.
  * Otherwise, the viewpoint's target geometry is normalized and a new viewpoint is created with the
@@ -487,27 +487,27 @@ private fun ViewpointHandler(
  *
  * @since 200.4.0
  */
-private fun tryNormalizeViewpoint(viewpoint: Viewpoint): Viewpoint {
+private fun Viewpoint.tryNormalize(): Viewpoint {
     // Normalization should only be done with pannable or geographic spatial references.
-    val sr = viewpoint.targetGeometry.spatialReference ?: return viewpoint
-    if (!sr.isPannable && !sr.isGeographic) return viewpoint
+    val sr = targetGeometry.spatialReference ?: return this
+    if (!sr.isPannable && !sr.isGeographic) return this
     // if normalization fails, just return the viewpoint as is
     val normalizedGeometry =
-        GeometryEngine.normalizeCentralMeridian(viewpoint.targetGeometry) ?: return viewpoint
+        GeometryEngine.normalizeCentralMeridian(targetGeometry) ?: return this
 
-    val normalizedViewpoint = when (viewpoint.viewpointType) {
+    val normalizedViewpoint = when (viewpointType) {
         ViewpointType.CenterAndScale -> {
             Viewpoint(
                 center = normalizedGeometry as Point,
-                scale = viewpoint.targetScale,
-                rotation = viewpoint.rotation
+                scale = targetScale,
+                rotation = rotation
             )
         }
 
         ViewpointType.BoundingGeometry -> {
             Viewpoint(
                 boundingGeometry = normalizedGeometry,
-                rotation = viewpoint.rotation
+                rotation = rotation
             )
         }
     }
