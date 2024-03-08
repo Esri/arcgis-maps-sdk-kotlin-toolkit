@@ -491,27 +491,14 @@ private fun Viewpoint.tryNormalize(): Viewpoint {
     // Normalization should only be done with pannable or geographic spatial references.
     val sr = targetGeometry.spatialReference ?: return this
     if (!sr.isPannable && !sr.isGeographic) return this
+    // Bounding geometries shouldn't be normalized because if they cross the meridian, the geometry
+    // will be split and the resulting viewpoint would have the max extent of the map.
+    if (viewpointType == ViewpointType.BoundingGeometry) return this
     // if normalization fails, just return the viewpoint as is
     val normalizedGeometry =
         GeometryEngine.normalizeCentralMeridian(targetGeometry) ?: return this
 
-    val normalizedViewpoint = when (viewpointType) {
-        ViewpointType.CenterAndScale -> {
-            Viewpoint(
-                center = normalizedGeometry as Point,
-                scale = targetScale,
-                rotation = rotation
-            )
-        }
-
-        ViewpointType.BoundingGeometry -> {
-            Viewpoint(
-                boundingGeometry = normalizedGeometry,
-                rotation = rotation
-            )
-        }
-    }
-    return normalizedViewpoint
+    return Viewpoint(center = normalizedGeometry as Point, scale = targetScale, rotation = rotation)
 }
 
 /**
