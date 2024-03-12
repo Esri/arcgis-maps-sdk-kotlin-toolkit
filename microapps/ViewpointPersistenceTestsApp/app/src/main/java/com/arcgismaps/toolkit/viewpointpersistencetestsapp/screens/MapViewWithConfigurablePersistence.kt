@@ -31,7 +31,13 @@ import com.arcgismaps.toolkit.geocompose.MapView
 import com.arcgismaps.toolkit.geocompose.ViewpointPersistence
 
 @Composable
-fun MapViewWithConfigurablePersistence(viewpointPersistence: ViewpointPersistence, onViewpointPersistenceSelected: (ViewpointPersistence) -> Unit, modifier: Modifier = Modifier, arcGISMap: ArcGISMap = remember { ArcGISMap(BasemapStyle.ArcGISTopographic) }) {
+fun MapViewWithConfigurablePersistence(
+    viewpointPersistence: ViewpointPersistence,
+    onViewpointPersistenceSelected: (ViewpointPersistence) -> Unit,
+    modifier: Modifier = Modifier,
+    arcGISMap: ArcGISMap = remember { ArcGISMap(BasemapStyle.ArcGISTopographic) },
+    useSquareAspectRatio: Boolean = true
+) {
     Surface(modifier = modifier.padding(16.dp)) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -41,7 +47,7 @@ fun MapViewWithConfigurablePersistence(viewpointPersistence: ViewpointPersistenc
             ViewpointPersistenceSelectionRow(viewpointPersistence, onViewpointPersistenceSelected)
             MapView(
                 arcGISMap = arcGISMap,
-                modifier = Modifier.aspectRatio(1.0f),
+                modifier = if (useSquareAspectRatio) Modifier.aspectRatio(1.0f) else Modifier.fillMaxSize(),
                 viewpointPersistence = viewpointPersistence
             )
         }
@@ -49,7 +55,10 @@ fun MapViewWithConfigurablePersistence(viewpointPersistence: ViewpointPersistenc
 }
 
 @Composable
-private fun ViewpointPersistenceSelectionRow(viewpointPersistence: ViewpointPersistence, onViewpointPersistenceSelected: (ViewpointPersistence) -> Unit) {
+private fun ViewpointPersistenceSelectionRow(
+    viewpointPersistence: ViewpointPersistence,
+    onViewpointPersistenceSelected: (ViewpointPersistence) -> Unit
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
