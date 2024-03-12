@@ -41,6 +41,7 @@ fun MainScreen() {
         composable("TC1_7_InitialViewpoint") { TC1_7_InitialViewpoint() }
         composable("TC2_TwoMapViews") { TC2TwoMapViews() }
         composable("TC3_TwoScreens") { TC3TwoScreens() }
+        composable("TC4_SceneView") { TC4SceneView() }
     }
 }
 
@@ -65,6 +66,11 @@ fun SelectionScreen(navController: NavHostController) {
         item {
             ScreenSelectionItem(text = "TC 3: Two Screens") {
                 navController.navigate("TC3_TwoScreens")
+            }
+        }
+        item {
+            ScreenSelectionItem(text = "TC 4: Single SceneView") {
+                navController.navigate("TC4_SceneView")
             }
         }
     }
