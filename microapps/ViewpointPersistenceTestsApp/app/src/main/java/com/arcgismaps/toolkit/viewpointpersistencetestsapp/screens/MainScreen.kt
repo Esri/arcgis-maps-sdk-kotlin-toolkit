@@ -40,6 +40,7 @@ fun MainScreen() {
         composable("TC1_Rotation") { TC1MainScreen() }
         composable("TC1_7_InitialViewpoint") { TC1_7_InitialViewpoint() }
         composable("TC2_TwoMapViews") { TC2TwoMapViews() }
+        composable("TC3_TwoScreens") { TC3TwoScreens() }
     }
 }
 
@@ -61,11 +62,18 @@ fun SelectionScreen(navController: NavHostController) {
                 navController.navigate("TC2_TwoMapViews")
             })
         }
+        item {
+            ScreenSelectionItem(text = "TC 3: Two Screens") {
+                navController.navigate("TC3_TwoScreens")
+            }
+        }
     }
 }
 
 @Composable
 fun ScreenSelectionItem(text: String, onClick: () -> Unit) {
-    Text(text = text, modifier = Modifier.padding(16.dp).clickable { onClick() }, style = MaterialTheme.typography.headlineMedium)
+    Text(text = text, modifier = Modifier
+        .padding(16.dp)
+        .clickable { onClick() }, style = MaterialTheme.typography.headlineMedium)
     Divider()
 }
