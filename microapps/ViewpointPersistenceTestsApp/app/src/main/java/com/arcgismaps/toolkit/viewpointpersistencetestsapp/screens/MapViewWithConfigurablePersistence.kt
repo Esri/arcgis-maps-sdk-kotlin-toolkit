@@ -30,6 +30,15 @@ import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.toolkit.geocompose.MapView
 import com.arcgismaps.toolkit.geocompose.ViewpointPersistence
 
+/**
+ * Shows a MapView with an option of the viewpoint persistence type above it.
+ *
+ * @param viewpointPersistence the viewpoint persistence state to use, use rememberSaveable to preserve the state across configuration changes
+ * @param onViewpointPersistenceSelected the callback to be invoked when the viewpoint persistence type is selected
+ * @param modifier the modifier to be applied to the MapView
+ * @param arcGISMap the ArcGISMap to be used in the MapView
+ * @param useSquareAspectRatio whether to use a square aspect ratio for the MapView
+ */
 @Composable
 fun MapViewWithConfigurablePersistence(
     viewpointPersistence: ViewpointPersistence,
@@ -54,6 +63,9 @@ fun MapViewWithConfigurablePersistence(
     }
 }
 
+/**
+ * Displays the currently selected viewpoint persistence and allows the user to change it.
+ */
 @Composable
 private fun ViewpointPersistenceSelectionRow(
     viewpointPersistence: ViewpointPersistence,
@@ -91,6 +103,9 @@ private fun ViewpointPersistenceSelectionRow(
     }
 }
 
+/**
+ * Displays the options for viewpoint persistence types.
+ */
 @Composable
 fun ViewpointPersistenceOptions(
     isExpanded: Boolean,
