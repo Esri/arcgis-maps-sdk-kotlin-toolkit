@@ -32,7 +32,7 @@ import com.arcgismaps.toolkit.geocompose.ViewpointPersistence
 
 @Composable
 fun MapViewWithConfigurablePersistence(viewpointPersistence: ViewpointPersistence, onViewpointPersistenceSelected: (ViewpointPersistence) -> Unit, modifier: Modifier = Modifier, arcGISMap: ArcGISMap = remember { ArcGISMap(BasemapStyle.ArcGISTopographic) }) {
-    Surface(modifier = modifier.padding(16.dp).aspectRatio(0.8f)) {
+    Surface(modifier = modifier.padding(16.dp)) {
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,

@@ -38,7 +38,8 @@ fun MainScreen() {
     NavHost(navController = navController, startDestination = "SelectionScreen") {
         composable("SelectionScreen") { SelectionScreen(navController) }
         composable("TC1_Rotation") { TC1MainScreen() }
-        composable("TC_1_7_InitialViewpoint") { TC_1_7_InitialViewpoint() }
+        composable("TC1_7_InitialViewpoint") { TC1_7_InitialViewpoint() }
+        composable("TC2_TwoMapViews") { TC2TwoMapViews() }
     }
 }
 
@@ -52,7 +53,12 @@ fun SelectionScreen(navController: NavHostController) {
         }
         item {
             ScreenSelectionItem(text = "TC 1.7: Single MapView with Initial Viewpoint", onClick = {
-                navController.navigate("TC_1_7_InitialViewpoint")
+                navController.navigate("TC1_7_InitialViewpoint")
+            })
+        }
+        item {
+            ScreenSelectionItem(text = "TC 2: Two MapViews", onClick = {
+                navController.navigate("TC2_TwoMapViews")
             })
         }
     }

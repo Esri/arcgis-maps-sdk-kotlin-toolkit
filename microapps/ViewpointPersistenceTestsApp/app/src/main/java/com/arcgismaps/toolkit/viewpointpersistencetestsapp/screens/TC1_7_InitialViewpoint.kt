@@ -19,7 +19,7 @@ import com.arcgismaps.toolkit.geocompose.ViewpointPersistence
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TC_1_7_InitialViewpoint() {
+fun TC1_7_InitialViewpoint() {
     Scaffold(
         topBar = {
             TopAppBar(title = { Text(text = "TC1.7: Single MapView with Initial Viewpoint") })
