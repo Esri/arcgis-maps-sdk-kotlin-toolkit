@@ -37,7 +37,7 @@ fun MainScreen() {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = "SelectionScreen") {
         composable("SelectionScreen") { SelectionScreen(navController) }
-        composable("TC1_Rotation") { TC1MainScreen() }
+        composable("TC1_SingleMapView") { TC1SingleMapView() }
         composable("TC1_7_InitialViewpoint") { TC1_7_InitialViewpoint() }
         composable("TC2_TwoMapViews") { TC2TwoMapViews() }
         composable("TC3_TwoScreens") { TC3TwoScreens() }
@@ -50,7 +50,7 @@ fun SelectionScreen(navController: NavHostController) {
     LazyColumn() {
         item {
             ScreenSelectionItem(text = "TC 1: Single MapView", onClick = {
-                navController.navigate("TC1_Rotation")
+                navController.navigate("TC1_SingleMapView")
             })
         }
         item {

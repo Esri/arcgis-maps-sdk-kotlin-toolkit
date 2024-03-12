@@ -15,7 +15,7 @@ import com.arcgismaps.toolkit.geocompose.ViewpointPersistence
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TC1MainScreen() {
+fun TC1SingleMapView() {
     Scaffold(
         topBar = {
             TopAppBar(title = { Text(text = "TC1: Single MapView") })
