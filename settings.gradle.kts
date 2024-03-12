@@ -86,6 +86,7 @@ include(":scene-view-analysis-overlay-app")
 include(":scene-view-set-viewpoint-app")
 include(":scene-view-camera-controller-app")
 include(":scene-view-lighting-options-app")
+include(":viewpoint-persistence-tests-app")
 
 projects.forEach {
     project(":$it").projectDir = File(rootDir, "toolkit/$it")
@@ -106,3 +107,4 @@ project(":scene-view-analysis-overlay-app").projectDir = File(rootDir, "microapp
 project(":scene-view-set-viewpoint-app").projectDir = File(rootDir, "microapps/sceneviewsetviewpointapp/app")
 project(":scene-view-camera-controller-app").projectDir = File(rootDir, "microapps/sceneviewcameracontrollerapp/app")
 project(":scene-view-lighting-options-app").projectDir = File(rootDir, "microapps/sceneviewlightingoptionsapp/app")
+project(":viewpoint-persistence-tests-app").projectDir = File(rootDir, "microapps/viewpointpersistencetestsapp/app")

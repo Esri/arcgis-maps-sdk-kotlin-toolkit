@@ -15,6 +15,7 @@ minSdk = "26"
 kotlinxCoroutinesTest = "1.7.3"
 kotlinxSerializationJson = "1.5.1"
 truth = "1.1.4"
+navigationCompose = "2.7.7"
 
 [libraries]
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose"}
@@ -41,6 +42,7 @@ kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 dokka-versioning = { group = "org.jetbrains.dokka", name = "versioning-plugin", version.ref = "dokka" }
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }

@@ -17,6 +17,9 @@
 
 package com.arcgismaps.toolkit.geocompose
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
 /**
  * Enum class representing the different types of viewpoint persistence on a composable [MapView].
  *
@@ -26,13 +29,14 @@ package com.arcgismaps.toolkit.geocompose
  *
  * @since 200.4.0
  */
-public sealed class ViewpointPersistence {
+public sealed class ViewpointPersistence : Parcelable {
 
     /**
      * The viewpoint is not persisted.
      *
      * @since 200.4.0
      */
+    @Parcelize
     public object None : ViewpointPersistence()
 
     /**
@@ -40,6 +44,7 @@ public sealed class ViewpointPersistence {
      *
      * @since 200.4.0
      */
+    @Parcelize
     public class ByCenterAndScale : ViewpointPersistence() {
 
         // Note: ByCenterAndScale and ByBoundingGeometry could have been defined as singletons (object) but we
@@ -55,6 +60,7 @@ public sealed class ViewpointPersistence {
      *
      * @since 200.4.0
      */
+    @Parcelize
     public class ByBoundingGeometry : ViewpointPersistence() {
         override fun hashCode(): Int = 1
         override fun equals(other: Any?): Boolean = other is ByBoundingGeometry
