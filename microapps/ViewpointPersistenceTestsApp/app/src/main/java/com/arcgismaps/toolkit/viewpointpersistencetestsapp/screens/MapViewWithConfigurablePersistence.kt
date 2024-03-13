@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.toolkit.geocompose.MapView
+import com.arcgismaps.toolkit.geocompose.MapViewProxy
 import com.arcgismaps.toolkit.geocompose.ViewpointPersistence
 
 /**
@@ -45,7 +46,8 @@ fun MapViewWithConfigurablePersistence(
     onViewpointPersistenceSelected: (ViewpointPersistence) -> Unit,
     modifier: Modifier = Modifier,
     arcGISMap: ArcGISMap = remember { ArcGISMap(BasemapStyle.ArcGISTopographic) },
-    useSquareAspectRatio: Boolean = true
+    useSquareAspectRatio: Boolean = true,
+    mapViewProxy: MapViewProxy? = null
 ) {
     Surface(modifier = modifier.padding(16.dp)) {
         Column(
@@ -57,7 +59,8 @@ fun MapViewWithConfigurablePersistence(
             MapView(
                 arcGISMap = arcGISMap,
                 modifier = if (useSquareAspectRatio) Modifier.aspectRatio(1.0f) else Modifier.fillMaxSize(),
-                viewpointPersistence = viewpointPersistence
+                viewpointPersistence = viewpointPersistence,
+                mapViewProxy = mapViewProxy
             )
         }
     }
