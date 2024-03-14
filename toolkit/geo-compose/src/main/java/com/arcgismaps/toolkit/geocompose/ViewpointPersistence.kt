@@ -17,8 +17,8 @@
 
 package com.arcgismaps.toolkit.geocompose
 
+import android.os.Parcel
 import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
 
 /**
  * Enum class representing the different types of viewpoint persistence on a composable [MapView].
@@ -26,6 +26,10 @@ import kotlinx.parcelize.Parcelize
  * Viewpoint persistence determines how the viewpoint of a MapView is saved and restored across activity
  * or process recreation, for example, when the device is rotated or when the app is sent to the background
  * and then brought back to the foreground.
+ *
+ * If the [ViewpointPersistence] is implemented with a [MutableState] type, it must be wrapped in [rememberSaveable],
+ * otherwise the state will not be saved and restored across activity or process recreation and the
+ * behavior of the [MapView] will be unpredictable.
  *
  * @since 200.4.0
  */
@@ -36,16 +40,32 @@ public sealed class ViewpointPersistence : Parcelable {
      *
      * @since 200.4.0
      */
-    @Parcelize
-    public object None : ViewpointPersistence()
+    public object None : ViewpointPersistence() {
+        override fun describeContents(): Int = 0
+
+        override fun writeToParcel(dest: Parcel, flags: Int) {
+            // No state to write for this object
+        }
+
+        @JvmField
+        public val CREATOR: Parcelable.Creator<None> = object : Parcelable.Creator<None> {
+            override fun createFromParcel(source: Parcel): None = None
+            override fun newArray(size: Int): Array<None?> = arrayOfNulls(size)
+        }
+    }
 
     /**
      * The viewpoint is persisted by its center and scale.
      *
      * @since 200.4.0
      */
-    @Parcelize
     public class ByCenterAndScale : ViewpointPersistence() {
+
+        override fun describeContents(): Int = 0
+
+        override fun writeToParcel(dest: Parcel, flags: Int) {
+            // No state to write for this object
+        }
 
         // Note: ByCenterAndScale and ByBoundingGeometry could have been defined as singletons (object) but we
         // want to keep the possibility open to add instance state (properties) to these classes in the future,
@@ -53,6 +73,13 @@ public sealed class ViewpointPersistence : Parcelable {
         // achieve the same equality behaviour as a singleton would do.
         override fun hashCode(): Int = 1
         override fun equals(other: Any?): Boolean = other is ByCenterAndScale
+
+        @JvmField
+        public val CREATOR: Parcelable.Creator<ByCenterAndScale> =
+            object : Parcelable.Creator<ByCenterAndScale> {
+                override fun createFromParcel(source: Parcel): ByCenterAndScale = ByCenterAndScale()
+                override fun newArray(size: Int): Array<ByCenterAndScale?> = arrayOfNulls(size)
+            }
     }
 
     /**
@@ -60,9 +87,23 @@ public sealed class ViewpointPersistence : Parcelable {
      *
      * @since 200.4.0
      */
-    @Parcelize
     public class ByBoundingGeometry : ViewpointPersistence() {
+        override fun describeContents(): Int = 0
+
+        override fun writeToParcel(dest: Parcel, flags: Int) {
+            // No state to write for this object
+        }
+
         override fun hashCode(): Int = 1
         override fun equals(other: Any?): Boolean = other is ByBoundingGeometry
+
+        @JvmField
+        public val CREATOR: Parcelable.Creator<ByBoundingGeometry> =
+            object : Parcelable.Creator<ByBoundingGeometry> {
+                override fun createFromParcel(source: Parcel): ByBoundingGeometry =
+                    ByBoundingGeometry()
+
+                override fun newArray(size: Int): Array<ByBoundingGeometry?> = arrayOfNulls(size)
+            }
     }
 }
