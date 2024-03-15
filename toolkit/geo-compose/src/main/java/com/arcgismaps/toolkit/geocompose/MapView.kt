@@ -443,21 +443,24 @@ private fun ViewpointHandler(
         persistedViewpoint?.let { mapView.setViewpoint(it) }
         launch {
             mapView.viewpointChanged.collect {
-                persistedViewpoint = mapView.getViewpointByPersistence(currentViewpointPersistence)
+                val newViewpoint = mapView.getViewpointByPersistence(currentViewpointPersistence)
+                newViewpoint?.let {
+                    persistedViewpoint = it
+                }
 
                 currentOnViewpointChangedForCenterAndScale?.let { callback ->
                     val currentViewpoint =
-                        if (persistedViewpoint?.viewpointType != ViewpointType.CenterAndScale) {
+                        if (newViewpoint?.viewpointType != ViewpointType.CenterAndScale) {
                             mapView.getCurrentViewpoint(ViewpointType.CenterAndScale)
-                        } else persistedViewpoint
+                        } else newViewpoint
                     currentViewpoint?.let(callback)
                 }
 
                 currentOnViewpointChangedForBoundingGeometry?.let { callback ->
                     val currentViewpoint =
-                        if (persistedViewpoint?.viewpointType != ViewpointType.BoundingGeometry) {
+                        if (newViewpoint?.viewpointType != ViewpointType.BoundingGeometry) {
                             mapView.getCurrentViewpoint(ViewpointType.BoundingGeometry)
-                        } else persistedViewpoint
+                        } else newViewpoint
                     currentViewpoint?.let(callback)
                 }
 
