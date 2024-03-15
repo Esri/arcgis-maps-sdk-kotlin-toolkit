@@ -226,16 +226,16 @@ private class FloorFilterStateImpl(
     private suspend fun loadFloorManager() {
         geoModel.load().onSuccess {
             val floorManager: FloorManager = geoModel.floorManager
-                ?: throw IllegalStateException("The map is not configured to be floor aware")
+                ?: return
             floorManager.load().onSuccess {
                 _floorManager.value = floorManager
                 // no FloorLevel is selected at this point, so clear the FloorFilter from the selected GeoModel
                 filterMap()
             }.onFailure {
-                throw it
+                return
             }
         }.onFailure {
-            throw it
+            return
         }
     }
 
