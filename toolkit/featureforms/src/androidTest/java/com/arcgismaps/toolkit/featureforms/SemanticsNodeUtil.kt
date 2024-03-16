@@ -72,7 +72,7 @@ private fun SemanticsNodeInteractionCollection.onChildWithText(value: String, re
  *
  * @param value the text string for which to search.
  * @param recurse if true will recurse through the whole semantic node hierarchy.
- * @throws AssertionError if the child with the content description does not exist.
+ * @throws AssertionError if the child with the given text does not exist.
  */
 @Throws(AssertionError::class)
 internal fun SemanticsNodeInteraction.onChildWithText(value: String, recurse: Boolean = false): SemanticsNodeInteraction {
