@@ -15,11 +15,11 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">ґ_The certificate provided by %1$s is not signed by a trusted authority____________________________________Ї.</string>
-    <string name="cancel">ґ_Cancel_____________Ї</string>
-    <string name="allow_connection">ґ_Dangerous: Allow Connection____________________________Ї</string>
-    <string name="username_password_login_message">ґ_Please login to %1$s_____________________Ї</string>
-    <string name="username_label">ґ_Username_________________Ї</string>
-    <string name="password_label">ґ_Password_________________Ї</string>
-    <string name="login">ґ_Login___________Ї</string>
+    <string name="server_trust_message">Сертифікат, наданий %1$s, не підписаний довіреним центром.</string>
+    <string name="cancel">Скасувати</string>
+    <string name="allow_connection">Небезпечно: дозволити підключення</string>
+    <string name="username_password_login_message">Увійдіть в %1$s</string>
+    <string name="username_label">Ім'я користувача</string>
+    <string name="password_label">Пароль</string>
+    <string name="login">Увійти в систему</string>
 </resources>

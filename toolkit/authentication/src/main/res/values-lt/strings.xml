@@ -15,11 +15,11 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">Į_The certificate provided by %1$s is not signed by a trusted authority____________________________________š.</string>
-    <string name="cancel">Į_Cancel_____________š</string>
-    <string name="allow_connection">Į_Dangerous: Allow Connection____________________________š</string>
-    <string name="username_password_login_message">Į_Please login to %1$s_____________________š</string>
-    <string name="username_label">Į_Username_________________š</string>
-    <string name="password_label">Į_Password_________________š</string>
-    <string name="login">Į_Login___________š</string>
+    <string name="server_trust_message">%1$s pateiktas sertifikatas nepasirašytas patikimos institucijos.</string>
+    <string name="cancel">Atšaukti</string>
+    <string name="allow_connection">Pavojinga: leisti prisijungti</string>
+    <string name="username_password_login_message">Prisijunkite prie %1$s</string>
+    <string name="username_label">Naudotojo vardas</string>
+    <string name="password_label">Slaptažodis</string>
+    <string name="login">Prisijungti</string>
 </resources>

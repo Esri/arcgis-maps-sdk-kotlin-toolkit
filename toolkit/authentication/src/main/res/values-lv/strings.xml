@@ -15,11 +15,11 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">ķ_The certificate provided by %1$s is not signed by a trusted authority____________________________________ū.</string>
-    <string name="cancel">ķ_Cancel_____________ū</string>
-    <string name="allow_connection">ķ_Dangerous: Allow Connection____________________________ū</string>
-    <string name="username_password_login_message">ķ_Please login to %1$s_____________________ū</string>
-    <string name="username_label">ķ_Username_________________ū</string>
-    <string name="password_label">ķ_Password_________________ū</string>
-    <string name="login">ķ_Login___________ū</string>
+    <string name="server_trust_message">%1$s nodrošināto sertifikātu nav parakstījusi uzticama iestāde.</string>
+    <string name="cancel">Atcelt</string>
+    <string name="allow_connection">Bīstami: atļaut savienojumu</string>
+    <string name="username_password_login_message">Lūdzu, piesakieties %1$s</string>
+    <string name="username_label">Lietotājvārds</string>
+    <string name="password_label">Parole</string>
+    <string name="login">Pieteikties</string>
 </resources>

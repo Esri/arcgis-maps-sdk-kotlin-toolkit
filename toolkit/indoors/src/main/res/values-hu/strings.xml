@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
-    <string name="floor_filter_view_filter_hint_sites">í_Filter sites…______________ő</string>
-    <string name="floor_filter_view_filter_hint_facilities">í_Filter facilities…___________________ő</string>
-    <string name="floor_filter_select_site">í_Select a site______________ő</string>
-    <string name="floor_filter_select_facility">í_Select a facility__________________ő</string>
-    <string name="floor_filter_no_results">í_No results found__________________ő.</string>
-    <string name="floor_filter_site_selector_top_bar">í_Site\u0020-\u0020__________________ő</string>
+    <string name="floor_filter_view_filter_hint_sites">Helyek szűrése...</string>
+    <string name="floor_filter_view_filter_hint_facilities">Létesítmények szűrése...</string>
+    <string name="floor_filter_select_site">Válasszon ki egy helyet</string>
+    <string name="floor_filter_select_facility">Válasszon ki egy létesítményt</string>
+    <string name="floor_filter_no_results">Nincs találat.</string>
+    <string name="floor_filter_site_selector_top_bar">Site\u0020-\u0020</string>
 </resources>

@@ -15,11 +15,11 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">ĺ_The certificate provided by %1$s is not signed by a trusted authority____________________________________ľ.</string>
-    <string name="cancel">ĺ_Cancel_____________ľ</string>
-    <string name="allow_connection">ĺ_Dangerous: Allow Connection____________________________ľ</string>
-    <string name="username_password_login_message">ĺ_Please login to %1$s_____________________ľ</string>
-    <string name="username_label">ĺ_Username_________________ľ</string>
-    <string name="password_label">ĺ_Password_________________ľ</string>
-    <string name="login">ĺ_Login___________ľ</string>
+    <string name="server_trust_message">Certifikát poskytnutý %1$s nie je podpísaný dôveryhodnou autoritou.</string>
+    <string name="cancel">Zrušiť</string>
+    <string name="allow_connection">Nebezpečné: Povoliť pripojenie</string>
+    <string name="username_password_login_message">Prihláste sa prosím do %1$s</string>
+    <string name="username_label">Používateľské meno</string>
+    <string name="password_label">Heslo</string>
+    <string name="login">Prihlásenie</string>
 </resources>

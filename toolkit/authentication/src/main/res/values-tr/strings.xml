@@ -15,11 +15,11 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">ı_The certificate provided by %1$s is not signed by a trusted authority____________________________________İ.</string>
-    <string name="cancel">ı_Cancel_____________İ</string>
-    <string name="allow_connection">ı_Dangerous: Allow Connection____________________________İ</string>
-    <string name="username_password_login_message">ı_Please login to %1$s_____________________İ</string>
-    <string name="username_label">ı_Username_________________İ</string>
-    <string name="password_label">ı_Password_________________İ</string>
-    <string name="login">ı_Login___________İ</string>
+    <string name="server_trust_message">%1$s tarafından sağlanmış sertifika, güvenilir bir otorite tarafından imzalanmamış.</string>
+    <string name="cancel">İptal</string>
+    <string name="allow_connection">Tehlikeli: Bağlantıya İzin Ver</string>
+    <string name="username_password_login_message">Lütfen %1$s'ta oturum açın</string>
+    <string name="username_label">Kullanıcı adı</string>
+    <string name="password_label">Parola</string>
+    <string name="login">Oturum aç</string>
 </resources>

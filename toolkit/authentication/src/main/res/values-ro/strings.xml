@@ -15,11 +15,11 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">Ă_The certificate provided by %1$s is not signed by a trusted authority____________________________________ș.</string>
-    <string name="cancel">Ă_Cancel_____________ș</string>
-    <string name="allow_connection">Ă_Dangerous: Allow Connection____________________________ș</string>
-    <string name="username_password_login_message">Ă_Please login to %1$s_____________________ș</string>
-    <string name="username_label">Ă_Username_________________ș</string>
-    <string name="password_label">Ă_Password_________________ș</string>
-    <string name="login">Ă_Login___________ș</string>
+    <string name="server_trust_message">Certificatul furnizat de %1$s nu este semnat de o autoritate de încredere.</string>
+    <string name="cancel">Anulare</string>
+    <string name="allow_connection">Periculos: permiteți conectarea</string>
+    <string name="username_password_login_message">Conectați-vă la %1$s</string>
+    <string name="username_label">Nume de utilizator</string>
+    <string name="password_label">Parolă</string>
+    <string name="login">Autentificare</string>
 </resources>

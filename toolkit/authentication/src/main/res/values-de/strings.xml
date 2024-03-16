@@ -15,11 +15,11 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">ä_The certificate provided by %1$s is not signed by a trusted authority____________________________________Ü.</string>
-    <string name="cancel">ä_Cancel_____________Ü</string>
-    <string name="allow_connection">ä_Dangerous: Allow Connection____________________________Ü</string>
-    <string name="username_password_login_message">ä_Please login to %1$s_____________________Ü</string>
-    <string name="username_label">ä_Username_________________Ü</string>
-    <string name="password_label">ä_Password_________________Ü</string>
-    <string name="login">ä_Login___________Ü</string>
+    <string name="server_trust_message">Das von %1$s bereitgestellte Zertifikat wurde nicht von einer vertrauenswürdigen Stelle unterzeichnet.</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="allow_connection">Warnung: Verbindung zulassen</string>
+    <string name="username_password_login_message">Melden Sie sich bei %1$s an.</string>
+    <string name="username_label">Benutzername</string>
+    <string name="password_label">Kennwort</string>
+    <string name="login">Anmeldung</string>
 </resources>

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
-    <string name="floor_filter_view_filter_hint_sites">Å_Filter sites…______________ö</string>
-    <string name="floor_filter_view_filter_hint_facilities">Å_Filter facilities…___________________ö</string>
-    <string name="floor_filter_select_site">Å_Select a site______________ö</string>
-    <string name="floor_filter_select_facility">Å_Select a facility__________________ö</string>
-    <string name="floor_filter_no_results">Å_No results found__________________ö.</string>
-    <string name="floor_filter_site_selector_top_bar">Å_Site\u0020-\u0020__________________ö</string>
+    <string name="floor_filter_view_filter_hint_sites">Suodata sivustot...</string>
+    <string name="floor_filter_view_filter_hint_facilities">Suodata palvelut...</string>
+    <string name="floor_filter_select_site">Valitse sivusto</string>
+    <string name="floor_filter_select_facility">Valitse palvelu</string>
+    <string name="floor_filter_no_results">Tuloksia ei löytynyt.</string>
+    <string name="floor_filter_site_selector_top_bar">Site\u0020-\u0020</string>
 </resources>

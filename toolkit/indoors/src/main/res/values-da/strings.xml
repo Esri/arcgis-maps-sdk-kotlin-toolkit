@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
-    <string name="floor_filter_view_filter_hint_sites">ø_Filter sites…______________å</string>
-    <string name="floor_filter_view_filter_hint_facilities">ø_Filter facilities…___________________å</string>
-    <string name="floor_filter_select_site">ø_Select a site______________å</string>
-    <string name="floor_filter_select_facility">ø_Select a facility__________________å</string>
-    <string name="floor_filter_no_results">ø_No results found__________________å.</string>
-    <string name="floor_filter_site_selector_top_bar">ø_Site\u0020-\u0020__________________å</string>
+    <string name="floor_filter_view_filter_hint_sites">Filtrer websteder...</string>
+    <string name="floor_filter_view_filter_hint_facilities">Filtrer faciliteter...</string>
+    <string name="floor_filter_select_site">Vælg et websted</string>
+    <string name="floor_filter_select_facility">Vælg en facilitet</string>
+    <string name="floor_filter_no_results">Ingen resultater fundet.</string>
+    <string name="floor_filter_site_selector_top_bar">Site\u0020-\u0020</string>
 </resources>

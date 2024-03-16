@@ -15,11 +15,11 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">Đ_The certificate provided by %1$s is not signed by a trusted authority____________________________________ớ.</string>
-    <string name="cancel">Đ_Cancel_____________ớ</string>
-    <string name="allow_connection">Đ_Dangerous: Allow Connection____________________________ớ</string>
-    <string name="username_password_login_message">Đ_Please login to %1$s_____________________ớ</string>
-    <string name="username_label">Đ_Username_________________ớ</string>
-    <string name="password_label">Đ_Password_________________ớ</string>
-    <string name="login">Đ_Login___________ớ</string>
+    <string name="server_trust_message">Chứng chỉ do %1$s cung cấp không được ký bởi cơ quan đáng tin cậy.</string>
+    <string name="cancel">Hủy</string>
+    <string name="allow_connection">Nguy hiểm: Cho phép Kết nối</string>
+    <string name="username_password_login_message">Vui lòng đăng nhập vào %1$s</string>
+    <string name="username_label">Tên người dùng</string>
+    <string name="password_label">Mật khẩu</string>
+    <string name="login">Đăng nhập</string>
 </resources>

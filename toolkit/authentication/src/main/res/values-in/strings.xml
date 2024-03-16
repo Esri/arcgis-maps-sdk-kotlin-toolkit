@@ -15,11 +15,11 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">ng_The certificate provided by %1$s is not signed by a trusted authority____________________________________ny.</string>
-    <string name="cancel">ng_Cancel_____________ny</string>
-    <string name="allow_connection">ng_Dangerous: Allow Connection____________________________ny</string>
-    <string name="username_password_login_message">ng_Please login to %1$s_____________________ny</string>
-    <string name="username_label">ng_Username_________________ny</string>
-    <string name="password_label">ng_Password_________________ny</string>
-    <string name="login">ng_Login___________ny</string>
+    <string name="server_trust_message">Sertifikat yang diberikan oleh %1$s tidak ditandatangani oleh otoritas tepercaya.</string>
+    <string name="cancel">Batalkan</string>
+    <string name="allow_connection">Berbahaya: Izinkan Koneksi</string>
+    <string name="username_password_login_message">Silakan login ke %1$s</string>
+    <string name="username_label">Nama Pengguna</string>
+    <string name="password_label">Kata Sandi</string>
+    <string name="login">Masuk</string>
 </resources>

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
-    <string name="floor_filter_view_filter_hint_sites">Ă_Filter sites…______________ș</string>
-    <string name="floor_filter_view_filter_hint_facilities">Ă_Filter facilities…___________________ș</string>
-    <string name="floor_filter_select_site">Ă_Select a site______________ș</string>
-    <string name="floor_filter_select_facility">Ă_Select a facility__________________ș</string>
-    <string name="floor_filter_no_results">Ă_No results found__________________ș.</string>
-    <string name="floor_filter_site_selector_top_bar">Ă_Site\u0020-\u0020__________________ș</string>
+    <string name="floor_filter_view_filter_hint_sites">Filtrare site-uri...</string>
+    <string name="floor_filter_view_filter_hint_facilities">Filtrare facilități...</string>
+    <string name="floor_filter_select_site">Selectați un site</string>
+    <string name="floor_filter_select_facility">Selectați un punct de servicii</string>
+    <string name="floor_filter_no_results">Nu a fost găsit niciun rezultat.</string>
+    <string name="floor_filter_site_selector_top_bar">Site\u0020-\u0020</string>
 </resources>
