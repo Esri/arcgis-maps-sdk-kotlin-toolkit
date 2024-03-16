@@ -85,7 +85,7 @@ public sealed class ValidationErrorVisibility {
  * when the validation errors are visible. Default is [ValidationErrorVisibility.Automatic] which
  * indicates errors are only visible once the respective field gains focus.
  *
- * @since 200.2.0
+ * @since 200.4.0
  */
 @Composable
 public fun FeatureForm(
