@@ -20,8 +20,8 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
-    id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
+    id("com.google.devtools.ksp")
 }
 
 secrets {
