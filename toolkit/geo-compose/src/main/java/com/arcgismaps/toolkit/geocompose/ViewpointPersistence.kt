@@ -74,12 +74,16 @@ public sealed class ViewpointPersistence : Parcelable {
         override fun hashCode(): Int = 1
         override fun equals(other: Any?): Boolean = other is ByCenterAndScale
 
-        @JvmField
-        public val CREATOR: Parcelable.Creator<ByCenterAndScale> =
-            object : Parcelable.Creator<ByCenterAndScale> {
-                override fun createFromParcel(source: Parcel): ByCenterAndScale = ByCenterAndScale()
-                override fun newArray(size: Int): Array<ByCenterAndScale?> = arrayOfNulls(size)
-            }
+        public companion object {
+            @JvmField
+            public val CREATOR: Parcelable.Creator<ByCenterAndScale> =
+                object : Parcelable.Creator<ByCenterAndScale> {
+                    override fun createFromParcel(source: Parcel): ByCenterAndScale =
+                        ByCenterAndScale()
+
+                    override fun newArray(size: Int): Array<ByCenterAndScale?> = arrayOfNulls(size)
+                }
+        }
     }
 
     /**
@@ -97,13 +101,16 @@ public sealed class ViewpointPersistence : Parcelable {
         override fun hashCode(): Int = 1
         override fun equals(other: Any?): Boolean = other is ByBoundingGeometry
 
-        @JvmField
-        public val CREATOR: Parcelable.Creator<ByBoundingGeometry> =
-            object : Parcelable.Creator<ByBoundingGeometry> {
-                override fun createFromParcel(source: Parcel): ByBoundingGeometry =
-                    ByBoundingGeometry()
+        public companion object {
+            @JvmField
+            public val CREATOR: Parcelable.Creator<ByBoundingGeometry> =
+                object : Parcelable.Creator<ByBoundingGeometry> {
+                    override fun createFromParcel(source: Parcel): ByBoundingGeometry =
+                        ByBoundingGeometry()
 
-                override fun newArray(size: Int): Array<ByBoundingGeometry?> = arrayOfNulls(size)
-            }
+                    override fun newArray(size: Int): Array<ByBoundingGeometry?> =
+                        arrayOfNulls(size)
+                }
+        }
     }
 }
