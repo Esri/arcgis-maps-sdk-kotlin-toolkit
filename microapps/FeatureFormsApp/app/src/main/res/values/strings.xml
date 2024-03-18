@@ -1,0 +1,45 @@
+<!--
+  ~ Copyright 2024 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+<resources>
+    <string name="app_name">FeatureFormsApp</string>
+    <string name="edit_feature">Edit Feature</string>
+    <string name="agol_portal_url">https://www.arcgis.com</string>
+    <string name="login">Login</string>
+    <string name="cancel">Cancel</string>
+    <string name="enter_enterprise_url">"Enter an URL for ArcGIS Enterprise"</string>
+    <string name="signing_in">Signing in..</string>
+    <string name="sign_in_with_default_credentials">Sign in using built-in Credentials</string>
+    <string name="sign_in_with_enterprise">Sign in with ArcGIS Enterprise</string>
+    <string name="skin_sign_in">Skip sign in</string>
+    <string name="maximum_character_length_exceeded">Maximum character length exceeded</string>
+    <string name="date_less_than_minimum">Date less than minimum</string>
+    <string name="value_must_be_of_correct_type">Value must be of correct type.</string>
+    <string name="date_exceeds_maximum">Date exceeds maximum</string>
+    <string name="exceeds_maximum_value">Exceeds maximum value</string>
+    <string name="minimum_character_length_not_met">Minimum character length not met</string>
+    <string name="less_than_minimum_value">Less than minimum value</string>
+    <string name="value_must_not_be_empty">Value must not be empty</string>
+    <string name="value_must_be_within_domain">Value must be within domain</string>
+    <string name="required">Required</string>
+    <string name="unknown_error">Unknown Error</string>
+    <string name="the_form_has_errors">The Form has errors</string>
+    <string name="errors_must_be_fixed_to_submit_this_form">Errors must be fixed to submit this form</string>
+    <string name="attributes_failed">%1$s attributes failed.</string>
+    <string name="view">View</string>
+    <string name="discard">Discard</string>
+    <string name="discard_edits">Discard Edits?</string>
+    <string name="all_changes_will_be_lost">All changes made within the form will be lost.</string>
+</resources>
