@@ -61,12 +61,6 @@ public sealed class ViewpointPersistence : Parcelable {
      */
     public class ByCenterAndScale : ViewpointPersistence() {
 
-        override fun describeContents(): Int = 0
-
-        override fun writeToParcel(dest: Parcel, flags: Int) {
-            // No state to write for this object
-        }
-
         // Note: ByCenterAndScale and ByBoundingGeometry could have been defined as singletons (object) but we
         // want to keep the possibility open to add instance state (properties) to these classes in the future,
         // thus we had to declare them as classes. This meant we had to override hashCode and equals in order to
@@ -74,6 +68,11 @@ public sealed class ViewpointPersistence : Parcelable {
         override fun hashCode(): Int = 1
         override fun equals(other: Any?): Boolean = other is ByCenterAndScale
 
+        override fun describeContents(): Int = 0
+
+        override fun writeToParcel(dest: Parcel, flags: Int) {
+            // No state to write for this object
+        }
         public companion object {
             @JvmField
             public val CREATOR: Parcelable.Creator<ByCenterAndScale> =
@@ -92,15 +91,15 @@ public sealed class ViewpointPersistence : Parcelable {
      * @since 200.4.0
      */
     public class ByBoundingGeometry : ViewpointPersistence() {
+
+        override fun hashCode(): Int = 1
+        override fun equals(other: Any?): Boolean = other is ByBoundingGeometry
+
         override fun describeContents(): Int = 0
 
         override fun writeToParcel(dest: Parcel, flags: Int) {
             // No state to write for this object
         }
-
-        override fun hashCode(): Int = 1
-        override fun equals(other: Any?): Boolean = other is ByBoundingGeometry
-
         public companion object {
             @JvmField
             public val CREATOR: Parcelable.Creator<ByBoundingGeometry> =
