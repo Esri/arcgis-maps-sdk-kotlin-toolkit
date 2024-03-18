@@ -1,6 +1,6 @@
 # FeatureForms Micro-app
 
-This micro-app demonstrates the use of the `FeatureForm` toolkit component which provides a rich, dynamic, and responsive form
+This micro-app demonstrates the use of the [FeatureForm](../../toolkit/featureforms/README.md) toolkit component which provides a rich, dynamic, and responsive form
 for editing Feature attributes.
 
 ![Screenshot](screenshot.gif)
