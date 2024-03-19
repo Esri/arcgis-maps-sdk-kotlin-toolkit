@@ -20,9 +20,8 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
-    id("org.jetbrains.kotlin.kapt")
-    id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
+    id("com.google.devtools.ksp")
 }
 
 secrets {
@@ -88,12 +87,12 @@ dependencies {
     // hilt
     implementation(libs.hilt.android.core)
     implementation(libs.androidx.hilt.navigation.compose)
-    kapt(libs.hilt.compiler)
+    ksp(libs.hilt.compiler)
     // room
     implementation(libs.room.runtime)
     annotationProcessor(libs.room.compiler)
     implementation(libs.room.ext)
-    kapt(libs.room.compiler)
+    ksp(libs.room.compiler)
     // jetpack window manager
     implementation(libs.androidx.window)
     implementation(libs.androidx.window.core)

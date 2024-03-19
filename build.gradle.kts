@@ -23,21 +23,10 @@ plugins {
     alias(libs.plugins.binary.compatibility.validator) apply false
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.gradle.secrets) apply false
-    alias(libs.plugins.kapt) apply false
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.hilt) apply false
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.dokka) apply false
-}
-
-allprojects{
-    // kapt compiler cannot figure out that it needs to target the same bytecode as kotlin and java compilers
-    // without this. Furthermore, KaptGenerateStubs is unresolved in module gradle.
-    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KaptGenerateStubs::class).all {
-        kotlinOptions {
-            jvmTarget = JavaVersion.VERSION_1_8.toString()
-        }
-    }
 }
 
 buildscript {
