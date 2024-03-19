@@ -73,14 +73,13 @@ import androidx.window.core.layout.WindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
 import com.arcgismaps.exceptions.FeatureFormValidationException
 import com.arcgismaps.toolkit.composablemap.ComposableMap
-import com.arcgismaps.toolkit.featureforms.theme.EditableTextFieldColors
 import com.arcgismaps.toolkit.featureforms.FeatureForm
+import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
+import com.arcgismaps.toolkit.featureforms.theme.EditableTextFieldColors
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormColorScheme
-import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTheme
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTypography
 import com.arcgismaps.toolkit.featureforms.theme.ReadOnlyTextFieldColors
 import com.arcgismaps.toolkit.featureforms.theme.ReadOnlyTextFieldTypography
-import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
 import com.arcgismaps.toolkit.featureformsapp.R
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.BottomSheetMaxWidth
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetExpansionHeight
