@@ -15,7 +15,7 @@
  *
  */
 
-package com.arcgismaps.toolkit.geocompose
+package com.arcgismaps.toolkit.geoviewcompose
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
@@ -116,7 +116,7 @@ import kotlinx.coroutines.launch
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable MapView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable MapView
  * @param onDrawStatusChanged lambda invoked when the draw status of the composable MapView is changed
- * @sample com.arcgismaps.toolkit.geocompose.samples.MapViewSample
+ * @sample com.arcgismaps.toolkit.geoviewcompose.samples.MapViewSample
  * @see
  * - <a href="https://developers.arcgis.com/kotlin/maps-2d/tutorials/display-a-map/">Display a map tutorial</a>
  * - <a href="https://developers.arcgis.com/kotlin/maps-2d/tutorials/display-a-web-map/">Display a web map tutorial</a>
@@ -552,7 +552,7 @@ public inline fun rememberLocationDisplay(
 /**
  * Contains default values for the composable MapView.
  *
- * @see com.arcgismaps.toolkit.geocompose.MapView
+ * @see com.arcgismaps.toolkit.geoviewcompose.MapView
  * @since 200.4.0
  */
 public object MapViewDefaults {

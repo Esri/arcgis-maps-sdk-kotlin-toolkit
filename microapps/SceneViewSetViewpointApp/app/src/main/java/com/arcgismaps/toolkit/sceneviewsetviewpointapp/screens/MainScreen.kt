@@ -49,8 +49,8 @@ import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Bookmark
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.view.Camera
-import com.arcgismaps.toolkit.geocompose.SceneView
-import com.arcgismaps.toolkit.geocompose.SceneViewProxy
+import com.arcgismaps.toolkit.geoviewcompose.SceneView
+import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 

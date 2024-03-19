@@ -15,7 +15,7 @@
  *
  */
 
-package com.arcgismaps.toolkit.geocompose
+package com.arcgismaps.toolkit.geoviewcompose
 
 import android.graphics.drawable.BitmapDrawable
 import androidx.compose.runtime.Stable
