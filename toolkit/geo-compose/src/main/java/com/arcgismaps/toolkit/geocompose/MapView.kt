@@ -37,8 +37,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.geometry.GeometryEngine
-import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.Polygon
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISMap
@@ -424,11 +422,7 @@ private fun ViewpointHandler(
     var persistedViewpoint by rememberSaveable(
         saver = Saver(
             save = {
-                val viewpoint = it.value ?: return@Saver null
-                // Normalize the viewpoint before persisting it as restoring it after rotation
-                // may fail if the viewpoint has crossed the central meridian
-                val viewpointToPersist = viewpoint.tryNormalize()
-                viewpointToPersist.toJson()
+                it.value?.toJson()
             },
             restore = {
                 mutableStateOf(Viewpoint.fromJsonOrNull(it))
@@ -476,42 +470,6 @@ private fun ViewpointHandler(
                 }
         }
     }
-}
-
-/**
- * Normalizes this viewpoint's target geometry.
- *
- * If the spatial reference is null or not pannable or geographic, the viewpoint is returned as is.
- * Otherwise, the viewpoint's target geometry is normalized and a new viewpoint is created with the
- * normalized geometry.
- *
- * @since 200.4.0
- */
-private fun Viewpoint.tryNormalize(): Viewpoint {
-    // Normalization should only be done with pannable or geographic spatial references.
-    val sr = targetGeometry.spatialReference ?: return this
-    if (!sr.isPannable && !sr.isGeographic) return this
-    // if normalization fails, just return the viewpoint as is
-    val normalizedGeometry =
-        GeometryEngine.normalizeCentralMeridian(targetGeometry) ?: return this
-
-    val normalizedViewpoint = when (viewpointType) {
-        ViewpointType.CenterAndScale -> {
-            Viewpoint(
-                center = normalizedGeometry as Point,
-                scale = targetScale,
-                rotation = rotation
-            )
-        }
-
-        ViewpointType.BoundingGeometry -> {
-            Viewpoint(
-                boundingGeometry = normalizedGeometry,
-                rotation = rotation
-            )
-        }
-    }
-    return normalizedViewpoint
 }
 
 /**
