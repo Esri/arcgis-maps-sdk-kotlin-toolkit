@@ -23,7 +23,7 @@ plugins {
 }
 
 android {
-    namespace = "com.arcgismaps.toolkit.geocompose"
+    namespace = "com.arcgismaps.toolkit.geoviewcompose"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
