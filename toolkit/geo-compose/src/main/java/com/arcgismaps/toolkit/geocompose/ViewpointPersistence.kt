@@ -27,9 +27,10 @@ import android.os.Parcelable
  * or process recreation, for example, when the device is rotated or when the app is sent to the background
  * and then brought back to the foreground.
  *
- * If the [ViewpointPersistence] is implemented with a [MutableState] type, it must be wrapped in [rememberSaveable],
- * otherwise the state will not be saved and restored across activity or process recreation and the
- * behavior of the [MapView] will be unpredictable.
+ * Note that a [MutableState] of [ViewpointPersistence] can not be used with [remember], because it will
+ * not be able to restore the state across process recreation. Instead, use [MutableState] of [Viewpoint]
+ * inside of [rememberSaveable] or within a [ViewModel]. Note that this class implements [Parcelable] so it
+ * can be used with [rememberSaveable] without any need for a custom [Saver].
  *
  * @since 200.4.0
  */
