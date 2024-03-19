@@ -33,6 +33,11 @@ private val DefaultSelectionColor = Color(0xFF4286F4)
  * Provides a default [FeatureFormColorScheme] via [colorScheme] and a default [FeatureFormTypography]
  * via [typography].
  *
+ * Creates a default theme from statically defined tokens. Do not use this at runtime, instead the
+ * FeatureFormTheme must always be specified from the current MaterialTheme.
+ *
+ * This mainly provides a default theme for use within previews.
+ *
  */
 internal object DefaultThemeTokens {
 

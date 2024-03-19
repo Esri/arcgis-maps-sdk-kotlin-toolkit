@@ -46,7 +46,8 @@ import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseTextField
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTheme
-import com.arcgismaps.toolkit.featureforms.theme.LocalFeatureFormTheme
+import com.arcgismaps.toolkit.featureforms.theme.LocalColorScheme
+import com.arcgismaps.toolkit.featureforms.theme.LocalTypography
 
 @Composable
 internal fun RadioButtonField(
@@ -97,9 +98,8 @@ private fun RadioButtonField(
     modifier: Modifier = Modifier,
     onValueChanged: (Any?) -> Unit = {}
 ) {
-    val theme = LocalFeatureFormTheme.current
-    val colors = theme.colorScheme.radioButtonFieldColors
-    val typography = theme.typography.radioButtonFieldTypography
+    val colors = LocalColorScheme.current.radioButtonFieldColors
+    val typography = LocalTypography.current.radioButtonFieldTypography
     val options = if (!required) {
         if (showNoValueOption == FormInputNoValueOption.Show) {
             mapOf(null to noValueLabel) + codedValues

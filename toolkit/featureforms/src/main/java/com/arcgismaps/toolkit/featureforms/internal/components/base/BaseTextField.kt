@@ -56,9 +56,10 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.toolkit.featureforms.theme.EditableTextFieldColors
-import com.arcgismaps.toolkit.featureforms.theme.LocalFeatureFormTheme
 import com.arcgismaps.toolkit.featureforms.internal.utils.PlaceholderTransformation
+import com.arcgismaps.toolkit.featureforms.theme.EditableTextFieldColors
+import com.arcgismaps.toolkit.featureforms.theme.LocalColorScheme
+import com.arcgismaps.toolkit.featureforms.theme.LocalTypography
 
 
 /**
@@ -112,7 +113,6 @@ internal fun BaseTextField(
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     trailingContent: (@Composable () -> Unit)? = null
 ) {
-    val theme = LocalFeatureFormTheme.current
     val focusManager = LocalFocusManager.current
     var isFocused by remember { mutableStateOf(false) }
     val visualTransformation = if (text.isEmpty())
@@ -127,11 +127,11 @@ internal fun BaseTextField(
     }
     val contentLength = "${text.length}"
     val isSupportingTextAvailable = supportingText.isNotEmpty() || (showCharacterCount && isFocused)
-    val colors = theme.colorScheme.editableTextFieldColors.toTextFieldColors(
+    val colors = LocalColorScheme.current.editableTextFieldColors.toTextFieldColors(
         textIsEmpty = text.isEmpty(),
         placeHolderIsEmpty = placeholder.isEmpty()
     )
-    val typography = theme.typography.editableTextFieldTypography
+    val typography = LocalTypography.current.editableTextFieldTypography
     Column(modifier = modifier
         .onFocusChanged {
             isFocused = it.hasFocus
@@ -257,9 +257,8 @@ private fun ReadOnlyTextField(
     modifier: Modifier = Modifier,
     supportingText: String,
 ) {
-    val theme = LocalFeatureFormTheme.current
-    val colors = theme.colorScheme.readOnlyTextFieldColors
-    val typography = theme.typography.readOnlyTextFieldTypography
+    val colors = LocalColorScheme.current.readOnlyTextFieldColors
+    val typography = LocalTypography.current.readOnlyTextFieldTypography
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
             text = label,

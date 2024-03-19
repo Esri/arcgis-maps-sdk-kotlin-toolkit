@@ -109,7 +109,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                     ValidationErrorVisibility.Automatic
                 )
             }
-            
+
             is UIState.Switching -> {
                 val state = uiState as UIState.Switching
                 Pair(
@@ -192,19 +192,17 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                             featureForm = featureForm,
                             modifier = Modifier.fillMaxSize(),
                             validationErrorVisibility = errorVisibility,
-                            theme = FeatureFormTheme.createDefaults(
-                                colorScheme = FeatureFormColorScheme.createDefaults(
-                                    editableTextFieldColors = EditableTextFieldColors.createDefaults(
-                                        errorTextColor = Color.Gray
-                                    ),
-                                    readOnlyTextFieldColors = ReadOnlyTextFieldColors.createDefaults(
-                                        labelColor = Color.Green
-                                    )
+                            colorScheme = FeatureFormColorScheme.createDefaults(
+                                editableTextFieldColors = EditableTextFieldColors.createDefaults(
+                                    errorTextColor = Color.Gray
                                 ),
-                                typography = FeatureFormTypography.createDefaults(
-                                    readOnlyTextFieldTypography = ReadOnlyTextFieldTypography.createDefaults(
-                                        labelStyle = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
-                                    )
+                                readOnlyTextFieldColors = ReadOnlyTextFieldColors.createDefaults(
+                                    labelColor = Color.Green
+                                )
+                            ),
+                            typography = FeatureFormTypography.createDefaults(
+                                readOnlyTextFieldTypography = ReadOnlyTextFieldTypography.createDefaults(
+                                    labelStyle = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
                                 )
                             )
                         )
@@ -304,7 +302,7 @@ fun TopFormBar(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SubmitForm(errors : List<ErrorInfo>, onDismissRequest: () -> Unit) {
+private fun SubmitForm(errors: List<ErrorInfo>, onDismissRequest: () -> Unit) {
     if (errors.isEmpty()) {
         // show a progress dialog if no errors are present
         AlertDialog(

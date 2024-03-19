@@ -50,7 +50,8 @@ import com.arcgismaps.toolkit.featureforms.internal.components.base.FormStateCol
 import com.arcgismaps.toolkit.featureforms.internal.components.base.MutableFormStateCollection
 import com.arcgismaps.toolkit.featureforms.internal.components.base.getState
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTheme
-import com.arcgismaps.toolkit.featureforms.theme.LocalFeatureFormTheme
+import com.arcgismaps.toolkit.featureforms.theme.LocalColorScheme
+import com.arcgismaps.toolkit.featureforms.theme.LocalTypography
 
 @Composable
 internal fun GroupElement(
@@ -81,7 +82,7 @@ private fun GroupElement(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    val colors = LocalFeatureFormTheme.current.colorScheme.groupElementColors
+    val colors = LocalColorScheme.current.groupElementColors
     Card(
         modifier = modifier,
         shape = GroupElementDefaults.containerShape,
@@ -121,9 +122,8 @@ private fun GroupElementHeader(
     isExpanded: Boolean,
     onClick: () -> Unit
 ) {
-    val theme = LocalFeatureFormTheme.current
-    val colors = theme.colorScheme.groupElementColors
-    val typography = theme.typography.groupElementTypography
+    val colors = LocalColorScheme.current.groupElementColors
+    val typography = LocalTypography.current.groupElementTypography
     Row(modifier = modifier
         .clickable {
             onClick()

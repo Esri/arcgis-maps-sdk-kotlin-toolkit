@@ -18,34 +18,35 @@ package com.arcgismaps.toolkit.featureforms.theme
 
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProvideTextStyle
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ProvidableCompositionLocal
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 
 /**
- * CompositionLocal used to pass a [FeatureFormTheme] down the tree.
+ * CompositionLocal used to pass a [FeatureFormColorScheme] down the tree.
  */
-internal val LocalFeatureFormTheme: ProvidableCompositionLocal<FeatureFormTheme> =
+internal val LocalColorScheme: ProvidableCompositionLocal<FeatureFormColorScheme> =
     staticCompositionLocalOf {
-        defaultTheme()
+        DefaultThemeTokens.colorScheme
     }
 
 /**
- * Creates a default theme from statically defined tokens. Do not use this at runtime, instead the
- * FeatureFormTheme must always be specified from the current MaterialTheme.
- *
- * This mainly provides a default theme for use within previews.
+ * CompositionLocal used to pass a [FeatureFormTypography] down the tree.
  */
-private fun defaultTheme(): FeatureFormTheme =
-    FeatureFormTheme(
-        colorScheme = DefaultThemeTokens.colorScheme,
-        typography = DefaultThemeTokens.typography
-    )
+internal val LocalTypography: ProvidableCompositionLocal<FeatureFormTypography> =
+    staticCompositionLocalOf {
+        DefaultThemeTokens.typography
+    }
 
 
 /**
@@ -61,40 +62,31 @@ private fun defaultTheme(): FeatureFormTheme =
  */
 @Composable
 internal fun FeatureFormTheme(
-    theme: FeatureFormTheme = FeatureFormTheme.createDefaults(),
+    colorScheme: FeatureFormColorScheme = FeatureFormColorScheme.createDefaults(),
+    typography: FeatureFormTypography = FeatureFormTypography.createDefaults(),
     content: @Composable () -> Unit
 ) {
-    val rememberedTheme = remember { theme }
-    CompositionLocalProvider(LocalFeatureFormTheme provides rememberedTheme) {
+    CompositionLocalProvider(
+        LocalColorScheme provides colorScheme,
+        LocalTypography provides typography
+    ) {
         content()
     }
-    MaterialTheme {
-
-    }
 }
 
-/**
- * If a type has both custom typography with color and a custom color specified, the color
- * specified will take precedence. This color will be merged with the text style.
- */
-public data class FeatureFormTheme internal constructor(
-    val colorScheme: FeatureFormColorScheme,
-    val typography: FeatureFormTypography
-) {
-    public companion object {
+internal object FeatureFormTheme {
+    val colorScheme: FeatureFormColorScheme
         @Composable
-        public fun createDefaults(
-            colorScheme: FeatureFormColorScheme = FeatureFormColorScheme.createDefaults(),
-            typography: FeatureFormTypography = FeatureFormTypography.createDefaults()
-        ): FeatureFormTheme {
-            return FeatureFormTheme(
-                colorScheme = colorScheme,
-                typography = typography
-            )
-        }
-    }
+        @ReadOnlyComposable
+        get() = LocalColorScheme.current
+
+    val typography: FeatureFormTypography
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalTypography.current
 }
 
+@Immutable
 public data class FeatureFormColorScheme internal constructor(
     public val editableTextFieldColors: EditableTextFieldColors,
     public val readOnlyTextFieldColors: ReadOnlyTextFieldColors,
@@ -120,6 +112,7 @@ public data class FeatureFormColorScheme internal constructor(
     }
 }
 
+@Immutable
 public class FeatureFormTypography internal constructor(
     public val editableTextFieldTypography: EditableTextFieldTypography,
     public val readOnlyTextFieldTypography: ReadOnlyTextFieldTypography,
@@ -144,6 +137,7 @@ public class FeatureFormTypography internal constructor(
     }
 }
 
+@Immutable
 public data class EditableTextFieldTypography internal constructor(
     public val labelStyle: TextStyle,
     public val textStyle: TextStyle,
@@ -166,6 +160,7 @@ public data class EditableTextFieldTypography internal constructor(
     }
 }
 
+@Immutable
 public data class ReadOnlyTextFieldTypography internal constructor(
     public val labelStyle: TextStyle,
     public val textStyle: TextStyle,
@@ -188,6 +183,7 @@ public data class ReadOnlyTextFieldTypography internal constructor(
     }
 }
 
+@Immutable
 public data class GroupElementTypography internal constructor(
     public val labelStyle: TextStyle,
     public val supportingTextStyle: TextStyle
@@ -206,6 +202,7 @@ public data class GroupElementTypography internal constructor(
     }
 }
 
+@Immutable
 public data class RadioButtonFieldTypography internal constructor(
     public val labelStyle: TextStyle,
     public val optionStyle: TextStyle,
@@ -227,6 +224,7 @@ public data class RadioButtonFieldTypography internal constructor(
     }
 }
 
+@Immutable
 public data class EditableTextFieldColors internal constructor(
     public val focusedTextColor: Color,
     public val unfocusedTextColor: Color,
@@ -338,6 +336,7 @@ public data class EditableTextFieldColors internal constructor(
     }
 }
 
+@Immutable
 public data class ReadOnlyTextFieldColors(
     public val labelColor: Color,
     public val textColor: Color,
@@ -359,6 +358,7 @@ public data class ReadOnlyTextFieldColors(
     }
 }
 
+@Immutable
 public data class GroupElementColors(
     public val labelColor: Color,
     public val supportingTextColor: Color,
@@ -387,6 +387,7 @@ public data class GroupElementColors(
     }
 }
 
+@Immutable
 public data class RadioButtonFieldColors internal constructor(
     public val labelColor: Color,
     public val textColor: Color,
