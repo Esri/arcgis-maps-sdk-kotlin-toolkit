@@ -49,8 +49,8 @@ public sealed class ViewpointPersistence : Parcelable {
         }
 
         @JvmField
-        public val CREATOR: Parcelable.Creator<None> = object : Parcelable.Creator<None> {
-            override fun createFromParcel(source: Parcel): None = None
+        public val CREATOR: Parcelable.Creator<None?> = object : Parcelable.Creator<None?> {
+            override fun createFromParcel(source: Parcel): None? = None
             override fun newArray(size: Int): Array<None?> = arrayOfNulls(size)
         }
     }
@@ -76,9 +76,9 @@ public sealed class ViewpointPersistence : Parcelable {
         }
         public companion object {
             @JvmField
-            public val CREATOR: Parcelable.Creator<ByCenterAndScale> =
-                object : Parcelable.Creator<ByCenterAndScale> {
-                    override fun createFromParcel(source: Parcel): ByCenterAndScale =
+            public val CREATOR: Parcelable.Creator<ByCenterAndScale?> =
+                object : Parcelable.Creator<ByCenterAndScale?> {
+                    override fun createFromParcel(source: Parcel): ByCenterAndScale? =
                         ByCenterAndScale()
 
                     override fun newArray(size: Int): Array<ByCenterAndScale?> = arrayOfNulls(size)
@@ -103,9 +103,9 @@ public sealed class ViewpointPersistence : Parcelable {
         }
         public companion object {
             @JvmField
-            public val CREATOR: Parcelable.Creator<ByBoundingGeometry> =
-                object : Parcelable.Creator<ByBoundingGeometry> {
-                    override fun createFromParcel(source: Parcel): ByBoundingGeometry =
+            public val CREATOR: Parcelable.Creator<ByBoundingGeometry?> =
+                object : Parcelable.Creator<ByBoundingGeometry?> {
+                    override fun createFromParcel(source: Parcel): ByBoundingGeometry? =
                         ByBoundingGeometry()
 
                     override fun newArray(size: Int): Array<ByBoundingGeometry?> =
