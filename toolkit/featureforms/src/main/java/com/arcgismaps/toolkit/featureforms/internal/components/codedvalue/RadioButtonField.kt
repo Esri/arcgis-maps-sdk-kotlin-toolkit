@@ -26,8 +26,9 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonColors
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -44,12 +45,13 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseTextField
+import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTheme
+import com.arcgismaps.toolkit.featureforms.theme.LocalFeatureFormTheme
 
 @Composable
 internal fun RadioButtonField(
     state: RadioButtonFieldState,
-    modifier: Modifier = Modifier,
-    colors: RadioButtonFieldColors = RadioButtonFieldDefaults.colors()
+    modifier: Modifier = Modifier
 ) {
     val value by state.value
     val editable by state.isEditable.collectAsState()
@@ -65,7 +67,6 @@ internal fun RadioButtonField(
             showNoValueOption = state.showNoValueOption,
             noValueLabel = noValueLabel,
             modifier = modifier,
-            colors = colors
         ) {
             state.onValueChanged(it)
         }
@@ -94,9 +95,11 @@ private fun RadioButtonField(
     showNoValueOption: FormInputNoValueOption,
     noValueLabel: String,
     modifier: Modifier = Modifier,
-    colors: RadioButtonFieldColors = RadioButtonFieldDefaults.colors(),
     onValueChanged: (Any?) -> Unit = {}
 ) {
+    val theme = LocalFeatureFormTheme.current
+    val colors = theme.colorScheme.radioButtonFieldColors
+    val typography = theme.typography.radioButtonFieldTypography
     val options = if (!required) {
         if (showNoValueOption == FormInputNoValueOption.Show) {
             mapOf(null to noValueLabel) + codedValues
@@ -117,7 +120,8 @@ private fun RadioButtonField(
             } else {
                 label
             },
-            style = RadioButtonFieldDefaults.labelTextStyle,
+            color = colors.labelColor,
+            style = typography.labelStyle,
             modifier = Modifier.semantics { contentDescription = "label" }
         )
         Column(
@@ -125,18 +129,24 @@ private fun RadioButtonField(
                 .selectableGroup()
                 .border(
                     width = 1.dp,
-                    color = colors.containerBorderColor,
+                    color = colors.outlineColor,
                     shape = RoundedCornerShape(5.dp)
                 )
         ) {
             CompositionLocalProvider(
-                LocalTextStyle provides RadioButtonFieldDefaults.textStyle
+                LocalTextStyle provides typography.optionStyle
             ) {
                 options.forEach { (code, name) ->
                     RadioButtonRow(
                         value = name,
                         selected = code == value || (name == noValueLabel && value == null),
-                        onClick = { onValueChanged(code) }
+                        onClick = { onValueChanged(code) },
+                        colors = RadioButtonDefaults.colors(
+                            selectedColor = colors.selectedColor,
+                            unselectedColor = colors.unselectedColor,
+                            disabledSelectedColor = colors.disabledSelectedColor,
+                            disabledUnselectedColor = colors.disabledUnselectedColor
+                        )
                     )
                 }
             }
@@ -144,7 +154,8 @@ private fun RadioButtonField(
         if (description.isNotEmpty()) {
             Text(
                 text = description,
-                style = RadioButtonFieldDefaults.supportingTextStyle,
+                color = colors.supportingTextColor,
+                style = typography.supportingTextStyle,
                 modifier = Modifier.semantics {
                     contentDescription = "supporting text"
                 }
@@ -160,6 +171,7 @@ private fun RadioButtonRow(
     selected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    colors: RadioButtonColors
 ) {
     Row(
         modifier = modifier
@@ -176,6 +188,7 @@ private fun RadioButtonRow(
         RadioButton(
             selected = selected,
             onClick = null,
+            colors = colors
         )
         Text(
             text = value
@@ -186,7 +199,7 @@ private fun RadioButtonRow(
 @Preview(showBackground = true, backgroundColor = 0xFFFFFFFF, showSystemUi = true)
 @Composable
 private fun RadioButtonFieldPreview() {
-    MaterialTheme {
+    FeatureFormTheme {
         RadioButtonField(
             label = "A list of values",
             description = "Description",

@@ -17,24 +17,9 @@
 package com.arcgismaps.toolkit.featureforms.internal.components.formelement
 
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 internal object GroupElementDefaults {
-
     val borderThickness = 1.dp
     val containerShape = RoundedCornerShape(5.dp)
-
-    @Composable
-    fun colors() : GroupElementColors = GroupElementColors(
-        containerColor = MaterialTheme.colorScheme.background,
-        borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
-    )
 }
-
-internal data class GroupElementColors(
-    val containerColor : Color,
-    val borderColor : Color,
-)

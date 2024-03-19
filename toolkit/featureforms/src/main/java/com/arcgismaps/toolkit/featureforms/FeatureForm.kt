@@ -71,6 +71,7 @@ import com.arcgismaps.toolkit.featureforms.internal.components.formelement.Field
 import com.arcgismaps.toolkit.featureforms.internal.components.formelement.GroupElement
 import com.arcgismaps.toolkit.featureforms.internal.components.text.rememberFormTextFieldState
 import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
+import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTheme
 import kotlinx.coroutines.CoroutineScope
 
 /**
@@ -109,12 +110,15 @@ public sealed class ValidationErrorVisibility {
 public fun FeatureForm(
     featureForm: FeatureForm,
     modifier: Modifier = Modifier,
-    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic
+    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
+    theme: FeatureFormTheme = FeatureFormTheme.createDefaults()
 ) {
     val scope = rememberCoroutineScope()
     val states = rememberStates(form = featureForm, scope = scope)
-    FeatureFormBody(form = featureForm, states = states, modifier = modifier)
-    FeatureFormDialog()
+    FeatureFormTheme(theme) {
+        FeatureFormBody(form = featureForm, states = states, modifier = modifier)
+        FeatureFormDialog()
+    }
     // launch a new side effect in a launched effect when validationErrorVisibility changes
     LaunchedEffect(validationErrorVisibility) {
         // if it set to always show errors force each field to validate itself and show any errors

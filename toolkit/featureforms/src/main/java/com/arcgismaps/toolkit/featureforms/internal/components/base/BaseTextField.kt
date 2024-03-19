@@ -36,6 +36,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,6 +56,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.featureforms.theme.EditableTextFieldColors
+import com.arcgismaps.toolkit.featureforms.theme.LocalFeatureFormTheme
 import com.arcgismaps.toolkit.featureforms.internal.utils.PlaceholderTransformation
 
 
@@ -108,6 +112,7 @@ internal fun BaseTextField(
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     trailingContent: (@Composable () -> Unit)? = null
 ) {
+    val theme = LocalFeatureFormTheme.current
     val focusManager = LocalFocusManager.current
     var isFocused by remember { mutableStateOf(false) }
     val visualTransformation = if (text.isEmpty())
@@ -122,7 +127,11 @@ internal fun BaseTextField(
     }
     val contentLength = "${text.length}"
     val isSupportingTextAvailable = supportingText.isNotEmpty() || (showCharacterCount && isFocused)
-    val colors = baseTextFieldColors(text.isEmpty(), placeholder.isEmpty())
+    val colors = theme.colorScheme.editableTextFieldColors.toTextFieldColors(
+        textIsEmpty = text.isEmpty(),
+        placeHolderIsEmpty = placeholder.isEmpty()
+    )
+    val typography = theme.typography.editableTextFieldTypography
     Column(modifier = modifier
         .onFocusChanged {
             isFocused = it.hasFocus
@@ -144,14 +153,14 @@ internal fun BaseTextField(
                 enabled = true,
                 readOnly = readOnly,
                 isError = isError,
-                textStyle = MaterialTheme.typography.bodyLarge,
+                textStyle = typography.textStyle,
                 label = {
                     Text(
                         text = title,
                         modifier = Modifier.semantics { contentDescription = "label" },
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1,
-                        style = MaterialTheme.typography.bodySmall
+                        style = typography.labelStyle
                     )
                 },
                 trailingIcon = trailingContent
@@ -172,7 +181,7 @@ internal fun BaseTextField(
                                     modifier = Modifier.semantics {
                                         contentDescription = "supporting text"
                                     },
-                                    style = MaterialTheme.typography.bodySmall
+                                    style = typography.supportingTextStyle
                                 )
                             }
                             if (showCharacterCount && isFocused) {
@@ -182,7 +191,7 @@ internal fun BaseTextField(
                                     modifier = Modifier.semantics {
                                         contentDescription = "char count"
                                     },
-                                    style = MaterialTheme.typography.bodySmall
+                                    style = typography.supportingTextStyle
                                 )
                             }
                         }
@@ -248,22 +257,91 @@ private fun ReadOnlyTextField(
     modifier: Modifier = Modifier,
     supportingText: String,
 ) {
+    val theme = LocalFeatureFormTheme.current
+    val colors = theme.colorScheme.readOnlyTextFieldColors
+    val typography = theme.typography.readOnlyTextFieldTypography
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
             text = label,
             overflow = TextOverflow.Ellipsis,
             maxLines = 1,
-            style = MaterialTheme.typography.bodyMedium
+            color = colors.labelColor,
+            style = typography.labelStyle
         )
         SelectionContainer(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
         ) {
-            Text(text = text.ifEmpty { "--" }, style = MaterialTheme.typography.bodyLarge)
+            Text(
+                text = text.ifEmpty { "--" },
+                color = colors.textColor,
+                style = typography.textStyle
+            )
         }
         if (supportingText.isNotEmpty()) {
-            Text(text = supportingText, style = MaterialTheme.typography.bodySmall)
+            Text(
+                text = supportingText,
+                color = colors.supportingTextColor,
+                style = typography.supportingTextStyle
+            )
         }
     }
+}
+
+@Composable
+internal fun EditableTextFieldColors.toTextFieldColors(
+    textIsEmpty: Boolean,
+    placeHolderIsEmpty: Boolean
+): TextFieldColors {
+    // transform placeholder colors into text colors
+    val transformPlaceHolderColors = textIsEmpty && !placeHolderIsEmpty
+    val transformedFocusedTextColor = if (transformPlaceHolderColors) {
+        // if placeholder is visible, make it lighter than the actual input text color
+        focusedPlaceholderColor
+    } else {
+        focusedTextColor
+    }
+    val transformedUnFocusedTextColor = if (transformPlaceHolderColors) {
+        unfocusedPlaceholderColor
+    } else {
+        unfocusedTextColor
+    }
+    val transformedErrorTextColor = if (transformPlaceHolderColors) {
+        errorPlaceholderColor
+    } else {
+        errorTextColor
+    }
+    return TextFieldDefaults.colors(
+        focusedTextColor = transformedFocusedTextColor,
+        unfocusedTextColor = transformedUnFocusedTextColor,
+        errorTextColor = transformedErrorTextColor,
+        focusedContainerColor = focusedContainerColor,
+        unfocusedContainerColor = unfocusedContainerColor,
+        errorContainerColor = errorContainerColor,
+        cursorColor = cursorColor,
+        errorCursorColor = errorCursorColor,
+        selectionColors = textSelectionColors,
+        focusedIndicatorColor = focusedIndicatorColor,
+        unfocusedIndicatorColor = unfocusedIndicatorColor,
+        errorIndicatorColor = errorIndicatorColor,
+        focusedLeadingIconColor = focusedLeadingIconColor,
+        unfocusedLeadingIconColor = unfocusedLeadingIconColor,
+        errorLeadingIconColor = errorLeadingIconColor,
+        focusedTrailingIconColor = focusedTrailingIconColor,
+        unfocusedTrailingIconColor = unfocusedTrailingIconColor,
+        errorTrailingIconColor = errorTrailingIconColor,
+        focusedLabelColor = focusedLabelColor,
+        unfocusedLabelColor = unfocusedLabelColor,
+        errorLabelColor = errorLabelColor,
+        focusedSupportingTextColor = focusedSupportingTextColor,
+        unfocusedSupportingTextColor = unfocusedSupportingTextColor,
+        errorSupportingTextColor = errorSupportingTextColor,
+        focusedPrefixColor = focusedPrefixColor,
+        unfocusedPrefixColor = unfocusedPrefixColor,
+        errorPrefixColor = errorPrefixColor,
+        focusedSuffixColor = focusedSuffixColor,
+        unfocusedSuffixColor = unfocusedSuffixColor,
+        errorSuffixColor = errorSuffixColor
+    )
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
@@ -303,3 +381,4 @@ private fun BaseTextFieldPreview() {
         )
     }
 }
+
