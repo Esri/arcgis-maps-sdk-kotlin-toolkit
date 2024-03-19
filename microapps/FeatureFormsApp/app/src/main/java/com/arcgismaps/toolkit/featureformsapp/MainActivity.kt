@@ -92,7 +92,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private suspend fun loadCredentials(portalSettings: PortalSettings) =
-        withContext(Dispatchers.IO) {
+        withContext(Dispatchers.Default) {
             // create and set a ArcGISCredentialStore that persists
             val arcGISCredentialStore = ArcGISCredentialStore.createWithPersistence().getOrThrow()
             ArcGISEnvironment.authenticationManager.arcGISCredentialStore = arcGISCredentialStore
