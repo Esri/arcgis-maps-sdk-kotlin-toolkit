@@ -29,7 +29,17 @@ import androidx.compose.ui.unit.sp
  */
 private val DefaultSelectionColor = Color(0xFF4286F4)
 
+/**
+ * Provides a default [FeatureFormColorScheme] via [colorScheme] and a default [FeatureFormTypography]
+ * via [typography].
+ *
+ */
 internal object DefaultThemeTokens {
+
+    /**
+     *  The default values provided are hardcoded based on the material 3 light color scheme.
+     *  See [androidx.compose.material3.lightColorScheme].
+     */
     val colorScheme: FeatureFormColorScheme = FeatureFormColorScheme(
         editableTextFieldColors = EditableTextFieldColors(
             focusedTextColor = ColorTokens.OnSurface,
@@ -93,6 +103,10 @@ internal object DefaultThemeTokens {
         )
     )
 
+    /**
+     * The default values provided are hardcoded based on the material 3 typography.
+     * See [androidx.compose.material3.Typography]
+     */
     val typography: FeatureFormTypography = FeatureFormTypography(
         editableTextFieldTypography = EditableTextFieldTypography(
             labelStyle = TypographyTokens.bodySmall,

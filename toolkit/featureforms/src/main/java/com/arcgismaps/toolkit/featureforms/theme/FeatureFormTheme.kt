@@ -27,6 +27,9 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 
+/**
+ * CompositionLocal used to pass a [FeatureFormTheme] down the tree.
+ */
 internal val LocalFeatureFormTheme: ProvidableCompositionLocal<FeatureFormTheme> =
     staticCompositionLocalOf {
         defaultTheme()
@@ -45,6 +48,17 @@ private fun defaultTheme(): FeatureFormTheme =
     )
 
 
+/**
+ * Provides a default [FeatureFormTheme] to the given [content] so that the FeatureForm can be
+ * customized.
+ *
+ * The default value for the [theme] is based on the current [MaterialTheme].
+ * See [FeatureFormTheme.createDefaults] for more info on the exact configuration used.
+ *
+ * @param theme A complete definition for the [FeatureFormTheme] to use. A default is provided based
+ * on the current [MaterialTheme].
+ * @param content The content to which the [theme] should be applied.
+ */
 @Composable
 internal fun FeatureFormTheme(
     theme: FeatureFormTheme = FeatureFormTheme.createDefaults(),
@@ -53,6 +67,9 @@ internal fun FeatureFormTheme(
     val rememberedTheme = remember { theme }
     CompositionLocalProvider(LocalFeatureFormTheme provides rememberedTheme) {
         content()
+    }
+    MaterialTheme {
+
     }
 }
 
