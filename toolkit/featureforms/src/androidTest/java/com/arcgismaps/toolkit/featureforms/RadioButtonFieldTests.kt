@@ -66,6 +66,8 @@ class RadioButtonFieldTests {
      * Then the RadioButtonField indicates the pre-existing value is selected
      * And when a new option is selected
      * Then the new selection is visible
+     *
+     * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-41-test-regular-selection
      */
     @Test
     fun testRadioButtonSelection() {
@@ -91,6 +93,8 @@ class RadioButtonFieldTests {
      * Given a RadioFormInput with a pre-existing value that is not in the given domain
      * When the FeatureForm is displayed
      * Then the FieldFormElement is rendered as a ComboBoxField
+     *
+     * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-42-test-radio-button-fallback-to-combo-box-and-no-value-label
      */
     @Test
     fun testFallback() {
@@ -114,6 +118,8 @@ class RadioButtonFieldTests {
      * Given a RadioFormInput with no pre-existing value and a noValueLabel
      * When the FeatureForm is displayed
      * Then the RadioButtonField displays the noValueLabel
+     *
+     * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-42-test-radio-button-fallback-to-combo-box-and-no-value-label
      */
     @Test
     fun testNoValueLabelExists() {
@@ -137,6 +143,8 @@ class RadioButtonFieldTests {
      * Given a RadioFormInput with no pre-existing value and no noValueLabel
      * When the FeatureForm is displayed
      * Then the RadioButtonField does not display the noValueLabel
+     *
+     * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-42-test-radio-button-fallback-to-combo-box-and-no-value-label
      */
     @Test
     fun testNoValueLabelDoesNotExist() {
