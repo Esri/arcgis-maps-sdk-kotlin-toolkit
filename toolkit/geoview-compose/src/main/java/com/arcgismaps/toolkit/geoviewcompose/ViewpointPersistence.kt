@@ -15,7 +15,7 @@
  *
  */
 
-package com.arcgismaps.toolkit.geocompose
+package com.arcgismaps.toolkit.geoviewcompose
 
 /**
  * Enum class representing the different types of viewpoint persistence on a composable [MapView].

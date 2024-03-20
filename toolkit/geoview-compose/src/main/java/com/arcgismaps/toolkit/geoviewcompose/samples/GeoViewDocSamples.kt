@@ -1,4 +1,4 @@
-package com.arcgismaps.toolkit.geocompose.samples
+package com.arcgismaps.toolkit.geoviewcompose.samples
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -21,8 +21,8 @@ import com.arcgismaps.mapping.symbology.SimpleLineSymbol
 import com.arcgismaps.mapping.symbology.SimpleLineSymbolStyle
 import com.arcgismaps.mapping.symbology.SimpleRenderer
 import com.arcgismaps.mapping.view.Camera
-import com.arcgismaps.toolkit.geocompose.MapView
-import com.arcgismaps.toolkit.geocompose.SceneView
+import com.arcgismaps.toolkit.geoviewcompose.MapView
+import com.arcgismaps.toolkit.geoviewcompose.SceneView
 
 /**
  * @suppress Suppress this function from being indexed in the KDoc
