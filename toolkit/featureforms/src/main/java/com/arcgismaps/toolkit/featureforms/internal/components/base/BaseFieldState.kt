@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.base
 
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -27,6 +28,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
+@Immutable
 internal open class FieldProperties<T>(
     val label: String,
     val placeholder: String,
@@ -41,6 +43,7 @@ internal open class FieldProperties<T>(
 /**
  * A class that provides a validation error [error] for the value of [data].
  */
+@Immutable
 internal data class Value<T>(
     val data: T,
     val error: ValidationErrorState = ValidationErrorState.NoError
