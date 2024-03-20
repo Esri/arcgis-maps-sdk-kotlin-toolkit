@@ -45,14 +45,14 @@ private const val RESULT_CODE_CANCELED = 2
  * The most common use case is that completing an OAuth challenge by signing in using the CustomTabs
  * browser should redirect back to this activity immediately and allow the `OAuthAuthenticator` to
  * immediately handle the completion of the challenge. In this case, the activity should be declared
- * in the manifest using `launchMode="singleTop"` and an `intent-filter` should be specified:
+ * in the manifest using `launchMode="singleTask"` and an `intent-filter` should be specified:
  *
  * ```
  * <activity
  * android:name="com.arcgismaps.toolkit.authentication.OAuthUserSignInActivity"
  * android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
  * android:exported="true"
- * android:launchMode="singleTop" >
+ * android:launchMode="singleTask" >
  *   <intent-filter>
  *     <action android:name="android.intent.action.VIEW" />
  *
