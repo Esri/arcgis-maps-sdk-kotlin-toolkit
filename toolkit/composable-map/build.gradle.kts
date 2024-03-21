@@ -16,7 +16,7 @@
  *
  */
 
-logger.warn("WARNING: The module composable-map is deprecated. Please use the module geo-compose instead.")
+logger.warn("WARNING: The module composable-map is deprecated. Please use the module geoview-compose instead.")
 
 plugins {
     id("com.android.library")

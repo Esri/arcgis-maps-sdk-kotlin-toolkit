@@ -44,10 +44,10 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
-import com.arcgismaps.toolkit.geocompose.MapView
+import com.arcgismaps.toolkit.geoviewcompose.MapView
 
 /**
- * Shows how a composable [com.arcgismaps.toolkit.geocompose.MapView] reacts to the
+ * Shows how a composable [com.arcgismaps.toolkit.geoviewcompose.MapView] reacts to the
  * insets values specified on it. The left, right, top and bottom values can be specified
  * using the OutlinedTextFields. The attribution bar at the bottom of the MapView moves in
  * regards to the specified inset values. The `Reset Insets` button sets all inset values to zero.
