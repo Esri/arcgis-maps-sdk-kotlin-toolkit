@@ -11,7 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.BasemapStyle
-import com.arcgismaps.toolkit.geocompose.SceneView
+import com.arcgismaps.toolkit.geoviewcompose.SceneView
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

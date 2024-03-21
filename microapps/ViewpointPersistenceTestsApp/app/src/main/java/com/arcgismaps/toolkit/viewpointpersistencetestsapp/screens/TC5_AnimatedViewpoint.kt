@@ -18,8 +18,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.arcgismaps.mapping.Viewpoint
-import com.arcgismaps.toolkit.geocompose.MapViewProxy
-import com.arcgismaps.toolkit.geocompose.ViewpointPersistence
+import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
+import com.arcgismaps.toolkit.geoviewcompose.ViewpointPersistence
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 

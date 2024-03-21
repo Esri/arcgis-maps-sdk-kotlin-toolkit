@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Viewpoint
-import com.arcgismaps.toolkit.geocompose.ViewpointPersistence
+import com.arcgismaps.toolkit.geoviewcompose.ViewpointPersistence
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

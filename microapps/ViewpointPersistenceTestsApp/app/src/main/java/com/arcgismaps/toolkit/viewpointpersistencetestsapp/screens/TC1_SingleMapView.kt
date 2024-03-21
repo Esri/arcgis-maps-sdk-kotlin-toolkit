@@ -11,7 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.arcgismaps.toolkit.geocompose.ViewpointPersistence
+import com.arcgismaps.toolkit.geoviewcompose.ViewpointPersistence
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
