@@ -39,17 +39,34 @@ MapView(
 
 ### Set a Viewpoint
 
-Setting the viewpoint of the `MapView` is handled by a parameter to the composable function.
+To set a viewpoint, create a `MapViewProxy` and call `setViewpoint()` on it after the `MapView` is displayed on screen:
 
 ```kotlin
 val point = Point(-117.182541, 34.055569, SpatialReference.wgs84())
 val scale = 170000.0
-val viewpointOperation = remember { MapViewpointOperation.Set(Viewpoint(point, scale)) }
+val mapViewProxy = remember { MapViewProxy() }
 
+Button(
+    onClick = {
+        mapViewProxy.setViewpoint(point, scale)
+    }
+) {
+    Text("Set Viewpoint")
+}
 MapView(
-	modifier = Modifier.fillMaxSize(),
-	arcGISMap = remember { ArcGISMap(BasemapStyle.ArcGISImagery) },
-	viewpointOperation = viewpointOperation
+    modifier = Modifier.fillMaxSize(),
+    arcGISMap = remember { ArcGISMap(BasemapStyle.ArcGISImagery) },
+    mapViewProxy = mapViewProxy,
+)
+```
+
+Note that the viewpoint of the MapView will automatically be persisted across configuration changes and process death. How this behaves can be customized by supplying the `viewpointPersistence` parameter to the `MapView`
+
+```kotlin
+MapView(
+    modifier = Modifier.fillMaxSize(),
+    arcGISMap = remember { ArcGISMap(BasemapStyle.ArcGISImagery) },
+    viewpointPersistence = ViewpointPersistence.ByBoundingGeometry
 )
 ```
 
