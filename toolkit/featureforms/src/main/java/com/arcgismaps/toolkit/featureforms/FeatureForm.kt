@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.featureforms
 
+import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -32,10 +33,13 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -111,6 +115,30 @@ public fun FeatureForm(
     modifier: Modifier = Modifier,
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic
 ) {
+    val stateData = remember(featureForm) {
+        StateData(featureForm)
+    }
+    FeatureForm(
+        stateData = stateData,
+        modifier = modifier,
+        validationErrorVisibility = validationErrorVisibility
+    )
+}
+
+/**
+ * A wrapper to hold state data. This provides a [Stable] class to enable smart recompositions,
+ * since [FeatureForm] is not stable.
+ */
+@Immutable
+internal data class StateData(@Stable val featureForm: FeatureForm)
+
+@Composable
+internal fun FeatureForm(
+    stateData: StateData,
+    modifier: Modifier = Modifier,
+    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic
+) {
+    val featureForm = stateData.featureForm
     val scope = rememberCoroutineScope()
     val states = rememberStates(form = featureForm, scope = scope)
     FeatureFormBody(form = featureForm, states = states, modifier = modifier)
@@ -234,6 +262,7 @@ internal fun rememberStates(
     form: FeatureForm,
     scope: CoroutineScope
 ): FormStateCollection {
+    Log.e("TAG", "rememberStates: remember states")
     val states = MutableFormStateCollection()
     form.elements.forEach { element ->
         when (element) {
@@ -266,7 +295,7 @@ internal fun rememberStates(
                 states.add(element, groupState)
             }
 
-            else -> { }
+            else -> {}
         }
     }
     return states
