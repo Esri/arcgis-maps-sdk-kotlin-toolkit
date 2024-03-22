@@ -60,6 +60,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
@@ -74,6 +75,11 @@ import com.arcgismaps.exceptions.FeatureFormValidationException
 import com.arcgismaps.toolkit.composablemap.ComposableMap
 import com.arcgismaps.toolkit.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
+import com.arcgismaps.toolkit.featureforms.theme.EditableTextFieldColors
+import com.arcgismaps.toolkit.featureforms.theme.FeatureFormColorScheme
+import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTypography
+import com.arcgismaps.toolkit.featureforms.theme.ReadOnlyTextFieldColors
+import com.arcgismaps.toolkit.featureforms.theme.ReadOnlyTextFieldTypography
 import com.arcgismaps.toolkit.featureformsapp.R
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.BottomSheetMaxWidth
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetExpansionHeight
@@ -102,7 +108,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                     ValidationErrorVisibility.Automatic
                 )
             }
-            
+
             is UIState.Switching -> {
                 val state = uiState as UIState.Switching
                 Pair(
@@ -184,7 +190,20 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                         FeatureForm(
                             featureForm = featureForm,
                             modifier = Modifier.fillMaxSize(),
-                            validationErrorVisibility = errorVisibility
+                            validationErrorVisibility = errorVisibility,
+                            colorScheme = FeatureFormColorScheme.createDefaults(
+                                editableTextFieldColors = EditableTextFieldColors.createDefaults(
+                                    errorTextColor = Color.Gray
+                                ),
+                                readOnlyTextFieldColors = ReadOnlyTextFieldColors.createDefaults(
+                                    labelColor = Color.Green
+                                )
+                            ),
+                            typography = FeatureFormTypography.createDefaults(
+                                readOnlyTextFieldTypography = ReadOnlyTextFieldTypography.createDefaults(
+                                    labelStyle = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
+                                )
+                            )
                         )
                     }
                 }
@@ -282,7 +301,7 @@ fun TopFormBar(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SubmitForm(errors : List<ErrorInfo>, onDismissRequest: () -> Unit) {
+private fun SubmitForm(errors: List<ErrorInfo>, onDismissRequest: () -> Unit) {
     if (errors.isEmpty()) {
         // show a progress dialog if no errors are present
         AlertDialog(

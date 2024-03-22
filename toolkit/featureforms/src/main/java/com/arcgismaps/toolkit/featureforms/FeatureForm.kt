@@ -31,6 +31,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -71,6 +72,9 @@ import com.arcgismaps.toolkit.featureforms.internal.components.formelement.Field
 import com.arcgismaps.toolkit.featureforms.internal.components.formelement.GroupElement
 import com.arcgismaps.toolkit.featureforms.internal.components.text.rememberFormTextFieldState
 import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
+import com.arcgismaps.toolkit.featureforms.theme.FeatureFormColorScheme
+import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTheme
+import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTypography
 import kotlinx.coroutines.CoroutineScope
 
 /**
@@ -103,18 +107,27 @@ public sealed class ValidationErrorVisibility {
  * when the validation errors are visible. Default is [ValidationErrorVisibility.Automatic] which
  * indicates errors are only visible once the respective field gains focus.
  *
+ * ///**
+ * // * If a type has both custom typography with color and a custom color specified, the color
+ * // * specified will take precedence. This color will be merged with the text style.
+ * // */
+ *
  * @since 200.4.0
  */
 @Composable
 public fun FeatureForm(
     featureForm: FeatureForm,
     modifier: Modifier = Modifier,
-    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic
+    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
+    colorScheme: FeatureFormColorScheme = FeatureFormColorScheme.createDefaults(),
+    typography: FeatureFormTypography = FeatureFormTypography.createDefaults()
 ) {
     val scope = rememberCoroutineScope()
     val states = rememberStates(form = featureForm, scope = scope)
-    FeatureFormBody(form = featureForm, states = states, modifier = modifier)
-    FeatureFormDialog()
+    FeatureFormTheme(colorScheme, typography) {
+        FeatureFormBody(form = featureForm, states = states, modifier = modifier)
+        FeatureFormDialog()
+    }
     // launch a new side effect in a launched effect when validationErrorVisibility changes
     LaunchedEffect(validationErrorVisibility) {
         // if it set to always show errors force each field to validate itself and show any errors
