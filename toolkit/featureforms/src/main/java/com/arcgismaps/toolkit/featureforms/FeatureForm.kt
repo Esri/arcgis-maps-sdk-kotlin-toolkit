@@ -18,7 +18,6 @@
 
 package com.arcgismaps.toolkit.featureforms
 
-import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -268,7 +267,6 @@ internal fun rememberStates(
     form: FeatureForm,
     scope: CoroutineScope
 ): FormStateCollection {
-    Log.e("TAG", "rememberStates: remember states")
     val states = MutableFormStateCollection()
     form.elements.forEach { element ->
         when (element) {
