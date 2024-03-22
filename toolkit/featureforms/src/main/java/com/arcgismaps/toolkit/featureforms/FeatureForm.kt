@@ -100,6 +100,9 @@ public sealed class ValidationErrorVisibility {
  * layer using forms that have been configured externally. Forms may be configured in the [Web Map Viewer](https://www.arcgis.com/home/webmap/viewer.html)
  * or [Fields Maps Designer](https://www.arcgis.com/apps/fieldmaps/)).
  *
+ * Note : Even though the [FeatureForm] class is not stable, there exists an internal mechanism to
+ * enable smart recompositions.
+ *
  * @param featureForm The [FeatureForm] configuration.
  * @param modifier The [Modifier] to be applied to layout corresponding to the content of this
  * FeatureForm.
@@ -132,6 +135,9 @@ public fun FeatureForm(
 @Immutable
 internal data class StateData(@Stable val featureForm: FeatureForm)
 
+/**
+ * This composable uses the [StateData] class to display a [FeatureForm].
+ */
 @Composable
 internal fun FeatureForm(
     stateData: StateData,
