@@ -2,7 +2,7 @@
 
 #### Release of individual toolkit components
 
-Most toolkit components will be releasable individually. We won't release the `composable-map` component yet.
+Most toolkit components will be releasable individually.
 Each toolkit component has its own module in the `toolkit` folder, with support for publishing to a Maven repo.
 
 In addition, a thin script to release all components at once will be implemented.
@@ -10,7 +10,7 @@ In addition, a thin script to release all components at once will be implemented
 #### BOM release
 
 In addition to the release of individual components, a "Bill Of Materials" (BOM) is released which represents
-a complete set of intercompatible toolkit components.
+a complete set of inter-compatible toolkit components.
 
 #### Release versioning
 
