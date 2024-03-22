@@ -22,6 +22,16 @@ The *ArcGIS Maps SDK for Kotlin Toolkit* has a *Minimum SDK* version of *26*, me
 
 ### Using the BOM
 
+Add the maven repository to your project's gradle file:
+
+```
+repositories {
+    maven {
+        url = uri("https://esri.jfrog.io/artifactory/arcgis")
+    }
+}
+```
+
 The *ArcGIS Maps SDK for Kotlin Toolkit* is released with a "bill of materials" (`BOM`). The releasable BOM is versioned and represents a set of versions of the toolkit components which are compatible with one another. You may specify dependencies as follows
 
 ```
