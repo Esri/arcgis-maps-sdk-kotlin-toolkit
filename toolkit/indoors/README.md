@@ -45,4 +45,3 @@ FloorFilter(floorFilterState = mapViewModel.floorFilterState)
 ```
 
 To see the FloorFilter in action, try out the [floor-filter-app](../../microapps/FloorFilterApp) micro app.
-../../toolkit/authentication/README.md
