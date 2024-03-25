@@ -25,7 +25,7 @@ The `FeatureForm` is a Composable that can render a `FeatureForm` object with a 
 
 ## Usage
 
-*View the API Reference for the `featureforms` module [here](https://developers.arcgis.com/kotlin/toolkit-api-reference/arcgis-maps-kotlin-toolkit/toolkit/featureforms/).*
+*View the API Reference for the `featureforms` module [here](https://developers.arcgis.com/kotlin/toolkit-api-reference/arcgis-maps-kotlin-toolkit/com.arcgismaps.toolkit.featureforms/index.html).*
 
 A `FeatureForm` composable can be created using a `FeatureForm` object as follows.
 

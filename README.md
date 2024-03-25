@@ -12,7 +12,7 @@ The ArcGIS Maps SDK for Kotlin Toolkit contains components that will simplify yo
 
 ## API Reference
 
-View the API reference for the toolkit [here](https://developers.arcgis.com/kotlin/toolkit-api-reference/).
+View the API reference for the toolkit [here](https://developers.arcgis.com/kotlin/toolkit-api-reference/index.html).
 
 ## Requirements
 

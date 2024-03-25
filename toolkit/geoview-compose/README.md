@@ -6,7 +6,7 @@ The GeoView-Compose module provides `@Composable` implementations of the `MapVie
 |:--:|
 |![image](screenshot.png)|
 
-*View the API Reference for the `geoview-compose` module [here](https://developers.arcgis.com/kotlin/toolkit-api-reference/arcgis-maps-kotlin-toolkit/toolkit/geoview-compose/).*
+*View the API Reference for the `geoview-compose` module [here](https://developers.arcgis.com/kotlin/toolkit-api-reference/arcgis-maps-kotlin-toolkit/com.arcgismaps.toolkit.geoviewcompose/index.html).*
 
 ## Features
 

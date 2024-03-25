@@ -8,7 +8,7 @@ in the building.
 |:--:|
 |![image](screenshot.png)|
 
-*View the API Reference for the `indoors` module [here](https://developers.arcgis.com/kotlin/toolkit-api-reference/arcgis-maps-kotlin-toolkit/toolkit/indoors/).*
+*View the API Reference for the `indoors` module [here](https://developers.arcgis.com/kotlin/toolkit-api-reference/arcgis-maps-kotlin-toolkit/com.arcgismaps.toolkit.indoors/index.html).*
 
 ##  Workflow
 

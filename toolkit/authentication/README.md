@@ -19,7 +19,7 @@ A second Composable component, the `DialogAuthenticator` performs the same funct
 
 ## Usage
 
-*View the API Reference for the `authentication` module [here](https://developers.arcgis.com/kotlin/toolkit-api-reference/arcgis-maps-kotlin-toolkit/toolkit/authentication/).*
+*View the API Reference for the `authentication` module [here](https://developers.arcgis.com/kotlin/toolkit-api-reference/arcgis-maps-kotlin-toolkit/com.arcgismaps.toolkit.authentication/index.html).*
 
 To see an example of how to use the `Authenticator`, try out the microapp [here](../../microapps/AuthenticationApp/README.md).
 
