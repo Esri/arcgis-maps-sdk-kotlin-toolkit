@@ -102,7 +102,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                     ValidationErrorVisibility.Automatic
                 )
             }
-            
+
             is UIState.Switching -> {
                 val state = uiState as UIState.Switching
                 Pair(
@@ -130,7 +130,6 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                     showDiscardEditsDialog = true
                 },
                 onSave = {
-                    //SubmitForm(mapViewModel = mapViewModel, featureForm = (uiState as UIState.Editing).featureForm)
                     scope.launch {
                         mapViewModel.commitEdits().onFailure {
                             Log.w("Forms", "Applying edits failed : ${it.message}")
@@ -159,6 +158,11 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
             exit = slideOutVertically { h -> h },
             label = "feature form"
         ) {
+            val isSwitching = uiState is UIState.Switching
+            // remember the form and update it when a new form is opened
+            val rememberedForm = remember(this, isSwitching) {
+                featureForm!!
+            }
             val bottomSheetState = rememberStandardBottomSheetState(
                 initialValue = SheetValue.PartiallyExpanded,
                 confirmValueChange = { it != SheetValue.Hidden },
@@ -180,13 +184,11 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                     sheetWidth = with(LocalDensity.current) { layoutWidth.toDp() }
                 ) {
                     // set bottom sheet content to the FeatureForm
-                    if (featureForm != null) {
-                        FeatureForm(
-                            featureForm = featureForm,
-                            modifier = Modifier.fillMaxSize(),
-                            validationErrorVisibility = errorVisibility
-                        )
-                    }
+                    FeatureForm(
+                        featureForm = rememberedForm,
+                        modifier = Modifier.fillMaxSize(),
+                        validationErrorVisibility = errorVisibility
+                    )
                 }
             }
         }
@@ -282,7 +284,7 @@ fun TopFormBar(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SubmitForm(errors : List<ErrorInfo>, onDismissRequest: () -> Unit) {
+private fun SubmitForm(errors: List<ErrorInfo>, onDismissRequest: () -> Unit) {
     if (errors.isEmpty()) {
         // show a progress dialog if no errors are present
         AlertDialog(

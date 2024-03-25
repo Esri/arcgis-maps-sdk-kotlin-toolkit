@@ -32,10 +32,13 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -96,6 +99,9 @@ public sealed class ValidationErrorVisibility {
  * layer using forms that have been configured externally. Forms may be configured in the [Web Map Viewer](https://www.arcgis.com/home/webmap/viewer.html)
  * or [Fields Maps Designer](https://www.arcgis.com/apps/fieldmaps/)).
  *
+ * Note : Even though the [FeatureForm] class is not stable, there exists an internal mechanism to
+ * enable smart recompositions.
+ *
  * @param featureForm The [FeatureForm] configuration.
  * @param modifier The [Modifier] to be applied to layout corresponding to the content of this
  * FeatureForm.
@@ -111,6 +117,33 @@ public fun FeatureForm(
     modifier: Modifier = Modifier,
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic
 ) {
+    val stateData = remember(featureForm) {
+        StateData(featureForm)
+    }
+    FeatureForm(
+        stateData = stateData,
+        modifier = modifier,
+        validationErrorVisibility = validationErrorVisibility
+    )
+}
+
+/**
+ * A wrapper to hold state data. This provides a [Stable] class to enable smart recompositions,
+ * since [FeatureForm] is not stable.
+ */
+@Immutable
+internal data class StateData(@Stable val featureForm: FeatureForm)
+
+/**
+ * This composable uses the [StateData] class to display a [FeatureForm].
+ */
+@Composable
+internal fun FeatureForm(
+    stateData: StateData,
+    modifier: Modifier = Modifier,
+    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic
+) {
+    val featureForm = stateData.featureForm
     val scope = rememberCoroutineScope()
     val states = rememberStates(form = featureForm, scope = scope)
     FeatureFormBody(form = featureForm, states = states, modifier = modifier)
@@ -266,7 +299,7 @@ internal fun rememberStates(
                 states.add(element, groupState)
             }
 
-            else -> { }
+            else -> {}
         }
     }
     return states
