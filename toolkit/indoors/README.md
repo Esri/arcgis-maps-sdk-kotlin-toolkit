@@ -8,6 +8,8 @@ in the building.
 |:--:|
 |![image](screenshot.png)|
 
+*View the API Reference for the `indoors` module [here](https://developers.arcgis.com/kotlin/toolkit-api-reference/arcgis-maps-kotlin-toolkit/toolkit/indoors/).*
+
 ##  Workflow
 
 The simplest workflow is for the app to instantiate a `FloorFilter` using an instance of the `FloorFilterState` to ideally display it within the GeoView. The `Modifier` properties of `Box`,`Column` or `Row` could be used to position the `FloorFilter` inside of a Composable Map.

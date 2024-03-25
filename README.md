@@ -10,6 +10,10 @@ The ArcGIS Maps SDK for Kotlin Toolkit contains components that will simplify yo
 * **[GeoView-Compose](toolkit/geoview-compose)** - Compose wrappers for the MapView and SceneView.
 * **[FloorFilter](toolkit/indoors)** - Allows filtering of floor plan data in a geo view by a site, a facility in the site, or a floor in the facility.
 
+## API Reference
+
+View the API reference for the toolkit [here](https://developers.arcgis.com/kotlin/toolkit-api-reference/).
+
 ## Requirements
 
 Please see the [developer setup](doc/general/developer_setup.md) for a complete description of requirements

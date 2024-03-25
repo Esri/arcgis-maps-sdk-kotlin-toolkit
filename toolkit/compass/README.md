@@ -23,6 +23,8 @@ the compass appears. When reset to north, it disappears. When `autoHide` is disa
 
 ## Usage
 
+*View the API Reference for the `compass` module [here](https://developers.arcgis.com/kotlin/toolkit-api-reference/arcgis-maps-kotlin-toolkit/toolkit/compass/).*
+
 ### Basic usage for displaying a `Compass` on a `MapView`
 
 The simplest workflow is to add the `Compass` composable as a child element to the content of a `ComposableMap`. 
