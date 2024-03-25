@@ -159,7 +159,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
             label = "feature form"
         ) {
             val isSwitching = uiState is UIState.Switching
-            // remember the form and update it when a new form opened
+            // remember the form and update it when a new form is opened
             val rememberedForm = remember(this, isSwitching) {
                 featureForm!!
             }
