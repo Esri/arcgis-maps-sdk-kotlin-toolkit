@@ -32,6 +32,8 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.mapping.featureforms.FormElement
+import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
@@ -125,7 +127,7 @@ class MapViewModel @Inject constructor(
         val featureForm = state.featureForm
         featureForm.validationErrors.value.forEach { entry ->
             entry.value.forEach { error ->
-                featureForm.getFormElement(entry.key)?.let { formElement ->
+                featureForm.elements.getFormElement(entry.key)?.let { formElement ->
                     if (formElement.isEditable.value) {
                         errors.add(
                             ErrorInfo(
@@ -256,10 +258,22 @@ class MapViewModel @Inject constructor(
  * Returns the [FieldFormElement] with the given [fieldName] in the [FeatureForm]. If none exists
  * null is returned.
  */
-fun FeatureForm.getFormElement(fieldName: String): FieldFormElement? {
-    return elements.firstNotNullOfOrNull {
-        if (it is FieldFormElement && it.fieldName == fieldName) {
-            it
+fun List<FormElement>.getFormElement(fieldName: String): FieldFormElement? {
+    val fieldElements = filterIsInstance<FieldFormElement>()
+    val element =  if (fieldElements.isNotEmpty()) {
+        fieldElements.firstNotNullOfOrNull {
+            if (it.fieldName == fieldName) it else null
+        }
+    } else {
+        null
+    }
+
+    return element ?: run {
+        val groupElements = filterIsInstance<GroupFormElement>()
+        if (groupElements.isNotEmpty()) {
+            groupElements.firstNotNullOfOrNull {
+                it.elements.getFormElement(fieldName)
+            }
         } else {
             null
         }
