@@ -19,7 +19,7 @@
     <string name="cancel">Скасувати</string>
     <string name="allow_connection">Небезпечно: дозволити підключення</string>
     <string name="username_password_login_message">Увійдіть в %1$s</string>
-    <string name="username_label">Ім'я користувача</string>
+    <string name="username_label">Ім\'я користувача</string>
     <string name="password_label">Пароль</string>
     <string name="login">Увійти в систему</string>
 </resources>
