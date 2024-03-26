@@ -1,5 +1,5 @@
  # Composable Map[Deprecated]
- This module is deprecated. Use https://github.com/Esri/arcgis-maps-sdk-kotlin-toolkit/tree/main/toolkit/geo-compose instead.
+ This module is deprecated. Use https://github.com/Esri/arcgis-maps-sdk-kotlin-toolkit/tree/main/toolkit/geoview-compose instead.
 
 ## DuplexFlow
 
