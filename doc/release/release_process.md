@@ -10,7 +10,7 @@ In addition, a thin script to release all components at once will be implemented
 #### BOM release
 
 In addition to the release of individual components, a "Bill Of Materials" (BOM) is released which represents
-a complete set of inter-compatible toolkit components.
+a complete set of intercompatible toolkit components.
 
 #### Release versioning
 
