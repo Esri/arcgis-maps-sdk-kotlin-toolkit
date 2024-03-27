@@ -15,7 +15,7 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">Il certificato fornito da %1$s non è firmato da un'autorità attendibile.</string>
+    <string name="server_trust_message">Il certificato fornito da %1$s non è firmato da un\'autorità attendibile.</string>
     <string name="cancel">Annulla</string>
     <string name="allow_connection">Pericolo: consenti connessione</string>
     <string name="username_password_login_message">Accedere a %1$s</string>

@@ -15,7 +15,7 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="server_trust_message">Certifikata, ki ga zagotavlja '%1$s ni podpisala zaupanja vredna ustanova.</string>
+    <string name="server_trust_message">Certifikata, ki ga zagotavlja \'%1$s ni podpisala zaupanja vredna ustanova.</string>
     <string name="cancel">Prekliči</string>
     <string name="allow_connection">Nevarno: Dovoli povezavo</string>
     <string name="username_password_login_message">Prijavite se v %1$s</string>

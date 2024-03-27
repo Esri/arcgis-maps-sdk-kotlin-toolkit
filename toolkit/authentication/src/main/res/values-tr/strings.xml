@@ -18,7 +18,7 @@
     <string name="server_trust_message">%1$s tarafından sağlanmış sertifika, güvenilir bir otorite tarafından imzalanmamış.</string>
     <string name="cancel">İptal</string>
     <string name="allow_connection">Tehlikeli: Bağlantıya İzin Ver</string>
-    <string name="username_password_login_message">Lütfen %1$s'ta oturum açın</string>
+    <string name="username_password_login_message">Lütfen %1$s\'ta oturum açın</string>
     <string name="username_label">Kullanıcı adı</string>
     <string name="password_label">Parola</string>
     <string name="login">Oturum aç</string>

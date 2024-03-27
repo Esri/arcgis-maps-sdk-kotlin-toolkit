@@ -3,6 +3,6 @@
     <string name="floor_filter_view_filter_hint_facilities">Filtra les instal·lacions…</string>
     <string name="floor_filter_select_site">Seleccioneu un lloc</string>
     <string name="floor_filter_select_facility">Seleccioneu una instal·lació</string>
-    <string name="floor_filter_no_results">No s'ha trobat cap resultat.</string>
+    <string name="floor_filter_no_results">No s\'ha trobat cap resultat.</string>
     <string name="floor_filter_site_selector_top_bar">Lloc\u0020-\u0020</string>
 </resources>

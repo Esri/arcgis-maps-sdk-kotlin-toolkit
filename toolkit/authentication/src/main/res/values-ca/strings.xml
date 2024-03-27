@@ -19,7 +19,7 @@
     <string name="cancel">Cancel·la</string>
     <string name="allow_connection">Perill: permeteu la connexió</string>
     <string name="username_password_login_message">Inicieu la sessió a %1$s</string>
-    <string name="username_label">Nom d'usuari</string>
+    <string name="username_label">Nom d\'usuari</string>
     <string name="password_label">Contrasenya</string>
     <string name="login">Inicia la sessió</string>
 </resources>
