@@ -360,7 +360,7 @@ private fun SubmitForm(errors: List<ErrorInfo>, onDismissRequest: () -> Unit) {
 @Composable
 fun FeatureFormValidationException.getString(): String {
     return when (this) {
-        is FeatureFormValidationException.IncorrectValueTypeError -> {
+        is FeatureFormValidationException.IncorrectValueTypeException -> {
             stringResource(id = R.string.value_must_be_of_correct_type)
         }
 
