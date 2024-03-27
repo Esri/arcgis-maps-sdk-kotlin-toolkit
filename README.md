@@ -41,10 +41,10 @@ repositories {
 The *ArcGIS Maps SDK for Kotlin Toolkit* is released with a "bill of materials" (`BOM`). The releasable BOM is versioned and represents a set of versions of the toolkit components which are compatible with one another. You may specify dependencies as follows
 
 ```
-implementation(platform('com.esri:arcgis-maps-kotlin-toolkit-bom:200.4.0'))
-implementation('com.esri:arcgis-maps-kotlin-toolkit-authentication')
-implementation('com.esri:arcgis-maps-kotlin-toolkit-compass')
-implementation('com.esri:arcgis-maps-kotlin-toolkit-indoors')
+implementation(platform("com.esri:arcgis-maps-kotlin-toolkit-bom:200.4.0"))
+implementation("com.esri:arcgis-maps-kotlin-toolkit-authentication")
+implementation("com.esri:arcgis-maps-kotlin-toolkit-compass")
+implementation("com.esri:arcgis-maps-kotlin-toolkit-indoors")
 ```
 
 The template and TemplateApp modules are for bootstrapping new modules.
