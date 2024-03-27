@@ -135,10 +135,17 @@ internal fun DateTimePicker(
     // DateTime from the state's value
     val dateTime by state.dateTime
     // create and remember a DatePickerState
+    val initialSelectedDateTimeMillis = dateTime.dateForPicker?.let {
+        if (state.dateValidator(it)) {
+            it
+        } else {
+            null
+        }
+    }
     val datePickerState = rememberSaveable(dateTime, saver = DatePickerState.Saver()) {
         DatePickerState(
-            initialSelectedDateMillis = dateTime.dateForPicker,
-            initialDisplayedMonthMillis = dateTime.dateForPicker
+            initialSelectedDateMillis = initialSelectedDateTimeMillis,
+            initialDisplayedMonthMillis = initialSelectedDateTimeMillis
                 ?: (state.minDateTime?.toEpochMilli() ?: state.maxDateTime?.toEpochMilli()),
             datePickerRange,
             DisplayMode.Picker
