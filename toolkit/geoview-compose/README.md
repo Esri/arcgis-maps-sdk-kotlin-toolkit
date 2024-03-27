@@ -124,6 +124,7 @@ Other microapps that demonstrate various workflows with the composable `MapView`
 
 - [MapView Geometry Editor App](../../microapps/MapViewGeometryEditorApp/README.md) demonstrates the use of `GeometryEditor` and `GraphicsOverlay`
 - [MapView Insets App](../../microapps/MapViewInsetsApp/README.md) demonstrates the use of `Insets`
+- [SceneView Analysis Overlay App](../../microapps/SceneViewAnalysisOverlayApp/README.md) demonstrates the use of `AnalysisOverlay`
 - [SceneView Camera Controller App](../../microapps/SceneViewCameraControllerApp/README.md) demonstrates the use of the `CameraController`
 - [SceneView Lighting Options App](../../microapps/SceneViewLightingOptionsApp/README.md) demonstrates the use of various lighting options with the `SceneView`
 
