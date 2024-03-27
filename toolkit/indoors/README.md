@@ -12,20 +12,19 @@ in the building.
 
 ##  Workflow
 
-The simplest workflow is for the app to instantiate a `FloorFilter` using an instance of the `FloorFilterState` to ideally display it within the GeoView. The `Modifier` properties of `Box`,`Column` or `Row` could be used to position the `FloorFilter` inside of a Composable Map.
+The simplest workflow is for the app to instantiate a `FloorFilter` using an instance of the `FloorFilterState` to ideally display it on top of the GeoView using a `Box`.
 
 ```kotlin
-val mapViewModel = viewModel<MapViewModel>(factory = MapViewModelFactory(floorAwareWebMap))
-ComposableMap(
-     modifier = Modifier.fillMaxSize(),
-     mapInterface = mapViewModel
- ) {
-    Box(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 40.dp),
-        contentAlignment = Alignment.BottomStart
-    ) {
-        FloorFilter(floorFilterState = mapViewModel.floorFilterState)
-    }
+
+Box(
+    modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 40.dp),
+    contentAlignment = Alignment.BottomStart
+) {
+    MapView(
+        arcgGISMap = floorAwareMap,
+        modifier = Modifier.fillMaxSize(),
+    )
+    FloorFilter(floorFilterState = mapViewModel.floorFilterState)
 }
 ```
 
@@ -43,7 +42,7 @@ private val uiProperties = UIProperties().apply {
 // create the floor filter state
 val floorFilterState = FloorFilterState(geoModel, coroutineScope, uiProperties)
 // pass the floor filter state in the compose layout
-FloorFilter(floorFilterState = mapViewModel.floorFilterState)
+FloorFilter(floorFilterState = floorFilterState)
 ```
 
 To see the FloorFilter in action, try out the [floor-filter-app](../../microapps/FloorFilterApp) micro app.
