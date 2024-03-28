@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="floor_filter_view_filter_hint_sites">正在过滤场地…</string>
+    <string name="floor_filter_view_filter_hint_facilities">正在过滤设施点…</string>
+    <string name="floor_filter_select_site">选择场地</string>
+    <string name="floor_filter_select_facility">选择设施点</string>
+    <string name="floor_filter_no_results">未找到任何结果。</string>
+    <string name="floor_filter_site_selector_top_bar">场地\u0020-\u0020</string>
+</resources>
