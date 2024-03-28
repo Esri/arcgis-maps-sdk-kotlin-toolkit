@@ -16,7 +16,7 @@
  *
  */
 
-package com.arcgismaps.toolkit.geocompose
+package com.arcgismaps.toolkit.geoviewcompose
 
 import android.os.Parcel
 import junit.framework.TestCase.assertEquals
