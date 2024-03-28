@@ -24,8 +24,8 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.data.ServiceFeatureTable
 import com.arcgismaps.exceptions.FeatureFormValidationException
@@ -90,6 +90,12 @@ sealed class UIState {
 data class ErrorInfo(val fieldName: String, val error: FeatureFormValidationException)
 
 /**
+ * Base class for context aware AndroidViewModel. This class must have only a single application
+ * parameter.
+ */
+open class BaseMapViewModel(application: Application): AndroidViewModel(application)
+
+/**
  * A view model for the FeatureForms MapView UI
  * @constructor to be invoked by injection
  */
@@ -97,11 +103,12 @@ data class ErrorInfo(val fieldName: String, val error: FeatureFormValidationExce
 class MapViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     portalItemRepository: PortalItemRepository,
-    val proxy: MapViewProxy,
-    private val application: Application,
+    application: Application,
     @ApplicationScope private val scope: CoroutineScope
-) : ViewModel() {
+) : BaseMapViewModel(application) {
     private val itemId: String = savedStateHandle["uri"]!!
+
+    val proxy: MapViewProxy = MapViewProxy()
 
     var portalItem: PortalItem = portalItemRepository(itemId)
         ?: throw IllegalStateException("portal item not found with id $itemId")
@@ -251,7 +258,7 @@ class MapViewModel @Inject constructor(
                     e.printStackTrace()
                     withContext(Dispatchers.Main) {
                         Toast.makeText(
-                            application.applicationContext,
+                            getApplication<Application>().applicationContext,
                             "failed to create a FeatureForm for the feature",
                             Toast.LENGTH_LONG
                         ).show()
