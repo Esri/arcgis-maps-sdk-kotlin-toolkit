@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="floor_filter_view_filter_hint_sites">סנן אתרים...</string>
+    <string name="floor_filter_view_filter_hint_facilities">סנן מתקנים...</string>
+    <string name="floor_filter_select_site">בחר אתר</string>
+    <string name="floor_filter_select_facility">בחר מתקן</string>
+    <string name="floor_filter_no_results">לא נמצאו תוצאות.</string>
+    <string name="floor_filter_site_selector_top_bar">אתר\u0020-\u0020</string>
+</resources>

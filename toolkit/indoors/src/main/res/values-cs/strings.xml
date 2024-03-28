@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="floor_filter_view_filter_hint_sites">Filtrovat místa…</string>
+    <string name="floor_filter_view_filter_hint_facilities">Filtrovat zařízení…</string>
+    <string name="floor_filter_select_site">Vybrat lokalitu</string>
+    <string name="floor_filter_select_facility">Vybrat zařízení</string>
+    <string name="floor_filter_no_results">Nebyly nalezeny žádné výsledky.</string>
+    <string name="floor_filter_site_selector_top_bar">Lokalita\u0020-\u0020</string>
+</resources>

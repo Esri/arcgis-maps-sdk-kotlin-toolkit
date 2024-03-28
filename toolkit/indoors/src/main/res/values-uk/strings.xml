@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="floor_filter_view_filter_hint_sites">Фільтр сайтів...</string>
+    <string name="floor_filter_view_filter_hint_facilities">Фільтр пунктів обслуговування...</string>
+    <string name="floor_filter_select_site">Вибрати сайт</string>
+    <string name="floor_filter_select_facility">Вибрати пункт обслуговування</string>
+    <string name="floor_filter_no_results">Результати не знайдено.</string>
+    <string name="floor_filter_site_selector_top_bar">Site\u0020-\u0020</string>
+</resources>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="floor_filter_view_filter_hint_sites">サイトのフィルター処理…</string>
+    <string name="floor_filter_view_filter_hint_facilities">施設のフィルター処理…</string>
+    <string name="floor_filter_select_site">サイトの選択</string>
+    <string name="floor_filter_select_facility">施設の選択</string>
+    <string name="floor_filter_no_results">結果が見つかりません。</string>
+    <string name="floor_filter_site_selector_top_bar">サイト\u0020-\u0020</string>
+</resources>

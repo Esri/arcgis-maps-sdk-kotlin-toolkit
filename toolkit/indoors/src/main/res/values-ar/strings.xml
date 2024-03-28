@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="floor_filter_view_filter_hint_sites">تصفية المواقع...</string>
+    <string name="floor_filter_view_filter_hint_facilities">تصفية المرافق...</string>
+    <string name="floor_filter_select_site">تحديد موقع</string>
+    <string name="floor_filter_select_facility">تحديد مرفق</string>
+    <string name="floor_filter_no_results">لم يتم العثور على نتائج.</string>
+    <string name="floor_filter_site_selector_top_bar">Site\u0020-\u0020</string>
+</resources>

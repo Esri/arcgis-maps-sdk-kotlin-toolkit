@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="floor_filter_view_filter_hint_sites">Filtreeri kohad...</string>
+    <string name="floor_filter_view_filter_hint_facilities">Filtreeri rajatised...</string>
+    <string name="floor_filter_select_site">Valige koht</string>
+    <string name="floor_filter_select_facility">Vali rajatis</string>
+    <string name="floor_filter_no_results">Tulemusi ei leitud.</string>
+    <string name="floor_filter_site_selector_top_bar">Site\u0020-\u0020</string>
+</resources>

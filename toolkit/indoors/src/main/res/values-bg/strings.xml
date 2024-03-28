@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="floor_filter_view_filter_hint_sites">Филтриране на сайтове...</string>
+    <string name="floor_filter_view_filter_hint_facilities">Филтриране на съоръжения…</string>
+    <string name="floor_filter_select_site">Избиране на сайт</string>
+    <string name="floor_filter_select_facility">Избиране на съоръжение</string>
+    <string name="floor_filter_no_results">Няма намерени резултати.</string>
+    <string name="floor_filter_site_selector_top_bar">Сайт\u0020-\u0020</string>
+</resources>

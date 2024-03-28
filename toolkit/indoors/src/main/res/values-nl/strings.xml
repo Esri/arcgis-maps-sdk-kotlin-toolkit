@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="floor_filter_view_filter_hint_sites">Locaties filteren...</string>
+    <string name="floor_filter_view_filter_hint_facilities">Faciliteiten filteren...</string>
+    <string name="floor_filter_select_site">Selecteer een locatie</string>
+    <string name="floor_filter_select_facility">Selecteer een faciliteit</string>
+    <string name="floor_filter_no_results">Kan geen resultaten vinden.</string>
+    <string name="floor_filter_site_selector_top_bar">Locatie\u0020-\u0020</string>
+</resources>
