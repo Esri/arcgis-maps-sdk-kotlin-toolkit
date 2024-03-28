@@ -106,7 +106,7 @@ private fun createValidationErrorStates(
                     )
                 }
 
-                is FeatureFormValidationException.IncorrectValueTypeError -> {
+                is FeatureFormValidationException.IncorrectValueTypeException -> {
                     if (formElement.fieldType.isFloatingPoint) {
                         add(ValidationErrorState.NotANumber)
                     } else if (formElement.fieldType.isIntegerType) {
