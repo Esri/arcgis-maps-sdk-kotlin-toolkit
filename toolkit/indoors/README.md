@@ -8,22 +8,23 @@ in the building.
 |:--:|
 |![image](screenshot.png)|
 
+*View the API Reference for the `indoors` module [here](https://developers.arcgis.com/kotlin/toolkit-api-reference/arcgis-maps-kotlin-toolkit/com.arcgismaps.toolkit.indoors/index.html).*
+
 ##  Workflow
 
-The simplest workflow is for the app to instantiate a `FloorFilter` using an instance of the `FloorFilterState` to ideally display it within the GeoView. The `Modifier` properties of `Box`,`Column` or `Row` could be used to position the `FloorFilter` inside of a Composable Map.
+The simplest workflow is for the app to instantiate a `FloorFilter` using an instance of the `FloorFilterState` to ideally display it on top of the GeoView using a `Box`.
 
 ```kotlin
-val mapViewModel = viewModel<MapViewModel>(factory = MapViewModelFactory(floorAwareWebMap))
-ComposableMap(
-     modifier = Modifier.fillMaxSize(),
-     mapInterface = mapViewModel
- ) {
-    Box(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 40.dp),
-        contentAlignment = Alignment.BottomStart
-    ) {
-        FloorFilter(floorFilterState = mapViewModel.floorFilterState)
-    }
+
+Box(
+    modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 40.dp),
+    contentAlignment = Alignment.BottomStart
+) {
+    MapView(
+        arcgGISMap = floorAwareMap,
+        modifier = Modifier.fillMaxSize(),
+    )
+    FloorFilter(floorFilterState = mapViewModel.floorFilterState)
 }
 ```
 
@@ -41,8 +42,7 @@ private val uiProperties = UIProperties().apply {
 // create the floor filter state
 val floorFilterState = FloorFilterState(geoModel, coroutineScope, uiProperties)
 // pass the floor filter state in the compose layout
-FloorFilter(floorFilterState = mapViewModel.floorFilterState)
+FloorFilter(floorFilterState = floorFilterState)
 ```
 
 To see the FloorFilter in action, try out the [floor-filter-app](../../microapps/FloorFilterApp) micro app.
-../../toolkit/authentication/README.md
