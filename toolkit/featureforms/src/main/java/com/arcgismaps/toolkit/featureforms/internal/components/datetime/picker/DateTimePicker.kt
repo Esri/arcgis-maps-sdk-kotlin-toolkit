@@ -98,6 +98,36 @@ internal enum class DateTimePickerInput {
     Time
 }
 
+private fun calcYearRangeStart(max: Long?, selectedDateTime: Long?): Int {
+    val year = if (max != null && selectedDateTime != null) {
+        if (max < selectedDateTime) {
+            Instant.ofEpochMilli(max).atZone(TimeZone.getDefault().toZoneId()).year
+        } else {
+            Instant.ofEpochMilli(selectedDateTime).atZone(TimeZone.getDefault().toZoneId()).year
+        }
+    } else if (max != null) {
+        Instant.ofEpochMilli(max)?.atZone(TimeZone.getDefault().toZoneId())?.year
+    } else {
+        null
+    }
+
+    return year ?: DatePickerDefaults.YearRange.first
+}
+private fun calcYearRangeEnd(max: Long?, selectedDateTime: Long?): Int {
+    val year = if (max != null && selectedDateTime != null) {
+        if (max > selectedDateTime) {
+            Instant.ofEpochMilli(max).atZone(TimeZone.getDefault().toZoneId()).year
+        } else {
+            Instant.ofEpochMilli(selectedDateTime).atZone(TimeZone.getDefault().toZoneId()).year
+        }
+    } else if (max != null) {
+        Instant.ofEpochMilli(max)?.atZone(TimeZone.getDefault().toZoneId())?.year
+    } else {
+        null
+    }
+
+    return year ?: DatePickerDefaults.YearRange.last
+}
 /**
  * A material3 date and time picker presented as an [AlertDialog].
  *
@@ -125,27 +155,19 @@ internal fun DateTimePicker(
     }
     // calculate the date ranges from the state
     val datePickerRange = IntRange(
-        start = state.minDateTime?.atZone(TimeZone.getDefault().toZoneId())?.year
-            ?: DatePickerDefaults.YearRange.first,
-        endInclusive = state.maxDateTime?.atZone(TimeZone.getDefault().toZoneId())?.year
-            ?: DatePickerDefaults.YearRange.last
+        start = calcYearRangeStart(state.minDateTime?.toEpochMilli(), state.selectedDateTimeMillis),
+        endInclusive = calcYearRangeEnd(state.maxDateTime?.toEpochMilli(), state.selectedDateTimeMillis)
     )
     // The picker input type, date or time.
     val pickerInput by state.activePickerInput
     // DateTime from the state's value
     val dateTime by state.dateTime
     // create and remember a DatePickerState
-    val initialSelectedDateTimeMillis = dateTime.dateForPicker?.let {
-        if (state.dateValidator(it)) {
-            it
-        } else {
-            null
-        }
-    }
+
     val datePickerState = rememberSaveable(dateTime, saver = DatePickerState.Saver()) {
         DatePickerState(
-            initialSelectedDateMillis = initialSelectedDateTimeMillis,
-            initialDisplayedMonthMillis = initialSelectedDateTimeMillis
+            initialSelectedDateMillis = dateTime.dateForPicker,
+            initialDisplayedMonthMillis = dateTime.dateForPicker
                 ?: (state.minDateTime?.toEpochMilli() ?: state.maxDateTime?.toEpochMilli()),
             datePickerRange,
             DisplayMode.Picker
