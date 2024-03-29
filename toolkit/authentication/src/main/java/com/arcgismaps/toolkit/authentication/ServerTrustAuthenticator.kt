@@ -70,10 +70,14 @@ internal fun ServerTrustAuthenticator(
                 val startIdx = string.indexOf(hostname)
                 val endIdx = startIdx + hostname.length
                 append(string)
-                addStyle(SpanStyle(fontFamily = FontFamily.Monospace, fontSize = MaterialTheme.typography.headlineSmall.fontSize), startIdx, endIdx)
-
-            } ,
-            style = MaterialTheme.typography.headlineMedium
+                addStyle(
+                    SpanStyle(
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = MaterialTheme.typography.titleLarge.fontSize
+                    ), startIdx, endIdx
+                )
+            },
+            style = MaterialTheme.typography.titleLarge
         )
         Spacer(modifier = Modifier.height(32.dp))
         Row(

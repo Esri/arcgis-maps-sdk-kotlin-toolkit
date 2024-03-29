@@ -93,13 +93,13 @@ public fun UsernamePasswordAuthenticator(
                 addStyle(
                     style = SpanStyle(
                         fontFamily = FontFamily.Monospace,
-                        fontSize = MaterialTheme.typography.headlineSmall.fontSize
+                        fontSize = MaterialTheme.typography.titleLarge.fontSize
                     ),
                     urlStart,
                     urlEnd
                 )
             },
-            style = MaterialTheme.typography.headlineMedium,
+            style = MaterialTheme.typography.titleLarge,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(32.dp))
