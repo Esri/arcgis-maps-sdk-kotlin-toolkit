@@ -18,13 +18,14 @@
 
 package com.arcgismaps.toolkit.featureformsapp.screens.map
 
+import android.app.Application
 import android.widget.Toast
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.data.ServiceFeatureTable
 import com.arcgismaps.exceptions.FeatureFormValidationException
@@ -35,15 +36,16 @@ import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormElement
 import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.layers.FeatureLayer
-import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
-import com.arcgismaps.toolkit.composablemap.MapInterface
-import com.arcgismaps.toolkit.composablemap.MapInterfaceImpl
 import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
+import com.arcgismaps.toolkit.featureformsapp.di.ApplicationScope
+import com.arcgismaps.toolkit.geocompose.MapViewProxy
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
@@ -54,7 +56,7 @@ sealed class UIState {
      * Currently not editing.
      */
     object NotEditing : UIState()
-    
+
     /**
      * Currently selecting a new Feature
      */
@@ -88,28 +90,34 @@ sealed class UIState {
 data class ErrorInfo(val fieldName: String, val error: FeatureFormValidationException)
 
 /**
+ * Base class for context aware AndroidViewModel. This class must have only a single application
+ * parameter.
+ */
+open class BaseMapViewModel(application: Application): AndroidViewModel(application)
+
+/**
  * A view model for the FeatureForms MapView UI
  * @constructor to be invoked by injection
  */
 @HiltViewModel
 class MapViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val portalItemRepository: PortalItemRepository
-) : ViewModel(),
-    MapInterface by MapInterfaceImpl(ArcGISMap()) {
+    portalItemRepository: PortalItemRepository,
+    application: Application,
+    @ApplicationScope private val scope: CoroutineScope
+) : BaseMapViewModel(application) {
     private val itemId: String = savedStateHandle["uri"]!!
-    lateinit var portalItem: PortalItem
+
+    val proxy: MapViewProxy = MapViewProxy()
+
+    var portalItem: PortalItem = portalItemRepository(itemId)
+        ?: throw IllegalStateException("portal item not found with id $itemId")
+
+    val map: ArcGISMap = ArcGISMap(portalItem)
 
     private val _uiState: MutableState<UIState> = mutableStateOf(UIState.NotEditing)
     val uiState: State<UIState>
         get() = _uiState
-
-    init {
-        viewModelScope.launch {
-            portalItem = portalItemRepository(itemId) ?: return@launch
-            setMap(ArcGISMap(portalItem))
-        }
-    }
 
     /**
      * Apply attribute edits to the Geodatabase backing
@@ -184,7 +192,7 @@ class MapViewModel @Inject constructor(
         )
         return Result.success(Unit)
     }
-    
+
     fun selectNewFeature() =
         (_uiState.value as? UIState.Switching)?.let { prevState ->
             prevState.oldState.featureForm.discardEdits()
@@ -192,9 +200,14 @@ class MapViewModel @Inject constructor(
             layer.clearSelection()
             layer.selectFeature(prevState.newFeature)
             _uiState.value =
-                UIState.Editing(featureForm = FeatureForm(prevState.newFeature, layer.featureFormDefinition!!))
+                UIState.Editing(
+                    featureForm = FeatureForm(
+                        prevState.newFeature,
+                        layer.featureFormDefinition!!
+                    )
+                )
         }
-    
+
     fun continueEditing() =
         (_uiState.value as? UIState.Switching)?.let { prevState ->
             _uiState.value = prevState.oldState
@@ -210,41 +223,42 @@ class MapViewModel @Inject constructor(
         } ?: return Result.failure(IllegalStateException("Not in editing state"))
     }
 
-    context(MapView, CoroutineScope) override fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {
-            launch {
-                this@MapView.identifyLayers(
-                    screenCoordinate = singleTapEvent.screenCoordinate,
-                    tolerance = 22.0,
-                    returnPopupsOnly = false
-                ).onSuccess { results ->
-                    try {
-                        results.forEach { result ->
-                            result.geoElements.firstOrNull {
-                                it is ArcGISFeature && (it.featureTable?.layer as? FeatureLayer)?.featureFormDefinition != null
-                            }?.let {
-                                if (_uiState.value is UIState.Editing) {
-                                    val currentState = _uiState.value as UIState.Editing
-                                    val newFeature = it as ArcGISFeature
-                                    _uiState.value = UIState.Switching(
-                                        oldState = currentState,
-                                        newFeature = newFeature
-                                    )
-                                } else if (_uiState.value is UIState.NotEditing) {
-                                    val feature = it as ArcGISFeature
-                                    val layer = feature.featureTable!!.layer as FeatureLayer
-                                    val featureForm =
-                                        FeatureForm(feature, layer.featureFormDefinition!!)
-                                    // select the feature
-                                    layer.selectFeature(feature)
-                                    // set the UI to an editing state with the FeatureForm
-                                    _uiState.value = UIState.Editing(featureForm)
-                                }
+    fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {
+        scope.launch {
+            proxy.identifyLayers(
+                screenCoordinate = singleTapEvent.screenCoordinate,
+                tolerance = 22.dp,
+                returnPopupsOnly = false
+            ).onSuccess { results ->
+                try {
+                    results.forEach { result ->
+                        result.geoElements.firstOrNull {
+                            it is ArcGISFeature && (it.featureTable?.layer as? FeatureLayer)?.featureFormDefinition != null
+                        }?.let {
+                            if (_uiState.value is UIState.Editing) {
+                                val currentState = _uiState.value as UIState.Editing
+                                val newFeature = it as ArcGISFeature
+                                _uiState.value = UIState.Switching(
+                                    oldState = currentState,
+                                    newFeature = newFeature
+                                )
+                            } else if (_uiState.value is UIState.NotEditing) {
+                                val feature = it as ArcGISFeature
+                                val layer = feature.featureTable!!.layer as FeatureLayer
+                                val featureForm =
+                                    FeatureForm(feature, layer.featureFormDefinition!!)
+                                // select the feature
+                                layer.selectFeature(feature)
+                                // set the UI to an editing state with the FeatureForm
+                                _uiState.value = UIState.Editing(featureForm)
                             }
                         }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    withContext(Dispatchers.Main) {
                         Toast.makeText(
-                            context,
+                            getApplication<Application>().applicationContext,
                             "failed to create a FeatureForm for the feature",
                             Toast.LENGTH_LONG
                         ).show()
@@ -252,6 +266,8 @@ class MapViewModel @Inject constructor(
                 }
             }
         }
+    }
+
 }
 
 /**
@@ -260,7 +276,7 @@ class MapViewModel @Inject constructor(
  */
 fun List<FormElement>.getFormElement(fieldName: String): FieldFormElement? {
     val fieldElements = filterIsInstance<FieldFormElement>()
-    val element =  if (fieldElements.isNotEmpty()) {
+    val element = if (fieldElements.isNotEmpty()) {
         fieldElements.firstNotNullOfOrNull {
             if (it.fieldName == fieldName) it else null
         }
