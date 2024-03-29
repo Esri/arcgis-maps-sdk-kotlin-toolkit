@@ -36,6 +36,8 @@
     <string name="value_must_be_a_number">Value must be a number</string>
     <string name="value_must_be_within_domain">Value must be within domain</string>
     <string name="value_must_not_be_empty">Value must not be empty</string>
+    <string name="min_datetime_helper_text">Date must be on or after %1$s</string>
+    <string name="max_datetime_helper_text">Date must be on or before %1$s</string>
 
     <!-- Date Picker string values -->
     <string name="ff_date_input_headline">Entered date</string>

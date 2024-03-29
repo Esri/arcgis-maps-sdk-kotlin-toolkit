@@ -61,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.arcgismaps.toolkit.featureforms.R
+import com.arcgismaps.toolkit.featureforms.internal.components.base.ValidationErrorState
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.date.DatePicker
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.date.DatePickerDefaults
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.date.DatePickerState
@@ -238,6 +239,7 @@ private fun (ColumnScope).PickerContent(
         PickerTitle(
             label = label,
             description = description,
+            error = state.initialError,
             icon = it,
             onIconTap = onPickerToggle
         )
@@ -273,20 +275,30 @@ private fun (ColumnScope).PickerContent(
 private fun PickerTitle(
     label: String,
     description: String,
+    error: ValidationErrorState,
     icon: ImageVector?,
     onIconTap: () -> Unit = {}
 ) {
     Row(
         Modifier
-            .padding(start = 25.dp, end = 15.dp, bottom = 10.dp)
+            .padding(start = 25.dp, end = 10.dp, bottom = 10.dp)
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(Modifier.weight(1f)) {
             Text(text = label, style = MaterialTheme.typography.titleMedium)
-            Spacer(modifier = Modifier.height(5.dp))
-            Text(text = description, style = MaterialTheme.typography.bodySmall)
+            if (error !is ValidationErrorState.NoError) {
+                Text(text = description, style = MaterialTheme.typography.bodySmall)
+                Text(
+                    text = error.getString(),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            } else {
+                Spacer(modifier = Modifier.height(5.dp))
+                Text(text = description, style = MaterialTheme.typography.bodySmall)
+            }
         }
         icon?.let {
             IconButton(onClick = onIconTap) {
@@ -420,7 +432,8 @@ private fun DateTimePickerPreview() {
         style = DateTimePickerStyle.DateTime,
         label = "Next Inspection Date",
         description = "Enter a date in the next six months",
-        pickerInput = DateTimePickerInput.Date
+        pickerInput = DateTimePickerInput.Date,
+        initialError = ValidationErrorState.MinDatetimeConstraint("1/1/2000 01:00 AM")
     )
     DateTimePicker(state = state, {}, {}, {})
 }
