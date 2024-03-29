@@ -134,7 +134,7 @@ private fun createValidationErrorStates(
 
                 is FeatureFormValidationException.LessThanMinimumDateTimeException -> {
                     val dateTimePickerInput = formElement.input as DateTimePickerFormInput
-                    val formatted = dateTimePickerInput.min?.formattedDateTime(true)
+                    val formatted = dateTimePickerInput.min?.formattedDateTime(dateTimePickerInput.includeTime)
                     if (formatted != null) {
                         add(ValidationErrorState.MinDatetimeConstraint(formatted))
                     }
@@ -142,7 +142,7 @@ private fun createValidationErrorStates(
 
                 is FeatureFormValidationException.MaxDateTimeConstraintException -> {
                     val dateTimePickerInput = formElement.input as DateTimePickerFormInput
-                    val formatted = dateTimePickerInput.max?.formattedDateTime(true)
+                    val formatted = dateTimePickerInput.max?.formattedDateTime(dateTimePickerInput.includeTime)
                     if (formatted != null) {
                         add(ValidationErrorState.MaxDatetimeConstraint(formatted))
                     }

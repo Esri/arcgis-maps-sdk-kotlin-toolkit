@@ -99,15 +99,15 @@ internal enum class DateTimePickerInput {
     Time
 }
 
-private fun calcYearRangeStart(max: Long?, selectedDateTime: Long?): Int {
-    val year = if (max != null && selectedDateTime != null) {
-        if (max < selectedDateTime) {
-            Instant.ofEpochMilli(max).atZone(TimeZone.getDefault().toZoneId()).year
+private fun calcYearRangeStart(min: Long?, selectedDateTime: Long?): Int {
+    val year = if (min != null && selectedDateTime != null) {
+        if (min < selectedDateTime) {
+            Instant.ofEpochMilli(min).atZone(TimeZone.getDefault().toZoneId()).year
         } else {
             Instant.ofEpochMilli(selectedDateTime).atZone(TimeZone.getDefault().toZoneId()).year
         }
-    } else if (max != null) {
-        Instant.ofEpochMilli(max)?.atZone(TimeZone.getDefault().toZoneId())?.year
+    } else if (min != null) {
+        Instant.ofEpochMilli(min)?.atZone(TimeZone.getDefault().toZoneId())?.year
     } else {
         null
     }
@@ -288,16 +288,14 @@ private fun PickerTitle(
     ) {
         Column(Modifier.weight(1f)) {
             Text(text = label, style = MaterialTheme.typography.titleMedium)
+            Spacer(modifier = Modifier.height(5.dp))
+            Text(text = description, style = MaterialTheme.typography.bodySmall)
             if (error !is ValidationErrorState.NoError) {
-                Text(text = description, style = MaterialTheme.typography.bodySmall)
                 Text(
                     text = error.getString(),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.error,
                 )
-            } else {
-                Spacer(modifier = Modifier.height(5.dp))
-                Text(text = description, style = MaterialTheme.typography.bodySmall)
             }
         }
         icon?.let {

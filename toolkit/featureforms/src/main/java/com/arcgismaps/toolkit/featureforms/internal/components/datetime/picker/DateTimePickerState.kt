@@ -387,7 +387,8 @@ internal fun rememberDateTimePickerState(
  */
 internal fun dateTimePickerStateSaver(): Saver<DateTimePickerState, Any> = listSaver(
     save = {
-        listOf(it.pickerStyle,
+        listOf(
+            it.pickerStyle,
             it.minDateTime?.toEpochMilli(),
             it.maxDateTime?.toEpochMilli(),
             it.dateTime.value.epochMillis,
@@ -407,6 +408,7 @@ internal fun dateTimePickerStateSaver(): Saver<DateTimePickerState, Any> = listS
         // not on initial conditions.
         val min  = it[1]?.let { Instant.ofEpochMilli(it as Long) }
         val max = it[2]?.let { Instant.ofEpochMilli(it as Long) }
+        val includeTime = (it[0] as DateTimePickerStyle) != DateTimePickerStyle.Date
         DateTimePickerStateImpl(
             it[0] as DateTimePickerStyle,
             min,
@@ -414,8 +416,8 @@ internal fun dateTimePickerStateSaver(): Saver<DateTimePickerState, Any> = listS
             it[3]?.let { Instant.ofEpochMilli(it as Long) },
             when (it[4]) {
               0 -> ValidationErrorState.NoError
-              -1 -> ValidationErrorState.MinDatetimeConstraint(min!!.formattedDateTime(true))
-              else ->  ValidationErrorState.MinDatetimeConstraint(max!!.formattedDateTime(true))
+              -1 -> ValidationErrorState.MinDatetimeConstraint(min!!.formattedDateTime(includeTime))
+              else ->  ValidationErrorState.MinDatetimeConstraint(max!!.formattedDateTime(includeTime))
             },
             it[5] as String,
             it[6] as String,
