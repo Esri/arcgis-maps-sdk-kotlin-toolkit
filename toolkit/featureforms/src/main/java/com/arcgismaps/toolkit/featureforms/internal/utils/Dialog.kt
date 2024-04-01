@@ -140,6 +140,7 @@ internal fun FeatureFormDialog() {
                 state.minEpochMillis,
                 state.maxEpochMillis,
                 state.value.value.data,
+                state.value.value.error,
                 state.label,
                 state.description,
                 DateTimePickerInput.Date

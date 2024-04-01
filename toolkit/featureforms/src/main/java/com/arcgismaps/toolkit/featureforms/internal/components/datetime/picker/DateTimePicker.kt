@@ -61,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.arcgismaps.toolkit.featureforms.R
+import com.arcgismaps.toolkit.featureforms.internal.components.base.ValidationErrorState
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.date.DatePicker
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.date.DatePickerDefaults
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.date.DatePickerState
@@ -98,6 +99,36 @@ internal enum class DateTimePickerInput {
     Time
 }
 
+private fun calcYearRangeStart(min: Long?, selectedDateTime: Long?): Int {
+    val year = if (min != null && selectedDateTime != null) {
+        if (min < selectedDateTime) {
+            Instant.ofEpochMilli(min).atZone(TimeZone.getDefault().toZoneId()).year
+        } else {
+            Instant.ofEpochMilli(selectedDateTime).atZone(TimeZone.getDefault().toZoneId()).year
+        }
+    } else if (min != null) {
+        Instant.ofEpochMilli(min)?.atZone(TimeZone.getDefault().toZoneId())?.year
+    } else {
+        null
+    }
+
+    return year ?: DatePickerDefaults.YearRange.first
+}
+private fun calcYearRangeEnd(max: Long?, selectedDateTime: Long?): Int {
+    val year = if (max != null && selectedDateTime != null) {
+        if (max > selectedDateTime) {
+            Instant.ofEpochMilli(max).atZone(TimeZone.getDefault().toZoneId()).year
+        } else {
+            Instant.ofEpochMilli(selectedDateTime).atZone(TimeZone.getDefault().toZoneId()).year
+        }
+    } else if (max != null) {
+        Instant.ofEpochMilli(max)?.atZone(TimeZone.getDefault().toZoneId())?.year
+    } else {
+        null
+    }
+
+    return year ?: DatePickerDefaults.YearRange.last
+}
 /**
  * A material3 date and time picker presented as an [AlertDialog].
  *
@@ -125,16 +156,15 @@ internal fun DateTimePicker(
     }
     // calculate the date ranges from the state
     val datePickerRange = IntRange(
-        start = state.minDateTime?.atZone(TimeZone.getDefault().toZoneId())?.year
-            ?: DatePickerDefaults.YearRange.first,
-        endInclusive = state.maxDateTime?.atZone(TimeZone.getDefault().toZoneId())?.year
-            ?: DatePickerDefaults.YearRange.last
+        start = calcYearRangeStart(state.minDateTime?.toEpochMilli(), state.selectedDateTimeMillis),
+        endInclusive = calcYearRangeEnd(state.maxDateTime?.toEpochMilli(), state.selectedDateTimeMillis)
     )
     // The picker input type, date or time.
     val pickerInput by state.activePickerInput
     // DateTime from the state's value
     val dateTime by state.dateTime
     // create and remember a DatePickerState
+
     val datePickerState = rememberSaveable(dateTime, saver = DatePickerState.Saver()) {
         DatePickerState(
             initialSelectedDateMillis = dateTime.dateForPicker,
@@ -209,6 +239,7 @@ private fun (ColumnScope).PickerContent(
         PickerTitle(
             label = label,
             description = description,
+            error = state.initialError,
             icon = it,
             onIconTap = onPickerToggle
         )
@@ -244,12 +275,13 @@ private fun (ColumnScope).PickerContent(
 private fun PickerTitle(
     label: String,
     description: String,
+    error: ValidationErrorState,
     icon: ImageVector?,
     onIconTap: () -> Unit = {}
 ) {
     Row(
         Modifier
-            .padding(start = 25.dp, end = 15.dp, bottom = 10.dp)
+            .padding(start = 25.dp, end = 10.dp, bottom = 10.dp)
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically
@@ -258,6 +290,13 @@ private fun PickerTitle(
             Text(text = label, style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(5.dp))
             Text(text = description, style = MaterialTheme.typography.bodySmall)
+            if (error !is ValidationErrorState.NoError) {
+                Text(
+                    text = error.getString(),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
         }
         icon?.let {
             IconButton(onClick = onIconTap) {
@@ -391,7 +430,8 @@ private fun DateTimePickerPreview() {
         style = DateTimePickerStyle.DateTime,
         label = "Next Inspection Date",
         description = "Enter a date in the next six months",
-        pickerInput = DateTimePickerInput.Date
+        pickerInput = DateTimePickerInput.Date,
+        initialError = ValidationErrorState.MinDatetimeConstraint("1/1/2000 01:00 AM")
     )
     DateTimePicker(state = state, {}, {}, {})
 }

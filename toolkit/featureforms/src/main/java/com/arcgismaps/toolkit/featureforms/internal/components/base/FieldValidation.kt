@@ -34,6 +34,8 @@ internal sealed class ValidationErrorState(
     class MinNumericConstraint(min: String) : ValidationErrorState(min)
     class MaxNumericConstraint(max: String) : ValidationErrorState(max)
     class MinMaxNumericConstraint(min: String, max: String) : ValidationErrorState(min, max)
+    class MinDatetimeConstraint(min: String) : ValidationErrorState(min)
+    class MaxDatetimeConstraint(max: String) : ValidationErrorState(max)
     data object NotANumber : ValidationErrorState()
     data object NotAWholeNumber : ValidationErrorState()
     data object NotInCodedValueDomain : ValidationErrorState()
@@ -73,6 +75,14 @@ internal sealed class ValidationErrorState(
 
             is MinMaxNumericConstraint -> {
                 stringResource(id = R.string.numeric_range_helper_text, *formatArgs)
+            }
+
+            is MinDatetimeConstraint -> {
+                stringResource(id = R.string.min_datetime_helper_text, *formatArgs)
+            }
+
+            is MaxDatetimeConstraint -> {
+                stringResource(id = R.string.max_datetime_helper_text, *formatArgs)
             }
 
             is NotANumber -> {

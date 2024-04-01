@@ -18,9 +18,11 @@ package com.arcgismaps.toolkit.featureforms.internal.components.base
 
 import com.arcgismaps.data.RangeDomain
 import com.arcgismaps.exceptions.FeatureFormValidationException
+import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
+import com.arcgismaps.toolkit.featureforms.internal.components.datetime.formattedDateTime
 import com.arcgismaps.toolkit.featureforms.internal.utils.asDoubleTuple
 import com.arcgismaps.toolkit.featureforms.internal.utils.asLongTuple
 import com.arcgismaps.toolkit.featureforms.internal.utils.format
@@ -128,6 +130,22 @@ private fun createValidationErrorStates(
 
                 is FeatureFormValidationException.MaxNumericConstraintException -> {
                     hasMaxRangeError = true
+                }
+
+                is FeatureFormValidationException.LessThanMinimumDateTimeException -> {
+                    val dateTimePickerInput = formElement.input as DateTimePickerFormInput
+                    val formatted = dateTimePickerInput.min?.formattedDateTime(dateTimePickerInput.includeTime)
+                    if (formatted != null) {
+                        add(ValidationErrorState.MinDatetimeConstraint(formatted))
+                    }
+                }
+
+                is FeatureFormValidationException.MaxDateTimeConstraintException -> {
+                    val dateTimePickerInput = formElement.input as DateTimePickerFormInput
+                    val formatted = dateTimePickerInput.max?.formattedDateTime(dateTimePickerInput.includeTime)
+                    if (formatted != null) {
+                        add(ValidationErrorState.MaxDatetimeConstraint(formatted))
+                    }
                 }
             }
             if (formElement.input is TextBoxFormInput || formElement.input is TextAreaFormInput) {
