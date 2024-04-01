@@ -4,9 +4,7 @@ The FloorFilter component simplifies visualization of GIS data for a specific fl
 It allows you to filter down the floor aware data displayed in your GeoView to a site, a building in the site, or a floor
 in the building. 
 
-|FloorFilter|
-|:--:|
-|![image](screenshot.png)|
+![image](screenshot.png)
 
 *View the API Reference for the `indoors` module [here](https://developers.arcgis.com/kotlin/toolkit-api-reference/arcgis-maps-kotlin-toolkit/com.arcgismaps.toolkit.indoors/index.html).*
 

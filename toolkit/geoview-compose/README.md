@@ -2,9 +2,7 @@
 
 The GeoView-Compose module provides `@Composable` implementations of the `MapView` and `SceneView` with a Compose-idiomatic API.
 
-|GeoView-Compose|
-|:--:|
-|![image](screenshot.png)|
+![image](screenshot.png)
 
 *View the API Reference for the `geoview-compose` module [here](https://developers.arcgis.com/kotlin/toolkit-api-reference/arcgis-maps-kotlin-toolkit/com.arcgismaps.toolkit.geoviewcompose/index.html).*
 
