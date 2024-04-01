@@ -27,6 +27,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -53,7 +55,8 @@ internal fun ServerTrustAuthenticator(
     Column(
         modifier = modifier
             .background(MaterialTheme.colorScheme.background)
-            .padding(32.dp),
+            .padding(32.dp)
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -67,10 +70,14 @@ internal fun ServerTrustAuthenticator(
                 val startIdx = string.indexOf(hostname)
                 val endIdx = startIdx + hostname.length
                 append(string)
-                addStyle(SpanStyle(fontFamily = FontFamily.Monospace, fontSize = MaterialTheme.typography.headlineSmall.fontSize), startIdx, endIdx)
-
-            } ,
-            style = MaterialTheme.typography.headlineMedium
+                addStyle(
+                    SpanStyle(
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = MaterialTheme.typography.titleLarge.fontSize
+                    ), startIdx, endIdx
+                )
+            },
+            style = MaterialTheme.typography.titleLarge
         )
         Spacer(modifier = Modifier.height(32.dp))
         Row(
