@@ -49,12 +49,16 @@ internal fun OAuthAuthenticator(
     if (authenticatorState.oAuthUserConfiguration?.redirectUrl == DEFAULT_REDIRECT_URI) {
         OAuthWebView(oAuthPendingSignIn, authenticatorState)
     } else {
-        // If a configuration change happens while the OAuth activity is active, then when the activity
-        // returns, this composable would launch the activity again due to being recomposed. This flag
-        // prevents a relaunch. Note that this flag does not need to be reset to false, because after the
-        // OAuth prompt completes, the OAuthAuthenticator will leave the composition, thus on a subsequent
-        // OAuth challenge the OAuthAuthenticator will re-enter the composition and a new `didLaunch` state
-        // variable will be initialized again here to false.
+        // `didLaunch` prevents the OAuth activity from being launched again if a configuration change happens while
+        // the OAuth activity is active. This could occur when the activity returns and this composable gets recomposed.
+        //
+        // The key for `rememberSaveable` is set to `oAuthPendingSignIn.hashCode().toString()` because
+        // it will be unique for each `OAuthUserSignIn` instance, ensuring that the state is correctly remembered
+        // for each individual sign-in process.
+        //
+        // Note that this flag does not need to be reset to false. After the OAuth prompt completes, the OAuthAuthenticator
+        // will leave the composition. On a subsequent OAuth challenge, the OAuthAuthenticator will re-enter the
+        // composition and a new `didLaunch` state variable will be initialized again to `false`.
         var didLaunch by rememberSaveable(key = oAuthPendingSignIn.hashCode().toString()) { mutableStateOf(false) }
         val launcher =
             rememberLauncherForActivityResult(contract = OAuthUserSignInActivity.Contract()) { redirectUrl ->
