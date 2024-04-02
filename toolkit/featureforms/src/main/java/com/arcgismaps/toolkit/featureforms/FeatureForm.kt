@@ -32,6 +32,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
@@ -169,9 +170,18 @@ internal fun FeatureForm(
 }
 
 @Composable
-private fun FeatureFormTitle(featureForm: FeatureForm) {
+private fun FeatureFormTitle(featureForm: FeatureForm, modifier: Modifier = Modifier) {
     val title by featureForm.title.collectAsState()
-    Text(text = title, style = TextStyle(fontWeight = FontWeight.Bold))
+    Text(
+        text = title,
+        style = TextStyle(fontWeight = FontWeight.Bold),
+        modifier = modifier
+    )
+    DisposableEffect(key1 =) {
+        onDispose {
+
+        }
+    }
 }
 
 @Composable
@@ -187,7 +197,10 @@ private fun FeatureFormBody(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // title
-        FeatureFormTitle(featureForm = form)
+        FeatureFormTitle(
+            featureForm = form,
+            modifier = Modifier.padding(horizontal = 15.dp)
+        )
         Spacer(
             modifier = Modifier
                 .fillMaxWidth()
