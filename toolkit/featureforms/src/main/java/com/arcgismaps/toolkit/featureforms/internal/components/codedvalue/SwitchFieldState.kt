@@ -25,6 +25,7 @@ import com.arcgismaps.data.CodedValue
 import com.arcgismaps.data.FieldType
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.mapping.featureforms.FormExpressionEvaluationError
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
@@ -72,20 +73,24 @@ internal class SwitchFieldProperties(
  * @param properties the [SwitchFieldProperties] associated with this state.
  * @property initialValue the initial value to set for this field. This value should be a CodedValue code or subtype.
  * @param scope a [CoroutineScope] to start [StateFlow] collectors on.
- * @param onEditValue a callback to invoke when the user edits result in a change of value. This
- * is called on [SwitchFieldState.onValueChanged].
+ * @param updateValue a function that is invoked when the user edits result in a change of value. This
+ * is called in [BaseFieldState.onValueChanged].
+ * @param evaluateExpressions a function that is invoked to evaluate all form expressions. This is
+ * called after a successful [updateValue].
  */
 @Stable
 internal class SwitchFieldState(
     properties: SwitchFieldProperties,
     val initialValue: Any? = properties.value.value,
     scope: CoroutineScope,
-    onEditValue: ((Any?) -> Unit)
+    updateValue: (Any?) -> Unit,
+    evaluateExpressions: suspend () -> Result<List<FormExpressionEvaluationError>>
 ) : CodedValueFieldState(
     properties = properties,
     scope = scope,
     initialValue = initialValue,
-    onEditValue = onEditValue
+    updateValue = updateValue,
+    evaluateExpressions = evaluateExpressions
 ) {
     /**
      * The CodedValue that represents the "on" state of the Switch.
@@ -139,10 +144,8 @@ internal class SwitchFieldState(
                     ),
                     initialValue = list[0],
                     scope = scope,
-                    onEditValue = { code ->
-                        formElement.updateValue(code)
-                        scope.launch { form.evaluateExpressions() }
-                    },
+                    updateValue = formElement::updateValue,
+                    evaluateExpressions = form::evaluateExpressions
                 )
             }
         )
@@ -184,9 +187,7 @@ internal fun rememberSwitchFieldState(
             noValueLabel = noValueString
         ),
         scope = scope,
-        onEditValue = {
-            field.updateValue(it)
-            scope.launch { form.evaluateExpressions() }
-        },
+        updateValue = field::updateValue,
+        evaluateExpressions = form::evaluateExpressions
     )
 }

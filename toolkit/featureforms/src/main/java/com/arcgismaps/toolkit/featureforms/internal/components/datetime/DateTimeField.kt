@@ -124,7 +124,10 @@ private fun DateTimeFieldPreview() {
                 shouldShowTime = true
             ),
             scope = scope,
-            onEditValue = {},
+            updateValue = {},
+            evaluateExpressions = {
+                return@DateTimeFieldState Result.success(emptyList())
+            }
         )
         DateTimeField(state = state)
     }

@@ -16,11 +16,13 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.base
 
+import android.util.Log
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.mapping.featureforms.FormExpressionEvaluationError
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -57,14 +59,17 @@ internal data class Value<T>(
  * @param initialValue optional initial value to set for this field. It is set to the value of
  * [FieldProperties.value] by default.
  * @param scope a [CoroutineScope] to start [StateFlow] collectors on.
- * @param onEditValue a callback to invoke when the user edits result in a change of value. This
- * is called on [BaseFieldState.onValueChanged].
+ * @param updateValue a function that is invoked when the user edits result in a change of value. This
+ * is called in [BaseFieldState.onValueChanged].
+ * @param evaluateExpressions a function that is invoked to evaluate all form expressions. This is
+ * called after a successful [updateValue].
  */
 internal abstract class BaseFieldState<T>(
     properties: FieldProperties<T>,
     initialValue: T = properties.value.value,
     private val scope: CoroutineScope,
-    protected val onEditValue: (Any?) -> Unit
+    private val updateValue: (Any?) -> Unit,
+    private val evaluateExpressions: suspend () -> Result<List<FormExpressionEvaluationError>>,
 ) : FormElementState(
     label = properties.label,
     description = properties.description,
@@ -150,7 +155,7 @@ internal abstract class BaseFieldState<T>(
 
     /**
      * Callback to update the current value of this state object to the given [input]. This also
-     * sets the value on the feature using [onEditValue].
+     * sets the value on the feature using [updateValue] and calls [evaluateExpressions].
      */
     fun onValueChanged(input: T) {
         // infer that a value change event comes from a user interaction and hence treat it as a
@@ -159,7 +164,13 @@ internal abstract class BaseFieldState<T>(
         // set the ui state immediately
         _value.value = Value(input)
         // update the attributes
-        onEditValue(typeConverter(input))
+        updateValue(typeConverter(input))
+        // evaluate expressions
+        scope.launch {
+            evaluateExpressions().onFailure {
+                Log.e ("FeatureForm", "Error while evaluating expressions", it)
+            }
+        }
     }
 
     /**
