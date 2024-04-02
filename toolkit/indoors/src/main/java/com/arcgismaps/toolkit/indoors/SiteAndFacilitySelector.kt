@@ -247,7 +247,7 @@ internal fun FacilitySelectorTopBar(
                 color = uiProperties.textColor,
                 fontWeight = FontWeight.Bold,
                 // reduce font size if the localized text is too long
-                fontSize = if (selectAFacilityText.length > 24) 12.sp else 18.sp,
+                fontSize = if (selectAFacilityText.length > 23) 12.sp else 18.sp,
                 textAlign = TextAlign.Start
             )
 
@@ -255,7 +255,7 @@ internal fun FacilitySelectorTopBar(
                 text = stringResource(R.string.floor_filter_site_selector_top_bar) +
                         (floorFilterState.getSelectedSite()?.name ?: "not available"),
                 // reduce font size if the localized text is too long
-                fontSize = if (selectAFacilityText.length > 24) 12.sp else 15.sp,
+                fontSize = if (selectAFacilityText.length > 23) 12.sp else 15.sp,
                 color = Color.Gray
             )
         }
