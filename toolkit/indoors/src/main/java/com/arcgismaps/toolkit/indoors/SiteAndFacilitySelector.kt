@@ -177,7 +177,7 @@ internal fun SiteSelectorTopBar(
     ) {
         Text(
             modifier = Modifier
-                .padding(horizontal = 20.dp)
+                .padding(start = 20.dp)
                 .align(CenterVertically),
             text = stringResource(R.string.floor_filter_select_site),
             fontWeight = FontWeight.Bold,
@@ -238,21 +238,24 @@ internal fun FacilitySelectorTopBar(
                 .weight(1f)
                 .fillMaxHeight()
                 .wrapContentHeight(CenterVertically)
-                .padding(horizontal = 20.dp)
+                .padding(start = 20.dp)
         ) {
+            val selectAFacilityText = stringResource(R.string.floor_filter_select_facility)
             Text(
                 modifier = Modifier.align(Start),
-                text = stringResource(R.string.floor_filter_select_facility),
+                text = selectAFacilityText,
                 color = uiProperties.textColor,
                 fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
+                // reduce font size if the localized text is too long
+                fontSize = if (selectAFacilityText.length > 24) 12.sp else 18.sp,
                 textAlign = TextAlign.Start
             )
 
             Text(
                 text = stringResource(R.string.floor_filter_site_selector_top_bar) +
                         (floorFilterState.getSelectedSite()?.name ?: "not available"),
-                fontSize = 15.sp,
+                // reduce font size if the localized text is too long
+                fontSize = if (selectAFacilityText.length > 24) 12.sp else 15.sp,
                 color = Color.Gray
             )
         }
