@@ -29,13 +29,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Divider
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -45,8 +49,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
@@ -93,8 +95,11 @@ public sealed class ValidationErrorVisibility {
 
 /**
  * A composable Form toolkit component that enables users to edit field values of features in a
- * layer using forms that have been configured externally (using either in the the Web Map Viewer
- * or the Fields Maps web app).
+ * layer using forms that have been configured externally. Forms may be configured in the [Web Map Viewer](https://www.arcgis.com/home/webmap/viewer.html)
+ * or [Fields Maps Designer](https://www.arcgis.com/apps/fieldmaps/)).
+ *
+ * Note : Even though the [FeatureForm] class is not stable, there exists an internal mechanism to
+ * enable smart recompositions.
  *
  * @param featureForm The [FeatureForm] configuration.
  * @param modifier The [Modifier] to be applied to layout corresponding to the content of this
@@ -111,6 +116,33 @@ public fun FeatureForm(
     modifier: Modifier = Modifier,
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic
 ) {
+    val stateData = remember(featureForm) {
+        StateData(featureForm)
+    }
+    FeatureForm(
+        stateData = stateData,
+        modifier = modifier,
+        validationErrorVisibility = validationErrorVisibility
+    )
+}
+
+/**
+ * A wrapper to hold state data. This provides a [Stable] class to enable smart recompositions,
+ * since [FeatureForm] is not stable.
+ */
+@Immutable
+internal data class StateData(@Stable val featureForm: FeatureForm)
+
+/**
+ * This composable uses the [StateData] class to display a [FeatureForm].
+ */
+@Composable
+internal fun FeatureForm(
+    stateData: StateData,
+    modifier: Modifier = Modifier,
+    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic
+) {
+    val featureForm = stateData.featureForm
     val scope = rememberCoroutineScope()
     val states = rememberStates(form = featureForm, scope = scope)
     FeatureFormBody(form = featureForm, states = states, modifier = modifier)
@@ -136,9 +168,13 @@ public fun FeatureForm(
 }
 
 @Composable
-private fun FeatureFormTitle(featureForm: FeatureForm) {
+private fun FeatureFormTitle(featureForm: FeatureForm, modifier: Modifier = Modifier) {
     val title by featureForm.title.collectAsState()
-    Text(text = title, style = TextStyle(fontWeight = FontWeight.Bold))
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleMedium,
+        modifier = modifier
+    )
 }
 
 @Composable
@@ -154,7 +190,10 @@ private fun FeatureFormBody(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // title
-        FeatureFormTitle(featureForm = form)
+        FeatureFormTitle(
+            featureForm = form,
+            modifier = Modifier.padding(horizontal = 15.dp)
+        )
         Spacer(
             modifier = Modifier
                 .fillMaxWidth()
@@ -266,7 +305,7 @@ internal fun rememberStates(
                 states.add(element, groupState)
             }
 
-            else -> { }
+            else -> {}
         }
     }
     return states

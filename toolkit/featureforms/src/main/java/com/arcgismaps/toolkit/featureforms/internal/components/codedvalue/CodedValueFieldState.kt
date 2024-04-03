@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.codedvalue
 
-import androidx.compose.runtime.Stable
 import com.arcgismaps.data.CodedValue
 import com.arcgismaps.data.FieldType
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
@@ -54,7 +53,6 @@ internal open class CodedValueFieldProperties(
  * @param onEditValue a callback to invoke when the user edits result in a change of value. This
  * is called on [CodedValueFieldState.onValueChanged]
  */
-@Stable
 internal abstract class CodedValueFieldState(
     properties: CodedValueFieldProperties,
     initialValue: Any? = properties.value.value,

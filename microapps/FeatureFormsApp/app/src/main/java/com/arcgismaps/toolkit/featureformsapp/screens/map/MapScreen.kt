@@ -71,7 +71,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
 import com.arcgismaps.exceptions.FeatureFormValidationException
-import com.arcgismaps.toolkit.composablemap.ComposableMap
 import com.arcgismaps.toolkit.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
 import com.arcgismaps.toolkit.featureformsapp.R
@@ -81,6 +80,7 @@ import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetLayout
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetValue
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.StandardBottomSheet
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.rememberStandardBottomSheetState
+import com.arcgismaps.toolkit.geoviewcompose.MapView
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -102,7 +102,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                     ValidationErrorVisibility.Automatic
                 )
             }
-            
+
             is UIState.Switching -> {
                 val state = uiState as UIState.Switching
                 Pair(
@@ -130,7 +130,6 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                     showDiscardEditsDialog = true
                 },
                 onSave = {
-                    //SubmitForm(mapViewModel = mapViewModel, featureForm = (uiState as UIState.Editing).featureForm)
                     scope.launch {
                         mapViewModel.commitEdits().onFailure {
                             Log.w("Forms", "Applying edits failed : ${it.message}")
@@ -147,11 +146,13 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
         }
     ) { padding ->
         // show the composable map using the mapViewModel
-        ComposableMap(
+        MapView(
+            arcGISMap = mapViewModel.map,
+            mapViewProxy = mapViewModel.proxy,
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize(),
-            mapInterface = mapViewModel
+            onSingleTapConfirmed = { mapViewModel.onSingleTapConfirmed(it) }
         )
         AnimatedVisibility(
             visible = featureForm != null,
@@ -159,6 +160,11 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
             exit = slideOutVertically { h -> h },
             label = "feature form"
         ) {
+            val isSwitching = uiState is UIState.Switching
+            // remember the form and update it when a new form is opened
+            val rememberedForm = remember(this, isSwitching) {
+                featureForm!!
+            }
             val bottomSheetState = rememberStandardBottomSheetState(
                 initialValue = SheetValue.PartiallyExpanded,
                 confirmValueChange = { it != SheetValue.Hidden },
@@ -180,13 +186,11 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                     sheetWidth = with(LocalDensity.current) { layoutWidth.toDp() }
                 ) {
                     // set bottom sheet content to the FeatureForm
-                    if (featureForm != null) {
-                        FeatureForm(
-                            featureForm = featureForm,
-                            modifier = Modifier.fillMaxSize(),
-                            validationErrorVisibility = errorVisibility
-                        )
-                    }
+                    FeatureForm(
+                        featureForm = rememberedForm,
+                        modifier = Modifier.fillMaxSize(),
+                        validationErrorVisibility = errorVisibility
+                    )
                 }
             }
         }
@@ -282,7 +286,7 @@ fun TopFormBar(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SubmitForm(errors : List<ErrorInfo>, onDismissRequest: () -> Unit) {
+private fun SubmitForm(errors: List<ErrorInfo>, onDismissRequest: () -> Unit) {
     if (errors.isEmpty()) {
         // show a progress dialog if no errors are present
         AlertDialog(
@@ -358,7 +362,7 @@ private fun SubmitForm(errors : List<ErrorInfo>, onDismissRequest: () -> Unit) {
 @Composable
 fun FeatureFormValidationException.getString(): String {
     return when (this) {
-        is FeatureFormValidationException.IncorrectValueTypeError -> {
+        is FeatureFormValidationException.IncorrectValueTypeException -> {
             stringResource(id = R.string.value_must_be_of_correct_type)
         }
 
