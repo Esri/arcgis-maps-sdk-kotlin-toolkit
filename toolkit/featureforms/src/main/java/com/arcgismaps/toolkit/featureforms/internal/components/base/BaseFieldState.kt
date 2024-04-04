@@ -168,7 +168,11 @@ internal abstract class BaseFieldState<T>(
         // evaluate expressions
         scope.launch {
             evaluateExpressions().onFailure {
-                Log.e ("FeatureForm", "Error while evaluating expressions", it)
+                Log.e ("FeatureForm", "Error running form expressions", it)
+            }.onSuccess {
+                if (it.isNotEmpty()) {
+                    Log.e("FeatureForm", "Errors found while evaluating expressions: $it")
+                }
             }
         }
     }
