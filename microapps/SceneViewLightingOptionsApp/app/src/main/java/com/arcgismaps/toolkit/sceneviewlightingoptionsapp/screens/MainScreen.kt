@@ -58,7 +58,7 @@ import com.arcgismaps.mapping.view.AtmosphereEffect
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.LightingMode
 import com.arcgismaps.mapping.view.SpaceEffect
-import com.arcgismaps.toolkit.geocompose.SceneView
+import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneId

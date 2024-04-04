@@ -230,8 +230,11 @@ internal abstract class BaseFieldState<T>(
                         errors.first()
                     }
                 } else {
-                    // if focused and empty, don't show the "Required" error or numeric parse errors
-                    if (value.value.data is String && (value.value.data as String).isEmpty()) {
+                    // if is a text field and is focused, empty and has a description do not show
+                    // any error
+                    if (value.value.data is String
+                        && (value.value.data as String).isEmpty()
+                        && description.isNotEmpty()) {
                         ValidationErrorState.NoError
                     } else {
                         // show the first non-required error

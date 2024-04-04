@@ -81,7 +81,7 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class).all {
 dependencies {
     implementation(project(":authentication"))
     implementation(project(":featureforms"))
-    implementation(project(":geo-compose"))
+    implementation(project(":geoview-compose"))
     // sdk
     implementation(arcgis.mapsSdk)
     // hilt

@@ -1,0 +1,25 @@
+<!--
+  ~
+  ~  Copyright 2023 Esri
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  ~
+  --><resources>
+    <string name="server_trust_message">Certifikát poskytnutý %1$s nie je podpísaný dôveryhodnou autoritou.</string>
+    <string name="cancel">Zrušiť</string>
+    <string name="allow_connection">Nebezpečné: Povoliť pripojenie</string>
+    <string name="username_password_login_message">Prihláste sa prosím do %1$s</string>
+    <string name="username_label">Používateľské meno</string>
+    <string name="password_label">Heslo</string>
+    <string name="login">Prihlásenie</string>
+</resources>

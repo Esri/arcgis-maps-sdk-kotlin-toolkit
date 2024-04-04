@@ -80,7 +80,7 @@ import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetLayout
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetValue
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.StandardBottomSheet
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.rememberStandardBottomSheetState
-import com.arcgismaps.toolkit.geocompose.MapView
+import com.arcgismaps.toolkit.geoviewcompose.MapView
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)

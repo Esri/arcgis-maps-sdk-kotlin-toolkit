@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="floor_filter_view_filter_hint_sites">Фильтр участков...</string>
+    <string name="floor_filter_view_filter_hint_facilities">Фильтр помещений...</string>
+    <string name="floor_filter_select_site">Выбрать участок</string>
+    <string name="floor_filter_select_facility">Выбрать помещение</string>
+    <string name="floor_filter_no_results">Ничего не найдено.</string>
+    <string name="floor_filter_site_selector_top_bar">Site\u0020-\u0020</string>
+</resources>

@@ -48,7 +48,7 @@ import com.arcgismaps.mapping.view.AnalysisOverlay
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.OrbitLocationCameraController
-import com.arcgismaps.toolkit.geocompose.SceneView
+import com.arcgismaps.toolkit.geoviewcompose.SceneView
 
 /**
  * Displays a composable [SceneView] with an [AnalysisOverlay] and a [GraphicsOverlay].
