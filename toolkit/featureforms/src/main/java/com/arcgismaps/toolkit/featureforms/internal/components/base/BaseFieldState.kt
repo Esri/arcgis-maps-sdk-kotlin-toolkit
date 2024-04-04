@@ -171,7 +171,10 @@ internal abstract class BaseFieldState<T>(
                 Log.e ("FeatureForm", "Error running form expressions", it)
             }.onSuccess {
                 if (it.isNotEmpty()) {
-                    Log.e("FeatureForm", "Errors found while evaluating expressions: $it")
+                    Log.e("FeatureForm", "Errors found while evaluating expressions:")
+                    it.forEach { error ->
+                        Log.e("FeatureForm", "Evaluation Error:", error.error)
+                    }
                 }
             }
         }
