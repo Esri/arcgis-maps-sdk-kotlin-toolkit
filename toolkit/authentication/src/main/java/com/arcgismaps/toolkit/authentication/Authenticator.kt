@@ -22,7 +22,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.security.KeyChain
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.AlertDialog
