@@ -25,6 +25,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.mapping.featureforms.FormExpressionEvaluationError
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FieldProperties
 import com.arcgismaps.toolkit.featureforms.internal.components.base.ValidationErrorState
@@ -59,19 +60,23 @@ internal class DateTimeFieldProperties(
  * @param initialValue optional initial value to set for this field. It is set to the value of
  * [DateTimeFieldProperties.value] by default.
  * @param scope a [CoroutineScope] to start [StateFlow] collectors on.
- * @param onEditValue a callback to invoke when the user edits result in a change of value. This
- * is called on [FormTextFieldState.onValueChanged]
+ * @param updateValue a function that is invoked when the user edits result in a change of value. This
+ * is called in [BaseFieldState.onValueChanged].
+ * @param evaluateExpressions a function that is invoked to evaluate all form expressions. This is
+ * called after a successful [updateValue].
  */
 internal class DateTimeFieldState(
     properties: DateTimeFieldProperties,
     initialValue: Instant? = properties.value.value,
     scope: CoroutineScope,
-    onEditValue: (Any?) -> Unit,
+    updateValue: (Any?) -> Unit,
+    evaluateExpressions: suspend () -> Result<List<FormExpressionEvaluationError>>
 ) : BaseFieldState<Instant?>(
     properties = properties,
     initialValue = initialValue,
     scope = scope,
-    onEditValue = onEditValue,
+    updateValue = updateValue,
+    evaluateExpressions = evaluateExpressions
 ) {
     val minEpochMillis: Instant? = properties.minEpochMillis
 
@@ -108,10 +113,8 @@ internal class DateTimeFieldState(
                     ),
                     initialValue = list[0] as Instant?,
                     scope = scope,
-                    onEditValue = {
-                        field.updateValue(it)
-                        scope.launch { form.evaluateExpressions() }
-                    },
+                    updateValue = field::updateValue,
+                    evaluateExpressions = form::evaluateExpressions
                 ).apply {
                     onFocusChanged(list[1] as Boolean)
                 }
@@ -151,9 +154,7 @@ internal fun rememberDateTimeFieldState(
             shouldShowTime = shouldShowTime
         ),
         scope = scope,
-        onEditValue = {
-            field.updateValue(it)
-            scope.launch { form.evaluateExpressions() }
-        },
+        updateValue = field::updateValue,
+        evaluateExpressions = form::evaluateExpressions
     )
 }

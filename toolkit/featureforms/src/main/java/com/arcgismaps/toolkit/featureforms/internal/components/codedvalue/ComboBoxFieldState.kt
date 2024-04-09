@@ -23,6 +23,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.mapping.featureforms.FormExpressionEvaluationError
 import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValidationErrors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -34,8 +35,9 @@ internal class ComboBoxFieldState(
     properties: CodedValueFieldProperties,
     initialValue: Any? = properties.value.value,
     scope: CoroutineScope,
-    onEditValue: ((Any?) -> Unit),
-) : CodedValueFieldState(properties, initialValue, scope, onEditValue) {
+    updateValue: (Any?) -> Unit,
+    evaluateExpressions: suspend () -> Result<List<FormExpressionEvaluationError>>
+) : CodedValueFieldState(properties, initialValue, scope, updateValue, evaluateExpressions) {
 
     companion object {
         /**
@@ -72,10 +74,8 @@ internal class ComboBoxFieldState(
                     ),
                     initialValue = list[0],
                     scope = scope,
-                    onEditValue = { newValue ->
-                        formElement.updateValue(newValue)
-                        scope.launch { form.evaluateExpressions() }
-                    },
+                    updateValue = formElement::updateValue,
+                    evaluateExpressions = form::evaluateExpressions
                 ).apply {
                     onFocusChanged(list[1] as Boolean)
                 }
@@ -110,9 +110,7 @@ internal fun rememberComboBoxFieldState(
             fieldType = field.fieldType
         ),
         scope = scope,
-        onEditValue = {
-            field.updateValue(it)
-            scope.launch { form.evaluateExpressions() }
-        },
+        updateValue = field::updateValue,
+        evaluateExpressions = form::evaluateExpressions
     )
 }

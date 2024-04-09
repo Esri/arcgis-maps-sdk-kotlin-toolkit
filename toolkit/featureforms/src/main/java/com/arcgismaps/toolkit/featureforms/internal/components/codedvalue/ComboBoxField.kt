@@ -366,7 +366,10 @@ private fun ComboBoxPreview() {
             noValueLabel = "No value"
         ),
         scope = scope,
-        onEditValue = {},
+        updateValue = {},
+        evaluateExpressions = {
+            return@ComboBoxFieldState Result.success(emptyList())
+        }
     )
     ComboBoxField(state = state)
 }
