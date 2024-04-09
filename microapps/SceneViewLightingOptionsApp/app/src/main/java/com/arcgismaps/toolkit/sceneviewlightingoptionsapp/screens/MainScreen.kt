@@ -296,7 +296,7 @@ fun SunTimeOptions(
  * @param currentLightingMode the current sun lighting mode set on the composable SceneView
  * @param setSunLighting called when the sun lighting mode should be changed
  * @param onDismissRequest called when the dialog should be dismissed
- * @since 200.4.9
+ * @since 200.4.0
  */
 @Composable
 fun SunLightingOptions(
