@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="floor_filter_view_filter_hint_sites">Filtrer steder ...</string>
+    <string name="floor_filter_view_filter_hint_facilities">Filtrer fasiliteter ...</string>
+    <string name="floor_filter_select_site">Velg et område</string>
+    <string name="floor_filter_select_facility">Velg en fasilitet</string>
+    <string name="floor_filter_no_results">Fant ingen resultater.</string>
+    <string name="floor_filter_site_selector_top_bar">Område\u0020-\u0020</string>
+</resources>

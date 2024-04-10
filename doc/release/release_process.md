@@ -2,7 +2,7 @@
 
 #### Release of individual toolkit components
 
-Most toolkit components will be releasable individually. We won't release the `composable-map` component yet.
+Most toolkit components will be releasable individually.
 Each toolkit component has its own module in the `toolkit` folder, with support for publishing to a Maven repo.
 
 In addition, a thin script to release all components at once will be implemented.

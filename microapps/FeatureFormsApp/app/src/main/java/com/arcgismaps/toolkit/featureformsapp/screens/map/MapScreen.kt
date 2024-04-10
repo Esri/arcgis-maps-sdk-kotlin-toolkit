@@ -60,7 +60,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
@@ -72,14 +71,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
 import com.arcgismaps.exceptions.FeatureFormValidationException
-import com.arcgismaps.toolkit.composablemap.ComposableMap
 import com.arcgismaps.toolkit.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
-import com.arcgismaps.toolkit.featureforms.theme.EditableTextFieldColors
-import com.arcgismaps.toolkit.featureforms.theme.FeatureFormColorScheme
-import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTypography
-import com.arcgismaps.toolkit.featureforms.theme.ReadOnlyTextFieldColors
-import com.arcgismaps.toolkit.featureforms.theme.ReadOnlyTextFieldTypography
 import com.arcgismaps.toolkit.featureformsapp.R
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.BottomSheetMaxWidth
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetExpansionHeight
@@ -87,6 +80,7 @@ import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetLayout
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetValue
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.StandardBottomSheet
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.rememberStandardBottomSheetState
+import com.arcgismaps.toolkit.geoviewcompose.MapView
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -136,7 +130,6 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                     showDiscardEditsDialog = true
                 },
                 onSave = {
-                    //SubmitForm(mapViewModel = mapViewModel, featureForm = (uiState as UIState.Editing).featureForm)
                     scope.launch {
                         mapViewModel.commitEdits().onFailure {
                             Log.w("Forms", "Applying edits failed : ${it.message}")
@@ -153,11 +146,13 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
         }
     ) { padding ->
         // show the composable map using the mapViewModel
-        ComposableMap(
+        MapView(
+            arcGISMap = mapViewModel.map,
+            mapViewProxy = mapViewModel.proxy,
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize(),
-            mapInterface = mapViewModel
+            onSingleTapConfirmed = { mapViewModel.onSingleTapConfirmed(it) }
         )
         AnimatedVisibility(
             visible = featureForm != null,
@@ -165,6 +160,11 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
             exit = slideOutVertically { h -> h },
             label = "feature form"
         ) {
+            val isSwitching = uiState is UIState.Switching
+            // remember the form and update it when a new form is opened
+            val rememberedForm = remember(this, isSwitching) {
+                featureForm!!
+            }
             val bottomSheetState = rememberStandardBottomSheetState(
                 initialValue = SheetValue.PartiallyExpanded,
                 confirmValueChange = { it != SheetValue.Hidden },
@@ -186,26 +186,11 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                     sheetWidth = with(LocalDensity.current) { layoutWidth.toDp() }
                 ) {
                     // set bottom sheet content to the FeatureForm
-                    if (featureForm != null) {
-                        FeatureForm(
-                            featureForm = featureForm,
-                            modifier = Modifier.fillMaxSize(),
-                            validationErrorVisibility = errorVisibility,
-                            colorScheme = FeatureFormColorScheme.createDefaults(
-                                editableTextFieldColors = EditableTextFieldColors.createDefaults(
-                                    errorTextColor = Color.Gray
-                                ),
-                                readOnlyTextFieldColors = ReadOnlyTextFieldColors.createDefaults(
-                                    labelColor = Color.Green
-                                )
-                            ),
-                            typography = FeatureFormTypography.createDefaults(
-                                readOnlyTextFieldTypography = ReadOnlyTextFieldTypography.createDefaults(
-                                    labelStyle = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
-                                )
-                            )
-                        )
-                    }
+                    FeatureForm(
+                        featureForm = rememberedForm,
+                        modifier = Modifier.fillMaxSize(),
+                        validationErrorVisibility = errorVisibility
+                    )
                 }
             }
         }
@@ -377,7 +362,7 @@ private fun SubmitForm(errors: List<ErrorInfo>, onDismissRequest: () -> Unit) {
 @Composable
 fun FeatureFormValidationException.getString(): String {
     return when (this) {
-        is FeatureFormValidationException.IncorrectValueTypeError -> {
+        is FeatureFormValidationException.IncorrectValueTypeException -> {
             stringResource(id = R.string.value_must_be_of_correct_type)
         }
 

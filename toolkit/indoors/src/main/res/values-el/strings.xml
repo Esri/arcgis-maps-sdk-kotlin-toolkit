@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="floor_filter_view_filter_hint_sites">Filter sites..</string>
+    <string name="floor_filter_view_filter_hint_facilities">Φιλτράρισμα εγκαταστάσεων...</string>
+    <string name="floor_filter_select_site">Επιλέξτε site</string>
+    <string name="floor_filter_select_facility">Επιλέξτε εγκατάσταση</string>
+    <string name="floor_filter_no_results">Δεν βρέθηκαν αποτελέσματα.</string>
+    <string name="floor_filter_site_selector_top_bar">Site\u0020-\u0020</string>
+</resources>

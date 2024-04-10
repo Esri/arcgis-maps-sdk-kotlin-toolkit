@@ -48,13 +48,13 @@ import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbol
 import com.arcgismaps.mapping.symbology.SimpleMarkerSceneSymbolStyle
 import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.CameraController
-import com.arcgismaps.toolkit.geocompose.SceneView
+import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.mapping.view.GlobeCameraController
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.OrbitGeoElementCameraController
 import com.arcgismaps.mapping.view.OrbitLocationCameraController
-import com.arcgismaps.toolkit.geocompose.SceneViewProxy
+import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
 import kotlin.time.Duration.Companion.seconds
 
 /**

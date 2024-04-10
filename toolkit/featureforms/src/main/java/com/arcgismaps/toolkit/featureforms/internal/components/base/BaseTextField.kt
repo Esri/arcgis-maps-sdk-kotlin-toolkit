@@ -228,24 +228,24 @@ private fun trailingIcon(
     onValueChange: (String) -> Unit,
     onDone: () -> Unit
 ): @Composable () -> Unit = {
-    if (!isEmpty) {
-        // show a clear icon if the field is not empty
-        IconButton(
-            onClick = { onValueChange("") },
-            modifier = Modifier.semantics { contentDescription = "Clear text button" }
-        ) {
-            Icon(imageVector = Icons.Rounded.Clear, contentDescription = "Clear Text")
-        }
-    } else if (singleLine && trailingIcon != null) {
-        // show a trailing icon if provided when the single line field is empty
-        Icon(imageVector = trailingIcon, contentDescription = "field icon")
-    } else if (!singleLine && isFocused) {
+    if (!singleLine && isFocused) {
         // show a done button only when focused for a multi line text field
         IconButton(
             onClick = onDone,
             modifier = Modifier.semantics { contentDescription = "Save local edit button" }
         ) {
             Icon(imageVector = Icons.Rounded.CheckCircle, contentDescription = "Done")
+        }
+    } else if (singleLine && trailingIcon != null && isEmpty) {
+        // show a trailing icon if provided when the single line field is empty
+        Icon(imageVector = trailingIcon, contentDescription = "field icon")
+    } else if (!isEmpty) {
+        // show a clear icon if the field is not empty
+        IconButton(
+            onClick = { onValueChange("") },
+            modifier = Modifier.semantics { contentDescription = "Clear text button" }
+        ) {
+            Icon(imageVector = Icons.Rounded.Clear, contentDescription = "Clear Text")
         }
     }
 }

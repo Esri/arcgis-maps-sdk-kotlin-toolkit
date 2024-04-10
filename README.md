@@ -6,7 +6,13 @@ The ArcGIS Maps SDK for Kotlin Toolkit contains components that will simplify yo
 
 * **[Authenticator](toolkit/authentication)** - Displays a user interface when network and ArcGIS authentication challenges occur.
 * **[Compass](toolkit/compass)** - Shows a compass direction when the map is rotated. Auto-hides when the map points north.
+* **[FeatureForms](toolkit/featureforms)** - Provides a UI for editing feature attributes.
+* **[GeoView-Compose](toolkit/geoview-compose)** - Compose wrappers for the MapView and SceneView.
 * **[FloorFilter](toolkit/indoors)** - Allows filtering of floor plan data in a geo view by a site, a facility in the site, or a floor in the facility.
+
+## API Reference
+
+View the API reference for the toolkit [here](https://developers.arcgis.com/kotlin/toolkit-api-reference/index.html).
 
 ## Requirements
 
@@ -22,13 +28,23 @@ The *ArcGIS Maps SDK for Kotlin Toolkit* has a *Minimum SDK* version of *26*, me
 
 ### Using the BOM
 
+Add the maven repository to your project's gradle file:
+
+```
+repositories {
+    maven {
+        url = uri("https://esri.jfrog.io/artifactory/arcgis")
+    }
+}
+```
+
 The *ArcGIS Maps SDK for Kotlin Toolkit* is released with a "bill of materials" (`BOM`). The releasable BOM is versioned and represents a set of versions of the toolkit components which are compatible with one another. You may specify dependencies as follows
 
 ```
-implementation(platform('com.esri:arcgis-maps-kotlin-toolkit-bom:200.3.0'))
-implementation('com.esri:arcgis-maps-kotlin-toolkit-authentication')
-implementation('com.esri:arcgis-maps-kotlin-toolkit-compass')
-implementation('com.esri:arcgis-maps-kotlin-toolkit-indoors')
+implementation(platform("com.esri:arcgis-maps-kotlin-toolkit-bom:200.4.0"))
+implementation("com.esri:arcgis-maps-kotlin-toolkit-authentication")
+implementation("com.esri:arcgis-maps-kotlin-toolkit-compass")
+implementation("com.esri:arcgis-maps-kotlin-toolkit-indoors")
 ```
 
 The template and TemplateApp modules are for bootstrapping new modules.

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="floor_filter_view_filter_hint_sites">Filter situs...</string>
+    <string name="floor_filter_view_filter_hint_facilities">Filter fasilitas...</string>
+    <string name="floor_filter_select_site">Pilih situs</string>
+    <string name="floor_filter_select_facility">Pilih fasilitas</string>
+    <string name="floor_filter_no_results">Tidak ada hasil yang ditemukan.</string>
+    <string name="floor_filter_site_selector_top_bar">Situs\u0020-\u0020</string>
+</resources>

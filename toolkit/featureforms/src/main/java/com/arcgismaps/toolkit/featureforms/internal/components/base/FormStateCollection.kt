@@ -16,12 +16,14 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.base
 
+import androidx.compose.runtime.Immutable
 import com.arcgismaps.mapping.featureforms.FormElement
 
 /**
  * An iterable collection that provides a [FormElement] and its [FormElementState] as a
  * [FormStateCollection.Entry].
  */
+@Immutable
 internal interface FormStateCollection : Iterable<FormStateCollection.Entry> {
     interface Entry {
         val formElement: FormElement

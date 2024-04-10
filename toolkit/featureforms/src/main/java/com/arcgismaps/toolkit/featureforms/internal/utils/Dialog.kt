@@ -18,6 +18,7 @@ package com.arcgismaps.toolkit.featureforms.internal.utils
 
 import android.content.Context
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -49,6 +50,7 @@ internal val LocalDialogRequester = staticCompositionLocalOf { DialogRequester()
 /**
  * A handler that handles dialog requests during the lifetime of a FeatureForm.
  */
+@Immutable
 internal class DialogRequester {
 
     private val _requestFlow: MutableStateFlow<DialogType?> = MutableStateFlow(null)
@@ -138,6 +140,7 @@ internal fun FeatureFormDialog() {
                 state.minEpochMillis,
                 state.maxEpochMillis,
                 state.value.value.data,
+                state.value.value.error,
                 state.label,
                 state.description,
                 DateTimePickerInput.Date

@@ -3,7 +3,7 @@
 Requirements: 
 
 * [Android Studio](https://developer.android.com/studio)
-* [android SDK build tools version 33](https://developer.android.com/about/versions/13/setup-sdk#:~:text=Click%20Tools%20%3E%20SDK%20Manager.,OK%20to%20install%20the%20SDK.)
+* [Android SDK build tools version 33](https://developer.android.com/about/versions/13/setup-sdk#:~:text=Click%20Tools%20%3E%20SDK%20Manager.,OK%20to%20install%20the%20SDK.)
 * [JDK 17](https://adoptium.net/temurin/releases/)
 
 and an internet connection to download dependencies expressed in gradle.
@@ -31,19 +31,33 @@ The actual toolkit components are releasable libraries whose modules can be foun
 
 <pre>
 toolkit
-├── composable-map
+├── authentication
+├── compass
 ├── featureforms
+├── geoview-compose
+├── indoors
 └── template
 </pre>
 
-The `composable-map` and the `template` libraries are not releasable components, they are used internally.
-These libraries have package names like `com.arcgismaps.toolkit.featureform`
+These libraries have package names like `com.arcgismaps.toolkit.authentication`. Note that the `template` module is used internally and is not released.
 
-For each toolkit component, there is an example app in the `microapps` folder.
+For each toolkit component, there are one or more example apps in the `microapps` folder.
 
 <pre>
 microapps
+├── AuthenticationApp
+├── CompassApp
 ├── FeatureFormsApp
+├── FloorFilterApp
+├── MapViewGeometryEditorApp
+├── MapViewIdentifyApp
+├── MapViewInsetsApp
+├── MapViewLocationDisplayApp
+├── MapViewSetViewpointApp
+├── SceneViewAnalysisOverlayApp
+├── SceneViewCameraControllerApp
+├── SceneViewLightingOptionsApp
+├── SceneViewSetViewpointApp
 └── TemplateApp
 </pre>
 

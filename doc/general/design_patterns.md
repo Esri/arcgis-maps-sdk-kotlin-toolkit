@@ -135,12 +135,10 @@ fun MyScreen(modifier: Modifier = Modifier, onBackPressed: () -> Unit) {
 ```
 
 
-## Composable Map
+## MapView and SceneView
 
-The `ComposableMap` component offers a Composable `MapView` by wrapping it within an `AndroidView`.
-
-### Challenges
-- AndroidView and MapView challenges (To-do)
+The `MapView` and `SceneView` components in the `geoview-compose` module offer Composable versions of the `MapView` and `SceneView`.
+These components should be used for displaying maps and scenes in Compose UIs.
 
 ## More Recommendations
 
@@ -166,8 +164,8 @@ We expect them to be cancelled only when the containing Composable leaves the co
 ```kotlin
 LaunchedEffect(Unit) {
     launch {
-        mapView.onSingleTapConfirmed.collect {
-            // do something
+        viewModel.dataLoadStatus.collect {
+            // display a loading spinner or the data when available
         }
     }
 }
@@ -177,9 +175,9 @@ LaunchedEffect(Unit) {
 Providing a key will ensure the `LaunchedEffect` runs on every recomposition if the key changes.
 
 ```kotlin
-LaunchedEffect(mapState) {
+LaunchedEffect(mutableArcGISMap) {
     launch {
-        // this will run on every recomposition when mapState changes
+        // this will run on every recomposition when mutableArcGISMap changes
     }
 }
 ```

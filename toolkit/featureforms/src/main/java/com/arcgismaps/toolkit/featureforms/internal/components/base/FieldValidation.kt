@@ -17,10 +17,12 @@
 package com.arcgismaps.toolkit.featureforms.internal.components.base
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.res.stringResource
 import com.arcgismaps.toolkit.featureforms.R
 
+@Immutable
 internal sealed class ValidationErrorState(
     private vararg val formatArgs: Any
 ) {
@@ -32,6 +34,8 @@ internal sealed class ValidationErrorState(
     class MinNumericConstraint(min: String) : ValidationErrorState(min)
     class MaxNumericConstraint(max: String) : ValidationErrorState(max)
     class MinMaxNumericConstraint(min: String, max: String) : ValidationErrorState(min, max)
+    class MinDatetimeConstraint(min: String) : ValidationErrorState(min)
+    class MaxDatetimeConstraint(max: String) : ValidationErrorState(max)
     data object NotANumber : ValidationErrorState()
     data object NotAWholeNumber : ValidationErrorState()
     data object NotInCodedValueDomain : ValidationErrorState()
@@ -71,6 +75,14 @@ internal sealed class ValidationErrorState(
 
             is MinMaxNumericConstraint -> {
                 stringResource(id = R.string.numeric_range_helper_text, *formatArgs)
+            }
+
+            is MinDatetimeConstraint -> {
+                stringResource(id = R.string.min_datetime_helper_text, *formatArgs)
+            }
+
+            is MaxDatetimeConstraint -> {
+                stringResource(id = R.string.max_datetime_helper_text, *formatArgs)
             }
 
             is NotANumber -> {
