@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonColors
@@ -40,6 +41,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
@@ -134,7 +136,9 @@ private fun RadioButtonField(
                 )
         ) {
             CompositionLocalProvider(
-                LocalTextStyle provides typography.optionStyle
+                LocalTextStyle provides typography.optionStyle.merge(
+                    TextStyle(color = colors.textColor)
+                ),
             ) {
                 options.forEach { (code, name) ->
                     RadioButtonRow(

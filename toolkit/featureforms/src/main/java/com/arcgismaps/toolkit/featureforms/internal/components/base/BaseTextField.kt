@@ -257,8 +257,8 @@ private fun ReadOnlyTextField(
     modifier: Modifier = Modifier,
     supportingText: String,
 ) {
-    val colors = LocalColorScheme.current.readOnlyTextFieldColors
-    val typography = LocalTypography.current.readOnlyTextFieldTypography
+    val colors = LocalColorScheme.current.readOnlyFieldColors
+    val typography = LocalTypography.current.readOnlyFieldTypography
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
             text = label,

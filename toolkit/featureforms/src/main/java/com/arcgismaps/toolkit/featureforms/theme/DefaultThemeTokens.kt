@@ -84,7 +84,7 @@ internal object DefaultThemeTokens {
             unfocusedSuffixColor = ColorTokens.OnSurfaceVariant,
             errorSuffixColor = ColorTokens.OnSurfaceVariant
         ),
-        readOnlyTextFieldColors = ReadOnlyTextFieldColors(
+        readOnlyFieldColors = ReadOnlyFieldColors(
             labelColor = Color.Unspecified,
             textColor = Color.Unspecified,
             supportingTextColor = Color.Unspecified
@@ -118,7 +118,7 @@ internal object DefaultThemeTokens {
             textStyle = TypographyTokens.bodyLarge,
             supportingTextStyle = TypographyTokens.bodySmall
         ),
-        readOnlyTextFieldTypography = ReadOnlyTextFieldTypography(
+        readOnlyFieldTypography = ReadOnlyFieldTypography(
             labelStyle = TypographyTokens.bodyMedium,
             textStyle = TypographyTokens.bodyLarge,
             supportingTextStyle = TypographyTokens.bodySmall
