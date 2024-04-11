@@ -16,6 +16,8 @@
  *
  */
 
+logger.warn("WARNING: The module composable-map is deprecated. Please use the module geoview-compose instead.")
+
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
@@ -68,6 +70,7 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class).all {
 
 dependencies {
     api(arcgis.mapsSdk)
+    implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)

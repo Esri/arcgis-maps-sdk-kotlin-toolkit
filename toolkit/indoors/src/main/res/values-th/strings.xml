@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="floor_filter_view_filter_hint_sites">กรองไซต์…</string>
+    <string name="floor_filter_view_filter_hint_facilities">กรองอาคารสถานที่…</string>
+    <string name="floor_filter_select_site">เลือกไซต์</string>
+    <string name="floor_filter_select_facility">เลือกอาคารสถานที่</string>
+    <string name="floor_filter_no_results">ไม่พบข้อมูล</string>
+    <string name="floor_filter_site_selector_top_bar">ไซต์\u0020-\u0020</string>
+</resources>

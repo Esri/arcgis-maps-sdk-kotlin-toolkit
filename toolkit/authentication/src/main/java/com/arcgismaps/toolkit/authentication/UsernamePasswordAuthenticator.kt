@@ -26,8 +26,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -70,13 +72,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 @Composable
 public fun UsernamePasswordAuthenticator(
     usernamePasswordChallenge: UsernamePasswordChallenge,
-    modifier: Modifier
+    modifier: Modifier = Modifier
 ) {
-
     Column(
         modifier = modifier
             .background(MaterialTheme.colorScheme.background)
-            .padding(32.dp),
+            .padding(32.dp)
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -91,13 +93,13 @@ public fun UsernamePasswordAuthenticator(
                 addStyle(
                     style = SpanStyle(
                         fontFamily = FontFamily.Monospace,
-                        fontSize = MaterialTheme.typography.headlineSmall.fontSize
+                        fontSize = MaterialTheme.typography.titleLarge.fontSize
                     ),
                     urlStart,
                     urlEnd
                 )
             },
-            style = MaterialTheme.typography.headlineMedium,
+            style = MaterialTheme.typography.titleLarge,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(32.dp))
@@ -152,28 +154,27 @@ public fun UsernamePasswordAuthenticator(
                 visualTransformation = PasswordVisualTransformation()
             )
             Spacer(modifier = Modifier.height(32.dp))
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            Column (
+                verticalArrangement = Arrangement.SpaceBetween,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Button(
-                    modifier = Modifier.padding(16.dp),
-                    onClick = { usernamePasswordChallenge.cancel() }
-                ) {
-                    Text(stringResource(id = R.string.cancel))
-                }
-                Button(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.padding(4.dp).fillMaxWidth(),
                     onClick = { submitUsernamePassword() }
                 ) {
                     Text(stringResource(id = R.string.login))
+                }
+                Button(
+                    modifier = Modifier.padding(4.dp).fillMaxWidth(),
+                    onClick = { usernamePasswordChallenge.cancel() }
+                ) {
+                    Text(stringResource(id = R.string.cancel))
                 }
             }
         }
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 private fun Modifier.moveFocusOnTabEvent(focusManager: FocusManager, onEnter: () -> Unit) =
     onPreviewKeyEvent {
         if (it.type == KeyEventType.KeyDown) {

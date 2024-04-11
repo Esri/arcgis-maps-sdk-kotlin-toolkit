@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="floor_filter_view_filter_hint_sites">Filtriranje mest ...</string>
+    <string name="floor_filter_view_filter_hint_facilities">Filtriranje objektov ...</string>
+    <string name="floor_filter_select_site">Izberi mesto</string>
+    <string name="floor_filter_select_facility">Izberi objekt</string>
+    <string name="floor_filter_no_results">Ni najdenih rezultatov.</string>
+    <string name="floor_filter_site_selector_top_bar">Site\u0020-\u0020</string>
+</resources>

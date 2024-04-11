@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="floor_filter_view_filter_hint_sites">Filtrera webbplatser...</string>
+    <string name="floor_filter_view_filter_hint_facilities">Filtrera inrättningar...</string>
+    <string name="floor_filter_select_site">Välj en webbplats</string>
+    <string name="floor_filter_select_facility">Välj en anläggning</string>
+    <string name="floor_filter_no_results">Inga resultat hittades.</string>
+    <string name="floor_filter_site_selector_top_bar">Site\u0020-\u0020</string>
+</resources>

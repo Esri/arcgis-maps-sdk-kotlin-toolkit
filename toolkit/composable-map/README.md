@@ -1,4 +1,5 @@
-# Composable Map
+ # Composable Map[Deprecated]
+ This module is deprecated. Use the [GeoView Compose Module](/toolkit/geoview-compose) instead.
 
 ## DuplexFlow
 

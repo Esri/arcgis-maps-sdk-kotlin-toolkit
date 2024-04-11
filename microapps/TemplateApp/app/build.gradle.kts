@@ -81,14 +81,16 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class).all {
 
 dependencies {
     implementation(project(":template"))
-    implementation(project(":composable-map"))
+    implementation(project(":geoview-compose"))
     implementation(arcgis.mapsSdk)
+    implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     testImplementation(libs.bundles.unitTest)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.bundles.composeTest)
     debugImplementation(libs.bundles.debug)
 }

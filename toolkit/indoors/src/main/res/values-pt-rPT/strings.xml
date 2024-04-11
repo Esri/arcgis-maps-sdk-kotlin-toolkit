@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="floor_filter_view_filter_hint_sites">Filtrar locais…</string>
+    <string name="floor_filter_view_filter_hint_facilities">Filtrar instalações…</string>
+    <string name="floor_filter_select_site">Selecionar um local</string>
+    <string name="floor_filter_select_facility">Selecione uma instalação</string>
+    <string name="floor_filter_no_results">Não foram encontrados resultados.</string>
+    <string name="floor_filter_site_selector_top_bar">Local\u0020-\u0020</string>
+</resources>

@@ -23,35 +23,48 @@ the compass appears. When reset to north, it disappears. When `autoHide` is disa
 
 ## Usage
 
+*View the API Reference for the `compass` module [here](https://developers.arcgis.com/kotlin/toolkit-api-reference/arcgis-maps-kotlin-toolkit/com.arcgismaps.toolkit.compass/index.html).*
+
 ### Basic usage for displaying a `Compass` on a `MapView`
 
-The simplest workflow is to add the `Compass` composable as a child element to the content of a `ComposableMap`. 
+The simplest workflow is to display the `Compass` composable over the top of a composable `MapView` using a `Box` 
 The tap action is provided as a callback using the `onClick()` lambda. This can be used to reset the rotation of the MapView.
 
 ```kotlin
-// create an ArcGISMap
-val map = ArcGISMap(BasemapStyle.ArcGISImagery)
-
-// create a MapInterface
-val mapInterface = MapInterface(map)
-
-// get the current map rotation from the MapInterface and hoist it as a state
-val mapRotation by mapInterface.mapRotation.collectAsState(flowType = DuplexFlow.Type.Read)
-
-// show a composable map using the MapInterface
-ComposableMap(
-    modifier = Modifier.fillMaxSize(),
-    mapInterface = mapInterface
+// create an ArcGISMap with a Topographic basemap style
+val arcGISMap by remember {
+    mutableStateOf(
+        ArcGISMap(BasemapStyle.ArcGISTopographic).apply {
+            // set the map's viewpoint to North America
+            initialViewpoint = Viewpoint(39.8, -98.6, 10e7)
+        }
+    )
+}
+var mapRotation by remember { mutableDoubleStateOf(0.0) }
+val mapViewProxy = remember { MapViewProxy() }
+// show composable MapView with compass
+Box(
+    modifier = Modifier.fillMaxSize()
 ) {
-    Row(modifier = Modifier
-        .height(IntrinsicSize.Max)
-        .fillMaxWidth()
-        .padding(25.dp)) {
-
-        // show the compass and pass the current mapRotation
+    MapView(
+        arcGISMap,
+        modifier = Modifier.fillMaxSize(),
+        mapViewProxy = mapViewProxy,
+        onMapRotationChanged = { rotation -> mapRotation = rotation }
+    )
+    Row(
+        modifier = Modifier
+            .height(IntrinsicSize.Max)
+            .fillMaxWidth()
+            .padding(25.dp)
+    ) {
+        val coroutineScope = rememberCoroutineScope()
+        // show the compass and pass the mapRotation state data
         Compass(rotation = mapRotation) {
-            // reset the ComposableMap viewpoint rotation to point north using the MapInterface
-            mapInterface.setViewpointRotation(0.0)
+            // reset the Composable MapView viewpoint rotation to point north
+            coroutineScope.launch {
+                mapViewProxy.setViewpointRotation(0.0)
+            }
         }
     }
 }
