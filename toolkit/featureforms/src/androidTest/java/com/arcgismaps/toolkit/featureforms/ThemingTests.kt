@@ -16,38 +16,36 @@
 
 package com.arcgismaps.toolkit.featureforms
 
-import android.content.Context
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.SemanticsActions
-import androidx.compose.ui.semantics.SemanticsPropertyKey
-import androidx.compose.ui.semantics.getOrNull
-import androidx.compose.ui.semantics.getTextLayoutResult
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.printToLog
-import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.test.performImeAction
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.test.platform.app.InstrumentationRegistry
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.data.QueryParameters
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.mapping.featureforms.FormElement
+import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.toolkit.featureforms.theme.EditableTextFieldColors
 import com.arcgismaps.toolkit.featureforms.theme.EditableTextFieldTypography
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormColorScheme
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTypography
+import com.arcgismaps.toolkit.featureforms.theme.GroupElementColors
+import com.arcgismaps.toolkit.featureforms.theme.GroupElementTypography
+import com.arcgismaps.toolkit.featureforms.theme.RadioButtonFieldColors
+import com.arcgismaps.toolkit.featureforms.theme.RadioButtonFieldTypography
+import com.arcgismaps.toolkit.featureforms.theme.ReadOnlyFieldColors
+import com.arcgismaps.toolkit.featureforms.theme.ReadOnlyFieldTypography
 import junit.framework.TestCase
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
@@ -57,18 +55,22 @@ class ThemingTests {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private fun getFormElementWithLabel(label: String): FieldFormElement {
-        return featureForm.elements
-            .filterIsInstance<FieldFormElement>()
-            .first {
+    private fun getFormElementWithLabel(label: String): FormElement {
+        return featureForm.elements.first {
                 it.label == label
             }
     }
 
+    /**
+     * Given a FeatureForm with a custom color scheme and typography for editable fields
+     * When the FeatureForm is displayed
+     * Then the custom color scheme and typography are applied to the editable form elements
+     */
     @Test
     fun testEditableFieldTheming() {
-        var colorScheme : FeatureFormColorScheme
-        var typography : FeatureFormTypography
+        var colorScheme: FeatureFormColorScheme
+        var typography: FeatureFormTypography
+        // create custom color scheme and typography and apply to the FeatureForm
         composeTestRule.setContent {
             colorScheme = FeatureFormColorScheme.createDefaults(
                 editableTextFieldColors = EditableTextFieldColors.createDefaults(
@@ -76,7 +78,7 @@ class ThemingTests {
                 )
             )
             typography = FeatureFormTypography.createDefaults(
-                EditableTextFieldTypography.createDefaults(
+                editableTextFieldTypography = EditableTextFieldTypography.createDefaults(
                     labelStyle = TextStyle(
                         fontWeight = FontWeight.ExtraBold,
                         color = Color.Green
@@ -89,7 +91,7 @@ class ThemingTests {
                 typography = typography
             )
         }
-        val formElement = getFormElementWithLabel("Text Box")
+        val formElement = getFormElementWithLabel("Text Box") as FieldFormElement
         val label = composeTestRule.onNodeWithText(formElement.label, useUnmergedTree = true)
         label.assertIsDisplayed()
         label.assertTextStyle(
@@ -98,30 +100,184 @@ class ThemingTests {
                 color = Color.Green
             )
         )
-        val text = composeTestRule.onNodeWithText(formElement.formattedValue, useUnmergedTree = true)
+        val text =
+            composeTestRule.onNodeWithText(formElement.formattedValue, useUnmergedTree = true)
         text.assertIsDisplayed()
         text.performClick()
         text.assertTextColor(Color.Red)
     }
 
+    /**
+     * Given a FeatureForm with a custom color scheme that includes placeholder colors
+     * When the FeatureForm is displayed and a form element is focused
+     * Then the custom placeholder colors are applied to the form elements based on focus state
+     */
     @Test
     fun testPlaceHolderTransformation() {
-
+        var colorScheme: FeatureFormColorScheme
+        // create custom color scheme and typography and apply to the FeatureForm
+        composeTestRule.setContent {
+            colorScheme = FeatureFormColorScheme.createDefaults(
+                editableTextFieldColors = EditableTextFieldColors.createDefaults(
+                    unfocusedPlaceholderColor = Color.White,
+                    focusedPlaceholderColor = Color.Red,
+                    unfocusedTextColor = Color.Black,
+                    focusedTextColor = Color.Blue
+                )
+            )
+            FeatureForm(
+                featureForm = featureForm,
+                colorScheme = colorScheme
+            )
+        }
+        val formElement = getFormElementWithLabel("An empty field") as FieldFormElement
+        val field = composeTestRule.onNodeWithText(formElement.label)
+        val placeholder = composeTestRule.onNodeWithText(formElement.hint, useUnmergedTree = true)
+        placeholder.assertIsDisplayed()
+        // test unfocused placeholder color
+        placeholder.assertTextColor(Color.White)
+        field.performClick()
+        // test focused placeholder color
+        placeholder.assertTextColor(Color.Red)
+        field.performTextInput("test")
+        val text = composeTestRule.onNodeWithText("test", useUnmergedTree = true)
+        text.assertIsDisplayed()
+        // test focused text color
+        text.assertTextColor(Color.Blue)
+        field.performImeAction()
+        // test unfocused text color
+        text.assertTextColor(Color.Black)
     }
 
+    /**
+     * Given a FeatureForm with a custom color scheme and typography for read only fields
+     * When the FeatureForm is displayed
+     * Then the custom color scheme and typography are applied to the read only form elements
+     */
     @Test
     fun testReadOnlyFieldTheming() {
-
+        var colorScheme: FeatureFormColorScheme
+        var typography: FeatureFormTypography
+        composeTestRule.setContent {
+            colorScheme = FeatureFormColorScheme.createDefaults(
+                readOnlyFieldColors = ReadOnlyFieldColors.createDefaults(
+                    textColor = Color.Green
+                )
+            )
+            typography = FeatureFormTypography.createDefaults(
+                readOnlyFieldTypography = ReadOnlyFieldTypography.createDefaults(
+                    labelStyle = TextStyle(
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color.Red
+                    )
+                )
+            )
+            FeatureForm(
+                featureForm = featureForm,
+                colorScheme = colorScheme,
+                typography = typography
+            )
+        }
+        val formElement = getFormElementWithLabel("Name") as FieldFormElement
+        val label = composeTestRule.onNodeWithText(formElement.label, useUnmergedTree = true)
+        label.assertIsDisplayed()
+        label.assertTextStyle(
+            TextStyle(
+                fontWeight = FontWeight.ExtraBold,
+                color = Color.Red
+            )
+        )
+        val text =
+            composeTestRule.onNodeWithText(formElement.formattedValue, useUnmergedTree = true)
+        text.assertIsDisplayed()
+        text.assertTextColor(Color.Green)
     }
 
+    /**
+     * Given a FeatureForm with a custom color scheme and typography for radio button fields
+     * When the FeatureForm is displayed
+     * Then the custom color scheme and typography are applied to the radio button form elements
+     */
     @Test
     fun testRadioButtonFieldTheming() {
-
+        var colorScheme: FeatureFormColorScheme
+        var typography: FeatureFormTypography
+        composeTestRule.setContent {
+            colorScheme = FeatureFormColorScheme.createDefaults(
+                radioButtonFieldColors = RadioButtonFieldColors.createDefaults(
+                    textColor = Color.Green
+                )
+            )
+            typography = FeatureFormTypography.createDefaults(
+                radioButtonFieldTypography = RadioButtonFieldTypography.createDefaults(
+                    labelStyle = TextStyle(
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color.Red
+                    )
+                )
+            )
+            FeatureForm(
+                featureForm = featureForm,
+                colorScheme = colorScheme,
+                typography = typography
+            )
+        }
+        val formElement = getFormElementWithLabel("Radio Button") as FieldFormElement
+        val label = composeTestRule.onNodeWithText(formElement.label, useUnmergedTree = true)
+        label.assertIsDisplayed()
+        label.assertTextStyle(
+            TextStyle(
+                fontWeight = FontWeight.ExtraBold,
+                color = Color.Red
+            )
+        )
+        val text =
+            composeTestRule.onNodeWithText(formElement.formattedValue, useUnmergedTree = true)
+        text.assertIsDisplayed()
+        text.assertTextColor(Color.Green)
     }
 
+    /**
+     * Given a FeatureForm with a custom color scheme and typography for group elements
+     * When the FeatureForm is displayed
+     * Then the custom color scheme and typography are applied to the group form elements
+     */
     @Test
     fun testGroupElementTheming() {
-
+        var colorScheme: FeatureFormColorScheme
+        var typography: FeatureFormTypography
+        composeTestRule.setContent {
+            colorScheme = FeatureFormColorScheme.createDefaults(
+                groupElementColors = GroupElementColors.createDefaults(
+                    supportingTextColor = Color.Green
+                )
+            )
+            typography = FeatureFormTypography.createDefaults(
+                groupElementTypography = GroupElementTypography.createDefaults(
+                    labelStyle = TextStyle(
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color.Blue
+                    )
+                )
+            )
+            FeatureForm(
+                featureForm = featureForm,
+                colorScheme = colorScheme,
+                typography = typography
+            )
+        }
+        val groupElement = getFormElementWithLabel("Group One") as GroupFormElement
+        val label = composeTestRule.onNodeWithText(groupElement.label, useUnmergedTree = true)
+        label.assertIsDisplayed()
+        label.assertTextStyle(
+            TextStyle(
+                fontWeight = FontWeight.ExtraBold,
+                color = Color.Blue
+            )
+        )
+        val supportingText = composeTestRule.onNodeWithText(groupElement.description, useUnmergedTree = true)
+        supportingText.assertIsDisplayed()
+        supportingText.assertTextColor(Color.Green)
     }
 
     companion object {
