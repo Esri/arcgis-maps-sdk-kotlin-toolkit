@@ -335,7 +335,7 @@ internal fun rememberStates(
  * @return returns the [BaseFieldState] created.
  */
 @Composable
-private fun rememberFieldState(
+internal fun rememberFieldState(
     element: FieldFormElement,
     form: FeatureForm,
     scope: CoroutineScope
