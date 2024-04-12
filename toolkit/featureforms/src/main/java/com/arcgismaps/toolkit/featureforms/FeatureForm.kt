@@ -115,7 +115,7 @@ public sealed class ValidationErrorVisibility {
  * @param validationErrorVisibility The [ValidationErrorVisibility] that determines the behavior of
  * when the validation errors are visible. Default is [ValidationErrorVisibility.Automatic] which
  * indicates errors are only visible once the respective field gains focus.
- * @param colorScheme The [FeatureFormColorScheme] to used for the FeatureForm.
+ * @param colorScheme The [FeatureFormColorScheme] to use for the FeatureForm.
  * @param typography The [FeatureFormTypography] to use for the FeatureForm.
  *
  * @since 200.4.0
