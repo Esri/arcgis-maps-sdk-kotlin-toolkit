@@ -21,7 +21,7 @@
     # Helper functions to use
     function _display_help_dialog {
 	echo "================================================================================"
-	echo "Usage: new-component-starter.sh -n component-name"
+	echo "Usage: new-component-starter.sh"
 	echo
 	echo "Description: generates a new toolkit component and microapp with the given name"
 	echo " -d        do not make the new component publishable. optional. defaults to publishable."
@@ -42,8 +42,8 @@
     componentName=
     #first letter uppercased
     composableFunctionName=
-    #app dir name
-    appDirName=
+    # whether to create the app
+    createMicroapp="no"
 
     function _check_options_and_set_variables {
 	if [ "${BASH_VERSINFO}" -lt "4" ]; then
@@ -58,7 +58,6 @@
 
 	componentName="${name,,}"
 	composableFunctionName="${name^}"
-	appDirName="${composableFunctionName}App"
     }
 
     function copyTemplate {
@@ -85,31 +84,6 @@
 	
 	popd > /dev/null
     }
-
-    function copyTemplateApp {
-	pushd microapps > /dev/null
-	if [ -d "${appDirName}" ]; then
-	    echo microapps/${appDirName} directory already exists	    
-	    exit -1
-	else
-	    cp -R TemplateApp "${appDirName}"	    
-	fi
-	popd > /dev/null
-    }
-
-    function convertTemplateApp {
-	pushd microapps > /dev/null
-	# replace the string "template" in any directory names	
-	find "${appDirName}" -type d -exec rename -s template $componentName {} \; > /dev/null 2>&1
-	# replace the string "Template" in any file names	
-	find "${appDirName}" -type f -exec rename -s Template $composableFunctionName {} \; > /dev/null 2>&1
-	# replace the string "template" in the contents of any file	
-	find "${appDirName}" -type f -exec perl -i -pe s/template/$componentName/ {} \; > /dev/null 2>&1
-	# replace the string "Template" in the contents of any file		
-	find "${appDirName}" -type f -exec perl -i -pe s/Template/$composableFunctionName/ {} \; > /dev/null 2>&1	
-	
-	popd > /dev/null
-    }    
 
     # appends a new project to the list of projects in settings.gradle.kts.
     # this is additive, and will add the same name each time it is run.
@@ -169,14 +143,20 @@ EOM
     echo "Please enter the name of the new toolkit component without spaces:"
     read name
 
+    # prompt for microapp creation
+    echo "Do you want to create a microapp? (yes/no)"
+    read createMicroapp
+
     _check_options_and_set_variables
     echo copying and converting files, estimated time 1 minute.
     cd "${toolkitDir}"
     rm -rf "./toolkit/template/build" > /dev/null 2>&1
     copyTemplate
     convertTemplate
-    copyTemplateApp
-    convertTemplateApp
+    # Call the create-microapp-starter.sh script if the user answered "yes"
+    if [ "$createMicroapp" = "yes" ]; then
+        ./new-microapp-starter.sh
+    fi
     updateSettings
     if [ ! -z $publish ]; then
 	makeProjectPublishable
