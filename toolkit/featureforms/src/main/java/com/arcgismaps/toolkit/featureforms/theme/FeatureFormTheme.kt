@@ -118,6 +118,10 @@ internal fun FeatureFormTheme(
  *
  * Use [FeatureFormColorScheme.createDefaults] to create a new instance with the default values.
  *
+ * @property editableTextFieldColors The color scheme for the editable text field types.
+ * @property readOnlyFieldColors The color scheme for the read-only field types.
+ * @property radioButtonFieldColors The color scheme for the radio button field types.
+ * @property groupElementColors The color scheme to use for any Group elements.
  * @since 200.5.0
  */
 @Immutable
