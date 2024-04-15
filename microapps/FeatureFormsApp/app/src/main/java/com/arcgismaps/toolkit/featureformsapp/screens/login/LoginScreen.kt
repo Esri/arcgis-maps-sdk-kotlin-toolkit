@@ -475,13 +475,3 @@ fun EnterpriseLoginPreview() {
 
     }
 }
-
-@Preview
-@Composable
-fun LoginOptionsPreview() {
-    LoginOptions(
-        onAgolLoginTapped = {},
-        onEnterpriseLoginTapped = {},
-        skipSignInTapped = {}
-    )
-}
