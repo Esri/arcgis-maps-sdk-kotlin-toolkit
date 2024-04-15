@@ -117,6 +117,8 @@ internal fun FeatureFormTheme(
  *
  *
  * Use [FeatureFormColorScheme.createDefaults] to create a new instance with the default values.
+ *
+ * @since 200.5.0
  */
 @Immutable
 public data class FeatureFormColorScheme internal constructor(
@@ -135,6 +137,7 @@ public data class FeatureFormColorScheme internal constructor(
          * @param readOnlyFieldColors The color scheme for the read-only field types.
          * @param radioButtonFieldColors The color scheme for the radio button field types.
          * @param groupElementColors The color scheme to use for any Group elements.
+         * @since 200.5.0
          */
         @Composable
         public fun createDefaults(
@@ -195,6 +198,7 @@ public data class FeatureFormColorScheme internal constructor(
  * @property focusedSuffixColor the suffix color for this text field when focused
  * @property unfocusedSuffixColor the suffix color for this text field when not focused
  * @property errorSuffixColor the suffix color for this text field when in error state
+ * @since 200.5.0
  */
 @Immutable
 public data class EditableTextFieldColors internal constructor(
@@ -267,6 +271,7 @@ public data class EditableTextFieldColors internal constructor(
          * @param focusedSuffixColor the suffix color for this text field when focused
          * @param unfocusedSuffixColor the suffix color for this text field when not focused
          * @param errorSuffixColor the suffix color for this text field when in error state
+         * @since 200.5.0
          */
         @Composable
         public fun createDefaults(
@@ -352,6 +357,7 @@ public data class EditableTextFieldColors internal constructor(
  * @property labelColor the color used for the label of this field
  * @property textColor the color used for the text of this field
  * @property supportingTextColor the color used for the supporting text of this field
+ * @since 200.5.0
  */
 @Immutable
 public data class ReadOnlyFieldColors internal constructor(
@@ -367,6 +373,7 @@ public data class ReadOnlyFieldColors internal constructor(
          * @param labelColor the color used for the label of this field
          * @param textColor the color used for the text of this field
          * @param supportingTextColor the color used for the supporting text of this field
+         * @since 200.5.0
          */
         @Composable
         public fun createDefaults(
@@ -395,6 +402,7 @@ public data class ReadOnlyFieldColors internal constructor(
  * the label and supporting text of the field.
  * @property containerColor the color used for the container of this field. The container
  * contains the field elements.
+ * @since 200.5.0
  */
 @Immutable
 public data class GroupElementColors internal constructor(
@@ -416,6 +424,7 @@ public data class GroupElementColors internal constructor(
          * the label and supporting text of the field.
          * @param containerColor the color used for the container of this field. The container
          * contains the field elements.
+         * @since 200.5.0
          */
         @Composable
         public fun createDefaults(
@@ -451,6 +460,7 @@ public data class GroupElementColors internal constructor(
  * @property disabledSelectedColor the color to use for the RadioButton when disabled and selected.
  * @property disabledUnselectedColor the color to use for the RadioButton when disabled and not
  * selected.
+ * @since 200.5.0
  */
 @Immutable
 public data class RadioButtonFieldColors internal constructor(
@@ -477,6 +487,7 @@ public data class RadioButtonFieldColors internal constructor(
          * @param disabledSelectedColor the color to use for the RadioButton when disabled and selected.
          * @param disabledUnselectedColor the color to use for the RadioButton when disabled and not
          * selected.
+         * @since 200.5.0
          */
         @Composable
         public fun createDefaults(
@@ -516,6 +527,7 @@ public data class RadioButtonFieldColors internal constructor(
  * @property readOnlyFieldTypography The typography for the read-only field types.
  * @property groupElementTypography The typography to use for any Group elements.
  * @property radioButtonFieldTypography The typography to use for the radio button field types.
+ * @since 200.5.0
  */
 @Immutable
 public class FeatureFormTypography internal constructor(
@@ -533,6 +545,7 @@ public class FeatureFormTypography internal constructor(
          * @param readOnlyFieldTypography The typography for the read-only field types.
          * @param groupElementTypography The typography to use for any Group elements.
          * @param radioButtonFieldTypography The typography to use for the radio button field types.
+         * @since 200.5.0
          */
         @Composable
         public fun createDefaults(
@@ -560,6 +573,7 @@ public class FeatureFormTypography internal constructor(
  * @property labelStyle The style for the label of this field
  * @property textStyle The style for the text of this field
  * @property supportingTextStyle The style for the supporting text of this field
+ * @since 200.5.0
  */
 @Immutable
 public data class EditableTextFieldTypography internal constructor(
@@ -575,6 +589,7 @@ public data class EditableTextFieldTypography internal constructor(
          * @param labelStyle The style for the label of this field
          * @param textStyle The style for the text of this field
          * @param supportingTextStyle The style for the supporting text of this field
+         * @since 200.5.0
          */
         @Composable
         public fun createDefaults(
@@ -601,6 +616,7 @@ public data class EditableTextFieldTypography internal constructor(
  * @property labelStyle The style for the label of this field
  * @property textStyle The style for the text of this field
  * @property supportingTextStyle The style for the supporting text of this field
+ * @since 200.5.0
  */
 @Immutable
 public data class ReadOnlyFieldTypography internal constructor(
@@ -616,6 +632,7 @@ public data class ReadOnlyFieldTypography internal constructor(
          * @param labelStyle The style for the label of this field
          * @param textStyle The style for the text of this field
          * @param supportingTextStyle The style for the supporting text of this field
+         * @since 200.5.0
          */
         @Composable
         public fun createDefaults(
@@ -640,6 +657,7 @@ public data class ReadOnlyFieldTypography internal constructor(
  *
  * @property labelStyle The style for the label of this field
  * @property supportingTextStyle The style for the supporting text of this field
+ * @since 200.5.0
  */
 @Immutable
 public data class GroupElementTypography internal constructor(
@@ -653,6 +671,7 @@ public data class GroupElementTypography internal constructor(
          *
          * @param labelStyle The style for the label of this field
          * @param supportingTextStyle The style for the supporting text of this field
+         * @since 200.5.0
          */
         @Composable
         public fun createDefaults(
@@ -675,6 +694,7 @@ public data class GroupElementTypography internal constructor(
  * @property labelStyle The style for the label of this field
  * @property optionStyle The style for the text of a RadioButton
  * @property supportingTextStyle The style for the supporting text of this field
+ * @since 200.5.0
  */
 @Immutable
 public data class RadioButtonFieldTypography internal constructor(
@@ -690,6 +710,7 @@ public data class RadioButtonFieldTypography internal constructor(
          * @param labelStyle The style for the label of this field
          * @param optionStyle The style for the text of a RadioButton
          * @param supportingTextStyle The style for the supporting text of this field
+         * @since 200.5.0
          */
         @Composable
         public fun createDefaults(
