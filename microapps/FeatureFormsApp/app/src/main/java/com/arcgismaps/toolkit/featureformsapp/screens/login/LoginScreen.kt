@@ -26,13 +26,17 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.with
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -55,7 +59,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -69,6 +72,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.CornerRadius
@@ -137,10 +141,10 @@ fun LoginScreen(
                             statusText = stringResource(R.string.signing_in)
                         )
                     } else {
-                        Spacer(modifier = Modifier.weight(1f))
+                        Spacer(modifier = Modifier.height(50.dp))
                         LoginOptions(
-                            onDefaultLoginTapped = {
-                                viewModel.loginWithDefaultCredentials()
+                            onAgolLoginTapped = {
+                                viewModel.login()
                             },
                             onEnterpriseLoginTapped = {
                                 showEnterpriseLogin = true
@@ -161,6 +165,7 @@ fun LoginScreen(
             showEnterpriseLogin = false
         }
     )
+    Authenticator(authenticatorState = viewModel.authenticatorState)
     LaunchedEffect(Unit) {
         viewModel.loginState.collect {
             if (it is LoginState.Success) {
@@ -182,13 +187,13 @@ fun EnterpriseLogin(
     val visible = visibilityProvider()
     if (visible) {
         var showPortalUrlForm by remember { mutableStateOf(true) }
-        Authenticator(authenticatorState = loginViewModel.authenticatorState)
         if (showPortalUrlForm) {
             PortalURLForm(
                 recents = loginViewModel.urlHistory.collectAsState().value,
-                onSubmit = {
+                onSubmit = { url ->
                     showPortalUrlForm = false
-                    loginViewModel.loginWithArcGISEnterprise(it)
+                    loginViewModel.addUrlToHistory(url)
+                    loginViewModel.login(url)
                 },
                 onCancel = onCancel
             )
@@ -296,7 +301,7 @@ fun TextFieldWithHistory(
                 imeAction = ImeAction.Done
             ),
             keyboardActions = KeyboardActions(
-                onDone = { focusManager.clearFocus()  }
+                onDone = { focusManager.clearFocus() }
             ),
             shape = RoundedCornerShape(10.dp),
             colors = TextFieldDefaults.colors(
@@ -358,23 +363,49 @@ fun TextFieldWithHistory(
 @Composable
 fun LoginOptions(
     modifier: Modifier = Modifier,
-    onDefaultLoginTapped: () -> Unit,
+    onAgolLoginTapped: () -> Unit,
     onEnterpriseLoginTapped: () -> Unit,
     skipSignInTapped: () -> Unit
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier.padding(vertical = 50.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Box(
+            modifier = Modifier
+                .wrapContentHeight()
+                .fillMaxWidth(0.8f)
+                .clip(RoundedCornerShape(15.dp))
+                .border(
+                    width = 5.dp,
+                    color = MaterialTheme.colorScheme.secondary,
+                    shape = RoundedCornerShape(15.dp)
+                )
+                .clickable { skipSignInTapped() }
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_topographic_map),
+                contentDescription = null
+            )
+            Text(
+                text = stringResource(R.string.browse_demo_maps),
+                style = MaterialTheme.typography.titleLarge.copy(
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                ),
+                modifier = Modifier.align(Alignment.Center)
+            )
+        }
+        Spacer(modifier = Modifier.weight(1f))
         Button(
-            onClick = onDefaultLoginTapped,
+            onClick = onAgolLoginTapped,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 40.dp)
         ) {
             Text(
-                text = stringResource(R.string.sign_in_with_default_credentials),
+                text = stringResource(R.string.sign_in_with_agol),
                 modifier = Modifier.padding(5.dp),
             )
         }
@@ -388,9 +419,6 @@ fun LoginOptions(
                 text = stringResource(R.string.sign_in_with_enterprise),
                 modifier = Modifier.padding(5.dp)
             )
-        }
-        TextButton(onClick = skipSignInTapped) {
-            Text(text = stringResource(R.string.skin_sign_in))
         }
     }
 }
@@ -446,4 +474,14 @@ fun EnterpriseLoginPreview() {
     ) {
 
     }
+}
+
+@Preview
+@Composable
+fun LoginOptionsPreview() {
+    LoginOptions(
+        onAgolLoginTapped = {},
+        onEnterpriseLoginTapped = {},
+        skipSignInTapped = {}
+    )
 }

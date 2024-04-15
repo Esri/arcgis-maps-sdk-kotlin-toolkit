@@ -34,7 +34,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 
 @HiltViewModel
@@ -42,9 +41,6 @@ class LoginViewModel @Inject constructor(
     private val portalSettings: PortalSettings,
     private val urlHistoryDao: UrlHistoryDao
 ) : ViewModel() {
-
-    private data class Credentials(val username: String = "", val password: String = "")
-
     val authenticatorState = AuthenticatorState()
 
     val urlHistory: StateFlow<List<String>> = urlHistoryDao.observeAll().map { urlEntries ->
@@ -62,53 +58,20 @@ class LoginViewModel @Inject constructor(
 
     private val oAuthRedirectUri = "featureformsapp://auth"
 
-    private var credentials: Credentials? = Credentials()
-
-    init {
+    fun addUrlToHistory(url: String) {
         viewModelScope.launch {
-            launch {
-                authenticatorState.pendingUsernamePasswordChallenge.collect {
-                    if (credentials != null) {
-                        it?.continueWithCredentials(credentials!!.username, credentials!!.password)
-                    }
-                }
-            }
-        }
-    }
-
-    fun loginWithDefaultCredentials() {
-        credentials = Credentials(BuildConfig.webMapUser, BuildConfig.webMapPassword)
-        _loginState.value = LoginState.Loading
-        viewModelScope.launch(Dispatchers.IO) {
-            // set a timeout of 20s
-            val result = withTimeoutOrNull(20000) {
-                authenticatorState.oAuthUserConfiguration = null
-                portalSettings.setPortalUrl(portalSettings.defaultPortalUrl)
-                portalSettings.setPortalConnection(Portal.Connection.Authenticated)
-                val portal =
-                    Portal(portalSettings.defaultPortalUrl, Portal.Connection.Authenticated)
-                portal.load().onFailure {
-                    _loginState.value = LoginState.Failed(it.message ?: "")
-                }.onSuccess {
-                    _loginState.value = LoginState.Success
-                }
-            }
-            if (result == null) {
-                _loginState.value = LoginState.Failed("Operation timed out")
-            }
-        }
-    }
-
-    fun loginWithArcGISEnterprise(url: String) {
-        credentials = null
-        _loginState.value = LoginState.Loading
-        viewModelScope.launch(Dispatchers.IO) {
             if (url.isNotEmpty()) {
                 urlHistoryDao.insert(UrlEntry(url))
             }
+        }
+    }
+
+    fun login(url: String = portalSettings.defaultPortalUrl) {
+        _loginState.value = LoginState.Loading
+        viewModelScope.launch(Dispatchers.IO) {
             authenticatorState.oAuthUserConfiguration = OAuthUserConfiguration(
-                portalUrl =  url,
-                clientId =  BuildConfig.clientId,
+                portalUrl = url,
+                clientId = BuildConfig.clientId,
                 redirectUrl = oAuthRedirectUri,
             )
             portalSettings.setPortalUrl(url)
