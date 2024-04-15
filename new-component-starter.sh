@@ -24,7 +24,6 @@
 	echo "Usage: new-component-starter.sh -n component-name"
 	echo
 	echo "Description: generates a new toolkit component and microapp with the given name"
-	echo " -n <name> the name of the new toolkit component"
 	echo " -d        do not make the new component publishable. optional. defaults to publishable."
 	echo " -h        this help message"	
 	echo " ./new-component-starter.sh -n FloorFilter"
@@ -144,11 +143,8 @@ EOM
     # ---------------------------------------------
     
     # parse options
-    while getopts :n:dh opt; do
+    while getopts :dh opt; do
 	case ${opt} in
-	    n)
-		name="${OPTARG}"
-		;;
 	    d)
 		publish=
 		;;
@@ -168,6 +164,10 @@ EOM
 	echo "Please check your command again for any missing - options."
 	exit 1
     fi
+
+    # prompt for component name
+    echo "Please enter the name of the new toolkit component without spaces:"
+    read name
 
     _check_options_and_set_variables
     echo copying and converting files, estimated time 1 minute.
