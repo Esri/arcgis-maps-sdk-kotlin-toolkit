@@ -18,6 +18,7 @@ package com.arcgismaps.toolkit.featureformsapp.screens.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.authentication.AuthenticatorState
 import com.arcgismaps.toolkit.featureformsapp.BuildConfig
@@ -58,6 +59,8 @@ class LoginViewModel @Inject constructor(
 
     private val _loginState: MutableStateFlow<LoginState> = MutableStateFlow(LoginState.NotLoggedIn)
     val loginState = _loginState.asStateFlow()
+
+    private val oAuthRedirectUri = "featureformsapp://auth"
 
     private var credentials: Credentials? = Credentials()
 
@@ -103,7 +106,13 @@ class LoginViewModel @Inject constructor(
             if (url.isNotEmpty()) {
                 urlHistoryDao.insert(UrlEntry(url))
             }
-            authenticatorState.oAuthUserConfiguration = null
+            authenticatorState.oAuthUserConfiguration = if (BuildConfig.clientId.isNotBlank())
+                OAuthUserConfiguration(
+                    portalUrl = url,
+                    clientId = BuildConfig.clientId,
+                    redirectUrl = oAuthRedirectUri,
+                )
+            else null
             portalSettings.setPortalUrl(url)
             portalSettings.setPortalConnection(Portal.Connection.Authenticated)
             val portal = Portal(url, Portal.Connection.Authenticated)
