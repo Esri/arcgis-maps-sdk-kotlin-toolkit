@@ -154,28 +154,27 @@ public fun UsernamePasswordAuthenticator(
                 visualTransformation = PasswordVisualTransformation()
             )
             Spacer(modifier = Modifier.height(32.dp))
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            Column (
+                verticalArrangement = Arrangement.SpaceBetween,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Button(
-                    modifier = Modifier.padding(16.dp),
-                    onClick = { usernamePasswordChallenge.cancel() }
-                ) {
-                    Text(stringResource(id = R.string.cancel))
-                }
-                Button(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.padding(4.dp).fillMaxWidth(),
                     onClick = { submitUsernamePassword() }
                 ) {
                     Text(stringResource(id = R.string.login))
+                }
+                Button(
+                    modifier = Modifier.padding(4.dp).fillMaxWidth(),
+                    onClick = { usernamePasswordChallenge.cancel() }
+                ) {
+                    Text(stringResource(id = R.string.cancel))
                 }
             }
         }
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 private fun Modifier.moveFocusOnTabEvent(focusManager: FocusManager, onEnter: () -> Unit) =
     onPreviewKeyEvent {
         if (it.type == KeyEventType.KeyDown) {
