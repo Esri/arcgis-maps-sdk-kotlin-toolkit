@@ -144,7 +144,7 @@ fun LoginScreen(
                         Spacer(modifier = Modifier.height(50.dp))
                         LoginOptions(
                             onAgolLoginTapped = {
-                                viewModel.login()
+                                viewModel.login(useOAuth = true)
                             },
                             onEnterpriseLoginTapped = {
                                 showEnterpriseLogin = true
@@ -193,7 +193,7 @@ fun EnterpriseLogin(
                 onSubmit = { url ->
                     showPortalUrlForm = false
                     loginViewModel.addUrlToHistory(url)
-                    loginViewModel.login(url)
+                    loginViewModel.login(url, useOAuth = false)
                 },
                 onCancel = onCancel
             )

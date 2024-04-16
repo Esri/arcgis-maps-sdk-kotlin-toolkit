@@ -72,16 +72,17 @@ class LoginViewModel @Inject constructor(
     /**
      * Authenticate the user with the given portal [url]. Default [url] is ArcGIS Online.
      */
-    fun login(url: String = portalSettings.defaultPortalUrl) {
+    fun login(url: String = portalSettings.defaultPortalUrl, useOAuth: Boolean) {
         _loginState.value = LoginState.Loading
         viewModelScope.launch(Dispatchers.IO) {
-            authenticatorState.oAuthUserConfiguration = if (BuildConfig.clientId.isNotBlank())
-                OAuthUserConfiguration(
-                    portalUrl = url,
-                    clientId = BuildConfig.clientId,
-                    redirectUrl = oAuthRedirectUri,
-                )
-            else null
+            authenticatorState.oAuthUserConfiguration =
+                if (useOAuth && BuildConfig.clientId.isNotBlank())
+                    OAuthUserConfiguration(
+                        portalUrl = url,
+                        clientId = BuildConfig.clientId,
+                        redirectUrl = oAuthRedirectUri,
+                    )
+                else null
             portalSettings.setPortalUrl(url)
             portalSettings.setPortalConnection(Portal.Connection.Authenticated)
             val portal = Portal(url, Portal.Connection.Authenticated)
