@@ -69,11 +69,13 @@ class LoginViewModel @Inject constructor(
     fun login(url: String = portalSettings.defaultPortalUrl) {
         _loginState.value = LoginState.Loading
         viewModelScope.launch(Dispatchers.IO) {
-            authenticatorState.oAuthUserConfiguration = OAuthUserConfiguration(
-                portalUrl = url,
-                clientId = BuildConfig.clientId,
-                redirectUrl = oAuthRedirectUri,
-            )
+            authenticatorState.oAuthUserConfiguration = if (BuildConfig.clientId.isNotBlank())
+                OAuthUserConfiguration(
+                    portalUrl = url,
+                    clientId = BuildConfig.clientId,
+                    redirectUrl = oAuthRedirectUri,
+                )
+            else null
             portalSettings.setPortalUrl(url)
             portalSettings.setPortalConnection(Portal.Connection.Authenticated)
             val portal = Portal(url, Portal.Connection.Authenticated)
