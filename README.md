@@ -62,9 +62,9 @@ Esri welcomes contributions from anyone and everyone. Please see our [guidelines
 ### Creating a New Toolkit Component
 
 A new toolkit component can be added to this project by running the bash script at the top level
-`./new-component-starter.sh -n NameOfNewComponent"`
+`./new-component-starter.sh`
 
-This will create a new library module for the new component, and a new app module which depends on the library.
+This will create a new library module for the new component, and optionally a new app module which depends on the library.
 Capitalization isn't necessary, but it won't capitalize anything but the first letter if none is specified.
 
 This script requires bash 4.0 or higher.
