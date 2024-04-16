@@ -58,6 +58,9 @@ class LoginViewModel @Inject constructor(
 
     private val oAuthRedirectUri = "featureformsapp://auth"
 
+    /**
+     * Save this url to the search history.
+     */
     fun addUrlToHistory(url: String) {
         viewModelScope.launch {
             if (url.isNotEmpty()) {
@@ -66,6 +69,9 @@ class LoginViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Authenticate the user with the given portal [url]. Default [url] is ArcGIS Online.
+     */
     fun login(url: String = portalSettings.defaultPortalUrl) {
         _loginState.value = LoginState.Loading
         viewModelScope.launch(Dispatchers.IO) {
@@ -87,6 +93,9 @@ class LoginViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Skip authentication and use the portal as an anonymous user to load any public content.
+     */
     fun skipSignIn() {
         viewModelScope.launch {
             portalSettings.setPortalUrl(portalSettings.defaultPortalUrl)

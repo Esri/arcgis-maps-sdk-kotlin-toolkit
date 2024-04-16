@@ -372,6 +372,7 @@ fun LoginOptions(
         verticalArrangement = Arrangement.spacedBy(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // browse demo maps card
         Box(
             modifier = Modifier
                 .wrapContentHeight()
