@@ -9,7 +9,7 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Select a facility</string>
     <string name="floor_filter_no_results">No results found.</string>
-    <string name="not_available">not available</string>
+    <string name="not_available">Not available</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
     <string name="floor_filter_site_selector_top_bar">Site - </string>
     <!-- This text is used to describe the UI element to support accessibility services -->
