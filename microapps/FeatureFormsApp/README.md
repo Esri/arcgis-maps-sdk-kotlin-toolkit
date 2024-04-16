@@ -17,4 +17,11 @@ webMapUser=XXX
 webMapPassword=YYY
 ```
 
+To authenticate using OAuth, provide the Client ID value in `local.properties`. If an OAuth client id
+is not provided, the app will prompt a username and password dialog.
+
+```
+clientId=YOUR_CLIENT_ID
+```
+
 For more information on the `FeatureForm` component and how it works, see it's [Readme](../../toolkit/featureforms/README.md).
