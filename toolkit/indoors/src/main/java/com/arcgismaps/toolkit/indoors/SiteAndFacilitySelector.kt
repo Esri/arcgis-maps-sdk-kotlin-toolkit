@@ -482,20 +482,25 @@ internal fun ListOfSitesOrFacilities(
 @Composable
 internal fun SiteOrFacilityItem(
     name: String,
-    isSelected: Boolean,
-    onSelected: (Int) -> Unit,
     index: Int,
+    isSelected: Boolean,
+    isSiteItem: Boolean,
     uiProperties: UIProperties,
-    isSiteItem: Boolean
+    onSelected: (Int) -> Unit
 ) {
+    val itemContentDescription =
+        if (isSiteItem) stringResource(id = R.string.site_item) else stringResource(id = R.string.facility_item)
     // a box is helpful to use a consistent clickable animation
     Box(modifier = Modifier
         .fillMaxWidth()
         .height(65.dp)
-        .clickable { onSelected(index) }) {
-        Row(modifier = Modifier
-            .padding(horizontal = 20.dp)
-            .align(Center)) {
+        .clickable { onSelected(index) }
+        .semantics { contentDescription = itemContentDescription }) {
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 20.dp)
+                .align(Center)
+        ) {
             if (isSelected) {
                 Canvas(
                     modifier = Modifier
