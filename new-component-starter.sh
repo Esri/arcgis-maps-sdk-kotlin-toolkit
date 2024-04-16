@@ -93,23 +93,30 @@
 
     # removes the default plugin block from the toolkit component's build.gradle.kts
     # and adds one back that has publishing capabilities.
-    function makeProjectPublishable {
-	pushd toolkit > /dev/null
-	local gradleFile="${componentName}/build.gradle.kts"
-	read -r -d '' pluginsBlock <<-EOM
+function makeProjectPublishable {
+    pushd toolkit > /dev/null
+    local gradleFile="${componentName}/build.gradle.kts"
+    read -r -d '' pluginsBlock <<-EOM
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("artifact-deploy")
 }
 EOM
-	local lines=$(wc -l "${gradleFile}" | awk '{print $1}')
-	local pluginLines=4
-	local linesLessPlugins=$(($lines-$pluginLines))
-	local tail=$(tail -${linesLessPlugins} "${gradleFile}")
-	echo -e "${pluginsBlock}\n${tail}" >  "${gradleFile}"
-	popd > /dev/null
-    }
+    # Find the line number of the old plugin block start
+    local startLine=$(awk '/plugins {/{ print NR; exit }' "${gradleFile}")
+    # Find the line number of the old plugin block end
+    local endLine=$(awk '/}/{ print NR; exit }' "${gradleFile}")
+    # Remove the old plugin block
+    sed -i '' "${startLine},${endLine}d" "${gradleFile}"
+    # Write the new plugin block to a temporary file
+    echo "${pluginsBlock}" > temp.txt
+    # Insert the new plugin block at the same position
+    sed -i '' "${startLine}r temp.txt" "${gradleFile}"
+    # Remove the temporary file
+    rm temp.txt
+    popd > /dev/null
+}
 
     
     # ---------------------------------------------
