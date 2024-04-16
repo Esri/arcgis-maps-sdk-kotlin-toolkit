@@ -263,7 +263,8 @@ internal fun FacilitySelectorTopBar(
 
             Text(
                 text = stringResource(R.string.floor_filter_site_selector_top_bar) +
-                        (floorFilterState.getSelectedSite()?.name ?: "not available"),
+                        (floorFilterState.getSelectedSite()?.name
+                            ?: stringResource(id = R.string.not_available)),
                 // reduce font size if the localized text is too long
                 fontSize = if (selectAFacilityText.length > 23) 12.sp else 15.sp,
                 color = Color.Gray
