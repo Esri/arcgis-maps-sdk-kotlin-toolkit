@@ -106,11 +106,13 @@ class LoginViewModel @Inject constructor(
             if (url.isNotEmpty()) {
                 urlHistoryDao.insert(UrlEntry(url))
             }
-            authenticatorState.oAuthUserConfiguration = OAuthUserConfiguration(
-                portalUrl =  url,
-                clientId =  BuildConfig.clientId,
-                redirectUrl = oAuthRedirectUri,
-            )
+            authenticatorState.oAuthUserConfiguration = if (BuildConfig.clientId.isNotBlank())
+                OAuthUserConfiguration(
+                    portalUrl = url,
+                    clientId = BuildConfig.clientId,
+                    redirectUrl = oAuthRedirectUri,
+                )
+            else null
             portalSettings.setPortalUrl(url)
             portalSettings.setPortalConnection(Portal.Connection.Authenticated)
             val portal = Portal(url, Portal.Connection.Authenticated)
