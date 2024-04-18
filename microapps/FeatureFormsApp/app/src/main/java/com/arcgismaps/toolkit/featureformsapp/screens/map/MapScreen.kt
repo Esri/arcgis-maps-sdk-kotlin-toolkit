@@ -482,9 +482,3 @@ fun getWindowSize(context: Context): WindowSizeClass {
     val density = context.resources.displayMetrics.density
     return WindowSizeClass.compute(width / density, height / density)
 }
-
-@Preview
-@Composable
-fun DialogPreview() {
-    NoFormDefinitionDialog({}, {})
-}
