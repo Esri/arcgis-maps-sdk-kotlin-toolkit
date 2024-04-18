@@ -21,7 +21,7 @@
     <string name="cancel">Cancel</string>
     <string name="enter_enterprise_url">"Enter an URL for ArcGIS Enterprise"</string>
     <string name="signing_in">Signing in..</string>
-    <string name="sign_in_with_default_credentials">Sign in using built-in Credentials</string>
+    <string name="sign_in_with_agol">Sign in with ArcGIS Online</string>
     <string name="sign_in_with_enterprise">Sign in with ArcGIS Enterprise</string>
     <string name="skin_sign_in">Skip sign in</string>
     <string name="maximum_character_length_exceeded">Maximum character length exceeded</string>
@@ -42,4 +42,5 @@
     <string name="discard">Discard</string>
     <string name="discard_edits">Discard Edits?</string>
     <string name="all_changes_will_be_lost">All changes made within the form will be lost.</string>
+    <string name="browse_demo_maps">Browse Demo Maps</string>
 </resources>
