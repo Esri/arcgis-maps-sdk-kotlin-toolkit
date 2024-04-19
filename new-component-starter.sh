@@ -87,8 +87,9 @@
 
     # appends a new project to the list of projects in settings.gradle.kts.
     # this is additive, and will add the same name each time it is run.
-    function updateSettings {
-	perl -i -pe "s/val projects = listOf\(([a-z\", ]+)\"\)/val projects = listOf\(\1\", \"$componentName\"\)/g" settings.gradle.kts 
+    function addToSettings {
+	echo "include (\":${componentName}\")" >> settings.gradle.kts
+	echo "project(\":${componentName}\").projectDir = File(rootDir, \"toolkit/${componentName}\")" >>  settings.gradle.kts
     }
 
     # removes the default plugin block from the toolkit component's build.gradle.kts
@@ -164,7 +165,7 @@ EOM
     if [ "$createMicroapp" = "yes" ]; then
         ./new-microapp-starter.sh
     fi
-    updateSettings
+    addToSettings
     if [ ! -z $publish ]; then
 	makeProjectPublishable
     fi
