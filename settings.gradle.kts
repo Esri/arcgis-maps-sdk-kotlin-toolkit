@@ -70,7 +70,7 @@ dependencyResolutionManagement {
 }
 
 var includedProjects = projects.flatMap { listOf(":$it", ":$it-app") }.toTypedArray()
-
+include(":microapps-lib")
 include(*includedProjects)
 include(":bom")
 include(":kdoc")
@@ -92,7 +92,7 @@ projects.forEach {
     project(":$it").projectDir = File(rootDir, "toolkit/$it")
     project(":$it-app").projectDir = File(rootDir, "microapps/${it.capitalized()}App/app")
 }
-
+project(":microapps-lib").projectDir = File(rootDir, "microapps/MicroappsLib")
 project(":bom").projectDir = File(rootDir, "bom")
 project(":composable-map").projectDir = File(rootDir, "toolkit/composable-map")
 project(":indoors").projectDir = File(rootDir, "toolkit/indoors")

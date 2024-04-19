@@ -217,13 +217,11 @@ fun MapListItem(
                     .padding(5.dp)
                     .clip(RoundedCornerShape(10.dp))
                     .wrapContentSize()
-                    .background(MaterialTheme.colorScheme.primaryContainer)
             ) {
                 Text(
                     text = shareType,
                     modifier = Modifier.padding(5.dp),
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
         }

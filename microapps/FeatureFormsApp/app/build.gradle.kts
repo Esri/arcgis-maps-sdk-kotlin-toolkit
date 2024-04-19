@@ -82,6 +82,7 @@ dependencies {
     implementation(project(":authentication"))
     implementation(project(":featureforms"))
     implementation(project(":geoview-compose"))
+    implementation(project(":microapps-lib"))
     // sdk
     implementation(arcgis.mapsSdk)
     // hilt
