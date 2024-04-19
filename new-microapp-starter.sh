@@ -17,6 +17,22 @@
 #
 #
 
+    # Helper functions to use
+    function _display_help_dialog {
+	echo "================================================================================"
+	echo "Usage: new-microapp-starter.sh"
+	echo
+	echo "Description: generates a new microapp. The script will prompt for the name of the new microapp."
+	echo " -h        this help message"
+	echo " ./new-microapp-starter.sh"
+	echo "================================================================================"
+	if [ -z $1 ]; then
+	    exit 0
+	else
+	    exit $1
+	fi
+    }
+
 function copyTemplateApp {
     pushd microapps > /dev/null
     if [ -d "${appDirName}" ]; then
@@ -48,6 +64,12 @@ function addToSettings {
     echo "include (\":${projectName}\")" >> settings.gradle.kts
     echo "project(\":${projectName}\").projectDir = File(rootDir, \"microapps/${appDirName}/app\")" >>  settings.gradle.kts
 }
+
+# check if a help dialog should be displayed
+if [ "$1" == "-h" ]; then
+    _display_help_dialog
+    exit 0
+fi
 
 # prompt for component name
 echo "Please enter the name of the new microapp in CamelCase without spaces."

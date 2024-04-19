@@ -23,10 +23,11 @@
 	echo "================================================================================"
 	echo "Usage: new-component-starter.sh"
 	echo
-	echo "Description: generates a new toolkit component and microapp with the given name"
+	echo "Description: generates a new toolkit component and optionally a new microapp. The script"
+	echo "will prompt for the name of the new component and whether to create a microapp."
 	echo " -d        do not make the new component publishable. optional. defaults to publishable."
 	echo " -h        this help message"	
-	echo " ./new-component-starter.sh -n FloorFilter"
+	echo " ./new-component-starter.sh"
 	echo "================================================================================"
 	if [ -z $1 ]; then
 	    exit 0
