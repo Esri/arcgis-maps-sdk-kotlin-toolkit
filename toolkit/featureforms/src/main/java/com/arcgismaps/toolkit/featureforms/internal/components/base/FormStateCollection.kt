@@ -25,6 +25,14 @@ import com.arcgismaps.mapping.featureforms.FormElement
  */
 @Immutable
 internal interface FormStateCollection : Iterable<FormStateCollection.Entry> {
+
+    /**
+     * Provides the bracket operator to the collection.
+     *
+     * @param formElement the search for in the collection
+     * @return the [FormElementState] associated with the formElement, or null if none.
+     */
+    operator fun get(formElement: FormElement): FormElementState?
     interface Entry {
         val formElement: FormElement
         val state: FormElementState
@@ -43,6 +51,14 @@ internal interface MutableFormStateCollection : FormStateCollection {
      * @param state the [FormElementState] to add.
      */
     fun add(formElement: FormElement, state: FormElementState)
+
+    /**
+     * Provides the bracket operator to the collection.
+     *
+     * @param formElement the search for in the collection
+     * @return the [FormElementState] associated with the formElement, or null if none.
+     */
+    override operator fun get(formElement: FormElement): FormElementState?
 }
 
 /**
@@ -55,7 +71,7 @@ internal fun MutableFormStateCollection(): MutableFormStateCollection = MutableF
  */
 private class MutableFormStateCollectionImpl : MutableFormStateCollection {
 
-    private val entries: MutableList<FormStateCollection.Entry> = mutableListOf()
+    private val entries: MutableSet<FormStateCollection.Entry> = mutableSetOf()
 
     override fun iterator(): Iterator<FormStateCollection.Entry> {
         return entries.iterator()
@@ -64,6 +80,9 @@ private class MutableFormStateCollectionImpl : MutableFormStateCollection {
     override fun add(formElement: FormElement, state: FormElementState) {
         entries.add(EntryImpl(formElement, state))
     }
+
+    override operator fun get(formElement: FormElement): FormElementState? =
+        entries.firstOrNull { it.formElement == formElement }?.state
 
     /**
      * Default implementation for a [FormStateCollection.Entry].

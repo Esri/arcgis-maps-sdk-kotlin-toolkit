@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -50,6 +51,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.mapping.featureforms.AttachmentFormElement
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
@@ -64,11 +66,13 @@ import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseGroupSta
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormStateCollection
 import com.arcgismaps.toolkit.featureforms.internal.components.base.MutableFormStateCollection
 import com.arcgismaps.toolkit.featureforms.internal.components.base.getState
+import com.arcgismaps.toolkit.featureforms.internal.components.base.rememberBaseAttachmentElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.rememberBaseGroupState
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.rememberComboBoxFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.rememberRadioButtonFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.rememberSwitchFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.rememberDateTimeFieldState
+import com.arcgismaps.toolkit.featureforms.internal.components.formelement.AttachmentFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.formelement.FieldElement
 import com.arcgismaps.toolkit.featureforms.internal.components.formelement.GroupElement
 import com.arcgismaps.toolkit.featureforms.internal.components.text.rememberFormTextFieldState
@@ -125,7 +129,6 @@ public fun FeatureForm(
         validationErrorVisibility = validationErrorVisibility
     )
 }
-
 /**
  * A wrapper to hold state data. This provides a [Stable] class to enable smart recompositions,
  * since [FeatureForm] is not stable.
@@ -144,8 +147,17 @@ internal fun FeatureForm(
 ) {
     val featureForm = stateData.featureForm
     val scope = rememberCoroutineScope()
-    val states = rememberStates(form = featureForm, scope = scope)
-    FeatureFormBody(form = featureForm, states = states, modifier = modifier)
+
+
+    val states = rememberStates(
+        form = featureForm,
+        scope = scope
+    )
+    FeatureFormBody(
+        form = featureForm,
+        states = states,
+        modifier = modifier
+    )
     FeatureFormDialog()
     // launch a new side effect in a launched effect when validationErrorVisibility changes
     LaunchedEffect(validationErrorVisibility) {
@@ -185,6 +197,10 @@ private fun FeatureFormBody(
 ) {
     var initialEvaluation by rememberSaveable(form) { mutableStateOf(false) }
     val lazyListState = rememberLazyListState()
+
+    if (initialEvaluation) {
+        rememberAttachmentStates(form = form, states = states)
+    }
     Column(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -202,7 +218,7 @@ private fun FeatureFormBody(
         InitializingExpressions(modifier = Modifier.fillMaxWidth()) {
             initialEvaluation
         }
-        Divider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
+        HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
         // form content
         LazyColumn(
             modifier = Modifier
@@ -225,6 +241,14 @@ private fun FeatureFormBody(
                                     .padding(horizontal = 15.dp, vertical = 10.dp)
                             )
                         }
+                        
+                        is AttachmentFormElement -> {
+                            AttachmentFormElement(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 15.dp, vertical = 10.dp)
+                            )
+                        }
 
                         else -> {
                             // other form elements are not created
@@ -234,6 +258,7 @@ private fun FeatureFormBody(
             }
         }
     }
+
     LaunchedEffect(form) {
         // ensure expressions are evaluated
         form.evaluateExpressions()
@@ -305,11 +330,32 @@ internal fun rememberStates(
                 states.add(element, groupState)
             }
 
-            else -> {}
+            is AttachmentFormElement -> {
+                val state = rememberBaseAttachmentElementState(form = form, attachmentFormElement = element)
+                states.add(element, state)
+            }
+
+            else -> { }
         }
     }
     return states
 }
+
+@Composable
+internal fun rememberAttachmentStates(
+    form: FeatureForm,
+    states: FormStateCollection
+): FormStateCollection {
+    form.elements.filterIsInstance<AttachmentFormElement>().forEach { element ->
+        if (states[element] == null) {
+            val state =
+                rememberBaseAttachmentElementState(form = form, attachmentFormElement = element)
+            (states as MutableFormStateCollection).add(element, state)
+        }
+    }
+    return states
+}
+
 
 /**
  * Creates and remembers a [BaseFieldState] for the provided [element].
