@@ -96,6 +96,7 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.exifinterface)
     implementation(libs.androidx.window)
     implementation(libs.androidx.window.core)
     implementation(libs.bundles.composeCore)

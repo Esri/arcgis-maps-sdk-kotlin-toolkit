@@ -55,9 +55,9 @@ import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.LibraryAdd
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.Card
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -86,21 +86,22 @@ import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.arcgismaps.toolkit.featureforms.R
+import com.arcgismaps.toolkit.featureforms.internal.components.base.FormElementState
+import kotlinx.coroutines.flow.MutableStateFlow
 
 
 internal data class FakeAttachmentElementState(
     val attachments: List<FakeAttachment>,
     val editable: Boolean = true,
     val title: String = "Titanic",
-    val description: String = "Take pictures of damage to the boat.",
     val keyword: String = "point of impact",// not used
     val input: String = "123",// not used
     var selectedAttachment: FakeAttachment? = null
-)
+): FormElementState(label = "fake attachments", description = "fake description", isVisible = MutableStateFlow<Boolean>(true))
 
 internal data class FakeAttachment(val name: String = "front of ship.jpg", val size: Long = 1234L)
 
-private val attachments =
+internal val fakeAttachments =
     buildList {
         repeat(40) {
             add(FakeAttachment("Bow point of collision.jpeg", 1234))
@@ -149,7 +150,7 @@ private fun Modifier.feedbackClickable(
 @Composable
 internal fun AttachmentFormElement(modifier: Modifier = Modifier) {
     AttachmentFormElement(
-        state = FakeAttachmentElementState(attachments = attachments, selectedAttachment = null),
+        state = FakeAttachmentElementState(attachments = fakeAttachments, selectedAttachment = null),
         modifier = modifier
     )
 }
@@ -194,7 +195,7 @@ private fun Carousel(onThumbnailTap: (FakeAttachment) -> Unit = {}, onDetailsTap
             .height(intrinsicSize = IntrinsicSize.Max),
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        attachments.forEach {
+        fakeAttachments.forEach {
             CarouselThumbnail(
                 it.name,
                 it.size,
@@ -271,7 +272,7 @@ private fun CarouselThumbnail(name: String, size: Long, onThumbnailTap: () -> Un
             }
         }
         
-        Divider()
+        HorizontalDivider()
         CarouselText(name, size)
     }
 }
@@ -296,7 +297,7 @@ private fun ThumbnailMenu(expanded: Boolean, onDismiss: () -> Unit = {}) {
                 contentPadding = PaddingValues(horizontal = 3.dp),
                 onClick = {}
             )
-            Divider(modifier = Modifier.padding(vertical = 5.dp))
+            HorizontalDivider(modifier = Modifier.padding(vertical = 5.dp))
             DropdownMenuItem(
                 text = { Text(text = "Delete") },
                 trailingIcon = {
@@ -377,7 +378,7 @@ private fun AddAttachmentMenu(expanded: Boolean, onDismiss: () -> Unit = {}) {
                 },
                 onClick = {}
             )
-            Divider(modifier = Modifier.padding(vertical = 5.dp))
+            HorizontalDivider(modifier = Modifier.padding(vertical = 5.dp))
             DropdownMenuItem(
                 text= { Text(text = "Add Photo From Gallery") },
                 trailingIcon = {
@@ -389,7 +390,7 @@ private fun AddAttachmentMenu(expanded: Boolean, onDismiss: () -> Unit = {}) {
                 },
                 onClick = {}
             )
-            Divider(modifier = Modifier.padding(vertical = 5.dp))
+            HorizontalDivider(modifier = Modifier.padding(vertical = 5.dp))
             DropdownMenuItem(
                 text= { Text(text = "Add File") },
                 trailingIcon = {

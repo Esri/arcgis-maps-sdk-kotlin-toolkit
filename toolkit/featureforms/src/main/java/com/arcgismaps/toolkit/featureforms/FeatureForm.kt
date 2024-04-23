@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -66,15 +65,16 @@ import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseGroupSta
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormStateCollection
 import com.arcgismaps.toolkit.featureforms.internal.components.base.MutableFormStateCollection
 import com.arcgismaps.toolkit.featureforms.internal.components.base.getState
-import com.arcgismaps.toolkit.featureforms.internal.components.base.rememberBaseAttachmentElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.rememberBaseGroupState
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.rememberComboBoxFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.rememberRadioButtonFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.rememberSwitchFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.rememberDateTimeFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.formelement.AttachmentFormElement
+import com.arcgismaps.toolkit.featureforms.internal.components.formelement.FakeAttachmentElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.formelement.FieldElement
 import com.arcgismaps.toolkit.featureforms.internal.components.formelement.GroupElement
+import com.arcgismaps.toolkit.featureforms.internal.components.formelement.fakeAttachments
 import com.arcgismaps.toolkit.featureforms.internal.components.text.rememberFormTextFieldState
 import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
 import kotlinx.coroutines.CoroutineScope
@@ -331,7 +331,7 @@ internal fun rememberStates(
             }
 
             is AttachmentFormElement -> {
-                val state = rememberBaseAttachmentElementState(form = form, attachmentFormElement = element)
+                val state = rememberFakeAttachmentElementState(form = form, attachmentFormElement = element)
                 states.add(element, state)
             }
 
@@ -349,7 +349,7 @@ internal fun rememberAttachmentStates(
     form.elements.filterIsInstance<AttachmentFormElement>().forEach { element ->
         if (states[element] == null) {
             val state =
-                rememberBaseAttachmentElementState(form = form, attachmentFormElement = element)
+                rememberFakeAttachmentElementState(form = form, attachmentFormElement = element)
             (states as MutableFormStateCollection).add(element, state)
         }
     }
@@ -434,4 +434,13 @@ internal fun rememberFieldState(
             null
         }
     }
+}
+
+@Suppress("UNUSED_PARAMETER")
+@Composable
+internal fun rememberFakeAttachmentElementState(
+    form: FeatureForm,
+    attachmentFormElement: AttachmentFormElement
+): FakeAttachmentElementState {
+    return FakeAttachmentElementState(fakeAttachments)
 }
