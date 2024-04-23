@@ -55,7 +55,17 @@ sealed class UIState {
     /**
      * Currently not editing.
      */
-    object NotEditing : UIState()
+    data object NotEditing : UIState()
+
+    /**
+     * Loading state that indicates the map is being loaded.
+     */
+    data object Loading : UIState()
+
+    /**
+     * No feature form definition available.
+     */
+    data object NoFeatureFormDefinition : UIState()
 
     /**
      * Currently selecting a new Feature
@@ -63,7 +73,7 @@ sealed class UIState {
     data class Switching(
         val oldState: Editing,
         val newFeature: ArcGISFeature
-    ): UIState()
+    ) : UIState()
 
     /**
      * In editing state with the [featureForm] with the validation error visibility given by
@@ -93,7 +103,7 @@ data class ErrorInfo(val fieldName: String, val error: FeatureFormValidationExce
  * Base class for context aware AndroidViewModel. This class must have only a single application
  * parameter.
  */
-open class BaseMapViewModel(application: Application): AndroidViewModel(application)
+open class BaseMapViewModel(application: Application) : AndroidViewModel(application)
 
 /**
  * A view model for the FeatureForms MapView UI
@@ -115,9 +125,33 @@ class MapViewModel @Inject constructor(
 
     val map: ArcGISMap = ArcGISMap(portalItem)
 
-    private val _uiState: MutableState<UIState> = mutableStateOf(UIState.NotEditing)
+    private val _uiState: MutableState<UIState> = mutableStateOf(UIState.Loading)
     val uiState: State<UIState>
         get() = _uiState
+
+    init {
+        scope.launch {
+            // check if this map has a FeatureFormDefinition on any of its layers
+            checkFeatureFormDefinition()
+        }
+    }
+
+    private suspend fun checkFeatureFormDefinition() {
+        map.load()
+        val layer = map.operationalLayers.firstOrNull {
+            if (it is FeatureLayer) {
+                it.load()
+                it.featureFormDefinition != null
+            } else {
+                false
+            }
+        }
+        _uiState.value = if (layer == null) {
+            UIState.NoFeatureFormDefinition
+        } else {
+            UIState.NotEditing
+        }
+    }
 
     /**
      * Apply attribute edits to the Geodatabase backing
@@ -268,6 +302,9 @@ class MapViewModel @Inject constructor(
         }
     }
 
+    fun setDefaultState() {
+        _uiState.value = UIState.NotEditing
+    }
 }
 
 /**
