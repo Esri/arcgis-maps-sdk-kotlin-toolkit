@@ -43,4 +43,8 @@
     <string name="discard_edits">Discard Edits?</string>
     <string name="all_changes_will_be_lost">All changes made within the form will be lost.</string>
     <string name="browse_demo_maps">Browse Demo Maps</string>
+    <string name="no_featureform_found">No FeatureForm Found!</string>
+    <string name="okay">Okay</string>
+    <string name="exit">Exit</string>
+    <string name="no_featureform_description">FeatureLayers in this map do not contain a FeatureFormDefinition. Feature editing will be disabled.</string>
 </resources>
