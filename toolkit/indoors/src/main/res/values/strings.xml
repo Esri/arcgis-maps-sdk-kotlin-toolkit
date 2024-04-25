@@ -11,7 +11,7 @@
     <string name="floor_filter_no_results">No results found.</string>
     <string name="not_available">Not available</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
-    <string name="floor_filter_site_selector_top_bar">Site - </string>
+    <string name="floor_filter_site_selector_top_bar">Site - %1$s</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
     <string name="site_facility_button">Sites and facilities button</string>
     <!-- This text is used to describe the UI element to support accessibility services -->

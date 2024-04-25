@@ -260,11 +260,9 @@ internal fun FacilitySelectorTopBar(
                 fontSize = if (selectAFacilityText.length > 23) 12.sp else 18.sp,
                 textAlign = TextAlign.Start
             )
-
+            val siteName =  floorFilterState.getSelectedSite()?.name ?: stringResource(id = R.string.not_available)
             Text(
-                text = stringResource(R.string.floor_filter_site_selector_top_bar) +
-                        (floorFilterState.getSelectedSite()?.name
-                            ?: stringResource(id = R.string.not_available)),
+                text = stringResource(R.string.floor_filter_site_selector_top_bar, siteName),
                 // reduce font size if the localized text is too long
                 fontSize = if (selectAFacilityText.length > 23) 12.sp else 15.sp,
                 color = Color.Gray
