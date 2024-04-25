@@ -51,7 +51,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.toolkit.authentication.DialogAuthenticator
-import com.arcgismaps.toolkit.authenticationapp.ui.theme.AuthenticationAppTheme
+import com.esri.microappslib.components.MicroAppScaffold
+import com.esri.microappslib.theme.MicroAppTheme
 
 class MainActivity : ComponentActivity() {
     private val authenticationAppViewModel: AuthenticationAppViewModel by viewModels()
@@ -60,7 +61,7 @@ class MainActivity : ComponentActivity() {
         // Application context must be set for client certificate authentication.
         ArcGISEnvironment.applicationContext = applicationContext
         setContent {
-            AuthenticationAppTheme {
+            MicroAppTheme {
                 AuthenticationApp(authenticationAppViewModel)
                 DialogAuthenticator(authenticatorState = authenticationAppViewModel.authenticatorState)
             }
@@ -70,18 +71,20 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 private fun AuthenticationApp(authenticationAppViewModel: AuthenticationAppViewModel) {
-    Column {
-        val infoText = authenticationAppViewModel.infoText.collectAsState().value
-        val isLoading = authenticationAppViewModel.isLoading.collectAsState().value
-        PortalDetails(
-            url = authenticationAppViewModel.url.collectAsState().value,
-            onSetUrl = authenticationAppViewModel::setUrl,
-            useOAuth = authenticationAppViewModel.useOAuth.collectAsState().value,
-            onSetUseOAuth = authenticationAppViewModel::setUseOAuth,
-            onSignOut = authenticationAppViewModel::signOut,
-            onLoadPortal = authenticationAppViewModel::loadPortal
-        )
-        InfoScreen(text = infoText, isLoading = isLoading)
+    MicroAppScaffold(title = "Authentication App") {
+        Column(Modifier.padding(it)) {
+            val infoText = authenticationAppViewModel.infoText.collectAsState().value
+            val isLoading = authenticationAppViewModel.isLoading.collectAsState().value
+            PortalDetails(
+                url = authenticationAppViewModel.url.collectAsState().value,
+                onSetUrl = authenticationAppViewModel::setUrl,
+                useOAuth = authenticationAppViewModel.useOAuth.collectAsState().value,
+                onSetUseOAuth = authenticationAppViewModel::setUseOAuth,
+                onSignOut = authenticationAppViewModel::signOut,
+                onLoadPortal = authenticationAppViewModel::loadPortal
+            )
+            InfoScreen(text = infoText, isLoading = isLoading)
+        }
     }
 }
 

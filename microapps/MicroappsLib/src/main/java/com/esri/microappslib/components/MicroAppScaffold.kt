@@ -24,6 +24,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.esri.microappslib.theme.MicroAppTheme
 
+/**
+ * Composable component to display a [Scaffold] with a customizable [TopAppBar]
+ * using the provided [MenuActions].
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MicroAppScaffold(
@@ -39,8 +43,8 @@ fun MicroAppScaffold(
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
                 ),
                 title = { Text(title) },
                 actions = {
@@ -96,6 +100,7 @@ fun MicroAppScaffold(
             )
         },
     ) { innerPadding ->
+        // Displays microapp content
         content.invoke(innerPadding)
     }
 }
@@ -106,7 +111,7 @@ fun MicroAppDropDown(
     dropdownListItems: List<String> = listOf(),
     expanded: Boolean = false,
     onDismissRequest: () -> Unit = {},
-    onItemSelected: (Int, String) -> Unit = { index: Int, value: String -> },
+    onItemSelected: (Int, String) -> Unit = { _: Int, _: String -> },
 ) {
     DropdownMenu(
         expanded = expanded,
@@ -117,7 +122,6 @@ fun MicroAppDropDown(
             DropdownMenuItem(
                 text = { Text(text = it) },
                 onClick = {
-                    // dismiss the dropdown when an item is selected
                     onDismissRequest()
                     onItemSelected.invoke(dropdownListItems.indexOf(it), it)
                 })
