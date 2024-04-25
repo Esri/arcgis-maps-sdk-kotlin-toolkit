@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright 2023 Esri
+ *  Copyright 2024 Esri
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -80,7 +80,6 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class).all {
 }
 
 dependencies {
-    implementation(project(":template"))
     implementation(project(":geoview-compose"))
     implementation(arcgis.mapsSdk)
     implementation(platform(libs.androidx.compose.bom))
