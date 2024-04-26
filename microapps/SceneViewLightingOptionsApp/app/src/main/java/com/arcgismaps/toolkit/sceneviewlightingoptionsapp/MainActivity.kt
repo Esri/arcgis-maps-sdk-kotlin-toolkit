@@ -26,7 +26,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.toolkit.sceneviewlightingoptionsapp.screens.MainScreen
-import com.arcgismaps.toolkit.sceneviewlightingoptionsapp.ui.theme.SceneViewLightingOptionsAppTheme
 import com.esri.microappslib.theme.MicroAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -50,7 +49,7 @@ fun SceneViewLightingOptionsApp() {
 @Preview(showBackground = true)
 @Composable
 fun AppPreview() {
-    SceneViewLightingOptionsAppTheme {
+    MicroAppTheme {
         SceneViewLightingOptionsApp()
     }
 }

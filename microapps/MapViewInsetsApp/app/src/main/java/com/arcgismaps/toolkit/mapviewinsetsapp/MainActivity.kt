@@ -21,11 +21,14 @@ package com.arcgismaps.toolkit.mapviewinsetsapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.toolkit.mapviewinsetsapp.screens.MainScreen
+import com.esri.microappslib.components.MicroAppScaffold
 import com.esri.microappslib.theme.MicroAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -43,7 +46,9 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MapviewInsetsApp() {
-    MainScreen()
+    MicroAppScaffold("MapView Insets App") {
+        MainScreen(Modifier.padding(it))
+    }
 }
 
 @Preview(showBackground = true)
