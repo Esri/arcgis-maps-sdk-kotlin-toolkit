@@ -1,5 +1,6 @@
 /*
  *
+ *
  *  Copyright 2024 Esri
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,42 +15,40 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
+ *  
  */
 
-package com.arcgismaps.toolkit.popupappapp
+package com.arcgismaps.toolkit.popupapp
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.arcgismaps.ApiKey
-import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.toolkit.popupappapp.screens.MainScreen
-import com.arcgismaps.toolkit.popupappapp.ui.theme.PopupAppAppTheme
+import com.arcgismaps.toolkit.popupapp.screens.MainScreen
+import com.arcgismaps.toolkit.popupapp.ui.theme.PopupAppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        ArcGISEnvironment.apiKey =
-            ApiKey.create(BuildConfig.API_KEY)
+
         setContent {
-            PopupAppAppTheme {
-                PopupAppApp()
+            PopupAppTheme {
+                PopupApp()
             }
         }
     }
 }
 
 @Composable
-fun PopupAppApp() {
+fun PopupApp() {
     MainScreen()
 }
 
 @Preview(showBackground = true)
 @Composable
 fun AppPreview() {
-    PopupAppAppTheme {
-        PopupAppApp()
+    PopupAppTheme {
+        PopupApp()
     }
 }

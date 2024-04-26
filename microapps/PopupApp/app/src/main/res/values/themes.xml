@@ -19,5 +19,5 @@
 
 <resources>
 
-    <style name="Theme.PopupAppApp" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.popupapp" parent="android:Theme.Material.Light.NoActionBar" />
 </resources>

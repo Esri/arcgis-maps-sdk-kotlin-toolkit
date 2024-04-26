@@ -18,12 +18,18 @@
 
 package com.arcgismaps.toolkit.popup
 
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.popup.Popup
 
 @Immutable
@@ -45,10 +51,13 @@ private data class PopupState(@Stable val popup: Popup)
  *
  * @since 200.5.0
  */
-@Suppress("unused_parameter", "unused")
+@Suppress("unused")
 @Composable
 public fun Popup(popup: Popup, modifier: Modifier = Modifier) {
-    Text(text = popup.title)
+    val stateData = remember(popup) {
+        PopupState(popup)
+    }
+    Popup(stateData, modifier)
 }
 
 @Suppress("unused_parameter")
@@ -57,10 +66,14 @@ private fun Popup(popupState: PopupState, modifier: Modifier = Modifier) {
     Popup(popupState.popup.title)
 }
 
-@Suppress("unused_parameter")
 @Composable
 private fun Popup(title: String, modifier: Modifier = Modifier) {
-    Text(text = title)
+    Text(
+        text = title,
+        textAlign = TextAlign.Center,
+        modifier = modifier.fillMaxWidth()
+    )
+    Spacer(modifier = modifier.height(200.dp))
 }
 @Preview
 @Composable

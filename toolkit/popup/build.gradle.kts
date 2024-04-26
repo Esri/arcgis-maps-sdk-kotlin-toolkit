@@ -16,11 +16,11 @@
  *
  */
 
-
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("artifact-deploy")
+    alias(libs.plugins.binary.compatibility.validator) apply true
 }
 android {
     namespace = "com.arcgismaps.toolkit.popup"
@@ -45,7 +45,7 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-    @Suppress("UnstableApiUsage")
+
     buildFeatures {
         compose = true
     }

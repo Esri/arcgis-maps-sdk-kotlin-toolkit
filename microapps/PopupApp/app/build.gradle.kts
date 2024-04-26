@@ -28,11 +28,11 @@ secrets {
 }
 
 android {
-    namespace = "com.arcgismaps.toolkit.popupappapp"
+    namespace = "com.arcgismaps.toolkit.popupapp"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId ="com.arcgismaps.toolkit.popupappapp"
+        applicationId ="com.arcgismaps.toolkit.popupapp"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.compileSdk.get().toInt()
         versionCode = 1
@@ -62,7 +62,7 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-    @Suppress("UnstableApiUsage")
+
     buildFeatures {
         compose = true
         buildConfig = true
@@ -82,9 +82,6 @@ dependencies {
     implementation(project(":geoview-compose"))
     implementation(arcgis.mapsSdk)
     implementation(project(":popup"))
-    // jetpack window manager
-    implementation(libs.androidx.window)
-    implementation(libs.androidx.window.core)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)

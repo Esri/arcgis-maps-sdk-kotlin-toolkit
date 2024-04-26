@@ -1,5 +1,6 @@
 /*
  *
+ *
  *  Copyright 2024 Esri
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,9 +15,10 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
+ *  
  */
 
-package com.arcgismaps.toolkit.popupappapp.ui.theme
+package com.arcgismaps.toolkit.popupapp.ui.theme
 
 import android.app.Activity
 import android.os.Build
@@ -56,7 +58,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun PopupAppAppTheme(
+fun PopupAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
