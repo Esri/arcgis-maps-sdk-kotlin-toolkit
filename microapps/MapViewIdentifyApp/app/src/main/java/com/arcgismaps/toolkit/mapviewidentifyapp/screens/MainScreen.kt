@@ -79,13 +79,7 @@ fun MainScreen() {
         },
         scaffoldState = bottomSheetScaffoldState,
         topBar = {
-            TopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                ),
-                title = { Text("MapView Identify App") }
-            )
+            TopAppBar(title = { Text("MapView Identify App") })
         },
     ) { paddingValues ->
         MapView(

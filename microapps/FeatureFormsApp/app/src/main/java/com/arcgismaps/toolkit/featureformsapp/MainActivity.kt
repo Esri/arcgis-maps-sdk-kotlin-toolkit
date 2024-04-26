@@ -46,7 +46,7 @@ import com.arcgismaps.toolkit.featureformsapp.data.PortalSettings
 import com.arcgismaps.toolkit.featureformsapp.navigation.AppNavigation
 import com.arcgismaps.toolkit.featureformsapp.navigation.NavigationRoute
 import com.arcgismaps.toolkit.featureformsapp.navigation.Navigator
-import com.esri.microappslib.theme.MicroAppTheme
+import com.arcgismaps.toolkit.featureformsapp.ui.theme.FeatureFormsAppTheme
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.AndroidEntryPoint
@@ -77,7 +77,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         ArcGISEnvironment.applicationContext = this
         setContent {
-            MicroAppTheme {
+            FeatureFormsAppTheme {
                 FeatureFormApp(appState.collectAsState().value, navigator)
             }
         }
@@ -151,6 +151,7 @@ fun AnimatedLoading(
     if (visible) {
         Surface(
             modifier = modifier,
+            color = backgroundColor
         ) {
             Column(
                 verticalArrangement = Arrangement.Center,

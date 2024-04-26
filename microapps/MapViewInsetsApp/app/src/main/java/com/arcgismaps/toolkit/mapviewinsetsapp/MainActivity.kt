@@ -26,7 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.toolkit.mapviewinsetsapp.screens.MainScreen
-import com.arcgismaps.toolkit.mapviewinsetsapp.ui.theme.MapviewInsetsAppTheme
+import com.esri.microappslib.theme.MicroAppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,7 +34,7 @@ class MainActivity : ComponentActivity() {
         ArcGISEnvironment.apiKey = ApiKey.create(BuildConfig.API_KEY)
 
         setContent {
-            MapviewInsetsAppTheme {
+            MicroAppTheme {
                 MapviewInsetsApp()
             }
         }
@@ -49,7 +49,7 @@ fun MapviewInsetsApp() {
 @Preview(showBackground = true)
 @Composable
 fun AppPreview() {
-    MapviewInsetsAppTheme {
+    MicroAppTheme {
         MapviewInsetsApp()
     }
 }

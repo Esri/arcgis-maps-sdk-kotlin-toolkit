@@ -20,12 +20,15 @@ package com.arcgismaps.toolkit.floorfilterapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.toolkit.floorfilterapp.screens.MainScreen
-import com.arcgismaps.toolkit.floorfilterapp.ui.theme.FloorFilterAppTheme
+import com.esri.microappslib.components.MicroAppScaffold
+import com.esri.microappslib.theme.MicroAppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,7 +36,7 @@ class MainActivity : ComponentActivity() {
         ArcGISEnvironment.apiKey =
             ApiKey.create(BuildConfig.API_KEY)
         setContent {
-            FloorFilterAppTheme {
+            MicroAppTheme {
                 FloorFilterApp()
             }
         }
@@ -42,13 +45,15 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun FloorFilterApp() {
-    MainScreen()
+    MicroAppScaffold(title = "FloorFilter App") {
+        MainScreen(Modifier.padding(it))
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun AppPreview() {
-    FloorFilterAppTheme {
+    MicroAppTheme {
         FloorFilterApp()
     }
 }

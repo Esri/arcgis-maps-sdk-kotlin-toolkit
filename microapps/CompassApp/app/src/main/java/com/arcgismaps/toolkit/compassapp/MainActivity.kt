@@ -26,7 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.toolkit.compassapp.screens.MainScreen
-import com.arcgismaps.toolkit.compassapp.ui.theme.CompassAppTheme
+import com.esri.microappslib.theme.MicroAppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,7 +36,7 @@ class MainActivity : ComponentActivity() {
         ArcGISEnvironment.apiKey =
             ApiKey.create(BuildConfig.API_KEY)
         setContent {
-            CompassAppTheme {
+            MicroAppTheme {
                 CompassApp()
             }
         }
@@ -51,7 +51,7 @@ fun CompassApp() {
 @Preview(showBackground = true)
 @Composable
 fun AppPreview() {
-    CompassAppTheme {
+    MicroAppTheme {
         CompassApp()
     }
 }

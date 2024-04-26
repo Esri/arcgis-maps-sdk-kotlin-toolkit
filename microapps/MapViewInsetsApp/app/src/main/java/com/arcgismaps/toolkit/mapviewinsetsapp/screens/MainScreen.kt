@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.toolkit.geoviewcompose.MapView
+import com.esri.microappslib.components.MicroAppScaffold
 
 /**
  * Shows how a composable [com.arcgismaps.toolkit.geoviewcompose.MapView] reacts to the
@@ -75,57 +76,60 @@ fun MainScreen() {
     }
 
     val focusManager = LocalFocusManager.current
-    Column(Modifier.fillMaxSize()) {
-        Row(
-            Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
 
-            InsetTextField(
-                value = leftText,
-                onValueChange = { text: TextFieldValue -> leftText = text },
-                label = { Text("Left") },
-                updateInsets = updateInsets
-            )
+    MicroAppScaffold("MapView Insets App") {
+        Column(Modifier.padding(it).fillMaxSize()) {
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
 
-            InsetTextField(
-                value = rightText,
-                onValueChange = { text: TextFieldValue -> rightText = text },
-                label = { Text("Right") },
-                updateInsets = updateInsets
-            )
+                InsetTextField(
+                    value = leftText,
+                    onValueChange = { text: TextFieldValue -> leftText = text },
+                    label = { Text("Left") },
+                    updateInsets = updateInsets
+                )
 
-            InsetTextField(
-                value = topText,
-                onValueChange = { text: TextFieldValue -> topText = text },
-                label = { Text("Top") },
-                updateInsets = updateInsets
-            )
+                InsetTextField(
+                    value = rightText,
+                    onValueChange = { text: TextFieldValue -> rightText = text },
+                    label = { Text("Right") },
+                    updateInsets = updateInsets
+                )
 
-            InsetTextField(
-                value = bottomText,
-                onValueChange = { text: TextFieldValue -> bottomText = text },
-                label = { Text("Bottom") },
-                updateInsets = updateInsets
+                InsetTextField(
+                    value = topText,
+                    onValueChange = { text: TextFieldValue -> topText = text },
+                    label = { Text("Top") },
+                    updateInsets = updateInsets
+                )
+
+                InsetTextField(
+                    value = bottomText,
+                    onValueChange = { text: TextFieldValue -> bottomText = text },
+                    label = { Text("Bottom") },
+                    updateInsets = updateInsets
+                )
+            }
+
+            Button(onClick = {
+                insets = PaddingValues(0.0.dp, 0.0.dp, 0.0.dp, 0.0.dp)
+                leftText = TextFieldValue("")
+                rightText = TextFieldValue("")
+                topText = TextFieldValue("")
+                bottomText = TextFieldValue("")
+                focusManager.clearFocus()
+            }, Modifier.fillMaxWidth().padding(horizontal = 40.dp)) {
+                Text("Reset Insets")
+            }
+
+            MapView(
+                arcGISMap,
+                modifier = Modifier.fillMaxSize(),
+                insets = insets
             )
         }
-
-        Button(onClick = {
-            insets = PaddingValues(0.0.dp, 0.0.dp, 0.0.dp, 0.0.dp)
-            leftText = TextFieldValue("")
-            rightText = TextFieldValue("")
-            topText = TextFieldValue("")
-            bottomText = TextFieldValue("")
-            focusManager.clearFocus()
-        }, Modifier.fillMaxWidth().padding(horizontal = 40.dp)) {
-            Text("Reset Insets")
-        }
-
-        MapView(
-            arcGISMap,
-            modifier = Modifier.fillMaxSize(),
-            insets = insets
-        )
     }
 }
 

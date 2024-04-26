@@ -111,10 +111,6 @@ fun MainScreen() {
     Scaffold(
         topBar = {
             TopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
-                ),
                 title = {
                     Text("SceneView Analysis Overlay App")
                 },

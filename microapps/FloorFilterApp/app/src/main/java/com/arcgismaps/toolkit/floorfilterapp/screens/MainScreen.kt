@@ -41,7 +41,7 @@ import com.arcgismaps.toolkit.indoors.FloorFilterSelection
 import com.arcgismaps.toolkit.indoors.FloorFilterState
 
 @Composable
-fun MainScreen() {
+fun MainScreen(modifier: Modifier = Modifier) {
     val floorAwareWebMap by remember {
         mutableStateOf(
             ArcGISMap(
@@ -87,7 +87,7 @@ fun MainScreen() {
 
     MapView(
         floorAwareWebMap,
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         mapViewProxy = mapViewProxy
     )
     Box(
