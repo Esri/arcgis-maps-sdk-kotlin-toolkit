@@ -87,7 +87,7 @@ private fun GroupElement(
         modifier = modifier,
         shape = GroupElementDefaults.containerShape,
         colors = CardDefaults.cardColors(
-            containerColor = colors.headerColor
+            containerColor = colors.containerColor
         ),
         border = BorderStroke(GroupElementDefaults.borderThickness, colors.outlineColor)
     ) {
@@ -104,7 +104,7 @@ private fun GroupElement(
         )
         AnimatedVisibility(visible = expanded) {
             Column(
-                modifier = Modifier.background(colors.containerColor)
+                modifier = Modifier.background(colors.bodyColor)
             ) {
                 fieldStates.forEach {
                     FieldElement(state = it.getState<BaseFieldState<*>>())

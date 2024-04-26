@@ -93,8 +93,8 @@ internal object DefaultThemeTokens {
             labelColor = Color.Unspecified,
             supportingTextColor = Color.Unspecified,
             outlineColor = ColorTokens.Outline,
-            headerColor = ColorTokens.OnSurfaceVariant,
-            containerColor = ColorTokens.Background
+            containerColor = ColorTokens.OnSurfaceVariant,
+            bodyColor = ColorTokens.Background
         ),
         radioButtonFieldColors = RadioButtonFieldColors(
             labelColor = Color.Unspecified,

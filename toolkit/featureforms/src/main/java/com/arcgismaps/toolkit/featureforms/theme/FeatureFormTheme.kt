@@ -238,9 +238,9 @@ public data class ReadOnlyFieldColors internal constructor(
  * @property labelColor the color used for the label of this field
  * @property supportingTextColor the color used for the supporting text of this field
  * @property outlineColor the color used for the outline of this field
- * @property headerColor the color used for the header of this field. The header contains
+ * @property containerColor the color used for the header container of this field. This contains
  * the label and supporting text of the field.
- * @property containerColor the color used for the container of this field. The container
+ * @property bodyColor the color used for the body of this field. The body
  * contains the field elements.
  * @since 200.5.0
  */
@@ -249,8 +249,8 @@ public data class GroupElementColors internal constructor(
     public val labelColor: Color,
     public val supportingTextColor: Color,
     public val outlineColor: Color,
-    public val headerColor: Color,
-    public val containerColor: Color
+    public val containerColor: Color,
+    public val bodyColor: Color
 )
 
 /**

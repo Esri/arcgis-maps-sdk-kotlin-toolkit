@@ -156,8 +156,8 @@ public final class com/arcgismaps/toolkit/featureforms/theme/GroupElementColors 
 	public final fun copy-t635Npw (JJJJJ)Lcom/arcgismaps/toolkit/featureforms/theme/GroupElementColors;
 	public static synthetic fun copy-t635Npw$default (Lcom/arcgismaps/toolkit/featureforms/theme/GroupElementColors;JJJJJILjava/lang/Object;)Lcom/arcgismaps/toolkit/featureforms/theme/GroupElementColors;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBodyColor-0d7_KjU ()J
 	public final fun getContainerColor-0d7_KjU ()J
-	public final fun getHeaderColor-0d7_KjU ()J
 	public final fun getLabelColor-0d7_KjU ()J
 	public final fun getOutlineColor-0d7_KjU ()J
 	public final fun getSupportingTextColor-0d7_KjU ()J

@@ -161,7 +161,6 @@ public object FeatureFormDefaults {
         )
     }
 
-
     /**
      * Creates an instance of [ReadOnlyFieldColors] with default values from [MaterialTheme].
      *
@@ -183,16 +182,15 @@ public object FeatureFormDefaults {
         )
     }
 
-
     /**
      * Creates an instance of [GroupElementColors] with default values from [MaterialTheme].
      *
      * @param labelColor the color used for the label of this field
      * @param supportingTextColor the color used for the supporting text of this field
      * @param outlineColor the color used for the outline of this field
-     * @param headerColor the color used for the header of this field. The header contains
+     * @property containerColor the color used for the header container of this field. This contains
      * the label and supporting text of the field.
-     * @param containerColor the color used for the container of this field. The container
+     * @property bodyColor the color used for the body of this field. The body
      * contains the field elements.
      * @since 200.5.0
      */
@@ -201,19 +199,17 @@ public object FeatureFormDefaults {
         labelColor: Color = Color.Unspecified,
         supportingTextColor: Color = Color.Unspecified,
         outlineColor: Color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f),
-        headerColor: Color = MaterialTheme.colorScheme.surfaceVariant,
-        containerColor: Color = MaterialTheme.colorScheme.background
+        containerColor: Color = MaterialTheme.colorScheme.surfaceVariant,
+        bodyColor: Color = MaterialTheme.colorScheme.background
     ): GroupElementColors {
         return GroupElementColors(
             labelColor = labelColor,
             supportingTextColor = supportingTextColor,
             outlineColor = outlineColor,
-            headerColor = headerColor,
-            containerColor = containerColor
-
+            containerColor = containerColor,
+            bodyColor = bodyColor
         )
     }
-
 
     /**
      * Creates an instance of [RadioButtonFieldColors] with default values from [MaterialTheme].
@@ -251,7 +247,6 @@ public object FeatureFormDefaults {
             disabledUnselectedColor = disabledUnselectedColor,
         )
     }
-
 
     /**
      * Creates a [FeatureFormTypography] with default values.
@@ -360,5 +355,3 @@ public object FeatureFormDefaults {
         )
     }
 }
-
-
