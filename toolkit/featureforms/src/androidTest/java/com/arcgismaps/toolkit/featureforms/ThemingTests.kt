@@ -34,16 +34,9 @@ import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormElement
 import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.layers.FeatureLayer
-import com.arcgismaps.toolkit.featureforms.theme.EditableTextFieldColors
-import com.arcgismaps.toolkit.featureforms.theme.EditableTextFieldTypography
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormColorScheme
+import com.arcgismaps.toolkit.featureforms.theme.FeatureFormDefaults
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTypography
-import com.arcgismaps.toolkit.featureforms.theme.GroupElementColors
-import com.arcgismaps.toolkit.featureforms.theme.GroupElementTypography
-import com.arcgismaps.toolkit.featureforms.theme.RadioButtonFieldColors
-import com.arcgismaps.toolkit.featureforms.theme.RadioButtonFieldTypography
-import com.arcgismaps.toolkit.featureforms.theme.ReadOnlyFieldColors
-import com.arcgismaps.toolkit.featureforms.theme.ReadOnlyFieldTypography
 import junit.framework.TestCase
 import kotlinx.coroutines.test.runTest
 import org.junit.BeforeClass
@@ -72,13 +65,13 @@ class ThemingTests {
         var typography: FeatureFormTypography
         // create custom color scheme and typography and apply to the FeatureForm
         composeTestRule.setContent {
-            colorScheme = FeatureFormColorScheme.createDefaults(
-                editableTextFieldColors = EditableTextFieldColors.createDefaults(
+            colorScheme = FeatureFormDefaults.colorScheme(
+                editableTextFieldColors = FeatureFormDefaults.editableTextFieldColors(
                     focusedTextColor = Color.Red
                 )
             )
-            typography = FeatureFormTypography.createDefaults(
-                editableTextFieldTypography = EditableTextFieldTypography.createDefaults(
+            typography = FeatureFormDefaults.typography(
+                editableTextFieldTypography = FeatureFormDefaults.editableTextFieldTypography(
                     labelStyle = TextStyle(
                         fontWeight = FontWeight.ExtraBold,
                         color = Color.Green
@@ -117,8 +110,8 @@ class ThemingTests {
         var colorScheme: FeatureFormColorScheme
         // create custom color scheme and typography and apply to the FeatureForm
         composeTestRule.setContent {
-            colorScheme = FeatureFormColorScheme.createDefaults(
-                editableTextFieldColors = EditableTextFieldColors.createDefaults(
+            colorScheme = FeatureFormDefaults.colorScheme(
+                editableTextFieldColors = FeatureFormDefaults.editableTextFieldColors(
                     unfocusedPlaceholderColor = Color.White,
                     focusedPlaceholderColor = Color.Red,
                     unfocusedTextColor = Color.Black,
@@ -159,13 +152,13 @@ class ThemingTests {
         var colorScheme: FeatureFormColorScheme
         var typography: FeatureFormTypography
         composeTestRule.setContent {
-            colorScheme = FeatureFormColorScheme.createDefaults(
-                readOnlyFieldColors = ReadOnlyFieldColors.createDefaults(
+            colorScheme = FeatureFormDefaults.colorScheme(
+                readOnlyFieldColors = FeatureFormDefaults.readOnlyFieldColors(
                     textColor = Color.Green
                 )
             )
-            typography = FeatureFormTypography.createDefaults(
-                readOnlyFieldTypography = ReadOnlyFieldTypography.createDefaults(
+            typography = FeatureFormDefaults.typography(
+                readOnlyFieldTypography = FeatureFormDefaults.readOnlyFieldTypography(
                     labelStyle = TextStyle(
                         fontWeight = FontWeight.ExtraBold,
                         color = Color.Red
@@ -203,13 +196,13 @@ class ThemingTests {
         var colorScheme: FeatureFormColorScheme
         var typography: FeatureFormTypography
         composeTestRule.setContent {
-            colorScheme = FeatureFormColorScheme.createDefaults(
-                radioButtonFieldColors = RadioButtonFieldColors.createDefaults(
+            colorScheme = FeatureFormDefaults.colorScheme(
+                radioButtonFieldColors = FeatureFormDefaults.radioButtonFieldColors(
                     textColor = Color.Green
                 )
             )
-            typography = FeatureFormTypography.createDefaults(
-                radioButtonFieldTypography = RadioButtonFieldTypography.createDefaults(
+            typography = FeatureFormDefaults.typography(
+                radioButtonFieldTypography = FeatureFormDefaults.radioButtonFieldTypography(
                     labelStyle = TextStyle(
                         fontWeight = FontWeight.ExtraBold,
                         color = Color.Red
@@ -247,13 +240,13 @@ class ThemingTests {
         var colorScheme: FeatureFormColorScheme
         var typography: FeatureFormTypography
         composeTestRule.setContent {
-            colorScheme = FeatureFormColorScheme.createDefaults(
-                groupElementColors = GroupElementColors.createDefaults(
+            colorScheme = FeatureFormDefaults.colorScheme(
+                groupElementColors = FeatureFormDefaults.groupElementColors(
                     supportingTextColor = Color.Green
                 )
             )
-            typography = FeatureFormTypography.createDefaults(
-                groupElementTypography = GroupElementTypography.createDefaults(
+            typography = FeatureFormDefaults.typography(
+                groupElementTypography = FeatureFormDefaults.groupElementTypography(
                     labelStyle = TextStyle(
                         fontWeight = FontWeight.ExtraBold,
                         color = Color.Blue

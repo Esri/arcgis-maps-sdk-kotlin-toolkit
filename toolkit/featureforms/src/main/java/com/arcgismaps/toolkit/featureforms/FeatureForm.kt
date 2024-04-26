@@ -74,6 +74,7 @@ import com.arcgismaps.toolkit.featureforms.internal.components.formelement.Group
 import com.arcgismaps.toolkit.featureforms.internal.components.text.rememberFormTextFieldState
 import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormColorScheme
+import com.arcgismaps.toolkit.featureforms.theme.FeatureFormDefaults
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTheme
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTypography
 import kotlinx.coroutines.CoroutineScope
@@ -125,8 +126,8 @@ public fun FeatureForm(
     featureForm: FeatureForm,
     modifier: Modifier = Modifier,
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
-    colorScheme: FeatureFormColorScheme = FeatureFormColorScheme.createDefaults(),
-    typography: FeatureFormTypography = FeatureFormTypography.createDefaults()
+    colorScheme: FeatureFormColorScheme = FeatureFormDefaults.colorScheme(),
+    typography: FeatureFormTypography = FeatureFormDefaults.typography()
 ) {
     val stateData = remember(featureForm) {
         StateData(featureForm)
