@@ -302,12 +302,8 @@ private class FloorFilterStateImpl(
     private fun filterMap() {
         // Set levels that match the selected level's vertical order to visible
         val selectedLevel = getSelectedLevel()
-        if (selectedLevel == null) {
-            clearMapFilter()
-        } else {
-            floorManager.value?.levels?.forEach {
-                it.isVisible = isVisibleWithSelectedLevel(it, selectedLevel)
-            }
+        floorManager.value?.levels?.forEach {
+            it.isVisible = isVisibleWithSelectedLevel(it, selectedLevel)
         }
     }
 
@@ -324,17 +320,6 @@ private class FloorFilterStateImpl(
             selectedLevel == null -> levelToCheck.verticalOrder == 0
             levelToCheck.facility == selectedLevel.facility -> levelToCheck == selectedLevel
             else -> levelToCheck.verticalOrder == 0
-        }
-    }
-
-    /**
-     * Clears the floor filter from the attached [GeoModel].
-     *
-     * @since 200.2.0
-     */
-    private fun clearMapFilter() {
-        floorManager.value?.levels?.forEach {
-            it.isVisible = true
         }
     }
 

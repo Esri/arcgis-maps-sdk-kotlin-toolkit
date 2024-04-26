@@ -16,14 +16,6 @@
  *
  */
 
-import org.gradle.configurationcache.extensions.capitalized
-
-// add new module to this list will declare a new toolkit module(Ex: "newComponent") with that name
-// and also add a companion micro app(Ex: "newComponent-app").
-// For mismatching toolkit component and microApp names add them individually at end of this file.
-// Refer to "indoors" project with "floor-filter-app" as an example.
-val projects = listOf("template", "featureforms", "authentication", "compass")
-
 pluginManagement {
     repositories {
         gradlePluginPortal()
@@ -69,41 +61,48 @@ dependencyResolutionManagement {
     }
 }
 
-var includedProjects = projects.flatMap { listOf(":$it", ":$it-app") }.toTypedArray()
-include(":microapps-lib")
-include(*includedProjects)
 include(":bom")
-include(":kdoc")
-include(":composable-map")
-include(":indoors")
-include(":floor-filter-app")
-include(":geoview-compose")
-include(":map-view-location-display-app")
-include(":map-view-insets-app")
-include(":map-view-geometry-editor-app")
-include(":map-view-set-viewpoint-app")
-include(":map-view-identify-app")
-include(":scene-view-analysis-overlay-app")
-include(":scene-view-set-viewpoint-app")
-include(":scene-view-camera-controller-app")
-include(":scene-view-lighting-options-app")
-
-projects.forEach {
-    project(":$it").projectDir = File(rootDir, "toolkit/$it")
-    project(":$it-app").projectDir = File(rootDir, "microapps/${it.capitalized()}App/app")
-}
-project(":microapps-lib").projectDir = File(rootDir, "microapps/MicroappsLib")
 project(":bom").projectDir = File(rootDir, "bom")
+include(":kdoc")
+include(":authentication-app")
+project(":authentication-app").projectDir = File(rootDir, "microapps/AuthenticationApp/app")
+include(":authentication")
+project(":authentication").projectDir = File(rootDir, "toolkit/authentication")
+include(":compass-app")
+project(":compass-app").projectDir = File(rootDir, "microapps/CompassApp/app")
+include(":compass")
+project(":compass").projectDir = File(rootDir, "toolkit/compass")
+include(":featureforms-app")
+project(":featureforms-app").projectDir = File(rootDir, "microapps/FeatureFormsApp/app")
+include(":featureforms")
+project(":featureforms").projectDir = File(rootDir, "toolkit/featureforms")
+include(":template-app")
+project(":template-app").projectDir = File(rootDir, "microapps/TemplateApp/app")
+include(":template")
+project(":template").projectDir = File(rootDir, "toolkit/template")
+include(":composable-map")
 project(":composable-map").projectDir = File(rootDir, "toolkit/composable-map")
+include(":indoors")
 project(":indoors").projectDir = File(rootDir, "toolkit/indoors")
+include(":floor-filter-app")
 project(":floor-filter-app").projectDir = File(rootDir, "microapps/FloorFilterApp/app")
+include(":geoview-compose")
 project(":geoview-compose").projectDir = File(rootDir, "toolkit/geoview-compose")
+include(":map-view-location-display-app")
 project(":map-view-location-display-app").projectDir = File(rootDir, "microapps/mapviewlocationdisplayapp/app")
+include(":map-view-insets-app")
 project(":map-view-insets-app").projectDir = File(rootDir, "microapps/mapviewinsetsapp/app")
+include(":map-view-geometry-editor-app")
 project(":map-view-geometry-editor-app").projectDir = File(rootDir, "microapps/mapviewgeometryeditorapp/app")
+include(":map-view-set-viewpoint-app")
 project(":map-view-set-viewpoint-app").projectDir = File(rootDir, "microapps/mapviewsetviewpointapp/app")
+include(":map-view-identify-app")
 project(":map-view-identify-app").projectDir = File(rootDir, "microapps/mapviewidentifyapp/app")
+include(":scene-view-analysis-overlay-app")
 project(":scene-view-analysis-overlay-app").projectDir = File(rootDir, "microapps/sceneviewanalysisoverlayapp/app")
+include(":scene-view-set-viewpoint-app")
 project(":scene-view-set-viewpoint-app").projectDir = File(rootDir, "microapps/sceneviewsetviewpointapp/app")
+include(":scene-view-camera-controller-app")
 project(":scene-view-camera-controller-app").projectDir = File(rootDir, "microapps/sceneviewcameracontrollerapp/app")
+include(":scene-view-lighting-options-app")
 project(":scene-view-lighting-options-app").projectDir = File(rootDir, "microapps/sceneviewlightingoptionsapp/app")
