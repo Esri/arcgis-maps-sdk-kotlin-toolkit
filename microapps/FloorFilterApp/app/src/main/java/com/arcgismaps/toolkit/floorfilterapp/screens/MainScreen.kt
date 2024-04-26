@@ -91,7 +91,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
         mapViewProxy = mapViewProxy
     )
     Box(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 40.dp),
+        modifier = modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 40.dp),
         contentAlignment = Alignment.BottomStart
     ) {
         FloorFilter(floorFilterState = floorFilterState)
