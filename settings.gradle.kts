@@ -64,6 +64,8 @@ dependencyResolutionManagement {
 include(":bom")
 project(":bom").projectDir = File(rootDir, "bom")
 include(":kdoc")
+include(":microapps-lib")
+project(":microapps-lib").projectDir = File(rootDir, "microapps/MicroappsLib")
 include(":authentication-app")
 project(":authentication-app").projectDir = File(rootDir, "microapps/AuthenticationApp/app")
 include(":authentication")
