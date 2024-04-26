@@ -100,6 +100,7 @@ function makeProjectPublishable {
     local gradleFile="${componentName}/build.gradle.kts"
     read -r -d '' pluginsBlock <<-EOM
 plugins {
+    alias(libs.plugins.binary.compatibility.validator) apply true
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("artifact-deploy")

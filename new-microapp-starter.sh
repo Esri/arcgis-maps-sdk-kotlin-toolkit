@@ -76,13 +76,14 @@ echo "Please enter the name of the new microapp in CamelCase without spaces."
 read name
 
 componentName="${name,,}"
+componentName="${componentName%app}"
 composableFunctionName="${name^}"
 appDirName="${composableFunctionName}"
 if [[ ! "${appDirName}" =~ .+App$ ]] ; then
     appDirName="${composableFunctionName}App"
 fi
 
-echo copying and converting app files, estimated time 1 minute.
+echo copying and converting app files, compnentName $componentName composableFunctionName $composableFunctionName  time 1 minute.
 copyTemplateApp
 convertTemplateApp
 addToSettings
