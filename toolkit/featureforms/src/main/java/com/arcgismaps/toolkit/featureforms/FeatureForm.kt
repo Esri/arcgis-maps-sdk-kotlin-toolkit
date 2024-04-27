@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.featureforms
 
+import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -38,11 +39,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -55,11 +58,15 @@ import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.mapping.featureforms.FormElement
 import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.featureforms.RadioButtonsFormInput
 import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentFormElement
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.FakeAttachmentElementState
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.fakeAttachments
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseGroupState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormStateCollection
@@ -70,14 +77,12 @@ import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.rememb
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.rememberRadioButtonFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.rememberSwitchFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.rememberDateTimeFieldState
-import com.arcgismaps.toolkit.featureforms.internal.components.formelement.AttachmentFormElement
-import com.arcgismaps.toolkit.featureforms.internal.components.formelement.FakeAttachmentElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.formelement.FieldElement
 import com.arcgismaps.toolkit.featureforms.internal.components.formelement.GroupElement
-import com.arcgismaps.toolkit.featureforms.internal.components.formelement.fakeAttachments
 import com.arcgismaps.toolkit.featureforms.internal.components.text.rememberFormTextFieldState
 import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 
 /**
  * The "property" determines the behavior of when the validation errors are visible.
@@ -129,6 +134,7 @@ public fun FeatureForm(
         validationErrorVisibility = validationErrorVisibility
     )
 }
+
 /**
  * A wrapper to hold state data. This provides a [Stable] class to enable smart recompositions,
  * since [FeatureForm] is not stable.
@@ -146,18 +152,24 @@ internal fun FeatureForm(
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic
 ) {
     val featureForm = stateData.featureForm
+    // hold the list of form elements in a mutable state to make them observable
+    val formElements = remember(featureForm) {
+        mutableStateOf(featureForm.elements)
+    }
     val scope = rememberCoroutineScope()
-
-
     val states = rememberStates(
         form = featureForm,
+        elements = formElements.value,
         scope = scope
     )
     FeatureFormBody(
         form = featureForm,
         states = states,
         modifier = modifier
-    )
+    ) {
+        // expressions evaluated, load attachments
+        formElements.value = featureForm.elements
+    }
     FeatureFormDialog()
     // launch a new side effect in a launched effect when validationErrorVisibility changes
     LaunchedEffect(validationErrorVisibility) {
@@ -193,14 +205,11 @@ private fun FeatureFormTitle(featureForm: FeatureForm, modifier: Modifier = Modi
 private fun FeatureFormBody(
     form: FeatureForm,
     states: FormStateCollection,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onExpressionsEvaluated: () -> Unit
 ) {
     var initialEvaluation by rememberSaveable(form) { mutableStateOf(false) }
     val lazyListState = rememberLazyListState()
-
-    if (initialEvaluation) {
-        rememberAttachmentStates(form = form, states = states)
-    }
     Column(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -241,7 +250,7 @@ private fun FeatureFormBody(
                                     .padding(horizontal = 15.dp, vertical = 10.dp)
                             )
                         }
-                        
+
                         is AttachmentFormElement -> {
                             AttachmentFormElement(
                                 Modifier
@@ -262,6 +271,7 @@ private fun FeatureFormBody(
     LaunchedEffect(form) {
         // ensure expressions are evaluated
         form.evaluateExpressions()
+        onExpressionsEvaluated()
         initialEvaluation = true
     }
 }
@@ -296,10 +306,11 @@ internal fun InitializingExpressions(
 @Composable
 internal fun rememberStates(
     form: FeatureForm,
+    elements : List<FormElement>,
     scope: CoroutineScope
 ): FormStateCollection {
     val states = MutableFormStateCollection()
-    form.elements.forEach { element ->
+    elements.forEach { element ->
         when (element) {
             is FieldFormElement -> {
                 val state = rememberFieldState(element, form, scope)
@@ -331,31 +342,16 @@ internal fun rememberStates(
             }
 
             is AttachmentFormElement -> {
-                val state = rememberFakeAttachmentElementState(form = form, attachmentFormElement = element)
+                val state =
+                    rememberFakeAttachmentElementState(form = form, attachmentFormElement = element)
                 states.add(element, state)
             }
 
-            else -> { }
+            else -> {}
         }
     }
     return states
 }
-
-@Composable
-internal fun rememberAttachmentStates(
-    form: FeatureForm,
-    states: FormStateCollection
-): FormStateCollection {
-    form.elements.filterIsInstance<AttachmentFormElement>().forEach { element ->
-        if (states[element] == null) {
-            val state =
-                rememberFakeAttachmentElementState(form = form, attachmentFormElement = element)
-            (states as MutableFormStateCollection).add(element, state)
-        }
-    }
-    return states
-}
-
 
 /**
  * Creates and remembers a [BaseFieldState] for the provided [element].
