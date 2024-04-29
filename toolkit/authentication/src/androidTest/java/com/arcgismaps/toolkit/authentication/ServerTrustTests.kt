@@ -20,6 +20,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.test.espresso.Espresso
 import androidx.test.platform.app.InstrumentationRegistry
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallenge
@@ -62,31 +63,15 @@ class ServerTrustTests {
      * @since 200.4.0
      */
     @Test
-    fun trustSelfSignedCertificate_4_1() = runTest {
-        composeTestRule.setContent {
-            DialogAuthenticator(authenticatorState = authenticatorState)
+    fun trustSelfSignedCertificate_4_1() = performTest(
+        challenge = certificateChallenge,
+        userInputOnDialog = {
+            composeTestRule.onNodeWithText(getString(R.string.allow_connection)).performClick()
+        },
+        onResponse = { response ->
+            assert(response is NetworkAuthenticationChallengeResponse.ContinueWithCredential)
         }
-        // issue the server trust challenge
-        val challengeResponse = async {
-            authenticatorState.handleNetworkAuthenticationChallenge(certificateChallenge)
-        }
-
-        val serverTrustMessage = getString(R.string.server_trust_message, certificateHostName)
-        // ensure the dialog prompt is displayed as expected
-        advanceUntilIdle()
-        assert(authenticatorState.pendingServerTrustChallenge.value != null)
-        composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithText(serverTrustMessage).assertIsDisplayed()
-
-        // trust the server
-        composeTestRule.onNodeWithText(getString(R.string.allow_connection)).performClick()
-        advanceUntilIdle()
-        assert(authenticatorState.pendingServerTrustChallenge.value == null)
-        composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithText(serverTrustMessage).assertDoesNotExist()
-
-        assert(challengeResponse.await() is NetworkAuthenticationChallengeResponse.ContinueWithCredential)
-    }
+    )
 
     /**
      * Given a Dialog Authenticator
@@ -99,13 +84,48 @@ class ServerTrustTests {
      * @since 200.4.0
      */
     @Test
-    fun cancelServerTrustChallenge_4_2() = runTest {
+    fun cancelServerTrustChallenge_4_2() = performTest(
+        challenge = certificateChallenge,
+        userInputOnDialog = {
+            composeTestRule.onNodeWithText(getString(R.string.cancel)).performClick()
+        },
+        onResponse = { response ->
+            assert(response is NetworkAuthenticationChallengeResponse.Cancel)
+        }
+    )
+
+    /**
+     * Given a Dialog Authenticator
+     * When a server trust challenge is issued
+     * Then the dialog prompt should be displayed
+     *
+     * When the user presses the back button
+     * Then the dialog should be dismissed and the response should be of type [NetworkAuthenticationChallengeResponse.Cancel]
+     *
+     * @since 200.4.0
+     */
+    @Test
+    fun backButtonDismissesDialog_4_3() = performTest(
+        challenge = certificateChallenge,
+        userInputOnDialog = {
+            Espresso.pressBack()
+        },
+        onResponse = { response ->
+            assert(response is NetworkAuthenticationChallengeResponse.Cancel)
+        }
+    )
+
+    private fun performTest(
+        challenge: NetworkAuthenticationChallenge,
+        userInputOnDialog: () -> Unit,
+        onResponse: (NetworkAuthenticationChallengeResponse) -> Unit
+    ) = runTest {
         composeTestRule.setContent {
             DialogAuthenticator(authenticatorState = authenticatorState)
         }
         // issue the server trust challenge
         val challengeResponse = async {
-            authenticatorState.handleNetworkAuthenticationChallenge(certificateChallenge)
+            authenticatorState.handleNetworkAuthenticationChallenge(challenge)
         }
 
         val serverTrustMessage = getString(R.string.server_trust_message, certificateHostName)
@@ -115,14 +135,13 @@ class ServerTrustTests {
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithText(serverTrustMessage).assertIsDisplayed()
 
-        // cancel the server trust challenge
-        composeTestRule.onNodeWithText(getString(R.string.cancel)).performClick()
+        userInputOnDialog()
         advanceUntilIdle()
         assert(authenticatorState.pendingServerTrustChallenge.value == null)
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithText(serverTrustMessage).assertDoesNotExist()
 
-        assert(challengeResponse.await() is NetworkAuthenticationChallengeResponse.Cancel)
+        onResponse(challengeResponse.await())
     }
 }
 
