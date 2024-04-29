@@ -23,9 +23,9 @@ import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallenge
+import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeResponse
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationType
-import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -57,7 +57,7 @@ class ServerTrustTests {
      * Then the dialog prompt should be displayed
      *
      * When the user trusts the server
-     * Then the dialog should be dismissed
+     * Then the dialog should be dismissed and the response should be of type [NetworkAuthenticationChallengeResponse.ContinueWithCredential]
      *
      * @since 200.4.0
      */
@@ -67,7 +67,7 @@ class ServerTrustTests {
             DialogAuthenticator(authenticatorState = authenticatorState)
         }
         // issue the server trust challenge
-        val challengeJob = launch {
+        val challengeResponse = async {
             authenticatorState.handleNetworkAuthenticationChallenge(certificateChallenge)
         }
 
@@ -85,7 +85,44 @@ class ServerTrustTests {
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithText(serverTrustMessage).assertDoesNotExist()
 
-        challengeJob.cancelAndJoin()
+        assert(challengeResponse.await() is NetworkAuthenticationChallengeResponse.ContinueWithCredential)
+    }
+
+    /**
+     * Given a Dialog Authenticator
+     * When a server trust challenge is issued
+     * Then the dialog prompt should be displayed
+     *
+     * When the user cancels the server trust challenge
+     * Then the dialog should be dismissed and the response should be of type [NetworkAuthenticationChallengeResponse.Cancel]
+     *
+     * @since 200.4.0
+     */
+    @Test
+    fun cancelServerTrustChallenge_4_2() = runTest {
+        composeTestRule.setContent {
+            DialogAuthenticator(authenticatorState = authenticatorState)
+        }
+        // issue the server trust challenge
+        val challengeResponse = async {
+            authenticatorState.handleNetworkAuthenticationChallenge(certificateChallenge)
+        }
+
+        val serverTrustMessage = getString(R.string.server_trust_message, certificateHostName)
+        // ensure the dialog prompt is displayed as expected
+        advanceUntilIdle()
+        assert(authenticatorState.pendingServerTrustChallenge.value != null)
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithText(serverTrustMessage).assertIsDisplayed()
+
+        // cancel the server trust challenge
+        composeTestRule.onNodeWithText(getString(R.string.cancel)).performClick()
+        advanceUntilIdle()
+        assert(authenticatorState.pendingServerTrustChallenge.value == null)
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithText(serverTrustMessage).assertDoesNotExist()
+
+        assert(challengeResponse.await() is NetworkAuthenticationChallengeResponse.Cancel)
     }
 }
 
