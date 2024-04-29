@@ -20,6 +20,7 @@ plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("artifact-deploy")
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
 android {
