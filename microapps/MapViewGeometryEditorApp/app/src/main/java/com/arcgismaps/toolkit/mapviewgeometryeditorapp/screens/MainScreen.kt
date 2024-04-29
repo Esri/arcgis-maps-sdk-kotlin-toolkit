@@ -53,8 +53,6 @@ import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
 import com.arcgismaps.mapping.view.geometryeditor.VertexTool
 import com.arcgismaps.toolkit.geoviewcompose.MapView
-import com.esri.microappslib.components.MenuActions
-import com.esri.microappslib.components.MicroAppScaffold
 
 // line symbol of the graphic sketched on the map
 private val lineSymbol: SimpleLineSymbol by lazy {
@@ -91,58 +89,58 @@ fun MainScreen() {
     // track the status if geometry editor is started or stopped
     var isDrawingEnabled by remember { mutableStateOf(false) }
 
-    MicroAppScaffold(
-        title = "MapView Geometry Editor App",
-        menuActions = MenuActions.SwitchAndDropDownMenu,
-        isSwitchEnabled = isDrawingEnabled,
-        dropdownListItems = listOf(
-            "Clear sketch",
-            "Undo sketch",
-            "Redo sketch",
-            "Reset all graphics"
-        ),
-        onItemSelected = { index, selectedItem ->
-            when {
-                selectedItem.contains("Clear sketch") -> {
-                    clearGeometryEditor(geometryEditor)
-                }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                ),
+                title = { Text("MapView Geometry Editor App") },
+                actions = {
+                    Switch(
+                        checked = isDrawingEnabled,
+                        onCheckedChange = {
+                            isDrawingEnabled = if (isDrawingEnabled) {
+                                GraphicsOverlay().apply {
+                                    // add the sketched graphic to this graphics overlay
+                                    addSketchedGraphic(
+                                        geometryEditor = geometryEditor,
+                                        currentGraphicsOverlay = this
+                                    )
+                                    // update list of graphics overlays with this graphics overlay
+                                    graphicsOverlays = graphicsOverlays.plus(this)
+                                }
+                                // on checked change, stop the geometry editor
+                                stopGeometryEditor(geometryEditor)
+                                // set isDrawingEnabled to false
+                                false
+                            } else {
+                                // on checked change, start the geometry editor
+                                startGeometryEditor(geometryEditor)
+                                // set isDrawingEnabled to true
+                                true
+                            }
+                        })
 
-                selectedItem.contains("Reset all graphics") -> {
-                    stopGeometryEditor(geometryEditor)
-                    graphicsOverlays = emptyList()
-                    isDrawingEnabled = false
-                }
+                    var actionsExpanded by remember { mutableStateOf(false) }
+                    IconButton(onClick = { actionsExpanded = !actionsExpanded }) {
+                        Icon(Icons.Default.MoreVert, "More")
+                    }
 
-                selectedItem.contains("Undo") -> {
-                    geometryEditor.undo()
-                }
-
-                selectedItem.contains("Redo") -> {
-                    geometryEditor.redo()
-                }
-            }
-        },
-        onSwitchToggle = {
-            isDrawingEnabled = if (isDrawingEnabled) {
-                GraphicsOverlay().apply {
-                    // add the sketched graphic to this graphics overlay
-                    addSketchedGraphic(
+                    GeometryEditorDropDownMenu(
+                        expanded = actionsExpanded,
                         geometryEditor = geometryEditor,
-                        currentGraphicsOverlay = this
+                        onDismissRequest = {
+                            actionsExpanded = false
+                        },
+                        onResetAllGraphics = {
+                            graphicsOverlays = emptyList()
+                            isDrawingEnabled = false
+                        }
                     )
-                    // update list of graphics overlays with this graphics overlay
-                    graphicsOverlays = graphicsOverlays.plus(this)
                 }
-                // on checked change, stop the geometry editor
-                stopGeometryEditor(geometryEditor)
-                // set isDrawingEnabled to false
-                false
-            } else {
-                // on checked change, start the geometry editor
-                startGeometryEditor(geometryEditor)
-                // set isDrawingEnabled to true
-                true
-            }
+            )
         },
     ) { innerPadding ->
         MapView(
@@ -153,6 +151,54 @@ fun MainScreen() {
             geometryEditor = geometryEditor,
             graphicsOverlays = graphicsOverlays
         )
+    }
+}
+
+/**
+ * A dropdown menu to provide options for the [geometryEditor]
+ */
+@Composable
+fun GeometryEditorDropDownMenu(
+    modifier: Modifier = Modifier,
+    expanded: Boolean = false,
+    geometryEditor: GeometryEditor,
+    onDismissRequest: () -> Unit = {},
+    onResetAllGraphics: () -> Unit = {}
+) {
+    val items = remember {
+        listOf("Clear sketch", "Undo sketch", "Redo sketch", "Reset all graphics")
+    }
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+        modifier = modifier
+    ) {
+        items.forEach {
+            DropdownMenuItem(
+                text = { Text(text = it) },
+                onClick = {
+                    when {
+                        it.contains("Clear sketch") -> {
+                            clearGeometryEditor(geometryEditor)
+                        }
+
+                        it.contains("Reset all graphics") -> {
+                            stopGeometryEditor(geometryEditor)
+                            onResetAllGraphics()
+                        }
+
+                        it.contains("Undo") -> {
+                            geometryEditor.undo()
+                        }
+
+                        it.contains("Redo") -> {
+                            geometryEditor.redo()
+                        }
+                    }
+                    // dismiss the dropdown when an item is selected
+                    onDismissRequest()
+                })
+        }
     }
 }
 

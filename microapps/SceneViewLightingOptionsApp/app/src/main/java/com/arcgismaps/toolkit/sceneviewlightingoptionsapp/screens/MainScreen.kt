@@ -59,8 +59,6 @@ import com.arcgismaps.mapping.view.Camera
 import com.arcgismaps.mapping.view.LightingMode
 import com.arcgismaps.mapping.view.SpaceEffect
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
-import com.esri.microappslib.components.MenuActions
-import com.esri.microappslib.components.MicroAppScaffold
 import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneId
@@ -109,41 +107,29 @@ fun MainScreen() {
         )
     }
 
-    var showSunTimeOptions by remember { mutableStateOf(false) }
-    var showSunLightingOptions by remember { mutableStateOf(false) }
-    var showAmbientLightColorOptions by remember { mutableStateOf(false) }
-    var showAtmosphereEffectOptions by remember { mutableStateOf(false) }
-    var showSpaceEffectOptions by remember { mutableStateOf(false) }
-
-    MicroAppScaffold(
-        title = "SceneView Lighting Options App",
-        menuActions = MenuActions.DropDownMenu,
-        dropdownListItems = listOf(
-            "Sun Time",
-            "Sun Lighting",
-            "Ambient Light Color",
-            "Atmosphere Effect",
-            "Space Effect"
-        ),
-        onItemSelected = { index, label ->
-            when (label) {
-                "Sun Time" -> {
-                    showSunTimeOptions = true
+    Scaffold(
+        topBar = {
+            var optionsExpanded by remember { mutableStateOf(false) }
+            TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                ),
+                title = {
+                    Text("SceneView Lighting Options App")
+                },
+                actions = {
+                    IconButton(onClick = { optionsExpanded = !optionsExpanded }) {
+                        Icon(Icons.Default.MoreVert, "More")
+                    }
+                    LightingOptionsDropDownMenu(
+                        expanded = optionsExpanded,
+                        lightingOptionsState = lightingOptionsState,
+                        onDismissRequest = { optionsExpanded = false },
+                    )
                 }
-                "Sun Lighting" -> {
-                    showSunLightingOptions = true
-                }
-                "Ambient Light Color" -> {
-                    showAmbientLightColorOptions = true
-                }
-                "Atmosphere Effect" -> {
-                    showAtmosphereEffectOptions = true
-                }
-                "Space Effect" -> {
-                    showSpaceEffectOptions = true
-                }
-            }
-        }
+            )
+        },
     ) { innerPadding ->
         SceneView(
             arcGISScene,
@@ -157,44 +143,110 @@ fun MainScreen() {
             spaceEffect = lightingOptionsState.spaceEffect.value
         )
     }
+}
 
+/**
+ * A drop down menu providing a selection of Lighting Options that can be changed
+ *
+ * @param expanded whether the dropdown is currently expanded
+ * @param onDismissRequest called when the menu should be dismissed
+ * @param lightingOptionsState the [LightingOptionsState] that will be modified when lighting options are selected
+ * @since 200.4.0
+ */
+@Composable
+fun LightingOptionsDropDownMenu(
+    modifier: Modifier = Modifier,
+    expanded: Boolean = false,
+    onDismissRequest: (() -> Unit) = {},
+    lightingOptionsState: LightingOptionsState
+) {
+    val items = remember {
+        listOf(
+            "Sun Time",
+            "Sun Lighting",
+            "Ambient Light Color",
+            "Atmosphere Effect",
+            "Space Effect"
+        )
+    }
+    var showSunTimeOptions by remember { mutableStateOf(false) }
+    var showSunLightingOptions by remember { mutableStateOf(false) }
+    var showAmbientLightColorOptions by remember { mutableStateOf(false) }
+    var showAtmosphereEffectOptions by remember { mutableStateOf(false) }
+    var showSpaceEffectOptions by remember { mutableStateOf(false) }
+
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+        modifier = modifier
+    ) {
+        items.forEach {
+            DropdownMenuItem(
+                text = {
+                    Text(text = it)
+                },
+                onClick = {
+                    when (it) {
+                        "Sun Time" -> showSunTimeOptions = true
+                        "Sun Lighting" -> showSunLightingOptions = true
+                        "Ambient Light Color" -> showAmbientLightColorOptions = true
+                        "Atmosphere Effect" -> showAtmosphereEffectOptions = true
+                        "Space Effect" -> showSpaceEffectOptions = true
+                    }
+                })
+        }
+    }
 
     if (showSunTimeOptions) {
         SunTimeOptions(
             currentSunTime = lightingOptionsState.sunTime.value,
             onSetSunTime = { lightingOptionsState.sunTime.value = it }
-        ) { showSunTimeOptions = false }
+        ) {
+            showSunTimeOptions = false
+            onDismissRequest()
+        }
     }
 
     if (showSunLightingOptions) {
         SunLightingOptions(
             currentLightingMode = lightingOptionsState.sunLighting.value,
             setSunLighting = { lightingOptionsState.sunLighting.value = it }
-        ) { showSunLightingOptions = false }
+        ) {
+            showSunLightingOptions = false
+            onDismissRequest()
+        }
     }
 
     if (showAmbientLightColorOptions) {
         AmbientLightColorOptions(
             currentColor = lightingOptionsState.ambientLightColor.value,
             onSetColor = { lightingOptionsState.ambientLightColor.value = it }
-        ) { showAmbientLightColorOptions = false }
+        ) {
+            showAmbientLightColorOptions = false
+            onDismissRequest()
+        }
     }
 
     if (showAtmosphereEffectOptions) {
         AtmosphereEffectOptions(
             currentAtmosphereEffect = lightingOptionsState.atmosphereEffect.value,
             onSetAtmosphereEffect = { lightingOptionsState.atmosphereEffect.value = it }
-        ) { showAtmosphereEffectOptions = false }
+        ) {
+            showAtmosphereEffectOptions = false
+            onDismissRequest()
+        }
     }
 
     if (showSpaceEffectOptions) {
         SpaceEffectOptions(
             currentSpaceEffect = lightingOptionsState.spaceEffect.value,
             onSetSpaceEffect = { lightingOptionsState.spaceEffect.value = it }
-        ) { showSpaceEffectOptions = false }
+        ) {
+            showSpaceEffectOptions = false
+            onDismissRequest()
+        }
     }
 }
-
 
 /**
  * Displays a time picker in an AlertDialog
