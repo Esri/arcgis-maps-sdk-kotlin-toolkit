@@ -41,6 +41,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.neverEqualPolicy
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -64,9 +65,9 @@ import com.arcgismaps.mapping.featureforms.RadioButtonsFormInput
 import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentFormElement
-import com.arcgismaps.toolkit.featureforms.internal.components.attachment.FakeAttachmentElementState
-import com.arcgismaps.toolkit.featureforms.internal.components.attachment.fakeAttachments
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.rememberAttachmentElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseGroupState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormStateCollection
@@ -253,6 +254,7 @@ private fun FeatureFormBody(
 
                         is AttachmentFormElement -> {
                             AttachmentFormElement(
+                                state = entry.getState(),
                                 Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 15.dp, vertical = 10.dp)
@@ -271,8 +273,8 @@ private fun FeatureFormBody(
     LaunchedEffect(form) {
         // ensure expressions are evaluated
         form.evaluateExpressions()
-        onExpressionsEvaluated()
         initialEvaluation = true
+        onExpressionsEvaluated()
     }
 }
 
@@ -306,7 +308,7 @@ internal fun InitializingExpressions(
 @Composable
 internal fun rememberStates(
     form: FeatureForm,
-    elements : List<FormElement>,
+    elements: List<FormElement>,
     scope: CoroutineScope
 ): FormStateCollection {
     val states = MutableFormStateCollection()
@@ -342,8 +344,7 @@ internal fun rememberStates(
             }
 
             is AttachmentFormElement -> {
-                val state =
-                    rememberFakeAttachmentElementState(form = form, attachmentFormElement = element)
+                val state = rememberAttachmentElementState(form, element)
                 states.add(element, state)
             }
 
@@ -430,13 +431,4 @@ internal fun rememberFieldState(
             null
         }
     }
-}
-
-@Suppress("UNUSED_PARAMETER")
-@Composable
-internal fun rememberFakeAttachmentElementState(
-    form: FeatureForm,
-    attachmentFormElement: AttachmentFormElement
-): FakeAttachmentElementState {
-    return FakeAttachmentElementState(fakeAttachments)
 }
