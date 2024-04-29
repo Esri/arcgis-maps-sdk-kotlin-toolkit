@@ -137,18 +137,6 @@ internal class FormAttachmentState(
             }
         }
     }
-
-    companion object {
-        fun Saver(
-            attachment: FormAttachment,
-            scope: CoroutineScope
-        ): Saver<FormAttachmentState, Any> = Saver(
-            save = {},
-            restore = {
-                FormAttachmentState(attachment, scope)
-            }
-        )
-    }
 }
 
 @Composable
