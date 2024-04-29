@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.text
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.saveable.Saver
@@ -37,7 +36,6 @@ import com.arcgismaps.toolkit.featureforms.internal.components.base.formattedVal
 import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValidationErrors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 
 internal class TextFieldProperties(
     label: String,
@@ -173,7 +171,6 @@ internal fun rememberFormTextFieldState(
     inputs = arrayOf(form),
     saver = FormTextFieldState.Saver(field, form, scope)
 ) {
-    Log.e("TAG", "rememberFormTextFieldState: init for ${field.label}", )
     FormTextFieldState(
         properties = TextFieldProperties(
             label = field.label,
