@@ -17,13 +17,18 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
+import kotlinx.coroutines.flow.collect
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Composition
+import androidx.compose.runtime.CompositionContext
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCompositionContext
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -66,6 +71,8 @@ import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.mapping.view.WrapAroundMode
 import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
 
 /**
@@ -161,7 +168,8 @@ public fun MapView(
     onLongPress: ((LongPressEvent) -> Unit)? = null,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
-    onDrawStatusChanged: ((DrawStatus) -> Unit)? = null
+    onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
+    content: @Composable (() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
@@ -206,6 +214,25 @@ public fun MapView(
         }
     }
 
+    val parentComposition = rememberCompositionContext()
+//    val currentContent by rememberUpdatedState(content)
+
+//    Composition(parentComposition, mapView) {
+//        currentContent?.invoke()
+//    }
+    LaunchedEffect(Unit) {
+        disposingComposition {
+            mapView.newComposition(parentComposition, map = arcGISMap, mapView) {
+                CompositionLocalProvider(
+
+                ) {
+                    content?.invoke()
+                }
+            }
+        }
+    }
+
+
     LaunchedEffect(insets) {
         // When this call is made in the AndroidView's update callback, ViewInsets are not applied
         // on the mapview on initial load. So we set the ViewInsets here.
@@ -248,6 +275,37 @@ public fun MapView(
         onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
         onVisibleAreaChanged = onVisibleAreaChanged
     )
+}
+
+internal suspend inline fun disposingComposition(factory: () -> Composition) {
+    val composition = factory()
+    try {
+        awaitCancellation()
+    } finally {
+        composition.dispose()
+    }
+}
+
+private suspend inline fun MapView.newComposition(
+    parent: CompositionContext,
+    map: ArcGISMap,
+    mapView: MapView,
+//    mapClickListeners: MapClickListeners,
+    noinline content: @Composable () -> Unit
+): Composition {
+//    val map = awaitMap()
+    awaitMap(mapView)
+    return Composition(
+        MapApplier(this), parent
+    ).apply {
+        setContent(content)
+    }
+}
+
+private suspend fun awaitMap(mapView: MapView): Unit {
+    mapView.drawStatus.takeWhile {
+        it == DrawStatus.InProgress
+    }.collect()
 }
 
 /**
