@@ -136,7 +136,7 @@ private fun AuthenticatorDelegate(
     val hasActivePrompt = authenticatorState.isDisplayed.collectAsStateWithLifecycle(initialValue = false).value
     // Dismiss all prompts when the back button is pressed, only if there is an active prompt.
     BackHandler(enabled = hasActivePrompt) {
-        authenticatorState.dismissAll()
+            authenticatorState.dismissAll()
     }
 
     val pendingOAuthUserSignIn =
