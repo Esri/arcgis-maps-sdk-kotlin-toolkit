@@ -77,6 +77,10 @@ import com.arcgismaps.toolkit.featureforms.internal.components.formelement.Group
 import com.arcgismaps.toolkit.featureforms.internal.components.formelement.fakeAttachments
 import com.arcgismaps.toolkit.featureforms.internal.components.text.rememberFormTextFieldState
 import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
+import com.arcgismaps.toolkit.featureforms.theme.FeatureFormColorScheme
+import com.arcgismaps.toolkit.featureforms.theme.FeatureFormDefaults
+import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTheme
+import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTypography
 import kotlinx.coroutines.CoroutineScope
 
 /**
@@ -102,6 +106,11 @@ public sealed class ValidationErrorVisibility {
  * layer using forms that have been configured externally. Forms may be configured in the [Web Map Viewer](https://www.arcgis.com/home/webmap/viewer.html)
  * or [Fields Maps Designer](https://www.arcgis.com/apps/fieldmaps/)).
  *
+ * The colors and typography for the Form can use customized using [FeatureFormColorScheme] and
+ * [FeatureFormTypography]. This customization is built on top of [MaterialTheme].
+ * If a custom color is specified in both the color scheme and the typography, the color from the
+ * color scheme will take precedence and will be merged with the text style, if one is provided.
+ *
  * Note : Even though the [FeatureForm] class is not stable, there exists an internal mechanism to
  * enable smart recompositions.
  *
@@ -111,6 +120,8 @@ public sealed class ValidationErrorVisibility {
  * @param validationErrorVisibility The [ValidationErrorVisibility] that determines the behavior of
  * when the validation errors are visible. Default is [ValidationErrorVisibility.Automatic] which
  * indicates errors are only visible once the respective field gains focus.
+ * @param colorScheme The [FeatureFormColorScheme] to use for the FeatureForm.
+ * @param typography The [FeatureFormTypography] to use for the FeatureForm.
  *
  * @since 200.4.0
  */
@@ -118,16 +129,20 @@ public sealed class ValidationErrorVisibility {
 public fun FeatureForm(
     featureForm: FeatureForm,
     modifier: Modifier = Modifier,
-    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic
+    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
+    colorScheme: FeatureFormColorScheme = FeatureFormDefaults.colorScheme(),
+    typography: FeatureFormTypography = FeatureFormDefaults.typography()
 ) {
     val stateData = remember(featureForm) {
         StateData(featureForm)
     }
-    FeatureForm(
-        stateData = stateData,
-        modifier = modifier,
-        validationErrorVisibility = validationErrorVisibility
-    )
+    FeatureFormTheme(colorScheme, typography) {
+        FeatureForm(
+            stateData = stateData,
+            modifier = modifier,
+            validationErrorVisibility = validationErrorVisibility
+        )
+    }
 }
 /**
  * A wrapper to hold state data. This provides a [Stable] class to enable smart recompositions,
@@ -140,7 +155,7 @@ internal data class StateData(@Stable val featureForm: FeatureForm)
  * This composable uses the [StateData] class to display a [FeatureForm].
  */
 @Composable
-internal fun FeatureForm(
+private fun FeatureForm(
     stateData: StateData,
     modifier: Modifier = Modifier,
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic
