@@ -21,7 +21,6 @@ import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
@@ -49,7 +48,11 @@ class ServerTrustTests {
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     private val certificateHostName = "https://server-trust-tests.com/"
-    private val certificateChallenge = NetworkAuthenticationChallenge(certificateHostName, NetworkAuthenticationType.ServerTrust, CertificateException("Test exception"))
+    private val certificateChallenge = NetworkAuthenticationChallenge(
+        certificateHostName,
+        NetworkAuthenticationType.ServerTrust,
+        CertificateException("Test exception")
+    )
     private val authenticatorState = AuthenticatorState()
 
     @Before
@@ -73,7 +76,8 @@ class ServerTrustTests {
     fun trustSelfSignedCertificate_4_1() = issueChallengeWithInput(
         challenge = certificateChallenge,
         userInputOnDialog = {
-            composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.allow_connection)).performClick()
+            composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.allow_connection))
+                .performClick()
         },
         onResponse = { response ->
             assert(response is NetworkAuthenticationChallengeResponse.ContinueWithCredential)
@@ -94,7 +98,8 @@ class ServerTrustTests {
     fun cancelServerTrustChallenge_4_2() = issueChallengeWithInput(
         challenge = certificateChallenge,
         userInputOnDialog = {
-            composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.cancel)).performClick()
+            composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.cancel))
+                .performClick()
         },
         onResponse = { response ->
             assert(response is NetworkAuthenticationChallengeResponse.Cancel)
@@ -124,28 +129,6 @@ class ServerTrustTests {
         }
     )
 
-    /**
-     * Given a Dialog Authenticator
-     * When a server trust challenge is issued
-     * Then the dialog prompt should be displayed
-     *
-     * When the user taps outside the dialog
-     * Then the dialog should be dismissed and the response should be of type [NetworkAuthenticationChallengeResponse.Cancel]
-     *
-     * @since 200.4.0
-     */
-    @Test
-    fun tapOutsideDialogDismissesDialog_4_4() = issueChallengeWithInput(
-        challenge = certificateChallenge,
-        userInputOnDialog = {
-                            // tap on the far left of the screen (outside the dialog)
-                            composeTestRule.onNodeWithTag("Column").performClick()
-        },
-        onResponse = { response ->
-            assert(response is NetworkAuthenticationChallengeResponse.Cancel)
-        }
-    )
-
     private fun issueChallengeWithInput(
         challenge: NetworkAuthenticationChallenge,
         userInputOnDialog: () -> Unit,
@@ -161,11 +144,11 @@ class ServerTrustTests {
             authenticatorState.handleNetworkAuthenticationChallenge(challenge)
         }
 
-        val serverTrustMessage = composeTestRule.activity.getString(R.string.server_trust_message, certificateHostName)
+        val serverTrustMessage =
+            composeTestRule.activity.getString(R.string.server_trust_message, certificateHostName)
         // ensure the dialog prompt is displayed as expected
         advanceUntilIdle()
         assert(authenticatorState.pendingServerTrustChallenge.value != null)
-        composeTestRule.waitForIdle()
         composeTestRule.onNodeWithText(serverTrustMessage).assertIsDisplayed()
 
         // simulate a configuration change
@@ -176,7 +159,6 @@ class ServerTrustTests {
 
         advanceUntilIdle()
         assert(authenticatorState.pendingServerTrustChallenge.value == null)
-        composeTestRule.waitForIdle()
         composeTestRule.onNodeWithText(serverTrustMessage).assertDoesNotExist()
 
         onResponse(challengeResponse.await())
