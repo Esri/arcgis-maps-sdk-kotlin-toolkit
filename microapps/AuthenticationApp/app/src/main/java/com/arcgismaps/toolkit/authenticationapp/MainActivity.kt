@@ -42,7 +42,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -76,15 +75,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun AuthenticationApp(authenticationAppViewModel: AuthenticationAppViewModel) {
     Scaffold(
-        topBar = {
-            TopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
-                ),
-                title = { Text("FloorFilter App") },
-            )
-        }
+        topBar = { TopAppBar(title = { Text("Authentication App") }) }
     ) {
         Column(Modifier.padding(it)) {
             val infoText = authenticationAppViewModel.infoText.collectAsState().value

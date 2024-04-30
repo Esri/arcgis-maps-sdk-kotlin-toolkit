@@ -24,16 +24,12 @@ import android.content.ContextWrapper
 import android.security.KeyChain
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
@@ -62,16 +58,12 @@ public fun Authenticator(
     modifier: Modifier = Modifier,
     onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)? = null
 ) {
-    Scaffold {
-        AuthenticatorDelegate(
-            authenticatorState = authenticatorState,
-            // `fillMaxSize()` is needed, otherwise the prompts are displayed at the top of the screen.
-            modifier = modifier
-                .fillMaxSize()
-                .padding(it),
-            onPendingOAuthUserSignIn = onPendingOAuthUserSignIn
-        )
-    }
+    AuthenticatorDelegate(
+        authenticatorState = authenticatorState,
+        // `fillMaxSize()` is needed, otherwise the prompts are displayed at the top of the screen.
+        modifier = modifier.fillMaxSize(),
+        onPendingOAuthUserSignIn = onPendingOAuthUserSignIn
+    )
 }
 
 /**
@@ -102,21 +94,16 @@ public fun DialogAuthenticator(
 ) {
     val showDialog = authenticatorState.isDisplayed.collectAsStateWithLifecycle(initialValue = false).value
     if (showDialog) {
-        Scaffold(
-            containerColor = Color.Transparent,
-            contentColor = MaterialTheme.colorScheme.onSurface
-        ) {
-            AuthenticatorDelegate(
-                authenticatorState = authenticatorState,
-                modifier = modifier.padding(it),
-                onPendingOAuthUserSignIn,
-            ) { authenticationPrompt ->
-                BasicAlertDialog(
-                    onDismissRequest = authenticatorState::dismissAll,
-                    modifier = Modifier.clip(MaterialTheme.shapes.extraLarge),
-                ) {
-                    authenticationPrompt()
-                }
+        AuthenticatorDelegate(
+            authenticatorState = authenticatorState,
+            modifier = modifier,
+            onPendingOAuthUserSignIn,
+        ) { authenticationPrompt ->
+            AlertDialog(
+                onDismissRequest = authenticatorState::dismissAll,
+                modifier = Modifier.clip(MaterialTheme.shapes.extraLarge),
+            ) {
+                authenticationPrompt()
             }
         }
     }
@@ -149,7 +136,7 @@ private fun AuthenticatorDelegate(
     val hasActivePrompt = authenticatorState.isDisplayed.collectAsStateWithLifecycle(initialValue = false).value
     // Dismiss all prompts when the back button is pressed, only if there is an active prompt.
     BackHandler(enabled = hasActivePrompt) {
-            authenticatorState.dismissAll()
+        authenticatorState.dismissAll()
     }
 
     val pendingOAuthUserSignIn =
