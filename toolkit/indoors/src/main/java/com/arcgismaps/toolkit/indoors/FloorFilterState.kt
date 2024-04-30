@@ -85,6 +85,7 @@ private class FloorFilterStateImpl(
     var geoModel: GeoModel,
     coroutineScope: CoroutineScope,
     override var uiProperties: UIProperties,
+    var onFloorFilterStateStatusChanged: ((FloorFilterStateStatus) -> Unit)?,
     var onSelectionChangedListener: (FloorFilterSelection) -> Unit
 ) : FloorFilterState {
 
@@ -224,18 +225,42 @@ private class FloorFilterStateImpl(
      * @since 200.2.0
      */
     private suspend fun loadFloorManager() {
+        onFloorFilterStateStatusChanged?.invoke(FloorFilterStateStatus.InitializationInProgress)
         geoModel.load().onSuccess {
-            val floorManager: FloorManager = geoModel.floorManager
-                ?: return
-            floorManager.load().onSuccess {
-                _floorManager.value = floorManager
-                // no FloorLevel is selected at this point, so clear the FloorFilter from the selected GeoModel
-                filterMap()
-            }.onFailure {
-                return
-            }
+            val floorManager: FloorManager? = geoModel.floorManager
+            floorManager?.let {
+                floorManager.load().onSuccess {
+                    _floorManager.value = floorManager
+                    // make sure the UI gets updated with the values for SelectedSiteId, SelectedFacilityId
+                    // and SelectedLevelId that were applied before initialization
+                    setSelectedValuesAppliedBeforeInitialization()
+                    filterMap()
+                    onFloorFilterStateStatusChanged?.invoke(FloorFilterStateStatus.Initialized(this))
+                }.onFailure {
+                    onFloorFilterStateStatusChanged?.invoke(FloorFilterStateStatus.FailedToInitialize(it))
+                }
+            } ?: onFloorFilterStateStatusChanged?.invoke(FloorFilterStateStatus.FailedToInitialize((IllegalStateException("map does not have a floor manager."))))
         }.onFailure {
-            return
+            onFloorFilterStateStatusChanged?.invoke(FloorFilterStateStatus.FailedToInitialize(it))
+        }
+    }
+
+    /**
+     * Sets the selected values that were applied before initialization by the user.
+     *
+     * @since 200.5.0
+     */
+    private fun setSelectedValuesAppliedBeforeInitialization() {
+        if (_selectedSiteId != null) {
+            selectedSiteId = _selectedSiteId
+        }
+        if (_selectedFacilityId != null) {
+            selectedFacilityId = _selectedFacilityId
+        }
+        if (_selectedLevelId != null) {
+            val temp = _selectedLevelId
+            _selectedLevelId = null
+            selectedLevelId = temp
         }
     }
 
@@ -399,6 +424,8 @@ public enum class ButtonPosition {
  * @param coroutineScope scope for [FloorFilterState] that it can use to load the [GeoModel] and the
  *        FloorManager
  * @param uiProperties set of properties to customize the UI used in the [FloorFilter]
+ * @param onFloorFilterStateStatusChanged the lambda invoked when the initialization status of [FloorFilterState]
+ *       changes
  * @param onSelectionChangedListener a lambda to facilitate setting of new ViewPoint on the [GeoView]
  *        with the Site or Facilities extent whenever a new Site or Facility is selected
  * @since 200.2.0
@@ -407,9 +434,42 @@ public fun FloorFilterState(
     geoModel: GeoModel,
     coroutineScope: CoroutineScope,
     uiProperties: UIProperties = UIProperties(),
+    onFloorFilterStateStatusChanged: ((FloorFilterStateStatus) -> Unit)? = null,
     onSelectionChangedListener: (FloorFilterSelection) -> Unit = { }
 ): FloorFilterState =
-    FloorFilterStateImpl(geoModel, coroutineScope, uiProperties, onSelectionChangedListener)
+    FloorFilterStateImpl(
+        geoModel,
+        coroutineScope,
+        uiProperties,
+        onFloorFilterStateStatusChanged,
+        onSelectionChangedListener,
+    )
+
+/**
+ * The initialization status of the [FloorFilterState].
+ *
+ * @since 200.4.0
+ */
+public sealed class FloorFilterStateStatus {
+    /**
+     * The FloorFilterState is in the process of being initialized.
+     *
+     * @since 200.5.0
+     */
+    public data object InitializationInProgress : FloorFilterStateStatus()
+    /**
+     * The initialization of FloorFilterState is complete.
+     *
+     * @since 200.5.0
+     */
+    public data class Initialized(public val floorFilterState: FloorFilterState) : FloorFilterStateStatus()
+    /**
+     * The FloorFilterState failed to initialize.
+     *
+     * @since 200.5.0
+     */
+    public data class FailedToInitialize(public val error: Throwable) : FloorFilterStateStatus()
+}
 
 /**
  * The selection that was made by the user
