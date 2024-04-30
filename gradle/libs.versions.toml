@@ -37,7 +37,7 @@ androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime
 androidx-compose-material3 = { module = "androidx.compose.material3:material3"}
 androidx-compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "compose-navigation" }
 androidx-compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics"}
-androidx-compose-ui-test = { group = "androidx.compose.ui", name = "ui-test-junit4"}
+androidx-compose-ui-test = { group = "androidx.compose.ui", name = "ui-test-junit4", version = "1.6.6"}
 androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling"}
 androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview"}
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest"}

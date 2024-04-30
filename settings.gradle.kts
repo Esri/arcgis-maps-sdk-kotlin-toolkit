@@ -60,10 +60,15 @@ dependencyResolutionManagement {
         }
     }
 }
+gradle.startParameter.excludedTaskNames.addAll(listOf(":buildSrc:testClasses"))
 
 include(":bom")
 project(":bom").projectDir = File(rootDir, "bom")
-include(":kdoc")
+//include(":kdoc")
+include(":authentication-app")
+project(":authentication-app").projectDir = File(rootDir, "microapps/AuthenticationApp/app")
+include(":authentication")
+project(":authentication").projectDir = File(rootDir, "toolkit/authentication")
 include(":composable-map")
 project(":composable-map").projectDir = File(rootDir, "toolkit/composable-map")
 include(":indoors")
