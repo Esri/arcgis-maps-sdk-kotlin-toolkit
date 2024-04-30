@@ -36,7 +36,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -172,7 +172,9 @@ internal fun SiteSelectorTopBar(
     closeButtonClicked: () -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().height(65.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(65.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
@@ -189,7 +191,9 @@ internal fun SiteSelectorTopBar(
             modifier = Modifier.align(CenterVertically)
         ) {
             Icon(
-                modifier = Modifier.padding(horizontal = 10.dp).size(24.dp),
+                modifier = Modifier
+                    .padding(horizontal = 10.dp)
+                    .size(24.dp),
                 painter = painterResource(id = R.drawable.ic_x_24),
                 contentDescription = "Close Icon"
             )
@@ -211,7 +215,9 @@ internal fun FacilitySelectorTopBar(
     closeButtonClicked: () -> Unit
 ) {
     Row(
-        modifier = Modifier.height(65.dp).fillMaxWidth(),
+        modifier = Modifier
+            .height(65.dp)
+            .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         // if there are no sites, do not allow going back to the siteSelector from facilitySelector
@@ -221,13 +227,16 @@ internal fun FacilitySelectorTopBar(
                 modifier = Modifier.clickable { backToSiteButtonClicked() }
             ) {
                 Icon(
-                    modifier = Modifier.fillMaxHeight().padding(horizontal = 6.dp).size(24.dp),
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .padding(horizontal = 6.dp)
+                        .size(24.dp),
                     painter = painterResource(id = R.drawable.ic_chevron_left_32),
                     contentDescription = "Go Back to Site Selector"
                 )
             }
         }
-        Divider(
+        HorizontalDivider(
             color = Color.LightGray,
             modifier = Modifier
                 .fillMaxHeight()
@@ -264,7 +273,9 @@ internal fun FacilitySelectorTopBar(
             onClick = closeButtonClicked
         ) {
             Icon(
-                modifier = Modifier.padding(horizontal = 10.dp).size(24.dp),
+                modifier = Modifier
+                    .padding(horizontal = 10.dp)
+                    .size(24.dp),
                 painter = painterResource(id = R.drawable.ic_x_24),
                 contentDescription = "Close Icon"
             )
@@ -335,7 +346,8 @@ internal fun SitesAndFacilitiesFilter(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(65.dp)
-                    .focusRequester(focusRequester).onKeyEvent {
+                    .focusRequester(focusRequester)
+                    .onKeyEvent {
                         // submit query when enter is tapped
                         if (it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_ENTER) {
                             focusManager.clearFocus()
@@ -478,7 +490,9 @@ internal fun SiteOrFacilityItem(
         .height(65.dp)
         .clickable { onSelected(index) }
         .semantics { contentDescription = "SiteOrFacilityItem" }) {
-        Row(modifier = Modifier.padding(horizontal = 20.dp).align(Center)) {
+        Row(modifier = Modifier
+            .padding(horizontal = 20.dp)
+            .align(Center)) {
             if (isSelected) {
                 Canvas(
                     modifier = Modifier
@@ -490,14 +504,18 @@ internal fun SiteOrFacilityItem(
                     })
             }
             Text(
-                modifier = Modifier.weight(1f).align(CenterVertically),
+                modifier = Modifier
+                    .weight(1f)
+                    .align(CenterVertically),
                 text = name,
                 color = uiProperties.textColor,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
             )
             if (isSiteItem) {
                 Icon(
-                    modifier = Modifier.size(24.dp).align(CenterVertically),
+                    modifier = Modifier
+                        .size(24.dp)
+                        .align(CenterVertically),
                     painter = painterResource(id = R.drawable.ic_chevron_right_32),
                     contentDescription = "Select site icon"
                 )
