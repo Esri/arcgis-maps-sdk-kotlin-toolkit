@@ -16,19 +16,13 @@
  */
 package com.arcgismaps.toolkit.authentication
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
+import android.view.KeyEvent
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.test.espresso.Espresso
 import androidx.test.platform.app.InstrumentationRegistry
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallenge
@@ -43,7 +37,11 @@ import org.junit.Rule
 import org.junit.Test
 import java.security.cert.CertificateException
 
-
+/**
+ * Tests for server trust challenges.
+ *
+ * @since 200.4.0
+ */
 class ServerTrustTests {
 
     @get:Rule
@@ -71,7 +69,7 @@ class ServerTrustTests {
      * @since 200.4.0
      */
     @Test
-    fun trustSelfSignedCertificate_4_1() = performTest(
+    fun trustSelfSignedCertificate_4_1() = issueChallengeWithInput(
         challenge = certificateChallenge,
         userInputOnDialog = {
             composeTestRule.onNodeWithText(getString(R.string.allow_connection)).performClick()
@@ -92,7 +90,7 @@ class ServerTrustTests {
      * @since 200.4.0
      */
     @Test
-    fun cancelServerTrustChallenge_4_2() = performTest(
+    fun cancelServerTrustChallenge_4_2() = issueChallengeWithInput(
         challenge = certificateChallenge,
         userInputOnDialog = {
             composeTestRule.onNodeWithText(getString(R.string.cancel)).performClick()
@@ -113,18 +111,30 @@ class ServerTrustTests {
      * @since 200.4.0
      */
     @Test
-    fun backButtonDismissesDialog_4_3() = performTest(
+    fun backButtonDismissesDialog_4_3() = issueChallengeWithInput(
         challenge = certificateChallenge,
         userInputOnDialog = {
-            Espresso.pressBack()
+            // press back. Using this seems to be more reliable than `Espresso.pressBack()`
+            // after the state restoration
+            InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_BACK)
         },
         onResponse = { response ->
             assert(response is NetworkAuthenticationChallengeResponse.Cancel)
         }
     )
 
+    /**
+     * Given a Dialog Authenticator
+     * When a server trust challenge is issued
+     * Then the dialog prompt should be displayed
+     *
+     * When the user taps outside the dialog
+     * Then the dialog should be dismissed and the response should be of type [NetworkAuthenticationChallengeResponse.Cancel]
+     *
+     * @since 200.4.0
+     */
     @Test
-    fun tapOutsideDialogDismissesDialog_4_4() = performTest(
+    fun tapOutsideDialogDismissesDialog_4_4() = issueChallengeWithInput(
         challenge = certificateChallenge,
         userInputOnDialog = {
                             // tap on the far left of the screen (outside the dialog)
@@ -135,22 +145,14 @@ class ServerTrustTests {
         }
     )
 
-    private fun performTest(
+    private fun issueChallengeWithInput(
         challenge: NetworkAuthenticationChallenge,
         userInputOnDialog: () -> Unit,
         onResponse: (NetworkAuthenticationChallengeResponse) -> Unit
     ) = runTest {
-        composeTestRule.setContent {
-            Column(modifier = Modifier.fillMaxSize().testTag("Column"), verticalArrangement = Arrangement.SpaceEvenly) {
-                Box(modifier = Modifier.fillMaxWidth().testTag("UpperHalf"))
-                Box(modifier = Modifier.fillMaxWidth().testTag("LowerHalf"))
-                Box(modifier = Modifier.fillMaxWidth().testTag("LowerHalf"))
-                Box(modifier = Modifier.fillMaxWidth().testTag("LowerHalf"))
-                Box(modifier = Modifier.fillMaxWidth().testTag("LowerHalf"))
-                Box(modifier = Modifier.fillMaxWidth().testTag("LowerHalf"))
-                Box(modifier = Modifier.fillMaxWidth().testTag("LowerHalf"))
-                Box(modifier = Modifier.fillMaxWidth().testTag("LowerHalf"))
-            }
+        // This class simulate the state restoration process
+        val stateRestorationTester = StateRestorationTester(composeTestRule)
+        stateRestorationTester.setContent {
             DialogAuthenticator(authenticatorState = authenticatorState)
         }
         // issue the server trust challenge
@@ -165,7 +167,12 @@ class ServerTrustTests {
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithText(serverTrustMessage).assertIsDisplayed()
 
+        // simulate a configuration change
+        stateRestorationTester.emulateSavedInstanceStateRestore()
+
+        // perform the test action
         userInputOnDialog()
+
         advanceUntilIdle()
         assert(authenticatorState.pendingServerTrustChallenge.value == null)
         composeTestRule.waitForIdle()
