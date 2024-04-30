@@ -16,8 +16,16 @@
  */
 package com.arcgismaps.toolkit.authentication
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.espresso.Espresso
@@ -115,12 +123,34 @@ class ServerTrustTests {
         }
     )
 
+    @Test
+    fun tapOutsideDialogDismissesDialog_4_4() = performTest(
+        challenge = certificateChallenge,
+        userInputOnDialog = {
+                            // tap on the far left of the screen (outside the dialog)
+                            composeTestRule.onNodeWithTag("Column").performClick()
+        },
+        onResponse = { response ->
+            assert(response is NetworkAuthenticationChallengeResponse.Cancel)
+        }
+    )
+
     private fun performTest(
         challenge: NetworkAuthenticationChallenge,
         userInputOnDialog: () -> Unit,
         onResponse: (NetworkAuthenticationChallengeResponse) -> Unit
     ) = runTest {
         composeTestRule.setContent {
+            Column(modifier = Modifier.fillMaxSize().testTag("Column"), verticalArrangement = Arrangement.SpaceEvenly) {
+                Box(modifier = Modifier.fillMaxWidth().testTag("UpperHalf"))
+                Box(modifier = Modifier.fillMaxWidth().testTag("LowerHalf"))
+                Box(modifier = Modifier.fillMaxWidth().testTag("LowerHalf"))
+                Box(modifier = Modifier.fillMaxWidth().testTag("LowerHalf"))
+                Box(modifier = Modifier.fillMaxWidth().testTag("LowerHalf"))
+                Box(modifier = Modifier.fillMaxWidth().testTag("LowerHalf"))
+                Box(modifier = Modifier.fillMaxWidth().testTag("LowerHalf"))
+                Box(modifier = Modifier.fillMaxWidth().testTag("LowerHalf"))
+            }
             DialogAuthenticator(authenticatorState = authenticatorState)
         }
         // issue the server trust challenge
