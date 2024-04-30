@@ -74,7 +74,6 @@ class ServerTrustTests {
      */
     @Test
     fun trustSelfSignedCertificate_4_1() = issueChallengeWithInput(
-        challenge = certificateChallenge,
         userInputOnDialog = {
             composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.allow_connection))
                 .performClick()
@@ -96,7 +95,6 @@ class ServerTrustTests {
      */
     @Test
     fun cancelServerTrustChallenge_4_2() = issueChallengeWithInput(
-        challenge = certificateChallenge,
         userInputOnDialog = {
             composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.cancel))
                 .performClick()
@@ -118,7 +116,6 @@ class ServerTrustTests {
      */
     @Test
     fun backButtonDismissesDialog_4_3() = issueChallengeWithInput(
-        challenge = certificateChallenge,
         userInputOnDialog = {
             // press back. Using this seems to be more reliable than `Espresso.pressBack()`
             // after the state restoration
@@ -129,8 +126,16 @@ class ServerTrustTests {
         }
     )
 
+    /**
+     * Places a DialogAuthenticator in the composition and issues a server trust challenge.
+     * Once the dialog is displayed, [userInputOnDialog] will be called, and when the challenge
+     * is resolved, [onResponse] will be called with the response.
+     *
+     * Note that this function will also simulate disposing and restoring the state of the DialogAuthenticator.
+     *
+     * @since 200.4.0
+     */
     private fun issueChallengeWithInput(
-        challenge: NetworkAuthenticationChallenge,
         userInputOnDialog: () -> Unit,
         onResponse: (NetworkAuthenticationChallengeResponse) -> Unit
     ) = runTest {
@@ -141,7 +146,7 @@ class ServerTrustTests {
         }
         // issue the server trust challenge
         val challengeResponse = async {
-            authenticatorState.handleNetworkAuthenticationChallenge(challenge)
+            authenticatorState.handleNetworkAuthenticationChallenge(certificateChallenge)
         }
 
         val serverTrustMessage =
