@@ -17,9 +17,10 @@
 package com.arcgismaps.toolkit.authentication
 
 import android.view.KeyEvent
+import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.StateRestorationTester
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -45,7 +46,7 @@ import java.security.cert.CertificateException
 class ServerTrustTests {
 
     @get:Rule
-    val composeTestRule = createComposeRule()
+    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     private val certificateHostName = "https://server-trust-tests.com/"
     private val certificateChallenge = NetworkAuthenticationChallenge(certificateHostName, NetworkAuthenticationType.ServerTrust, CertificateException("Test exception"))
@@ -72,7 +73,7 @@ class ServerTrustTests {
     fun trustSelfSignedCertificate_4_1() = issueChallengeWithInput(
         challenge = certificateChallenge,
         userInputOnDialog = {
-            composeTestRule.onNodeWithText(getString(R.string.allow_connection)).performClick()
+            composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.allow_connection)).performClick()
         },
         onResponse = { response ->
             assert(response is NetworkAuthenticationChallengeResponse.ContinueWithCredential)
@@ -93,7 +94,7 @@ class ServerTrustTests {
     fun cancelServerTrustChallenge_4_2() = issueChallengeWithInput(
         challenge = certificateChallenge,
         userInputOnDialog = {
-            composeTestRule.onNodeWithText(getString(R.string.cancel)).performClick()
+            composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.cancel)).performClick()
         },
         onResponse = { response ->
             assert(response is NetworkAuthenticationChallengeResponse.Cancel)
@@ -160,7 +161,7 @@ class ServerTrustTests {
             authenticatorState.handleNetworkAuthenticationChallenge(challenge)
         }
 
-        val serverTrustMessage = getString(R.string.server_trust_message, certificateHostName)
+        val serverTrustMessage = composeTestRule.activity.getString(R.string.server_trust_message, certificateHostName)
         // ensure the dialog prompt is displayed as expected
         advanceUntilIdle()
         assert(authenticatorState.pendingServerTrustChallenge.value != null)
@@ -181,6 +182,3 @@ class ServerTrustTests {
         onResponse(challengeResponse.await())
     }
 }
-
-fun getString(resourceId: Int, vararg formatArgs: String) : String =
-    InstrumentationRegistry.getInstrumentation().context.resources.getString(resourceId, *formatArgs)
