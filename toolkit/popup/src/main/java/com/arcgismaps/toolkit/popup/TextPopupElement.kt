@@ -23,13 +23,10 @@ import android.util.Log
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
-import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.mapping.popup.TextPopupElement
 
 /**
  * Renders the following [content] as HTML.
@@ -53,7 +50,6 @@ internal fun HTML(content: String) {
             body { margin:16px; padding:0px; }
         </style></head>
         """.trimIndent()
-    // TODO: how will we pass the background color in dark mode?
     AndroidView(factory = { context ->
         WebView(context).apply {
             webViewClient = object : WebViewClient() {
@@ -71,20 +67,20 @@ internal fun HTML(content: String) {
                     return true
                 }
             }
-            val html = "$header$headStyle<html>${content.trim()}</html>"
-            loadData(html, "text/html", "UTF-8")
+            val completeHtml = "$header$headStyle<html>${content.trim()}</html>"
+            loadData(completeHtml, "text/html", "UTF-8")
         }
     })
 }
 
 /**
- * A popup element that displays text.
+ * A composable that displays a TextPopupElement.
  *
  * @since 200.5.0
  */
 @Composable
-public fun TextPopupElement(content: String) {
-    HTML(content = content)
+public fun TextPopupElement(popupElement: TextPopupElement) {
+    HTML(content = popupElement.text)
 }
 
 @Preview
@@ -92,10 +88,9 @@ public fun TextPopupElement(content: String) {
 internal fun TextPopupElementPreview() {
     val tempText =
         "<p><span style='color:#287fb8;font-family:Verdana;font-size:14px;'><strong>{NAME}</strong></span><span style='font-family:Verdana;font-size:14px;'> is a peak in California's {RANGE} range. It ranks </span><span style='color:#aa3427;font-family:Verdana;font-size:14px;'><strong>#{RANK}</strong></span><span style='font-family:Verdana;font-size:14px;'> among the California Fourteeners.</span></p><p><span style='font-family:Verdana;font-size:14px;'>The summit is </span><span style='color:#287fb8;font-family:Verdana;font-size:14px;'><strong>{ELEV_FEET}</strong></span><span style='font-family:Verdana;font-size:14px;'> feet high ({ELEV_METERS} meters) and has a prominence of </span><span style='color:#287fb8;font-family:Verdana;font-size:14px;'><strong>{PROM_FEET}</strong></span><span style='font-family:Verdana;font-size:14px;'> feet ({PROM_METERS} meters).</span></p><p><a href='https://arcgis.com' rel='nofollow ugc'><span style='font-family:Verdana;font-size:14px;'>More info</span></a></p>"
-//    TextPopupElement("<h1>Hello World</h1>")
-//    TextPopupElement(content = "hello world")
+    val popupElement = TextPopupElement(tempText)
     ExpandableCard {
-        TextPopupElement(content = tempText)
+        TextPopupElement(popupElement)
     }
 }
 
