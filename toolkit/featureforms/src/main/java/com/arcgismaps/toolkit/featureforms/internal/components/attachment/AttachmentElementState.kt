@@ -17,6 +17,13 @@
 package com.arcgismaps.toolkit.featureforms.internal.components.attachment
 
 import android.graphics.drawable.BitmapDrawable
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AudioFile
+import androidx.compose.material.icons.outlined.FileCopy
+import androidx.compose.material.icons.outlined.FilePresent
+import androidx.compose.material.icons.outlined.Image
+import androidx.compose.material.icons.outlined.VideoCameraBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -28,6 +35,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.vector.ImageVector
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.mapping.featureforms.AttachmentFormElement
 import com.arcgismaps.mapping.featureforms.FeatureForm
@@ -53,6 +61,11 @@ internal class AttachmentElementState(
      */
     val attachments = SnapshotStateList<FormAttachmentState>()
 
+    /**
+     * The state of the lazy list that displays the [attachments].
+     */
+    val lazyListState = LazyListState()
+
     init {
         scope.launch {
             loadAttachments()
@@ -71,6 +84,19 @@ internal class AttachmentElementState(
                 FormAttachmentState(it, scope)
             }
         )
+    }
+
+    /**
+     * Adds an attachment with the given [name], [contentType], and [data].
+     */
+    suspend fun addAttachment(name: String, contentType: String, data: ByteArray) {
+        formElement.addAttachment(name, contentType, data)
+        // refresh the list of attachments
+        loadAttachments()
+        // load the attachment that was just added
+        attachments.last().loadAttachment()
+        // scroll to the newly added attachment
+        lazyListState.scrollToItem(attachments.size - 1)
     }
 
     companion object {
@@ -117,6 +143,8 @@ internal class FormAttachmentState(
     private val _thumbnail: MutableState<ImageBitmap?> = mutableStateOf(null)
     val thumbnail: State<ImageBitmap?> = _thumbnail
 
+    val type: AttachmentType = getAttachmentType(name)
+
     constructor(attachment: FormAttachment, scope: CoroutineScope) : this(
         name = attachment.name,
         size = attachment.size,
@@ -154,4 +182,32 @@ internal fun rememberAttachmentElementState(
             scope = scope
         )
     }
+}
+
+internal sealed class AttachmentType {
+    data object Image : AttachmentType()
+    data object Audio : AttachmentType()
+    data object Video : AttachmentType()
+    data object Document : AttachmentType()
+    data object Other : AttachmentType()
+}
+
+internal fun getAttachmentType(filename: String): AttachmentType {
+    val extension = filename.substring(filename.lastIndexOf(".") + 1)
+    return when (extension) {
+        "jpg", "jpeg", "png", "gif", "bmp" -> AttachmentType.Image
+        "mp3", "wav", "ogg", "flac" -> AttachmentType.Audio
+        "mp4", "avi", "mov", "wmv", "flv" -> AttachmentType.Video
+        "doc", "docx", "pdf", "txt", "rtf" -> AttachmentType.Document
+        else -> AttachmentType.Other
+    }
+}
+
+@Composable
+internal fun AttachmentType.getIcon(): ImageVector = when (this) {
+    AttachmentType.Image -> Icons.Outlined.Image
+    AttachmentType.Audio -> Icons.Outlined.AudioFile
+    AttachmentType.Video -> Icons.Outlined.VideoCameraBack
+    AttachmentType.Document -> Icons.Outlined.FilePresent
+    AttachmentType.Other -> Icons.Outlined.FileCopy
 }

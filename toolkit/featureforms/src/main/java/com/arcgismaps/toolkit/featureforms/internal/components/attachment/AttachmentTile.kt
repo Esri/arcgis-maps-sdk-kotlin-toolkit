@@ -273,31 +273,3 @@ private fun Size(
             .padding(horizontal = 1.dp)
     )
 }
-
-private sealed class AttachmentType {
-    data object Image : AttachmentType()
-    data object Audio : AttachmentType()
-    data object Video : AttachmentType()
-    data object Document : AttachmentType()
-    data object Other : AttachmentType()
-}
-
-private fun getAttachmentType(filename: String): AttachmentType {
-    val extension = filename.substring(filename.lastIndexOf(".") + 1)
-    return when (extension) {
-        "jpg", "jpeg", "png", "gif", "bmp" -> AttachmentType.Image
-        "mp3", "wav", "ogg", "flac" -> AttachmentType.Audio
-        "mp4", "avi", "mov", "wmv", "flv" -> AttachmentType.Video
-        "doc", "docx", "pdf", "txt", "rtf" -> AttachmentType.Document
-        else -> AttachmentType.Other
-    }
-}
-
-@Composable
-private fun AttachmentType.getIcon(): ImageVector = when (this) {
-    AttachmentType.Image -> Icons.Outlined.Image
-    AttachmentType.Audio -> Icons.Outlined.AudioFile
-    AttachmentType.Video -> Icons.Outlined.VideoCameraBack
-    AttachmentType.Document -> Icons.Outlined.FilePresent
-    AttachmentType.Other -> Icons.Outlined.FileCopy
-}
