@@ -84,14 +84,7 @@ internal fun HTML(content: String) {
  */
 @Composable
 public fun TextPopupElement(content: String) {
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.background
-        )
-    ) {
-        HTML(content = content)
-    }
-
+    HTML(content = content)
 }
 
 @Preview

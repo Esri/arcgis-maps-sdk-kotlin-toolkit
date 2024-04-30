@@ -25,10 +25,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
+/**
+ * Composable Card that has the ability to expand and collapse its [content].
+ *
+ * @since 200.5.0
+ */
 @Composable
-public fun ExpandableCard(title: String = "", expandable: Boolean = false, content: @Composable () -> Unit) {
-    var expanded by remember { mutableStateOf(true) }
-    val arrowIcon = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown
+public fun ExpandableCard(title: String = "", expandable: Boolean = true, content: @Composable () -> Unit) {
+    var expanded by remember { mutableStateOf(expandable) }
     Card(
         shape = RoundedCornerShape(5.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
@@ -45,8 +49,11 @@ public fun ExpandableCard(title: String = "", expandable: Boolean = false, conte
                         modifier = Modifier.padding(8.dp),
                         style = MaterialTheme.typography.titleMedium,
                     )
-                    IconButton(onClick = {expanded = !expanded}) {
-                        Icon(imageVector = arrowIcon, contentDescription = "More")
+                    IconButton(onClick = { expanded = !expanded }) {
+                        Icon(
+                            imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                            contentDescription = "More"
+                        )
                     }
                 }
             }
