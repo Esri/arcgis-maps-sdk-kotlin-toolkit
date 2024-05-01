@@ -35,7 +35,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,6 +48,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.mapping.popup.TextPopupElement
+import com.arcgismaps.toolkit.popup.internal.elementstate.MutablePopupElementStateCollection
+import com.arcgismaps.toolkit.popup.internal.elementstate.PopupElementStateCollection
+import com.arcgismaps.toolkit.popup.internal.textelement.rememberTextElementState
 
 @Immutable
 private data class PopupState(@Stable val popup: Popup)
@@ -83,24 +85,17 @@ private fun Popup(popupState: PopupState, modifier: Modifier = Modifier) {
     val popup = popupState.popup
     var evaluated by rememberSaveable(popup) { mutableStateOf(false) }
 
-    //TODO: create a state collection here
-    val states = rememberElementStates()
     LaunchedEffect(popup) {
         popupState.popup.evaluateExpressions()
         evaluated = true
     }
 
-    Popup(popup, evaluated, states.value)
+    Popup(popup, evaluated)
 }
 
-internal fun rememberElementStates(): State<Boolean> {
-    return mutableStateOf(true)
-}
-
-@Suppress("unused_parameter")
 @Composable
-private fun Popup(popup: Popup, evaluated: Boolean, states: Boolean, modifier: Modifier = Modifier) {
-
+private fun Popup(popup: Popup, evaluated: Boolean, modifier: Modifier = Modifier) {
+    val states = rememberStates(popup)
     val lazyListState = rememberLazyListState()
     Column(
         modifier = modifier.fillMaxSize(),
@@ -125,7 +120,8 @@ private fun Popup(popup: Popup, evaluated: Boolean, states: Boolean, modifier: M
                 .semantics { contentDescription = "lazy column" },
             state = lazyListState
         ) {
-            popup.evaluatedElements.forEach { element ->
+            states.forEach { entry ->
+                val element = entry.popupElement
                 item {
                     when (element) {
                         is TextPopupElement -> {
@@ -134,7 +130,7 @@ private fun Popup(popup: Popup, evaluated: Boolean, states: Boolean, modifier: M
 
 
                         else -> {
-                            // other form elements are not created
+                            // other popup elements are not created
                         }
                     }
                 }
@@ -160,4 +156,34 @@ internal fun InitializingExpressions(
     ) {
         LinearProgressIndicator(modifier)
     }
+}
+
+/**
+ * Creates and remembers state objects for all the supported element types that are part of the
+ * provided FeatureForm. These state objects are returned as part of a [PopupElementStateCollection].
+ *
+ * @param popup the [Popup] to create the states for.
+ * @return returns the [PopupElementStateCollection] created.
+ */
+@Composable
+internal fun rememberStates(
+    popup: Popup
+): PopupElementStateCollection {
+    val states = MutablePopupElementStateCollection()
+    popup.evaluatedElements.forEach { element ->
+        when (element) {
+            is TextPopupElement -> {
+                states.add(
+                    element,
+                    rememberTextElementState(element = element, popup = popup)
+                )
+            }
+
+            else -> {
+                println("encountered element of type ${element::class.java}")
+            }
+        }
+    }
+
+    return states
 }
