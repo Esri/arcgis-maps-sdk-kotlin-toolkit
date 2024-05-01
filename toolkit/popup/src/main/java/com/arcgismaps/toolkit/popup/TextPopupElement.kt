@@ -81,7 +81,7 @@ internal fun HTML(content: String) {
                 }
             }
             val completeHtml = "$header$headStyle<html>${content.trim()}</html>"
-            loadData(completeHtml, "text/html", "UTF-8")
+            loadDataWithBaseURL(null, completeHtml, "text/html", "UTF-8", null)
         }
     })
 }

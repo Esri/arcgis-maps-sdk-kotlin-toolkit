@@ -129,7 +129,9 @@ private fun Popup(popup: Popup, evaluated: Boolean, states: Boolean, modifier: M
                 item {
                     when (element) {
                         is TextPopupElement -> {
-                            Text(text = element.text)
+                            ExpandableCard {
+                                TextPopupElement(element)
+                            }
                         }
 
 
