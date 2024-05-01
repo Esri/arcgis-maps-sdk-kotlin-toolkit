@@ -51,7 +51,6 @@ private data class PopupState(@Stable val popup: Popup)
  *
  * @since 200.5.0
  */
-@Suppress("unused")
 @Composable
 public fun Popup(popup: Popup, modifier: Modifier = Modifier) {
     val stateData = remember(popup) {

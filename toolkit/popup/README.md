@@ -18,7 +18,7 @@ The `Popup` is a composable function that can render a [Popup object](https://de
 
 ## Get Started
 
-To get started, set up a `composable MapView` as described [here](../geo-view-composable/README.md)
+To get started, set up a `composable MapView` as described [here](../geoview-compose/README.md)
 
 Get Popup objects from tapping on [GeoElements](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping/-geo-element/index.html) on the composable MapView as follows:
 
