@@ -188,14 +188,15 @@ internal fun SiteSelectorTopBar(
         )
         IconButton(
             onClick = closeButtonClicked,
-            modifier = Modifier.align(CenterVertically)
+            modifier = Modifier
+                .align(CenterVertically)
         ) {
             Icon(
                 modifier = Modifier
                     .padding(horizontal = 10.dp)
                     .size(24.dp),
                 painter = painterResource(id = R.drawable.ic_x_24),
-                contentDescription = "Close Icon"
+                contentDescription = stringResource(R.string.close)
             )
         }
     }
@@ -232,7 +233,7 @@ internal fun FacilitySelectorTopBar(
                         .padding(horizontal = 6.dp)
                         .size(24.dp),
                     painter = painterResource(id = R.drawable.ic_chevron_left_32),
-                    contentDescription = "Go Back to Site Selector"
+                    contentDescription = stringResource(id = R.string.go_back_to_site_selector)
                 )
             }
         }
@@ -259,17 +260,17 @@ internal fun FacilitySelectorTopBar(
                 fontSize = if (selectAFacilityText.length > 23) 12.sp else 18.sp,
                 textAlign = TextAlign.Start
             )
-
+            val siteName =  floorFilterState.getSelectedSite()?.name ?: stringResource(id = R.string.not_available)
             Text(
-                text = stringResource(R.string.floor_filter_site_selector_top_bar) +
-                        (floorFilterState.getSelectedSite()?.name ?: "not available"),
+                text = stringResource(R.string.floor_filter_site_selector_top_bar, siteName),
                 // reduce font size if the localized text is too long
                 fontSize = if (selectAFacilityText.length > 23) 12.sp else 15.sp,
                 color = Color.Gray
             )
         }
         IconButton(
-            modifier = Modifier.align(CenterVertically),
+            modifier = Modifier
+                .align(CenterVertically),
             onClick = closeButtonClicked
         ) {
             Icon(
@@ -277,7 +278,7 @@ internal fun FacilitySelectorTopBar(
                     .padding(horizontal = 10.dp)
                     .size(24.dp),
                 painter = painterResource(id = R.drawable.ic_x_24),
-                contentDescription = "Close Icon"
+                contentDescription = stringResource(R.string.close)
             )
         }
     }
@@ -371,19 +372,20 @@ internal fun SitesAndFacilitiesFilter(
                         modifier = Modifier.size(24.dp),
                         painter = painterResource(id = R.drawable.ic_search_32),
                         tint = Color.Gray,
-                        contentDescription = "Search Icon"
+                        contentDescription = null // decorative
                     )
                 },
                 trailingIcon = if (text.isNotEmpty()) {
                     {
                         Icon(
-                            modifier = Modifier.clickable {
-                                text = ""
-                                filteredSitesOrFacilities = allSitesOrFacilities
-                            },
+                            modifier = Modifier
+                                .clickable {
+                                    text = ""
+                                    filteredSitesOrFacilities = allSitesOrFacilities
+                                },
                             painter = painterResource(id = R.drawable.ic_x_24),
                             tint = Color.Gray,
-                            contentDescription = "Clear Search Icon"
+                            contentDescription = stringResource(id = R.string.clear_search)
                         )
                     }
                 } else {
@@ -478,21 +480,25 @@ internal fun ListOfSitesOrFacilities(
 @Composable
 internal fun SiteOrFacilityItem(
     name: String,
-    isSelected: Boolean,
-    onSelected: (Int) -> Unit,
     index: Int,
+    isSelected: Boolean,
+    isSiteItem: Boolean,
     uiProperties: UIProperties,
-    isSiteItem: Boolean
+    onSelected: (Int) -> Unit
 ) {
+    val itemContentDescription =
+        if (isSiteItem) stringResource(id = R.string.site_item) else stringResource(id = R.string.facility_item)
     // a box is helpful to use a consistent clickable animation
     Box(modifier = Modifier
         .fillMaxWidth()
         .height(65.dp)
         .clickable { onSelected(index) }
-        .semantics { contentDescription = "SiteOrFacilityItem" }) {
-        Row(modifier = Modifier
-            .padding(horizontal = 20.dp)
-            .align(Center)) {
+        .semantics { contentDescription = itemContentDescription }) {
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 20.dp)
+                .align(Center)
+        ) {
             if (isSelected) {
                 Canvas(
                     modifier = Modifier
@@ -517,7 +523,7 @@ internal fun SiteOrFacilityItem(
                         .size(24.dp)
                         .align(CenterVertically),
                     painter = painterResource(id = R.drawable.ic_chevron_right_32),
-                    contentDescription = "Select site icon"
+                    contentDescription = null // decorative
                 )
             }
         }

@@ -45,7 +45,6 @@ class FloorFilterTests {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private val floorFilterTestTag = "FloorFilterComponent"
     private val portal = Portal("https://arcgis.com/")
     private val portalItem = PortalItem(portal, "b4b599a43a474d33946cf0df526426f5")
     private val floorAwareWebMap = ArcGISMap(portalItem)
@@ -70,21 +69,13 @@ class FloorFilterTests {
     fun testFloorFilterInteractions() {
         // wait for the floor filter component to load and display in view
         composeTestRule.waitUntil(timeoutMillis = 15000) {
-            composeTestRule.onAllNodesWithContentDescription("FloorFilterComponent")
+            composeTestRule.onAllNodesWithContentDescription("Sites and facilities button")
                 .fetchSemanticsNodes().size == 1
         }
 
-        // get the semantic node of the component
-        val floorFilter = composeTestRule.onNodeWithContentDescription(
-            label = floorFilterTestTag
-        )
-
-        // verify if the component is being displayed
-        floorFilter.assertIsDisplayed()
-
         // get the semantic node of the site facility dialog selector button
         val siteFacilityButton = composeTestRule.onNodeWithContentDescription(
-            label = "SiteFacilityButton"
+            label = "Sites and facilities button"
         )
 
         // verify if the selector button is being displayed
@@ -96,9 +87,8 @@ class FloorFilterTests {
 
         // get the semantic node of the second site displayed in the list of sites ("Research Annex")
         val researchAnnexSiteItem = composeTestRule.onAllNodesWithContentDescription(
-            label = "SiteOrFacilityItem"
+            label = "Site item"
         )[1]
-
 
         // verify if the expected site is being displayed
         researchAnnexSiteItem.assertIsDisplayed()
@@ -109,7 +99,7 @@ class FloorFilterTests {
 
         // get the semantic node of the first facility of the selected site ("Lattice")
         val latticeFacilityItem = composeTestRule.onAllNodesWithContentDescription(
-            label = "SiteOrFacilityItem"
+            label = "Facility item"
         )[0]
 
         // verify if the expected facility is being displayed
@@ -121,7 +111,7 @@ class FloorFilterTests {
 
         // get the collection of semantic node of all floor levels of the selected facility
         val floorLevelButtons = composeTestRule.onAllNodesWithContentDescription(
-            label = "FloorLevelSelectButton"
+            label = "Floor level select button"
         )
 
         // verify if the facility has 12 floor levels
@@ -129,7 +119,7 @@ class FloorFilterTests {
 
         // verify the floor level selector is not collapsed
         val floorListCloseButton = composeTestRule.onAllNodesWithContentDescription(
-            label = "FloorListCloseButton"
+            label = "Close"
         )[0]
 
         // get semantic node of the 8th floor level select button
@@ -147,7 +137,6 @@ class FloorFilterTests {
         floorListCloseButton.assertDoesNotExist()
     }
 }
-
 
 class MapViewModel(
     arcGISMap: ArcGISMap
