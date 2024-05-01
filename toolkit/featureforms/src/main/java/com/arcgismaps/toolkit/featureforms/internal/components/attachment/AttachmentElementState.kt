@@ -16,6 +16,9 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.attachment
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.drawable.BitmapDrawable
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.Icons
@@ -36,6 +39,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.core.content.ContextCompat
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.mapping.featureforms.AttachmentFormElement
 import com.arcgismaps.mapping.featureforms.FeatureForm
@@ -65,6 +69,8 @@ internal class AttachmentElementState(
      * The state of the lazy list that displays the [attachments].
      */
     val lazyListState = LazyListState()
+
+    val inputType = formElement.input
 
     init {
         scope.launch {
@@ -98,6 +104,11 @@ internal class AttachmentElementState(
         // scroll to the newly added attachment
         lazyListState.scrollToItem(attachments.size - 1)
     }
+
+    fun hasCameraPermissions(context: Context): Boolean = ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.CAMERA
+    ) == PackageManager.PERMISSION_GRANTED
 
     companion object {
         fun Saver(

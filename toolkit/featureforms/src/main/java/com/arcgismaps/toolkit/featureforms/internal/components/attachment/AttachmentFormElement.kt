@@ -20,6 +20,7 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -61,6 +62,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.VisualMediaType
+import androidx.compose.material.icons.rounded.Photo
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.toolkit.featureforms.internal.utils.AttachmentCaptureFileProvider
 import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
@@ -78,12 +81,14 @@ internal fun AttachmentFormElement(
     modifier: Modifier = Modifier
 ) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     AttachmentFormElement(
         label = state.label,
         description = state.description,
         editable = true,
         attachments = state.attachments,
         lazyListState = state.lazyListState,
+        hasCameraPermission = state.hasCameraPermissions(context),
         onAttachmentAdded = { name, contentType, data ->
             scope.launch {
                 state.addAttachment(name, contentType, data)
@@ -100,6 +105,7 @@ internal fun AttachmentFormElement(
     editable: Boolean,
     attachments: List<FormAttachmentState>,
     lazyListState: LazyListState,
+    hasCameraPermission: Boolean,
     onAttachmentAdded: suspend (String, String, ByteArray) -> Unit,
     modifier: Modifier = Modifier,
     colors: AttachmentElementColors = AttachmentElementDefaults.colors()
@@ -122,14 +128,16 @@ internal fun AttachmentFormElement(
                 Spacer(modifier = Modifier.weight(1f))
                 if (editable) {
                     // Add attachment button
-                    AddAttachment { contentType, uri ->
+                    AddAttachment(
+                        hasCameraPermission = hasCameraPermission
+                    ) { contentType, uri ->
                         scope.launch(Dispatchers.IO) {
                             context.readBytes(uri)?.let {
                                 val name = attachments.getNewAttachmentNameForContentType(
                                     contentType,
                                     uri
                                 )
-                                Log.e("TAG", "AttachmentFormElement: $name, $contentType, $uri", )
+                                Log.e("TAG", "AttachmentFormElement: $name, $contentType, $uri")
                                 onAttachmentAdded(name, contentType, it)
                             }
                         }
@@ -143,7 +151,7 @@ internal fun AttachmentFormElement(
 }
 
 @Composable
-private fun Carousel(state : LazyListState, attachments: List<FormAttachmentState>) {
+private fun Carousel(state: LazyListState, attachments: List<FormAttachmentState>) {
     LazyRow(
         state = state,
         horizontalArrangement = Arrangement.spacedBy(15.dp),
@@ -184,12 +192,14 @@ private fun Header(
 }
 
 @Composable
-private fun AddAttachment(onAttachment: (String, Uri) -> Unit) {
+private fun AddAttachment(
+    hasCameraPermission : Boolean,
+    onAttachment: (String, Uri) -> Unit
+) {
     var showMenu by remember { mutableStateOf(false) }
     val dialogRequester = LocalDialogRequester.current
     val scope = rememberCoroutineScope()
     val pickerStyle = remember { MutableSharedFlow<PickerStyle>() }
-    val context = LocalContext.current
     Box {
         IconButton(
             onClick = { showMenu = true },
@@ -205,18 +215,36 @@ private fun AddAttachment(onAttachment: (String, Uri) -> Unit) {
             offset = DpOffset.Zero,
             onDismissRequest = { showMenu = false }
         ) {
+            if (hasCameraPermission) {
+                DropdownMenuItem(
+                    text = { Text(text = "Take Photo") },
+                    trailingIcon = {
+                        Icon(
+                            imageVector = Icons.Rounded.PhotoCamera,
+                            contentDescription = "Take Photo",
+                            modifier = Modifier.alpha(0.4f)
+                        )
+                    },
+                    onClick = {
+                        scope.launch {
+                            pickerStyle.emit(PickerStyle.Camera)
+                            showMenu = false
+                        }
+                    }
+                )
+            }
             DropdownMenuItem(
-                text = { Text(text = "Take Photo") },
+                text = { Text(text = "Add Photo") },
                 trailingIcon = {
                     Icon(
-                        imageVector = Icons.Rounded.PhotoCamera,
-                        contentDescription = "Take Photo",
+                        imageVector = Icons.Rounded.Photo,
+                        contentDescription = "Add Photo",
                         modifier = Modifier.alpha(0.4f)
                     )
                 },
                 onClick = {
                     scope.launch {
-                        pickerStyle.emit(PickerStyle.Camera)
+                        pickerStyle.emit(PickerStyle.Gallery)
                         showMenu = false
                     }
                 }
@@ -227,20 +255,29 @@ private fun AddAttachment(onAttachment: (String, Uri) -> Unit) {
         pickerStyle.collect {
             when (it) {
                 PickerStyle.Camera -> {
-                    dialogRequester.requestDialog(DialogType.ImagePickerDialog { uri ->
+                    dialogRequester.requestDialog(DialogType.ImageCaptureDialog { uri ->
                         onAttachment("image/jpeg", uri)
                     })
                 }
 
-                PickerStyle.Gallery -> {}
-                PickerStyle.None -> {}
+                PickerStyle.Gallery -> {
+                    dialogRequester.requestDialog(
+                        DialogType.GalleryPickerDialog(
+                            ActivityResultContracts.PickVisualMedia.ImageOnly
+                        ) { uri ->
+                            onAttachment("image/jpeg", uri)
+                        }
+                    )
+                }
+
+                else -> {}
             }
         }
     }
 }
 
 @Composable
-internal fun ImagePicker(onImageCaptured: (Uri) -> Unit) {
+internal fun ImageCapture(onImageCaptured: (Uri) -> Unit) {
     val context = LocalContext.current
     var hasLaunched by rememberSaveable {
         mutableStateOf(false)
@@ -270,21 +307,36 @@ internal fun ImagePicker(onImageCaptured: (Uri) -> Unit) {
     }
 }
 
+@Composable
+internal fun GalleryPicker(visualMediaType: VisualMediaType, onImageSelected: (Uri) -> Unit) {
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) {
+        if (it != null) {
+            onImageSelected(it)
+        }
+    }
+    LaunchedEffect(Unit) {
+        launcher.launch(PickVisualMediaRequest(visualMediaType))
+    }
+}
+
 private fun List<FormAttachmentState>.getNewAttachmentNameForContentType(
     contentType: String,
     uri: Uri
 ): String {
-    val attachmentType : AttachmentType = when (contentType) {
-        "image/jpeg" -> AttachmentType.Image
-        else -> AttachmentType.Other
+    val (attachmentType: AttachmentType, ext: String) = when (contentType) {
+        "image/jpeg" -> Pair(AttachmentType.Image, "jpg")
+        else -> Pair(AttachmentType.Other, "")
     }
     val count = this.count { it.type == attachmentType }
-    return "$attachmentType $count"
+    return "$attachmentType $count.$ext"
 }
 
 private fun Context.createImageFile(): File {
     val timeStamp = Instant.now().toEpochMilli()
     val dir = File(cacheDir, "feature_forms_attachments")
+    dir.mkdirs()
     return File.createTempFile(
         "IMAGE_$timeStamp",
         ".jpg",
@@ -296,7 +348,7 @@ private fun Context.readBytes(uri: Uri): ByteArray? =
     contentResolver.openInputStream(uri)?.use { it.buffered().readBytes() }
 
 private sealed class PickerStyle {
-    data object None : PickerStyle()
+    data object File : PickerStyle()
     data object Camera : PickerStyle()
     data object Gallery : PickerStyle()
 }
@@ -318,7 +370,8 @@ private fun AttachmentFormElementPreview() {
                 scope = rememberCoroutineScope()
             )
         ),
-        LazyListState(),
-        { _, _, _ -> }
+        lazyListState = LazyListState(),
+        hasCameraPermission = true,
+        onAttachmentAdded = { _, _, _ -> }
     )
 }

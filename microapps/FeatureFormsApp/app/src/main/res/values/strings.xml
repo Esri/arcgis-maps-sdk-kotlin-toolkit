@@ -47,4 +47,5 @@
     <string name="okay">Okay</string>
     <string name="exit">Exit</string>
     <string name="no_featureform_description">FeatureLayers in this map do not contain a FeatureFormDefinition. Feature editing will be disabled.</string>
+    <string name="camera_permission_required">Camera permission is required for Attachments. This will result in limited functionality.</string>
 </resources>
