@@ -1,0 +1,4 @@
+public final class com/arcgismaps/toolkit/popup/PopupKt {
+	public static final fun Popup (Lcom/arcgismaps/mapping/popup/Popup;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+}
+
