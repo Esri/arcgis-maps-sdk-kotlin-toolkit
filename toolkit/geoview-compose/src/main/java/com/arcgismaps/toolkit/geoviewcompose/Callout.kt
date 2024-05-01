@@ -11,13 +11,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ComposeNode
 import androidx.compose.runtime.CompositionContext
+import androidx.compose.runtime.ReusableComposeNode
+
 import androidx.compose.runtime.currentComposer
+import androidx.compose.runtime.rememberCompositionContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.geometry.Point
-import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.view.ScreenCoordinate
 
 internal class CalloutNode(
@@ -53,11 +55,22 @@ public fun Callout(location: Point,
 private fun CalloutImpl(location: ScreenCoordinate,
                         content: @Composable () -> Unit) {
     val mapView = (currentComposer.applier as MapApplier).mapView
+    val compositionContext = rememberCompositionContext()
     ComposeNode<CalloutNode, MapApplier>(
-        factory =
-        {},
-        update = { addCallout(location, content) }
+        factory = { CalloutNode(compositionContext = compositionContext) },
+        update = {  },
+    ) {
+        addCallout(calloutScreenCoordinate = location, content = content)
+    }
 
+//    ReusableComposeNode<CalloutNode, MapApplier>(
+//         factory = { CalloutNode(compositionContext = compositionContext) },
+//         update = {},
+//        { addCallout(calloutScreenCoordinate = location, content = content) }
+//    )
+//    {
+//        addCallout(calloutScreenCoordinate = location, content = content)
+//    }
 }
 
 @Composable
