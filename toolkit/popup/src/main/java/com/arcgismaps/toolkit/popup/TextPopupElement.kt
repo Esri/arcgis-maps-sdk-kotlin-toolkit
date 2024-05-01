@@ -36,8 +36,13 @@ import com.arcgismaps.mapping.popup.TextPopupElement
 @Composable
 internal fun HTML(content: String) {
     // Set the initial scale to 1 to not allow user scaling
-    val header =
-        "<header><meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no'></header>"
+    val header = """
+        <header>
+            <meta name='viewport'
+                content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no'>
+        </header>
+    """.trimIndent()
+
 
     // Inject css in a head element to:
     // - word wrap long content such as urls
@@ -54,6 +59,14 @@ internal fun HTML(content: String) {
         WebView(context).apply {
             webViewClient = object : WebViewClient() {
 
+                // This view might have changed size, so request a layout to ensure it is displayed correctly.
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    super.onPageFinished(view, url)
+                    parent?.requestLayout()
+                }
+
+                // Override the WebView's default behavior to open links. Instead of loading the URL in the WebView,
+                // launch the device's default browser to handle the URL.
                 override fun shouldOverrideUrlLoading(view: WebView, webResourceRequest: WebResourceRequest): Boolean {
                     val intent = Intent(Intent.ACTION_VIEW, webResourceRequest.url).apply {
                         flags = Intent.FLAG_ACTIVITY_NEW_TASK
