@@ -51,10 +51,15 @@ import kotlinx.coroutines.launch
 
 /**
  * Represents the state of an [AttachmentFormElement]
+ *
+ * @param formElement The form element that this state represents.
+ * @param scope The coroutine scope used to launch coroutines.
+ * @param evaluateExpressions A method to evaluates the expressions in the form.
  */
 internal class AttachmentElementState(
     private val formElement: AttachmentFormElement,
-    private val scope: CoroutineScope
+    private val scope: CoroutineScope,
+    private val evaluateExpressions : suspend () -> Unit
 ) : FormElementState(
     label = formElement.label,
     description = formElement.description,
@@ -69,8 +74,6 @@ internal class AttachmentElementState(
      * The state of the lazy list that displays the [attachments].
      */
     val lazyListState = LazyListState()
-
-    val inputType = formElement.input
 
     init {
         scope.launch {
@@ -97,6 +100,7 @@ internal class AttachmentElementState(
      */
     suspend fun addAttachment(name: String, contentType: String, data: ByteArray) {
         formElement.addAttachment(name, contentType, data)
+        evaluateExpressions()
         // refresh the list of attachments
         loadAttachments()
         // load the attachment that was just added
@@ -113,7 +117,8 @@ internal class AttachmentElementState(
     companion object {
         fun Saver(
             attachmentFormElement: AttachmentFormElement,
-            scope: CoroutineScope
+            scope: CoroutineScope,
+            evaluateExpressions: suspend () -> Unit
         ): Saver<AttachmentElementState, Any> = listSaver(
             save = {
                 // save the list of indices of attachments that have been loaded
@@ -126,7 +131,7 @@ internal class AttachmentElementState(
                 }
             },
             restore = { savedList ->
-                AttachmentElementState(attachmentFormElement, scope).also {
+                AttachmentElementState(attachmentFormElement, scope, evaluateExpressions).also {
                     scope.launch {
                         it.loadAttachments()
                         // load the attachments that were previously loaded
@@ -142,6 +147,13 @@ internal class AttachmentElementState(
 
 /**
  * Represents the state of a [FormAttachment].
+ *
+ * @param name The name of the attachment.
+ * @param size The size of the attachment.
+ * @param loadStatus The load status of the attachment.
+ * @param onLoadAttachment A function that loads the attachment.
+ * @param onLoadThumbnail A function that loads the thumbnail of the attachment.
+ * @param scope The coroutine scope used to launch coroutines.
  */
 internal class FormAttachmentState(
     val name: String,
@@ -152,8 +164,15 @@ internal class FormAttachmentState(
     private val scope: CoroutineScope
 ) {
     private val _thumbnail: MutableState<ImageBitmap?> = mutableStateOf(null)
+
+    /**
+     * The thumbnail of the attachment. This is `null` until [loadAttachment] is called.
+     */
     val thumbnail: State<ImageBitmap?> = _thumbnail
 
+    /**
+     * The type of the attachment.
+     */
     val type: AttachmentType = getAttachmentType(name)
 
     constructor(attachment: FormAttachment, scope: CoroutineScope) : this(
@@ -165,6 +184,9 @@ internal class FormAttachmentState(
         scope = scope
     )
 
+    /**
+     * Loads the attachment and its thumbnail.
+     */
     fun loadAttachment() {
         scope.launch {
             onLoadAttachment().onSuccess {
@@ -186,11 +208,12 @@ internal fun rememberAttachmentElementState(
     val scope = rememberCoroutineScope()
     return rememberSaveable(
         inputs = arrayOf(form),
-        saver = AttachmentElementState.Saver(attachmentFormElement, scope)
+        saver = AttachmentElementState.Saver(attachmentFormElement, scope, form::evaluateExpressions)
     ) {
         AttachmentElementState(
             formElement = attachmentFormElement,
-            scope = scope
+            scope = scope,
+            evaluateExpressions = form::evaluateExpressions
         )
     }
 }

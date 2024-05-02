@@ -132,8 +132,7 @@ internal fun AttachmentFormElement(
                         scope.launch(Dispatchers.IO) {
                             context.readBytes(uri)?.let {
                                 val name = attachments.getNewAttachmentNameForContentType(
-                                    contentType,
-                                    uri
+                                    contentType
                                 )
                                 onAttachmentAdded(name, contentType, it)
                             }
@@ -271,6 +270,10 @@ private fun AddAttachment(
     }
 }
 
+/**
+ * Launches the camera to capture an image. When an image is captured, the [onImageCaptured] callback
+ * is invoked with the URI of the captured image.
+ */
 @Composable
 internal fun ImageCapture(onImageCaptured: (Uri) -> Unit) {
     val context = LocalContext.current
@@ -283,7 +286,7 @@ internal fun ImageCapture(onImageCaptured: (Uri) -> Unit) {
             restore = { Uri.parse(it.first()) }
         )
     ) {
-        val file = context.createImageFile()
+        val file = context.createTempImageFile()
         AttachmentCaptureFileProvider.getImageUri(file, context)
     }
     val cameraLauncher = rememberLauncherForActivityResult(
@@ -302,6 +305,10 @@ internal fun ImageCapture(onImageCaptured: (Uri) -> Unit) {
     }
 }
 
+/**
+ * Launches the Gallery to select an image. When an image is selected, the [onImageSelected] callback
+ * is invoked with the URI of the selected image.
+ */
 @Composable
 internal fun ImagePicker(onImageSelected: (Uri) -> Unit) {
     val launcher = rememberLauncherForActivityResult(
@@ -317,8 +324,7 @@ internal fun ImagePicker(onImageSelected: (Uri) -> Unit) {
 }
 
 private fun List<FormAttachmentState>.getNewAttachmentNameForContentType(
-    contentType: String,
-    uri: Uri
+    contentType: String
 ): String {
     val (attachmentType: AttachmentType, ext: String) = when (contentType) {
         "image/jpeg" -> Pair(AttachmentType.Image, "jpg")
@@ -328,7 +334,7 @@ private fun List<FormAttachmentState>.getNewAttachmentNameForContentType(
     return "$attachmentType $count.$ext"
 }
 
-private fun Context.createImageFile(): File {
+private fun Context.createTempImageFile(): File {
     val timeStamp = Instant.now().toEpochMilli()
     val dir = File(cacheDir, "feature_forms_attachments")
     dir.mkdirs()
