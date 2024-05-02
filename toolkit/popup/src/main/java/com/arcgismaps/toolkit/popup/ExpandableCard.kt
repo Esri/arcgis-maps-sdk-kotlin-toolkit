@@ -31,12 +31,12 @@ import androidx.compose.ui.unit.dp
  * @since 200.5.0
  */
 @Composable
-internal fun ExpandableCard(title: String = "", expandable: Boolean = true, content: @Composable () -> Unit) {
+internal fun ExpandableCard( modifier: Modifier = Modifier, title: String = "", expandable: Boolean = true, content: @Composable () -> Unit) {
     var expanded by remember { mutableStateOf(expandable) }
     Card(
         shape = RoundedCornerShape(5.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(16.dp)
             .clickable(enabled = expandable) { expanded = !expanded }
@@ -68,7 +68,7 @@ internal fun ExpandableCard(title: String = "", expandable: Boolean = true, cont
 @Preview
 @Composable
 private fun ExpandableCardPreview() {
-    ExpandableCard("This is a title", expandable = true) {
+    ExpandableCard(title = "This is a title", expandable = true) {
         Text(
             "Hello World",
             style = MaterialTheme.typography.bodyMedium,
