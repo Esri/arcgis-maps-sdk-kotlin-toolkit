@@ -18,6 +18,18 @@
 package com.arcgismaps.toolkit.geoviewcompose
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupPositionProvider
+import androidx.compose.ui.zIndex
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.view.MapView
 
@@ -27,15 +39,29 @@ public class MapViewScope(internal val mapView: MapView)
 //our warning annotation here.
 public fun MapViewScope.Callout(
     point: Point,
-    content: @Composable () -> Unit
+    modifier: Modifier = Modifier.zIndex(1f),
+    content: @Composable MapViewScope.() -> Unit
 ) {
+    val screenLocation by remember(point) { mutableStateOf(mapView.locationToScreen(point)) }
+    println("foo screen location ${screenLocation.x} ${screenLocation.y}")
+    var currentCoordinates: IntOffset by remember(point) { mutableStateOf(IntOffset(screenLocation.x.toInt(), screenLocation.y.toInt())) }
+        val popupPositionProvider = object : PopupPositionProvider {
+        override fun calculatePosition(anchorBounds: IntRect,
+                                       windowSize: IntSize,
+                                       layoutDirection: LayoutDirection,
+                                       popupContentSize: IntSize
+        ): IntOffset {
+            println("foo anchorBounds rect: $anchorBounds window size $windowSize ppupcontent size $popupContentSize")
+            return currentCoordinates.copy(
+                x = currentCoordinates.x - popupContentSize.width/2,
+                y = currentCoordinates.y + anchorBounds.top - popupContentSize.height - 20
+            )
+        }
+    }
+    Popup(popupPositionProvider) {
 
-    val screenLocation = mapView.locationToScreen(point)
-    //Popup(popupPositionProvider = ) {
         content()
-
-
-    //}
+    }
 
 }
 

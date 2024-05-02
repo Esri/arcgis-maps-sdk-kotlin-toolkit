@@ -30,13 +30,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.zIndex
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.geometry.Polygon
 import com.arcgismaps.geometry.SpatialReference
@@ -126,10 +126,7 @@ import kotlinx.coroutines.launch
 @Composable
 public fun MapView(
     arcGISMap: ArcGISMap,
-    modifier: Modifier = Modifier.drawWithContent {
-        drawContent()
-
-    },
+    modifier: Modifier = Modifier,
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
     onVisibleAreaChanged: ((Polygon) -> Unit)? = null,
@@ -167,7 +164,7 @@ public fun MapView(
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
-    content: (@Composable MapViewScope.() -> Unit)? = null
+    content: (@Composable MapViewScope.(Modifier) -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
@@ -214,7 +211,7 @@ public fun MapView(
 
     val mapViewScope = remember (mapView) { MapViewScope(mapView) }
     if (content != null) {
-        mapViewScope.content()
+        mapViewScope.content(modifier.zIndex(2f))
     }
 
     LaunchedEffect(insets) {
