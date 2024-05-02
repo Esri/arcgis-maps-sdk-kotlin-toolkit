@@ -24,7 +24,6 @@ import com.arcgismaps.mapping.view.ScreenCoordinate
 
 internal class CalloutNode(
     val compositionContext: CompositionContext,
-
 ) : MapNode {
     override fun onAttached() {
 
