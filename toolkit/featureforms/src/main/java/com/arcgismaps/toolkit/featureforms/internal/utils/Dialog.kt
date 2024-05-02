@@ -29,9 +29,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
-import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.VisualMediaType
 import com.arcgismaps.toolkit.featureforms.R
-import com.arcgismaps.toolkit.featureforms.internal.components.attachment.GalleryPicker
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.ImagePicker
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.ImageCapture
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.CodedValueFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComboBoxDialog
@@ -99,9 +98,8 @@ internal sealed class DialogType {
 
     data class ImageCaptureDialog(val onImage: (Uri) -> Unit) : DialogType()
 
-    data class GalleryPickerDialog(
-        val visualMediaType: VisualMediaType,
-        val onPick: (Uri) -> Unit
+    data class ImagePickerDialog(
+        val onSelection: (Uri) -> Unit
     ) : DialogType()
 }
 
@@ -178,10 +176,9 @@ internal fun FeatureFormDialog() {
             }
         }
 
-        is DialogType.GalleryPickerDialog -> {
-            val visualMediaType = (dialogType as DialogType.GalleryPickerDialog).visualMediaType
-            val onMediaPicked = (dialogType as DialogType.GalleryPickerDialog).onPick
-            GalleryPicker(visualMediaType = visualMediaType) {
+        is DialogType.ImagePickerDialog -> {
+            val onMediaPicked = (dialogType as DialogType.ImagePickerDialog).onSelection
+            ImagePicker {
                 onMediaPicked(it)
                 dialogRequester.dismissDialog()
             }

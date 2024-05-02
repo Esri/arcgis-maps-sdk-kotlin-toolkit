@@ -194,8 +194,13 @@ class MapViewModel @Inject constructor(
                     IllegalStateException("cannot save feature edit without a ServiceFeatureTable")
                 )
             val result = serviceFeatureTable.updateFeature(feature).map {
-                serviceFeatureTable.serviceGeodatabase?.applyEdits()
-                    ?: throw IllegalStateException("cannot apply feature edit without a ServiceGeodatabase")
+                serviceFeatureTable.serviceGeodatabase?.let { database ->
+                    return@let if (database.serviceInfo?.canUseServiceGeodatabaseApplyEdits == true) {
+                        database.applyEdits()
+                    } else {
+                        serviceFeatureTable.applyEdits()
+                    }
+                }
                 feature.refresh()
                 // unselect the feature after the edits have been saved
                 (feature.featureTable?.layer as FeatureLayer).clearSelection()

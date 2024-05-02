@@ -18,7 +18,6 @@ package com.arcgismaps.toolkit.featureforms.internal.components.attachment
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -37,6 +36,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Photo
 import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
@@ -62,8 +62,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.VisualMediaType
-import androidx.compose.material.icons.rounded.Photo
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.toolkit.featureforms.internal.utils.AttachmentCaptureFileProvider
 import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
@@ -137,7 +135,6 @@ internal fun AttachmentFormElement(
                                     contentType,
                                     uri
                                 )
-                                Log.e("TAG", "AttachmentFormElement: $name, $contentType, $uri")
                                 onAttachmentAdded(name, contentType, it)
                             }
                         }
@@ -193,7 +190,7 @@ private fun Header(
 
 @Composable
 private fun AddAttachment(
-    hasCameraPermission : Boolean,
+    hasCameraPermission: Boolean,
     onAttachment: (String, Uri) -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -244,7 +241,7 @@ private fun AddAttachment(
                 },
                 onClick = {
                     scope.launch {
-                        pickerStyle.emit(PickerStyle.Gallery)
+                        pickerStyle.emit(PickerStyle.PickImage)
                         showMenu = false
                     }
                 }
@@ -260,11 +257,9 @@ private fun AddAttachment(
                     })
                 }
 
-                PickerStyle.Gallery -> {
+                PickerStyle.PickImage -> {
                     dialogRequester.requestDialog(
-                        DialogType.GalleryPickerDialog(
-                            ActivityResultContracts.PickVisualMedia.ImageOnly
-                        ) { uri ->
+                        DialogType.ImagePickerDialog { uri ->
                             onAttachment("image/jpeg", uri)
                         }
                     )
@@ -308,7 +303,7 @@ internal fun ImageCapture(onImageCaptured: (Uri) -> Unit) {
 }
 
 @Composable
-internal fun GalleryPicker(visualMediaType: VisualMediaType, onImageSelected: (Uri) -> Unit) {
+internal fun ImagePicker(onImageSelected: (Uri) -> Unit) {
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) {
@@ -317,7 +312,7 @@ internal fun GalleryPicker(visualMediaType: VisualMediaType, onImageSelected: (U
         }
     }
     LaunchedEffect(Unit) {
-        launcher.launch(PickVisualMediaRequest(visualMediaType))
+        launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
     }
 }
 
@@ -350,7 +345,7 @@ private fun Context.readBytes(uri: Uri): ByteArray? =
 private sealed class PickerStyle {
     data object File : PickerStyle()
     data object Camera : PickerStyle()
-    data object Gallery : PickerStyle()
+    data object PickImage : PickerStyle()
 }
 
 @Preview
