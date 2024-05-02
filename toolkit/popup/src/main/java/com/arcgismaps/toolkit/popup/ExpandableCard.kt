@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
  * @since 200.5.0
  */
 @Composable
-public fun ExpandableCard(title: String = "", expandable: Boolean = true, content: @Composable () -> Unit) {
+private fun ExpandableCard(title: String = "", expandable: Boolean = true, content: @Composable () -> Unit) {
     var expanded by remember { mutableStateOf(expandable) }
     Card(
         shape = RoundedCornerShape(5.dp),
@@ -67,7 +67,7 @@ public fun ExpandableCard(title: String = "", expandable: Boolean = true, conten
 
 @Preview
 @Composable
-public fun ExpandableCardPreview() {
+private fun ExpandableCardPreview() {
     ExpandableCard("This is a title", expandable = true) {
         Text(
             "Hello World",

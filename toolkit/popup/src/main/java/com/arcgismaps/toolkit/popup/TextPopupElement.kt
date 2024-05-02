@@ -34,7 +34,7 @@ import com.arcgismaps.mapping.popup.TextPopupElement
  * @since 200.5.0
  */
 @Composable
-internal fun HTML(content: String) {
+private fun HTML(content: String) {
     // Set the initial scale to 1 to not allow user scaling
     val header = """
         <header>
@@ -92,13 +92,13 @@ internal fun HTML(content: String) {
  * @since 200.5.0
  */
 @Composable
-public fun TextPopupElement(popupElement: TextPopupElement) {
+internal fun TextPopupElement(popupElement: TextPopupElement) {
     HTML(content = popupElement.text)
 }
 
 @Preview
 @Composable
-internal fun TextPopupElementPreview() {
+private fun TextPopupElementPreview() {
     val tempText =
         "<p><span style='color:#287fb8;font-family:Verdana;font-size:14px;'><strong>{NAME}</strong></span><span style='font-family:Verdana;font-size:14px;'> is a peak in California's {RANGE} range. It ranks </span><span style='color:#aa3427;font-family:Verdana;font-size:14px;'><strong>#{RANK}</strong></span><span style='font-family:Verdana;font-size:14px;'> among the California Fourteeners.</span></p><p><span style='font-family:Verdana;font-size:14px;'>The summit is </span><span style='color:#287fb8;font-family:Verdana;font-size:14px;'><strong>{ELEV_FEET}</strong></span><span style='font-family:Verdana;font-size:14px;'> feet high ({ELEV_METERS} meters) and has a prominence of </span><span style='color:#287fb8;font-family:Verdana;font-size:14px;'><strong>{PROM_FEET}</strong></span><span style='font-family:Verdana;font-size:14px;'> feet ({PROM_METERS} meters).</span></p><p><a href='https://arcgis.com' rel='nofollow ugc'><span style='font-family:Verdana;font-size:14px;'>More info</span></a></p>"
     val popupElement = TextPopupElement(tempText)
