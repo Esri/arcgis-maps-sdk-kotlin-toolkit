@@ -70,6 +70,8 @@ internal class AttachmentElementState(
      */
     val attachments = SnapshotStateList<FormAttachmentState>()
 
+    val isEditable = formElement.isEditable
+
     /**
      * The state of the lazy list that displays the [attachments].
      */

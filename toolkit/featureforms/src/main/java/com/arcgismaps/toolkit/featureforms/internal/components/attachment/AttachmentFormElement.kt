@@ -47,6 +47,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -80,10 +81,11 @@ internal fun AttachmentFormElement(
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val editable by state.isEditable.collectAsState()
     AttachmentFormElement(
         label = state.label,
         description = state.description,
-        editable = true,
+        editable = editable,
         attachments = state.attachments,
         lazyListState = state.lazyListState,
         hasCameraPermission = state.hasCameraPermissions(context),

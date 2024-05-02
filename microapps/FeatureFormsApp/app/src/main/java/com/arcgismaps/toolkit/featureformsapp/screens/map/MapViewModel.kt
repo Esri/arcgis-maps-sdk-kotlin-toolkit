@@ -36,6 +36,8 @@ import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormElement
 import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.layers.FeatureLayer
+import com.arcgismaps.mapping.layers.GroupLayer
+import com.arcgismaps.mapping.layers.Layer
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
@@ -139,12 +141,7 @@ class MapViewModel @Inject constructor(
     private suspend fun checkFeatureFormDefinition() {
         map.load()
         val layer = map.operationalLayers.firstOrNull {
-            if (it is FeatureLayer) {
-                it.load()
-                it.featureFormDefinition != null
-            } else {
-                false
-            }
+            it.hasFeatureFormDefinition()
         }
         _uiState.value = if (layer == null) {
             UIState.NoFeatureFormDefinition
@@ -336,4 +333,20 @@ fun List<FormElement>.getFormElement(fieldName: String): FieldFormElement? {
             null
         }
     }
+}
+
+/**
+ * Returns true if the layer has a feature form definition. If the layer is a [GroupLayer] then
+ * this function will return true if any of the layers in the group have a feature form definition.
+ */
+private suspend fun Layer.hasFeatureFormDefinition(): Boolean = when(this) {
+    is FeatureLayer -> {
+        load()
+        featureFormDefinition != null
+    }
+    is GroupLayer -> {
+        load()
+        layers.any { it.hasFeatureFormDefinition() }
+    }
+    else -> false
 }
