@@ -31,7 +31,6 @@ public fun Callout(location: Point,
 //    if (mapView!!.spatialReference.collectAsState().value == null) return
     if (LocalMapView.current?.drawStatus?.collectAsState()?.value == DrawStatus.InProgress) return
     Log.d("location->", "outer")
-    CompositionLocalProvider(LocalMapView provides mapView) {
         val localMapView = LocalMapView.current
         Log.d("location->", localMapView?.locationToScreen(location)?.x.toString())
 
@@ -53,6 +52,5 @@ public fun Callout(location: Point,
         {
             content.invoke()
         }
-    }
 
 }

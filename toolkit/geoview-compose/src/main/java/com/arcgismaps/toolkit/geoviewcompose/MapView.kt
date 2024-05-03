@@ -75,8 +75,8 @@ import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
 
 @SuppressLint("StaticFieldLeak")
-internal lateinit var mapView: MapView
-internal val LocalMapView = compositionLocalOf<MapView?> { mapView }
+internal lateinit var mapViewStatic: MapView
+internal val LocalMapView = compositionLocalOf<MapView?> { mapViewStatic }
 
 /**
  * A compose equivalent of the view-based [MapView].
@@ -176,7 +176,10 @@ public fun MapView(
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
-    mapView = remember { MapView(context) }
+    val mapView = remember(arcGISMap) { MapView(context) }.also{
+        mapViewStatic = it
+    }
+
     val layoutDirection = LocalLayoutDirection.current
 
         AndroidView(

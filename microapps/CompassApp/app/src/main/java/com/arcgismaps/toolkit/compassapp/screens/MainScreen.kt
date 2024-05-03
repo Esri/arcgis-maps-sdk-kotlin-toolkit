@@ -19,33 +19,27 @@
 package com.arcgismaps.toolkit.compassapp.screens
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Viewpoint
-import com.arcgismaps.toolkit.compass.Compass
 import com.arcgismaps.toolkit.geoviewcompose.Callout
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
-import kotlinx.coroutines.launch
 
 @Composable
 fun MainScreen() {
@@ -58,34 +52,67 @@ fun MainScreen() {
             }
         )
     }
+
+    val arcGISMap2 by remember {
+        mutableStateOf(
+            ArcGISMap(BasemapStyle.ArcGISTopographic).apply {
+                // set the map's viewpoint to North America
+                initialViewpoint = Viewpoint(39.8, -98.6, 10e7)
+            }
+        )
+    }
     var mapRotation by remember { mutableDoubleStateOf(0.0) }
     val mapViewProxy = remember { MapViewProxy() }
+    val mapViewProxy2 = remember { MapViewProxy() }
     val disneyLand = remember { Point(-117.9190, 33.8121, SpatialReference.wgs84()) }
-    // show composable MapView with compass
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        MapView(
-            arcGISMap,
-            modifier = Modifier.fillMaxSize(),
-            mapViewProxy = mapViewProxy,
-            onMapRotationChanged = { rotation -> mapRotation = rotation },
-            content = { Callout(location = disneyLand) { Text("Hello, World!", color = Color.Green) } }
+    var calloutMapOne: @Composable (() -> Unit)? by remember {
+        mutableStateOf(
+            { Callout(location = disneyLand) { Text("Hello, World!", color = Color.Green) } }
         )
-        Row(
+    }
+
+    var calloutMapTwo: @Composable (() -> Unit)? by remember {
+        mutableStateOf(
+            { Callout(location = disneyLand) { Text("Hello, World!", color = Color.Red) } }
+        )
+    }
+    // show composable MapView with compass
+
+    Column {
+        Box(
             modifier = Modifier
-                .height(IntrinsicSize.Max)
-                .fillMaxWidth()
-                .padding(25.dp)
+                .weight(0.5f)
+                .aspectRatio(1.0f)
         ) {
-            val coroutineScope = rememberCoroutineScope()
-            // show the compass and pass the mapRotation state data
-            Compass(rotation = mapRotation) {
-                // reset the Composable MapView viewpoint rotation to point north
-                coroutineScope.launch {
-                    mapViewProxy.setViewpointRotation(0.0)
-                }
-            }
+            MapView(
+                arcGISMap,
+                modifier = Modifier.fillMaxSize(),
+//            modifier = Modifier.weight(0.5f).aspectRatio(1.0f),
+                mapViewProxy = mapViewProxy,
+//            onMapRotationChanged = { rotation -> mapRotation = rotation },
+                content = calloutMapOne
+            )
+
+        }
+        Box(
+            modifier = Modifier
+                .weight(0.5f)
+                .aspectRatio(1.0f)
+        ) {
+            MapView(
+                arcGISMap2,
+                modifier = Modifier.fillMaxSize(),
+//            modifier = Modifier.weight(0.5f).aspectRatio(1.0f),
+                mapViewProxy = mapViewProxy2,
+//            onMapRotationChanged = { rotation -> mapRotation = rotation },
+                content = calloutMapTwo
+            )
+        }
+        Button(onClick = {
+            calloutMapOne = { Callout(location = disneyLand) { Text("Hello again Map One!", color = Color.Blue) } }
+            calloutMapTwo = { Callout(location = disneyLand) { Text("Hello again Map Two!", color = Color.Magenta) } }
+        }) {
+            Text(text = "Change Callout Location in Map 1")
         }
     }
 }
