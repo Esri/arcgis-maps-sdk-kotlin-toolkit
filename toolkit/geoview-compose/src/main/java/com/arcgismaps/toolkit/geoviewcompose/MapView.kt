@@ -17,10 +17,15 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
+import kotlinx.coroutines.flow.collect
+import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -66,7 +71,12 @@ import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.mapping.view.WrapAroundMode
 import com.arcgismaps.mapping.view.geometryeditor.GeometryEditor
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
+
+@SuppressLint("StaticFieldLeak")
+internal lateinit var mapView: MapView
+internal val LocalMapView = compositionLocalOf<MapView?> { mapView }
 
 /**
  * A compose equivalent of the view-based [MapView].
@@ -161,35 +171,42 @@ public fun MapView(
     onLongPress: ((LongPressEvent) -> Unit)? = null,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
-    onDrawStatusChanged: ((DrawStatus) -> Unit)? = null
+    onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
+    content: @Composable (() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
-    val mapView = remember { MapView(context) }
+    mapView = remember { MapView(context) }
     val layoutDirection = LocalLayoutDirection.current
 
-    AndroidView(
-        modifier = modifier.semantics { contentDescription = "MapView" },
-        factory = { mapView },
-        update = {
-            it.map = arcGISMap
-            it.selectionProperties = selectionProperties
-            it.interactionOptions = mapViewInteractionOptions
-            it.locationDisplay = locationDisplay
-            it.labeling = viewLabelProperties
-            it.wrapAroundMode = wrapAroundMode
-            it.geometryEditor = geometryEditor
-            it.grid = grid
-            it.backgroundGrid = backgroundGrid
-            it.isAttributionBarVisible = isAttributionBarVisible
-            it.setTimeExtent(timeExtent)
-            if (it.graphicsOverlays != graphicsOverlays) {
-                it.graphicsOverlays.apply {
-                    clear()
-                    addAll(graphicsOverlays)
+        AndroidView(
+            modifier = modifier.semantics { contentDescription = "MapView" },
+            factory = { mapView },
+            update = {
+                it.map = arcGISMap
+                it.selectionProperties = selectionProperties
+                it.interactionOptions = mapViewInteractionOptions
+                it.locationDisplay = locationDisplay
+                it.labeling = viewLabelProperties
+                it.wrapAroundMode = wrapAroundMode
+                it.geometryEditor = geometryEditor
+                it.grid = grid
+                it.backgroundGrid = backgroundGrid
+                it.isAttributionBarVisible = isAttributionBarVisible
+                it.setTimeExtent(timeExtent)
+                if (it.graphicsOverlays != graphicsOverlays) {
+                    it.graphicsOverlays.apply {
+                        clear()
+                        addAll(graphicsOverlays)
+                    }
                 }
-            }
-        })
+            })
+
+    CompositionLocalProvider(LocalMapView provides mapView) {
+        if (content != null) {
+            content()
+        }
+    }
 
     DisposableEffect(Unit) {
         lifecycleOwner.lifecycle.addObserver(mapView)
@@ -205,6 +222,18 @@ public fun MapView(
             mapViewProxy?.setMapView(null)
         }
     }
+
+//    LaunchedEffect(Unit) {
+//        awaitMap(mapView)
+//    }
+//
+//    CompositionLocalProvider(LocalMapView provides mapView) {
+//        if (content != null) {
+////        Box {
+//            content()
+////            }
+//        }
+//    }
 
     LaunchedEffect(insets) {
         // When this call is made in the AndroidView's update callback, ViewInsets are not applied
@@ -248,6 +277,12 @@ public fun MapView(
         onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
         onVisibleAreaChanged = onVisibleAreaChanged
     )
+}
+
+private suspend fun awaitMap(mapView: MapView): Unit {
+    mapView.drawStatus.takeWhile {
+        it == DrawStatus.InProgress
+    }.collect()
 }
 
 /**

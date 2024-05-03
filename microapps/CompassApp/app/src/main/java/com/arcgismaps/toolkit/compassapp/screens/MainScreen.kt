@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
@@ -33,11 +34,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.geometry.Point
+import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.compass.Compass
+import com.arcgismaps.toolkit.geoviewcompose.Callout
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import kotlinx.coroutines.launch
@@ -55,6 +60,7 @@ fun MainScreen() {
     }
     var mapRotation by remember { mutableDoubleStateOf(0.0) }
     val mapViewProxy = remember { MapViewProxy() }
+    val disneyLand = remember { Point(-117.9190, 33.8121, SpatialReference.wgs84()) }
     // show composable MapView with compass
     Box(
         modifier = Modifier.fillMaxSize()
@@ -63,7 +69,8 @@ fun MainScreen() {
             arcGISMap,
             modifier = Modifier.fillMaxSize(),
             mapViewProxy = mapViewProxy,
-            onMapRotationChanged = { rotation -> mapRotation = rotation }
+            onMapRotationChanged = { rotation -> mapRotation = rotation },
+            content = { Callout(location = disneyLand) { Text("Hello, World!", color = Color.Green) } }
         )
         Row(
             modifier = Modifier
