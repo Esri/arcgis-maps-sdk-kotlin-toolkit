@@ -23,32 +23,25 @@ package com.arcgismaps.toolkit.popupapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
-import com.arcgismaps.toolkit.popupapp.screens.MainScreen
+import com.arcgismaps.toolkit.popupapp.screens.mapscreen.MainScreen
+import com.arcgismaps.toolkit.popupapp.screens.mapscreen.MapViewModel
 import com.arcgismaps.toolkit.popupapp.ui.theme.PopupAppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        val viewModel: MapViewModel by viewModels { MapViewModel.Factory }
         setContent {
             PopupAppTheme {
-                PopupApp()
+                PopupApp(viewModel)
             }
         }
     }
 }
 
 @Composable
-fun PopupApp() {
-    MainScreen()
-}
-
-@Preview(showBackground = true)
-@Composable
-fun AppPreview() {
-    PopupAppTheme {
-        PopupApp()
-    }
+fun PopupApp(viewModel: MapViewModel) {
+    MainScreen(viewModel)
 }
