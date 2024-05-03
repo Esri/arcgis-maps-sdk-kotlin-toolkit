@@ -36,7 +36,6 @@ import com.arcgismaps.toolkit.featureforms.internal.components.base.formattedVal
 import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValidationErrors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 
 internal class TextFieldProperties(
     label: String,
