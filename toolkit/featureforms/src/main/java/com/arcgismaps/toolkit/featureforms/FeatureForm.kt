@@ -27,7 +27,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -202,7 +202,7 @@ private fun FeatureFormBody(
         InitializingExpressions(modifier = Modifier.fillMaxWidth()) {
             initialEvaluation
         }
-        Divider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
+        HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
         // form content
         LazyColumn(
             modifier = Modifier
