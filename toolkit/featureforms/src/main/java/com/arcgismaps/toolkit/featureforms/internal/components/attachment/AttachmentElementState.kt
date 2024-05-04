@@ -70,6 +70,9 @@ internal class AttachmentElementState(
      */
     val attachments = SnapshotStateList<FormAttachmentState>()
 
+    /**
+     * Indicates whether the attachment form element is editable.
+     */
     val isEditable = formElement.isEditable
 
     /**
