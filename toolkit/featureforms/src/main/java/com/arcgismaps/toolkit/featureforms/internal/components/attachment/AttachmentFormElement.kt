@@ -59,11 +59,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.LoadStatus
+import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.utils.AttachmentCaptureFileProvider
 import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
 import com.arcgismaps.toolkit.featureforms.internal.utils.LocalDialogRequester
@@ -215,7 +217,7 @@ private fun AddAttachment(
         ) {
             if (hasCameraPermission) {
                 DropdownMenuItem(
-                    text = { Text(text = "Take Photo") },
+                    text = { Text(text = stringResource(R.string.take_photo)) },
                     trailingIcon = {
                         Icon(
                             imageVector = Icons.Rounded.PhotoCamera,
@@ -232,7 +234,7 @@ private fun AddAttachment(
                 )
             }
             DropdownMenuItem(
-                text = { Text(text = "Add Photo") },
+                text = { Text(text = stringResource(R.string.add_photo)) },
                 trailingIcon = {
                     Icon(
                         imageVector = Icons.Rounded.Photo,
