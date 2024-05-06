@@ -60,6 +60,7 @@ dependencyResolutionManagement {
         }
     }
 }
+gradle.startParameter.excludedTaskNames.addAll(listOf(":buildSrc:testClasses"))
 
 include(":bom")
 project(":bom").projectDir = File(rootDir, "bom")

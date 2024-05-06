@@ -62,6 +62,17 @@ android {
     }
 }
 
+apiValidation {
+    // todo: remove when this is resolved https://github.com/Kotlin/binary-compatibility-validator/issues/74
+    // compose compiler generates public singletons for internal compose functions. this may be resolved in the compose
+    // compiler.
+    val composableSingletons = listOf(
+        "com.arcgismaps.toolkit.popup.ComposableSingletons\$ExpandableCardKt"
+    )
+
+    ignoredClasses.addAll(composableSingletons)
+}
+
 dependencies {
     api(arcgis.mapsSdk)
     implementation(platform(libs.androidx.compose.bom))
@@ -69,6 +80,7 @@ dependencies {
     implementation(libs.bundles.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.material.icons)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
     debugImplementation(libs.bundles.debug)
