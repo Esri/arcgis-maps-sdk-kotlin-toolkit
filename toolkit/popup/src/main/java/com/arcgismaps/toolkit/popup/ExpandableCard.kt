@@ -4,12 +4,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.rounded.ExpandLess
+import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -19,7 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,8 +33,13 @@ import androidx.compose.ui.unit.dp
  * @since 200.5.0
  */
 @Composable
-internal fun ExpandableCard( modifier: Modifier = Modifier, title: String = "", expandable: Boolean = true, content: @Composable () -> Unit) {
-    var expanded by remember { mutableStateOf(expandable) }
+internal fun ExpandableCard(
+    modifier: Modifier = Modifier,
+    title: String = "",
+    expandable: Boolean = true,
+    content: @Composable () -> Unit
+) {
+    var expanded by rememberSaveable { mutableStateOf(expandable) }
     Card(
         shape = RoundedCornerShape(5.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
@@ -43,7 +50,7 @@ internal fun ExpandableCard( modifier: Modifier = Modifier, title: String = "", 
     ) {
         Column {
             if (title.isNotEmpty()) {
-                Row(modifier = Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Text(
                         title,
                         modifier = Modifier.padding(8.dp),
@@ -51,11 +58,12 @@ internal fun ExpandableCard( modifier: Modifier = Modifier, title: String = "", 
                     )
                     IconButton(onClick = { expanded = !expanded }) {
                         Icon(
-                            imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                            imageVector = if (expanded) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore,
                             contentDescription = "More"
                         )
                     }
                 }
+                Spacer(modifier = Modifier.height(10.dp))
             }
 
             if (expanded) {
