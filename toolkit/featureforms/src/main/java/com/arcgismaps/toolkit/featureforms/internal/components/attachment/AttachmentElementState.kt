@@ -48,6 +48,7 @@ import com.arcgismaps.toolkit.featureforms.internal.components.base.FormElementS
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.util.Objects
 
 /**
  * Represents the state of an [AttachmentFormElement]
@@ -59,7 +60,7 @@ import kotlinx.coroutines.launch
 internal class AttachmentElementState(
     private val formElement: AttachmentFormElement,
     private val scope: CoroutineScope,
-    private val evaluateExpressions : suspend () -> Unit
+    private val evaluateExpressions: suspend () -> Unit
 ) : FormElementState(
     label = formElement.label,
     description = formElement.description,
@@ -95,7 +96,7 @@ internal class AttachmentElementState(
         attachments.clear()
         attachments.addAll(
             formElement.attachments.map {
-                FormAttachmentState(it, scope)
+                FormAttachmentState(this, it, scope)
             }
         )
     }
@@ -112,6 +113,18 @@ internal class AttachmentElementState(
         attachments.last().loadAttachment()
         // scroll to the newly added attachment
         lazyListState.scrollToItem(attachments.size - 1)
+    }
+
+    suspend fun deleteAttachment(formAttachment: FormAttachment) {
+        formElement.deleteAttachment(formAttachment)
+        loadAttachments()
+    }
+
+    suspend fun renameAttachment(formAttachment: FormAttachment, newName: String) {
+        if (formAttachment.name != newName) {
+            formElement.renameAttachment(formAttachment, newName)
+            loadAttachments()
+        }
     }
 
     fun hasCameraPermissions(context: Context): Boolean = ContextCompat.checkSelfPermission(
@@ -166,6 +179,8 @@ internal class FormAttachmentState(
     val loadStatus: StateFlow<LoadStatus>,
     private val onLoadAttachment: suspend () -> Result<Unit>,
     private val onLoadThumbnail: suspend () -> Result<BitmapDrawable?>,
+    val deleteAttachment: suspend () -> Unit,
+    val renameAttachment: suspend (String) -> Unit,
     private val scope: CoroutineScope
 ) {
     private val _thumbnail: MutableState<ImageBitmap?> = mutableStateOf(null)
@@ -180,12 +195,22 @@ internal class FormAttachmentState(
      */
     val type: AttachmentType = getAttachmentType(name)
 
-    constructor(attachment: FormAttachment, scope: CoroutineScope) : this(
+    constructor(
+        element: AttachmentElementState,
+        attachment: FormAttachment,
+        scope: CoroutineScope
+    ) : this(
         name = attachment.name,
         size = attachment.size,
         loadStatus = attachment.loadStatus,
         onLoadAttachment = attachment::load,
         onLoadThumbnail = attachment::createFullImage,
+        deleteAttachment = {
+            element.deleteAttachment(attachment)
+        },
+        renameAttachment = {
+            element.renameAttachment(attachment, it)
+        },
         scope = scope
     )
 
@@ -203,6 +228,23 @@ internal class FormAttachmentState(
             }
         }
     }
+
+    override fun hashCode(): Int {
+        return Objects.hash(name, size, type)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as FormAttachmentState
+
+        if (name != other.name) return false
+        if (size != other.size) return false
+        if (type != other.type) return false
+
+        return true
+    }
 }
 
 @Composable
@@ -213,7 +255,11 @@ internal fun rememberAttachmentElementState(
     val scope = rememberCoroutineScope()
     return rememberSaveable(
         inputs = arrayOf(form),
-        saver = AttachmentElementState.Saver(attachmentFormElement, scope, form::evaluateExpressions)
+        saver = AttachmentElementState.Saver(
+            attachmentFormElement,
+            scope,
+            form::evaluateExpressions
+        )
     ) {
         AttachmentElementState(
             formElement = attachmentFormElement,

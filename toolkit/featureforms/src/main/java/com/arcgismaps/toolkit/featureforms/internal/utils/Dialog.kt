@@ -30,8 +30,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
 import com.arcgismaps.toolkit.featureforms.R
-import com.arcgismaps.toolkit.featureforms.internal.components.attachment.ImagePicker
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.ImageCapture
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.ImagePicker
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.RenameAttachmentDialog
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.CodedValueFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComboBoxDialog
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.DateTimeFieldState
@@ -100,6 +101,11 @@ internal sealed class DialogType {
 
     data class ImagePickerDialog(
         val onSelection: (Uri) -> Unit
+    ) : DialogType()
+
+    data class RenameAttachmentDialog(
+        val name : String,
+        val onRename: (String) -> Unit
     ) : DialogType()
 }
 
@@ -180,6 +186,20 @@ internal fun FeatureFormDialog() {
             val onMediaPicked = (dialogType as DialogType.ImagePickerDialog).onSelection
             ImagePicker {
                 onMediaPicked(it)
+                dialogRequester.dismissDialog()
+            }
+        }
+
+        is DialogType.RenameAttachmentDialog -> {
+            val onRenameAttachment = (dialogType as DialogType.RenameAttachmentDialog).onRename
+            val name = (dialogType as DialogType.RenameAttachmentDialog).name
+            RenameAttachmentDialog(
+                name = name,
+                onRename = {
+                    onRenameAttachment(it)
+                    dialogRequester.dismissDialog()
+                }
+            ) {
                 dialogRequester.dismissDialog()
             }
         }

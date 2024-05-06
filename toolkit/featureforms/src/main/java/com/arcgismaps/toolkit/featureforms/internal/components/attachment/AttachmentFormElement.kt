@@ -156,7 +156,7 @@ private fun Carousel(state: LazyListState, attachments: List<FormAttachmentState
         state = state,
         horizontalArrangement = Arrangement.spacedBy(15.dp),
     ) {
-        items(attachments, key = { it.name + it.type + it.size }) {
+        items(attachments, key = { it.hashCode() }) {
             AttachmentTile(it)
         }
     }
@@ -372,6 +372,8 @@ private fun AttachmentFormElementPreview() {
                 MutableStateFlow(LoadStatus.Loaded),
                 { Result.success(Unit) },
                 { Result.success(null) },
+                {},
+                {},
                 scope = rememberCoroutineScope()
             )
         ),
