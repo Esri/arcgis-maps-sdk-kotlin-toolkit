@@ -17,6 +17,7 @@
 package com.arcgismaps.toolkit.featureforms.internal.utils
 
 import android.content.Context
+import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
@@ -29,6 +30,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
 import com.arcgismaps.toolkit.featureforms.R
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.ImagePicker
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.ImageCapture
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.CodedValueFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComboBoxDialog
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.DateTimeFieldState
@@ -92,6 +95,12 @@ internal sealed class DialogType {
      * @param state The [DateTimeFieldState] to use for the dialog.
      */
     data class DateTimeDialog(val state: DateTimeFieldState) : DialogType()
+
+    data class ImageCaptureDialog(val onImage: (Uri) -> Unit) : DialogType()
+
+    data class ImagePickerDialog(
+        val onSelection: (Uri) -> Unit
+    ) : DialogType()
 }
 
 /**
@@ -157,6 +166,22 @@ internal fun FeatureFormDialog() {
                     dialogRequester.dismissDialog()
                 }
             )
+        }
+
+        is DialogType.ImageCaptureDialog -> {
+            val onImage = (dialogType as DialogType.ImageCaptureDialog).onImage
+            ImageCapture {
+                onImage(it)
+                dialogRequester.dismissDialog()
+            }
+        }
+
+        is DialogType.ImagePickerDialog -> {
+            val onMediaPicked = (dialogType as DialogType.ImagePickerDialog).onSelection
+            ImagePicker {
+                onMediaPicked(it)
+                dialogRequester.dismissDialog()
+            }
         }
 
         else -> {
