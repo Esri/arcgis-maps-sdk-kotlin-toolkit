@@ -47,6 +47,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -115,7 +116,6 @@ public fun FloorFilter(
     val uiProperties = floorFilterState.uiProperties
 
     Surface(
-        modifier = modifier.semantics { contentDescription = "FloorFilterComponent" },
         shadowElevation = 10.dp,
         color = Color.Transparent
     ) {
@@ -279,7 +279,9 @@ internal fun FloorListColumn(
         if (measureHeight == null)
             modifier.fillMaxWidth()
         else
-            modifier.fillMaxWidth().height(measureHeight),
+            modifier
+                .fillMaxWidth()
+                .height(measureHeight),
         reverseLayout = true,
         userScrollEnabled = true
     ) {
@@ -312,7 +314,7 @@ internal fun SiteFacilityButton(
     onFacilitiesSelectorVisible: (Boolean) -> Unit
 ) {
     Box(
-        modifier = modifier.semantics { contentDescription = "SiteFacilityButton" }
+        modifier = modifier
             .height(uiProperties.buttonSize.height.dp)
             .clickable {
                 onSiteFacilitySelectorVisibilityChanged(true)
@@ -320,7 +322,7 @@ internal fun SiteFacilityButton(
         Icon(
             painter = painterResource(id = R.drawable.ic_site_facility_24),
             tint = uiProperties.selectedForegroundColor,
-            contentDescription = "Facilities icon",
+            contentDescription = stringResource(R.string.site_facility_button),
             modifier = modifier
                 .height(uiProperties.buttonSize.height.dp)
                 .width(uiProperties.buttonSize.width.dp)
@@ -352,15 +354,15 @@ internal fun FloorListCloseButton(
     buttonSize: Size,
     onClick: (Unit) -> Unit
 ) {
-    Box(modifier
-        .fillMaxWidth()
-        .height(buttonSize.height.dp)
-        .clickable { onClick(Unit) }
-        .semantics { contentDescription = "FloorListCloseButton" }) {
+    Box(
+        modifier
+            .fillMaxWidth()
+            .height(buttonSize.height.dp)
+            .clickable { onClick(Unit) }) {
         Icon(
             modifier = modifier.align(Center),
             painter = painterResource(id = R.drawable.ic_x_24),
-            contentDescription = "Close icon"
+            contentDescription = stringResource(R.string.close)
         )
     }
 }
@@ -379,6 +381,7 @@ internal fun FloorLevelSelectButton(
     uiProperties: UIProperties,
     onFloorLevelSelected: (Int) -> Unit,
 ) {
+    val floorLevelSelectButton = stringResource(R.string.floor_level_select_button)
     Text(
         text = floorText,
         textAlign = TextAlign.Center,
@@ -392,6 +395,6 @@ internal fun FloorLevelSelectButton(
             .height(uiProperties.buttonSize.height.dp)
             .fillMaxWidth()
             .wrapContentHeight(align = CenterVertically)
-            .semantics { contentDescription = "FloorLevelSelectButton" },
+            .semantics { contentDescription = floorLevelSelectButton },
     )
 }

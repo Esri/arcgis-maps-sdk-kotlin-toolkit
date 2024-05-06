@@ -1,11 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="floor_filter_view_filter_hint_sites">Filter sites&#8230;</string>
-    <string name="floor_filter_view_filter_hint_facilities">Filter facilities&#8230;</string>
-    <!-- This text is a label on a textfield that can fit 24 chars -->
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
+    <string name="floor_filter_view_filter_hint_sites">Filter sites…</string>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
+    <string name="floor_filter_view_filter_hint_facilities">Filter facilities…</string>
+    <!-- This text is a label on a text field that can fit 24 chars -->
     <string name="floor_filter_select_site">Select a site</string>
-    <!-- This text is a label on a textfield that can fit 23 chars -->
+    <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Select a facility</string>
     <string name="floor_filter_no_results">No results found.</string>
-    <string name="floor_filter_site_selector_top_bar">Site\u0020-\u0020</string>
+    <string name="not_available">Not available</string>
+    <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
+    <string name="floor_filter_site_selector_top_bar">Site - %1$s</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_facility_button">Sites and facilities button</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="floor_level_select_button">Floor level select button</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_item">Site item</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="facility_item">Facility item</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="clear_search">Clear search</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="close">Close</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="go_back_to_site_selector">Go back to site selector</string>
 </resources>
