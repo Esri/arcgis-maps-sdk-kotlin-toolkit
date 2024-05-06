@@ -64,7 +64,7 @@ gradle.startParameter.excludedTaskNames.addAll(listOf(":buildSrc:testClasses"))
 
 include(":bom")
 project(":bom").projectDir = File(rootDir, "bom")
-//include(":kdoc")
+include(":kdoc")
 include(":authentication-app")
 project(":authentication-app").projectDir = File(rootDir, "microapps/AuthenticationApp/app")
 include(":authentication")
