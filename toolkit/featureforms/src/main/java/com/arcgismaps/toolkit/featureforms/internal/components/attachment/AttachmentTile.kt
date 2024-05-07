@@ -163,9 +163,12 @@ internal fun AttachmentTile(
                     },
                     onClick = {
                         showContextMenu = false
-                        dialogRequester.requestDialog(DialogType.RenameAttachmentDialog(state.name) {
-                            state.rename(it)
-                        })
+                        dialogRequester.requestDialog(
+                            DialogType.RenameAttachmentDialog(
+                                stateId = state.elementStateId,
+                                name = state.name,
+                            )
+                        )
                     })
                 DropdownMenuItem(
                     text = { Text(text = stringResource(R.string.delete)) },
@@ -182,7 +185,7 @@ internal fun AttachmentTile(
                     ),
                     onClick = {
                         showContextMenu = false
-                        scope.launch { state.delete() }
+                        scope.launch { state.deleteAttachment() }
                     })
             }
         }

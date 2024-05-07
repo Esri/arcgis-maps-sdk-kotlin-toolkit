@@ -58,10 +58,10 @@ import java.util.Objects
  * @param evaluateExpressions A method to evaluates the expressions in the form.
  */
 internal class AttachmentElementState(
+    id: Int,
     private val formElement: AttachmentFormElement,
     private val scope: CoroutineScope,
-    id : Int,
-    private val evaluateExpressions : suspend () -> Unit
+    private val evaluateExpressions: suspend () -> Unit
 ) : FormElementState(
     label = formElement.label,
     description = formElement.description,
@@ -112,7 +112,7 @@ internal class AttachmentElementState(
         // refresh the list of attachments
         loadAttachments()
         // load the attachment that was just added
-        attachments.last().loadAttachment()
+        attachments.last().load()
         // scroll to the newly added attachment
         lazyListState.scrollToItem(attachments.size - 1)
     }
@@ -122,7 +122,8 @@ internal class AttachmentElementState(
         loadAttachments()
     }
 
-    suspend fun renameAttachment(formAttachment: FormAttachment, newName: String) {
+    suspend fun renameAttachment(name: String, newName: String) {
+        val formAttachment = formElement.attachments.firstOrNull { it.name == name } ?: return
         if (formAttachment.name != newName) {
             formElement.renameAttachment(formAttachment, newName)
             loadAttachments()
@@ -151,12 +152,17 @@ internal class AttachmentElementState(
                 }
             },
             restore = { savedList ->
-                AttachmentElementState(attachmentFormElement, scope, attachmentFormElement.hashCode() , evaluateExpressions).also {
+                AttachmentElementState(
+                    id = attachmentFormElement.hashCode(),
+                    formElement = attachmentFormElement,
+                    scope = scope,
+                    evaluateExpressions = evaluateExpressions
+                ).also {
                     scope.launch {
                         it.loadAttachments()
                         // load the attachments that were previously loaded
                         savedList.forEach { index ->
-                            it.attachments[index].loadAttachment()
+                            it.attachments[index].load()
                         }
                     }
                 }
@@ -178,17 +184,17 @@ internal class AttachmentElementState(
 internal class FormAttachmentState(
     val name: String,
     val size: Long,
+    val elementStateId: Int,
     val loadStatus: StateFlow<LoadStatus>,
     private val onLoadAttachment: suspend () -> Result<Unit>,
     private val onLoadThumbnail: suspend () -> Result<BitmapDrawable?>,
     val deleteAttachment: suspend () -> Unit,
-    val renameAttachment: suspend (String) -> Unit,
-    private val scope: CoroutineScope
+    private val scope: CoroutineScope,
 ) {
     private val _thumbnail: MutableState<ImageBitmap?> = mutableStateOf(null)
 
     /**
-     * The thumbnail of the attachment. This is `null` until [loadAttachment] is called.
+     * The thumbnail of the attachment. This is `null` until [load] is called.
      */
     val thumbnail: State<ImageBitmap?> = _thumbnail
 
@@ -204,14 +210,12 @@ internal class FormAttachmentState(
     ) : this(
         name = attachment.name,
         size = attachment.size,
+        elementStateId = element.id,
         loadStatus = attachment.loadStatus,
         onLoadAttachment = attachment::load,
         onLoadThumbnail = attachment::createFullImage,
         deleteAttachment = {
             element.deleteAttachment(attachment)
-        },
-        renameAttachment = {
-            element.renameAttachment(attachment, it)
         },
         scope = scope
     )
@@ -219,7 +223,7 @@ internal class FormAttachmentState(
     /**
      * Loads the attachment and its thumbnail.
      */
-    fun loadAttachment() {
+    fun load() {
         scope.launch {
             onLoadAttachment().onSuccess {
                 onLoadThumbnail().onSuccess {

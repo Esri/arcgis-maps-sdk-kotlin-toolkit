@@ -365,10 +365,10 @@ private fun AttachmentFormElementPreview() {
             FormAttachmentState(
                 "Photo 1.jpg",
                 2024,
+                1,
                 MutableStateFlow(LoadStatus.Loaded),
                 { Result.success(Unit) },
                 { Result.success(null) },
-                {},
                 {},
                 scope = rememberCoroutineScope()
             )

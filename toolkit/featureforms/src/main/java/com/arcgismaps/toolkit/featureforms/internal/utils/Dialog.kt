@@ -101,7 +101,7 @@ internal sealed class DialogType {
      *
      * @param stateId The id of the [DateTimeFieldState] that requested the dialog.
      */
-    data class DateTimeDialog(val stateId : Int) : DialogType()
+    data class DateTimeDialog(val stateId: Int) : DialogType()
 
     /**
      * Indicates an image capture dialog.
@@ -110,8 +110,8 @@ internal sealed class DialogType {
      * @param contentType The content type of the image to capture.
      */
     data class ImageCaptureDialog(
-        val stateId : Int,
-        val contentType : String
+        val stateId: Int,
+        val contentType: String
     ) : DialogType()
 
     /**
@@ -122,12 +122,13 @@ internal sealed class DialogType {
      */
     data class ImagePickerDialog(
         val stateId: Int,
-        val contentType : String
+        val contentType: String
     ) : DialogType()
 
+
     data class RenameAttachmentDialog(
-        val name : String,
-        val onRename: (String) -> Unit
+        val stateId: Int,
+        val name: String
     ) : DialogType()
 }
 
@@ -135,7 +136,7 @@ internal sealed class DialogType {
  * Shows the appropriate dialogs as requested by the [LocalDialogRequester].
  */
 @Composable
-internal fun FeatureFormDialog(states : FormStateCollection) {
+internal fun FeatureFormDialog(states: FormStateCollection) {
     val focusManager = LocalFocusManager.current
     val dialogRequester = LocalDialogRequester.current
     val dialogType by dialogRequester.requestFlow.collectAsState()
@@ -235,13 +236,16 @@ internal fun FeatureFormDialog(states : FormStateCollection) {
         }
 
         is DialogType.RenameAttachmentDialog -> {
-            val onRenameAttachment = (dialogType as DialogType.RenameAttachmentDialog).onRename
+            val stateId = (dialogType as DialogType.RenameAttachmentDialog).stateId
             val name = (dialogType as DialogType.RenameAttachmentDialog).name
+            val state = states[stateId]!! as AttachmentElementState
             RenameAttachmentDialog(
                 name = name,
-                onRename = {
-                    onRenameAttachment(it)
-                    dialogRequester.dismissDialog()
+                onRename = { newName ->
+                    scope.launch {
+                        state.renameAttachment(name, newName)
+                        dialogRequester.dismissDialog()
+                    }
                 }
             ) {
                 dialogRequester.dismissDialog()
