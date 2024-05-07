@@ -20,6 +20,7 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.drawable.BitmapDrawable
+import android.util.Log
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AudioFile
@@ -59,11 +60,13 @@ import kotlinx.coroutines.launch
 internal class AttachmentElementState(
     private val formElement: AttachmentFormElement,
     private val scope: CoroutineScope,
+    id : Int,
     private val evaluateExpressions : suspend () -> Unit
 ) : FormElementState(
     label = formElement.label,
     description = formElement.description,
     isVisible = formElement.isVisible,
+    id = id
 ) {
     /**
      * The attachments associated with the form element.
@@ -84,6 +87,7 @@ internal class AttachmentElementState(
         scope.launch {
             loadAttachments()
         }
+        Log.e("TAG", "id: $id, ${hashCode()}", )
     }
 
     /**
@@ -136,7 +140,7 @@ internal class AttachmentElementState(
                 }
             },
             restore = { savedList ->
-                AttachmentElementState(attachmentFormElement, scope, evaluateExpressions).also {
+                AttachmentElementState(attachmentFormElement, scope, attachmentFormElement.hashCode() , evaluateExpressions).also {
                     scope.launch {
                         it.loadAttachments()
                         // load the attachments that were previously loaded
@@ -218,6 +222,7 @@ internal fun rememberAttachmentElementState(
         AttachmentElementState(
             formElement = attachmentFormElement,
             scope = scope,
+            id = attachmentFormElement.hashCode(),
             evaluateExpressions = form::evaluateExpressions
         )
     }

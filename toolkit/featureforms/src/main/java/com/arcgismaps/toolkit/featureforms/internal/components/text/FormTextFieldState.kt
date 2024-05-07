@@ -68,12 +68,14 @@ internal class TextFieldProperties(
  */
 @Stable
 internal class FormTextFieldState(
+    id : Int,
     properties: TextFieldProperties,
     initialValue: String = properties.value.value,
     scope: CoroutineScope,
     updateValue: (Any?) -> Unit,
     evaluateExpressions: suspend () -> Result<List<FormExpressionEvaluationError>>
 ) : BaseFieldState<String>(
+    id = id,
     properties = properties,
     initialValue = initialValue,
     scope = scope,
@@ -132,6 +134,7 @@ internal class FormTextFieldState(
                 val maxLength = (formElement.input as? TextBoxFormInput)?.maxLength
                     ?: (formElement.input as TextAreaFormInput).maxLength
                 FormTextFieldState(
+                    id = formElement.hashCode(),
                     properties = TextFieldProperties(
                         label = formElement.label,
                         placeholder = formElement.hint,
@@ -172,6 +175,7 @@ internal fun rememberFormTextFieldState(
     saver = FormTextFieldState.Saver(field, form, scope)
 ) {
     FormTextFieldState(
+        id = field.hashCode(),
         properties = TextFieldProperties(
             label = field.label,
             placeholder = field.hint,

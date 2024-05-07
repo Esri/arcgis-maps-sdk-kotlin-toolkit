@@ -27,15 +27,17 @@ import com.arcgismaps.mapping.featureforms.GroupFormElement
 import kotlinx.coroutines.flow.StateFlow
 
 internal class BaseGroupState(
+    id : Int,
     label: String,
     description: String,
     isVisible: StateFlow<Boolean>,
     expanded: Boolean,
     val fieldStates: FormStateCollection
 ) : FormElementState(
+    id = id,
     label = label,
     description = description,
-    isVisible = isVisible
+    isVisible = isVisible,
 ) {
     private val _expanded = mutableStateOf(expanded)
     val expanded: State<Boolean> = _expanded
@@ -54,11 +56,12 @@ internal class BaseGroupState(
             },
             restore = {
                 BaseGroupState(
+                    id = groupElement.hashCode(),
                     label = groupElement.label,
                     description = groupElement.description,
                     isVisible = groupElement.isVisible,
                     expanded = it,
-                    fieldStates = fieldStates
+                    fieldStates = fieldStates,
                 )
             }
         )
@@ -75,10 +78,11 @@ internal fun rememberBaseGroupState(
     saver = BaseGroupState.Saver(groupElement, fieldStates)
 ) {
     BaseGroupState(
+        id = groupElement.hashCode(),
         label = groupElement.label,
         description = groupElement.description,
         isVisible = groupElement.isVisible,
         expanded = groupElement.initialState == FormGroupState.Expanded,
-        fieldStates = fieldStates
+        fieldStates = fieldStates,
     )
 }

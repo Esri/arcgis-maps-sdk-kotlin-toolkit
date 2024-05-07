@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.datetime
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
@@ -66,12 +67,14 @@ internal class DateTimeFieldProperties(
  * called after a successful [updateValue].
  */
 internal class DateTimeFieldState(
+    id : Int,
     properties: DateTimeFieldProperties,
     initialValue: Instant? = properties.value.value,
     scope: CoroutineScope,
     updateValue: (Any?) -> Unit,
     evaluateExpressions: suspend () -> Result<List<FormExpressionEvaluationError>>
 ) : BaseFieldState<Instant?>(
+    id = id,
     properties = properties,
     initialValue = initialValue,
     scope = scope,
@@ -85,6 +88,10 @@ internal class DateTimeFieldState(
     val shouldShowTime: Boolean = properties.shouldShowTime
 
     override fun typeConverter(input: Instant?): Any? = input
+
+    init {
+        Log.e("TAG", "id : $label: ${hashCode()}", )
+    }
     
     companion object {
         fun Saver(
@@ -98,6 +105,7 @@ internal class DateTimeFieldState(
             restore = { list ->
                 val input = field.input as DateTimePickerFormInput
                 DateTimeFieldState(
+                    id = field.hashCode(),
                     properties = DateTimeFieldProperties(
                         label = field.label,
                         placeholder = field.hint,
@@ -140,6 +148,7 @@ internal fun rememberDateTimeFieldState(
     )
 ) {
     DateTimeFieldState(
+        id = field.hashCode(),
         properties = DateTimeFieldProperties(
             label = field.label,
             placeholder = field.hint,

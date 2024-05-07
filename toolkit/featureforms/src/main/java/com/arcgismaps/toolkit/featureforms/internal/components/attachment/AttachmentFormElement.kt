@@ -88,6 +88,7 @@ internal fun AttachmentFormElement(
         label = state.label,
         description = state.description,
         editable = editable,
+        stateId = state.id,
         attachments = state.attachments,
         lazyListState = state.lazyListState,
         hasCameraPermission = state.hasCameraPermissions(context),
@@ -105,6 +106,7 @@ internal fun AttachmentFormElement(
     label: String,
     description: String,
     editable: Boolean,
+    stateId : Int,
     attachments: List<FormAttachmentState>,
     lazyListState: LazyListState,
     hasCameraPermission: Boolean,
@@ -131,17 +133,9 @@ internal fun AttachmentFormElement(
                 if (editable) {
                     // Add attachment button
                     AddAttachment(
+                        stateId = stateId,
                         hasCameraPermission = hasCameraPermission
-                    ) { contentType, uri ->
-                        scope.launch(Dispatchers.IO) {
-                            context.readBytes(uri)?.let {
-                                val name = attachments.getNewAttachmentNameForContentType(
-                                    contentType
-                                )
-                                onAttachmentAdded(name, contentType, it)
-                            }
-                        }
-                    }
+                    )
                 }
             }
             Spacer(modifier = Modifier.height(20.dp))
@@ -193,8 +187,8 @@ private fun Header(
 
 @Composable
 private fun AddAttachment(
+    stateId : Int,
     hasCameraPermission: Boolean,
-    onAttachment: (String, Uri) -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
     val dialogRequester = LocalDialogRequester.current
@@ -255,15 +249,16 @@ private fun AddAttachment(
         pickerStyle.collect {
             when (it) {
                 PickerStyle.Camera -> {
-                    dialogRequester.requestDialog(DialogType.ImageCaptureDialog { uri ->
-                        onAttachment("image/jpeg", uri)
-                    })
+                    dialogRequester.requestDialog(DialogType.ImageCaptureDialog(
+                        stateId = stateId,
+                        contentType = "image/jpeg"
+                    ))
                 }
 
                 PickerStyle.PickImage -> {
                     dialogRequester.requestDialog(
                         DialogType.ImagePickerDialog { uri ->
-                            onAttachment("image/jpeg", uri)
+                            //onAttachment("image/jpeg", uri)
                         }
                     )
                 }
@@ -327,7 +322,7 @@ internal fun ImagePicker(onImageSelected: (Uri) -> Unit) {
     }
 }
 
-private fun List<FormAttachmentState>.getNewAttachmentNameForContentType(
+internal fun List<FormAttachmentState>.getNewAttachmentNameForContentType(
     contentType: String
 ): String {
     val (attachmentType: AttachmentType, ext: String) = when (contentType) {
@@ -338,7 +333,7 @@ private fun List<FormAttachmentState>.getNewAttachmentNameForContentType(
     return "$attachmentType $count.$ext"
 }
 
-private fun Context.createTempImageFile(): File {
+internal fun Context.createTempImageFile(): File {
     val timeStamp = Instant.now().toEpochMilli()
     val dir = File(cacheDir, "feature_forms_attachments")
     dir.mkdirs()
@@ -348,9 +343,6 @@ private fun Context.createTempImageFile(): File {
         dir,
     )
 }
-
-private fun Context.readBytes(uri: Uri): ByteArray? =
-    contentResolver.openInputStream(uri)?.use { it.buffered().readBytes() }
 
 private sealed class PickerStyle {
     data object File : PickerStyle()
@@ -365,6 +357,7 @@ private fun AttachmentFormElementPreview() {
         label = "Attachments",
         description = "Add attachments",
         editable = true,
+        stateId = 1,
         attachments = listOf(
             FormAttachmentState(
                 "Photo 1.jpg",

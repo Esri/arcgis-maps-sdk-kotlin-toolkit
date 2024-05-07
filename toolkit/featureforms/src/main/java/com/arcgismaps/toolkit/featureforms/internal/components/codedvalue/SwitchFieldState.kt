@@ -80,12 +80,14 @@ internal class SwitchFieldProperties(
  */
 @Stable
 internal class SwitchFieldState(
+    id : Int,
     properties: SwitchFieldProperties,
     val initialValue: Any? = properties.value.value,
     scope: CoroutineScope,
     updateValue: (Any?) -> Unit,
     evaluateExpressions: suspend () -> Result<List<FormExpressionEvaluationError>>
 ) : CodedValueFieldState(
+    id = id,
     properties = properties,
     scope = scope,
     initialValue = initialValue,
@@ -123,6 +125,7 @@ internal class SwitchFieldState(
             restore = { list ->
                 val input = formElement.input as SwitchFormInput
                 SwitchFieldState(
+                    id = formElement.hashCode(),
                     properties = SwitchFieldProperties(
                         label = formElement.label,
                         placeholder = formElement.hint,
@@ -167,6 +170,7 @@ internal fun rememberSwitchFieldState(
     val fallback = initialValue.isEmpty()
         || (field.value.value != input.onValue.code && field.value.value != input.offValue.code)
     SwitchFieldState(
+        id = field.hashCode(),
         properties = SwitchFieldProperties(
             label = field.label,
             placeholder = field.hint,

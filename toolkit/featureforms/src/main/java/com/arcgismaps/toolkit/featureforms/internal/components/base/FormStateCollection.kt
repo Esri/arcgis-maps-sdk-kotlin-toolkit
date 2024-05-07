@@ -33,6 +33,15 @@ internal interface FormStateCollection : Iterable<FormStateCollection.Entry> {
      * @return the [FormElementState] associated with the formElement, or null if none.
      */
     operator fun get(formElement: FormElement): FormElementState?
+
+    /**
+     * Provides the bracket operator to the collection.
+     *
+     * @param id the unique identifier [FormElementState.id]
+     * @return the [FormElementState] associated with the id, or null if none.
+     */
+    operator fun get(id: Int): FormElementState?
+
     interface Entry {
         val formElement: FormElement
         val state: FormElementState
@@ -64,7 +73,8 @@ internal interface MutableFormStateCollection : FormStateCollection {
 /**
  * Creates a new [MutableFormStateCollection].
  */
-internal fun MutableFormStateCollection(): MutableFormStateCollection = MutableFormStateCollectionImpl()
+internal fun MutableFormStateCollection(): MutableFormStateCollection =
+    MutableFormStateCollectionImpl()
 
 /**
  * Default implementation for a [MutableFormStateCollection].
@@ -83,6 +93,9 @@ private class MutableFormStateCollectionImpl : MutableFormStateCollection {
 
     override operator fun get(formElement: FormElement): FormElementState? =
         entries.firstOrNull { it.formElement == formElement }?.state
+
+    override fun get(id: Int): FormElementState? =
+        entries.firstOrNull { it.formElement.hashCode() == id }?.state
 
     /**
      * Default implementation for a [FormStateCollection.Entry].

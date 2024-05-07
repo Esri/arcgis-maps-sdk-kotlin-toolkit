@@ -47,6 +47,7 @@ internal open class CodedValueFieldProperties(
  * A class to handle the state of any coded value type. Essential properties are inherited
  * from the [BaseFieldState].
  *
+ * @param id Unique identifier for the field.
  * @param properties the [CodedValueFieldProperties] associated with this state.
  * @param initialValue optional initial value to set for this field. It is set to the value of
  * [TextFieldProperties.value] by default.
@@ -57,12 +58,14 @@ internal open class CodedValueFieldProperties(
  * called after a successful [updateValue].
  */
 internal abstract class CodedValueFieldState(
+    id : Int,
     properties: CodedValueFieldProperties,
     initialValue: Any? = properties.value.value,
     scope: CoroutineScope,
     updateValue: (Any?) -> Unit,
     evaluateExpressions: suspend () -> Result<List<FormExpressionEvaluationError>>
 ) : BaseFieldState<Any?>(
+    id = id,
     properties = properties,
     scope = scope,
     initialValue = initialValue,

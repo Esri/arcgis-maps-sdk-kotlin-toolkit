@@ -141,7 +141,7 @@ internal fun ComboBoxField(
         interactionSource.interactions.collect {
             if (it is PressInteraction.Release) {
                 if (isEditable) {
-                    dialogRequester.requestDialog(DialogType.ComboBoxDialog(state))
+                    dialogRequester.requestDialog(DialogType.ComboBoxDialog(state.id))
                 }
             }
         }
@@ -366,6 +366,7 @@ private fun ComboBoxPreview() {
             noValueLabel = "No value"
         ),
         scope = scope,
+        id = 1,
         updateValue = {},
         evaluateExpressions = {
             return@ComboBoxFieldState Result.success(emptyList())
