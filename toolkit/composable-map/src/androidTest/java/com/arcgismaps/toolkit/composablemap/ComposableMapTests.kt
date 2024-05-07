@@ -16,6 +16,8 @@
  *
  */
 
+@file:Suppress("DEPRECATION")
+
 package com.arcgismaps.toolkit.composablemap
 
 import androidx.compose.material3.Card
