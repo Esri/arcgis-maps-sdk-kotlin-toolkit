@@ -63,10 +63,10 @@ internal class AttachmentElementState(
     private val scope: CoroutineScope,
     private val evaluateExpressions: suspend () -> Unit
 ) : FormElementState(
+    id = id,
     label = formElement.label,
     description = formElement.description,
-    isVisible = formElement.isVisible,
-    id = id
+    isVisible = formElement.isVisible
 ) {
     /**
      * The attachments associated with the form element.

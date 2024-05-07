@@ -128,7 +128,8 @@ internal sealed class DialogType {
 
     data class RenameAttachmentDialog(
         val stateId: Int,
-        val name: String
+        val name: String,
+        val contentType: String
     ) : DialogType()
 }
 
