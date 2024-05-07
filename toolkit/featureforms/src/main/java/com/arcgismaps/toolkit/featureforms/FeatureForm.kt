@@ -180,7 +180,7 @@ private fun FeatureForm(
         // expressions evaluated, load attachments
         formElements.value = featureForm.elements
     }
-    FeatureFormDialog()
+    FeatureFormDialog(states)
     // launch a new side effect in a launched effect when validationErrorVisibility changes
     LaunchedEffect(validationErrorVisibility) {
         // if it set to always show errors force each field to validate itself and show any errors

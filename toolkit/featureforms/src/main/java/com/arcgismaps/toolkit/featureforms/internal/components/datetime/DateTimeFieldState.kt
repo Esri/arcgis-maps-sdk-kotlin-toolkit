@@ -30,12 +30,10 @@ import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldSta
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FieldProperties
 import com.arcgismaps.toolkit.featureforms.internal.components.base.ValidationErrorState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValidationErrors
-import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextFieldState
-import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFieldProperties
 import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValueAsStateFlow
+import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFieldProperties
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import java.time.Instant
 
 internal class DateTimeFieldProperties(
@@ -66,12 +64,14 @@ internal class DateTimeFieldProperties(
  * called after a successful [updateValue].
  */
 internal class DateTimeFieldState(
+    id : Int,
     properties: DateTimeFieldProperties,
     initialValue: Instant? = properties.value.value,
     scope: CoroutineScope,
     updateValue: (Any?) -> Unit,
     evaluateExpressions: suspend () -> Result<List<FormExpressionEvaluationError>>
 ) : BaseFieldState<Instant?>(
+    id = id,
     properties = properties,
     initialValue = initialValue,
     scope = scope,
@@ -98,6 +98,7 @@ internal class DateTimeFieldState(
             restore = { list ->
                 val input = field.input as DateTimePickerFormInput
                 DateTimeFieldState(
+                    id = field.hashCode(),
                     properties = DateTimeFieldProperties(
                         label = field.label,
                         placeholder = field.hint,
@@ -140,6 +141,7 @@ internal fun rememberDateTimeFieldState(
     )
 ) {
     DateTimeFieldState(
+        id = field.hashCode(),
         properties = DateTimeFieldProperties(
             label = field.label,
             placeholder = field.hint,

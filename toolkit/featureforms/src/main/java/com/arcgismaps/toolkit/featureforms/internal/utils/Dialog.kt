@@ -23,16 +23,21 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
 import com.arcgismaps.toolkit.featureforms.R
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.ImageCapture
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.ImagePicker
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.RenameAttachmentDialog
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.getNewAttachmentNameForContentType
+import com.arcgismaps.toolkit.featureforms.internal.components.base.FormStateCollection
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.CodedValueFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComboBoxDialog
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.DateTimeFieldState
@@ -43,6 +48,7 @@ import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.r
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import java.time.Instant
 
 /**
@@ -86,21 +92,37 @@ internal sealed class DialogType {
     /**
      * Indicates a [ComboBoxDialog].
      *
-     * @param state The [CodedValueFieldState] to use for the dialog.
+     * @param stateId The id of the [CodedValueFieldState] that requested the dialog.
      */
-    data class ComboBoxDialog(val state: CodedValueFieldState) : DialogType()
+    data class ComboBoxDialog(val stateId: Int) : DialogType()
 
     /**
      * Indicates a [DateTimePicker].
      *
-     * @param state The [DateTimeFieldState] to use for the dialog.
+     * @param stateId The id of the [DateTimeFieldState] that requested the dialog.
      */
-    data class DateTimeDialog(val state: DateTimeFieldState) : DialogType()
+    data class DateTimeDialog(val stateId : Int) : DialogType()
 
-    data class ImageCaptureDialog(val onImage: (Uri) -> Unit) : DialogType()
+    /**
+     * Indicates an image capture dialog.
+     *
+     * @param stateId The id of the [AttachmentElementState] that requested the dialog.
+     * @param contentType The content type of the image to capture.
+     */
+    data class ImageCaptureDialog(
+        val stateId : Int,
+        val contentType : String
+    ) : DialogType()
 
+    /**
+     * Indicates an image picker dialog.
+     *
+     * @param stateId The id of the [AttachmentElementState] that requested the dialog.
+     * @param contentType The content type of the image to pick.
+     */
     data class ImagePickerDialog(
-        val onSelection: (Uri) -> Unit
+        val stateId: Int,
+        val contentType : String
     ) : DialogType()
 
     data class RenameAttachmentDialog(
@@ -113,13 +135,16 @@ internal sealed class DialogType {
  * Shows the appropriate dialogs as requested by the [LocalDialogRequester].
  */
 @Composable
-internal fun FeatureFormDialog() {
+internal fun FeatureFormDialog(states : FormStateCollection) {
     val focusManager = LocalFocusManager.current
     val dialogRequester = LocalDialogRequester.current
     val dialogType by dialogRequester.requestFlow.collectAsState()
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     when (dialogType) {
         is DialogType.ComboBoxDialog -> {
-            val state = (dialogType as DialogType.ComboBoxDialog).state
+            val stateId = (dialogType as DialogType.ComboBoxDialog).stateId
+            val state = states[stateId]!! as CodedValueFieldState
             ComboBoxDialog(
                 initialValue = state.value.value.data,
                 values = state.codedValues.associateBy({ it.code }, { it.name }),
@@ -141,7 +166,8 @@ internal fun FeatureFormDialog() {
         }
 
         is DialogType.DateTimeDialog -> {
-            val state = (dialogType as DialogType.DateTimeDialog).state
+            val stateId = (dialogType as DialogType.DateTimeDialog).stateId
+            val state = states[stateId]!! as DateTimeFieldState
             val shouldShowTime = remember {
                 state.shouldShowTime
             }
@@ -175,18 +201,36 @@ internal fun FeatureFormDialog() {
         }
 
         is DialogType.ImageCaptureDialog -> {
-            val onImage = (dialogType as DialogType.ImageCaptureDialog).onImage
-            ImageCapture {
-                onImage(it)
-                dialogRequester.dismissDialog()
+            val stateId = (dialogType as DialogType.ImageCaptureDialog).stateId
+            val contentType = (dialogType as DialogType.ImageCaptureDialog).contentType
+            val state = states[stateId]!! as AttachmentElementState
+            ImageCapture { uri ->
+                scope.launch {
+                    context.readBytes(uri)?.let { data ->
+                        val name = state.attachments.getNewAttachmentNameForContentType(
+                            contentType
+                        )
+                        state.addAttachment(name, contentType, data)
+                    }
+                    dialogRequester.dismissDialog()
+                }
             }
         }
 
         is DialogType.ImagePickerDialog -> {
-            val onMediaPicked = (dialogType as DialogType.ImagePickerDialog).onSelection
-            ImagePicker {
-                onMediaPicked(it)
-                dialogRequester.dismissDialog()
+            val stateId = (dialogType as DialogType.ImagePickerDialog).stateId
+            val contentType = (dialogType as DialogType.ImagePickerDialog).contentType
+            val state = states[stateId]!! as AttachmentElementState
+            ImagePicker { uri ->
+                scope.launch {
+                    context.readBytes(uri)?.let { data ->
+                        val name = state.attachments.getNewAttachmentNameForContentType(
+                            contentType
+                        )
+                        state.addAttachment(name, contentType, data)
+                    }
+                    dialogRequester.dismissDialog()
+                }
             }
         }
 
@@ -212,6 +256,9 @@ internal fun FeatureFormDialog() {
         }
     }
 }
+
+internal fun Context.readBytes(uri: Uri): ByteArray? =
+    contentResolver.openInputStream(uri)?.use { it.buffered().readBytes() }
 
 /**
  * Computes the [WindowSizeClass] of the device.

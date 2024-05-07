@@ -32,12 +32,13 @@ import kotlinx.coroutines.launch
  * A concrete class for use with a [ComboBoxField].
  */
 internal class ComboBoxFieldState(
+    id : Int,
     properties: CodedValueFieldProperties,
     initialValue: Any? = properties.value.value,
     scope: CoroutineScope,
     updateValue: (Any?) -> Unit,
     evaluateExpressions: suspend () -> Result<List<FormExpressionEvaluationError>>
-) : CodedValueFieldState(properties, initialValue, scope, updateValue, evaluateExpressions) {
+) : CodedValueFieldState(id, properties, initialValue, scope, updateValue, evaluateExpressions) {
 
     companion object {
         /**
@@ -58,6 +59,7 @@ internal class ComboBoxFieldState(
             restore = { list ->
                 val input = formElement.input as ComboBoxFormInput
                 ComboBoxFieldState(
+                    id = formElement.hashCode(),
                     properties = CodedValueFieldProperties(
                         label = formElement.label,
                         placeholder = formElement.hint,
@@ -95,6 +97,7 @@ internal fun rememberComboBoxFieldState(
 ) {
     val input = field.input as ComboBoxFormInput
     ComboBoxFieldState(
+        id = field.hashCode(),
         properties = CodedValueFieldProperties(
             label = field.label,
             placeholder = field.hint,
