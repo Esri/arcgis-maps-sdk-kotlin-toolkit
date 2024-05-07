@@ -106,7 +106,7 @@ internal fun AttachmentFormElement(
     label: String,
     description: String,
     editable: Boolean,
-    stateId : Int,
+    stateId: Int,
     attachments: List<FormAttachmentState>,
     lazyListState: LazyListState,
     hasCameraPermission: Boolean,
@@ -187,7 +187,7 @@ private fun Header(
 
 @Composable
 private fun AddAttachment(
-    stateId : Int,
+    stateId: Int,
     hasCameraPermission: Boolean,
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -249,17 +249,20 @@ private fun AddAttachment(
         pickerStyle.collect {
             when (it) {
                 PickerStyle.Camera -> {
-                    dialogRequester.requestDialog(DialogType.ImageCaptureDialog(
-                        stateId = stateId,
-                        contentType = "image/jpeg"
-                    ))
+                    dialogRequester.requestDialog(
+                        DialogType.ImageCaptureDialog(
+                            stateId = stateId,
+                            contentType = "image/jpeg"
+                        )
+                    )
                 }
 
                 PickerStyle.PickImage -> {
                     dialogRequester.requestDialog(
-                        DialogType.ImagePickerDialog { uri ->
-                            //onAttachment("image/jpeg", uri)
-                        }
+                        DialogType.ImagePickerDialog(
+                            stateId = stateId,
+                            contentType = "image/jpeg"
+                        )
                     )
                 }
 

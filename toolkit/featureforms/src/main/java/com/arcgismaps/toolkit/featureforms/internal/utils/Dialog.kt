@@ -92,24 +92,37 @@ internal sealed class DialogType {
     /**
      * Indicates a [ComboBoxDialog].
      *
-     * @param state The [CodedValueFieldState] to use for the dialog.
+     * @param stateId The id of the [CodedValueFieldState] that requested the dialog.
      */
     data class ComboBoxDialog(val stateId: Int) : DialogType()
 
     /**
      * Indicates a [DateTimePicker].
      *
-     * @param state The [DateTimeFieldState] to use for the dialog.
+     * @param stateId The id of the [DateTimeFieldState] that requested the dialog.
      */
     data class DateTimeDialog(val stateId : Int) : DialogType()
 
+    /**
+     * Indicates an image capture dialog.
+     *
+     * @param stateId The id of the [AttachmentElementState] that requested the dialog.
+     * @param contentType The content type of the image to capture.
+     */
     data class ImageCaptureDialog(
         val stateId : Int,
         val contentType : String
     ) : DialogType()
 
+    /**
+     * Indicates an image picker dialog.
+     *
+     * @param stateId The id of the [AttachmentElementState] that requested the dialog.
+     * @param contentType The content type of the image to pick.
+     */
     data class ImagePickerDialog(
-        val onSelection: (Uri) -> Unit
+        val stateId: Int,
+        val contentType : String
     ) : DialogType()
 }
 
@@ -202,10 +215,19 @@ internal fun FeatureFormDialog(states : FormStateCollection) {
         }
 
         is DialogType.ImagePickerDialog -> {
-            val onMediaPicked = (dialogType as DialogType.ImagePickerDialog).onSelection
-            ImagePicker {
-                onMediaPicked(it)
-                dialogRequester.dismissDialog()
+            val stateId = (dialogType as DialogType.ImagePickerDialog).stateId
+            val contentType = (dialogType as DialogType.ImagePickerDialog).contentType
+            val state = states[stateId]!! as AttachmentElementState
+            ImagePicker { uri ->
+                scope.launch {
+                    context.readBytes(uri)?.let { data ->
+                        val name = state.attachments.getNewAttachmentNameForContentType(
+                            contentType
+                        )
+                        state.addAttachment(name, contentType, data)
+                    }
+                    dialogRequester.dismissDialog()
+                }
             }
         }
 
