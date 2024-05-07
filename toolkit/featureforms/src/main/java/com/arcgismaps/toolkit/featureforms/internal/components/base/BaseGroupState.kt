@@ -37,7 +37,7 @@ internal class BaseGroupState(
     id = id,
     label = label,
     description = description,
-    isVisible = isVisible,
+    isVisible = isVisible
 ) {
     private val _expanded = mutableStateOf(expanded)
     val expanded: State<Boolean> = _expanded
@@ -61,7 +61,7 @@ internal class BaseGroupState(
                     description = groupElement.description,
                     isVisible = groupElement.isVisible,
                     expanded = it,
-                    fieldStates = fieldStates,
+                    fieldStates = fieldStates
                 )
             }
         )
@@ -83,6 +83,6 @@ internal fun rememberBaseGroupState(
         description = groupElement.description,
         isVisible = groupElement.isVisible,
         expanded = groupElement.initialState == FormGroupState.Expanded,
-        fieldStates = fieldStates,
+        fieldStates = fieldStates
     )
 }

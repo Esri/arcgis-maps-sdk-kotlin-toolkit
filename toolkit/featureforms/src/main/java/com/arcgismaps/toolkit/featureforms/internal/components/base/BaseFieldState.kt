@@ -76,7 +76,7 @@ internal abstract class BaseFieldState<T>(
     id = id,
     label = properties.label,
     description = properties.description,
-    isVisible = properties.visible,
+    isVisible = properties.visible
 ) {
     /**
      * Placeholder hint for the field.

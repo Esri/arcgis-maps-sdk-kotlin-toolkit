@@ -18,7 +18,6 @@ package com.arcgismaps.toolkit.featureforms.internal.utils
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
@@ -187,7 +186,6 @@ internal fun FeatureFormDialog(states : FormStateCollection) {
                 onDismissRequest = { dialogRequester.dismissDialog() },
                 onCancelled = { dialogRequester.dismissDialog() },
                 onConfirmed = {
-                    Log.e("TAG", "FeatureFormDialog: ${state.hashCode()}", )
                     state.onValueChanged(pickerState.selectedDateTimeMillis?.let {
                         Instant.ofEpochMilli(it)
                     })
@@ -198,7 +196,6 @@ internal fun FeatureFormDialog(states : FormStateCollection) {
 
         is DialogType.ImageCaptureDialog -> {
             val stateId = (dialogType as DialogType.ImageCaptureDialog).stateId
-            Log.e("TAG", "FeatureFormDialog: id is $stateId", )
             val contentType = (dialogType as DialogType.ImageCaptureDialog).contentType
             val state = states[stateId]!! as AttachmentElementState
             ImageCapture { uri ->

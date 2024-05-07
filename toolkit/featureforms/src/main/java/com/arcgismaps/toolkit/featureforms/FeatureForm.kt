@@ -18,7 +18,6 @@
 
 package com.arcgismaps.toolkit.featureforms
 
-import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer

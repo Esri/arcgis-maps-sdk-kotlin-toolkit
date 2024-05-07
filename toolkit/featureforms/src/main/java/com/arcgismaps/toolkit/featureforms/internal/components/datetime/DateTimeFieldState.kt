@@ -18,7 +18,6 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.datetime
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
@@ -31,12 +30,10 @@ import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldSta
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FieldProperties
 import com.arcgismaps.toolkit.featureforms.internal.components.base.ValidationErrorState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValidationErrors
-import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextFieldState
-import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFieldProperties
 import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValueAsStateFlow
+import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFieldProperties
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import java.time.Instant
 
 internal class DateTimeFieldProperties(
@@ -88,10 +85,6 @@ internal class DateTimeFieldState(
     val shouldShowTime: Boolean = properties.shouldShowTime
 
     override fun typeConverter(input: Instant?): Any? = input
-
-    init {
-        Log.e("TAG", "id : $label: ${hashCode()}", )
-    }
     
     companion object {
         fun Saver(

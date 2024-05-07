@@ -57,6 +57,7 @@ internal class TextFieldProperties(
  * A class to handle the state of a [FormTextField]. Essential properties are inherited from the
  * [BaseFieldState].
  *
+ * @param id Unique identifier for the field.
  * @param properties the [TextFieldProperties] associated with this state.
  * @param initialValue optional initial value to set for this field. It is set to the value of
  * [TextFieldProperties.value] by default.

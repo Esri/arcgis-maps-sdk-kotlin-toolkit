@@ -20,7 +20,6 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.drawable.BitmapDrawable
-import android.util.Log
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AudioFile
@@ -87,7 +86,6 @@ internal class AttachmentElementState(
         scope.launch {
             loadAttachments()
         }
-        Log.e("TAG", "id: $id, ${hashCode()}", )
     }
 
     /**

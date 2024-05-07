@@ -33,5 +33,5 @@ internal abstract class FormElementState(
     val id : Int,
     val label : String,
     val description: String,
-    val isVisible : StateFlow<Boolean>,
+    val isVisible : StateFlow<Boolean>
 )
