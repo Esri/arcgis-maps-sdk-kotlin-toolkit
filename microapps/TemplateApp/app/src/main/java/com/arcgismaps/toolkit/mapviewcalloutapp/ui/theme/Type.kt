@@ -16,7 +16,7 @@
  *
  */
 
-package com.arcgismaps.toolkit.mapviewcalloutapp.ui.theme
+package com.arcgismaps.toolkit.templateapp.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

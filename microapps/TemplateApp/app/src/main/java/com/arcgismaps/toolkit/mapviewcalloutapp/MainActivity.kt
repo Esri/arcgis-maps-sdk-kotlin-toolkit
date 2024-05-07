@@ -16,7 +16,7 @@
  *
  */
 
-package com.arcgismaps.toolkit.mapviewcalloutapp
+package com.arcgismaps.toolkit.templateapp
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -25,8 +25,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.toolkit.mapviewcalloutapp.screens.MainScreen
-import com.arcgismaps.toolkit.mapviewcalloutapp.ui.theme.TemplateAppTheme
+import com.arcgismaps.toolkit.templateapp.screens.MainScreen
+import com.arcgismaps.toolkit.templateapp.ui.theme.TemplateAppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

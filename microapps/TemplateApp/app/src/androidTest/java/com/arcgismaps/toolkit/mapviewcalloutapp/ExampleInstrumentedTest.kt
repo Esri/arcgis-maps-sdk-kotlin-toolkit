@@ -16,7 +16,7 @@
  *
  */
 
-package com.arcgismaps.toolkit.mapviewcalloutapp
+package com.arcgismaps.toolkit.templateapp
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry

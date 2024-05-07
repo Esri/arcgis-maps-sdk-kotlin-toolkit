@@ -16,7 +16,7 @@
  *
  */
 
-package com.arcgismaps.toolkit.mapviewcalloutapp.screens
+package com.arcgismaps.toolkit.templateapp.screens
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable

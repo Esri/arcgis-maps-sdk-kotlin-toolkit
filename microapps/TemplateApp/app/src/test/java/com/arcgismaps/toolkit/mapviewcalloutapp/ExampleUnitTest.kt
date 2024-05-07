@@ -16,7 +16,7 @@
  *
  */
 
-package com.arcgismaps.toolkit.mapviewcalloutapp
+package com.arcgismaps.toolkit.templateapp
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
