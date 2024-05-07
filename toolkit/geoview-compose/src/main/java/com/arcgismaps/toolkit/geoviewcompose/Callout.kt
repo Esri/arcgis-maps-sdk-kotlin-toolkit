@@ -35,6 +35,11 @@ import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.ScreenCoordinate
 
+/**
+ * Receiver scope which is used by MapView and SceneView composable functions.
+ *
+ * @since 200.5.0
+ */
 public class MapViewScope(internal val mapView: MapView)
 
 /**
