@@ -55,6 +55,7 @@ internal data class Value<T>(
  * Base state class for any Field within a feature form. It provides the default set of properties
  * that are common to all [FieldFormElement]'s.
  *
+ * @param id Unique identifier for the field.
  * @param properties the [FieldProperties] associated with this state.
  * @param initialValue optional initial value to set for this field. It is set to the value of
  * [FieldProperties.value] by default.
@@ -65,12 +66,14 @@ internal data class Value<T>(
  * called after a successful [updateValue].
  */
 internal abstract class BaseFieldState<T>(
+    id: Int,
     properties: FieldProperties<T>,
     initialValue: T = properties.value.value,
     private val scope: CoroutineScope,
     private val updateValue: (Any?) -> Unit,
     private val evaluateExpressions: suspend () -> Result<List<FormExpressionEvaluationError>>,
 ) : FormElementState(
+    id = id,
     label = properties.label,
     description = properties.description,
     isVisible = properties.visible

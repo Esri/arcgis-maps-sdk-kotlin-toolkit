@@ -97,7 +97,7 @@ internal fun DateTimeField(
                 // request to show the date picker dialog only when the touch is released
                 // the dialog is responsible for updating the value on the state
                 if (isEditable) {
-                    dialogRequester.requestDialog(DialogType.DateTimeDialog(state))
+                    dialogRequester.requestDialog(DialogType.DateTimeDialog(state.id))
                 }
             }
         }
@@ -125,6 +125,7 @@ private fun DateTimeFieldPreview() {
             ),
             scope = scope,
             updateValue = {},
+            id = 1,
             evaluateExpressions = {
                 return@DateTimeFieldState Result.success(emptyList())
             }

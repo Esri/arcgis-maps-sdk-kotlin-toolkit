@@ -57,6 +57,7 @@ internal class TextFieldProperties(
  * A class to handle the state of a [FormTextField]. Essential properties are inherited from the
  * [BaseFieldState].
  *
+ * @param id Unique identifier for the field.
  * @param properties the [TextFieldProperties] associated with this state.
  * @param initialValue optional initial value to set for this field. It is set to the value of
  * [TextFieldProperties.value] by default.
@@ -68,12 +69,14 @@ internal class TextFieldProperties(
  */
 @Stable
 internal class FormTextFieldState(
+    id : Int,
     properties: TextFieldProperties,
     initialValue: String = properties.value.value,
     scope: CoroutineScope,
     updateValue: (Any?) -> Unit,
     evaluateExpressions: suspend () -> Result<List<FormExpressionEvaluationError>>
 ) : BaseFieldState<String>(
+    id = id,
     properties = properties,
     initialValue = initialValue,
     scope = scope,
@@ -132,6 +135,7 @@ internal class FormTextFieldState(
                 val maxLength = (formElement.input as? TextBoxFormInput)?.maxLength
                     ?: (formElement.input as TextAreaFormInput).maxLength
                 FormTextFieldState(
+                    id = formElement.hashCode(),
                     properties = TextFieldProperties(
                         label = formElement.label,
                         placeholder = formElement.hint,
@@ -172,6 +176,7 @@ internal fun rememberFormTextFieldState(
     saver = FormTextFieldState.Saver(field, form, scope)
 ) {
     FormTextFieldState(
+        id = field.hashCode(),
         properties = TextFieldProperties(
             label = field.label,
             placeholder = field.hint,

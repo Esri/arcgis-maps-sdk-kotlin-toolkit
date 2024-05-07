@@ -59,11 +59,13 @@ import kotlinx.coroutines.launch
 internal class AttachmentElementState(
     private val formElement: AttachmentFormElement,
     private val scope: CoroutineScope,
+    id : Int,
     private val evaluateExpressions : suspend () -> Unit
 ) : FormElementState(
     label = formElement.label,
     description = formElement.description,
     isVisible = formElement.isVisible,
+    id = id
 ) {
     /**
      * The attachments associated with the form element.
@@ -136,7 +138,7 @@ internal class AttachmentElementState(
                 }
             },
             restore = { savedList ->
-                AttachmentElementState(attachmentFormElement, scope, evaluateExpressions).also {
+                AttachmentElementState(attachmentFormElement, scope, attachmentFormElement.hashCode() , evaluateExpressions).also {
                     scope.launch {
                         it.loadAttachments()
                         // load the attachments that were previously loaded
@@ -218,6 +220,7 @@ internal fun rememberAttachmentElementState(
         AttachmentElementState(
             formElement = attachmentFormElement,
             scope = scope,
+            id = attachmentFormElement.hashCode(),
             evaluateExpressions = form::evaluateExpressions
         )
     }

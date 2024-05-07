@@ -30,12 +30,14 @@ import kotlinx.coroutines.CoroutineScope
 internal typealias RadioButtonFieldProperties = CodedValueFieldProperties
 
 internal class RadioButtonFieldState(
+    id : Int,
     properties: RadioButtonFieldProperties,
     initialValue: Any? = properties.value.value,
     scope: CoroutineScope,
     updateValue: (Any?) -> Unit,
     evaluateExpressions: suspend () -> Result<List<FormExpressionEvaluationError>>
 ) : CodedValueFieldState(
+    id,
     properties = properties,
     initialValue = initialValue,
     scope = scope,
@@ -73,6 +75,7 @@ internal class RadioButtonFieldState(
             restore = { list ->
                 val input = formElement.input as RadioButtonsFormInput
                 RadioButtonFieldState(
+                    id = formElement.hashCode(),
                     properties = RadioButtonFieldProperties(
                         label = formElement.label,
                         placeholder = formElement.hint,
@@ -108,6 +111,7 @@ internal fun rememberRadioButtonFieldState(
 ) {
     val input = field.input as RadioButtonsFormInput
     RadioButtonFieldState(
+        id = field.hashCode(),
         properties = RadioButtonFieldProperties(
             label = field.label,
             placeholder = field.hint,
