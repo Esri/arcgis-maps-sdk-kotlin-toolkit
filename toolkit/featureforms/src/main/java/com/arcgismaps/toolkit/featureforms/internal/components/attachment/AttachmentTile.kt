@@ -17,6 +17,7 @@
 package com.arcgismaps.toolkit.featureforms.internal.components.attachment
 
 import android.text.format.Formatter
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -58,6 +59,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -69,6 +72,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalViewConfiguration
@@ -91,6 +95,7 @@ import com.arcgismaps.toolkit.featureforms.internal.utils.LocalDialogRequester
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.lang.ref.WeakReference
 
 @Composable
 internal fun AttachmentTile(
@@ -102,8 +107,8 @@ internal fun AttachmentTile(
     val configuration = LocalViewConfiguration.current
     val haptic = LocalHapticFeedback.current
     var showContextMenu by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
     val dialogRequester = LocalDialogRequester.current
+    val scope = rememberCoroutineScope()
     Surface(
         onClick = {},
         modifier = Modifier
@@ -158,12 +163,8 @@ internal fun AttachmentTile(
                     },
                     onClick = {
                         showContextMenu = false
-                        dialogRequester.requestDialog(DialogType.RenameAttachmentDialog(
-                            name = state.name,
-                        ) {
-                            scope.launch {
-                                state.renameAttachment(it)
-                            }
+                        dialogRequester.requestDialog(DialogType.RenameAttachmentDialog(state.name) {
+                            state.rename(it)
                         })
                     })
                 DropdownMenuItem(
@@ -181,9 +182,7 @@ internal fun AttachmentTile(
                     ),
                     onClick = {
                         showContextMenu = false
-                        scope.launch {
-                            state.deleteAttachment()
-                        }
+                        scope.launch { state.delete() }
                     })
             }
         }
@@ -209,7 +208,7 @@ internal fun AttachmentTile(
                         // handle single tap
                         if (loadStatus is LoadStatus.NotLoaded || loadStatus is LoadStatus.FailedToLoad) {
                             // load attachment
-                            state.loadAttachment()
+                            state.load()
                         } else if (loadStatus is LoadStatus.Loaded) {
                             // open attachment
                         }
@@ -368,9 +367,9 @@ internal fun RenameAttachmentDialog(
     onRename: (String) -> Unit,
     onDismissRequest: () -> Unit
 ) {
-    val groups = remember(name) { name.split("\\.(?=[^\\\\.]+\$)".toRegex()) }
-    var filename by remember(groups) { mutableStateOf(groups.first()) }
-    val extension = remember(groups) { if (groups.count() == 2) groups.last() else "" }
+    val groups = rememberSaveable(name) { name.split("\\.(?=[^\\\\.]+\$)".toRegex()) }
+    var filename by rememberSaveable(groups) { mutableStateOf(groups.first()) }
+    val extension = rememberSaveable(groups) { if (groups.count() == 2) groups.last() else "" }
     val focusRequester = remember { FocusRequester() }
     Dialog(
         onDismissRequest = onDismissRequest,
@@ -399,7 +398,10 @@ internal fun RenameAttachmentDialog(
                         onValueChange = { value -> filename = value.text },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .focusRequester(focusRequester),
+                            .focusRequester(focusRequester)
+                            .onGloballyPositioned {
+                                focusRequester.requestFocus()
+                            },
                         label = { Text(stringResource(R.string.name)) },
                         suffix = {
                             Text(text = ".$extension")
@@ -425,9 +427,6 @@ internal fun RenameAttachmentDialog(
             }
         }
     )
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
-    }
 }
 
 @Preview
