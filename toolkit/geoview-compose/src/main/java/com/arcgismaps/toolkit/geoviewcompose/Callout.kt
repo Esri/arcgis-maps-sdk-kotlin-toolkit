@@ -25,16 +25,18 @@ import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.mapping.view.MapView
 
+
+public class MapViewScope(internal val mapView: MapView)
+
 @Composable
-public fun Callout(location: Point,
+public fun MapViewScope.Callout(location: Point,
                    content: @Composable () -> Unit) {
 //    if (mapView!!.spatialReference.collectAsState().value == null) return
-    if (LocalMapView.current?.drawStatus?.collectAsState()?.value == DrawStatus.InProgress) return
+    if (mapView.drawStatus?.collectAsState()?.value == DrawStatus.InProgress) return
     Log.d("location->", "outer")
-        val localMapView = LocalMapView.current
-        Log.d("location->", localMapView?.locationToScreen(location)?.x.toString())
+        Log.d("location->", mapView.locationToScreen(location).x.toString())
 
-        val calloutScreenCoordinate: ScreenCoordinate = localMapView!!.locationToScreen(location)
+        val calloutScreenCoordinate: ScreenCoordinate = mapView.locationToScreen(location)
         Box(
 //        modifier = Modifier.offset(x = calloutScreenCoordinate.x.dp, y = calloutScreenCoordinate.y.dp)
 //        modifier = Modifier.offset(x = 186.dp, y = 50.dp)

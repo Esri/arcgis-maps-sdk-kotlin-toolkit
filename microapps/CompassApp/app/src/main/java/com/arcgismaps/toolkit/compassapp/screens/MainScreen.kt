@@ -40,6 +40,7 @@ import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.geoviewcompose.Callout
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
+import com.arcgismaps.toolkit.geoviewcompose.MapViewScope
 
 @Composable
 fun MainScreen() {
@@ -65,13 +66,13 @@ fun MainScreen() {
     val mapViewProxy = remember { MapViewProxy() }
     val mapViewProxy2 = remember { MapViewProxy() }
     val disneyLand = remember { Point(-117.9190, 33.8121, SpatialReference.wgs84()) }
-    var calloutMapOne: @Composable (() -> Unit)? by remember {
+    var calloutMapOne: (@Composable MapViewScope.() -> Unit)? by remember {
         mutableStateOf(
             { Callout(location = disneyLand) { Text("Hello, World!", color = Color.Green) } }
         )
     }
 
-    var calloutMapTwo: @Composable (() -> Unit)? by remember {
+    var calloutMapTwo: (@Composable MapViewScope.() -> Unit)? by remember {
         mutableStateOf(
             { Callout(location = disneyLand) { Text("Hello, World!", color = Color.Red) } }
         )

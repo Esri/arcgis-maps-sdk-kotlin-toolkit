@@ -74,10 +74,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
 
-@SuppressLint("StaticFieldLeak")
-internal lateinit var mapViewStatic: MapView
-internal val LocalMapView = compositionLocalOf<MapView?> { mapViewStatic }
-
 /**
  * A compose equivalent of the view-based [MapView].
  *
@@ -172,13 +168,11 @@ public fun MapView(
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
-    content: @Composable (() -> Unit)? = null
+    content: (@Composable MapViewScope.() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
-    val mapView = remember(arcGISMap) { MapView(context) }.also{
-        mapViewStatic = it
-    }
+    val mapView = remember(arcGISMap) { MapView(context) }
 
     val layoutDirection = LocalLayoutDirection.current
 
@@ -205,10 +199,10 @@ public fun MapView(
                 }
             })
 
-    CompositionLocalProvider(LocalMapView provides mapView) {
-        if (content != null) {
-            content()
-        }
+
+    val mapViewScope = remember (mapView) { MapViewScope(mapView) }
+    if (content != null) {
+        mapViewScope.content()
     }
 
     DisposableEffect(Unit) {
