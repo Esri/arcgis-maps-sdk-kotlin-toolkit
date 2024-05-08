@@ -20,6 +20,7 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.drawable.BitmapDrawable
+import android.net.Uri
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AudioFile
@@ -39,6 +40,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.mapping.featureforms.AttachmentFormElement
@@ -46,8 +48,11 @@ import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FormAttachment
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormElementState
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
 import java.util.Objects
 
 /**
@@ -61,7 +66,8 @@ internal class AttachmentElementState(
     id: Int,
     private val formElement: AttachmentFormElement,
     private val scope: CoroutineScope,
-    private val evaluateExpressions: suspend () -> Unit
+    private val evaluateExpressions: suspend () -> Unit,
+    private val filesDir : String
 ) : FormElementState(
     id = id,
     label = formElement.label,
@@ -98,7 +104,7 @@ internal class AttachmentElementState(
         attachments.clear()
         attachments.addAll(
             formElement.attachments.map {
-                FormAttachmentState(this, it, scope)
+                FormAttachmentState(this, it, scope, filesDir)
             }
         )
     }
@@ -112,7 +118,7 @@ internal class AttachmentElementState(
         // refresh the list of attachments
         loadAttachments()
         // load the attachment that was just added
-        attachments.last().load()
+        attachments.last().loadThumbnail()
         // scroll to the newly added attachment
         lazyListState.scrollToItem(attachments.size - 1)
     }
@@ -139,7 +145,8 @@ internal class AttachmentElementState(
         fun Saver(
             attachmentFormElement: AttachmentFormElement,
             scope: CoroutineScope,
-            evaluateExpressions: suspend () -> Unit
+            evaluateExpressions: suspend () -> Unit,
+            filesDir: String
         ): Saver<AttachmentElementState, Any> = listSaver(
             save = {
                 // save the list of indices of attachments that have been loaded
@@ -156,13 +163,14 @@ internal class AttachmentElementState(
                     id = attachmentFormElement.hashCode(),
                     formElement = attachmentFormElement,
                     scope = scope,
-                    evaluateExpressions = evaluateExpressions
+                    evaluateExpressions = evaluateExpressions,
+                    filesDir = filesDir
                 ).also {
                     scope.launch {
                         it.loadAttachments()
                         // load the attachments that were previously loaded
                         savedList.forEach { index ->
-                            it.attachments[index].load()
+                            it.attachments[index].loadThumbnail()
                         }
                     }
                 }
@@ -184,12 +192,14 @@ internal class AttachmentElementState(
 internal class FormAttachmentState(
     val name: String,
     val size: Long,
+    val contentType : String,
     val elementStateId: Int,
     val loadStatus: StateFlow<LoadStatus>,
-    private val onLoadAttachment: suspend () -> Result<Unit>,
+    private val onLoadAttachment: suspend () -> Result<ByteArray?>,
     private val onLoadThumbnail: suspend () -> Result<BitmapDrawable?>,
     val deleteAttachment: suspend () -> Unit,
     private val scope: CoroutineScope,
+    private val filesDir : String,
 ) {
     private val _thumbnail: MutableState<ImageBitmap?> = mutableStateOf(null)
 
@@ -197,6 +207,12 @@ internal class FormAttachmentState(
      * The thumbnail of the attachment. This is `null` until [load] is called.
      */
     val thumbnail: State<ImageBitmap?> = _thumbnail
+
+    var uri : Uri = Uri.EMPTY
+        private set
+
+    var filePath: String = ""
+        private set
 
     /**
      * The type of the attachment.
@@ -206,33 +222,59 @@ internal class FormAttachmentState(
     constructor(
         element: AttachmentElementState,
         attachment: FormAttachment,
-        scope: CoroutineScope
+        scope: CoroutineScope,
+        filesDir : String,
     ) : this(
         name = attachment.name,
         size = attachment.size,
+        contentType = attachment.contentType,
         elementStateId = element.id,
         loadStatus = attachment.loadStatus,
-        onLoadAttachment = attachment::load,
+        onLoadAttachment = {
+            attachment.load()
+            attachment.attachment?.fetchData()
+                ?: Result.failure(Exception("Attachment data is null"))
+        },
         onLoadThumbnail = attachment::createFullImage,
         deleteAttachment = {
             element.deleteAttachment(attachment)
         },
-        scope = scope
+        scope = scope,
+        filesDir = filesDir
     )
 
     /**
      * Loads the attachment and its thumbnail.
      */
     fun load() {
-        scope.launch {
-            onLoadAttachment().onSuccess {
-                onLoadThumbnail().onSuccess {
-                    if (it != null) {
-                        _thumbnail.value = it.bitmap.asImageBitmap()
-                    }
+        scope.launch(Dispatchers.IO) {
+            onLoadAttachment().onSuccess { data ->
+                if (data != null) {
+                    writeDataToDisk(data)
                 }
+                loadThumbnail()
             }
         }
+    }
+
+    suspend fun loadThumbnail() {
+        onLoadThumbnail().onSuccess {
+            if (it != null) {
+                _thumbnail.value = it.bitmap.asImageBitmap()
+            }
+        }
+    }
+
+    private fun writeDataToDisk(data: ByteArray) {
+        val directory = File(filesDir, "feature_forms_attachments")
+        directory.mkdirs()
+        // write the data to disk
+        val file = File(directory, name)
+        file.createNewFile()
+        FileOutputStream(file).use {
+            it.write(data)
+        }
+        filePath = file.absolutePath
     }
 
     override fun hashCode(): Int {
@@ -259,19 +301,22 @@ internal fun rememberAttachmentElementState(
     attachmentFormElement: AttachmentFormElement
 ): AttachmentElementState {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     return rememberSaveable(
         inputs = arrayOf(form),
         saver = AttachmentElementState.Saver(
             attachmentFormElement,
             scope,
-            form::evaluateExpressions
+            form::evaluateExpressions,
+            context.cacheDir.absolutePath
         )
     ) {
         AttachmentElementState(
             formElement = attachmentFormElement,
             scope = scope,
             id = attachmentFormElement.hashCode(),
-            evaluateExpressions = form::evaluateExpressions
+            evaluateExpressions = form::evaluateExpressions,
+            filesDir = context.cacheDir.absolutePath
         )
     }
 }

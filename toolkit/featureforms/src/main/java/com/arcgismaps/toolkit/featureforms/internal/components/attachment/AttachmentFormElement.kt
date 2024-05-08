@@ -66,10 +66,9 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.toolkit.featureforms.R
-import com.arcgismaps.toolkit.featureforms.internal.utils.AttachmentCaptureFileProvider
+import com.arcgismaps.toolkit.featureforms.internal.utils.AttachmentsFileProvider
 import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
 import com.arcgismaps.toolkit.featureforms.internal.utils.LocalDialogRequester
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -150,7 +149,7 @@ private fun Carousel(state: LazyListState, attachments: List<FormAttachmentState
         state = state,
         horizontalArrangement = Arrangement.spacedBy(15.dp),
     ) {
-        items(attachments, key = { it.hashCode() }) {
+        items(attachments) {
             AttachmentTile(it)
         }
     }
@@ -288,8 +287,8 @@ internal fun ImageCapture(onImageCaptured: (Uri) -> Unit) {
             restore = { Uri.parse(it.first()) }
         )
     ) {
-        val file = context.createTempImageFile()
-        AttachmentCaptureFileProvider.getImageUri(file, context)
+        val timeStamp = Instant.now().toEpochMilli()
+        AttachmentsFileProvider.createTempFileWithUri("IMAGE_$timeStamp", ".jpg", context)
     }
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
@@ -365,12 +364,14 @@ private fun AttachmentFormElementPreview() {
             FormAttachmentState(
                 "Photo 1.jpg",
                 2024,
+                "image/jpeg",
                 1,
                 MutableStateFlow(LoadStatus.Loaded),
-                { Result.success(Unit) },
+                { Result.success(null) },
                 { Result.success(null) },
                 {},
-                scope = rememberCoroutineScope()
+                scope = rememberCoroutineScope(),
+                ""
             )
         ),
         lazyListState = LazyListState(),
