@@ -125,11 +125,15 @@ internal sealed class DialogType {
         val contentType: String
     ) : DialogType()
 
-
+    /**
+     * Indicates a dialog to rename an attachment.
+     *
+     * @param stateId The id of the [AttachmentElementState] that requested the dialog.
+     * @param name The current name of the attachment.
+     */
     data class RenameAttachmentDialog(
         val stateId: Int,
         val name: String,
-        val contentType: String
     ) : DialogType()
 }
 
