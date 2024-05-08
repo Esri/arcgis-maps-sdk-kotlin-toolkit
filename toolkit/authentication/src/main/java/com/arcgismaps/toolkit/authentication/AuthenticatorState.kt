@@ -35,6 +35,7 @@ import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 import com.arcgismaps.httpcore.authentication.PasswordCredential
 import com.arcgismaps.httpcore.authentication.ServerTrust
 import com.arcgismaps.httpcore.authentication.TokenCredential
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.Flow
@@ -286,6 +287,7 @@ private class AuthenticatorStateImpl(
      * @return [NetworkAuthenticationChallengeResponse] based on the user choice.
      * @since 200.2.0
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     private suspend fun awaitCertificateChallengeResponse(): NetworkAuthenticationChallengeResponse {
         val selectedAlias = suspendCancellableCoroutine { continuation ->
             val aliasCallback = KeyChainAliasCallback { alias ->
@@ -395,7 +397,7 @@ private suspend fun OAuthUserConfiguration.handleOAuthChallenge(
 /**
  * Completes the current [AuthenticatorState.pendingOAuthUserSignIn] with data from the provided [intent].
  *
- * The [intent.data] should contain a string representing the redirect URI that came from a browser
+ * The [Intent] data should contain a string representing the redirect URI that came from a browser
  * where the OAuth sign-in was performed. If the data is null, the sign-in will be cancelled.
  *
  * @since 200.3.0

@@ -55,9 +55,9 @@ import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.LibraryAdd
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.Card
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -271,7 +271,7 @@ private fun CarouselThumbnail(name: String, size: Long, onThumbnailTap: () -> Un
             }
         }
         
-        Divider()
+        HorizontalDivider()
         CarouselText(name, size)
     }
 }
@@ -296,7 +296,7 @@ private fun ThumbnailMenu(expanded: Boolean, onDismiss: () -> Unit = {}) {
                 contentPadding = PaddingValues(horizontal = 3.dp),
                 onClick = {}
             )
-            Divider(modifier = Modifier.padding(vertical = 5.dp))
+            HorizontalDivider(modifier = Modifier.padding(vertical = 5.dp))
             DropdownMenuItem(
                 text = { Text(text = "Delete") },
                 trailingIcon = {
@@ -377,7 +377,7 @@ private fun AddAttachmentMenu(expanded: Boolean, onDismiss: () -> Unit = {}) {
                 },
                 onClick = {}
             )
-            Divider(modifier = Modifier.padding(vertical = 5.dp))
+            HorizontalDivider(modifier = Modifier.padding(vertical = 5.dp))
             DropdownMenuItem(
                 text= { Text(text = "Add Photo From Gallery") },
                 trailingIcon = {
@@ -389,7 +389,7 @@ private fun AddAttachmentMenu(expanded: Boolean, onDismiss: () -> Unit = {}) {
                 },
                 onClick = {}
             )
-            Divider(modifier = Modifier.padding(vertical = 5.dp))
+            HorizontalDivider(modifier = Modifier.padding(vertical = 5.dp))
             DropdownMenuItem(
                 text= { Text(text = "Add File") },
                 trailingIcon = {

@@ -15,6 +15,8 @@
  *
  */
 
+@file:Suppress("DEPRECATION")
+
 package com.arcgismaps.toolkit.indoors
 
 import androidx.compose.ui.test.assertIsDisplayed

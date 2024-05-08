@@ -17,6 +17,8 @@
  * Modifications copyright (C) 2024 Esri Inc
  */
 
+@file:Suppress("unused")
+
 package com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.time
 
 import android.annotation.SuppressLint
@@ -111,7 +113,7 @@ import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.isContainer
+import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selectableGroup
@@ -982,7 +984,7 @@ private fun PeriodToggleImpl(
     Layout(
         modifier = modifier
             .semantics {
-                isContainer = true
+                isTraversalGroup = true
                 this.contentDescription = contentDescription
             }
             .selectableGroup()
@@ -1134,7 +1136,7 @@ internal fun ClockFace(
             .background(shape = CircleShape, color = colors.clockDialColor)
             .size(ClockDialContainerSize)
             .semantics {
-                isContainer = false
+                isTraversalGroup = false
                 selectableGroup()
             },
         targetState = state.values,
