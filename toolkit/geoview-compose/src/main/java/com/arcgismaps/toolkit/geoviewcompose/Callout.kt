@@ -32,7 +32,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.geometry.Point
-import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.ScreenCoordinate
 
