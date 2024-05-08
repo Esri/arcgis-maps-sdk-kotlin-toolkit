@@ -93,13 +93,12 @@ private fun Popup(popupState: PopupState, modifier: Modifier = Modifier) {
         evaluated = true
     }
 
-    Popup(popup, evaluated)
+    Popup(popupState, evaluated)
 }
 
 @Composable
-private fun Popup(popup: Popup, evaluated: Boolean, modifier: Modifier = Modifier) {
-    val states = rememberStates(popup)
-    val lazyListState = rememberLazyListState()
+private fun Popup(popupState: PopupState, evaluated: Boolean, modifier: Modifier = Modifier) {
+    val popup = popupState.popup
     Column(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -117,26 +116,36 @@ private fun Popup(popup: Popup, evaluated: Boolean, modifier: Modifier = Modifie
             evaluated
         }
         HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .semantics { contentDescription = "lazy column" },
-            state = lazyListState
-        ) {
-            states.forEach { entry ->
-                val element = entry.popupElement
-                item {
-                    when (element) {
-                        is TextPopupElement -> {
-                            ExpandableCard {
-                                TextPopupElement(entry.state as TextElementState)
-                            }
+        if (evaluated) {
+            PopupBody(popupState)
+        }
+    }
+}
+
+@Composable
+private fun PopupBody(popupState: PopupState) {
+    val popup = popupState.popup
+    val lazyListState = rememberLazyListState()
+    val states = rememberStates(popup)
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .semantics { contentDescription = "lazy column" },
+        state = lazyListState
+    ) {
+        states.forEach { entry ->
+            val element = entry.popupElement
+            item {
+                when (element) {
+                    is TextPopupElement -> {
+                        ExpandableCard {
+                            TextPopupElement(entry.state as TextElementState)
                         }
+                    }
 
 
-                        else -> {
-                            // other popup elements are not created
-                        }
+                    else -> {
+                        // other popup elements are not created
                     }
                 }
             }
