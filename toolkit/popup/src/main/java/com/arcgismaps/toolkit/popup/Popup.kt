@@ -47,6 +47,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.mapping.popup.FieldsPopupElement
 import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.mapping.popup.TextPopupElement
 
@@ -131,6 +132,11 @@ private fun Popup(popup: Popup, evaluated: Boolean, states: Boolean, modifier: M
                         is TextPopupElement -> {
                             ExpandableCard {
                                 TextPopupElement(element)
+                            }
+                        }
+                        is FieldsPopupElement -> {
+                            ExpandableCard(title= element.title) {
+                                FieldsPopupElement(element)
                             }
                         }
 
