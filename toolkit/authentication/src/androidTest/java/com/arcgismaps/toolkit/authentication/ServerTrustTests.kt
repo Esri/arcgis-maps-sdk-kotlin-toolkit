@@ -28,8 +28,11 @@ import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeResponse
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationType
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -67,15 +70,13 @@ class ServerTrustTests {
      * @since 200.4.0
      */
     @Test
-    fun trustSelfSignedCertificate_4_1() = issueChallengeWithInput(
-        userInputOnDialog = {
+    fun trustSelfSignedCertificate_4_1() = runTest {
+        val response = testServerTrustChallengeWithStateRestoration {
             composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.allow_connection))
                 .performClick()
-        },
-        onResponse = { response ->
-            assert(response is NetworkAuthenticationChallengeResponse.ContinueWithCredential)
-        }
-    )
+        }.await()
+        assert(response is NetworkAuthenticationChallengeResponse.ContinueWithCredential)
+    }
 
     /**
      * Given a Dialog Authenticator
@@ -88,15 +89,13 @@ class ServerTrustTests {
      * @since 200.4.0
      */
     @Test
-    fun cancelServerTrustChallenge_4_2() = issueChallengeWithInput(
-        userInputOnDialog = {
+    fun cancelServerTrustChallenge_4_2() = runTest {
+        val response = testServerTrustChallengeWithStateRestoration {
             composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.cancel))
                 .performClick()
-        },
-        onResponse = { response ->
-            assert(response is NetworkAuthenticationChallengeResponse.Cancel)
-        }
-    )
+        }.await()
+        assert(response is NetworkAuthenticationChallengeResponse.Cancel)
+    }
 
     /**
      * Given a Dialog Authenticator
@@ -109,30 +108,27 @@ class ServerTrustTests {
      * @since 200.4.0
      */
     @Test
-    fun backButtonDismissesDialog_4_3() = issueChallengeWithInput(
-        userInputOnDialog = {
+    fun backButtonDismissesDialog_4_3() = runTest {
+        val response = this.testServerTrustChallengeWithStateRestoration {
             // press back. Using this seems to be more reliable than `Espresso.pressBack()`
             // after the state restoration
             InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_BACK)
-        },
-        onResponse = { response ->
-            assert(response is NetworkAuthenticationChallengeResponse.Cancel)
-        }
-    )
+        }.await()
+        assert(response is NetworkAuthenticationChallengeResponse.Cancel)
+    }
 
     /**
      * Places a DialogAuthenticator in the composition and issues a server trust challenge.
-     * Once the dialog is displayed, [userInputOnDialog] will be called, and when the challenge
-     * is resolved, [onResponse] will be called with the response.
+     * Once the dialog is displayed, [userInputOnDialog] will be called to simulate user input.
+     * The function will return the response to the server trust challenge from the authenticator in a deferred.
      *
      * Note that this function will also simulate disposing and restoring the state of the DialogAuthenticator.
      *
      * @since 200.4.0
      */
-    private fun issueChallengeWithInput(
-        userInputOnDialog: () -> Unit,
-        onResponse: (NetworkAuthenticationChallengeResponse) -> Unit
-    ) = runTest {
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun TestScope.testServerTrustChallengeWithStateRestoration(userInputOnDialog: () -> Unit): Deferred<NetworkAuthenticationChallengeResponse> {
+        val coroutineContext = this.coroutineContext
         // This class simulate the state restoration process
         val stateRestorationTester = StateRestorationTester(composeTestRule)
         stateRestorationTester.setContent {
@@ -164,9 +160,11 @@ class ServerTrustTests {
         userInputOnDialog()
 
         advanceUntilIdle()
+        // ensure the dialog has disappeared
         assert(authenticatorState.pendingServerTrustChallenge.value == null)
         composeTestRule.onNodeWithText(serverTrustMessage).assertDoesNotExist()
 
-        onResponse(challengeResponse.await())
+        // return the response deferred
+        return challengeResponse
     }
 }
