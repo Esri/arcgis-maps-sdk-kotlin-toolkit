@@ -70,7 +70,7 @@ class ServerTrustTests {
      * @since 200.4.0
      */
     @Test
-    fun trustSelfSignedCertificate_4_1() = runTest {
+    fun trustSelfSignedCertificate() = runTest {
         val response = testServerTrustChallengeWithStateRestoration {
             composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.allow_connection))
                 .performClick()
@@ -89,7 +89,7 @@ class ServerTrustTests {
      * @since 200.4.0
      */
     @Test
-    fun cancelServerTrustChallenge_4_2() = runTest {
+    fun cancelServerTrustChallenge() = runTest {
         val response = testServerTrustChallengeWithStateRestoration {
             composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.cancel))
                 .performClick()
@@ -108,7 +108,7 @@ class ServerTrustTests {
      * @since 200.4.0
      */
     @Test
-    fun backButtonDismissesDialog_4_3() = runTest {
+    fun backButtonDismissesDialog() = runTest {
         val response = this.testServerTrustChallengeWithStateRestoration {
             // press back. Using this seems to be more reliable than `Espresso.pressBack()`
             // after the state restoration
