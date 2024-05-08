@@ -40,11 +40,12 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -331,7 +332,7 @@ fun TopFormBar(
                 }
             } else {
                 IconButton(onClick = onBackPressed) {
-                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                    Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                 }
             }
         },
@@ -350,9 +351,7 @@ fun TopFormBar(
 private fun SubmitForm(errors: List<ErrorInfo>, onDismissRequest: () -> Unit) {
     if (errors.isEmpty()) {
         // show a progress dialog if no errors are present
-        AlertDialog(
-            onDismissRequest = { /* cannot be dismissed */ },
-        ) {
+        BasicAlertDialog(onDismissRequest = { /* cannot be dismissed */ }) {
             Card(modifier = Modifier.wrapContentSize()) {
                 Column(
                     modifier = Modifier.padding(15.dp),
