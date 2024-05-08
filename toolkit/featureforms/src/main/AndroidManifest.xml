@@ -21,7 +21,7 @@
     <application>
         <provider
             android:name="com.arcgismaps.toolkit.featureforms.internal.utils.AttachmentsFileProvider"
-            android:authorities="com.arcgismaps.toolkit.featureforms.attachmentsfileprovider"
+            android:authorities="${applicationId}.com.arcgismaps.toolkit.featureforms.attachmentsfileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

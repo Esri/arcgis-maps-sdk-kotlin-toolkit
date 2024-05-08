@@ -45,7 +45,7 @@ internal class AttachmentsFileProvider :
 
         fun createTempFileWithUri(prefix: String, suffix: String, context: Context): Uri {
             val authority = "${context.packageName}.$AUTHORITY_BASE"
-            val directory = File(context.cacheDir, FILE_PROVIDER_PATH)
+            val directory = File(context.cacheDir, authority)
             directory.mkdirs()
             val file =  File.createTempFile(prefix, suffix, directory)
             return getUriForFile(
@@ -57,7 +57,7 @@ internal class AttachmentsFileProvider :
 
         fun getUriForFile(file: File, context: Context): Uri {
             val authority = "${context.packageName}.$AUTHORITY_BASE"
-            return getUriForFile(context, AUTHORITY_BASE, file)
+            return getUriForFile(context, authority, file)
         }
     }
 }
