@@ -128,7 +128,6 @@ class ServerTrustTests {
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun TestScope.testServerTrustChallengeWithStateRestoration(userInputOnDialog: () -> Unit): Deferred<NetworkAuthenticationChallengeResponse> {
-        val coroutineContext = this.coroutineContext
         // This class simulate the state restoration process
         val stateRestorationTester = StateRestorationTester(composeTestRule)
         stateRestorationTester.setContent {
