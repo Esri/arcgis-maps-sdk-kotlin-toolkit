@@ -125,7 +125,9 @@ private fun Popup(popup: Popup, evaluated: Boolean, modifier: Modifier = Modifie
                 item {
                     when (element) {
                         is TextPopupElement -> {
-                            Text(text = element.text)
+                            ExpandableCard {
+                                TextPopupElement(element)
+                            }
                         }
 
 
