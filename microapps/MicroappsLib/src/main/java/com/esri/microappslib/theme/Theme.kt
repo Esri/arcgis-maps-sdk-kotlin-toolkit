@@ -98,4 +98,3 @@ fun MicroAppTheme(
         content = content
     )
 }
-
