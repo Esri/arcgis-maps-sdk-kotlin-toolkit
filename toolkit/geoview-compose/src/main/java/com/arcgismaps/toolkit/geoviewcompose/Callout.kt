@@ -21,17 +21,15 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.geometry.Point
-import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.ScreenCoordinate
 
@@ -57,24 +55,15 @@ public class MapViewScope(internal val mapView: MapView)
 @Composable
 public fun MapViewScope.Callout(location: Point,
                                 modifier: Modifier = Modifier,
-                                content: @Composable () -> Unit) {
-
-    if (mapView.drawStatus.collectAsState().value == DrawStatus.InProgress) return
+                                content: @Composable BoxScope.() -> Unit) {
 
     val calloutScreenCoordinate: ScreenCoordinate = mapView.locationToScreen(location)
     Box(
         modifier = Modifier
-            .offset(
-                x = with(LocalDensity.current) {
-                    calloutScreenCoordinate.x
-                        .toFloat()
-                        .toDp()
-                },
-                y = with(LocalDensity.current) {
-                    calloutScreenCoordinate.y
-                        .toFloat()
-                        .toDp()
-                })
+            .graphicsLayer {
+                translationX = calloutScreenCoordinate.x.toFloat()
+                translationY = calloutScreenCoordinate.y.toFloat()
+            }
             .wrapContentSize()
             .background(Color.White)
             .border(
@@ -83,6 +72,6 @@ public fun MapViewScope.Callout(location: Point,
             )
     )
     {
-        content.invoke()
+        this.content()
     }
 }

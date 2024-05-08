@@ -25,15 +25,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.material3.Text
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import com.arcgismaps.geometry.Point
-import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.geoviewcompose.Callout
 import com.arcgismaps.toolkit.geoviewcompose.MapView
-import com.arcgismaps.toolkit.geoviewcompose.MapViewScope
 
 @Composable
 fun MainScreen() {
@@ -49,16 +48,12 @@ fun MainScreen() {
         )
     }
 
-    val disneyLand = remember { Point(-117.9190, 33.8121, SpatialReference.wgs84()) }
-    val callout: (@Composable MapViewScope.() -> Unit)? by remember {
-        mutableStateOf(
-            { Callout(location = disneyLand) { Text("Hello, World!", color = Color.Green) } }
-        )
-    }
+    var mapPoint by remember { mutableStateOf ( null as Point? ) }
 
     MapView(
         modifier = Modifier.fillMaxSize(),
         arcGISMap = arcGISMap,
-        content = callout
+        onSingleTapConfirmed = { mapPoint = it.mapPoint},
+        content = { mapPoint?.let { Callout(location = mapPoint!!) { Text("Hello, World!", color = Color.Green) } } },
     )
 }
