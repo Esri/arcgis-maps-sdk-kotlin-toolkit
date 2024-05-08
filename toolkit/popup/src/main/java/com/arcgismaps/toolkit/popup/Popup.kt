@@ -48,9 +48,12 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.mapping.popup.TextPopupElement
-import com.arcgismaps.toolkit.popup.internal.elementstate.MutablePopupElementStateCollection
-import com.arcgismaps.toolkit.popup.internal.elementstate.PopupElementStateCollection
-import com.arcgismaps.toolkit.popup.internal.textelement.rememberTextElementState
+import com.arcgismaps.toolkit.popup.internal.element.state.PopupElementStateCollection
+import com.arcgismaps.toolkit.popup.internal.element.state.mutablePopupElementStateCollection
+import com.arcgismaps.toolkit.popup.internal.element.textelement.TextElementState
+import com.arcgismaps.toolkit.popup.internal.element.textelement.TextPopupElement
+import com.arcgismaps.toolkit.popup.internal.element.textelement.rememberTextElementState
+import com.arcgismaps.toolkit.popup.internal.ui.ExpandableCard
 
 @Immutable
 private data class PopupState(@Stable val popup: Popup)
@@ -126,7 +129,7 @@ private fun Popup(popup: Popup, evaluated: Boolean, modifier: Modifier = Modifie
                     when (element) {
                         is TextPopupElement -> {
                             ExpandableCard {
-                                TextPopupElement(element)
+                                TextPopupElement(entry.state as TextElementState)
                             }
                         }
 
@@ -171,7 +174,7 @@ internal fun InitializingExpressions(
 internal fun rememberStates(
     popup: Popup
 ): PopupElementStateCollection {
-    val states = MutablePopupElementStateCollection()
+    val states = mutablePopupElementStateCollection()
     popup.evaluatedElements.forEach { element ->
         when (element) {
             is TextPopupElement -> {
@@ -182,6 +185,7 @@ internal fun rememberStates(
             }
 
             else -> {
+                // TODO remove for release
                 println("encountered element of type ${element::class.java}")
             }
         }

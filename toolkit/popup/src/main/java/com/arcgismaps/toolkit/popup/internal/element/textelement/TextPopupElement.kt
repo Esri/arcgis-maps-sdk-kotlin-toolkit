@@ -1,22 +1,20 @@
 /*
+ * Copyright 2024 Esri
  *
- *  Copyright 2024 Esri
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *  http://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *
  */
 
-package com.arcgismaps.toolkit.popup
+package com.arcgismaps.toolkit.popup.internal.element.textelement
 
 import android.content.Intent
 import android.util.Log
@@ -26,7 +24,7 @@ import android.webkit.WebViewClient
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
-import com.arcgismaps.mapping.popup.TextPopupElement
+import com.arcgismaps.toolkit.popup.internal.ui.ExpandableCard
 
 /**
  * Renders the following [content] as HTML.
@@ -92,8 +90,8 @@ private fun HTML(content: String) {
  * @since 200.5.0
  */
 @Composable
-internal fun TextPopupElement(popupElement: TextPopupElement) {
-    HTML(content = popupElement.text)
+internal fun TextPopupElement(state: TextElementState) {
+    HTML(content = state.value)
 }
 
 @Preview
@@ -101,9 +99,13 @@ internal fun TextPopupElement(popupElement: TextPopupElement) {
 private fun TextPopupElementPreview() {
     val tempText =
         "<p><span style='color:#287fb8;font-family:Verdana;font-size:14px;'><strong>{NAME}</strong></span><span style='font-family:Verdana;font-size:14px;'> is a peak in California's {RANGE} range. It ranks </span><span style='color:#aa3427;font-family:Verdana;font-size:14px;'><strong>#{RANK}</strong></span><span style='font-family:Verdana;font-size:14px;'> among the California Fourteeners.</span></p><p><span style='font-family:Verdana;font-size:14px;'>The summit is </span><span style='color:#287fb8;font-family:Verdana;font-size:14px;'><strong>{ELEV_FEET}</strong></span><span style='font-family:Verdana;font-size:14px;'> feet high ({ELEV_METERS} meters) and has a prominence of </span><span style='color:#287fb8;font-family:Verdana;font-size:14px;'><strong>{PROM_FEET}</strong></span><span style='font-family:Verdana;font-size:14px;'> feet ({PROM_METERS} meters).</span></p><p><a href='https://arcgis.com' rel='nofollow ugc'><span style='font-family:Verdana;font-size:14px;'>More info</span></a></p>"
-    val popupElement = TextPopupElement(tempText)
     ExpandableCard {
-        TextPopupElement(popupElement)
+        TextPopupElement(
+            TextElementState(
+                value = tempText,
+                id = 42
+            )
+        )
     }
 }
 
