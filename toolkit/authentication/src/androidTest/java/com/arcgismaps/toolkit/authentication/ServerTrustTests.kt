@@ -47,12 +47,6 @@ class ServerTrustTests {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
-    private val certificateHostName = "https://server-trust-tests.com/"
-    private val certificateChallenge = NetworkAuthenticationChallenge(
-        certificateHostName,
-        NetworkAuthenticationType.ServerTrust,
-        CertificateException("Test exception")
-    )
     private val authenticatorState = AuthenticatorState()
 
     @Before
@@ -145,8 +139,15 @@ class ServerTrustTests {
             DialogAuthenticator(authenticatorState = authenticatorState)
         }
         // issue the server trust challenge
+        val certificateHostName = "https://server-trust-tests.com/"
         val challengeResponse = async {
-            authenticatorState.handleNetworkAuthenticationChallenge(certificateChallenge)
+            authenticatorState.handleNetworkAuthenticationChallenge(
+                NetworkAuthenticationChallenge(
+                    certificateHostName,
+                    NetworkAuthenticationType.ServerTrust,
+                    CertificateException("Test exception")
+                )
+            )
         }
 
         val serverTrustMessage =
