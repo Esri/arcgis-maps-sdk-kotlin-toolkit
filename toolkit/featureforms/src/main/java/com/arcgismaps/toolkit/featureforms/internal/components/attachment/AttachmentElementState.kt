@@ -212,7 +212,7 @@ internal class FormAttachmentState(
         size = attachment.size,
         elementStateId = element.id,
         loadStatus = attachment.loadStatus,
-        onLoadAttachment = attachment::load,
+        onLoadAttachment = attachment::retryLoad,
         onLoadThumbnail = attachment::createFullImage,
         deleteAttachment = {
             element.deleteAttachment(attachment)
