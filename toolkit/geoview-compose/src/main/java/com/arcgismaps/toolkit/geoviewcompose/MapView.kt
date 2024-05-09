@@ -170,7 +170,7 @@ public fun MapView(
     val context = LocalContext.current
     val mapView = remember { MapView(context) }
     val layoutDirection = LocalLayoutDirection.current
-    var refreshCalloutPosition by remember { mutableStateOf(false) }
+    var refreshCalloutPosition by rememberSaveable { mutableStateOf(false) }
 
     AndroidView(
         modifier = modifier.semantics { contentDescription = "MapView" },
@@ -196,16 +196,14 @@ public fun MapView(
         })
 
     LaunchedEffect(Unit) {
-        launch {
-            mapView.viewpointChanged.collect {
-                refreshCalloutPosition = !refreshCalloutPosition
-            }
+        mapView.viewpointChanged.collect {
+            refreshCalloutPosition = !refreshCalloutPosition
         }
     }
 
     val mapViewScope = remember(mapView) { MapViewScope(mapView) }
-    key(refreshCalloutPosition) {
-        if (content != null) {
+    if (content != null) {
+        key(refreshCalloutPosition, content) {
             mapViewScope.content()
         }
     }

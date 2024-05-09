@@ -36,7 +36,7 @@ import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.ScreenCoordinate
 
 /**
- * Receiver scope which is used by MapView and SceneView composable functions.
+ * The receiver class of the MapView content lambda.
  *
  * @since 200.5.0
  */
