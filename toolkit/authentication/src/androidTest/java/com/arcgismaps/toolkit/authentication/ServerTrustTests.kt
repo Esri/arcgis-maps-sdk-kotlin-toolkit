@@ -50,7 +50,6 @@ class ServerTrustTests {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
-    private val authenticatorState = AuthenticatorState()
 
     @Before
     fun signOut() {
@@ -128,6 +127,7 @@ class ServerTrustTests {
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun TestScope.testServerTrustChallengeWithStateRestoration(userInputOnDialog: () -> Unit): Deferred<NetworkAuthenticationChallengeResponse> {
+        val authenticatorState = AuthenticatorState()
         // This class simulate the state restoration process
         val stateRestorationTester = StateRestorationTester(composeTestRule)
         stateRestorationTester.setContent {
