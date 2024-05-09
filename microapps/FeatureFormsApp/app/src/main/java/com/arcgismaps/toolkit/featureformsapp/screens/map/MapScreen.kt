@@ -86,7 +86,9 @@ import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetValue
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.StandardBottomSheet
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.rememberStandardBottomSheetState
 import com.arcgismaps.toolkit.geoviewcompose.MapView
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -139,11 +141,13 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
                         scope.launch {
                             mapViewModel.commitEdits().onFailure {
                                 Log.w("Forms", "Applying edits failed : ${it.message}")
-                                Toast.makeText(
-                                    context,
-                                    "Applying edits failed : ${it.message}",
-                                    Toast.LENGTH_LONG
-                                ).show()
+                                withContext(Dispatchers.Main) {
+                                    Toast.makeText(
+                                        context,
+                                        "Applying edits failed : ${it.message}",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
                             }
                         }
                     }) {
