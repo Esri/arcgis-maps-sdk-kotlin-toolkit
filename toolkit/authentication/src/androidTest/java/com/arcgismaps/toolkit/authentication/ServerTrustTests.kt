@@ -121,7 +121,8 @@ class ServerTrustTests {
      * Once the dialog is displayed, [userInputOnDialog] will be called to simulate user input.
      * The function will return the response to the server trust challenge from the authenticator in a deferred.
      *
-     * Note that this function will also simulate disposing and restoring the state of the DialogAuthenticator.
+     * Note that this function will also simulate disposing and restoring the state of the DialogAuthenticator
+     * before interaction with the server trust dialog.
      *
      * @since 200.4.0
      */
