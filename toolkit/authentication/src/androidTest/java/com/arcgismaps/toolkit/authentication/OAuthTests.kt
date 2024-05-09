@@ -14,10 +14,10 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.junit4.createComposeRule
 import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 import com.arcgismaps.portal.Portal
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -65,16 +65,11 @@ class OAuthTests {
             }
         }
 
-//        repeat(1000) {
-//            delay(100)
-//            composeTestRule.waitForIdle()
-//        }
-        val job = async(context = Dispatchers.IO) {
+        val job = async {
             portal.load()
         }
-        job.await()
-//        composeTestRule.waitUntilAtLeastOneExists(hasText("Sign in to ArcGIS Online"))
-
+        advanceUntilIdle()
+        composeTestRule.waitUntil(timeoutMillis = 60_000) { authenticatorState.pendingOAuthUserSignIn.value != null }
         assert(authenticatorState.pendingOAuthUserSignIn.value != null)
     }
 }
