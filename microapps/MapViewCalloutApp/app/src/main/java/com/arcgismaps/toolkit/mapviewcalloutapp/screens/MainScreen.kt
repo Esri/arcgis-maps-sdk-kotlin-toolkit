@@ -35,15 +35,14 @@ fun MainScreen(viewModel: MapViewModel) {
         arcGISMap = viewModel.arcGISMap,
         onDoubleTap = { },
         onSingleTapConfirmed = viewModel::setMapPoint,
-        content = {
-            viewModel.mapPoint.collectAsState().value?.let {
-                Callout(location = viewModel.mapPoint.collectAsState().value!!) {
-                    Text(
-                        "Hello, World!",
-                        color = Color.Green
-                    )
-                }
+    ) {
+        viewModel.mapPoint.collectAsState().value?.let {
+            Callout(location = viewModel.mapPoint.collectAsState().value!!) {
+                Text(
+                    "Hello, World!",
+                    color = Color.Green
+                )
             }
         }
-    )
+    }
 }
