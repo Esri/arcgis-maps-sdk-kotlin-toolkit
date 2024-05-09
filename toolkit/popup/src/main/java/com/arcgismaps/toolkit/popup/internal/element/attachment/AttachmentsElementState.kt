@@ -27,6 +27,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.graphics.ImageBitmap
@@ -77,16 +78,28 @@ internal class AttachmentsElementState(
 
 @Composable
 internal fun rememberAttachmentElementState(
-    popup: Popup,
-    attachmentPopupElement: AttachmentsPopupElement
+    element: AttachmentsPopupElement,
+    popup: Popup
 ): AttachmentsElementState {
+    val scope = rememberCoroutineScope()
     return rememberSaveable(
-        inputs = arrayOf(popup),
-        saver = AttachmentsElementState.Saver(attachmentPopupElement)
+        inputs = arrayOf(popup, element),
+        saver = AttachmentsElementState.Saver(element)
     ) {
         AttachmentsElementState(
-            attachmentPopupElement
-        )
+            element
+        ).also {
+            // NOTE: potential core issue with PopupAttachments not abiding the instance id contract here.
+            // Loaded attachments are coming back NotLoaded after rotation.
+            // Investigation underway.
+            it.attachments
+                .filter { state ->
+                    state.loadStatus.value == LoadStatus.Loaded
+                }
+                .forEach { state ->
+                    state.loadAttachment(scope)
+                }
+        }
     }
 }
 
@@ -119,7 +132,7 @@ internal class PopupAttachmentState(
         size = attachment.size,
         type = attachment.type,
         loadStatus = attachment.loadStatus,
-        onLoadAttachment = attachment::load,
+        onLoadAttachment = attachment::retryLoad,
         onLoadThumbnail = attachment::createFullImage
     )
 
