@@ -127,44 +127,46 @@ class ServerTrustTests {
      * @since 200.4.0
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun TestScope.testServerTrustChallengeWithStateRestoration(userInputOnDialog: () -> Unit): Deferred<NetworkAuthenticationChallengeResponse> {
-        val authenticatorState = AuthenticatorState()
-        // This class simulate the state restoration process
-        val stateRestorationTester = StateRestorationTester(composeTestRule)
-        stateRestorationTester.setContent {
-            DialogAuthenticator(authenticatorState = authenticatorState)
-        }
-        // issue the server trust challenge
-        val certificateHostName = "https://server-trust-tests.com/"
-        val challengeResponse = async {
-            authenticatorState.handleNetworkAuthenticationChallenge(
-                NetworkAuthenticationChallenge(
-                    certificateHostName,
-                    NetworkAuthenticationType.ServerTrust,
-                    CertificateException("Test exception")
+    fun TestScope.testServerTrustChallengeWithStateRestoration(userInputOnDialog: () -> Unit): Deferred<NetworkAuthenticationChallengeResponse> =
+        with(StateRestorationTester(composeTestRule)) {
+            val authenticatorState = AuthenticatorState()
+            setContent {
+                DialogAuthenticator(authenticatorState = authenticatorState)
+            }
+            // issue the server trust challenge
+            val certificateHostName = "https://server-trust-tests.com/"
+            val challengeResponse = async {
+                authenticatorState.handleNetworkAuthenticationChallenge(
+                    NetworkAuthenticationChallenge(
+                        certificateHostName,
+                        NetworkAuthenticationType.ServerTrust,
+                        CertificateException("Test exception")
+                    )
                 )
-            )
+            }
+
+            val serverTrustMessage =
+                composeTestRule.activity.getString(
+                    R.string.server_trust_message,
+                    certificateHostName
+                )
+            // ensure the dialog prompt is displayed as expected
+            advanceUntilIdle()
+            assert(authenticatorState.pendingServerTrustChallenge.value != null)
+            composeTestRule.onNodeWithText(serverTrustMessage).assertIsDisplayed()
+
+            // simulate a configuration change
+            emulateSavedInstanceStateRestore()
+
+            // perform the test action
+            userInputOnDialog()
+
+            advanceUntilIdle()
+            // ensure the dialog has disappeared
+            assert(authenticatorState.pendingServerTrustChallenge.value == null)
+            composeTestRule.onNodeWithText(serverTrustMessage).assertDoesNotExist()
+
+            // return the response deferred
+            return challengeResponse
         }
-
-        val serverTrustMessage =
-            composeTestRule.activity.getString(R.string.server_trust_message, certificateHostName)
-        // ensure the dialog prompt is displayed as expected
-        advanceUntilIdle()
-        assert(authenticatorState.pendingServerTrustChallenge.value != null)
-        composeTestRule.onNodeWithText(serverTrustMessage).assertIsDisplayed()
-
-        // simulate a configuration change
-        stateRestorationTester.emulateSavedInstanceStateRestore()
-
-        // perform the test action
-        userInputOnDialog()
-
-        advanceUntilIdle()
-        // ensure the dialog has disappeared
-        assert(authenticatorState.pendingServerTrustChallenge.value == null)
-        composeTestRule.onNodeWithText(serverTrustMessage).assertDoesNotExist()
-
-        // return the response deferred
-        return challengeResponse
-    }
 }
