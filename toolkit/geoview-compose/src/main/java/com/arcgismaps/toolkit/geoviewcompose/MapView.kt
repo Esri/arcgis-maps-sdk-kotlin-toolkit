@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -114,6 +115,7 @@ import kotlinx.coroutines.launch
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable MapView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable MapView
  * @param onDrawStatusChanged lambda invoked when the draw status of the composable MapView is changed
+ * @param content the content of the composable MapView
  * @sample com.arcgismaps.toolkit.geoviewcompose.samples.MapViewSample
  * @see
  * - <a href="https://developers.arcgis.com/kotlin/maps-2d/tutorials/display-a-map/">Display a map tutorial</a>
@@ -161,12 +163,14 @@ public fun MapView(
     onLongPress: ((LongPressEvent) -> Unit)? = null,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
-    onDrawStatusChanged: ((DrawStatus) -> Unit)? = null
+    onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
+    content: (@Composable MapViewScope.() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val mapView = remember { MapView(context) }
     val layoutDirection = LocalLayoutDirection.current
+    var refreshCalloutPosition by rememberSaveable { mutableStateOf(false) }
 
     AndroidView(
         modifier = modifier.semantics { contentDescription = "MapView" },
@@ -190,6 +194,19 @@ public fun MapView(
                 }
             }
         })
+
+    LaunchedEffect(Unit) {
+        mapView.viewpointChanged.collect {
+            refreshCalloutPosition = !refreshCalloutPosition
+        }
+    }
+
+    val mapViewScope = remember(mapView) { MapViewScope(mapView) }
+    if (content != null) {
+        key(refreshCalloutPosition, content) {
+            mapViewScope.content()
+        }
+    }
 
     DisposableEffect(Unit) {
         lifecycleOwner.lifecycle.addObserver(mapView)
