@@ -125,7 +125,8 @@ internal class AttachmentElementState(
 
     suspend fun deleteAttachment(formAttachment: FormAttachment) {
         formElement.deleteAttachment(formAttachment)
-        loadAttachments()
+        val state = attachments.find { it.name == formAttachment.name } ?: return
+        attachments.remove(state)
     }
 
     suspend fun renameAttachment(name: String, newName: String) {

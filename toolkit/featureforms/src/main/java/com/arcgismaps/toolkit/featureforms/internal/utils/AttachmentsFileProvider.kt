@@ -30,27 +30,14 @@ internal class AttachmentsFileProvider :
         private const val AUTHORITY_BASE = "com.arcgismaps.toolkit.featureforms.attachmentsfileprovider"
         private const val FILE_PROVIDER_PATH = "feature_forms_attachments"
 
-        fun createFileWithUri(name: String, context: Context): Uri {
-            val authority = "${context.packageName}.$AUTHORITY_BASE"
-            val directory = File(context.cacheDir, AUTHORITY_BASE)
-            directory.mkdirs()
-            val file = File(directory, name)
-            file.createNewFile()
-            return getUriForFile(
-                context,
-                authority,
-                file,
-            )
-        }
-
         fun createTempFileWithUri(prefix: String, suffix: String, context: Context): Uri {
             val authority = "${context.packageName}.$AUTHORITY_BASE"
-            val directory = File(context.cacheDir, authority)
+            val directory = File(context.cacheDir, FILE_PROVIDER_PATH)
             directory.mkdirs()
             val file =  File.createTempFile(prefix, suffix, directory)
             return getUriForFile(
                 context,
-                AUTHORITY_BASE,
+                authority,
                 file,
             )
         }
