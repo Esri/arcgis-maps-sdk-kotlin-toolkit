@@ -70,8 +70,8 @@ fun MainScreen(viewModel: MapViewModel) {
         },
         content = if (mapPoint != null) {
             {
-//                Callout(location = mapPoint, offset = DoubleXY(200.0, 0.0), rotateOffsetWithGeoView = true){
-                Callout(location = mapPoint, offset = DpOffset(200.0D, 0.0), rotateOffsetWithGeoView = true){
+                Callout(location = mapPoint, offset = DoubleXY(200.0, 0.0), rotateOffsetWithGeoView = true){
+//                Callout(location = mapPoint, offset = DpOffset(200.0, 0.0), rotateOffsetWithGeoView = true){
                     Text(
                         "Hello, World!",
                         color = Color.Green
