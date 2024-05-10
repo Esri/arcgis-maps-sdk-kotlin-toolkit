@@ -16,14 +16,14 @@
 
 package com.arcgismaps.toolkit.popup.internal.element.state
 
+import android.os.Parcelable
 import androidx.compose.runtime.Immutable
 
 /**
  * Base state class for a [com.arcgismaps.mapping.popup.PopupElement].
  */
 @Immutable
-internal abstract class PopupElementState {
-    // abstract so derived classes can parcelize it if possible
+internal abstract class PopupElementState : Parcelable {
     abstract val id: Int
 
     companion object {
