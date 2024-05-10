@@ -104,9 +104,7 @@ internal class AttachmentElementState(
      */
     private suspend fun loadAttachments() {
         formElement.fetchAttachments()
-        formElement.attachments.forEach { formAttachment ->
-
-        }
+        attachments.clear()
         attachments.addAll(
             formElement.attachments.map {
                 FormAttachmentState(
