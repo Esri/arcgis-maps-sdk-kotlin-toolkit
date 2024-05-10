@@ -214,7 +214,7 @@ internal fun AttachmentTile(
                         // handle single tap
                         if (loadStatus is LoadStatus.NotLoaded || loadStatus is LoadStatus.FailedToLoad) {
                             // load attachment
-                            state.load()
+                            state.loadWithParentScope()
                         } else if (loadStatus is LoadStatus.Loaded) {
                             // open attachment
                             val intent = Intent()

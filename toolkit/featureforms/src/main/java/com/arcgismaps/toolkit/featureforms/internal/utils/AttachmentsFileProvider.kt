@@ -17,7 +17,6 @@
 package com.arcgismaps.toolkit.featureforms.internal.utils
 
 import android.content.Context
-import android.net.IpPrefix
 import android.net.Uri
 import androidx.core.content.FileProvider
 import com.arcgismaps.toolkit.featureforms.R
@@ -31,6 +30,8 @@ internal class AttachmentsFileProvider :
         private const val FILE_PROVIDER_PATH = "feature_forms_attachments"
 
         fun createTempFileWithUri(prefix: String, suffix: String, context: Context): Uri {
+            // authority is unique, which uses the package name + base authority name
+            // to avoid conflicts with other apps using the same library
             val authority = "${context.packageName}.$AUTHORITY_BASE"
             val directory = File(context.cacheDir, FILE_PROVIDER_PATH)
             directory.mkdirs()
@@ -43,6 +44,8 @@ internal class AttachmentsFileProvider :
         }
 
         fun getUriForFile(file: File, context: Context): Uri {
+            // authority is unique, which uses the package name + base authority name
+            // to avoid conflicts with other apps using the same library
             val authority = "${context.packageName}.$AUTHORITY_BASE"
             return getUriForFile(context, authority, file)
         }

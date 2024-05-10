@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.attachment
 
-import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -64,15 +63,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.LoadStatus
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.utils.AttachmentsFileProvider
 import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
 import com.arcgismaps.toolkit.featureforms.internal.utils.LocalDialogRequester
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import java.io.File
 import java.time.Instant
 
 @Composable
@@ -80,7 +76,6 @@ internal fun AttachmentFormElement(
     state: AttachmentElementState,
     modifier: Modifier = Modifier
 ) {
-    val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val editable by state.isEditable.collectAsState()
     AttachmentFormElement(
@@ -91,11 +86,6 @@ internal fun AttachmentFormElement(
         attachments = state.attachments,
         lazyListState = state.lazyListState,
         hasCameraPermission = state.hasCameraPermissions(context),
-        onAttachmentAdded = { name, contentType, data ->
-            scope.launch {
-                state.addAttachment(name, contentType, data)
-            }
-        },
         modifier = modifier
     )
 }
@@ -109,12 +99,9 @@ internal fun AttachmentFormElement(
     attachments: List<FormAttachmentState>,
     lazyListState: LazyListState,
     hasCameraPermission: Boolean,
-    onAttachmentAdded: suspend (String, String, ByteArray) -> Unit,
     modifier: Modifier = Modifier,
     colors: AttachmentElementColors = AttachmentElementDefaults.colors()
 ) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     Card(
         modifier = modifier,
         shape = AttachmentElementDefaults.containerShape,
@@ -149,7 +136,7 @@ private fun Carousel(state: LazyListState, attachments: List<FormAttachmentState
         state = state,
         horizontalArrangement = Arrangement.spacedBy(15.dp),
     ) {
-        items(attachments) {
+        items(attachments, key = { it.hashCode() }) {
             AttachmentTile(it)
         }
     }
@@ -335,17 +322,6 @@ internal fun List<FormAttachmentState>.getNewAttachmentNameForContentType(
     return "$attachmentType $count.$ext"
 }
 
-internal fun Context.createTempImageFile(): File {
-    val timeStamp = Instant.now().toEpochMilli()
-    val dir = File(cacheDir, "feature_forms_attachments")
-    dir.mkdirs()
-    return File.createTempFile(
-        "IMAGE_$timeStamp",
-        ".jpg",
-        dir,
-    )
-}
-
 private sealed class PickerStyle {
     data object File : PickerStyle()
     data object Camera : PickerStyle()
@@ -366,16 +342,12 @@ private fun AttachmentFormElementPreview() {
                 2024,
                 "image/jpeg",
                 1,
-                MutableStateFlow(LoadStatus.Loaded),
-                { Result.success(null) },
-                { Result.success(null) },
                 {},
-                scope = rememberCoroutineScope(),
-                ""
+                "",
+                scope = rememberCoroutineScope()
             )
         ),
         lazyListState = LazyListState(),
         hasCameraPermission = true,
-        onAttachmentAdded = { _, _, _ -> }
     )
 }
