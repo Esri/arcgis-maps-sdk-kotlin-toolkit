@@ -30,19 +30,23 @@ import com.arcgismaps.toolkit.geoviewcompose.MapView
 @Composable
 fun MainScreen(viewModel: MapViewModel) {
 
+    val mapPoint = viewModel.mapPoint.collectAsState().value
+
     MapView(
         modifier = Modifier.fillMaxSize(),
         arcGISMap = viewModel.arcGISMap,
-        onDoubleTap = { },
         onSingleTapConfirmed = viewModel::setMapPoint,
-    ) {
-        viewModel.mapPoint.collectAsState().value?.let {
-            Callout(location = viewModel.mapPoint.collectAsState().value!!) {
-                Text(
-                    "Hello, World!",
-                    color = Color.Green
-                )
+        content = if (mapPoint != null) {
+            {
+                Callout(location = mapPoint) {
+                    Text(
+                        "Hello, World!",
+                        color = Color.Green
+                    )
+                }
             }
+        } else {
+            null
         }
-    }
+    )
 }

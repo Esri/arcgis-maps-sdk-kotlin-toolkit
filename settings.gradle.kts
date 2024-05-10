@@ -89,7 +89,7 @@ project(":floor-filter-app").projectDir = File(rootDir, "microapps/FloorFilterAp
 include(":geoview-compose")
 project(":geoview-compose").projectDir = File(rootDir, "toolkit/geoview-compose")
 include(":map-view-callout-app")
-project(":map-view-callout-app").projectDir = File(rootDir, "microapps/mapviewcalloutapp/app")
+project(":map-view-callout-app").projectDir = File(rootDir, "microapps/MapViewCalloutApp/app")
 include(":map-view-location-display-app")
 project(":map-view-location-display-app").projectDir = File(rootDir, "microapps/mapviewlocationdisplayapp/app")
 include(":map-view-insets-app")
