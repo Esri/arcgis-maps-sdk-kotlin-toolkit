@@ -174,7 +174,7 @@ internal fun InitializingExpressions(
 
 /**
  * Creates and remembers state objects for all the supported element types that are part of the
- * provided FeatureForm. These state objects are returned as part of a [PopupElementStateCollection].
+ * provided Popup. These state objects are returned as part of a [PopupElementStateCollection].
  *
  * @param popup the [Popup] to create the states for.
  * @return returns the [PopupElementStateCollection] created.
