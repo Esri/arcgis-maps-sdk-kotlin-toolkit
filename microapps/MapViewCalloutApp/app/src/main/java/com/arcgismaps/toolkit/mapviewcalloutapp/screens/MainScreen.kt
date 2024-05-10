@@ -19,41 +19,34 @@
 package com.arcgismaps.toolkit.mapviewcalloutapp.screens
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import androidx.compose.material3.Text
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.arcgismaps.geometry.Point
-import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.BasemapStyle
-import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.geoviewcompose.Callout
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 
 @Composable
-fun MainScreen() {
-    val arcGISMap by remember {
-        mutableStateOf(
-            ArcGISMap(BasemapStyle.ArcGISTopographic).apply {
-                initialViewpoint = Viewpoint(
-                    latitude = 39.8,
-                    longitude = -98.6,
-                    scale = 10e7
-                )
-            }
-        )
-    }
+fun MainScreen(viewModel: MapViewModel) {
 
-    var mapPoint by remember { mutableStateOf ( null as Point? ) }
+    val mapPoint = viewModel.mapPoint.collectAsState().value
 
     MapView(
         modifier = Modifier.fillMaxSize(),
-        arcGISMap = arcGISMap,
-        onSingleTapConfirmed = { mapPoint = it.mapPoint},
-        content = { mapPoint?.let { Callout(location = mapPoint!!) { Text("Hello, World!", color = Color.Green) } } },
+        arcGISMap = viewModel.arcGISMap,
+        onSingleTapConfirmed = viewModel::setMapPoint,
+        content = if (mapPoint != null) {
+            {
+                Callout(location = mapPoint) {
+                    Text(
+                        "Hello, World!",
+                        color = Color.Green
+                    )
+                }
+            }
+        } else {
+            null
+        }
     )
 }

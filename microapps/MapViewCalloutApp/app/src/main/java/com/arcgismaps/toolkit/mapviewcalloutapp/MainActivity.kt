@@ -21,11 +21,12 @@ package com.arcgismaps.toolkit.mapviewcalloutapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.toolkit.mapviewcalloutapp.screens.MainScreen
+import com.arcgismaps.toolkit.mapviewcalloutapp.screens.MapViewModel
 import com.arcgismaps.toolkit.mapviewcalloutapp.ui.theme.MapViewCalloutAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -33,23 +34,16 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         ArcGISEnvironment.apiKey =
             ApiKey.create(BuildConfig.API_KEY)
+        val viewModel: MapViewModel by viewModels()
         setContent {
             MapViewCalloutAppTheme {
-                MapViewCalloutApp()
+                MapViewCalloutApp(viewModel)
             }
         }
     }
 }
 
 @Composable
-fun MapViewCalloutApp() {
-    MainScreen()
-}
-
-@Preview(showBackground = true)
-@Composable
-fun AppPreview() {
-    MapViewCalloutAppTheme {
-        MapViewCalloutApp()
-    }
+fun MapViewCalloutApp(viewModel: MapViewModel) {
+    MainScreen(viewModel)
 }
