@@ -57,7 +57,7 @@ import com.arcgismaps.toolkit.popup.internal.element.state.mutablePopupElementSt
 import com.arcgismaps.toolkit.popup.internal.element.textelement.TextElementState
 import com.arcgismaps.toolkit.popup.internal.element.textelement.TextPopupElement
 import com.arcgismaps.toolkit.popup.internal.element.textelement.rememberTextElementState
-import com.arcgismaps.toolkit.popup.internal.ui.ExpandableCard
+import com.arcgismaps.toolkit.popup.internal.ui.ExpandableCardDefaults
 import kotlinx.coroutines.async
 
 @Immutable
@@ -141,6 +141,7 @@ private fun PopupBody(popupState: PopupState) {
     val popup = popupState.popup
     val lazyListState = rememberLazyListState()
     val states = rememberStates(popup)
+    val shapes = ExpandableCardDefaults.shapes()
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -152,9 +153,12 @@ private fun PopupBody(popupState: PopupState) {
             item {
                 when (element) {
                     is TextPopupElement -> {
-                        ExpandableCard {
-                            TextPopupElement(entry.state as TextElementState)
-                        }
+                        TextPopupElement(
+                            entry.state as TextElementState,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(shapes.padding)
+                        )
                     }
 
                     is AttachmentsPopupElement -> {
@@ -196,7 +200,7 @@ internal fun InitializingExpressions(
 
 /**
  * Creates and remembers state objects for all the supported element types that are part of the
- * provided FeatureForm. These state objects are returned as part of a [PopupElementStateCollection].
+ * provided Popup. These state objects are returned as part of a [PopupElementStateCollection].
  *
  * @param popup the [Popup] to create the states for.
  * @return returns the [PopupElementStateCollection] created.

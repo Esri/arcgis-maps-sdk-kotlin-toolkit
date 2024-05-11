@@ -22,6 +22,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.toolkit.popup.internal.ui.ExpandableCard
@@ -90,8 +91,10 @@ private fun HTML(content: String) {
  * @since 200.5.0
  */
 @Composable
-internal fun TextPopupElement(state: TextElementState) {
-    HTML(content = state.value)
+internal fun TextPopupElement(state: TextElementState, modifier: Modifier = Modifier) {
+    ExpandableCard(modifier = modifier) {
+        HTML(content = state.value)
+    }
 }
 
 @Preview

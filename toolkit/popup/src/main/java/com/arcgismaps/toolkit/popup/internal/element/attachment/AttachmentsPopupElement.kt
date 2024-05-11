@@ -16,29 +16,20 @@
 
 package com.arcgismaps.toolkit.popup.internal.element.attachment
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Card
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.mapping.popup.PopupAttachmentType
+import com.arcgismaps.toolkit.popup.internal.ui.ExpandableCard
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
@@ -61,25 +52,18 @@ internal fun AttachmentsPopupElement(
     title: String,
     @Suppress("UNUSED_PARAMETER") stateId: Int,
     attachments: List<PopupAttachmentState>,
-    modifier: Modifier = Modifier,
-    colors: AttachmentsElementColors = AttachmentsElementDefaults.colors()
+    modifier: Modifier = Modifier
 ) {
-    Card(
+    ExpandableCard(
         modifier = modifier,
-        shape = AttachmentsElementDefaults.containerShape,
-        border = BorderStroke(AttachmentsElementDefaults.borderThickness, colors.borderColor)
+        title = title,
+        description = description,
+        elementCount = attachments.size
     ) {
         Column(
             modifier = Modifier.padding(15.dp)
         ) {
             val listState = rememberLazyListState()
-            Row {
-                Header(
-                    title = title,
-                    description = description
-                )
-            }
-            Spacer(modifier = Modifier.height(20.dp))
             AttachmentGallery(listState, attachments)
         }
     }
@@ -97,41 +81,13 @@ private fun AttachmentGallery(state: LazyListState, attachments: List<PopupAttac
     }
 }
 
-@Composable
-private fun Header(
-    title: String,
-    description: String,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier.wrapContentHeight(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyLarge,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            if (description.isNotEmpty()) {
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-        }
-    }
-}
 
 @Preview
 @Composable
 private fun AttachmentsPopupElementPreview() {
     AttachmentsPopupElement(
         title = "Attachments",
-        description = "Add attachments",
+        description = "description of attachments",
         stateId = 1,
         attachments = listOf(
             PopupAttachmentState(
@@ -142,6 +98,7 @@ private fun AttachmentsPopupElementPreview() {
                 { Result.success(Unit) },
                 { Result.success(null) }
             )
-        )
+        ),
+        modifier = Modifier.padding(16.dp)
     )
 }
