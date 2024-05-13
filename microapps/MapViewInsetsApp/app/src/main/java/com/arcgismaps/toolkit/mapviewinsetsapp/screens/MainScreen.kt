@@ -53,7 +53,7 @@ import com.arcgismaps.toolkit.geoviewcompose.MapView
  * regards to the specified inset values. The `Reset Insets` button sets all inset values to zero.
  */
 @Composable
-fun MainScreen() {
+fun MainScreen(modifier: Modifier) {
     val arcGISMap = remember { ArcGISMap(BasemapStyle.ArcGISImagery) }
 
     var insets by remember { mutableStateOf(PaddingValues()) }
@@ -75,7 +75,7 @@ fun MainScreen() {
     }
 
     val focusManager = LocalFocusManager.current
-    Column(Modifier.fillMaxSize()) {
+    Column(modifier.fillMaxSize()) {
         Row(
             Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly

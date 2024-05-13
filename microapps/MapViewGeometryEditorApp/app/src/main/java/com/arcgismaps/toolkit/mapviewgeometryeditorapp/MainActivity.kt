@@ -26,7 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.toolkit.mapviewgeometryeditorapp.screens.MainScreen
-import com.arcgismaps.toolkit.mapviewgeometryeditorapp.ui.theme.MapViewGeometryEditorAppTheme
+import com.esri.microappslib.theme.MicroAppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,7 +34,7 @@ class MainActivity : ComponentActivity() {
         ArcGISEnvironment.apiKey = ApiKey.create(BuildConfig.API_KEY)
 
         setContent {
-            MapViewGeometryEditorAppTheme {
+            MicroAppTheme {
                 MapViewGeometryEditorApp()
             }
         }
@@ -49,7 +49,7 @@ fun MapViewGeometryEditorApp() {
 @Preview(showBackground = true)
 @Composable
 fun AppPreview() {
-    MapViewGeometryEditorAppTheme {
+    MicroAppTheme {
         MapViewGeometryEditorApp()
     }
 }
