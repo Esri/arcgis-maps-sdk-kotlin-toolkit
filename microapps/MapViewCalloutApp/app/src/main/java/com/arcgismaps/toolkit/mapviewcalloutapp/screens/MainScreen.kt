@@ -24,6 +24,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.arcgismaps.geometry.Point
+import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.toolkit.geoviewcompose.Callout
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 
@@ -35,18 +37,14 @@ fun MainScreen(viewModel: MapViewModel) {
     MapView(
         modifier = Modifier.fillMaxSize(),
         arcGISMap = viewModel.arcGISMap,
-        onSingleTapConfirmed = viewModel::setMapPoint,
-        content = if (mapPoint != null) {
-            {
-                Callout(location = mapPoint) {
-                    Text(
-                        "Hello, World!",
-                        color = Color.Green
-                    )
-                }
+        //onSingleTapConfirmed = viewModel::setMapPoint,
+        content = {
+            Callout(location = Point(-117.9190, 33.8121, SpatialReference.wgs84())) {
+                Text(
+                    "Hello, World!",
+                    color = Color.Green
+                )
             }
-        } else {
-            null
         }
     )
 }

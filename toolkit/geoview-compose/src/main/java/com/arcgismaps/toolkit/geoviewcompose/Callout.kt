@@ -25,7 +25,11 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Rect
@@ -46,7 +50,6 @@ import androidx.compose.ui.unit.times
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
-import com.arcgismaps.LoadStatus
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.ScreenCoordinate
@@ -77,7 +80,6 @@ public fun MapViewScope.Callout(
     modifier: Modifier = Modifier,
     content: @Composable BoxScope.() -> Unit
 ) {
-
     val localDensity = LocalDensity.current
 
     // SHAPE PROPERTIES
@@ -93,52 +95,62 @@ public fun MapViewScope.Callout(
         height = strokeBorderWidth + (2 * cornerRadius)
     )
 
+    // Convert the given location to a screen coordinate
+    var calloutScreenCoordinate: ScreenCoordinate by remember {
+        mutableStateOf(mapView.locationToScreen(location))
+    }
 
-    if (mapView.map?.loadStatus?.collectAsState()?.value == LoadStatus.Loaded) {
-        val calloutScreenCoordinate: ScreenCoordinate = mapView.locationToScreen(location)
-
-        val popupPositionProvider = object : PopupPositionProvider {
-            override fun calculatePosition(
-                anchorBounds: IntRect,
-                windowSize: IntSize,
-                layoutDirection: LayoutDirection,
-                popupContentSize: IntSize
-            ): IntOffset {
-                return IntOffset(
-                    x = calloutScreenCoordinate.x.roundToInt() - (popupContentSize.width / 2),
-                    y = calloutScreenCoordinate.y.roundToInt()
-                            - (popupContentSize.height / 2)
-                            - (with(localDensity) { anchorLeaderHeight.toPx() }).roundToInt()
-                )
-            }
+    LaunchedEffect(location) {
+        // Used to update screen coordinate when new location point is used
+        calloutScreenCoordinate = mapView.locationToScreen(location)
+        // Used to update screen coordinate when viewpoint is changed
+        mapView.viewpointChanged.collect {
+            calloutScreenCoordinate = mapView.locationToScreen(location)
         }
+    }
 
-        Popup(
-            popupPositionProvider = popupPositionProvider,
-            onDismissRequest = {
-                // TODO
-            },
-            properties = PopupProperties()
-        ) {
-            Box(
-                modifier = modifier
-                    .drawCalloutShape(
-                        cornerRadius = with(localDensity) { cornerRadius.toPx() },
-                        anchorLeaderWidth = with(localDensity) { anchorLeaderWidth.toPx() },
-                        anchorLeaderHeight = with(localDensity) { anchorLeaderHeight.toPx() },
-                        strokeBorderWidth = with(localDensity) { strokeBorderWidth.toPx() },
-                        minSize = minSize,
-                        strokeColor = stokeColor,
-                        calloutBackgroundColor = calloutBackgroundColor,
-                        calloutContentPadding = calloutContentPadding,
-                    )
+    // Create a provider to calculate the offset for the current callout screen coordinate
+    val popupPositionProvider = object : PopupPositionProvider {
+        override fun calculatePosition(
+            anchorBounds: IntRect,
+            windowSize: IntSize,
+            layoutDirection: LayoutDirection,
+            popupContentSize: IntSize
+        ): IntOffset {
+            if (calloutScreenCoordinate.x.isNaN() || calloutScreenCoordinate.y.isNaN())
+                return IntOffset(-9999, -9999) // TODO: This is not ideal, find a way to only display this content when given Map/Scene has loaded.
+
+            return IntOffset(
+                x = calloutScreenCoordinate.x.roundToInt() - (popupContentSize.width / 2),
+                y = calloutScreenCoordinate.y.roundToInt() - (popupContentSize.height / 2)
+                        - (with(localDensity) { anchorLeaderHeight.toPx() }).roundToInt()
             )
-            {
-                this.content()
-            }
         }
+    }
 
-
+    Popup(
+        popupPositionProvider = popupPositionProvider,
+        properties = PopupProperties(clippingEnabled = false),
+        onDismissRequest = {
+            // TODO: Callout function probably would need a dismiss param.
+        }
+    ) {
+        Box(
+            modifier = modifier
+                .drawCalloutShape(
+                    cornerRadius = with(localDensity) { cornerRadius.toPx() },
+                    anchorLeaderWidth = with(localDensity) { anchorLeaderWidth.toPx() },
+                    anchorLeaderHeight = with(localDensity) { anchorLeaderHeight.toPx() },
+                    strokeBorderWidth = with(localDensity) { strokeBorderWidth.toPx() },
+                    minSize = minSize,
+                    strokeColor = stokeColor,
+                    calloutBackgroundColor = calloutBackgroundColor,
+                    calloutContentPadding = calloutContentPadding,
+                )
+        )
+        {
+            this.content()
+        }
     }
 }
 
