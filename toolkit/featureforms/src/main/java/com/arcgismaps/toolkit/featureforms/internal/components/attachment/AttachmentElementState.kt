@@ -51,6 +51,7 @@ import com.arcgismaps.toolkit.featureforms.internal.utils.AttachmentsFileProvide
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -109,8 +110,7 @@ internal class AttachmentElementState(
             formElement.attachments.forEach { formAttachment ->
                 val state = attachments[formAttachment.hashCode()]
                 if (state == null) {
-                    // if does not exist
-                    // then add it to the list
+                    // if does not exist then create a new state
                     FormAttachmentState(
                         name = formAttachment.name,
                         size = formAttachment.size,
@@ -139,25 +139,12 @@ internal class AttachmentElementState(
         formElement.addAttachment(name, contentType, data)
         evaluateExpressions()
         // refresh the list of attachments
-        attachments = buildMap {
-            // add the new attachment to the front of the list
-            val formAttachment = formElement.attachments.last()
-            FormAttachmentState(
-                name = formAttachment.name,
-                size = formAttachment.size,
-                contentType = formAttachment.contentType,
-                elementStateId = id,
-                deleteAttachment = { deleteAttachment(formAttachment) },
-                filesDir = filesDir,
-                scope = scope,
-                formAttachment = formAttachment
-            ).also { newState ->
-                // load the attachment that was just added
-                newState.loadWithParentScope()
-                put(formAttachment.hashCode(), newState)
-            }
-            putAll(attachments)
-        }
+        loadAttachments()
+        // load the new attachment
+        attachments.entries.last().value.loadWithParentScope()
+        // scroll to the new attachment after a delay to allow the recomposition to complete
+        delay(100)
+        lazyListState.scrollToItem(attachments.count())
     }
 
     private suspend fun deleteAttachment(formAttachment: FormAttachment) {

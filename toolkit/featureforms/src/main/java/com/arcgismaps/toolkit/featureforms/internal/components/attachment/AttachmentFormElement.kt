@@ -131,9 +131,6 @@ internal fun AttachmentFormElement(
 
 @Composable
 private fun Carousel(state: LazyListState, attachments: Map<Int, FormAttachmentState>) {
-    var attachmentCount = rememberSaveable {
-        attachments.count()
-    }
     LazyRow(
         state = state,
         horizontalArrangement = Arrangement.spacedBy(15.dp),
@@ -143,13 +140,6 @@ private fun Carousel(state: LazyListState, attachments: Map<Int, FormAttachmentS
                 AttachmentTile(entry.value)
             }
         }
-    }
-    LaunchedEffect(attachments) {
-        if (attachmentCount < attachments.count()) {
-            // Scroll to the first item when a new attachment is added
-            state.scrollToItem(0)
-        }
-        attachmentCount = attachments.count()
     }
 }
 
