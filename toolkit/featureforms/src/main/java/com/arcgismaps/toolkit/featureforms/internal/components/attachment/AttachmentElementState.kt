@@ -221,7 +221,6 @@ internal class FormAttachmentState(
     private val scope: CoroutineScope,
     private val formAttachment: FormAttachment? = null
 ) : Loadable {
-
     private val _thumbnail: MutableState<ImageBitmap?> = mutableStateOf(null)
 
     /**
@@ -314,6 +313,18 @@ internal class FormAttachmentState(
             ?: return Result.failure(Exception("Form attachment is null"))
     }
 
+    private suspend fun writeDataToDisk(data: ByteArray) = withContext(Dispatchers.IO) {
+        val directory = File(filesDir, attachmentsDir)
+        directory.mkdirs()
+        // write the data to disk
+        val file = File(directory, name)
+        file.createNewFile()
+        FileOutputStream(file).use {
+            it.write(data)
+        }
+        filePath = file.absolutePath
+    }
+
     override fun hashCode(): Int {
         return Objects.hash(name, size, type)
     }
@@ -329,18 +340,6 @@ internal class FormAttachmentState(
         if (type != other.type) return false
 
         return true
-    }
-
-    private suspend fun writeDataToDisk(data: ByteArray) = withContext(Dispatchers.IO) {
-        val directory = File(filesDir, attachmentsDir)
-        directory.mkdirs()
-        // write the data to disk
-        val file = File(directory, name)
-        file.createNewFile()
-        FileOutputStream(file).use {
-            it.write(data)
-        }
-        filePath = file.absolutePath
     }
 }
 

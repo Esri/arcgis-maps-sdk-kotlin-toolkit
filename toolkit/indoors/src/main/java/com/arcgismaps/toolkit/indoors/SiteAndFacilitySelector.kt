@@ -36,7 +36,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -172,7 +172,9 @@ internal fun SiteSelectorTopBar(
     closeButtonClicked: () -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().height(65.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(65.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
@@ -186,12 +188,15 @@ internal fun SiteSelectorTopBar(
         )
         IconButton(
             onClick = closeButtonClicked,
-            modifier = Modifier.align(CenterVertically)
+            modifier = Modifier
+                .align(CenterVertically)
         ) {
             Icon(
-                modifier = Modifier.padding(horizontal = 10.dp).size(24.dp),
+                modifier = Modifier
+                    .padding(horizontal = 10.dp)
+                    .size(24.dp),
                 painter = painterResource(id = R.drawable.ic_x_24),
-                contentDescription = "Close Icon"
+                contentDescription = stringResource(R.string.close)
             )
         }
     }
@@ -211,7 +216,9 @@ internal fun FacilitySelectorTopBar(
     closeButtonClicked: () -> Unit
 ) {
     Row(
-        modifier = Modifier.height(65.dp).fillMaxWidth(),
+        modifier = Modifier
+            .height(65.dp)
+            .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         // if there are no sites, do not allow going back to the siteSelector from facilitySelector
@@ -221,13 +228,16 @@ internal fun FacilitySelectorTopBar(
                 modifier = Modifier.clickable { backToSiteButtonClicked() }
             ) {
                 Icon(
-                    modifier = Modifier.fillMaxHeight().padding(horizontal = 6.dp).size(24.dp),
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .padding(horizontal = 6.dp)
+                        .size(24.dp),
                     painter = painterResource(id = R.drawable.ic_chevron_left_32),
-                    contentDescription = "Go Back to Site Selector"
+                    contentDescription = stringResource(id = R.string.go_back_to_site_selector)
                 )
             }
         }
-        Divider(
+        HorizontalDivider(
             color = Color.LightGray,
             modifier = Modifier
                 .fillMaxHeight()
@@ -250,23 +260,25 @@ internal fun FacilitySelectorTopBar(
                 fontSize = if (selectAFacilityText.length > 23) 12.sp else 18.sp,
                 textAlign = TextAlign.Start
             )
-
+            val siteName =  floorFilterState.getSelectedSite()?.name ?: stringResource(id = R.string.not_available)
             Text(
-                text = stringResource(R.string.floor_filter_site_selector_top_bar) +
-                        (floorFilterState.getSelectedSite()?.name ?: "not available"),
+                text = stringResource(R.string.floor_filter_site_selector_top_bar, siteName),
                 // reduce font size if the localized text is too long
                 fontSize = if (selectAFacilityText.length > 23) 12.sp else 15.sp,
                 color = Color.Gray
             )
         }
         IconButton(
-            modifier = Modifier.align(CenterVertically),
+            modifier = Modifier
+                .align(CenterVertically),
             onClick = closeButtonClicked
         ) {
             Icon(
-                modifier = Modifier.padding(horizontal = 10.dp).size(24.dp),
+                modifier = Modifier
+                    .padding(horizontal = 10.dp)
+                    .size(24.dp),
                 painter = painterResource(id = R.drawable.ic_x_24),
-                contentDescription = "Close Icon"
+                contentDescription = stringResource(R.string.close)
             )
         }
     }
@@ -335,7 +347,8 @@ internal fun SitesAndFacilitiesFilter(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(65.dp)
-                    .focusRequester(focusRequester).onKeyEvent {
+                    .focusRequester(focusRequester)
+                    .onKeyEvent {
                         // submit query when enter is tapped
                         if (it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_ENTER) {
                             focusManager.clearFocus()
@@ -359,19 +372,20 @@ internal fun SitesAndFacilitiesFilter(
                         modifier = Modifier.size(24.dp),
                         painter = painterResource(id = R.drawable.ic_search_32),
                         tint = Color.Gray,
-                        contentDescription = "Search Icon"
+                        contentDescription = null // decorative
                     )
                 },
                 trailingIcon = if (text.isNotEmpty()) {
                     {
                         Icon(
-                            modifier = Modifier.clickable {
-                                text = ""
-                                filteredSitesOrFacilities = allSitesOrFacilities
-                            },
+                            modifier = Modifier
+                                .clickable {
+                                    text = ""
+                                    filteredSitesOrFacilities = allSitesOrFacilities
+                                },
                             painter = painterResource(id = R.drawable.ic_x_24),
                             tint = Color.Gray,
-                            contentDescription = "Clear Search Icon"
+                            contentDescription = stringResource(id = R.string.clear_search)
                         )
                     }
                 } else {
@@ -466,19 +480,25 @@ internal fun ListOfSitesOrFacilities(
 @Composable
 internal fun SiteOrFacilityItem(
     name: String,
-    isSelected: Boolean,
-    onSelected: (Int) -> Unit,
     index: Int,
+    isSelected: Boolean,
+    isSiteItem: Boolean,
     uiProperties: UIProperties,
-    isSiteItem: Boolean
+    onSelected: (Int) -> Unit
 ) {
+    val itemContentDescription =
+        if (isSiteItem) stringResource(id = R.string.site_item) else stringResource(id = R.string.facility_item)
     // a box is helpful to use a consistent clickable animation
     Box(modifier = Modifier
         .fillMaxWidth()
         .height(65.dp)
         .clickable { onSelected(index) }
-        .semantics { contentDescription = "SiteOrFacilityItem" }) {
-        Row(modifier = Modifier.padding(horizontal = 20.dp).align(Center)) {
+        .semantics { contentDescription = itemContentDescription }) {
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 20.dp)
+                .align(Center)
+        ) {
             if (isSelected) {
                 Canvas(
                     modifier = Modifier
@@ -490,16 +510,20 @@ internal fun SiteOrFacilityItem(
                     })
             }
             Text(
-                modifier = Modifier.weight(1f).align(CenterVertically),
+                modifier = Modifier
+                    .weight(1f)
+                    .align(CenterVertically),
                 text = name,
                 color = uiProperties.textColor,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
             )
             if (isSiteItem) {
                 Icon(
-                    modifier = Modifier.size(24.dp).align(CenterVertically),
+                    modifier = Modifier
+                        .size(24.dp)
+                        .align(CenterVertically),
                     painter = painterResource(id = R.drawable.ic_chevron_right_32),
-                    contentDescription = "Select site icon"
+                    contentDescription = null // decorative
                 )
             }
         }
