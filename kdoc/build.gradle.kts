@@ -19,7 +19,7 @@
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
-    alias(libs.plugins.dokka)
+    alias(libs.plugins.dokka) apply true
 }
 
 val versionNumber: String by project
@@ -40,26 +40,35 @@ rootProject.subprojects.filter {
     evaluationDependsOn(":${it.name}")
 }
 
+// only run kdoc on components which are released. Only modules that apply
+// the `artifact-deploy` plugin are released.
+// TODO: flag released modules directly.
 val releasedModules = project.rootProject.subprojects.filter {
     it.plugins.findPlugin("artifact-deploy") != null
 }
 
 // determine the released toolkit components
-val releasedSourceSets = releasedModules.map { subproject ->
+val releasedSourceSetPaths = releasedModules.map { subproject ->
     // add all the intended library projects as sourceSets below
     File(rootDir, "toolkit/${subproject.name}/src/main/java").canonicalPath
 }
 
 tasks {
-    //./gradlew :documentation:dokkaHtml
+    //./gradlew :kdoc:dokkaHtml
     // doc output will be under `documentation/build/dokka/html`.
     dokkaHtml {
         pluginConfiguration<org.jetbrains.dokka.versioning.VersioningPlugin, org.jetbrains.dokka.versioning.VersioningConfiguration> {
             version = versionNumber
         }
+
         moduleName.set("arcgis-maps-kotlin-toolkit")
         dokkaSourceSets {
+            named("main") {
+                sourceRoots.from(releasedSourceSetPaths)
+            }
+
             configureEach {
+                platform.set(org.jetbrains.dokka.Platform.jvm)
                 perPackageOption {
                     matchingRegex.set(".*internal.*")
                     suppress.set(true)
@@ -68,7 +77,6 @@ tasks {
                 perPackageOption {
                     reportUndocumented.set(true)
                 }
-                
             }
         }
     }
@@ -80,34 +88,16 @@ android {
     
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
-        
         consumerProguardFiles("consumer-rules.pro")
-    }
-
-    sourceSets {
-        named("main") {
-            java {
-                releasedSourceSets.forEach {
-                    srcDir(it)
-                }
-            }
-        }
     }
 }
 
 dependencies {
     // Puts the version in the KDoc
     dokkaPlugin(libs.dokka.versioning)
-
-    project.afterEvaluate {
-       releasedModules.forEach { proj ->
-           proj.configurations.forEach { config ->
-               config.allDependencies.forEach {
-                   //add all dependencies as implementation dependencies, no need for api.
-                   project.dependencies.add("implementation", it)
-               }
-           }
-       }
-    }
+    // put exposed dependencies in dokka's classpath
+    implementation(arcgis.mapsSdk)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.bundles.composeCore)
 }
 

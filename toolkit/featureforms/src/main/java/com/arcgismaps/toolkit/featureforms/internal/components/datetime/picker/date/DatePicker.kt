@@ -56,17 +56,17 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DateRangePickerState
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DividerDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalAbsoluteTonalElevation
@@ -113,7 +113,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.horizontalScrollAxisRange
-import androidx.compose.ui.semantics.isContainer
+import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.role
@@ -1004,7 +1004,7 @@ internal fun DateEntryContainer(
     Column(
         modifier = modifier
             .sizeIn(minWidth = DatePickerModalTokens.ContainerWidth)
-            .semantics { isContainer = true }
+            .semantics { isTraversalGroup = true }
     ) {
         DatePickerHeader(
             modifier = Modifier,
@@ -1035,7 +1035,7 @@ internal fun DateEntryContainer(
                 }
                 // Display a divider only when there is a title, headline, or a mode toggle.
                 if (title != null || headline != null || modeToggleButton != null) {
-                    Divider()
+                    HorizontalDivider()
                 }
             }
         }
@@ -1082,7 +1082,7 @@ private fun SwitchableDateEntryContent(
     Crossfade(
         targetState = state.displayMode,
         animationSpec = spring(),
-        modifier = Modifier.semantics { isContainer = true }) { mode ->
+        modifier = Modifier.semantics { isTraversalGroup = true }) { mode ->
         when (mode) {
             DisplayMode.Picker -> DatePickerContent(
                 stateData = state.stateData,
@@ -1197,7 +1197,7 @@ private fun DatePickerContent(
                         colors = colors,
                         stateData = stateData
                     )
-                    Divider()
+                    HorizontalDivider()
                 }
             }
         }
@@ -1759,9 +1759,9 @@ private fun MonthsNavigation(
                 IconButton(onClick = onPreviousClicked, enabled = previousAvailable) {
                     Icon(
                         if (rtl) {
-                            Icons.Filled.KeyboardArrowRight
+                            Icons.AutoMirrored.Filled.KeyboardArrowRight
                         } else {
-                            Icons.Filled.KeyboardArrowLeft
+                            Icons.AutoMirrored.Filled.KeyboardArrowLeft
                         },
                         contentDescription = getString(Strings.DatePickerSwitchToPreviousMonth)
                     )
@@ -1769,9 +1769,9 @@ private fun MonthsNavigation(
                 IconButton(onClick = onNextClicked, enabled = nextAvailable) {
                     Icon(
                         if (rtl) {
-                            Icons.Filled.KeyboardArrowLeft
+                            Icons.AutoMirrored.Filled.KeyboardArrowLeft
                         } else {
-                            Icons.Filled.KeyboardArrowRight
+                            Icons.AutoMirrored.Filled.KeyboardArrowRight
                         },
                         contentDescription = getString(Strings.DatePickerSwitchToNextMonth)
                     )

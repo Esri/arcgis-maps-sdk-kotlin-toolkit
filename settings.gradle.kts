@@ -61,6 +61,10 @@ dependencyResolutionManagement {
     }
 }
 
+// fixes https://devtopia.esri.com/runtime/kotlin/issues/3863#issuecomment-4715101
+// fixes https://issuetracker.google.com/issues/315023802
+gradle.startParameter.excludedTaskNames.addAll(listOf(":buildSrc:testClasses"))
+
 include(":bom")
 project(":bom").projectDir = File(rootDir, "bom")
 include(":kdoc")

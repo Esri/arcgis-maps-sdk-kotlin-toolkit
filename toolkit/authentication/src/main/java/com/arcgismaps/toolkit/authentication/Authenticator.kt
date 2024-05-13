@@ -25,8 +25,10 @@ import android.security.KeyChain
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,12 +60,14 @@ public fun Authenticator(
     modifier: Modifier = Modifier,
     onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)? = null
 ) {
-    AuthenticatorDelegate(
-        authenticatorState = authenticatorState,
-        // `fillMaxSize()` is needed, otherwise the prompts are displayed at the top of the screen.
-        modifier = modifier.fillMaxSize(),
-        onPendingOAuthUserSignIn = onPendingOAuthUserSignIn
-    )
+    Surface {
+        AuthenticatorDelegate(
+            authenticatorState = authenticatorState,
+            // `fillMaxSize()` is needed, otherwise the prompts are displayed at the top of the screen.
+            modifier = modifier.fillMaxSize(),
+            onPendingOAuthUserSignIn = onPendingOAuthUserSignIn
+        )
+    }
 }
 
 /**
@@ -94,16 +98,18 @@ public fun DialogAuthenticator(
 ) {
     val showDialog = authenticatorState.isDisplayed.collectAsStateWithLifecycle(initialValue = false).value
     if (showDialog) {
-        AuthenticatorDelegate(
-            authenticatorState = authenticatorState,
-            modifier = modifier,
-            onPendingOAuthUserSignIn,
-        ) { authenticationPrompt ->
-            AlertDialog(
-                onDismissRequest = authenticatorState::dismissAll,
-                modifier = Modifier.clip(MaterialTheme.shapes.extraLarge),
-            ) {
-                authenticationPrompt()
+        Surface {
+            AuthenticatorDelegate(
+                authenticatorState = authenticatorState,
+                modifier = modifier,
+                onPendingOAuthUserSignIn,
+            ) { authenticationPrompt ->
+                BasicAlertDialog(
+                    onDismissRequest = authenticatorState::dismissAll,
+                    modifier = Modifier.clip(MaterialTheme.shapes.extraLarge),
+                ) {
+                    authenticationPrompt()
+                }
             }
         }
     }

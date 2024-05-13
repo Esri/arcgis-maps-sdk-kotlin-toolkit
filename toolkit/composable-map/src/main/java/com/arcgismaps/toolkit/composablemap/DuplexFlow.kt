@@ -16,6 +16,8 @@
  *
  */
 
+@file:Suppress("DEPRECATION")
+
 package com.arcgismaps.toolkit.composablemap
 
 import androidx.compose.runtime.Composable
@@ -88,7 +90,6 @@ public interface MutableDuplexFlow<T> : DuplexFlow<T> {
  * both the [DuplexFlow.Type]'s.
  */
 @Deprecated("Deprecated without replacement")
-@Suppress("FunctionName")
 public fun <T> MutableDuplexFlow(initialValue: T): MutableDuplexFlow<T> = DuplexFlowImpl(initialValue)
 
 /**
@@ -128,6 +129,7 @@ internal class DuplexFlowImpl<T>(private val initialValue: T) : MutableDuplexFlo
             )
         }
 
+    @Deprecated("Deprecated without replacement")
     override fun setValue(value: T, flowType: DuplexFlow.Type) {
         if (flowType == DuplexFlow.Type.Read) {
             readerFlow.value = value

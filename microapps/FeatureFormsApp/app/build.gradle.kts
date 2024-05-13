@@ -57,7 +57,6 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-    @Suppress("UnstableApiUsage")
     buildFeatures {
         compose = true
         buildConfig = true
@@ -97,6 +96,7 @@ dependencies {
     implementation(libs.androidx.window)
     implementation(libs.androidx.window.core)
     // compose
+    implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -104,6 +104,8 @@ dependencies {
     implementation(libs.androidx.compose.navigation)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     testImplementation(libs.bundles.unitTest)
+    testImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.bundles.composeTest)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
     debugImplementation(libs.bundles.debug)
 }
