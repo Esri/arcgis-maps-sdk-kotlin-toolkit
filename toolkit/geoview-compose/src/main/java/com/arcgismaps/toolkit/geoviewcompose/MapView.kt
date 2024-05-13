@@ -56,6 +56,7 @@ import com.arcgismaps.mapping.view.LongPressEvent
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.MapViewInteractionOptions
 import com.arcgismaps.mapping.view.PanChangeEvent
+import com.arcgismaps.mapping.view.Reticle
 import com.arcgismaps.mapping.view.RotationChangeEvent
 import com.arcgismaps.mapping.view.ScaleChangeEvent
 import com.arcgismaps.mapping.view.SelectionProperties
@@ -132,6 +133,7 @@ public fun MapView(
     graphicsOverlays: List<GraphicsOverlay> = remember { emptyList() },
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     geometryEditor: GeometryEditor? = null,
+    isReticleVisible : Boolean = remember { false },
     mapViewProxy: MapViewProxy? = null,
     mapViewInteractionOptions: MapViewInteractionOptions = remember { MapViewInteractionOptions() },
     viewLabelProperties: ViewLabelProperties = remember { ViewLabelProperties() },
@@ -174,6 +176,7 @@ public fun MapView(
         update = {
             it.map = arcGISMap
             it.selectionProperties = selectionProperties
+            if (isReticleVisible) it.reticle.show() else it.reticle.hide()
             it.interactionOptions = mapViewInteractionOptions
             it.locationDisplay = locationDisplay
             it.labeling = viewLabelProperties

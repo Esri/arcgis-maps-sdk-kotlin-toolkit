@@ -22,6 +22,7 @@ import com.arcgismaps.geometry.Geometry
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.view.AnimationCurve
+import com.arcgismaps.mapping.view.Reticle
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -53,6 +54,20 @@ public class MapViewProxy : GeoViewProxy("MapView") {
             setGeoView(value)
             field = value
         }
+
+    public fun setReticleVisible(visible: Boolean) {
+        mapView?.let {
+            if (visible) it.reticle.show() else it.reticle.hide()
+        }
+    }
+
+    /**
+     * TODO I think we only want to use show and hide
+     * @since 200.5.0
+     */
+    public val reticle: Reticle?
+        get() = mapView?.reticle
+
 
     /**
      * Sets the [mapView] parameter on this operator. This should be called by the composable [MapView]
