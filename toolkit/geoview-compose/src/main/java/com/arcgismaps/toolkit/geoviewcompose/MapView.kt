@@ -17,6 +17,7 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
+import android.graphics.drawable.BitmapDrawable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -37,6 +38,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.viewinterop.AndroidView
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.Polygon
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISMap
@@ -59,6 +61,7 @@ import com.arcgismaps.mapping.view.PanChangeEvent
 import com.arcgismaps.mapping.view.Reticle
 import com.arcgismaps.mapping.view.RotationChangeEvent
 import com.arcgismaps.mapping.view.ScaleChangeEvent
+import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.mapping.view.SelectionProperties
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
@@ -134,6 +137,8 @@ public fun MapView(
     locationDisplay: LocationDisplay = rememberLocationDisplay(),
     geometryEditor: GeometryEditor? = null,
     isReticleVisible : Boolean = remember { false },
+    onReticleMapPointChanged : ((Point?) -> Unit)? = null,
+    onReticleScreenPointChanged : ((ScreenCoordinate) -> Unit)? = null,
     mapViewProxy: MapViewProxy? = null,
     mapViewInteractionOptions: MapViewInteractionOptions = remember { MapViewInteractionOptions() },
     viewLabelProperties: ViewLabelProperties = remember { ViewLabelProperties() },
@@ -251,6 +256,13 @@ public fun MapView(
         onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
         onVisibleAreaChanged = onVisibleAreaChanged
     )
+
+    ReticleHandler(
+        mapView = mapView,
+        onReticleMapPointChanged = onReticleMapPointChanged,
+        onReticleScreenPointChanged = onReticleScreenPointChanged
+    )
+
 }
 
 /**
@@ -474,6 +486,39 @@ private fun ViewpointHandler(
                 .collect {
                     persistedViewpoint = mapView.getViewpointByPersistence(it)
                 }
+        }
+    }
+}
+
+/**
+ * Handles reticle events.
+ *
+ * @since 200.5.0
+ */
+@Composable
+private fun ReticleHandler(
+    mapView:MapView,
+    onReticleMapPointChanged:((Point?)->Unit)?,
+    onReticleScreenPointChanged:((ScreenCoordinate)->Unit)?
+) {
+    val currentOnReticleMapPointChanged by rememberUpdatedState(
+        onReticleMapPointChanged
+    )
+    val currentOnReticleScreenPointChanged by rememberUpdatedState(
+        onReticleScreenPointChanged
+    )
+
+    LaunchedEffect(Unit) {
+        launch {
+            mapView.reticle.mapPoint.collect {
+                currentOnReticleMapPointChanged?.invoke(it)
+            }
+        }
+
+        launch {
+            mapView.reticle.screenPoint.collect {
+                currentOnReticleScreenPointChanged?.invoke(it)
+            }
         }
     }
 }
