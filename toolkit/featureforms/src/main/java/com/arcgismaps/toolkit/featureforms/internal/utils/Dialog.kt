@@ -35,6 +35,7 @@ import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.ImageCapture
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.ImagePicker
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.RenameAttachmentDialog
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.getNewAttachmentNameForContentType
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormStateCollection
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.CodedValueFieldState
@@ -100,7 +101,7 @@ internal sealed class DialogType {
      *
      * @param stateId The id of the [DateTimeFieldState] that requested the dialog.
      */
-    data class DateTimeDialog(val stateId : Int) : DialogType()
+    data class DateTimeDialog(val stateId: Int) : DialogType()
 
     /**
      * Indicates an image capture dialog.
@@ -109,8 +110,8 @@ internal sealed class DialogType {
      * @param contentType The content type of the image to capture.
      */
     data class ImageCaptureDialog(
-        val stateId : Int,
-        val contentType : String
+        val stateId: Int,
+        val contentType: String
     ) : DialogType()
 
     /**
@@ -121,7 +122,18 @@ internal sealed class DialogType {
      */
     data class ImagePickerDialog(
         val stateId: Int,
-        val contentType : String
+        val contentType: String
+    ) : DialogType()
+
+    /**
+     * Indicates a dialog to rename an attachment.
+     *
+     * @param stateId The id of the [AttachmentElementState] that requested the dialog.
+     * @param name The current name of the attachment.
+     */
+    data class RenameAttachmentDialog(
+        val stateId: Int,
+        val name: String,
     ) : DialogType()
 }
 
@@ -129,7 +141,7 @@ internal sealed class DialogType {
  * Shows the appropriate dialogs as requested by the [LocalDialogRequester].
  */
 @Composable
-internal fun FeatureFormDialog(states : FormStateCollection) {
+internal fun FeatureFormDialog(states: FormStateCollection) {
     val focusManager = LocalFocusManager.current
     val dialogRequester = LocalDialogRequester.current
     val dialogType by dialogRequester.requestFlow.collectAsState()
@@ -225,6 +237,23 @@ internal fun FeatureFormDialog(states : FormStateCollection) {
                     }
                     dialogRequester.dismissDialog()
                 }
+            }
+        }
+
+        is DialogType.RenameAttachmentDialog -> {
+            val stateId = (dialogType as DialogType.RenameAttachmentDialog).stateId
+            val name = (dialogType as DialogType.RenameAttachmentDialog).name
+            val state = states[stateId]!! as AttachmentElementState
+            RenameAttachmentDialog(
+                name = name,
+                onRename = { newName ->
+                    scope.launch {
+                        state.renameAttachment(name, newName)
+                        dialogRequester.dismissDialog()
+                    }
+                }
+            ) {
+                dialogRequester.dismissDialog()
             }
         }
 
