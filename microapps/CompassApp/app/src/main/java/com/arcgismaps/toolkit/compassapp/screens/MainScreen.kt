@@ -43,7 +43,7 @@ import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import kotlinx.coroutines.launch
 
 @Composable
-fun MainScreen() {
+fun MainScreen(modifier: Modifier) {
     // create an ArcGISMap with a Topographic basemap style
     val arcGISMap by remember {
         mutableStateOf(
@@ -57,7 +57,7 @@ fun MainScreen() {
     val mapViewProxy = remember { MapViewProxy() }
     // show composable MapView with compass
     Box(
-        modifier = Modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize()
     ) {
         MapView(
             arcGISMap,
