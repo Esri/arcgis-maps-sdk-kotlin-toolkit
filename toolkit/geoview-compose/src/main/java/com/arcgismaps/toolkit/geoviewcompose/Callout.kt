@@ -17,7 +17,6 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
-import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -28,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
@@ -62,36 +62,35 @@ public class MapViewScope(internal val mapView: MapView)
  * @param location the geographical location at which to display the Callout
  * @param modifier Modifier to be applied to the composable Callout
  * @param content the content of the Callout
+ * @param offset the offset in screen coordinates from the geographical location at which to place the callout
+ * @param rotateOffsetWithGeoView specifies whether the screen offset is rotated with the [GeoView]. The Screen offset
+ *        will be rotated with the [GeoView] when true, false otherwise.
+ *        This is useful if you are showing the callout for elements with symbology that does rotate with the [GeoView]
  * @since 200.5.0
  */
 @Composable
-public fun MapViewScope.Callout(location: Point,
-                                modifier: Modifier = Modifier,
-                                offset: DoubleXY = DoubleXY.zero,
-//                                offset: DpOffset = DpOffset(0.dp, 0.dp),
-                                rotateOffsetWithGeoView: Boolean = false,
-                                content: @Composable BoxScope.() -> Unit) {
+public fun MapViewScope.Callout(
+    location: Point,
+    modifier: Modifier = Modifier,
+    offset: Offset = Offset.Zero,
+    rotateOffsetWithGeoView: Boolean = false,
+    content: @Composable BoxScope.() -> Unit
+) {
 
     if (mapView.map?.loadStatus?.collectAsState()?.value == LoadStatus.Loaded) {
 
-//        val mapViewRotation = mapView.mapRotation.collectAsState().value
-//        Log.d("***Callout test", "mapViewRotation: $mapViewRotation")
-
-        val leaderLocation = getLeaderScreenCoordinate(
+        val leaderScreenCoordinate = getLeaderScreenCoordinate(
             mapView,
             location,
             offset,
             rotateOffsetWithGeoView,
-//            mapViewRotation
         )
-        Log.d("***Callout test", "leaderLocation: $leaderLocation")
-//        val calloutScreenCoordinate: ScreenCoordinate = mapView.locationToScreen(location)
-        leaderLocation?.let {
+        leaderScreenCoordinate?.let {
             Box(
                 modifier = Modifier
                     .graphicsLayer {
-                        translationX = leaderLocation.x.toFloat()
-                        translationY = leaderLocation.y.toFloat()
+                        translationX = leaderScreenCoordinate.x.toFloat()
+                        translationY = leaderScreenCoordinate.y.toFloat()
                     }
                     .wrapContentSize()
                     .background(Color.White)
@@ -107,62 +106,61 @@ public fun MapViewScope.Callout(location: Point,
     }
 }
 
-
-    /**
-     * Returns the ScreenCoordinate for the location [Point] on [GeoView].
-     *
-     * @param geoView the GeoView
-     * @return A [ScreenCoordinate] for the screen in pixels or null if the location is not visible
-     * @since 200.2.0
-     */
-    private fun getLeaderScreenCoordinate(
-        geoView: GeoView,
-        location: Point,
-        offset: DoubleXY = DoubleXY.zero,
-        rotateOffsetWithGeoView: Boolean = false,
-//        geoViewRotation: Double = 0.0
-    ): ScreenCoordinate? {
-        val geoViewRotation = geoView.rotation()
-        val locationToScreen = if (geoView is MapView) {
-             geoView.locationToScreen(location)
-        } else {
-            // geoView is a SceneView
-            val locationToScreenResult = (geoView as SceneView).locationToScreen(location)
-            if (locationToScreenResult?.visibility == SceneLocationVisibility.Visible) {
-                return locationToScreenResult.screenPoint
-            }
-            null
+/**
+ * Returns the ScreenCoordinate for the location [Point] on [GeoView].
+ *
+ * @param geoView the GeoView
+ * @param location the location in geographical coordinates
+ * @param offset the offset in screen coordinates from the geographical location at which to place the callout
+ * @param rotateOffsetWithGeoView specifies whether the screen offset is rotated with the [GeoView]. The Screen offset
+ *       will be rotated with the [GeoView] when true, false otherwise.
+ * @return A [ScreenCoordinate] for the screen in pixels or null if the location is not visible
+ * @since 200.5.0
+ */
+private fun getLeaderScreenCoordinate(
+    geoView: GeoView,
+    location: Point,
+    offset: Offset,
+    rotateOffsetWithGeoView: Boolean
+): ScreenCoordinate? {
+    val geoViewRotation = geoView.rotation()
+    val locationToScreen = if (geoView is MapView) {
+        geoView.locationToScreen(location)
+    } else {
+        // geoView is a SceneView
+        val locationToScreenResult = (geoView as SceneView).locationToScreen(location)
+        if (locationToScreenResult?.visibility == SceneLocationVisibility.Visible) {
+            return locationToScreenResult.screenPoint
         }
-        return locationToScreen?.let { screenCoordinate ->
-            if (rotateOffsetWithGeoView && geoViewRotation != 0.0) {
-                val angle = AngularUnit.degrees.convertTo(AngularUnit.radians, -geoViewRotation)
-                screenCoordinate.offset(offset).rotate(angle, screenCoordinate)
-            } else {
-                screenCoordinate.offset(offset)
-            }
+        null
+    }
+    return locationToScreen?.let { screenCoordinate ->
+        if (rotateOffsetWithGeoView && geoViewRotation != 0.0) {
+            val angle = AngularUnit.degrees.convertTo(AngularUnit.radians, -geoViewRotation)
+            screenCoordinate.offset(offset).rotate(angle, screenCoordinate)
+        } else {
+            screenCoordinate.offset(offset)
         }
     }
+}
 
 private fun GeoView.rotation(): Double {
     return if (this is SceneView) {
         getCurrentViewpoint(ViewpointType.CenterAndScale)?.rotation ?: 0.0
     } else {
-        val mapViewRotation = (this as MapView).mapRotation.value
-        Log.d("***Callout test", "mapViewRotation: $mapViewRotation")
-        mapViewRotation
-//        (this as MapView).mapRotation.value
+        (this as MapView).mapRotation.value
     }
 }
 
 /**
- * Returns a [DoubleXY] which is the result of offsetting this [DoubleXY] by the specified value.
+ * Returns a [DoubleXY] which is the result of offsetting this [DoubleXY] by the specified [Offset].
  *
- * @param offset the offset to he applied
+ * @param offset the offset to be applied
  * @return the new [DoubleXY] offset point
- * @since 200.2.0
+ * @since 200.5.0
  */
-private fun DoubleXY.offset(offset: DoubleXY): DoubleXY {
-    return this + offset
+private fun DoubleXY.offset(offset: Offset): DoubleXY {
+    return DoubleXY(x + offset.x, y + offset.y)
 }
 
 /**
@@ -171,7 +169,7 @@ private fun DoubleXY.offset(offset: DoubleXY): DoubleXY {
  * @param rotateByAngle angle in Radians where a positive value is counter clockwise
  * @param center the center around which the resulting point will be rotated
  * @return the resulting [DoubleXY] that has been rotated
- * @since 200.2.0
+ * @since 200.5.0
  */
 private fun DoubleXY.rotate(rotateByAngle: Double, center: DoubleXY = DoubleXY.zero): DoubleXY {
     val x1 = x - center.x
