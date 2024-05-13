@@ -32,7 +32,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Photo
@@ -96,7 +95,7 @@ internal fun AttachmentFormElement(
     description: String,
     editable: Boolean,
     stateId: Int,
-    attachments: List<FormAttachmentState>,
+    attachments: Map<Int, FormAttachmentState>,
     lazyListState: LazyListState,
     hasCameraPermission: Boolean,
     modifier: Modifier = Modifier,
@@ -131,14 +130,26 @@ internal fun AttachmentFormElement(
 }
 
 @Composable
-private fun Carousel(state: LazyListState, attachments: List<FormAttachmentState>) {
+private fun Carousel(state: LazyListState, attachments: Map<Int, FormAttachmentState>) {
+    var attachmentCount = rememberSaveable {
+        attachments.count()
+    }
     LazyRow(
         state = state,
         horizontalArrangement = Arrangement.spacedBy(15.dp),
     ) {
-        items(attachments, key = { it.hashCode() }) {
-            AttachmentTile(it)
+        attachments.entries.forEach { entry ->
+            item(key = entry.key) {
+                AttachmentTile(entry.value)
+            }
         }
+    }
+    LaunchedEffect(attachments) {
+        if (attachmentCount < attachments.count()) {
+            // Scroll to the first item when a new attachment is added
+            state.scrollToItem(0)
+        }
+        attachmentCount = attachments.count()
     }
 }
 
@@ -311,17 +322,6 @@ internal fun ImagePicker(onImageSelected: (Uri) -> Unit) {
     }
 }
 
-internal fun List<FormAttachmentState>.getNewAttachmentNameForContentType(
-    contentType: String
-): String {
-    val (attachmentType: AttachmentType, ext: String) = when (contentType) {
-        "image/jpeg" -> Pair(AttachmentType.Image, "jpg")
-        else -> Pair(AttachmentType.Other, "")
-    }
-    val count = this.count { it.type == attachmentType }
-    return "$attachmentType $count.$ext"
-}
-
 private sealed class PickerStyle {
     data object File : PickerStyle()
     data object Camera : PickerStyle()
@@ -336,15 +336,18 @@ private fun AttachmentFormElementPreview() {
         description = "Add attachments",
         editable = true,
         stateId = 1,
-        attachments = listOf(
-            FormAttachmentState(
-                "Photo 1.jpg",
-                2024,
-                "image/jpeg",
+        attachments = mapOf(
+            Pair(
                 1,
-                {},
-                "",
-                scope = rememberCoroutineScope()
+                FormAttachmentState(
+                    "Photo 1.jpg",
+                    2024,
+                    "image/jpeg",
+                    1,
+                    {},
+                    "",
+                    scope = rememberCoroutineScope()
+                )
             )
         ),
         lazyListState = LazyListState(),

@@ -29,12 +29,13 @@ import androidx.compose.material.icons.outlined.VideoCameraBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -80,7 +81,7 @@ internal class AttachmentElementState(
     /**
      * The attachments associated with the form element.
      */
-    val attachments = SnapshotStateList<FormAttachmentState>()
+    var attachments by mutableStateOf(emptyMap<Int, FormAttachmentState>())
 
     /**
      * Indicates whether the attachment form element is editable.
@@ -104,21 +105,31 @@ internal class AttachmentElementState(
      */
     private suspend fun loadAttachments() {
         formElement.fetchAttachments()
-        attachments.clear()
-        attachments.addAll(
-            formElement.attachments.map {
-                FormAttachmentState(
-                    name = it.name,
-                    size = it.size,
-                    contentType = it.contentType,
-                    elementStateId = id,
-                    deleteAttachment = { deleteAttachment(it) },
-                    filesDir = filesDir,
-                    scope = scope,
-                    formAttachment = it
-                )
+        attachments = buildMap {
+            formElement.attachments.forEach { formAttachment ->
+                val state = attachments[formAttachment.hashCode()]
+                if (state == null) {
+                    // if does not exist
+                    // then add it to the list
+                    FormAttachmentState(
+                        name = formAttachment.name,
+                        size = formAttachment.size,
+                        contentType = formAttachment.contentType,
+                        elementStateId = id,
+                        deleteAttachment = { deleteAttachment(formAttachment) },
+                        filesDir = filesDir,
+                        scope = scope,
+                        formAttachment = formAttachment
+                    ).also { newState ->
+                        put(formAttachment.hashCode(), newState)
+                    }
+                } else {
+                    // update the current state
+                    state.update(formAttachment)
+                    put(formAttachment.hashCode(), state)
+                }
             }
-        )
+        }
     }
 
     /**
@@ -128,17 +139,30 @@ internal class AttachmentElementState(
         formElement.addAttachment(name, contentType, data)
         evaluateExpressions()
         // refresh the list of attachments
-        loadAttachments()
-        // load the attachment that was just added
-        attachments.last().loadWithParentScope()
-        // scroll to the newly added attachment
-        lazyListState.scrollToItem(attachments.size - 1)
+        attachments = buildMap {
+            // add the new attachment to the front of the list
+            val formAttachment = formElement.attachments.last()
+            FormAttachmentState(
+                name = formAttachment.name,
+                size = formAttachment.size,
+                contentType = formAttachment.contentType,
+                elementStateId = id,
+                deleteAttachment = { deleteAttachment(formAttachment) },
+                filesDir = filesDir,
+                scope = scope,
+                formAttachment = formAttachment
+            ).also { newState ->
+                // load the attachment that was just added
+                newState.loadWithParentScope()
+                put(formAttachment.hashCode(), newState)
+            }
+            putAll(attachments)
+        }
     }
 
     private suspend fun deleteAttachment(formAttachment: FormAttachment) {
         formElement.deleteAttachment(formAttachment)
-        val state = attachments.find { it.name == formAttachment.name } ?: return
-        attachments.remove(state)
+        attachments = attachments.filter { it.key != formAttachment.hashCode() }
     }
 
     suspend fun renameAttachment(name: String, newName: String) {
@@ -162,11 +186,11 @@ internal class AttachmentElementState(
             filesDir: String
         ): Saver<AttachmentElementState, Any> = listSaver(
             save = {
-                // save the list of indices of attachments that have been loaded
                 buildList<Int> {
-                    for (i in it.attachments.indices) {
-                        if (it.attachments[i].loadStatus.value is LoadStatus.Loaded) {
-                            add(i)
+                    // save the keys of attachments that have been loaded
+                    it.attachments.forEach { entry ->
+                        if (entry.value.loadStatus.value is LoadStatus.Loaded) {
+                            add(entry.key)
                         }
                     }
                     // save the index of the first visible item
@@ -186,12 +210,15 @@ internal class AttachmentElementState(
                         it.loadAttachments()
                         // load the attachments that were previously loaded
                         for (i in savedList.dropLast(2)) {
-                            it.attachments[i].loadWithParentScope()
+                            it.attachments[i]?.loadWithParentScope()
                         }
                         // scroll to the last visible item
                         val firstVisibleItemIndex = savedList[savedList.count() - 2]
                         val firstVisibleItemScrollOffset = savedList[savedList.count() - 1]
-                        it.lazyListState.scrollToItem(firstVisibleItemIndex, firstVisibleItemScrollOffset)
+                        it.lazyListState.scrollToItem(
+                            firstVisibleItemIndex,
+                            firstVisibleItemScrollOffset
+                        )
                     }
                 }
             }
@@ -212,7 +239,7 @@ internal class AttachmentElementState(
  * @param formAttachment The [FormAttachment] that this state represents.
  */
 internal class FormAttachmentState(
-    val name: String,
+    name: String,
     val size: Long,
     val contentType: String,
     val elementStateId: Int,
@@ -221,6 +248,9 @@ internal class FormAttachmentState(
     private val scope: CoroutineScope,
     private val formAttachment: FormAttachment? = null
 ) : Loadable {
+
+    var name by mutableStateOf(name)
+        private set
 
     private val _thumbnail: MutableState<ImageBitmap?> = mutableStateOf(null)
 
@@ -260,6 +290,13 @@ internal class FormAttachmentState(
     }
 
     /**
+     * Updates the attachment with the given [formAttachment].
+     */
+    fun update(formAttachment: FormAttachment) {
+        name = formAttachment.name
+    }
+
+    /**
      * Loads the attachment and its thumbnail. Use [loadWithParentScope] to load the attachment as
      * a long-running task. This coroutine will get cancelled if the calling composable is removed
      * from the composition.
@@ -291,10 +328,9 @@ internal class FormAttachmentState(
         } catch (ex: CancellationException) {
             result = Result.failure(ex)
             throw ex
-        } catch (ex : Exception) {
+        } catch (ex: Exception) {
             result = Result.failure(ex)
-        }
-        finally {
+        } finally {
             if (result.isSuccess) {
                 _loadStatus.value = LoadStatus.Loaded
             } else {
@@ -396,4 +432,15 @@ internal fun AttachmentType.getIcon(): ImageVector = when (this) {
     AttachmentType.Video -> Icons.Outlined.VideoCameraBack
     AttachmentType.Document -> Icons.Outlined.FilePresent
     AttachmentType.Other -> Icons.Outlined.FileCopy
+}
+
+internal fun Map<Int, FormAttachmentState>.getNewAttachmentNameForImageType(): String {
+    val count = this.count { entry ->
+        entry.value.contentType.isContentTypeImage()
+    }
+    return "Image $count.jpg"
+}
+
+internal fun String.isContentTypeImage(): Boolean {
+    return this.startsWith("image/")
 }

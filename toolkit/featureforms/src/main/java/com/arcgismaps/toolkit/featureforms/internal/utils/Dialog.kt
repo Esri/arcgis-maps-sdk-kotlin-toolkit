@@ -36,7 +36,7 @@ import com.arcgismaps.toolkit.featureforms.internal.components.attachment.Attach
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.ImageCapture
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.ImagePicker
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.RenameAttachmentDialog
-import com.arcgismaps.toolkit.featureforms.internal.components.attachment.getNewAttachmentNameForContentType
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.getNewAttachmentNameForImageType
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormStateCollection
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.CodedValueFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComboBoxDialog
@@ -213,9 +213,7 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
             ImageCapture { uri ->
                 scope.launch {
                     context.readBytes(uri)?.let { data ->
-                        val name = state.attachments.getNewAttachmentNameForContentType(
-                            contentType
-                        )
+                        val name = state.attachments.getNewAttachmentNameForImageType()
                         state.addAttachment(name, contentType, data)
                     }
                     dialogRequester.dismissDialog()
@@ -230,9 +228,7 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
             ImagePicker { uri ->
                 scope.launch {
                     context.readBytes(uri)?.let { data ->
-                        val name = state.attachments.getNewAttachmentNameForContentType(
-                            contentType
-                        )
+                        val name = state.attachments.getNewAttachmentNameForImageType()
                         state.addAttachment(name, contentType, data)
                     }
                     dialogRequester.dismissDialog()
