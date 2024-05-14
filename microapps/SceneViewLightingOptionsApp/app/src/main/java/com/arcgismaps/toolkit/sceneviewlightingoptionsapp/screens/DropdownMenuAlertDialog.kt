@@ -83,7 +83,7 @@ fun DropdownMenuAlertDialog(
             Box(
                 modifier = Modifier
                     .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
-                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .background(MaterialTheme.colorScheme.secondaryContainer)
                     .clickable {
                         dropdownExpanded = !dropdownExpanded
                     }
@@ -93,7 +93,7 @@ fun DropdownMenuAlertDialog(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        itemList[selectedIndex] ?: "Unexpected index",
+                        itemList[selectedIndex],
                         modifier = Modifier.padding(8.dp)
                     )
                     Icon(
