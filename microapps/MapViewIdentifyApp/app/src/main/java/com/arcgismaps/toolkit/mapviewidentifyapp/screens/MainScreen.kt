@@ -35,12 +35,11 @@ import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -60,8 +59,7 @@ private val detailsHeight = 200.dp
 fun MainScreen() {
     val identifyViewModel: IdentifyViewModel = viewModel()
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
-        SheetState(
-            skipPartiallyExpanded = false,
+        bottomSheetState = rememberStandardBottomSheetState(
             initialValue = SheetValue.Expanded,
             skipHiddenState = true
         )
@@ -79,13 +77,7 @@ fun MainScreen() {
         },
         scaffoldState = bottomSheetScaffoldState,
         topBar = {
-            TopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
-                ),
-                title = { Text("MapView Identify App") }
-            )
+            TopAppBar(title = { Text("MapView Identify App") })
         },
     ) { paddingValues ->
         MapView(
