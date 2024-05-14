@@ -20,6 +20,7 @@ plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("artifact-deploy")
+    id("kotlin-parcelize")
     alias(libs.plugins.binary.compatibility.validator) apply true
 }
 android {
