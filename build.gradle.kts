@@ -51,7 +51,7 @@ buildscript {
  * Test report to be found under `arcgis-maps-sdk-kotlin-toolkit/build/reports`.
  */
 testAggregation {
-    getModules(
+    getModulesExcept(
         "bom",
         "kdoc",
         "microapps-lib",
@@ -65,7 +65,7 @@ testAggregation {
 /**
  * Returns all modules in this project, except the ones specified by [modulesToExclude].
  */
-fun getModules(vararg modulesToExclude: String): List<String> =
+fun getModulesExcept(vararg modulesToExclude: String): List<String> =
     with(File("$rootDir/settings.gradle.kts")) {
         readLines()
             .filter { it.startsWith("include") }
