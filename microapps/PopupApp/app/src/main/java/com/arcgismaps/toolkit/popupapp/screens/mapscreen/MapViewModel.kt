@@ -50,14 +50,12 @@ open class BaseMapViewModel(application: Application) : AndroidViewModel(applica
 
 /**
  * Simple android view model for the Popup app map screen.
- * Provides persistence of state across orientation changes etc. This allows us to test
- * persistence of internal composable Popup() state across orientation changes etc.
  */
 @Suppress("unused_parameter")
 class MapViewModel(
     savedStateHandle: SavedStateHandle,
     application: Application,
-    private val coroutineScope: CoroutineScope = CloseableCoroutineScope()
+    coroutineScope: CoroutineScope = CloseableCoroutineScope()
 ) : BaseMapViewModel(application) {
 
     private var _geoElement: GeoElement? = null
