@@ -99,7 +99,7 @@ Please see the [package structure](doc/general/developer_setup.md#package-struct
 
 ### Testing
 
-In order to run *local* tests of all modules and get an aggregated test report, run the following at the root folder of the project:
+In order to run *local* (non-instrumented) tests of all modules and get an aggregated test report, run the following at the root folder of the project:
 ```
 ./gradlew testAggregatedReport
 ```
