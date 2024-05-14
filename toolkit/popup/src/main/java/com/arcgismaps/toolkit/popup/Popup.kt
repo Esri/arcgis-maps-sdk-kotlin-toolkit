@@ -49,6 +49,9 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.popup.FieldsPopupElement
 import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.mapping.popup.TextPopupElement
+import com.arcgismaps.toolkit.popup.internal.element.fieldselement.FieldsElementState
+import com.arcgismaps.toolkit.popup.internal.element.fieldselement.FieldsPopupElement
+import com.arcgismaps.toolkit.popup.internal.element.fieldselement.rememberFieldsElementState
 import com.arcgismaps.toolkit.popup.internal.element.state.PopupElementStateCollection
 import com.arcgismaps.toolkit.popup.internal.element.state.mutablePopupElementStateCollection
 import com.arcgismaps.toolkit.popup.internal.element.textelement.TextElementState
@@ -148,6 +151,15 @@ private fun PopupBody(popupState: PopupState) {
                         )
                     }
 
+                    is FieldsPopupElement -> {
+                        FieldsPopupElement(
+                            entry.state as FieldsElementState,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(shapes.padding)
+                        )
+                    }
+
                     else -> {
                         // other popup elements are not created
                     }
@@ -194,6 +206,13 @@ internal fun rememberStates(
                 states.add(
                     element,
                     rememberTextElementState(element = element, popup = popup)
+                )
+            }
+
+            is FieldsPopupElement -> {
+                states.add(
+                    element,
+                    rememberFieldsElementState(element = element, popup = popup)
                 )
             }
 
