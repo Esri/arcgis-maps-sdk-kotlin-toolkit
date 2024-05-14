@@ -53,7 +53,6 @@ import com.arcgismaps.toolkit.popup.internal.element.state.mutablePopupElementSt
 import com.arcgismaps.toolkit.popup.internal.element.textelement.TextElementState
 import com.arcgismaps.toolkit.popup.internal.element.textelement.TextPopupElement
 import com.arcgismaps.toolkit.popup.internal.element.textelement.rememberTextElementState
-import com.arcgismaps.toolkit.popup.internal.ui.ExpandableCardDefaults
 
 @Immutable
 private data class PopupState(@Stable val popup: Popup)
@@ -127,7 +126,6 @@ private fun PopupBody(popupState: PopupState) {
     val popup = popupState.popup
     val lazyListState = rememberLazyListState()
     val states = rememberStates(popup)
-    val shapes = ExpandableCardDefaults.shapes()
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -140,10 +138,7 @@ private fun PopupBody(popupState: PopupState) {
                 when (element) {
                     is TextPopupElement -> {
                         TextPopupElement(
-                            entry.state as TextElementState,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(shapes.padding)
+                            entry.state as TextElementState
                         )
                     }
 
