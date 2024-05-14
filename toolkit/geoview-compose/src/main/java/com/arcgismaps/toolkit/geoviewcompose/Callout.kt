@@ -134,12 +134,6 @@ public fun MapViewScope.Callout(
                 layoutDirection: LayoutDirection,
                 popupContentSize: IntSize
             ): IntOffset {
-                if (calloutScreenCoordinate.x.isNaN() || calloutScreenCoordinate.y.isNaN())
-                    return IntOffset(
-                        -9999,
-                        -9999
-                    ) // TODO: This is not ideal, find a way to only display this content when given Map/Scene has loaded.
-
                 return IntOffset(
                     x = calloutScreenCoordinate.x.roundToInt() - (popupContentSize.width / 2),
                     y = calloutScreenCoordinate.y.roundToInt() - (popupContentSize.height / 2)
