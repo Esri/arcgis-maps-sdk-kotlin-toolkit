@@ -44,7 +44,7 @@ buildscript {
  * Configures the [gmazzo test aggregation plugin](https://github.com/gmazzo/gradle-android-test-aggregation-plugin)
  * with all local tests to be aggregated into a single test report.
  * Note: This works only for local tests, not for connected tests.
- * To run aggregated local tests:
+ * To run aggregated local tests, run the following at the root folder of the project:
  * ```
  * ./gradlew testAggregatedReport
  * ```
