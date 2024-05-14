@@ -7,6 +7,7 @@ import android.view.inputmethod.InputMethodManager
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.platform.app.InstrumentationRegistry
@@ -113,29 +114,33 @@ class OAuthTests {
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun TestScope.testOAuthChallengeWithStateRestoration(userInputOnDialog: UiDevice.() -> Unit): Deferred<ArcGISAuthenticationChallengeResponse> {
-        composeTestRule.setContent {
-            Authenticator(
-                authenticatorState = authenticatorState,
-                modifier = Modifier.testTag("Authenticator")
-            )
+    fun TestScope.testOAuthChallengeWithStateRestoration(userInputOnDialog: UiDevice.() -> Unit): Deferred<ArcGISAuthenticationChallengeResponse> =
+        with(StateRestorationTester(composeTestRule)) {
+            setContent {
+                Authenticator(
+                    authenticatorState = authenticatorState,
+                    modifier = Modifier.testTag("Authenticator")
+                )
+            }
+            val challengeResponse = async {
+                authenticatorState.handleArcGISAuthenticationChallenge(
+                    makeMockArcGISAuthenticationChallenge()
+                )
+            }
+            advanceUntilIdle()
+
+            composeTestRule.waitUntil(timeoutMillis = 40_000) { authenticatorState.pendingOAuthUserSignIn.value != null }
+            composeTestRule.onNodeWithTag("Authenticator").assertDoesNotExist()
+            val uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+
+            uiDevice.awaitViewVisible("com.android.chrome")
+
+            emulateSavedInstanceStateRestore()
+
+            uiDevice.userInputOnDialog()
+
+            return challengeResponse
         }
-        val challengeResponse = async {
-            authenticatorState.handleArcGISAuthenticationChallenge(
-                makeMockArcGISAuthenticationChallenge()
-            )
-        }
-        advanceUntilIdle()
-
-        composeTestRule.waitUntil(timeoutMillis = 40_000) { authenticatorState.pendingOAuthUserSignIn.value != null }
-        composeTestRule.onNodeWithTag("Authenticator").assertDoesNotExist()
-        val uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-
-        uiDevice.awaitViewVisible("com.android.chrome")
-        uiDevice.userInputOnDialog()
-
-        return challengeResponse
-    }
 }
 
 /**
@@ -185,16 +190,14 @@ fun UiDevice.enterCredentialsOnBrowser(username: String, password: String, activ
  *
  * @since 200.4.0
  */
-fun closeSoftKeyboard(activity: Activity) {
+fun UiDevice.closeSoftKeyboard(activity: Activity) {
     val inputMethodManager =
         activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     val view = activity.currentFocus ?: View(activity)
     inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
 
-    val uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-
     // Wait for the keyboard to be hidden
-    uiDevice.wait(Until.gone(By.clazz("android.inputmethodservice.SoftInputWindow")), 5000)
+    wait(Until.gone(By.clazz("android.inputmethodservice.SoftInputWindow")), 5000)
 }
 
 /**
