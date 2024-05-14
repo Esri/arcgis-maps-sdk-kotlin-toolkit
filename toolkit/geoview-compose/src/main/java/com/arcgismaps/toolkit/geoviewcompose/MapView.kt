@@ -194,11 +194,6 @@ public fun MapView(
             }
         })
 
-    val mapViewScope = remember(mapView) { MapViewScope(mapView) }
-    if (content != null) {
-        mapViewScope.content()
-    }
-
     DisposableEffect(Unit) {
         lifecycleOwner.lifecycle.addObserver(mapView)
         onDispose {
@@ -256,6 +251,11 @@ public fun MapView(
         onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
         onVisibleAreaChanged = onVisibleAreaChanged
     )
+
+    val mapViewScope = remember(mapView) { MapViewScope(mapView) }
+    if (content != null) {
+        mapViewScope.content()
+    }
 }
 
 /**
