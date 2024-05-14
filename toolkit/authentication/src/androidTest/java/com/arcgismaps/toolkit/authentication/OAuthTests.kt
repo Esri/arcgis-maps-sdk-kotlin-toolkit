@@ -7,7 +7,6 @@ import android.view.inputmethod.InputMethodManager
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.platform.app.InstrumentationRegistry
@@ -113,34 +112,44 @@ class OAuthTests {
         assert(response is ArcGISAuthenticationChallengeResponse.Cancel)
     }
 
+    /**
+     * Places an [Authenticator] in the composition and issues an OAuth challenge.
+     * Once the browser is launched, [userInputOnDialog] will be called to simulate user input.
+     * Also, the device will be rotated to ensure that the Authenticator can handle configuration changes
+     * before calling [userInputOnDialog].
+     *
+     * @since 200.4.0
+     */
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun TestScope.testOAuthChallengeWithStateRestoration(userInputOnDialog: UiDevice.() -> Unit): Deferred<ArcGISAuthenticationChallengeResponse> =
-        with(StateRestorationTester(composeTestRule)) {
-            setContent {
-                Authenticator(
-                    authenticatorState = authenticatorState,
-                    modifier = Modifier.testTag("Authenticator")
-                )
-            }
-            val challengeResponse = async {
-                authenticatorState.handleArcGISAuthenticationChallenge(
-                    makeMockArcGISAuthenticationChallenge()
-                )
-            }
-            advanceUntilIdle()
-
-            composeTestRule.waitUntil(timeoutMillis = 40_000) { authenticatorState.pendingOAuthUserSignIn.value != null }
-            composeTestRule.onNodeWithTag("Authenticator").assertDoesNotExist()
-            val uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-
-            uiDevice.awaitViewVisible("com.android.chrome")
-
-            emulateSavedInstanceStateRestore()
-
-            uiDevice.userInputOnDialog()
-
-            return challengeResponse
+    fun TestScope.testOAuthChallengeWithStateRestoration(
+        userInputOnDialog: UiDevice.() -> Unit,
+    ): Deferred<ArcGISAuthenticationChallengeResponse> {
+        composeTestRule.setContent {
+            Authenticator(
+                authenticatorState = authenticatorState,
+                modifier = Modifier.testTag("Authenticator")
+            )
         }
+        val challengeResponse = async {
+            authenticatorState.handleArcGISAuthenticationChallenge(
+                makeMockArcGISAuthenticationChallenge()
+            )
+        }
+        advanceUntilIdle()
+
+        composeTestRule.waitUntil(timeoutMillis = 40_000) { authenticatorState.pendingOAuthUserSignIn.value != null }
+        composeTestRule.onNodeWithTag("Authenticator").assertDoesNotExist()
+        val uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+
+        uiDevice.awaitViewVisible("com.android.chrome")
+
+        uiDevice.setOrientationLandscape()
+        uiDevice.setOrientationPortrait()
+
+        uiDevice.userInputOnDialog()
+
+        return challengeResponse
+    }
 }
 
 /**
