@@ -84,87 +84,91 @@ public fun MapViewScope.Callout(
     content: @Composable BoxScope.() -> Unit
 ) {
     val isMapViewReady = remember { mutableStateOf(false) }
+    // We don't want to start drawing the Callout until the MapView is ready. We only collect
+    // the drawStatus till the first time MapView is done drawing. the transformWhile operator
+    // will stop collecting when isMapViewReady.value becomes false.
     LaunchedEffect(location) {
-        launch {
-            mapView.drawStatus.transformWhile { drawStatus ->
-                emit(drawStatus)
-                !isMapViewReady.value
-            }.collect {
-                if (it == DrawStatus.Completed) {
-                    isMapViewReady.value = true
-                }
+        mapView.drawStatus.transformWhile { drawStatus ->
+            emit(drawStatus)
+            !isMapViewReady.value
+        }.collect {
+            if (it == DrawStatus.Completed) {
+                isMapViewReady.value = true
             }
         }
     }
 
-    if (isMapViewReady.value) {
+    if (!isMapViewReady.value) {
+        return
+    }
 
-        val localDensity = LocalDensity.current
+    val localDensity = LocalDensity.current
 
-        // SHAPE PROPERTIES
-        val cornerRadius = 10.dp
-        val anchorLeaderWidth = 10.dp
-        val anchorLeaderHeight = 12.dp
-        val strokeBorderWidth = 2.dp
-        val stokeColor = Color.LightGray
-        val calloutBackgroundColor = Color.White
-        val calloutContentPadding = PaddingValues(cornerRadius + (strokeBorderWidth / 2))
-        val minSize = DpSize(
-            width = strokeBorderWidth + (2 * cornerRadius),
-            height = strokeBorderWidth + (2 * cornerRadius)
-        )
+    // SHAPE PROPERTIES
+    val cornerRadius = 10.dp
+    val anchorLeaderWidth = 10.dp
+    val anchorLeaderHeight = 12.dp
+    val strokeBorderWidth = 2.dp
+    val stokeColor = Color.LightGray
+    val calloutBackgroundColor = Color.White
+    val calloutContentPadding = PaddingValues(cornerRadius + (strokeBorderWidth / 2))
+    val minSize = DpSize(
+        width = strokeBorderWidth + (2 * cornerRadius),
+        height = strokeBorderWidth + (2 * cornerRadius)
+    )
 
-        // Convert the given location to a screen coordinate
-        var calloutScreenCoordinate: ScreenCoordinate by remember {
-            mutableStateOf(mapView.locationToScreen(location))
+    // Convert the given location to a screen coordinate
+    var calloutScreenCoordinate: ScreenCoordinate by remember {
+        mutableStateOf(mapView.locationToScreen(location))
+    }
+
+    LaunchedEffect(location) {
+        // Used to update screen coordinate when new location point is used
+        calloutScreenCoordinate = mapView.locationToScreen(location)
+        // Used to update screen coordinate when viewpoint is changed
+        mapView.viewpointChanged.collect {
+            calloutScreenCoordinate = mapView.locationToScreen(location)
         }
+    }
 
-        LaunchedEffect(location) {
-            // Used to update screen coordinate when viewpoint is changed
-            mapView.viewpointChanged.collect {
-                calloutScreenCoordinate = mapView.locationToScreen(location)
-            }
-        }
-
-        // Create a provider to calculate the offset for the current callout screen coordinate
-        val popupPositionProvider = object : PopupPositionProvider {
-            override fun calculatePosition(
-                anchorBounds: IntRect,
-                windowSize: IntSize,
-                layoutDirection: LayoutDirection,
-                popupContentSize: IntSize
-            ): IntOffset {
-                return IntOffset(
-                    x = calloutScreenCoordinate.x.roundToInt() - (popupContentSize.width / 2),
-                    y = calloutScreenCoordinate.y.roundToInt() - (popupContentSize.height / 2)
-                            - (with(localDensity) { anchorLeaderHeight.toPx() }).roundToInt()
-                )
-            }
-        }
-
-        Popup(
-            popupPositionProvider = popupPositionProvider,
-            properties = PopupProperties(clippingEnabled = false),
-            onDismissRequest = {
-                // TODO: Callout function probably would need a dismiss param.
-            }
-        ) {
-            Box(
-                modifier = modifier
-                    .drawCalloutShape(
-                        cornerRadius = with(localDensity) { cornerRadius.toPx() },
-                        anchorLeaderWidth = with(localDensity) { anchorLeaderWidth.toPx() },
-                        anchorLeaderHeight = with(localDensity) { anchorLeaderHeight.toPx() },
-                        strokeBorderWidth = with(localDensity) { strokeBorderWidth.toPx() },
-                        minSize = minSize,
-                        strokeColor = stokeColor,
-                        calloutBackgroundColor = calloutBackgroundColor,
-                        calloutContentPadding = calloutContentPadding,
-                    )
+    // Create a provider to calculate the offset for the current callout screen coordinate
+    val popupPositionProvider = object : PopupPositionProvider {
+        override fun calculatePosition(
+            anchorBounds: IntRect,
+            windowSize: IntSize,
+            layoutDirection: LayoutDirection,
+            popupContentSize: IntSize
+        ): IntOffset {
+            return IntOffset(
+                x = calloutScreenCoordinate.x.roundToInt() - (popupContentSize.width / 2),
+                y = calloutScreenCoordinate.y.roundToInt() - (popupContentSize.height / 2)
+                        - (with(localDensity) { anchorLeaderHeight.toPx() }).roundToInt()
             )
-            {
-                this.content()
-            }
+        }
+    }
+
+    Popup(
+        popupPositionProvider = popupPositionProvider,
+        properties = PopupProperties(clippingEnabled = false),
+        onDismissRequest = {
+            // TODO: Callout function probably would need a dismiss param.
+        }
+    ) {
+        Box(
+            modifier = modifier
+                .drawCalloutShape(
+                    cornerRadius = with(localDensity) { cornerRadius.toPx() },
+                    anchorLeaderWidth = with(localDensity) { anchorLeaderWidth.toPx() },
+                    anchorLeaderHeight = with(localDensity) { anchorLeaderHeight.toPx() },
+                    strokeBorderWidth = with(localDensity) { strokeBorderWidth.toPx() },
+                    minSize = minSize,
+                    strokeColor = stokeColor,
+                    calloutBackgroundColor = calloutBackgroundColor,
+                    calloutContentPadding = calloutContentPadding,
+                )
+        )
+        {
+            this.content()
         }
     }
 }
