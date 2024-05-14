@@ -33,7 +33,12 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-class OAuthTests {
+/**
+ * Tests the default configuration of the [Authenticator] with OAuth.
+ *
+ * @since 200.4.0
+ */
+class OAuthDefaultConfigurationTests {
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
