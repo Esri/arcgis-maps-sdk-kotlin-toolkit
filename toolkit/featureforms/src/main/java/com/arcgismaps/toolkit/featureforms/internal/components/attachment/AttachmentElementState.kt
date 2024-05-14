@@ -43,9 +43,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.Loadable
-import com.arcgismaps.mapping.featureforms.AttachmentFormElement
+import com.arcgismaps.mapping.featureforms.AnyAttachmentsFormInput
+import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FormAttachment
+import com.arcgismaps.mapping.featureforms.FormAttachmentType
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormElementState
 import com.arcgismaps.toolkit.featureforms.internal.utils.AttachmentsFileProvider
 import kotlinx.coroutines.CancellationException
@@ -69,7 +71,7 @@ import java.util.Objects
  */
 internal class AttachmentElementState(
     id: Int,
-    private val formElement: AttachmentFormElement,
+    private val formElement: AttachmentsFormElement,
     private val scope: CoroutineScope,
     private val evaluateExpressions: suspend () -> Unit,
     private val filesDir: String
@@ -94,20 +96,32 @@ internal class AttachmentElementState(
      */
     val lazyListState = LazyListState()
 
+    /**
+     * The input type of the attachment form element.
+     */
+    val input = formElement.input
+
     init {
         scope.launch {
-            loadAttachments()
+            formElement.fetchAttachments()
+            formElement.attachments.collect { list ->
+                buildAttachmentStates(list)
+            }
+        }
+        when (formElement.input) {
+            is AnyAttachmentsFormInput -> TODO()
         }
     }
 
     /**
-     * Loads the attachments associated with the form element. This clears the current list of
-     * attachments and updates it with the list of attachments from the [formElement].
+     *  Loads the attachments provided in the [list] and transforms them into state objects
+     *  to produce the [attachments] map. This will generate a new map of attachments but will
+     *  reuse the existing state objects if they exist while updating their properties.
      */
-    private suspend fun loadAttachments() {
-        formElement.fetchAttachments()
+    private suspend fun buildAttachmentStates(list: List<FormAttachment>) {
         attachments = buildMap {
-            formElement.attachments.forEach { formAttachment ->
+            list.forEach { formAttachment ->
+                // get the current state of the attachment if it exists
                 val state = attachments[formAttachment.hashCode()]
                 if (state == null) {
                     // if does not exist then create a new state
@@ -115,6 +129,7 @@ internal class AttachmentElementState(
                         name = formAttachment.name,
                         size = formAttachment.size,
                         contentType = formAttachment.contentType,
+                        type = formAttachment.type,
                         elementStateId = id,
                         deleteAttachment = { deleteAttachment(formAttachment) },
                         filesDir = filesDir,
@@ -122,6 +137,9 @@ internal class AttachmentElementState(
                         formAttachment = formAttachment
                     ).also { newState ->
                         put(formAttachment.hashCode(), newState)
+                        if (formAttachment.loadStatus.value is LoadStatus.Loaded) {
+                            scope.launch { newState.load() }
+                        }
                     }
                 } else {
                     // update the current state
@@ -138,8 +156,6 @@ internal class AttachmentElementState(
     suspend fun addAttachment(name: String, contentType: String, data: ByteArray) {
         formElement.addAttachment(name, contentType, data)
         evaluateExpressions()
-        // refresh the list of attachments
-        loadAttachments()
         // load the new attachment
         attachments.entries.last().value.loadWithParentScope()
         // scroll to the new attachment after a delay to allow the recomposition to complete
@@ -149,14 +165,12 @@ internal class AttachmentElementState(
 
     private suspend fun deleteAttachment(formAttachment: FormAttachment) {
         formElement.deleteAttachment(formAttachment)
-        attachments = attachments.filter { it.key != formAttachment.hashCode() }
     }
 
     suspend fun renameAttachment(name: String, newName: String) {
-        val formAttachment = formElement.attachments.firstOrNull { it.name == name } ?: return
+        val formAttachment = formElement.attachments.value.firstOrNull { it.name == name } ?: return
         if (formAttachment.name != newName) {
             formElement.renameAttachment(formAttachment, newName)
-            loadAttachments()
         }
     }
 
@@ -167,7 +181,7 @@ internal class AttachmentElementState(
 
     companion object {
         fun Saver(
-            attachmentFormElement: AttachmentFormElement,
+            attachmentFormElement: AttachmentsFormElement,
             scope: CoroutineScope,
             evaluateExpressions: suspend () -> Unit,
             filesDir: String
@@ -175,11 +189,11 @@ internal class AttachmentElementState(
             save = {
                 buildList<Int> {
                     // save the keys of attachments that have been loaded
-                    it.attachments.forEach { entry ->
-                        if (entry.value.loadStatus.value is LoadStatus.Loaded) {
-                            add(entry.key)
-                        }
-                    }
+//                    it.attachments.forEach { entry ->
+//                        if (entry.value.loadStatus.value is LoadStatus.Loaded) {
+//                            add(entry.key)
+//                        }
+//                    }
                     // save the index of the first visible item
                     add(it.lazyListState.firstVisibleItemIndex)
                     add(it.lazyListState.firstVisibleItemScrollOffset)
@@ -193,20 +207,19 @@ internal class AttachmentElementState(
                     evaluateExpressions = evaluateExpressions,
                     filesDir = filesDir
                 ).also {
-                    scope.launch {
-                        it.loadAttachments()
-                        // load the attachments that were previously loaded
-                        for (i in savedList.dropLast(2)) {
-                            it.attachments[i]?.loadWithParentScope()
-                        }
-                        // scroll to the last visible item
-                        val firstVisibleItemIndex = savedList[savedList.count() - 2]
-                        val firstVisibleItemScrollOffset = savedList[savedList.count() - 1]
-                        it.lazyListState.scrollToItem(
-                            firstVisibleItemIndex,
-                            firstVisibleItemScrollOffset
-                        )
-                    }
+//                    scope.launch {
+//                        // load the attachments that were previously loaded
+//                        for (i in savedList.dropLast(2)) {
+//                            it.attachments[i]?.loadWithParentScope()
+//                        }
+//                        // scroll to the last visible item
+//                        val firstVisibleItemIndex = savedList[savedList.count() - 2]
+//                        val firstVisibleItemScrollOffset = savedList[savedList.count() - 1]
+//                        it.lazyListState.scrollToItem(
+//                            firstVisibleItemIndex,
+//                            firstVisibleItemScrollOffset
+//                        )
+//                    }
                 }
             }
         )
@@ -219,6 +232,7 @@ internal class AttachmentElementState(
  * @param name The name of the attachment.
  * @param size The size of the attachment.
  * @param contentType The content type of the attachment.
+ * @param type The type of the attachment.
  * @param elementStateId The ID of the [AttachmentElementState] that created this attachment.
  * @param deleteAttachment A function to delete the attachment.
  * @param filesDir The directory where the attachments are stored.
@@ -229,6 +243,7 @@ internal class FormAttachmentState(
     name: String,
     val size: Long,
     val contentType: String,
+    val type : FormAttachmentType,
     val elementStateId: Int,
     val deleteAttachment: suspend () -> Unit,
     private val filesDir: String,
@@ -249,7 +264,7 @@ internal class FormAttachmentState(
     /**
      * The type of the attachment.
      */
-    val type: AttachmentType = getAttachmentType(name)
+    //val type: AttachmentType = getAttachmentType(name)
 
     private val _loadStatus: MutableStateFlow<LoadStatus> = MutableStateFlow(LoadStatus.NotLoaded)
     override val loadStatus = _loadStatus.asStateFlow()
@@ -370,7 +385,7 @@ internal class FormAttachmentState(
 @Composable
 internal fun rememberAttachmentElementState(
     form: FeatureForm,
-    attachmentFormElement: AttachmentFormElement
+    attachmentFormElement: AttachmentsFormElement
 ): AttachmentElementState {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -393,32 +408,13 @@ internal fun rememberAttachmentElementState(
     }
 }
 
-internal sealed class AttachmentType {
-    data object Image : AttachmentType()
-    data object Audio : AttachmentType()
-    data object Video : AttachmentType()
-    data object Document : AttachmentType()
-    data object Other : AttachmentType()
-}
-
-internal fun getAttachmentType(filename: String): AttachmentType {
-    val extension = filename.substring(filename.lastIndexOf(".") + 1)
-    return when (extension) {
-        "jpg", "jpeg", "png", "gif", "bmp" -> AttachmentType.Image
-        "mp3", "wav", "ogg", "flac" -> AttachmentType.Audio
-        "mp4", "avi", "mov", "wmv", "flv" -> AttachmentType.Video
-        "doc", "docx", "pdf", "txt", "rtf" -> AttachmentType.Document
-        else -> AttachmentType.Other
-    }
-}
-
 @Composable
-internal fun AttachmentType.getIcon(): ImageVector = when (this) {
-    AttachmentType.Image -> Icons.Outlined.Image
-    AttachmentType.Audio -> Icons.Outlined.AudioFile
-    AttachmentType.Video -> Icons.Outlined.VideoCameraBack
-    AttachmentType.Document -> Icons.Outlined.FilePresent
-    AttachmentType.Other -> Icons.Outlined.FileCopy
+internal fun FormAttachmentType.getIcon(): ImageVector = when (this) {
+    FormAttachmentType.Image -> Icons.Outlined.Image
+    FormAttachmentType.Audio -> Icons.Outlined.AudioFile
+    FormAttachmentType.Video -> Icons.Outlined.VideoCameraBack
+    FormAttachmentType.Document -> Icons.Outlined.FilePresent
+    FormAttachmentType.Other -> Icons.Outlined.FileCopy
 }
 
 internal fun Map<Int, FormAttachmentState>.getNewAttachmentNameForImageType(): String {
