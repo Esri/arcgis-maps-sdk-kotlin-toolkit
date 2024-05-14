@@ -82,6 +82,36 @@ class OAuthTests {
         assert(response is ArcGISAuthenticationChallengeResponse.ContinueWithCredential)
     }
 
+    /**
+     * Given an [AuthenticatorState] configured with an [OAuthUserConfiguration] for ArcGIS Online,
+     * When an [ArcGISAuthenticationChallenge] is received and the user cancels the sign in process,
+     * Then the [ArcGISAuthenticationChallengeResponse] should be [ArcGISAuthenticationChallengeResponse.Cancel].
+     *
+     * @since 200.4.0
+     */
+    @Test
+    fun cancelSignIn() = runTest {
+        val response = testOAuthChallengeWithStateRestoration {
+            clickByText("Cancel")
+        }.await()
+        assert(response is ArcGISAuthenticationChallengeResponse.Cancel)
+    }
+
+    /**
+     * Given an [AuthenticatorState] configured with an [OAuthUserConfiguration] for ArcGIS Online,
+     * When an [ArcGISAuthenticationChallenge] is received and the user presses the back button,
+     * Then the [ArcGISAuthenticationChallengeResponse] should be [ArcGISAuthenticationChallengeResponse.Cancel].
+     *
+     * @since 200.4.0
+     */
+    @Test
+    fun pressBack() = runTest {
+        val response = testOAuthChallengeWithStateRestoration {
+            pressBack()
+        }.await()
+        assert(response is ArcGISAuthenticationChallengeResponse.Cancel)
+    }
+
     @OptIn(ExperimentalCoroutinesApi::class)
     fun TestScope.testOAuthChallengeWithStateRestoration(userInputOnDialog: UiDevice.() -> Unit): Deferred<ArcGISAuthenticationChallengeResponse> {
         composeTestRule.setContent {
