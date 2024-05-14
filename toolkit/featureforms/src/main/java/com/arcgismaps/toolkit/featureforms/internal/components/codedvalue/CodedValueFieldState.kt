@@ -18,6 +18,7 @@ package com.arcgismaps.toolkit.featureforms.internal.components.codedvalue
 
 import com.arcgismaps.data.CodedValue
 import com.arcgismaps.data.FieldType
+import com.arcgismaps.mapping.featureforms.FormExpressionEvaluationError
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FieldProperties
@@ -46,23 +47,30 @@ internal open class CodedValueFieldProperties(
  * A class to handle the state of any coded value type. Essential properties are inherited
  * from the [BaseFieldState].
  *
+ * @param id Unique identifier for the field.
  * @param properties the [CodedValueFieldProperties] associated with this state.
  * @param initialValue optional initial value to set for this field. It is set to the value of
  * [TextFieldProperties.value] by default.
  * @param scope a [CoroutineScope] to start [StateFlow] collectors on.
- * @param onEditValue a callback to invoke when the user edits result in a change of value. This
- * is called on [CodedValueFieldState.onValueChanged]
+ * @param updateValue a function that is invoked when the user edits result in a change of value. This
+ * is called in [BaseFieldState.onValueChanged].
+ * @param evaluateExpressions a function that is invoked to evaluate all form expressions. This is
+ * called after a successful [updateValue].
  */
 internal abstract class CodedValueFieldState(
+    id : Int,
     properties: CodedValueFieldProperties,
     initialValue: Any? = properties.value.value,
     scope: CoroutineScope,
-    onEditValue: ((Any?) -> Unit),
+    updateValue: (Any?) -> Unit,
+    evaluateExpressions: suspend () -> Result<List<FormExpressionEvaluationError>>
 ) : BaseFieldState<Any?>(
+    id = id,
     properties = properties,
     scope = scope,
     initialValue = initialValue,
-    onEditValue = onEditValue,
+    updateValue = updateValue,
+    evaluateExpressions = evaluateExpressions
 ) {
     /**
      * The list of coded values associated with this field.

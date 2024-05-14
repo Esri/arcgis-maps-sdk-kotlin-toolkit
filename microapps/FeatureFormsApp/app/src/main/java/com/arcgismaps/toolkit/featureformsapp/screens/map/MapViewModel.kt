@@ -36,6 +36,8 @@ import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormElement
 import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.layers.FeatureLayer
+import com.arcgismaps.mapping.layers.GroupLayer
+import com.arcgismaps.mapping.layers.Layer
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
@@ -55,7 +57,17 @@ sealed class UIState {
     /**
      * Currently not editing.
      */
-    object NotEditing : UIState()
+    data object NotEditing : UIState()
+
+    /**
+     * Loading state that indicates the map is being loaded.
+     */
+    data object Loading : UIState()
+
+    /**
+     * No feature form definition available.
+     */
+    data object NoFeatureFormDefinition : UIState()
 
     /**
      * Currently selecting a new Feature
@@ -63,7 +75,7 @@ sealed class UIState {
     data class Switching(
         val oldState: Editing,
         val newFeature: ArcGISFeature
-    ): UIState()
+    ) : UIState()
 
     /**
      * In editing state with the [featureForm] with the validation error visibility given by
@@ -93,7 +105,7 @@ data class ErrorInfo(val fieldName: String, val error: FeatureFormValidationExce
  * Base class for context aware AndroidViewModel. This class must have only a single application
  * parameter.
  */
-open class BaseMapViewModel(application: Application): AndroidViewModel(application)
+open class BaseMapViewModel(application: Application) : AndroidViewModel(application)
 
 /**
  * A view model for the FeatureForms MapView UI
@@ -115,9 +127,28 @@ class MapViewModel @Inject constructor(
 
     val map: ArcGISMap = ArcGISMap(portalItem)
 
-    private val _uiState: MutableState<UIState> = mutableStateOf(UIState.NotEditing)
+    private val _uiState: MutableState<UIState> = mutableStateOf(UIState.Loading)
     val uiState: State<UIState>
         get() = _uiState
+
+    init {
+        scope.launch {
+            // check if this map has a FeatureFormDefinition on any of its layers
+            checkFeatureFormDefinition()
+        }
+    }
+
+    private suspend fun checkFeatureFormDefinition() {
+        map.load()
+        val layer = map.operationalLayers.firstOrNull {
+            it.hasFeatureFormDefinition()
+        }
+        _uiState.value = if (layer == null) {
+            UIState.NoFeatureFormDefinition
+        } else {
+            UIState.NotEditing
+        }
+    }
 
     /**
      * Apply attribute edits to the Geodatabase backing
@@ -160,8 +191,13 @@ class MapViewModel @Inject constructor(
                     IllegalStateException("cannot save feature edit without a ServiceFeatureTable")
                 )
             val result = serviceFeatureTable.updateFeature(feature).map {
-                serviceFeatureTable.serviceGeodatabase?.applyEdits()
-                    ?: throw IllegalStateException("cannot apply feature edit without a ServiceGeodatabase")
+                serviceFeatureTable.serviceGeodatabase?.let { database ->
+                    return@let if (database.serviceInfo?.canUseServiceGeodatabaseApplyEdits == true) {
+                        database.applyEdits()
+                    } else {
+                        serviceFeatureTable.applyEdits()
+                    }
+                }
                 feature.refresh()
                 // unselect the feature after the edits have been saved
                 (feature.featureTable?.layer as FeatureLayer).clearSelection()
@@ -268,6 +304,9 @@ class MapViewModel @Inject constructor(
         }
     }
 
+    fun setDefaultState() {
+        _uiState.value = UIState.NotEditing
+    }
 }
 
 /**
@@ -294,4 +333,20 @@ fun List<FormElement>.getFormElement(fieldName: String): FieldFormElement? {
             null
         }
     }
+}
+
+/**
+ * Returns true if the layer has a feature form definition. If the layer is a [GroupLayer] then
+ * this function will return true if any of the layers in the group have a feature form definition.
+ */
+private suspend fun Layer.hasFeatureFormDefinition(): Boolean = when(this) {
+    is FeatureLayer -> {
+        load()
+        featureFormDefinition != null
+    }
+    is GroupLayer -> {
+        load()
+        layers.any { it.hasFeatureFormDefinition() }
+    }
+    else -> false
 }
