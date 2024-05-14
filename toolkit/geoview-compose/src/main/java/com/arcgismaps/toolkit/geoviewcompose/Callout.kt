@@ -275,8 +275,8 @@ public data class CalloutProperties(
         all = cornerRadius + (strokeBorderWidth / 2)
     ),
     public val leaderSize: DpSize = DpSize(
-        width = 10.dp,
-        height = 12.dp
+        width = 12.dp,
+        height = 10.dp
     ),
     public val minSize: DpSize = DpSize(
         width = strokeBorderWidth + (2 * cornerRadius),
