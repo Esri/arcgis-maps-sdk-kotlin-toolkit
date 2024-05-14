@@ -55,7 +55,6 @@ import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import kotlinx.coroutines.flow.transformWhile
-import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 /**
