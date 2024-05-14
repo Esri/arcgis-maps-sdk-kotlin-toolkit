@@ -22,8 +22,6 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
@@ -36,7 +34,7 @@ import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
@@ -68,24 +66,11 @@ public class MapViewScope(internal val mapView: MapView)
 public fun MapViewScope.Callout(
     location: Point,
     modifier: Modifier = Modifier,
+    properties: CalloutProperties = CalloutProperties(),
     content: @Composable BoxScope.() -> Unit
 ) {
 
     val localDensity = LocalDensity.current
-
-    // SHAPE PROPERTIES
-    val cornerRadius = 10.dp
-    val anchorLeaderWidth = 10.dp
-    val anchorLeaderHeight = 12.dp
-    val strokeBorderWidth = 2.dp
-    val stokeColor = Color.LightGray
-    val calloutBackgroundColor = Color.White
-    val calloutContentPadding = PaddingValues(cornerRadius + (strokeBorderWidth / 2))
-    val minSize = DpSize(
-        width = strokeBorderWidth + (2 * cornerRadius),
-        height = strokeBorderWidth + (2 * cornerRadius)
-    )
-
 
     if (mapView.map?.loadStatus?.collectAsState()?.value == LoadStatus.Loaded) {
         val calloutScreenCoordinate: ScreenCoordinate = mapView.locationToScreen(location)
@@ -93,15 +78,15 @@ public fun MapViewScope.Callout(
         Box(
             modifier = modifier
                 .drawCalloutShape(
-                    cornerRadius = with(localDensity) { cornerRadius.toPx() },
-                    anchorLeaderWidth = with(localDensity) { anchorLeaderWidth.toPx() },
-                    anchorLeaderHeight = with(localDensity) { anchorLeaderHeight.toPx() },
-                    strokeBorderWidth = with(localDensity) { strokeBorderWidth.toPx() },
-                    minSize = minSize,
-                    strokeColor = stokeColor,
-                    calloutBackgroundColor = calloutBackgroundColor,
+                    cornerRadius = with(localDensity) { properties.cornerRadius.toPx() },
+                    strokeBorderWidth = with(localDensity) { properties.strokeBorderWidth.toPx() },
+                    strokeColor = properties.strokeColor,
+                    backgroundColor = properties.backgroundColor,
+                    calloutContentPadding = properties.calloutContentPadding,
+                    leaderWidth = with(localDensity) { properties.leaderSize.width.toPx() },
+                    leaderHeight = with(localDensity) { properties.leaderSize.height.toPx() },
+                    minSize = properties.minSize,
                     calloutScreenCoordinate = calloutScreenCoordinate,
-                    calloutContentPadding = calloutContentPadding
                 )
         )
         {
@@ -111,33 +96,34 @@ public fun MapViewScope.Callout(
 }
 
 /**
- * Extension function to draw the Callout shape using the given shape options.
+ * Extension function to draw the Callout using the given parameters. It draws the shape, adds the content padding, adds padding for the leader height, restricting the min size and positions it on the screen.
  *
- * [cornerRadius] The corner radius of the rectangle shape in px.
- * [anchorLeaderWidth] Width of the anchor leader in px.
- * [anchorLeaderHeight] Height of the anchor leader in px.
+ * [cornerRadius] The corner radius of the Callout shape in px.
  * [strokeBorderWidth] Width of the Callout stroke in px.
  * [strokeColor] Color used to define the outline stroke.
- * [calloutBackgroundColor] Color used to define the fill color of the Callout shape.
+ * [backgroundColor] Color used to define the fill color of the Callout shape.
+ * [calloutContentPadding] PaddingValues for the content placed inside the Callout.
+ * [leaderWidth] Width of the anchor leader in px.
+ * [leaderHeight] Height of the anchor leader in px.
  * [minSize] Minimum size the of the Callout shape.
- * [calloutScreenCoordinate] Represents the x,y coordinate of the callout leader.
+ * [calloutScreenCoordinate] Represents the x,y coordinate of the Callout leader.
  * @since 200.5.0
  */
 @Composable
 private fun Modifier.drawCalloutShape(
     cornerRadius: Float,
-    anchorLeaderWidth: Float,
-    anchorLeaderHeight: Float,
     strokeBorderWidth: Float,
     strokeColor: Color,
-    calloutBackgroundColor: Color,
+    backgroundColor: Color,
+    calloutContentPadding: PaddingValues,
+    leaderWidth: Float,
+    leaderHeight: Float,
     minSize: DpSize,
     calloutScreenCoordinate: ScreenCoordinate,
-    calloutContentPadding: PaddingValues
 ) = then(
     sizeIn(minWidth = minSize.width, minHeight = minSize.height)
         // Set bottom padding to ensure the leader is visible
-        .padding(bottom = with(LocalDensity.current) { anchorLeaderHeight.toDp() })
+        .padding(bottom = with(LocalDensity.current) { leaderHeight.toDp() })
         .graphicsLayer {
             translationX = calloutScreenCoordinate.x.toFloat()
             translationY = calloutScreenCoordinate.y.toFloat()
@@ -145,11 +131,11 @@ private fun Modifier.drawCalloutShape(
         .drawWithCache {
             onDrawBehind {
                 // Define the Path of the callout
-                val path = calloutPath(size, cornerRadius, anchorLeaderWidth, anchorLeaderHeight)
+                val path = calloutPath(size, cornerRadius, leaderWidth, leaderHeight)
                 // Fill the path's shape with the Callout's background color
                 drawPath(
                     path = path,
-                    color = calloutBackgroundColor,
+                    color = backgroundColor,
                     style = Fill
                 )
                 // Outline the path's shape with the Callout's stroke color
@@ -168,15 +154,15 @@ private fun Modifier.drawCalloutShape(
  *
  * [size] The calculated size of the resulting content used to created the Path.
  * [cornerRadius] The corner radius of the rectangle shape in px.
- * [anchorLeaderWidth] Width of the anchor leader in px.
- * [anchorLeaderHeight] Height of the anchor leader in px.
+ * [leaderWidth] Width of the anchor leader in px.
+ * [leaderHeight] Height of the anchor leader in px.
  * @since 200.5.0
  */
 private fun calloutPath(
     size: Size,
     cornerRadius: Float,
-    anchorLeaderWidth: Float,
-    anchorLeaderHeight: Float
+    leaderWidth: Float,
+    leaderHeight: Float
 ): Path {
     return Path().apply {
         reset()
@@ -221,17 +207,17 @@ private fun calloutPath(
         )
         // Draw a line from the end of the arc to the start of the bottom leader
         lineTo(
-            x = (size.width / 2) + (anchorLeaderWidth / 2),
+            x = (size.width / 2) + (leaderWidth / 2),
             y = rect.bottom
         )
         // Draw a line from start of the leader bottom to the leader tip
         lineTo(
             x = (size.width / 2),
-            y = rect.bottom + anchorLeaderHeight
+            y = rect.bottom + leaderHeight
         )
         // Draw a line from the leader tip to the bottom leader
         lineTo(
-            x = (size.width / 2) - (anchorLeaderWidth / 2),
+            x = (size.width / 2) - (leaderWidth / 2),
             y = rect.bottom
         )
         // Draw a line from the bottom leader to the start of the bottom-left corner
@@ -277,40 +263,23 @@ private fun calloutPath(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-public fun CalloutPreview() {
-    MaterialTheme {
-        val localDensity = LocalDensity.current
-        // SHAPE PROPERTIES
-        val cornerRadius = 10.dp
-        val anchorLeaderWidth = 10.dp
-        val anchorLeaderHeight = 12.dp
-        val strokeBorderWidth = 2.dp
-        val stokeColor = Color.LightGray
-        val calloutBackgroundColor = Color.White
-        val calloutContentPadding = PaddingValues(cornerRadius + (strokeBorderWidth / 2))
-        val minSize = DpSize(
-            width = strokeBorderWidth + (2 * cornerRadius),
-            height = strokeBorderWidth + (2 * cornerRadius)
-        )
-
-        Box(
-            modifier = Modifier
-                .drawCalloutShape(
-                    cornerRadius = with(localDensity) { cornerRadius.toPx() },
-                    anchorLeaderWidth = with(localDensity) { anchorLeaderWidth.toPx() },
-                    anchorLeaderHeight = with(localDensity) { anchorLeaderHeight.toPx() },
-                    strokeBorderWidth = with(localDensity) { strokeBorderWidth.toPx() },
-                    minSize = minSize,
-                    strokeColor = stokeColor,
-                    calloutBackgroundColor = calloutBackgroundColor,
-                    calloutScreenCoordinate = ScreenCoordinate(0.0, 0.0),
-                    calloutContentPadding = calloutContentPadding
-                )
-        )
-        {
-            Text(text = "Hello World")
-        }
-    }
-}
+/**
+ * UI default properties for the [Callout] component.
+ */
+public data class CalloutProperties(
+    public val cornerRadius: Dp = 10.dp,
+    public val strokeBorderWidth: Dp = 2.dp,
+    public val strokeColor: Color = Color.LightGray,
+    public val backgroundColor: Color = Color.White,
+    public val calloutContentPadding: PaddingValues = PaddingValues(
+        all = cornerRadius + (strokeBorderWidth / 2)
+    ),
+    public val leaderSize: DpSize = DpSize(
+        width = 10.dp,
+        height = 12.dp
+    ),
+    public val minSize: DpSize = DpSize(
+        width = strokeBorderWidth + (2 * cornerRadius),
+        height = strokeBorderWidth + (2 * cornerRadius)
+    )
+)
