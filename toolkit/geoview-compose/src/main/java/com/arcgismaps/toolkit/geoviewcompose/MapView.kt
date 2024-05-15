@@ -17,6 +17,7 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -31,6 +32,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -254,7 +256,9 @@ public fun MapView(
 
     val mapViewScope = remember(mapView) { MapViewScope(mapView) }
     if (content != null) {
-        mapViewScope.content()
+        Box(modifier = modifier.clipToBounds()) {
+            mapViewScope.content()
+        }
     }
 }
 

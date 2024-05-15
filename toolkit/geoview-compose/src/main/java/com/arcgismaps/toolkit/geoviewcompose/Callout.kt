@@ -22,8 +22,6 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -38,24 +36,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntRect
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
-import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupPositionProvider
-import androidx.compose.ui.window.PopupProperties
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import kotlinx.coroutines.flow.transformWhile
-import kotlin.math.roundToInt
 
 /**
  * The receiver class of the MapView content lambda.
@@ -130,45 +121,32 @@ public fun MapViewScope.Callout(
         }
     }
 
-    // Create a provider to calculate the offset for the current callout screen coordinate
-    val popupPositionProvider = object : PopupPositionProvider {
-        override fun calculatePosition(
-            anchorBounds: IntRect,
-            windowSize: IntSize,
-            layoutDirection: LayoutDirection,
-            popupContentSize: IntSize
-        ): IntOffset {
-            return IntOffset(
-                x = calloutScreenCoordinate.x.roundToInt() - (popupContentSize.width / 2),
-                y = calloutScreenCoordinate.y.roundToInt() - (popupContentSize.height / 2)
-                        - (with(localDensity) { anchorLeaderHeight.toPx() }).roundToInt()
-            )
-        }
-    }
+    val contentSize = remember { mutableStateOf(Size.Zero) }
 
-    Popup(
-        popupPositionProvider = popupPositionProvider,
-        properties = PopupProperties(clippingEnabled = false),
-        onDismissRequest = {
-            // TODO: Callout function probably would need a dismiss param.
-        }
-    ) {
-        Box(
-            modifier = modifier
-                .drawCalloutShape(
-                    cornerRadius = with(localDensity) { cornerRadius.toPx() },
-                    anchorLeaderWidth = with(localDensity) { anchorLeaderWidth.toPx() },
-                    anchorLeaderHeight = with(localDensity) { anchorLeaderHeight.toPx() },
-                    strokeBorderWidth = with(localDensity) { strokeBorderWidth.toPx() },
-                    minSize = minSize,
-                    strokeColor = stokeColor,
-                    calloutBackgroundColor = calloutBackgroundColor,
-                    calloutContentPadding = calloutContentPadding,
-                )
-        )
-        {
-            this.content()
-        }
+    Box(
+        modifier = modifier
+            .layout { measurable, constraints ->
+                val placeable = measurable.measure(constraints)
+                contentSize.value = Size(placeable.width.toFloat(), placeable.height.toFloat())
+                layout(placeable.width, placeable.height) {
+                    placeable.placeRelative(0, 0)
+                }
+            }
+            .drawCalloutShape(
+                cornerRadius = with(localDensity) { cornerRadius.toPx() },
+                anchorLeaderWidth = with(localDensity) { anchorLeaderWidth.toPx() },
+                anchorLeaderHeight = with(localDensity) { anchorLeaderHeight.toPx() },
+                strokeBorderWidth = with(localDensity) { strokeBorderWidth.toPx() },
+                minSize = minSize,
+                strokeColor = stokeColor,
+                calloutBackgroundColor = calloutBackgroundColor,
+                calloutContentPadding = calloutContentPadding,
+                calloutScreenCoordinate = calloutScreenCoordinate,
+                contentSize = contentSize.value
+            )
+    )
+    {
+        this.content()
     }
 }
 
@@ -193,9 +171,16 @@ private fun Modifier.drawCalloutShape(
     strokeColor: Color,
     calloutBackgroundColor: Color,
     minSize: DpSize,
-    calloutContentPadding: PaddingValues
+    calloutContentPadding: PaddingValues,
+    calloutScreenCoordinate: ScreenCoordinate,
+    contentSize: Size
 ) = then(
     sizeIn(minWidth = minSize.width, minHeight = minSize.height)
+        .padding(bottom = with(LocalDensity.current) { anchorLeaderHeight.toDp() })
+        .graphicsLayer {
+            translationX = calloutScreenCoordinate.x.toFloat() - contentSize.width / 2
+            translationY = calloutScreenCoordinate.y.toFloat() - contentSize.height
+        }
         .drawWithCache {
             onDrawBehind {
                 // Define the Path of the callout
@@ -328,42 +313,5 @@ private fun calloutPath(
         )
         // Close the path to complete the shape
         close()
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-public fun CalloutPreview() {
-    MaterialTheme {
-        val localDensity = LocalDensity.current
-        // SHAPE PROPERTIES
-        val cornerRadius = 10.dp
-        val anchorLeaderWidth = 10.dp
-        val anchorLeaderHeight = 12.dp
-        val strokeBorderWidth = 2.dp
-        val stokeColor = Color.LightGray
-        val calloutBackgroundColor = Color.White
-        val calloutContentPadding = PaddingValues(cornerRadius + (strokeBorderWidth / 2))
-        val minSize = DpSize(
-            width = strokeBorderWidth + (2 * cornerRadius),
-            height = strokeBorderWidth + (2 * cornerRadius)
-        )
-
-        Box(
-            modifier = Modifier
-                .drawCalloutShape(
-                    cornerRadius = with(localDensity) { cornerRadius.toPx() },
-                    anchorLeaderWidth = with(localDensity) { anchorLeaderWidth.toPx() },
-                    anchorLeaderHeight = with(localDensity) { anchorLeaderHeight.toPx() },
-                    strokeBorderWidth = with(localDensity) { strokeBorderWidth.toPx() },
-                    minSize = minSize,
-                    strokeColor = stokeColor,
-                    calloutBackgroundColor = calloutBackgroundColor,
-                    calloutContentPadding = calloutContentPadding,
-                )
-        )
-        {
-            Text(text = "Hello World")
-        }
     }
 }
