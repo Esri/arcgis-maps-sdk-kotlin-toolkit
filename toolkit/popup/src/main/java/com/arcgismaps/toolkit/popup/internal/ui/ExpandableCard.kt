@@ -40,10 +40,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.popup.R
 
 /**
  * Composable Card that has the ability to expand and collapse its [content].
@@ -52,34 +54,34 @@ import androidx.compose.ui.unit.dp
  */
 @Composable
 internal fun ExpandableCard(
-    modifier: Modifier = Modifier,
     title: String = "",
     description: String = "",
-    expandable: Boolean = true,
     elementCount: Int = 1,
     content: @Composable () -> Unit = {}
 ) {
     // TODO: promote to public theme.
     val shapes = ExpandableCardDefaults.shapes()
     val colors = ExpandableCardDefaults.colors()
-    var expanded by rememberSaveable { mutableStateOf(expandable) }
+    var expanded by rememberSaveable { mutableStateOf(true) }
+    val dynamic = elementCount > 1
     Card(
         colors = CardDefaults.cardColors(
             containerColor = colors.containerColor
         ),
         border = BorderStroke(shapes.borderThickness, colors.borderColor),
         shape = shapes.containerShape,
-        modifier = modifier
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(shapes.padding)
     ) {
         Column {
             ExpandableHeader(
-                modifier = modifier,
                 title = title,
                 description = description,
                 elementCount = elementCount,
                 isExpanded = expanded
             ) {
-                if (expandable) {
+                if (dynamic) {
                     expanded = !expanded
                 }
             }
@@ -94,7 +96,6 @@ internal fun ExpandableCard(
 
 @Composable
 private fun ExpandableHeader(
-    modifier: Modifier = Modifier,
     title: String = "",
     description: String = "",
     elementCount: Int,
@@ -102,6 +103,7 @@ private fun ExpandableHeader(
     onClick: () -> Unit
 ) {
     if (title.isEmpty() && description.isEmpty() && elementCount == 1) return
+    val shapes = ExpandableCardDefaults.shapes()
     Row(
         Modifier
             .fillMaxWidth()
@@ -114,7 +116,9 @@ private fun ExpandableHeader(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(
-            modifier = modifier
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(shapes.padding)
                 .weight(0.5f)
         ) {
             Text(
@@ -141,7 +145,7 @@ private fun ExpandableHeader(
                     modifier = Modifier
                         .padding(16.dp),
                     imageVector = if (it) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore,
-                    contentDescription = "expand popup element content"
+                    contentDescription = stringResource(R.string.show_or_hide_popup_element_content)
                 )
             }
         }
@@ -152,7 +156,6 @@ private fun ExpandableHeader(
 @Composable
 internal fun ExpandableHeaderPreview() {
     ExpandableHeader(
-        modifier = Modifier.padding(16.dp).fillMaxWidth(),
         title = "The Title",
         description = "the description",
         2,
@@ -164,10 +167,8 @@ internal fun ExpandableHeaderPreview() {
 @Composable
 private fun ExpandableCardPreview() {
     ExpandableCard(
-        modifier = Modifier.padding(16.dp).fillMaxWidth(),
         description = "Foo",
         title = "Title",
-        expandable = true,
         elementCount = 2
     ) {
         Text(
