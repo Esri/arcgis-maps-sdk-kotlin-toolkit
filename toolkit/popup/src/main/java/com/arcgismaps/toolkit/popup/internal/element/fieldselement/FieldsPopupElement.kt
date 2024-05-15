@@ -15,16 +15,27 @@
  */
 package com.arcgismaps.toolkit.popup.internal.element.fieldselement
 
+import android.content.Intent
+import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.toolkit.popup.internal.ui.ExpandableCard
 
 @Composable
 internal fun FieldsPopupElement(state: FieldsElementState, modifier: Modifier = Modifier) {
+    val localContext = LocalContext.current
     ExpandableCard(
         title = state.title,
         description = state.description,
@@ -34,10 +45,41 @@ internal fun FieldsPopupElement(state: FieldsElementState, modifier: Modifier = 
         Column {
             state.fieldsToFormattedValues.forEach {
                 // Display the field
-                Column() {
+                Column {
                     ListItem(
                         headlineContent = { Text(text = it.key) },
-                        supportingContent = { Text(text = it.value.ifEmpty { "--" }) }
+                        supportingContent = {
+                            // build annotated string if the text is an URL
+                            if (it.value.startsWith("https")) {
+                                val annotatedString = buildAnnotatedString {
+                                    pushStringAnnotation("url", it.value)
+                                    withStyle(
+                                        style = SpanStyle(
+                                            color = Color.Blue,
+                                            textDecoration = TextDecoration.Underline
+                                        )
+                                    ) {
+                                        append("View")
+                                    }
+                                }
+                                ClickableText(text = annotatedString, onClick = { offset ->
+                                    annotatedString.getStringAnnotations(tag = "url", start = offset, end = offset)
+                                        .firstOrNull()?.let {
+                                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it.item)).apply {
+                                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                            }
+
+                                            runCatching {
+                                                localContext.startActivity(intent)
+                                            }.onFailure { exception ->
+                                                Log.e("ArcGISMapsSDK", "Failed to open link: ${exception.message}")
+                                            }
+                                        }
+                                })
+                            } else {
+                                Text(text = it.value.ifEmpty { "--" })
+                            }
+                        }
                     )
                 }
             }
@@ -54,9 +96,10 @@ private fun FieldsPopupElementPreview() {
         fieldsToFormattedValues = mapOf(
             "Field 1" to "Value 1",
             "Field 2" to "Value 2",
-            "Field 3" to "Value 3"
+            "Field 3" to "https://developers.arcgis.com/"
         ),
         id = 0
     )
     FieldsPopupElement(state)
 }
+
