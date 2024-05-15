@@ -89,12 +89,13 @@ internal fun rememberAttachmentElementState(
         AttachmentsElementState(
             element
         ).also {
-            // NOTE: potential core issue with PopupAttachments not abiding the instance id contract here.
+            // NOTE: core issue with PopupAttachments not abiding the instance id contract here.
             // Loaded attachments are coming back NotLoaded after rotation.
-            // Investigation underway.
+            // https://devtopia.esri.com/runtime/apollo/issues/681
             it.attachments
                 .filter { state ->
                     state.loadStatus.value == LoadStatus.Loaded
+                            && state.type == PopupAttachmentType.Image
                 }
                 .forEach { state ->
                     state.loadAttachment(scope)
@@ -118,7 +119,7 @@ internal class PopupAttachmentState(
     val type: PopupAttachmentType,
     val loadStatus: StateFlow<LoadStatus>,
     private val onLoadAttachment: suspend () -> Result<Unit>,
-    private val onLoadThumbnail: suspend () -> Result<BitmapDrawable?>
+    private val onLoadThumbnail: (suspend () -> Result<BitmapDrawable?>)? = null
 ) {
     private val _thumbnail: MutableState<ImageBitmap?> = mutableStateOf(null)
 
@@ -133,7 +134,11 @@ internal class PopupAttachmentState(
         type = attachment.type,
         loadStatus = attachment.loadStatus,
         onLoadAttachment = attachment::retryLoad,
-        onLoadThumbnail = attachment::createFullImage
+        onLoadThumbnail = if (attachment.type == PopupAttachmentType.Image) {
+            attachment::createFullImage
+        } else {
+            null
+        }
     )
 
     /**
@@ -142,7 +147,7 @@ internal class PopupAttachmentState(
     fun loadAttachment(scope: CoroutineScope) {
         scope.launch {
             onLoadAttachment().onSuccess {
-                onLoadThumbnail().onSuccess {
+                onLoadThumbnail?.invoke()?.onSuccess {
                     if (it != null) {
                         _thumbnail.value = it.bitmap.asImageBitmap()
                     }
@@ -151,18 +156,6 @@ internal class PopupAttachmentState(
         }
     }
 }
-
-//
-//
-//internal fun getAttachmentType(filename: String): PopupAttachmentType {
-//    val extension = filename.substring(filename.lastIndexOf(".") + 1)
-//    return when (extension) {
-//        "jpg", "jpeg", "png", "gif", "bmp" -> PopupAttachmentType.Image
-//        "mp4", "avi", "mov", "wmv", "flv" -> PopupAttachmentType.Video
-//        "doc", "docx", "pdf", "txt", "rtf" -> PopupAttachmentType.Document
-//        else -> PopupAttachmentType.Other
-//    }
-//}
 
 @Composable
 internal fun PopupAttachmentType.getIcon(): ImageVector = when (this) {

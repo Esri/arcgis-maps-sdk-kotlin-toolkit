@@ -17,15 +17,11 @@
 package com.arcgismaps.toolkit.popup.internal.element.attachment
 
 import android.text.format.Formatter
-import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.awaitLongPressOrCancellation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -54,17 +50,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.mapping.popup.PopupAttachmentType
+import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 internal fun AttachmentTile(
@@ -82,22 +79,12 @@ internal fun AttachmentTile(
                 border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline),
                 shape = RoundedCornerShape(8.dp)
             )
-            .pointerInput(Unit) {
-                awaitEachGesture {
-                    val down = awaitFirstDown(requireUnconsumed = false)
-                    awaitLongPressOrCancellation(down.id)?.let {
-                        // handle long press
-                    }
-                }
-            }
             .clickable {
                 if (loadStatus is LoadStatus.NotLoaded || loadStatus is LoadStatus.FailedToLoad) {
                     // load attachment
                     state.loadAttachment(coroutineScope)
-                } else if (loadStatus is LoadStatus.Loaded) {
-                    // open attachment
-                    Log.d("popup", "view attachment requested")
                 }
+            // TODO open attachment viewer in `else` here
             }
     ) {
         when (loadStatus) {
@@ -270,5 +257,20 @@ private fun Size(
         overflow = TextOverflow.Ellipsis,
         modifier = modifier
             .padding(horizontal = 1.dp)
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+internal fun PreviewAttachmentTile() {
+    AttachmentTile(
+        state = PopupAttachmentState(
+            name = "Some attachment",
+            size = 1234L,
+            type = PopupAttachmentType.Other,
+            loadStatus = MutableStateFlow(LoadStatus.NotLoaded),
+            onLoadAttachment = { Result.success(Unit) },
+            onLoadThumbnail = null
+        )
     )
 }
