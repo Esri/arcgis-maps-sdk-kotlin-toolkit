@@ -23,16 +23,21 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
+/**
+ * A central place for theming values. To be promoted to a public theme type.
+ */
 internal object AttachmentsElementDefaults {
+    @Composable
+    fun shapes(): AttachmentElementShapes = AttachmentElementShapes(
+        borderThickness = 1.dp,
+        containerShape = RoundedCornerShape(5.dp),
+        galleryPadding = 15.dp
+    )
 
-    val buttonBorderThickness = 2.dp
-    val borderThickness = 1.dp
-    val containerShape = RoundedCornerShape(5.dp)
-    val attachmentDetailShape = RoundedCornerShape(10.dp)
-    val attachmentShape = RoundedCornerShape(10.dp)
-
+    @Suppress("unused")
     @Composable
     fun colors() : AttachmentsElementColors = AttachmentsElementColors(
         containerColor = MaterialTheme.colorScheme.background,
@@ -40,6 +45,12 @@ internal object AttachmentsElementDefaults {
         borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
     )
 }
+
+internal data class AttachmentElementShapes(
+    val borderThickness: Dp,
+    val containerShape: RoundedCornerShape,
+    val galleryPadding: Dp
+)
 
 internal data class AttachmentsElementColors(
     val containerColor : Color,

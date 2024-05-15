@@ -57,7 +57,7 @@ internal fun AttachmentsPopupElement(
         elementCount = attachments.size
     ) {
         Column(
-            modifier = Modifier.padding(15.dp)
+            modifier = Modifier.padding(AttachmentsElementDefaults.shapes().galleryPadding)
         ) {
             val listState = rememberLazyListState()
             AttachmentGallery(listState, attachments)
