@@ -17,13 +17,11 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
-import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -171,7 +169,6 @@ public fun MapView(
     val context = LocalContext.current
     val mapView = remember { MapView(context) }
     val layoutDirection = LocalLayoutDirection.current
-    Log.d("MapView****", "MapView content: $content")
 
     AndroidView(
         modifier = modifier.semantics { contentDescription = "MapView" },
