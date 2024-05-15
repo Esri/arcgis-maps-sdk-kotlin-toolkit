@@ -149,9 +149,6 @@ private fun PopupBody(popupState: PopupState) {
                     is FieldsPopupElement -> {
                         FieldsPopupElement(
                             entry.state as FieldsElementState,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(shapes.padding)
                         )
                     }
 
