@@ -17,6 +17,7 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -31,6 +32,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -170,7 +172,6 @@ public fun MapView(
     val context = LocalContext.current
     val mapView = remember { MapView(context) }
     val layoutDirection = LocalLayoutDirection.current
-    var refreshCalloutPosition by rememberSaveable { mutableStateOf(false) }
 
     AndroidView(
         modifier = modifier.semantics { contentDescription = "MapView" },
@@ -194,19 +195,6 @@ public fun MapView(
                 }
             }
         })
-
-    LaunchedEffect(Unit) {
-        mapView.viewpointChanged.collect {
-            refreshCalloutPosition = !refreshCalloutPosition
-        }
-    }
-
-    val mapViewScope = remember(mapView) { MapViewScope(mapView) }
-    if (content != null) {
-        key(refreshCalloutPosition, content) {
-            mapViewScope.content()
-        }
-    }
 
     DisposableEffect(Unit) {
         lifecycleOwner.lifecycle.addObserver(mapView)
@@ -265,6 +253,13 @@ public fun MapView(
         onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
         onVisibleAreaChanged = onVisibleAreaChanged
     )
+
+    val mapViewScope = remember(mapView) { MapViewScope(mapView) }
+    if (content != null) {
+        Box(modifier = modifier.clipToBounds()) {
+            mapViewScope.content()
+        }
+    }
 }
 
 /**
