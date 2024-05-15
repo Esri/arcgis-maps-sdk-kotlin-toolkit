@@ -62,6 +62,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.mapping.featureforms.FormAttachmentType
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.utils.AttachmentsFileProvider
 import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
@@ -333,6 +334,7 @@ private fun AttachmentFormElementPreview() {
                     "Photo 1.jpg",
                     2024,
                     "image/jpeg",
+                    FormAttachmentType.Image,
                     1,
                     {},
                     "",
