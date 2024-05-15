@@ -2,7 +2,6 @@ package com.arcgismaps.toolkit.authentication
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -12,8 +11,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
-import androidx.test.uiautomator.UiObjectNotFoundException
-import androidx.test.uiautomator.UiSelector
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
@@ -85,7 +82,7 @@ class OAuthUserLauncherTests {
     fun cancelSignIn() = runTest {
         val response = testOAuthChallengeWithStateRestoration {
             clickByText("Cancel")
-            chooseLauncherWhichContainsText(OAuthUserLauncherTestActivity::class.java.name)
+            chooseLauncher<OAuthUserLauncherTestActivity>()
         }.await()
         assert(response is ArcGISAuthenticationChallengeResponse.Cancel)
     }
@@ -142,14 +139,6 @@ class OAuthUserLauncherTests {
     }
 }
 
-fun UiDevice.chooseLauncherWhichContainsText(text: String) {
-    try {
-        findObject(UiSelector().packageName("android").className("android.widget.TextView").textContains(text)).click()
-        clickByText("Just once")
-    } catch (e: UiObjectNotFoundException) {
-        Log.d("Test", "Could not find the launcher with text: $text")
-    }
-}
 
 class OAuthUserLauncherTestActivity: ComponentActivity() {
     val viewModel: OAuthUserLauncherTestViewModel by viewModels()
