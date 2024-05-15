@@ -23,7 +23,6 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
@@ -34,13 +33,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.toolkit.popup.internal.ui.ExpandableCard
 
 @Composable
-internal fun FieldsPopupElement(state: FieldsElementState, modifier: Modifier = Modifier) {
+internal fun FieldsPopupElement(state: FieldsElementState) {
     val localContext = LocalContext.current
     ExpandableCard(
         title = state.title,
         description = state.description,
         elementCount = state.fieldsToFormattedValues.size,
-        modifier = modifier
     ) {
         Column {
             state.fieldsToFormattedValues.forEach {
