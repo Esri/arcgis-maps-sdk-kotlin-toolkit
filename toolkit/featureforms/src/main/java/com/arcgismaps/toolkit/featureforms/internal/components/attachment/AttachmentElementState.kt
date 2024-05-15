@@ -199,13 +199,15 @@ internal class AttachmentElementState(
                         for (i in savedList.dropLast(2)) {
                             it.attachments[i]?.loadWithParentScope()
                         }
-                        // scroll to the last visible item
-                        val firstVisibleItemIndex = savedList[savedList.count() - 2]
-                        val firstVisibleItemScrollOffset = savedList[savedList.count() - 1]
-                        it.lazyListState.scrollToItem(
-                            firstVisibleItemIndex,
-                            firstVisibleItemScrollOffset
-                        )
+                        if (savedList.count() > 1) {
+                            // scroll to the last visible item
+                            val firstVisibleItemIndex = savedList[savedList.count() - 2]
+                            val firstVisibleItemScrollOffset = savedList[savedList.count() - 1]
+                            it.lazyListState.scrollToItem(
+                                firstVisibleItemIndex,
+                                firstVisibleItemScrollOffset
+                            )
+                        }
                     }
                 }
             }
@@ -337,6 +339,18 @@ internal class FormAttachmentState(
             ?: return Result.failure(Exception("Form attachment is null"))
     }
 
+    private suspend fun writeDataToDisk(data: ByteArray) = withContext(Dispatchers.IO) {
+        val directory = File(filesDir, attachmentsDir)
+        directory.mkdirs()
+        // write the data to disk
+        val file = File(directory, name)
+        file.createNewFile()
+        FileOutputStream(file).use {
+            it.write(data)
+        }
+        filePath = file.absolutePath
+    }
+
     override fun hashCode(): Int {
         return Objects.hash(name, size, type)
     }
@@ -352,18 +366,6 @@ internal class FormAttachmentState(
         if (type != other.type) return false
 
         return true
-    }
-
-    private suspend fun writeDataToDisk(data: ByteArray) = withContext(Dispatchers.IO) {
-        val directory = File(filesDir, attachmentsDir)
-        directory.mkdirs()
-        // write the data to disk
-        val file = File(directory, name)
-        file.createNewFile()
-        FileOutputStream(file).use {
-            it.write(data)
-        }
-        filePath = file.absolutePath
     }
 }
 

@@ -93,7 +93,7 @@ fun DropdownMenuAlertDialog(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        itemList[selectedIndex] ?: "Unexpected index",
+                        itemList[selectedIndex],
                         modifier = Modifier.padding(8.dp)
                     )
                     Icon(
