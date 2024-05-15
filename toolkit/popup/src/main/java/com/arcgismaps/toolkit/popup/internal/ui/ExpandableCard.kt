@@ -57,13 +57,12 @@ internal fun ExpandableCard(
     title: String = "",
     description: String = "",
     elementCount: Int = 1,
-    initialExpandedState: Boolean = elementCount == 1,
     content: @Composable () -> Unit = {}
 ) {
     // TODO: promote to public theme.
     val shapes = ExpandableCardDefaults.shapes()
     val colors = ExpandableCardDefaults.colors()
-    var expanded by rememberSaveable { mutableStateOf(initialExpandedState) }
+    var expanded by rememberSaveable { mutableStateOf(true) }
     val dynamic = elementCount > 1
     Card(
         colors = CardDefaults.cardColors(
@@ -170,7 +169,6 @@ private fun ExpandableCardPreview() {
     ExpandableCard(
         description = "Foo",
         title = "Title",
-        initialExpandedState = true,
         elementCount = 2
     ) {
         Text(
