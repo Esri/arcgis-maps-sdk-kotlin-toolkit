@@ -152,9 +152,6 @@ private fun PopupBody(popupState: PopupState) {
                     is AttachmentsPopupElement -> {
                         AttachmentsPopupElement(
                             state = entry.state as AttachmentsElementState
-//                            modifier = Modifier
-//                                .fillMaxWidth()
-//                                .padding(horizontal = 15.dp, vertical = 10.dp)
                         )
                     }
 
