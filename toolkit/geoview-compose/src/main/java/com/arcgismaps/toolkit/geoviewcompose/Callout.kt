@@ -51,6 +51,13 @@ import com.arcgismaps.mapping.view.ScreenCoordinate
 public class MapViewScope(internal val mapView: MapView)
 
 /**
+ * The default shape, color & size properties for Callout.
+ *
+ * @since 200.5.0
+ */
+internal val DefaultCalloutProperties = CalloutProperties()
+
+/**
  * Creates a Callout at the specified geographical location on the MapView. The Callout is a composable
  * that can be used to display additional information about a location on the map. The additional information is
  * passed as a content composable that contains text and/or other content. It has a leader that points to
@@ -66,7 +73,7 @@ public class MapViewScope(internal val mapView: MapView)
 public fun MapViewScope.Callout(
     location: Point,
     modifier: Modifier = Modifier,
-    properties: CalloutProperties = CalloutProperties(),
+    properties: CalloutProperties = DefaultCalloutProperties,
     content: @Composable BoxScope.() -> Unit
 ) {
 
@@ -77,7 +84,7 @@ public fun MapViewScope.Callout(
 
         Box(
             modifier = modifier
-                .drawCalloutShape(
+                .drawCalloutContainer(
                     cornerRadius = with(localDensity) { properties.cornerRadius.toPx() },
                     strokeBorderWidth = with(localDensity) { properties.strokeBorderWidth.toPx() },
                     strokeColor = properties.strokeColor,
@@ -96,21 +103,21 @@ public fun MapViewScope.Callout(
 }
 
 /**
- * Extension function to draw the Callout using the given parameters. It draws the shape, adds the content padding, adds padding for the leader height, restricting the min size and positions it on the screen.
+ * Extension function to draw the Callout container using the given parameters. It draws the shape, adds the content padding, adds padding for the leader height, restricting the min size and positions it on the screen.
  *
  * [cornerRadius] The corner radius of the Callout shape in px.
  * [strokeBorderWidth] Width of the Callout stroke in px.
  * [strokeColor] Color used to define the outline stroke.
  * [backgroundColor] Color used to define the fill color of the Callout shape.
  * [calloutContentPadding] PaddingValues for the content placed inside the Callout.
- * [leaderWidth] Width of the anchor leader in px.
- * [leaderHeight] Height of the anchor leader in px.
+ * [leaderWidth] Width of the Callout leader in px.
+ * [leaderHeight] Height of the Callout leader in px.
  * [minSize] Minimum size the of the Callout shape.
  * [calloutScreenCoordinate] Represents the x,y coordinate of the Callout leader.
  * @since 200.5.0
  */
 @Composable
-private fun Modifier.drawCalloutShape(
+private fun Modifier.drawCalloutContainer(
     cornerRadius: Float,
     strokeBorderWidth: Float,
     strokeColor: Color,
@@ -154,8 +161,8 @@ private fun Modifier.drawCalloutShape(
  *
  * [size] The calculated size of the resulting content used to created the Path.
  * [cornerRadius] The corner radius of the rectangle shape in px.
- * [leaderWidth] Width of the anchor leader in px.
- * [leaderHeight] Height of the anchor leader in px.
+ * [leaderWidth] Width of the Callout leader in px.
+ * [leaderHeight] Height of the Callout leader in px.
  * @since 200.5.0
  */
 private fun calloutPath(
