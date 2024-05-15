@@ -57,8 +57,6 @@ import com.arcgismaps.toolkit.popup.internal.element.state.mutablePopupElementSt
 import com.arcgismaps.toolkit.popup.internal.element.textelement.TextElementState
 import com.arcgismaps.toolkit.popup.internal.element.textelement.TextPopupElement
 import com.arcgismaps.toolkit.popup.internal.element.textelement.rememberTextElementState
-import com.arcgismaps.toolkit.popup.internal.ui.ExpandableCardDefaults
-import kotlinx.coroutines.async
 
 @Immutable
 private data class PopupState(@Stable val popup: Popup)
@@ -94,16 +92,10 @@ private fun Popup(popupState: PopupState, modifier: Modifier = Modifier) {
     var evaluated by rememberSaveable(popup) { mutableStateOf(false) }
 
     LaunchedEffect(popup) {
-        val evaluation = async {
-            popupState.popup.evaluateExpressions()
-        }
-        val attachments = async {
-            popupState.popup.evaluatedElements
-                .filterIsInstance<AttachmentsPopupElement>()
-                .firstOrNull()?.fetchAttachments()
-        }
-        evaluation.await()
-        attachments.await()
+        popupState.popup.evaluateExpressions()
+        popupState.popup.evaluatedElements
+            .filterIsInstance<AttachmentsPopupElement>()
+            .firstOrNull()?.fetchAttachments()
         evaluated = true
     }
 
@@ -141,7 +133,6 @@ private fun PopupBody(popupState: PopupState) {
     val popup = popupState.popup
     val lazyListState = rememberLazyListState()
     val states = rememberStates(popup)
-    val shapes = ExpandableCardDefaults.shapes()
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -154,19 +145,16 @@ private fun PopupBody(popupState: PopupState) {
                 when (element) {
                     is TextPopupElement -> {
                         TextPopupElement(
-                            entry.state as TextElementState,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(shapes.padding)
+                            entry.state as TextElementState
                         )
                     }
 
                     is AttachmentsPopupElement -> {
                         AttachmentsPopupElement(
-                            state = entry.state as AttachmentsElementState,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 15.dp, vertical = 10.dp)
+                            state = entry.state as AttachmentsElementState
+//                            modifier = Modifier
+//                                .fillMaxWidth()
+//                                .padding(horizontal = 15.dp, vertical = 10.dp)
                         )
                     }
 

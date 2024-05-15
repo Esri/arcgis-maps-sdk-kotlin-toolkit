@@ -34,15 +34,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 internal fun AttachmentsPopupElement(
-    state: AttachmentsElementState,
-    modifier: Modifier = Modifier
+    state: AttachmentsElementState
 ) {
     AttachmentsPopupElement(
         title = state.title,
         description = state.description,
         stateId = state.id,
-        attachments = state.attachments,
-        modifier = modifier
+        attachments = state.attachments
     )
 }
 
@@ -51,11 +49,9 @@ internal fun AttachmentsPopupElement(
     description: String,
     title: String,
     @Suppress("UNUSED_PARAMETER") stateId: Int,
-    attachments: List<PopupAttachmentState>,
-    modifier: Modifier = Modifier
+    attachments: List<PopupAttachmentState>
 ) {
     ExpandableCard(
-        modifier = modifier,
         title = title,
         description = description,
         elementCount = attachments.size
@@ -98,7 +94,6 @@ private fun AttachmentsPopupElementPreview() {
                 { Result.success(Unit) },
                 { Result.success(null) }
             )
-        ),
-        modifier = Modifier.padding(16.dp)
+        )
     )
 }
