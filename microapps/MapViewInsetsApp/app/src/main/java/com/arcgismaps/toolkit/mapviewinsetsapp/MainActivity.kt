@@ -21,12 +21,18 @@ package com.arcgismaps.toolkit.mapviewinsetsapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.toolkit.mapviewinsetsapp.screens.MainScreen
-import com.arcgismaps.toolkit.mapviewinsetsapp.ui.theme.MapviewInsetsAppTheme
+import com.esri.microappslib.theme.MicroAppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,22 +40,25 @@ class MainActivity : ComponentActivity() {
         ArcGISEnvironment.apiKey = ApiKey.create(BuildConfig.API_KEY)
 
         setContent {
-            MapviewInsetsAppTheme {
+            MicroAppTheme {
                 MapviewInsetsApp()
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapviewInsetsApp() {
-    MainScreen()
+    Scaffold(topBar = { TopAppBar(title = { Text("MapView Insets App") }) }) {
+        MainScreen(Modifier.padding(it))
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun AppPreview() {
-    MapviewInsetsAppTheme {
+    MicroAppTheme {
         MapviewInsetsApp()
     }
 }

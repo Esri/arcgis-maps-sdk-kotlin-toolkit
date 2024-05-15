@@ -89,4 +89,10 @@
     <string name="ff_time_picker_minute_text_field">for minutes</string>
     <string name="ff_time_picker_period_toggle_description">Select AM or PM</string>
     <string name="ff_time_picker_pm">PM</string>
+    <string name="take_photo">Take Photo</string>
+    <string name="add_photo">Add Photo</string>
+    <string name="rename">Rename</string>
+    <string name="delete">Delete</string>
+    <string name="rename_attachment">Rename Attachment</string>
+    <string name="name">Name</string>
 </resources>
