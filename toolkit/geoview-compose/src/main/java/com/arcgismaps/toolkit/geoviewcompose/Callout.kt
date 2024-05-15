@@ -51,13 +51,6 @@ import com.arcgismaps.mapping.view.ScreenCoordinate
 public class MapViewScope(internal val mapView: MapView)
 
 /**
- * The default shape, color & size properties for Callout.
- *
- * @since 200.5.0
- */
-internal val DefaultCalloutProperties = CalloutProperties()
-
-/**
  * Creates a Callout at the specified geographical location on the MapView. The Callout is a composable
  * that can be used to display additional information about a location on the map. The additional information is
  * passed as a content composable that contains text and/or other content. It has a leader that points to
@@ -73,7 +66,6 @@ internal val DefaultCalloutProperties = CalloutProperties()
 public fun MapViewScope.Callout(
     location: Point,
     modifier: Modifier = Modifier,
-    properties: CalloutProperties = DefaultCalloutProperties,
     content: @Composable BoxScope.() -> Unit
 ) {
 
@@ -81,6 +73,9 @@ public fun MapViewScope.Callout(
 
     if (mapView.map?.loadStatus?.collectAsState()?.value == LoadStatus.Loaded) {
         val calloutScreenCoordinate: ScreenCoordinate = mapView.locationToScreen(location)
+
+        // Get the default shape, color & size properties for Callout
+        val properties = CalloutProperties()
 
         Box(
             modifier = modifier
@@ -105,15 +100,15 @@ public fun MapViewScope.Callout(
 /**
  * Extension function to draw the Callout container using the given parameters. It draws the shape, adds the content padding, adds padding for the leader height, restricting the min size and positions it on the screen.
  *
- * [cornerRadius] The corner radius of the Callout shape in px.
- * [strokeBorderWidth] Width of the Callout stroke in px.
- * [strokeColor] Color used to define the outline stroke.
- * [backgroundColor] Color used to define the fill color of the Callout shape.
- * [calloutContentPadding] PaddingValues for the content placed inside the Callout.
- * [leaderWidth] Width of the Callout leader in px.
- * [leaderHeight] Height of the Callout leader in px.
- * [minSize] Minimum size the of the Callout shape.
- * [calloutScreenCoordinate] Represents the x,y coordinate of the Callout leader.
+ * @param cornerRadius The corner radius of the Callout shape in px.
+ * @param strokeBorderWidth Width of the Callout stroke in px.
+ * @param strokeColor Color used to define the outline stroke.
+ * @param backgroundColor Color used to define the fill color of the Callout shape.
+ * @param calloutContentPadding PaddingValues for the content placed inside the Callout.
+ * @param leaderWidth Width of the Callout leader in px.
+ * @param leaderHeight Height of the Callout leader in px.
+ * @param minSize Minimum size the of the Callout shape.
+ * @param calloutScreenCoordinate Represents the x,y coordinate of the Callout leader.
  * @since 200.5.0
  */
 @Composable
@@ -159,10 +154,10 @@ private fun Modifier.drawCalloutContainer(
 /**
  * Create the Callout shape by returning the [Path] using the given parameters.
  *
- * [size] The calculated size of the resulting content used to created the Path.
- * [cornerRadius] The corner radius of the rectangle shape in px.
- * [leaderWidth] Width of the Callout leader in px.
- * [leaderHeight] Height of the Callout leader in px.
+ * @param size The calculated size of the resulting content used to created the Path.
+ * @param cornerRadius The corner radius of the rectangle shape in px.
+ * @param leaderWidth Width of the Callout leader in px.
+ * @param leaderHeight Height of the Callout leader in px.
  * @since 200.5.0
  */
 private fun calloutPath(
@@ -273,19 +268,19 @@ private fun calloutPath(
 /**
  * UI default properties for the [Callout] component.
  */
-public data class CalloutProperties(
-    public val cornerRadius: Dp = 10.dp,
-    public val strokeBorderWidth: Dp = 2.dp,
-    public val strokeColor: Color = Color.LightGray,
-    public val backgroundColor: Color = Color.White,
-    public val calloutContentPadding: PaddingValues = PaddingValues(
+internal data class CalloutProperties(
+    val cornerRadius: Dp = 10.dp,
+    val strokeBorderWidth: Dp = 2.dp,
+    val strokeColor: Color = Color.LightGray,
+    val backgroundColor: Color = Color.White,
+    val calloutContentPadding: PaddingValues = PaddingValues(
         all = cornerRadius + (strokeBorderWidth / 2)
     ),
-    public val leaderSize: DpSize = DpSize(
+    val leaderSize: DpSize = DpSize(
         width = 12.dp,
         height = 10.dp
     ),
-    public val minSize: DpSize = DpSize(
+    val minSize: DpSize = DpSize(
         width = strokeBorderWidth + (2 * cornerRadius),
         height = strokeBorderWidth + (2 * cornerRadius)
     )
