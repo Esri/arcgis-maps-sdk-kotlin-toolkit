@@ -91,7 +91,9 @@ private fun HTML(content: String) {
  */
 @Composable
 internal fun TextPopupElement(state: TextElementState) {
-    HTML(content = state.value)
+    ExpandableCard {
+        HTML(content = state.value)
+    }
 }
 
 @Preview
@@ -99,13 +101,11 @@ internal fun TextPopupElement(state: TextElementState) {
 private fun TextPopupElementPreview() {
     val tempText =
         "<p><span style='color:#287fb8;font-family:Verdana;font-size:14px;'><strong>{NAME}</strong></span><span style='font-family:Verdana;font-size:14px;'> is a peak in California's {RANGE} range. It ranks </span><span style='color:#aa3427;font-family:Verdana;font-size:14px;'><strong>#{RANK}</strong></span><span style='font-family:Verdana;font-size:14px;'> among the California Fourteeners.</span></p><p><span style='font-family:Verdana;font-size:14px;'>The summit is </span><span style='color:#287fb8;font-family:Verdana;font-size:14px;'><strong>{ELEV_FEET}</strong></span><span style='font-family:Verdana;font-size:14px;'> feet high ({ELEV_METERS} meters) and has a prominence of </span><span style='color:#287fb8;font-family:Verdana;font-size:14px;'><strong>{PROM_FEET}</strong></span><span style='font-family:Verdana;font-size:14px;'> feet ({PROM_METERS} meters).</span></p><p><a href='https://arcgis.com' rel='nofollow ugc'><span style='font-family:Verdana;font-size:14px;'>More info</span></a></p>"
-    ExpandableCard {
-        TextPopupElement(
-            TextElementState(
-                value = tempText,
-                id = 42
-            )
+    TextPopupElement(
+        TextElementState(
+            value = tempText,
+            id = 42
         )
-    }
+    )
 }
 

@@ -53,7 +53,6 @@ import com.arcgismaps.toolkit.popup.internal.element.state.mutablePopupElementSt
 import com.arcgismaps.toolkit.popup.internal.element.textelement.TextElementState
 import com.arcgismaps.toolkit.popup.internal.element.textelement.TextPopupElement
 import com.arcgismaps.toolkit.popup.internal.element.textelement.rememberTextElementState
-import com.arcgismaps.toolkit.popup.internal.ui.ExpandableCard
 
 @Immutable
 private data class PopupState(@Stable val popup: Popup)
@@ -138,11 +137,10 @@ private fun PopupBody(popupState: PopupState) {
             item {
                 when (element) {
                     is TextPopupElement -> {
-                        ExpandableCard {
-                            TextPopupElement(entry.state as TextElementState)
-                        }
+                        TextPopupElement(
+                            entry.state as TextElementState
+                        )
                     }
-
 
                     else -> {
                         // other popup elements are not created

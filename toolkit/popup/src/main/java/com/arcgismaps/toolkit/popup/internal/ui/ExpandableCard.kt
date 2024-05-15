@@ -16,22 +16,21 @@
 
 package com.arcgismaps.toolkit.popup.internal.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ExpandLess
 import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,9 +38,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.popup.R
 
 /**
  * Composable Card that has the ability to expand and collapse its [content].
@@ -50,40 +54,99 @@ import androidx.compose.ui.unit.dp
  */
 @Composable
 internal fun ExpandableCard(
-    modifier: Modifier = Modifier,
     title: String = "",
-    expandable: Boolean = true,
-    content: @Composable () -> Unit
+    description: String = "",
+    elementCount: Int = 1,
+    content: @Composable () -> Unit = {}
 ) {
-    var expanded by rememberSaveable { mutableStateOf(expandable) }
+    // TODO: promote to public theme.
+    val shapes = ExpandableCardDefaults.shapes()
+    val colors = ExpandableCardDefaults.colors()
+    var expanded by rememberSaveable { mutableStateOf(true) }
+    val dynamic = elementCount > 1
     Card(
-        shape = RoundedCornerShape(5.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-        modifier = modifier
+        colors = CardDefaults.cardColors(
+            containerColor = colors.containerColor
+        ),
+        border = BorderStroke(shapes.borderThickness, colors.borderColor),
+        shape = shapes.containerShape,
+        modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
-            .clickable(enabled = expandable) { expanded = !expanded }
+            .padding(shapes.padding)
     ) {
         Column {
-            if (title.isNotEmpty()) {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(
-                        title,
-                        modifier = Modifier.padding(8.dp),
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                    IconButton(onClick = { expanded = !expanded }) {
-                        Icon(
-                            imageVector = if (expanded) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore,
-                            contentDescription = "More"
-                        )
-                    }
+            ExpandableHeader(
+                title = title,
+                description = description,
+                elementCount = elementCount,
+                isExpanded = expanded
+            ) {
+                if (dynamic) {
+                    expanded = !expanded
                 }
-                Spacer(modifier = Modifier.height(10.dp))
             }
 
-            if (expanded) {
+            AnimatedVisibility(visible = expanded) {
                 content()
+            }
+
+        }
+    }
+}
+
+@Composable
+private fun ExpandableHeader(
+    title: String = "",
+    description: String = "",
+    elementCount: Int,
+    isExpanded: Boolean,
+    onClick: () -> Unit
+) {
+    if (title.isEmpty() && description.isEmpty() && elementCount == 1) return
+    val shapes = ExpandableCardDefaults.shapes()
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .applyIf(elementCount > 1) {
+                clickable {
+                    onClick()
+                }
+            }
+            .background(MaterialTheme.colorScheme.surface),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(shapes.padding)
+                .weight(0.5f)
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            if (description.isNotEmpty() && isExpanded) {
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.Normal,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+        }
+
+        if (elementCount > 1) {
+            Crossfade(targetState = isExpanded, label = "expandPopupElement") {
+                Icon(
+                    modifier = Modifier
+                        .padding(16.dp),
+                    imageVector = if (it) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore,
+                    contentDescription = stringResource(R.string.show_or_hide_popup_element_content)
+                )
             }
         }
     }
@@ -91,12 +154,27 @@ internal fun ExpandableCard(
 
 @Preview
 @Composable
+internal fun ExpandableHeaderPreview() {
+    ExpandableHeader(
+        title = "The Title",
+        description = "the description",
+        2,
+        true
+    ) {}
+}
+
+@Preview
+@Composable
 private fun ExpandableCardPreview() {
-    ExpandableCard(title = "This is a title", expandable = true) {
+    ExpandableCard(
+        description = "Foo",
+        title = "Title",
+        elementCount = 2
+    ) {
         Text(
             "Hello World",
             style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(8.dp)
+            modifier = Modifier.padding(16.dp)
         )
     }
 }
