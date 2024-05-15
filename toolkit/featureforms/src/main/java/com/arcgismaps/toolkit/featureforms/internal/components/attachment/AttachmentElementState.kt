@@ -188,10 +188,15 @@ internal class AttachmentElementState(
                         for (i in savedList.dropLast(2)) {
                             it.attachments[i].loadWithParentScope()
                         }
-                        // scroll to the last visible item
-                        val firstVisibleItemIndex = savedList[savedList.count() - 2]
-                        val firstVisibleItemScrollOffset = savedList[savedList.count() - 1]
-                        it.lazyListState.scrollToItem(firstVisibleItemIndex, firstVisibleItemScrollOffset)
+                        if (savedList.count() > 1) {
+                            // scroll to the last visible item
+                            val firstVisibleItemIndex = savedList[savedList.count() - 2]
+                            val firstVisibleItemScrollOffset = savedList[savedList.count() - 1]
+                            it.lazyListState.scrollToItem(
+                                firstVisibleItemIndex,
+                                firstVisibleItemScrollOffset
+                            )
+                        }
                     }
                 }
             }
