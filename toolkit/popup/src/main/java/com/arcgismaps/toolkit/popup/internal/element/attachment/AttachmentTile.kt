@@ -32,7 +32,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowDownward
 import androidx.compose.material.icons.outlined.ErrorOutline
@@ -70,21 +69,23 @@ internal fun AttachmentTile(
     val loadStatus by state.loadStatus.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val thumbnail by state.thumbnail
+    val colors = AttachmentsElementDefaults.colors()
+    val shapes = AttachmentsElementDefaults.shapes()
     Box(
         modifier = Modifier
-            .width(92.dp)
-            .height(75.dp)
-            .clip(shape = RoundedCornerShape(8.dp))
+            .width(shapes.tileWidth)
+            .height(shapes.tileHeight)
+            .clip(shape = shapes.tileShape)
             .border(
-                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline),
-                shape = RoundedCornerShape(8.dp)
+                border = BorderStroke(shapes.tileStrokeWidth, colors.tileBorderColor),
+                shape = shapes.tileShape
             )
             .clickable {
                 if (loadStatus is LoadStatus.NotLoaded || loadStatus is LoadStatus.FailedToLoad) {
                     // load attachment
                     state.loadAttachment(coroutineScope)
                 }
-            // TODO open attachment viewer in `else` here
+                // TODO open attachment viewer in `else` here
             }
     ) {
         when (loadStatus) {

@@ -34,7 +34,11 @@ internal object AttachmentsElementDefaults {
     fun shapes(): AttachmentElementShapes = AttachmentElementShapes(
         borderThickness = 1.dp,
         containerShape = RoundedCornerShape(5.dp),
-        galleryPadding = 15.dp
+        tileShape = RoundedCornerShape(8.dp),
+        galleryPadding = 15.dp,
+        tileStrokeWidth = 0.5.dp,
+        tileWidth = 92.dp,
+        tileHeight = 75.dp
     )
 
     @Suppress("unused")
@@ -42,19 +46,26 @@ internal object AttachmentsElementDefaults {
     fun colors() : AttachmentsElementColors = AttachmentsElementColors(
         containerColor = MaterialTheme.colorScheme.background,
         galleryContainerColor = MaterialTheme.colorScheme.onBackground,
-        borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
+        borderColor = MaterialTheme.colorScheme.outline,
+        tileBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
+
     )
 }
 
 internal data class AttachmentElementShapes(
     val borderThickness: Dp,
     val containerShape: RoundedCornerShape,
-    val galleryPadding: Dp
+    val tileShape: RoundedCornerShape,
+    val galleryPadding: Dp,
+    val tileStrokeWidth: Dp,
+    val tileWidth: Dp,
+    val tileHeight: Dp
 )
 
 internal data class AttachmentsElementColors(
     val containerColor : Color,
     val galleryContainerColor: Color,
-    val borderColor : Color,
+    val tileBorderColor : Color,
+    val borderColor : Color
 )
 
