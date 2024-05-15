@@ -17,6 +17,7 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
+import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -170,7 +171,7 @@ public fun MapView(
     val context = LocalContext.current
     val mapView = remember { MapView(context) }
     val layoutDirection = LocalLayoutDirection.current
-    var refreshCalloutPosition by rememberSaveable { mutableStateOf(false) }
+    Log.d("MapView****", "MapView content: $content")
 
     AndroidView(
         modifier = modifier.semantics { contentDescription = "MapView" },
@@ -194,19 +195,6 @@ public fun MapView(
                 }
             }
         })
-
-    LaunchedEffect(Unit) {
-        mapView.viewpointChanged.collect {
-            refreshCalloutPosition = !refreshCalloutPosition
-        }
-    }
-
-    val mapViewScope = remember(mapView) { MapViewScope(mapView) }
-    if (content != null) {
-        key(refreshCalloutPosition, content) {
-            mapViewScope.content()
-        }
-    }
 
     DisposableEffect(Unit) {
         lifecycleOwner.lifecycle.addObserver(mapView)
@@ -265,6 +253,11 @@ public fun MapView(
         onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
         onVisibleAreaChanged = onVisibleAreaChanged
     )
+
+    val mapViewScope = remember(mapView) { MapViewScope(mapView) }
+    if (content != null) {
+        mapViewScope.content()
+    }
 }
 
 /**
