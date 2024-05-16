@@ -72,6 +72,14 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    /**
+     * Configures the test report for connected (instrumented) tests to be copied to a central
+     * folder in the project's root directory.
+     */
+    testOptions {
+        reportDir = "${rootDir}/connectedTestReports/${project.name}"
+    }
 }
 
 dependencies {
