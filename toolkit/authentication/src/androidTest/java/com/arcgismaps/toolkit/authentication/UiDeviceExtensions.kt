@@ -2,12 +2,10 @@ package com.arcgismaps.toolkit.authentication
 
 import android.app.Activity
 import android.content.Context
-import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
-import androidx.test.uiautomator.UiObjectNotFoundException
 import androidx.test.uiautomator.UiSelector
 import androidx.test.uiautomator.Until
 import org.junit.Assert
@@ -80,13 +78,3 @@ fun UiDevice.enterTextByHint(text: String, hint: String) {
  */
 fun UiDevice.clickByText(text: String) =
     findObject(UiSelector().className("android.widget.Button").textContains(text)).click()
-
-inline fun <reified T> UiDevice.chooseLauncher() {
-    val name = T::class.java.name
-    try {
-        findObject(UiSelector().packageName("android").className("android.widget.TextView").textContains(name)).click()
-        clickByText("Just once")
-    } catch (e: UiObjectNotFoundException) {
-        Log.d("Test", "Could not find the launcher with text: $name")
-    }
-}

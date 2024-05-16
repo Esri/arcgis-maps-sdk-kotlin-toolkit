@@ -40,7 +40,7 @@
 
                 <data
                     android:host="auth"
-                    android:scheme="kotlin-toolkit-authenticator-microapp" />
+                    android:scheme="authenticate-with-oauth" />
             </intent-filter>
             </activity>
     </application>

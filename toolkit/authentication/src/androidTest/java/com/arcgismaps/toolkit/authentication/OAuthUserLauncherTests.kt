@@ -82,7 +82,6 @@ class OAuthUserLauncherTests {
     fun cancelSignIn() = runTest {
         val response = testOAuthChallengeWithStateRestoration {
             clickByText("Cancel")
-            chooseLauncher<OAuthUserLauncherTestActivity>()
         }.await()
         assert(response is ArcGISAuthenticationChallengeResponse.Cancel)
     }
@@ -140,7 +139,7 @@ class OAuthUserLauncherTests {
 }
 
 
-class OAuthUserLauncherTestActivity: ComponentActivity() {
+class OAuthUserLauncherTestActivity : ComponentActivity() {
     val viewModel: OAuthUserLauncherTestViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -162,14 +161,14 @@ class OAuthUserLauncherTestActivity: ComponentActivity() {
     }
 }
 
-class OAuthUserLauncherTestViewModel: ViewModel() {
+class OAuthUserLauncherTestViewModel : ViewModel() {
     val authenticatorState = AuthenticatorState().apply {
         oAuthUserConfiguration = OAuthUserConfiguration(
             "https://arcgis.com/",
             // This client ID is for demo purposes only. For use of the Authenticator in your own app,
             //            // create your own client ID. For more info see: https://developers.arcgis.com/documentation/mapping-apis-and-services/security/tutorials/register-your-application/
-            "aink3YEhnDNBBcJq",
-            "kotlin-toolkit-authenticator-microapp://auth"
+            "lgAdHkYZYlwwfAhC",
+            "authenticate-with-oauth://auth"
         )
     }
 }
