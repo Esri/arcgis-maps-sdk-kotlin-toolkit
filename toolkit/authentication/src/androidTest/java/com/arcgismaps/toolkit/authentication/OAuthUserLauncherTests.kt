@@ -113,32 +113,47 @@ class OAuthUserLauncherTests {
     fun TestScope.testOAuthChallengeWithStateRestoration(
         userInputOnDialog: UiDevice.() -> Unit,
     ): Deferred<ArcGISAuthenticationChallengeResponse> {
+        // start the activity (which contains the Authenticator)
         val authenticatorState = composeTestRule.activity.viewModel.authenticatorState
         composeTestRule.activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
+        // wait for the activity content to be displayed
         composeTestRule.waitForIdle()
+        // issue the OAuth challenge
         val challengeResponse = async {
             authenticatorState.handleArcGISAuthenticationChallenge(
                 makeMockArcGISAuthenticationChallenge()
             )
         }
+        // ensure the challenge is issued
         advanceUntilIdle()
 
+        // wait for the pending sign in to be ready
         composeTestRule.waitUntil(timeoutMillis = 40_000) { authenticatorState.pendingOAuthUserSignIn.value != null }
+        // wait for the authenticator to be removed from the composition, ie the CCT is launched
         composeTestRule.onNodeWithTag("Authenticator").assertDoesNotExist()
+
         val uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
 
+        // wait for the browser to be launched
         uiDevice.awaitViewVisible("com.android.chrome")
 
+        // rotate the device to ensure the Authenticator can handle configuration changes
         uiDevice.setOrientationLandscape()
         uiDevice.setOrientationPortrait()
 
+        // perform the test action
         uiDevice.userInputOnDialog()
 
+        // return the response deferred
         return challengeResponse
     }
 }
 
-
+/**
+ * This activity is used to test the Authenticator when the Custom Chrome Tab is launched from a user activity
+ *
+ * @since 200.4.0
+ */
 class OAuthUserLauncherTestActivity : ComponentActivity() {
     val viewModel: OAuthUserLauncherTestViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -161,6 +176,12 @@ class OAuthUserLauncherTestActivity : ComponentActivity() {
     }
 }
 
+/**
+ * ViewModel for the [OAuthUserLauncherTestActivity] that contains the [AuthenticatorState] for testing
+ *
+ * @since 200.4.0
+ *
+ */
 class OAuthUserLauncherTestViewModel : ViewModel() {
     val authenticatorState = AuthenticatorState().apply {
         oAuthUserConfiguration = OAuthUserConfiguration(

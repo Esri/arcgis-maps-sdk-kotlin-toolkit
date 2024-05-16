@@ -127,24 +127,33 @@ class OAuthDefaultConfigurationTests {
                 modifier = Modifier.testTag("Authenticator")
             )
         }
+        // isse the OAuth challenge
         val challengeResponse = async {
             authenticatorState.handleArcGISAuthenticationChallenge(
                 makeMockArcGISAuthenticationChallenge()
             )
         }
+        // ensure the challenge is issued
         advanceUntilIdle()
 
+        // wait for the pending sign in to be ready
         composeTestRule.waitUntil(timeoutMillis = 40_000) { authenticatorState.pendingOAuthUserSignIn.value != null }
+        // wait for the authenticator to be removed from the composition, ie the CCT is launched
         composeTestRule.onNodeWithTag("Authenticator").assertDoesNotExist()
+
         val uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
 
+        // wait for the browser to be launched
         uiDevice.awaitViewVisible("com.android.chrome")
 
+        // rotate the device to ensure the Authenticator can handle configuration changes
         uiDevice.setOrientationLandscape()
         uiDevice.setOrientationPortrait()
 
+        // perform the test action
         uiDevice.userInputOnDialog()
 
+        // return the response deferred
         return challengeResponse
     }
 }
