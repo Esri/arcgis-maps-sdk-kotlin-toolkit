@@ -124,15 +124,15 @@ private fun getLeaderScreenCoordinate(
     rotateOffsetWithGeoView: Boolean
 ): ScreenCoordinate? {
     val geoViewRotation = geoView.rotation()
-    val locationToScreen = if (geoView is MapView) {
-        geoView.locationToScreen(location)
-    } else {
-        // geoView is a SceneView
-        val locationToScreenResult = (geoView as SceneView).locationToScreen(location)
-        if (locationToScreenResult?.visibility == SceneLocationVisibility.Visible) {
-            return locationToScreenResult.screenPoint
+    val locationToScreen = when (geoView) {
+        is MapView -> geoView.locationToScreen(location)
+        is SceneView -> {
+            val locationToScreenResult = geoView.locationToScreen(location)
+            if (locationToScreenResult?.visibility == SceneLocationVisibility.Visible) {
+                locationToScreenResult.screenPoint
+            }
+            null
         }
-        null
     }
     return locationToScreen?.let { screenCoordinate ->
         if (rotateOffsetWithGeoView && geoViewRotation != 0.0) {
@@ -144,12 +144,9 @@ private fun getLeaderScreenCoordinate(
     }
 }
 
-private fun GeoView.rotation(): Double {
-    return if (this is SceneView) {
-        getCurrentViewpoint(ViewpointType.CenterAndScale)?.rotation ?: 0.0
-    } else {
-        (this as MapView).mapRotation.value
-    }
+private fun GeoView.rotation(): Double = when (this) {
+    is SceneView -> getCurrentViewpoint(ViewpointType.CenterAndScale)?.rotation ?: 0.0
+    is MapView -> mapRotation.value
 }
 
 /**
