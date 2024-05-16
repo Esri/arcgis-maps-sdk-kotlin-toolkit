@@ -21,13 +21,13 @@
     # Helper functions to use
     function _display_help_dialog {
 	echo "================================================================================"
-	echo "Usage: new-component-starter.sh -n component-name"
+	echo "Usage: new-component-starter.sh"
 	echo
-	echo "Description: generates a new toolkit component and microapp with the given name"
-	echo " -n <name> the name of the new toolkit component"
+	echo "Description: generates a new toolkit component and optionally a new microapp. The script"
+	echo "will prompt for the name of the new component and whether to create a microapp."
 	echo " -d        do not make the new component publishable. optional. defaults to publishable."
 	echo " -h        this help message"	
-	echo " ./new-component-starter.sh -n FloorFilter"
+	echo " ./new-component-starter.sh"
 	echo "================================================================================"
 	if [ -z $1 ]; then
 	    exit 0
@@ -43,8 +43,8 @@
     componentName=
     #first letter uppercased
     composableFunctionName=
-    #app dir name
-    appDirName=
+    # whether to create the app
+    createMicroapp="no"
 
     function _check_options_and_set_variables {
 	if [ "${BASH_VERSINFO}" -lt "4" ]; then
@@ -59,7 +59,6 @@
 
 	componentName="${name,,}"
 	composableFunctionName="${name^}"
-	appDirName="${composableFunctionName}App"
     }
 
     function copyTemplate {
@@ -87,56 +86,39 @@
 	popd > /dev/null
     }
 
-    function copyTemplateApp {
-	pushd microapps > /dev/null
-	if [ -d "${appDirName}" ]; then
-	    echo microapps/${appDirName} directory already exists	    
-	    exit -1
-	else
-	    cp -R TemplateApp "${appDirName}"	    
-	fi
-	popd > /dev/null
-    }
-
-    function convertTemplateApp {
-	pushd microapps > /dev/null
-	# replace the string "template" in any directory names	
-	find "${appDirName}" -type d -exec rename -s template $componentName {} \; > /dev/null 2>&1
-	# replace the string "Template" in any file names	
-	find "${appDirName}" -type f -exec rename -s Template $composableFunctionName {} \; > /dev/null 2>&1
-	# replace the string "template" in the contents of any file	
-	find "${appDirName}" -type f -exec perl -i -pe s/template/$componentName/ {} \; > /dev/null 2>&1
-	# replace the string "Template" in the contents of any file		
-	find "${appDirName}" -type f -exec perl -i -pe s/Template/$composableFunctionName/ {} \; > /dev/null 2>&1	
-	
-	popd > /dev/null
-    }    
-
     # appends a new project to the list of projects in settings.gradle.kts.
     # this is additive, and will add the same name each time it is run.
-    function updateSettings {
-	perl -i -pe "s/val projects = listOf\(([a-z\", ]+)\"\)/val projects = listOf\(\1\", \"$componentName\"\)/g" settings.gradle.kts 
+    function addToSettings {
+	echo "include (\":${componentName}\")" >> settings.gradle.kts
+	echo "project(\":${componentName}\").projectDir = File(rootDir, \"toolkit/${componentName}\")" >>  settings.gradle.kts
     }
 
     # removes the default plugin block from the toolkit component's build.gradle.kts
     # and adds one back that has publishing capabilities.
-    function makeProjectPublishable {
-	pushd toolkit > /dev/null
-	local gradleFile="${componentName}/build.gradle.kts"
-	read -r -d '' pluginsBlock <<-EOM
+function makeProjectPublishable {
+    pushd toolkit > /dev/null
+    local gradleFile="${componentName}/build.gradle.kts"
+    read -r -d '' pluginsBlock <<-EOM
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("artifact-deploy")
 }
 EOM
-	local lines=$(wc -l "${gradleFile}" | awk '{print $1}')
-	local pluginLines=4
-	local linesLessPlugins=$(($lines-$pluginLines))
-	local tail=$(tail -${linesLessPlugins} "${gradleFile}")
-	echo -e "${pluginsBlock}\n${tail}" >  "${gradleFile}"
-	popd > /dev/null
-    }
+    # Find the line number of the old plugin block start
+    local startLine=$(awk '/plugins {/{ print NR; exit }' "${gradleFile}")
+    # Find the line number of the old plugin block end
+    local endLine=$(awk '/}/{ print NR; exit }' "${gradleFile}")
+    # Remove the old plugin block
+    sed -i '' "${startLine},${endLine}d" "${gradleFile}"
+    # Write the new plugin block to a temporary file
+    echo "${pluginsBlock}" > temp.txt
+    # Insert the new plugin block at the same position
+    sed -i '' "${startLine}r temp.txt" "${gradleFile}"
+    # Remove the temporary file
+    rm temp.txt
+    popd > /dev/null
+}
 
     
     # ---------------------------------------------
@@ -144,11 +126,8 @@ EOM
     # ---------------------------------------------
     
     # parse options
-    while getopts :n:dh opt; do
+    while getopts :dh opt; do
 	case ${opt} in
-	    n)
-		name="${OPTARG}"
-		;;
 	    d)
 		publish=
 		;;
@@ -169,15 +148,25 @@ EOM
 	exit 1
     fi
 
+    # prompt for component name
+    echo "Please enter the name of the new toolkit component without spaces:"
+    read name
+
+    # prompt for microapp creation
+    echo "Do you want to create a microapp? (yes/no)"
+    read createMicroapp
+
     _check_options_and_set_variables
     echo copying and converting files, estimated time 1 minute.
     cd "${toolkitDir}"
     rm -rf "./toolkit/template/build" > /dev/null 2>&1
     copyTemplate
     convertTemplate
-    copyTemplateApp
-    convertTemplateApp
-    updateSettings
+    # Call the create-microapp-starter.sh script if the user answered "yes"
+    if [ "$createMicroapp" = "yes" ]; then
+        ./new-microapp-starter.sh
+    fi
+    addToSettings
     if [ ! -z $publish ]; then
 	makeProjectPublishable
     fi

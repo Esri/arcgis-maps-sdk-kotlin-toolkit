@@ -25,7 +25,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.with
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -53,7 +53,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -125,10 +125,10 @@ fun LoginScreen(
             AnimatedContent(
                 targetState = loginState is LoginState.Loading || loginState is LoginState.Success,
                 transitionSpec = {
-                    slideInVertically { h -> h } with
-                        slideOutVertically(
-                            animationSpec = tween()
-                        ) { h -> h } + fadeOut()
+                    slideInVertically { h -> h } togetherWith
+                            slideOutVertically(
+                                animationSpec = tween()
+                            ) { h -> h } + fadeOut()
                 },
                 label = "evaluation loading animation"
             ) {
@@ -351,7 +351,7 @@ fun TextFieldWithHistory(
                                 )
                             }
                             if (index < recents.lastIndex)
-                                Divider()
+                                HorizontalDivider()
                         }
                     }
                 }
@@ -470,7 +470,7 @@ fun EnterpriseLoginPreview() {
             "https://url2.com/portal",
             "https://url3.com/portal"
         ),
-        onSubmit = { a ->
+        onSubmit = { _ ->
         }
     ) {
 
