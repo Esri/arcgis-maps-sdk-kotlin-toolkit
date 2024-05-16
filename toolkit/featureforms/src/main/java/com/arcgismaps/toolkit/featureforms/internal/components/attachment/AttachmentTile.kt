@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.attachment
 
+import android.content.Intent
 import android.text.format.Formatter
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -90,11 +91,13 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.toolkit.featureforms.R
+import com.arcgismaps.toolkit.featureforms.internal.utils.AttachmentsFileProvider
 import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
 import com.arcgismaps.toolkit.featureforms.internal.utils.LocalDialogRequester
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.io.File
 
 @Composable
 internal fun AttachmentTile(
@@ -108,6 +111,7 @@ internal fun AttachmentTile(
     var showContextMenu by remember { mutableStateOf(false) }
     val dialogRequester = LocalDialogRequester.current
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     Surface(
         onClick = {},
         modifier = Modifier
@@ -210,9 +214,21 @@ internal fun AttachmentTile(
                         // handle single tap
                         if (loadStatus is LoadStatus.NotLoaded || loadStatus is LoadStatus.FailedToLoad) {
                             // load attachment
-                            state.load()
+                            state.loadWithParentScope()
                         } else if (loadStatus is LoadStatus.Loaded) {
                             // open attachment
+                            val intent = Intent()
+                            intent.setAction(Intent.ACTION_VIEW)
+                            val uri = AttachmentsFileProvider.getUriForFile(
+                                context = context,
+                                file = File(state.filePath)
+                            )
+                            intent.setDataAndType(
+                                uri,
+                                state.contentType
+                            )
+                            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            context.startActivity(intent)
                         }
                     }
                 }

@@ -18,6 +18,6 @@
   -->
 <paths>
     <cache-path
-        name="feature_forms_captured_attachments"
+        name="feature_forms_attachments"
         path="feature_forms_attachments/" />
 </paths>
