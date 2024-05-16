@@ -252,9 +252,7 @@ public fun MapView(
     )
 
     val mapViewScope = remember(mapView) { MapViewScope(mapView) }
-    if (content != null) {
-        mapViewScope.content()
-    }
+    content?.let { mapViewScope.it() }
 }
 
 /**
