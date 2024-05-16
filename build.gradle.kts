@@ -46,7 +46,7 @@ buildscript {
  * Note: This works only for local tests, not for connected tests.
  * To run aggregated local tests, run the following at the root folder of the project:
  * ```
- * ./gradlew testAggregatedReport
+ * ./gradlew testAggregatedReport --continue
  * ```
  * Test report to be found under `arcgis-maps-sdk-kotlin-toolkit/build/reports`.
  */

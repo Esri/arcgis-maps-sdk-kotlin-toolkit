@@ -101,7 +101,7 @@ Please see the [package structure](doc/general/developer_setup.md#package-struct
 
 In order to run *local* (non-instrumented) tests of all modules and get an aggregated test report, run the following at the root folder of the project:
 ```
-./gradlew testAggregatedReport
+./gradlew testAggregatedReport --continue
 ```
 The test report for local tests can be located under `arcgis-maps-sdk-kotlin-toolkit/build/reports`.
 
