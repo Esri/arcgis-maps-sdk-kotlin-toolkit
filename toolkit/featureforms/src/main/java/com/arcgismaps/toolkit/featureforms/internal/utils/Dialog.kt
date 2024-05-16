@@ -36,7 +36,7 @@ import com.arcgismaps.toolkit.featureforms.internal.components.attachment.Attach
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.ImageCapture
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.ImagePicker
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.RenameAttachmentDialog
-import com.arcgismaps.toolkit.featureforms.internal.components.attachment.getNewAttachmentNameForContentType
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.getNewAttachmentNameForImageType
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormStateCollection
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.CodedValueFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComboBoxDialog
@@ -150,7 +150,11 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
     when (dialogType) {
         is DialogType.ComboBoxDialog -> {
             val stateId = (dialogType as DialogType.ComboBoxDialog).stateId
-            val state = states[stateId]!! as CodedValueFieldState
+            val state = states[stateId] as? CodedValueFieldState
+            if (state == null) {
+                dialogRequester.dismissDialog()
+                return
+            }
             ComboBoxDialog(
                 initialValue = state.value.value.data,
                 values = state.codedValues.associateBy({ it.code }, { it.name }),
@@ -173,7 +177,11 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
 
         is DialogType.DateTimeDialog -> {
             val stateId = (dialogType as DialogType.DateTimeDialog).stateId
-            val state = states[stateId]!! as DateTimeFieldState
+            val state = states[stateId] as? DateTimeFieldState
+            if (state == null) {
+                dialogRequester.dismissDialog()
+                return
+            }
             val shouldShowTime = remember {
                 state.shouldShowTime
             }
@@ -209,48 +217,56 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
         is DialogType.ImageCaptureDialog -> {
             val stateId = (dialogType as DialogType.ImageCaptureDialog).stateId
             val contentType = (dialogType as DialogType.ImageCaptureDialog).contentType
-            val state = states[stateId]!! as AttachmentElementState
+            val state = states[stateId] as? AttachmentElementState
+            if (state == null) {
+                dialogRequester.dismissDialog()
+                return
+            }
             ImageCapture { uri ->
                 scope.launch {
                     context.readBytes(uri)?.let { data ->
-                        val name = state.attachments.getNewAttachmentNameForContentType(
-                            contentType
-                        )
+                        val name = state.attachments.getNewAttachmentNameForImageType()
                         state.addAttachment(name, contentType, data)
                     }
-                    dialogRequester.dismissDialog()
                 }
+                dialogRequester.dismissDialog()
             }
         }
 
         is DialogType.ImagePickerDialog -> {
             val stateId = (dialogType as DialogType.ImagePickerDialog).stateId
             val contentType = (dialogType as DialogType.ImagePickerDialog).contentType
-            val state = states[stateId]!! as AttachmentElementState
+            val state = states[stateId] as? AttachmentElementState
+            if (state == null) {
+                dialogRequester.dismissDialog()
+                return
+            }
             ImagePicker { uri ->
                 scope.launch {
                     context.readBytes(uri)?.let { data ->
-                        val name = state.attachments.getNewAttachmentNameForContentType(
-                            contentType
-                        )
+                        val name = state.attachments.getNewAttachmentNameForImageType()
                         state.addAttachment(name, contentType, data)
                     }
-                    dialogRequester.dismissDialog()
                 }
+                dialogRequester.dismissDialog()
             }
         }
 
         is DialogType.RenameAttachmentDialog -> {
             val stateId = (dialogType as DialogType.RenameAttachmentDialog).stateId
             val name = (dialogType as DialogType.RenameAttachmentDialog).name
-            val state = states[stateId]!! as AttachmentElementState
+            val state = states[stateId] as? AttachmentElementState
+            if (state == null) {
+                dialogRequester.dismissDialog()
+                return
+            }
             RenameAttachmentDialog(
                 name = name,
                 onRename = { newName ->
                     scope.launch {
                         state.renameAttachment(name, newName)
-                        dialogRequester.dismissDialog()
                     }
+                    dialogRequester.dismissDialog()
                 }
             ) {
                 dialogRequester.dismissDialog()
