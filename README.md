@@ -111,7 +111,7 @@ The test report for local tests can be located under `arcgis-maps-sdk-kotlin-too
 
 In order to run *connected* (instrumented) tests of all modules and get the test reports in a centralized folder, run the following at the root folder of the project:
 ```
-./gradlew testAggregatedReport --continue
+./gradlew connectedDebugAndroidTest --continue
 ```
 The test reports for connected tests can be located under `arcgis-maps-sdk-kotlin-toolkit/connectedTestReports`.
 
