@@ -36,7 +36,6 @@ class UsernamePasswordTests {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
-
     @Before
     fun signOut() {
         runBlocking {
