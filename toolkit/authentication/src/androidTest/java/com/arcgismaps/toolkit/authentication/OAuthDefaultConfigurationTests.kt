@@ -41,8 +41,8 @@ class OAuthDefaultConfigurationTests {
             arcGISOnline,
             // This client ID is for demo purposes only. For use of the Authenticator in your own app,
             //            // create your own client ID. For more info see: https://developers.arcgis.com/documentation/mapping-apis-and-services/security/tutorials/register-your-application/
-            "aink3YEhnDNBBcJq",
-            "kotlin-toolkit-authenticator-microapp://auth"
+            "uITYQG1POJsrluOP",
+            "kotlin-authentication-test-1://auth"
         )
     }
 

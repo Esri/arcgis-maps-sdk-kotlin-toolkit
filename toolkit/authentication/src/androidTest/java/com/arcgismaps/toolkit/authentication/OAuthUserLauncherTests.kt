@@ -188,8 +188,8 @@ class OAuthUserLauncherTestViewModel : ViewModel() {
             "https://arcgis.com/",
             // This client ID is for demo purposes only. For use of the Authenticator in your own app,
             //            // create your own client ID. For more info see: https://developers.arcgis.com/documentation/mapping-apis-and-services/security/tutorials/register-your-application/
-            "lgAdHkYZYlwwfAhC",
-            "authenticate-with-oauth://auth"
+            "SmYakFwlYRYWEJAR",
+            "kotlin-authentication-test-2://auth"
         )
     }
 }
