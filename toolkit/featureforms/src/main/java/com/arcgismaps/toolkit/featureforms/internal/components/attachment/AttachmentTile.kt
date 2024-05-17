@@ -171,12 +171,15 @@ internal fun AttachmentTile(
                     },
                     onClick = {
                         showContextMenu = false
-                        dialogRequester.requestDialog(
-                            DialogType.RenameAttachmentDialog(
-                                stateId = state.elementStateId,
-                                name = state.name,
+                        state.formAttachment?.let {
+                            dialogRequester.requestDialog(
+                                DialogType.RenameAttachmentDialog(
+                                    stateId = state.elementStateId,
+                                    formAttachment = state.formAttachment,
+                                    name = state.name,
+                                )
                             )
-                        )
+                        }
                     })
                 DropdownMenuItem(
                     text = { Text(text = stringResource(R.string.delete)) },

@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Photo
@@ -96,7 +97,7 @@ internal fun AttachmentFormElement(
     description: String,
     editable: Boolean,
     stateId: Int,
-    attachments: Map<Int, FormAttachmentState>,
+    attachments: List<FormAttachmentState>,
     lazyListState: LazyListState,
     hasCameraPermission: Boolean,
     modifier: Modifier = Modifier,
@@ -131,15 +132,15 @@ internal fun AttachmentFormElement(
 }
 
 @Composable
-private fun Carousel(state: LazyListState, attachments: Map<Int, FormAttachmentState>) {
+private fun Carousel(state: LazyListState, attachments: List<FormAttachmentState>) {
     LazyRow(
         state = state,
         horizontalArrangement = Arrangement.spacedBy(15.dp),
     ) {
-        attachments.entries.forEach { entry ->
-            item(key = entry.key) {
-                AttachmentTile(entry.value)
-            }
+        items(attachments, key = {
+            it.formAttachment.hashCode()
+        }) { attachment ->
+            AttachmentTile(attachment)
         }
     }
 }
@@ -327,19 +328,16 @@ private fun AttachmentFormElementPreview() {
         description = "Add attachments",
         editable = true,
         stateId = 1,
-        attachments = mapOf(
-            Pair(
+        attachments = listOf(
+            FormAttachmentState(
+                "Photo 1.jpg",
+                2024,
+                "image/jpeg",
+                FormAttachmentType.Image,
                 1,
-                FormAttachmentState(
-                    "Photo 1.jpg",
-                    2024,
-                    "image/jpeg",
-                    FormAttachmentType.Image,
-                    1,
-                    {},
-                    "",
-                    scope = rememberCoroutineScope()
-                )
+                {},
+                "",
+                scope = rememberCoroutineScope()
             )
         ),
         lazyListState = LazyListState(),

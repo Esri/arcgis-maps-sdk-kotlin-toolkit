@@ -31,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
+import com.arcgismaps.mapping.featureforms.FormAttachment
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.ImageCapture
@@ -133,6 +134,7 @@ internal sealed class DialogType {
      */
     data class RenameAttachmentDialog(
         val stateId: Int,
+        val formAttachment : FormAttachment,
         val name: String,
     ) : DialogType()
 }
@@ -255,6 +257,7 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
         is DialogType.RenameAttachmentDialog -> {
             val stateId = (dialogType as DialogType.RenameAttachmentDialog).stateId
             val name = (dialogType as DialogType.RenameAttachmentDialog).name
+            val formAttachment = (dialogType as DialogType.RenameAttachmentDialog).formAttachment
             val state = states[stateId] as? AttachmentElementState
             if (state == null) {
                 dialogRequester.dismissDialog()
@@ -264,26 +267,9 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                 name = name,
                 onRename = { newName ->
                     scope.launch {
-                        state.renameAttachment(name, newName)
+                        state.renameAttachment(formAttachment, newName)
                     }
                     dialogRequester.dismissDialog()
-                }
-            ) {
-                dialogRequester.dismissDialog()
-            }
-        }
-
-        is DialogType.RenameAttachmentDialog -> {
-            val stateId = (dialogType as DialogType.RenameAttachmentDialog).stateId
-            val name = (dialogType as DialogType.RenameAttachmentDialog).name
-            val state = states[stateId]!! as AttachmentElementState
-            RenameAttachmentDialog(
-                name = name,
-                onRename = { newName ->
-                    scope.launch {
-                        state.renameAttachment(name, newName)
-                        dialogRequester.dismissDialog()
-                    }
                 }
             ) {
                 dialogRequester.dismissDialog()

@@ -19,7 +19,6 @@ package com.arcgismaps.toolkit.featureforms.internal.components.attachment
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
-import android.util.Log
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AudioFile
@@ -28,11 +27,11 @@ import androidx.compose.material.icons.outlined.FilePresent
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.VideoCameraBack
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
@@ -87,7 +86,7 @@ internal class AttachmentElementState(
     /**
      * The attachments associated with the form element.
      */
-    var attachments by mutableStateOf(emptyMap<Int, FormAttachmentState>())
+    var attachments = mutableStateListOf<FormAttachmentState>()
 
     /**
      * Indicates whether the attachment form element is editable.
@@ -106,9 +105,8 @@ internal class AttachmentElementState(
 
     init {
         scope.launch {
-            formElement.fetchAttachments()
-            formElement.attachments.collect { list ->
-                buildAttachmentStates(list)
+            formElement.fetchAttachments().onSuccess {
+                buildAttachmentStates(formElement.attachments.value)
             }
         }
     }
@@ -119,37 +117,27 @@ internal class AttachmentElementState(
      *  reuse the existing state objects if they exist while updating their properties.
      */
     private suspend fun buildAttachmentStates(list: List<FormAttachment>) {
-        attachments = buildMap {
-            list.forEach { formAttachment ->
-                // get the current state of the attachment if it exists
-                val state = attachments[formAttachment.hashCode()]
-                if (state == null) {
-                    // if does not exist then create a new state
-                    FormAttachmentState(
-                        name = formAttachment.name,
-                        size = formAttachment.size,
-                        contentType = formAttachment.contentType,
-                        type = formAttachment.type,
-                        elementStateId = id,
-                        deleteAttachment = { deleteAttachment(formAttachment) },
-                        filesDir = filesDir,
-                        scope = scope,
-                        formAttachment = formAttachment
-                    ).also { newState ->
-                        put(formAttachment.hashCode(), newState)
-                        // if the attachment is already loaded then re-load the new state
-                        // this is useful during a configuration change when the form attachment
-                        // objects have already been loaded by the state object.
-                        if (formAttachment.loadStatus.value is LoadStatus.Loaded) {
-                            scope.launch { newState.load() }
-                        }
-                    }
-                } else {
-                    // update the current state
-                    state.update(formAttachment)
-                    put(formAttachment.hashCode(), state)
-                }
+        attachments.clear()
+        list.forEach { formAttachment ->
+            // create a new state
+            val state = FormAttachmentState(
+                name = formAttachment.name,
+                size = formAttachment.size,
+                contentType = formAttachment.contentType,
+                type = formAttachment.type,
+                elementStateId = id,
+                deleteAttachment = { deleteAttachment(formAttachment) },
+                filesDir = filesDir,
+                scope = scope,
+                formAttachment = formAttachment
+            )
+            // if the attachment is already loaded then re-load the new state
+            // this is useful during a configuration change when the form attachment
+            // objects have already been loaded by the state object.
+            if (formAttachment.loadStatus.value is LoadStatus.Loaded) {
+                state.loadWithParentScope()
             }
+            attachments.add(state)
         }
     }
 
@@ -157,10 +145,24 @@ internal class AttachmentElementState(
      * Adds an attachment with the given [name], [contentType], and [data].
      */
     suspend fun addAttachment(name: String, contentType: String, data: ByteArray) {
-        formElement.addAttachment(name, contentType, data).onSuccess {
-            evaluateExpressions()
+        formElement.addAttachment(name, contentType, data).onSuccess { formAttachment ->
+            // create a new state
+            val state = FormAttachmentState(
+                name = formAttachment.name,
+                size = formAttachment.size,
+                contentType = formAttachment.contentType,
+                type = formAttachment.type,
+                elementStateId = id,
+                deleteAttachment = { deleteAttachment(formAttachment) },
+                filesDir = filesDir,
+                scope = scope,
+                formAttachment = formAttachment
+            )
+            attachments.add(state)
             // load the new attachment
-            attachments.entries.lastOrNull()?.value?.loadWithParentScope()
+            state.loadWithParentScope()
+            // evaluate expressions after adding the attachment
+            evaluateExpressions()
             // scroll to the new attachment after a delay to allow the recomposition to complete
             delay(100)
             lazyListState.scrollToItem(attachments.count())
@@ -168,13 +170,22 @@ internal class AttachmentElementState(
     }
 
     private suspend fun deleteAttachment(formAttachment: FormAttachment) {
-        formElement.deleteAttachment(formAttachment)
+        formElement.deleteAttachment(formAttachment).onSuccess {
+            attachments.removeIf {
+                it.formAttachment == formAttachment
+            }
+            evaluateExpressions()
+        }
     }
 
-    suspend fun renameAttachment(name: String, newName: String) {
-        val formAttachment = formElement.attachments.value.firstOrNull { it.name == name } ?: return
+    suspend fun renameAttachment(formAttachment: FormAttachment, newName: String) {
         if (formAttachment.name != newName) {
-            formElement.renameAttachment(formAttachment, newName)
+            formElement.renameAttachment(formAttachment, newName).onSuccess {
+                attachments.firstOrNull {
+                    it.formAttachment == formAttachment
+                }?.update(formAttachment)
+                evaluateExpressions()
+            }
         }
     }
 
@@ -245,7 +256,7 @@ internal class FormAttachmentState(
     val deleteAttachment: suspend () -> Unit,
     private val filesDir: String,
     private val scope: CoroutineScope,
-    private val formAttachment: FormAttachment? = null
+    val formAttachment: FormAttachment? = null
 ) : Loadable {
 
     var name by mutableStateOf(name)
@@ -415,9 +426,9 @@ internal fun FormAttachmentType.getIcon(): ImageVector = when (this) {
     FormAttachmentType.Other -> Icons.Outlined.FileCopy
 }
 
-internal fun Map<Int, FormAttachmentState>.getNewAttachmentNameForImageType(): String {
+internal fun List<FormAttachmentState>.getNewAttachmentNameForImageType(): String {
     val count = this.count { entry ->
-        entry.value.contentType.isContentTypeImage()
+        entry.contentType.isContentTypeImage()
     }
     return "Image $count.jpg"
 }
