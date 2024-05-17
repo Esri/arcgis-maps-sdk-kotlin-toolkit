@@ -121,60 +121,6 @@ public fun MapViewScope.Callout(
 }
 
 /**
- * Extension function to draw the Callout container using the given parameters. It draws the shape, adds the content padding, adds padding for the leader height, restricting the min size and positions it on the screen.
- *
- * @param cornerRadius The corner radius of the Callout shape in px.
- * @param strokeBorderWidth Width of the Callout stroke in px.
- * @param strokeColor Color used to define the outline stroke.
- * @param backgroundColor Color used to define the fill color of the Callout shape.
- * @param calloutContentPadding PaddingValues for the content placed inside the Callout.
- * @param leaderWidth Width of the Callout leader in px.
- * @param leaderHeight Height of the Callout leader in px.
- * @param minSize Minimum size the of the Callout shape.
- * @param calloutScreenCoordinate Represents the x,y coordinate of the Callout leader.
- * @since 200.5.0
- */
-@Composable
-private fun Modifier.drawCalloutContainer(
-    cornerRadius: Float,
-    strokeBorderWidth: Float,
-    strokeColor: Color,
-    backgroundColor: Color,
-    calloutContentPadding: PaddingValues,
-    leaderWidth: Float,
-    leaderHeight: Float,
-    minSize: DpSize,
-    calloutScreenCoordinate: ScreenCoordinate,
-) = then(
-    sizeIn(minWidth = minSize.width, minHeight = minSize.height)
-        // Set bottom padding to ensure the leader is visible
-        .padding(bottom = with(LocalDensity.current) { leaderHeight.toDp() })
-        .graphicsLayer {
-            translationX = calloutScreenCoordinate.x.toFloat()
-            translationY = calloutScreenCoordinate.y.toFloat()
-        }
-        .drawWithCache {
-            onDrawBehind {
-                // Define the Path of the callout
-                val path = calloutPath(size, cornerRadius, leaderWidth, leaderHeight)
-                // Fill the path's shape with the Callout's background color
-                drawPath(
-                    path = path,
-                    color = backgroundColor,
-                    style = Fill
-                )
-                // Outline the path's shape with the Callout's stroke color
-                drawPath(
-                    path = path,
-                    color = strokeColor,
-                    style = Stroke(width = strokeBorderWidth)
-                )
-            }
-        }
-        .padding(calloutContentPadding)
-)
-
-/**
  * Returns the ScreenCoordinate for the location [Point] on [GeoView].
  *
  * @param geoView the GeoView
@@ -245,6 +191,60 @@ private fun DoubleXY.rotate(rotateByAngle: Double, center: DoubleXY = DoubleXY.z
 
     return DoubleXY(x2 + center.x, y2 + center.y)
 }
+
+/**
+ * Extension function to draw the Callout container using the given parameters. It draws the shape, adds the content padding, adds padding for the leader height, restricting the min size and positions it on the screen.
+ *
+ * @param cornerRadius The corner radius of the Callout shape in px.
+ * @param strokeBorderWidth Width of the Callout stroke in px.
+ * @param strokeColor Color used to define the outline stroke.
+ * @param backgroundColor Color used to define the fill color of the Callout shape.
+ * @param calloutContentPadding PaddingValues for the content placed inside the Callout.
+ * @param leaderWidth Width of the Callout leader in px.
+ * @param leaderHeight Height of the Callout leader in px.
+ * @param minSize Minimum size the of the Callout shape.
+ * @param calloutScreenCoordinate Represents the x,y coordinate of the Callout leader.
+ * @since 200.5.0
+ */
+@Composable
+private fun Modifier.drawCalloutContainer(
+    cornerRadius: Float,
+    strokeBorderWidth: Float,
+    strokeColor: Color,
+    backgroundColor: Color,
+    calloutContentPadding: PaddingValues,
+    leaderWidth: Float,
+    leaderHeight: Float,
+    minSize: DpSize,
+    calloutScreenCoordinate: ScreenCoordinate,
+) = then(
+    sizeIn(minWidth = minSize.width, minHeight = minSize.height)
+        // Set bottom padding to ensure the leader is visible
+        .padding(bottom = with(LocalDensity.current) { leaderHeight.toDp() })
+        .graphicsLayer {
+            translationX = calloutScreenCoordinate.x.toFloat()
+            translationY = calloutScreenCoordinate.y.toFloat()
+        }
+        .drawWithCache {
+            onDrawBehind {
+                // Define the Path of the callout
+                val path = calloutPath(size, cornerRadius, leaderWidth, leaderHeight)
+                // Fill the path's shape with the Callout's background color
+                drawPath(
+                    path = path,
+                    color = backgroundColor,
+                    style = Fill
+                )
+                // Outline the path's shape with the Callout's stroke color
+                drawPath(
+                    path = path,
+                    color = strokeColor,
+                    style = Stroke(width = strokeBorderWidth)
+                )
+            }
+        }
+        .padding(calloutContentPadding)
+)
 
 /**
  * Create the Callout shape by returning the [Path] using the given parameters.
@@ -363,7 +363,7 @@ private fun calloutPath(
 /**
  * UI default properties for the [Callout] component.
  */
-internal data class CalloutProperties(
+private data class CalloutProperties(
     val cornerRadius: Dp = 10.dp,
     val strokeBorderWidth: Dp = 2.dp,
     val strokeColor: Color = Color.LightGray,
