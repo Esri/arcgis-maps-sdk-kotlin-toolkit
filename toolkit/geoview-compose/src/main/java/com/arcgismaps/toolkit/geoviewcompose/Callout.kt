@@ -17,17 +17,23 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Fill
@@ -39,9 +45,18 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import com.arcgismaps.LoadStatus
+import com.arcgismaps.geometry.AngularUnit
 import com.arcgismaps.geometry.Point
+import com.arcgismaps.mapping.ViewpointType
+import com.arcgismaps.mapping.view.DoubleXY
+import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.mapping.view.MapView
+import com.arcgismaps.mapping.view.SceneLocationVisibility
+import com.arcgismaps.mapping.view.SceneView
 import com.arcgismaps.mapping.view.ScreenCoordinate
+import com.arcgismaps.mapping.view.zero
+import kotlin.math.cos
+import kotlin.math.sin
 
 /**
  * The receiver class of the MapView content lambda.
@@ -60,39 +75,53 @@ public class MapViewScope(internal val mapView: MapView)
  * @param location the geographical location at which to display the Callout
  * @param modifier Modifier to be applied to the composable Callout
  * @param content the content of the Callout
+ * @param offset the offset in screen coordinates from the geographical location at which to place the callout
+ * @param rotateOffsetWithGeoView specifies whether the screen offset is rotated with the [GeoView]. The Screen offset
+ *        will be rotated with the [GeoView] when true, false otherwise.
+ *        This is useful if you are showing the callout for elements with symbology that does rotate with the [GeoView]
  * @since 200.5.0
  */
 @Composable
 public fun MapViewScope.Callout(
     location: Point,
     modifier: Modifier = Modifier,
+    offset: Offset = Offset.Zero,
+    rotateOffsetWithGeoView: Boolean = false,
     content: @Composable BoxScope.() -> Unit
 ) {
 
     val localDensity = LocalDensity.current
 
     if (mapView.map?.loadStatus?.collectAsState()?.value == LoadStatus.Loaded) {
-        val calloutScreenCoordinate: ScreenCoordinate = mapView.locationToScreen(location)
 
-        // Get the default shape, color & size properties for Callout
-        val properties = CalloutProperties()
-
-        Box(
-            modifier = modifier
-                .drawCalloutContainer(
-                    cornerRadius = with(localDensity) { properties.cornerRadius.toPx() },
-                    strokeBorderWidth = with(localDensity) { properties.strokeBorderWidth.toPx() },
-                    strokeColor = properties.strokeColor,
-                    backgroundColor = properties.backgroundColor,
-                    calloutContentPadding = properties.calloutContentPadding,
-                    leaderWidth = with(localDensity) { properties.leaderSize.width.toPx() },
-                    leaderHeight = with(localDensity) { properties.leaderSize.height.toPx() },
-                    minSize = properties.minSize,
-                    calloutScreenCoordinate = calloutScreenCoordinate,
-                )
+        val leaderScreenCoordinate = getLeaderScreenCoordinate(
+            mapView,
+            location,
+            offset,
+            rotateOffsetWithGeoView,
         )
-        {
-            this.content()
+        leaderScreenCoordinate?.let {
+
+            // Get the default shape, color & size properties for Callout
+            val properties = CalloutProperties()
+
+            Box(
+                modifier = modifier
+                    .drawCalloutContainer(
+                        cornerRadius = with(localDensity) { properties.cornerRadius.toPx() },
+                        strokeBorderWidth = with(localDensity) { properties.strokeBorderWidth.toPx() },
+                        strokeColor = properties.strokeColor,
+                        backgroundColor = properties.backgroundColor,
+                        calloutContentPadding = properties.calloutContentPadding,
+                        leaderWidth = with(localDensity) { properties.leaderSize.width.toPx() },
+                        leaderHeight = with(localDensity) { properties.leaderSize.height.toPx() },
+                        minSize = properties.minSize,
+                        calloutScreenCoordinate = leaderScreenCoordinate,
+                    )
+            )
+            {
+                this.content()
+            }
         }
     }
 }
@@ -150,6 +179,78 @@ private fun Modifier.drawCalloutContainer(
         }
         .padding(calloutContentPadding)
 )
+
+/**
+ * Returns the ScreenCoordinate for the location [Point] on [GeoView].
+ *
+ * @param geoView the GeoView
+ * @param location the location in geographical coordinates
+ * @param offset the offset in screen coordinates from the geographical location at which to place the callout
+ * @param rotateOffsetWithGeoView specifies whether the screen offset is rotated with the [GeoView]. The Screen offset
+ *       will be rotated with the [GeoView] when true, false otherwise.
+ * @return A [ScreenCoordinate] for the screen in pixels or null if the location is not visible
+ * @since 200.5.0
+ */
+private fun getLeaderScreenCoordinate(
+    geoView: GeoView,
+    location: Point,
+    offset: Offset,
+    rotateOffsetWithGeoView: Boolean
+): ScreenCoordinate? {
+    val geoViewRotation = geoView.rotation()
+    val locationToScreen = when (geoView) {
+        is MapView -> geoView.locationToScreen(location)
+        is SceneView -> {
+            val locationToScreenResult = geoView.locationToScreen(location)
+            if (locationToScreenResult?.visibility == SceneLocationVisibility.Visible) {
+                locationToScreenResult.screenPoint
+            }
+            null
+        }
+    }
+    return locationToScreen?.let { screenCoordinate ->
+        if (rotateOffsetWithGeoView && geoViewRotation != 0.0) {
+            val angle = AngularUnit.degrees.convertTo(AngularUnit.radians, -geoViewRotation)
+            screenCoordinate.offset(offset).rotate(angle, screenCoordinate)
+        } else {
+            screenCoordinate.offset(offset)
+        }
+    }
+}
+
+private fun GeoView.rotation(): Double = when (this) {
+    is SceneView -> getCurrentViewpoint(ViewpointType.CenterAndScale)?.rotation ?: 0.0
+    is MapView -> mapRotation.value
+}
+
+/**
+ * Returns a [DoubleXY] which is the result of offsetting this [DoubleXY] by the specified [Offset].
+ *
+ * @param offset the offset to be applied
+ * @return the new [DoubleXY] offset point
+ * @since 200.5.0
+ */
+private fun DoubleXY.offset(offset: Offset): DoubleXY {
+    return DoubleXY(x + offset.x, y + offset.y)
+}
+
+/**
+ * Returns a [DoubleXY] which is the result of rotating this [DoubleXY] by an angle around a center.
+ *
+ * @param rotateByAngle angle in Radians where a positive value is counter clockwise
+ * @param center the center around which the resulting point will be rotated
+ * @return the resulting [DoubleXY] that has been rotated
+ * @since 200.5.0
+ */
+private fun DoubleXY.rotate(rotateByAngle: Double, center: DoubleXY = DoubleXY.zero): DoubleXY {
+    val x1 = x - center.x
+    val y1 = y - center.y
+
+    val x2 = x1 * cos(rotateByAngle) - y1 * sin(rotateByAngle)
+    val y2 = x1 * sin(rotateByAngle) + y1 * cos(rotateByAngle)
+
+    return DoubleXY(x2 + center.x, y2 + center.y)
+}
 
 /**
  * Create the Callout shape by returning the [Path] using the given parameters.
