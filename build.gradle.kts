@@ -40,6 +40,9 @@ buildscript {
     }
 }
 
+// Path to the centralized folder in root directory where test reports for connected tests end up
+val connectedTestReportsPath by extra("${rootDir}/connectedTestReports")
+
 /**
  * Configures the [gmazzo test aggregation plugin](https://github.com/gmazzo/gradle-android-test-aggregation-plugin)
  * with all local tests to be aggregated into a single test report.

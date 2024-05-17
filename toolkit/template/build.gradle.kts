@@ -65,7 +65,8 @@ android {
      * folder in the project's root directory.
      */
     testOptions {
-        reportDir = "${rootDir}/connectedTestReports/${project.name}"
+        val connectedTestReportsPath: String by project
+        reportDir = "$connectedTestReportsPath/${project.name}"
     }
 }
 
