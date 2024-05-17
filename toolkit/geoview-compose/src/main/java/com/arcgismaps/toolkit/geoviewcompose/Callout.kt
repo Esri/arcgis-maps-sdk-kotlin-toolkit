@@ -85,8 +85,6 @@ public fun MapViewScope.Callout(
     content: @Composable BoxScope.() -> Unit
 ) {
 
-    val localDensity = LocalDensity.current
-
     if (mapView.map?.loadStatus?.collectAsState()?.value == LoadStatus.Loaded) {
 
         val leaderScreenCoordinate = getLeaderScreenCoordinate(
@@ -97,6 +95,7 @@ public fun MapViewScope.Callout(
         )
         leaderScreenCoordinate?.let {
 
+            val localDensity = LocalDensity.current
             // Get the default shape, color & size properties for Callout
             val properties = CalloutProperties()
 
