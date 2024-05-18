@@ -35,7 +35,7 @@ fun MainScreen(viewModel: MapViewModel) {
     val mapPoint = viewModel.mapPoint.collectAsState().value
 
     MapView(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize(0.75f),
         arcGISMap = viewModel.arcGISMap,
         onSingleTapConfirmed = viewModel::setMapPoint,
         content = if (mapPoint != null) {

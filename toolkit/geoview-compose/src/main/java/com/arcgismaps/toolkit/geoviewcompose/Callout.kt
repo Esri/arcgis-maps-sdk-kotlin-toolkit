@@ -36,9 +36,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
@@ -112,6 +113,7 @@ public fun MapViewScope.Callout(
         mutableStateOf(mapView.locationToScreen(location))
     }
 
+
     LaunchedEffect(location) {
         // Used to update screen coordinate when new location point is used
         calloutScreenCoordinate = mapView.locationToScreen(location)
@@ -120,33 +122,67 @@ public fun MapViewScope.Callout(
             calloutScreenCoordinate = mapView.locationToScreen(location)
         }
     }
+    SubComposableLayout(
+        screenCoordinate = calloutScreenCoordinate
+    ) { width, height ->
+        Box(
+            modifier = modifier
+                .drawCalloutShape(
+                    cornerRadius = with(localDensity) { cornerRadius.toPx() },
+                    anchorLeaderWidth = with(localDensity) { anchorLeaderWidth.toPx() },
+                    anchorLeaderHeight = with(localDensity) { anchorLeaderHeight.toPx() },
+                    strokeBorderWidth = with(localDensity) { strokeBorderWidth.toPx() },
+                    minSize = minSize,
+                    strokeColor = stokeColor,
+                    calloutBackgroundColor = calloutBackgroundColor,
+                    calloutContentPadding = calloutContentPadding
+                )
+        )
+        {
+            this.content()
+        }
+    }
 
-    val contentSize = remember { mutableStateOf(Size.Zero) }
+}
 
-    Box(
-        modifier = modifier
-            .layout { measurable, constraints ->
-                val placeable = measurable.measure(constraints)
-                contentSize.value = Size(placeable.width.toFloat(), placeable.height.toFloat())
-                layout(placeable.width, placeable.height) {
-                    placeable.placeRelative(0, 0)
-                }
-            }
-            .drawCalloutShape(
-                cornerRadius = with(localDensity) { cornerRadius.toPx() },
-                anchorLeaderWidth = with(localDensity) { anchorLeaderWidth.toPx() },
-                anchorLeaderHeight = with(localDensity) { anchorLeaderHeight.toPx() },
-                strokeBorderWidth = with(localDensity) { strokeBorderWidth.toPx() },
-                minSize = minSize,
-                strokeColor = stokeColor,
-                calloutBackgroundColor = calloutBackgroundColor,
-                calloutContentPadding = calloutContentPadding,
-                calloutScreenCoordinate = calloutScreenCoordinate,
-                contentSize = contentSize.value
+@Composable
+private fun SubComposableLayout(
+    modifier: Modifier = Modifier,
+    maxWidth: Dp = Constraints.Infinity.dp,
+    minWidth: Dp = 0.dp,
+    screenCoordinate: ScreenCoordinate,
+    content: @Composable (Int, Int) -> Unit
+) {
+    val configuration = LocalDensity.current
+    // convert the max width from dp into pixels
+    val maxWidthInPx = with(configuration) {
+        maxWidth.roundToPx()
+    }
+    val minWidthInPx = with(configuration) {
+        minWidth.roundToPx()
+    }
+
+    SubcomposeLayout(modifier = modifier) { constraints ->
+        // set the max width to the lesser of the available size or the maxWidth
+        val layoutWidth = Integer.min(constraints.maxWidth, maxWidthInPx)
+        // use all the available height
+        val layoutHeight = Integer.max(constraints.maxWidth, minWidthInPx)
+        // measure the sheet content with the constraints
+        val sheetPlaceable = subcompose(0) {
+            content(layoutWidth, layoutHeight)
+        }[0].measure(
+            constraints.copy(
+                maxWidth = layoutWidth,
+                maxHeight = layoutHeight
             )
-    )
-    {
-        this.content()
+        )
+
+        // anchor in the center of the screen
+        val sheetOffsetX = screenCoordinate.x.toInt() - (sheetPlaceable.width / 2)
+        val sheetOffsetY = screenCoordinate.y.toInt() - sheetPlaceable.height
+        layout(layoutWidth, layoutHeight) {
+            sheetPlaceable.place(sheetOffsetX, sheetOffsetY)
+        }
     }
 }
 
@@ -172,35 +208,38 @@ private fun Modifier.drawCalloutShape(
     calloutBackgroundColor: Color,
     minSize: DpSize,
     calloutContentPadding: PaddingValues,
-    calloutScreenCoordinate: ScreenCoordinate,
-    contentSize: Size
-) = then(
-    sizeIn(minWidth = minSize.width, minHeight = minSize.height)
-        .padding(bottom = with(LocalDensity.current) { anchorLeaderHeight.toDp() })
-        .graphicsLayer {
-            translationX = calloutScreenCoordinate.x.toFloat() - contentSize.width / 2
-            translationY = calloutScreenCoordinate.y.toFloat() - contentSize.height
-        }
-        .drawWithCache {
-            onDrawBehind {
-                // Define the Path of the callout
-                val path = calloutPath(size, cornerRadius, anchorLeaderWidth, anchorLeaderHeight)
-                // Fill the path's shape with the Callout's background color
-                drawPath(
-                    path = path,
-                    color = calloutBackgroundColor,
-                    style = Fill
-                )
-                // Outline the path's shape with the Callout's stroke color
-                drawPath(
-                    path = path,
-                    color = strokeColor,
-                    style = Stroke(width = strokeBorderWidth)
-                )
+): Modifier {
+
+    val localDensity = LocalDensity.current
+    return this.then(
+        sizeIn(minWidth = minSize.width, minHeight = minSize.height)
+            .padding(bottom = with(localDensity) { anchorLeaderHeight.toDp() })
+            .drawWithCache {
+                onDrawBehind {
+                    // Define the Path of the callout
+                    val path = calloutPath(
+                        size = size,
+                        cornerRadius = cornerRadius,
+                        anchorLeaderWidth = anchorLeaderWidth,
+                        anchorLeaderHeight = anchorLeaderHeight
+                    )
+                    // Fill the path's shape with the Callout's background color
+                    drawPath(
+                        path = path,
+                        color = calloutBackgroundColor,
+                        style = Fill
+                    )
+                    // Outline the path's shape with the Callout's stroke color
+                    drawPath(
+                        path = path,
+                        color = strokeColor,
+                        style = Stroke(width = strokeBorderWidth)
+                    )
+                }
             }
-        }
-        .padding(calloutContentPadding)
-)
+            .padding(calloutContentPadding)
+    )
+}
 
 /**
  * Create the Callout shape by returning the [Path] using the given parameters.
