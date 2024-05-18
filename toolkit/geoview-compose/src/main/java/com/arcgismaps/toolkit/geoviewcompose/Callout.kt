@@ -124,7 +124,7 @@ public fun MapViewScope.Callout(
     }
     SubComposableLayout(
         screenCoordinate = calloutScreenCoordinate
-    ) { width, height ->
+    ) {
         Box(
             modifier = modifier
                 .drawCalloutShape(
@@ -149,39 +149,38 @@ public fun MapViewScope.Callout(
 private fun SubComposableLayout(
     modifier: Modifier = Modifier,
     maxWidth: Dp = Constraints.Infinity.dp,
-    minWidth: Dp = 0.dp,
+    maxHeight: Dp = Constraints.Infinity.dp,
     screenCoordinate: ScreenCoordinate,
-    content: @Composable (Int, Int) -> Unit
+    content: @Composable () -> Unit
 ) {
     val configuration = LocalDensity.current
-    // convert the max width from dp into pixels
     val maxWidthInPx = with(configuration) {
         maxWidth.roundToPx()
     }
-    val minWidthInPx = with(configuration) {
-        minWidth.roundToPx()
+    val maxHeightInPx = with(configuration) {
+        maxHeight.roundToPx()
     }
 
     SubcomposeLayout(modifier = modifier) { constraints ->
         // set the max width to the lesser of the available size or the maxWidth
         val layoutWidth = Integer.min(constraints.maxWidth, maxWidthInPx)
-        // use all the available height
-        val layoutHeight = Integer.max(constraints.maxWidth, minWidthInPx)
-        // measure the sheet content with the constraints
-        val sheetPlaceable = subcompose(0) {
-            content(layoutWidth, layoutHeight)
+        // set the max height to the lesser of the available size or the maxHeight
+        val layoutHeight = Integer.min(constraints.maxHeight, maxHeightInPx)
+        // measure the content with the constraints
+        val contentPlaceable = subcompose(0) {
+            content()
         }[0].measure(
             constraints.copy(
                 maxWidth = layoutWidth,
                 maxHeight = layoutHeight
             )
         )
-
-        // anchor in the center of the screen
-        val sheetOffsetX = screenCoordinate.x.toInt() - (sheetPlaceable.width / 2)
-        val sheetOffsetY = screenCoordinate.y.toInt() - sheetPlaceable.height
+        // calculate the callout position
+        val calloutOffsetX = screenCoordinate.x.toInt() - (contentPlaceable.width / 2)
+        val calloutOffsetY = screenCoordinate.y.toInt() - contentPlaceable.height
+        // place the callout in the layout
         layout(layoutWidth, layoutHeight) {
-            sheetPlaceable.place(sheetOffsetX, sheetOffsetY)
+            contentPlaceable.place(calloutOffsetX, calloutOffsetY)
         }
     }
 }
