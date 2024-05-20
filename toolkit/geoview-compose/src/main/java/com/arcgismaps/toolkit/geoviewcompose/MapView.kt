@@ -17,7 +17,6 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
-import android.graphics.drawable.BitmapDrawable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -58,7 +57,6 @@ import com.arcgismaps.mapping.view.LongPressEvent
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.MapViewInteractionOptions
 import com.arcgismaps.mapping.view.PanChangeEvent
-import com.arcgismaps.mapping.view.Reticle
 import com.arcgismaps.mapping.view.RotationChangeEvent
 import com.arcgismaps.mapping.view.ScaleChangeEvent
 import com.arcgismaps.mapping.view.ScreenCoordinate
@@ -181,7 +179,7 @@ public fun MapView(
         update = {
             it.map = arcGISMap
             it.selectionProperties = selectionProperties
-            if (isReticleVisible) it.reticle.show() else it.reticle.hide()
+            if (isReticleVisible) mapViewProxy?.setReticleVisible(true) else mapViewProxy?.setReticleVisible(false)
             it.interactionOptions = mapViewInteractionOptions
             it.locationDisplay = locationDisplay
             it.labeling = viewLabelProperties
