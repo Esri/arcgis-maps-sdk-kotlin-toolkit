@@ -27,6 +27,7 @@ plugins {
     alias(libs.plugins.hilt) apply false
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.dokka) apply false
+    alias(libs.plugins.gmazzo.test.aggregation)
 }
 
 buildscript {
@@ -38,3 +39,41 @@ buildscript {
         classpath(libs.dokka.versioning)
     }
 }
+
+// Path to the centralized folder in root directory where test reports for connected tests end up
+val connectedTestReportsPath by extra("${rootDir}/connectedTestReports")
+
+/**
+ * Configures the [gmazzo test aggregation plugin](https://github.com/gmazzo/gradle-android-test-aggregation-plugin)
+ * with all local tests to be aggregated into a single test report.
+ * Note: This works only for local tests, not for connected tests.
+ * To run aggregated local tests, run the following at the root folder of the project:
+ * ```
+ * ./gradlew testAggregatedReport --continue
+ * ```
+ * Test report to be found under `arcgis-maps-sdk-kotlin-toolkit/build/reports`.
+ */
+testAggregation {
+    getModulesExcept(
+        "bom",
+        "kdoc",
+        "microapps-lib",
+        "template",
+        "template-app",
+        "composable-map").forEach {
+        this.modules.include(project(":$it"))
+    }
+}
+
+/**
+ * Returns all modules in this project, except the ones specified by [modulesToExclude].
+ */
+fun getModulesExcept(vararg modulesToExclude: String): List<String> =
+    with(File("$rootDir/settings.gradle.kts")) {
+        readLines()
+            .filter { it.startsWith("include") }
+            .map {
+                it.removePrefix("include(\":").removeSuffix("\")")
+            }
+            .filter { !modulesToExclude.contains(it) } // exclude specified modules
+    }

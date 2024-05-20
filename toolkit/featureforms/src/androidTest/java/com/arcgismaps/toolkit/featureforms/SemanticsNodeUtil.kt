@@ -29,6 +29,7 @@ import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextStyle
 
 fun SemanticsNodeInteraction.getAnnotatedTextString(): AnnotatedString {
     val textList = fetchSemanticsNode().config.first {
@@ -56,6 +57,24 @@ private fun isOfColor(color: Color): SemanticsMatcher = SemanticsMatcher(
         false
     } else {
         textLayoutResults.first().layoutInput.style.color == color
+    }
+}
+
+fun SemanticsNodeInteraction.assertTextStyle(
+    style: TextStyle
+): SemanticsNodeInteraction = assert(isOfTextStyle(style))
+
+private fun isOfTextStyle(style: TextStyle): SemanticsMatcher = SemanticsMatcher(
+    "${SemanticsProperties.Text.name} is of style '$style'"
+) {
+    val textLayoutResults = mutableListOf<TextLayoutResult>()
+    it.config.getOrNull(SemanticsActions.GetTextLayoutResult)
+        ?.action
+        ?.invoke(textLayoutResults)
+    return@SemanticsMatcher if (textLayoutResults.isEmpty()) {
+        false
+    } else {
+        textLayoutResults.first().layoutInput.style == style
     }
 }
 

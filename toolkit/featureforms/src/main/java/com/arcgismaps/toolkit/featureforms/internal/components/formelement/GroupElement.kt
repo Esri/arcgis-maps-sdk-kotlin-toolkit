@@ -25,12 +25,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ExpandLess
 import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -45,15 +46,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseGroupState
-import com.arcgismaps.toolkit.featureforms.internal.components.base.MutableFormStateCollection
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormStateCollection
+import com.arcgismaps.toolkit.featureforms.internal.components.base.MutableFormStateCollection
 import com.arcgismaps.toolkit.featureforms.internal.components.base.getState
+import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTheme
+import com.arcgismaps.toolkit.featureforms.theme.LocalColorScheme
+import com.arcgismaps.toolkit.featureforms.theme.LocalTypography
 
 @Composable
 internal fun GroupElement(
     state: BaseGroupState,
-    modifier: Modifier = Modifier,
-    colors: GroupElementColors = GroupElementDefaults.colors()
+    modifier: Modifier = Modifier
 ) {
     val visible by state.isVisible.collectAsState()
     if (visible) {
@@ -63,7 +66,6 @@ internal fun GroupElement(
             expanded = state.expanded.value,
             fieldStates = state.fieldStates,
             modifier = modifier,
-            colors = colors,
             onClick = {
                 state.setExpanded(!state.expanded.value)
             }
@@ -78,13 +80,16 @@ private fun GroupElement(
     expanded: Boolean,
     fieldStates: FormStateCollection,
     modifier: Modifier = Modifier,
-    colors: GroupElementColors,
     onClick: () -> Unit
 ) {
+    val colors = LocalColorScheme.current.groupElementColors
     Card(
         modifier = modifier,
         shape = GroupElementDefaults.containerShape,
-        border = BorderStroke(GroupElementDefaults.borderThickness, colors.borderColor)
+        colors = CardDefaults.cardColors(
+            containerColor = colors.containerColor
+        ),
+        border = BorderStroke(GroupElementDefaults.borderThickness, colors.outlineColor)
     ) {
         GroupElementHeader(
             modifier = Modifier
@@ -99,7 +104,7 @@ private fun GroupElement(
         )
         AnimatedVisibility(visible = expanded) {
             Column(
-                modifier = Modifier.background(colors.containerColor)
+                modifier = Modifier.background(colors.bodyColor)
             ) {
                 fieldStates.forEach {
                     FieldElement(state = it.getState<BaseFieldState<*>>())
@@ -117,6 +122,8 @@ private fun GroupElementHeader(
     isExpanded: Boolean,
     onClick: () -> Unit
 ) {
+    val colors = LocalColorScheme.current.groupElementColors
+    val typography = LocalTypography.current.groupElementTypography
     Row(modifier = modifier
         .clickable {
             onClick()
@@ -127,14 +134,16 @@ private fun GroupElementHeader(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodyMedium,
+                color = colors.labelColor,
+                style = typography.labelStyle,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
             if (description.isNotEmpty()) {
                 Text(
                     text = description,
-                    style = MaterialTheme.typography.bodySmall
+                    color = colors.supportingTextColor,
+                    style = typography.supportingTextStyle
                 )
             }
         }
@@ -151,16 +160,22 @@ private fun GroupElementHeader(
     }
 }
 
+internal object GroupElementDefaults {
+    val borderThickness = 1.dp
+    val containerShape = RoundedCornerShape(5.dp)
+}
+
 @Preview(showBackground = true, backgroundColor = 0xFFFFFF)
 @Composable
 private fun GroupElementPreview() {
-    GroupElement(
-        label = "Title",
-        description = "Description",
-        expanded = false,
-        fieldStates = MutableFormStateCollection(),
-        modifier = Modifier.padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 10.dp),
-        colors = GroupElementDefaults.colors(),
-        onClick = {}
-    )
+    FeatureFormTheme {
+        GroupElement(
+            label = "Title",
+            description = "Description",
+            expanded = false,
+            fieldStates = MutableFormStateCollection(),
+            modifier = Modifier.padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 10.dp),
+            onClick = {}
+        )
+    }
 }

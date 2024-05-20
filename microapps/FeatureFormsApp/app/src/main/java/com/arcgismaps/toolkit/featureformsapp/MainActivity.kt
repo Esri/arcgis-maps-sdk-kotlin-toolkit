@@ -18,24 +18,38 @@
 
 package com.arcgismaps.toolkit.featureformsapp
 
+import android.Manifest.permission.CAMERA
+import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Warning
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
 import com.arcgismaps.ArcGISEnvironment
@@ -73,12 +87,26 @@ class MainActivity : ComponentActivity() {
 
     private val appState: MutableStateFlow<AppState> = MutableStateFlow(AppState.Loading)
 
+    private val hasPermissions = mutableStateOf<Boolean?>(null)
+
+    // Register the permissions callback, which handles the user's response to the
+    // system permissions dialog.
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        hasPermissions.value = isGranted
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ArcGISEnvironment.applicationContext = this
         setContent {
             FeatureFormsAppTheme {
-                FeatureFormApp(appState.collectAsState().value, navigator)
+                FeatureFormApp(
+                    appState.collectAsState().value,
+                    navigator,
+                    hasPermissions.value
+                )
             }
         }
         lifecycleScope.launch {
@@ -88,6 +116,14 @@ class MainActivity : ComponentActivity() {
                 PortalSettingsFactory::class.java
             )
             loadCredentials(factory.getPortalSettings())
+        }
+        // check for permissions
+        when (ContextCompat.checkSelfPermission(this, CAMERA)) {
+            PackageManager.PERMISSION_GRANTED -> {
+                hasPermissions.value = true
+            }
+
+            else -> requestPermissionLauncher.launch(CAMERA)
         }
     }
 
@@ -118,7 +154,14 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun FeatureFormApp(appState: AppState, navigator: Navigator) {
+fun FeatureFormApp(
+    appState: AppState,
+    navigator: Navigator,
+    hasPermissions: Boolean?
+) {
+    var showPermissionsDialog by remember(hasPermissions) {
+        mutableStateOf(hasPermissions != null && hasPermissions == false)
+    }
     if (appState is AppState.Loading) {
         AnimatedLoading({ true }, modifier = Modifier.fillMaxSize())
     } else {
@@ -136,6 +179,24 @@ fun FeatureFormApp(appState: AppState, navigator: Navigator) {
             navController = navController,
             navigator = navigator,
             startDestination = startDestination
+        )
+    }
+    if (showPermissionsDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showPermissionsDialog = false
+            },
+            text = {
+                Text(text = stringResource(R.string.camera_permission_required))
+            },
+            icon = {
+                Icon(imageVector = Icons.Rounded.Warning, contentDescription = "Warning")
+            },
+            confirmButton = {
+                Button(onClick = { showPermissionsDialog = false }) {
+                    Text(text = stringResource(id = R.string.okay))
+                }
+            }
         )
     }
 }

@@ -26,6 +26,7 @@ import com.arcgismaps.data.FieldType
 import com.arcgismaps.data.RangeDomain
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.mapping.featureforms.FormExpressionEvaluationError
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
@@ -35,7 +36,6 @@ import com.arcgismaps.toolkit.featureforms.internal.components.base.formattedVal
 import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValidationErrors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 
 internal class TextFieldProperties(
     label: String,
@@ -57,24 +57,31 @@ internal class TextFieldProperties(
  * A class to handle the state of a [FormTextField]. Essential properties are inherited from the
  * [BaseFieldState].
  *
+ * @param id Unique identifier for the field.
  * @param properties the [TextFieldProperties] associated with this state.
  * @param initialValue optional initial value to set for this field. It is set to the value of
  * [TextFieldProperties.value] by default.
  * @param scope a [CoroutineScope] to start [StateFlow] collectors on.
- * @param onEditValue a callback to invoke when the user edits result in a change of value. This
- * is called on [FormTextFieldState.onValueChanged]
+ * @param updateValue a function that is invoked when the user edits result in a change of value. This
+ * is called in [BaseFieldState.onValueChanged].
+ * @param evaluateExpressions a function that is invoked to evaluate all form expressions. This is
+ * called after a successful [updateValue].
  */
 @Stable
 internal class FormTextFieldState(
+    id : Int,
     properties: TextFieldProperties,
     initialValue: String = properties.value.value,
     scope: CoroutineScope,
-    onEditValue: (Any?) -> Unit
+    updateValue: (Any?) -> Unit,
+    evaluateExpressions: suspend () -> Result<List<FormExpressionEvaluationError>>
 ) : BaseFieldState<String>(
+    id = id,
     properties = properties,
     initialValue = initialValue,
     scope = scope,
-    onEditValue = onEditValue
+    updateValue = updateValue,
+    evaluateExpressions = evaluateExpressions
 ) {
     // indicates singleLine only if TextBoxFeatureFormInput
     val singleLine = properties.singleLine
@@ -128,6 +135,7 @@ internal class FormTextFieldState(
                 val maxLength = (formElement.input as? TextBoxFormInput)?.maxLength
                     ?: (formElement.input as TextAreaFormInput).maxLength
                 FormTextFieldState(
+                    id = formElement.hashCode(),
                     properties = TextFieldProperties(
                         label = formElement.label,
                         placeholder = formElement.hint,
@@ -145,10 +153,8 @@ internal class FormTextFieldState(
                     ),
                     initialValue = list[0] as String,
                     scope = scope,
-                    onEditValue = { newValue ->
-                        formElement.updateValue(newValue)
-                        scope.launch { form.evaluateExpressions() }
-                    },
+                    updateValue = formElement::updateValue,
+                    evaluateExpressions = form::evaluateExpressions
                 ).apply {
                     // focus is lost on rotation. https://devtopia.esri.com/runtime/apollo/issues/230
                     onFocusChanged(list[1] as Boolean)
@@ -170,6 +176,7 @@ internal fun rememberFormTextFieldState(
     saver = FormTextFieldState.Saver(field, form, scope)
 ) {
     FormTextFieldState(
+        id = field.hashCode(),
         properties = TextFieldProperties(
             label = field.label,
             placeholder = field.hint,
@@ -186,9 +193,7 @@ internal fun rememberFormTextFieldState(
             maxLength = maxLength
         ),
         scope = scope,
-        onEditValue = { newValue ->
-            field.updateValue(newValue)
-            scope.launch { form.evaluateExpressions() }
-        },
+        updateValue = field::updateValue,
+        evaluateExpressions = form::evaluateExpressions,
     )
 }

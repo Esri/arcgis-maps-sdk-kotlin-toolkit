@@ -53,6 +53,15 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    /**
+     * Configures the test report for connected (instrumented) tests to be copied to a central
+     * folder in the project's root directory.
+     */
+    testOptions {
+        val connectedTestReportsPath: String by project
+        reportDir = "$connectedTestReportsPath/${project.name}"
+    }
 }
 
 // context receivers are not experimental anymore, but AS thinks they are.
