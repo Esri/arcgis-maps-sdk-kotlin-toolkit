@@ -17,6 +17,8 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
+import android.util.Log
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -163,6 +165,8 @@ public fun MapView(
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
+//    callout: (@Composable MapViewScope.() -> Unit)? = null,
+//    compass: (@Composable MapViewScope.() -> Unit)? = null,
     content: (@Composable MapViewScope.() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -253,6 +257,8 @@ public fun MapView(
 
     val mapViewScope = remember(mapView) { MapViewScope(mapView) }
     content?.let { mapViewScope.it() }
+//    compass?.let { mapViewScope.it() }
+//    callout?.let { mapViewScope.it() }
 }
 
 /**
@@ -387,6 +393,7 @@ private fun MapViewEventHandler(
         }
         launch {
             mapView.drawStatus.collect { drawStatus ->
+                Log.d("MapViewEventHandler***", "DrawStatus: $drawStatus")
                 currentOnDrawStatusChanged?.invoke(drawStatus)
             }
         }

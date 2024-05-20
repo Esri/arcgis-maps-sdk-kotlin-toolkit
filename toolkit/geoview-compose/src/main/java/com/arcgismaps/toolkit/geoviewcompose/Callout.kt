@@ -22,6 +22,24 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
+import androidx.annotation.DrawableRes
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -33,6 +51,8 @@ import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Fill
@@ -41,6 +61,9 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.view.DrawStatus
 import androidx.compose.ui.unit.times
@@ -120,10 +143,10 @@ public fun MapViewScope.Callout(
         leaderScreenCoordinate =
             getLeaderScreenCoordinate(mapView, location, offset, rotateOffsetWithGeoView)
         // Used to update screen coordinate when viewpoint is changed
-        mapView.viewpointChanged.collect {
-            leaderScreenCoordinate =
-                getLeaderScreenCoordinate(mapView, location, offset, rotateOffsetWithGeoView)
-        }
+//        mapView.viewpointChanged.collect {
+//            leaderScreenCoordinate =
+//                getLeaderScreenCoordinate(mapView, location, offset, rotateOffsetWithGeoView)
+//        }
     }
 
     val localDensity = LocalDensity.current
@@ -411,3 +434,66 @@ private data class CalloutProperties(
         height = strokeBorderWidth + (2 * cornerRadius)
     )
 )
+@Composable
+public fun MapViewScope.Compass(
+    rotation: Double,
+    modifier: Modifier = Modifier,
+    autoHide: Boolean = true,
+    size: Dp = 50.dp,
+    color: Color = Color.White,
+    borderColor: Color = Color.Gray,
+    onClick: () -> Unit = {}
+) {
+    val heading = -rotation.toFloat()
+    val visible = if (autoHide) heading != 0f else true
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn(),
+        exit = fadeOut(animationSpec = tween(delayMillis = 500))
+    ) {
+        CompassButtonIcon(
+            icon = R.drawable.ic_compass,
+            color = color,
+            borderColor = borderColor,
+            modifier = modifier
+                .size(size)
+                .rotate(heading)
+                .semantics { contentDescription = "CompassButtonIcon" },
+            onClick = onClick
+        )
+    }
+}
+
+/**
+ * A composable ButtonIcon for the Compass with the [icon] and [color] for container color.
+ * Tap events can be handled using the [onClick] callback.
+ */
+@Composable
+internal fun CompassButtonIcon(
+    @DrawableRes icon: Int,
+    color: Color,
+    borderColor: Color,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
+) {
+    val borderWidth = 2.dp
+    Button(
+        modifier = modifier
+            .border(
+                BorderStroke(borderWidth, borderColor),
+                CircleShape
+            )
+            .padding(borderWidth)
+            .clip(CircleShape),
+        colors = ButtonDefaults.buttonColors(containerColor = color),
+        contentPadding = PaddingValues(10.dp),
+        onClick = onClick
+    ) {
+        Image(
+            modifier = Modifier.fillMaxSize(),
+            painter = painterResource(icon),
+            contentDescription = "CompassIcon"
+        )
+    }
+}
+

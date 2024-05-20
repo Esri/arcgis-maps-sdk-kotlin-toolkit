@@ -18,35 +18,78 @@
 
 package com.arcgismaps.toolkit.mapviewcalloutapp.screens
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.arcgismaps.geometry.Point
+import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.toolkit.geoviewcompose.Callout
+import com.arcgismaps.toolkit.geoviewcompose.Compass
 import com.arcgismaps.toolkit.geoviewcompose.MapView
+import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
+import kotlinx.coroutines.launch
 
 @Composable
 fun MainScreen(viewModel: MapViewModel) {
 
-    val mapPoint = viewModel.mapPoint.collectAsState().value
+    val mapViewProxy = remember { MapViewProxy() }
+    val coroutineScope = rememberCoroutineScope()
 
-    MapView(
-        modifier = Modifier.fillMaxSize(),
-        arcGISMap = viewModel.arcGISMap,
-        onSingleTapConfirmed = viewModel::setMapPoint,
-        content = if (mapPoint != null) {
-            {
-                Callout(location = mapPoint) {
-                    Text(
-                        "Hello, World!",
-                        color = Color.Green
-                    )
+    var mapPoint: Point? by remember { mutableStateOf(null) }
+    var mapRotation by remember { mutableDoubleStateOf(0.0) }
+
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        MapView(
+            modifier = Modifier.fillMaxSize(),
+            arcGISMap = viewModel.arcGISMap,
+            mapViewProxy = mapViewProxy,
+            onSingleTapConfirmed = { mapPoint = it.mapPoint },
+            onMapRotationChanged = { mapRotation = it },
+//            compass = {
+//                Compass(rotation = mapRotation, autoHide = false) {
+//                    // reset the Composable MapView viewpoint rotation to point north
+//                    coroutineScope.launch {
+//                        mapViewProxy.setViewpointRotation(0.0)
+//                    }
+//                }
+//            },
+//            callout = {
+//                if (mapPoint != null) {
+//                    Callout(location = mapPoint!!) {
+//                        Text(
+//                            "Hello, World!",
+//                            color = Color.Green
+//                        )
+//                    }
+//                }},
+            content = {
+                Compass(rotation = mapRotation, autoHide = false) {
+                    // reset the Composable MapView viewpoint rotation to point north
+                    coroutineScope.launch {
+                        mapViewProxy.setViewpointRotation(0.0)
+                    }
+                }
+                if (mapPoint != null) {
+                    Callout(location = mapPoint!!) {
+                        Text(
+                            "Hello, World!",
+                            color = Color.Green
+                        )
+                    }
                 }
             }
-        } else {
-            null
-        }
-    )
+        )
+    }
 }
