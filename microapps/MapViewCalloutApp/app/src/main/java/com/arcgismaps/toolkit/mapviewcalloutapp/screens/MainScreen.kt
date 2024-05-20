@@ -19,13 +19,11 @@
 package com.arcgismaps.toolkit.mapviewcalloutapp.screens
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.geoviewcompose.Callout
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 
@@ -35,16 +33,16 @@ fun MainScreen(viewModel: MapViewModel) {
     val mapPoint = viewModel.mapPoint.collectAsState().value
 
     MapView(
-        modifier = Modifier.fillMaxSize(0.75f),
+        modifier = Modifier.fillMaxSize(),
         arcGISMap = viewModel.arcGISMap,
         onSingleTapConfirmed = viewModel::setMapPoint,
         content = if (mapPoint != null) {
             {
                 Callout(location = mapPoint) {
-                        Text(
-                            "Hello, World!",
-                            color = Color.Green
-                        )
+                    Text(
+                        "Hello, World!",
+                        color = Color.Green
+                    )
                 }
             }
         } else {
