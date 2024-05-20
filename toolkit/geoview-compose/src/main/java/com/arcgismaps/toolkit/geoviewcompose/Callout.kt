@@ -38,7 +38,9 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -131,22 +133,27 @@ public fun MapViewScope.Callout(
     val properties = CalloutProperties()
     val localLeaderScreenCoordinate = leaderScreenCoordinate
     localLeaderScreenCoordinate?.let {
-        Box(
-            modifier = modifier
-                .drawCalloutContainer(
-                    cornerRadius = with(localDensity) { properties.cornerRadius.toPx() },
-                    strokeBorderWidth = with(localDensity) { properties.strokeBorderWidth.toPx() },
-                    strokeColor = properties.strokeColor,
-                    backgroundColor = properties.backgroundColor,
-                    calloutContentPadding = properties.calloutContentPadding,
-                    leaderWidth = with(localDensity) { properties.leaderSize.width.toPx() },
-                    leaderHeight = with(localDensity) { properties.leaderSize.height.toPx() },
-                    minSize = properties.minSize,
-                    calloutScreenCoordinate = localLeaderScreenCoordinate,
-                )
-        )
-        {
-            this.content()
+
+        SubComposableLayout(
+            screenCoordinate = it
+        ) {
+            Box(
+                modifier = modifier
+                    .drawCalloutContainer(
+                        cornerRadius = with(localDensity) { properties.cornerRadius.toPx() },
+                        strokeBorderWidth = with(localDensity) { properties.strokeBorderWidth.toPx() },
+                        strokeColor = properties.strokeColor,
+                        backgroundColor = properties.backgroundColor,
+                        calloutContentPadding = properties.calloutContentPadding,
+                        leaderWidth = with(localDensity) { properties.leaderSize.width.toPx() },
+                        leaderHeight = with(localDensity) { properties.leaderSize.height.toPx() },
+                        minSize = properties.minSize,
+                        calloutScreenCoordinate = localLeaderScreenCoordinate,
+                    )
+            )
+            {
+                this.content()
+            }
         }
     }
 }
@@ -224,6 +231,52 @@ private fun DoubleXY.rotate(rotateByAngle: Double, center: DoubleXY = DoubleXY.z
 }
 
 /**
+ * Analogue of Layout which allows to sub-compose the Callout content during the measuring stage,
+ * and place the content at the given [screenCoordinate].
+ *
+ * @since 200.5.0
+ */
+@Composable
+private fun SubComposableLayout(
+    modifier: Modifier = Modifier,
+    maxWidth: Dp = Constraints.Infinity.dp,
+    maxHeight: Dp = Constraints.Infinity.dp,
+    screenCoordinate: ScreenCoordinate,
+    content: @Composable () -> Unit
+) {
+    val configuration = LocalDensity.current
+    val maxWidthInPx = with(configuration) {
+        maxWidth.roundToPx()
+    }
+    val maxHeightInPx = with(configuration) {
+        maxHeight.roundToPx()
+    }
+
+    SubcomposeLayout(modifier = modifier) { constraints ->
+        // set the max width to the lesser of the available size or the maxWidth
+        val layoutWidth = Integer.min(constraints.maxWidth, maxWidthInPx)
+        // set the max height to the lesser of the available size or the maxHeight
+        val layoutHeight = Integer.min(constraints.maxHeight, maxHeightInPx)
+        // measure the content with the constraints
+        val contentPlaceable = subcompose(0) {
+            content()
+        }[0].measure(
+            constraints.copy(
+                maxWidth = layoutWidth,
+                maxHeight = layoutHeight
+            )
+        )
+        // calculate the callout position
+        val calloutOffsetX = screenCoordinate.x.toInt() - (contentPlaceable.width / 2)
+        val calloutOffsetY = screenCoordinate.y.toInt() - contentPlaceable.height
+        // place the callout in the layout
+        layout(layoutWidth, layoutHeight) {
+            contentPlaceable.place(calloutOffsetX, calloutOffsetY)
+        }
+    }
+}
+
+/**
  * Extension function to draw the Callout container using the given parameters. It draws the shape, adds the content padding, adds padding for the leader height, restricting the min size and positions it on the screen.
  *
  * @param cornerRadius The corner radius of the Callout shape in px.
@@ -252,10 +305,6 @@ private fun Modifier.drawCalloutContainer(
     sizeIn(minWidth = minSize.width, minHeight = minSize.height)
         // Set bottom padding to ensure the leader is visible
         .padding(bottom = with(LocalDensity.current) { leaderHeight.toDp() })
-        .graphicsLayer {
-            translationX = calloutScreenCoordinate.x.toFloat()
-            translationY = calloutScreenCoordinate.y.toFloat()
-        }
         .drawWithCache {
             onDrawBehind {
                 // Define the Path of the callout
