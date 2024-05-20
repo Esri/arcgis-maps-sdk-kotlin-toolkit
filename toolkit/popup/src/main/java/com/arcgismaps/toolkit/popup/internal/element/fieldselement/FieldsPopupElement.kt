@@ -18,11 +18,14 @@ package com.arcgismaps.toolkit.popup.internal.element.fieldselement
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
@@ -32,6 +35,11 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.toolkit.popup.internal.ui.ExpandableCard
 
+/**
+ * Composable that displays the fields of a popup element.
+ *
+ * @since 200.5.0
+ */
 @Composable
 internal fun FieldsPopupElement(state: FieldsElementState) {
     val localContext = LocalContext.current
@@ -43,7 +51,7 @@ internal fun FieldsPopupElement(state: FieldsElementState) {
         Column {
             state.fieldsToFormattedValues.forEach {
                 // Display the field
-                Column {
+                Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
                     ListItem(
                         headlineContent = { Text(text = it.key) },
                         supportingContent = {
