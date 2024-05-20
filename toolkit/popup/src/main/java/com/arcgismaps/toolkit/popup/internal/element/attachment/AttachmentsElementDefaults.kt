@@ -16,9 +16,6 @@
 
 package com.arcgismaps.toolkit.popup.internal.element.attachment
 
-
-
-
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -68,4 +65,3 @@ internal data class AttachmentsElementColors(
     val tileBorderColor : Color,
     val borderColor : Color
 )
-

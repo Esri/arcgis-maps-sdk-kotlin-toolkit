@@ -75,7 +75,6 @@ internal class AttachmentsElementState(
     }
 }
 
-
 @Composable
 internal fun rememberAttachmentElementState(
     element: AttachmentsPopupElement,

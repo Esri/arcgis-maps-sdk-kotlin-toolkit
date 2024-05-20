@@ -77,7 +77,6 @@ private fun AttachmentGallery(state: LazyListState, attachments: List<PopupAttac
     }
 }
 
-
 @Preview
 @Composable
 private fun AttachmentsPopupElementPreview() {
