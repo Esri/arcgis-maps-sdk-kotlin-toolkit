@@ -22,7 +22,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -170,7 +169,6 @@ public fun MapView(
     val context = LocalContext.current
     val mapView = remember { MapView(context) }
     val layoutDirection = LocalLayoutDirection.current
-    var refreshCalloutPosition by rememberSaveable { mutableStateOf(false) }
 
     AndroidView(
         modifier = modifier.semantics { contentDescription = "MapView" },
@@ -194,19 +192,6 @@ public fun MapView(
                 }
             }
         })
-
-    LaunchedEffect(Unit) {
-        mapView.viewpointChanged.collect {
-            refreshCalloutPosition = !refreshCalloutPosition
-        }
-    }
-
-    val mapViewScope = remember(mapView) { MapViewScope(mapView) }
-    if (content != null) {
-        key(refreshCalloutPosition, content) {
-            mapViewScope.content()
-        }
-    }
 
     DisposableEffect(Unit) {
         lifecycleOwner.lifecycle.addObserver(mapView)
@@ -265,6 +250,9 @@ public fun MapView(
         onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
         onVisibleAreaChanged = onVisibleAreaChanged
     )
+
+    val mapViewScope = remember(mapView) { MapViewScope(mapView) }
+    content?.let { mapViewScope.it() }
 }
 
 /**
