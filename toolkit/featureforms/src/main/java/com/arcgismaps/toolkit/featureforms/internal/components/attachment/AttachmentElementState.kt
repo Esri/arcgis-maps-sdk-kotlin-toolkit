@@ -45,6 +45,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.Loadable
+import com.arcgismaps.mapping.featureforms.AttachmentChangeType
 import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FormAttachment
@@ -106,7 +107,27 @@ internal class AttachmentElementState(
     init {
         scope.launch {
             formElement.fetchAttachments().onSuccess {
-                buildAttachmentStates(formElement.attachments.value)
+                buildAttachmentStates(formElement.attachments)
+            }
+        }
+        scope.launch { 
+            formElement.attachmentChanged.collect {
+                when (it.changeType) {
+                    is AttachmentChangeType.Deletion -> {
+                        attachments.removeIf { state ->
+                            state.formAttachment == it.attachment
+                        }
+                    }
+
+                    is AttachmentChangeType.Rename -> {
+                        attachments.firstOrNull { state ->
+                            state.formAttachment == it.attachment
+                        }?.update(it.attachment)
+                    }
+
+                    else -> {}
+                }
+                evaluateExpressions()
             }
         }
     }
@@ -161,8 +182,6 @@ internal class AttachmentElementState(
             attachments.add(state)
             // load the new attachment
             state.loadWithParentScope()
-            // evaluate expressions after adding the attachment
-            evaluateExpressions()
             // scroll to the new attachment after a delay to allow the recomposition to complete
             delay(100)
             lazyListState.scrollToItem(attachments.count())
@@ -170,22 +189,12 @@ internal class AttachmentElementState(
     }
 
     private suspend fun deleteAttachment(formAttachment: FormAttachment) {
-        formElement.deleteAttachment(formAttachment).onSuccess {
-            attachments.removeIf {
-                it.formAttachment == formAttachment
-            }
-            evaluateExpressions()
-        }
+        formElement.deleteAttachment(formAttachment)
     }
 
     suspend fun renameAttachment(formAttachment: FormAttachment, newName: String) {
         if (formAttachment.name != newName) {
-            formElement.renameAttachment(formAttachment, newName).onSuccess {
-                attachments.firstOrNull {
-                    it.formAttachment == formAttachment
-                }?.update(formAttachment)
-                evaluateExpressions()
-            }
+            formElement.renameAttachment(formAttachment, newName)
         }
     }
 
