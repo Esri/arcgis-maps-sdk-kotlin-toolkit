@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
-cd ${runtime_path}/arcgis-maps-sdk-kotlin-toolkit
+source $(dirname ${BASH_SOURCE})/../common.sh
+
+cd ${apps_path}/arcgis-maps-sdk-kotlin-toolkit
+echo "$(pwd)"
+echo ${apps_path}
 function _build() {
   _log "Run the gradle assembleRelease task to pre-build the Kotlin Toolkit"
   if ! ./gradlew assembleRelease; then

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build and run the tests
+# Build and run the Kotlin Toolkit tests
 
 source $(dirname ${BASH_SOURCE})/common_test.sh
 

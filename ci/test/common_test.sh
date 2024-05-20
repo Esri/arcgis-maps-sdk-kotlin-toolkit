@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
 # Contains common variables and helper functions used by the jenkins scripts for Kotlin Toolkit
 
+source $(dirname ${BASH_SOURCE})/../common.sh
+
 # global constants
 adb="${HOME}/Library/Android/Sdk/platform-tools/adb"
 archive_folder_root="/net/apps-data.esri.com/data/api/kotlin"
 
 # global variables
-integration_reports_path="${runtime_path}/arcgis-maps-sdk-kotlin-toolkit/connectedTestReports"
-unit_reports_path="${runtime_path}/arcgis-maps-sdk-kotlin-toolkit/build/reports/tests/unit-test/aggregated-results"
+integration_reports_path="${apps_path}/arcgis-maps-sdk-kotlin-toolkit/connectedTestReports"
+unit_reports_path="${apps_path}/arcgis-maps-sdk-kotlin-toolkit/build/reports/tests/unit-test/aggregated-results"
 
 # helper functions
 function _reboot_device() {
