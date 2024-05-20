@@ -37,7 +37,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Constraints
@@ -119,24 +118,18 @@ public fun MapViewScope.Callout(
 
     LaunchedEffect(location) {
         // Used to update screen coordinate when new location point is used
-        leaderScreenCoordinate =
-            getLeaderScreenCoordinate(mapView, location, offset, rotateOffsetWithGeoView)
+        leaderScreenCoordinate = getLeaderScreenCoordinate(mapView, location, offset, rotateOffsetWithGeoView)
         // Used to update screen coordinate when viewpoint is changed
         mapView.viewpointChanged.collect {
-            leaderScreenCoordinate =
-                getLeaderScreenCoordinate(mapView, location, offset, rotateOffsetWithGeoView)
+            leaderScreenCoordinate = getLeaderScreenCoordinate(mapView, location, offset, rotateOffsetWithGeoView)
         }
     }
 
     val localDensity = LocalDensity.current
     // Get the default shape, color & size properties for Callout
     val properties = CalloutProperties()
-    val localLeaderScreenCoordinate = leaderScreenCoordinate
-    localLeaderScreenCoordinate?.let {
-
-        SubComposableLayout(
-            screenCoordinate = it
-        ) {
+    leaderScreenCoordinate?.let {
+        CalloutSubComposeLayout(leaderScreenCoordinate = it) {
             Box(
                 modifier = modifier
                     .drawCalloutContainer(
@@ -230,18 +223,24 @@ private fun DoubleXY.rotate(rotateByAngle: Double, center: DoubleXY = DoubleXY.z
 }
 
 /**
- * Analogue of Layout which allows to sub-compose the Callout content during the measuring stage,
- * and place the content at the given screenCoordinate.
- * @param screenCoordinate Represents the x,y coordinate for the location on GeoView
+ * Analogue of Layout which allows to sub-compose the Callout container during the measuring stage,
+ * and anchor the Callout leader at the given screenCoordinate. The callout is drawn using a Box
+ * and by default it is anchored to its top left corner. In order to anchor the Callout at the tip
+ * of the leader we need to determine the size of its content to calculate the anchor point's
+ * location before drawing the Callout on the screen.
+ *
+ * @param leaderScreenCoordinate Represents the x,y coordinate for the location on GeoView
+ * @param maxWidth TODO
+ * @param maxHeight TODO
  * @since 200.5.0
  */
 @Composable
-private fun SubComposableLayout(
+private fun CalloutSubComposeLayout(
     modifier: Modifier = Modifier,
-    maxWidth: Dp = Constraints.Infinity.dp,
-    maxHeight: Dp = Constraints.Infinity.dp,
-    screenCoordinate: ScreenCoordinate,
-    content: @Composable () -> Unit
+    leaderScreenCoordinate: ScreenCoordinate,
+    maxWidth: Dp = Constraints.Infinity.dp, // TODO: Use geoview max size here
+    maxHeight: Dp = Constraints.Infinity.dp, // TODO: Use geoview max size here
+    calloutContainer: @Composable () -> Unit
 ) {
     val configuration = LocalDensity.current
     val maxWidthInPx = with(configuration) {
@@ -257,26 +256,31 @@ private fun SubComposableLayout(
         // set the max height to the lesser of the available size or the maxHeight
         val layoutHeight = Integer.min(constraints.maxHeight, maxHeightInPx)
         // measure the content with the constraints
-        val contentPlaceable = subcompose(0) {
-            content()
+        val calloutContainerPlaceable = subcompose(slotId = 0) {
+            calloutContainer()
         }[0].measure(
             constraints.copy(
                 maxWidth = layoutWidth,
                 maxHeight = layoutHeight
             )
         )
-        // calculate the callout position
-        val calloutOffsetX = screenCoordinate.x.toInt() - (contentPlaceable.width / 2)
-        val calloutOffsetY = screenCoordinate.y.toInt() - contentPlaceable.height
+        // the default (0,0) value is on the top-left edge of the callout container,
+        // this moves the anchor to the bottom-middle point using X,Y offsets.
+        // and ensures the anchor leader always represents the tapped location point,
+        // in this case, the bottom-middle leader position.
+        val calloutOffsetX = leaderScreenCoordinate.x.toInt() - (calloutContainerPlaceable.width / 2)
+        val calloutOffsetY = leaderScreenCoordinate.y.toInt() - calloutContainerPlaceable.height
         // place the callout in the layout
         layout(layoutWidth, layoutHeight) {
-            contentPlaceable.place(calloutOffsetX, calloutOffsetY)
+            calloutContainerPlaceable.place(calloutOffsetX, calloutOffsetY)
         }
     }
 }
 
 /**
- * Extension function to draw the Callout container using the given parameters. It draws the shape, adds the content padding, adds padding for the leader height, restricting the min size and positions it on the screen.
+ * Extension function to draw the Callout container using the given parameters.
+ * It draws the shape, adds the content padding, adds padding for the leader height
+ * and restricts it to the min size.
  *
  * @param cornerRadius The corner radius of the Callout shape in px.
  * @param strokeBorderWidth Width of the Callout stroke in px.
