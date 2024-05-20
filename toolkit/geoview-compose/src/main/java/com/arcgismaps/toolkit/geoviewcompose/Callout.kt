@@ -24,8 +24,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
@@ -35,7 +37,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Constraints
@@ -116,33 +117,48 @@ public fun MapViewScope.Callout(
         rotateOffsetWithGeoView,
     )
     leaderScreenCoordinate?.let {
+        // TODO ....
+    }
 
-        val localDensity = LocalDensity.current
-        // Get the default shape, color & size properties for Callout
-        val properties = CalloutProperties()
+    val localDensity = LocalDensity.current
+    // Get the default shape, color & size properties for Callout
+    val properties = CalloutProperties()
 
-        SubComposableLayout(
-            screenCoordinate = leaderScreenCoordinate
-        ) {
-            Box(
-                modifier = modifier
-                    .drawCalloutContainer(
-                        cornerRadius = with(localDensity) { properties.cornerRadius.toPx() },
-                        strokeBorderWidth = with(localDensity) { properties.strokeBorderWidth.toPx() },
-                        strokeColor = properties.strokeColor,
-                        backgroundColor = properties.backgroundColor,
-                        calloutContentPadding = properties.calloutContentPadding,
-                        leaderWidth = with(localDensity) { properties.leaderSize.width.toPx() },
-                        leaderHeight = with(localDensity) { properties.leaderSize.height.toPx() },
-                        minSize = properties.minSize,
-                        calloutScreenCoordinate = leaderScreenCoordinate,
-                    )
-            )
-            {
-                this.content()
-            }
+    // Convert the given location to a screen coordinate
+    var calloutScreenCoordinate: ScreenCoordinate by remember {
+        mutableStateOf(mapView.locationToScreen(location))
+    }
+
+    LaunchedEffect(location) {
+        // Used to update screen coordinate when new location point is used
+        calloutScreenCoordinate = mapView.locationToScreen(location)
+        // Used to update screen coordinate when viewpoint is changed
+        mapView.viewpointChanged.collect {
+            calloutScreenCoordinate = mapView.locationToScreen(location)
         }
     }
+
+    SubComposableLayout(
+        screenCoordinate = calloutScreenCoordinate
+    ) {
+        Box(
+            modifier = modifier
+                .drawCalloutContainer(
+                    cornerRadius = with(localDensity) { properties.cornerRadius.toPx() },
+                    strokeBorderWidth = with(localDensity) { properties.strokeBorderWidth.toPx() },
+                    strokeColor = properties.strokeColor,
+                    backgroundColor = properties.backgroundColor,
+                    calloutContentPadding = properties.calloutContentPadding,
+                    leaderWidth = with(localDensity) { properties.leaderSize.width.toPx() },
+                    leaderHeight = with(localDensity) { properties.leaderSize.height.toPx() },
+                    minSize = properties.minSize
+                )
+        )
+        {
+            this.content()
+        }
+    }
+
 }
 
 /**
@@ -162,6 +178,7 @@ private fun getLeaderScreenCoordinate(
     offset: Offset,
     rotateOffsetWithGeoView: Boolean
 ): ScreenCoordinate? {
+
     val geoViewRotation = geoView.rotation()
     val locationToScreen = when (geoView) {
         is MapView -> geoView.locationToScreen(location)
@@ -217,60 +234,6 @@ private fun DoubleXY.rotate(rotateByAngle: Double, center: DoubleXY = DoubleXY.z
     return DoubleXY(x2 + center.x, y2 + center.y)
 }
 
-/**
- * Extension function to draw the Callout container using the given parameters. It draws the shape, adds the content padding, adds padding for the leader height, restricting the min size and positions it on the screen.
- *
- * @param cornerRadius The corner radius of the Callout shape in px.
- * @param strokeBorderWidth Width of the Callout stroke in px.
- * @param strokeColor Color used to define the outline stroke.
- * @param backgroundColor Color used to define the fill color of the Callout shape.
- * @param calloutContentPadding PaddingValues for the content placed inside the Callout.
- * @param leaderWidth Width of the Callout leader in px.
- * @param leaderHeight Height of the Callout leader in px.
- * @param minSize Minimum size the of the Callout shape.
- * @param calloutScreenCoordinate Represents the x,y coordinate of the Callout leader.
- * @since 200.5.0
- */
-@Composable
-private fun Modifier.drawCalloutContainer(
-    cornerRadius: Float,
-    strokeBorderWidth: Float,
-    strokeColor: Color,
-    backgroundColor: Color,
-    calloutContentPadding: PaddingValues,
-    leaderWidth: Float,
-    leaderHeight: Float,
-    minSize: DpSize,
-    calloutScreenCoordinate: ScreenCoordinate,
-) = then(
-    sizeIn(minWidth = minSize.width, minHeight = minSize.height)
-        // Set bottom padding to ensure the leader is visible
-        .padding(bottom = with(LocalDensity.current) { leaderHeight.toDp() })
-        .graphicsLayer {
-            translationX = calloutScreenCoordinate.x.toFloat()
-            translationY = calloutScreenCoordinate.y.toFloat()
-        }
-        .drawWithCache {
-            onDrawBehind {
-                // Define the Path of the callout
-                val path = calloutPath(size, cornerRadius, leaderWidth, leaderHeight)
-                // Fill the path's shape with the Callout's background color
-                drawPath(
-                    path = path,
-                    color = backgroundColor,
-                    style = Fill
-                )
-                // Outline the path's shape with the Callout's stroke color
-                drawPath(
-                    path = path,
-                    color = strokeColor,
-                    style = Stroke(width = strokeBorderWidth)
-                )
-            }
-        }
-        .padding(calloutContentPadding)
-)
-
 @Composable
 private fun SubComposableLayout(
     modifier: Modifier = Modifier,
@@ -312,46 +275,47 @@ private fun SubComposableLayout(
 }
 
 /**
- * Extension function to draw the Callout shape using the given shape options.
+ * Extension function to draw the Callout container using the given parameters. It draws the shape, adds the content padding, adds padding for the leader height, restricting the min size and positions it on the screen.
  *
- * [cornerRadius] The corner radius of the rectangle shape in px.
- * [anchorLeaderWidth] Width of the anchor leader in px.
- * [anchorLeaderHeight] Height of the anchor leader in px.
- * [strokeBorderWidth] Width of the Callout stroke in px.
- * [strokeColor] Color used to define the outline stroke.
- * [calloutBackgroundColor] Color used to define the fill color of the Callout shape.
- * [minSize] Minimum size the of the Callout shape.
+ * @param cornerRadius The corner radius of the Callout shape in px.
+ * @param strokeBorderWidth Width of the Callout stroke in px.
+ * @param strokeColor Color used to define the outline stroke.
+ * @param backgroundColor Color used to define the fill color of the Callout shape.
+ * @param calloutContentPadding PaddingValues for the content placed inside the Callout.
+ * @param leaderWidth Width of the Callout leader in px.
+ * @param leaderHeight Height of the Callout leader in px.
+ * @param minSize Minimum size the of the Callout shape.
  * @since 200.5.0
  */
 @Composable
-private fun Modifier.drawCalloutShape(
+private fun Modifier.drawCalloutContainer(
     cornerRadius: Float,
-    anchorLeaderWidth: Float,
-    anchorLeaderHeight: Float,
     strokeBorderWidth: Float,
     strokeColor: Color,
-    calloutBackgroundColor: Color,
-    minSize: DpSize,
+    backgroundColor: Color,
     calloutContentPadding: PaddingValues,
+    leaderWidth: Float,
+    leaderHeight: Float,
+    minSize: DpSize,
 ): Modifier {
 
     val localDensity = LocalDensity.current
     return this.then(
         sizeIn(minWidth = minSize.width, minHeight = minSize.height)
-            .padding(bottom = with(localDensity) { anchorLeaderHeight.toDp() })
+            .padding(bottom = with(localDensity) { leaderHeight.toDp() })
             .drawWithCache {
                 onDrawBehind {
                     // Define the Path of the callout
                     val path = calloutPath(
                         size = size,
                         cornerRadius = cornerRadius,
-                        anchorLeaderWidth = anchorLeaderWidth,
-                        anchorLeaderHeight = anchorLeaderHeight
+                        anchorLeaderWidth = leaderWidth,
+                        anchorLeaderHeight = leaderHeight
                     )
                     // Fill the path's shape with the Callout's background color
                     drawPath(
                         path = path,
-                        color = calloutBackgroundColor,
+                        color = backgroundColor,
                         style = Fill
                     )
                     // Outline the path's shape with the Callout's stroke color
