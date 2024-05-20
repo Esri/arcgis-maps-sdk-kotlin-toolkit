@@ -23,7 +23,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import com.arcgismaps.geometry.Point
 import com.arcgismaps.toolkit.geoviewcompose.Callout
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 
@@ -43,6 +45,14 @@ fun MainScreen(viewModel: MapViewModel) {
                         "Hello, World!",
                         color = Color.Green
                     )
+                }
+                val newPoint = Point(mapPoint.x, mapPoint.y)
+                Callout(location = mapPoint, offset = Offset(1.0f, 150.0f)) {
+                    Text(
+                        "Hello, New World!",
+                        color = Color.Red
+                    )
+
                 }
             }
         } else {

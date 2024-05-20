@@ -163,7 +163,7 @@ public fun MapView(
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
-    content: (@Composable MapViewScope.() -> Unit)? = null
+    content: (@Composable () -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
@@ -252,7 +252,9 @@ public fun MapView(
     )
 
     val mapViewScope = remember(mapView) { MapViewScope(mapView) }
-    content?.let { mapViewScope.it() }
+    MapViewScope (mapViewScope) {
+        content?.let { it() }
+    }
 }
 
 /**

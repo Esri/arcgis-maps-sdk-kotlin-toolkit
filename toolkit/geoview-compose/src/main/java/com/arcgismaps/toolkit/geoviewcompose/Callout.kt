@@ -23,7 +23,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.ProvidableCompositionLocal
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,28 +45,132 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.mapping.view.DrawStatus
 import androidx.compose.ui.unit.times
 import com.arcgismaps.geometry.AngularUnit
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ViewpointType
 import com.arcgismaps.mapping.view.DoubleXY
+import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.SceneLocationVisibility
 import com.arcgismaps.mapping.view.SceneView
 import com.arcgismaps.mapping.view.ScreenCoordinate
-import kotlinx.coroutines.flow.transformWhile
 import com.arcgismaps.mapping.view.zero
+import kotlinx.coroutines.flow.transformWhile
 import kotlin.math.cos
 import kotlin.math.sin
+
+internal val LocalMapViewScope: ProvidableCompositionLocal<MapViewScope> =
+    compositionLocalOf {
+        MapViewScope(null)
+    }
+
+@Composable
+internal fun MapViewScope(
+    scope: MapViewScope,
+    content: @Composable () -> Unit
+) {
+    CompositionLocalProvider(
+        LocalMapViewScope provides scope
+    ) {
+        content()
+    }
+}
 
 /**
  * The receiver class of the MapView content lambda.
  *
  * @since 200.5.0
  */
-public class MapViewScope(internal val mapView: MapView)
+internal class MapViewScope(internal var _mapView: MapView?) {
+    var location: Point? = null
+    var modifier: Modifier? = null
+    var offset: Offset = Offset.Zero
+    var rotateOffsetWithGeoView: Boolean = false
+    var content: (@Composable BoxScope.() -> Unit)? = null
+    private val mapView: MapView
+        get() = _mapView ?: throw IllegalStateException("MapView has not been initialized")
+    /**
+     * Creates a Callout at the specified geographical location on the MapView. The Callout is a composable
+     * that can be used to display additional information about a location on the map. The additional information is
+     * passed as a content composable that contains text and/or other content. It has a leader that points to
+     * the location that Callout refers to. The body of the Callout is a rectangular area with curved corners
+     * that contains the content lambda provided by the application. A thin border line is drawn around the entire Callout.
+     *
+     * @param location the geographical location at which to display the Callout
+     * @param modifier Modifier to be applied to the composable Callout
+     * @param content the content of the Callout
+     * @param offset the offset in screen coordinates from the geographical location at which to place the callout
+     * @param rotateOffsetWithGeoView specifies whether the screen offset is rotated with the [GeoView]. The Screen offset
+     *        will be rotated with the [GeoView] when true, false otherwise.
+     *        This is useful if you are showing the callout for elements with symbology that does rotate with the [GeoView]
+     * @since 200.5.0
+     */
+    @Composable
+    internal fun Callout() {
+        val isMapViewReady = remember { mutableStateOf(false) }
+        // We don't want to start drawing the Callout until the MapView is ready. We only collect
+        // the drawStatus till the first time MapView is done drawing. the transformWhile operator
+        // will stop collecting when isMapViewReady.value becomes false.
+        LaunchedEffect(location) {
+            mapView.drawStatus.transformWhile { drawStatus ->
+                emit(drawStatus)
+                !isMapViewReady.value
+            }.collect {
+                if (it == DrawStatus.Completed) {
+                    isMapViewReady.value = true
+                }
+            }
+        }
+
+        if (!isMapViewReady.value) {
+            return
+        }
+
+        // Convert the given location to a screen coordinate
+        var leaderScreenCoordinate: ScreenCoordinate? by remember {
+            mutableStateOf(
+                getLeaderScreenCoordinate(mapView, location!!, offset, rotateOffsetWithGeoView)
+            )
+        }
+
+        LaunchedEffect(location) {
+            // Used to update screen coordinate when new location point is used
+            leaderScreenCoordinate =
+                getLeaderScreenCoordinate(mapView, location!!, offset, rotateOffsetWithGeoView)
+            // Used to update screen coordinate when viewpoint is changed
+            mapView.viewpointChanged.collect {
+                leaderScreenCoordinate =
+                    getLeaderScreenCoordinate(mapView, location!!, offset, rotateOffsetWithGeoView)
+            }
+        }
+
+        val localDensity = LocalDensity.current
+        // Get the default shape, color & size properties for Callout
+        val properties = CalloutProperties()
+        val localLeaderScreenCoordinate = leaderScreenCoordinate
+        localLeaderScreenCoordinate?.let {
+            Box(
+                modifier = modifier
+                    !!.drawCalloutContainer(
+                        cornerRadius = with(localDensity) { properties.cornerRadius.toPx() },
+                        strokeBorderWidth = with(localDensity) { properties.strokeBorderWidth.toPx() },
+                        strokeColor = properties.strokeColor,
+                        backgroundColor = properties.backgroundColor,
+                        calloutContentPadding = properties.calloutContentPadding,
+                        leaderWidth = with(localDensity) { properties.leaderSize.width.toPx() },
+                        leaderHeight = with(localDensity) { properties.leaderSize.height.toPx() },
+                        minSize = properties.minSize,
+                        calloutScreenCoordinate = localLeaderScreenCoordinate,
+                    )
+            )
+            {
+                content!!.invoke(this)
+            }
+        }
+    }
+}
 
 /**
  * Creates a Callout at the specified geographical location on the MapView. The Callout is a composable
@@ -82,73 +189,23 @@ public class MapViewScope(internal val mapView: MapView)
  * @since 200.5.0
  */
 @Composable
-public fun MapViewScope.Callout(
+public fun Callout(
     location: Point,
     modifier: Modifier = Modifier,
     offset: Offset = Offset.Zero,
     rotateOffsetWithGeoView: Boolean = false,
     content: @Composable BoxScope.() -> Unit
 ) {
-    val isMapViewReady = remember { mutableStateOf(false) }
-    // We don't want to start drawing the Callout until the MapView is ready. We only collect
-    // the drawStatus till the first time MapView is done drawing. the transformWhile operator
-    // will stop collecting when isMapViewReady.value becomes false.
-    LaunchedEffect(location) {
-        mapView.drawStatus.transformWhile { drawStatus ->
-            emit(drawStatus)
-            !isMapViewReady.value
-        }.collect {
-            if (it == DrawStatus.Completed) {
-                isMapViewReady.value = true
-            }
-        }
-    }
+    val mapViewScope = LocalMapViewScope.current
+        mapViewScope.location = location
+        mapViewScope.modifier = modifier
+    mapViewScope.offset = offset
+    mapViewScope.rotateOffsetWithGeoView = rotateOffsetWithGeoView
+    mapViewScope.content = content
 
-    if (!isMapViewReady.value) {
-        return
-    }
 
-    // Convert the given location to a screen coordinate
-    var leaderScreenCoordinate: ScreenCoordinate? by remember {
-        mutableStateOf(
-            getLeaderScreenCoordinate(mapView, location, offset, rotateOffsetWithGeoView)
-        )
-    }
+    mapViewScope.Callout()
 
-    LaunchedEffect(location) {
-        // Used to update screen coordinate when new location point is used
-        leaderScreenCoordinate =
-            getLeaderScreenCoordinate(mapView, location, offset, rotateOffsetWithGeoView)
-        // Used to update screen coordinate when viewpoint is changed
-        mapView.viewpointChanged.collect {
-            leaderScreenCoordinate =
-                getLeaderScreenCoordinate(mapView, location, offset, rotateOffsetWithGeoView)
-        }
-    }
-
-    val localDensity = LocalDensity.current
-    // Get the default shape, color & size properties for Callout
-    val properties = CalloutProperties()
-    val localLeaderScreenCoordinate = leaderScreenCoordinate
-    localLeaderScreenCoordinate?.let {
-        Box(
-            modifier = modifier
-                .drawCalloutContainer(
-                    cornerRadius = with(localDensity) { properties.cornerRadius.toPx() },
-                    strokeBorderWidth = with(localDensity) { properties.strokeBorderWidth.toPx() },
-                    strokeColor = properties.strokeColor,
-                    backgroundColor = properties.backgroundColor,
-                    calloutContentPadding = properties.calloutContentPadding,
-                    leaderWidth = with(localDensity) { properties.leaderSize.width.toPx() },
-                    leaderHeight = with(localDensity) { properties.leaderSize.height.toPx() },
-                    minSize = properties.minSize,
-                    calloutScreenCoordinate = localLeaderScreenCoordinate,
-                )
-        )
-        {
-            this.content()
-        }
-    }
 }
 
 /**
