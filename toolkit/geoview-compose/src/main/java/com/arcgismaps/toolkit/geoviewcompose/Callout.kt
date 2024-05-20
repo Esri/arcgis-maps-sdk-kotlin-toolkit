@@ -147,8 +147,7 @@ public fun MapViewScope.Callout(
                         calloutContentPadding = properties.calloutContentPadding,
                         leaderWidth = with(localDensity) { properties.leaderSize.width.toPx() },
                         leaderHeight = with(localDensity) { properties.leaderSize.height.toPx() },
-                        minSize = properties.minSize,
-                        calloutScreenCoordinate = localLeaderScreenCoordinate,
+                        minSize = properties.minSize
                     )
             )
             {
@@ -232,8 +231,8 @@ private fun DoubleXY.rotate(rotateByAngle: Double, center: DoubleXY = DoubleXY.z
 
 /**
  * Analogue of Layout which allows to sub-compose the Callout content during the measuring stage,
- * and place the content at the given [screenCoordinate].
- *
+ * and place the content at the given screenCoordinate.
+ * @param screenCoordinate Represents the x,y coordinate for the location on GeoView
  * @since 200.5.0
  */
 @Composable
@@ -287,7 +286,6 @@ private fun SubComposableLayout(
  * @param leaderWidth Width of the Callout leader in px.
  * @param leaderHeight Height of the Callout leader in px.
  * @param minSize Minimum size the of the Callout shape.
- * @param calloutScreenCoordinate Represents the x,y coordinate of the Callout leader.
  * @since 200.5.0
  */
 @Composable
@@ -299,8 +297,7 @@ private fun Modifier.drawCalloutContainer(
     calloutContentPadding: PaddingValues,
     leaderWidth: Float,
     leaderHeight: Float,
-    minSize: DpSize,
-    calloutScreenCoordinate: ScreenCoordinate,
+    minSize: DpSize
 ) = then(
     sizeIn(minWidth = minSize.width, minHeight = minSize.height)
         // Set bottom padding to ensure the leader is visible
