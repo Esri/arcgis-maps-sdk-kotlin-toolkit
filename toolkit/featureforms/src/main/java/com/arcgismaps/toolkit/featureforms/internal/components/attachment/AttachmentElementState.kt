@@ -107,6 +107,7 @@ internal class AttachmentElementState(
     init {
         scope.launch {
             formElement.fetchAttachments().onSuccess {
+                // build a state list of attachments
                 buildAttachmentStates(formElement.attachments)
             }
         }
@@ -114,12 +115,14 @@ internal class AttachmentElementState(
             formElement.attachmentChanged.collect {
                 when (it.changeType) {
                     is AttachmentChangeType.Deletion -> {
+                        // delete the state object
                         attachments.removeIf { state ->
                             state.formAttachment == it.attachment
                         }
                     }
 
                     is AttachmentChangeType.Rename -> {
+                        // update the state object
                         attachments.firstOrNull { state ->
                             state.formAttachment == it.attachment
                         }?.update(it.attachment)
@@ -134,8 +137,7 @@ internal class AttachmentElementState(
 
     /**
      *  Loads the attachments provided in the [list] and transforms them into state objects
-     *  to produce the [attachments] map. This will generate a new map of attachments but will
-     *  reuse the existing state objects if they exist while updating their properties.
+     *  to produce the [attachments] list.
      */
     private suspend fun buildAttachmentStates(list: List<FormAttachment>) {
         attachments.clear()
@@ -188,16 +190,25 @@ internal class AttachmentElementState(
         }
     }
 
+    /**
+     * Deletes the given [formAttachment].
+     */
     private suspend fun deleteAttachment(formAttachment: FormAttachment) {
         formElement.deleteAttachment(formAttachment)
     }
 
+    /**
+     * Renames the given [formAttachment] with the new [newName].
+     */
     suspend fun renameAttachment(formAttachment: FormAttachment, newName: String) {
         if (formAttachment.name != newName) {
             formElement.renameAttachment(formAttachment, newName)
         }
     }
 
+    /**
+     * Checks if the camera permissions are granted.
+     */
     fun hasCameraPermissions(context: Context): Boolean = ContextCompat.checkSelfPermission(
         context,
         Manifest.permission.CAMERA
