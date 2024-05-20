@@ -117,7 +117,7 @@ public fun MapViewScope.Callout(
         rotateOffsetWithGeoView,
     )
     leaderScreenCoordinate?.let {
-        // TODO ....
+        // TODO .... How to incorporate this with calloutScreenCoordinate?
     }
 
     val localDensity = LocalDensity.current
@@ -234,6 +234,12 @@ private fun DoubleXY.rotate(rotateByAngle: Double, center: DoubleXY = DoubleXY.z
     return DoubleXY(x2 + center.x, y2 + center.y)
 }
 
+/**
+ * Analogue of Layout which allows to sub-compose the Callout content during the measuring stage,
+ * and place the content at the given [screenCoordinate].
+ *
+ * @since 200.5.0
+ */
 @Composable
 private fun SubComposableLayout(
     modifier: Modifier = Modifier,
@@ -309,8 +315,8 @@ private fun Modifier.drawCalloutContainer(
                     val path = calloutPath(
                         size = size,
                         cornerRadius = cornerRadius,
-                        anchorLeaderWidth = leaderWidth,
-                        anchorLeaderHeight = leaderHeight
+                        leaderWidth = leaderWidth,
+                        leaderHeight = leaderHeight
                     )
                     // Fill the path's shape with the Callout's background color
                     drawPath(
@@ -333,17 +339,17 @@ private fun Modifier.drawCalloutContainer(
 /**
  * Create the Callout shape by returning the [Path] using the given parameters.
  *
- * [size] The calculated size of the resulting content used to created the Path.
- * [cornerRadius] The corner radius of the rectangle shape in px.
- * [anchorLeaderWidth] Width of the anchor leader in px.
- * [anchorLeaderHeight] Height of the anchor leader in px.
+ * @param size The calculated size of the resulting content used to created the Path.
+ * @param cornerRadius The corner radius of the rectangle shape in px.
+ * @param leaderWidth Width of the Callout leader in px.
+ * @param leaderHeight Height of the Callout leader in px.
  * @since 200.5.0
  */
 private fun calloutPath(
     size: Size,
     cornerRadius: Float,
-    anchorLeaderWidth: Float,
-    anchorLeaderHeight: Float
+    leaderWidth: Float,
+    leaderHeight: Float
 ): Path {
     return Path().apply {
         reset()
@@ -388,17 +394,17 @@ private fun calloutPath(
         )
         // Draw a line from the end of the arc to the start of the bottom leader
         lineTo(
-            x = (size.width / 2) + (anchorLeaderWidth / 2),
+            x = (size.width / 2) + (leaderWidth / 2),
             y = rect.bottom
         )
         // Draw a line from start of the leader bottom to the leader tip
         lineTo(
             x = (size.width / 2),
-            y = rect.bottom + anchorLeaderHeight
+            y = rect.bottom + leaderHeight
         )
         // Draw a line from the leader tip to the bottom leader
         lineTo(
-            x = (size.width / 2) - (anchorLeaderWidth / 2),
+            x = (size.width / 2) - (leaderWidth / 2),
             y = rect.bottom
         )
         // Draw a line from the bottom leader to the start of the bottom-left corner
