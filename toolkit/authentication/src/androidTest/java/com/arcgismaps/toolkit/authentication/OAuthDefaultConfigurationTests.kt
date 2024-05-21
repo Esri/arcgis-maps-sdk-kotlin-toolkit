@@ -36,17 +36,6 @@ class OAuthDefaultConfigurationTests {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
-    private val arcGISOnline = "https://arcgis.com"
-    private val authenticatorState = AuthenticatorState().apply {
-        oAuthUserConfiguration = OAuthUserConfiguration(
-            arcGISOnline,
-            // This client ID is for demo purposes only. For use of the Authenticator in your own app,
-            //            // create your own client ID. For more info see: https://developers.arcgis.com/documentation/mapping-apis-and-services/security/tutorials/register-your-application/
-            "uITYQG1POJsrluOP",
-            "kotlin-authentication-test-1://auth"
-        )
-    }
-
     @Before
     fun signOutBefore() = signOut()
 
@@ -119,6 +108,15 @@ class OAuthDefaultConfigurationTests {
     fun TestScope.testOAuthChallengeWithStateRestoration(
         userInputOnDialog: UiDevice.() -> Unit,
     ): Deferred<ArcGISAuthenticationChallengeResponse> {
+        val authenticatorState = AuthenticatorState().apply {
+            oAuthUserConfiguration = OAuthUserConfiguration(
+                "https://arcgis.com",
+                // This client ID is for demo purposes only. For use of the Authenticator in your own app,
+                //            // create your own client ID. For more info see: https://developers.arcgis.com/documentation/mapping-apis-and-services/security/tutorials/register-your-application/
+                "uITYQG1POJsrluOP",
+                "kotlin-authentication-test-1://auth"
+            )
+        }
         composeTestRule.setContent {
             Authenticator(
                 authenticatorState = authenticatorState,
