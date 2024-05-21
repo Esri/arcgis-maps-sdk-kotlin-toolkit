@@ -194,7 +194,7 @@ private fun DefaultView(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            Size(size = size)
+            AttachmentSize(size = size)
             Icon(
                 imageVector = Icons.Outlined.ArrowDownward,
                 contentDescription = null,
@@ -243,7 +243,7 @@ private fun Title(
 }
 
 @Composable
-private fun Size(
+private fun AttachmentSize(
     size: Long, modifier:
     Modifier = Modifier
 ) {

@@ -91,7 +91,7 @@ private fun HTML(content: String) {
  */
 @Composable
 internal fun TextPopupElement(state: TextElementState) {
-    ExpandableCard {
+    ExpandableCard(toggleable = false) {
         HTML(content = state.value)
     }
 }

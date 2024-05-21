@@ -45,7 +45,7 @@ internal fun AttachmentsPopupElement(
 }
 
 @Composable
-internal fun AttachmentsPopupElement(
+private fun AttachmentsPopupElement(
     description: String,
     title: String,
     @Suppress("UNUSED_PARAMETER") stateId: Int,
@@ -53,8 +53,7 @@ internal fun AttachmentsPopupElement(
 ) {
     ExpandableCard(
         title = title,
-        description = description,
-        elementCount = attachments.size
+        description = description
     ) {
         Column(
             modifier = Modifier.padding(AttachmentsElementDefaults.shapes().galleryPadding)
