@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # Build and run the Kotlin Toolkit tests
 
+source $(dirname ${BASH_SOURCE})/../common.sh
 source $(dirname ${BASH_SOURCE})/common_test.sh
 
 test_project="${1}"
-if [[ "${test_project}" != "integration" && "${test_project}" != "unit" ]]; then
+if [ "${test_project}" != "integration" ] && [ "${test_project}" != "unit" ]; then
   echo "error: Unknown test project: ${test_project}"
   exit 1
 fi
@@ -12,10 +13,10 @@ fi
 gradle_task=""
 reports_path=""
 results_path=""
-if [ "${test_project}" == "integration"]; then
+if [ "${test_project}" == "integration" ]; then
   gradle_task="connectedDebugAndroidTest --continue"
   reports_path="${integration_reports_path}"
-elif [ "${test_project}" == "unit"]; then
+elif [ "${test_project}" == "unit" ]; then
   gradle_task="testAggregatedReport --continue"
   reports_path="${unit_reports_path}"
 else
@@ -30,7 +31,8 @@ if [ "${test_project}" != "unit" ]; then
 fi
 
 _log "Building and running the ${test_project} tests"
-if ! ${runtime_path}/arcgis-maps-sdk-kotlin-toolkit/gradlew "${gradle_task}"; then
+cd ${apps_path}/arcgis-maps-sdk-kotlin-toolkit
+if ! ./gradlew "${gradle_task}"; then
   success="false"
 fi
 
