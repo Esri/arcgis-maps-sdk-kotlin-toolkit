@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModel
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.exceptions.OperationCancelledException
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
 import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
@@ -63,7 +64,7 @@ class OAuthUserLauncherTests {
             // TODO: Replace with real credentials once we have a test data solution
             enterCredentialsOnBrowser("username", "password", composeTestRule.activity)
             clickByText("Sign In")
-        }.await()
+        }.await().getOrNull()
         assert(response is ArcGISAuthenticationChallengeResponse.ContinueWithCredential)
         assert((response as ArcGISAuthenticationChallengeResponse.ContinueWithCredential).credential is OAuthUserCredential)
     }
@@ -79,8 +80,8 @@ class OAuthUserLauncherTests {
     fun cancelSignIn() = runTest {
         val response = testOAuthChallengeWithStateRestoration {
             clickByText("Cancel")
-        }.await()
-        assert(response is ArcGISAuthenticationChallengeResponse.Cancel)
+        }.await().exceptionOrNull()
+        assert(response is OperationCancelledException)
     }
 
     /**
@@ -94,8 +95,8 @@ class OAuthUserLauncherTests {
     fun pressBack() = runTest {
         val response = testOAuthChallengeWithStateRestoration {
             pressBack()
-        }.await()
-        assert(response is ArcGISAuthenticationChallengeResponse.Cancel)
+        }.await().exceptionOrNull()
+        assert(response is OperationCancelledException)
     }
 
     /**
@@ -109,7 +110,7 @@ class OAuthUserLauncherTests {
     @OptIn(ExperimentalCoroutinesApi::class)
     fun TestScope.testOAuthChallengeWithStateRestoration(
         userInputOnDialog: UiDevice.() -> Unit,
-    ): Deferred<ArcGISAuthenticationChallengeResponse> {
+    ): Deferred<Result<ArcGISAuthenticationChallengeResponse>> {
         // start the activity (which contains the Authenticator)
         val authenticatorState = composeTestRule.activity.viewModel.authenticatorState
         composeTestRule.activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
@@ -117,9 +118,11 @@ class OAuthUserLauncherTests {
         composeTestRule.waitForIdle()
         // issue the OAuth challenge
         val challengeResponse = async {
-            authenticatorState.handleArcGISAuthenticationChallenge(
-                makeMockArcGISAuthenticationChallenge()
-            )
+            runCatching {
+                authenticatorState.handleArcGISAuthenticationChallenge(
+                    makeMockArcGISAuthenticationChallenge()
+                )
+            }
         }
         // ensure the challenge is issued
         advanceUntilIdle()

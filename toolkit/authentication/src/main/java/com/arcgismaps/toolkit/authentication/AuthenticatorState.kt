@@ -21,7 +21,6 @@ package com.arcgismaps.toolkit.authentication
 import android.content.Intent
 import android.security.KeyChainAliasCallback
 import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.exceptions.OperationCancelledException
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeHandler
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
@@ -180,13 +179,7 @@ private class AuthenticatorStateImpl(
                         // we can get rid of the pending sign in. Composables observing this can know
                         // to remove the OAuth prompt when this value changes.
                         _pendingOAuthUserSignIn.value = null
-                    }.getOrElse {
-                        if (it is OperationCancelledException) {
-                            return ArcGISAuthenticationChallengeResponse.Cancel
-                        } else {
-                            return ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError(it)
-                        }
-                    }
+                    }.getOrThrow()
 
                 ArcGISAuthenticationChallengeResponse.ContinueWithCredential(
                     oAuthUserCredential
