@@ -46,7 +46,6 @@ internal fun FieldsPopupElement(state: FieldsElementState) {
     ExpandableCard(
         title = state.title,
         description = state.description,
-        elementCount = state.fieldsToFormattedValues.size,
     ) {
         Column {
             state.fieldsToFormattedValues.forEach {
