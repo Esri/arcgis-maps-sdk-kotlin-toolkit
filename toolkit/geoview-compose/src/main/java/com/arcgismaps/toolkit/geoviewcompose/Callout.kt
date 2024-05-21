@@ -58,12 +58,390 @@ import com.arcgismaps.mapping.view.zero
 import kotlin.math.cos
 import kotlin.math.sin
 
+internal data class CalloutParams (private val mapPlacement: MapPlacement) {
+    public sealed class MapPlacement {
+        data class MapPoint(
+            val location: Point,
+            val modifier: Modifier,
+            val offset: Offset,
+            val rotateOffsetWithGeoView: Boolean,
+            val content: (@Composable BoxScope.() -> Unit)
+        ) : MapPlacement()
+    }
+
+//    constructor(
+//        location: Point,
+//        modifier: Modifier,
+//        offset: Offset,
+//        rotateOffsetWithGeoView: Boolean,
+//        content: (@Composable BoxScope.() -> Unit)
+//    ) : this(MapPlacement.MapPoint(location, modifier, offset, rotateOffsetWithGeoView, content))
+
+}
+
 /**
  * The receiver class of the MapView content lambda.
  *
  * @since 200.5.0
  */
-public class MapViewScope(internal val mapView: MapView)
+public class MapViewScope(private var _mapView: MapView?) {
+    internal lateinit var location: Point
+    internal lateinit var modifier: Modifier
+    internal var offset: Offset = Offset.Zero
+    internal var rotateOffsetWithGeoView: Boolean = false
+    internal var content: (@Composable BoxScope.() -> Unit)? = null
+    internal lateinit var mapPlacement: CalloutParams.MapPlacement
+    private val mapView: MapView
+        get() = _mapView ?: error("MapView not initialized")
+
+    /**
+     * Creates a Callout at the specified geographical location on the MapView. The Callout is a composable
+     * that can be used to display additional information about a location on the map. The additional information is
+     * passed as a content composable that contains text and/or other content. It has a leader that points to
+     * the location that Callout refers to. The body of the Callout is a rectangular area with curved corners
+     * that contains the content lambda provided by the application. A thin border line is drawn around the entire Callout.
+     *
+     * @param location the geographical location at which to display the Callout
+     * @param modifier Modifier to be applied to the composable Callout
+     * @param content the content of the Callout
+     * @param offset the offset in screen coordinates from the geographical location at which to place the callout
+     * @param rotateOffsetWithGeoView specifies whether the screen offset is rotated with the [GeoView]. The Screen offset
+     *        will be rotated with the [GeoView] when true, false otherwise.
+     *        This is useful if you are showing the callout for elements with symbology that does rotate with the [GeoView]
+     * @since 200.5.0
+     */
+    @Composable
+    internal fun MapPointCallout() {
+        val isMapViewReady = remember { mutableStateOf(false) }
+        // We don't want to start drawing the Callout until the MapView is ready. We only collect
+        // the drawStatus till the first time MapView is done drawing. the transformWhile operator
+        // will stop collecting when isMapViewReady.value becomes false.
+//        LaunchedEffect(location) {
+//        val mapPoint = mapPlacement as CalloutParams.MapPlacement.MapPoint
+        LaunchedEffect(location) {
+            mapView.drawStatus.transformWhile { drawStatus ->
+                emit(drawStatus)
+                !isMapViewReady.value
+            }.collect {
+                if (it == DrawStatus.Completed) {
+                    isMapViewReady.value = true
+                }
+            }
+        }
+
+        if (!isMapViewReady.value) {
+            return
+        }
+
+        // Convert the given location to a screen coordinate
+        var leaderScreenCoordinate: ScreenCoordinate? by remember {
+            mutableStateOf(
+                getLeaderScreenCoordinate(mapView, location, offset, rotateOffsetWithGeoView)
+            )
+        }
+
+        LaunchedEffect(location) {
+            // Used to update screen coordinate when new location point is used
+            leaderScreenCoordinate =
+                getLeaderScreenCoordinate(mapView, location, offset, rotateOffsetWithGeoView)
+            // Used to update screen coordinate when viewpoint is changed
+            mapView.viewpointChanged.collect {
+                leaderScreenCoordinate =
+                    getLeaderScreenCoordinate(
+                        mapView,
+                        location,
+                        offset,
+                        rotateOffsetWithGeoView
+                    )
+            }
+        }
+
+        val localDensity = LocalDensity.current
+        // Get the default shape, color & size properties for Callout
+        val properties = CalloutProperties()
+        val localLeaderScreenCoordinate = leaderScreenCoordinate
+        localLeaderScreenCoordinate?.let {
+            Box(
+                modifier = modifier
+                    .drawCalloutContainer(
+                        cornerRadius = with(localDensity) { properties.cornerRadius.toPx() },
+                        strokeBorderWidth = with(localDensity) { properties.strokeBorderWidth.toPx() },
+                        strokeColor = properties.strokeColor,
+                        backgroundColor = properties.backgroundColor,
+                        calloutContentPadding = properties.calloutContentPadding,
+                        leaderWidth = with(localDensity) { properties.leaderSize.width.toPx() },
+                        leaderHeight = with(localDensity) { properties.leaderSize.height.toPx() },
+                        minSize = properties.minSize,
+                        calloutScreenCoordinate = localLeaderScreenCoordinate,
+                    )
+            )
+            {
+//                this.content()
+                content!!.invoke(this)
+            }
+        }
+    }
+    /**
+     * Returns the ScreenCoordinate for the location [Point] on [GeoView].
+     *
+     * @param geoView the GeoView
+     * @param location the location in geographical coordinates
+     * @param offset the offset in screen coordinates from the geographical location at which to place the callout
+     * @param rotateOffsetWithGeoView specifies whether the screen offset is rotated with the [GeoView]. The Screen offset
+     *       will be rotated with the [GeoView] when true, false otherwise.
+     * @return A [ScreenCoordinate] for the screen in pixels or null if the location is not visible
+     * @since 200.5.0
+     */
+    private fun getLeaderScreenCoordinate(
+        geoView: GeoView,
+        location: Point,
+        offset: Offset,
+        rotateOffsetWithGeoView: Boolean
+    ): ScreenCoordinate? {
+        val geoViewRotation = geoView.rotation()
+        val locationToScreen = when (geoView) {
+            is MapView -> geoView.locationToScreen(location)
+            is SceneView -> {
+                val locationToScreenResult = geoView.locationToScreen(location)
+                if (locationToScreenResult?.visibility == SceneLocationVisibility.Visible) {
+                    locationToScreenResult.screenPoint
+                }
+                null
+            }
+        }
+        return locationToScreen?.let { screenCoordinate ->
+            if (rotateOffsetWithGeoView && geoViewRotation != 0.0) {
+                val angle = AngularUnit.degrees.convertTo(AngularUnit.radians, -geoViewRotation)
+                screenCoordinate.offset(offset).rotate(angle, screenCoordinate)
+            } else {
+                screenCoordinate.offset(offset)
+            }
+        }
+    }
+
+    private fun GeoView.rotation(): Double = when (this) {
+        is SceneView -> getCurrentViewpoint(ViewpointType.CenterAndScale)?.rotation ?: 0.0
+        is MapView -> mapRotation.value
+    }
+
+    /**
+     * Returns a [DoubleXY] which is the result of offsetting this [DoubleXY] by the specified [Offset].
+     *
+     * @param offset the offset to be applied
+     * @return the new [DoubleXY] offset point
+     * @since 200.5.0
+     */
+    private fun DoubleXY.offset(offset: Offset): DoubleXY {
+        return DoubleXY(x + offset.x, y + offset.y)
+    }
+
+    /**
+     * Returns a [DoubleXY] which is the result of rotating this [DoubleXY] by an angle around a center.
+     *
+     * @param rotateByAngle angle in Radians where a positive value is counter clockwise
+     * @param center the center around which the resulting point will be rotated
+     * @return the resulting [DoubleXY] that has been rotated
+     * @since 200.5.0
+     */
+    private fun DoubleXY.rotate(rotateByAngle: Double, center: DoubleXY = DoubleXY.zero): DoubleXY {
+        val x1 = x - center.x
+        val y1 = y - center.y
+
+        val x2 = x1 * cos(rotateByAngle) - y1 * sin(rotateByAngle)
+        val y2 = x1 * sin(rotateByAngle) + y1 * cos(rotateByAngle)
+
+        return DoubleXY(x2 + center.x, y2 + center.y)
+    }
+
+    /**
+     * Extension function to draw the Callout container using the given parameters. It draws the shape, adds the content padding, adds padding for the leader height, restricting the min size and positions it on the screen.
+     *
+     * @param cornerRadius The corner radius of the Callout shape in px.
+     * @param strokeBorderWidth Width of the Callout stroke in px.
+     * @param strokeColor Color used to define the outline stroke.
+     * @param backgroundColor Color used to define the fill color of the Callout shape.
+     * @param calloutContentPadding PaddingValues for the content placed inside the Callout.
+     * @param leaderWidth Width of the Callout leader in px.
+     * @param leaderHeight Height of the Callout leader in px.
+     * @param minSize Minimum size the of the Callout shape.
+     * @param calloutScreenCoordinate Represents the x,y coordinate of the Callout leader.
+     * @since 200.5.0
+     */
+    @Composable
+    private fun Modifier.drawCalloutContainer(
+        cornerRadius: Float,
+        strokeBorderWidth: Float,
+        strokeColor: Color,
+        backgroundColor: Color,
+        calloutContentPadding: PaddingValues,
+        leaderWidth: Float,
+        leaderHeight: Float,
+        minSize: DpSize,
+        calloutScreenCoordinate: ScreenCoordinate,
+    ) = then(
+        sizeIn(minWidth = minSize.width, minHeight = minSize.height)
+            // Set bottom padding to ensure the leader is visible
+            .padding(bottom = with(LocalDensity.current) { leaderHeight.toDp() })
+            .graphicsLayer {
+                translationX = calloutScreenCoordinate.x.toFloat()
+                translationY = calloutScreenCoordinate.y.toFloat()
+            }
+            .drawWithCache {
+                onDrawBehind {
+                    // Define the Path of the callout
+                    val path = calloutPath(size, cornerRadius, leaderWidth, leaderHeight)
+                    // Fill the path's shape with the Callout's background color
+                    drawPath(
+                        path = path,
+                        color = backgroundColor,
+                        style = Fill
+                    )
+                    // Outline the path's shape with the Callout's stroke color
+                    drawPath(
+                        path = path,
+                        color = strokeColor,
+                        style = Stroke(width = strokeBorderWidth)
+                    )
+                }
+            }
+            .padding(calloutContentPadding)
+    )
+
+    /**
+     * Create the Callout shape by returning the [Path] using the given parameters.
+     *
+     * @param size The calculated size of the resulting content used to created the Path.
+     * @param cornerRadius The corner radius of the rectangle shape in px.
+     * @param leaderWidth Width of the Callout leader in px.
+     * @param leaderHeight Height of the Callout leader in px.
+     * @since 200.5.0
+     */
+    private fun calloutPath(
+        size: Size,
+        cornerRadius: Float,
+        leaderWidth: Float,
+        leaderHeight: Float
+    ): Path {
+        return Path().apply {
+            reset()
+            // Create a default rectangle using the given size
+            val rect = Rect(left = 0f, top = 0f, right = size.width, bottom = size.height)
+            // Move to the top-left corner of the shape
+            moveTo(x = rect.left + cornerRadius, y = rect.top)
+            // Draw a line from 0,0 to the top-right start of the corner
+            lineTo(x = rect.right - cornerRadius, y = rect.top)
+            // Create the top-right corner rectangle
+            val topRightCorner = Rect(
+                left = rect.right - 2 * cornerRadius,
+                top = rect.top,
+                right = rect.right,
+                bottom = rect.top + 2 * cornerRadius
+            )
+            // Draw an arc representing the top-right corner
+            arcTo(
+                rect = topRightCorner,
+                startAngleDegrees = -90f,
+                sweepAngleDegrees = 90f,
+                forceMoveTo = false
+            )
+            // Draw a line from the end of the arc to the bottom-right start of the corner
+            lineTo(
+                x = rect.right,
+                y = rect.bottom - cornerRadius
+            )
+            // Create the bottom-right corner rectangle
+            val bottomRightCorner = Rect(
+                left = rect.right - 2 * cornerRadius,
+                top = rect.bottom - 2 * cornerRadius,
+                right = rect.right,
+                bottom = rect.bottom
+            )
+            // Draw an arc representing the bottom-right corner
+            arcTo(
+                rect = bottomRightCorner,
+                startAngleDegrees = 0f,
+                sweepAngleDegrees = 90f,
+                forceMoveTo = false
+            )
+            // Draw a line from the end of the arc to the start of the bottom leader
+            lineTo(
+                x = (size.width / 2) + (leaderWidth / 2),
+                y = rect.bottom
+            )
+            // Draw a line from start of the leader bottom to the leader tip
+            lineTo(
+                x = (size.width / 2),
+                y = rect.bottom + leaderHeight
+            )
+            // Draw a line from the leader tip to the bottom leader
+            lineTo(
+                x = (size.width / 2) - (leaderWidth / 2),
+                y = rect.bottom
+            )
+            // Draw a line from the bottom leader to the start of the bottom-left corner
+            lineTo(
+                x = rect.left + cornerRadius,
+                y = rect.bottom
+            )
+            // Create the bottom-left corner rectangle
+            val bottomLeftCorner = Rect(
+                left = rect.left,
+                top = rect.bottom - 2 * cornerRadius,
+                right = rect.left + 2 * cornerRadius,
+                bottom = rect.bottom
+            )
+            // Draw an arc representing the bottom-left corner
+            arcTo(
+                rect = bottomLeftCorner,
+                startAngleDegrees = 90f,
+                sweepAngleDegrees = 90f,
+                forceMoveTo = false
+            )
+            // Draw a line from the end of the arc to the top-left start of the corner
+            lineTo(
+                x = rect.left,
+                y = rect.top + cornerRadius
+            )
+            // Create the top-left corner rectangle
+            val topLeftCorner = Rect(
+                left = rect.left,
+                top = rect.top,
+                right = rect.left + 2 * cornerRadius,
+                bottom = rect.top + 2 * cornerRadius
+            )
+            // Draw an arc representing the top-left corner
+            arcTo(
+                rect = topLeftCorner,
+                startAngleDegrees = 180f,
+                sweepAngleDegrees = 90f,
+                forceMoveTo = false
+            )
+            // Close the path to complete the shape
+            close()
+        }
+    }
+
+    /**
+     * UI default properties for the [Callout] component.
+     */
+    private data class CalloutProperties(
+        val cornerRadius: Dp = 10.dp,
+        val strokeBorderWidth: Dp = 2.dp,
+        val strokeColor: Color = Color.LightGray,
+        val backgroundColor: Color = Color.White,
+        val calloutContentPadding: PaddingValues = PaddingValues(
+            all = cornerRadius + (strokeBorderWidth / 2)
+        ),
+        val leaderSize: DpSize = DpSize(
+            width = 12.dp,
+            height = 10.dp
+        ),
+        val minSize: DpSize = DpSize(
+            width = strokeBorderWidth + (2 * cornerRadius),
+            height = strokeBorderWidth + (2 * cornerRadius)
+        )
+    )
+}
 
 /**
  * Creates a Callout at the specified geographical location on the MapView. The Callout is a composable
@@ -89,325 +467,12 @@ public fun MapViewScope.Callout(
     rotateOffsetWithGeoView: Boolean = false,
     content: @Composable BoxScope.() -> Unit
 ) {
-    val isMapViewReady = remember { mutableStateOf(false) }
-    // We don't want to start drawing the Callout until the MapView is ready. We only collect
-    // the drawStatus till the first time MapView is done drawing. the transformWhile operator
-    // will stop collecting when isMapViewReady.value becomes false.
-    LaunchedEffect(location) {
-        mapView.drawStatus.transformWhile { drawStatus ->
-            emit(drawStatus)
-            !isMapViewReady.value
-        }.collect {
-            if (it == DrawStatus.Completed) {
-                isMapViewReady.value = true
-            }
-        }
-    }
-
-    if (!isMapViewReady.value) {
-        return
-    }
-
-    // Convert the given location to a screen coordinate
-    var leaderScreenCoordinate: ScreenCoordinate? by remember {
-        mutableStateOf(
-            getLeaderScreenCoordinate(mapView, location, offset, rotateOffsetWithGeoView)
-        )
-    }
-
-    LaunchedEffect(location) {
-        // Used to update screen coordinate when new location point is used
-        leaderScreenCoordinate =
-            getLeaderScreenCoordinate(mapView, location, offset, rotateOffsetWithGeoView)
-        // Used to update screen coordinate when viewpoint is changed
-        mapView.viewpointChanged.collect {
-            leaderScreenCoordinate =
-                getLeaderScreenCoordinate(mapView, location, offset, rotateOffsetWithGeoView)
-        }
-    }
-
-    val localDensity = LocalDensity.current
-    // Get the default shape, color & size properties for Callout
-    val properties = CalloutProperties()
-    val localLeaderScreenCoordinate = leaderScreenCoordinate
-    localLeaderScreenCoordinate?.let {
-        Box(
-            modifier = modifier
-                .drawCalloutContainer(
-                    cornerRadius = with(localDensity) { properties.cornerRadius.toPx() },
-                    strokeBorderWidth = with(localDensity) { properties.strokeBorderWidth.toPx() },
-                    strokeColor = properties.strokeColor,
-                    backgroundColor = properties.backgroundColor,
-                    calloutContentPadding = properties.calloutContentPadding,
-                    leaderWidth = with(localDensity) { properties.leaderSize.width.toPx() },
-                    leaderHeight = with(localDensity) { properties.leaderSize.height.toPx() },
-                    minSize = properties.minSize,
-                    calloutScreenCoordinate = localLeaderScreenCoordinate,
-                )
-        )
-        {
-            this.content()
-        }
-    }
+//    this.mapPlacement = CalloutParams.MapPlacement.MapPoint(location, modifier, offset, rotateOffsetWithGeoView, content)
+    this.location = location
+    this.modifier = modifier
+    this.offset = offset
+    this.rotateOffsetWithGeoView = rotateOffsetWithGeoView
+    this.content = content
+    this.MapPointCallout()
 }
 
-/**
- * Returns the ScreenCoordinate for the location [Point] on [GeoView].
- *
- * @param geoView the GeoView
- * @param location the location in geographical coordinates
- * @param offset the offset in screen coordinates from the geographical location at which to place the callout
- * @param rotateOffsetWithGeoView specifies whether the screen offset is rotated with the [GeoView]. The Screen offset
- *       will be rotated with the [GeoView] when true, false otherwise.
- * @return A [ScreenCoordinate] for the screen in pixels or null if the location is not visible
- * @since 200.5.0
- */
-private fun getLeaderScreenCoordinate(
-    geoView: GeoView,
-    location: Point,
-    offset: Offset,
-    rotateOffsetWithGeoView: Boolean
-): ScreenCoordinate? {
-    val geoViewRotation = geoView.rotation()
-    val locationToScreen = when (geoView) {
-        is MapView -> geoView.locationToScreen(location)
-        is SceneView -> {
-            val locationToScreenResult = geoView.locationToScreen(location)
-            if (locationToScreenResult?.visibility == SceneLocationVisibility.Visible) {
-                locationToScreenResult.screenPoint
-            }
-            null
-        }
-    }
-    return locationToScreen?.let { screenCoordinate ->
-        if (rotateOffsetWithGeoView && geoViewRotation != 0.0) {
-            val angle = AngularUnit.degrees.convertTo(AngularUnit.radians, -geoViewRotation)
-            screenCoordinate.offset(offset).rotate(angle, screenCoordinate)
-        } else {
-            screenCoordinate.offset(offset)
-        }
-    }
-}
-
-private fun GeoView.rotation(): Double = when (this) {
-    is SceneView -> getCurrentViewpoint(ViewpointType.CenterAndScale)?.rotation ?: 0.0
-    is MapView -> mapRotation.value
-}
-
-/**
- * Returns a [DoubleXY] which is the result of offsetting this [DoubleXY] by the specified [Offset].
- *
- * @param offset the offset to be applied
- * @return the new [DoubleXY] offset point
- * @since 200.5.0
- */
-private fun DoubleXY.offset(offset: Offset): DoubleXY {
-    return DoubleXY(x + offset.x, y + offset.y)
-}
-
-/**
- * Returns a [DoubleXY] which is the result of rotating this [DoubleXY] by an angle around a center.
- *
- * @param rotateByAngle angle in Radians where a positive value is counter clockwise
- * @param center the center around which the resulting point will be rotated
- * @return the resulting [DoubleXY] that has been rotated
- * @since 200.5.0
- */
-private fun DoubleXY.rotate(rotateByAngle: Double, center: DoubleXY = DoubleXY.zero): DoubleXY {
-    val x1 = x - center.x
-    val y1 = y - center.y
-
-    val x2 = x1 * cos(rotateByAngle) - y1 * sin(rotateByAngle)
-    val y2 = x1 * sin(rotateByAngle) + y1 * cos(rotateByAngle)
-
-    return DoubleXY(x2 + center.x, y2 + center.y)
-}
-
-/**
- * Extension function to draw the Callout container using the given parameters. It draws the shape, adds the content padding, adds padding for the leader height, restricting the min size and positions it on the screen.
- *
- * @param cornerRadius The corner radius of the Callout shape in px.
- * @param strokeBorderWidth Width of the Callout stroke in px.
- * @param strokeColor Color used to define the outline stroke.
- * @param backgroundColor Color used to define the fill color of the Callout shape.
- * @param calloutContentPadding PaddingValues for the content placed inside the Callout.
- * @param leaderWidth Width of the Callout leader in px.
- * @param leaderHeight Height of the Callout leader in px.
- * @param minSize Minimum size the of the Callout shape.
- * @param calloutScreenCoordinate Represents the x,y coordinate of the Callout leader.
- * @since 200.5.0
- */
-@Composable
-private fun Modifier.drawCalloutContainer(
-    cornerRadius: Float,
-    strokeBorderWidth: Float,
-    strokeColor: Color,
-    backgroundColor: Color,
-    calloutContentPadding: PaddingValues,
-    leaderWidth: Float,
-    leaderHeight: Float,
-    minSize: DpSize,
-    calloutScreenCoordinate: ScreenCoordinate,
-) = then(
-    sizeIn(minWidth = minSize.width, minHeight = minSize.height)
-        // Set bottom padding to ensure the leader is visible
-        .padding(bottom = with(LocalDensity.current) { leaderHeight.toDp() })
-        .graphicsLayer {
-            translationX = calloutScreenCoordinate.x.toFloat()
-            translationY = calloutScreenCoordinate.y.toFloat()
-        }
-        .drawWithCache {
-            onDrawBehind {
-                // Define the Path of the callout
-                val path = calloutPath(size, cornerRadius, leaderWidth, leaderHeight)
-                // Fill the path's shape with the Callout's background color
-                drawPath(
-                    path = path,
-                    color = backgroundColor,
-                    style = Fill
-                )
-                // Outline the path's shape with the Callout's stroke color
-                drawPath(
-                    path = path,
-                    color = strokeColor,
-                    style = Stroke(width = strokeBorderWidth)
-                )
-            }
-        }
-        .padding(calloutContentPadding)
-)
-
-/**
- * Create the Callout shape by returning the [Path] using the given parameters.
- *
- * @param size The calculated size of the resulting content used to created the Path.
- * @param cornerRadius The corner radius of the rectangle shape in px.
- * @param leaderWidth Width of the Callout leader in px.
- * @param leaderHeight Height of the Callout leader in px.
- * @since 200.5.0
- */
-private fun calloutPath(
-    size: Size,
-    cornerRadius: Float,
-    leaderWidth: Float,
-    leaderHeight: Float
-): Path {
-    return Path().apply {
-        reset()
-        // Create a default rectangle using the given size
-        val rect = Rect(left = 0f, top = 0f, right = size.width, bottom = size.height)
-        // Move to the top-left corner of the shape
-        moveTo(x = rect.left + cornerRadius, y = rect.top)
-        // Draw a line from 0,0 to the top-right start of the corner
-        lineTo(x = rect.right - cornerRadius, y = rect.top)
-        // Create the top-right corner rectangle
-        val topRightCorner = Rect(
-            left = rect.right - 2 * cornerRadius,
-            top = rect.top,
-            right = rect.right,
-            bottom = rect.top + 2 * cornerRadius
-        )
-        // Draw an arc representing the top-right corner
-        arcTo(
-            rect = topRightCorner,
-            startAngleDegrees = -90f,
-            sweepAngleDegrees = 90f,
-            forceMoveTo = false
-        )
-        // Draw a line from the end of the arc to the bottom-right start of the corner
-        lineTo(
-            x = rect.right,
-            y = rect.bottom - cornerRadius
-        )
-        // Create the bottom-right corner rectangle
-        val bottomRightCorner = Rect(
-            left = rect.right - 2 * cornerRadius,
-            top = rect.bottom - 2 * cornerRadius,
-            right = rect.right,
-            bottom = rect.bottom
-        )
-        // Draw an arc representing the bottom-right corner
-        arcTo(
-            rect = bottomRightCorner,
-            startAngleDegrees = 0f,
-            sweepAngleDegrees = 90f,
-            forceMoveTo = false
-        )
-        // Draw a line from the end of the arc to the start of the bottom leader
-        lineTo(
-            x = (size.width / 2) + (leaderWidth / 2),
-            y = rect.bottom
-        )
-        // Draw a line from start of the leader bottom to the leader tip
-        lineTo(
-            x = (size.width / 2),
-            y = rect.bottom + leaderHeight
-        )
-        // Draw a line from the leader tip to the bottom leader
-        lineTo(
-            x = (size.width / 2) - (leaderWidth / 2),
-            y = rect.bottom
-        )
-        // Draw a line from the bottom leader to the start of the bottom-left corner
-        lineTo(
-            x = rect.left + cornerRadius,
-            y = rect.bottom
-        )
-        // Create the bottom-left corner rectangle
-        val bottomLeftCorner = Rect(
-            left = rect.left,
-            top = rect.bottom - 2 * cornerRadius,
-            right = rect.left + 2 * cornerRadius,
-            bottom = rect.bottom
-        )
-        // Draw an arc representing the bottom-left corner
-        arcTo(
-            rect = bottomLeftCorner,
-            startAngleDegrees = 90f,
-            sweepAngleDegrees = 90f,
-            forceMoveTo = false
-        )
-        // Draw a line from the end of the arc to the top-left start of the corner
-        lineTo(
-            x = rect.left,
-            y = rect.top + cornerRadius
-        )
-        // Create the top-left corner rectangle
-        val topLeftCorner = Rect(
-            left = rect.left,
-            top = rect.top,
-            right = rect.left + 2 * cornerRadius,
-            bottom = rect.top + 2 * cornerRadius
-        )
-        // Draw an arc representing the top-left corner
-        arcTo(
-            rect = topLeftCorner,
-            startAngleDegrees = 180f,
-            sweepAngleDegrees = 90f,
-            forceMoveTo = false
-        )
-        // Close the path to complete the shape
-        close()
-    }
-}
-
-/**
- * UI default properties for the [Callout] component.
- */
-private data class CalloutProperties(
-    val cornerRadius: Dp = 10.dp,
-    val strokeBorderWidth: Dp = 2.dp,
-    val strokeColor: Color = Color.LightGray,
-    val backgroundColor: Color = Color.White,
-    val calloutContentPadding: PaddingValues = PaddingValues(
-        all = cornerRadius + (strokeBorderWidth / 2)
-    ),
-    val leaderSize: DpSize = DpSize(
-        width = 12.dp,
-        height = 10.dp
-    ),
-    val minSize: DpSize = DpSize(
-        width = strokeBorderWidth + (2 * cornerRadius),
-        height = strokeBorderWidth + (2 * cornerRadius)
-    )
-)
