@@ -107,7 +107,7 @@ mkdir -p ${archive_folder}
 _log "Copying all test results, reports, ic-output to"
 echo "Archive URL: ${archive_url}"
 
-for test_artifact in ${WORKSPACE}/ic-output ${WORKSPACE}/reports ${WORKSPACE}/test-results; do
+for test_artifact in ${apps_path}/ic-output ${apps_path}/reports ${apps_path}/test-results; do
   if [ -d "${test_artifact}" ]; then
     cp -r ${test_artifact} ${archive_folder}/
   fi
