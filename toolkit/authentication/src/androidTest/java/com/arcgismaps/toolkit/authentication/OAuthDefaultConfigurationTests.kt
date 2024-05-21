@@ -47,18 +47,14 @@ class OAuthDefaultConfigurationTests {
     }
 
     @Before
-    fun signOut() {
-        runBlocking {
-            ArcGISEnvironment.authenticationManager.signOut()
-        }
-    }
+    fun signOutBefore() = signOut()
 
     @After
-    fun closeBrowser() {
-        try {
-            UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).pressBack()
-        } catch (e: Exception) {
-            // ignore
+    fun signOutAfter() = signOut()
+
+    private fun signOut() {
+        runBlocking {
+            ArcGISEnvironment.authenticationManager.signOut()
         }
     }
 
