@@ -11,6 +11,7 @@ import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
 import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
+import com.arcgismaps.httpcore.authentication.OAuthUserCredential
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Deferred
@@ -73,6 +74,7 @@ class OAuthDefaultConfigurationTests {
             clickByText("Sign In")
         }.await()
         assert(response is ArcGISAuthenticationChallengeResponse.ContinueWithCredential)
+        assert((response as ArcGISAuthenticationChallengeResponse.ContinueWithCredential).credential is OAuthUserCredential)
     }
 
     /**
