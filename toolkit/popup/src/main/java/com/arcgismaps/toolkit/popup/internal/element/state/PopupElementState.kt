@@ -23,6 +23,7 @@ import androidx.compose.runtime.Immutable
  */
 @Immutable
 internal abstract class PopupElementState {
+    // abstract so derived classes can parcelize it if possible
     abstract val id: Int
 
     companion object {
