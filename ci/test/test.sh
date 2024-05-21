@@ -49,6 +49,8 @@ fi
 #fi
 
 # copy results to the job workspace so Jenkins can find them
+_log "Copying results to the job workspace to:"
+echo "Workspace folder: ${WORKSPACE}"
 mkdir ${WORKSPACE}/reports ${WORKSPACE}/test-results
 if [ -d ${reports_path} ]; then
   cp -r ${reports_path} ${WORKSPACE}/reports/
