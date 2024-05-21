@@ -32,7 +32,7 @@ fi
 
 _log "Building and running the ${test_project} tests"
 cd ${apps_path}/arcgis-maps-sdk-kotlin-toolkit
-if ! ./gradlew "${gradle_task}"; then
+if ! ./gradlew $gradle_task; then
   success="false"
 fi
 
@@ -50,13 +50,13 @@ fi
 
 # copy results to the job workspace so Jenkins can find them
 _log "Copying results to the job workspace to:"
-echo "Workspace folder: ${WORKSPACE}"
-mkdir ${WORKSPACE}/reports ${WORKSPACE}/test-results
+echo "Workspace folder: ${apps_path}"
+mkdir ${apps_path}/reports ${apps_path}/test-results
 if [ -d ${reports_path} ]; then
-  cp -r ${reports_path} ${WORKSPACE}/reports/
+  cp -r ${reports_path} ${apps_path}/reports/
 fi
 if [ -d ${results_path} ]; then
-  cp -r ${results_path} ${WORKSPACE}/test-results/
+  cp -r ${results_path} ${apps_path}/test-results/
 fi
 
 # copy the WORKSPACE to a network share so raw results and images can be kept
@@ -68,7 +68,7 @@ archive_url="https://runtime-zip.esri.com/userContent/${archive_folder/\/net\//}
 mkdir -p ${archive_folder}
 _log "Copying all test results, reports and ic-output output to"
 echo "Archive URL: ${archive_url}"
-cp -r ${WORKSPACE}/* ${archive_folder}
+cp -r ${apps_path}/* ${archive_folder}
 
 if [ "${success}" == "false" ]; then
   echo "error: Building and running the ${test_project} failed"
