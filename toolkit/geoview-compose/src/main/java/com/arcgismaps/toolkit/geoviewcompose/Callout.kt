@@ -224,7 +224,7 @@ private fun DoubleXY.rotate(rotateByAngle: Double, center: DoubleXY = DoubleXY.z
 
 /**
  * Analogue of Layout which allows to sub-compose the Callout container during the measuring stage,
- * and anchor the Callout leader at the given screenCoordinate. The callout is drawn using a Box
+ * and anchor the Callout leader at the given screenCoordinate. The Callout is drawn using a Box
  * and by default it is anchored to its top left corner. In order to anchor the Callout at the tip
  * of the leader we need to determine the size of its content to calculate the anchor point's
  * location before drawing the Callout on the screen.
@@ -264,10 +264,10 @@ private fun CalloutSubComposeLayout(
                 maxHeight = layoutHeight
             )
         )
-        // the default (0,0) value is on the top-left edge of the callout container,
-        // this moves the anchor to the bottom-middle point using X,Y offsets.
-        // and ensures the anchor leader always represents the tapped location point,
-        // in this case, the bottom-middle leader position.
+        // The default (0,0) value is on the top-left edge of the callout container.
+        // This moves the anchor to the bottom-middle point using X,Y offsets,
+        // and ensures that the leader's anchor point always represents the tapped location,
+        // in this case the bottom-middle leader position.
         val calloutOffsetX = leaderScreenCoordinate.x.toInt() - (calloutContainerPlaceable.width / 2)
         val calloutOffsetY = leaderScreenCoordinate.y.toInt() - calloutContainerPlaceable.height
         // place the callout in the layout
