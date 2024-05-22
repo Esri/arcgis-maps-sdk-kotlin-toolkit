@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -58,25 +59,36 @@ import com.arcgismaps.mapping.view.zero
 import kotlin.math.cos
 import kotlin.math.sin
 
-internal data class CalloutParams (private val mapPlacement: MapPlacement) {
-    public sealed class MapPlacement {
-        data class MapPoint(
-            val location: Point,
-            val modifier: Modifier,
-            val offset: Offset,
-            val rotateOffsetWithGeoView: Boolean,
-            val content: (@Composable BoxScope.() -> Unit)
-        ) : MapPlacement()
+/**
+ * Creates a Callout at the specified geographical location on the MapView. The Callout is a composable
+ * that can be used to display additional information about a location on the map. The additional information is
+ * passed as a content composable that contains text and/or other content. It has a leader that points to
+ * the location that Callout refers to. The body of the Callout is a rectangular area with curved corners
+ * that contains the content lambda provided by the application. A thin border line is drawn around the entire Callout.
+ *
+ * Note: Only one Callout can be displayed at a time on the MapView.
+ *
+ * @param location the geographical location at which to display the Callout
+ * @param modifier Modifier to be applied to the composable Callout
+ * @param content the content of the Callout
+ * @param offset the offset in screen coordinates from the geographical location at which to place the callout
+ * @param rotateOffsetWithGeoView specifies whether the screen offset is rotated with the [GeoView]. The Screen offset
+ *        will be rotated with the [GeoView] when true, false otherwise.
+ *        This is useful if you are showing the callout for elements with symbology that does rotate with the [GeoView]
+ * @since 200.5.0
+ */
+@Composable
+public fun MapViewScope.Callout(
+    location: Point,
+    modifier: Modifier = Modifier,
+    offset: Offset = Offset.Zero,
+    rotateOffsetWithGeoView: Boolean = false,
+    content: @Composable BoxScope.() -> Unit
+) {
+    if (this.calloutParams.location == null) {
+        this.calloutParams = CalloutParams(location, modifier, offset, rotateOffsetWithGeoView, content)
+        this.Callout()
     }
-
-//    constructor(
-//        location: Point,
-//        modifier: Modifier,
-//        offset: Offset,
-//        rotateOffsetWithGeoView: Boolean,
-//        content: (@Composable BoxScope.() -> Unit)
-//    ) : this(MapPlacement.MapPoint(location, modifier, offset, rotateOffsetWithGeoView, content))
-
 }
 
 /**
@@ -85,14 +97,14 @@ internal data class CalloutParams (private val mapPlacement: MapPlacement) {
  * @since 200.5.0
  */
 public class MapViewScope(private var _mapView: MapView?) {
-    internal lateinit var location: Point
-    internal lateinit var modifier: Modifier
-    internal var offset: Offset = Offset.Zero
-    internal var rotateOffsetWithGeoView: Boolean = false
-    internal var content: (@Composable BoxScope.() -> Unit)? = null
-    internal lateinit var mapPlacement: CalloutParams.MapPlacement
+
+    internal var calloutParams: CalloutParams = CalloutParams()
     private val mapView: MapView
         get() = _mapView ?: error("MapView not initialized")
+
+    internal fun reset() {
+        calloutParams = CalloutParams()
+    }
 
     /**
      * Creates a Callout at the specified geographical location on the MapView. The Callout is a composable
@@ -101,24 +113,16 @@ public class MapViewScope(private var _mapView: MapView?) {
      * the location that Callout refers to. The body of the Callout is a rectangular area with curved corners
      * that contains the content lambda provided by the application. A thin border line is drawn around the entire Callout.
      *
-     * @param location the geographical location at which to display the Callout
-     * @param modifier Modifier to be applied to the composable Callout
-     * @param content the content of the Callout
-     * @param offset the offset in screen coordinates from the geographical location at which to place the callout
-     * @param rotateOffsetWithGeoView specifies whether the screen offset is rotated with the [GeoView]. The Screen offset
-     *        will be rotated with the [GeoView] when true, false otherwise.
-     *        This is useful if you are showing the callout for elements with symbology that does rotate with the [GeoView]
      * @since 200.5.0
      */
     @Composable
-    internal fun MapPointCallout() {
+    internal fun Callout() {
+
         val isMapViewReady = remember { mutableStateOf(false) }
         // We don't want to start drawing the Callout until the MapView is ready. We only collect
         // the drawStatus till the first time MapView is done drawing. the transformWhile operator
         // will stop collecting when isMapViewReady.value becomes false.
-//        LaunchedEffect(location) {
-//        val mapPoint = mapPlacement as CalloutParams.MapPlacement.MapPoint
-        LaunchedEffect(location) {
+        LaunchedEffect(calloutParams.location) {
             mapView.drawStatus.transformWhile { drawStatus ->
                 emit(drawStatus)
                 !isMapViewReady.value
@@ -136,22 +140,22 @@ public class MapViewScope(private var _mapView: MapView?) {
         // Convert the given location to a screen coordinate
         var leaderScreenCoordinate: ScreenCoordinate? by remember {
             mutableStateOf(
-                getLeaderScreenCoordinate(mapView, location, offset, rotateOffsetWithGeoView)
+                getLeaderScreenCoordinate(mapView, calloutParams.location!!, calloutParams.offset, calloutParams.rotateOffsetWithGeoView)
             )
         }
 
-        LaunchedEffect(location) {
+        LaunchedEffect(calloutParams.location) {
             // Used to update screen coordinate when new location point is used
             leaderScreenCoordinate =
-                getLeaderScreenCoordinate(mapView, location, offset, rotateOffsetWithGeoView)
+                getLeaderScreenCoordinate(mapView, calloutParams.location!!, calloutParams.offset, calloutParams.rotateOffsetWithGeoView)
             // Used to update screen coordinate when viewpoint is changed
             mapView.viewpointChanged.collect {
                 leaderScreenCoordinate =
                     getLeaderScreenCoordinate(
                         mapView,
-                        location,
-                        offset,
-                        rotateOffsetWithGeoView
+                        calloutParams.location!!,
+                        calloutParams.offset,
+                        calloutParams.rotateOffsetWithGeoView
                     )
             }
         }
@@ -162,7 +166,7 @@ public class MapViewScope(private var _mapView: MapView?) {
         val localLeaderScreenCoordinate = leaderScreenCoordinate
         localLeaderScreenCoordinate?.let {
             Box(
-                modifier = modifier
+                modifier = calloutParams.modifier!!
                     .drawCalloutContainer(
                         cornerRadius = with(localDensity) { properties.cornerRadius.toPx() },
                         strokeBorderWidth = with(localDensity) { properties.strokeBorderWidth.toPx() },
@@ -176,11 +180,11 @@ public class MapViewScope(private var _mapView: MapView?) {
                     )
             )
             {
-//                this.content()
-                content!!.invoke(this)
+                calloutParams.content!!.invoke(this)
             }
         }
     }
+
     /**
      * Returns the ScreenCoordinate for the location [Point] on [GeoView].
      *
@@ -443,36 +447,11 @@ public class MapViewScope(private var _mapView: MapView?) {
     )
 }
 
-/**
- * Creates a Callout at the specified geographical location on the MapView. The Callout is a composable
- * that can be used to display additional information about a location on the map. The additional information is
- * passed as a content composable that contains text and/or other content. It has a leader that points to
- * the location that Callout refers to. The body of the Callout is a rectangular area with curved corners
- * that contains the content lambda provided by the application. A thin border line is drawn around the entire Callout.
- *
- * @param location the geographical location at which to display the Callout
- * @param modifier Modifier to be applied to the composable Callout
- * @param content the content of the Callout
- * @param offset the offset in screen coordinates from the geographical location at which to place the callout
- * @param rotateOffsetWithGeoView specifies whether the screen offset is rotated with the [GeoView]. The Screen offset
- *        will be rotated with the [GeoView] when true, false otherwise.
- *        This is useful if you are showing the callout for elements with symbology that does rotate with the [GeoView]
- * @since 200.5.0
- */
-@Composable
-public fun MapViewScope.Callout(
-    location: Point,
-    modifier: Modifier = Modifier,
-    offset: Offset = Offset.Zero,
-    rotateOffsetWithGeoView: Boolean = false,
-    content: @Composable BoxScope.() -> Unit
-) {
-//    this.mapPlacement = CalloutParams.MapPlacement.MapPoint(location, modifier, offset, rotateOffsetWithGeoView, content)
-    this.location = location
-    this.modifier = modifier
-    this.offset = offset
-    this.rotateOffsetWithGeoView = rotateOffsetWithGeoView
-    this.content = content
-    this.MapPointCallout()
-}
-
+@Immutable
+internal data class CalloutParams(
+    val location: Point? = null,
+    val modifier: Modifier? = null,
+    val offset: Offset = Offset.Zero,
+    val rotateOffsetWithGeoView: Boolean = false,
+    val content: (@Composable BoxScope.() -> Unit)? = null
+)
