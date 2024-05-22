@@ -35,6 +35,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.Photo
 import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material3.Card
@@ -83,6 +84,7 @@ internal fun AttachmentFormElement(
         label = state.label,
         description = state.description,
         editable = editable,
+        captureOptions = CaptureOptions.create(state.input),
         stateId = state.id,
         attachments = state.attachments,
         lazyListState = state.lazyListState,
@@ -96,6 +98,7 @@ internal fun AttachmentFormElement(
     label: String,
     description: String,
     editable: Boolean,
+    captureOptions: CaptureOptions,
     stateId: Int,
     attachments: List<FormAttachmentState>,
     lazyListState: LazyListState,
@@ -121,6 +124,7 @@ internal fun AttachmentFormElement(
                     // Add attachment button
                     AddAttachment(
                         stateId = stateId,
+                        captureOptions = captureOptions,
                         hasCameraPermission = hasCameraPermission
                     )
                 }
@@ -177,6 +181,7 @@ private fun Header(
 @Composable
 private fun AddAttachment(
     stateId: Int,
+    captureOptions: CaptureOptions,
     hasCameraPermission: Boolean,
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -198,7 +203,7 @@ private fun AddAttachment(
             offset = DpOffset.Zero,
             onDismissRequest = { showMenu = false }
         ) {
-            if (hasCameraPermission) {
+            if (hasCameraPermission && captureOptions.hasImageCapture()) {
                 DropdownMenuItem(
                     text = { Text(text = stringResource(R.string.take_photo)) },
                     trailingIcon = {
@@ -216,22 +221,53 @@ private fun AddAttachment(
                     }
                 )
             }
-            DropdownMenuItem(
-                text = { Text(text = stringResource(R.string.add_photo)) },
-                trailingIcon = {
-                    Icon(
-                        imageVector = Icons.Rounded.Photo,
-                        contentDescription = "Add Photo",
-                        modifier = Modifier.alpha(0.4f)
-                    )
-                },
-                onClick = {
-                    scope.launch {
-                        pickerStyle.emit(PickerStyle.PickImage)
-                        showMenu = false
+            if (captureOptions.hasVideoCapture()) {
+                // TODO: Add video capture
+            }
+            if (captureOptions.hasMediaCapture()) {
+                DropdownMenuItem(
+                    text = { Text(text = stringResource(R.string.add_from_gallery)) },
+                    trailingIcon = {
+                        Icon(
+                            imageVector = Icons.Rounded.Photo,
+                            contentDescription = "Add From Gallery",
+                            modifier = Modifier.alpha(0.4f)
+                        )
+                    },
+                    onClick = {
+                        scope.launch {
+                            val visualMediaType =
+                                if (captureOptions.hasImageCapture() && captureOptions.hasVideoCapture()) {
+                                    ActivityResultContracts.PickVisualMedia.ImageAndVideo
+                                } else if (captureOptions.hasImageCapture()) {
+                                    ActivityResultContracts.PickVisualMedia.ImageOnly
+                                } else {
+                                    ActivityResultContracts.PickVisualMedia.VideoOnly
+                                }
+                            pickerStyle.emit(PickerStyle.PickMedia(visualMediaType))
+                            showMenu = false
+                        }
                     }
-                }
-            )
+                )
+            }
+            if (captureOptions.hasFileCapture()) {
+                DropdownMenuItem(
+                    text = { Text(text = stringResource(R.string.add_file)) },
+                    trailingIcon = {
+                        Icon(
+                            imageVector = Icons.Rounded.Folder,
+                            contentDescription = "Add File",
+                            modifier = Modifier.alpha(0.4f)
+                        )
+                    },
+                    onClick = {
+                        scope.launch {
+                            pickerStyle.emit(PickerStyle.File(captureOptions.getAllowedMimeTypes()))
+                            showMenu = false
+                        }
+                    }
+                )
+            }
         }
     }
     LaunchedEffect(Unit) {
@@ -240,22 +276,28 @@ private fun AddAttachment(
                 PickerStyle.Camera -> {
                     dialogRequester.requestDialog(
                         DialogType.ImageCaptureDialog(
-                            stateId = stateId,
-                            contentType = "image/jpeg"
+                            stateId = stateId
                         )
                     )
                 }
 
-                PickerStyle.PickImage -> {
+                is PickerStyle.PickMedia -> {
                     dialogRequester.requestDialog(
-                        DialogType.ImagePickerDialog(
+                        DialogType.GalleryPickerDialog(
                             stateId = stateId,
-                            contentType = "image/jpeg"
+                            type = it.type
                         )
                     )
                 }
 
-                else -> {}
+                is PickerStyle.File -> {
+                    dialogRequester.requestDialog(
+                        DialogType.FilePickerDialog(
+                            stateId = stateId,
+                            allowedTypes = it.allowedMimeTypes
+                        )
+                    )
+                }
             }
         }
     }
@@ -266,7 +308,7 @@ private fun AddAttachment(
  * is invoked with the URI of the captured image.
  */
 @Composable
-internal fun ImageCapture(onImageCaptured: (Uri) -> Unit) {
+internal fun ImageCapture(onImageCaptured: (Uri?) -> Unit) {
     val context = LocalContext.current
     var hasLaunched by rememberSaveable {
         mutableStateOf(false)
@@ -285,6 +327,8 @@ internal fun ImageCapture(onImageCaptured: (Uri) -> Unit) {
         onResult = { success ->
             if (success) {
                 onImageCaptured(capturedImageUri)
+            } else {
+                onImageCaptured(null)
             }
         }
     )
@@ -297,27 +341,62 @@ internal fun ImageCapture(onImageCaptured: (Uri) -> Unit) {
 }
 
 /**
- * Launches the Gallery to select an image. When an image is selected, the [onImageSelected] callback
- * is invoked with the URI of the selected image.
+ * Launches the Gallery to select an image, video or both based on the [type]. When a selection is
+ * made, the [onMediaSelected] callback is invoked with the URI of the selected image/video.
  */
 @Composable
-internal fun ImagePicker(onImageSelected: (Uri) -> Unit) {
+internal fun GalleryPicker(
+    type: ActivityResultContracts.PickVisualMedia.VisualMediaType,
+    onMediaSelected: (Uri?) -> Unit
+) {
+    var hasLaunched by rememberSaveable {
+        mutableStateOf(false)
+    }
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) {
-        if (it != null) {
-            onImageSelected(it)
-        }
+        onMediaSelected(it)
     }
     LaunchedEffect(Unit) {
-        launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        if (!hasLaunched) {
+            hasLaunched = true
+            launcher.launch(PickVisualMediaRequest(type))
+        }
     }
 }
 
+/**
+ * Launches the file picker to select a file based on the [allowedMimeTypes]. When a file is selected,
+ * the [onFileSelected] callback is invoked with the URI of the selected file.
+ */
+@Composable
+internal fun FilePicker(
+    allowedMimeTypes: List<String>,
+    onFileSelected: (Uri?) -> Unit
+) {
+    var hasLaunched by rememberSaveable {
+        mutableStateOf(false)
+    }
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {
+        onFileSelected(it)
+    }
+    LaunchedEffect(Unit) {
+        if (!hasLaunched) {
+            hasLaunched = true
+            launcher.launch(allowedMimeTypes.toTypedArray())
+        }
+    }
+}
+
+/**
+ * Determines the type of picker to launch.
+ */
 private sealed class PickerStyle {
-    data object File : PickerStyle()
     data object Camera : PickerStyle()
-    data object PickImage : PickerStyle()
+    data class PickMedia(val type: ActivityResultContracts.PickVisualMedia.VisualMediaType) :
+        PickerStyle()
+
+    data class File(val allowedMimeTypes: List<String>) : PickerStyle()
 }
 
 @Preview
@@ -327,6 +406,7 @@ private fun AttachmentFormElementPreview() {
         label = "Attachments",
         description = "Add attachments",
         editable = true,
+        captureOptions = CaptureOptions.Any,
         stateId = 1,
         attachments = listOf(
             FormAttachmentState(
