@@ -50,12 +50,12 @@ import com.arcgismaps.mapping.popup.FieldsPopupElement
 import com.arcgismaps.mapping.popup.AttachmentsPopupElement
 import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.mapping.popup.TextPopupElement
-import com.arcgismaps.toolkit.popup.internal.element.fieldselement.FieldsElementState
-import com.arcgismaps.toolkit.popup.internal.element.fieldselement.FieldsPopupElement
-import com.arcgismaps.toolkit.popup.internal.element.fieldselement.rememberFieldsElementState
 import com.arcgismaps.toolkit.popup.internal.element.attachment.AttachmentsElementState
 import com.arcgismaps.toolkit.popup.internal.element.attachment.AttachmentsPopupElement
 import com.arcgismaps.toolkit.popup.internal.element.attachment.rememberAttachmentElementState
+import com.arcgismaps.toolkit.popup.internal.element.fieldselement.FieldsElementState
+import com.arcgismaps.toolkit.popup.internal.element.fieldselement.FieldsPopupElement
+import com.arcgismaps.toolkit.popup.internal.element.fieldselement.rememberFieldsElementState
 import com.arcgismaps.toolkit.popup.internal.element.state.PopupElementStateCollection
 import com.arcgismaps.toolkit.popup.internal.element.state.mutablePopupElementStateCollection
 import com.arcgismaps.toolkit.popup.internal.element.textelement.TextElementState
