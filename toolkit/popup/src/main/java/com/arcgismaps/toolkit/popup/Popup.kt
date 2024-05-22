@@ -46,8 +46,12 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.mapping.popup.AttachmentsPopupElement
 import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.mapping.popup.TextPopupElement
+import com.arcgismaps.toolkit.popup.internal.element.attachment.AttachmentsElementState
+import com.arcgismaps.toolkit.popup.internal.element.attachment.AttachmentsPopupElement
+import com.arcgismaps.toolkit.popup.internal.element.attachment.rememberAttachmentElementState
 import com.arcgismaps.toolkit.popup.internal.element.state.PopupElementStateCollection
 import com.arcgismaps.toolkit.popup.internal.element.state.mutablePopupElementStateCollection
 import com.arcgismaps.toolkit.popup.internal.element.textelement.TextElementState
@@ -89,6 +93,9 @@ private fun Popup(popupState: PopupState, modifier: Modifier = Modifier) {
 
     LaunchedEffect(popup) {
         popupState.popup.evaluateExpressions()
+        popupState.popup.evaluatedElements
+            .filterIsInstance<AttachmentsPopupElement>()
+            .firstOrNull()?.fetchAttachments()
         evaluated = true
     }
 
@@ -142,6 +149,12 @@ private fun PopupBody(popupState: PopupState) {
                         )
                     }
 
+                    is AttachmentsPopupElement -> {
+                        AttachmentsPopupElement(
+                            state = entry.state as AttachmentsElementState
+                        )
+                    }
+
                     else -> {
                         // other popup elements are not created
                     }
@@ -188,6 +201,13 @@ internal fun rememberStates(
                 states.add(
                     element,
                     rememberTextElementState(element = element, popup = popup)
+                )
+            }
+
+            is AttachmentsPopupElement -> {
+                states.add(
+                    element,
+                    rememberAttachmentElementState(popup = popup, element = element)
                 )
             }
 

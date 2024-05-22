@@ -56,14 +56,14 @@ import com.arcgismaps.toolkit.popup.R
 internal fun ExpandableCard(
     title: String = "",
     description: String = "",
-    elementCount: Int = 1,
+    toggleable: Boolean = true,
     content: @Composable () -> Unit = {}
 ) {
     // TODO: promote to public theme.
     val shapes = ExpandableCardDefaults.shapes()
     val colors = ExpandableCardDefaults.colors()
     var expanded by rememberSaveable { mutableStateOf(true) }
-    val dynamic = elementCount > 1
+
     Card(
         colors = CardDefaults.cardColors(
             containerColor = colors.containerColor
@@ -78,10 +78,10 @@ internal fun ExpandableCard(
             ExpandableHeader(
                 title = title,
                 description = description,
-                elementCount = elementCount,
+                expandable = toggleable,
                 isExpanded = expanded
             ) {
-                if (dynamic) {
+                if (toggleable) {
                     expanded = !expanded
                 }
             }
@@ -98,16 +98,16 @@ internal fun ExpandableCard(
 private fun ExpandableHeader(
     title: String = "",
     description: String = "",
-    elementCount: Int,
+    expandable: Boolean,
     isExpanded: Boolean,
     onClick: () -> Unit
 ) {
-    if (title.isEmpty() && description.isEmpty() && elementCount == 1) return
+    if (title.isEmpty() && description.isEmpty() && !expandable) return
     val shapes = ExpandableCardDefaults.shapes()
     Row(
         Modifier
             .fillMaxWidth()
-            .applyIf(elementCount > 1) {
+            .applyIf(expandable) {
                 clickable {
                     onClick()
                 }
@@ -139,7 +139,7 @@ private fun ExpandableHeader(
 
         }
 
-        if (elementCount > 1) {
+        if (expandable) {
             Crossfade(targetState = isExpanded, label = "expandPopupElement") {
                 Icon(
                     modifier = Modifier
@@ -158,8 +158,8 @@ internal fun ExpandableHeaderPreview() {
     ExpandableHeader(
         title = "The Title",
         description = "the description",
-        2,
-        true
+        expandable = true,
+        isExpanded = true
     ) {}
 }
 
@@ -168,8 +168,7 @@ internal fun ExpandableHeaderPreview() {
 private fun ExpandableCardPreview() {
     ExpandableCard(
         description = "Foo",
-        title = "Title",
-        elementCount = 2
+        title = "Title"
     ) {
         Text(
             "Hello World",
