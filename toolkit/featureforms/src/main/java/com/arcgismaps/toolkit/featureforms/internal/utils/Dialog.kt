@@ -18,6 +18,11 @@ package com.arcgismaps.toolkit.featureforms.internal.utils
 
 import android.content.Context
 import android.net.Uri
+import android.provider.OpenableColumns
+import android.util.Log
+import android.webkit.MimeTypeMap
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
@@ -29,15 +34,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.core.database.getStringOrNull
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
 import com.arcgismaps.mapping.featureforms.FormAttachment
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentElementState
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.FilePicker
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.GalleryPicker
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.ImageCapture
-import com.arcgismaps.toolkit.featureforms.internal.components.attachment.ImagePicker
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.RenameAttachmentDialog
-import com.arcgismaps.toolkit.featureforms.internal.components.attachment.getNewAttachmentNameForImageType
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.getNewAttachmentNameForContentType
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormStateCollection
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.CodedValueFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComboBoxDialog
@@ -51,6 +58,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.time.Instant
+
 
 /**
  * Local containing the default [DialogRequester] for providing the same instance in the
@@ -108,22 +116,31 @@ internal sealed class DialogType {
      * Indicates an image capture dialog.
      *
      * @param stateId The id of the [AttachmentElementState] that requested the dialog.
-     * @param contentType The content type of the image to capture.
      */
     data class ImageCaptureDialog(
-        val stateId: Int,
-        val contentType: String
+        val stateId: Int
     ) : DialogType()
 
     /**
-     * Indicates an image picker dialog.
+     * Indicates an gallery picker dialog.
      *
      * @param stateId The id of the [AttachmentElementState] that requested the dialog.
-     * @param contentType The content type of the image to pick.
+     * @param type The content type of the file to pick.
      */
-    data class ImagePickerDialog(
+    data class GalleryPickerDialog(
         val stateId: Int,
-        val contentType: String
+        val type: ActivityResultContracts.PickVisualMedia.VisualMediaType
+    ) : DialogType()
+
+    /**
+     * Indicates a file picker dialog.
+     *
+     * @param stateId The id of the [AttachmentElementState] that requested the dialog.
+     * @param allowedTypes The allowed mime types for the file picker.
+     */
+    data class FilePickerDialog(
+        val stateId: Int,
+        val allowedTypes: List<String>
     ) : DialogType()
 
     /**
@@ -134,7 +151,7 @@ internal sealed class DialogType {
      */
     data class RenameAttachmentDialog(
         val stateId: Int,
-        val formAttachment : FormAttachment,
+        val formAttachment: FormAttachment,
         val name: String,
     ) : DialogType()
 }
@@ -218,7 +235,6 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
 
         is DialogType.ImageCaptureDialog -> {
             val stateId = (dialogType as DialogType.ImageCaptureDialog).stateId
-            val contentType = (dialogType as DialogType.ImageCaptureDialog).contentType
             val state = states[stateId] as? AttachmentElementState
             if (state == null) {
                 dialogRequester.dismissDialog()
@@ -226,8 +242,15 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
             }
             ImageCapture { uri ->
                 scope.launch {
+                    val contentType = context.contentResolver.getType(uri) ?: run {
+                        Toast.makeText(context, R.string.attachment_error, Toast.LENGTH_SHORT)
+                            .show()
+                        return@launch
+                    }
+                    val extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(contentType)
                     context.readBytes(uri)?.let { data ->
-                        val name = state.attachments.getNewAttachmentNameForImageType()
+                        val name =
+                            "${state.attachments.getNewAttachmentNameForContentType(contentType)}.$extension"
                         state.addAttachment(name, contentType, data)
                     }
                 }
@@ -235,18 +258,63 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
             }
         }
 
-        is DialogType.ImagePickerDialog -> {
-            val stateId = (dialogType as DialogType.ImagePickerDialog).stateId
-            val contentType = (dialogType as DialogType.ImagePickerDialog).contentType
+        is DialogType.GalleryPickerDialog -> {
+            val stateId = (dialogType as DialogType.GalleryPickerDialog).stateId
+            val type = (dialogType as DialogType.GalleryPickerDialog).type
             val state = states[stateId] as? AttachmentElementState
             if (state == null) {
                 dialogRequester.dismissDialog()
                 return
             }
-            ImagePicker { uri ->
+            GalleryPicker(
+                type = type
+            ) { uri ->
                 scope.launch {
+                    val contentType = context.contentResolver.getType(uri) ?: run {
+                        Toast.makeText(context, R.string.attachment_error, Toast.LENGTH_SHORT)
+                            .show()
+                        return@launch
+                    }
+                    val extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(contentType)
+                    Log.e("TAG", "FeatureFormDialog: $contentType")
                     context.readBytes(uri)?.let { data ->
-                        val name = state.attachments.getNewAttachmentNameForImageType()
+                        val name =
+                            "${state.attachments.getNewAttachmentNameForContentType(contentType)}.$extension"
+                        state.addAttachment(name, contentType, data)
+                    }
+                }
+                dialogRequester.dismissDialog()
+            }
+        }
+
+        is DialogType.FilePickerDialog -> {
+            val stateId = (dialogType as DialogType.FilePickerDialog).stateId
+            val allowedMimeTypes = (dialogType as DialogType.FilePickerDialog).allowedTypes
+            val state = states[stateId] as? AttachmentElementState
+            if (state == null) {
+                dialogRequester.dismissDialog()
+                return
+            }
+            FilePicker(allowedMimeTypes = allowedMimeTypes) { uri ->
+                scope.launch {
+                    val contentType = context.contentResolver.getType(uri) ?: run {
+                        Toast.makeText(context, R.string.attachment_error, Toast.LENGTH_SHORT)
+                            .show()
+                        return@launch
+                    }
+                    val extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(contentType)
+                    // use a default name
+                    var name =
+                        "${state.attachments.getNewAttachmentNameForContentType(contentType)}.$extension"
+                    context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                        cursor.moveToFirst()
+                        val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                        // use the name from the uri if available
+                        cursor.getStringOrNull(nameIndex)?.let {
+                            name = it
+                        }
+                    }
+                    context.readBytes(uri)?.let { data ->
                         state.addAttachment(name, contentType, data)
                     }
                 }

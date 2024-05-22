@@ -45,8 +45,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.Loadable
+import com.arcgismaps.mapping.featureforms.AnyAttachmentsFormInput
 import com.arcgismaps.mapping.featureforms.AttachmentChangeType
 import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
+import com.arcgismaps.mapping.featureforms.AttachmentsFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FormAttachment
 import com.arcgismaps.mapping.featureforms.FormAttachmentType
@@ -111,7 +113,7 @@ internal class AttachmentElementState(
                 buildAttachmentStates(formElement.attachments)
             }
         }
-        scope.launch { 
+        scope.launch {
             formElement.attachmentChanged.collect {
                 when (it.changeType) {
                     is AttachmentChangeType.Deletion -> {
@@ -411,6 +413,67 @@ internal class FormAttachmentState(
     }
 }
 
+/**
+ * Represents valid options for capturing attachments. This is used to determine the types of
+ * attachments that can be captured by the UI.
+ */
+internal sealed class CaptureOptions {
+
+    data object Image : CaptureOptions()
+    data object Video : CaptureOptions()
+    data object Audio : CaptureOptions()
+    data object Document : CaptureOptions()
+    data object Signature : CaptureOptions()
+    data object Any : CaptureOptions()
+    data object Unknown : CaptureOptions()
+
+    /**
+     * Returns `true` if the capture options include image capture.
+     */
+    fun hasImageCapture(): Boolean = this is Any || this is Image
+
+    /**
+     * Returns `true` if the capture options include video capture.
+     */
+    fun hasVideoCapture(): Boolean = this is Any || this is Video
+
+    /**
+     * Returns `true` if the capture options include image or video capture.
+     */
+    fun hasMediaCapture(): Boolean = hasImageCapture() || hasVideoCapture()
+
+    /**
+     * Returns `true` if the capture options include document capture.
+     */
+    fun hasFileCapture(): Boolean = this is Any || this is Document
+
+    /**
+     * Returns a list of allowed mime types for this capture option.
+     */
+    fun getAllowedMimeTypes(): List<String> {
+        return when (this) {
+            is Any -> listOf("*/*")
+            Audio -> listOf("audio/*")
+            Document -> listOf("application/*", "text/*")
+            Image -> listOf("image/*")
+            Signature -> listOf("image/*")
+            Video -> listOf("video/*")
+            Unknown -> emptyList()
+        }
+    }
+
+    companion object {
+
+        /**
+         * Creates a [CaptureOptions] from the given [AttachmentsFormInput].
+         */
+        fun create(value: AttachmentsFormInput): CaptureOptions = when (value) {
+            is AnyAttachmentsFormInput -> Any
+            else -> Unknown
+        }
+    }
+}
+
 @Composable
 internal fun rememberAttachmentElementState(
     form: FeatureForm,
@@ -437,6 +500,9 @@ internal fun rememberAttachmentElementState(
     }
 }
 
+/**
+ * Returns an icon for the attachment type.
+ */
 @Composable
 internal fun FormAttachmentType.getIcon(): ImageVector = when (this) {
     FormAttachmentType.Image -> Icons.Outlined.Image
@@ -446,13 +512,18 @@ internal fun FormAttachmentType.getIcon(): ImageVector = when (this) {
     FormAttachmentType.Other -> Icons.Outlined.FileCopy
 }
 
-internal fun List<FormAttachmentState>.getNewAttachmentNameForImageType(): String {
-    val count = this.count { entry ->
-        entry.contentType.isContentTypeImage()
+/**
+ * Returns a new attachment name based on the content type.
+ */
+internal fun List<FormAttachmentState>.getNewAttachmentNameForContentType(contentType: String): String {
+    val prefix = when {
+        contentType.startsWith("image/") -> "Image"
+        contentType.startsWith("video/") -> "Video"
+        else -> "Attachment"
     }
-    return "Image $count.jpg"
-}
-
-internal fun String.isContentTypeImage(): Boolean {
-    return this.startsWith("image/")
+    val count = this.count { entry ->
+        entry.contentType.split("/").firstOrNull()
+            .equals(contentType.split("/").firstOrNull(), ignoreCase = true)
+    } + 1
+    return "$prefix $count"
 }
