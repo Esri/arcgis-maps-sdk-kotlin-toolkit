@@ -128,7 +128,27 @@ internal class AttachmentElementState(
                         }?.update(it.attachment)
                     }
 
-                    else -> {}
+                    is AttachmentChangeType.Addition -> {
+                        val formAttachment = it.attachment
+                        // create a new state
+                        val state = FormAttachmentState(
+                            name = formAttachment.name,
+                            size = formAttachment.size,
+                            contentType = formAttachment.contentType,
+                            type = formAttachment.type,
+                            elementStateId = id,
+                            deleteAttachment = { deleteAttachment(formAttachment) },
+                            filesDir = filesDir,
+                            scope = scope,
+                            formAttachment = formAttachment
+                        )
+                        attachments.add(state)
+                        // load the new attachment
+                        state.loadWithParentScope()
+                        // scroll to the new attachment after a delay to allow the recomposition to complete
+                        delay(100)
+                        lazyListState.scrollToItem(attachments.count())
+                    }
                 }
                 evaluateExpressions()
             }
@@ -168,26 +188,7 @@ internal class AttachmentElementState(
      * Adds an attachment with the given [name], [contentType], and [data].
      */
     suspend fun addAttachment(name: String, contentType: String, data: ByteArray) {
-        formElement.addAttachment(name, contentType, data).onSuccess { formAttachment ->
-            // create a new state
-            val state = FormAttachmentState(
-                name = formAttachment.name,
-                size = formAttachment.size,
-                contentType = formAttachment.contentType,
-                type = formAttachment.type,
-                elementStateId = id,
-                deleteAttachment = { deleteAttachment(formAttachment) },
-                filesDir = filesDir,
-                scope = scope,
-                formAttachment = formAttachment
-            )
-            attachments.add(state)
-            // load the new attachment
-            state.loadWithParentScope()
-            // scroll to the new attachment after a delay to allow the recomposition to complete
-            delay(100)
-            lazyListState.scrollToItem(attachments.count())
-        }
+        formElement.addAttachment(name, contentType, data)
     }
 
     /**
