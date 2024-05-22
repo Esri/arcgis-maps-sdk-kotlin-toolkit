@@ -21,7 +21,7 @@ function _reboot_device() {
   _log "Restarting test device"
   ${adb} reboot
 
-  # wait-for-any-device typically doesn't wait long eough for the device to be truly
+  # wait-for-any-device typically doesn't wait long enough for the device to be truly
   # ready e.g. to be able to delete files from the sdcard with `adb shell rm`.
   ${adb} wait-for-any-device
 
