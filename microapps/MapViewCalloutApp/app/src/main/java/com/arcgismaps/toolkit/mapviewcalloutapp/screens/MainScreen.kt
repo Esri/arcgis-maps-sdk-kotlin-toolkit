@@ -18,13 +18,17 @@
 
 package com.arcgismaps.toolkit.mapviewcalloutapp.screens
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.zIndex
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.toolkit.geoviewcompose.Callout
 import com.arcgismaps.toolkit.geoviewcompose.MapView
@@ -40,18 +44,41 @@ fun MainScreen(viewModel: MapViewModel) {
         onSingleTapConfirmed = viewModel::setMapPoint,
         content = if (mapPoint != null) {
             {
-                Callout(location = mapPoint) {
-                    Text(
-                        "Hello, World!",
-                        color = Color.Green
-                    )
+                Callout(
+                    location = mapPoint,
+                    modifier = Modifier.zIndex(100.0f)
+                ) {
+                    Surface {
+                        Text(
+                            "Hello, 1!",
+                            color = Color.Green
+                        )
+                    }
                 }
                 val newPoint = Point(mapPoint.x, mapPoint.y)
-                Callout(location = mapPoint, offset = Offset(1.0f, 150.0f)) {
-                    Text(
-                        "Hello, New World!",
-                        color = Color.Red
-                    )
+                Callout(
+                    location = mapPoint,
+                    modifier = Modifier.zIndex(50.0f),
+                    offset = Offset(1.0f, 150.0f)
+                ) {
+                    Column {
+                        Text(
+                            "Hello, 2",
+                            color = Color.Red
+                        )
+                    }
+
+                }
+                Callout(
+                    location = mapPoint,
+                    modifier = Modifier.zIndex(0.0f)
+                ) {
+                    Row {
+                        Text(
+                            "Hello, 3!",
+                            color = Color.Red
+                        )
+                    }
 
                 }
             }
