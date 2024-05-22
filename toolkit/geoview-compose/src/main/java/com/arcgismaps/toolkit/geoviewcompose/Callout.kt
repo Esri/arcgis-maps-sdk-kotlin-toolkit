@@ -80,7 +80,6 @@ internal fun MapViewScope(
     }
 }
 
-
 @Immutable
 internal data class CalloutParams(
     val location: Point? = null,
@@ -227,9 +226,10 @@ public fun Callout(
             rotateOffsetWithGeoView = rotateOffsetWithGeoView,
             content = content
         )
+        mapViewScope.Callout()
     }
 
-    mapViewScope.Callout()
+
 }
 
 /**
