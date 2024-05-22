@@ -308,7 +308,7 @@ private fun AddAttachment(
  * is invoked with the URI of the captured image.
  */
 @Composable
-internal fun ImageCapture(onImageCaptured: (Uri) -> Unit) {
+internal fun ImageCapture(onImageCaptured: (Uri?) -> Unit) {
     val context = LocalContext.current
     var hasLaunched by rememberSaveable {
         mutableStateOf(false)
@@ -327,6 +327,8 @@ internal fun ImageCapture(onImageCaptured: (Uri) -> Unit) {
         onResult = { success ->
             if (success) {
                 onImageCaptured(capturedImageUri)
+            } else {
+                onImageCaptured(null)
             }
         }
     )
@@ -345,17 +347,21 @@ internal fun ImageCapture(onImageCaptured: (Uri) -> Unit) {
 @Composable
 internal fun GalleryPicker(
     type: ActivityResultContracts.PickVisualMedia.VisualMediaType,
-    onMediaSelected: (Uri) -> Unit
+    onMediaSelected: (Uri?) -> Unit
 ) {
+    var hasLaunched by rememberSaveable {
+        mutableStateOf(false)
+    }
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) {
-        if (it != null) {
-            onMediaSelected(it)
-        }
+        onMediaSelected(it)
     }
     LaunchedEffect(Unit) {
-        launcher.launch(PickVisualMediaRequest(type))
+        if (!hasLaunched) {
+            hasLaunched = true
+            launcher.launch(PickVisualMediaRequest(type))
+        }
     }
 }
 
@@ -365,17 +371,20 @@ internal fun GalleryPicker(
  */
 @Composable
 internal fun FilePicker(
-    allowedMimeTypes : List<String>,
-    onFileSelected: (Uri) -> Unit
+    allowedMimeTypes: List<String>,
+    onFileSelected: (Uri?) -> Unit
 ) {
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {
-        if (it != null) {
-            onFileSelected(it)
-        }
+    var hasLaunched by rememberSaveable {
+        mutableStateOf(false)
     }
-
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {
+        onFileSelected(it)
+    }
     LaunchedEffect(Unit) {
-        launcher.launch(allowedMimeTypes.toTypedArray())
+        if (!hasLaunched) {
+            hasLaunched = true
+            launcher.launch(allowedMimeTypes.toTypedArray())
+        }
     }
 }
 
@@ -386,6 +395,7 @@ private sealed class PickerStyle {
     data object Camera : PickerStyle()
     data class PickMedia(val type: ActivityResultContracts.PickVisualMedia.VisualMediaType) :
         PickerStyle()
+
     data class File(val allowedMimeTypes: List<String>) : PickerStyle()
 }
 

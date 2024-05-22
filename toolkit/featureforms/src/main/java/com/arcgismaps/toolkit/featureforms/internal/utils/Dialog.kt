@@ -241,17 +241,20 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                 return
             }
             ImageCapture { uri ->
-                scope.launch {
-                    val contentType = context.contentResolver.getType(uri) ?: run {
-                        Toast.makeText(context, R.string.attachment_error, Toast.LENGTH_SHORT)
-                            .show()
-                        return@launch
-                    }
-                    val extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(contentType)
-                    context.readBytes(uri)?.let { data ->
-                        val name =
-                            "${state.attachments.getNewAttachmentNameForContentType(contentType)}.$extension"
-                        state.addAttachment(name, contentType, data)
+                if (uri != null) {
+                    scope.launch {
+                        val contentType = context.contentResolver.getType(uri) ?: run {
+                            Toast.makeText(context, R.string.attachment_error, Toast.LENGTH_SHORT)
+                                .show()
+                            return@launch
+                        }
+                        val extension =
+                            MimeTypeMap.getSingleton().getExtensionFromMimeType(contentType)
+                        context.readBytes(uri)?.let { data ->
+                            val name =
+                                "${state.attachments.getNewAttachmentNameForContentType(contentType)}.$extension"
+                            state.addAttachment(name, contentType, data)
+                        }
                     }
                 }
                 dialogRequester.dismissDialog()
@@ -269,18 +272,21 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
             GalleryPicker(
                 type = type
             ) { uri ->
-                scope.launch {
-                    val contentType = context.contentResolver.getType(uri) ?: run {
-                        Toast.makeText(context, R.string.attachment_error, Toast.LENGTH_SHORT)
-                            .show()
-                        return@launch
-                    }
-                    val extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(contentType)
-                    Log.e("TAG", "FeatureFormDialog: $contentType")
-                    context.readBytes(uri)?.let { data ->
-                        val name =
-                            "${state.attachments.getNewAttachmentNameForContentType(contentType)}.$extension"
-                        state.addAttachment(name, contentType, data)
+                if (uri != null) {
+                    scope.launch {
+                        val contentType = context.contentResolver.getType(uri) ?: run {
+                            Toast.makeText(context, R.string.attachment_error, Toast.LENGTH_SHORT)
+                                .show()
+                            return@launch
+                        }
+                        val extension =
+                            MimeTypeMap.getSingleton().getExtensionFromMimeType(contentType)
+                        context.readBytes(uri)?.let { data ->
+                            val name =
+                                "${state.attachments.getNewAttachmentNameForContentType(contentType)}.$extension"
+                            state.addAttachment(name, contentType, data)
+                        }
+
                     }
                 }
                 dialogRequester.dismissDialog()
@@ -296,26 +302,29 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                 return
             }
             FilePicker(allowedMimeTypes = allowedMimeTypes) { uri ->
-                scope.launch {
-                    val contentType = context.contentResolver.getType(uri) ?: run {
-                        Toast.makeText(context, R.string.attachment_error, Toast.LENGTH_SHORT)
-                            .show()
-                        return@launch
-                    }
-                    val extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(contentType)
-                    // use a default name
-                    var name =
-                        "${state.attachments.getNewAttachmentNameForContentType(contentType)}.$extension"
-                    context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-                        cursor.moveToFirst()
-                        val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                        // use the name from the uri if available
-                        cursor.getStringOrNull(nameIndex)?.let {
-                            name = it
+                if (uri != null) {
+                    scope.launch {
+                        val contentType = context.contentResolver.getType(uri) ?: run {
+                            Toast.makeText(context, R.string.attachment_error, Toast.LENGTH_SHORT)
+                                .show()
+                            return@launch
                         }
-                    }
-                    context.readBytes(uri)?.let { data ->
-                        state.addAttachment(name, contentType, data)
+                        val extension =
+                            MimeTypeMap.getSingleton().getExtensionFromMimeType(contentType)
+                        // use a default name
+                        var name =
+                            "${state.attachments.getNewAttachmentNameForContentType(contentType)}.$extension"
+                        context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                            cursor.moveToFirst()
+                            val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                            // use the name from the uri if available
+                            cursor.getStringOrNull(nameIndex)?.let {
+                                name = it
+                            }
+                        }
+                        context.readBytes(uri)?.let { data ->
+                            state.addAttachment(name, contentType, data)
+                        }
                     }
                 }
                 dialogRequester.dismissDialog()
