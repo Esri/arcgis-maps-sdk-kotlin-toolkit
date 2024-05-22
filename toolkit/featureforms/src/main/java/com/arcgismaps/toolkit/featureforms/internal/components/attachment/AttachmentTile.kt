@@ -90,6 +90,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.arcgismaps.LoadStatus
+import com.arcgismaps.mapping.featureforms.FormAttachmentType
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.utils.AttachmentsFileProvider
 import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
@@ -127,13 +128,15 @@ internal fun AttachmentTile(
         Box(modifier = Modifier) {
             when (loadStatus) {
                 LoadStatus.Loaded -> LoadedView(
-                    thumbnail = thumbnail,
-                    title = state.name
+                    title = state.name,
+                    type = state.type,
+                    thumbnail = thumbnail
                 )
 
                 LoadStatus.Loading -> DefaultView(
                     title = state.name,
                     size = state.size,
+                    type = state.type,
                     isLoading = true,
                     isError = false
                 )
@@ -141,6 +144,7 @@ internal fun AttachmentTile(
                 LoadStatus.NotLoaded -> DefaultView(
                     title = state.name,
                     size = state.size,
+                    type = state.type,
                     isLoading = false,
                     isError = false
                 )
@@ -148,6 +152,7 @@ internal fun AttachmentTile(
                 is LoadStatus.FailedToLoad -> DefaultView(
                     title = state.name,
                     size = state.size,
+                    type = state.type,
                     isLoading = false,
                     isError = true
                 )
@@ -166,12 +171,15 @@ internal fun AttachmentTile(
                     },
                     onClick = {
                         showContextMenu = false
-                        dialogRequester.requestDialog(
-                            DialogType.RenameAttachmentDialog(
-                                stateId = state.elementStateId,
-                                name = state.name,
+                        state.formAttachment?.let {
+                            dialogRequester.requestDialog(
+                                DialogType.RenameAttachmentDialog(
+                                    stateId = state.elementStateId,
+                                    formAttachment = state.formAttachment,
+                                    name = state.name,
+                                )
                             )
-                        )
+                        }
                     })
                 DropdownMenuItem(
                     text = { Text(text = stringResource(R.string.delete)) },
@@ -239,13 +247,11 @@ internal fun AttachmentTile(
 
 @Composable
 private fun LoadedView(
-    thumbnail: ImageBitmap?,
     title: String,
+    type: FormAttachmentType,
+    thumbnail: ImageBitmap?,
     modifier: Modifier = Modifier
 ) {
-    val attachmentType = remember(title) {
-        getAttachmentType(title)
-    }
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -259,7 +265,7 @@ private fun LoadedView(
             )
         } else {
             Icon(
-                imageVector = attachmentType.getIcon(),
+                imageVector = type.getIcon(),
                 contentDescription = null,
                 modifier = Modifier
                     .padding(top = 10.dp, bottom = 25.dp)
@@ -294,13 +300,11 @@ private fun LoadedView(
 private fun DefaultView(
     title: String,
     size: Long,
+    type: FormAttachmentType,
     isLoading: Boolean,
     isError: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val attachmentType = remember(title) {
-        getAttachmentType(title)
-    }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -333,7 +337,7 @@ private fun DefaultView(
             )
         } else {
             Icon(
-                imageVector = attachmentType.getIcon(),
+                imageVector = type.getIcon(),
                 contentDescription = null,
                 modifier = Modifier.size(20.dp)
             )

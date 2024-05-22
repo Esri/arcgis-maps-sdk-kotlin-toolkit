@@ -50,7 +50,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.mapping.featureforms.AttachmentFormElement
+import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
@@ -261,7 +261,7 @@ private fun FeatureFormBody(
                             )
                         }
 
-                        is AttachmentFormElement -> {
+                        is AttachmentsFormElement -> {
                             AttachmentFormElement(
                                 state = entry.getState(),
                                 Modifier
@@ -352,7 +352,7 @@ internal fun rememberStates(
                 states.add(element, groupState)
             }
 
-            is AttachmentFormElement -> {
+            is AttachmentsFormElement -> {
                 val state = rememberAttachmentElementState(form, element)
                 states.add(element, state)
             }
