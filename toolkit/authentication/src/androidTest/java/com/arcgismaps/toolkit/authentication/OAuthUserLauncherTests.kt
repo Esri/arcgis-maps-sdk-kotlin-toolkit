@@ -32,7 +32,7 @@ import org.junit.Test
 /**
  * Tests the [Authenticator] against OAuth challenges when the Custom Chrome Tab is launched from a user activity
  *
- * @since 200.4.0
+ * @since 200.5.0
  */
 class OAuthUserLauncherTests {
 
@@ -58,7 +58,7 @@ class OAuthUserLauncherTests {
      * When an [ArcGISAuthenticationChallenge] is received and the user signs in with credentials,
      * Then the [ArcGISAuthenticationChallengeResponse] should be [ArcGISAuthenticationChallengeResponse.ContinueWithCredential].
      *
-     * @since 200.4.0
+     * @since 200.5.0
      */
     @Test
     fun signInWithCredentials() = runTest {
@@ -74,7 +74,7 @@ class OAuthUserLauncherTests {
      * When an [ArcGISAuthenticationChallenge] is received and the user cancels the sign in process,
      * Then the [ArcGISAuthenticationChallengeResponse] should be [ArcGISAuthenticationChallengeResponse.Cancel].
      *
-     * @since 200.4.0
+     * @since 200.5.0
      */
     @Test
     fun cancelSignIn() = runTest {
@@ -89,7 +89,7 @@ class OAuthUserLauncherTests {
      * When an [ArcGISAuthenticationChallenge] is received and the user presses the back button,
      * Then the [ArcGISAuthenticationChallengeResponse] should be [ArcGISAuthenticationChallengeResponse.Cancel].
      *
-     * @since 200.4.0
+     * @since 200.5.0
      */
     @Test
     fun pressBack() = runTest {
@@ -105,7 +105,7 @@ class OAuthUserLauncherTests {
      * Also, the device will be rotated to ensure that the Authenticator can handle configuration changes
      * before calling [userInputOnDialog].
      *
-     * @since 200.4.0
+     * @since 200.5.0
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun TestScope.testOAuthChallengeWithStateRestoration(
@@ -155,7 +155,7 @@ class OAuthUserLauncherTests {
 /**
  * This activity is used to test the Authenticator when the Custom Chrome Tab is launched from a user activity
  *
- * @since 200.4.0
+ * @since 200.5.0
  */
 class OAuthUserLauncherTestActivity : ComponentActivity() {
     val viewModel: OAuthUserLauncherTestViewModel by viewModels()
@@ -182,7 +182,7 @@ class OAuthUserLauncherTestActivity : ComponentActivity() {
 /**
  * ViewModel for the [OAuthUserLauncherTestActivity] that contains the [AuthenticatorState] for testing
  *
- * @since 200.4.0
+ * @since 200.5.0
  *
  */
 class OAuthUserLauncherTestViewModel : ViewModel() {
