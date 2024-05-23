@@ -53,15 +53,19 @@ class OAuthUserLauncherTests {
         ArcGISEnvironment.configureArcGISHttpClient()
     }
 
+
     /**
      * Given an [AuthenticatorState] configured with an [OAuthUserConfiguration] for ArcGIS Online,
-     * When an [ArcGISAuthenticationChallenge] is received and the user signs in with credentials,
+     * When an [ArcGISAuthenticationChallenge] is received and the OAuth browser redirects with a successful response,
      * Then the [ArcGISAuthenticationChallengeResponse] should be [ArcGISAuthenticationChallengeResponse.ContinueWithCredential].
+     *
+     * Note: This function automatically redirects to the app with a successful response without user input,
+     * and fakes the token validation response.
      *
      * @since 200.5.0
      */
     @Test
-    fun signInWithCredentials() = runTest {
+    fun successfulSignIn() = runTest {
         val response = testOAuthChallengeWithStateRestoration {
             InstrumentationRegistry.getInstrumentation().context.startActivity(getSuccessfulRedirectIntent("kotlin-authentication-test-2://auth"))
         }.await().getOrNull()
