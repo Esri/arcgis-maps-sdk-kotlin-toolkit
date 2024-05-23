@@ -17,6 +17,7 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
+import android.util.DisplayMetrics
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -38,8 +39,11 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.SubcomposeLayout
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -57,6 +61,7 @@ import com.arcgismaps.mapping.view.ScreenCoordinate
 import kotlinx.coroutines.flow.transformWhile
 import com.arcgismaps.mapping.view.zero
 import kotlin.math.cos
+import kotlin.math.roundToInt
 import kotlin.math.sin
 
 /**
@@ -129,7 +134,13 @@ public fun MapViewScope.Callout(
     // Get the default shape, color & size properties for Callout
     val properties = CalloutProperties()
     leaderScreenCoordinate?.let {
-        CalloutSubComposeLayout(leaderScreenCoordinate = it) {
+        CalloutSubComposeLayout(
+            leaderScreenCoordinate = it,
+            maxSize = calloutContentMaxSize(
+                geoView = mapView,
+                density = LocalDensity.current,
+                displayMetrics = LocalContext.current.resources.displayMetrics
+            )) {
             Box(
                 modifier = modifier
                     .drawCalloutContainer(
@@ -223,6 +234,35 @@ private fun DoubleXY.rotate(rotateByAngle: Double, center: DoubleXY = DoubleXY.z
 }
 
 /**
+ * Determines the max content size of the Callout container factoring in the Insets set on the GeoView.
+ * @since 200.5.0
+ */
+private fun calloutContentMaxSize(
+    geoView: GeoView,
+    density: Density,
+    displayMetrics: DisplayMetrics
+): DpSize {
+    // Start by getting height & width of GeoView
+    var maxHeightForGeoView = geoView.height
+    var maxWidthForGeoView = geoView.width
+    if (maxHeightForGeoView == 0 || maxWidthForGeoView == 0) {
+        // Use width of display if view width not available yet (as happens once, before it is measured)
+        maxHeightForGeoView = displayMetrics.heightPixels
+        maxWidthForGeoView = displayMetrics.widthPixels
+    }
+    // if we have valid insets set on the MapView, we deduct the maxHeightForGeoView & maxWidthForMapView  by the specified inset sizes
+    if (geoView is MapView && geoView.isViewInsetsValid) {
+        maxHeightForGeoView -= with(density) { (geoView.viewInsetTop + geoView.viewInsetBottom).dp.toPx() }.roundToInt()
+        maxWidthForGeoView -= with(density) { (geoView.viewInsetLeft + geoView.viewInsetRight).dp.toPx() }.roundToInt()
+    }
+
+    return DpSize(
+        height = with(density) { maxHeightForGeoView.toDp() },
+        width = with(density) { maxWidthForGeoView.toDp() }
+    )
+}
+
+/**
  * Analogue of Layout which allows to sub-compose the Callout container during the measuring stage,
  * and anchor the Callout leader at the given screenCoordinate. The Callout is drawn using a Box
  * and by default it is anchored to its top left corner. In order to anchor the Callout at the tip
@@ -230,24 +270,22 @@ private fun DoubleXY.rotate(rotateByAngle: Double, center: DoubleXY = DoubleXY.z
  * location before drawing the Callout on the screen.
  *
  * @param leaderScreenCoordinate Represents the x,y coordinate for the location on GeoView
- * @param maxWidth TODO
- * @param maxHeight TODO
+ * @param maxSize The calculated maximum size of the callout container
  * @since 200.5.0
  */
 @Composable
 private fun CalloutSubComposeLayout(
     modifier: Modifier = Modifier,
     leaderScreenCoordinate: ScreenCoordinate,
-    maxWidth: Dp = Constraints.Infinity.dp, // TODO: Use geoview max size here
-    maxHeight: Dp = Constraints.Infinity.dp, // TODO: Use geoview max size here
+    maxSize: DpSize,
     calloutContainer: @Composable () -> Unit
 ) {
     val configuration = LocalDensity.current
     val maxWidthInPx = with(configuration) {
-        maxWidth.roundToPx()
+        maxSize.width.roundToPx()
     }
     val maxHeightInPx = with(configuration) {
-        maxHeight.roundToPx()
+        maxSize.height.roundToPx()
     }
 
     SubcomposeLayout(modifier = modifier) { constraints ->
