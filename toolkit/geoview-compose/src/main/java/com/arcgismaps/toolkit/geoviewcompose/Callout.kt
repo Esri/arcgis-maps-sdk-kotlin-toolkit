@@ -141,34 +141,18 @@ public class MapViewScope(private var _mapView: MapView?) {
         // Convert the given location to a screen coordinate
         var leaderScreenCoordinate: ScreenCoordinate? by remember {
             mutableStateOf(
-                getLeaderScreenCoordinate(
-                    mapView,
-                    calloutParams.location!!,
-                    calloutParams.offset,
-                    calloutParams.rotateOffsetWithGeoView
-                )
+                getLeaderScreenCoordinate(mapView, calloutParams.location!!, calloutParams.offset, calloutParams.rotateOffsetWithGeoView)
             )
         }
 
         LaunchedEffect(calloutParams.location) {
             // Used to update screen coordinate when new location point is used
-            leaderScreenCoordinate = getLeaderScreenCoordinate(
-                mapView,
-                calloutParams.location!!,
-                calloutParams.offset,
-                calloutParams.rotateOffsetWithGeoView
-            )
+            leaderScreenCoordinate = getLeaderScreenCoordinate(mapView, calloutParams.location!!, calloutParams.offset, calloutParams.rotateOffsetWithGeoView)
             // Used to update screen coordinate when viewpoint is changed
             mapView.viewpointChanged.collect {
-                leaderScreenCoordinate = getLeaderScreenCoordinate(
-                    mapView,
-                    calloutParams.location!!,
-                    calloutParams.offset,
-                    calloutParams.rotateOffsetWithGeoView
-                )
+                leaderScreenCoordinate = getLeaderScreenCoordinate(mapView, calloutParams.location!!, calloutParams.offset, calloutParams.rotateOffsetWithGeoView)
             }
         }
-
 
         val localDensity = LocalDensity.current
         // Get the default shape, color & size properties for Callout
