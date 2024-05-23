@@ -49,6 +49,8 @@ class OAuthUserLauncherTests {
         runBlocking {
             ArcGISEnvironment.authenticationManager.signOut()
         }
+        // reset the ArcGISHttpClient to remove any custom interceptors
+        ArcGISEnvironment.configureArcGISHttpClient()
     }
 
     /**
@@ -61,9 +63,7 @@ class OAuthUserLauncherTests {
     @Test
     fun signInWithCredentials() = runTest {
         val response = testOAuthChallengeWithStateRestoration {
-            // TODO: Replace with real credentials once we have a test data solution
-            enterCredentialsOnBrowser("username", "password", composeTestRule.activity)
-            clickByText("Sign In")
+            InstrumentationRegistry.getInstrumentation().context.startActivity(getSuccessfulRedirectIntent("kotlin-authentication-test-2://auth"))
         }.await().getOrNull()
         assert(response is ArcGISAuthenticationChallengeResponse.ContinueWithCredential)
         assert((response as ArcGISAuthenticationChallengeResponse.ContinueWithCredential).credential is OAuthUserCredential)
@@ -111,6 +111,9 @@ class OAuthUserLauncherTests {
     fun TestScope.testOAuthChallengeWithStateRestoration(
         userInputOnDialog: UiDevice.() -> Unit,
     ): Deferred<Result<ArcGISAuthenticationChallengeResponse>> {
+        ArcGISEnvironment.configureArcGISHttpClient {
+            interceptTokenRequests()
+        }
         // start the activity (which contains the Authenticator)
         val authenticatorState = composeTestRule.activity.viewModel.authenticatorState
         composeTestRule.activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
