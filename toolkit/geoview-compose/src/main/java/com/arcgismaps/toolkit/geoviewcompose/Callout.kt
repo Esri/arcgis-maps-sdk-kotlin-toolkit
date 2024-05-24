@@ -39,27 +39,25 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.SubcomposeLayout
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.mapping.view.DrawStatus
 import androidx.compose.ui.unit.times
 import com.arcgismaps.geometry.AngularUnit
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ViewpointType
 import com.arcgismaps.mapping.view.DoubleXY
+import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.SceneLocationVisibility
 import com.arcgismaps.mapping.view.SceneView
 import com.arcgismaps.mapping.view.ScreenCoordinate
-import kotlinx.coroutines.flow.transformWhile
 import com.arcgismaps.mapping.view.zero
+import kotlinx.coroutines.flow.transformWhile
 import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
@@ -234,7 +232,8 @@ private fun DoubleXY.rotate(rotateByAngle: Double, center: DoubleXY = DoubleXY.z
 }
 
 /**
- * Determines the max content size of the Callout container factoring in the Insets set on the GeoView.
+ * Determines the max content size of the Callout container factoring in the
+ * size of the GeoView and the Insets set on the GeoView.
  * @since 200.5.0
  */
 private fun calloutContentMaxSize(
@@ -245,12 +244,15 @@ private fun calloutContentMaxSize(
     // Start by getting height & width of GeoView
     var maxHeightForGeoView = geoView.height
     var maxWidthForGeoView = geoView.width
-    if (maxHeightForGeoView == 0 || maxWidthForGeoView == 0) {
-        // Use width of display if view width not available yet (as happens once, before it is measured)
+    if (maxHeightForGeoView == 0) {
+        // Use height of display if view height not available yet (as happens once, before it is measured)
         maxHeightForGeoView = displayMetrics.heightPixels
+    }
+    if (maxWidthForGeoView == 0) {
+        // Use width of display if view width not available yet (as happens once, before it is measured)
         maxWidthForGeoView = displayMetrics.widthPixels
     }
-    // if we have valid insets set on the MapView, we deduct the maxHeightForGeoView & maxWidthForMapView  by the specified inset sizes
+    // if we have valid insets set on the MapView, we deduct the maxHeightForGeoView & maxWidthForMapView by the specified inset sizes
     if (geoView is MapView && geoView.isViewInsetsValid) {
         maxHeightForGeoView -= with(density) { (geoView.viewInsetTop + geoView.viewInsetBottom).dp.toPx() }.roundToInt()
         maxWidthForGeoView -= with(density) { (geoView.viewInsetLeft + geoView.viewInsetRight).dp.toPx() }.roundToInt()
