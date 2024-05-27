@@ -18,6 +18,7 @@ package com.arcgismaps.toolkit.featureforms.internal.components.attachment
 
 import android.content.Intent
 import android.text.format.Formatter
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -70,6 +71,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -89,6 +91,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import coil.compose.AsyncImage
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.mapping.featureforms.FormAttachmentType
 import com.arcgismaps.toolkit.featureforms.R
@@ -105,8 +108,8 @@ internal fun AttachmentTile(
     state: FormAttachmentState
 ) {
     val loadStatus by state.loadStatus.collectAsState()
-    val thumbnail by state.thumbnail
     val interactionSource = remember { MutableInteractionSource() }
+    val thumbnailUri by state.thumbnailUri
     val configuration = LocalViewConfiguration.current
     val haptic = LocalHapticFeedback.current
     var showContextMenu by remember { mutableStateOf(false) }
@@ -130,7 +133,7 @@ internal fun AttachmentTile(
                 LoadStatus.Loaded -> LoadedView(
                     title = state.name,
                     type = state.type,
-                    thumbnail = thumbnail
+                    thumbnailUri = thumbnailUri
                 )
 
                 LoadStatus.Loading -> DefaultView(
@@ -249,19 +252,20 @@ internal fun AttachmentTile(
 private fun LoadedView(
     title: String,
     type: FormAttachmentType,
-    thumbnail: ImageBitmap?,
+    thumbnailUri: String,
     modifier: Modifier = Modifier
 ) {
     Box(
         modifier = modifier
             .fillMaxSize()
     ) {
-        if (thumbnail != null) {
-            Image(
-                bitmap = thumbnail,
+        Log.e("TAG", "LoadedView: $thumbnailUri", )
+        if (thumbnailUri.isNotEmpty()) {
+            AsyncImage(
+                model = thumbnailUri,
                 contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
             )
         } else {
             Icon(
