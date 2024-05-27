@@ -438,7 +438,6 @@ internal class FormAttachmentState(
             _thumbnailUri.value = file.absolutePath
             return@withContext
         }
-        file.createNewFile()
         val bitmap = try {
             when (type) {
                 is FormAttachmentType.Image -> {
@@ -463,6 +462,8 @@ internal class FormAttachmentState(
             null
         } ?: return@withContext
 
+        // create and write to the thumbnail file if the bitmap is not null
+        file.createNewFile()
         BufferedOutputStream(FileOutputStream(file)).use { bos ->
             bitmap.compress(CompressFormat.JPEG, 85, bos)
         }
