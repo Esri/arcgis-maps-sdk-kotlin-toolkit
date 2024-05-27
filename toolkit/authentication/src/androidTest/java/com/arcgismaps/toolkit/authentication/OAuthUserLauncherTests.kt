@@ -67,6 +67,9 @@ class OAuthUserLauncherTests {
     @Test
     fun successfulSignIn() = runTest {
         val response = testOAuthChallengeWithStateRestoration {
+            // When the OAuth sign in screen displays, we simulate successful sign in by launching an
+            // intent with the expected redirect URL, which otherwise would be sent from the Portal
+            // server, but would require valid credentials
             InstrumentationRegistry.getInstrumentation().context.startActivity(getSuccessfulRedirectIntent("kotlin-authentication-test-2://auth"))
         }.await().getOrNull()
         assert(response is ArcGISAuthenticationChallengeResponse.ContinueWithCredential)
