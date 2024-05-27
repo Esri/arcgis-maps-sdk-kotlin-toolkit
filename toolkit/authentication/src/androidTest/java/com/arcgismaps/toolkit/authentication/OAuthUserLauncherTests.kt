@@ -66,6 +66,12 @@ class OAuthUserLauncherTests {
      */
     @Test
     fun successfulSignIn() = runTest {
+        // configure the ArcGISHttpClient to intercept token requests and return a fake token response
+        // this is necessary when we are faking a successful sign-in without entering credentials,
+        // as we are not given a valid token from the OAuth server and RTC won't be able to verify it.
+        ArcGISEnvironment.configureArcGISHttpClient {
+            interceptTokenRequests()
+        }
         val response = testOAuthChallengeWithStateRestoration {
             // When the OAuth sign in screen displays, we simulate successful sign in by launching an
             // intent with the expected redirect URL, which otherwise would be sent from the Portal
@@ -118,9 +124,6 @@ class OAuthUserLauncherTests {
     fun TestScope.testOAuthChallengeWithStateRestoration(
         userInputOnDialog: UiDevice.() -> Unit,
     ): Deferred<Result<ArcGISAuthenticationChallengeResponse>> {
-        ArcGISEnvironment.configureArcGISHttpClient {
-            interceptTokenRequests()
-        }
         // start the activity (which contains the Authenticator)
         val authenticatorState = composeTestRule.activity.viewModel.authenticatorState
         composeTestRule.activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
