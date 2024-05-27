@@ -1,3 +1,19 @@
+/*
+ *  Copyright 2024 Esri
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 package com.arcgismaps.toolkit.authentication
 
 import android.app.Activity
@@ -16,7 +32,7 @@ import org.junit.Assert
  * found.
  *
  * @param packageId the view's package Id to wait for.
- * @since 200.4.0
+ * @since 200.5.0
  */
 fun UiDevice.awaitViewVisible(packageId: String) {
     wait(
@@ -34,7 +50,7 @@ fun UiDevice.awaitViewVisible(packageId: String) {
 /**
  * Enters the [username] and [password] in the OAuth login page.
  *
- * @since 200.4.0
+ * @since 200.5.0
  */
 fun UiDevice.enterCredentialsOnBrowser(username: String, password: String, activity: Activity) {
     enterTextByHint(username, "Username")
@@ -46,7 +62,7 @@ fun UiDevice.enterCredentialsOnBrowser(username: String, password: String, activ
 /**
  * Closes the soft keyboard and waits for it to be hidden.
  *
- * @since 200.4.0
+ * @since 200.5.0
  */
 fun UiDevice.closeSoftKeyboard(activity: Activity) {
     val inputMethodManager =
@@ -61,7 +77,7 @@ fun UiDevice.closeSoftKeyboard(activity: Activity) {
 /**
  * Enters the [text] in the box with the passed in [hint].
  *
- * @since 200.4.0
+ * @since 200.5.0
  */
 fun UiDevice.enterTextByHint(text: String, hint: String) {
     val textBox = findObject(By.hint(hint))
@@ -74,7 +90,7 @@ fun UiDevice.enterTextByHint(text: String, hint: String) {
 /**
  * Clicks the button in the UI with the passed [text].
  *
- * @since 200.4.0
+ * @since 200.5.0
  */
 fun UiDevice.clickByText(text: String) =
     findObject(UiSelector().className("android.widget.Button").textContains(text)).click()
