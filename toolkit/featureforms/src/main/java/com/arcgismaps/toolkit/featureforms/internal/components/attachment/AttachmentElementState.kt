@@ -363,10 +363,9 @@ internal class FormAttachmentState(
                 }.onSuccess {
                     val data = formAttachment.attachment?.fetchData()?.getOrNull()
                     if (data != null) {
-                        // write the data to disk only if the file does not exist
-                        if (!File(filePath).exists()) {
-                            writeDataToDisk(data)
-                        }
+                        // write the data to disk
+                        writeDataToDisk(data)
+                        // create the thumbnail
                         createThumbnail()
                     } else {
                         result = Result.failure(Exception("Failed to load attachment data"))
@@ -415,18 +414,28 @@ internal class FormAttachmentState(
         return true
     }
 
+    /**
+     * Writes the attachment data to disk. If the file already exists, it will not be overwritten.
+     */
     private suspend fun writeDataToDisk(data: ByteArray) = withContext(Dispatchers.IO) {
         val directory = File(filesDir, attachmentsDir)
         directory.mkdirs()
         // write the data to disk using the attachment id as the file name
         val file = File(directory, id)
-        file.createNewFile()
-        FileOutputStream(file).use {
-            it.write(data)
+        // write to the file only if the file does not exist
+        if (file.exists().not()) {
+            file.createNewFile()
+            FileOutputStream(file).use {
+                it.write(data)
+            }
         }
         filePath = file.absolutePath
     }
 
+    /**
+     * Creates a thumbnail image for the attachment. If the thumbnail already exists, it will not be
+     * recreated.
+     */
     private suspend fun createThumbnail() = withContext(Dispatchers.IO) {
         if (formAttachment == null) {
             return@withContext
