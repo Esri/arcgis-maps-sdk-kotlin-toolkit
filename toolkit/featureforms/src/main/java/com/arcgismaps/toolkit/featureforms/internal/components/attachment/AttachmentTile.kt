@@ -18,7 +18,6 @@ package com.arcgismaps.toolkit.featureforms.internal.components.attachment
 
 import android.content.Intent
 import android.text.format.Formatter
-import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -259,7 +258,6 @@ private fun LoadedView(
         modifier = modifier
             .fillMaxSize()
     ) {
-        Log.e("TAG", "LoadedView: $thumbnailUri", )
         if (thumbnailUri.isNotEmpty()) {
             AsyncImage(
                 model = thumbnailUri,
