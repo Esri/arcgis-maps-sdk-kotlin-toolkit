@@ -48,28 +48,13 @@ fun createSuccessfulRedirectIntent(redirectUrl: String): Intent {
 }
 
 /**
- * Intercepts requests to validate a token and returns a fake response that validates the token.
- *
- * @since 200.5.0
- */
-fun ArcGISHttpClient.Builder.setupTokenRequestInterceptor() {
-    interceptor { chain ->
-        chain.request().let { request ->
-            if (request.url.endsWith("sharing/rest/oauth2/token")) {
-                request.createFakeTokenResponse()
-            } else chain.proceed(request)
-        }
-    }
-}
-
-/**
  * Returns a fake response that validates the token.
  *
  * @since 200.5.0
  */
-fun Request.createFakeTokenResponse(): Response =
+fun Request.createFakeOAuthTokenResponse(): Response =
     Response.builder().apply {
-        request(this@createFakeTokenResponse)
+        request(this@createFakeOAuthTokenResponse)
         val bodyString =
             """
             {"access_token":"12345","expires_in":1800,"username":"username","ssl":true,"refresh_token":"67890","refresh_token_expires_in":1209599}
@@ -88,6 +73,61 @@ fun Request.createFakeTokenResponse(): Response =
         addHeader("response-status-code", "200")
         addHeader("strict-transport-security", "max-age=31536000")
         addHeader("transfer-encoding", "chunked")
+        addHeader("vary", "X-Esri-Authorization")
+        addHeader("x-content-type-options", "nosniff")
+    }.build()
+
+fun Request.createFakeUsernamePasswordTokenResponse(): Response =
+    Response.builder().apply {
+        request(this@createFakeUsernamePasswordTokenResponse)
+        val bodyString =
+            """
+                {"token":"12345","expires":1716805837870,"ssl":true}
+            """.trimIndent()
+        body(
+            Response.Body.builder().contentType("text/plain;charset=utf-8")
+                .data(bodyString.byteInputStream(), bodyString.length.toLong()).build()
+        )
+        addHeader("cache-control", "no-cache")
+        addHeader("connection", "keep-alive")
+        addHeader("content-encoding", "gzip")
+        addHeader("date", "Wed, 22 May 2024 15:04:50 GMT")
+        addHeader("expires", "-1")
+        addHeader("pragma", "no-cache")
+        addHeader("response-status-code", "200")
+        addHeader("transfer-encoding", "chunked")
+        addHeader("vary", "X-Esri-Authorization")
+        addHeader("x-content-type-options", "nosniff")
+    }.build()
+
+fun ArcGISHttpClient.Builder.setupUsernamePasswordRequestInterceptor() {
+    interceptor { chain ->
+        chain.request().let { request ->
+            if (request.url.endsWith("sharing/rest/oauth2/token")) {
+                request.createFakeInvalidUsernamePasswordResponse()
+            } else chain.proceed(request)
+        }
+    }
+}
+
+fun Request.createFakeInvalidUsernamePasswordResponse(): Response =
+    Response.builder().apply {
+        request(this@createFakeInvalidUsernamePasswordResponse)
+        val bodyString =
+            """
+                {"error":{"code":400,"message":"Unable to generate token.","details":["Invalid username or password."]}}
+            """.trimIndent()
+        body(
+            Response.Body.builder().contentType("text/plain;charset=utf-8")
+                .data(bodyString.byteInputStream(), bodyString.length.toLong()).build()
+        )
+        addHeader("cache-control", "no-cache")
+        addHeader("connection", "keep-alive")
+        addHeader("content-length", "104")
+        addHeader("date", "Wed, 22 May 2024 15:04:50 GMT")
+        addHeader("expires", "-1")
+        addHeader("pragma", "no-cache")
+        addHeader("response-status-code", "200")
         addHeader("vary", "X-Esri-Authorization")
         addHeader("x-content-type-options", "nosniff")
     }.build()
