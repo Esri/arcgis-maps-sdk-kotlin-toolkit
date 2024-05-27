@@ -81,13 +81,13 @@ class OAuthDefaultConfigurationTests {
         // this is necessary when we are faking a successful sign-in without entering credentials,
         // as we are not given a valid token from the OAuth server and RTC won't be able to verify it.
         ArcGISEnvironment.configureArcGISHttpClient {
-            interceptTokenRequests()
+            setupTokenRequestInterceptor()
         }
         val response = testOAuthChallengeWithStateRestoration {
             // When the OAuth sign in screen displays, we simulate successful sign in by launching an
             // intent with the expected redirect URL, which otherwise would be sent from the Portal
             // server, but would require valid credentials
-            InstrumentationRegistry.getInstrumentation().context.startActivity(getSuccessfulRedirectIntent("kotlin-authentication-test-1://auth"))
+            InstrumentationRegistry.getInstrumentation().context.startActivity(createSuccessfulRedirectIntent("kotlin-authentication-test-1://auth"))
         }.await().getOrNull()
         assert(response is ArcGISAuthenticationChallengeResponse.ContinueWithCredential)
         assert((response as ArcGISAuthenticationChallengeResponse.ContinueWithCredential).credential is OAuthUserCredential)

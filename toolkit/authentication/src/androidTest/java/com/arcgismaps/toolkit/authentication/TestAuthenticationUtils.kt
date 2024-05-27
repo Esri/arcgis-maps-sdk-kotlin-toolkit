@@ -40,7 +40,7 @@ fun makeMockArcGISAuthenticationChallenge() = mockk<ArcGISAuthenticationChalleng
  *
  * @since 200.5.0
  */
-fun getSuccessfulRedirectIntent(redirectUrl: String): Intent {
+fun createSuccessfulRedirectIntent(redirectUrl: String): Intent {
     return Intent().apply {
         data = Uri.parse("$redirectUrl?code=12345")
         flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -52,11 +52,11 @@ fun getSuccessfulRedirectIntent(redirectUrl: String): Intent {
  *
  * @since 200.5.0
  */
-fun ArcGISHttpClient.Builder.interceptTokenRequests() {
+fun ArcGISHttpClient.Builder.setupTokenRequestInterceptor() {
     interceptor { chain ->
         chain.request().let { request ->
             if (request.url.endsWith("sharing/rest/oauth2/token")) {
-                request.getFakeTokenResponse()
+                request.createFakeTokenResponse()
             } else chain.proceed(request)
         }
     }
@@ -67,9 +67,9 @@ fun ArcGISHttpClient.Builder.interceptTokenRequests() {
  *
  * @since 200.5.0
  */
-fun Request.getFakeTokenResponse(): Response =
+fun Request.createFakeTokenResponse(): Response =
     Response.builder().apply {
-        request(this@getFakeTokenResponse)
+        request(this@createFakeTokenResponse)
         val bodyString =
             """
             {"access_token":"12345","expires_in":1800,"username":"username","ssl":true,"refresh_token":"67890","refresh_token_expires_in":1209599}
