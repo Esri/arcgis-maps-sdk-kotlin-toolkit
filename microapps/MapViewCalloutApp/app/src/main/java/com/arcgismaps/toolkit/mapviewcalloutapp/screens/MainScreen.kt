@@ -109,7 +109,7 @@ Column {
                         visible = visible, enter = scaleIn(),
                         exit = scaleOut(),
                     ) {
-                        Callout(location = mapPoint, isDismissed = visible) {
+                        Callout(location = mapPoint) {
                             Text(
                                 "Hello, World 0!",
                                 color = Color.Green
