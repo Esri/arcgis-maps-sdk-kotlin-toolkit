@@ -48,7 +48,22 @@ fun createSuccessfulRedirectIntent(redirectUrl: String): Intent {
 }
 
 /**
- * Returns a fake response that validates the token.
+ * Intercepts requests to validate a token and returns a fake response that validates the token.
+ *
+ * @since 200.5.0
+ */
+fun ArcGISHttpClient.Builder.setupOAuthTokenRequestInterceptor() {
+    interceptor { chain ->
+        chain.request().let { request ->
+            if (request.url.endsWith("sharing/rest/oauth2/token")) {
+                request.createFakeOAuthTokenResponse()
+            } else chain.proceed(request)
+        }
+    }
+}
+
+/**
+ * Returns a fake response that validates an OAuth token.
  *
  * @since 200.5.0
  */
@@ -77,9 +92,42 @@ fun Request.createFakeOAuthTokenResponse(): Response =
         addHeader("x-content-type-options", "nosniff")
     }.build()
 
-fun Request.createFakeUsernamePasswordTokenResponse(): Response =
+/**
+ * Intercepts requests to generate an ArcGIS token and returns a fake response with an error.
+ *
+ * @since 200.5.0
+ */
+fun ArcGISHttpClient.Builder.setupFailingArcGISTokenRequestInterceptor() {
+    interceptor { chain ->
+        chain.request().let { request ->
+            if (request.url.endsWith("sharing/rest/generateToken")) {
+                request.createInvalidArcGISTokenResponse()
+            } else chain.proceed(request)
+        }
+    }
+}
+
+/**
+ * Intercepts requests to generate an ArcGIS token and returns a fake response with the token.
+ */
+fun ArcGISHttpClient.Builder.setupSuccessfulArcGISTokenRequestInterceptor() {
+    interceptor { chain ->
+        chain.request().let { request ->
+            if (request.url.endsWith("sharing/rest/generateToken")) {
+                request.createValidArcGISTokenResponse()
+            } else chain.proceed(request)
+        }
+    }
+}
+
+/**
+ * Returns a fake response that generates an ArcGIS token.
+ *
+ * @since 200.5.0
+ */
+fun Request.createValidArcGISTokenResponse(): Response =
     Response.builder().apply {
-        request(this@createFakeUsernamePasswordTokenResponse)
+        request(this@createValidArcGISTokenResponse)
         val bodyString =
             """
                 {"token":"12345","expires":1716805837870,"ssl":true}
@@ -91,7 +139,7 @@ fun Request.createFakeUsernamePasswordTokenResponse(): Response =
         addHeader("cache-control", "no-cache")
         addHeader("connection", "keep-alive")
         addHeader("content-encoding", "gzip")
-        addHeader("date", "Wed, 22 May 2024 15:04:50 GMT")
+        addHeader("date", "Mon, 22 May 2084 15:04:50 GMT")
         addHeader("expires", "-1")
         addHeader("pragma", "no-cache")
         addHeader("response-status-code", "200")
@@ -100,19 +148,14 @@ fun Request.createFakeUsernamePasswordTokenResponse(): Response =
         addHeader("x-content-type-options", "nosniff")
     }.build()
 
-fun ArcGISHttpClient.Builder.setupUsernamePasswordRequestInterceptor() {
-    interceptor { chain ->
-        chain.request().let { request ->
-            if (request.url.endsWith("sharing/rest/oauth2/token")) {
-                request.createFakeInvalidUsernamePasswordResponse()
-            } else chain.proceed(request)
-        }
-    }
-}
-
-fun Request.createFakeInvalidUsernamePasswordResponse(): Response =
+/**
+ * Returns a fake response that indicates a failure to generate an ArcGIS token.
+ *
+ * @since 200.5.0
+ */
+fun Request.createInvalidArcGISTokenResponse(): Response =
     Response.builder().apply {
-        request(this@createFakeInvalidUsernamePasswordResponse)
+        request(this@createInvalidArcGISTokenResponse)
         val bodyString =
             """
                 {"error":{"code":400,"message":"Unable to generate token.","details":["Invalid username or password."]}}
