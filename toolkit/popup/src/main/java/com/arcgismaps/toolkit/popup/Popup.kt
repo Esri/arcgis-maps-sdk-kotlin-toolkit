@@ -52,8 +52,6 @@ import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.mapping.popup.TextPopupElement
 import com.arcgismaps.toolkit.popup.internal.element.attachment.AttachmentsElementState
 import com.arcgismaps.toolkit.popup.internal.element.attachment.AttachmentsPopupElement
-import com.arcgismaps.toolkit.popup.internal.element.attachment.ViewableFile
-import com.arcgismaps.toolkit.popup.internal.element.attachment.ViewableFileSaver
 import com.arcgismaps.toolkit.popup.internal.element.attachment.rememberAttachmentsElementState
 import com.arcgismaps.toolkit.popup.internal.element.fieldselement.FieldsElementState
 import com.arcgismaps.toolkit.popup.internal.element.fieldselement.FieldsPopupElement
@@ -63,8 +61,7 @@ import com.arcgismaps.toolkit.popup.internal.element.state.mutablePopupElementSt
 import com.arcgismaps.toolkit.popup.internal.element.textelement.TextElementState
 import com.arcgismaps.toolkit.popup.internal.element.textelement.TextPopupElement
 import com.arcgismaps.toolkit.popup.internal.element.textelement.rememberTextElementState
-import com.arcgismaps.toolkit.popup.internal.ui.FileState
-import com.arcgismaps.toolkit.popup.internal.ui.FileViewer
+import com.arcgismaps.toolkit.popup.internal.fileviewer.FileViewer
 import com.arcgismaps.toolkit.popup.internal.fileviewer.ViewableFile
 
 @Immutable
@@ -114,14 +111,6 @@ private fun Popup(popupState: PopupState, modifier: Modifier = Modifier) {
 @Composable
 private fun Popup(popupState: PopupState, evaluated: Boolean, modifier: Modifier = Modifier) {
     val popup = popupState.popup
-    var displayFileViewer: FileState? by rememberSaveable { mutableStateOf(null) }
-
-    displayFileViewer?.let{
-        FileViewer(
-            fileState = it,
-            onDismissRequest = { displayFileViewer = null }
-        )
-    }
     Column(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -140,9 +129,7 @@ private fun Popup(popupState: PopupState, evaluated: Boolean, modifier: Modifier
         }
         HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
         if (evaluated) {
-            PopupBody(popupState) {
-                displayFileViewer = it
-            }
+            PopupBody(popupState)
         }
     }
 }
