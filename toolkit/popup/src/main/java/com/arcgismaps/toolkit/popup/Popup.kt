@@ -52,7 +52,9 @@ import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.mapping.popup.TextPopupElement
 import com.arcgismaps.toolkit.popup.internal.element.attachment.AttachmentsElementState
 import com.arcgismaps.toolkit.popup.internal.element.attachment.AttachmentsPopupElement
-import com.arcgismaps.toolkit.popup.internal.element.attachment.rememberAttachmentElementState
+import com.arcgismaps.toolkit.popup.internal.element.attachment.ViewableFile
+import com.arcgismaps.toolkit.popup.internal.element.attachment.ViewableFileSaver
+import com.arcgismaps.toolkit.popup.internal.element.attachment.rememberAttachmentsElementState
 import com.arcgismaps.toolkit.popup.internal.element.fieldselement.FieldsElementState
 import com.arcgismaps.toolkit.popup.internal.element.fieldselement.FieldsPopupElement
 import com.arcgismaps.toolkit.popup.internal.element.fieldselement.rememberFieldsElementState
@@ -61,6 +63,8 @@ import com.arcgismaps.toolkit.popup.internal.element.state.mutablePopupElementSt
 import com.arcgismaps.toolkit.popup.internal.element.textelement.TextElementState
 import com.arcgismaps.toolkit.popup.internal.element.textelement.TextPopupElement
 import com.arcgismaps.toolkit.popup.internal.element.textelement.rememberTextElementState
+import com.arcgismaps.toolkit.popup.internal.ui.FileState
+import com.arcgismaps.toolkit.popup.internal.ui.FileViewer
 
 @Immutable
 private data class PopupState(@Stable val popup: Popup)
@@ -109,6 +113,14 @@ private fun Popup(popupState: PopupState, modifier: Modifier = Modifier) {
 @Composable
 private fun Popup(popupState: PopupState, evaluated: Boolean, modifier: Modifier = Modifier) {
     val popup = popupState.popup
+    var displayFileViewer: FileState? by rememberSaveable { mutableStateOf(null) }
+
+    displayFileViewer?.let{
+        FileViewer(
+            fileState = it,
+            onDismissRequest = { displayFileViewer = null }
+        )
+    }
     Column(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -127,13 +139,15 @@ private fun Popup(popupState: PopupState, evaluated: Boolean, modifier: Modifier
         }
         HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
         if (evaluated) {
-            PopupBody(popupState)
+            PopupBody(popupState) {
+                displayFileViewer = it
+            }
         }
     }
 }
 
 @Composable
-private fun PopupBody(popupState: PopupState) {
+private fun PopupBody(popupState: PopupState, onFileClicked: (FileState?) -> Unit = {}) {
     val popup = popupState.popup
     val lazyListState = rememberLazyListState()
     val states = rememberStates(popup)
@@ -155,8 +169,8 @@ private fun PopupBody(popupState: PopupState) {
 
                     is AttachmentsPopupElement -> {
                         AttachmentsPopupElement(
-                            state = entry.state as AttachmentsElementState
-                        )
+                            state = entry.state as AttachmentsElementState,
+                            onFileClicked)
                     }
 
                     is FieldsPopupElement -> {
@@ -217,7 +231,7 @@ internal fun rememberStates(
             is AttachmentsPopupElement -> {
                 states.add(
                     element,
-                    rememberAttachmentElementState(popup = popup, element = element)
+                    rememberAttachmentsElementState(popup = popup, element = element)
                 )
             }
 
