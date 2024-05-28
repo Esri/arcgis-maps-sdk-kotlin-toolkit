@@ -105,7 +105,6 @@ internal fun rememberAttachmentsElementState(
     }
 }
 
-
 /**
  * Represents the state of a [PopupAttachment].
  *
