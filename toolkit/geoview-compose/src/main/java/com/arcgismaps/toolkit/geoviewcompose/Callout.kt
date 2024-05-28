@@ -17,6 +17,11 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -84,11 +89,19 @@ public fun MapViewScope.Callout(
     modifier: Modifier = Modifier,
     offset: Offset = Offset.Zero,
     rotateOffsetWithGeoView: Boolean = false,
+//    isAnimated: Boolean = false,
+    isDismissed: Boolean = false,
     content: @Composable BoxScope.() -> Unit
 ) {
+    val scope = this
     if (this.calloutParams.location == null) {
         this.calloutParams = CalloutParams(location, modifier, offset, rotateOffsetWithGeoView, content)
-        this.Callout()
+//        AnimatedVisibility(
+//            visible = isAnimated, enter = fadeIn(),
+//            exit = scaleOut(),
+//        ) {
+            scope.Callout()
+//        }
     }
 }
 
@@ -114,7 +127,7 @@ public class MapViewScope(private var _mapView: MapView?) {
      */
     @Composable
     internal fun Callout() {
-
+        var isVisible by remember { mutableStateOf(true) }
         val isMapViewReady = remember { mutableStateOf(false) }
         // We don't want to start drawing the Callout until the MapView is ready. We only collect
         // the drawStatus till the first time MapView is done drawing. the transformWhile operator
@@ -151,28 +164,36 @@ public class MapViewScope(private var _mapView: MapView?) {
         }
 
         val localDensity = LocalDensity.current
+
         // Get the default shape, color & size properties for Callout
         val properties = CalloutProperties()
         leaderScreenCoordinate?.let {
-            CalloutSubComposeLayout(leaderScreenCoordinate = it) {
-                Box(
-                    modifier = calloutParams.modifier!!
-                        .drawCalloutContainer(
-                            cornerRadius = with(localDensity) { properties.cornerRadius.toPx() },
-                            strokeBorderWidth = with(localDensity) { properties.strokeBorderWidth.toPx() },
-                            strokeColor = properties.strokeColor,
-                            backgroundColor = properties.backgroundColor,
-                            calloutContentPadding = properties.calloutContentPadding,
-                            leaderWidth = with(localDensity) { properties.leaderSize.width.toPx() },
-                            leaderHeight = with(localDensity) { properties.leaderSize.height.toPx() },
-                            minSize = properties.minSize
-                        )
-                )
-                {
-                    calloutParams.content!!.invoke(this)
+
+//            AnimatedVisibility(
+////                visible = !calloutParams.isDismissed, enter = scaleIn(),
+//                visible = isVisible, enter = scaleIn(),
+//                exit = scaleOut(),
+//            ) {
+                CalloutSubComposeLayout(leaderScreenCoordinate = it) {
+                    Box(
+                        modifier = calloutParams.modifier!!
+                            .drawCalloutContainer(
+                                cornerRadius = with(localDensity) { properties.cornerRadius.toPx() },
+                                strokeBorderWidth = with(localDensity) { properties.strokeBorderWidth.toPx() },
+                                strokeColor = properties.strokeColor,
+                                backgroundColor = properties.backgroundColor,
+                                calloutContentPadding = properties.calloutContentPadding,
+                                leaderWidth = with(localDensity) { properties.leaderSize.width.toPx() },
+                                leaderHeight = with(localDensity) { properties.leaderSize.height.toPx() },
+                                minSize = properties.minSize
+                            )
+                    )
+                    {
+                        calloutParams.content!!.invoke(this)
+                    }
                 }
             }
-        }
+//        }
     }
 
     /**
@@ -298,6 +319,8 @@ internal data class CalloutParams(
     val modifier: Modifier? = null,
     val offset: Offset = Offset.Zero,
     val rotateOffsetWithGeoView: Boolean = false,
+//    val isAnimated: Boolean = false,
+//    val isDismissed: Boolean = false,
     val content: (@Composable BoxScope.() -> Unit)? = null
 )
 

@@ -64,6 +64,7 @@ android {
 
 dependencies {
     api(arcgis.mapsSdk)
+    implementation("androidx.compose.animation:animation:1.6.7")
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)

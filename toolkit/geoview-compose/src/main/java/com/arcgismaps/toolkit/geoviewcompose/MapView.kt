@@ -17,6 +17,10 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -170,6 +174,7 @@ public fun MapView(
     val mapView = remember { MapView(context) }
     val layoutDirection = LocalLayoutDirection.current
 
+    Box{
     AndroidView(
         modifier = modifier.semantics { contentDescription = "MapView" },
         factory = { mapView },
@@ -252,9 +257,12 @@ public fun MapView(
     )
 
     val mapViewScope = remember(mapView) { MapViewScope(mapView) }
-    content?.let {
-        mapViewScope.reset()
-        mapViewScope.it()
+//    AnimatedVisibility(visible = true, enter = fadeIn(),
+//        exit = fadeOut()) {
+        content?.let {
+            mapViewScope.reset()
+            mapViewScope.it()
+        }
     }
 }
 
