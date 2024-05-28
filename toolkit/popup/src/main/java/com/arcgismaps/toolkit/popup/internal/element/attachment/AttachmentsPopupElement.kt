@@ -29,14 +29,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.mapping.popup.PopupAttachmentType
+import com.arcgismaps.toolkit.popup.internal.fileviewer.ViewableFile
 import com.arcgismaps.toolkit.popup.internal.ui.ExpandableCard
-import com.arcgismaps.toolkit.popup.internal.ui.FileState
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 internal fun AttachmentsPopupElement(
     state: AttachmentsElementState,
-    onSelectedAttachment: (FileState?) -> Unit = {}
+    onSelectedAttachment: (ViewableFile?) -> Unit = {}
 ) {
     AttachmentsPopupElement(
         title = state.title,
@@ -53,7 +53,7 @@ private fun AttachmentsPopupElement(
     title: String,
     @Suppress("UNUSED_PARAMETER") stateId: Int,
     attachments: List<PopupAttachmentState>,
-    onSelectedAttachment: (FileState?) -> Unit = {}
+    onSelectedAttachment: (ViewableFile?) -> Unit = {}
 ) {
     ExpandableCard(
         title = title,
@@ -72,7 +72,7 @@ private fun AttachmentsPopupElement(
 private fun AttachmentGallery(
     state: LazyListState,
     attachments: List<PopupAttachmentState>,
-    onSelectedAttachment: (FileState) -> Unit = {}
+    onSelectedAttachment: (ViewableFile) -> Unit = {}
 ) {
     LazyRow(
         state = state,

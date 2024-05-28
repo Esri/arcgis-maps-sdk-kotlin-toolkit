@@ -65,6 +65,7 @@ import com.arcgismaps.toolkit.popup.internal.element.textelement.TextPopupElemen
 import com.arcgismaps.toolkit.popup.internal.element.textelement.rememberTextElementState
 import com.arcgismaps.toolkit.popup.internal.ui.FileState
 import com.arcgismaps.toolkit.popup.internal.ui.FileViewer
+import com.arcgismaps.toolkit.popup.internal.fileviewer.ViewableFile
 
 @Immutable
 private data class PopupState(@Stable val popup: Popup)
@@ -147,7 +148,7 @@ private fun Popup(popupState: PopupState, evaluated: Boolean, modifier: Modifier
 }
 
 @Composable
-private fun PopupBody(popupState: PopupState, onFileClicked: (FileState?) -> Unit = {}) {
+private fun PopupBody(popupState: PopupState, onFileClicked: (ViewableFile?) -> Unit = {}) {
     val popup = popupState.popup
     val lazyListState = rememberLazyListState()
     val states = rememberStates(popup)

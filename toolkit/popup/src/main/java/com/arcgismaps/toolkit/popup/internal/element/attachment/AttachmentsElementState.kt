@@ -17,7 +17,6 @@
 package com.arcgismaps.toolkit.popup.internal.element.attachment
 
 import android.graphics.drawable.BitmapDrawable
-import android.os.Parcelable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.FileCopy
 import androidx.compose.material.icons.outlined.FilePresent
@@ -30,7 +29,6 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.SaverScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -40,11 +38,12 @@ import com.arcgismaps.mapping.popup.AttachmentsPopupElement
 import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.mapping.popup.PopupAttachment
 import com.arcgismaps.mapping.popup.PopupAttachmentType
+import com.arcgismaps.toolkit.popup.internal.fileviewer.ViewableFile
+import com.arcgismaps.toolkit.popup.internal.fileviewer.toViewableFileType
 import com.arcgismaps.toolkit.popup.internal.element.state.PopupElementState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.parcelize.Parcelize
 
 /**
  * Represents the state of an [AttachmentsPopupElement]
@@ -54,10 +53,10 @@ internal class AttachmentsElementState(
     val description: String,
     val title: String,
     val attachments: List<PopupAttachmentState>,
-    override val id : Int = createId(),
+    override val id: Int = createId(),
 ) : PopupElementState() {
 
-    constructor(attachmentPopupElement: AttachmentsPopupElement): this(
+    constructor(attachmentPopupElement: AttachmentsPopupElement) : this(
         description = attachmentPopupElement.description,
         title = attachmentPopupElement.title,
         attachments = attachmentPopupElement.attachments.map { PopupAttachmentState(it) }
@@ -106,58 +105,7 @@ internal fun rememberAttachmentsElementState(
     }
 }
 
-internal object ViewableFileSaver: Saver<ViewableFile, Any> {
-    override fun restore(value: Any): ViewableFile {
-        val map = value as Map<*, *>
-        return object : ViewableFile {
-            override val name: String = map["name"] as String
-            override val size: Long = map["size"] as Long
-            override val path: String = map["path"] as String
-            override val type: ViewableFileType = map["type"] as ViewableFileType
-        }
-    }
-    
-    override fun SaverScope.save(value: ViewableFile): Any {
-        return mapOf(
-            "name" to value.name,
-            "size" to value.size,
-            "path" to value.path,
-            "type" to value.type
-        )
-    }
-}
 
-
-internal interface ViewableFile {
-    val name: String
-    val size: Long
-    val path: String
-    val type: ViewableFileType
-}
-
-internal sealed class ViewableFileType {
-    data object Image : ViewableFileType()
-    data object Video : ViewableFileType()
-    data object Other : ViewableFileType()
-}
-
-internal fun PopupAttachmentType.toViewableFileType(): ViewableFileType = when (this) {
-    PopupAttachmentType.Image -> ViewableFileType.Image
-    PopupAttachmentType.Video -> ViewableFileType.Video
-    PopupAttachmentType.Document,
-    PopupAttachmentType.Other -> ViewableFileType.Other
-}
-
-@Composable
-internal fun rememberPopupAttachmentState(
-    attachment: PopupAttachment
-): PopupAttachmentState {
-    return rememberSaveable(
-        saver = PopupAttachmentState.Saver(attachment)
-    ) {
-        PopupAttachmentState(attachment)
-    }
-}
 /**
  * Represents the state of a [PopupAttachment].
  *
@@ -174,7 +122,7 @@ internal class PopupAttachmentState(
     val loadStatus: StateFlow<LoadStatus>,
     private val onLoadAttachment: suspend () -> Result<Unit>,
     private val onLoadThumbnail: (suspend () -> Result<BitmapDrawable?>)? = null
-): ViewableFile {
+) : ViewableFile(name, size, "", popupAttachmentType.toViewableFileType()) {
     private val _thumbnail: MutableState<ImageBitmap?> = mutableStateOf(null)
     private lateinit var _attachment: PopupAttachment
 
@@ -184,7 +132,6 @@ internal class PopupAttachmentState(
     val thumbnail: State<ImageBitmap?> = _thumbnail
     override val path: String
         get() = _attachment.filePath
-    override val type: ViewableFileType = popupAttachmentType.toViewableFileType()
 
     constructor(attachment: PopupAttachment) : this(
         name = attachment.name,
