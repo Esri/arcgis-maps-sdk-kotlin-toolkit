@@ -252,7 +252,10 @@ public fun MapView(
     )
 
     val mapViewScope = remember(mapView) { MapViewScope(mapView) }
-    content?.let { mapViewScope.it() }
+    content?.let {
+        mapViewScope.reset()
+        mapViewScope.it()
+    }
 }
 
 /**
