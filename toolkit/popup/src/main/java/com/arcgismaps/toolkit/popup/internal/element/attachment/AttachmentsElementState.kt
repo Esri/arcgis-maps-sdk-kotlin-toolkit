@@ -162,17 +162,6 @@ internal class PopupAttachmentState(
             }
         }
     }
-
-    companion object {
-        fun Saver(
-            attachment: PopupAttachment
-        ): Saver<PopupAttachmentState, Any> = Saver(
-            save = { null },
-            restore = {
-                PopupAttachmentState(attachment)
-            }
-        )
-    }
 }
 
 @Composable
