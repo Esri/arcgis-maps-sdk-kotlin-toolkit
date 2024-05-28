@@ -180,7 +180,7 @@ public class MapViewScope(private var _mapView: MapView?) {
      *
      * @param geoView the GeoView
      * @param location the location in geographical coordinates
-     * @param offset the offset in screen coordinates from the geographical location at which to place the callout
+     * @param offset the offset in screen coordinates from the geographical location at which to place the Callout
      * @param rotateOffsetWithGeoView specifies whether the screen offset is rotated with the [GeoView]. The Screen offset
      *       will be rotated with the [GeoView] when true, false otherwise.
      * @return A [ScreenCoordinate] for the screen in pixels or null if the location is not visible
