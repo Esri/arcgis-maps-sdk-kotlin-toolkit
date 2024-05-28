@@ -18,10 +18,11 @@
 
 package com.arcgismaps.toolkit.mapviewcalloutapp.screens
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
@@ -33,8 +34,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -53,8 +55,15 @@ import com.arcgismaps.toolkit.geoviewcompose.MapView
 @Composable
 fun MainScreen(viewModel: MapViewModel) {
 
-    val mapPoint = viewModel.mapPoint.collectAsState().value
-    var visible by remember { mutableStateOf(true) }
+    var mapPoint by remember {
+        mutableStateOf<Point?>(null)
+    }
+    Log.e("TAG", "MainScreen: recompose $mapPoint")
+    val visible by remember {
+        derivedStateOf {
+            mapPoint != null
+        }
+    }
     val density = LocalDensity.current
 
     val state = remember {
@@ -89,9 +98,9 @@ fun MainScreen(viewModel: MapViewModel) {
 //            }
 //        }
 
-Column {
-    Button(
-            onClick = { visible = !visible }
+    Column {
+        Button(
+            onClick = { mapPoint = null }
 //        modifier = Modifier.fillMaxSize()
         ) {
             Text("Set Box Visibility")
@@ -100,16 +109,15 @@ Column {
         MapView(
             modifier = Modifier.fillMaxSize(),
             arcGISMap = viewModel.arcGISMap,
-            onSingleTapConfirmed = viewModel::setMapPoint,
-            onLongPress = { visible = !visible },
-            onDoubleTap = { visible = false },
-            content = if (mapPoint != null) {
-                {
-                    AnimatedVisibility(
-                        visible = visible, enter = scaleIn(),
-                        exit = scaleOut(),
-                    ) {
-                        Callout(location = mapPoint) {
+            onSingleTapConfirmed = {
+                mapPoint = it.mapPoint
+            },
+            onLongPress = { },
+            onDoubleTap = { },
+            content = {
+                val movableContent = movableContentOf {
+                    if (mapPoint != null) {
+                        Callout(location = mapPoint!!) {
                             Text(
                                 "Hello, World 0!",
                                 color = Color.Green
@@ -117,8 +125,14 @@ Column {
                         }
                     }
                 }
-            } else {
-                null
+                AnimatedVisibility(
+                    visible = visible,
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                    label = "",
+                ) {
+                    movableContent()
+                }
             }
         )
     }
@@ -138,39 +152,39 @@ Column {
 @Composable
 fun SubComposeLayoutDemo() {
     var isVisible by remember { mutableStateOf(false) }
-        Column {
+    Column {
 
-            Button(
-                onClick = { isVisible = !isVisible }
+        Button(
+            onClick = { isVisible = !isVisible }
 //        modifier = Modifier.fillMaxSize()
         ) {
             Text("Set Box Visibility")
         }
 //        if (visible) {
-            AnimatedVisibility(
-                visible = isVisible, enter = scaleIn(),
-                exit = scaleOut(),
-            ) {
+        AnimatedVisibility(
+            visible = isVisible, enter = scaleIn(),
+            exit = scaleOut(),
+        ) {
 
-                ResizeWidthColumn(Modifier.fillMaxWidth(), true) {
+            ResizeWidthColumn(Modifier.fillMaxWidth(), true) {
 
-                    Box(
-                        modifier = Modifier
-                            .background(Color.Red)
-                    ) {
-                        Text("Hello")
-                    }
+                Box(
+                    modifier = Modifier
+                        .background(Color.Red)
+                ) {
+                    Text("Hello")
+                }
 
-                    Box(
-                        modifier = Modifier
-                            .padding(top = 8.dp)
-                            .background(Color.Red)
-                    ) {
-                        Text("This is a long messsage \n and its longer")
-                    }
+                Box(
+                    modifier = Modifier
+                        .padding(top = 8.dp)
+                        .background(Color.Red)
+                ) {
+                    Text("This is a long messsage \n and its longer")
                 }
             }
         }
+    }
 }
 
 @Composable
