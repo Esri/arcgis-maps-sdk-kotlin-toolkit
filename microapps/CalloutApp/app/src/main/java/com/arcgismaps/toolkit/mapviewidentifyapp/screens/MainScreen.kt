@@ -54,7 +54,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.arcgismaps.toolkit.geoviewcompose.Callout
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import com.arcgismaps.toolkit.mapviewidentifyapp.R
 
@@ -104,7 +103,7 @@ fun MainScreen() {
                 val mapPoint by identifyViewModel.calloutPoint
 
                 mapPoint?.let {
-                    Callout(it, modifier) {
+                    Callout(it) {
                         Text(text = "HELLO WORLD",
                             modifier = Modifier
                                 .wrapContentWidth(align = Alignment.CenterHorizontally)
