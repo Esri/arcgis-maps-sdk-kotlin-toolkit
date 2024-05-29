@@ -28,10 +28,9 @@ import org.junit.Assert
 
 
 /**
- * Waits for the View with the matching package to be visible. Throws an error if the view can't be
+ * Waits for the View with the matching [packageId] to be visible. Throws an error if the view can't be
  * found.
  *
- * @param packageId the view's package Id to wait for.
  * @since 200.5.0
  */
 fun UiDevice.awaitViewVisible(packageId: String) {
