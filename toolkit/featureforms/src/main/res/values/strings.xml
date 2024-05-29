@@ -97,4 +97,5 @@
     <string name="name">Name</string>
     <string name="add_file">Add From Files</string>
     <string name="attachment_error">Error Adding Attachment</string>
+    <string name="no_app_found">No application found to open this file type.</string>
 </resources>
