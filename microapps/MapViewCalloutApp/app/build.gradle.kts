@@ -75,6 +75,7 @@ android {
 
 dependencies {
     implementation(project(":geoview-compose"))
+    implementation(project(":microapps-lib"))
     implementation(arcgis.mapsSdk)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
@@ -82,6 +83,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.compose.navigation)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.bundles.composeTest)

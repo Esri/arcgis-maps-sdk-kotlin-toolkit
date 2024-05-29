@@ -22,28 +22,32 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.toolkit.mapviewcalloutapp.screens.MainScreen
-import com.arcgismaps.toolkit.mapviewcalloutapp.screens.MapViewModel
-import com.arcgismaps.toolkit.mapviewcalloutapp.ui.theme.MapViewCalloutAppTheme
+import com.esri.microappslib.theme.MicroAppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        ArcGISEnvironment.apiKey =
-            ApiKey.create(BuildConfig.API_KEY)
-        val viewModel: MapViewModel by viewModels()
+        ArcGISEnvironment.apiKey = ApiKey.create(BuildConfig.API_KEY)
         setContent {
-            MapViewCalloutAppTheme {
-                MapViewCalloutApp(viewModel)
+            MicroAppTheme {
+                MapViewCalloutApp()
             }
         }
     }
 }
 
 @Composable
-fun MapViewCalloutApp(viewModel: MapViewModel) {
-    MainScreen(viewModel)
+fun MapViewCalloutApp() {
+    MainScreen()
 }

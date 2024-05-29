@@ -18,35 +18,184 @@
 
 package com.arcgismaps.toolkit.mapviewcalloutapp.screens
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import com.arcgismaps.toolkit.geoviewcompose.Callout
-import com.arcgismaps.toolkit.geoviewcompose.MapView
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+
+private val calloutAppScreens = mutableListOf(
+    "Callout on MapView tapped",
+    "Callout using FeatureLayer",
+    "Callout using GraphicsOverlay"
+)
 
 @Composable
-fun MainScreen(viewModel: MapViewModel) {
+fun MainScreen() {
+    var currentScreen by remember { mutableStateOf("") }
+    val navController = rememberNavController()
 
-    val mapPoint = viewModel.mapPoint.collectAsState().value
+    navController.addOnDestinationChangedListener(listener = { _, destination, _ ->
+        currentScreen = destination.route.toString()
+    })
 
-    MapView(
-        modifier = Modifier.fillMaxSize(),
-        arcGISMap = viewModel.arcGISMap,
-        onSingleTapConfirmed = viewModel::setMapPoint,
-        content = if (mapPoint != null) {
-            {
-                Callout(location = mapPoint) {
-                    Text(
-                        "Hello, World!",
-                        color = Color.Green
+    CalloutAppNavHost(
+        navController = navController,
+        calloutScreenNames = calloutAppScreens,
+        currentScreen = currentScreen
+    ) {
+        composable(route = calloutAppScreens[0]) {
+            AppScreen1()
+        }
+        composable(route = calloutAppScreens[1]) {
+            AppScreen1()
+        }
+        composable(route = calloutAppScreens[2]) {
+            AppScreen1()
+        }
+    }
+}
+
+
+@Composable
+fun CalloutAppNavHost(
+    navController: NavHostController,
+    calloutScreenNames: MutableList<String>,
+    currentScreen: String,
+    builder: NavGraphBuilder.() -> Unit
+) {
+    Scaffold(
+        topBar = {
+            CalloutAppBar(
+                currentScreen = currentScreen,
+                canNavigateBack = navController.previousBackStackEntry != null,
+                navigateUp = { navController.navigateUp() }
+            )
+        }
+    ) { innerPadding ->
+        NavHost(
+            modifier = Modifier.padding(innerPadding),
+            navController = navController,
+            startDestination = "Callout App",
+        ) {
+            composable(route = "Callout App") {
+                NavScreenSwitcher(
+                    calloutScreenNames = calloutScreenNames,
+                    onScreenSelected = { selectedScreen ->
+                        navController.navigate(selectedScreen)
+                    }
+                )
+            }
+            builder.invoke(this)
+        }
+    }
+}
+
+@Composable
+fun NavScreenSwitcher(
+    calloutScreenNames: List<String>,
+    onScreenSelected: (String) -> Unit
+) {
+    Scaffold(
+        modifier = Modifier
+            .fillMaxSize(),
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                modifier = Modifier.padding(24.dp),
+                text = "Select screen to launch"
+            )
+
+            val (selectedOption, onOptionSelected) = remember { mutableStateOf(calloutScreenNames[0]) }
+            Column(
+                Modifier
+                    .selectableGroup()
+                    .padding(24.dp)
+            ) {
+                calloutScreenNames.forEach { calloutScreen ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .selectable(
+                                selected = (calloutScreen == selectedOption),
+                                onClick = { onOptionSelected(calloutScreen) },
+                                role = Role.RadioButton
+                            )
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = (calloutScreen == selectedOption),
+                            onClick = null
+                        )
+                        Text(
+                            text = calloutScreen,
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                    }
+                }
+            }
+
+            Button(onClick = { onScreenSelected(selectedOption) }) {
+                Text(text = "Launch screen")
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CalloutAppBar(
+    currentScreen: String,
+    canNavigateBack: Boolean,
+    navigateUp: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    TopAppBar(
+        title = { Text(currentScreen) },
+        modifier = modifier,
+        navigationIcon = {
+            if (canNavigateBack) {
+                IconButton(onClick = navigateUp) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back button"
                     )
                 }
             }
-        } else {
-            null
         }
     )
 }
