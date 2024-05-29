@@ -43,7 +43,7 @@ import java.security.cert.CertificateException
 /**
  * Tests for server trust challenges.
  *
- * @since 200.4.0
+ * @since 200.5.0
  */
 class ServerTrustTests {
 
@@ -66,7 +66,7 @@ class ServerTrustTests {
      * When the user trusts the server
      * Then the dialog should be dismissed and the response should be of type [NetworkAuthenticationChallengeResponse.ContinueWithCredential]
      *
-     * @since 200.4.0
+     * @since 200.5.0
      */
     @Test
     fun trustSelfSignedCertificate() = runTest {
@@ -85,7 +85,7 @@ class ServerTrustTests {
      * When the user cancels the server trust challenge
      * Then the dialog should be dismissed and the response should be of type [NetworkAuthenticationChallengeResponse.Cancel]
      *
-     * @since 200.4.0
+     * @since 200.5.0
      */
     @Test
     fun cancelServerTrustChallenge() = runTest {
@@ -104,7 +104,7 @@ class ServerTrustTests {
      * When the user presses the back button
      * Then the dialog should be dismissed and the response should be of type [NetworkAuthenticationChallengeResponse.Cancel]
      *
-     * @since 200.4.0
+     * @since 200.5.0
      */
     @Test
     fun backButtonDismissesDialog() = runTest {
@@ -124,7 +124,7 @@ class ServerTrustTests {
      * Note that this function will also simulate disposing and restoring the state of the DialogAuthenticator
      * before interaction with the server trust dialog.
      *
-     * @since 200.4.0
+     * @since 200.5.0
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun TestScope.testServerTrustChallengeWithStateRestoration(userInputOnDialog: () -> Unit): Deferred<NetworkAuthenticationChallengeResponse> =

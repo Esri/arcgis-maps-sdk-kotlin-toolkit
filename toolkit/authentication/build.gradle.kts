@@ -49,6 +49,10 @@ android {
     buildFeatures {
         compose = true
     }
+    packagingOptions {
+        exclude("META-INF/LICENSE-notice.md")
+        exclude("META-INF/LICENSE.md")
+    }
     composeOptions {
         kotlinCompilerExtensionVersion = libs.versions.androidxComposeCompiler.get()
     }
@@ -82,4 +86,8 @@ dependencies {
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
     debugImplementation(libs.bundles.debug)
+
+    // uiautomator
+    androidTestImplementation(libs.androidx.uiautomator)
+    androidTestImplementation(libs.mockk.android)
 }
