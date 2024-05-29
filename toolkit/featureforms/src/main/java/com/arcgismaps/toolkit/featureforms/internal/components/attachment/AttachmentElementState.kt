@@ -295,11 +295,10 @@ internal class FormAttachmentState(
     /**
      * A unique ID for the attachment.
      */
-    val id by lazy {
-        formAttachment?.attachment?.let {
+    val id: String
+        get() = formAttachment?.attachment?.let {
             "${it.id}_${it.name}"
         } ?: name
-    }
 
     private val _loadStatus: MutableStateFlow<LoadStatus> = MutableStateFlow(LoadStatus.NotLoaded)
     override val loadStatus = _loadStatus.asStateFlow()
