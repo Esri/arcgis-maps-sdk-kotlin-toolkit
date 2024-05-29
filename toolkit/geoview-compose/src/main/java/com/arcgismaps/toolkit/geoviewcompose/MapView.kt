@@ -17,6 +17,7 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -170,28 +171,36 @@ public fun MapView(
     val mapView = remember { MapView(context) }
     val layoutDirection = LocalLayoutDirection.current
 
-    AndroidView(
-        modifier = modifier.semantics { contentDescription = "MapView" },
-        factory = { mapView },
-        update = {
-            it.map = arcGISMap
-            it.selectionProperties = selectionProperties
-            it.interactionOptions = mapViewInteractionOptions
-            it.locationDisplay = locationDisplay
-            it.labeling = viewLabelProperties
-            it.wrapAroundMode = wrapAroundMode
-            it.geometryEditor = geometryEditor
-            it.grid = grid
-            it.backgroundGrid = backgroundGrid
-            it.isAttributionBarVisible = isAttributionBarVisible
-            it.setTimeExtent(timeExtent)
-            if (it.graphicsOverlays != graphicsOverlays) {
-                it.graphicsOverlays.apply {
-                    clear()
-                    addAll(graphicsOverlays)
+    Box(modifier){
+        AndroidView(
+            modifier = modifier.semantics { contentDescription = "MapView" },
+            factory = { mapView },
+            update = {
+                it.map = arcGISMap
+                it.selectionProperties = selectionProperties
+                it.interactionOptions = mapViewInteractionOptions
+                it.locationDisplay = locationDisplay
+                it.labeling = viewLabelProperties
+                it.wrapAroundMode = wrapAroundMode
+                it.geometryEditor = geometryEditor
+                it.grid = grid
+                it.backgroundGrid = backgroundGrid
+                it.isAttributionBarVisible = isAttributionBarVisible
+                it.setTimeExtent(timeExtent)
+                if (it.graphicsOverlays != graphicsOverlays) {
+                    it.graphicsOverlays.apply {
+                        clear()
+                        addAll(graphicsOverlays)
+                    }
                 }
-            }
-        })
+            })
+
+        val mapViewScope = remember(mapView) { MapViewScope(mapView) }
+        content?.let {
+            mapViewScope.reset()
+            mapViewScope.it()
+        }
+    }
 
     DisposableEffect(Unit) {
         lifecycleOwner.lifecycle.addObserver(mapView)
@@ -250,12 +259,6 @@ public fun MapView(
         onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
         onVisibleAreaChanged = onVisibleAreaChanged
     )
-
-    val mapViewScope = remember(mapView) { MapViewScope(mapView) }
-    content?.let {
-        mapViewScope.reset()
-        mapViewScope.it()
-    }
 }
 
 /**
