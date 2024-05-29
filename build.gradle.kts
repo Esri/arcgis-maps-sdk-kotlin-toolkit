@@ -40,13 +40,16 @@ buildscript {
     }
 }
 
+// Path to the centralized folder in root directory where test reports for connected tests end up
+val connectedTestReportsPath by extra("${rootDir}/connectedTestReports")
+
 /**
  * Configures the [gmazzo test aggregation plugin](https://github.com/gmazzo/gradle-android-test-aggregation-plugin)
  * with all local tests to be aggregated into a single test report.
  * Note: This works only for local tests, not for connected tests.
  * To run aggregated local tests, run the following at the root folder of the project:
  * ```
- * ./gradlew testAggregatedReport
+ * ./gradlew testAggregatedReport --continue
  * ```
  * Test report to be found under `arcgis-maps-sdk-kotlin-toolkit/build/reports`.
  */
