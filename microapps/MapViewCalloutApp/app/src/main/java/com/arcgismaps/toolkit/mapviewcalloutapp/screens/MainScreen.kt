@@ -75,10 +75,10 @@ fun MainScreen() {
             AppScreen1()
         }
         composable(route = calloutAppScreens[1]) {
-            AppScreen1()
+            AppScreen2()
         }
         composable(route = calloutAppScreens[2]) {
-            AppScreen1()
+            AppScreen3()
         }
     }
 }

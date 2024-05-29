@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -38,11 +39,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.geoviewcompose.Callout
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import com.arcgismaps.toolkit.mapviewcalloutapp.MapViewModel
 import kotlin.math.roundToInt
+
 @Composable
 fun AppScreen1() {
 
@@ -121,29 +124,28 @@ fun CalloutOptionsBox(
             )
         }
 
-        Text(text = "Offset")
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(text = "X-Axis")
-            TextField(
-                value = offset.x.toString(),
-                onValueChange = { value ->
-                    onXAxisOffsetChanged(value.toFloat())
-                },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                label = { Text("Enter an integer") }
-            )
-        }
-
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(text = "Y-Axis")
-            TextField(
-                value = offset.y.toString(),
-                onValueChange = { value ->
-                    onYAxisOffsetChanged(value.toFloat())
-                },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                label = { Text("Enter an integer") }
-            )
+            Text(text = "Offset")
+            Column {
+                TextField(
+                    value = offset.x.toString(),
+                    onValueChange = { value ->
+                        onXAxisOffsetChanged(value.toFloat())
+                    },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    label = { Text("X-Axis offset") },
+                    textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.End)
+                )
+                TextField(
+                    value = offset.y.toString(),
+                    onValueChange = { value ->
+                        onYAxisOffsetChanged(value.toFloat())
+                    },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    label = { Text("Y-Axis offset") },
+                    textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.End)
+                )
+            }
         }
     }
 }

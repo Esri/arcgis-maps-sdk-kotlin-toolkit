@@ -34,8 +34,9 @@ import com.arcgismaps.toolkit.geoviewcompose.MapView
 
 @Composable
 fun AppScreen2(){
-    Box(modifier = Modifier.fillMaxSize()){
+    Box{
         MapView(
+            modifier = Modifier.fillMaxSize(),
             arcGISMap = ArcGISMap(BasemapStyle.ArcGISTopographic)
         )
     }
