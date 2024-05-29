@@ -16,8 +16,10 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.attachment
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.text.format.Formatter
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -236,7 +238,12 @@ internal fun AttachmentTile(
                                 state.contentType
                             )
                             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                            context.startActivity(intent)
+                            try {
+                                context.startActivity(intent)
+                            } catch (e: ActivityNotFoundException) {
+                                // show a toast if there is no app to open the file type
+                                Toast.makeText(context, R.string.no_app_found, Toast.LENGTH_SHORT).show()
+                            }
                         }
                     }
                 }
