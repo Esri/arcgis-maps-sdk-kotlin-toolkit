@@ -16,19 +16,14 @@
 
 package com.arcgismaps.toolkit.popup.internal.element.media
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.BarChart
-import androidx.compose.material.icons.outlined.Image
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.graphics.vector.ImageVector
 import com.arcgismaps.mapping.popup.MediaPopupElement
 import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.mapping.popup.PopupMedia
 import com.arcgismaps.mapping.popup.PopupMediaType
-import com.arcgismaps.mapping.popup.PopupMediaValue
 import com.arcgismaps.toolkit.popup.internal.element.state.PopupElementState
 
 /**
@@ -86,21 +81,17 @@ internal fun rememberMediaElementState(
 internal class PopupMediaState(
     val title: String,
     val caption: String,
-    val refreshInterval: Long,
-    val media: PopupMediaValue,
+    @Suppress("unused") val refreshInterval: Long,
+    @Suppress("unused") val linkUrl: String,
+    val sourceUrl: String,
     val type: PopupMediaType
 ) {
     constructor(media: PopupMedia) : this(
         title = media.title,
         caption = media.caption,
         refreshInterval = media.imageRefreshInterval,
-        media = media.value!!,
+        linkUrl = media.value?.linkUrl ?: "",
+        sourceUrl = media.value?.sourceUrl ?: "",
         type = media.type
     )
-}
-
-@Composable
-internal fun PopupMediaType.getIcon(): ImageVector = when (this) {
-    PopupMediaType.Image -> Icons.Outlined.Image
-    else -> Icons.Outlined.BarChart
 }

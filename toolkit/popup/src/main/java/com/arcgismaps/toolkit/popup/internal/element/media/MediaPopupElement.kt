@@ -28,7 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.popup.PopupMediaType
-import com.arcgismaps.mapping.popup.PopupMediaValue
 import com.arcgismaps.toolkit.popup.internal.ui.ExpandableCard
 
 @Composable
@@ -87,9 +86,9 @@ private fun MediaPopupElementPreview() {
                 "Photo 1.jpg",
                 "caption",
                 1234L,
-                PopupMediaValue().apply { sourceUrl = "https://i.postimg.cc/65yws9mR/Screenshot-2024-02-02-at-6-20-49-PM.png" },
+                linkUrl = "",
+                sourceUrl = "https://i.postimg.cc/65yws9mR/Screenshot-2024-02-02-at-6-20-49-PM.png",
                 PopupMediaType.Image,
-
             )
         )
     )

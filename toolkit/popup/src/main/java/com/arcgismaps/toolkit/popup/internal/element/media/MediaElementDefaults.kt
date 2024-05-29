@@ -34,8 +34,8 @@ internal object MediaElementDefaults {
         tileShape = RoundedCornerShape(8.dp),
         galleryPadding = 15.dp,
         tileStrokeWidth = 0.5.dp,
-        tileWidth = 92.dp,
-        tileHeight = 75.dp
+        tileWidth = 276.dp,
+        tileHeight = 225.dp
     )
 
     @Suppress("unused")

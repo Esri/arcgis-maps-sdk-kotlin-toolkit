@@ -19,63 +19,26 @@ package com.arcgismaps.toolkit.popup.internal.util
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
-import androidx.compose.foundation.Image
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.DefaultAlpha
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import coil.imageLoader
 import coil.request.ImageRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /**
- * Loads an image asynchronously using the [ImageGetter].
- */
-@Composable
-internal fun MediaImage(
-    imageGetter: ImageGetter,
-    modifier: Modifier = Modifier,
-    alignment: Alignment = Alignment.Center,
-    contentScale: ContentScale = ContentScale.Fit,
-    contentDescription: String,
-    alpha: Float = DefaultAlpha,
-    colorFilter: ColorFilter? = null
-) {
-    val context = LocalContext.current
-    LaunchedEffect(imageGetter) {
-        imageGetter.get(context)
-    }
-    val painter = imageGetter.image.value
-    Image(
-        painter = painter,
-        contentDescription = contentDescription,
-        modifier = modifier,
-        alignment = alignment,
-        contentScale = contentScale,
-        alpha = alpha,
-        colorFilter = colorFilter
-    )
-}
-
-/**
- * A model to asynchronously load the image. Once the loading is complete
- * the loaded image is presented via [image] State.
+ * A model to asynchronously acquire a Popup Media image. This class provides an abstraction layer
+ * above Chart and remote URL images. Once the target image is acquired it is presented via [image]
+ * State.
  *
- * @param placeholder the placeholder image to show until the loading is complete.
- * @param getter a suspending lambda to get the image
+ * @param placeholder the placeholder image to show until the intended image is acquired.
+ * @param getter a suspending lambda to acquire the image
  */
-internal open class ImageGetter(
+internal sealed class PopupMediaImageLoader(
     placeholder: Painter,
     private val getter: suspend (Context) -> Bitmap
 ) {
@@ -87,10 +50,10 @@ internal open class ImageGetter(
     }
 }
 
-internal class RemoteImageGetter(
+internal class RemoteImageLoader(
     placeholder: Painter,
     private val url: String
-): ImageGetter(placeholder, getter = { context ->
+): PopupMediaImageLoader(placeholder, getter = { context ->
     withContext(Dispatchers.IO) {
         val request = ImageRequest.Builder(context)
             .data(url)
@@ -102,11 +65,10 @@ internal class RemoteImageGetter(
 })
 
 //
-//internal class ChartImageGetter(
+//internal class ChartImageLoader(
 //    media: PopupMedia,
 //    chartParameters: ChartImageParameters,
-//    placeholder: Painter,
-//    private val url: String
+//    placeholder: Painter
 //): ImageGetter(placeholder, getter = { _ ->
 //    media.generateChartAsync(chartParameters).getOrThrow().image
 //})
