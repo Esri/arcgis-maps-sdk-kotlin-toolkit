@@ -16,7 +16,7 @@
  *
  */
 
-package com.arcgismaps.toolkit.mapviewcalloutapp
+package com.arcgismaps.toolkit.mapviewcalloutapp.screens
 
 import androidx.lifecycle.ViewModel
 import com.arcgismaps.Color
