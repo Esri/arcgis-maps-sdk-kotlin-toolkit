@@ -165,7 +165,7 @@ public class MapViewScope(private var _mapView: MapView?) {
                     displayMetrics = LocalContext.current.resources.displayMetrics
                 )) {
                 Box(
-                    modifier = modifier
+                    modifier = calloutParams.modifier!!
                         .drawCalloutContainer(
                             cornerRadius = with(localDensity) { properties.cornerRadius.toPx() },
                             strokeBorderWidth = with(localDensity) { properties.strokeBorderWidth.toPx() },
