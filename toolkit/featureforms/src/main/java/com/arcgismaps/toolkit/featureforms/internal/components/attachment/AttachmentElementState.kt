@@ -19,7 +19,10 @@ package com.arcgismaps.toolkit.featureforms.internal.components.attachment
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
-import android.util.Log
+import android.graphics.Bitmap.CompressFormat
+import android.media.ThumbnailUtils
+import android.os.Build
+import android.util.Size
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AudioFile
@@ -31,16 +34,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
@@ -62,9 +61,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.util.Objects
+
 
 /**
  * Represents the state of an [AttachmentFormElement]
@@ -284,12 +285,13 @@ internal class FormAttachmentState(
             _name.value = value
         }
 
-    private val _thumbnail: MutableState<ImageBitmap?> = mutableStateOf(null)
-
     /**
-     * The thumbnail of the attachment. This is `null` until [load] is called.
+     * A unique ID for the attachment.
      */
-    val thumbnail: State<ImageBitmap?> = _thumbnail
+    val id: String
+        get() = formAttachment?.attachment?.let {
+            "${it.id}_${it.name}"
+        } ?: name
 
     private val _loadStatus: MutableStateFlow<LoadStatus> = MutableStateFlow(LoadStatus.NotLoaded)
     override val loadStatus = _loadStatus.asStateFlow()
@@ -300,6 +302,13 @@ internal class FormAttachmentState(
     var filePath: String = ""
         private set
 
+    private var _thumbnailUri: MutableState<String> = mutableStateOf("")
+
+    /**
+     * The URI of the thumbnail image. This is empty until [load] is called.
+     */
+    val thumbnailUri: State<String> = _thumbnailUri
+
     /**
      * The directory where the attachments are stored as defined in the [AttachmentsFileProvider].
      */
@@ -308,7 +317,7 @@ internal class FormAttachmentState(
     /**
      * The size of the thumbnail image.
      */
-    private val thumbnailSize = Pair(368, 300)
+    private val thumbnailSize = Size(368, 300)
 
     /**
      * Loads the attachment and its thumbnail in the coroutine scope of the state object that
@@ -338,14 +347,10 @@ internal class FormAttachmentState(
                 }.onSuccess {
                     val data = formAttachment.attachment?.fetchData()?.getOrNull()
                     if (data != null) {
-                        formAttachment.createThumbnail(thumbnailSize.first, thumbnailSize.second)
-                            .onSuccess {
-                                _thumbnail.value = it.bitmap.asImageBitmap()
-                            }
-                        // write the data to disk only if the file does not exist
-                        if (!File(filePath).exists()) {
-                            writeDataToDisk(data)
-                        }
+                        // write the data to disk
+                        writeDataToDisk(data)
+                        // create the thumbnail
+                        createThumbnail()
                     } else {
                         result = Result.failure(Exception("Failed to load attachment data"))
                     }
@@ -376,7 +381,7 @@ internal class FormAttachmentState(
     }
 
     override fun hashCode(): Int {
-        return Objects.hash(name, size, type)
+        return Objects.hash(id, name, size, type)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -385,6 +390,7 @@ internal class FormAttachmentState(
 
         other as FormAttachmentState
 
+        if (id != other.id) return false
         if (name != other.name) return false
         if (size != other.size) return false
         if (type != other.type) return false
@@ -392,16 +398,69 @@ internal class FormAttachmentState(
         return true
     }
 
+    /**
+     * Writes the attachment data to disk. If the file already exists, it will not be overwritten.
+     */
     private suspend fun writeDataToDisk(data: ByteArray) = withContext(Dispatchers.IO) {
         val directory = File(filesDir, attachmentsDir)
         directory.mkdirs()
-        // write the data to disk
-        val file = File(directory, name)
-        file.createNewFile()
-        FileOutputStream(file).use {
-            it.write(data)
+        // write the data to disk using the attachment id as the file name
+        val file = File(directory, id)
+        // write to the file only if the file does not exist
+        if (file.exists().not()) {
+            file.createNewFile()
+            FileOutputStream(file).use {
+                it.write(data)
+            }
         }
         filePath = file.absolutePath
+    }
+
+    /**
+     * Creates a thumbnail image for the attachment. If the thumbnail already exists, it will not be
+     * recreated.
+     */
+    private suspend fun createThumbnail() = withContext(Dispatchers.IO) {
+        if (formAttachment == null) {
+            return@withContext
+        }
+        val directory = File(filesDir, attachmentsDir)
+        directory.mkdirs()
+        val file = File(directory, "thumb_$id")
+        if (file.exists()) {
+            _thumbnailUri.value = file.absolutePath
+            return@withContext
+        }
+        val bitmap = try {
+            when (type) {
+                is FormAttachmentType.Image -> {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        ThumbnailUtils.createImageThumbnail(File(filePath), thumbnailSize, null)
+                    } else {
+                        ThumbnailUtils.createImageThumbnail(filePath, 1)
+                    }
+                }
+
+                FormAttachmentType.Video -> {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        ThumbnailUtils.createVideoThumbnail(File(filePath), thumbnailSize, null)
+                    } else {
+                        ThumbnailUtils.createVideoThumbnail(filePath, 1)
+                    }
+                }
+
+                else -> null
+            }
+        } catch (ex: Exception) {
+            null
+        } ?: return@withContext
+
+        // create and write to the thumbnail file if the bitmap is not null
+        file.createNewFile()
+        BufferedOutputStream(FileOutputStream(file)).use { bos ->
+            bitmap.compress(CompressFormat.JPEG, 85, bos)
+        }
+        _thumbnailUri.value = file.absolutePath
     }
 }
 
