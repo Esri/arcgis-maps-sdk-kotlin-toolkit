@@ -127,7 +127,7 @@ class UsernamePasswordTests {
     /**
      * Places a DialogAuthenticator in the composition and issues a username/password challenge.
      * Once the dialog is displayed, [userInputOnDialog] will be called to simulate user input.
-     * The function will return the response to the username/password challenge from the authenticator in a deferred.
+     * The function will return the response to the username/password challenge from the authenticator in a Deferred.
      *
      * Note that this function will also simulate disposing and restoring the state of the DialogAuthenticator
      * before interaction with the username/password dialog.
@@ -176,6 +176,19 @@ class UsernamePasswordTests {
         }
     }
 
+    /**
+     * Given a Dialog Authenticator
+     * When a username and password challenge is issued
+     * Then the dialog prompt should be displayed
+     *
+     * When the user enters an incorrect username and password 5 times
+     * Then the dialog should be dismissed and the response should be of type [ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError]
+     *
+     * When the user enters a correct username and password
+     * Then the dialog should be dismissed and the response should be of type [ArcGISAuthenticationChallengeResponse.ContinueWithCredential]
+     *
+     * @since 200.5.0
+     */
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun arcGISTokenAuthentication() = runTest {
@@ -261,6 +274,11 @@ class UsernamePasswordTests {
     }
 }
 
+/**
+ * Enters a fake username and password and clicks the login button on a [UsernamePasswordAuthenticator].
+ *
+ * @since 200.5.0
+ */
 fun <T : TestRule, A : ComponentActivity> AndroidComposeTestRule<T, A>.enterUsernamePasswordAndLogin() {
     // Enter the username
     onNodeWithText(activity.getString(R.string.username_label))
