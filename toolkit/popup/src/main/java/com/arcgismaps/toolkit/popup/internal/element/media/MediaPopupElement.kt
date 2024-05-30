@@ -38,7 +38,7 @@ internal fun MediaPopupElement(
         title = state.title,
         description = state.description,
         stateId = state.id,
-        Media = state.media
+        media = state.media
     )
 }
 
@@ -47,7 +47,7 @@ private fun MediaPopupElement(
     description: String,
     title: String,
     @Suppress("UNUSED_PARAMETER") stateId: Int,
-    Media: List<PopupMediaState>
+    media: List<PopupMediaState>
 ) {
     ExpandableCard(
         title = title,
@@ -57,7 +57,7 @@ private fun MediaPopupElement(
             modifier = Modifier.padding(MediaElementDefaults.shapes().galleryPadding)
         ) {
             val listState = rememberLazyListState()
-            MediaGallery(listState, Media)
+            MediaGallery(listState, media)
         }
     }
 }
@@ -81,7 +81,7 @@ private fun MediaPopupElementPreview() {
         title = "Media",
         description = "description of Media",
         stateId = 1,
-        Media = listOf(
+        media = listOf(
             PopupMediaState(
                 "Photo 1.jpg",
                 "caption",

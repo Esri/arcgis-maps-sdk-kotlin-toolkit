@@ -33,6 +33,8 @@ internal object MediaElementDefaults {
         containerShape = RoundedCornerShape(5.dp),
         tileShape = RoundedCornerShape(8.dp),
         galleryPadding = 15.dp,
+        mediaChartPadding = 4.dp,
+        mediaImagePadding = 0.dp,
         tileStrokeWidth = 0.5.dp,
         tileWidth = 276.dp,
         tileHeight = 225.dp
@@ -53,6 +55,8 @@ internal data class MediaElementShapes(
     val containerShape: RoundedCornerShape,
     val tileShape: RoundedCornerShape,
     val galleryPadding: Dp,
+    val mediaChartPadding: Dp,
+    val mediaImagePadding: Dp,
     val tileStrokeWidth: Dp,
     val tileWidth: Dp,
     val tileHeight: Dp
