@@ -77,7 +77,6 @@ internal fun MediaTile(
                 // TODO open media viewer here
             }
     ) {
-
         val placeholder = state.type.rememberPlaceholder()
         val getter by remember(state.sourceUrl) {
             mutableStateOf(
@@ -138,7 +137,7 @@ private fun Title(
         textAlign = TextAlign.Start,
         overflow = TextOverflow.Ellipsis,
         maxLines = 1,
-        modifier = modifier.padding(vertical = 1.dp)
+        modifier = modifier
     )
 }
 
@@ -171,6 +170,9 @@ internal fun MediaView(
         modifier = modifier
             .fillMaxSize()
     ) {
+        val defaults = MediaElementDefaults.colors()
+        val backgroundColor = defaults.tileTextBackgroundColor
+        val textColor = defaults.tileTextColor
         MediaImage(
             mediaImageLoader = mediaImageLoader,
             contentDescription = title,
@@ -190,7 +192,7 @@ internal fun MediaView(
                     }
                 )
                 .background(
-                    MaterialTheme.colorScheme.onBackground.copy(
+                    backgroundColor.copy(
                         alpha = 0.7f
                     )
                 ),
@@ -200,15 +202,15 @@ internal fun MediaView(
                 text = title,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 5.dp),
-                color = MaterialTheme.colorScheme.background
+                    .padding(horizontal = 5.dp, vertical = 1.dp),
+                color = textColor
             )
             Caption(
                 text = caption,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 5.dp),
-                color = MaterialTheme.colorScheme.background.copy(alpha = 0.7f)
+                color = textColor
             )
 
         }

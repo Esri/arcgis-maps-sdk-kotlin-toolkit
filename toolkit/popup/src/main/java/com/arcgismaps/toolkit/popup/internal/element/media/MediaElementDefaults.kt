@@ -44,7 +44,9 @@ internal object MediaElementDefaults {
         containerColor = MaterialTheme.colorScheme.background,
         galleryContainerColor = MaterialTheme.colorScheme.onBackground,
         borderColor = MaterialTheme.colorScheme.outline,
-        tileBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
+        tileBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f),
+        tileTextBackgroundColor = MaterialTheme.colorScheme.onBackground,
+        tileTextColor = MaterialTheme.colorScheme.background
     )
 }
 
@@ -62,5 +64,7 @@ internal data class MediaElementColors(
     val containerColor : Color,
     val galleryContainerColor: Color,
     val tileBorderColor : Color,
-    val borderColor : Color
+    val borderColor : Color,
+    val tileTextBackgroundColor: Color,
+    val tileTextColor: Color
 )
