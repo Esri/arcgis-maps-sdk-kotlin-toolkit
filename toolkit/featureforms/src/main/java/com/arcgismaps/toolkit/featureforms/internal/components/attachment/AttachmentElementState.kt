@@ -19,6 +19,7 @@ package com.arcgismaps.toolkit.featureforms.internal.components.attachment
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.util.Log
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AudioFile
@@ -46,7 +47,6 @@ import androidx.core.content.ContextCompat
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.Loadable
 import com.arcgismaps.mapping.featureforms.AnyAttachmentsFormInput
-import com.arcgismaps.mapping.featureforms.AttachmentChangeType
 import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
 import com.arcgismaps.mapping.featureforms.AttachmentsFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
@@ -113,55 +113,13 @@ internal class AttachmentElementState(
                 buildAttachmentStates(formElement.attachments)
             }
         }
-        scope.launch {
-            formElement.attachmentChanged.collect {
-                when (it.changeType) {
-                    is AttachmentChangeType.Deletion -> {
-                        // delete the state object
-                        attachments.removeIf { state ->
-                            state.formAttachment == it.attachment
-                        }
-                    }
-
-                    is AttachmentChangeType.Rename -> {
-                        // update the state object
-                        attachments.firstOrNull { state ->
-                            state.formAttachment == it.attachment
-                        }?.update(it.attachment)
-                    }
-
-                    is AttachmentChangeType.Addition -> {
-                        val formAttachment = it.attachment
-                        // create a new state
-                        val state = FormAttachmentState(
-                            name = formAttachment.name,
-                            size = formAttachment.size,
-                            contentType = formAttachment.contentType,
-                            type = formAttachment.type,
-                            elementStateId = id,
-                            deleteAttachment = { deleteAttachment(formAttachment) },
-                            filesDir = filesDir,
-                            scope = scope,
-                            formAttachment = formAttachment
-                        )
-                        attachments.add(state)
-                        // load the new attachment
-                        state.loadWithParentScope()
-                        // scroll to the new attachment after a delay to allow the recomposition to complete
-                        delay(100)
-                        lazyListState.scrollToItem(attachments.count())
-                    }
-                }
-                evaluateExpressions()
-            }
-        }
     }
 
     /**
      *  Loads the attachments provided in the [list] and transforms them into state objects
      *  to produce the [attachments] list.
      */
-    private suspend fun buildAttachmentStates(list: List<FormAttachment>) {
+    private fun buildAttachmentStates(list: List<FormAttachment>) {
         attachments.clear()
         list.forEach { formAttachment ->
             // create a new state
@@ -190,7 +148,26 @@ internal class AttachmentElementState(
      * Adds an attachment with the given [name], [contentType], and [data].
      */
     suspend fun addAttachment(name: String, contentType: String, data: ByteArray) {
-        formElement.addAttachment(name, contentType, data)
+        val formAttachment = formElement.addAttachment(name, contentType, data)
+        // create a new state
+        val state = FormAttachmentState(
+            name = formAttachment.name,
+            size = formAttachment.size,
+            contentType = formAttachment.contentType,
+            type = formAttachment.type,
+            elementStateId = id,
+            deleteAttachment = { deleteAttachment(formAttachment) },
+            filesDir = filesDir,
+            scope = scope,
+            formAttachment = formAttachment
+        )
+        attachments.add(state)
+        // load the new attachment
+        state.loadWithParentScope()
+        // scroll to the new attachment after a delay to allow the recomposition to complete
+        delay(100)
+        lazyListState.scrollToItem(attachments.count())
+        evaluateExpressions()
     }
 
     /**
@@ -198,15 +175,24 @@ internal class AttachmentElementState(
      */
     private suspend fun deleteAttachment(formAttachment: FormAttachment) {
         formElement.deleteAttachment(formAttachment)
+        // delete the state object
+        attachments.removeIf { state ->
+            state.formAttachment == formAttachment
+        }
+        evaluateExpressions()
     }
 
     /**
      * Renames the given [formAttachment] with the new [newName].
      */
     suspend fun renameAttachment(formAttachment: FormAttachment, newName: String) {
-        if (formAttachment.name != newName) {
-            formElement.renameAttachment(formAttachment, newName)
-        }
+        formAttachment.name = newName
+        Log.e("TAG", "renameAttachment: renamed to ${formAttachment.name} with $newName", )
+        // update the state object
+        attachments.firstOrNull { state ->
+            state.formAttachment == formAttachment
+        }?.name = newName
+        evaluateExpressions()
     }
 
     /**
@@ -282,8 +268,14 @@ internal class FormAttachmentState(
     val formAttachment: FormAttachment? = null
 ) : Loadable {
 
-    var name by mutableStateOf(name)
-        private set
+    private var _name: MutableState<String> = mutableStateOf(name)
+    var name : String
+        get() = _name.value
+        set(value) {
+            Log.e("TAG", "setting value to: $value", )
+            formAttachment?.name = value
+            _name.value = value
+        }
 
     private val _thumbnail: MutableState<ImageBitmap?> = mutableStateOf(null)
 
@@ -326,6 +318,7 @@ internal class FormAttachmentState(
      * Updates the attachment properties with the given [formAttachment].
      */
     fun update(formAttachment: FormAttachment) {
+        Log.e("TAG", "update: ${formAttachment.name}", )
         // only name is updated since renameAttachment() is the only update call that can be made
         name = formAttachment.name
     }
