@@ -17,7 +17,6 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
