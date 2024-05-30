@@ -276,7 +276,7 @@ internal class FormAttachmentState(
 
     /**
      * The name of the attachment. Setting the name will update the [FormAttachment.name] property.
-     * This is backed by a [MutableState] and can be observed by the composable.
+     * This is backed by a [MutableState] and can be observed by the composition.
      */
     var name : String
         get() = _name.value

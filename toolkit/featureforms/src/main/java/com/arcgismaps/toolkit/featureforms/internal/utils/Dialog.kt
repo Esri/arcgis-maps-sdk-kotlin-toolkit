@@ -301,16 +301,12 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                 dialogRequester.dismissDialog()
                 return
             }
-            FilePicker(allowedMimeTypes = allowedMimeTypes)
-            { uri ->
+            FilePicker(allowedMimeTypes = allowedMimeTypes) { uri ->
                 if (uri != null) {
                     scope.launch(Dispatchers.IO) {
                         val contentType = context.contentResolver.getType(uri) ?: run {
-                            Toast.makeText(
-                                context,
-                                R.string.attachment_error,
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            Toast.makeText(context, R.string.attachment_error, Toast.LENGTH_SHORT)
+                                .show()
                             return@launch
                         }
                         val extension =
@@ -318,8 +314,7 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                         // use a default name
                         var name =
                             "${state.attachments.getNewAttachmentNameForContentType(contentType)}.$extension"
-                        context.contentResolver.query(uri, null, null, null, null)
-                            ?.use { cursor ->
+                        context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
                                 cursor.moveToFirst()
                                 val nameIndex =
                                     cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
@@ -334,8 +329,8 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                             }
                         }
                     }
-                    dialogRequester.dismissDialog()
                 }
+                dialogRequester.dismissDialog()
             }
         }
 
