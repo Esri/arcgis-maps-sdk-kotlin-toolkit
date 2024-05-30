@@ -196,7 +196,7 @@ internal fun AttachmentTile(
                     ),
                     onClick = {
                         showContextMenu = false
-                        scope.launch { state.deleteAttachment() }
+                        state.deleteAttachment()
                     })
             }
         }

@@ -147,7 +147,7 @@ internal class AttachmentElementState(
     /**
      * Adds an attachment with the given [name], [contentType], and [data].
      */
-    suspend fun addAttachment(name: String, contentType: String, data: ByteArray) {
+    fun addAttachment(name: String, contentType: String, data: ByteArray) {
         val formAttachment = formElement.addAttachment(name, contentType, data)
         // create a new state
         val state = FormAttachmentState(
@@ -165,34 +165,34 @@ internal class AttachmentElementState(
         // load the new attachment
         state.loadWithParentScope()
         // scroll to the new attachment after a delay to allow the recomposition to complete
-        delay(100)
-        lazyListState.scrollToItem(attachments.count())
-        evaluateExpressions()
+        scope.launch {
+            delay(100)
+            lazyListState.scrollToItem(attachments.count())
+            evaluateExpressions()
+        }
     }
 
     /**
      * Deletes the given [formAttachment].
      */
-    private suspend fun deleteAttachment(formAttachment: FormAttachment) {
+    fun deleteAttachment(formAttachment: FormAttachment) {
         formElement.deleteAttachment(formAttachment)
         // delete the state object
         attachments.removeIf { state ->
             state.formAttachment == formAttachment
         }
-        evaluateExpressions()
+        scope.launch { evaluateExpressions() }
     }
 
     /**
      * Renames the given [formAttachment] with the new [newName].
      */
-    suspend fun renameAttachment(formAttachment: FormAttachment, newName: String) {
-        formAttachment.name = newName
-        Log.e("TAG", "renameAttachment: renamed to ${formAttachment.name} with $newName", )
-        // update the state object
+    fun renameAttachment(formAttachment: FormAttachment, newName: String) {
+        // update the state object which also updates FormAttachment
         attachments.firstOrNull { state ->
             state.formAttachment == formAttachment
         }?.name = newName
-        evaluateExpressions()
+        scope.launch { evaluateExpressions() }
     }
 
     /**
@@ -262,17 +262,24 @@ internal class FormAttachmentState(
     val contentType: String,
     val type: FormAttachmentType,
     val elementStateId: Int,
-    val deleteAttachment: suspend () -> Unit,
+    val deleteAttachment: () -> Unit,
     private val filesDir: String,
     private val scope: CoroutineScope,
     val formAttachment: FormAttachment? = null
 ) : Loadable {
 
+    /**
+     * Backing mutable state for the [name] property.
+     */
     private var _name: MutableState<String> = mutableStateOf(name)
+
+    /**
+     * The name of the attachment. Setting the name will update the [FormAttachment.name] property.
+     * This is backed by a [MutableState] and can be observed by the composable.
+     */
     var name : String
         get() = _name.value
         set(value) {
-            Log.e("TAG", "setting value to: $value", )
             formAttachment?.name = value
             _name.value = value
         }
@@ -312,15 +319,6 @@ internal class FormAttachmentState(
         scope.launch {
             load()
         }
-    }
-
-    /**
-     * Updates the attachment properties with the given [formAttachment].
-     */
-    fun update(formAttachment: FormAttachment) {
-        Log.e("TAG", "update: ${formAttachment.name}", )
-        // only name is updated since renameAttachment() is the only update call that can be made
-        name = formAttachment.name
     }
 
     /**

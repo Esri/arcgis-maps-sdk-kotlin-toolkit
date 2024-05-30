@@ -23,6 +23,7 @@ import android.util.Log
 import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
@@ -30,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
@@ -53,10 +55,12 @@ import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.D
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.DateTimePickerInput
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.DateTimePickerStyle
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.rememberDateTimePickerState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.Instant
 
 
@@ -301,34 +305,48 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                 dialogRequester.dismissDialog()
                 return
             }
-            FilePicker(allowedMimeTypes = allowedMimeTypes) { uri ->
-                if (uri != null) {
-                    scope.launch {
-                        val contentType = context.contentResolver.getType(uri) ?: run {
-                            Toast.makeText(context, R.string.attachment_error, Toast.LENGTH_SHORT)
-                                .show()
-                            return@launch
-                        }
-                        val extension =
-                            MimeTypeMap.getSingleton().getExtensionFromMimeType(contentType)
-                        // use a default name
-                        var name =
-                            "${state.attachments.getNewAttachmentNameForContentType(contentType)}.$extension"
-                        context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-                            cursor.moveToFirst()
-                            val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                            // use the name from the uri if available
-                            cursor.getStringOrNull(nameIndex)?.let {
-                                name = it
+            FilePicker(
+                modifier = Modifier.fillMaxSize(),
+                allowedMimeTypes = allowedMimeTypes,
+                onFileSelected = { uri ->
+                    if (uri != null) {
+                        scope.launch(Dispatchers.IO) {
+                            Log.e("TAG", "FeatureFormDialog: starting", )
+                            val contentType = context.contentResolver.getType(uri) ?: run {
+                                Toast.makeText(
+                                    context,
+                                    R.string.attachment_error,
+                                    Toast.LENGTH_SHORT
+                                )
+                                    .show()
+                                return@launch
                             }
-                        }
-                        context.readBytes(uri)?.let { data ->
-                            state.addAttachment(name, contentType, data)
+                            val extension =
+                                MimeTypeMap.getSingleton().getExtensionFromMimeType(contentType)
+                            // use a default name
+                            var name =
+                                "${state.attachments.getNewAttachmentNameForContentType(contentType)}.$extension"
+                            context.contentResolver.query(uri, null, null, null, null)
+                                ?.use { cursor ->
+                                    cursor.moveToFirst()
+                                    val nameIndex =
+                                        cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                                    // use the name from the uri if available
+                                    cursor.getStringOrNull(nameIndex)?.let {
+                                        name = it
+                                    }
+                                }
+                            context.readBytes(uri)?.let { data ->
+                                withContext(Dispatchers.Main) {
+                                    state.addAttachment(name, contentType, data)
+                                }
+                            }
+                            Log.e("TAG", "FeatureFormDialog: done", )
+                            dialogRequester.dismissDialog()
                         }
                     }
                 }
-                dialogRequester.dismissDialog()
-            }
+            )
         }
 
         is DialogType.RenameAttachmentDialog -> {
@@ -343,9 +361,7 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
             RenameAttachmentDialog(
                 name = name,
                 onRename = { newName ->
-                    scope.launch {
-                        state.renameAttachment(formAttachment, newName)
-                    }
+                    state.renameAttachment(formAttachment, newName)
                     dialogRequester.dismissDialog()
                 }
             ) {
