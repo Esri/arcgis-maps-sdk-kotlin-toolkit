@@ -10,13 +10,20 @@ import kotlinx.parcelize.TypeParceler
 /**
  * A file that can be viewed in the [FileViewer].
  */
+internal interface ViewableFile {
+    val name: String
+    val size: Long
+    val path: String
+    val type: ViewableFileType
+}
+
 @Parcelize
-internal open class ViewableFile(
-    open val name: String,
-    open val size: Long,
-    open val path: String,
-    @TypeParceler<ViewableFileType, ViewableFileTypeParceler>() open val type: ViewableFileType
-): Parcelable
+internal data class ViewableFileImpl(
+    override val name: String,
+    override val size: Long,
+    override val path: String,
+    @TypeParceler<ViewableFileType, ViewableFileTypeParceler>() override val type: ViewableFileType
+): ViewableFile, Parcelable
 
 private object ViewableFileTypeParceler: Parceler<ViewableFileType> {
     override fun create(parcel: Parcel): ViewableFileType {
