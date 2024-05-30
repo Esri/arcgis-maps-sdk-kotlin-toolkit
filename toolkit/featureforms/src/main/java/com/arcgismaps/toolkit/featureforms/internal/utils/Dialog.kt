@@ -52,12 +52,10 @@ import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.D
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.DateTimePickerInput
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.DateTimePickerStyle
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.rememberDateTimePickerState
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.time.Instant
 
 /**
@@ -303,7 +301,7 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
             }
             FilePicker(allowedMimeTypes = allowedMimeTypes) { uri ->
                 if (uri != null) {
-                    scope.launch(Dispatchers.IO) {
+                    scope.launch {
                         val contentType = context.contentResolver.getType(uri) ?: run {
                             Toast.makeText(context, R.string.attachment_error, Toast.LENGTH_SHORT)
                                 .show()
@@ -315,18 +313,16 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                         var name =
                             "${state.attachments.getNewAttachmentNameForContentType(contentType)}.$extension"
                         context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-                                cursor.moveToFirst()
-                                val nameIndex =
-                                    cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                                // use the name from the uri if available
-                                cursor.getStringOrNull(nameIndex)?.let {
-                                    name = it
-                                }
+                            cursor.moveToFirst()
+                            val nameIndex =
+                                cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                            // use the name from the uri if available
+                            cursor.getStringOrNull(nameIndex)?.let {
+                                name = it
                             }
+                        }
                         context.readBytes(uri)?.let { data ->
-                            withContext(Dispatchers.Main) {
-                                state.addAttachment(name, contentType, data)
-                            }
+                            state.addAttachment(name, contentType, data)
                         }
                     }
                 }
