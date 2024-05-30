@@ -71,7 +71,7 @@ internal fun MediaTile(
         val painter by state.rememberMediaPainter()
         val defaults = MediaElementDefaults.shapes()
         val padding = if (state.type is PopupMediaType.Image)
-            defaults.mediaChartPadding
+            defaults.mediaImagePadding
         else defaults.mediaChartPadding
         MediaView(
             painter = painter,
@@ -150,7 +150,7 @@ internal fun MediaView(
     modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
     ) {
         MediaImage(
