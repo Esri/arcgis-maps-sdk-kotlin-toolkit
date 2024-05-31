@@ -26,14 +26,14 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 
-// Case b.
+// TODO Case b.
 //- Show a MapView with a map with a Feature layer with features
 //- Display callout using Point(tap location) on a feature (with some text)
 //- Display a graphic at the tapped location
 //- add switch to enable/disable animation
 
 @Composable
-fun AppScreen2(){
+fun FeatureScreen(){
     Box{
         MapView(
             modifier = Modifier.fillMaxSize(),

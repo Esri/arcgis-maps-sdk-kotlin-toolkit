@@ -19,6 +19,7 @@
 package com.arcgismaps.toolkit.mapviewcalloutapp.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -45,13 +46,16 @@ import com.arcgismaps.toolkit.geoviewcompose.Callout
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import kotlin.math.roundToInt
 
+/**
+ * Displays a composable [MapView] that displays a [Callout] at the tapped location.
+ */
 @Composable
-fun AppScreen1() {
+fun TapLocationScreen() {
 
     val viewModel = remember { MapViewModel() }
     val mapPoint = viewModel.mapPoint.collectAsState().value
 
-    var calloutVisibility by remember { mutableStateOf(true) }
+    var calloutVisibility by remember { mutableStateOf(false) }
     var rotateOffsetWithGeoView by remember { mutableStateOf(false) }
     var offset by remember { mutableStateOf(Offset.Zero) }
 
@@ -70,29 +74,32 @@ fun AppScreen1() {
             }
         )
 
-        MapView(
-            modifier = Modifier
-                .fillMaxSize(),
-            arcGISMap = viewModel.arcGISMap,
-            graphicsOverlays = remember { listOf(viewModel.tapLocationGraphicsOverlay) },
-            onSingleTapConfirmed = viewModel::setMapPoint,
-            content = if (mapPoint != null && calloutVisibility) {
-                {
-                    Callout(
-                        modifier = Modifier.size(100.dp),
-                        location = mapPoint,
-                        rotateOffsetWithGeoView = rotateOffsetWithGeoView,
-                        offset = offset
-                    )
+        Box {
+            MapView(
+                modifier = Modifier
+                    .fillMaxSize(),
+                arcGISMap = viewModel.arcGISMap,
+                graphicsOverlays = remember { listOf(viewModel.tapLocationGraphicsOverlay) },
+                onSingleTapConfirmed = viewModel::setMapPoint,
+                onLongPress = { viewModel.clearMapPoint() },
+                content = if (mapPoint != null && calloutVisibility) {
                     {
-                        Text("Tapped location: ${mapPoint.x.roundToInt()},${mapPoint.y.roundToInt()}")
-                    }
+                        Callout(
+                            modifier = Modifier.size(100.dp),
+                            location = mapPoint,
+                            rotateOffsetWithGeoView = rotateOffsetWithGeoView,
+                            offset = offset
+                        )
+                        {
+                            Text("Tapped location: ${mapPoint.x.roundToInt()},${mapPoint.y.roundToInt()}")
+                        }
 
+                    }
+                } else {
+                    null
                 }
-            } else {
-                null
-            }
-        )
+            )
+        }
     }
 }
 
@@ -131,7 +138,7 @@ fun CalloutOptionsBox(
                     onValueChange = { value ->
                         onXAxisOffsetChanged(value.toFloat())
                     },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     label = { Text("X-Axis offset") },
                     textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.End)
                 )
@@ -140,7 +147,7 @@ fun CalloutOptionsBox(
                     onValueChange = { value ->
                         onYAxisOffsetChanged(value.toFloat())
                     },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     label = { Text("Y-Axis offset") },
                     textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.End)
                 )

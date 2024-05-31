@@ -26,14 +26,14 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 
-// Case c.
+// TODO Case c.
 //- Show a MapView with a map with a GraphicLayer with some graphics
 //- Display callout using Point(tap location) on a Graphic (with some HTML content ??)
 //- Display a graphic at the tapped location
 //- add switch to enable/disable animation
 
 @Composable
-fun AppScreen3(){
+fun GraphicScreen(){
     Box{
         MapView(
             modifier = Modifier.fillMaxSize(),

@@ -46,6 +46,11 @@ class MapViewModel : ViewModel() {
 
     val tapLocationGraphicsOverlay: GraphicsOverlay = GraphicsOverlay()
 
+    fun clearMapPoint() {
+        _mapPoint.value = null
+        tapLocationGraphicsOverlay.graphics.clear()
+    }
+
     fun setMapPoint(singleTapConfirmedEvent: SingleTapConfirmedEvent) {
         _mapPoint.value = singleTapConfirmedEvent.mapPoint
 

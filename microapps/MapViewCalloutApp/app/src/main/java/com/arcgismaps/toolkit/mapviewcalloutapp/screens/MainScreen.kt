@@ -50,13 +50,19 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.arcgismaps.toolkit.geoviewcompose.MapView
+import com.arcgismaps.toolkit.geoviewcompose.Callout
 
 private val calloutAppScreens = mutableListOf(
-    "Callout on MapView tapped",
-    "Callout using FeatureLayer",
-    "Callout using GraphicsOverlay"
+    "Show Callout on a tap location",
+    "Show Callout on a Feature",
+    "Show Callout on a Graphic"
 )
 
+/**
+ * Displays a list of screens to launch. Each of which demonstrates different ways to show
+ * a [Callout] on a [MapView].
+ */
 @Composable
 fun MainScreen() {
     var currentScreen by remember { mutableStateOf("") }
@@ -72,13 +78,13 @@ fun MainScreen() {
         currentScreen = currentScreen
     ) {
         composable(route = calloutAppScreens[0]) {
-            AppScreen1()
+            TapLocationScreen()
         }
         composable(route = calloutAppScreens[1]) {
-            AppScreen2()
+            FeatureScreen()
         }
         composable(route = calloutAppScreens[2]) {
-            AppScreen3()
+            GraphicScreen()
         }
     }
 }
