@@ -52,7 +52,7 @@ import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.mapping.popup.TextPopupElement
 import com.arcgismaps.toolkit.popup.internal.element.attachment.AttachmentsElementState
 import com.arcgismaps.toolkit.popup.internal.element.attachment.AttachmentsPopupElement
-import com.arcgismaps.toolkit.popup.internal.element.attachment.rememberAttachmentElementState
+import com.arcgismaps.toolkit.popup.internal.element.attachment.rememberAttachmentsElementState
 import com.arcgismaps.toolkit.popup.internal.element.fieldselement.FieldsElementState
 import com.arcgismaps.toolkit.popup.internal.element.fieldselement.FieldsPopupElement
 import com.arcgismaps.toolkit.popup.internal.element.fieldselement.rememberFieldsElementState
@@ -61,6 +61,7 @@ import com.arcgismaps.toolkit.popup.internal.element.state.mutablePopupElementSt
 import com.arcgismaps.toolkit.popup.internal.element.textelement.TextElementState
 import com.arcgismaps.toolkit.popup.internal.element.textelement.TextPopupElement
 import com.arcgismaps.toolkit.popup.internal.element.textelement.rememberTextElementState
+import com.arcgismaps.toolkit.popup.internal.fileviewer.ViewableFile
 
 @Immutable
 private data class PopupState(@Stable val popup: Popup)
@@ -133,7 +134,7 @@ private fun Popup(popupState: PopupState, evaluated: Boolean, modifier: Modifier
 }
 
 @Composable
-private fun PopupBody(popupState: PopupState) {
+private fun PopupBody(popupState: PopupState, onFileClicked: (ViewableFile?) -> Unit = {}) {
     val popup = popupState.popup
     val lazyListState = rememberLazyListState()
     val states = rememberStates(popup)
@@ -155,8 +156,8 @@ private fun PopupBody(popupState: PopupState) {
 
                     is AttachmentsPopupElement -> {
                         AttachmentsPopupElement(
-                            state = entry.state as AttachmentsElementState
-                        )
+                            state = entry.state as AttachmentsElementState,
+                            onFileClicked)
                     }
 
                     is FieldsPopupElement -> {
@@ -217,7 +218,7 @@ internal fun rememberStates(
             is AttachmentsPopupElement -> {
                 states.add(
                     element,
-                    rememberAttachmentElementState(popup = popup, element = element)
+                    rememberAttachmentsElementState(popup = popup, element = element)
                 )
             }
 

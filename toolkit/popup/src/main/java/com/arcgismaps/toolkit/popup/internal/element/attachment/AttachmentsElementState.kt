@@ -38,7 +38,10 @@ import com.arcgismaps.mapping.popup.AttachmentsPopupElement
 import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.mapping.popup.PopupAttachment
 import com.arcgismaps.mapping.popup.PopupAttachmentType
+import com.arcgismaps.toolkit.popup.internal.fileviewer.ViewableFile
+import com.arcgismaps.toolkit.popup.internal.fileviewer.toViewableFileType
 import com.arcgismaps.toolkit.popup.internal.element.state.PopupElementState
+import com.arcgismaps.toolkit.popup.internal.fileviewer.ViewableFileImpl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -51,10 +54,10 @@ internal class AttachmentsElementState(
     val description: String,
     val title: String,
     val attachments: List<PopupAttachmentState>,
-    override val id : Int = createId(),
+    override val id: Int = createId(),
 ) : PopupElementState() {
 
-    constructor(attachmentPopupElement: AttachmentsPopupElement): this(
+    constructor(attachmentPopupElement: AttachmentsPopupElement) : this(
         description = attachmentPopupElement.description,
         title = attachmentPopupElement.title,
         attachments = attachmentPopupElement.attachments.map { PopupAttachmentState(it) }
@@ -76,7 +79,7 @@ internal class AttachmentsElementState(
 }
 
 @Composable
-internal fun rememberAttachmentElementState(
+internal fun rememberAttachmentsElementState(
     element: AttachmentsPopupElement,
     popup: Popup
 ): AttachmentsElementState {
@@ -94,7 +97,7 @@ internal fun rememberAttachmentElementState(
             it.attachments
                 .filter { state ->
                     state.loadStatus.value == LoadStatus.Loaded
-                            && state.type == PopupAttachmentType.Image
+                            && state.popupAttachmentType == PopupAttachmentType.Image
                 }
                 .forEach { state ->
                     state.loadAttachment(scope)
@@ -113,24 +116,27 @@ internal fun rememberAttachmentElementState(
  * @param onLoadThumbnail A function that loads the thumbnail of the attachment.
  */
 internal class PopupAttachmentState(
-    val name: String,
-    val size: Long,
-    val type: PopupAttachmentType,
+    name: String,
+    size: Long,
+    val popupAttachmentType: PopupAttachmentType,
     val loadStatus: StateFlow<LoadStatus>,
     private val onLoadAttachment: suspend () -> Result<Unit>,
     private val onLoadThumbnail: (suspend () -> Result<BitmapDrawable?>)? = null
-) {
+) : ViewableFile by ViewableFileImpl(name, size, "", popupAttachmentType.toViewableFileType()) {
     private val _thumbnail: MutableState<ImageBitmap?> = mutableStateOf(null)
+    private lateinit var _attachment: PopupAttachment
 
     /**
      * The thumbnail of the attachment. This is `null` until [loadAttachment] is called.
      */
     val thumbnail: State<ImageBitmap?> = _thumbnail
+    override val path: String
+        get() = _attachment.filePath
 
     constructor(attachment: PopupAttachment) : this(
         name = attachment.name,
         size = attachment.size,
-        type = attachment.type,
+        popupAttachmentType = attachment.type,
         loadStatus = attachment.loadStatus,
         onLoadAttachment = attachment::retryLoad,
         onLoadThumbnail = if (attachment.type == PopupAttachmentType.Image) {
@@ -138,7 +144,9 @@ internal class PopupAttachmentState(
         } else {
             null
         }
-    )
+    ) {
+        _attachment = attachment
+    }
 
     /**
      * Loads the attachment and its thumbnail.
