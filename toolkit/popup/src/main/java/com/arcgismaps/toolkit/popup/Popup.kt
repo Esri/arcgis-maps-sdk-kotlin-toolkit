@@ -61,6 +61,7 @@ import com.arcgismaps.toolkit.popup.internal.element.state.mutablePopupElementSt
 import com.arcgismaps.toolkit.popup.internal.element.textelement.TextElementState
 import com.arcgismaps.toolkit.popup.internal.element.textelement.TextPopupElement
 import com.arcgismaps.toolkit.popup.internal.element.textelement.rememberTextElementState
+import com.arcgismaps.toolkit.popup.internal.fileviewer.FileViewer
 import com.arcgismaps.toolkit.popup.internal.fileviewer.ViewableFile
 
 @Immutable
@@ -110,6 +111,12 @@ private fun Popup(popupState: PopupState, modifier: Modifier = Modifier) {
 @Composable
 private fun Popup(popupState: PopupState, evaluated: Boolean, modifier: Modifier = Modifier) {
     val popup = popupState.popup
+    val viewableFileState = rememberSaveable { mutableStateOf<ViewableFile?>(null) }
+    viewableFileState.value?.let { viewableFile ->
+        FileViewer(fileState = viewableFile) {
+            viewableFileState.value = null
+        }
+    }
     Column(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -128,7 +135,9 @@ private fun Popup(popupState: PopupState, evaluated: Boolean, modifier: Modifier
         }
         HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
         if (evaluated) {
-            PopupBody(popupState)
+            PopupBody(popupState) {
+                viewableFileState.value = it
+            }
         }
     }
 }
@@ -157,7 +166,8 @@ private fun PopupBody(popupState: PopupState, onFileClicked: (ViewableFile?) -> 
                     is AttachmentsPopupElement -> {
                         AttachmentsPopupElement(
                             state = entry.state as AttachmentsElementState,
-                            onFileClicked)
+                            onFileClicked
+                        )
                     }
 
                     is FieldsPopupElement -> {

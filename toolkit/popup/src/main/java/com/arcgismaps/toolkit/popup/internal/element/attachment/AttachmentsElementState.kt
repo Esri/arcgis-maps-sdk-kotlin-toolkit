@@ -38,10 +38,7 @@ import com.arcgismaps.mapping.popup.AttachmentsPopupElement
 import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.mapping.popup.PopupAttachment
 import com.arcgismaps.mapping.popup.PopupAttachmentType
-import com.arcgismaps.toolkit.popup.internal.fileviewer.ViewableFile
-import com.arcgismaps.toolkit.popup.internal.fileviewer.toViewableFileType
 import com.arcgismaps.toolkit.popup.internal.element.state.PopupElementState
-import com.arcgismaps.toolkit.popup.internal.fileviewer.ViewableFileImpl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -116,13 +113,13 @@ internal fun rememberAttachmentsElementState(
  * @param onLoadThumbnail A function that loads the thumbnail of the attachment.
  */
 internal class PopupAttachmentState(
-    name: String,
-    size: Long,
+    val name: String,
+    val size: Long,
     val popupAttachmentType: PopupAttachmentType,
     val loadStatus: StateFlow<LoadStatus>,
     private val onLoadAttachment: suspend () -> Result<Unit>,
     private val onLoadThumbnail: (suspend () -> Result<BitmapDrawable?>)? = null
-) : ViewableFile by ViewableFileImpl(name, size, "", popupAttachmentType.toViewableFileType()) {
+) {
     private val _thumbnail: MutableState<ImageBitmap?> = mutableStateOf(null)
     private lateinit var _attachment: PopupAttachment
 
@@ -130,7 +127,7 @@ internal class PopupAttachmentState(
      * The thumbnail of the attachment. This is `null` until [loadAttachment] is called.
      */
     val thumbnail: State<ImageBitmap?> = _thumbnail
-    override val path: String
+    val path: String
         get() = _attachment.filePath
 
     constructor(attachment: PopupAttachment) : this(

@@ -2,6 +2,10 @@ package com.arcgismaps.toolkit.popup.internal.fileviewer
 
 import android.os.Parcel
 import android.os.Parcelable
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.mapping.popup.PopupAttachmentType
 import kotlinx.parcelize.Parceler
 import kotlinx.parcelize.Parcelize
@@ -10,20 +14,13 @@ import kotlinx.parcelize.TypeParceler
 /**
  * A file that can be viewed in the [FileViewer].
  */
-internal interface ViewableFile {
-    val name: String
-    val size: Long
-    val path: String
-    val type: ViewableFileType
-}
-
 @Parcelize
-internal data class ViewableFileImpl(
-    override val name: String,
-    override val size: Long,
-    override val path: String,
-    @TypeParceler<ViewableFileType, ViewableFileTypeParceler>() override val type: ViewableFileType
-): ViewableFile, Parcelable
+internal data class ViewableFile(
+    val name: String,
+    val size: Long,
+    val path: String,
+    @TypeParceler<ViewableFileType, ViewableFileTypeParceler>() val type: ViewableFileType
+): Parcelable
 
 private object ViewableFileTypeParceler: Parceler<ViewableFileType> {
     override fun create(parcel: Parcel): ViewableFileType {
