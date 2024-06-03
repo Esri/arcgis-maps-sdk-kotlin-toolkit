@@ -101,54 +101,12 @@ internal fun FileViewer(fileState: ViewableFile, onDismissRequest: () -> Unit) {
 
 @Composable
 private fun ImageViewer(path: String) {
-    val maxScale = 3f
-    val minScale = 1f
-    var scale by remember { mutableFloatStateOf(1f) }
-    var offset by remember { mutableStateOf(Offset.Zero) }
-    val coroutineScope = rememberCoroutineScope()
-    val state = rememberTransformableState { zoomChange, panChange, _ ->
-        scale *= zoomChange
-        scale = scale.coerceIn(minScale, maxScale)
-
-        offset = if (scale == 1f) Offset.Zero  else offset + panChange
-    }
-    Box(
-        modifier = Modifier
-//            .offset { IntOffset(offset.x.roundToInt(), offset.y.roundToInt()) }
-            .transformable(state)
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onDoubleTap = {
-                        coroutineScope.launch {
-                            if (scale == maxScale) {
-                                state.animateZoomBy(1 / maxScale)
-                            } else {
-                                state.animateZoomBy(maxScale)
-                            }
-                        }
-                    }
-                )
-            }
-            .fillMaxSize()
-            .background(Color.Black),
-        contentAlignment = Alignment.Center
-    ) {
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(path)
-                .build(),
-            contentDescription = "Image",
-            placeholder = painterResource(id = R.drawable.temp_1),
-            modifier = Modifier
-                .graphicsLayer {
-                    scaleX = scale
-                    scaleY = scale
-                    translationX = offset.x
-                    translationY = offset.y
-                }
-                .clipToBounds()
-        )
-    }
+    AsyncImage(
+        model = ImageRequest.Builder(LocalContext.current)
+            .data(path)
+            .build(),
+        contentDescription = "Image",
+    )
 }
 
 @Preview
