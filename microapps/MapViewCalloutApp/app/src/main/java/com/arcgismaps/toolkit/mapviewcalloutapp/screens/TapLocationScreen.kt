@@ -36,9 +36,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -50,14 +52,13 @@ import kotlin.math.roundToInt
  * Displays a composable [MapView] that displays a [Callout] at the tapped location.
  */
 @Composable
-fun TapLocationScreen() {
+fun TapLocationScreen(viewModel: MapViewModel) {
 
-    val viewModel = remember { MapViewModel() }
     val mapPoint = viewModel.mapPoint.collectAsState().value
+    val offset = viewModel.offset.collectAsState().value
 
-    var calloutVisibility by remember { mutableStateOf(false) }
-    var rotateOffsetWithGeoView by remember { mutableStateOf(false) }
-    var offset by remember { mutableStateOf(Offset.Zero) }
+    var calloutVisibility by rememberSaveable { mutableStateOf(false) }
+    var rotateOffsetWithGeoView by rememberSaveable { mutableStateOf(false) }
 
     Column {
         CalloutOptionsBox(
@@ -67,10 +68,10 @@ fun TapLocationScreen() {
             onVisibilityToggled = { calloutVisibility = !calloutVisibility },
             onCalloutOffsetRotationToggled = { rotateOffsetWithGeoView = !rotateOffsetWithGeoView },
             onXAxisOffsetChanged = {
-                offset = Offset(it,offset.y)
+                viewModel.setOffset(Offset(it,offset.y))
             },
             onYAxisOffsetChanged = {
-                offset = Offset(offset.x,it)
+                viewModel.setOffset(Offset(offset.x,it))
             }
         )
 
@@ -85,7 +86,7 @@ fun TapLocationScreen() {
                 content = if (mapPoint != null && calloutVisibility) {
                     {
                         Callout(
-                            modifier = Modifier.size(100.dp),
+                            modifier = Modifier.size(175.dp, 75.dp),
                             location = mapPoint,
                             rotateOffsetWithGeoView = rotateOffsetWithGeoView,
                             offset = offset
@@ -106,13 +107,12 @@ fun TapLocationScreen() {
 @Composable
 fun CalloutOptionsBox(
     calloutVisibility: Boolean,
-    onVisibilityToggled: () -> Unit,
     isCalloutRotationEnabled: Boolean,
+    offset: Offset,
+    onVisibilityToggled: () -> Unit,
     onCalloutOffsetRotationToggled: () -> Unit,
     onXAxisOffsetChanged: (Float) -> Unit,
-    onYAxisOffsetChanged: (Float) -> Unit,
-    offset: Offset,
-
+    onYAxisOffsetChanged: (Float) -> Unit
     ) {
     Column(Modifier.padding(8.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -138,7 +138,7 @@ fun CalloutOptionsBox(
                     onValueChange = { value ->
                         onXAxisOffsetChanged(value.toFloat())
                     },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
                     label = { Text("X-Axis offset") },
                     textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.End)
                 )
@@ -147,7 +147,7 @@ fun CalloutOptionsBox(
                     onValueChange = { value ->
                         onYAxisOffsetChanged(value.toFloat())
                     },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
                     label = { Text("Y-Axis offset") },
                     textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.End)
                 )

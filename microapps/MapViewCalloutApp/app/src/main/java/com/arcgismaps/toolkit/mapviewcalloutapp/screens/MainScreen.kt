@@ -64,7 +64,7 @@ private val calloutAppScreens = mutableListOf(
  * a [Callout] on a [MapView].
  */
 @Composable
-fun MainScreen() {
+fun MainScreen(viewModel: MapViewModel) {
     var currentScreen by remember { mutableStateOf("") }
     val navController = rememberNavController()
 
@@ -78,7 +78,7 @@ fun MainScreen() {
         currentScreen = currentScreen
     ) {
         composable(route = calloutAppScreens[0]) {
-            TapLocationScreen()
+            TapLocationScreen(viewModel)
         }
         composable(route = calloutAppScreens[1]) {
             FeatureScreen()

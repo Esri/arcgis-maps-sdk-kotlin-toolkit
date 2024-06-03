@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.mapviewcalloutapp.screens
 
+import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
 import com.arcgismaps.Color
 import com.arcgismaps.geometry.Point
@@ -44,11 +45,18 @@ class MapViewModel : ViewModel() {
     private val _mapPoint = MutableStateFlow<Point?>(null)
     val mapPoint: StateFlow<Point?> = _mapPoint
 
+    private val _offset = MutableStateFlow(Offset.Zero)
+    val offset: StateFlow<Offset> = _offset
+
     val tapLocationGraphicsOverlay: GraphicsOverlay = GraphicsOverlay()
 
     fun clearMapPoint() {
         _mapPoint.value = null
         tapLocationGraphicsOverlay.graphics.clear()
+    }
+
+    fun setOffset(offset: Offset) {
+        _offset.value = offset
     }
 
     fun setMapPoint(singleTapConfirmedEvent: SingleTapConfirmedEvent) {
