@@ -86,7 +86,7 @@ class OAuthUserLauncherTests {
         // this is necessary when we are faking a successful sign-in without entering credentials,
         // as we are not given a valid token from the OAuth server and RTC won't be able to verify it.
         ArcGISEnvironment.configureArcGISHttpClient {
-            setupTokenRequestInterceptor()
+            setupOAuthTokenRequestInterceptor()
         }
         val response = testOAuthChallengeWithStateRestoration {
             // When the OAuth sign in screen displays, we simulate successful sign in by launching an

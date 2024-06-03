@@ -52,24 +52,24 @@ fun createSuccessfulRedirectIntent(redirectUrl: String): Intent {
  *
  * @since 200.5.0
  */
-fun ArcGISHttpClient.Builder.setupTokenRequestInterceptor() {
+fun ArcGISHttpClient.Builder.setupOAuthTokenRequestInterceptor() {
     interceptor { chain ->
         chain.request().let { request ->
             if (request.url.endsWith("sharing/rest/oauth2/token")) {
-                request.createFakeTokenResponse()
+                request.createFakeOAuthTokenResponse()
             } else chain.proceed(request)
         }
     }
 }
 
 /**
- * Returns a fake response that validates the token.
+ * Returns a fake response that validates an OAuth token.
  *
  * @since 200.5.0
  */
-fun Request.createFakeTokenResponse(): Response =
+fun Request.createFakeOAuthTokenResponse(): Response =
     Response.builder().apply {
-        request(this@createFakeTokenResponse)
+        request(this@createFakeOAuthTokenResponse)
         val bodyString =
             """
             {"access_token":"12345","expires_in":1800,"username":"username","ssl":true,"refresh_token":"67890","refresh_token_expires_in":1209599}
@@ -88,6 +88,89 @@ fun Request.createFakeTokenResponse(): Response =
         addHeader("response-status-code", "200")
         addHeader("strict-transport-security", "max-age=31536000")
         addHeader("transfer-encoding", "chunked")
+        addHeader("vary", "X-Esri-Authorization")
+        addHeader("x-content-type-options", "nosniff")
+    }.build()
+
+/**
+ * Intercepts requests to generate an ArcGIS token and returns a fake response with an error.
+ *
+ * @since 200.5.0
+ */
+fun ArcGISHttpClient.Builder.setupFailingArcGISTokenRequestInterceptor() {
+    interceptor { chain ->
+        chain.request().let { request ->
+            if (request.url.endsWith("sharing/rest/generateToken")) {
+                request.createInvalidArcGISTokenResponse()
+            } else chain.proceed(request)
+        }
+    }
+}
+
+/**
+ * Intercepts requests to generate an ArcGIS token and returns a fake response with the token.
+ */
+fun ArcGISHttpClient.Builder.setupSuccessfulArcGISTokenRequestInterceptor() {
+    interceptor { chain ->
+        chain.request().let { request ->
+            if (request.url.endsWith("sharing/rest/generateToken")) {
+                request.createValidArcGISTokenResponse()
+            } else chain.proceed(request)
+        }
+    }
+}
+
+/**
+ * Returns a fake response that generates an ArcGIS token.
+ *
+ * @since 200.5.0
+ */
+fun Request.createValidArcGISTokenResponse(): Response =
+    Response.builder().apply {
+        request(this@createValidArcGISTokenResponse)
+        val bodyString =
+            """
+                {"token":"12345","expires":1716805837870,"ssl":true}
+            """.trimIndent()
+        body(
+            Response.Body.builder().contentType("text/plain;charset=utf-8")
+                .data(bodyString.byteInputStream(), bodyString.length.toLong()).build()
+        )
+        addHeader("cache-control", "no-cache")
+        addHeader("connection", "keep-alive")
+        addHeader("content-encoding", "gzip")
+        addHeader("date", "Mon, 22 May 2084 15:04:50 GMT")
+        addHeader("expires", "-1")
+        addHeader("pragma", "no-cache")
+        addHeader("response-status-code", "200")
+        addHeader("transfer-encoding", "chunked")
+        addHeader("vary", "X-Esri-Authorization")
+        addHeader("x-content-type-options", "nosniff")
+    }.build()
+
+/**
+ * Returns a fake response that indicates a failure to generate an ArcGIS token.
+ *
+ * @since 200.5.0
+ */
+fun Request.createInvalidArcGISTokenResponse(): Response =
+    Response.builder().apply {
+        request(this@createInvalidArcGISTokenResponse)
+        val bodyString =
+            """
+                {"error":{"code":400,"message":"Unable to generate token.","details":["Invalid username or password."]}}
+            """.trimIndent()
+        body(
+            Response.Body.builder().contentType("text/plain;charset=utf-8")
+                .data(bodyString.byteInputStream(), bodyString.length.toLong()).build()
+        )
+        addHeader("cache-control", "no-cache")
+        addHeader("connection", "keep-alive")
+        addHeader("content-length", "104")
+        addHeader("date", "Wed, 22 May 2024 15:04:50 GMT")
+        addHeader("expires", "-1")
+        addHeader("pragma", "no-cache")
+        addHeader("response-status-code", "200")
         addHeader("vary", "X-Esri-Authorization")
         addHeader("x-content-type-options", "nosniff")
     }.build()
