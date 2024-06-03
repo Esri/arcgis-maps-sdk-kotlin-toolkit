@@ -60,11 +60,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.mapping.popup.PopupAttachmentType
+import com.arcgismaps.toolkit.popup.internal.fileviewer.ViewableFile
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 internal fun AttachmentTile(
-    state: PopupAttachmentState
+    state: PopupAttachmentState,
+    onClicked: (ViewableFile) -> Unit = {}
 ) {
     val loadStatus by state.loadStatus.collectAsState()
     val coroutineScope = rememberCoroutineScope()
@@ -84,6 +86,8 @@ internal fun AttachmentTile(
                 if (loadStatus is LoadStatus.NotLoaded || loadStatus is LoadStatus.FailedToLoad) {
                     // load attachment
                     state.loadAttachment(coroutineScope)
+                } else if (loadStatus is LoadStatus.Loaded) {
+                    onClicked(state)
                 }
                 // TODO open attachment viewer in `else` here
             }
@@ -91,14 +95,14 @@ internal fun AttachmentTile(
         when (loadStatus) {
             LoadStatus.Loaded -> LoadedView(
                 thumbnail = thumbnail,
-                attachmentType = state.type,
+                attachmentType = state.popupAttachmentType,
                 title = state.name
             )
 
             LoadStatus.Loading -> DefaultView(
                 title = state.name,
                 size = state.size,
-                attachmentType = state.type,
+                attachmentType = state.popupAttachmentType,
                 isLoading = true,
                 isError = false
             )
@@ -106,7 +110,7 @@ internal fun AttachmentTile(
             LoadStatus.NotLoaded -> DefaultView(
                 title = state.name,
                 size = state.size,
-                attachmentType = state.type,
+                attachmentType = state.popupAttachmentType,
                 isLoading = false,
                 isError = false
             )
@@ -114,7 +118,7 @@ internal fun AttachmentTile(
             is LoadStatus.FailedToLoad -> DefaultView(
                 title = state.name,
                 size = state.size,
-                attachmentType = state.type,
+                attachmentType = state.popupAttachmentType,
                 isLoading = false,
                 isError = true
             )
@@ -268,7 +272,7 @@ internal fun PreviewAttachmentTile() {
         state = PopupAttachmentState(
             name = "Some attachment",
             size = 1234L,
-            type = PopupAttachmentType.Other,
+            popupAttachmentType = PopupAttachmentType.Other,
             loadStatus = MutableStateFlow(LoadStatus.NotLoaded),
             onLoadAttachment = { Result.success(Unit) },
             onLoadThumbnail = null
