@@ -27,16 +27,15 @@ import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.toolkit.mapviewcalloutapp.screens.MainScreen
 import com.arcgismaps.toolkit.mapviewcalloutapp.screens.MapViewModel
-import com.arcgismaps.toolkit.mapviewcalloutapp.ui.theme.MapViewCalloutAppTheme
+import com.esri.microappslib.theme.MicroAppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        ArcGISEnvironment.apiKey =
-            ApiKey.create(BuildConfig.API_KEY)
+        ArcGISEnvironment.apiKey = ApiKey.create(BuildConfig.API_KEY)
         val viewModel: MapViewModel by viewModels()
         setContent {
-            MapViewCalloutAppTheme {
+            MicroAppTheme {
                 MapViewCalloutApp(viewModel)
             }
         }
