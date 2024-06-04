@@ -80,6 +80,9 @@ internal fun PopupAttachmentType.toViewableFileType(): ViewableFileType = when (
     PopupAttachmentType.Other -> ViewableFileType.Other
 }
 
+/**
+ * Saves the file to the device.
+ */
 internal fun ViewableFile.saveToDevice(context: Context): Boolean {
     try {
         val values = ContentValues().apply {
