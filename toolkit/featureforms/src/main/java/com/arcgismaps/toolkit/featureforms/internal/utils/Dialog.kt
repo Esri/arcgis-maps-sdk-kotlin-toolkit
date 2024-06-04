@@ -242,24 +242,15 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                 dialogRequester.dismissDialog()
                 return
             }
-            ImageCapture { uri ->
-                if (uri != null) {
-                    scope.launch {
-                        val contentType = context.contentResolver.getType(uri) ?: run {
-                            Toast.makeText(context, R.string.attachment_error, Toast.LENGTH_SHORT)
-                                .show()
-                            return@launch
-                        }
-                        val extension =
-                            MimeTypeMap.getSingleton().getExtensionFromMimeType(contentType)
-                        context.readBytes(uri).getOrNull()?.let { data ->
-                            val name =
-                                "${state.attachments.getNewAttachmentNameForContentType(contentType)}.$extension"
-                            state.addAttachment(name, contentType, data)
-                        }
+            ImageCapture(
+                onDismissRequest = dialogRequester::dismissDialog
+            ) { uri ->
+                scope.launch {
+                    state.addAttachmentFromUri(uri, context, false).onFailure {
+                        showError(context, it.message ?: context.getString(R.string.attachment_error))
                     }
+                    dialogRequester.dismissDialog()
                 }
-                dialogRequester.dismissDialog()
             }
         }
 
@@ -272,26 +263,15 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                 return
             }
             GalleryPicker(
-                type = type
+                type = type,
+                onDismissRequest = dialogRequester::dismissDialog
             ) { uri ->
-                if (uri != null) {
-                    scope.launch {
-                        val contentType = context.contentResolver.getType(uri) ?: run {
-                            Toast.makeText(context, R.string.attachment_error, Toast.LENGTH_SHORT)
-                                .show()
-                            return@launch
-                        }
-                        val extension =
-                            MimeTypeMap.getSingleton().getExtensionFromMimeType(contentType)
-                        context.readBytes(uri).getOrNull()?.let { data ->
-                            val name =
-                                "${state.attachments.getNewAttachmentNameForContentType(contentType)}.$extension"
-                            state.addAttachment(name, contentType, data)
-                        }
-
+                scope.launch {
+                    state.addAttachmentFromUri(uri, context, false).onFailure {
+                        showError(context, it.message ?: context.getString(R.string.attachment_error))
                     }
+                    dialogRequester.dismissDialog()
                 }
-                dialogRequester.dismissDialog()
             }
         }
 
@@ -303,44 +283,16 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                 dialogRequester.dismissDialog()
                 return
             }
-            FilePicker(allowedMimeTypes = allowedMimeTypes) { uri ->
-                if (uri != null) {
-                    scope.launch {
-                        val contentType = context.contentResolver.getType(uri) ?: run {
-                            Toast.makeText(context, R.string.attachment_error, Toast.LENGTH_SHORT)
-                                .show()
-                            return@launch
-                        }
-                        val extension =
-                            MimeTypeMap.getSingleton().getExtensionFromMimeType(contentType)
-                        // use a default name
-                        var name =
-                            "${state.attachments.getNewAttachmentNameForContentType(contentType)}.$extension"
-                        var size = 0L
-                        context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-                            cursor.moveToFirst()
-                            val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                            val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
-                            // use the name from the uri if available
-                            cursor.getStringOrNull(nameIndex)?.let {
-                                name = it
-                            }
-                            cursor.getLongOrNull(sizeIndex)?.let {
-                                size = it
-                            }
-                        }
-                        if (size > 5_000_000) {
-                            showError(context, context.getString(R.string.attachment_too_large))
-                            return@launch
-                        }
-                        context.readBytes(uri).onFailure {
-                            showError(context, it.message ?: "Error reading file")
-                        }.getOrNull()?.let { data ->
-                            state.addAttachment(name, contentType, data)
-                        }
+            FilePicker(
+                allowedMimeTypes = allowedMimeTypes,
+                onDismissRequest = dialogRequester::dismissDialog
+            ) { uri ->
+                scope.launch {
+                    state.addAttachmentFromUri(uri, context, true).onFailure {
+                        showError(context, it.message ?: context.getString(R.string.attachment_error))
                     }
+                    dialogRequester.dismissDialog()
                 }
-                dialogRequester.dismissDialog()
             }
         }
 
@@ -402,3 +354,58 @@ internal fun computeWindowSizeClasses(context: Context): WindowSizeClass {
 internal fun showError(context: Context, message: String) {
     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 }
+
+/**
+ * Adds an attachment to the [AttachmentElementState] from the specified [uri]. Since the data from
+ * the uri is read into memory, there is a limit of 50 MB for the size of the attachment.
+ *
+ * @param uri The uri of the attachment.
+ * @param context The context.
+ * @param useDefaultName Whether to use the default name from the uri. If false, a new name will be generated
+ * based on the content type of the attachment.
+ */
+private suspend fun AttachmentElementState.addAttachmentFromUri(
+    uri: Uri,
+    context: Context,
+    useDefaultName: Boolean
+) : Result<Unit> = withContext(Dispatchers.IO) {
+        // get the content type of the uri
+        val contentType = context.contentResolver.getType(uri) ?: run {
+            return@withContext Result.failure(Exception(context.getString(R.string.attachment_error)))
+        }
+        // get the file extension from the content type
+        val extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(contentType)
+        // generate a name for the attachment
+        var name = "${attachments.getNewAttachmentNameForContentType(contentType)}.$extension"
+        // size of the attachment
+        var size = 0L
+        // get the name and size of the attachment
+        context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+            cursor.moveToFirst()
+            val nameIndex =
+                cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
+            // use the default file name from the uri if available
+            if (useDefaultName) {
+                cursor.getStringOrNull(nameIndex)?.let {
+                    name = it
+                }
+            }
+            // update the size
+            cursor.getLongOrNull(sizeIndex)?.let {
+                size = it
+            }
+        }
+        // check if the size is within the limit of 50 MB
+        return@withContext if (size > 50_000_000) {
+            Result.failure(Exception(context.getString(R.string.attachment_too_large)))
+        } else {
+            var result = Result.success(Unit)
+            context.readBytes(uri).onFailure {
+                result = Result.failure(it)
+            }.onSuccess { data ->
+                addAttachment(name, contentType, data)
+            }
+            result
+        }
+    }

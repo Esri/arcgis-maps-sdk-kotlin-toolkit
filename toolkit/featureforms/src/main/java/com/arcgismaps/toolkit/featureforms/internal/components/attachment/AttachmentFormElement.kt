@@ -39,6 +39,7 @@ import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.Photo
 import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -64,6 +65,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import com.arcgismaps.mapping.featureforms.FormAttachmentType
 import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.utils.AttachmentsFileProvider
@@ -305,10 +307,17 @@ private fun AddAttachment(
 
 /**
  * Launches the camera to capture an image. When an image is captured, the [onImageCaptured] callback
- * is invoked with the URI of the captured image.
+ * is invoked with the URI of the captured image. In case of a dismissal or if no image is captured,
+ * the [onDismissRequest] callback is invoked.
+ *
+ * @param onDismissRequest A request to dismiss the camera picker.
+ * @param onImageCaptured A callback to invoke when an image is captured.
  */
 @Composable
-internal fun ImageCapture(onImageCaptured: (Uri?) -> Unit) {
+internal fun ImageCapture(
+    onDismissRequest: () -> Unit,
+    onImageCaptured: (Uri) -> Unit
+) {
     val context = LocalContext.current
     var hasLaunched by rememberSaveable {
         mutableStateOf(false)
@@ -328,7 +337,7 @@ internal fun ImageCapture(onImageCaptured: (Uri?) -> Unit) {
             if (success) {
                 onImageCaptured(capturedImageUri)
             } else {
-                onImageCaptured(null)
+                onDismissRequest()
             }
         }
     )
@@ -342,12 +351,18 @@ internal fun ImageCapture(onImageCaptured: (Uri?) -> Unit) {
 
 /**
  * Launches the Gallery to select an image, video or both based on the [type]. When a selection is
- * made, the [onMediaSelected] callback is invoked with the URI of the selected image/video.
+ * made, the [onMediaSelected] callback is invoked with the URI of the selected image/video. In case
+ * of a dismissal or if no media is selected, the [onDismissRequest] callback is invoked.
+ *
+ * @param type The type of media to select.
+ * @param onDismissRequest A request to dismiss the gallery picker.
+ * @param onMediaSelected A callback to invoke when a media file is selected.
  */
 @Composable
 internal fun GalleryPicker(
     type: ActivityResultContracts.PickVisualMedia.VisualMediaType,
-    onMediaSelected: (Uri?) -> Unit
+    onDismissRequest: () -> Unit,
+    onMediaSelected: (Uri) -> Unit
 ) {
     var hasLaunched by rememberSaveable {
         mutableStateOf(false)
@@ -355,7 +370,18 @@ internal fun GalleryPicker(
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) {
-        onMediaSelected(it)
+        if (it != null) {
+            onMediaSelected(it)
+        } else {
+            onDismissRequest()
+        }
+    }
+    Dialog(onDismissRequest = onDismissRequest) {
+        CircularProgressIndicator(
+            modifier = Modifier.size(50.dp),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            strokeWidth = 5.dp
+        )
     }
     LaunchedEffect(Unit) {
         if (!hasLaunched) {
@@ -367,18 +393,35 @@ internal fun GalleryPicker(
 
 /**
  * Launches the file picker to select a file based on the [allowedMimeTypes]. When a file is selected,
- * the [onFileSelected] callback is invoked with the URI of the selected file.
+ * the [onFileSelected] callback is invoked with the URI of the selected file. In case of a dismissal
+ * or if no file is selected, the [onDismissRequest] callback is invoked.
+ *
+ * @param allowedMimeTypes The list of allowed MIME types to select.
+ * @param onDismissRequest A request to dismiss the file picker.
+ * @param onFileSelected A callback to invoke when a file is selected.
  */
 @Composable
 internal fun FilePicker(
     allowedMimeTypes: List<String>,
-    onFileSelected: (Uri?) -> Unit
+    onDismissRequest: () -> Unit,
+    onFileSelected: (Uri) -> Unit
 ) {
     var hasLaunched by rememberSaveable {
         mutableStateOf(false)
     }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {
-        onFileSelected(it)
+        if (it != null) {
+            onFileSelected(it)
+        } else {
+            onDismissRequest()
+        }
+    }
+    Dialog(onDismissRequest = onDismissRequest) {
+        CircularProgressIndicator(
+            modifier = Modifier.size(50.dp),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            strokeWidth = 5.dp
+        )
     }
     LaunchedEffect(Unit) {
         if (!hasLaunched) {
