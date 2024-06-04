@@ -19,7 +19,6 @@ package com.arcgismaps.toolkit.featureforms.internal.utils
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
-import android.util.Log
 import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -34,6 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.core.database.getLongOrNull
 import androidx.core.database.getStringOrNull
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
@@ -53,10 +53,13 @@ import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.D
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.DateTimePickerInput
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.DateTimePickerStyle
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.rememberDateTimePickerState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.FileNotFoundException
 import java.time.Instant
 
 
@@ -250,7 +253,7 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                         }
                         val extension =
                             MimeTypeMap.getSingleton().getExtensionFromMimeType(contentType)
-                        context.readBytes(uri)?.let { data ->
+                        context.readBytes(uri).getOrNull()?.let { data ->
                             val name =
                                 "${state.attachments.getNewAttachmentNameForContentType(contentType)}.$extension"
                             state.addAttachment(name, contentType, data)
@@ -281,7 +284,7 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                         }
                         val extension =
                             MimeTypeMap.getSingleton().getExtensionFromMimeType(contentType)
-                        context.readBytes(uri)?.let { data ->
+                        context.readBytes(uri).getOrNull()?.let { data ->
                             val name =
                                 "${state.attachments.getNewAttachmentNameForContentType(contentType)}.$extension"
                             state.addAttachment(name, contentType, data)
@@ -314,15 +317,26 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
                         // use a default name
                         var name =
                             "${state.attachments.getNewAttachmentNameForContentType(contentType)}.$extension"
+                        var size = 0L
                         context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
                             cursor.moveToFirst()
                             val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                            val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
                             // use the name from the uri if available
                             cursor.getStringOrNull(nameIndex)?.let {
                                 name = it
                             }
+                            cursor.getLongOrNull(sizeIndex)?.let {
+                                size = it
+                            }
                         }
-                        context.readBytes(uri)?.let { data ->
+                        if (size > 5_000_000) {
+                            showError(context, context.getString(R.string.attachment_too_large))
+                            return@launch
+                        }
+                        context.readBytes(uri).onFailure {
+                            showError(context, it.message ?: "Error reading file")
+                        }.getOrNull()?.let { data ->
                             state.addAttachment(name, contentType, data)
                         }
                     }
@@ -362,8 +376,20 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
     }
 }
 
-internal fun Context.readBytes(uri: Uri): ByteArray? =
-    contentResolver.openInputStream(uri)?.use { it.buffered().readBytes() }
+internal suspend fun Context.readBytes(uri: Uri): Result<ByteArray> = withContext(Dispatchers.IO) {
+    return@withContext try {
+        val bytes = contentResolver.openInputStream(uri)?.use { it.buffered().readBytes() }
+        if (bytes == null) {
+            Result.failure(Exception("Failed to read data from file: $uri"))
+        } else {
+            Result.success(bytes)
+        }
+    } catch (e: FileNotFoundException) {
+        Result.failure(Exception("File not found: $uri"))
+    } catch (e: OutOfMemoryError) {
+        Result.failure(Exception("File too large: $uri"))
+    }
+}
 
 /**
  * Computes the [WindowSizeClass] of the device.
@@ -374,4 +400,8 @@ internal fun computeWindowSizeClasses(context: Context): WindowSizeClass {
     val height = metrics.bounds.height()
     val density = context.resources.displayMetrics.density
     return WindowSizeClass.compute(width / density, height / density)
+}
+
+internal fun showError(context: Context, message: String) {
+    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 }

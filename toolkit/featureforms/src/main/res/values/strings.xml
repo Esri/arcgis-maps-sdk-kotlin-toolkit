@@ -98,4 +98,5 @@
     <string name="add_file">Add From Files</string>
     <string name="attachment_error">Error Adding Attachment</string>
     <string name="no_app_found">No application found to open this file type.</string>
+    <string name="attachment_too_large">The File is too large. Please add a file less than 50 MB.</string>
 </resources>
