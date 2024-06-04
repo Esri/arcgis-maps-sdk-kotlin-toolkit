@@ -116,6 +116,7 @@ internal class PopupAttachmentState(
     val name: String,
     val size: Long,
     val popupAttachmentType: PopupAttachmentType,
+    val contentType: String,
     val loadStatus: StateFlow<LoadStatus>,
     private val onLoadAttachment: suspend () -> Result<Unit>,
     private val onLoadThumbnail: (suspend () -> Result<BitmapDrawable?>)? = null
@@ -134,6 +135,7 @@ internal class PopupAttachmentState(
         name = attachment.name,
         size = attachment.size,
         popupAttachmentType = attachment.type,
+        contentType = attachment.contentType,
         loadStatus = attachment.loadStatus,
         onLoadAttachment = attachment::retryLoad,
         onLoadThumbnail = if (attachment.type == PopupAttachmentType.Image) {

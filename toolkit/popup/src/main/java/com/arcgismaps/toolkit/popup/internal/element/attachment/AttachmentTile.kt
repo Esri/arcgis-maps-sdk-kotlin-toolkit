@@ -93,7 +93,8 @@ internal fun AttachmentTile(
                             state.name,
                             state.size,
                             state.path,
-                            state.popupAttachmentType.toViewableFileType()
+                            state.popupAttachmentType.toViewableFileType(),
+                            state.contentType
                         )
                     )
                 }
@@ -282,6 +283,7 @@ internal fun PreviewAttachmentTile() {
             size = 1234L,
             popupAttachmentType = PopupAttachmentType.Other,
             loadStatus = MutableStateFlow(LoadStatus.NotLoaded),
+            contentType = "image/jpeg",
             onLoadAttachment = { Result.success(Unit) },
             onLoadThumbnail = null
         )
