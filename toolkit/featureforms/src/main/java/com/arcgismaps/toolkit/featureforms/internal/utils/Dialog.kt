@@ -247,7 +247,10 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
             ) { uri ->
                 scope.launch {
                     state.addAttachmentFromUri(uri, context, false).onFailure {
-                        showError(context, it.message ?: context.getString(R.string.attachment_error))
+                        showError(
+                            context,
+                            it.message ?: context.getString(R.string.attachment_error)
+                        )
                     }
                     dialogRequester.dismissDialog()
                 }
@@ -268,7 +271,10 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
             ) { uri ->
                 scope.launch {
                     state.addAttachmentFromUri(uri, context, false).onFailure {
-                        showError(context, it.message ?: context.getString(R.string.attachment_error))
+                        showError(
+                            context,
+                            it.message ?: context.getString(R.string.attachment_error)
+                        )
                     }
                     dialogRequester.dismissDialog()
                 }
@@ -289,7 +295,10 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
             ) { uri ->
                 scope.launch {
                     state.addAttachmentFromUri(uri, context, true).onFailure {
-                        showError(context, it.message ?: context.getString(R.string.attachment_error))
+                        showError(
+                            context,
+                            it.message ?: context.getString(R.string.attachment_error)
+                        )
                     }
                     dialogRequester.dismissDialog()
                 }
@@ -368,44 +377,46 @@ private suspend fun AttachmentElementState.addAttachmentFromUri(
     uri: Uri,
     context: Context,
     useDefaultName: Boolean
-) : Result<Unit> = withContext(Dispatchers.IO) {
-        // get the content type of the uri
-        val contentType = context.contentResolver.getType(uri) ?: run {
-            return@withContext Result.failure(Exception(context.getString(R.string.attachment_error)))
-        }
-        // get the file extension from the content type
-        val extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(contentType)
-        // generate a name for the attachment
-        var name = "${attachments.getNewAttachmentNameForContentType(contentType)}.$extension"
-        // size of the attachment
-        var size = 0L
-        // get the name and size of the attachment
-        context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-            cursor.moveToFirst()
-            val nameIndex =
-                cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-            val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
-            // use the default file name from the uri if available
-            if (useDefaultName) {
-                cursor.getStringOrNull(nameIndex)?.let {
-                    name = it
-                }
-            }
-            // update the size
-            cursor.getLongOrNull(sizeIndex)?.let {
-                size = it
+): Result<Unit> = withContext(Dispatchers.IO) {
+    // get the content type of the uri
+    val contentType = context.contentResolver.getType(uri) ?: run {
+        return@withContext Result.failure(Exception(context.getString(R.string.attachment_error)))
+    }
+    // get the file extension from the content type
+    val extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(contentType) ?: run {
+        return@withContext Result.failure(Exception(context.getString(R.string.attachment_error)))
+    }
+    // generate a name for the attachment
+    var name = "${attachments.getNewAttachmentNameForContentType(contentType)}.$extension"
+    // size of the attachment
+    var size = 0L
+    // get the name and size of the attachment
+    context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+        cursor.moveToFirst()
+        val nameIndex =
+            cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+        val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
+        // use the default file name from the uri if available
+        if (useDefaultName) {
+            cursor.getStringOrNull(nameIndex)?.let {
+                name = it
             }
         }
-        // check if the size is within the limit of 50 MB
-        return@withContext if (size > 50_000_000) {
-            Result.failure(Exception(context.getString(R.string.attachment_too_large)))
-        } else {
-            var result = Result.success(Unit)
-            context.readBytes(uri).onFailure {
-                result = Result.failure(it)
-            }.onSuccess { data ->
-                addAttachment(name, contentType, data)
-            }
-            result
+        // update the size
+        cursor.getLongOrNull(sizeIndex)?.let {
+            size = it
         }
     }
+    // check if the size is within the limit of 50 MB
+    return@withContext if (size > 50_000_000) {
+        Result.failure(Exception(context.getString(R.string.attachment_too_large)))
+    } else {
+        var result = Result.success(Unit)
+        context.readBytes(uri).onFailure {
+            result = Result.failure(it)
+        }.onSuccess { data ->
+            addAttachment(name, contentType, data)
+        }
+        result
+    }
+}
