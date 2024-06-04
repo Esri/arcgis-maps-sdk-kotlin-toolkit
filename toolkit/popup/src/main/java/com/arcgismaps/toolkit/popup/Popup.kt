@@ -58,6 +58,7 @@ import com.arcgismaps.toolkit.popup.internal.element.fieldselement.FieldsElement
 import com.arcgismaps.toolkit.popup.internal.element.fieldselement.FieldsPopupElement
 import com.arcgismaps.toolkit.popup.internal.element.fieldselement.rememberFieldsElementState
 import com.arcgismaps.toolkit.popup.internal.element.media.MediaElementState
+import com.arcgismaps.toolkit.popup.internal.element.media.MediaPopupElement
 import com.arcgismaps.toolkit.popup.internal.element.media.rememberMediaElementState
 import com.arcgismaps.toolkit.popup.internal.element.state.PopupElementStateCollection
 import com.arcgismaps.toolkit.popup.internal.element.state.mutablePopupElementStateCollection
