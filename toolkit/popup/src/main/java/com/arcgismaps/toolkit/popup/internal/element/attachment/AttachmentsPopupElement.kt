@@ -96,6 +96,7 @@ private fun AttachmentsPopupElementPreview() {
                 name = "Photo 1.jpg",
                 size = 2024,
                 PopupAttachmentType.Image,
+                contentType = "image/jpeg",
                 MutableStateFlow(LoadStatus.Loaded),
                 { Result.success(Unit) },
                 { Result.success(null) }

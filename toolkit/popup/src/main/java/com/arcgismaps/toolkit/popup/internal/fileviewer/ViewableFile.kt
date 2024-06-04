@@ -131,11 +131,10 @@ internal fun ViewableFile.share(scope: CoroutineScope, context: Context) {
             "${context.applicationContext.applicationInfo.processName}.fileprovider",
             file
         )
-        val itemType = context.contentResolver.getType(uri)
         val intent = Intent().apply {
             action = Intent.ACTION_SEND
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            setDataAndType(uri, itemType)
+            setDataAndType(uri, contentType)
             putExtra(Intent.EXTRA_STREAM, uri)
         }
 
