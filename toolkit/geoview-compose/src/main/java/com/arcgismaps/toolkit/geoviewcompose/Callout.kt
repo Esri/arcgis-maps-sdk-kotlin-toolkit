@@ -18,11 +18,16 @@
 package com.arcgismaps.toolkit.geoviewcompose
 
 import android.util.DisplayMetrics
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,22 +36,31 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.layout.SubcomposeLayout
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
+import androidx.compose.ui.unit.toSize
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupPositionProvider
+import androidx.compose.ui.window.PopupProperties
 import com.arcgismaps.geometry.AngularUnit
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ViewpointType
@@ -54,7 +68,6 @@ import com.arcgismaps.mapping.view.DoubleXY
 import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.mapping.view.MapView
-import com.arcgismaps.mapping.view.SceneLocationVisibility
 import com.arcgismaps.mapping.view.SceneView
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.mapping.view.zero
@@ -87,7 +100,7 @@ public fun MapViewScope.Callout(
     modifier: Modifier = Modifier,
     offset: Offset = Offset.Zero,
     rotateOffsetWithGeoView: Boolean = false,
-    content: @Composable BoxScope.() -> Unit
+    content: @Composable () -> Unit
 ) {
     if (this.calloutParams.location == null) {
         this.calloutParams = CalloutParams(location, modifier, offset, rotateOffsetWithGeoView, content)
@@ -117,12 +130,13 @@ public class MapViewScope(private var _mapView: MapView?) {
      */
     @Composable
     internal fun Callout() {
+        val point = calloutParams.location!!
 
         val isMapViewReady = remember { mutableStateOf(false) }
         // We don't want to start drawing the Callout until the MapView is ready. We only collect
         // the drawStatus till the first time MapView is done drawing. the transformWhile operator
         // will stop collecting when isMapViewReady.value becomes false.
-        LaunchedEffect(calloutParams.location) {
+        LaunchedEffect(point) {
             mapView.drawStatus.transformWhile { drawStatus ->
                 emit(drawStatus)
                 !isMapViewReady.value
@@ -137,50 +151,147 @@ public class MapViewScope(private var _mapView: MapView?) {
             return
         }
 
-        // Convert the given location to a screen coordinate
-        var leaderScreenCoordinate: ScreenCoordinate? by remember {
+        var leaderScreenCoordinate: ScreenCoordinate by remember {
             mutableStateOf(
-                getLeaderScreenCoordinate(mapView, calloutParams.location!!, calloutParams.offset, calloutParams.rotateOffsetWithGeoView)
+                getLeaderScreenCoordinate(mapView, point, calloutParams.offset, calloutParams.rotateOffsetWithGeoView)
             )
         }
 
-        LaunchedEffect(calloutParams.location) {
+        LaunchedEffect(point) {
+            leaderScreenCoordinate = mapView.locationToScreen(point)
             // Used to update screen coordinate when new location point is used
-            leaderScreenCoordinate = getLeaderScreenCoordinate(mapView, calloutParams.location!!, calloutParams.offset, calloutParams.rotateOffsetWithGeoView)
             // Used to update screen coordinate when viewpoint is changed
             mapView.viewpointChanged.collect {
-                leaderScreenCoordinate = getLeaderScreenCoordinate(mapView, calloutParams.location!!, calloutParams.offset, calloutParams.rotateOffsetWithGeoView)
+                leaderScreenCoordinate = getLeaderScreenCoordinate(mapView, point, calloutParams.offset, calloutParams.rotateOffsetWithGeoView)
             }
         }
 
-        val localDensity = LocalDensity.current
-        // Get the default shape, color & size properties for Callout
-        val properties = CalloutProperties()
-        leaderScreenCoordinate?.let {
-            CalloutSubComposeLayout(
-                leaderScreenCoordinate = it,
-                maxSize = calloutContentMaxSize(
-                    geoView = mapView,
-                    density = LocalDensity.current,
-                    displayMetrics = LocalContext.current.resources.displayMetrics
-                )) {
-                Box(
-                    modifier = calloutParams.modifier!!
-                        .drawCalloutContainer(
-                            cornerRadius = with(localDensity) { properties.cornerRadius.toPx() },
-                            strokeBorderWidth = with(localDensity) { properties.strokeBorderWidth.toPx() },
-                            strokeColor = properties.strokeColor,
-                            backgroundColor = properties.backgroundColor,
-                            calloutContentPadding = properties.calloutContentPadding,
-                            leaderWidth = with(localDensity) { properties.leaderSize.width.toPx() },
-                            leaderHeight = with(localDensity) { properties.leaderSize.height.toPx() },
-                            minSize = properties.minSize
-                        )
+        val offsetX = calloutParams.offset.x.toInt()
+        val offsetY = calloutParams.offset.y.toInt()
+        val currentCoordinates =
+            IntOffset(leaderScreenCoordinate.x.toInt(), leaderScreenCoordinate.y.toInt())
+
+
+        println("Callout mapPoint: ${point.x} ${point.y}")
+        var showPopup by remember {
+            mutableStateOf(true)
+        }
+
+        var contentSize by remember { mutableStateOf(IntSize.Zero) }
+        val popupPositionProvider = object : PopupPositionProvider {
+            override fun calculatePosition(
+                anchorBounds: IntRect,
+                windowSize: IntSize,
+                layoutDirection: LayoutDirection,
+                popupContentSize: IntSize
+            ): IntOffset {
+                contentSize = popupContentSize
+                return IntOffset(
+                    x = leaderScreenCoordinate.x.toInt() + anchorBounds.left - popupContentSize.width / 2,
+                    y = leaderScreenCoordinate.y.toInt() + anchorBounds.top - popupContentSize.height - calloutParams.offset.y.toInt()
                 )
-                {
-                    calloutParams.content!!.invoke(this)
-                }
             }
+        }
+
+        LaunchedEffect(currentCoordinates) {
+            showPopup =
+                currentCoordinates.y > calloutParams.offset.y.toInt()
+                        && currentCoordinates.y < (mapView.height + offsetY + contentSize.height)
+        }
+
+        if (showPopup) {
+            val shouldClipBottom = currentCoordinates.y - mapView.height - offsetY > 0
+            val shouldClipTop = currentCoordinates.y < contentSize.height + offsetY
+
+            val clipShape = object : Shape {
+                override fun createOutline(
+                    size: Size,
+                    layoutDirection: LayoutDirection,
+                    density: Density
+                ): Outline =
+                    if (shouldClipBottom) {
+                        val clipBottom = currentCoordinates.y - mapView.height - offsetY
+                        val clipBottomSize = contentSize.height - clipBottom
+                        val rectSize = IntSize(contentSize.width, clipBottomSize)
+                        Outline.Rectangle(
+                            Rect(
+                                Offset.Zero,
+                                rectSize.toSize()
+                            )
+                        )
+                    } else if (shouldClipTop) {
+                        val clipTopSize = currentCoordinates.y - offsetY
+                        val clipTopOffset =
+                            (contentSize.height - currentCoordinates.y + offsetY).toFloat()
+                        val rectSize = IntSize(
+                            contentSize.width,
+                            clipTopSize
+                        )
+                        Outline.Rectangle(
+                            Rect(
+                                Offset(0.0f, clipTopOffset),
+                                rectSize.toSize()
+                            )
+                        )
+                    } else {
+                        Outline.Rectangle(
+                            Rect(
+                                Offset.Zero,
+                                contentSize.toSize()
+                            )
+                        )
+                    }
+            }
+
+            MaterialTheme(
+                colorScheme = MaterialTheme.colorScheme.copy(surface = Color.Transparent)
+            ) {
+                Popup(
+                    popupPositionProvider,
+                    properties = PopupProperties(clippingEnabled = false)
+                ) {
+                    val localDensity = LocalDensity.current
+                    // Get the default shape, color & size properties for Callout
+                    val properties = CalloutProperties()
+                    PopupContent(
+                        modifier = calloutParams.modifier!!
+                            .background(Color.Transparent)
+                            .clip(clipShape)
+                            .drawCalloutContainer(
+                                cornerRadius = with(localDensity) { properties.cornerRadius.toPx() },
+                                strokeBorderWidth = with(localDensity) { properties.strokeBorderWidth.toPx() },
+                                strokeColor = properties.strokeColor,
+                                backgroundColor = properties.backgroundColor,
+                                calloutContentPadding = properties.calloutContentPadding,
+                                leaderWidth = with(localDensity) { properties.leaderSize.width.toPx() },
+                                leaderHeight = with(localDensity) { properties.leaderSize.height.toPx() },
+                                minSize = properties.minSize
+                            )
+
+
+                    ) {
+                        calloutParams.content!!.invoke()
+                    }
+
+                }
+
+            }
+        }
+    }
+
+    @Composable
+    private fun PopupContent(
+        modifier: Modifier = Modifier,
+        content: @Composable ColumnScope.() -> Unit
+    ) {
+        Surface(
+            modifier = Modifier
+        ) {
+            Column(
+                modifier = modifier
+                    .width(IntrinsicSize.Max),
+                content = content
+            )
         }
     }
 
@@ -189,7 +300,7 @@ public class MapViewScope(private var _mapView: MapView?) {
      *
      * @param geoView the GeoView
      * @param location the location in geographical coordinates
-     * @param offset the offset in screen coordinates from the geographical location at which to place the Callout
+     * @param offset the offset in screen coordinates from the geographical location at which to place the callout
      * @param rotateOffsetWithGeoView specifies whether the screen offset is rotated with the [GeoView]. The Screen offset
      *       will be rotated with the [GeoView] when true, false otherwise.
      * @return A [ScreenCoordinate] for the screen in pixels or null if the location is not visible
@@ -200,80 +311,14 @@ public class MapViewScope(private var _mapView: MapView?) {
         location: Point,
         offset: Offset,
         rotateOffsetWithGeoView: Boolean
-    ): ScreenCoordinate? {
+    ): ScreenCoordinate {
         val geoViewRotation = geoView.rotation()
-        val locationToScreen = when (geoView) {
-            is MapView -> geoView.locationToScreen(location)
-            is SceneView -> {
-                val locationToScreenResult = geoView.locationToScreen(location)
-                if (locationToScreenResult?.visibility == SceneLocationVisibility.Visible) {
-                    locationToScreenResult.screenPoint
-                }
-                null
-            }
-        }
-        return locationToScreen?.let { screenCoordinate ->
-            if (rotateOffsetWithGeoView && geoViewRotation != 0.0) {
-                val angle = AngularUnit.degrees.convertTo(AngularUnit.radians, -geoViewRotation)
-                screenCoordinate.offset(offset).rotate(angle, screenCoordinate)
-            } else {
-                screenCoordinate.offset(offset)
-            }
-        }
-    }
-
-    /**
-     * Analogue of Layout which allows to sub-compose the Callout container during the measuring stage,
-     * and anchor the Callout leader at the given screenCoordinate. The Callout is drawn using a Box
-     * and by default it is anchored to its top left corner. In order to anchor the Callout at the tip
-     * of the leader we need to determine the size of its content to calculate the anchor point's
-     * location before drawing the Callout on the screen.
-     *
-     * @param leaderScreenCoordinate Represents the x,y coordinate for the location on GeoView
-     * @param maxSize The calculated maximum size of the callout container
-     * @since 200.5.0
-     */
-    @Composable
-    private fun CalloutSubComposeLayout(
-        modifier: Modifier = Modifier,
-        leaderScreenCoordinate: ScreenCoordinate,
-        maxSize: DpSize,
-        calloutContainer: @Composable () -> Unit
-    ) {
-        val configuration = LocalDensity.current
-        val maxWidthInPx = with(configuration) {
-            maxSize.width.roundToPx()
-        }
-        val maxHeightInPx = with(configuration) {
-            maxSize.height.roundToPx()
-        }
-
-        SubcomposeLayout(modifier = modifier) { constraints ->
-            // set the max width to the lesser of the available size or the maxWidth
-            val layoutWidth = Integer.min(constraints.maxWidth, maxWidthInPx)
-            // set the max height to the lesser of the available size or the maxHeight
-            val layoutHeight = Integer.min(constraints.maxHeight, maxHeightInPx)
-            // measure the content with the constraints
-            val calloutContainerPlaceable = subcompose(slotId = 0) {
-                calloutContainer()
-            }[0].measure(
-                constraints.copy(
-                    maxWidth = layoutWidth,
-                    maxHeight = layoutHeight
-                )
-            )
-            // The default (0,0) value is on the top-left edge of the callout container.
-            // This moves the anchor to the bottom-middle point using X,Y offsets,
-            // and ensures that the leader's anchor point always represents the tapped location,
-            // in this case the bottom-middle leader position.
-            val calloutOffsetX =
-                leaderScreenCoordinate.x.toInt() - (calloutContainerPlaceable.width / 2)
-            val calloutOffsetY =
-                leaderScreenCoordinate.y.toInt() - calloutContainerPlaceable.height
-            // place the callout in the layout
-            layout(layoutWidth, layoutHeight) {
-                calloutContainerPlaceable.place(calloutOffsetX, calloutOffsetY)
-            }
+        val screenCoordinate = (geoView as MapView).locationToScreen(location)
+        return if (rotateOffsetWithGeoView && geoViewRotation != 0.0) {
+            val angle = AngularUnit.degrees.convertTo(AngularUnit.radians, -geoViewRotation)
+            screenCoordinate.offset(offset).rotate(angle, screenCoordinate)
+        } else {
+            screenCoordinate.offset(offset)
         }
     }
 
@@ -305,7 +350,7 @@ internal data class CalloutParams(
     val modifier: Modifier? = null,
     val offset: Offset = Offset.Zero,
     val rotateOffsetWithGeoView: Boolean = false,
-    val content: (@Composable BoxScope.() -> Unit)? = null
+    val content: (@Composable () -> Unit)? = null
 )
 
 private fun GeoView.rotation(): Double = when (this) {
