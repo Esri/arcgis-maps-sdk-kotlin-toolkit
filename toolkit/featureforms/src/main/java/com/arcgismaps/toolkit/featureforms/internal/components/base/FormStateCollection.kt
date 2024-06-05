@@ -91,9 +91,10 @@ private class MutableFormStateCollectionImpl : MutableFormStateCollection {
         entries.add(EntryImpl(formElement, state))
     }
 
-    override operator fun get(formElement: FormElement): FormElementState? = get(formElement.hashCode())
+    override operator fun get(formElement: FormElement): FormElementState? =
+        get(formElement.hashCode())
 
-    override fun get(id: Int): FormElementState? {
+    override operator fun get(id: Int): FormElementState? {
         entries.forEach { entry ->
             when (entry.state) {
                 is BaseGroupState -> {
