@@ -18,11 +18,13 @@
 package com.arcgismaps.toolkit.geoviewcompose
 
 import android.util.DisplayMetrics
+import android.util.LayoutDirection
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,22 +33,35 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.toRect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.toComposeRect
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupPositionProvider
+import androidx.compose.ui.window.PopupProperties
+import androidx.compose.ui.zIndex
 import com.arcgismaps.geometry.AngularUnit
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ViewpointType
@@ -156,16 +171,53 @@ public class MapViewScope(private var _mapView: MapView?) {
         val localDensity = LocalDensity.current
         // Get the default shape, color & size properties for Callout
         val properties = CalloutProperties()
+
+        var mapViewBounds = android.graphics.Rect()
+        mapView.getGlobalVisibleRect(mapViewBounds)
+        var mapViewAnchorBounds by remember { mutableStateOf(mapViewBounds.toComposeRect()) }
+
         leaderScreenCoordinate?.let {
-            CalloutSubComposeLayout(
-                leaderScreenCoordinate = it,
-                maxSize = calloutContentMaxSize(
-                    geoView = mapView,
-                    density = LocalDensity.current,
-                    displayMetrics = LocalContext.current.resources.displayMetrics
-                )) {
+//            CalloutSubComposeLayout(
+//                leaderScreenCoordinate = it,
+//                maxSize = calloutContentMaxSize(
+//                    geoView = mapView,
+//                    density = LocalDensity.current,
+//                    displayMetrics = LocalContext.current.resources.displayMetrics
+//                )) {
+            val popupPositionProvider = object : PopupPositionProvider {
+                override fun calculatePosition(
+                    anchorBounds: IntRect,
+                    windowSize: IntSize,
+                    layoutDirection: androidx.compose.ui.unit.LayoutDirection,
+                    popupContentSize: IntSize
+                ): IntOffset {
+                    return IntOffset(
+                        x =
+                        mapViewAnchorBounds.left.roundToInt() +
+                                leaderScreenCoordinate!!.x.roundToInt()
+                                - (popupContentSize.width / 2),
+                        y =
+                        leaderScreenCoordinate!!.y.roundToInt() + anchorBounds.top
+//                                - mapViewAnchorBounds.top.roundToInt()
+                                - (popupContentSize.height)
+//                                + with(localDensity) { properties.leaderSize.height.toPx() }.roundToInt()
+//                                - (with(localDensity) { anchorLeaderHeight.toPx() }).roundToInt())
+                    )
+                }
+            }
+
+            Popup(
+                popupPositionProvider = popupPositionProvider,
+                onDismissRequest = {
+                    // TODO
+                },
+                properties = PopupProperties(
+                    clippingEnabled = false
+                )
+            ) {
                 Box(
                     modifier = calloutParams.modifier!!
+                        .zIndex(1f)
                         .drawCalloutContainer(
                             cornerRadius = with(localDensity) { properties.cornerRadius.toPx() },
                             strokeBorderWidth = with(localDensity) { properties.strokeBorderWidth.toPx() },
