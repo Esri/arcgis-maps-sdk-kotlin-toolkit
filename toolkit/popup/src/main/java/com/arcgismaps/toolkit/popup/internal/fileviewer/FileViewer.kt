@@ -15,13 +15,18 @@
  */
 package com.arcgismaps.toolkit.popup.internal.fileviewer
 
+import android.app.Activity
+import android.content.Context
+import android.os.Build
 import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
@@ -49,8 +54,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -62,8 +68,6 @@ import kotlinx.coroutines.withContext
  */
 @Composable
 internal fun FileViewer(fileState: ViewableFile, onDismissRequest: () -> Unit) {
-    val coroutineScope = rememberCoroutineScope()
-    val context = LocalContext.current
     Dialog(
         onDismissRequest = onDismissRequest,
         properties = DialogProperties(usePlatformDefaultWidth = false)
@@ -74,16 +78,28 @@ internal fun FileViewer(fileState: ViewableFile, onDismissRequest: () -> Unit) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 6.dp, vertical = 20.dp)
-                        .background(Color.Gray),
+                        .height(64.dp)
+                        .background(MaterialTheme.colorScheme.surface),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Absolute.SpaceBetween,
                 ) {
                     val expanded = remember { mutableStateOf(false) }
-                    IconButton(onClick = { onDismissRequest() }) {
-                        Icon(Icons.Rounded.Close, contentDescription = "Back", tint = Color.White)
+                    IconButton(modifier = Modifier/*.padding(16.dp)*/, onClick = { onDismissRequest() }) {
+                        Icon(
+                            Icons.Rounded.Close,
+                            contentDescription = "Back",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
                     }
-                    Text(text = fileState.name, color = Color.White, fontSize = MaterialTheme.typography.headlineSmall.fontSize)
+                    Text(
+                        text = fileState.name,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = MaterialTheme.typography.headlineSmall.fontSize
+                    )
+                    Spacer(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                    )
                     ViewerActions(
                         expanded = expanded,
                         viewableFile = fileState,
@@ -95,7 +111,7 @@ internal fun FileViewer(fileState: ViewableFile, onDismissRequest: () -> Unit) {
                 modifier = Modifier
                     .fillMaxSize()
                     .clipToBounds()
-                    .background(Color.Black)
+                    .background(MaterialTheme.colorScheme.background)
                     .padding(it),
                 contentAlignment = Alignment.Center
             ) {
@@ -117,14 +133,14 @@ private fun ViewerActions(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    Box {
+    Box(modifier = modifier) {
         IconButton(onClick = { expanded.value = true }) {
-            Icon(Icons.Rounded.MoreVert, contentDescription = "More", tint = Color.White)
+            Icon(Icons.Rounded.MoreVert, contentDescription = "More", tint = MaterialTheme.colorScheme.onSurface)
         }
 
         DropdownMenu(expanded = expanded.value, onDismissRequest = { expanded.value = false }) {
             DropdownMenuItem(
-                text = { Text("Share", color = Color.Black) },
+                text = { Text("Share", color = MaterialTheme.colorScheme.onSurface) },
                 onClick = {
                     expanded.value = false
                     viewableFile.share(scope, context)
@@ -136,7 +152,7 @@ private fun ViewerActions(
 
             DropdownMenuItem(
                 text = {
-                    Text("Save", color = Color.Black)
+                    Text("Save", color = MaterialTheme.colorScheme.onSurface)
                 },
                 onClick = {
                     expanded.value = false
@@ -152,15 +168,22 @@ private fun ViewerActions(
                     }
                 },
                 leadingIcon = {
-                    Icon(Icons.Rounded.Save, contentDescription = "Save", tint = Color.Black)
+                    Icon(Icons.Rounded.Save, contentDescription = "Save", tint = MaterialTheme.colorScheme.onSurface)
                 }
             )
         }
     }
         ),
         onDismissRequest = {}
-    )
 
+        fileState = ViewableFile(
+            path = "path",
+            name = "ArcGIS Pro",
+            size = 0,
+            type = ViewableFileType.Image,
+            contentType = "image/jpeg",
+        ), onDismissRequest = {}
+    )
 }
 
 @Composable
@@ -168,7 +191,15 @@ private fun ImageViewer(path: String) {
     AsyncImage(
         model = ImageRequest.Builder(LocalContext.current)
             .data(path)
-            .build(),
+        model = path,
         contentDescription = "Image",
     )
+}
+            ActivityCompat.requestPermissions(
+                context as Activity,
+                arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                1
+            )
+        }
+    }
 }
