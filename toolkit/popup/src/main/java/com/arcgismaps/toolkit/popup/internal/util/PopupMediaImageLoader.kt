@@ -19,14 +19,23 @@ package com.arcgismaps.toolkit.popup.internal.util
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.BarChart
+import androidx.compose.material.icons.rounded.Image
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.platform.LocalContext
 import coil.imageLoader
 import coil.request.ImageRequest
+import com.arcgismaps.mapping.ChartImageParameters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -64,11 +73,43 @@ internal class RemoteImageLoader(
     }
 })
 
-//
-//internal class ChartImageLoader(
-//    media: PopupMedia,
-//    chartParameters: ChartImageParameters,
-//    placeholder: Painter
-//): ImageGetter(placeholder, getter = { _ ->
-//    media.generateChartAsync(chartParameters).getOrThrow().image
-//})
+
+internal class ChartImageLoader(
+    chartParameters: ChartImageParameters,
+    placeholder: Painter,
+    chartGenerator: suspend (ChartImageParameters) -> Bitmap
+): PopupMediaImageLoader(placeholder, getter = { _ ->
+    chartGenerator(chartParameters)
+})
+
+@Composable
+internal fun rememberMediaImagePainter(url: String): State<Painter> {
+    val placeholder = rememberVectorPainter(image = Icons.Rounded.Image)
+    val loader = remember(url) {
+        RemoteImageLoader(placeholder, url)
+    }
+    val context = LocalContext.current
+    LaunchedEffect(url) {
+        loader.get(context)
+    }
+
+    return loader.image
+}
+
+@Composable
+internal fun rememberChartImagePainter(
+    key: Any?,
+    chartParameters: ChartImageParameters,
+    chartGenerator: suspend (ChartImageParameters) -> Bitmap
+) : State<Painter> {
+    val placeholder = rememberVectorPainter(image = Icons.Rounded.BarChart)
+    val loader = remember(key) {
+        ChartImageLoader(chartParameters, placeholder, chartGenerator)
+    }
+    val context = LocalContext.current
+    LaunchedEffect(key) {
+        loader.get(context)
+    }
+
+    return loader.image
+}
