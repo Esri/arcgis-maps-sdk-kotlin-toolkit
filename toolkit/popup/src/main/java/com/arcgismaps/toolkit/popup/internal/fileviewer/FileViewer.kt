@@ -146,7 +146,7 @@ private fun ViewerActions(
                     viewableFile.share(scope, context)
                 },
                 leadingIcon = {
-                    Icon(Icons.Rounded.Share, contentDescription = "Share", tint = Color.Black)
+                    Icon(Icons.Rounded.Share, contentDescription = "Share", tint = MaterialTheme.colorScheme.onSurface)
                 }
             )
 
@@ -173,9 +173,12 @@ private fun ViewerActions(
             )
         }
     }
-        ),
-        onDismissRequest = {}
+}
 
+@Preview
+@Composable
+private fun FileViewerPreview() {
+    FileViewer(
         fileState = ViewableFile(
             path = "path",
             name = "ArcGIS Pro",
@@ -186,15 +189,15 @@ private fun ViewerActions(
     )
 }
 
-@Composable
-private fun ImageViewer(path: String) {
-    AsyncImage(
-        model = ImageRequest.Builder(LocalContext.current)
-            .data(path)
-        model = path,
-        contentDescription = "Image",
-    )
-}
+private fun requestPermission(context: Context) {
+    val permissionCheckWriteToDisk = ContextCompat.checkSelfPermission(
+        context,
+        android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+    ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+
+    if (!permissionCheckWriteToDisk) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // Request permission
             ActivityCompat.requestPermissions(
                 context as Activity,
                 arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE),
