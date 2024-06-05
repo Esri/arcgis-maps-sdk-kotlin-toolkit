@@ -175,6 +175,15 @@ private fun ViewerActions(
     }
 }
 
+@Composable
+private fun ImageViewer(path: String) {
+    AsyncImage(
+        model = path,
+        contentDescription = "Image",
+    )
+}
+
+
 @Preview
 @Composable
 private fun FileViewerPreview() {
@@ -189,20 +198,3 @@ private fun FileViewerPreview() {
     )
 }
 
-private fun requestPermission(context: Context) {
-    val permissionCheckWriteToDisk = ContextCompat.checkSelfPermission(
-        context,
-        android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-    ) == android.content.pm.PackageManager.PERMISSION_GRANTED
-
-    if (!permissionCheckWriteToDisk) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // Request permission
-            ActivityCompat.requestPermissions(
-                context as Activity,
-                arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                1
-            )
-        }
-    }
-}
