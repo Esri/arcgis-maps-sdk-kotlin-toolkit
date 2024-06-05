@@ -15,9 +15,6 @@
  */
 package com.arcgismaps.toolkit.popup.internal.fileviewer
 
-import android.app.Activity
-import android.content.Context
-import android.os.Build
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -48,14 +45,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -183,7 +177,6 @@ private fun ImageViewer(path: String) {
     )
 }
 
-
 @Preview
 @Composable
 private fun FileViewerPreview() {
@@ -197,4 +190,3 @@ private fun FileViewerPreview() {
         ), onDismissRequest = {}
     )
 }
-
