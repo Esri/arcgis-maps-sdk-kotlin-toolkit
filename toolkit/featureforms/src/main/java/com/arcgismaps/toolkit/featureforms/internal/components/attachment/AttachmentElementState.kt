@@ -299,8 +299,8 @@ internal class FormAttachmentState(
     /**
      * The file path of the attachment on disk. This is empty until [load] is called.
      */
-    var filePath: String = ""
-        private set
+    val filePath: String
+        get() = formAttachment?.filePath ?: ""
 
     private var _thumbnailUri: MutableState<String> = mutableStateOf("")
 
@@ -345,15 +345,7 @@ internal class FormAttachmentState(
                 formAttachment.retryLoad().onFailure {
                     result = Result.failure(it)
                 }.onSuccess {
-                    val data = formAttachment.attachment?.fetchData()?.getOrNull()
-                    if (data != null) {
-                        // write the data to disk
-                        writeDataToDisk(data)
-                        // create the thumbnail
-                        createThumbnail()
-                    } else {
-                        result = Result.failure(Exception("Failed to load attachment data"))
-                    }
+                    createThumbnail()
                 }
             }
         } catch (ex: CancellationException) {
@@ -396,24 +388,6 @@ internal class FormAttachmentState(
         if (type != other.type) return false
 
         return true
-    }
-
-    /**
-     * Writes the attachment data to disk. If the file already exists, it will not be overwritten.
-     */
-    private suspend fun writeDataToDisk(data: ByteArray) = withContext(Dispatchers.IO) {
-        val directory = File(filesDir, attachmentsDir)
-        directory.mkdirs()
-        // write the data to disk using the attachment id as the file name
-        val file = File(directory, id)
-        // write to the file only if the file does not exist
-        if (file.exists().not()) {
-            file.createNewFile()
-            FileOutputStream(file).use {
-                it.write(data)
-            }
-        }
-        filePath = file.absolutePath
     }
 
     /**

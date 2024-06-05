@@ -209,10 +209,8 @@ internal fun AttachmentTile(
                     delay(configuration.longPressTimeoutMillis)
                     wasALongPress = true
                     // handle long press
-                    if (loadStatus is LoadStatus.Loaded) {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        showContextMenu = true
-                    }
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    showContextMenu = true
                 }
 
                 is PressInteraction.Release -> {

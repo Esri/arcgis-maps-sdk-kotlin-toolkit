@@ -19,5 +19,5 @@
 <paths>
     <cache-path
         name="feature_forms_attachments"
-        path="feature_forms_attachments/" />
+        path="." />
 </paths>
