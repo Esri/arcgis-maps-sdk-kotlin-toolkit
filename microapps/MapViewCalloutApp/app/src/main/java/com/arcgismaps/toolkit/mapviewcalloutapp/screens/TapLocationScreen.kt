@@ -19,7 +19,6 @@
 package com.arcgismaps.toolkit.mapviewcalloutapp.screens
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,7 +26,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -51,6 +52,7 @@ import kotlin.math.roundToInt
 /**
  * Displays a composable [MapView] that displays a [Callout] at the tapped location.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TapLocationScreen(viewModel: MapViewModel) {
 
@@ -60,22 +62,26 @@ fun TapLocationScreen(viewModel: MapViewModel) {
     var calloutVisibility by rememberSaveable { mutableStateOf(false) }
     var rotateOffsetWithGeoView by rememberSaveable { mutableStateOf(false) }
 
-    Column {
-        CalloutOptionsBox(
-            calloutVisibility = calloutVisibility,
-            isCalloutRotationEnabled = rotateOffsetWithGeoView,
-            offset = offset,
-            onVisibilityToggled = { calloutVisibility = !calloutVisibility },
-            onCalloutOffsetRotationToggled = { rotateOffsetWithGeoView = !rotateOffsetWithGeoView },
-            onXAxisOffsetChanged = {
-                viewModel.setOffset(Offset(it,offset.y))
-            },
-            onYAxisOffsetChanged = {
-                viewModel.setOffset(Offset(offset.x,it))
-            }
-        )
-
-        Box {
+    BottomSheetScaffold(sheetContent =
+    {
+        Column {
+            CalloutOptionsBox(
+                calloutVisibility = calloutVisibility,
+                isCalloutRotationEnabled = rotateOffsetWithGeoView,
+                offset = offset,
+                onVisibilityToggled = { calloutVisibility = !calloutVisibility },
+                onCalloutOffsetRotationToggled = {
+                    rotateOffsetWithGeoView = !rotateOffsetWithGeoView
+                },
+                onXAxisOffsetChanged = {
+                    viewModel.setOffset(Offset(it, offset.y))
+                },
+                onYAxisOffsetChanged = {
+                    viewModel.setOffset(Offset(offset.x, it))
+                }
+            )
+        }
+    }) {
             MapView(
                 modifier = Modifier
                     .fillMaxSize(),
@@ -101,7 +107,6 @@ fun TapLocationScreen(viewModel: MapViewModel) {
                 }
             )
         }
-    }
 }
 
 @Composable
