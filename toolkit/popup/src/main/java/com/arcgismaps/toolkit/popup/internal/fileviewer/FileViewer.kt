@@ -15,11 +15,13 @@
  */
 package com.arcgismaps.toolkit.popup.internal.fileviewer
 
-import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
@@ -28,13 +30,11 @@ import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -45,11 +45,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -59,7 +60,6 @@ import kotlinx.coroutines.withContext
  *
  * @since 200.5.0
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun FileViewer(fileState: ViewableFile, onDismissRequest: () -> Unit) {
     val coroutineScope = rememberCoroutineScope()
@@ -71,32 +71,24 @@ internal fun FileViewer(fileState: ViewableFile, onDismissRequest: () -> Unit) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
-                TopAppBar(
-                    title = {
-                        Text(
-                            fileState.name,
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = { onDismissRequest() }) {
-                            Icon(Icons.Rounded.Close, contentDescription = "Back", tint = Color.White)
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.Black,
-                        titleContentColor = Color.White
-                    ),
-                    actions = {
-                        val expanded = remember { mutableStateOf(false) }
-                        ViewerActions(
-                            expanded = expanded,
-                            viewableFile = fileState,
-                            scope = coroutineScope,
-                            context = context
-                        )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 6.dp, vertical = 20.dp)
+                        .background(Color.Gray),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Absolute.SpaceBetween,
+                ) {
+                    val expanded = remember { mutableStateOf(false) }
+                    IconButton(onClick = { onDismissRequest() }) {
+                        Icon(Icons.Rounded.Close, contentDescription = "Back", tint = Color.White)
                     }
-
-                )
+                    Text(text = fileState.name, color = Color.White, fontSize = MaterialTheme.typography.headlineSmall.fontSize)
+                    ViewerActions(
+                        expanded = expanded,
+                        viewableFile = fileState,
+                    )
+                }
             }
         ) {
             Box(
@@ -122,9 +114,9 @@ private fun ViewerActions(
     expanded: MutableState<Boolean>,
     modifier: Modifier = Modifier,
     viewableFile: ViewableFile,
-    scope: CoroutineScope,
-    context: Context
 ) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     Box {
         IconButton(onClick = { expanded.value = true }) {
             Icon(Icons.Rounded.MoreVert, contentDescription = "More", tint = Color.White)
@@ -165,6 +157,9 @@ private fun ViewerActions(
             )
         }
     }
+        ),
+        onDismissRequest = {}
+    )
 
 }
 
