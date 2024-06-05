@@ -91,11 +91,27 @@ private class MutableFormStateCollectionImpl : MutableFormStateCollection {
         entries.add(EntryImpl(formElement, state))
     }
 
-    override operator fun get(formElement: FormElement): FormElementState? =
-        entries.firstOrNull { it.formElement == formElement }?.state
+    override operator fun get(formElement: FormElement): FormElementState? = get(formElement.hashCode())
 
-    override fun get(id: Int): FormElementState? =
-        entries.firstOrNull { it.formElement.hashCode() == id }?.state
+    override fun get(id: Int): FormElementState? {
+        entries.forEach { entry ->
+            when (entry.state) {
+                is BaseGroupState -> {
+                    val groupState = entry.state as? BaseGroupState
+                    groupState?.fieldStates?.forEach { childEntry ->
+                        if (childEntry.state.id == id) {
+                            return childEntry.state
+                        }
+                    }
+                }
+
+                else -> if (entry.state.id == id) {
+                    return entry.state
+                }
+            }
+        }
+        return null
+    }
 
     /**
      * Default implementation for a [FormStateCollection.Entry].
