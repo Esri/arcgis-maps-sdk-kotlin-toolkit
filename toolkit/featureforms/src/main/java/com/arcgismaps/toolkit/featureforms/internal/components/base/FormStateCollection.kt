@@ -60,14 +60,6 @@ internal interface MutableFormStateCollection : FormStateCollection {
      * @param state the [FormElementState] to add.
      */
     fun add(formElement: FormElement, state: FormElementState)
-
-    /**
-     * Provides the bracket operator to the collection.
-     *
-     * @param formElement the search for in the collection
-     * @return the [FormElementState] associated with the formElement, or null if none.
-     */
-    override operator fun get(formElement: FormElement): FormElementState?
 }
 
 /**
