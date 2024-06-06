@@ -90,8 +90,8 @@ private class MutableFormStateCollectionImpl : MutableFormStateCollection {
         entries.forEach { entry ->
             when (entry.state) {
                 is BaseGroupState -> {
-                    val groupState = entry.state as? BaseGroupState
-                    groupState?.fieldStates?.forEach { childEntry ->
+                    val groupState = entry.state as BaseGroupState
+                    groupState.fieldStates.forEach { childEntry ->
                         if (childEntry.state.id == id) {
                             return childEntry.state
                         }
