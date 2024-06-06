@@ -88,11 +88,9 @@ fun TapLocationScreen(viewModel: MapViewModel) {
                         location = mapPoint,
                         rotateOffsetWithGeoView = rotateOffsetWithGeoView,
                         offset = offset
-                    )
-                    {
+                    ) {
                         Text("Tapped location: ${mapPoint.x.roundToInt()},${mapPoint.y.roundToInt()}")
                     }
-
                 }
             } else {
                 null
