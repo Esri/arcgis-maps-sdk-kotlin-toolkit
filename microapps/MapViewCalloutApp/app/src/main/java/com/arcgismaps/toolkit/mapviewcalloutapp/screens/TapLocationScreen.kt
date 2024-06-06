@@ -19,7 +19,6 @@
 package com.arcgismaps.toolkit.mapviewcalloutapp.screens
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -75,32 +74,28 @@ fun TapLocationScreen(viewModel: MapViewModel) {
             }
         )
 
-        Box {
-            MapView(
-                modifier = Modifier
-                    .fillMaxSize(),
-                arcGISMap = viewModel.arcGISMap,
-                graphicsOverlays = remember { listOf(viewModel.tapLocationGraphicsOverlay) },
-                onSingleTapConfirmed = viewModel::setMapPoint,
-                onLongPress = { viewModel.clearMapPoint() },
-                content = if (mapPoint != null && calloutVisibility) {
-                    {
-                        Callout(
-                            modifier = Modifier.size(175.dp, 75.dp),
-                            location = mapPoint,
-                            rotateOffsetWithGeoView = rotateOffsetWithGeoView,
-                            offset = offset
-                        )
-                        {
-                            Text("Tapped location: ${mapPoint.x.roundToInt()},${mapPoint.y.roundToInt()}")
-                        }
-
+        MapView(
+            modifier = Modifier
+                .fillMaxSize(),
+            arcGISMap = viewModel.arcGISMap,
+            graphicsOverlays = remember { listOf(viewModel.tapLocationGraphicsOverlay) },
+            onSingleTapConfirmed = viewModel::setMapPoint,
+            onLongPress = { viewModel.clearMapPoint() },
+            content = if (mapPoint != null && calloutVisibility) {
+                {
+                    Callout(
+                        modifier = Modifier.size(175.dp, 75.dp),
+                        location = mapPoint,
+                        rotateOffsetWithGeoView = rotateOffsetWithGeoView,
+                        offset = offset
+                    ) {
+                        Text("Tapped location: ${mapPoint.x.roundToInt()},${mapPoint.y.roundToInt()}")
                     }
-                } else {
-                    null
                 }
-            )
-        }
+            } else {
+                null
+            }
+        )
     }
 }
 
