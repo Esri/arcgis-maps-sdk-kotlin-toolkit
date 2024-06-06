@@ -60,14 +60,6 @@ internal interface MutableFormStateCollection : FormStateCollection {
      * @param state the [FormElementState] to add.
      */
     fun add(formElement: FormElement, state: FormElementState)
-
-    /**
-     * Provides the bracket operator to the collection.
-     *
-     * @param formElement the search for in the collection
-     * @return the [FormElementState] associated with the formElement, or null if none.
-     */
-    override operator fun get(formElement: FormElement): FormElementState?
 }
 
 /**
@@ -92,10 +84,27 @@ private class MutableFormStateCollectionImpl : MutableFormStateCollection {
     }
 
     override operator fun get(formElement: FormElement): FormElementState? =
-        entries.firstOrNull { it.formElement == formElement }?.state
+        get(formElement.hashCode())
 
-    override fun get(id: Int): FormElementState? =
-        entries.firstOrNull { it.formElement.hashCode() == id }?.state
+    override operator fun get(id: Int): FormElementState? {
+        entries.forEach { entry ->
+            when (entry.state) {
+                is BaseGroupState -> {
+                    val groupState = entry.state as BaseGroupState
+                    groupState.fieldStates.forEach { childEntry ->
+                        if (childEntry.state.id == id) {
+                            return childEntry.state
+                        }
+                    }
+                }
+
+                else -> if (entry.state.id == id) {
+                    return entry.state
+                }
+            }
+        }
+        return null
+    }
 
     /**
      * Default implementation for a [FormStateCollection.Entry].
