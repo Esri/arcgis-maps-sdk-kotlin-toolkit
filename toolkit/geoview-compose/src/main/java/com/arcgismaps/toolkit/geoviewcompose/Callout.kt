@@ -555,7 +555,7 @@ private fun DoubleXY.rotate(
  * Returns the [LeaderPointOffset] for the [MarkerSymbol]
  *
  * @return the [LeaderPointOffset]
- * @since 200.2.0
+ * @since 200.5.0
  */
 internal fun MarkerSymbol.leaderPointOffset(): LeaderPointOffset {
     var leaderOffset = DoubleXY(leaderOffsetX.toDouble(), leaderOffsetY.toDouble())
@@ -575,7 +575,7 @@ internal fun MarkerSymbol.leaderPointOffset(): LeaderPointOffset {
  * Returns the [LeaderPointOffset] for the [CompositeSymbol]
  *
  * @return the [LeaderPointOffset]
- * @since 200.2.0
+ * @since 200.5.0
  */
 internal fun CompositeSymbol.leaderPointOffset(): LeaderPointOffset {
     // return first MarkerSymbol to CalloutLeaderSupport
@@ -588,7 +588,7 @@ internal fun CompositeSymbol.leaderPointOffset(): LeaderPointOffset {
  *
  * @param geometry the geometry of the [GeoElement] that the callout is being placed on
  * @return the geographic location of the callout placement
- * @since 200.2.0
+ * @since 200.5.0
  */
 private fun Point?.calloutLocation(geometry: Geometry): Point {
     if (geometry is Point) return geometry
@@ -602,9 +602,6 @@ private fun Point?.calloutLocation(geometry: Geometry): Point {
     val normalizedGeometry =
         GeometryEngine.normalizeCentralMeridian(projectedGeometry) ?: return this
 
-//    val builder = PointBuilder(this)
-//    builder.normalize()
-//    val normalizedTap = builder.toGeometry()
     val normalizedTap = GeometryEngine.normalizeCentralMeridian(this) as Point
 
     val proximity: ProximityResult? = if (normalizedGeometry is Multipoint) {
