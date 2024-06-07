@@ -27,15 +27,16 @@ internal class AttachmentsFileProvider :
     companion object {
 
         private const val AUTHORITY_BASE = "com.arcgismaps.toolkit.featureforms.attachmentsfileprovider"
-        private const val FILE_PROVIDER_PATH = "feature_forms_attachments"
 
         fun createTempFileWithUri(prefix: String, suffix: String, context: Context): Uri {
             // authority is unique, which uses the package name + base authority name
             // to avoid conflicts with other apps using the same library
             val authority = "${context.packageName}.$AUTHORITY_BASE"
-            val directory = File(context.cacheDir, FILE_PROVIDER_PATH)
+            val directory = File(context.cacheDir.absolutePath)
             directory.mkdirs()
             val file =  File.createTempFile(prefix, suffix, directory)
+            // delete the temp file when no process is using it
+            file.deleteOnExit()
             return getUriForFile(
                 context,
                 authority,

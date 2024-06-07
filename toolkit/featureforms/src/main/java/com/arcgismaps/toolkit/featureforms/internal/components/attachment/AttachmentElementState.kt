@@ -34,21 +34,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.Loadable
 import com.arcgismaps.mapping.featureforms.AnyAttachmentsFormInput
-import com.arcgismaps.mapping.featureforms.AttachmentChangeType
 import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
 import com.arcgismaps.mapping.featureforms.AttachmentsFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
@@ -117,55 +114,13 @@ internal class AttachmentElementState(
                 buildAttachmentStates(formElement.attachments)
             }
         }
-        scope.launch {
-            formElement.attachmentChanged.collect {
-                when (it.changeType) {
-                    is AttachmentChangeType.Deletion -> {
-                        // delete the state object
-                        attachments.removeIf { state ->
-                            state.formAttachment == it.attachment
-                        }
-                    }
-
-                    is AttachmentChangeType.Rename -> {
-                        // update the state object
-                        attachments.firstOrNull { state ->
-                            state.formAttachment == it.attachment
-                        }?.update(it.attachment)
-                    }
-
-                    is AttachmentChangeType.Addition -> {
-                        val formAttachment = it.attachment
-                        // create a new state
-                        val state = FormAttachmentState(
-                            name = formAttachment.name,
-                            size = formAttachment.size,
-                            contentType = formAttachment.contentType,
-                            type = formAttachment.type,
-                            elementStateId = id,
-                            deleteAttachment = { deleteAttachment(formAttachment) },
-                            filesDir = filesDir,
-                            scope = scope,
-                            formAttachment = formAttachment
-                        )
-                        attachments.add(state)
-                        // load the new attachment
-                        state.loadWithParentScope()
-                        // scroll to the new attachment after a delay to allow the recomposition to complete
-                        delay(100)
-                        lazyListState.scrollToItem(attachments.count())
-                    }
-                }
-                evaluateExpressions()
-            }
-        }
     }
 
     /**
      *  Loads the attachments provided in the [list] and transforms them into state objects
      *  to produce the [attachments] list.
      */
-    private suspend fun buildAttachmentStates(list: List<FormAttachment>) {
+    private fun buildAttachmentStates(list: List<FormAttachment>) {
         attachments.clear()
         list.forEach { formAttachment ->
             // create a new state
@@ -193,24 +148,52 @@ internal class AttachmentElementState(
     /**
      * Adds an attachment with the given [name], [contentType], and [data].
      */
-    suspend fun addAttachment(name: String, contentType: String, data: ByteArray) {
-        formElement.addAttachment(name, contentType, data)
+    fun addAttachment(name: String, contentType: String, data: ByteArray) {
+        val formAttachment = formElement.addAttachment(name, contentType, data)
+        // create a new state
+        val state = FormAttachmentState(
+            name = formAttachment.name,
+            size = formAttachment.size,
+            contentType = formAttachment.contentType,
+            type = formAttachment.type,
+            elementStateId = id,
+            deleteAttachment = { deleteAttachment(formAttachment) },
+            filesDir = filesDir,
+            scope = scope,
+            formAttachment = formAttachment
+        )
+        attachments.add(state)
+        // load the new attachment
+        state.loadWithParentScope()
+        // scroll to the new attachment after a delay to allow the recomposition to complete
+        scope.launch {
+            delay(100)
+            lazyListState.scrollToItem(attachments.count())
+            evaluateExpressions()
+        }
     }
 
     /**
      * Deletes the given [formAttachment].
      */
-    private suspend fun deleteAttachment(formAttachment: FormAttachment) {
+    fun deleteAttachment(formAttachment: FormAttachment) {
         formElement.deleteAttachment(formAttachment)
+        // delete the state object
+        attachments.removeIf { state ->
+            state.formAttachment == formAttachment
+        }
+        scope.launch { evaluateExpressions() }
     }
 
     /**
      * Renames the given [formAttachment] with the new [newName].
      */
-    suspend fun renameAttachment(formAttachment: FormAttachment, newName: String) {
-        if (formAttachment.name != newName) {
-            formElement.renameAttachment(formAttachment, newName)
-        }
+    fun renameAttachment(formAttachment: FormAttachment, newName: String) {
+        // update the state object which also updates FormAttachment
+        attachments.firstOrNull { state ->
+            state.formAttachment == formAttachment
+        }?.name = newName
+        scope.launch { evaluateExpressions() }
     }
 
     /**
@@ -280,17 +263,27 @@ internal class FormAttachmentState(
     val contentType: String,
     val type: FormAttachmentType,
     val elementStateId: Int,
-    val deleteAttachment: suspend () -> Unit,
+    val deleteAttachment: () -> Unit,
     private val filesDir: String,
     private val scope: CoroutineScope,
     val formAttachment: FormAttachment? = null
 ) : Loadable {
 
     /**
-     * The name of the attachment.
+     * Backing mutable state for the [name] property.
      */
-    var name by mutableStateOf(name)
-        private set
+    private var _name: MutableState<String> = mutableStateOf(name)
+
+    /**
+     * The name of the attachment. Setting the name will update the [FormAttachment.name] property.
+     * This is backed by a [MutableState] and can be observed by the composition.
+     */
+    var name : String
+        get() = _name.value
+        set(value) {
+            formAttachment?.name = value
+            _name.value = value
+        }
 
     /**
      * A unique ID for the attachment.
@@ -306,8 +299,8 @@ internal class FormAttachmentState(
     /**
      * The file path of the attachment on disk. This is empty until [load] is called.
      */
-    var filePath: String = ""
-        private set
+    val filePath: String
+        get() = formAttachment?.filePath ?: ""
 
     private var _thumbnailUri: MutableState<String> = mutableStateOf("")
 
@@ -338,14 +331,6 @@ internal class FormAttachmentState(
     }
 
     /**
-     * Updates the attachment properties with the given [formAttachment].
-     */
-    fun update(formAttachment: FormAttachment) {
-        // only name is updated since renameAttachment() is the only update call that can be made
-        name = formAttachment.name
-    }
-
-    /**
      * Loads the attachment and its thumbnail. Use [loadWithParentScope] to load the attachment as
      * a long-running task. This coroutine will get cancelled if the calling composable is removed
      * from the composition.
@@ -360,15 +345,7 @@ internal class FormAttachmentState(
                 formAttachment.retryLoad().onFailure {
                     result = Result.failure(it)
                 }.onSuccess {
-                    val data = formAttachment.attachment?.fetchData()?.getOrNull()
-                    if (data != null) {
-                        // write the data to disk
-                        writeDataToDisk(data)
-                        // create the thumbnail
-                        createThumbnail()
-                    } else {
-                        result = Result.failure(Exception("Failed to load attachment data"))
-                    }
+                    createThumbnail()
                 }
             }
         } catch (ex: CancellationException) {
@@ -411,24 +388,6 @@ internal class FormAttachmentState(
         if (type != other.type) return false
 
         return true
-    }
-
-    /**
-     * Writes the attachment data to disk. If the file already exists, it will not be overwritten.
-     */
-    private suspend fun writeDataToDisk(data: ByteArray) = withContext(Dispatchers.IO) {
-        val directory = File(filesDir, attachmentsDir)
-        directory.mkdirs()
-        // write the data to disk using the attachment id as the file name
-        val file = File(directory, id)
-        // write to the file only if the file does not exist
-        if (file.exists().not()) {
-            file.createNewFile()
-            FileOutputStream(file).use {
-                it.write(data)
-            }
-        }
-        filePath = file.absolutePath
     }
 
     /**

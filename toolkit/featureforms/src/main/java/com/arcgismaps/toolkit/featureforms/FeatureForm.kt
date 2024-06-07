@@ -360,6 +360,10 @@ internal fun rememberStates(
             else -> {}
         }
     }
+    if (form.defaultAttachmentsElement != null) {
+        val state = rememberAttachmentElementState(form, form.defaultAttachmentsElement!!)
+        states.add(form.defaultAttachmentsElement!!, state)
+    }
     return states
 }
 
