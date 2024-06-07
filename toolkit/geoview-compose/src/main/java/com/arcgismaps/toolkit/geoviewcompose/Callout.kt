@@ -457,7 +457,7 @@ public class MapViewScope(private var _mapView: MapView?) {
  * @param offset the offset in screen coordinates from the geographical location in which to place the Callout
  * @param rotateOffsetWithGeoView whether the screen offset is rotated with the geo view.
  *        This is useful if you are showing the callout for elements with symbology that does not rotate with the [GeoView]
- * @since 200.2.0
+ * @since 200.5.0
  */
 internal data class LeaderLocation (var location: Point, var offset: Offset = Offset.Zero, var rotateOffsetWithGeoView: Boolean = false)
 
