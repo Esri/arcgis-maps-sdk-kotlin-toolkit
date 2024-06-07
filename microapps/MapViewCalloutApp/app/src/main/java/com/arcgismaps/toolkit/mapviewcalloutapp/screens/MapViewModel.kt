@@ -19,21 +19,30 @@
 package com.arcgismaps.toolkit.mapviewcalloutapp.screens
 
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.arcgismaps.Color
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
+import com.arcgismaps.mapping.GeoElement
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
+import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 class MapViewModel : ViewModel() {
+
+    val mapViewProxy = MapViewProxy()
+
     val arcGISMap = ArcGISMap(BasemapStyle.ArcGISTopographic).apply {
         initialViewpoint = Viewpoint(
             latitude = 39.8,
@@ -42,13 +51,23 @@ class MapViewModel : ViewModel() {
         )
     }
 
+    val arcGISMapWithFeatureLayer = ArcGISMap("http://www.arcgis.com/home/webmap/viewer.html?webmap=a58aafbd19994eb38f374e205d1b7b30")
+
     private val _mapPoint = MutableStateFlow<Point?>(null)
     val mapPoint: StateFlow<Point?> = _mapPoint
+
+    private val _selectedGeoElement = MutableStateFlow<GeoElement?>(null)
+    val selectedGeoElement: StateFlow<GeoElement?> = _selectedGeoElement
+
+    private val _tapLocation = MutableStateFlow<Point?>(null)
+    val tapLocation: StateFlow<Point?> = _tapLocation
 
     private val _offset = MutableStateFlow(Offset.Zero)
     val offset: StateFlow<Offset> = _offset
 
     val tapLocationGraphicsOverlay: GraphicsOverlay = GraphicsOverlay()
+
+    private var currentIdentifyJob: Job? = null
 
     fun clearMapPoint() {
         _mapPoint.value = null
@@ -69,5 +88,42 @@ class MapViewModel : ViewModel() {
                 symbol = SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Cross, Color.red, 12.0f)
             )
         )
+    }
+
+    fun clearTapLocationAndGeoElement() {
+        _tapLocation.value = null
+        _selectedGeoElement.value = null
+        tapLocationGraphicsOverlay.graphics.clear()
+    }
+
+    fun setTapLocation(tapLocation: Point?, nullTapLocation: Boolean) {
+        _tapLocation.value = if (nullTapLocation) null else tapLocation
+
+        tapLocationGraphicsOverlay.graphics.clear()
+        tapLocationGraphicsOverlay.graphics.add(
+            Graphic(
+                geometry = tapLocation,
+                symbol = SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Cross, Color.red, 12.0f)
+            )
+        )
+    }
+
+    /**
+     * Identifies the tapped screen coordinate in the provided [singleTapConfirmedEvent]. The
+     * identified geoelement is set to [_selectedGeoElement].
+     *
+     * @since 200.5.0
+     */
+    fun identify(singleTapConfirmedEvent: SingleTapConfirmedEvent) {
+        currentIdentifyJob?.cancel()
+        currentIdentifyJob = viewModelScope.launch {
+            val result =
+                mapViewProxy.identifyLayers(singleTapConfirmedEvent.screenCoordinate, 20.dp)
+            result.onSuccess { identifyLayerResultList ->
+                if (identifyLayerResultList.isNotEmpty()) {
+                    _selectedGeoElement.value = identifyLayerResultList[0].geoElements.firstOrNull()
+                }
+            }
+        }
     }
 }
