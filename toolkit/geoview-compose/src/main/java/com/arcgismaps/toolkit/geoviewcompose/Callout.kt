@@ -140,7 +140,7 @@ public fun MapViewScope.Callout(
     content: @Composable BoxScope.() -> Unit
 ) {
     if (this.calloutParams.location == null) {
-        val leaderLocation = computeLeaderLocationForGeoelement(geoElement, tapLocation)
+        val leaderLocation = this.computeLeaderLocationForGeoelement(geoElement, tapLocation) ?: return
         this.calloutParams = CalloutParams(
             location = leaderLocation.location,
             modifier = modifier,
@@ -335,6 +335,100 @@ public class MapViewScope(private var _mapView: MapView?) {
     }
 
     /**
+     * Calculates the appropriate placement for the Callout with the provided [GeoElement] and tap location.
+     *
+     * @param geoElement the geoElement for which to place the Callout
+     * @param tapLocation the location user tapped at
+     * @return LeaderLocation the [LeaderLocation]
+     * @since 200.5.0
+     */
+    internal fun computeLeaderLocationForGeoelement(geoElement: GeoElement, tapLocation: Point?) : LeaderLocation? {
+        val geometry = geoElement.geometry ?: return null
+        return when (geoElement) {
+            is Graphic -> computeCalloutLocationForGraphic(geoElement, tapLocation)
+            is Feature -> computeCalloutLocationForFeature(geoElement, tapLocation)
+            else -> LeaderLocation(
+                location = tapLocation.calloutLocation(geometry),
+                offset = Offset.Zero,
+                rotateOffsetWithGeoView = false
+            )
+        }
+    }
+
+    /**
+     * Calculates the appropriate placement for the Callout with the provided [Graphic] and tap location.
+     * This method looks at the following properties of the graphic,
+     *
+     * * Geometry
+     * * Symbology
+     * * The overlay, it is a part of
+     *
+     * Along with that information and the tap location it calculates the fitting placement
+     * for the Callout.
+     *
+     * @param graphic the graphic for which to place the Callout
+     * @param tapLocation the location user tapped at
+     * @return LeaderLocation the [LeaderLocation]
+     * @since 200.5.0
+     */
+    private fun computeCalloutLocationForGraphic(graphic: Graphic, tapLocation: Point?): LeaderLocation? {
+        val geometry = graphic.geometry ?: return null
+
+        val renderingMode = graphic.graphicsOverlay?.renderingMode ?: GraphicsRenderingMode.Dynamic
+        val symbol = graphic.symbol ?: graphic.graphicsOverlay?.renderer?.getSymbol(graphic)
+
+        val leaderPointOffset = LeaderPointOffset.create(
+            geometry = geometry,
+            symbol = symbol,
+            isStaticRendering = renderingMode == GraphicsRenderingMode.Static
+        )
+
+        return LeaderLocation(
+            location = tapLocation.calloutLocation(geometry),
+            offset = leaderPointOffset.offset,
+            rotateOffsetWithGeoView = leaderPointOffset.rotatesWithGeoView
+        )
+    }
+
+    /**
+     * Calculates the appropriate placement for the Callout with the provided [Feature] and
+     * tap location.
+     * This method looks at the following properties of the feature,
+     *
+     * * Geometry
+     * * Symbology
+     * * The overlay, it is a part of
+     *
+     * Along with that information and the tap location it calculates the fitting placement
+     * for the Callout.
+     *
+     * @param feature the feature for which to place the Callout
+     * @param tapLocation the location user tapped at
+     * @return LeaderLocation the [LeaderLocation]
+     * @since 200.5.0
+     */
+    private fun computeCalloutLocationForFeature(feature: Feature, tapLocation: Point?): LeaderLocation? {
+        val geometry = feature.geometry ?: return null
+
+        val layer = feature.featureTable?.layer as? FeatureLayer
+        val isStaticRendering = (layer?.renderingMode == FeatureRenderingMode.Static)
+
+        val symbol = layer?.renderer?.getSymbol(feature)
+
+        val leaderPointOffset = LeaderPointOffset.create(
+            geometry = geometry,
+            symbol = symbol,
+            isStaticRendering = isStaticRendering
+        )
+
+        return LeaderLocation(
+            location = tapLocation.calloutLocation(geometry),
+            offset = leaderPointOffset.offset,
+            rotateOffsetWithGeoView = leaderPointOffset.rotatesWithGeoView
+        )
+    }
+
+    /**
      * UI default properties for the [Callout] component.
      */
     private data class CalloutProperties(
@@ -357,101 +451,59 @@ public class MapViewScope(private var _mapView: MapView?) {
 }
 
 /**
- * Calculates the appropriate placement for the callout with the provided [GeoElement] and tap location.
+ * Encapsulates properties used to display a Callout at a specific location on a [GeoView]
  *
- * @param geoElement the geoElement for which to place the callout
- * @param tapLocation the location user tapped at
- * @return LeaderLocation the [LeaderLocation]
+ * @param location the geographical location that a Callout should be displayed at
+ * @param offset the offset in screen coordinates from the geographical location in which to place the Callout
+ * @param rotateOffsetWithGeoView whether the screen offset is rotated with the geo view.
+ *        This is useful if you are showing the callout for elements with symbology that does not rotate with the [GeoView]
  * @since 200.2.0
  */
-private fun computeLeaderLocationForGeoelement(geoElement: GeoElement, tapLocation: Point?) : LeaderLocation {
-    val geometry = requireNotNull(geoElement.geometry) { "geoElement geometry should not be null" }
-    return when (geoElement) {
-        is Graphic -> computeCalloutLocationForGraphic(geoElement, tapLocation)
-        is Feature -> computeCalloutLocationForFeature(geoElement, tapLocation)
-        else -> LeaderLocation(
-            location = tapLocation.calloutLocation(geometry),
-            offset = Offset.Zero,
-            rotateOffsetWithGeoView = false
-        )
+internal data class LeaderLocation (var location: Point, var offset: Offset = Offset.Zero, var rotateOffsetWithGeoView: Boolean = false)
+
+/**
+ * Encapsulates the screen offset for the Callout leader and if that offset should be rotated
+ * with the [GeoView]
+ *
+ * @param offset the screen offset for the Callout leader
+ * @param rotatesWithGeoView signifies whether the offset should be rotated with the [GeoView]
+ * @since 200.5.0
+ */
+internal class LeaderPointOffset internal constructor(
+    var offset: Offset = Offset.Zero,
+    var rotatesWithGeoView: Boolean = false
+) {
+    companion object {
+        /**
+         * Creates an instance required for a [GeoElement] with a given geometry and symbol.
+         *
+         * @param geometry the geometry of the [GeoElement]
+         * @param symbol the symbol used to render the [GeoElement]
+         * @param isStaticRendering if static rendering is used
+         * @return LeaderPointOffset the offset needed to place the Callout
+         * @since 200.5.0
+         */
+        fun create(
+            geometry: Geometry?,
+            symbol: Symbol?,
+            isStaticRendering: Boolean
+        ): LeaderPointOffset {
+            if (geometry !is Multipart) {
+                val leaderPointOffsetForSymbol = when (symbol) {
+                    is MarkerSymbol -> symbol.leaderPointOffset()
+                    is CompositeSymbol -> symbol.leaderPointOffset()
+                    else -> return LeaderPointOffset()
+                }
+                return LeaderPointOffset(
+                    offset = leaderPointOffsetForSymbol.offset,
+                    rotatesWithGeoView = leaderPointOffsetForSymbol.rotatesWithGeoView || isStaticRendering
+                )
+            } else {
+                return LeaderPointOffset()
+            }
+        }
     }
 }
-
-/**
- * Calculates the appropriate placement for the callout with the provided [Graphic] and tap location.
- * This method looks at the following properties of the graphic,
- *
- * * Geometry
- * * Symbology
- * * The overlay, it is a part of
- *
- * Along with that information and the tap location it calculates the fitting placement
- * for the callout.
- *
- * @param graphic the graphic for which to place the callout
- * @param tapLocation the location user tapped at
- * @return LeaderLocation the [LeaderLocation]
- *
- * @since 200.2.0
- */
-private fun computeCalloutLocationForGraphic(graphic: Graphic, tapLocation: Point?): LeaderLocation {
-    val geometry = requireNotNull(graphic.geometry) { "graphic geometry should not be null" }
-
-    val renderingMode = graphic.graphicsOverlay?.renderingMode ?: GraphicsRenderingMode.Dynamic
-    val symbol = graphic.symbol ?: graphic.graphicsOverlay?.renderer?.getSymbol(graphic)
-
-    val leaderPointOffset = LeaderPointOffset.create(
-        geometry = geometry,
-        symbol = symbol,
-        isStaticRendering = renderingMode == GraphicsRenderingMode.Static
-    )
-
-    return LeaderLocation(
-        location = tapLocation.calloutLocation(geometry),
-        offset = leaderPointOffset.offset,
-        rotateOffsetWithGeoView = leaderPointOffset.rotatesWithGeoView
-    )
-}
-
-/**
- * Calculates the appropriate placement for the callout with the provided [Feature] and
- * tap location.
- * This method looks at the following properties of the feature,
- *
- * * Geometry
- * * Symbology
- * * The overlay, it is a part of
- *
- * Along with that information and the tap location it calculates the fitting placement
- * for the callout.
- *
- * @param feature the feature for which to place the callout
- * @param tapLocation the location user tapped at
- * @return LeaderLocation the [LeaderLocation]
- * @since 200.2.0
- */
-private fun computeCalloutLocationForFeature(feature: Feature, tapLocation: Point?): LeaderLocation {
-    val geometry = requireNotNull(feature.geometry) { "feature geometry should not be null" }
-
-    val layer = feature.featureTable?.layer as? FeatureLayer
-    val isStaticRendering = (layer?.renderingMode == FeatureRenderingMode.Static)
-
-    val symbol = layer?.renderer?.getSymbol(feature)
-
-    val leaderPointOffset = LeaderPointOffset.create(
-        geometry = geometry,
-        symbol = symbol,
-        isStaticRendering = isStaticRendering
-    )
-
-    return LeaderLocation(
-        location = tapLocation.calloutLocation(geometry),
-        offset = leaderPointOffset.offset,
-        rotateOffsetWithGeoView = leaderPointOffset.rotatesWithGeoView
-    )
-}
-
-internal data class LeaderLocation (var location: Point, var offset: Offset = Offset.Zero, var rotateOffsetWithGeoView: Boolean = false)
 
 @Immutable
 internal data class CalloutParams(
@@ -497,51 +549,6 @@ private fun DoubleXY.rotate(
     val y2 = x1 * sin(rotateByAngle) + y1 * cos(rotateByAngle)
 
     return DoubleXY(x2 + center.x, y2 + center.y)
-}
-
-
-/**
- * Encapsulates the screen offset for the [callout] leader and if that offset should be rotated
- * with the [GeoView]
- *
- * @param offset the screen offset for the callout leader
- * @param rotatesWithGeoView signifies whether the offset should be rotated with the [GeoView]
- * @since 200.2.0
- */
-internal class LeaderPointOffset internal constructor(
-    var offset: Offset = Offset.Zero,
-    var rotatesWithGeoView: Boolean = false
-) {
-    companion object {
-        /**
-         * Creates an instance required for a [GeoElement] with a given geometry and symbol.
-         *
-         * @param geometry the geometry of the [GeoElement]
-         * @param symbol the symbol used to render the [GeoElement]
-         * @param isStaticRendering if static renderin is used
-         * @return LeaderPointOffset the offset needed to place the callout
-         * @since 200.5.0
-         */
-        fun create(
-            geometry: Geometry?,
-            symbol: Symbol?,
-            isStaticRendering: Boolean
-        ): LeaderPointOffset {
-            if (geometry !is Multipart) {
-                val leaderPointOffsetForSymbol = when (symbol) {
-                    is MarkerSymbol -> symbol.leaderPointOffset()
-                    is CompositeSymbol -> symbol.leaderPointOffset()
-                    else -> return LeaderPointOffset()
-                }
-                return LeaderPointOffset(
-                    offset = leaderPointOffsetForSymbol.offset,
-                    rotatesWithGeoView = leaderPointOffsetForSymbol.rotatesWithGeoView || isStaticRendering
-                )
-            } else {
-                return LeaderPointOffset()
-            }
-        }
-    }
 }
 
 /**
