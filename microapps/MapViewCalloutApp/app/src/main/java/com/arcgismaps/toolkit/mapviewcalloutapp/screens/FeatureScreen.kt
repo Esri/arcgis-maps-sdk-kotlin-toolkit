@@ -76,34 +76,32 @@ fun FeatureScreen(viewModel: MapViewModel) {
         },
         scaffoldState = bottomSheetScaffoldState,
     ) {
-        Box {
-            MapView(
-                modifier = Modifier.fillMaxSize(),
-                arcGISMap = viewModel.arcGISMapWithFeatureLayer,
-                mapViewProxy = viewModel.mapViewProxy,
-                graphicsOverlays = remember { listOf(viewModel.tapLocationGraphicsOverlay) },
-                onSingleTapConfirmed = { singleTapConfirmedEvent ->
-                    viewModel.clearTapLocationAndGeoElement()
-                    viewModel.setTapLocation(singleTapConfirmedEvent.mapPoint, nullTapLocation)
-                    viewModel.identify(singleTapConfirmedEvent)
-                },
-                onLongPress = { viewModel.clearTapLocationAndGeoElement() },
-                content = if (selectedGeoElement != null && calloutVisibility) {
-                    {
-                        val tapLocation = viewModel.tapLocation.value
-                        Callout(
-                            geoElement = selectedGeoElement,
-                            modifier = Modifier.size(175.dp, 75.dp),
-                            tapLocation = viewModel.tapLocation.value,
-                        ) {
-                            Text("Tapped location: ${tapLocation?.x?.roundToInt()},${tapLocation?.y?.roundToInt()}")
-                        }
+        MapView(
+            modifier = Modifier.fillMaxSize(),
+            arcGISMap = viewModel.arcGISMapWithFeatureLayer,
+            mapViewProxy = viewModel.mapViewProxy,
+            graphicsOverlays = remember { listOf(viewModel.tapLocationGraphicsOverlay) },
+            onSingleTapConfirmed = { singleTapConfirmedEvent ->
+                viewModel.clearTapLocationAndGeoElement()
+                viewModel.setTapLocation(singleTapConfirmedEvent.mapPoint, nullTapLocation)
+                viewModel.identify(singleTapConfirmedEvent)
+            },
+            onLongPress = { viewModel.clearTapLocationAndGeoElement() },
+            content = if (selectedGeoElement != null && calloutVisibility) {
+                {
+                    val tapLocation = viewModel.tapLocation.value
+                    Callout(
+                        geoElement = selectedGeoElement,
+                        modifier = Modifier.size(175.dp, 75.dp),
+                        tapLocation = viewModel.tapLocation.value,
+                    ) {
+                        Text("Tapped location: ${tapLocation?.x?.roundToInt()},${tapLocation?.y?.roundToInt()}")
                     }
-                } else {
-                    null
                 }
-            )
-        }
+            } else {
+                null
+            }
+        )
     }
 }
 
