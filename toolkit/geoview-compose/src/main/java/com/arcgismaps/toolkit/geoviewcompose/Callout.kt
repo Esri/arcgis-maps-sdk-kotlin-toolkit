@@ -100,11 +100,11 @@ public fun MapViewScope.Callout(
  *
  * @since 200.5.0
  */
-public class MapViewScope(private var _mapView: MapView?) {
+public class MapViewScope(private var _geoView: GeoView?) {
 
     internal var calloutParams: CalloutParams = CalloutParams()
-    private val mapView: MapView
-        get() = _mapView ?: error("MapView not initialized")
+    private val geoView: GeoView
+        get() = _geoView ?: error("MapView not initialized")
 
     internal fun reset() {
         calloutParams = CalloutParams()
@@ -123,7 +123,7 @@ public class MapViewScope(private var _mapView: MapView?) {
         // the drawStatus till the first time MapView is done drawing. the transformWhile operator
         // will stop collecting when isMapViewReady.value becomes false.
         LaunchedEffect(calloutParams.location) {
-            mapView.drawStatus.transformWhile { drawStatus ->
+            geoView.drawStatus.transformWhile { drawStatus ->
                 emit(drawStatus)
                 !isMapViewReady.value
             }.collect {
@@ -140,16 +140,16 @@ public class MapViewScope(private var _mapView: MapView?) {
         // Convert the given location to a screen coordinate
         var leaderScreenCoordinate: ScreenCoordinate? by remember {
             mutableStateOf(
-                getLeaderScreenCoordinate(mapView, calloutParams.location!!, calloutParams.offset, calloutParams.rotateOffsetWithGeoView)
+                getLeaderScreenCoordinate(geoView, calloutParams.location!!, calloutParams.offset, calloutParams.rotateOffsetWithGeoView)
             )
         }
 
         LaunchedEffect(calloutParams.location) {
             // Used to update screen coordinate when new location point is used
-            leaderScreenCoordinate = getLeaderScreenCoordinate(mapView, calloutParams.location!!, calloutParams.offset, calloutParams.rotateOffsetWithGeoView)
+            leaderScreenCoordinate = getLeaderScreenCoordinate(geoView, calloutParams.location!!, calloutParams.offset, calloutParams.rotateOffsetWithGeoView)
             // Used to update screen coordinate when viewpoint is changed
-            mapView.viewpointChanged.collect {
-                leaderScreenCoordinate = getLeaderScreenCoordinate(mapView, calloutParams.location!!, calloutParams.offset, calloutParams.rotateOffsetWithGeoView)
+            geoView.viewpointChanged.collect {
+                leaderScreenCoordinate = getLeaderScreenCoordinate(geoView, calloutParams.location!!, calloutParams.offset, calloutParams.rotateOffsetWithGeoView)
             }
         }
 
@@ -160,7 +160,7 @@ public class MapViewScope(private var _mapView: MapView?) {
             CalloutSubComposeLayout(
                 leaderScreenCoordinate = it,
                 maxSize = calloutContentMaxSize(
-                    geoView = mapView,
+                    geoView = geoView,
                     density = LocalDensity.current,
                     displayMetrics = LocalContext.current.resources.displayMetrics
                 )) {
