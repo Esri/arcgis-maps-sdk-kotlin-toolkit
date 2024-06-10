@@ -81,7 +81,9 @@ private fun HTML(content: String) {
             val completeHtml = "$header$headStyle<html>${content.trim()}</html>"
             loadDataWithBaseURL(null, completeHtml, "text/html", "UTF-8", null)
         }
-    })
+    },
+        onReset = {}
+    )
 }
 
 /**
