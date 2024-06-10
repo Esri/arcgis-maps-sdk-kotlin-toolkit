@@ -28,11 +28,11 @@ secrets {
 }
 
 android {
-    namespace = "com.arcgismaps.toolkit.templateapp"
+    namespace = "com.arcgismaps.toolkit.sceneviewcalloutapp"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId ="com.arcgismaps.toolkit.templateapp"
+        applicationId ="com.arcgismaps.toolkit.sceneviewcalloutapp"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.compileSdk.get().toInt()
         versionCode = 1
@@ -57,7 +57,6 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-    @Suppress("UnstableApiUsage")
     buildFeatures {
         compose = true
         buildConfig = true
