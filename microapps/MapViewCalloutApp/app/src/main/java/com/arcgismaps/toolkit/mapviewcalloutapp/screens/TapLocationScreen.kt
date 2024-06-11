@@ -21,15 +21,22 @@ package com.arcgismaps.toolkit.mapviewcalloutapp.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
+import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -50,33 +57,45 @@ import kotlin.math.roundToInt
 /**
  * Displays a composable [MapView] that displays a [Callout] at the tapped location.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TapLocationScreen(viewModel: MapViewModel) {
 
     val mapPoint = viewModel.mapPoint.collectAsState().value
     val offset = viewModel.offset.collectAsState().value
 
-    var calloutVisibility by rememberSaveable { mutableStateOf(false) }
+    var calloutVisibility by rememberSaveable { mutableStateOf(true) }
     var rotateOffsetWithGeoView by rememberSaveable { mutableStateOf(false) }
 
-    Column {
-        CalloutOptionsBox(
-            calloutVisibility = calloutVisibility,
-            isCalloutRotationEnabled = rotateOffsetWithGeoView,
-            offset = offset,
-            onVisibilityToggled = { calloutVisibility = !calloutVisibility },
-            onCalloutOffsetRotationToggled = { rotateOffsetWithGeoView = !rotateOffsetWithGeoView },
-            onXAxisOffsetChanged = {
-                viewModel.setOffset(Offset(it,offset.y))
-            },
-            onYAxisOffsetChanged = {
-                viewModel.setOffset(Offset(offset.x,it))
-            }
+    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState = rememberStandardBottomSheetState(
+            initialValue = SheetValue.Expanded,
+            skipHiddenState = true
         )
+    )
 
+    BottomSheetScaffold(
+        sheetContent = {
+            CalloutOptionsBox(
+                calloutVisibility = calloutVisibility,
+                isCalloutRotationEnabled = rotateOffsetWithGeoView,
+                offset = offset,
+                onVisibilityToggled = { calloutVisibility = !calloutVisibility },
+                onCalloutOffsetRotationToggled = {
+                    rotateOffsetWithGeoView = !rotateOffsetWithGeoView
+                },
+                onXAxisOffsetChanged = {
+                    viewModel.setOffset(Offset(it, offset.y))
+                },
+                onYAxisOffsetChanged = {
+                    viewModel.setOffset(Offset(offset.x, it))
+                }
+            )
+        },
+        scaffoldState = bottomSheetScaffoldState,
+    ) { paddingValues ->
         MapView(
-            modifier = Modifier
-                .fillMaxSize(),
+            modifier = Modifier.fillMaxSize().padding(paddingValues),
             arcGISMap = viewModel.arcGISMap,
             graphicsOverlays = remember { listOf(viewModel.tapLocationGraphicsOverlay) },
             onSingleTapConfirmed = viewModel::setMapPoint,
@@ -84,12 +103,12 @@ fun TapLocationScreen(viewModel: MapViewModel) {
             content = if (mapPoint != null && calloutVisibility) {
                 {
                     Callout(
-                        modifier = Modifier.size(175.dp, 75.dp),
+                        modifier = Modifier.wrapContentSize(),
                         location = mapPoint,
                         rotateOffsetWithGeoView = rotateOffsetWithGeoView,
                         offset = offset
                     ) {
-                        Text("Tapped location: ${mapPoint.x.roundToInt()},${mapPoint.y.roundToInt()}")
+                        Text("Tapped location:\n${mapPoint.x.roundToInt()},${mapPoint.y.roundToInt()}")
                     }
                 }
             } else {
@@ -108,7 +127,7 @@ fun CalloutOptionsBox(
     onCalloutOffsetRotationToggled: () -> Unit,
     onXAxisOffsetChanged: (Float) -> Unit,
     onYAxisOffsetChanged: (Float) -> Unit
-    ) {
+) {
     Column(Modifier.padding(8.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(text = "Show Callout")
@@ -125,28 +144,34 @@ fun CalloutOptionsBox(
             )
         }
 
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(text = "Offset")
-            Column {
-                TextField(
-                    value = offset.x.toString(),
-                    onValueChange = { value ->
-                        onXAxisOffsetChanged(value.toFloat())
-                    },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
-                    label = { Text("X-Axis offset") },
-                    textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.End)
-                )
-                TextField(
-                    value = offset.y.toString(),
-                    onValueChange = { value ->
-                        onYAxisOffsetChanged(value.toFloat())
-                    },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
-                    label = { Text("Y-Axis offset") },
-                    textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.End)
-                )
-            }
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
+            OutlinedTextField(
+                modifier = Modifier.weight(1f),
+                value = offset.x.toString(),
+                onValueChange = { value ->
+                    onXAxisOffsetChanged(value.toFloat())
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal,
+                    imeAction = ImeAction.Done
+                ),
+                label = { Text("X-Axis offset") },
+                textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.End)
+            )
+            Spacer(modifier = Modifier.size(10.dp))
+            OutlinedTextField(
+                modifier = Modifier.weight(1f),
+                value = offset.y.toString(),
+                onValueChange = { value ->
+                    onYAxisOffsetChanged(value.toFloat())
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal,
+                    imeAction = ImeAction.Done
+                ),
+                label = { Text("Y-Axis offset") },
+                textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.End)
+            )
         }
     }
 }
