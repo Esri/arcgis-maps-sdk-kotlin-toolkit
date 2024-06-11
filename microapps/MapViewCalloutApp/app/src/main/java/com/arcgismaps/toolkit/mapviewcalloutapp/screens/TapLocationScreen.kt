@@ -60,7 +60,7 @@ fun TapLocationScreen(viewModel: MapViewModel) {
     var rotateOffsetWithGeoView by rememberSaveable { mutableStateOf(false) }
 
     Column {
-        CalloutOptionsBox(
+        CalloutOptions(
             calloutVisibility = calloutVisibility,
             isCalloutRotationEnabled = rotateOffsetWithGeoView,
             offset = offset,
@@ -100,7 +100,7 @@ fun TapLocationScreen(viewModel: MapViewModel) {
 }
 
 @Composable
-fun CalloutOptionsBox(
+fun CalloutOptions(
     calloutVisibility: Boolean,
     isCalloutRotationEnabled: Boolean,
     offset: Offset,

@@ -19,14 +19,14 @@
 package com.arcgismaps.toolkit.mapviewcalloutapp.screens
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetValue
@@ -67,7 +67,8 @@ fun FeatureScreen(viewModel: MapViewModel) {
 
     BottomSheetScaffold(
         sheetContent = {
-            CalloutOptionsBox(
+            CalloutOptions(
+                viewModel = viewModel,
                 calloutVisibility = calloutVisibility,
                 onVisibilityToggled = { calloutVisibility = !calloutVisibility },
                 passNullTapLocation = nullTapLocation,
@@ -86,13 +87,12 @@ fun FeatureScreen(viewModel: MapViewModel) {
                 viewModel.setTapLocation(singleTapConfirmedEvent.mapPoint, nullTapLocation)
                 viewModel.identify(singleTapConfirmedEvent)
             },
-            onLongPress = { viewModel.clearTapLocationAndGeoElement() },
             content = if (selectedGeoElement != null && calloutVisibility) {
                 {
                     val tapLocation = viewModel.tapLocation.value
                     Callout(
                         geoElement = selectedGeoElement,
-                        modifier = Modifier.size(175.dp, 75.dp),
+                        modifier = Modifier.wrapContentSize(),
                         tapLocation = viewModel.tapLocation.value,
                     ) {
                         Text("Tapped location: ${tapLocation?.x?.roundToInt()},${tapLocation?.y?.roundToInt()}")
@@ -106,7 +106,8 @@ fun FeatureScreen(viewModel: MapViewModel) {
 }
 
 @Composable
-fun CalloutOptionsBox(
+fun CalloutOptions(
+    viewModel: MapViewModel,
     calloutVisibility: Boolean,
     onVisibilityToggled: () -> Unit,
     passNullTapLocation: Boolean,
@@ -126,6 +127,9 @@ fun CalloutOptionsBox(
                 checked = passNullTapLocation,
                 onCheckedChange = { onNullTapLocationToggled() }
             )
+        }
+        Button(onClick = { viewModel.clearTapLocationAndGeoElement() }) {
+            Text(text = "Clear Tap Location")
         }
     }
 }

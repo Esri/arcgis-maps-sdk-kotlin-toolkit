@@ -54,7 +54,6 @@ import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.Multipart
 import com.arcgismaps.geometry.Multipoint
 import com.arcgismaps.geometry.Point
-import com.arcgismaps.geometry.PointBuilder
 import com.arcgismaps.geometry.ProximityResult
 import com.arcgismaps.mapping.GeoElement
 import com.arcgismaps.mapping.ViewpointType
@@ -339,7 +338,7 @@ public class MapViewScope(private var _mapView: MapView?) {
      *
      * @param geoElement the geoElement for which to place the Callout
      * @param tapLocation the location user tapped at
-     * @return LeaderLocation the [LeaderLocation]
+     * @return the [LeaderLocation] of the Callout
      * @since 200.5.0
      */
     internal fun computeLeaderLocationForGeoelement(geoElement: GeoElement, tapLocation: Point?) : LeaderLocation? {
@@ -368,7 +367,7 @@ public class MapViewScope(private var _mapView: MapView?) {
      *
      * @param graphic the graphic for which to place the Callout
      * @param tapLocation the location user tapped at
-     * @return LeaderLocation the [LeaderLocation]
+     * @return the [LeaderLocation] of the Callout
      * @since 200.5.0
      */
     private fun computeCalloutLocationForGraphic(graphic: Graphic, tapLocation: Point?): LeaderLocation? {
@@ -404,7 +403,7 @@ public class MapViewScope(private var _mapView: MapView?) {
      *
      * @param feature the feature for which to place the Callout
      * @param tapLocation the location user tapped at
-     * @return LeaderLocation the [LeaderLocation]
+     * @return the [LeaderLocation] of the Callout
      * @since 200.5.0
      */
     private fun computeCalloutLocationForFeature(feature: Feature, tapLocation: Point?): LeaderLocation? {
@@ -456,7 +455,7 @@ public class MapViewScope(private var _mapView: MapView?) {
  * @param location the geographical location that a Callout should be displayed at
  * @param offset the offset in screen coordinates from the geographical location in which to place the Callout
  * @param rotateOffsetWithGeoView whether the screen offset is rotated with the geo view.
- *        This is useful if you are showing the callout for elements with symbology that does not rotate with the [GeoView]
+ * This is useful if you are showing the Callout for elements with symbology that does not rotate with the [GeoView]
  * @since 200.5.0
  */
 internal data class LeaderLocation (var location: Point, var offset: Offset = Offset.Zero, var rotateOffsetWithGeoView: Boolean = false)
@@ -480,7 +479,7 @@ internal class LeaderPointOffset internal constructor(
          * @param geometry the geometry of the [GeoElement]
          * @param symbol the symbol used to render the [GeoElement]
          * @param isStaticRendering if static rendering is used
-         * @return LeaderPointOffset the offset needed to place the Callout
+         * @return the [LeaderPointOffset] needed to place the Callout
          * @since 200.5.0
          */
         fun create(
@@ -583,11 +582,11 @@ internal fun CompositeSymbol.leaderPointOffset(): LeaderPointOffset {
 }
 
 /**
- * The location that the callout should be placed. Calculated by taking into account the
+ * The location that the Callout should be placed. Calculated by taking into account the
  * type of geometry and the tap location from a user interaction.
  *
- * @param geometry the geometry of the [GeoElement] that the callout is being placed on
- * @return the geographic location of the callout placement
+ * @param geometry the geometry of the [GeoElement] that the Callout is being placed on
+ * @return the geographic location of the Callout placement
  * @since 200.5.0
  */
 private fun Point?.calloutLocation(geometry: Geometry): Point {
