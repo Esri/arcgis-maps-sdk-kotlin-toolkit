@@ -153,6 +153,7 @@ private fun PopupBody(popupState: PopupState, onFileClicked: (ViewableFile?) -> 
             val element = entry.popupElement
             when (element) {
                 is TextPopupElement -> {
+                    // a contentType is needed to reuse the TextPopupElement composable inside a LazyColumn
                     item(contentType = TextPopupElement::class.java) {
                         TextPopupElement(
                             entry.state as TextElementState
