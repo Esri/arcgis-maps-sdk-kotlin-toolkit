@@ -35,6 +35,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.arcgismaps.toolkit.", appContext.packageName)
+        assertEquals("com.arcgismaps.toolkit.sceneviewcameracontrollerapp", appContext.packageName)
     }
 }
