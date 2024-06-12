@@ -16,15 +16,25 @@
 
 package com.arcgismaps.toolkit.popup.internal.element.media
 
+import android.graphics.Bitmap
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalDensity
+import com.arcgismaps.mapping.ChartImageParameters
+import com.arcgismaps.mapping.ChartImageStyle
 import com.arcgismaps.mapping.popup.MediaPopupElement
 import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.mapping.popup.PopupMedia
 import com.arcgismaps.mapping.popup.PopupMediaType
 import com.arcgismaps.toolkit.popup.internal.element.state.PopupElementState
+import com.arcgismaps.toolkit.popup.internal.util.rememberChartImagePainter
+import com.arcgismaps.toolkit.popup.internal.util.rememberMediaImagePainter
 
 /**
  * Represents the state of an [MediaPopupElement]
@@ -40,9 +50,7 @@ internal class MediaElementState(
     constructor(mediaPopupElement: MediaPopupElement): this(
         description = mediaPopupElement.description,
         title = mediaPopupElement.title,
-        media = mediaPopupElement.media
-            .filter { it.type is PopupMediaType.Image }
-            .map { PopupMediaState(it) }
+        media = mediaPopupElement.media.map { PopupMediaState(it) }
     )
 
     companion object {
@@ -84,7 +92,8 @@ internal class PopupMediaState(
     @Suppress("unused") val refreshInterval: Long,
     @Suppress("unused") val linkUrl: String,
     val sourceUrl: String,
-    val type: PopupMediaType
+    val type: PopupMediaType,
+    val imageGenerator: (suspend (ChartImageParameters) -> Bitmap)? = null
 ) {
     constructor(media: PopupMedia) : this(
         title = media.title,
@@ -92,6 +101,41 @@ internal class PopupMediaState(
         refreshInterval = media.imageRefreshInterval,
         linkUrl = media.value?.linkUrl ?: "",
         sourceUrl = media.value?.sourceUrl ?: "",
-        type = media.type
+        type = media.type,
+        imageGenerator = { params -> media.generateChart(params).getOrThrow().image.bitmap }
     )
 }
+
+@Composable
+internal fun PopupMediaState.rememberMediaPainter(): State<Painter> =
+    when (type) {
+        is PopupMediaType.Image -> rememberMediaImagePainter(sourceUrl)
+        else -> {
+            val darkMode = isSystemInDarkTheme()
+            val defaults = MediaElementDefaults.shapes()
+            val localDensity = LocalDensity.current
+            val width = with(localDensity) {
+                defaults.tileWidth.roundToPx()
+            }
+            val height = with(localDensity) {
+                defaults.tileHeight.roundToPx()
+            }
+
+            val params = remember(this, isSystemInDarkTheme()) {
+                ChartImageParameters(width, height).apply {
+                    style = if (darkMode) {
+                        ChartImageStyle.Dark
+                    } else {
+                        ChartImageStyle.Light
+                    }
+
+                    this.screenScale = localDensity.density
+                }
+            }
+            rememberChartImagePainter(
+                key = this,
+                chartParameters = params,
+                chartGenerator = imageGenerator!!
+            )
+        }
+    }

@@ -29,26 +29,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.BarChart
-import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.DefaultAlpha
-import androidx.compose.ui.graphics.vector.VectorPainter
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -56,7 +48,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.popup.PopupMediaType
 import com.arcgismaps.toolkit.popup.internal.util.PopupMediaImageLoader
-import com.arcgismaps.toolkit.popup.internal.util.RemoteImageLoader
 
 @Composable
 internal fun MediaTile(
@@ -77,19 +68,16 @@ internal fun MediaTile(
                 // TODO open media viewer here
             }
     ) {
-        val placeholder = state.type.rememberPlaceholder()
-        val getter by remember(state.sourceUrl) {
-            mutableStateOf(
-                RemoteImageLoader(
-                    placeholder,
-                    state.sourceUrl
-                )
-            )
-        }
+        val painter by state.rememberMediaPainter()
+        val defaults = MediaElementDefaults.shapes()
+        val padding = if (state.type is PopupMediaType.Image)
+            defaults.mediaImagePadding
+        else defaults.mediaChartPadding
         MediaView(
-            mediaImageLoader = getter,
+            painter = painter,
             title = state.title,
-            caption = state.caption
+            caption = state.caption,
+            modifier = Modifier.padding(padding)
         )
     }
 }
@@ -99,7 +87,7 @@ internal fun MediaTile(
  */
 @Composable
 private fun MediaImage(
-    mediaImageLoader: PopupMediaImageLoader,
+    painter: Painter,
     modifier: Modifier = Modifier,
     alignment: Alignment = Alignment.Center,
     contentScale: ContentScale = ContentScale.FillBounds,
@@ -107,11 +95,6 @@ private fun MediaImage(
     alpha: Float = DefaultAlpha,
     colorFilter: ColorFilter? = null
 ) {
-    val context = LocalContext.current
-    LaunchedEffect(mediaImageLoader) {
-        mediaImageLoader.get(context)
-    }
-    val painter = mediaImageLoader.image.value
     Image(
         painter = painter,
         contentDescription = contentDescription,
@@ -137,7 +120,7 @@ private fun Title(
         textAlign = TextAlign.Start,
         overflow = TextOverflow.Ellipsis,
         maxLines = 1,
-        modifier = modifier
+        modifier = modifier.padding(vertical = 1.dp)
     )
 }
 
@@ -163,20 +146,17 @@ private fun Caption(
 internal fun MediaView(
     title: String,
     caption: String,
-    mediaImageLoader: PopupMediaImageLoader,
+    painter: Painter,
     modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
     ) {
-        val defaults = MediaElementDefaults.colors()
-        val backgroundColor = defaults.tileTextBackgroundColor
-        val textColor = defaults.tileTextColor
         MediaImage(
-            mediaImageLoader = mediaImageLoader,
+            painter = painter,
             contentDescription = title,
-            modifier = Modifier.fillMaxSize()
+            modifier = modifier.fillMaxSize()
         )
         Column(
             modifier = Modifier
@@ -192,7 +172,7 @@ internal fun MediaView(
                     }
                 )
                 .background(
-                    backgroundColor.copy(
+                    MaterialTheme.colorScheme.onBackground.copy(
                         alpha = 0.7f
                     )
                 ),
@@ -202,15 +182,15 @@ internal fun MediaView(
                 text = title,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 5.dp, vertical = 1.dp),
-                color = textColor
+                    .padding(horizontal = 5.dp),
+                color = MaterialTheme.colorScheme.background
             )
             Caption(
                 text = caption,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 5.dp),
-                color = textColor
+                color = MaterialTheme.colorScheme.background.copy(alpha = 0.7f)
             )
 
         }
@@ -231,10 +211,3 @@ internal fun PreviewMediaTile() {
         )
     )
 }
-
-@Composable
-private fun PopupMediaType.rememberPlaceholder(): VectorPainter = when (this) {
-    PopupMediaType.Image -> rememberVectorPainter(image = Icons.Outlined.Image)
-    else -> rememberVectorPainter(image = Icons.Outlined.BarChart)
-}
-
