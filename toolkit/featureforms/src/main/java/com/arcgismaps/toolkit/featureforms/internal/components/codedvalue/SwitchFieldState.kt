@@ -83,6 +83,7 @@ internal class SwitchFieldState(
     id : Int,
     properties: SwitchFieldProperties,
     val initialValue: Any? = properties.value.value,
+    hasValueExpression : Boolean,
     scope: CoroutineScope,
     updateValue: (Any?) -> Unit,
     evaluateExpressions: suspend () -> Result<List<FormExpressionEvaluationError>>
@@ -91,6 +92,7 @@ internal class SwitchFieldState(
     properties = properties,
     scope = scope,
     initialValue = initialValue,
+    hasValueExpression = hasValueExpression,
     updateValue = updateValue,
     evaluateExpressions = evaluateExpressions
 ) {
@@ -146,6 +148,7 @@ internal class SwitchFieldState(
                         noValueLabel = noValueString
                     ),
                     initialValue = list[0],
+                    hasValueExpression = formElement.hasValueExpression,
                     scope = scope,
                     updateValue = formElement::updateValue,
                     evaluateExpressions = form::evaluateExpressions
@@ -190,6 +193,7 @@ internal fun rememberSwitchFieldState(
                 FormInputNoValueOption.Hide,
             noValueLabel = noValueString
         ),
+        hasValueExpression = field.hasValueExpression,
         scope = scope,
         updateValue = field::updateValue,
         evaluateExpressions = form::evaluateExpressions

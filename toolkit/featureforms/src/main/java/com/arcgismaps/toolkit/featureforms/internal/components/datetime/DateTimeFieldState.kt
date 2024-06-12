@@ -67,6 +67,7 @@ internal class DateTimeFieldState(
     id : Int,
     properties: DateTimeFieldProperties,
     initialValue: Instant? = properties.value.value,
+    hasValueExpression : Boolean,
     scope: CoroutineScope,
     updateValue: (Any?) -> Unit,
     evaluateExpressions: suspend () -> Result<List<FormExpressionEvaluationError>>
@@ -74,6 +75,7 @@ internal class DateTimeFieldState(
     id = id,
     properties = properties,
     initialValue = initialValue,
+    hasValueExpression = hasValueExpression,
     scope = scope,
     updateValue = updateValue,
     evaluateExpressions = evaluateExpressions
@@ -113,6 +115,7 @@ internal class DateTimeFieldState(
                         shouldShowTime = input.includeTime
                     ),
                     initialValue = list[0] as Instant?,
+                    hasValueExpression = field.hasValueExpression,
                     scope = scope,
                     updateValue = field::updateValue,
                     evaluateExpressions = form::evaluateExpressions
@@ -155,6 +158,7 @@ internal fun rememberDateTimeFieldState(
             maxEpochMillis = maxEpochMillis,
             shouldShowTime = shouldShowTime
         ),
+        hasValueExpression = field.hasValueExpression,
         scope = scope,
         updateValue = field::updateValue,
         evaluateExpressions = form::evaluateExpressions

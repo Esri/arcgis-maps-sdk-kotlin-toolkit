@@ -69,6 +69,7 @@ internal abstract class BaseFieldState<T>(
     id: Int,
     properties: FieldProperties<T>,
     initialValue: T = properties.value.value,
+    val hasValueExpression : Boolean,
     private val scope: CoroutineScope,
     private val updateValue: (Any?) -> Unit,
     private val evaluateExpressions: suspend () -> Result<List<FormExpressionEvaluationError>>,

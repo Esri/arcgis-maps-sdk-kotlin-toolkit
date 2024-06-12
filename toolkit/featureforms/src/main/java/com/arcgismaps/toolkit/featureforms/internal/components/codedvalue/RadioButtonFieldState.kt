@@ -33,6 +33,7 @@ internal class RadioButtonFieldState(
     id : Int,
     properties: RadioButtonFieldProperties,
     initialValue: Any? = properties.value.value,
+    hasValueExpression : Boolean,
     scope: CoroutineScope,
     updateValue: (Any?) -> Unit,
     evaluateExpressions: suspend () -> Result<List<FormExpressionEvaluationError>>
@@ -40,6 +41,7 @@ internal class RadioButtonFieldState(
     id,
     properties = properties,
     initialValue = initialValue,
+    hasValueExpression = hasValueExpression,
     scope = scope,
     updateValue = updateValue,
     evaluateExpressions = evaluateExpressions
@@ -91,6 +93,7 @@ internal class RadioButtonFieldState(
                         noValueLabel = input.noValueLabel
                     ),
                     initialValue = list[0],
+                    hasValueExpression = formElement.hasValueExpression,
                     scope = scope,
                     updateValue = formElement::updateValue,
                     evaluateExpressions = form::evaluateExpressions
@@ -126,6 +129,7 @@ internal fun rememberRadioButtonFieldState(
             showNoValueOption = input.noValueOption,
             noValueLabel = input.noValueLabel
         ),
+        hasValueExpression = field.hasValueExpression,
         scope = scope,
         updateValue = field::updateValue,
         evaluateExpressions = form::evaluateExpressions

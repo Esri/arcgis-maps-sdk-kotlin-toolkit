@@ -52,7 +52,8 @@ internal fun SwitchField(state: SwitchFieldState, modifier: Modifier = Modifier)
         isError = false,
         isRequired = false,
         singleLine = true,
-        interactionSource = interactionSource
+        interactionSource = interactionSource,
+        hasValueExpression = state.hasValueExpression
     ) {
         Switch(
             checked = checkedState,

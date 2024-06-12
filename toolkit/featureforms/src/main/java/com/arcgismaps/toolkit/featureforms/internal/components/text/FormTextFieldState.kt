@@ -72,6 +72,7 @@ internal class FormTextFieldState(
     id : Int,
     properties: TextFieldProperties,
     initialValue: String = properties.value.value,
+    hasValueExpression : Boolean,
     scope: CoroutineScope,
     updateValue: (Any?) -> Unit,
     evaluateExpressions: suspend () -> Result<List<FormExpressionEvaluationError>>
@@ -79,6 +80,7 @@ internal class FormTextFieldState(
     id = id,
     properties = properties,
     initialValue = initialValue,
+    hasValueExpression = hasValueExpression,
     scope = scope,
     updateValue = updateValue,
     evaluateExpressions = evaluateExpressions
@@ -152,6 +154,7 @@ internal class FormTextFieldState(
                         maxLength = maxLength.toInt()
                     ),
                     initialValue = list[0] as String,
+                    hasValueExpression = formElement.hasValueExpression,
                     scope = scope,
                     updateValue = formElement::updateValue,
                     evaluateExpressions = form::evaluateExpressions
@@ -192,6 +195,7 @@ internal fun rememberFormTextFieldState(
             minLength = minLength,
             maxLength = maxLength
         ),
+        hasValueExpression = field.hasValueExpression,
         scope = scope,
         updateValue = field::updateValue,
         evaluateExpressions = form::evaluateExpressions,

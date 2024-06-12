@@ -30,6 +30,7 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Clear
+import androidx.compose.material.icons.rounded.Code
 import androidx.compose.material.icons.rounded.TextFields
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -43,6 +44,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -106,6 +108,7 @@ internal fun BaseTextField(
     singleLine: Boolean,
     modifier: Modifier = Modifier,
     readOnly: Boolean = !isEditable,
+    hasValueExpression: Boolean,
     showCharacterCount: Boolean = false,
     keyboardType: KeyboardType = KeyboardType.Ascii,
     trailingIcon: ImageVector? = null,
@@ -213,7 +216,8 @@ internal fun BaseTextField(
             ReadOnlyTextField(
                 label = label,
                 text = text,
-                supportingText = supportingText
+                supportingText = supportingText,
+                hasValueExpression = hasValueExpression
             )
         }
     }
@@ -256,31 +260,46 @@ private fun ReadOnlyTextField(
     text: String,
     modifier: Modifier = Modifier,
     supportingText: String,
+    hasValueExpression: Boolean
 ) {
     val colors = LocalColorScheme.current.readOnlyFieldColors
     val typography = LocalTypography.current.readOnlyFieldTypography
-    Column(modifier = modifier.fillMaxWidth()) {
-        Text(
-            text = label,
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 1,
-            color = colors.labelColor,
-            style = typography.labelStyle
-        )
-        SelectionContainer(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
-        ) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = modifier
+            .fillMaxWidth()
+            .weight(1f)) {
             Text(
-                text = text.ifEmpty { "--" },
-                color = colors.textColor,
-                style = typography.textStyle
+                text = label,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
+                color = colors.labelColor,
+                style = typography.labelStyle
             )
+            SelectionContainer(
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
+            ) {
+                Text(
+                    text = text.ifEmpty { "--" },
+                    color = colors.textColor,
+                    style = typography.textStyle
+                )
+            }
+            if (supportingText.isNotEmpty()) {
+                Text(
+                    text = supportingText,
+                    color = colors.supportingTextColor,
+                    style = typography.supportingTextStyle
+                )
+            }
         }
-        if (supportingText.isNotEmpty()) {
-            Text(
-                text = supportingText,
-                color = colors.supportingTextColor,
-                style = typography.supportingTextStyle
+        if (hasValueExpression) {
+            Icon(
+                imageVector = Icons.Rounded.Code,
+                contentDescription = "calculated field icon",
+                modifier = Modifier.padding(horizontal = 8.dp)
             )
         }
     }
@@ -358,6 +377,7 @@ private fun ReadOnlyTextFieldPreview() {
             isRequired = true,
             singleLine = false,
             trailingIcon = Icons.Rounded.TextFields,
+            hasValueExpression = true
         )
     }
 }
@@ -377,6 +397,7 @@ private fun BaseTextFieldPreview() {
             isRequired = true,
             singleLine = false,
             trailingIcon = Icons.Rounded.TextFields,
+            hasValueExpression = false
         )
     }
 }

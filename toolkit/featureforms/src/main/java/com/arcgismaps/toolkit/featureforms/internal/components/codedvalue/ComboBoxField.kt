@@ -134,7 +134,8 @@ internal fun ComboBoxField(
             {
                 Icon(imageVector = Icons.AutoMirrored.Outlined.List, contentDescription = "field icon")
             }
-        } else null
+        } else null,
+        hasValueExpression = state.hasValueExpression
     )
 
     LaunchedEffect(interactionSource) {
@@ -365,6 +366,7 @@ private fun ComboBoxPreview() {
             showNoValueOption = FormInputNoValueOption.Show,
             noValueLabel = "No value"
         ),
+        hasValueExpression = false,
         scope = scope,
         id = 1,
         updateValue = {},

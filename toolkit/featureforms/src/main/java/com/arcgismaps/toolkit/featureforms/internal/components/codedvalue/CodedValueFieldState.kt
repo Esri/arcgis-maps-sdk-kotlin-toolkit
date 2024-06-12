@@ -61,6 +61,7 @@ internal abstract class CodedValueFieldState(
     id : Int,
     properties: CodedValueFieldProperties,
     initialValue: Any? = properties.value.value,
+    hasValueExpression : Boolean,
     scope: CoroutineScope,
     updateValue: (Any?) -> Unit,
     evaluateExpressions: suspend () -> Result<List<FormExpressionEvaluationError>>
@@ -69,6 +70,7 @@ internal abstract class CodedValueFieldState(
     properties = properties,
     scope = scope,
     initialValue = initialValue,
+    hasValueExpression = hasValueExpression,
     updateValue = updateValue,
     evaluateExpressions = evaluateExpressions
 ) {
