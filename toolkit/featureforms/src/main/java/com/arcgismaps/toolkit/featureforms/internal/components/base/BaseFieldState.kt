@@ -59,6 +59,7 @@ internal data class Value<T>(
  * @param properties the [FieldProperties] associated with this state.
  * @param initialValue optional initial value to set for this field. It is set to the value of
  * [FieldProperties.value] by default.
+ * @property hasValueExpression a flag to indicate if the field has a value expression.
  * @param scope a [CoroutineScope] to start [StateFlow] collectors on.
  * @param updateValue a function that is invoked when the user edits result in a change of value. This
  * is called in [BaseFieldState.onValueChanged].

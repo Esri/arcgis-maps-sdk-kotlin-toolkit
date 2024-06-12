@@ -87,6 +87,7 @@ import com.arcgismaps.toolkit.featureforms.theme.LocalTypography
  * @param modifier a [Modifier] for this text field.
  * @param readOnly controls the editable state of the text field. When true, the text field cannot
  * be modified. However, a user can focus it and copy text from it.
+ * @param hasValueExpression if true, a special icon will be displayed at the end of the text field
  * @param showCharacterCount if true shows the current character count of the [text].
  * @param keyboardType the keyboard type to use depending on the FormFieldElement input type.
  * @param trailingIcon the icon to be displayed at the end of the text field container.
@@ -268,7 +269,7 @@ private fun ReadOnlyTextField(
     val typography = LocalTypography.current.readOnlyFieldTypography
     Row(
         modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.Top
     ) {
         Column(
             modifier = modifier
