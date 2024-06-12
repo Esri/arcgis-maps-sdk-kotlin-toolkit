@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalTextStyle
@@ -76,7 +77,7 @@ fun TapLocationScreen(viewModel: MapViewModel) {
 
     BottomSheetScaffold(
         sheetContent = {
-            CalloutOptionsBox(
+            CalloutOptions(
                 calloutVisibility = calloutVisibility,
                 isCalloutRotationEnabled = rotateOffsetWithGeoView,
                 offset = offset,
@@ -89,7 +90,8 @@ fun TapLocationScreen(viewModel: MapViewModel) {
                 },
                 onYAxisOffsetChanged = {
                     viewModel.setOffset(Offset(offset.x, it))
-                }
+                },
+                onClearTapLocation = viewModel::clearMapPoint
             )
         },
         scaffoldState = bottomSheetScaffoldState,
@@ -99,7 +101,6 @@ fun TapLocationScreen(viewModel: MapViewModel) {
             arcGISMap = viewModel.arcGISMap,
             graphicsOverlays = remember { listOf(viewModel.tapLocationGraphicsOverlay) },
             onSingleTapConfirmed = viewModel::setMapPoint,
-            onLongPress = { viewModel.clearMapPoint() },
             content = if (mapPoint != null && calloutVisibility) {
                 {
                     Callout(
@@ -119,14 +120,15 @@ fun TapLocationScreen(viewModel: MapViewModel) {
 }
 
 @Composable
-fun CalloutOptionsBox(
+fun CalloutOptions(
     calloutVisibility: Boolean,
     isCalloutRotationEnabled: Boolean,
     offset: Offset,
     onVisibilityToggled: () -> Unit,
     onCalloutOffsetRotationToggled: () -> Unit,
     onXAxisOffsetChanged: (Float) -> Unit,
-    onYAxisOffsetChanged: (Float) -> Unit
+    onYAxisOffsetChanged: (Float) -> Unit,
+    onClearTapLocation: () -> Unit
 ) {
     Column(Modifier.padding(8.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -172,6 +174,10 @@ fun CalloutOptionsBox(
                 label = { Text("Y-Axis offset") },
                 textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.End)
             )
+        }
+
+        Button(onClick =  onClearTapLocation) {
+            Text(text = "Clear Tap Location")
         }
     }
 }
