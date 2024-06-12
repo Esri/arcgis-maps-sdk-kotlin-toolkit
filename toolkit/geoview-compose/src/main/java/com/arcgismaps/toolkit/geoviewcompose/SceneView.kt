@@ -115,6 +115,7 @@ import java.time.Instant
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable SceneView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable SceneView
  * @param onDrawStatusChanged lambda invoked when the draw status of the composable SceneView is changed
+ * @param content the content of the composable SceneView
  * @sample com.arcgismaps.toolkit.geoviewcompose.samples.SceneViewSample
  * @see
  * - <a href="https://developers.arcgis.com/kotlin/scenes-3d/tutorials/display-a-scene/">Display a scene tutorial</a>
