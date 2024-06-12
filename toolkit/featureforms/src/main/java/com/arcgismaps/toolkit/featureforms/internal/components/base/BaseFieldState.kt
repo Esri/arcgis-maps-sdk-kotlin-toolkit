@@ -69,7 +69,7 @@ internal abstract class BaseFieldState<T>(
     id: Int,
     properties: FieldProperties<T>,
     initialValue: T = properties.value.value,
-    val hasValueExpression : Boolean,
+    val hasValueExpression: Boolean,
     private val scope: CoroutineScope,
     private val updateValue: (Any?) -> Unit,
     private val evaluateExpressions: suspend () -> Result<List<FormExpressionEvaluationError>>,
@@ -218,10 +218,12 @@ internal abstract class BaseFieldState<T>(
      * @return A single validation error
      */
     private fun filterErrors(errors: List<ValidationErrorState>): ValidationErrorState {
-        // if editable
-        return if (errors.isNotEmpty() && isEditable.value) {
-            // if it has been focused
-            if (wasFocused) {
+        // if editable or has a value expression
+        return if (errors.isNotEmpty() && (hasValueExpression || isEditable.value)) {
+            // if it has a value expression, show the first error
+            if (hasValueExpression) {
+                errors.first()
+            } else if (wasFocused) { // if it has been focused
                 // if not in focus
                 if (!isFocused.value) {
                     // show a required error if it is present

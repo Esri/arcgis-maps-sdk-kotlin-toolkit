@@ -87,7 +87,8 @@ internal object DefaultThemeTokens {
         readOnlyFieldColors = ReadOnlyFieldColors(
             labelColor = Color.Unspecified,
             textColor = Color.Unspecified,
-            supportingTextColor = Color.Unspecified
+            supportingTextColor = Color.Unspecified,
+            errorSupportingTextColor = ColorTokens.Error
         ),
         groupElementColors = GroupElementColors(
             labelColor = Color.Unspecified,

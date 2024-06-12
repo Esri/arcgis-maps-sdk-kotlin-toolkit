@@ -217,6 +217,7 @@ internal fun BaseTextField(
                 label = label,
                 text = text,
                 supportingText = supportingText,
+                isError = isError,
                 hasValueExpression = hasValueExpression
             )
         }
@@ -260,6 +261,7 @@ private fun ReadOnlyTextField(
     text: String,
     modifier: Modifier = Modifier,
     supportingText: String,
+    isError: Boolean,
     hasValueExpression: Boolean
 ) {
     val colors = LocalColorScheme.current.readOnlyFieldColors
@@ -268,9 +270,11 @@ private fun ReadOnlyTextField(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(modifier = modifier
-            .fillMaxWidth()
-            .weight(1f)) {
+        Column(
+            modifier = modifier
+                .fillMaxWidth()
+                .weight(1f)
+        ) {
             Text(
                 text = label,
                 overflow = TextOverflow.Ellipsis,
@@ -290,7 +294,11 @@ private fun ReadOnlyTextField(
             if (supportingText.isNotEmpty()) {
                 Text(
                     text = supportingText,
-                    color = colors.supportingTextColor,
+                    color = if (!isError) {
+                        colors.supportingTextColor
+                    } else {
+                        colors.errorSupportingTextColor
+                    },
                     style = typography.supportingTextStyle
                 )
             }

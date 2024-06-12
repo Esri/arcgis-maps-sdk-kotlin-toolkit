@@ -28,12 +28,12 @@ internal sealed class ValidationErrorState(
 ) {
     data object NoError : ValidationErrorState()
     data object Required : ValidationErrorState()
-    class MinMaxCharConstraint(min: Int, max: Int) : ValidationErrorState(min, max)
-    class ExactCharConstraint(length: Int) : ValidationErrorState(length)
+    class MinMaxCharConstraint(min: Int, max: Int, hasValueExpression : Boolean) : ValidationErrorState(min, max, hasValueExpression)
+    class ExactCharConstraint(length: Int, hasValueExpression: Boolean) : ValidationErrorState(length, hasValueExpression)
     class MaxCharConstraint(max: Int) : ValidationErrorState(max)
     class MinNumericConstraint(min: String) : ValidationErrorState(min)
     class MaxNumericConstraint(max: String) : ValidationErrorState(max)
-    class MinMaxNumericConstraint(min: String, max: String) : ValidationErrorState(min, max)
+    class MinMaxNumericConstraint(min: String, max: String, hasValueExpression: Boolean) : ValidationErrorState(min, max, hasValueExpression)
     class MinDatetimeConstraint(min: String) : ValidationErrorState(min)
     class MaxDatetimeConstraint(max: String) : ValidationErrorState(max)
     data object NotANumber : ValidationErrorState()
@@ -54,11 +54,21 @@ internal sealed class ValidationErrorState(
             }
 
             is MinMaxCharConstraint -> {
-                stringResource(id = R.string.enter_min_to_max_chars, *formatArgs)
+                val hasValueExpression = formatArgs.last() as Boolean
+                if (hasValueExpression) {
+                    stringResource(id = R.string.value_must_be_from_to_characters, *formatArgs)
+                } else {
+                    stringResource(id = R.string.enter_min_to_max_chars, *formatArgs)
+                }
             }
 
             is ExactCharConstraint -> {
-                stringResource(id = R.string.enter_n_chars, *formatArgs)
+                val hasValueExpression = formatArgs.last() as Boolean
+                if (hasValueExpression) {
+                    stringResource(R.string.value_must_be_n_characters, *formatArgs)
+                } else {
+                    stringResource(id = R.string.enter_n_chars, *formatArgs)
+                }
             }
 
             is MaxCharConstraint -> {
@@ -74,7 +84,12 @@ internal sealed class ValidationErrorState(
             }
 
             is MinMaxNumericConstraint -> {
-                stringResource(id = R.string.numeric_range_helper_text, *formatArgs)
+                val hasValueExpression = formatArgs.last() as Boolean
+                if (hasValueExpression) {
+                    stringResource(R.string.value_must_be_from_to, *formatArgs)
+                } else {
+                    stringResource(id = R.string.numeric_range_helper_text, *formatArgs)
+                }
             }
 
             is MinDatetimeConstraint -> {

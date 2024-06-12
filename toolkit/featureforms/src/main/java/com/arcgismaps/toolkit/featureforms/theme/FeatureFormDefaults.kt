@@ -167,18 +167,21 @@ public object FeatureFormDefaults {
      * @param labelColor the color used for the label of this field
      * @param textColor the color used for the text of this field
      * @param supportingTextColor the color used for the supporting text of this field
+     * @param errorSupportingTextColor the color used for the supporting text of this field when in error state
      * @since 200.5.0
      */
     @Composable
     public fun readOnlyFieldColors(
         labelColor: Color = Color.Unspecified,
         textColor: Color = Color.Unspecified,
-        supportingTextColor: Color = Color.Unspecified
+        supportingTextColor: Color = Color.Unspecified,
+        errorSupportingTextColor : Color = MaterialTheme.colorScheme.error
     ): ReadOnlyFieldColors {
         return ReadOnlyFieldColors(
             labelColor = labelColor,
             textColor = textColor,
-            supportingTextColor = supportingTextColor
+            supportingTextColor = supportingTextColor,
+            errorSupportingTextColor = errorSupportingTextColor
         )
     }
 
