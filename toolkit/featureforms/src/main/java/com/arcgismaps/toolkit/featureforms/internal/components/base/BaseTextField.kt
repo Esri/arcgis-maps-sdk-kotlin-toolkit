@@ -269,7 +269,10 @@ private fun ReadOnlyTextField(
     val colors = LocalColorScheme.current.readOnlyFieldColors
     val typography = LocalTypography.current.readOnlyFieldTypography
     Row(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            // merge descendants semantics to make them part of the parent node
+            .semantics(mergeDescendants = true) {},
         verticalAlignment = Alignment.Top
     ) {
         Column(
@@ -308,7 +311,7 @@ private fun ReadOnlyTextField(
         if (hasValueExpression) {
             Icon(
                 imageVector = Icons.Rounded.Code,
-                contentDescription = "calculated field icon",
+                contentDescription = "calculated field",
                 modifier = Modifier.padding(horizontal = 8.dp)
             )
         }

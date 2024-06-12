@@ -19,6 +19,7 @@ package com.arcgismaps.toolkit.featureforms.internal.components.base
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.arcgismaps.toolkit.featureforms.R
 
@@ -64,10 +65,11 @@ internal sealed class ValidationErrorState(
 
             is ExactCharConstraint -> {
                 val hasValueExpression = formatArgs.last() as Boolean
+                val length = formatArgs.first() as Int
                 if (hasValueExpression) {
-                    stringResource(R.string.value_must_be_n_characters, *formatArgs)
+                    pluralStringResource(id = R.plurals.value_must_be_n_characters, length, length)
                 } else {
-                    stringResource(id = R.string.enter_n_chars, *formatArgs)
+                    pluralStringResource(id = R.plurals.enter_n_chars, length, length)
                 }
             }
 
