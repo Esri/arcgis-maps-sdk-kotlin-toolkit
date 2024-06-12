@@ -66,29 +66,29 @@ public sealed class GeoViewScope(private var _geoView: GeoView?, className: Stri
     }
 
     /**
-     * Creates a Callout at the specified geographical location on the MapView.
+     * Creates a Callout at the specified geographical location on the GeoView.
      *
      * @since 200.5.0
      */
     @Composable
     internal fun Callout() {
 
-        val isMapViewReady = remember { mutableStateOf(false) }
-        // We don't want to start drawing the Callout until the MapView is ready. We only collect
-        // the drawStatus till the first time MapView is done drawing. the transformWhile operator
-        // will stop collecting when isMapViewReady.value becomes false.
+        val isGeoViewReady = remember { mutableStateOf(false) }
+        // We don't want to start drawing the Callout until the GeoView is ready. We only collect
+        // the drawStatus till the first time GeoView is done drawing. The transformWhile operator
+        // will stop collecting when isGeoViewReady.value becomes false.
         LaunchedEffect(calloutParams.location) {
             geoView.drawStatus.transformWhile { drawStatus ->
                 emit(drawStatus)
-                !isMapViewReady.value
+                !isGeoViewReady.value
             }.collect {
                 if (it == DrawStatus.Completed) {
-                    isMapViewReady.value = true
+                    isGeoViewReady.value = true
                 }
             }
         }
 
-        if (!isMapViewReady.value) {
+        if (!isGeoViewReady.value) {
             return
         }
 
