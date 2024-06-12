@@ -17,6 +17,8 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -28,6 +30,7 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -156,47 +159,56 @@ public fun SceneView(
     onLongPress: ((LongPressEvent) -> Unit)? = null,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
-    onDrawStatusChanged: ((DrawStatus) -> Unit)? = null
+    onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
+    content: (@Composable SceneViewScope.() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val sceneView = remember { SceneView(context) }
 
-    AndroidView(
-        modifier = modifier.semantics { contentDescription = "SceneView" },
-        factory = { sceneView },
-        update = {
-            it.scene = arcGISScene
-            it.interactionOptions = sceneViewInteractionOptions
-            it.labeling = viewLabelProperties
-            it.selectionProperties = selectionProperties
-            it.setTimeExtent(timeExtent)
-            it.cameraController = cameraController
-            it.atmosphereEffect = atmosphereEffect
-            it.spaceEffect = spaceEffect
-            it.sunTime = sunTime
-            it.sunLighting = sunLighting
-            it.ambientLightColor = com.arcgismaps.Color(ambientLightColor.toArgb())
-            it.isAttributionBarVisible = isAttributionBarVisible
-            if (it.graphicsOverlays != graphicsOverlays) {
-                it.graphicsOverlays.apply {
-                    clear()
-                    addAll(graphicsOverlays)
+    Box(modifier = modifier.clipToBounds()) {
+        AndroidView(
+            modifier = Modifier.fillMaxSize().semantics { contentDescription = "SceneView" },
+            factory = { sceneView },
+            update = {
+                it.scene = arcGISScene
+                it.interactionOptions = sceneViewInteractionOptions
+                it.labeling = viewLabelProperties
+                it.selectionProperties = selectionProperties
+                it.setTimeExtent(timeExtent)
+                it.cameraController = cameraController
+                it.atmosphereEffect = atmosphereEffect
+                it.spaceEffect = spaceEffect
+                it.sunTime = sunTime
+                it.sunLighting = sunLighting
+                it.ambientLightColor = com.arcgismaps.Color(ambientLightColor.toArgb())
+                it.isAttributionBarVisible = isAttributionBarVisible
+                if (it.graphicsOverlays != graphicsOverlays) {
+                    it.graphicsOverlays.apply {
+                        clear()
+                        addAll(graphicsOverlays)
+                    }
                 }
-            }
-            if (it.analysisOverlays != analysisOverlays) {
-                it.analysisOverlays.apply {
-                    clear()
-                    addAll(analysisOverlays)
+                if (it.analysisOverlays != analysisOverlays) {
+                    it.analysisOverlays.apply {
+                        clear()
+                        addAll(analysisOverlays)
+                    }
                 }
-            }
-            if (it.imageOverlays != imageOverlays) {
-                it.imageOverlays.apply {
-                    clear()
-                    addAll(imageOverlays)
+                if (it.imageOverlays != imageOverlays) {
+                    it.imageOverlays.apply {
+                        clear()
+                        addAll(imageOverlays)
+                    }
                 }
-            }
-        })
+            })
+
+        val sceneViewScope = remember(sceneView) { SceneViewScope(sceneView) }
+        content?.let {
+            sceneViewScope.reset()
+            sceneViewScope.it()
+        }
+    }
 
     DisposableEffect(Unit) {
         lifecycleOwner.lifecycle.addObserver(sceneView)
@@ -452,6 +464,12 @@ private fun ViewpointHandler(
     }
 }
 
+/**
+ * The receiver class of the [SceneView] content lambda.
+ *
+ * @since 200.5.0
+ */
+public class SceneViewScope(private var _sceneView: SceneView?) : GeoViewScope(_sceneView, "SceneView")
 
 /**
  * Contains default values for the SceneView.

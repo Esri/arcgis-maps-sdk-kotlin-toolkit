@@ -524,6 +524,13 @@ public inline fun rememberLocationDisplay(
 }
 
 /**
+ * The receiver class of the [MapView] content lambda.
+ *
+ * @since 200.5.0
+ */
+public class MapViewScope(_mapView: MapView?) : GeoViewScope(_mapView, "MapView")
+
+/**
  * Contains default values for the composable MapView.
  *
  * @see com.arcgismaps.toolkit.geoviewcompose.MapView

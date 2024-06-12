@@ -26,10 +26,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -43,52 +48,61 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.BasemapStyle
-import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.geoviewcompose.Callout
-import com.arcgismaps.toolkit.geoviewcompose.MapView
+import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import kotlin.math.roundToInt
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(viewModel: SceneViewModel) {
-    val mapPoint = viewModel.mapPoint.collectAsState().value
+    val tapLocation = viewModel.tapLocation.collectAsState().value
     val offset = viewModel.offset.collectAsState().value
 
-    var calloutVisibility by rememberSaveable { mutableStateOf(false) }
+    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState = rememberStandardBottomSheetState(
+            initialValue = SheetValue.Expanded,
+            skipHiddenState = true
+        )
+    )
+
+    var calloutVisibility by rememberSaveable { mutableStateOf(true) }
     var rotateOffsetWithGeoView by rememberSaveable { mutableStateOf(false) }
 
-    Column {
-        CalloutOptionsBox(
-            calloutVisibility = calloutVisibility,
-            isCalloutRotationEnabled = rotateOffsetWithGeoView,
-            offset = offset,
-            onVisibilityToggled = { calloutVisibility = !calloutVisibility },
-            onCalloutOffsetRotationToggled = { rotateOffsetWithGeoView = !rotateOffsetWithGeoView },
-            onXAxisOffsetChanged = {
-                viewModel.setOffset(Offset(it,offset.y))
-            },
-            onYAxisOffsetChanged = {
-                viewModel.setOffset(Offset(offset.x,it))
-            }
-        )
-
-        MapView(
+    BottomSheetScaffold(
+        sheetContent = {
+            CalloutOptions(
+                calloutVisibility = calloutVisibility,
+                isCalloutRotationEnabled = rotateOffsetWithGeoView,
+                offset = offset,
+                onVisibilityToggled = { calloutVisibility = !calloutVisibility },
+                onCalloutOffsetRotationToggled = { rotateOffsetWithGeoView = !rotateOffsetWithGeoView },
+                onXAxisOffsetChanged = {
+                    viewModel.setOffset(Offset(it, offset.y))
+                },
+                onYAxisOffsetChanged = {
+                    viewModel.setOffset(Offset(offset.x, it))
+                }
+            )
+        },
+        scaffoldState = bottomSheetScaffoldState,
+    ) {
+        SceneView(
             modifier = Modifier
                 .fillMaxSize(),
-            arcGISMap = viewModel.arcGISMap,
+            arcGISScene = viewModel.arcGISScene,
             graphicsOverlays = remember { listOf(viewModel.tapLocationGraphicsOverlay) },
-            onSingleTapConfirmed = viewModel::setMapPoint,
-            onLongPress = { viewModel.clearMapPoint() },
-            content = if (mapPoint != null && calloutVisibility) {
+            sceneViewProxy = viewModel.sceneViewProxy,
+            onSingleTapConfirmed = viewModel::setTapLocation,
+            onLongPress = { viewModel.clearTapLocation() },
+            content = if (tapLocation != null && calloutVisibility) {
                 {
                     Callout(
                         modifier = Modifier.size(175.dp, 75.dp),
-                        location = mapPoint,
+                        location = tapLocation,
                         rotateOffsetWithGeoView = rotateOffsetWithGeoView,
                         offset = offset
                     ) {
-                        Text("Tapped location: ${mapPoint.x.roundToInt()},${mapPoint.y.roundToInt()}")
+                        Text("Tapped location: ${tapLocation.x.roundToInt()}, ${tapLocation.y.roundToInt()}")
                     }
                 }
             } else {
@@ -99,7 +113,7 @@ fun MainScreen(viewModel: SceneViewModel) {
 }
 
 @Composable
-fun CalloutOptionsBox(
+fun CalloutOptions(
     calloutVisibility: Boolean,
     isCalloutRotationEnabled: Boolean,
     offset: Offset,
