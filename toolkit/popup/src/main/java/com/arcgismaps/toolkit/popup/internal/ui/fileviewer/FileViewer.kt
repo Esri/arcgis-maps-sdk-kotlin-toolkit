@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.arcgismaps.toolkit.popup.internal.fileviewer
+package com.arcgismaps.toolkit.popup.internal.ui.fileviewer
 
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -109,7 +109,7 @@ internal fun FileViewer(fileState: ViewableFile, onDismissRequest: () -> Unit) {
             ) {
                 when (fileState.type) {
                     is ViewableFileType.Image -> ImageViewer(fileState.path)
-                    is ViewableFileType.Video -> Text("Video")
+                    is ViewableFileType.Video -> VideoViewer(fileState.path, Modifier.fillMaxSize())
                     is ViewableFileType.Other -> Text("Other")
                 }
             }

@@ -65,8 +65,8 @@ import com.arcgismaps.toolkit.popup.internal.element.state.mutablePopupElementSt
 import com.arcgismaps.toolkit.popup.internal.element.textelement.TextElementState
 import com.arcgismaps.toolkit.popup.internal.element.textelement.TextPopupElement
 import com.arcgismaps.toolkit.popup.internal.element.textelement.rememberTextElementState
-import com.arcgismaps.toolkit.popup.internal.fileviewer.FileViewer
-import com.arcgismaps.toolkit.popup.internal.fileviewer.ViewableFile
+import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.FileViewer
+import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ViewableFile
 
 @Immutable
 private data class PopupState(@Stable val popup: Popup)
