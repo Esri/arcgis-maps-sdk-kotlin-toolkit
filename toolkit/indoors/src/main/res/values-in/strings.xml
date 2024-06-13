@@ -1,8 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
     <string name="floor_filter_view_filter_hint_sites">Filter situs...</string>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
     <string name="floor_filter_view_filter_hint_facilities">Filter fasilitas...</string>
+    <!-- This text is a label on a text field that can fit 24 chars -->
     <string name="floor_filter_select_site">Pilih situs</string>
+    <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Pilih fasilitas</string>
     <string name="floor_filter_no_results">Tidak ada hasil yang ditemukan.</string>
-    <string name="floor_filter_site_selector_top_bar">Situs\u0020-\u0020</string>
+    <string name="not_available">ng_Not available______________ny</string>
+    <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
+    <string name="floor_filter_site_selector_top_bar">ng_Site - %1$s____________ny</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_facility_button">ng_Sites and facilities button____________________________ny</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="floor_level_select_button">ng_Floor level select button__________________________ny</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_item">ng_Site item___________________ny</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="facility_item">ng_Facility item______________ny</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="clear_search">ng_Clear search_____________ny</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="close">ng_Close___________ny</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="go_back_to_site_selector">ng_Go back to site selector_________________________ny</string>
 </resources>

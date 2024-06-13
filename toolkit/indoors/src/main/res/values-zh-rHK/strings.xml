@@ -1,8 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
     <string name="floor_filter_view_filter_hint_sites">篩選網站...</string>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
     <string name="floor_filter_view_filter_hint_facilities">篩選機構...</string>
+    <!-- This text is a label on a text field that can fit 24 chars -->
     <string name="floor_filter_select_site">選擇網站</string>
+    <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">選擇機構</string>
     <string name="floor_filter_no_results">找不到任何結果。</string>
-    <string name="floor_filter_site_selector_top_bar">網站\u0020-\u0020</string>
+    <string name="not_available">試_Not available______________驗</string>
+    <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
+    <string name="floor_filter_site_selector_top_bar">試_Site - %1$s____________驗</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_facility_button">試_Sites and facilities button____________________________驗</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="floor_level_select_button">試_Floor level select button__________________________驗</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_item">試_Site item___________________驗</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="facility_item">試_Facility item______________驗</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="clear_search">試_Clear search_____________驗</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="close">試_Close___________驗</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="go_back_to_site_selector">試_Go back to site selector_________________________驗</string>
 </resources>
