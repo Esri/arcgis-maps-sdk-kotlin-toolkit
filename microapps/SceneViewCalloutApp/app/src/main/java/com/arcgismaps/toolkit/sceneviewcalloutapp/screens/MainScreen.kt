@@ -21,18 +21,21 @@ package com.arcgismaps.toolkit.sceneviewcalloutapp.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
@@ -42,6 +45,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.input.ImeAction
@@ -74,14 +78,9 @@ fun MainScreen(viewModel: SceneViewModel) {
                 calloutVisibility = calloutVisibility,
                 isCalloutRotationEnabled = rotateOffsetWithGeoView,
                 offset = offset,
+                viewModel = viewModel,
                 onVisibilityToggled = { calloutVisibility = !calloutVisibility },
                 onCalloutOffsetRotationToggled = { rotateOffsetWithGeoView = !rotateOffsetWithGeoView },
-                onXAxisOffsetChanged = {
-                    viewModel.setOffset(Offset(it, offset.y))
-                },
-                onYAxisOffsetChanged = {
-                    viewModel.setOffset(Offset(offset.x, it))
-                }
             )
         },
         scaffoldState = bottomSheetScaffoldState,
@@ -97,12 +96,12 @@ fun MainScreen(viewModel: SceneViewModel) {
             content = if (tapLocation != null && calloutVisibility) {
                 {
                     Callout(
-                        modifier = Modifier.size(175.dp, 75.dp),
+                        modifier = Modifier.wrapContentSize(),
                         location = tapLocation,
                         rotateOffsetWithGeoView = rotateOffsetWithGeoView,
                         offset = offset
                     ) {
-                        Text("Tapped location: ${tapLocation.x.roundToInt()}, ${tapLocation.y.roundToInt()}")
+                        Text("Tapped location:\n${tapLocation.x.roundToInt()},${tapLocation.y.roundToInt()}")
                     }
                 }
             } else {
@@ -117,12 +116,11 @@ fun CalloutOptions(
     calloutVisibility: Boolean,
     isCalloutRotationEnabled: Boolean,
     offset: Offset,
+    viewModel: SceneViewModel,
     onVisibilityToggled: () -> Unit,
     onCalloutOffsetRotationToggled: () -> Unit,
-    onXAxisOffsetChanged: (Float) -> Unit,
-    onYAxisOffsetChanged: (Float) -> Unit
 ) {
-    Column(Modifier.padding(8.dp)) {
+    Column(Modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(text = "Show Callout")
             Checkbox(
@@ -137,29 +135,37 @@ fun CalloutOptions(
                 onCheckedChange = { onCalloutOffsetRotationToggled() }
             )
         }
-
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(text = "Offset")
-            Column {
-                TextField(
-                    value = offset.x.toString(),
-                    onValueChange = { value ->
-                        onXAxisOffsetChanged(value.toFloat())
-                    },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
-                    label = { Text("X-Axis offset") },
-                    textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.End)
-                )
-                TextField(
-                    value = offset.y.toString(),
-                    onValueChange = { value ->
-                        onYAxisOffsetChanged(value.toFloat())
-                    },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
-                    label = { Text("Y-Axis offset") },
-                    textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.End)
-                )
-            }
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
+            OutlinedTextField(
+                modifier = Modifier.weight(1f),
+                value = offset.x.toString(),
+                onValueChange = { value ->
+                    viewModel.setOffset(Offset(value.toFloat(), offset.y))
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal,
+                    imeAction = ImeAction.Done
+                ),
+                label = { Text("X-Axis offset") },
+                textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.End)
+            )
+            Spacer(modifier = Modifier.size(10.dp))
+            OutlinedTextField(
+                modifier = Modifier.weight(1f),
+                value = offset.y.toString(),
+                onValueChange = { value ->
+                    viewModel.setOffset(Offset(offset.x, value.toFloat()))
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal,
+                    imeAction = ImeAction.Done
+                ),
+                label = { Text("Y-Axis offset") },
+                textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.End)
+            )
+        }
+        Button(onClick = viewModel::clearTapLocation) {
+            Text(text = "Clear Tap Location")
         }
     }
 }
