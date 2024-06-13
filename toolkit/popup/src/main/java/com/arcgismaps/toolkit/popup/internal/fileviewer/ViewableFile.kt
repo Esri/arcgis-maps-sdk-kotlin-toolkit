@@ -26,9 +26,7 @@ import android.os.Parcelable
 import android.provider.MediaStore
 import androidx.core.content.FileProvider
 import com.arcgismaps.mapping.popup.PopupAttachmentType
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parceler
 import kotlinx.parcelize.Parcelize
@@ -127,24 +125,22 @@ internal suspend fun ViewableFile.saveToDevice(context: Context): Result<Unit> =
 /**
  * Shares the file using Android's share sheet.
  */
-internal fun ViewableFile.share(scope: CoroutineScope, context: Context) {
-    scope.launch(Dispatchers.IO) {
-        val file = File(path)
+internal suspend fun ViewableFile.share(context: Context) = withContext(Dispatchers.IO) {
+    val file = File(path)
 
-        val uri = FileProvider.getUriForFile(
-            context.applicationContext,
-            "${context.applicationContext.applicationInfo.processName}.fileprovider",
-            file
-        )
-        val intent = Intent().apply {
-            action = Intent.ACTION_SEND
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            setDataAndType(uri, contentType)
-            putExtra(Intent.EXTRA_STREAM, uri)
-        }
-
-        context.startActivity(
-            Intent.createChooser(intent, "Share")
-        )
+    val uri = FileProvider.getUriForFile(
+        context.applicationContext,
+        "${context.applicationContext.applicationInfo.packageName}.fileprovider",
+        file
+    )
+    val intent = Intent().apply {
+        action = Intent.ACTION_SEND
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        setDataAndType(uri, contentType)
+        putExtra(Intent.EXTRA_STREAM, uri)
     }
+
+    context.startActivity(
+        Intent.createChooser(intent, "Share")
+    )
 }
