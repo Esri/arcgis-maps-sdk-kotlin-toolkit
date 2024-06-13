@@ -39,7 +39,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -51,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -61,7 +61,7 @@ import kotlinx.coroutines.withContext
  * @since 200.5.0
  */
 @Composable
-internal fun FileViewer(fileState: ViewableFile, onDismissRequest: () -> Unit) {
+internal fun FileViewer(scope: CoroutineScope, fileState: ViewableFile, onDismissRequest: () -> Unit) {
     Dialog(
         onDismissRequest = onDismissRequest,
         properties = DialogProperties(usePlatformDefaultWidth = false)
@@ -76,8 +76,7 @@ internal fun FileViewer(fileState: ViewableFile, onDismissRequest: () -> Unit) {
                         .background(MaterialTheme.colorScheme.surface),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    val expanded = remember { mutableStateOf(false) }
-                    IconButton(modifier = Modifier/*.padding(16.dp)*/, onClick = { onDismissRequest() }) {
+                    IconButton(onClick = { onDismissRequest() }) {
                         Icon(
                             Icons.Rounded.Close,
                             contentDescription = "Back",
@@ -95,7 +94,7 @@ internal fun FileViewer(fileState: ViewableFile, onDismissRequest: () -> Unit) {
                             .fillMaxHeight()
                     )
                     ViewerActions(
-                        expanded = expanded,
+                        coroutineScope = scope,
                         viewableFile = fileState,
                     )
                 }
@@ -120,12 +119,12 @@ internal fun FileViewer(fileState: ViewableFile, onDismissRequest: () -> Unit) {
 
 @Composable
 private fun ViewerActions(
-    expanded: MutableState<Boolean>,
+    coroutineScope: CoroutineScope,
     modifier: Modifier = Modifier,
     viewableFile: ViewableFile,
 ) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
+    val expanded = remember { mutableStateOf(false) }
     Box(modifier = modifier) {
         IconButton(onClick = { expanded.value = true }) {
             Icon(Icons.Rounded.MoreVert, contentDescription = "More", tint = MaterialTheme.colorScheme.onSurface)
@@ -136,7 +135,7 @@ private fun ViewerActions(
                 text = { Text("Share", color = MaterialTheme.colorScheme.onSurface) },
                 onClick = {
                     expanded.value = false
-                    viewableFile.share(scope, context)
+                    coroutineScope.launch(Dispatchers.IO) { viewableFile.share(context) }
                 },
                 leadingIcon = {
                     Icon(Icons.Rounded.Share, contentDescription = "Share", tint = MaterialTheme.colorScheme.onSurface)
@@ -149,7 +148,7 @@ private fun ViewerActions(
                 },
                 onClick = {
                     expanded.value = false
-                    scope.launch(Dispatchers.IO) {
+                    coroutineScope.launch(Dispatchers.IO) {
                         val saveResult = viewableFile.saveToDevice(context)
                         withContext(Dispatchers.Main) {
                             saveResult.onSuccess {
@@ -182,6 +181,7 @@ private fun ImageViewer(path: String) {
 @Composable
 private fun FileViewerPreview() {
     FileViewer(
+        scope = rememberCoroutineScope(),
         fileState = ViewableFile(
             path = "path",
             name = "ArcGIS Pro",
