@@ -24,16 +24,18 @@ import android.os.Build
 import android.os.Parcel
 import android.os.Parcelable
 import android.provider.MediaStore
-import android.util.Log
 import androidx.core.content.FileProvider
 import com.arcgismaps.mapping.popup.PopupAttachmentType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parceler
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.TypeParceler
 import java.io.File
+import java.io.FileNotFoundException
+import java.io.IOException
 
 /**
  * A file that can be viewed in the [FileViewer].
@@ -83,9 +85,13 @@ internal fun PopupAttachmentType.toViewableFileType(): ViewableFileType = when (
 /**
  * Saves the file to the device.
  */
-internal fun ViewableFile.saveToDevice(context: Context): Boolean {
-    try {
-        val values = ContentValues().apply {
+internal suspend fun ViewableFile.saveToDevice(context: Context): Result<Unit> = withContext(Dispatchers.IO) {
+    runCatching {
+        val sourceFile = File(path).takeIf { it.exists() }
+            ?: throw FileNotFoundException("File not found: $path")
+
+        // define the file values
+        val fileValues = ContentValues().apply {
             put(MediaStore.Images.Media.DISPLAY_NAME, name)
             put(MediaStore.Images.Media.MIME_TYPE, contentType)
         }
@@ -95,31 +101,27 @@ internal fun ViewableFile.saveToDevice(context: Context): Boolean {
             MediaStore.VOLUME_EXTERNAL_PRIMARY
         else
             MediaStore.VOLUME_EXTERNAL
-        val collection = when (type) {
+
+        val contentCollection = when (type) {
             ViewableFileType.Video -> MediaStore.Video.Media.getContentUri(uri)
             ViewableFileType.Image -> MediaStore.Images.Media.getContentUri(uri)
-            else -> throw (UnsupportedOperationException("Cannot save this file type"))
+            else -> throw UnsupportedOperationException("Cannot save this file type")
         }
-        val itemUri = context.contentResolver.insert(collection, values) ?: return false
-        val sourceFile = File(path)
-        if (!sourceFile.exists()) {
-            return false
-        }
+        val destinationUri = context.contentResolver.insert(contentCollection, fileValues)
+            ?: throw IOException("Failed to save file")
+
+        // copy file to destination
         val sourceUri = Uri.fromFile(sourceFile)
         context.contentResolver?.openInputStream(sourceUri)?.use { inputStream ->
-            context.contentResolver.openOutputStream(itemUri)?.use { outputStream ->
+            context.contentResolver.openOutputStream(destinationUri)?.use { outputStream ->
                 val buffer = ByteArray(1024)
                 var length: Int
                 while (inputStream.read(buffer).also { length = it } > 0) {
                     outputStream.write(buffer, 0, length)
                 }
             }
-        }
-    } catch (exception: Exception) {
-        Log.d("ArcGIS-Maps", "Failed to save ViewableFile: ${exception.message}")
-        return false
+        } ?: throw IOException("Failed to save file")
     }
-    return true
 }
 
 /**

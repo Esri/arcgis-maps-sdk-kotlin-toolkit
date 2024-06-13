@@ -15,6 +15,7 @@
  */
 package com.arcgismaps.toolkit.popup.internal.fileviewer
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -149,12 +150,13 @@ private fun ViewerActions(
                 onClick = {
                     expanded.value = false
                     scope.launch(Dispatchers.IO) {
-                        val saveSuccessful = viewableFile.saveToDevice(context)
+                        val saveResult = viewableFile.saveToDevice(context)
                         withContext(Dispatchers.Main) {
-                            if (saveSuccessful) {
+                            saveResult.onSuccess {
                                 Toast.makeText(context, "Save successful", Toast.LENGTH_SHORT).show()
-                            } else {
+                            }.onFailure {
                                 Toast.makeText(context, "Save failed", Toast.LENGTH_SHORT).show()
+                                Log.e("ArcGISMapsSDK", "Failed to save file: $it")
                             }
                         }
                     }
