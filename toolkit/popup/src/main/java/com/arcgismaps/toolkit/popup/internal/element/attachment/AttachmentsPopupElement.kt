@@ -29,7 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.mapping.popup.PopupAttachmentType
-import com.arcgismaps.toolkit.popup.internal.fileviewer.ViewableFile
+import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ViewableFile
 import com.arcgismaps.toolkit.popup.internal.ui.ExpandableCard
 import kotlinx.coroutines.flow.MutableStateFlow
 

@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.arcgismaps.toolkit.popup.internal.fileviewer
+package com.arcgismaps.toolkit.popup.internal.ui.fileviewer
 
 import android.util.Log
 import android.widget.Toast
@@ -166,15 +166,6 @@ private fun ViewerActions(
             )
         }
     }
-}
-
-@Composable
-private fun ImageViewer(path: String) {
-    AsyncImage(
-        modifier = Modifier.fillMaxSize(),
-        model = path,
-        contentDescription = "Image",
-    )
 }
 
 @Preview

@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.arcgismaps.toolkit.popup.internal.fileviewer
+package com.arcgismaps.toolkit.popup.internal.ui.fileviewer
 
 import android.annotation.SuppressLint
 import android.content.ContentValues
