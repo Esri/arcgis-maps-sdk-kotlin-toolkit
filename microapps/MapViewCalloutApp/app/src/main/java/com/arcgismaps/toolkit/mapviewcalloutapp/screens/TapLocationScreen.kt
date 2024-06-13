@@ -45,6 +45,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.input.ImeAction
@@ -81,17 +82,11 @@ fun TapLocationScreen(viewModel: MapViewModel) {
                 calloutVisibility = calloutVisibility,
                 isCalloutRotationEnabled = rotateOffsetWithGeoView,
                 offset = offset,
+                viewModel = viewModel,
                 onVisibilityToggled = { calloutVisibility = !calloutVisibility },
                 onCalloutOffsetRotationToggled = {
                     rotateOffsetWithGeoView = !rotateOffsetWithGeoView
                 },
-                onXAxisOffsetChanged = {
-                    viewModel.setOffset(Offset(it, offset.y))
-                },
-                onYAxisOffsetChanged = {
-                    viewModel.setOffset(Offset(offset.x, it))
-                },
-                onClearTapLocation = viewModel::clearMapPoint
             )
         },
         scaffoldState = bottomSheetScaffoldState,
@@ -124,13 +119,11 @@ fun CalloutOptions(
     calloutVisibility: Boolean,
     isCalloutRotationEnabled: Boolean,
     offset: Offset,
+    viewModel: MapViewModel,
     onVisibilityToggled: () -> Unit,
     onCalloutOffsetRotationToggled: () -> Unit,
-    onXAxisOffsetChanged: (Float) -> Unit,
-    onYAxisOffsetChanged: (Float) -> Unit,
-    onClearTapLocation: () -> Unit
 ) {
-    Column(Modifier.padding(8.dp)) {
+    Column(Modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(text = "Show Callout")
             Checkbox(
@@ -145,13 +138,12 @@ fun CalloutOptions(
                 onCheckedChange = { onCalloutOffsetRotationToggled() }
             )
         }
-
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
             OutlinedTextField(
                 modifier = Modifier.weight(1f),
                 value = offset.x.toString(),
                 onValueChange = { value ->
-                    onXAxisOffsetChanged(value.toFloat())
+                    viewModel.setOffset(Offset(value.toFloat(), offset.y))
                 },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Decimal,
@@ -165,7 +157,7 @@ fun CalloutOptions(
                 modifier = Modifier.weight(1f),
                 value = offset.y.toString(),
                 onValueChange = { value ->
-                    onYAxisOffsetChanged(value.toFloat())
+                    viewModel.setOffset(Offset(offset.x, value.toFloat()))
                 },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Decimal,
@@ -176,7 +168,7 @@ fun CalloutOptions(
             )
         }
 
-        Button(onClick =  onClearTapLocation) {
+        Button(onClick = viewModel::clearMapPoint) {
             Text(text = "Clear Tap Location")
         }
     }
