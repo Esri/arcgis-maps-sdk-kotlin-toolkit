@@ -25,7 +25,7 @@ import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.view.GeoView
 
 /**
- * Creates a Callout at the specified geographical location on the GeoView. The Callout is a composable
+ * Displays a Callout at the specified geographical location on the GeoView. The Callout is a composable
  * that can be used to display additional information about a location on the map. The additional information is
  * passed as a content composable that contains text and/or other content. It has a leader that points to
  * the location that Callout refers to. The body of the Callout is a rectangular area with curved corners
