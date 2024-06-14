@@ -135,7 +135,7 @@ private fun ViewerActions(
                 text = { Text("Share", color = MaterialTheme.colorScheme.onSurface) },
                 onClick = {
                     expanded.value = false
-                    coroutineScope.launch(Dispatchers.IO) { viewableFile.share(context) }
+                    coroutineScope.launch { viewableFile.share(context) }
                 },
                 leadingIcon = {
                     Icon(Icons.Rounded.Share, contentDescription = "Share", tint = MaterialTheme.colorScheme.onSurface)
@@ -148,15 +148,13 @@ private fun ViewerActions(
                 },
                 onClick = {
                     expanded.value = false
-                    coroutineScope.launch(Dispatchers.IO) {
+                    coroutineScope.launch {
                         val saveResult = viewableFile.saveToDevice(context)
-                        withContext(Dispatchers.Main) {
-                            saveResult.onSuccess {
-                                Toast.makeText(context, "Save successful", Toast.LENGTH_SHORT).show()
-                            }.onFailure {
-                                Toast.makeText(context, "Save failed", Toast.LENGTH_SHORT).show()
-                                Log.e("ArcGISMapsSDK", "Failed to save file: $it")
-                            }
+                        saveResult.onSuccess {
+                            Toast.makeText(context, "Save successful", Toast.LENGTH_SHORT).show()
+                        }.onFailure {
+                            Toast.makeText(context, "Save failed", Toast.LENGTH_SHORT).show()
+                            Log.e("ArcGISMapsSDK", "Failed to save file: $it")
                         }
                     }
                 },
