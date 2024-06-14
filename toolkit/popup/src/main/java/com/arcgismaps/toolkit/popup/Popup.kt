@@ -38,6 +38,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -114,10 +115,11 @@ private fun Popup(popupState: PopupState, modifier: Modifier = Modifier) {
 
 @Composable
 private fun Popup(popupState: PopupState, evaluated: Boolean, modifier: Modifier = Modifier) {
+    val scope = rememberCoroutineScope()
     val popup = popupState.popup
     val viewableFileState = rememberSaveable { mutableStateOf<ViewableFile?>(null) }
     viewableFileState.value?.let { viewableFile ->
-        FileViewer(fileState = viewableFile) {
+        FileViewer(scope, fileState = viewableFile) {
             viewableFileState.value = null
         }
     }
