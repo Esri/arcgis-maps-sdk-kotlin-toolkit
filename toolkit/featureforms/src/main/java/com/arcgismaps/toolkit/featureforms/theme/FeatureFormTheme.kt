@@ -221,13 +221,15 @@ public data class EditableTextFieldColors internal constructor(
  * @property labelColor the color used for the label of this field
  * @property textColor the color used for the text of this field
  * @property supportingTextColor the color used for the supporting text of this field
+ * @property errorSupportingTextColor the color used for the supporting text of this field when in error state
  * @since 200.5.0
  */
 @Immutable
 public data class ReadOnlyFieldColors internal constructor(
     public val labelColor: Color,
     public val textColor: Color,
-    public val supportingTextColor: Color
+    public val supportingTextColor: Color,
+    public val errorSupportingTextColor : Color
 )
 
 /**

@@ -35,10 +35,11 @@ internal class ComboBoxFieldState(
     id : Int,
     properties: CodedValueFieldProperties,
     initialValue: Any? = properties.value.value,
+    hasValueExpression : Boolean,
     scope: CoroutineScope,
     updateValue: (Any?) -> Unit,
     evaluateExpressions: suspend () -> Result<List<FormExpressionEvaluationError>>
-) : CodedValueFieldState(id, properties, initialValue, scope, updateValue, evaluateExpressions) {
+) : CodedValueFieldState(id, properties, initialValue, hasValueExpression, scope, updateValue, evaluateExpressions) {
 
     companion object {
         /**
@@ -75,6 +76,7 @@ internal class ComboBoxFieldState(
                         fieldType = formElement.fieldType
                     ),
                     initialValue = list[0],
+                    hasValueExpression = formElement.hasValueExpression,
                     scope = scope,
                     updateValue = formElement::updateValue,
                     evaluateExpressions = form::evaluateExpressions
@@ -112,6 +114,7 @@ internal fun rememberComboBoxFieldState(
             noValueLabel = input.noValueLabel,
             fieldType = field.fieldType
         ),
+        hasValueExpression = field.hasValueExpression,
         scope = scope,
         updateValue = field::updateValue,
         evaluateExpressions = form::evaluateExpressions

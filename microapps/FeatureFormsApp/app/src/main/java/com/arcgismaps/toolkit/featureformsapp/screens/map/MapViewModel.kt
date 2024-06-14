@@ -167,7 +167,7 @@ class MapViewModel @Inject constructor(
         featureForm.validationErrors.value.forEach { entry ->
             entry.value.forEach { error ->
                 featureForm.elements.getFormElement(entry.key)?.let { formElement ->
-                    if (formElement.isEditable.value) {
+                    if (formElement.isEditable.value || formElement.hasValueExpression) {
                         errors.add(
                             ErrorInfo(
                                 formElement.label,

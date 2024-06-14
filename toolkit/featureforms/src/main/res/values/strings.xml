@@ -17,8 +17,16 @@
   -->
 
 <resources>
-    <string name="enter_n_chars">Enter %1$d characters</string>
+    <plurals name="enter_n_chars">
+        <item quantity="one">Enter %1$d character</item>
+        <item quantity="other">Enter %1$d characters</item>
+    </plurals>
+    <plurals name="value_must_be_n_characters">
+        <item quantity="one">Value must be %1$d character</item>
+        <item quantity="other">Value must be %1$d characters</item>
+    </plurals>
     <string name="enter_min_to_max_chars">Enter %1$d to %2$d characters</string>
+    <string name="value_must_be_from_to_characters">Value must be %1$d to %2$d characters</string>
     <string name="maximum_n_chars">Maximum %1$d characters</string>
     <string name="no_value">No value</string>
     <string name="enter_value">Enter Value</string>
@@ -30,6 +38,7 @@
     <string name="done">Done</string>
     <string name="filter">Filter %1$s</string>
     <string name="numeric_range_helper_text">Enter value from %1$s to %2$s</string>
+    <string name="value_must_be_from_to">Value must be from %1$s to %2$s</string>
     <string name="less_than_min_value">Less than minimum value %1$s</string>
     <string name="exceeds_max_value">Exceeds maximum value %1$s</string>
     <string name="value_must_be_a_whole_number">Value must be a whole number</string>
@@ -89,6 +98,7 @@
     <string name="ff_time_picker_minute_text_field">for minutes</string>
     <string name="ff_time_picker_period_toggle_description">Select AM or PM</string>
     <string name="ff_time_picker_pm">PM</string>
+
     <string name="take_photo">Take Photo</string>
     <string name="add_from_gallery">Add From Gallery</string>
     <string name="rename">Rename</string>
