@@ -88,7 +88,7 @@ import com.arcgismaps.toolkit.featureforms.theme.LocalTypography
  * @param readOnly controls the editable state of the text field. When true, the text field cannot
  * be modified. However, a user can focus it and copy text from it.
  * @param hasValueExpression if true, a special icon will be displayed at the end of the text field
- * if [readOnly] is also true.
+ * given that [readOnly] is also set to true.
  * @param showCharacterCount if true shows the current character count of the [text].
  * @param keyboardType the keyboard type to use depending on the FormFieldElement input type.
  * @param trailingIcon the icon to be displayed at the end of the text field container.
