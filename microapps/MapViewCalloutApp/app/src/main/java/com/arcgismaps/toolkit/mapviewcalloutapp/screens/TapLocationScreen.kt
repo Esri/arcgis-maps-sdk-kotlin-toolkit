@@ -27,11 +27,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SheetValue
@@ -48,8 +49,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.geoviewcompose.Callout
@@ -139,37 +138,66 @@ fun CalloutOptions(
             )
         }
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
-            OutlinedTextField(
+            OffsetDropDownMenu(
                 modifier = Modifier.weight(1f),
-                value = offset.x.toString(),
-                onValueChange = { value ->
-                    viewModel.setOffset(Offset(value.toFloat(), offset.y))
-                },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Decimal,
-                    imeAction = ImeAction.Done
-                ),
-                label = { Text("X-Axis offset") },
-                textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.End)
+                offsetValue = offset.x,
+                offsetName = "X-Axis offset",
+                onOffsetSelected = { xOffset ->
+                    viewModel.setOffset(Offset(xOffset, offset.y))
+                }
             )
             Spacer(modifier = Modifier.size(10.dp))
-            OutlinedTextField(
+            OffsetDropDownMenu(
                 modifier = Modifier.weight(1f),
-                value = offset.y.toString(),
-                onValueChange = { value ->
-                    viewModel.setOffset(Offset(offset.x, value.toFloat()))
-                },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Decimal,
-                    imeAction = ImeAction.Done
-                ),
-                label = { Text("Y-Axis offset") },
-                textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.End)
+                offsetValue = offset.y,
+                offsetName = "Y-Axis offset",
+                onOffsetSelected = { yOffset ->
+                    viewModel.setOffset(Offset(offset.x, yOffset))
+                }
             )
         }
 
         Button(onClick = viewModel::clearMapPoint) {
             Text(text = "Clear Tap Location")
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun OffsetDropDownMenu(
+    modifier: Modifier,
+    offsetValue: Float,
+    offsetName: String,
+    onOffsetSelected: (Float) -> Unit,
+) {
+    val offsetsItems = listOf(-100.0, -50.0, -25.0, 0.0, 25.0, 50.0, 100.0)
+    var isXOffsetsExpanded by rememberSaveable { mutableStateOf(false) }
+    ExposedDropdownMenuBox(
+        modifier = modifier,
+        expanded = isXOffsetsExpanded,
+        onExpandedChange = { isXOffsetsExpanded = !isXOffsetsExpanded }
+    ) {
+        OutlinedTextField(
+            modifier = Modifier.menuAnchor(),
+            value = offsetValue.toString(),
+            readOnly = true,
+            onValueChange = { },
+            label = { Text(offsetName) },
+            textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.End)
+        )
+        ExposedDropdownMenu(
+            expanded = isXOffsetsExpanded,
+            onDismissRequest = { isXOffsetsExpanded = false }
+        ) {
+            offsetsItems.forEach {
+                DropdownMenuItem(
+                    text = { Text(it.toString()) },
+                    onClick = {
+                        onOffsetSelected(it.toFloat())
+                        isXOffsetsExpanded = false
+                    })
+            }
         }
     }
 }
