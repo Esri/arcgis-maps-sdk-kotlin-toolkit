@@ -171,12 +171,12 @@ fun OffsetDropDownMenu(
     offsetName: String,
     onOffsetSelected: (Float) -> Unit,
 ) {
-    val offsetsItems = listOf(-100.0, -50.0, -25.0, 0.0, 25.0, 50.0, 100.0)
-    var isXOffsetsExpanded by rememberSaveable { mutableStateOf(false) }
+    val offsetItems = listOf(-100.0, -50.0, -25.0, 0.0, 25.0, 50.0, 100.0)
+    var isExpanded by rememberSaveable { mutableStateOf(false) }
     ExposedDropdownMenuBox(
         modifier = modifier,
-        expanded = isXOffsetsExpanded,
-        onExpandedChange = { isXOffsetsExpanded = !isXOffsetsExpanded }
+        expanded = isExpanded,
+        onExpandedChange = { isExpanded = !isExpanded }
     ) {
         OutlinedTextField(
             modifier = Modifier.menuAnchor(),
@@ -187,15 +187,15 @@ fun OffsetDropDownMenu(
             textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.End)
         )
         ExposedDropdownMenu(
-            expanded = isXOffsetsExpanded,
-            onDismissRequest = { isXOffsetsExpanded = false }
+            expanded = isExpanded,
+            onDismissRequest = { isExpanded = false }
         ) {
-            offsetsItems.forEach {
+            offsetItems.forEach {
                 DropdownMenuItem(
                     text = { Text(it.toString()) },
                     onClick = {
                         onOffsetSelected(it.toFloat())
-                        isXOffsetsExpanded = false
+                        isExpanded = false
                     })
             }
         }
