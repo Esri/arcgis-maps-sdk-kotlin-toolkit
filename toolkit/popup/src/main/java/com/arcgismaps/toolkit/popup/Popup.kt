@@ -150,35 +150,43 @@ private fun PopupBody(popupState: PopupState, onFileClicked: (ViewableFile?) -> 
     ) {
         states.forEach { entry ->
             val element = entry.popupElement
-            item {
-                when (element) {
-                    is TextPopupElement -> {
+            when (element) {
+                is TextPopupElement -> {
+                    // a contentType is needed to reuse the TextPopupElement composable inside a LazyColumn
+                    item(contentType = TextPopupElement::class.java) {
                         TextPopupElement(
                             entry.state as TextElementState
                         )
                     }
+                }
 
-                    is AttachmentsPopupElement -> {
+                is AttachmentsPopupElement -> {
+                    item(contentType = AttachmentsPopupElement::class.java) {
                         AttachmentsPopupElement(
                             state = entry.state as AttachmentsElementState,
-                            onFileClicked)
+                            onFileClicked
+                        )
                     }
+                }
 
-                    is FieldsPopupElement -> {
+                is FieldsPopupElement -> {
+                    item(contentType = FieldsPopupElement::class.java) {
                         FieldsPopupElement(
                             entry.state as FieldsElementState,
                         )
                     }
+                }
 
-                    is MediaPopupElement -> {
+                is MediaPopupElement -> {
+                    item(contentType = MediaPopupElement::class.java) {
                         MediaPopupElement(
                             entry.state as MediaElementState
                         )
                     }
+                }
 
-                    else -> {
-                        // other popup elements are not created
-                    }
+                else -> {
+                    // other popup elements are not created
                 }
             }
         }
