@@ -162,13 +162,14 @@ internal class AttachmentElementState(
             scope = scope,
             formAttachment = formAttachment
         )
-        attachments.add(state)
+        // add the new state to the beginning of the list
+        attachments.add(0, state)
         // load the new attachment
         state.loadWithParentScope()
         // scroll to the new attachment after a delay to allow the recomposition to complete
         scope.launch {
             delay(100)
-            lazyListState.scrollToItem(attachments.count())
+            lazyListState.scrollToItem(0)
             evaluateExpressions()
         }
     }
