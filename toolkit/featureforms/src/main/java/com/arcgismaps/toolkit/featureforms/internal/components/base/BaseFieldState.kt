@@ -218,45 +218,20 @@ internal abstract class BaseFieldState<T>(
      * @param errors the list of validation errors
      * @return A single validation error
      */
-    private fun filterErrors(errors: List<ValidationErrorState>): ValidationErrorState {
-        // if editable or has a value expression
-        return if (errors.isNotEmpty() && (hasValueExpression || isEditable.value)) {
-            // if it has a value expression, show the first error
-            if (hasValueExpression) {
-                errors.first()
-            } else if (wasFocused) { // if it has been focused
-                // if not in focus
-                if (!isFocused.value) {
-                    // show a required error if it is present
-                    if (errors.any { it is ValidationErrorState.Required }) {
-                        ValidationErrorState.Required
-                    } else {
-                        // show any other error
-                        errors.first()
-                    }
-                } else {
-                    // if is a text field and is focused, empty and has a description do not show
-                    // any error
-                    if (value.value.data is String
-                        && (value.value.data as String).isEmpty()
-                        && description.isNotEmpty()) {
-                        ValidationErrorState.NoError
-                    } else {
-                        // show the first non-required error
-                        errors.firstOrNull { it !is ValidationErrorState.Required }
-                        // if none is found, do not show any error
-                            ?: ValidationErrorState.NoError
-                    }
-                }
-            } else {
-                // never been focused
-                ValidationErrorState.NoError
-            }
-        } else {
-            // not editable
-            ValidationErrorState.NoError
+    private fun filterErrors(errors: List<ValidationErrorState>): ValidationErrorState =
+        when {
+            // if there are no errors
+            hasNoErrors(errors) -> ValidationErrorState.NoError
+            // if the field has a value expression
+            hasValueExpression -> errors.first()
+            // if the field was focused and is focused
+            wasFocused && isFocused.value -> handleFocusedErrors(errors)
+            // if the field was focused but is not currently focused
+            wasFocused && !isFocused.value -> handleNonFocusedErrors(errors)
+            // if the field has never been focused
+            else -> ValidationErrorState.NoError
         }
-    }
+
 
     /**
      * Implement this method to provide the proper type conversion from [T] to an Any?. This
@@ -266,4 +241,37 @@ internal abstract class BaseFieldState<T>(
      * @param input The value to convert
      */
     abstract fun typeConverter(input: T): Any?
+}
+
+/**
+ * Returns true if the field should not show any errors.
+ */
+private fun BaseFieldState<*>.hasNoErrors(errors: List<ValidationErrorState>): Boolean {
+    return errors.isEmpty() || !(hasValueExpression || isEditable.value)
+}
+
+/**
+ * Returns the appropriate error to show when the field is focused.
+ */
+private fun BaseFieldState<*>.handleFocusedErrors(errors: List<ValidationErrorState>): ValidationErrorState {
+    // if is a text field that is empty and has a description do not show any error
+    return if (value.value.data is String && (value.value.data as String).isEmpty() && description.isNotEmpty()) {
+        ValidationErrorState.NoError
+    } else {
+        // show the first non-required error
+        errors.firstOrNull { it !is ValidationErrorState.Required } ?: ValidationErrorState.NoError
+    }
+}
+
+/**
+ * Returns the appropriate error to show when the field is not focused.
+ */
+private fun BaseFieldState<*>.handleNonFocusedErrors(errors: List<ValidationErrorState>): ValidationErrorState {
+    // show a required error if it is present
+    return if (errors.any { it is ValidationErrorState.Required }) {
+        ValidationErrorState.Required
+    } else {
+        // show any other error
+        errors.first()
+    }
 }
