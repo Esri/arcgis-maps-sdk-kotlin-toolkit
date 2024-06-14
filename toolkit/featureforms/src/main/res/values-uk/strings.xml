@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~
+  ~  Copyright 2023 Esri
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  ~
+  --><resources>
+    <string name="enter_n_chars">ґ_Enter %1$d characters______________________Ї</string>
+    <string name="enter_min_to_max_chars">ґ_Enter %1$d to %2$d characters______________________________Ї</string>
+    <string name="maximum_n_chars">ґ_Maximum %1$d characters________________________Ї</string>
+    <string name="no_value">ґ_No value_________________Ї</string>
+    <string name="enter_value">ґ_Enter Value____________Ї</string>
+    <string name="required">ґ_Required_________________Ї</string>
+    <string name="today">ґ_Today___________Ї</string>
+    <string name="now">ґ_Now_______Ї</string>
+    <string name="cancel">ґ_Cancel_____________Ї</string>
+    <string name="ok">ґ_OK_____Ї</string>
+    <string name="done">ґ_Done_________Ї</string>
+    <string name="filter">ґ_Filter %1$s____________Ї</string>
+    <string name="numeric_range_helper_text">ґ_Enter value from %1$s to %2$s______________________________Ї</string>
+    <string name="less_than_min_value">ґ_Less than minimum value %1$s_____________________________Ї</string>
+    <string name="exceeds_max_value">ґ_Exceeds maximum value %1$s___________________________Ї</string>
+    <string name="value_must_be_a_whole_number">ґ_Value must be a whole number_____________________________Ї</string>
+    <string name="value_must_be_a_number">ґ_Value must be a number_______________________Ї</string>
+    <string name="value_must_be_within_domain">ґ_Value must be within domain____________________________Ї</string>
+    <string name="value_must_not_be_empty">ґ_Value must not be empty________________________Ї</string>
+    <string name="min_datetime_helper_text">ґ_Date must be on or after %1$s______________________________Ї</string>
+    <string name="max_datetime_helper_text">ґ_Date must be on or before %1$s_______________________________Ї</string>
+
+    <!-- Date Picker string values -->
+    <string name="ff_date_input_headline">ґ_Entered date_____________Ї</string>
+    <string name="ff_date_input_headline_description">ґ_Entered date: %1$s___________________Ї</string>
+    <string name="ff_date_input_invalid_for_pattern">ґ_Date does not match expected pattern: %1$s______________________Ї</string>
+    <string name="ff_date_input_invalid_not_allowed">ґ_Date not allowed: %1$s_______________________Ї</string>
+    <string name="ff_date_input_invalid_year_range">ґ__Ї
+        ґ_Date out of expected year range %1$s - %2$s___________________________Ї
+ґ__________Ї    </string>
+    <string name="ff_date_input_label">ґ_Date_________Ї</string>
+    <string name="ff_date_input_no_input_description">ґ_None_________Ї</string>
+    <string name="ff_date_input_title">ґ_Select date____________Ї</string>
+    <string name="ff_date_picker_headline">ґ_"Selected date"________________Ї</string>
+    <string name="ff_date_picker_headline_description">ґ_Current selection: %1$s________________________Ї</string>
+    <string name="ff_date_picker_navigate_to_year_description">ґ_Navigate to year %1$s______________________Ї</string>
+    <string name="ff_date_picker_no_selection_description">ґ_None_________Ї</string>
+    <string name="ff_date_picker_scroll_to_earlier_years">ґ_Scroll to show earlier years_____________________________Ї</string>
+    <string name="ff_date_picker_scroll_to_later_years">ґ_Scroll to show later years___________________________Ї</string>
+    <string name="ff_date_picker_switch_to_calendar_mode">ґ_Switch to calendar input mode______________________________Ї</string>
+    <string name="ff_date_picker_switch_to_day_selection">ґ__Ї
+        ґ_"Swipe to select a year, or tap to switch back to selecting a day"______________________________________Ї
+ґ__________Ї    </string>
+    <string name="ff_date_picker_switch_to_input_mode">ґ_Switch to text input mode__________________________Ї</string>
+    <string name="ff_date_picker_switch_to_next_month">ґ_"Change to next month"_______________________Ї</string>
+    <string name="ff_date_picker_switch_to_previous_month">ґ_"Change to previous month"___________________________Ї</string>
+    <string name="ff_date_picker_switch_to_year_selection">ґ_"Switch to selecting a year"_____________________________Ї</string>
+    <string name="ff_date_picker_title">ґ_"Select date"______________Ї</string>
+    <string name="ff_date_picker_today_description">ґ_Today___________Ї</string>
+    <string name="ff_date_picker_year_picker_pane_title">ґ_Year picker visible____________________Ї</string>
+    <string name="ff_date_range_input_invalid_range_input">ґ_Invalid date range input_________________________Ї</string>
+    <string name="ff_date_range_input_title">ґ_Enter dates____________Ї</string>
+    <string name="ff_date_range_picker_day_in_range">ґ_In range_________________Ї</string>
+    <string name="ff_date_range_picker_end_headline">ґ_End date_________________Ї</string>
+    <string name="ff_date_range_picker_scroll_to_next_month">ґ_Scroll to show the next month______________________________Ї</string>
+    <string name="ff_date_range_picker_scroll_to_previous_month">ґ_Scroll to show the previous month__________________Ї</string>
+    <string name="ff_date_range_picker_start_headline">ґ_Start date_____________________Ї</string>
+    <string name="ff_date_range_picker_title">ґ_Select dates_____________Ї</string>
+
+    <!-- Time Picker string values -->
+    <string name="ff_time_picker_am">ґ_AM_____Ї</string>
+    <string name="ff_time_picker_hour">ґ_Hour_________Ї</string>
+    <string name="ff_time_picker_hour_24h_suffix">ґ_%1$d hours_____________________Ї</string>
+    <string name="ff_time_picker_hour_selection">ґ_Select hour____________Ї</string>
+    <string name="ff_time_picker_hour_suffix">ґ_%1$d o\'clock______________Ї</string>
+    <string name="ff_time_picker_hour_text_field">ґ_for hour_________________Ї</string>
+    <string name="ff_time_picker_minute">ґ_Minute_____________Ї</string>
+    <string name="ff_time_picker_minute_selection">ґ_Select minutes_______________Ї</string>
+    <string name="ff_time_picker_minute_suffix">ґ_%1$d minutes_____________Ї</string>
+    <string name="ff_time_picker_minute_text_field">ґ_for minutes____________Ї</string>
+    <string name="ff_time_picker_period_toggle_description">ґ_Select AM or PM________________Ї</string>
+    <string name="ff_time_picker_pm">ґ_PM_____Ї</string>
+    <string name="take_photo">ґ_Take Photo_____________________Ї</string>
+    <string name="add_photo">ґ_Add Photo___________________Ї</string>
+    <string name="rename">ґ_Rename_____________Ї</string>
+    <string name="delete">ґ_Delete_____________Ї</string>
+    <string name="rename_attachment">ґ_Rename Attachment__________________Ї</string>
+    <string name="name">ґ_Name_________Ї</string>
+</resources>

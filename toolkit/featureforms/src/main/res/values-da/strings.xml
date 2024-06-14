@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~
+  ~  Copyright 2023 Esri
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  ~
+  --><resources>
+    <string name="enter_n_chars">ø_Enter %1$d characters______________________å</string>
+    <string name="enter_min_to_max_chars">ø_Enter %1$d to %2$d characters______________________________å</string>
+    <string name="maximum_n_chars">ø_Maximum %1$d characters________________________å</string>
+    <string name="no_value">ø_No value_________________å</string>
+    <string name="enter_value">ø_Enter Value____________å</string>
+    <string name="required">ø_Required_________________å</string>
+    <string name="today">ø_Today___________å</string>
+    <string name="now">ø_Now_______å</string>
+    <string name="cancel">ø_Cancel_____________å</string>
+    <string name="ok">ø_OK_____å</string>
+    <string name="done">ø_Done_________å</string>
+    <string name="filter">ø_Filter %1$s____________å</string>
+    <string name="numeric_range_helper_text">ø_Enter value from %1$s to %2$s______________________________å</string>
+    <string name="less_than_min_value">ø_Less than minimum value %1$s_____________________________å</string>
+    <string name="exceeds_max_value">ø_Exceeds maximum value %1$s___________________________å</string>
+    <string name="value_must_be_a_whole_number">ø_Value must be a whole number_____________________________å</string>
+    <string name="value_must_be_a_number">ø_Value must be a number_______________________å</string>
+    <string name="value_must_be_within_domain">ø_Value must be within domain____________________________å</string>
+    <string name="value_must_not_be_empty">ø_Value must not be empty________________________å</string>
+    <string name="min_datetime_helper_text">ø_Date must be on or after %1$s______________________________å</string>
+    <string name="max_datetime_helper_text">ø_Date must be on or before %1$s_______________________________å</string>
+
+    <!-- Date Picker string values -->
+    <string name="ff_date_input_headline">ø_Entered date_____________å</string>
+    <string name="ff_date_input_headline_description">ø_Entered date: %1$s___________________å</string>
+    <string name="ff_date_input_invalid_for_pattern">ø_Date does not match expected pattern: %1$s______________________å</string>
+    <string name="ff_date_input_invalid_not_allowed">ø_Date not allowed: %1$s_______________________å</string>
+    <string name="ff_date_input_invalid_year_range">ø__å
+        ø_Date out of expected year range %1$s - %2$s___________________________å
+ø__________å    </string>
+    <string name="ff_date_input_label">ø_Date_________å</string>
+    <string name="ff_date_input_no_input_description">ø_None_________å</string>
+    <string name="ff_date_input_title">ø_Select date____________å</string>
+    <string name="ff_date_picker_headline">ø_"Selected date"________________å</string>
+    <string name="ff_date_picker_headline_description">ø_Current selection: %1$s________________________å</string>
+    <string name="ff_date_picker_navigate_to_year_description">ø_Navigate to year %1$s______________________å</string>
+    <string name="ff_date_picker_no_selection_description">ø_None_________å</string>
+    <string name="ff_date_picker_scroll_to_earlier_years">ø_Scroll to show earlier years_____________________________å</string>
+    <string name="ff_date_picker_scroll_to_later_years">ø_Scroll to show later years___________________________å</string>
+    <string name="ff_date_picker_switch_to_calendar_mode">ø_Switch to calendar input mode______________________________å</string>
+    <string name="ff_date_picker_switch_to_day_selection">ø__å
+        ø_"Swipe to select a year, or tap to switch back to selecting a day"______________________________________å
+ø__________å    </string>
+    <string name="ff_date_picker_switch_to_input_mode">ø_Switch to text input mode__________________________å</string>
+    <string name="ff_date_picker_switch_to_next_month">ø_"Change to next month"_______________________å</string>
+    <string name="ff_date_picker_switch_to_previous_month">ø_"Change to previous month"___________________________å</string>
+    <string name="ff_date_picker_switch_to_year_selection">ø_"Switch to selecting a year"_____________________________å</string>
+    <string name="ff_date_picker_title">ø_"Select date"______________å</string>
+    <string name="ff_date_picker_today_description">ø_Today___________å</string>
+    <string name="ff_date_picker_year_picker_pane_title">ø_Year picker visible____________________å</string>
+    <string name="ff_date_range_input_invalid_range_input">ø_Invalid date range input_________________________å</string>
+    <string name="ff_date_range_input_title">ø_Enter dates____________å</string>
+    <string name="ff_date_range_picker_day_in_range">ø_In range_________________å</string>
+    <string name="ff_date_range_picker_end_headline">ø_End date_________________å</string>
+    <string name="ff_date_range_picker_scroll_to_next_month">ø_Scroll to show the next month______________________________å</string>
+    <string name="ff_date_range_picker_scroll_to_previous_month">ø_Scroll to show the previous month__________________å</string>
+    <string name="ff_date_range_picker_start_headline">ø_Start date_____________________å</string>
+    <string name="ff_date_range_picker_title">ø_Select dates_____________å</string>
+
+    <!-- Time Picker string values -->
+    <string name="ff_time_picker_am">ø_AM_____å</string>
+    <string name="ff_time_picker_hour">ø_Hour_________å</string>
+    <string name="ff_time_picker_hour_24h_suffix">ø_%1$d hours_____________________å</string>
+    <string name="ff_time_picker_hour_selection">ø_Select hour____________å</string>
+    <string name="ff_time_picker_hour_suffix">ø_%1$d o\'clock______________å</string>
+    <string name="ff_time_picker_hour_text_field">ø_for hour_________________å</string>
+    <string name="ff_time_picker_minute">ø_Minute_____________å</string>
+    <string name="ff_time_picker_minute_selection">ø_Select minutes_______________å</string>
+    <string name="ff_time_picker_minute_suffix">ø_%1$d minutes_____________å</string>
+    <string name="ff_time_picker_minute_text_field">ø_for minutes____________å</string>
+    <string name="ff_time_picker_period_toggle_description">ø_Select AM or PM________________å</string>
+    <string name="ff_time_picker_pm">ø_PM_____å</string>
+    <string name="take_photo">ø_Take Photo_____________________å</string>
+    <string name="add_photo">ø_Add Photo___________________å</string>
+    <string name="rename">ø_Rename_____________å</string>
+    <string name="delete">ø_Delete_____________å</string>
+    <string name="rename_attachment">ø_Rename Attachment__________________å</string>
+    <string name="name">ø_Name_________å</string>
+</resources>
