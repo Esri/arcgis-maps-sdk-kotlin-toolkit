@@ -528,7 +528,7 @@ public inline fun rememberLocationDisplay(
  *
  * @since 200.5.0
  */
-public class MapViewScope(_mapView: MapView?) : GeoViewScope(_mapView, "MapView")
+public class MapViewScope internal constructor(mapView: MapView) : GeoViewScope(mapView, "MapView")
 
 /**
  * Contains default values for the composable MapView.

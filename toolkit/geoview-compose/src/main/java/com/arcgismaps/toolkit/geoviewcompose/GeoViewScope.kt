@@ -69,7 +69,10 @@ import kotlin.math.sin
  * @since 200.5.0
  *
  */
-public sealed class GeoViewScope(private var _geoView: GeoView?, className: String) {
+public sealed class GeoViewScope protected constructor(
+    private val _geoView: GeoView?,
+    className: String
+) {
 
     private val nullGeoViewErrorMessage: String =
         "$className not initialized. Make sure to use the composable within the MapView or SceneView."
@@ -78,6 +81,14 @@ public sealed class GeoViewScope(private var _geoView: GeoView?, className: Stri
     private val geoView: GeoView
         get() = _geoView ?: error(nullGeoViewErrorMessage)
 
+    /**
+     * Used to reset the Callout parameters on re-composition of the Callout. We use Callout parameters
+     * location value as an indicator to determine if the Callout is already displayed. If the location
+     * is set we don't execute the Callout again. In case of recomposition being triggered by the location
+     * change, we reset the Callout parameters to display the Callout at the new location.
+     *
+     * @since 200.5.0
+     */
     internal fun reset() {
         calloutParams = CalloutParams()
     }
@@ -109,25 +120,28 @@ public sealed class GeoViewScope(private var _geoView: GeoView?, className: Stri
             return
         }
 
+        val calloutLocation = calloutParams.location ?: return
+
         // Convert the given location to a screen coordinate
         var leaderScreenCoordinate: ScreenCoordinate? by remember {
             mutableStateOf(
-                getLeaderScreenCoordinate(geoView, calloutParams.location!!, calloutParams.offset, calloutParams.rotateOffsetWithGeoView)
+                getLeaderScreenCoordinate(geoView, calloutLocation, calloutParams.offset, calloutParams.rotateOffsetWithGeoView)
             )
         }
 
         LaunchedEffect(calloutParams.location) {
             // Used to update screen coordinate when new location point is used
-            leaderScreenCoordinate = getLeaderScreenCoordinate(geoView, calloutParams.location!!, calloutParams.offset, calloutParams.rotateOffsetWithGeoView)
+            calloutParams.location?.let { location ->
+                leaderScreenCoordinate = getLeaderScreenCoordinate(geoView, location, calloutParams.offset, calloutParams.rotateOffsetWithGeoView)
+            }
             // Used to update screen coordinate when viewpoint is changed
             geoView.viewpointChanged.collect {
-                leaderScreenCoordinate = getLeaderScreenCoordinate(geoView, calloutParams.location!!, calloutParams.offset, calloutParams.rotateOffsetWithGeoView)
+                calloutParams.location?.let { location ->
+                    leaderScreenCoordinate = getLeaderScreenCoordinate(geoView, location, calloutParams.offset, calloutParams.rotateOffsetWithGeoView)
+                }
             }
         }
 
-        val localDensity = LocalDensity.current
-        // Get the default shape, color & size properties for Callout
-        val properties = CalloutProperties()
         leaderScreenCoordinate?.let {
             CalloutSubComposeLayout(
                 leaderScreenCoordinate = it,
@@ -137,20 +151,20 @@ public sealed class GeoViewScope(private var _geoView: GeoView?, className: Stri
                     displayMetrics = LocalContext.current.resources.displayMetrics
                 )) {
                 Box(
-                    modifier = calloutParams.modifier!!
+                    modifier = calloutParams.modifier
                         .drawCalloutContainer(
-                            cornerRadius = with(localDensity) { properties.cornerRadius.toPx() },
-                            strokeBorderWidth = with(localDensity) { properties.strokeBorderWidth.toPx() },
-                            strokeColor = properties.strokeColor,
-                            backgroundColor = properties.backgroundColor,
-                            calloutContentPadding = properties.calloutContentPadding,
-                            leaderWidth = with(localDensity) { properties.leaderSize.width.toPx() },
-                            leaderHeight = with(localDensity) { properties.leaderSize.height.toPx() },
-                            minSize = properties.minSize
+                            cornerRadius = with(LocalDensity.current) { DefaultCalloutProperties.cornerRadius.toPx() },
+                            strokeBorderWidth = with(LocalDensity.current) { DefaultCalloutProperties.strokeBorderWidth.toPx() },
+                            strokeColor = DefaultCalloutProperties.strokeColor,
+                            backgroundColor = DefaultCalloutProperties.backgroundColor,
+                            calloutContentPadding = DefaultCalloutProperties.calloutContentPadding,
+                            leaderWidth = with(LocalDensity.current) { DefaultCalloutProperties.leaderSize.width.toPx() },
+                            leaderHeight = with(LocalDensity.current) { DefaultCalloutProperties.leaderSize.height.toPx() },
+                            minSize = DefaultCalloutProperties.minSize
                         )
                 )
                 {
-                    calloutParams.content!!.invoke(this)
+                    calloutParams.content.invoke(this)
                 }
             }
         }
@@ -213,11 +227,10 @@ public sealed class GeoViewScope(private var _geoView: GeoView?, className: Stri
         maxSize: DpSize,
         calloutContainer: @Composable () -> Unit
     ) {
-        val configuration = LocalDensity.current
-        val maxWidthInPx = with(configuration) {
+        val maxWidthInPx = with(LocalDensity.current) {
             maxSize.width.roundToPx()
         }
-        val maxHeightInPx = with(configuration) {
+        val maxHeightInPx = with(LocalDensity.current) {
             maxSize.height.roundToPx()
         }
 
@@ -253,32 +266,32 @@ public sealed class GeoViewScope(private var _geoView: GeoView?, className: Stri
     /**
      * UI default properties for the [Callout] component.
      */
-    private data class CalloutProperties(
-        val cornerRadius: Dp = 10.dp,
-        val strokeBorderWidth: Dp = 2.dp,
-        val strokeColor: Color = Color.LightGray,
-        val backgroundColor: Color = Color.White,
+    private object DefaultCalloutProperties {
+        val cornerRadius: Dp = 10.dp
+        val strokeBorderWidth: Dp = 2.dp
+        val strokeColor: Color = Color.LightGray
+        val backgroundColor: Color = Color.White
         val calloutContentPadding: PaddingValues = PaddingValues(
             all = cornerRadius + (strokeBorderWidth / 2)
-        ),
+        )
         val leaderSize: DpSize = DpSize(
             width = 12.dp,
             height = 10.dp
-        ),
+        )
         val minSize: DpSize = DpSize(
             width = strokeBorderWidth + (2 * cornerRadius),
             height = strokeBorderWidth + (2 * cornerRadius)
         )
-    )
+    }
 }
 
 @Immutable
 internal data class CalloutParams(
     val location: Point? = null,
-    val modifier: Modifier? = null,
+    val modifier: Modifier = Modifier,
     val offset: Offset = Offset.Zero,
     val rotateOffsetWithGeoView: Boolean = false,
-    val content: (@Composable BoxScope.() -> Unit)? = null
+    val content: (@Composable BoxScope.() -> Unit) = { }
 )
 
 private fun GeoView.rotation(): Double = when (this) {
