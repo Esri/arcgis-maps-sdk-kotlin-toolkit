@@ -109,7 +109,7 @@ internal fun FileViewer(scope: CoroutineScope, fileState: ViewableFile, onDismis
             ) {
                 when (fileState.type) {
                     is ViewableFileType.Image -> ImageViewer(fileState.path)
-                    is ViewableFileType.Video -> VideoViewer(fileState.path, Modifier.fillMaxSize())
+                    is ViewableFileType.Video -> VideoViewer(fileState.path)
                     is ViewableFileType.Other -> Text("Other")
                 }
             }
