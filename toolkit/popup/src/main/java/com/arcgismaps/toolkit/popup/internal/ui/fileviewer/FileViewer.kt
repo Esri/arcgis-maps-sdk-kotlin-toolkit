@@ -45,15 +45,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import coil.compose.AsyncImage
+import com.arcgismaps.toolkit.popup.R
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /**
  * A file viewer that can display different type of images.
@@ -79,7 +78,7 @@ internal fun FileViewer(scope: CoroutineScope, fileState: ViewableFile, onDismis
                     IconButton(onClick = { onDismissRequest() }) {
                         Icon(
                             Icons.Rounded.Close,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(id = R.string.close),
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
@@ -127,39 +126,39 @@ private fun ViewerActions(
     val expanded = remember { mutableStateOf(false) }
     Box(modifier = modifier) {
         IconButton(onClick = { expanded.value = true }) {
-            Icon(Icons.Rounded.MoreVert, contentDescription = "More", tint = MaterialTheme.colorScheme.onSurface)
+            Icon(Icons.Rounded.MoreVert, contentDescription = stringResource(id = R.string.more), tint = MaterialTheme.colorScheme.onSurface)
         }
 
         DropdownMenu(expanded = expanded.value, onDismissRequest = { expanded.value = false }) {
             DropdownMenuItem(
-                text = { Text("Share", color = MaterialTheme.colorScheme.onSurface) },
+                text = { Text(stringResource(id = R.string.more), color = MaterialTheme.colorScheme.onSurface) },
                 onClick = {
                     expanded.value = false
                     coroutineScope.launch { viewableFile.share(context) }
                 },
                 leadingIcon = {
-                    Icon(Icons.Rounded.Share, contentDescription = "Share", tint = MaterialTheme.colorScheme.onSurface)
+                    Icon(Icons.Rounded.Share, contentDescription = stringResource(id = R.string.share), tint = MaterialTheme.colorScheme.onSurface)
                 }
             )
 
             DropdownMenuItem(
                 text = {
-                    Text("Save", color = MaterialTheme.colorScheme.onSurface)
+                    Text(text = stringResource(id = R.string.save), color = MaterialTheme.colorScheme.onSurface)
                 },
                 onClick = {
                     expanded.value = false
                     coroutineScope.launch {
                         val saveResult = viewableFile.saveToDevice(context)
                         saveResult.onSuccess {
-                            Toast.makeText(context, "Save successful", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, context.getString(R.string.save_successful), Toast.LENGTH_SHORT).show()
                         }.onFailure {
-                            Toast.makeText(context, "Save failed", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, context.getString(R.string.save_failed), Toast.LENGTH_SHORT).show()
                             Log.e("ArcGISMapsSDK", "Failed to save file: $it")
                         }
                     }
                 },
                 leadingIcon = {
-                    Icon(Icons.Rounded.Save, contentDescription = "Save", tint = MaterialTheme.colorScheme.onSurface)
+                    Icon(Icons.Rounded.Save, contentDescription = stringResource(id = R.string.save), tint = MaterialTheme.colorScheme.onSurface)
                 }
             )
         }

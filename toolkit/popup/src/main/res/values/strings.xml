@@ -16,4 +16,13 @@
 
 <resources>
     <string name="show_or_hide_popup_element_content">expand popup element content</string>
+    <string name="share">Share</string>
+    <string name="save">Save</string>
+    <string name="save_successful">Save successful</string>
+    <string name="save_failed">Save failed</string>
+    <string name="more">More</string>
+    <string name="image">Image</string>
+    <string name="video">Video</string>
+    <string name="other">Other</string>
+    <string name="close">Back</string>
 </resources>

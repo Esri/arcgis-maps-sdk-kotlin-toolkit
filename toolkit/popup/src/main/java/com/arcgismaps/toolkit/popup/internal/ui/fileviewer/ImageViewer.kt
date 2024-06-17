@@ -18,7 +18,9 @@ package com.arcgismaps.toolkit.popup.internal.ui.fileviewer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import coil.compose.AsyncImage
+import com.arcgismaps.toolkit.popup.R
 
 
 @Composable
@@ -26,6 +28,6 @@ internal fun ImageViewer(path: String) {
     AsyncImage(
         modifier = Modifier.fillMaxSize(),
         model = path,
-        contentDescription = "Image",
+        contentDescription = stringResource(id = R.string.image),
     )
 }
