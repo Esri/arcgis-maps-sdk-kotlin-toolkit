@@ -56,7 +56,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 /**
- * A file viewer that can display different type of images.
+ * A file viewer that can display different type of files.
  *
  * @since 200.5.0
  */
