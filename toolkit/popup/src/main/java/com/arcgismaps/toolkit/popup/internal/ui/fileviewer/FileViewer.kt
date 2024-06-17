@@ -50,6 +50,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import coil.compose.AsyncImage
 import com.arcgismaps.toolkit.popup.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -107,7 +108,13 @@ internal fun FileViewer(scope: CoroutineScope, fileState: ViewableFile, onDismis
                 contentAlignment = Alignment.Center
             ) {
                 when (fileState.type) {
-                    is ViewableFileType.Image -> ImageViewer(fileState.path)
+                    is ViewableFileType.Image ->
+                        AsyncImage(
+                            modifier = Modifier.fillMaxSize(),
+                            model = fileState.path,
+                            contentDescription = stringResource(id = R.string.image),
+                        )
+
                     is ViewableFileType.Video -> Text("Video")
                     is ViewableFileType.Other -> Text("Other")
                 }
@@ -126,7 +133,11 @@ private fun ViewerActions(
     val expanded = remember { mutableStateOf(false) }
     Box(modifier = modifier) {
         IconButton(onClick = { expanded.value = true }) {
-            Icon(Icons.Rounded.MoreVert, contentDescription = stringResource(id = R.string.more), tint = MaterialTheme.colorScheme.onSurface)
+            Icon(
+                Icons.Rounded.MoreVert,
+                contentDescription = stringResource(id = R.string.more),
+                tint = MaterialTheme.colorScheme.onSurface
+            )
         }
 
         DropdownMenu(expanded = expanded.value, onDismissRequest = { expanded.value = false }) {
@@ -137,7 +148,11 @@ private fun ViewerActions(
                     coroutineScope.launch { viewableFile.share(context) }
                 },
                 leadingIcon = {
-                    Icon(Icons.Rounded.Share, contentDescription = stringResource(id = R.string.share), tint = MaterialTheme.colorScheme.onSurface)
+                    Icon(
+                        Icons.Rounded.Share,
+                        contentDescription = stringResource(id = R.string.share),
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
                 }
             )
 
@@ -150,7 +165,8 @@ private fun ViewerActions(
                     coroutineScope.launch {
                         val saveResult = viewableFile.saveToDevice(context)
                         saveResult.onSuccess {
-                            Toast.makeText(context, context.getString(R.string.save_successful), Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, context.getString(R.string.save_successful), Toast.LENGTH_SHORT)
+                                .show()
                         }.onFailure {
                             Toast.makeText(context, context.getString(R.string.save_failed), Toast.LENGTH_SHORT).show()
                             Log.e("ArcGISMapsSDK", "Failed to save file: $it")
@@ -158,7 +174,11 @@ private fun ViewerActions(
                     }
                 },
                 leadingIcon = {
-                    Icon(Icons.Rounded.Save, contentDescription = stringResource(id = R.string.save), tint = MaterialTheme.colorScheme.onSurface)
+                    Icon(
+                        Icons.Rounded.Save,
+                        contentDescription = stringResource(id = R.string.save),
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
                 }
             )
         }
