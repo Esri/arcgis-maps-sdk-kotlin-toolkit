@@ -72,7 +72,7 @@ fun FeatureScreen(viewModel: MapViewModel) {
     val selectedGeoElement = viewModel.selectedGeoElement.collectAsState().value
     var calloutVisibility by rememberSaveable { mutableStateOf(true) }
     var nullTapLocation by rememberSaveable { mutableStateOf(false) }
-    val modalBottomSheetState = rememberModalBottomSheetState()
+    val modalBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showBottomSheet by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -199,6 +199,9 @@ fun CalloutContent(viewModel: MapViewModel, selectedElementAttributes: Map<Strin
     }
 }
 
+/**
+ * Callout visibility and tap location options, displayed in a BottomSheet.
+ */
 @Composable
 fun CalloutOptions(
     calloutVisibility: Boolean,
@@ -232,6 +235,9 @@ fun CalloutOptions(
     }
 }
 
+/**
+ * Filter undesired feature attributes like, empty or null values and GlobalIDs.
+ */
 private fun filterAttributes(attributes: Map<String, Any?>): Map<String, Any?> {
     return attributes
         .filter { attribute -> attribute.value != null }
