@@ -130,7 +130,7 @@ internal suspend fun ViewableFile.share(context: Context) = withContext(Dispatch
 
     val uri = FileProvider.getUriForFile(
         context.applicationContext,
-        "${context.applicationContext.applicationInfo.packageName}.fileprovider",
+        "${context.applicationContext.applicationInfo.packageName}.arcgis.popup.fileprovider",
         file
     )
     val intent = Intent().apply {
