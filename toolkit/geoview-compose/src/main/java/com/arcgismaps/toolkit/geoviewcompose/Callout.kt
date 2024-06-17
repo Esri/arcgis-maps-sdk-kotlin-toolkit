@@ -117,17 +117,17 @@ public fun MapViewScope.Callout(
 }
 
 /**
- * Creates a Callout at the specified geographical location on the MapView. The Callout is a composable
+ * Creates a Callout at the specified [geoElement] or the [tapLocation] location on the MapView. The Callout is a composable
  * that can be used to display additional information about a location on the map. The additional information is
- * passed as a content composable that contains text and/or other content. It has a leader that points to
+ * passed as a [content] composable that contains text and/or other content. It has a leader that points to
  * the location that Callout refers to. The body of the Callout is a rectangular area with curved corners
- * that contains the content lambda provided by the application. A thin border line is drawn around the entire Callout.
+ * that contains the [content] lambda provided by the application. A thin border line is drawn around the entire Callout.
  *
  * Note: Only one Callout can be displayed at a time on the MapView.
  *
  * @param geoElement the GeoElement for which to display the Callout
  * @param modifier Modifier to be applied to the composable Callout
- * @param tapLocation a Point the user has tapped, or null if the callout is not associated with a tap
+ * @param tapLocation a Point the user has tapped, or null if the Callout is not associated with a tap
  * @param content the content of the Callout
  * @since 200.5.0
  */
@@ -334,7 +334,7 @@ public class MapViewScope(private var _mapView: MapView?) {
     }
 
     /**
-     * Calculates the appropriate placement for the Callout with the provided [GeoElement] and tap location.
+     * Calculates the appropriate placement of the Callout with the provided [GeoElement] and tap location.
      *
      * @param geoElement the geoElement for which to place the Callout
      * @param tapLocation the location user tapped at
@@ -355,15 +355,15 @@ public class MapViewScope(private var _mapView: MapView?) {
     }
 
     /**
-     * Calculates the appropriate placement for the Callout with the provided [Graphic] and tap location.
+     * Calculates the appropriate placement of the Callout with the provided [Graphic] and tap location.
      * This method looks at the following properties of the graphic,
      *
      * * Geometry
      * * Symbology
      * * The overlay, it is a part of
      *
-     * Along with that information and the tap location it calculates the fitting placement
-     * for the Callout.
+     * Along with that information and the tap location, it calculates the fitting placement
+     * of the Callout.
      *
      * @param graphic the graphic for which to place the Callout
      * @param tapLocation the location user tapped at
@@ -390,7 +390,7 @@ public class MapViewScope(private var _mapView: MapView?) {
     }
 
     /**
-     * Calculates the appropriate placement for the Callout with the provided [Feature] and
+     * Calculates the appropriate placement of the Callout with the provided [Feature] and
      * tap location.
      * This method looks at the following properties of the feature,
      *
@@ -399,7 +399,7 @@ public class MapViewScope(private var _mapView: MapView?) {
      * * The overlay, it is a part of
      *
      * Along with that information and the tap location it calculates the fitting placement
-     * for the Callout.
+     * of the Callout.
      *
      * @param feature the feature for which to place the Callout
      * @param tapLocation the location user tapped at
@@ -558,7 +558,7 @@ private fun DoubleXY.rotate(
  */
 internal fun MarkerSymbol.leaderPointOffset(): LeaderPointOffset {
     var leaderOffset = DoubleXY(leaderOffsetX.toDouble(), leaderOffsetY.toDouble())
-    if (!angle.equals(0.0f)) {
+    if (angle != 0.0f) {
         leaderOffset = leaderOffset.rotate(AngularUnit.degrees.toRadians(angle.toDouble()))
     }
     leaderOffset = leaderOffset.offset(Offset(offsetX, offsetY))
