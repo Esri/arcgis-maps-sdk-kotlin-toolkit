@@ -69,17 +69,9 @@ import kotlin.math.sin
  * @since 200.5.0
  *
  */
-public sealed class GeoViewScope protected constructor(
-    private val _geoView: GeoView?,
-    className: String
-) {
-
-    private val nullGeoViewErrorMessage: String =
-        "$className not initialized. Make sure to use the composable within the MapView or SceneView."
+public sealed class GeoViewScope protected constructor(private val geoView: GeoView) {
 
     internal var calloutParams: CalloutParams = CalloutParams()
-    private val geoView: GeoView
-        get() = _geoView ?: error(nullGeoViewErrorMessage)
 
     /**
      * Used to reset the Callout parameters on re-composition of the Callout. We use Callout parameters

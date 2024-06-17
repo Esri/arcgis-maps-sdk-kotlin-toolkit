@@ -470,7 +470,7 @@ private fun ViewpointHandler(
  *
  * @since 200.5.0
  */
-public class SceneViewScope internal constructor(sceneView: SceneView) : GeoViewScope(sceneView, "SceneView")
+public class SceneViewScope internal constructor(sceneView: SceneView) : GeoViewScope(sceneView)
 
 /**
  * Contains default values for the SceneView.

@@ -92,7 +92,6 @@ fun MainScreen(viewModel: SceneViewModel) {
             graphicsOverlays = remember { listOf(viewModel.tapLocationGraphicsOverlay) },
             sceneViewProxy = viewModel.sceneViewProxy,
             onSingleTapConfirmed = viewModel::setTapLocation,
-            onLongPress = { viewModel.clearTapLocation() },
             content = if (tapLocation != null && calloutVisibility) {
                 {
                     Callout(
