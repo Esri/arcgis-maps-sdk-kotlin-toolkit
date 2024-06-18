@@ -86,7 +86,7 @@ internal fun AttachmentFormElement(
         label = state.label,
         description = state.description,
         editable = editable,
-        captureOptions = CaptureOptions.create(state.input),
+        captureOptions = CaptureOptions.Any,
         stateId = state.id,
         attachments = state.attachments,
         lazyListState = state.lazyListState,
