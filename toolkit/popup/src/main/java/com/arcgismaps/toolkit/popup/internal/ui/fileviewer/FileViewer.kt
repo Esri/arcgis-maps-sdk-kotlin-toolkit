@@ -15,6 +15,7 @@
  */
 package com.arcgismaps.toolkit.popup.internal.ui.fileviewer
 
+import android.content.Intent
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -50,10 +51,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.content.FileProvider
 import coil.compose.AsyncImage
 import com.arcgismaps.toolkit.popup.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.io.File
 
 /**
  * A file viewer that can display different type of files.
@@ -62,6 +65,7 @@ import kotlinx.coroutines.launch
  */
 @Composable
 internal fun FileViewer(scope: CoroutineScope, fileState: ViewableFile, onDismissRequest: () -> Unit) {
+    val context = LocalContext.current
     Dialog(
         onDismissRequest = onDismissRequest,
         properties = DialogProperties(usePlatformDefaultWidth = false)
@@ -116,7 +120,20 @@ internal fun FileViewer(scope: CoroutineScope, fileState: ViewableFile, onDismis
                         )
 
                     is ViewableFileType.Video -> Text("Video")
-                    is ViewableFileType.Other -> Text("Other")
+                    is ViewableFileType.Other -> {
+                        val uri = FileProvider.getUriForFile(
+                            context,
+                            "${context.applicationInfo.processName}.fileprovider",
+                            File(fileState.path)
+                        )
+
+                        val intent = Intent(Intent.ACTION_VIEW).apply {
+                            setDataAndType(uri, fileState.contentType)
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        }
+
+                        context.startActivity(intent)
+                    }
                 }
             }
         }
