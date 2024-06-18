@@ -147,7 +147,7 @@ private fun ViewerActions(
 
         DropdownMenu(expanded = expanded.value, onDismissRequest = { expanded.value = false }) {
             DropdownMenuItem(
-                text = { Text(stringResource(id = R.string.more), color = MaterialTheme.colorScheme.onSurface) },
+                text = { Text(stringResource(id = R.string.share), color = MaterialTheme.colorScheme.onSurface) },
                 onClick = {
                     expanded.value = false
                     coroutineScope.launch { viewableFile.share(context) }
