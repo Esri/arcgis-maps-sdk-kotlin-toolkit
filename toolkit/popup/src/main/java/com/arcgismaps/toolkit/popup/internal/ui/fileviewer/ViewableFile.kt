@@ -26,6 +26,7 @@ import android.os.Parcelable
 import android.provider.MediaStore
 import androidx.core.content.FileProvider
 import com.arcgismaps.mapping.popup.PopupAttachmentType
+import com.arcgismaps.toolkit.popup.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parceler
@@ -130,7 +131,7 @@ internal suspend fun ViewableFile.share(context: Context) = withContext(Dispatch
 
     val uri = FileProvider.getUriForFile(
         context.applicationContext,
-        "${context.applicationContext.applicationInfo.packageName}.fileprovider",
+        "${context.applicationContext.applicationInfo.packageName}.arcgis.popup.fileprovider",
         file
     )
     val intent = Intent().apply {
@@ -141,6 +142,6 @@ internal suspend fun ViewableFile.share(context: Context) = withContext(Dispatch
     }
 
     context.startActivity(
-        Intent.createChooser(intent, "Share")
+        Intent.createChooser(intent, context.getString(R.string.share))
     )
 }

@@ -81,7 +81,12 @@ private fun HTML(content: String) {
             val completeHtml = "$header$headStyle<html>${content.trim()}</html>"
             loadDataWithBaseURL(null, completeHtml, "text/html", "UTF-8", null)
         }
-    })
+    },
+        // By default, AndroidViews aren't reused in a lazy list. This means that the `HTML` composable instance will
+        // get discarded and recreated every time. By defining an `onReset` lambda, we can ensure tha the AndroidView will
+        // be reused when the composition hierarchy changes.
+        onReset = {}
+    )
 }
 
 /**

@@ -98,7 +98,6 @@ internal fun AttachmentTile(
                         )
                     )
                 }
-                // TODO open attachment viewer in `else` here
             }
     ) {
         when (loadStatus) {

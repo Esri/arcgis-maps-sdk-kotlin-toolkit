@@ -39,28 +39,24 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.media3.common.MediaItem
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.ui.PlayerView
+import coil.compose.AsyncImage
+import com.arcgismaps.toolkit.popup.R
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /**
- * A file viewer that can display different type of images.
+ * A file viewer that can display different type of files.
  *
  * @since 200.5.0
  */
@@ -83,7 +79,7 @@ internal fun FileViewer(scope: CoroutineScope, fileState: ViewableFile, onDismis
                     IconButton(onClick = { onDismissRequest() }) {
                         Icon(
                             Icons.Rounded.Close,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(id = R.string.close),
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
@@ -112,8 +108,14 @@ internal fun FileViewer(scope: CoroutineScope, fileState: ViewableFile, onDismis
                 contentAlignment = Alignment.Center
             ) {
                 when (fileState.type) {
-                    is ViewableFileType.Image -> ImageViewer(fileState.path)
-                    is ViewableFileType.Video -> VideoViewer(fileState.path)
+                    is ViewableFileType.Image ->
+                        AsyncImage(
+                            modifier = Modifier.fillMaxSize(),
+                            model = fileState.path,
+                            contentDescription = stringResource(id = R.string.image),
+                        )
+
+                    is ViewableFileType.Video -> Text("Video")
                     is ViewableFileType.Other -> Text("Other")
                 }
             }
@@ -131,70 +133,54 @@ private fun ViewerActions(
     val expanded = remember { mutableStateOf(false) }
     Box(modifier = modifier) {
         IconButton(onClick = { expanded.value = true }) {
-            Icon(Icons.Rounded.MoreVert, contentDescription = "More", tint = MaterialTheme.colorScheme.onSurface)
+            Icon(
+                Icons.Rounded.MoreVert,
+                contentDescription = stringResource(id = R.string.more),
+                tint = MaterialTheme.colorScheme.onSurface
+            )
         }
 
         DropdownMenu(expanded = expanded.value, onDismissRequest = { expanded.value = false }) {
             DropdownMenuItem(
-                text = { Text("Share", color = MaterialTheme.colorScheme.onSurface) },
+                text = { Text(stringResource(id = R.string.more), color = MaterialTheme.colorScheme.onSurface) },
                 onClick = {
                     expanded.value = false
-                    coroutineScope.launch(Dispatchers.IO) { viewableFile.share(context) }
+                    coroutineScope.launch { viewableFile.share(context) }
                 },
                 leadingIcon = {
-                    Icon(Icons.Rounded.Share, contentDescription = "Share", tint = MaterialTheme.colorScheme.onSurface)
+                    Icon(
+                        Icons.Rounded.Share,
+                        contentDescription = stringResource(id = R.string.share),
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
                 }
             )
 
             DropdownMenuItem(
                 text = {
-                    Text("Save", color = MaterialTheme.colorScheme.onSurface)
+                    Text(text = stringResource(id = R.string.save), color = MaterialTheme.colorScheme.onSurface)
                 },
                 onClick = {
                     expanded.value = false
-                    coroutineScope.launch(Dispatchers.IO) {
+                    coroutineScope.launch {
                         val saveResult = viewableFile.saveToDevice(context)
-                        withContext(Dispatchers.Main) {
-                            saveResult.onSuccess {
-                                Toast.makeText(context, "Save successful", Toast.LENGTH_SHORT).show()
-                            }.onFailure {
-                                Toast.makeText(context, "Save failed", Toast.LENGTH_SHORT).show()
-                                Log.e("ArcGISMapsSDK", "Failed to save file: $it")
-                            }
+                        saveResult.onSuccess {
+                            Toast.makeText(context, context.getString(R.string.save_successful), Toast.LENGTH_SHORT)
+                                .show()
+                        }.onFailure {
+                            Toast.makeText(context, context.getString(R.string.save_failed), Toast.LENGTH_SHORT).show()
+                            Log.e("ArcGISMapsSDK", "Failed to save file: $it")
                         }
                     }
                 },
                 leadingIcon = {
-                    Icon(Icons.Rounded.Save, contentDescription = "Save", tint = MaterialTheme.colorScheme.onSurface)
-                }
-            )
-        }
-    }
-}
-
-@Composable
-internal fun VideoViewer(path: String) {
-    val context = LocalContext.current
-    val exoPlayer = remember {
-        ExoPlayer.Builder(context).build().apply {
-            val mediaItem = MediaItem.Builder()
-                .setUri(path)
-                .build()
-            setMediaItem(mediaItem)
-            prepare()
-        }
-    }
-
-    AndroidView(
-        factory = {
-            PlayerView(context).apply {
-                player = exoPlayer
-            }
+                    Icon(
+                        Icons.Rounded.Save,
+                        contentDescription = stringResource(id = R.string.save),
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
         }
     )
-    DisposableEffect(Unit) {
-        onDispose {
-            exoPlayer.release()
         }
     }
 }
