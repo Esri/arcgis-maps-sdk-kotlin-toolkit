@@ -184,8 +184,8 @@ private fun ViewerActions(
                         contentDescription = stringResource(id = R.string.save),
                         tint = MaterialTheme.colorScheme.onSurface
                     )
-        }
-    )
+                }
+            )
         }
     }
 }
