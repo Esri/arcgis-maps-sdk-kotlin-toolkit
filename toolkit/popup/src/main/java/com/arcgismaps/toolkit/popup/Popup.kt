@@ -38,6 +38,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -65,7 +66,8 @@ import com.arcgismaps.toolkit.popup.internal.element.state.mutablePopupElementSt
 import com.arcgismaps.toolkit.popup.internal.element.textelement.TextElementState
 import com.arcgismaps.toolkit.popup.internal.element.textelement.TextPopupElement
 import com.arcgismaps.toolkit.popup.internal.element.textelement.rememberTextElementState
-import com.arcgismaps.toolkit.popup.internal.fileviewer.ViewableFile
+import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.FileViewer
+import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ViewableFile
 
 @Immutable
 private data class PopupState(@Stable val popup: Popup)
@@ -113,7 +115,14 @@ private fun Popup(popupState: PopupState, modifier: Modifier = Modifier) {
 
 @Composable
 private fun Popup(popupState: PopupState, evaluated: Boolean, modifier: Modifier = Modifier) {
+    val scope = rememberCoroutineScope()
     val popup = popupState.popup
+    val viewableFileState = rememberSaveable { mutableStateOf<ViewableFile?>(null) }
+    viewableFileState.value?.let { viewableFile ->
+        FileViewer(scope, fileState = viewableFile) {
+            viewableFileState.value = null
+        }
+    }
     Column(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -132,7 +141,9 @@ private fun Popup(popupState: PopupState, evaluated: Boolean, modifier: Modifier
         }
         HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
         if (evaluated) {
-            PopupBody(popupState)
+            PopupBody(popupState) {
+                viewableFileState.value = it
+            }
         }
     }
 }

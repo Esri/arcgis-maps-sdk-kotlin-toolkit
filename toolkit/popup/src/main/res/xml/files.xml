@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~
   ~  Copyright 2024 Esri
   ~
   ~  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,20 +12,8 @@
   ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
-  ~
   -->
 
-<!--suppress XmlUnusedNamespaceDeclaration -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <application>
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.arcgis.popup.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/files" />
-        </provider>
-    </application>
-</manifest>
+<paths>
+    <cache-path name="external_file" path="."/>
+</paths>

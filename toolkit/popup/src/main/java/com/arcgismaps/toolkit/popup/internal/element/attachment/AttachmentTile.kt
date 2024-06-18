@@ -60,7 +60,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.mapping.popup.PopupAttachmentType
-import com.arcgismaps.toolkit.popup.internal.fileviewer.ViewableFile
+import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ViewableFile
+import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.toViewableFileType
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
@@ -87,9 +88,16 @@ internal fun AttachmentTile(
                     // load attachment
                     state.loadAttachment(coroutineScope)
                 } else if (loadStatus is LoadStatus.Loaded) {
-                    onClicked(state)
+                    onClicked(
+                        ViewableFile(
+                            state.name,
+                            state.size,
+                            state.path,
+                            state.popupAttachmentType.toViewableFileType(),
+                            state.contentType
+                        )
+                    )
                 }
-                // TODO open attachment viewer in `else` here
             }
     ) {
         when (loadStatus) {
@@ -274,6 +282,7 @@ internal fun PreviewAttachmentTile() {
             size = 1234L,
             popupAttachmentType = PopupAttachmentType.Other,
             loadStatus = MutableStateFlow(LoadStatus.NotLoaded),
+            contentType = "image/jpeg",
             onLoadAttachment = { Result.success(Unit) },
             onLoadThumbnail = null
         )
