@@ -50,8 +50,8 @@ public fun GeoViewScope.Callout(
     rotateOffsetWithGeoView: Boolean = false,
     content: @Composable BoxScope.() -> Unit
 ) {
-    if (this.calloutParams.location == null) {
-        this.calloutParams = CalloutParams(location, modifier, offset, rotateOffsetWithGeoView, content)
-        this.Callout()
+    if (!this.isCalloutBeingDisplayed) {
+        isCalloutBeingDisplayed = true
+        this.Callout(location, modifier, offset, rotateOffsetWithGeoView, content)
     }
 }

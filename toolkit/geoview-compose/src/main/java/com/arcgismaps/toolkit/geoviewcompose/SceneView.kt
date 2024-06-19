@@ -206,7 +206,7 @@ public fun SceneView(
 
         val sceneViewScope = remember(sceneView) { SceneViewScope(sceneView) }
         content?.let {
-            sceneViewScope.reset()
+            sceneViewScope.isCalloutBeingDisplayed = false
             sceneViewScope.it()
         }
     }

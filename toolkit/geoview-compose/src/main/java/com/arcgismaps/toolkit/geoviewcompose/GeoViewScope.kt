@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -67,23 +66,15 @@ import kotlin.math.sin
  * The receiver class of the MapView/SceneView content lambda.
  *
  * @since 200.5.0
- *
  */
 public sealed class GeoViewScope protected constructor(private val geoView: GeoView) {
 
-    internal var calloutParams: CalloutParams = CalloutParams()
-
     /**
-     * Used to reset the Callout parameters on re-composition of the Callout. We use Callout parameters
-     * location value as an indicator to determine if the Callout is already displayed. If the location
-     * is set we don't execute the Callout again. In case of recomposition being triggered by the location
-     * change, we reset the Callout parameters to display the Callout at the new location.
+     * Used to restrict only one Callout to be displayed at a time.
      *
      * @since 200.5.0
      */
-    internal fun reset() {
-        calloutParams = CalloutParams()
-    }
+    internal var isCalloutBeingDisplayed: Boolean = false
 
     /**
      * Creates a Callout at the specified geographical location on the GeoView.
@@ -91,13 +82,18 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
      * @since 200.5.0
      */
     @Composable
-    internal fun Callout() {
-
+    internal fun Callout(
+        location: Point,
+        modifier: Modifier,
+        offset: Offset,
+        rotateOffsetWithGeoView: Boolean,
+        content: (@Composable BoxScope.() -> Unit)
+    ) {
         val isGeoViewReady = remember { mutableStateOf(false) }
         // We don't want to start drawing the Callout until the GeoView is ready. We only collect
         // the drawStatus till the first time GeoView is done drawing. The transformWhile operator
         // will stop collecting when isGeoViewReady.value becomes false.
-        LaunchedEffect(calloutParams.location) {
+        LaunchedEffect(location) {
             geoView.drawStatus.transformWhile { drawStatus ->
                 emit(drawStatus)
                 !isGeoViewReady.value
@@ -112,25 +108,21 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
             return
         }
 
-        val calloutLocation = calloutParams.location ?: return
-
         // Convert the given location to a screen coordinate
         var leaderScreenCoordinate: ScreenCoordinate? by remember {
             mutableStateOf(
-                getLeaderScreenCoordinate(geoView, calloutLocation, calloutParams.offset, calloutParams.rotateOffsetWithGeoView)
+                getLeaderScreenCoordinate(geoView, location, offset, rotateOffsetWithGeoView)
             )
         }
 
-        LaunchedEffect(calloutParams.location) {
+        LaunchedEffect(location) {
             // Used to update screen coordinate when new location point is used
-            calloutParams.location?.let { location ->
-                leaderScreenCoordinate = getLeaderScreenCoordinate(geoView, location, calloutParams.offset, calloutParams.rotateOffsetWithGeoView)
-            }
+            leaderScreenCoordinate =
+                getLeaderScreenCoordinate(geoView, location, offset, rotateOffsetWithGeoView)
             // Used to update screen coordinate when viewpoint is changed
             geoView.viewpointChanged.collect {
-                calloutParams.location?.let { location ->
-                    leaderScreenCoordinate = getLeaderScreenCoordinate(geoView, location, calloutParams.offset, calloutParams.rotateOffsetWithGeoView)
-                }
+                leaderScreenCoordinate =
+                    getLeaderScreenCoordinate(geoView, location, offset, rotateOffsetWithGeoView)
             }
         }
 
@@ -143,7 +135,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
                     displayMetrics = LocalContext.current.resources.displayMetrics
                 )) {
                 Box(
-                    modifier = calloutParams.modifier
+                    modifier = modifier
                         .drawCalloutContainer(
                             cornerRadius = with(LocalDensity.current) { DefaultCalloutProperties.cornerRadius.toPx() },
                             strokeBorderWidth = with(LocalDensity.current) { DefaultCalloutProperties.strokeBorderWidth.toPx() },
@@ -156,7 +148,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
                         )
                 )
                 {
-                    calloutParams.content.invoke(this)
+                    content.invoke(this)
                 }
             }
         }
@@ -276,15 +268,6 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         )
     }
 }
-
-@Immutable
-internal data class CalloutParams(
-    val location: Point? = null,
-    val modifier: Modifier = Modifier,
-    val offset: Offset = Offset.Zero,
-    val rotateOffsetWithGeoView: Boolean = false,
-    val content: (@Composable BoxScope.() -> Unit) = { }
-)
 
 private fun GeoView.rotation(): Double = when (this) {
     is SceneView -> getCurrentViewpoint(ViewpointType.CenterAndScale)?.rotation ?: 0.0

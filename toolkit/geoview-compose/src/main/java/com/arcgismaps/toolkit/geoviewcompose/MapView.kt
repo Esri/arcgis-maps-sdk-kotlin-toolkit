@@ -199,7 +199,7 @@ public fun MapView(
 
         val mapViewScope = remember(mapView) { MapViewScope(mapView) }
         content?.let {
-            mapViewScope.reset()
+            mapViewScope.isCalloutBeingDisplayed = false
             mapViewScope.it()
         }
     }
