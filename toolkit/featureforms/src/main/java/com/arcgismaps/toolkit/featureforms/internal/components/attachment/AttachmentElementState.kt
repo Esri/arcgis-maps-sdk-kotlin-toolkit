@@ -45,9 +45,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.Loadable
-import com.arcgismaps.mapping.featureforms.AnyAttachmentsFormInput
 import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
-import com.arcgismaps.mapping.featureforms.AttachmentsFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FormAttachment
 import com.arcgismaps.mapping.featureforms.FormAttachmentType
@@ -101,11 +99,6 @@ internal class AttachmentElementState(
      * The state of the lazy list that displays the [attachments].
      */
     val lazyListState = LazyListState()
-
-    /**
-     * The input type of the attachment form element.
-     */
-    val input = formElement.input
 
     init {
         scope.launch {
@@ -485,17 +478,6 @@ internal sealed class CaptureOptions {
             Signature -> listOf("image/*")
             Video -> listOf("video/*")
             Unknown -> emptyList()
-        }
-    }
-
-    companion object {
-
-        /**
-         * Creates a [CaptureOptions] from the given [AttachmentsFormInput].
-         */
-        fun create(value: AttachmentsFormInput): CaptureOptions = when (value) {
-            is AnyAttachmentsFormInput -> Any
-            else -> Unknown
         }
     }
 }
