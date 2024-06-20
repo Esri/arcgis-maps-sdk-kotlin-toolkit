@@ -65,78 +65,94 @@ import java.io.File
  */
 @Composable
 internal fun FileViewer(scope: CoroutineScope, fileState: ViewableFile, onDismissRequest: () -> Unit) {
-    val context = LocalContext.current
-    Dialog(
-        onDismissRequest = onDismissRequest,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
-    ) {
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            topBar = {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(64.dp)
-                        .background(MaterialTheme.colorScheme.surface),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    IconButton(onClick = { onDismissRequest() }) {
-                        Icon(
-                            Icons.Rounded.Close,
-                            contentDescription = stringResource(id = R.string.close),
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                    Text(
-                        text = fileState.name,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = MaterialTheme.typography.headlineSmall.fontSize
-                    )
-                    Spacer(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                    )
-                    ViewerActions(
-                        coroutineScope = scope,
-                        viewableFile = fileState,
-                    )
-                }
-            }
+    if (fileState.type !is ViewableFileType.Other) {
+        Dialog(
+            onDismissRequest = onDismissRequest,
+            properties = DialogProperties(usePlatformDefaultWidth = false)
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(it),
-                contentAlignment = Alignment.Center
-            ) {
-                when (fileState.type) {
-                    is ViewableFileType.Image ->
-                        AsyncImage(
-                            modifier = Modifier.fillMaxSize(),
-                            model = fileState.path,
-                            contentDescription = stringResource(id = R.string.image),
-                        )
-
-                    is ViewableFileType.Video -> Text("Video")
-                    is ViewableFileType.Other -> {
-                        val uri = FileProvider.getUriForFile(
-                            context,
-                            "${context.applicationInfo.processName}.fileprovider",
-                            File(fileState.path)
-                        )
-
-                        val intent = Intent(Intent.ACTION_VIEW).apply {
-                            setDataAndType(uri, fileState.contentType)
-                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
-                        }
-
-                        context.startActivity(intent)
-                    }
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                topBar = {
+                    TopAppBar(fileState, scope, onDismissRequest)
                 }
+            ) {
+                FileViewerContent(Modifier.padding(it), fileState)
             }
         }
+    } else {
+        val context = LocalContext.current
+        val uri = FileProvider.getUriForFile(
+            context.applicationContext,
+            "${context.applicationContext.applicationInfo.packageName}.arcgis.popup.fileprovider",
+            File(fileState.path)
+        )
+
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            setDataAndType(uri, fileState.contentType)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        context.startActivity(intent)
+        onDismissRequest()
+    }
+}
+
+@Composable
+private fun FileViewerContent(
+    modifier: Modifier,
+    fileState: ViewableFile
+) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
+        contentAlignment = Alignment.Center
+    ) {
+        when (fileState.type) {
+            is ViewableFileType.Image ->
+                AsyncImage(
+                    modifier = Modifier.fillMaxSize(),
+                    model = fileState.path,
+                    contentDescription = stringResource(id = R.string.image),
+                )
+
+            is ViewableFileType.Video -> Text("Video")
+            else -> {
+                throw UnsupportedOperationException("Cannot view this file type")
+            }
+        }
+    }
+}
+
+@Composable
+private fun TopAppBar(fileState: ViewableFile, scope: CoroutineScope, onDismissRequest: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(64.dp)
+            .background(MaterialTheme.colorScheme.surface),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        IconButton(onClick = { onDismissRequest() }) {
+            Icon(
+                Icons.Rounded.Close,
+                contentDescription = stringResource(id = R.string.close),
+                tint = MaterialTheme.colorScheme.onSurface
+            )
+        }
+        Text(
+            text = fileState.name,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontSize = MaterialTheme.typography.headlineSmall.fontSize
+        )
+        Spacer(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+        )
+        ViewerActions(
+            coroutineScope = scope,
+            viewableFile = fileState,
+        )
     }
 }
 
