@@ -33,6 +33,7 @@ import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class SceneViewModel : ViewModel() {
 
@@ -47,10 +48,10 @@ class SceneViewModel : ViewModel() {
     }
 
     private val _tapLocation = MutableStateFlow<Point?>(null)
-    val tapLocation: StateFlow<Point?> = _tapLocation
+    val tapLocation: StateFlow<Point?> = _tapLocation.asStateFlow()
 
     private val _offset = MutableStateFlow(Offset.Zero)
-    val offset: StateFlow<Offset> = _offset
+    val offset: StateFlow<Offset> = _offset.asStateFlow()
 
     val tapLocationGraphicsOverlay: GraphicsOverlay = GraphicsOverlay()
 

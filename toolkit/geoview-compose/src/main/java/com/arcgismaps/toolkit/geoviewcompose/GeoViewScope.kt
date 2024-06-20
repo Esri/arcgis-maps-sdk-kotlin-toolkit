@@ -58,6 +58,7 @@ import com.arcgismaps.mapping.view.SceneView
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.mapping.view.zero
 import kotlinx.coroutines.flow.transformWhile
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
@@ -70,11 +71,66 @@ import kotlin.math.sin
 public sealed class GeoViewScope protected constructor(private val geoView: GeoView) {
 
     /**
+     * Displays a Callout at the specified geographical location on the GeoView. The Callout is a composable
+     * that can be used to display additional information about a location on the map. The additional information is
+     * passed as a content composable that contains text and/or other content. It has a leader that points to
+     * the location that Callout refers to. The body of the Callout is a rectangular area with curved corners
+     * that contains the content lambda provided by the application. A thin border line is drawn around the entire Callout.
+     *
+     * Note: Only one Callout can be displayed at a time on the GeoView.
+     *
+     * @param location the geographical location at which to display the Callout
+     * @param modifier Modifier to be applied to the composable Callout
+     * @param content the content of the Callout
+     * @param offset the offset in screen coordinates from the geographical location at which to place the callout
+     * @param rotateOffsetWithGeoView specifies whether the screen offset is rotated with the [GeoView]. The Screen offset
+     *        will be rotated with the [GeoView] when true, false otherwise.
+     *        This is useful if you are showing the callout for elements with symbology that does rotate with the [GeoView]
+     * @since 200.5.0
+     */
+    @Composable
+    public fun Callout(
+        location: Point,
+        modifier: Modifier = Modifier,
+        offset: Offset = Offset.Zero,
+        rotateOffsetWithGeoView: Boolean = false,
+        content: @Composable BoxScope.() -> Unit
+    ) {
+        if (this.isCalloutBeingDisplayed.compareAndSet(false, true)) {
+            this.CalloutInternal(location, modifier, offset, rotateOffsetWithGeoView, content)
+        }
+    }
+
+    /**
      * Used to restrict only one Callout to be displayed at a time.
      *
      * @since 200.5.0
      */
-    internal var isCalloutBeingDisplayed: Boolean = false
+    internal var isCalloutBeingDisplayed = AtomicBoolean(false)
+
+    /**
+     * This function is used to wait for the GeoView to be ready to return positive values
+     * for operations like locationToScreen. We determine that by waiting for the first drawStatus
+     * message when the map/scene is rendered on the GeoView.
+     * For the MapView/SceneView's content parameter like the Callout we don't want to start drawing
+     * the Callout until the GeoView is ready.
+     *
+     * @since 200.5.0
+     */
+    @Composable
+    internal fun AwaitGeoViewReady(onGeoViewReady: (Boolean) -> Unit) {
+        var isGeoViewReady by remember { mutableStateOf(false) }
+        LaunchedEffect(Unit) {
+            geoView.drawStatus.transformWhile<DrawStatus, DrawStatus> { drawStatus ->
+                if (drawStatus == DrawStatus.InProgress) {
+                    onGeoViewReady(true)
+                    isGeoViewReady = true
+                }
+                !isGeoViewReady
+            }.collect {
+            }
+        }
+    }
 
     /**
      * Creates a Callout at the specified geographical location on the GeoView.
@@ -82,31 +138,13 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
      * @since 200.5.0
      */
     @Composable
-    internal fun Callout(
+    private fun CalloutInternal(
         location: Point,
         modifier: Modifier,
         offset: Offset,
         rotateOffsetWithGeoView: Boolean,
         content: (@Composable BoxScope.() -> Unit)
     ) {
-        val isGeoViewReady = remember { mutableStateOf(false) }
-        // We don't want to start drawing the Callout until the GeoView is ready. We only collect
-        // the drawStatus till the first time GeoView is done drawing. The transformWhile operator
-        // will stop collecting when isGeoViewReady.value becomes false.
-        LaunchedEffect(location) {
-            geoView.drawStatus.transformWhile { drawStatus ->
-                emit(drawStatus)
-                !isGeoViewReady.value
-            }.collect {
-                if (it == DrawStatus.Completed) {
-                    isGeoViewReady.value = true
-                }
-            }
-        }
-
-        if (!isGeoViewReady.value) {
-            return
-        }
 
         // Convert the given location to a screen coordinate
         var leaderScreenCoordinate: ScreenCoordinate? by remember {

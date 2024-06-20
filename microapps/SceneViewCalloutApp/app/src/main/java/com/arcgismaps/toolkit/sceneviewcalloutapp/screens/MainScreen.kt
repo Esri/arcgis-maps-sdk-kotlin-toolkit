@@ -52,7 +52,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.toolkit.geoviewcompose.Callout
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import kotlin.math.roundToInt
 
@@ -78,9 +77,15 @@ fun MainScreen(viewModel: SceneViewModel) {
                 calloutVisibility = calloutVisibility,
                 isCalloutRotationEnabled = rotateOffsetWithGeoView,
                 offset = offset,
-                viewModel = viewModel,
                 onVisibilityToggled = { calloutVisibility = !calloutVisibility },
                 onCalloutOffsetRotationToggled = { rotateOffsetWithGeoView = !rotateOffsetWithGeoView },
+                onXAxisOffsetChanged = {
+                    viewModel.setOffset(Offset(it,offset.y))
+                },
+                onYAxisOffsetChanged = {
+                    viewModel.setOffset(Offset(offset.x,it))
+                },
+                onDismissCallout = viewModel::clearTapLocation
             )
         },
         scaffoldState = bottomSheetScaffoldState,
@@ -115,9 +120,11 @@ fun CalloutOptions(
     calloutVisibility: Boolean,
     isCalloutRotationEnabled: Boolean,
     offset: Offset,
-    viewModel: SceneViewModel,
     onVisibilityToggled: () -> Unit,
     onCalloutOffsetRotationToggled: () -> Unit,
+    onXAxisOffsetChanged: (Float) -> Unit,
+    onYAxisOffsetChanged: (Float) -> Unit,
+    onDismissCallout: () -> Unit
 ) {
     Column(Modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -139,7 +146,7 @@ fun CalloutOptions(
                 modifier = Modifier.weight(1f),
                 value = offset.x.toString(),
                 onValueChange = { value ->
-                    viewModel.setOffset(Offset(value.toFloat(), offset.y))
+                    onXAxisOffsetChanged(value.toFloat())
                 },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Decimal,
@@ -153,7 +160,7 @@ fun CalloutOptions(
                 modifier = Modifier.weight(1f),
                 value = offset.y.toString(),
                 onValueChange = { value ->
-                    viewModel.setOffset(Offset(offset.x, value.toFloat()))
+                    onYAxisOffsetChanged(value.toFloat())
                 },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Decimal,
@@ -163,7 +170,7 @@ fun CalloutOptions(
                 textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.End)
             )
         }
-        Button(onClick = viewModel::clearTapLocation) {
+        Button(onClick = onDismissCallout) {
             Text(text = "Clear Tap Location")
         }
     }

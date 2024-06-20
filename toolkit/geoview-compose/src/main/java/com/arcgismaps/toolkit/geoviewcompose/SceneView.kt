@@ -205,9 +205,16 @@ public fun SceneView(
             })
 
         val sceneViewScope = remember(sceneView) { SceneViewScope(sceneView) }
-        content?.let {
-            sceneViewScope.isCalloutBeingDisplayed = false
-            sceneViewScope.it()
+        val isGeoViewReady = remember { mutableStateOf(false) }
+        sceneViewScope.AwaitGeoViewReady {
+            isGeoViewReady.value = it
+        }
+
+        if (isGeoViewReady.value) {
+            content?.let {
+                sceneViewScope.isCalloutBeingDisplayed.set(false)
+                sceneViewScope.it()
+            }
         }
     }
 

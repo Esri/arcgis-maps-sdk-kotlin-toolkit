@@ -175,7 +175,9 @@ public fun MapView(
 
     Box(modifier = modifier.clipToBounds()) {
         AndroidView(
-            modifier = Modifier.fillMaxSize().semantics { contentDescription = "MapView" },
+            modifier = Modifier
+                .fillMaxSize()
+                .semantics { contentDescription = "MapView" },
             factory = { mapView },
             update = {
                 it.map = arcGISMap
@@ -198,9 +200,16 @@ public fun MapView(
             })
 
         val mapViewScope = remember(mapView) { MapViewScope(mapView) }
-        content?.let {
-            mapViewScope.isCalloutBeingDisplayed = false
-            mapViewScope.it()
+        val isGeoViewReady = remember { mutableStateOf(false) }
+        mapViewScope.AwaitGeoViewReady {
+            isGeoViewReady.value = it
+        }
+
+        if (isGeoViewReady.value) {
+            content?.let {
+                mapViewScope.isCalloutBeingDisplayed.set(false)
+                mapViewScope.it()
+            }
         }
     }
 
@@ -395,6 +404,7 @@ private fun MapViewEventHandler(
         }
         launch {
             mapView.drawStatus.collect { drawStatus ->
+//                Log.e("mapView.drawStatus", "in mapView drawStatus: $drawStatus")
                 currentOnDrawStatusChanged?.invoke(drawStatus)
             }
         }
