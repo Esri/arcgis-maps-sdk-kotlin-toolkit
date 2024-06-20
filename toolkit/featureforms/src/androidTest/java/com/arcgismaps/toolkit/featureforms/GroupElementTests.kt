@@ -20,11 +20,12 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertTextContains
-import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildren
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onParent
 import androidx.compose.ui.test.performClick
@@ -105,7 +106,7 @@ class GroupElementTests {
         val groupElementToTest =
             getGroupElementWithLabel("Group with children that are visible dependent")
         // find the scrollable container
-        val lazyColumn = composeTestRule.onNode(hasScrollAction())
+        val lazyColumn = composeTestRule.onNodeWithContentDescription("lazy column")
         // scroll until the group is visible
         lazyColumn.performScrollToNode(hasText(groupElementToTest.label))
         // find the group and check if displayed
@@ -115,8 +116,15 @@ class GroupElementTests {
         groupElement.assertTextContains(groupElementToTest.description)
         // assert only the header is visible and other field elements are not
         assert(groupElement.onParent().onChildren().fetchSemanticsNodes().count() == 1)
-        // find and click on the radio button option
-        composeTestRule.onNodeWithText("show invisible form element").performClick()
+        // find the radio button option that enables the group element's children visibility
+        val radioButtonLabel = "show invisible form element"
+        val radioButton = composeTestRule.onNodeWithText(radioButtonLabel)
+        // scroll to the radio button and click it
+        lazyColumn.performScrollToNode(hasText(radioButtonLabel))
+        radioButton.performClick()
+        radioButton.assertIsSelected()
+        // scroll back to the group element
+        lazyColumn.performScrollToNode(hasText(groupElementToTest.label))
         // assert the and other field elements are visible
         assert(groupElement.onParent().onChildren().fetchSemanticsNodes().count() > 1)
     }
