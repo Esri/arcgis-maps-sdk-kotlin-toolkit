@@ -102,7 +102,8 @@ import java.io.File
 
 @Composable
 internal fun AttachmentTile(
-    state: FormAttachmentState
+    state: FormAttachmentState,
+    modifier: Modifier = Modifier
 ) {
     val loadStatus by state.loadStatus.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
@@ -114,7 +115,7 @@ internal fun AttachmentTile(
     val context = LocalContext.current
     Surface(
         onClick = {},
-        modifier = Modifier
+        modifier = modifier
             .width(92.dp)
             .height(75.dp)
             .clip(shape = RoundedCornerShape(8.dp))
