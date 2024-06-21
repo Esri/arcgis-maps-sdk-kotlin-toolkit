@@ -1,8 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
     <string name="floor_filter_view_filter_hint_sites">تصفية المواقع...</string>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
     <string name="floor_filter_view_filter_hint_facilities">تصفية المرافق...</string>
+    <!-- This text is a label on a text field that can fit 24 chars -->
     <string name="floor_filter_select_site">تحديد موقع</string>
+    <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">تحديد مرفق</string>
     <string name="floor_filter_no_results">لم يتم العثور على نتائج.</string>
-    <string name="floor_filter_site_selector_top_bar">Site\u0020-\u0020</string>
+    <string name="not_available">بيت_Not available______________لاحقة</string>
+    <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
+    <string name="floor_filter_site_selector_top_bar">بيت_Site - %1$s____________لاحقة</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_facility_button">بيت_Sites and facilities button____________________________لاحقة</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="floor_level_select_button">بيت_Floor level select button__________________________لاحقة</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_item">بيت_Site item___________________لاحقة</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="facility_item">بيت_Facility item______________لاحقة</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="clear_search">بيت_Clear search_____________لاحقة</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="close">بيت_Close___________لاحقة</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="go_back_to_site_selector">بيت_Go back to site selector_________________________لاحقة</string>
 </resources>

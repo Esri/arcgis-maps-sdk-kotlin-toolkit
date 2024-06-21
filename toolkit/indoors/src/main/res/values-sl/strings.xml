@@ -1,8 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
     <string name="floor_filter_view_filter_hint_sites">Filtriranje mest ...</string>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
     <string name="floor_filter_view_filter_hint_facilities">Filtriranje objektov ...</string>
+    <!-- This text is a label on a text field that can fit 24 chars -->
     <string name="floor_filter_select_site">Izberi mesto</string>
+    <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Izberi objekt</string>
     <string name="floor_filter_no_results">Ni najdenih rezultatov.</string>
-    <string name="floor_filter_site_selector_top_bar">Site\u0020-\u0020</string>
+    <string name="not_available">Š_Not available______________č</string>
+    <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
+    <string name="floor_filter_site_selector_top_bar">Š_Site - %1$s____________č</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_facility_button">Š_Sites and facilities button____________________________č</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="floor_level_select_button">Š_Floor level select button__________________________č</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_item">Š_Site item___________________č</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="facility_item">Š_Facility item______________č</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="clear_search">Š_Clear search_____________č</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="close">Š_Close___________č</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="go_back_to_site_selector">Š_Go back to site selector_________________________č</string>
 </resources>

@@ -1,8 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
     <string name="floor_filter_view_filter_hint_sites">Филтриране на сайтове...</string>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
     <string name="floor_filter_view_filter_hint_facilities">Филтриране на съоръжения…</string>
+    <!-- This text is a label on a text field that can fit 24 chars -->
     <string name="floor_filter_select_site">Избиране на сайт</string>
+    <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Избиране на съоръжение</string>
     <string name="floor_filter_no_results">Няма намерени резултати.</string>
-    <string name="floor_filter_site_selector_top_bar">Сайт\u0020-\u0020</string>
+    <string name="not_available">й_Not available______________й</string>
+    <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
+    <string name="floor_filter_site_selector_top_bar">й_Site - %1$s____________й</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_facility_button">й_Sites and facilities button____________________________й</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="floor_level_select_button">й_Floor level select button__________________________й</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_item">й_Site item___________________й</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="facility_item">й_Facility item______________й</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="clear_search">й_Clear search_____________й</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="close">й_Close___________й</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="go_back_to_site_selector">й_Go back to site selector_________________________й</string>
 </resources>
