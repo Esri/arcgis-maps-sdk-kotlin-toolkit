@@ -536,7 +536,7 @@ private fun calloutPath(
  * @since 200.5.0
  */
 @Composable
-public fun GeoView.rememberIsReady(): State<Boolean> {
+internal fun GeoView.rememberIsReady(): State<Boolean> {
     val isGeoViewReady = remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         this@rememberIsReady.drawStatus.first()
