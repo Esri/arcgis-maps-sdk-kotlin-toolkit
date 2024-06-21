@@ -173,6 +173,8 @@ public fun MapView(
     val mapView = remember { MapView(context) }
     val layoutDirection = LocalLayoutDirection.current
 
+    // The MapView is wrapped in a Box to ensure that the Callout is drawn on top of the MapView and
+    // that the Callout is clipped to its bounds
     Box(modifier = modifier.clipToBounds()) {
         AndroidView(
             modifier = Modifier
@@ -199,15 +201,12 @@ public fun MapView(
                 }
             })
 
-        val mapViewScope = remember(mapView) { MapViewScope(mapView) }
-        val isGeoViewReady = remember { mutableStateOf(false) }
-        mapViewScope.AwaitGeoViewReady {
-            isGeoViewReady.value = it
-        }
+        val mapViewScope = remember { MapViewScope(mapView) }
+        val isMapViewReady = mapView.rememberIsReady()
 
-        if (isGeoViewReady.value) {
+        if (isMapViewReady.value) {
             content?.let {
-                mapViewScope.isCalloutBeingDisplayed.set(false)
+                mapViewScope.reset()
                 mapViewScope.it()
             }
         }
@@ -404,7 +403,6 @@ private fun MapViewEventHandler(
         }
         launch {
             mapView.drawStatus.collect { drawStatus ->
-//                Log.e("mapView.drawStatus", "in mapView drawStatus: $drawStatus")
                 currentOnDrawStatusChanged?.invoke(drawStatus)
             }
         }

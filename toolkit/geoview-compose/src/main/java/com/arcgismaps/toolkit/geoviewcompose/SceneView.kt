@@ -167,6 +167,8 @@ public fun SceneView(
     val context = LocalContext.current
     val sceneView = remember { SceneView(context) }
 
+    // The SceneView is wrapped in a Box to ensure that the Callout is drawn on top of the SceneView and
+    // that the Callout is clipped to its bounds
     Box(modifier = modifier.clipToBounds()) {
         AndroidView(
             modifier = Modifier.fillMaxSize().semantics { contentDescription = "SceneView" },
@@ -204,15 +206,12 @@ public fun SceneView(
                 }
             })
 
-        val sceneViewScope = remember(sceneView) { SceneViewScope(sceneView) }
-        val isGeoViewReady = remember { mutableStateOf(false) }
-        sceneViewScope.AwaitGeoViewReady {
-            isGeoViewReady.value = it
-        }
+        val sceneViewScope = remember { SceneViewScope(sceneView) }
+        val isSceneViewReady = sceneView.rememberIsReady()
 
-        if (isGeoViewReady.value) {
+        if (isSceneViewReady.value) {
             content?.let {
-                sceneViewScope.isCalloutBeingDisplayed.set(false)
+                sceneViewScope.reset()
                 sceneViewScope.it()
             }
         }

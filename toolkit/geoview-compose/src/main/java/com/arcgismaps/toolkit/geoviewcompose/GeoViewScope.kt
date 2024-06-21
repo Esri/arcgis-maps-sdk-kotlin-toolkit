@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -57,6 +58,7 @@ import com.arcgismaps.mapping.view.SceneLocationVisibility
 import com.arcgismaps.mapping.view.SceneView
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.mapping.view.zero
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.transformWhile
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.cos
@@ -106,30 +108,15 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
      *
      * @since 200.5.0
      */
-    internal var isCalloutBeingDisplayed = AtomicBoolean(false)
+    private val isCalloutBeingDisplayed = AtomicBoolean(false)
 
     /**
-     * This function is used to wait for the GeoView to be ready to return positive values
-     * for operations like locationToScreen. We determine that by waiting for the first drawStatus
-     * message when the map/scene is rendered on the GeoView.
-     * For the MapView/SceneView's content parameter like the Callout we don't want to start drawing
-     * the Callout until the GeoView is ready.
+     * Resets the Callout display flag to false.
      *
      * @since 200.5.0
      */
-    @Composable
-    internal fun AwaitGeoViewReady(onGeoViewReady: (Boolean) -> Unit) {
-        var isGeoViewReady by remember { mutableStateOf(false) }
-        LaunchedEffect(Unit) {
-            geoView.drawStatus.transformWhile<DrawStatus, DrawStatus> { drawStatus ->
-                if (drawStatus == DrawStatus.InProgress) {
-                    onGeoViewReady(true)
-                    isGeoViewReady = true
-                }
-                !isGeoViewReady
-            }.collect {
-            }
-        }
+    internal fun reset() {
+        isCalloutBeingDisplayed.set(false)
     }
 
     /**
@@ -539,4 +526,23 @@ private fun calloutPath(
         // Close the path to complete the shape
         close()
     }
+}
+
+/**
+ * This function is used to wait for the GeoView to be ready to return positive values
+ * for operations like locationToScreen. We determine that by waiting for the first drawStatus
+ * message when the map/scene is rendered on the GeoView.
+ * For the MapView/SceneView's content parameter like the Callout we don't want to start drawing
+ * the Callout until the GeoView is ready.
+ *
+ * @since 200.5.0
+ */
+@Composable
+public fun GeoView.rememberIsReady(): State<Boolean> {
+    val isGeoViewReady = remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        this@rememberIsReady.drawStatus.first()
+        isGeoViewReady.value = true
+    }
+    return isGeoViewReady
 }
