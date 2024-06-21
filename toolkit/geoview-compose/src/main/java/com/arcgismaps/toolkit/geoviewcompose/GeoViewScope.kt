@@ -51,7 +51,6 @@ import com.arcgismaps.geometry.AngularUnit
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ViewpointType
 import com.arcgismaps.mapping.view.DoubleXY
-import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.SceneLocationVisibility
@@ -59,7 +58,6 @@ import com.arcgismaps.mapping.view.SceneView
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.mapping.view.zero
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.transformWhile
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.cos
 import kotlin.math.roundToInt
