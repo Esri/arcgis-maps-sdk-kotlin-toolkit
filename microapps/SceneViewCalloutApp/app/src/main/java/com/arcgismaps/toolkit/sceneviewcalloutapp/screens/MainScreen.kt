@@ -16,7 +16,7 @@
  *
  */
 
-package com.arcgismaps.toolkit.mapviewcalloutapp.screens
+package com.arcgismaps.toolkit.sceneviewcalloutapp.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -52,21 +52,14 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.toolkit.geoviewcompose.MapView
+import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import kotlin.math.roundToInt
 
-/**
- * Displays a composable [MapView] that displays a [Callout] at the tapped location.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TapLocationScreen(viewModel: MapViewModel) {
-
-    val mapPoint = viewModel.mapPoint.collectAsState().value
+fun MainScreen(viewModel: SceneViewModel) {
+    val tapLocation = viewModel.tapLocation.collectAsState().value
     val offset = viewModel.offset.collectAsState().value
-
-    var calloutVisibility by rememberSaveable { mutableStateOf(true) }
-    var rotateOffsetWithGeoView by rememberSaveable { mutableStateOf(false) }
 
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
@@ -75,35 +68,44 @@ fun TapLocationScreen(viewModel: MapViewModel) {
         )
     )
 
+    var calloutVisibility by rememberSaveable { mutableStateOf(true) }
+    var rotateOffsetWithGeoView by rememberSaveable { mutableStateOf(false) }
+
     BottomSheetScaffold(
         sheetContent = {
             CalloutOptions(
                 calloutVisibility = calloutVisibility,
                 isCalloutRotationEnabled = rotateOffsetWithGeoView,
                 offset = offset,
-                viewModel = viewModel,
                 onVisibilityToggled = { calloutVisibility = !calloutVisibility },
-                onCalloutOffsetRotationToggled = {
-                    rotateOffsetWithGeoView = !rotateOffsetWithGeoView
+                onCalloutOffsetRotationToggled = { rotateOffsetWithGeoView = !rotateOffsetWithGeoView },
+                onXAxisOffsetChanged = {
+                    viewModel.setOffset(Offset(it,offset.y))
                 },
+                onYAxisOffsetChanged = {
+                    viewModel.setOffset(Offset(offset.x,it))
+                },
+                onDismissCallout = viewModel::clearTapLocation
             )
         },
         scaffoldState = bottomSheetScaffoldState,
-    ) { paddingValues ->
-        MapView(
-            modifier = Modifier.fillMaxSize().padding(paddingValues),
-            arcGISMap = viewModel.arcGISMap,
+    ) {
+        SceneView(
+            modifier = Modifier
+                .fillMaxSize(),
+            arcGISScene = viewModel.arcGISScene,
             graphicsOverlays = remember { listOf(viewModel.tapLocationGraphicsOverlay) },
-            onSingleTapConfirmed = viewModel::setMapPoint,
-            content = if (mapPoint != null && calloutVisibility) {
+            sceneViewProxy = viewModel.sceneViewProxy,
+            onSingleTapConfirmed = viewModel::setTapLocation,
+            content = if (tapLocation != null && calloutVisibility) {
                 {
                     Callout(
                         modifier = Modifier.wrapContentSize(),
-                        location = mapPoint,
+                        location = tapLocation,
                         rotateOffsetWithGeoView = rotateOffsetWithGeoView,
                         offset = offset
                     ) {
-                        Text("Tapped location:\n${mapPoint.x.roundToInt()},${mapPoint.y.roundToInt()}")
+                        Text("Tapped location:\n${tapLocation.x.roundToInt()},${tapLocation.y.roundToInt()}")
                     }
                 }
             } else {
@@ -118,9 +120,11 @@ fun CalloutOptions(
     calloutVisibility: Boolean,
     isCalloutRotationEnabled: Boolean,
     offset: Offset,
-    viewModel: MapViewModel,
     onVisibilityToggled: () -> Unit,
     onCalloutOffsetRotationToggled: () -> Unit,
+    onXAxisOffsetChanged: (Float) -> Unit,
+    onYAxisOffsetChanged: (Float) -> Unit,
+    onDismissCallout: () -> Unit
 ) {
     Column(Modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -142,13 +146,13 @@ fun CalloutOptions(
                 modifier = Modifier.weight(1f),
                 value = offset.x.toString(),
                 onValueChange = { value ->
-                    viewModel.setOffset(Offset(value.toFloat(), offset.y))
+                    onXAxisOffsetChanged(value.toFloat())
                 },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Decimal,
                     imeAction = ImeAction.Done
                 ),
-                label = { Text("X-Axis offset (px)") },
+                label = { Text("X-Axis offset") },
                 textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.End)
             )
             Spacer(modifier = Modifier.size(10.dp))
@@ -156,18 +160,17 @@ fun CalloutOptions(
                 modifier = Modifier.weight(1f),
                 value = offset.y.toString(),
                 onValueChange = { value ->
-                    viewModel.setOffset(Offset(offset.x, value.toFloat()))
+                    onYAxisOffsetChanged(value.toFloat())
                 },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Decimal,
                     imeAction = ImeAction.Done
                 ),
-                label = { Text("Y-Axis offset (px)") },
+                label = { Text("Y-Axis offset") },
                 textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.End)
             )
         }
-
-        Button(onClick = viewModel::clearMapPoint) {
+        Button(onClick = onDismissCallout) {
             Text(text = "Clear Tap Location")
         }
     }

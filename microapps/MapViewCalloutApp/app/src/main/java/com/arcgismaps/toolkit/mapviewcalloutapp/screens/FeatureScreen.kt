@@ -42,7 +42,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.toolkit.geoviewcompose.Callout
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import kotlin.math.roundToInt
 
