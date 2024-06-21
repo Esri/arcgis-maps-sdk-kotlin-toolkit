@@ -120,7 +120,7 @@ internal fun FileViewer(scope: CoroutineScope, fileState: ViewableFile, onDismis
                             contentDescription = stringResource(id = R.string.image),
                         )
 
-                    is ViewableFileType.Video -> VideoViewer(fileState.path)
+                    is ViewableFileType.Video, ViewableFileType.Audio -> VideoViewer(fileState.path)
                     is ViewableFileType.Other -> Text("Other")
                 }
             }
