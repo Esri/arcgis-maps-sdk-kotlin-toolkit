@@ -47,11 +47,26 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
+import com.arcgismaps.data.Feature
 import com.arcgismaps.geometry.AngularUnit
+import com.arcgismaps.geometry.Geometry
+import com.arcgismaps.geometry.GeometryEngine
+import com.arcgismaps.geometry.Multipart
+import com.arcgismaps.geometry.Multipoint
 import com.arcgismaps.geometry.Point
+import com.arcgismaps.geometry.ProximityResult
+import com.arcgismaps.mapping.GeoElement
 import com.arcgismaps.mapping.ViewpointType
+import com.arcgismaps.mapping.layers.FeatureLayer
+import com.arcgismaps.mapping.layers.FeatureRenderingMode
+import com.arcgismaps.mapping.symbology.CompositeSymbol
+import com.arcgismaps.mapping.symbology.MarkerSymbol
+import com.arcgismaps.mapping.symbology.Symbol
+import com.arcgismaps.mapping.symbology.SymbolAngleAlignment
 import com.arcgismaps.mapping.view.DoubleXY
 import com.arcgismaps.mapping.view.GeoView
+import com.arcgismaps.mapping.view.Graphic
+import com.arcgismaps.mapping.view.GraphicsRenderingMode
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.mapping.view.SceneLocationVisibility
 import com.arcgismaps.mapping.view.SceneView
@@ -98,6 +113,40 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
     ) {
         if (this.isCalloutBeingDisplayed.compareAndSet(false, true)) {
             this.CalloutInternal(location, modifier, offset, rotateOffsetWithGeoView, content)
+        }
+    }
+
+    /**
+     * Creates a Callout at the specified [geoElement] or the [tapLocation] location on the MapView. The Callout is a composable
+     * that can be used to display additional information about a location on the map. The additional information is
+     * passed as a [content] composable that contains text and/or other content. It has a leader that points to
+     * the location that Callout refers to. The body of the Callout is a rectangular area with curved corners
+     * that contains the [content] lambda provided by the application. A thin border line is drawn around the entire Callout.
+     *
+     * Note: Only one Callout can be displayed at a time on the MapView.
+     *
+     * @param geoElement the GeoElement for which to display the Callout
+     * @param modifier Modifier to be applied to the composable Callout
+     * @param tapLocation a Point the user has tapped, or null if the Callout is not associated with a tap
+     * @param content the content of the Callout
+     * @since 200.5.0
+     */
+    @Composable
+    public fun Callout(
+        geoElement: GeoElement,
+        modifier: Modifier = Modifier,
+        tapLocation: Point? = null,
+        content: @Composable BoxScope.() -> Unit
+    ) {
+        if (this.isCalloutBeingDisplayed.compareAndSet(false, true)) {
+            val leaderLocation = this.computeLeaderLocationForGeoelement(geoElement, tapLocation) ?: return
+            this.CalloutInternal(
+                leaderLocation.location,
+                modifier,
+                leaderLocation.offset,
+                leaderLocation.rotateOffsetWithGeoView,
+                content
+            )
         }
     }
 
@@ -271,6 +320,100 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
     }
 
     /**
+     * Calculates the appropriate placement of the Callout with the provided [GeoElement] and tap location.
+     *
+     * @param geoElement the geoElement for which to place the Callout
+     * @param tapLocation the location user tapped at
+     * @return the [LeaderLocation] of the Callout
+     * @since 200.5.0
+     */
+    private fun computeLeaderLocationForGeoelement(geoElement: GeoElement, tapLocation: Point?) : LeaderLocation? {
+        val geometry = geoElement.geometry ?: return null
+        return when (geoElement) {
+            is Graphic -> computeCalloutLocationForGraphic(geoElement, tapLocation)
+            is Feature -> computeCalloutLocationForFeature(geoElement, tapLocation)
+            else -> LeaderLocation(
+                location = tapLocation.calloutLocation(geometry),
+                offset = Offset.Zero,
+                rotateOffsetWithGeoView = false
+            )
+        }
+    }
+
+    /**
+     * Calculates the appropriate placement of the Callout with the provided [Graphic] and tap location.
+     * This method looks at the following properties of the graphic,
+     *
+     * * Geometry
+     * * Symbology
+     * * The overlay, it is a part of
+     *
+     * Along with that information and the tap location, it calculates the fitting placement
+     * of the Callout.
+     *
+     * @param graphic the graphic for which to place the Callout
+     * @param tapLocation the location user tapped at
+     * @return the [LeaderLocation] of the Callout
+     * @since 200.5.0
+     */
+    private fun computeCalloutLocationForGraphic(graphic: Graphic, tapLocation: Point?): LeaderLocation? {
+        val geometry = graphic.geometry ?: return null
+
+        val renderingMode = graphic.graphicsOverlay?.renderingMode ?: GraphicsRenderingMode.Dynamic
+        val symbol = graphic.symbol ?: graphic.graphicsOverlay?.renderer?.getSymbol(graphic)
+
+        val leaderPointOffset = LeaderPointOffset.create(
+            geometry = geometry,
+            symbol = symbol,
+            isStaticRendering = renderingMode == GraphicsRenderingMode.Static
+        )
+
+        return LeaderLocation(
+            location = tapLocation.calloutLocation(geometry),
+            offset = leaderPointOffset.offset,
+            rotateOffsetWithGeoView = leaderPointOffset.rotatesWithGeoView
+        )
+    }
+
+    /**
+     * Calculates the appropriate placement of the Callout with the provided [Feature] and
+     * tap location.
+     * This method looks at the following properties of the feature,
+     *
+     * * Geometry
+     * * Symbology
+     * * The overlay, it is a part of
+     *
+     * Along with that information and the tap location it calculates the fitting placement
+     * of the Callout.
+     *
+     * @param feature the feature for which to place the Callout
+     * @param tapLocation the location user tapped at
+     * @return the [LeaderLocation] of the Callout
+     * @since 200.5.0
+     */
+    private fun computeCalloutLocationForFeature(feature: Feature, tapLocation: Point?): LeaderLocation? {
+        val geometry = feature.geometry ?: return null
+
+        val layer = feature.featureTable?.layer as? FeatureLayer
+        val isStaticRendering = (layer?.renderingMode == FeatureRenderingMode.Static)
+
+        val symbol = layer?.renderer?.getSymbol(feature)
+
+        val leaderPointOffset = LeaderPointOffset.create(
+            geometry = geometry,
+            symbol = symbol,
+            isStaticRendering = isStaticRendering
+        )
+
+        return LeaderLocation(
+            location = tapLocation.calloutLocation(geometry),
+            offset = leaderPointOffset.offset,
+            rotateOffsetWithGeoView = leaderPointOffset.rotatesWithGeoView
+        )
+    }
+
+    /**
      * UI default properties for the [Callout] component.
      */
     private object DefaultCalloutProperties {
@@ -289,6 +432,61 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
             width = strokeBorderWidth + (2 * cornerRadius),
             height = strokeBorderWidth + (2 * cornerRadius)
         )
+    }
+}
+
+/**
+ * Encapsulates properties used to display a Callout at a specific location on a [GeoView]
+ *
+ * @param location the geographical location that a Callout should be displayed at
+ * @param offset the offset in screen coordinates from the geographical location in which to place the Callout
+ * @param rotateOffsetWithGeoView whether the screen offset is rotated with the geo view.
+ * This is useful if you are showing the Callout for elements with symbology that does not rotate with the [GeoView]
+ * @since 200.5.0
+ */
+internal data class LeaderLocation (var location: Point, var offset: Offset = Offset.Zero, var rotateOffsetWithGeoView: Boolean = false)
+
+/**
+ * Encapsulates the screen offset for the Callout leader and if that offset should be rotated
+ * with the [GeoView]
+ *
+ * @param offset the screen offset for the Callout leader
+ * @param rotatesWithGeoView signifies whether the offset should be rotated with the [GeoView]
+ * @since 200.5.0
+ */
+internal class LeaderPointOffset internal constructor(
+    var offset: Offset = Offset.Zero,
+    var rotatesWithGeoView: Boolean = false
+) {
+    companion object {
+        /**
+         * Creates an instance required for a [GeoElement] with a given geometry and symbol.
+         *
+         * @param geometry the geometry of the [GeoElement]
+         * @param symbol the symbol used to render the [GeoElement]
+         * @param isStaticRendering if static rendering is used
+         * @return the [LeaderPointOffset] needed to place the Callout
+         * @since 200.5.0
+         */
+        fun create(
+            geometry: Geometry?,
+            symbol: Symbol?,
+            isStaticRendering: Boolean
+        ): LeaderPointOffset {
+            if (geometry !is Multipart) {
+                val leaderPointOffsetForSymbol = when (symbol) {
+                    is MarkerSymbol -> symbol.leaderPointOffset()
+                    is CompositeSymbol -> symbol.leaderPointOffset()
+                    else -> return LeaderPointOffset()
+                }
+                return LeaderPointOffset(
+                    offset = leaderPointOffsetForSymbol.offset,
+                    rotatesWithGeoView = leaderPointOffsetForSymbol.rotatesWithGeoView || isStaticRendering
+                )
+            } else {
+                return LeaderPointOffset()
+            }
+        }
     }
 }
 
@@ -327,6 +525,68 @@ private fun DoubleXY.rotate(
     val y2 = x1 * sin(rotateByAngle) + y1 * cos(rotateByAngle)
 
     return DoubleXY(x2 + center.x, y2 + center.y)
+}
+
+/**
+ * Returns the [LeaderPointOffset] for the [MarkerSymbol]
+ *
+ * @return the [LeaderPointOffset]
+ * @since 200.5.0
+ */
+internal fun MarkerSymbol.leaderPointOffset(): LeaderPointOffset {
+    var leaderOffset = DoubleXY(leaderOffsetX.toDouble(), leaderOffsetY.toDouble())
+    if (angle != 0.0f) {
+        leaderOffset = leaderOffset.rotate(AngularUnit.degrees.toRadians(angle.toDouble()))
+    }
+    leaderOffset = leaderOffset.offset(Offset(offsetX, offsetY))
+    // we have to flip the y value (for consistency with offset coord system)
+    leaderOffset = DoubleXY(leaderOffset.x, -leaderOffset.y)
+    return LeaderPointOffset(
+        offset = Offset(leaderOffset.x.toFloat(), leaderOffset.y.toFloat()),
+        rotatesWithGeoView = angleAlignment == SymbolAngleAlignment.Map
+    )
+}
+
+/**
+ * Returns the [LeaderPointOffset] for the [CompositeSymbol]
+ *
+ * @return the [LeaderPointOffset]
+ * @since 200.5.0
+ */
+internal fun CompositeSymbol.leaderPointOffset(): LeaderPointOffset {
+    // return first MarkerSymbol to CalloutLeaderSupport
+    return symbols.filterIsInstance<MarkerSymbol>().firstOrNull()?.leaderPointOffset() ?: LeaderPointOffset()
+}
+
+/**
+ * The location that the Callout should be placed. Calculated by taking into account the
+ * type of geometry and the tap location from a user interaction.
+ *
+ * @param geometry the geometry of the [GeoElement] that the Callout is being placed on
+ * @return the geographic location of the Callout placement
+ * @since 200.5.0
+ */
+private fun Point?.calloutLocation(geometry: Geometry): Point {
+    if (geometry is Point) return geometry
+
+    // if either tapLocation or its spatial reference is null, return the center of geometry's extent
+    val spatialReference = this?.spatialReference ?: return geometry.extent.center
+
+    val projectedGeometry =
+        GeometryEngine.projectOrNull(geometry, spatialReference) ?: return this
+
+    val normalizedGeometry =
+        GeometryEngine.normalizeCentralMeridian(projectedGeometry) ?: return this
+
+    val normalizedTap = GeometryEngine.normalizeCentralMeridian(this) as Point
+
+    val proximity: ProximityResult? = if (normalizedGeometry is Multipoint) {
+        GeometryEngine.nearestVertex(normalizedGeometry, normalizedTap)
+    } else {
+        GeometryEngine.nearestCoordinate(normalizedGeometry, normalizedTap)
+    }
+
+    return proximity?.coordinate ?: this
 }
 
 /**

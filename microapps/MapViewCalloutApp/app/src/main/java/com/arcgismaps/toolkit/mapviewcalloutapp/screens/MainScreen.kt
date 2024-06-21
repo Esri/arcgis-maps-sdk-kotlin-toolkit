@@ -80,7 +80,7 @@ fun MainScreen(viewModel: MapViewModel) {
             TapLocationScreen(viewModel)
         }
         composable(route = calloutAppScreens[1]) {
-            FeatureScreen()
+            FeatureScreen(viewModel)
         }
         composable(route = calloutAppScreens[2]) {
             GraphicScreen()
