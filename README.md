@@ -97,6 +97,24 @@ The template and TemplateApp modules are for bootstrapping new modules.
 
 Please see the [package structure](doc/general/developer_setup.md#package-structure) documentation for more details.
 
+### Testing
+
+#### Running Local Tests
+
+In order to run *local* (non-instrumented) tests of all modules and get an aggregated test report, run the following at the root folder of the project:
+```
+./gradlew testAggregatedReport --continue
+```
+The test report for local tests can be located under `arcgis-maps-sdk-kotlin-toolkit/build/reports`.
+
+#### Running Connected Tests
+
+In order to run *connected* (instrumented) tests of all modules and get the test reports in a centralized folder, run the following at the root folder of the project:
+```
+./gradlew connectedDebugAndroidTest --continue
+```
+The test reports for connected tests can be located under `arcgis-maps-sdk-kotlin-toolkit/connectedTestReports`.
+
 ## Licensing
 
 Copyright 2019-2022 Esri

@@ -1,0 +1,47 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--Note: this manifest is only applied to instrumented tests (tests in androidTest folder).
+    For manifest settings that should get applied to the SDK aar see AndroidManifest.xml under src/main-->
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application android:requestLegacyExternalStorage="true">
+        <activity
+            android:name="com.arcgismaps.toolkit.authentication.OAuthUserSignInActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            android:exported="true"
+            android:launchMode="singleTop" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="auth"
+                    android:scheme="kotlin-authentication-test-1" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name="com.arcgismaps.toolkit.authentication.OAuthUserLauncherTestActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:taskAffinity="">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="auth"
+                    android:scheme="kotlin-authentication-test-2" />
+            </intent-filter>
+            </activity>
+    </application>
+</manifest>
