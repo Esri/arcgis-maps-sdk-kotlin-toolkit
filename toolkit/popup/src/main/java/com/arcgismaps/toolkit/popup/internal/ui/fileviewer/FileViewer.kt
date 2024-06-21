@@ -80,10 +80,9 @@ internal fun FileViewer(scope: CoroutineScope, fileState: ViewableFile, onDismis
             }
         }
     } else {
-        val context = LocalContext.current
         val uri = FileProvider.getUriForFile(
-            context.applicationContext,
-            "${context.applicationContext.applicationInfo.packageName}.arcgis.popup.fileprovider",
+            LocalContext.current.applicationContext,
+            "${LocalContext.current.applicationContext.applicationInfo.packageName}.arcgis.popup.fileprovider",
             File(fileState.path)
         )
 
@@ -91,7 +90,7 @@ internal fun FileViewer(scope: CoroutineScope, fileState: ViewableFile, onDismis
             setDataAndType(uri, fileState.contentType)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
-        context.startActivity(intent)
+        LocalContext.current.startActivity(intent)
         onDismissRequest()
     }
 }
