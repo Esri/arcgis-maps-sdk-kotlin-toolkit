@@ -17,7 +17,6 @@
 package com.arcgismaps.toolkit.popup.internal.element.media
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -33,21 +32,20 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.DefaultAlpha
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.arcgismaps.mapping.popup.PopupMediaType
-import com.arcgismaps.toolkit.popup.internal.util.PopupMediaImageLoader
 
 @Composable
 internal fun MediaTile(
@@ -55,6 +53,7 @@ internal fun MediaTile(
 ) {
     val colors = MediaElementDefaults.colors()
     val shapes = MediaElementDefaults.shapes()
+    val model by state.imageUri
     Box(
         modifier = Modifier
             .width(shapes.tileWidth)
@@ -68,42 +67,17 @@ internal fun MediaTile(
                 // TODO open media viewer here
             }
     ) {
-        val painter by state.rememberMediaPainter()
         val defaults = MediaElementDefaults.shapes()
         val padding = if (state.type is PopupMediaType.Image)
             defaults.mediaImagePadding
         else defaults.mediaChartPadding
         MediaView(
-            painter = painter,
+            model = model,
             title = state.title,
             caption = state.caption,
             modifier = Modifier.padding(padding)
         )
     }
-}
-
-/**
- * Loads an image asynchronously using the [PopupMediaImageLoader].
- */
-@Composable
-private fun MediaImage(
-    painter: Painter,
-    modifier: Modifier = Modifier,
-    alignment: Alignment = Alignment.Center,
-    contentScale: ContentScale = ContentScale.FillBounds,
-    contentDescription: String = " ",
-    alpha: Float = DefaultAlpha,
-    colorFilter: ColorFilter? = null
-) {
-    Image(
-        painter = painter,
-        contentDescription = contentDescription,
-        modifier = modifier,
-        alignment = alignment,
-        contentScale = contentScale,
-        alpha = alpha,
-        colorFilter = colorFilter
-    )
 }
 
 @Composable
@@ -144,19 +118,23 @@ private fun Caption(
 
 @Composable
 internal fun MediaView(
+    model: String,
     title: String,
     caption: String,
-    painter: Painter,
     modifier: Modifier = Modifier
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        MediaImage(
-            painter = painter,
+        AsyncImage(
+            model = model,
             contentDescription = title,
-            modifier = modifier.fillMaxSize()
+            contentScale = ContentScale.FillBounds,
+            modifier = modifier.fillMaxSize(),
+            alignment = Alignment.Center,
+            alpha = DefaultAlpha,
+            colorFilter = null
         )
         Column(
             modifier = Modifier
@@ -207,7 +185,10 @@ internal fun PreviewMediaTile() {
             refreshInterval = 1234L,
             sourceUrl = "https://i.postimg.cc/65yws9mR/Screenshot-2024-02-02-at-6-20-49-PM.png",
             linkUrl = "",
-            type = PopupMediaType.Image
+            type = PopupMediaType.Image,
+            scope = rememberCoroutineScope(),
+            chartFolder = "",
+            imageGenerator = null
         )
     )
 }

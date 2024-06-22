@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -83,12 +84,14 @@ private fun MediaPopupElementPreview() {
         stateId = 1,
         media = listOf(
             PopupMediaState(
-                "Photo 1.jpg",
-                "caption",
-                1234L,
+                title = "Photo 1.jpg",
+                caption = "caption",
+                refreshInterval = 1234L,
                 linkUrl = "",
                 sourceUrl = "https://i.postimg.cc/65yws9mR/Screenshot-2024-02-02-at-6-20-49-PM.png",
-                PopupMediaType.Image,
+                type = PopupMediaType.Image,
+                scope = rememberCoroutineScope(),
+                chartFolder = ""
             )
         )
     )

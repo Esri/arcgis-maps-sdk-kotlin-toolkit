@@ -48,9 +48,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -58,8 +58,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.mapping.popup.PopupAttachmentType
+import com.arcgismaps.toolkit.popup.R
 import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ViewableFile
 import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.toViewableFileType
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -71,7 +73,7 @@ internal fun AttachmentTile(
 ) {
     val loadStatus by state.loadStatus.collectAsState()
     val coroutineScope = rememberCoroutineScope()
-    val thumbnail by state.thumbnail
+    val thumbnail by state.thumbnailUri
     val colors = AttachmentsElementDefaults.colors()
     val shapes = AttachmentsElementDefaults.shapes()
     Box(
@@ -102,7 +104,7 @@ internal fun AttachmentTile(
     ) {
         when (loadStatus) {
             LoadStatus.Loaded -> LoadedView(
-                thumbnail = thumbnail,
+                thumbnailUri = thumbnail,
                 attachmentType = state.popupAttachmentType,
                 title = state.name
             )
@@ -136,20 +138,19 @@ internal fun AttachmentTile(
 
 @Composable
 private fun LoadedView(
-    thumbnail: ImageBitmap?,
+    thumbnailUri: String,
     title: String,
     attachmentType: PopupAttachmentType,
     modifier: Modifier = Modifier
 ) {
-
     Box(
         modifier = modifier
             .fillMaxSize()
     ) {
-        if (thumbnail != null) {
-            Image(
-                bitmap = thumbnail,
-                contentDescription = null,
+        if (thumbnailUri.isNotEmpty()) {
+            AsyncImage(
+                model = thumbnailUri,
+                contentDescription = stringResource(id = R.string.attachment_thumbnail),
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )

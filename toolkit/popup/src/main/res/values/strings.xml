@@ -25,4 +25,5 @@
     <string name="video">Video</string>
     <string name="other">Other</string>
     <string name="close">Back</string>
+    <string name="attachment_thumbnail">attachment thumbnail</string>
 </resources>

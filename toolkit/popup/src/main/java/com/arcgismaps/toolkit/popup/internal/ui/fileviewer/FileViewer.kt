@@ -110,13 +110,13 @@ internal fun FileViewer(scope: CoroutineScope, fileState: ViewableFile, onDismis
                 when (fileState.type) {
                     is ViewableFileType.Image ->
                         AsyncImage(
-                            modifier = Modifier.fillMaxSize(),
                             model = fileState.path,
                             contentDescription = stringResource(id = R.string.image),
+                            modifier = Modifier.fillMaxSize()
                         )
 
-                    is ViewableFileType.Video -> Text("Video")
-                    is ViewableFileType.Other -> Text("Other")
+                    is ViewableFileType.Video -> Text(stringResource(R.string.video))
+                    is ViewableFileType.Other -> Text(stringResource(R.string.other))
                 }
             }
         }

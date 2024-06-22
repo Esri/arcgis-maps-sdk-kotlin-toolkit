@@ -25,6 +25,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
+import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
+import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeHandler
+import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
+import com.arcgismaps.httpcore.authentication.TokenCredential
 import com.arcgismaps.toolkit.popupapp.screens.mapscreen.MainScreen
 import com.arcgismaps.toolkit.popupapp.screens.mapscreen.MapViewModel
 import com.arcgismaps.toolkit.popupapp.ui.theme.PopupAppTheme
@@ -33,6 +38,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val viewModel: MapViewModel by viewModels { MapViewModel.Factory }
+        ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler =
+            TestArcGISAuthenticationChallengeHandler(
+                BuildConfig.webMapUser,
+                BuildConfig.webMapPassword
+            )
         setContent {
             PopupAppTheme {
                 PopupApp(viewModel)
@@ -44,4 +54,29 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun PopupApp(viewModel: MapViewModel) {
     MainScreen(viewModel)
+}
+
+
+class TestArcGISAuthenticationChallengeHandler(
+    private val username: String,
+    private val password: String
+) : ArcGISAuthenticationChallengeHandler {
+    override suspend fun handleArcGISAuthenticationChallenge(
+        challenge: ArcGISAuthenticationChallenge
+    ): ArcGISAuthenticationChallengeResponse {
+        val result: Result<TokenCredential> =
+            TokenCredential.create(
+                challenge.requestUrl,
+                username,
+                password,
+                tokenExpirationInterval = 0
+            )
+        return result.let {
+            if (it.isSuccess) {
+                ArcGISAuthenticationChallengeResponse.ContinueWithCredential(it.getOrThrow())
+            } else {
+                ArcGISAuthenticationChallengeResponse.ContinueAndFailWithError(it.exceptionOrNull()!!)
+            }
+        }
+    }
 }

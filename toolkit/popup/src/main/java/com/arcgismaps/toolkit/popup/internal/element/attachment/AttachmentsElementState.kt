@@ -30,8 +30,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.mapping.popup.AttachmentsPopupElement
@@ -121,13 +119,13 @@ internal class PopupAttachmentState(
     private val onLoadAttachment: suspend () -> Result<Unit>,
     private val onLoadThumbnail: (suspend () -> Result<BitmapDrawable?>)? = null
 ) {
-    private val _thumbnail: MutableState<ImageBitmap?> = mutableStateOf(null)
+    private val _thumbnailUri: MutableState<String> = mutableStateOf("")
     private lateinit var _attachment: PopupAttachment
 
     /**
      * The thumbnail of the attachment. This is `null` until [loadAttachment] is called.
      */
-    val thumbnail: State<ImageBitmap?> = _thumbnail
+    val thumbnailUri: State<String> = _thumbnailUri
     val path: String
         get() = _attachment.filePath
 
@@ -153,11 +151,7 @@ internal class PopupAttachmentState(
     fun loadAttachment(scope: CoroutineScope) {
         scope.launch {
             onLoadAttachment().onSuccess {
-                onLoadThumbnail?.invoke()?.onSuccess {
-                    if (it != null) {
-                        _thumbnail.value = it.bitmap.asImageBitmap()
-                    }
-                }
+                _thumbnailUri.value = _attachment.filePath
             }
         }
     }
