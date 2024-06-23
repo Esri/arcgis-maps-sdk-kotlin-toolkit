@@ -173,9 +173,13 @@ public fun MapView(
     val mapView = remember { MapView(context) }
     val layoutDirection = LocalLayoutDirection.current
 
+    // The MapView is wrapped in a Box to ensure that the Callout is drawn on top of the MapView and
+    // that the Callout is clipped to its bounds
     Box(modifier = modifier.clipToBounds()) {
         AndroidView(
-            modifier = Modifier.fillMaxSize().semantics { contentDescription = "MapView" },
+            modifier = Modifier
+                .fillMaxSize()
+                .semantics { contentDescription = "MapView" },
             factory = { mapView },
             update = {
                 it.map = arcGISMap
@@ -197,10 +201,14 @@ public fun MapView(
                 }
             })
 
-        val mapViewScope = remember(mapView) { MapViewScope(mapView) }
-        content?.let {
-            mapViewScope.reset()
-            mapViewScope.it()
+        val mapViewScope = remember { MapViewScope(mapView) }
+        val isMapViewReady = mapView.rememberIsReady()
+
+        if (isMapViewReady.value) {
+            content?.let {
+                mapViewScope.reset()
+                mapViewScope.it()
+            }
         }
     }
 
@@ -522,6 +530,13 @@ public inline fun rememberLocationDisplay(
         LocationDisplay().apply(init)
     }
 }
+
+/**
+ * The receiver class of the [MapView] content lambda.
+ *
+ * @since 200.5.0
+ */
+public class MapViewScope internal constructor(mapView: MapView) : GeoViewScope(mapView)
 
 /**
  * Contains default values for the composable MapView.

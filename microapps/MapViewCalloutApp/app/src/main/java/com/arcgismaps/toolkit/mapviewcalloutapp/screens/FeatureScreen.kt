@@ -19,34 +19,20 @@
 package com.arcgismaps.toolkit.mapviewcalloutapp.screens
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -54,17 +40,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.toolkit.geoviewcompose.Callout
 import com.arcgismaps.toolkit.geoviewcompose.MapView
+import kotlin.math.roundToInt
 
-/**
- * Displays a composable [MapView] that displays a [Callout] on the tapped Feature.
- */
+// TODO Case b.
+//- Show a MapView with a map with a Feature layer with features
+//- Display callout using Point(tap location) on a feature (with some text)
+//- Display a graphic at the tapped location
+//- add switch to enable/disable animation
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,175 +57,78 @@ fun FeatureScreen(viewModel: MapViewModel) {
     val selectedGeoElement = viewModel.selectedGeoElement.collectAsState().value
     var calloutVisibility by rememberSaveable { mutableStateOf(true) }
     var nullTapLocation by rememberSaveable { mutableStateOf(false) }
-    val modalBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var showBottomSheet by remember { mutableStateOf(false) }
+    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState = rememberStandardBottomSheetState(
+            initialValue = SheetValue.Expanded,
+            skipHiddenState = true
+        )
+    )
 
-    Scaffold(
-        floatingActionButton = {
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 12.dp),
-                contentAlignment = Alignment.BottomEnd
-            ) {
-                ExtendedFloatingActionButton(
-                    text = { Text("Callout options") },
-                    icon = { Icon(Icons.Filled.Settings, contentDescription = "SettingsIcon") },
-                    onClick = { showBottomSheet = true }
-                )
-            }
-        }
-    ) { contentPadding ->
+    BottomSheetScaffold(
+        sheetContent = {
+            CalloutOptions(
+                viewModel = viewModel,
+                calloutVisibility = calloutVisibility,
+                onVisibilityToggled = { calloutVisibility = !calloutVisibility },
+                passNullTapLocation = nullTapLocation,
+                onNullTapLocationToggled = { nullTapLocation = !nullTapLocation }
+            )
+        },
+        scaffoldState = bottomSheetScaffoldState,
+    ) {
         MapView(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(contentPadding),
+            modifier = Modifier.fillMaxSize(),
             arcGISMap = viewModel.arcGISMapWithFeatureLayer,
             mapViewProxy = viewModel.mapViewProxy,
-            insets = PaddingValues(horizontal = 12.dp),
             graphicsOverlays = remember { listOf(viewModel.tapLocationGraphicsOverlay) },
             onSingleTapConfirmed = { singleTapConfirmedEvent ->
-                viewModel.apply {
-                    // clears the tapped location and reset selected geoelement
-                    clearTapLocationAndGeoElement()
-                    // sets the new tapped location and adds a graphic
-                    setTapLocation(singleTapConfirmedEvent.mapPoint, nullTapLocation)
-                    // identify the tapped layer and the features attributes
-                    identify(singleTapConfirmedEvent)
-                    // animate the map to recenter to tapped point
-                    recenterMap(singleTapConfirmedEvent.mapPoint)
-                }
+                viewModel.clearTapLocationAndGeoElement()
+                viewModel.setTapLocation(singleTapConfirmedEvent.mapPoint, nullTapLocation)
+                viewModel.identify(singleTapConfirmedEvent)
             },
             content = if (selectedGeoElement != null && calloutVisibility) {
                 {
+                    val tapLocation = viewModel.tapLocation.value
                     Callout(
-                        modifier = Modifier
-                            .wrapContentSize()
-                            .height(200.dp)
-                            .widthIn(max = 500.dp),
                         geoElement = selectedGeoElement,
+                        modifier = Modifier.wrapContentSize(),
                         tapLocation = viewModel.tapLocation.value,
                     ) {
-                        CalloutContent(viewModel, filterAttributes(selectedGeoElement.attributes))
+                        Text("Tapped location: ${tapLocation?.x?.roundToInt()},${tapLocation?.y?.roundToInt()}")
                     }
                 }
             } else {
                 null
             }
         )
-
-        if (showBottomSheet) {
-            ModalBottomSheet(
-                modifier = Modifier.padding(contentPadding),
-                onDismissRequest = { showBottomSheet = false },
-                sheetState = modalBottomSheetState
-            ) {
-                Box(Modifier.navigationBarsPadding()) {
-                    CalloutOptions(
-                        calloutVisibility = calloutVisibility,
-                        onVisibilityToggled = { calloutVisibility = !calloutVisibility },
-                        passNullTapLocation = nullTapLocation,
-                        onNullTapLocationToggled = { nullTapLocation = !nullTapLocation }
-                    )
-                }
-            }
-        }
     }
 }
 
-/**
- * Content for the [Callout] to display information on the tapped Layer and it's [selectedElementAttributes]
- */
-@Composable
-fun CalloutContent(viewModel: MapViewModel, selectedElementAttributes: Map<String, Any?>) {
-    LazyColumn(contentPadding = PaddingValues(8.dp)) {
-        item {
-            Row(
-                Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Layer: " + viewModel.selectedLayerName.value,
-                    style = MaterialTheme.typography.titleMedium
-                )
-                IconButton(onClick = viewModel::clearTapLocationAndGeoElement) {
-                    Icon(
-                        imageVector = Icons.Outlined.Close,
-                        contentDescription = null
-                    )
-                }
-            }
-        }
-        item {
-            HorizontalDivider(Modifier.padding(vertical = 8.dp))
-        }
-        selectedElementAttributes.forEach { attribute ->
-            item {
-                Row(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top
-                ) {
-                    Text(
-                        text = "${attribute.key}:",
-                        fontStyle = FontStyle.Italic,
-                        style = MaterialTheme.typography.labelSmall
-                    )
-                    Spacer(modifier = Modifier.width(20.dp))
-                    Text(
-                        text = "${attribute.value}",
-                        style = MaterialTheme.typography.bodySmall,
-                        textAlign = TextAlign.End
-                    )
-                }
-            }
-        }
-    }
-}
-
-/**
- * Callout visibility and tap location options, displayed in a BottomSheet.
- */
 @Composable
 fun CalloutOptions(
+    viewModel: MapViewModel,
     calloutVisibility: Boolean,
     onVisibilityToggled: () -> Unit,
     passNullTapLocation: Boolean,
     onNullTapLocationToggled: () -> Unit,
 ) {
-    Column(Modifier.padding(vertical = 8.dp, horizontal = 12.dp)) {
-        Row(
-            Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(text = "Enable Callout:", style = MaterialTheme.typography.labelMedium)
+    Column(Modifier.padding(8.dp)) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(text = "Show Callout")
             Checkbox(
                 checked = calloutVisibility,
                 onCheckedChange = { onVisibilityToggled() }
             )
         }
-        Row(
-            Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(text = "Use tapped location:", style = MaterialTheme.typography.labelMedium)
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(text = "Pass null TapLocation")
             Checkbox(
-                checked = !passNullTapLocation,
+                checked = passNullTapLocation,
                 onCheckedChange = { onNullTapLocationToggled() }
             )
         }
+        Button(onClick = { viewModel.clearTapLocationAndGeoElement() }) {
+            Text(text = "Clear Tap Location")
+        }
     }
-}
-
-/**
- * Filter undesired feature attributes like, empty or null values and GlobalIDs.
- */
-private fun filterAttributes(attributes: Map<String, Any?>): Map<String, Any?> {
-    return attributes
-        .filter { attribute -> attribute.value != null }
-        .filter { attribute -> attribute.value.toString().trim().isNotEmpty() }
-        .filter { attribute -> !attribute.key.contains("GlobalID") }
 }

@@ -18,7 +18,6 @@
 
 package com.arcgismaps.toolkit.mapviewcalloutapp.screens
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
@@ -33,7 +32,6 @@ import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
-import com.arcgismaps.mapping.view.IdentifyLayerResult
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import kotlinx.coroutines.Job
@@ -53,21 +51,13 @@ class MapViewModel : ViewModel() {
         )
     }
 
-    val arcGISMapWithFeatureLayer = ArcGISMap(
-        uri = "https://www.arcgis.com/home/item.html?id=16f1b8ba37b44dc3884afc8d5f454dd2"
-    ).apply {
-        initialViewpoint = Viewpoint(
-            Point(x = -1.3659e7, y = 5.6917e6),
-            scale = 50000.0,
-        )
-    }
+    val arcGISMapWithFeatureLayer = ArcGISMap("http://www.arcgis.com/home/webmap/viewer.html?webmap=a58aafbd19994eb38f374e205d1b7b30")
+
     private val _mapPoint = MutableStateFlow<Point?>(null)
     val mapPoint: StateFlow<Point?> = _mapPoint
 
     private val _selectedGeoElement = MutableStateFlow<GeoElement?>(null)
     val selectedGeoElement: StateFlow<GeoElement?> = _selectedGeoElement
-
-    val selectedLayerName = mutableStateOf("")
 
     private val _tapLocation = MutableStateFlow<Point?>(null)
     val tapLocation: StateFlow<Point?> = _tapLocation
@@ -119,30 +109,21 @@ class MapViewModel : ViewModel() {
     }
 
     /**
-     * Identifies the tapped screen coordinate in the provided [singleTapConfirmedEvent].
-     * The identified geoelement is set to [_selectedGeoElement].
+     * Identifies the tapped screen coordinate in the provided [singleTapConfirmedEvent]. The
+     * identified geoelement is set to [_selectedGeoElement].
+     *
+     * @since 200.5.0
      */
     fun identify(singleTapConfirmedEvent: SingleTapConfirmedEvent) {
         currentIdentifyJob?.cancel()
         currentIdentifyJob = viewModelScope.launch {
-            val result = mapViewProxy.identifyLayers(singleTapConfirmedEvent.screenCoordinate, 5.dp)
+            val result =
+                mapViewProxy.identifyLayers(singleTapConfirmedEvent.screenCoordinate, 20.dp)
             result.onSuccess { identifyLayerResultList ->
                 if (identifyLayerResultList.isNotEmpty()) {
                     _selectedGeoElement.value = identifyLayerResultList[0].geoElements.firstOrNull()
-                    selectedLayerName.value = identifyLayerResultList[0].layerContent.name
                 }
             }
-        }
-    }
-
-    /**
-     * Recenter the viewpoint to the given [mapPoint]
-     */
-    fun recenterMap(mapPoint: Point?) {
-        viewModelScope.launch {
-            mapViewProxy.setViewpointAnimated(
-                viewpoint = Viewpoint(mapPoint!!)
-            )
         }
     }
 }
