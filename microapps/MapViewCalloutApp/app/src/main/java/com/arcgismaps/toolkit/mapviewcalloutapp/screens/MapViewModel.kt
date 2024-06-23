@@ -51,13 +51,23 @@ class MapViewModel : ViewModel() {
         )
     }
 
-    val arcGISMapWithFeatureLayer = ArcGISMap("http://www.arcgis.com/home/webmap/viewer.html?webmap=a58aafbd19994eb38f374e205d1b7b30")
+    val arcGISMapWithFeatureLayer = ArcGISMap(
+        uri = "https://www.arcgis.com/home/item.html?id=16f1b8ba37b44dc3884afc8d5f454dd2"
+    ).apply {
+        initialViewpoint = Viewpoint(
+            Point(x = -1.3659e7, y = 5.6917e6),
+            scale = 50000.0,
+        )
+    }
 
     private val _mapPoint = MutableStateFlow<Point?>(null)
     val mapPoint: StateFlow<Point?> = _mapPoint
 
     private val _selectedGeoElement = MutableStateFlow<GeoElement?>(null)
     val selectedGeoElement: StateFlow<GeoElement?> = _selectedGeoElement
+
+    private val _selectedLayerName = MutableStateFlow("")
+    val selectedLayerName: StateFlow<String> = _selectedLayerName
 
     private val _tapLocation = MutableStateFlow<Point?>(null)
     val tapLocation: StateFlow<Point?> = _tapLocation
@@ -122,8 +132,20 @@ class MapViewModel : ViewModel() {
             result.onSuccess { identifyLayerResultList ->
                 if (identifyLayerResultList.isNotEmpty()) {
                     _selectedGeoElement.value = identifyLayerResultList[0].geoElements.firstOrNull()
+                    _selectedLayerName.value = identifyLayerResultList[0].layerContent.name
                 }
             }
+        }
+    }
+
+    /**
+     * Recenter the viewpoint to the given [mapPoint]
+     */
+    fun recenterMap(mapPoint: Point?) {
+        viewModelScope.launch {
+            mapViewProxy.setViewpointAnimated(
+                viewpoint = Viewpoint(mapPoint!!)
+            )
         }
     }
 }
