@@ -155,11 +155,11 @@ fun TapLocationScreen(viewModel: MapViewModel) {
                         calloutVisibility = calloutVisibility,
                         isCalloutRotationEnabled = rotateOffsetWithGeoView,
                         offset = offset,
-                        viewModel = viewModel,
+                        onOffsetChange = { viewModel.setOffset(it) },
                         onVisibilityToggled = { calloutVisibility = !calloutVisibility },
                         onCalloutOffsetRotationToggled = {
                             rotateOffsetWithGeoView = !rotateOffsetWithGeoView
-                        },
+                        }
                     )
                 }
             }
@@ -188,8 +188,8 @@ fun CalloutOptions(
     calloutVisibility: Boolean,
     isCalloutRotationEnabled: Boolean,
     offset: Offset,
-    viewModel: MapViewModel,
     onVisibilityToggled: () -> Unit,
+    onOffsetChange: (Offset) -> Unit,
     onCalloutOffsetRotationToggled: () -> Unit,
 ) {
     Column(Modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -211,9 +211,7 @@ fun CalloutOptions(
             OutlinedTextField(
                 modifier = Modifier.weight(1f),
                 value = offset.x.toString(),
-                onValueChange = { value ->
-                    viewModel.setOffset(Offset(value.toFloat(), offset.y))
-                },
+                onValueChange = { onOffsetChange(Offset(it.toFloat(), offset.y)) },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Decimal,
                     imeAction = ImeAction.Done
@@ -225,9 +223,7 @@ fun CalloutOptions(
             OutlinedTextField(
                 modifier = Modifier.weight(1f),
                 value = offset.y.toString(),
-                onValueChange = { value ->
-                    viewModel.setOffset(Offset(offset.x, value.toFloat()))
-                },
+                onValueChange = { onOffsetChange(Offset(offset.x, it.toFloat())) },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Decimal,
                     imeAction = ImeAction.Done

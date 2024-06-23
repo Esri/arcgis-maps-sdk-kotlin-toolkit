@@ -60,7 +60,7 @@ private val calloutAppScreens = mutableListOf(
 
 /**
  * Displays a list of screens to launch. Each of which demonstrates different ways to show
- * a [Callout] on a [MapView].
+ * a Callout on a [MapView].
  */
 @Composable
 fun MainScreen(viewModel: MapViewModel) {
