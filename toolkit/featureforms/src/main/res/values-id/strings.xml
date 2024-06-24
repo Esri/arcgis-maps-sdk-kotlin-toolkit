@@ -15,82 +15,82 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="enter_n_chars">ng_Enter %1$d characters______________________ny</string>
-    <string name="enter_min_to_max_chars">ng_Enter %1$d to %2$d characters______________________________ny</string>
-    <string name="maximum_n_chars">ng_Maximum %1$d characters________________________ny</string>
-    <string name="no_value">ng_No value_________________ny</string>
-    <string name="enter_value">ng_Enter Value____________ny</string>
-    <string name="required">ng_Required_________________ny</string>
-    <string name="today">ng_Today___________ny</string>
-    <string name="now">ng_Now_______ny</string>
-    <string name="cancel">ng_Cancel_____________ny</string>
-    <string name="ok">ng_OK_____ny</string>
-    <string name="done">ng_Done_________ny</string>
-    <string name="filter">ng_Filter %1$s____________ny</string>
-    <string name="numeric_range_helper_text">ng_Enter value from %1$s to %2$s______________________________ny</string>
-    <string name="less_than_min_value">ng_Less than minimum value %1$s_____________________________ny</string>
-    <string name="exceeds_max_value">ng_Exceeds maximum value %1$s___________________________ny</string>
-    <string name="value_must_be_a_whole_number">ng_Value must be a whole number_____________________________ny</string>
-    <string name="value_must_be_a_number">ng_Value must be a number_______________________ny</string>
-    <string name="value_must_be_within_domain">ng_Value must be within domain____________________________ny</string>
-    <string name="value_must_not_be_empty">ng_Value must not be empty________________________ny</string>
-    <string name="min_datetime_helper_text">ng_Date must be on or after %1$s______________________________ny</string>
-    <string name="max_datetime_helper_text">ng_Date must be on or before %1$s_______________________________ny</string>
+    <string name="enter_n_chars">Masukkan %1$d karakter</string>
+    <string name="enter_min_to_max_chars">Masukkan %1$d hingga %2$d karakter</string>
+    <string name="maximum_n_chars">Maksimal %1$d karakter</string>
+    <string name="no_value">Tidak ada nilai</string>
+    <string name="enter_value">Masukkan Nilai</string>
+    <string name="required">Wajib</string>
+    <string name="today">Hari ini</string>
+    <string name="now">Sekarang</string>
+    <string name="cancel">Batalkan</string>
+    <string name="ok">OK</string>
+    <string name="done">Selesai</string>
+    <string name="filter">Filter %1$s</string>
+    <string name="numeric_range_helper_text">Masukkan nilai dari %1$s hingga %2$s</string>
+    <string name="less_than_min_value">Kurang dari nilai minimal %1$s</string>
+    <string name="exceeds_max_value">Melebihi nilai maksimal %1$s</string>
+    <string name="value_must_be_a_whole_number">Nilai harus berupa bilangan bulat</string>
+    <string name="value_must_be_a_number">Nilai harus berupa angka</string>
+    <string name="value_must_be_within_domain">Nilai harus berada dalam domain</string>
+    <string name="value_must_not_be_empty">Nilai tidak boleh kosong</string>
+    <string name="min_datetime_helper_text">Tanggal harus pada atau setelah %1$s</string>
+    <string name="max_datetime_helper_text">Tanggal harus pada atau sebelum %1$s</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">ng_Entered date_____________ny</string>
-    <string name="ff_date_input_headline_description">ng_Entered date: %1$s___________________ny</string>
-    <string name="ff_date_input_invalid_for_pattern">ng_Date does not match expected pattern: %1$s______________________ny</string>
-    <string name="ff_date_input_invalid_not_allowed">ng_Date not allowed: %1$s_______________________ny</string>
-    <string name="ff_date_input_invalid_year_range">ng__ny
-        ng_Date out of expected year range %1$s - %2$s___________________________ny
-ng__________ny    </string>
-    <string name="ff_date_input_label">ng_Date_________ny</string>
-    <string name="ff_date_input_no_input_description">ng_None_________ny</string>
-    <string name="ff_date_input_title">ng_Select date____________ny</string>
-    <string name="ff_date_picker_headline">ng_"Selected date"________________ny</string>
-    <string name="ff_date_picker_headline_description">ng_Current selection: %1$s________________________ny</string>
-    <string name="ff_date_picker_navigate_to_year_description">ng_Navigate to year %1$s______________________ny</string>
-    <string name="ff_date_picker_no_selection_description">ng_None_________ny</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">ng_Scroll to show earlier years_____________________________ny</string>
-    <string name="ff_date_picker_scroll_to_later_years">ng_Scroll to show later years___________________________ny</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">ng_Switch to calendar input mode______________________________ny</string>
-    <string name="ff_date_picker_switch_to_day_selection">ng__ny
-        ng_"Swipe to select a year, or tap to switch back to selecting a day"______________________________________ny
-ng__________ny    </string>
-    <string name="ff_date_picker_switch_to_input_mode">ng_Switch to text input mode__________________________ny</string>
-    <string name="ff_date_picker_switch_to_next_month">ng_"Change to next month"_______________________ny</string>
-    <string name="ff_date_picker_switch_to_previous_month">ng_"Change to previous month"___________________________ny</string>
-    <string name="ff_date_picker_switch_to_year_selection">ng_"Switch to selecting a year"_____________________________ny</string>
-    <string name="ff_date_picker_title">ng_"Select date"______________ny</string>
-    <string name="ff_date_picker_today_description">ng_Today___________ny</string>
-    <string name="ff_date_picker_year_picker_pane_title">ng_Year picker visible____________________ny</string>
-    <string name="ff_date_range_input_invalid_range_input">ng_Invalid date range input_________________________ny</string>
-    <string name="ff_date_range_input_title">ng_Enter dates____________ny</string>
-    <string name="ff_date_range_picker_day_in_range">ng_In range_________________ny</string>
-    <string name="ff_date_range_picker_end_headline">ng_End date_________________ny</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">ng_Scroll to show the next month______________________________ny</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">ng_Scroll to show the previous month__________________ny</string>
-    <string name="ff_date_range_picker_start_headline">ng_Start date_____________________ny</string>
-    <string name="ff_date_range_picker_title">ng_Select dates_____________ny</string>
+    <string name="ff_date_input_headline">Tanggal yang dimasukkan</string>
+    <string name="ff_date_input_headline_description">Tanggal yang dimasukkan: %1$s</string>
+    <string name="ff_date_input_invalid_for_pattern">Tanggal tidak sesuai dengan pola yang diharapkan: %1$s</string>
+    <string name="ff_date_input_invalid_not_allowed">Tanggal tidak diizinkan: %1$s</string>
+    <string name="ff_date_input_invalid_year_range">
+        Tanggal di luar rentang tahun yang diharapkan %1$s - %2$s
+    </string>
+    <string name="ff_date_input_label">Tanggal</string>
+    <string name="ff_date_input_no_input_description">Tidak Ada</string>
+    <string name="ff_date_input_title">Pilih tanggal</string>
+    <string name="ff_date_picker_headline">"Tanggal yang dipillih"</string>
+    <string name="ff_date_picker_headline_description">Pilihan saat ini: %1$s</string>
+    <string name="ff_date_picker_navigate_to_year_description">Navigasikan ke tahun %1$s</string>
+    <string name="ff_date_picker_no_selection_description">Tidak Ada</string>
+    <string name="ff_date_picker_scroll_to_earlier_years">Gulir untuk menampilkan tahun-tahun sebelumnya</string>
+    <string name="ff_date_picker_scroll_to_later_years">Gulir untuk menampilkan tahun-tahun berikutnya</string>
+    <string name="ff_date_picker_switch_to_calendar_mode">Beralih ke mode input kalender</string>
+    <string name="ff_date_picker_switch_to_day_selection">
+        "Geser untuk memilih tahun, atau ketuk untuk kembali memilih hari"
+    </string>
+    <string name="ff_date_picker_switch_to_input_mode">Beralih ke mode input teks</string>
+    <string name="ff_date_picker_switch_to_next_month">"Ubah ke bulan berikutnya"</string>
+    <string name="ff_date_picker_switch_to_previous_month">"Ubah ke bulan sebelumnya"</string>
+    <string name="ff_date_picker_switch_to_year_selection">"Beralih ke memilih tahun"</string>
+    <string name="ff_date_picker_title">"Pilih tanggal"</string>
+    <string name="ff_date_picker_today_description">Hari ini</string>
+    <string name="ff_date_picker_year_picker_pane_title">Pemilih tahun terlihat</string>
+    <string name="ff_date_range_input_invalid_range_input">Input rentang tanggal tidak valid</string>
+    <string name="ff_date_range_input_title">Masukkan tanggal</string>
+    <string name="ff_date_range_picker_day_in_range">Dalam rentang</string>
+    <string name="ff_date_range_picker_end_headline">Tanggal akhir</string>
+    <string name="ff_date_range_picker_scroll_to_next_month">Gulir untuk menampilkan bulan berikutnya</string>
+    <string name="ff_date_range_picker_scroll_to_previous_month">Gulir untuk menampilkan bulan sebelumnya</string>
+    <string name="ff_date_range_picker_start_headline">Tanggal mulai</string>
+    <string name="ff_date_range_picker_title">Pilih tanggal</string>
 
     <!-- Time Picker string values -->
-    <string name="ff_time_picker_am">ng_AM_____ny</string>
-    <string name="ff_time_picker_hour">ng_Hour_________ny</string>
-    <string name="ff_time_picker_hour_24h_suffix">ng_%1$d hours_____________________ny</string>
-    <string name="ff_time_picker_hour_selection">ng_Select hour____________ny</string>
-    <string name="ff_time_picker_hour_suffix">ng_%1$d o\'clock______________ny</string>
-    <string name="ff_time_picker_hour_text_field">ng_for hour_________________ny</string>
-    <string name="ff_time_picker_minute">ng_Minute_____________ny</string>
-    <string name="ff_time_picker_minute_selection">ng_Select minutes_______________ny</string>
-    <string name="ff_time_picker_minute_suffix">ng_%1$d minutes_____________ny</string>
-    <string name="ff_time_picker_minute_text_field">ng_for minutes____________ny</string>
-    <string name="ff_time_picker_period_toggle_description">ng_Select AM or PM________________ny</string>
-    <string name="ff_time_picker_pm">ng_PM_____ny</string>
-    <string name="take_photo">ng_Take Photo_____________________ny</string>
-    <string name="add_photo">ng_Add Photo___________________ny</string>
-    <string name="rename">ng_Rename_____________ny</string>
-    <string name="delete">ng_Delete_____________ny</string>
-    <string name="rename_attachment">ng_Rename Attachment__________________ny</string>
-    <string name="name">ng_Name_________ny</string>
+    <string name="ff_time_picker_am">AM</string>
+    <string name="ff_time_picker_hour">Jam</string>
+    <string name="ff_time_picker_hour_24h_suffix">%1$d jam</string>
+    <string name="ff_time_picker_hour_selection">Pilih jam</string>
+    <string name="ff_time_picker_hour_suffix">Jam %1$d</string>
+    <string name="ff_time_picker_hour_text_field">selama satu jam</string>
+    <string name="ff_time_picker_minute">Menit</string>
+    <string name="ff_time_picker_minute_selection">Pilih menit</string>
+    <string name="ff_time_picker_minute_suffix">%1$d menit</string>
+    <string name="ff_time_picker_minute_text_field">selama beberapa menit</string>
+    <string name="ff_time_picker_period_toggle_description">Pilih AM atau PM</string>
+    <string name="ff_time_picker_pm">PM</string>
+    <string name="take_photo">Ambil Foto</string>
+    <string name="add_photo">Tambahkan Foto</string>
+    <string name="rename">Ubah Nama</string>
+    <string name="delete">Hapus</string>
+    <string name="rename_attachment">Ganti Nama Lampiran</string>
+    <string name="name">Nama</string>
 </resources>

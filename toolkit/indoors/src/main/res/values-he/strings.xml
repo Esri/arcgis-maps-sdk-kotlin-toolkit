@@ -8,21 +8,21 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">בחר מתקן</string>
     <string name="floor_filter_no_results">לא נמצאו תוצאות.</string>
-    <string name="not_available">כן_Not available______________ש</string>
+    <string name="not_available">לא זמין</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
-    <string name="floor_filter_site_selector_top_bar">כן_Site - %1$s____________ש</string>
+    <string name="floor_filter_site_selector_top_bar">אתר - %1$s</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="site_facility_button">כן_Sites and facilities button____________________________ש</string>
+    <string name="site_facility_button">לחצן אתרים ומתקנים</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="floor_level_select_button">כן_Floor level select button__________________________ש</string>
+    <string name="floor_level_select_button">לחצן בחירת מפלס קומה</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="site_item">כן_Site item___________________ש</string>
+    <string name="site_item">פריט אתר</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="facility_item">כן_Facility item______________ש</string>
+    <string name="facility_item">פריט מתקן</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="clear_search">כן_Clear search_____________ש</string>
+    <string name="clear_search">נקה חיפוש</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="close">כן_Close___________ש</string>
+    <string name="close">סגירה</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="go_back_to_site_selector">כן_Go back to site selector_________________________ש</string>
+    <string name="go_back_to_site_selector">חזור לבורר האתרים</string>
 </resources>

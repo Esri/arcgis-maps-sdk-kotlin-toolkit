@@ -15,82 +15,82 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="enter_n_chars">æ_Enter %1$d characters______________________Â</string>
-    <string name="enter_min_to_max_chars">æ_Enter %1$d to %2$d characters______________________________Â</string>
-    <string name="maximum_n_chars">æ_Maximum %1$d characters________________________Â</string>
-    <string name="no_value">æ_No value_________________Â</string>
-    <string name="enter_value">æ_Enter Value____________Â</string>
-    <string name="required">æ_Required_________________Â</string>
-    <string name="today">æ_Today___________Â</string>
-    <string name="now">æ_Now_______Â</string>
-    <string name="cancel">æ_Cancel_____________Â</string>
-    <string name="ok">æ_OK_____Â</string>
-    <string name="done">æ_Done_________Â</string>
-    <string name="filter">æ_Filter %1$s____________Â</string>
-    <string name="numeric_range_helper_text">æ_Enter value from %1$s to %2$s______________________________Â</string>
-    <string name="less_than_min_value">æ_Less than minimum value %1$s_____________________________Â</string>
-    <string name="exceeds_max_value">æ_Exceeds maximum value %1$s___________________________Â</string>
-    <string name="value_must_be_a_whole_number">æ_Value must be a whole number_____________________________Â</string>
-    <string name="value_must_be_a_number">æ_Value must be a number_______________________Â</string>
-    <string name="value_must_be_within_domain">æ_Value must be within domain____________________________Â</string>
-    <string name="value_must_not_be_empty">æ_Value must not be empty________________________Â</string>
-    <string name="min_datetime_helper_text">æ_Date must be on or after %1$s______________________________Â</string>
-    <string name="max_datetime_helper_text">æ_Date must be on or before %1$s_______________________________Â</string>
+    <string name="enter_n_chars">Saisir %1$d caractères</string>
+    <string name="enter_min_to_max_chars">Saisir %1$d à %2$d caractères</string>
+    <string name="maximum_n_chars">%1$d caractères au maximum</string>
+    <string name="no_value">Aucune valeur</string>
+    <string name="enter_value">Saisir une valeur</string>
+    <string name="required">Obligatoire</string>
+    <string name="today">Aujourd’hui</string>
+    <string name="now">Maintenant</string>
+    <string name="cancel">Annuler</string>
+    <string name="ok">OK</string>
+    <string name="done">Terminé</string>
+    <string name="filter">Filtrer %1$s</string>
+    <string name="numeric_range_helper_text">Saisir une valeur comprise entre %1$s et %2$s</string>
+    <string name="less_than_min_value">Inférieure à la valeur minimale %1$s</string>
+    <string name="exceeds_max_value">Supérieure à la valeur maximale %1$s</string>
+    <string name="value_must_be_a_whole_number">La valeur doit être un nombre entier</string>
+    <string name="value_must_be_a_number">La valeur doit être un nombre</string>
+    <string name="value_must_be_within_domain">La valeur doit être comprise dans le domaine</string>
+    <string name="value_must_not_be_empty">La valeur ne doit pas être vide</string>
+    <string name="min_datetime_helper_text">La date doit être le ou après le %1$s</string>
+    <string name="max_datetime_helper_text">La date doit être le ou avant le %1$s</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">æ_Entered date_____________Â</string>
-    <string name="ff_date_input_headline_description">æ_Entered date: %1$s___________________Â</string>
-    <string name="ff_date_input_invalid_for_pattern">æ_Date does not match expected pattern: %1$s______________________Â</string>
-    <string name="ff_date_input_invalid_not_allowed">æ_Date not allowed: %1$s_______________________Â</string>
-    <string name="ff_date_input_invalid_year_range">æ__Â
-        æ_Date out of expected year range %1$s - %2$s___________________________Â
-æ__________Â    </string>
-    <string name="ff_date_input_label">æ_Date_________Â</string>
-    <string name="ff_date_input_no_input_description">æ_None_________Â</string>
-    <string name="ff_date_input_title">æ_Select date____________Â</string>
-    <string name="ff_date_picker_headline">æ_"Selected date"________________Â</string>
-    <string name="ff_date_picker_headline_description">æ_Current selection: %1$s________________________Â</string>
-    <string name="ff_date_picker_navigate_to_year_description">æ_Navigate to year %1$s______________________Â</string>
-    <string name="ff_date_picker_no_selection_description">æ_None_________Â</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">æ_Scroll to show earlier years_____________________________Â</string>
-    <string name="ff_date_picker_scroll_to_later_years">æ_Scroll to show later years___________________________Â</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">æ_Switch to calendar input mode______________________________Â</string>
-    <string name="ff_date_picker_switch_to_day_selection">æ__Â
-        æ_"Swipe to select a year, or tap to switch back to selecting a day"______________________________________Â
-æ__________Â    </string>
-    <string name="ff_date_picker_switch_to_input_mode">æ_Switch to text input mode__________________________Â</string>
-    <string name="ff_date_picker_switch_to_next_month">æ_"Change to next month"_______________________Â</string>
-    <string name="ff_date_picker_switch_to_previous_month">æ_"Change to previous month"___________________________Â</string>
-    <string name="ff_date_picker_switch_to_year_selection">æ_"Switch to selecting a year"_____________________________Â</string>
-    <string name="ff_date_picker_title">æ_"Select date"______________Â</string>
-    <string name="ff_date_picker_today_description">æ_Today___________Â</string>
-    <string name="ff_date_picker_year_picker_pane_title">æ_Year picker visible____________________Â</string>
-    <string name="ff_date_range_input_invalid_range_input">æ_Invalid date range input_________________________Â</string>
-    <string name="ff_date_range_input_title">æ_Enter dates____________Â</string>
-    <string name="ff_date_range_picker_day_in_range">æ_In range_________________Â</string>
-    <string name="ff_date_range_picker_end_headline">æ_End date_________________Â</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">æ_Scroll to show the next month______________________________Â</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">æ_Scroll to show the previous month__________________Â</string>
-    <string name="ff_date_range_picker_start_headline">æ_Start date_____________________Â</string>
-    <string name="ff_date_range_picker_title">æ_Select dates_____________Â</string>
+    <string name="ff_date_input_headline">Date saisie</string>
+    <string name="ff_date_input_headline_description">Date saisie : %1$s</string>
+    <string name="ff_date_input_invalid_for_pattern">La date ne correspond pas au modèle attendu : %1$s</string>
+    <string name="ff_date_input_invalid_not_allowed">Date non autorisée : %1$s</string>
+    <string name="ff_date_input_invalid_year_range">
+        Date hors de la plage d’années attendue %1$s – %2$s
+    </string>
+    <string name="ff_date_input_label">Date</string>
+    <string name="ff_date_input_no_input_description">Aucune</string>
+    <string name="ff_date_input_title">Sélectionner une date</string>
+    <string name="ff_date_picker_headline">"Date sélectionnée"</string>
+    <string name="ff_date_picker_headline_description">Sélection actuelle : %1$s</string>
+    <string name="ff_date_picker_navigate_to_year_description">Accéder à l’année %1$s</string>
+    <string name="ff_date_picker_no_selection_description">Aucune</string>
+    <string name="ff_date_picker_scroll_to_earlier_years">Faire défiler pour afficher les années précédentes</string>
+    <string name="ff_date_picker_scroll_to_later_years">Faire défiler pour afficher les années suivantes</string>
+    <string name="ff_date_picker_switch_to_calendar_mode">Basculer en mode de saisie Calendrier</string>
+    <string name="ff_date_picker_switch_to_day_selection">
+        "Balayer pour sélectionner une année ou appuyer pour revenir à la sélection d’un jour"
+    </string>
+    <string name="ff_date_picker_switch_to_input_mode">Basculer en mode de saisie Texte</string>
+    <string name="ff_date_picker_switch_to_next_month">"Passer au mois suivant"</string>
+    <string name="ff_date_picker_switch_to_previous_month">"Passer au mois précédent"</string>
+    <string name="ff_date_picker_switch_to_year_selection">"Passer à la sélection d’une année"</string>
+    <string name="ff_date_picker_title">"Sélectionner une date"</string>
+    <string name="ff_date_picker_today_description">Aujourd’hui</string>
+    <string name="ff_date_picker_year_picker_pane_title">Sélecteur d’année visible</string>
+    <string name="ff_date_range_input_invalid_range_input">Plage de dates saisie non valide</string>
+    <string name="ff_date_range_input_title">Saisir des dates</string>
+    <string name="ff_date_range_picker_day_in_range">Dans la plage</string>
+    <string name="ff_date_range_picker_end_headline">Date de fin</string>
+    <string name="ff_date_range_picker_scroll_to_next_month">Faire défiler pour afficher le mois suivant</string>
+    <string name="ff_date_range_picker_scroll_to_previous_month">Faire défiler pour afficher le mois précédent</string>
+    <string name="ff_date_range_picker_start_headline">Date de début</string>
+    <string name="ff_date_range_picker_title">Sélectionner des dates</string>
 
     <!-- Time Picker string values -->
-    <string name="ff_time_picker_am">æ_AM_____Â</string>
-    <string name="ff_time_picker_hour">æ_Hour_________Â</string>
-    <string name="ff_time_picker_hour_24h_suffix">æ_%1$d hours_____________________Â</string>
-    <string name="ff_time_picker_hour_selection">æ_Select hour____________Â</string>
-    <string name="ff_time_picker_hour_suffix">æ_%1$d o\'clock______________Â</string>
-    <string name="ff_time_picker_hour_text_field">æ_for hour_________________Â</string>
-    <string name="ff_time_picker_minute">æ_Minute_____________Â</string>
-    <string name="ff_time_picker_minute_selection">æ_Select minutes_______________Â</string>
-    <string name="ff_time_picker_minute_suffix">æ_%1$d minutes_____________Â</string>
-    <string name="ff_time_picker_minute_text_field">æ_for minutes____________Â</string>
-    <string name="ff_time_picker_period_toggle_description">æ_Select AM or PM________________Â</string>
-    <string name="ff_time_picker_pm">æ_PM_____Â</string>
-    <string name="take_photo">æ_Take Photo_____________________Â</string>
-    <string name="add_photo">æ_Add Photo___________________Â</string>
-    <string name="rename">æ_Rename_____________Â</string>
-    <string name="delete">æ_Delete_____________Â</string>
-    <string name="rename_attachment">æ_Rename Attachment__________________Â</string>
-    <string name="name">æ_Name_________Â</string>
+    <string name="ff_time_picker_am">AM</string>
+    <string name="ff_time_picker_hour">Heure</string>
+    <string name="ff_time_picker_hour_24h_suffix">%1$d heure(s)</string>
+    <string name="ff_time_picker_hour_selection">Sélectionner une heure</string>
+    <string name="ff_time_picker_hour_suffix">%1$d heure(s)</string>
+    <string name="ff_time_picker_hour_text_field">pour l’heure</string>
+    <string name="ff_time_picker_minute">Minute</string>
+    <string name="ff_time_picker_minute_selection">Sélectionner des minutes</string>
+    <string name="ff_time_picker_minute_suffix">%1$d minute(s)</string>
+    <string name="ff_time_picker_minute_text_field">pour les minutes</string>
+    <string name="ff_time_picker_period_toggle_description">Sélectionner AM ou PM</string>
+    <string name="ff_time_picker_pm">PM</string>
+    <string name="take_photo">Prendre une photo</string>
+    <string name="add_photo">Ajouter une photo</string>
+    <string name="rename">Renommer</string>
+    <string name="delete">Supprimer</string>
+    <string name="rename_attachment">Renommer la pièce jointe</string>
+    <string name="name">Nom</string>
 </resources>

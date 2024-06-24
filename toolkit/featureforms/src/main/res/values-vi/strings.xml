@@ -15,82 +15,82 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="enter_n_chars">Đ_Enter %1$d characters______________________ớ</string>
-    <string name="enter_min_to_max_chars">Đ_Enter %1$d to %2$d characters______________________________ớ</string>
-    <string name="maximum_n_chars">Đ_Maximum %1$d characters________________________ớ</string>
-    <string name="no_value">Đ_No value_________________ớ</string>
-    <string name="enter_value">Đ_Enter Value____________ớ</string>
-    <string name="required">Đ_Required_________________ớ</string>
-    <string name="today">Đ_Today___________ớ</string>
-    <string name="now">Đ_Now_______ớ</string>
-    <string name="cancel">Đ_Cancel_____________ớ</string>
-    <string name="ok">Đ_OK_____ớ</string>
-    <string name="done">Đ_Done_________ớ</string>
-    <string name="filter">Đ_Filter %1$s____________ớ</string>
-    <string name="numeric_range_helper_text">Đ_Enter value from %1$s to %2$s______________________________ớ</string>
-    <string name="less_than_min_value">Đ_Less than minimum value %1$s_____________________________ớ</string>
-    <string name="exceeds_max_value">Đ_Exceeds maximum value %1$s___________________________ớ</string>
-    <string name="value_must_be_a_whole_number">Đ_Value must be a whole number_____________________________ớ</string>
-    <string name="value_must_be_a_number">Đ_Value must be a number_______________________ớ</string>
-    <string name="value_must_be_within_domain">Đ_Value must be within domain____________________________ớ</string>
-    <string name="value_must_not_be_empty">Đ_Value must not be empty________________________ớ</string>
-    <string name="min_datetime_helper_text">Đ_Date must be on or after %1$s______________________________ớ</string>
-    <string name="max_datetime_helper_text">Đ_Date must be on or before %1$s_______________________________ớ</string>
+    <string name="enter_n_chars">Nhập %1$d ký tự</string>
+    <string name="enter_min_to_max_chars">Nhập %1$d đến %2$d ký tự</string>
+    <string name="maximum_n_chars">Giới hạn tối đa %1$d ký tự</string>
+    <string name="no_value">Không có giá trị</string>
+    <string name="enter_value">Nhập Giá trị</string>
+    <string name="required">Bắt buộc</string>
+    <string name="today">Hôm nay</string>
+    <string name="now">Bây giờ</string>
+    <string name="cancel">Hủy</string>
+    <string name="ok">OK</string>
+    <string name="done">Hoàn tất</string>
+    <string name="filter">Bộ lọc %1$s</string>
+    <string name="numeric_range_helper_text">Nhập giá trị trong khoảng từ %1$s đến %2$s</string>
+    <string name="less_than_min_value">Dưới giá trị tối thiểu %1$s</string>
+    <string name="exceeds_max_value">Vượt quá giá trị tối đa %1$s</string>
+    <string name="value_must_be_a_whole_number">Giá trị phải là một số nguyên</string>
+    <string name="value_must_be_a_number">Giá trị phải là một số</string>
+    <string name="value_must_be_within_domain">Giá trị phải nằm trong domain</string>
+    <string name="value_must_not_be_empty">Giá trị không được trống</string>
+    <string name="min_datetime_helper_text">Ngày phải vào hoặc sau %1$s</string>
+    <string name="max_datetime_helper_text">Ngày phải vào hoặc trước %1$s</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Đ_Entered date_____________ớ</string>
-    <string name="ff_date_input_headline_description">Đ_Entered date: %1$s___________________ớ</string>
-    <string name="ff_date_input_invalid_for_pattern">Đ_Date does not match expected pattern: %1$s______________________ớ</string>
-    <string name="ff_date_input_invalid_not_allowed">Đ_Date not allowed: %1$s_______________________ớ</string>
-    <string name="ff_date_input_invalid_year_range">Đ__ớ
-        Đ_Date out of expected year range %1$s - %2$s___________________________ớ
-Đ__________ớ    </string>
-    <string name="ff_date_input_label">Đ_Date_________ớ</string>
-    <string name="ff_date_input_no_input_description">Đ_None_________ớ</string>
-    <string name="ff_date_input_title">Đ_Select date____________ớ</string>
-    <string name="ff_date_picker_headline">Đ_"Selected date"________________ớ</string>
-    <string name="ff_date_picker_headline_description">Đ_Current selection: %1$s________________________ớ</string>
-    <string name="ff_date_picker_navigate_to_year_description">Đ_Navigate to year %1$s______________________ớ</string>
-    <string name="ff_date_picker_no_selection_description">Đ_None_________ớ</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Đ_Scroll to show earlier years_____________________________ớ</string>
-    <string name="ff_date_picker_scroll_to_later_years">Đ_Scroll to show later years___________________________ớ</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Đ_Switch to calendar input mode______________________________ớ</string>
-    <string name="ff_date_picker_switch_to_day_selection">Đ__ớ
-        Đ_"Swipe to select a year, or tap to switch back to selecting a day"______________________________________ớ
-Đ__________ớ    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Đ_Switch to text input mode__________________________ớ</string>
-    <string name="ff_date_picker_switch_to_next_month">Đ_"Change to next month"_______________________ớ</string>
-    <string name="ff_date_picker_switch_to_previous_month">Đ_"Change to previous month"___________________________ớ</string>
-    <string name="ff_date_picker_switch_to_year_selection">Đ_"Switch to selecting a year"_____________________________ớ</string>
-    <string name="ff_date_picker_title">Đ_"Select date"______________ớ</string>
-    <string name="ff_date_picker_today_description">Đ_Today___________ớ</string>
-    <string name="ff_date_picker_year_picker_pane_title">Đ_Year picker visible____________________ớ</string>
-    <string name="ff_date_range_input_invalid_range_input">Đ_Invalid date range input_________________________ớ</string>
-    <string name="ff_date_range_input_title">Đ_Enter dates____________ớ</string>
-    <string name="ff_date_range_picker_day_in_range">Đ_In range_________________ớ</string>
-    <string name="ff_date_range_picker_end_headline">Đ_End date_________________ớ</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Đ_Scroll to show the next month______________________________ớ</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Đ_Scroll to show the previous month__________________ớ</string>
-    <string name="ff_date_range_picker_start_headline">Đ_Start date_____________________ớ</string>
-    <string name="ff_date_range_picker_title">Đ_Select dates_____________ớ</string>
+    <string name="ff_date_input_headline">Ngày đã nhập</string>
+    <string name="ff_date_input_headline_description">Ngày đã nhập: %1$s</string>
+    <string name="ff_date_input_invalid_for_pattern">Ngày không khớp với kiểu mẫu dự kiến: %1$s</string>
+    <string name="ff_date_input_invalid_not_allowed">Ngày không được cho phép: %1$s</string>
+    <string name="ff_date_input_invalid_year_range">
+        Ngày nằm ngoài khoảng năm dự kiến %1$s - %2$s
+    </string>
+    <string name="ff_date_input_label">Ngày</string>
+    <string name="ff_date_input_no_input_description">Không có</string>
+    <string name="ff_date_input_title">Chọn ngày</string>
+    <string name="ff_date_picker_headline">"Ngày đã chọn"</string>
+    <string name="ff_date_picker_headline_description">Lựa chọn hiện tại: %1$s</string>
+    <string name="ff_date_picker_navigate_to_year_description">Điều hướng đến năm %1$s</string>
+    <string name="ff_date_picker_no_selection_description">Không có</string>
+    <string name="ff_date_picker_scroll_to_earlier_years">Cuộn để hiển thị các năm trước</string>
+    <string name="ff_date_picker_scroll_to_later_years">Cuộn để hiển thị các năm sau</string>
+    <string name="ff_date_picker_switch_to_calendar_mode">Chuyển sang chế độ đầu vào lịch</string>
+    <string name="ff_date_picker_switch_to_day_selection">
+        "Vuốt để chọn năm hoặc chạm để chuyển về chọn ngày"
+    </string>
+    <string name="ff_date_picker_switch_to_input_mode">Chuyển sang chế độ đầu vào văn bản</string>
+    <string name="ff_date_picker_switch_to_next_month">"Thay đổi sang tháng sau"</string>
+    <string name="ff_date_picker_switch_to_previous_month">"Thay đổi về tháng trước"</string>
+    <string name="ff_date_picker_switch_to_year_selection">"Chuyển sang chọn năm"</string>
+    <string name="ff_date_picker_title">"Chọn ngày"</string>
+    <string name="ff_date_picker_today_description">Hôm nay</string>
+    <string name="ff_date_picker_year_picker_pane_title">Trình chọn năm hiển thị</string>
+    <string name="ff_date_range_input_invalid_range_input">Đầu vào khoảng ngày tháng không hợp lệ</string>
+    <string name="ff_date_range_input_title">Nhập ngày</string>
+    <string name="ff_date_range_picker_day_in_range">Trong khoảng</string>
+    <string name="ff_date_range_picker_end_headline">Ngày kết thúc</string>
+    <string name="ff_date_range_picker_scroll_to_next_month">Cuộn để hiển thị tháng sau</string>
+    <string name="ff_date_range_picker_scroll_to_previous_month">Cuộn để hiển thị tháng trước</string>
+    <string name="ff_date_range_picker_start_headline">Ngày bắt đầu</string>
+    <string name="ff_date_range_picker_title">Chọn ngày</string>
 
     <!-- Time Picker string values -->
-    <string name="ff_time_picker_am">Đ_AM_____ớ</string>
-    <string name="ff_time_picker_hour">Đ_Hour_________ớ</string>
-    <string name="ff_time_picker_hour_24h_suffix">Đ_%1$d hours_____________________ớ</string>
-    <string name="ff_time_picker_hour_selection">Đ_Select hour____________ớ</string>
-    <string name="ff_time_picker_hour_suffix">Đ_%1$d o\'clock______________ớ</string>
-    <string name="ff_time_picker_hour_text_field">Đ_for hour_________________ớ</string>
-    <string name="ff_time_picker_minute">Đ_Minute_____________ớ</string>
-    <string name="ff_time_picker_minute_selection">Đ_Select minutes_______________ớ</string>
-    <string name="ff_time_picker_minute_suffix">Đ_%1$d minutes_____________ớ</string>
-    <string name="ff_time_picker_minute_text_field">Đ_for minutes____________ớ</string>
-    <string name="ff_time_picker_period_toggle_description">Đ_Select AM or PM________________ớ</string>
-    <string name="ff_time_picker_pm">Đ_PM_____ớ</string>
-    <string name="take_photo">Đ_Take Photo_____________________ớ</string>
-    <string name="add_photo">Đ_Add Photo___________________ớ</string>
-    <string name="rename">Đ_Rename_____________ớ</string>
-    <string name="delete">Đ_Delete_____________ớ</string>
-    <string name="rename_attachment">Đ_Rename Attachment__________________ớ</string>
-    <string name="name">Đ_Name_________ớ</string>
+    <string name="ff_time_picker_am">SA</string>
+    <string name="ff_time_picker_hour">Giờ</string>
+    <string name="ff_time_picker_hour_24h_suffix">%1$d giờ</string>
+    <string name="ff_time_picker_hour_selection">Chọn giờ</string>
+    <string name="ff_time_picker_hour_suffix">%1$d giờ</string>
+    <string name="ff_time_picker_hour_text_field">cho giờ</string>
+    <string name="ff_time_picker_minute">Phút</string>
+    <string name="ff_time_picker_minute_selection">Chọn phút</string>
+    <string name="ff_time_picker_minute_suffix">%1$d phút</string>
+    <string name="ff_time_picker_minute_text_field">cho phút</string>
+    <string name="ff_time_picker_period_toggle_description">Chọn SA hoặc CH</string>
+    <string name="ff_time_picker_pm">CH</string>
+    <string name="take_photo">Chụp Ảnh</string>
+    <string name="add_photo">Thêm Ảnh</string>
+    <string name="rename">Đổi tên</string>
+    <string name="delete">Xóa</string>
+    <string name="rename_attachment">Đổi tên Tệp đính kèm</string>
+    <string name="name">Tên</string>
 </resources>

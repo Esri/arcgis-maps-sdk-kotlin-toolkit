@@ -15,82 +15,82 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="enter_n_chars">ı_Enter %1$d characters______________________İ</string>
-    <string name="enter_min_to_max_chars">ı_Enter %1$d to %2$d characters______________________________İ</string>
-    <string name="maximum_n_chars">ı_Maximum %1$d characters________________________İ</string>
-    <string name="no_value">ı_No value_________________İ</string>
-    <string name="enter_value">ı_Enter Value____________İ</string>
-    <string name="required">ı_Required_________________İ</string>
-    <string name="today">ı_Today___________İ</string>
-    <string name="now">ı_Now_______İ</string>
-    <string name="cancel">ı_Cancel_____________İ</string>
-    <string name="ok">ı_OK_____İ</string>
-    <string name="done">ı_Done_________İ</string>
-    <string name="filter">ı_Filter %1$s____________İ</string>
-    <string name="numeric_range_helper_text">ı_Enter value from %1$s to %2$s______________________________İ</string>
-    <string name="less_than_min_value">ı_Less than minimum value %1$s_____________________________İ</string>
-    <string name="exceeds_max_value">ı_Exceeds maximum value %1$s___________________________İ</string>
-    <string name="value_must_be_a_whole_number">ı_Value must be a whole number_____________________________İ</string>
-    <string name="value_must_be_a_number">ı_Value must be a number_______________________İ</string>
-    <string name="value_must_be_within_domain">ı_Value must be within domain____________________________İ</string>
-    <string name="value_must_not_be_empty">ı_Value must not be empty________________________İ</string>
-    <string name="min_datetime_helper_text">ı_Date must be on or after %1$s______________________________İ</string>
-    <string name="max_datetime_helper_text">ı_Date must be on or before %1$s_______________________________İ</string>
+    <string name="enter_n_chars">%1$d karakter girin</string>
+    <string name="enter_min_to_max_chars">%1$d - %2$d karakter girin</string>
+    <string name="maximum_n_chars">Maksimum %1$d karakter</string>
+    <string name="no_value">Değer yok</string>
+    <string name="enter_value">Değer Gir</string>
+    <string name="required">Gerekli</string>
+    <string name="today">Bugün</string>
+    <string name="now">Şimdi</string>
+    <string name="cancel">İptal</string>
+    <string name="ok">Tamam</string>
+    <string name="done">Bitti</string>
+    <string name="filter">%1$s filtrele</string>
+    <string name="numeric_range_helper_text">%1$s\'den %2$s\'e değer gir</string>
+    <string name="less_than_min_value">Minimum değerden daha küçük %1$s</string>
+    <string name="exceeds_max_value">Maksimum değeri aşıyor %1$s</string>
+    <string name="value_must_be_a_whole_number">Değer bir tam sayı olmalıdır</string>
+    <string name="value_must_be_a_number">Değer bir sayı olmalıdır</string>
+    <string name="value_must_be_within_domain">Değer, domain içinde olmalıdır</string>
+    <string name="value_must_not_be_empty">Değer boş olmamalıdır</string>
+    <string name="min_datetime_helper_text">Tarih %1$s veya daha sonra olmalıdır</string>
+    <string name="max_datetime_helper_text">Tarih %1$s veya daha önce olmalıdır</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">ı_Entered date_____________İ</string>
-    <string name="ff_date_input_headline_description">ı_Entered date: %1$s___________________İ</string>
-    <string name="ff_date_input_invalid_for_pattern">ı_Date does not match expected pattern: %1$s______________________İ</string>
-    <string name="ff_date_input_invalid_not_allowed">ı_Date not allowed: %1$s_______________________İ</string>
-    <string name="ff_date_input_invalid_year_range">ı__İ
-        ı_Date out of expected year range %1$s - %2$s___________________________İ
-ı__________İ    </string>
-    <string name="ff_date_input_label">ı_Date_________İ</string>
-    <string name="ff_date_input_no_input_description">ı_None_________İ</string>
-    <string name="ff_date_input_title">ı_Select date____________İ</string>
-    <string name="ff_date_picker_headline">ı_"Selected date"________________İ</string>
-    <string name="ff_date_picker_headline_description">ı_Current selection: %1$s________________________İ</string>
-    <string name="ff_date_picker_navigate_to_year_description">ı_Navigate to year %1$s______________________İ</string>
-    <string name="ff_date_picker_no_selection_description">ı_None_________İ</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">ı_Scroll to show earlier years_____________________________İ</string>
-    <string name="ff_date_picker_scroll_to_later_years">ı_Scroll to show later years___________________________İ</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">ı_Switch to calendar input mode______________________________İ</string>
-    <string name="ff_date_picker_switch_to_day_selection">ı__İ
-        ı_"Swipe to select a year, or tap to switch back to selecting a day"______________________________________İ
-ı__________İ    </string>
-    <string name="ff_date_picker_switch_to_input_mode">ı_Switch to text input mode__________________________İ</string>
-    <string name="ff_date_picker_switch_to_next_month">ı_"Change to next month"_______________________İ</string>
-    <string name="ff_date_picker_switch_to_previous_month">ı_"Change to previous month"___________________________İ</string>
-    <string name="ff_date_picker_switch_to_year_selection">ı_"Switch to selecting a year"_____________________________İ</string>
-    <string name="ff_date_picker_title">ı_"Select date"______________İ</string>
-    <string name="ff_date_picker_today_description">ı_Today___________İ</string>
-    <string name="ff_date_picker_year_picker_pane_title">ı_Year picker visible____________________İ</string>
-    <string name="ff_date_range_input_invalid_range_input">ı_Invalid date range input_________________________İ</string>
-    <string name="ff_date_range_input_title">ı_Enter dates____________İ</string>
-    <string name="ff_date_range_picker_day_in_range">ı_In range_________________İ</string>
-    <string name="ff_date_range_picker_end_headline">ı_End date_________________İ</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">ı_Scroll to show the next month______________________________İ</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">ı_Scroll to show the previous month__________________İ</string>
-    <string name="ff_date_range_picker_start_headline">ı_Start date_____________________İ</string>
-    <string name="ff_date_range_picker_title">ı_Select dates_____________İ</string>
+    <string name="ff_date_input_headline">Girilen tarih</string>
+    <string name="ff_date_input_headline_description">Girilen tarih: %1$s</string>
+    <string name="ff_date_input_invalid_for_pattern">Tarih beklenen kalıpla eşleşmiyor: %1$s</string>
+    <string name="ff_date_input_invalid_not_allowed">İzin verilmeyen tarih: %1$s</string>
+    <string name="ff_date_input_invalid_year_range">
+        Beklenen yıl aralığı %1$s - %2$s dışındaki tarih
+    </string>
+    <string name="ff_date_input_label">Tarih</string>
+    <string name="ff_date_input_no_input_description">Hiçbiri</string>
+    <string name="ff_date_input_title">Tarih seç</string>
+    <string name="ff_date_picker_headline">"Seçilen tarih"</string>
+    <string name="ff_date_picker_headline_description">Mevcut seçim: %1$s</string>
+    <string name="ff_date_picker_navigate_to_year_description">%1$s yılına git</string>
+    <string name="ff_date_picker_no_selection_description">Hiçbiri</string>
+    <string name="ff_date_picker_scroll_to_earlier_years">Önceki yılları göstermek için kaydır</string>
+    <string name="ff_date_picker_scroll_to_later_years">Sonraki yılları göstermek için kaydır</string>
+    <string name="ff_date_picker_switch_to_calendar_mode">Takvim giriş moduna geçin</string>
+    <string name="ff_date_picker_switch_to_day_selection">
+        "Yıl seçmek için kaydırın veya gün seçmeye geri dönmek için dokunun"
+    </string>
+    <string name="ff_date_picker_switch_to_input_mode">Metin giriş moduna geçin</string>
+    <string name="ff_date_picker_switch_to_next_month">"Sonraki aya değiştir"</string>
+    <string name="ff_date_picker_switch_to_previous_month">"Önceki aya değiştir"</string>
+    <string name="ff_date_picker_switch_to_year_selection">"Yıl seçimine değiştir"</string>
+    <string name="ff_date_picker_title">"Tarih seç"</string>
+    <string name="ff_date_picker_today_description">Bugün</string>
+    <string name="ff_date_picker_year_picker_pane_title">Yıl seçici görünür</string>
+    <string name="ff_date_range_input_invalid_range_input">Geçersiz tarih aralığı girdisi</string>
+    <string name="ff_date_range_input_title">Tarihleri gir</string>
+    <string name="ff_date_range_picker_day_in_range">Aralık içinde</string>
+    <string name="ff_date_range_picker_end_headline">Bitiş tarihi</string>
+    <string name="ff_date_range_picker_scroll_to_next_month">Sonraki ayı göstermek için kaydır</string>
+    <string name="ff_date_range_picker_scroll_to_previous_month">Önceki ayı göstermek için kaydır</string>
+    <string name="ff_date_range_picker_start_headline">Başlangıç tarihi</string>
+    <string name="ff_date_range_picker_title">Tarihleri seç</string>
 
     <!-- Time Picker string values -->
-    <string name="ff_time_picker_am">ı_AM_____İ</string>
-    <string name="ff_time_picker_hour">ı_Hour_________İ</string>
-    <string name="ff_time_picker_hour_24h_suffix">ı_%1$d hours_____________________İ</string>
-    <string name="ff_time_picker_hour_selection">ı_Select hour____________İ</string>
-    <string name="ff_time_picker_hour_suffix">ı_%1$d o\'clock______________İ</string>
-    <string name="ff_time_picker_hour_text_field">ı_for hour_________________İ</string>
-    <string name="ff_time_picker_minute">ı_Minute_____________İ</string>
-    <string name="ff_time_picker_minute_selection">ı_Select minutes_______________İ</string>
-    <string name="ff_time_picker_minute_suffix">ı_%1$d minutes_____________İ</string>
-    <string name="ff_time_picker_minute_text_field">ı_for minutes____________İ</string>
-    <string name="ff_time_picker_period_toggle_description">ı_Select AM or PM________________İ</string>
-    <string name="ff_time_picker_pm">ı_PM_____İ</string>
-    <string name="take_photo">ı_Take Photo_____________________İ</string>
-    <string name="add_photo">ı_Add Photo___________________İ</string>
-    <string name="rename">ı_Rename_____________İ</string>
-    <string name="delete">ı_Delete_____________İ</string>
-    <string name="rename_attachment">ı_Rename Attachment__________________İ</string>
-    <string name="name">ı_Name_________İ</string>
+    <string name="ff_time_picker_am">AM</string>
+    <string name="ff_time_picker_hour">Saat</string>
+    <string name="ff_time_picker_hour_24h_suffix">%1$d saat</string>
+    <string name="ff_time_picker_hour_selection">Saat seç</string>
+    <string name="ff_time_picker_hour_suffix">%1$d o\'saat</string>
+    <string name="ff_time_picker_hour_text_field">saat için</string>
+    <string name="ff_time_picker_minute">Dakika</string>
+    <string name="ff_time_picker_minute_selection">Dakika seç</string>
+    <string name="ff_time_picker_minute_suffix">%1$d dakika</string>
+    <string name="ff_time_picker_minute_text_field">dakika için</string>
+    <string name="ff_time_picker_period_toggle_description">AM veya PM olarak seç</string>
+    <string name="ff_time_picker_pm">PM</string>
+    <string name="take_photo">Fotoğraf Çek</string>
+    <string name="add_photo">Fotoğraf Ekle</string>
+    <string name="rename">Yeniden Adlandır</string>
+    <string name="delete">Sil</string>
+    <string name="rename_attachment">Eki Yeniden Adlandır</string>
+    <string name="name">Adı</string>
 </resources>

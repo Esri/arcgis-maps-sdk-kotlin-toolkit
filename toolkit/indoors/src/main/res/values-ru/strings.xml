@@ -8,21 +8,21 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Выбрать помещение</string>
     <string name="floor_filter_no_results">Ничего не найдено.</string>
-    <string name="not_available">Ж_Not available______________Я</string>
+    <string name="not_available">Не доступно</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
-    <string name="floor_filter_site_selector_top_bar">Ж_Site - %1$s____________Я</string>
+    <string name="floor_filter_site_selector_top_bar">Площадка - %1$s</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="site_facility_button">Ж_Sites and facilities button____________________________Я</string>
+    <string name="site_facility_button">Кнопка площадок и зданий</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="floor_level_select_button">Ж_Floor level select button__________________________Я</string>
+    <string name="floor_level_select_button">Кнопка выбора уровня этажа</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="site_item">Ж_Site item___________________Я</string>
+    <string name="site_item">Элемент площадки</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="facility_item">Ж_Facility item______________Я</string>
+    <string name="facility_item">Элемент здания</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="clear_search">Ж_Clear search_____________Я</string>
+    <string name="clear_search">Очистить поиск</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="close">Ж_Close___________Я</string>
+    <string name="close">Закрыть</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="go_back_to_site_selector">Ж_Go back to site selector_________________________Я</string>
+    <string name="go_back_to_site_selector">Вернуться к выбору площадки</string>
 </resources>

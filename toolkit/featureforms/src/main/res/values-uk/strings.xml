@@ -15,82 +15,82 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="enter_n_chars">ґ_Enter %1$d characters______________________Ї</string>
-    <string name="enter_min_to_max_chars">ґ_Enter %1$d to %2$d characters______________________________Ї</string>
-    <string name="maximum_n_chars">ґ_Maximum %1$d characters________________________Ї</string>
-    <string name="no_value">ґ_No value_________________Ї</string>
-    <string name="enter_value">ґ_Enter Value____________Ї</string>
-    <string name="required">ґ_Required_________________Ї</string>
-    <string name="today">ґ_Today___________Ї</string>
-    <string name="now">ґ_Now_______Ї</string>
-    <string name="cancel">ґ_Cancel_____________Ї</string>
-    <string name="ok">ґ_OK_____Ї</string>
-    <string name="done">ґ_Done_________Ї</string>
-    <string name="filter">ґ_Filter %1$s____________Ї</string>
-    <string name="numeric_range_helper_text">ґ_Enter value from %1$s to %2$s______________________________Ї</string>
-    <string name="less_than_min_value">ґ_Less than minimum value %1$s_____________________________Ї</string>
-    <string name="exceeds_max_value">ґ_Exceeds maximum value %1$s___________________________Ї</string>
-    <string name="value_must_be_a_whole_number">ґ_Value must be a whole number_____________________________Ї</string>
-    <string name="value_must_be_a_number">ґ_Value must be a number_______________________Ї</string>
-    <string name="value_must_be_within_domain">ґ_Value must be within domain____________________________Ї</string>
-    <string name="value_must_not_be_empty">ґ_Value must not be empty________________________Ї</string>
-    <string name="min_datetime_helper_text">ґ_Date must be on or after %1$s______________________________Ї</string>
-    <string name="max_datetime_helper_text">ґ_Date must be on or before %1$s_______________________________Ї</string>
+    <string name="enter_n_chars">Введіть %1$d символи(-ів)</string>
+    <string name="enter_min_to_max_chars">Ввести від %1$d до %2$d символів</string>
+    <string name="maximum_n_chars">Максимум %1$d символи</string>
+    <string name="no_value">Немає значення</string>
+    <string name="enter_value">Ввести значення</string>
+    <string name="required">Потрібні відомості</string>
+    <string name="today">Сьогодні</string>
+    <string name="now">Зараз</string>
+    <string name="cancel">Скасувати</string>
+    <string name="ok">OK</string>
+    <string name="done">Готово</string>
+    <string name="filter">Фільтр %1$s</string>
+    <string name="numeric_range_helper_text">Ввести значення від %1$s до %2$s</string>
+    <string name="less_than_min_value">Менше мінімального значення %1$s</string>
+    <string name="exceeds_max_value">Перевищує максимальне значення %1$s</string>
+    <string name="value_must_be_a_whole_number">Значення повинно бути цілим числом</string>
+    <string name="value_must_be_a_number">Значення має бути числом</string>
+    <string name="value_must_be_within_domain">Значення має бути в межах домену</string>
+    <string name="value_must_not_be_empty">Значення не має бути порожнім</string>
+    <string name="min_datetime_helper_text">Дата повинна бути не пізніше %1$s</string>
+    <string name="max_datetime_helper_text">Дата має бути не раніше %1$s</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">ґ_Entered date_____________Ї</string>
-    <string name="ff_date_input_headline_description">ґ_Entered date: %1$s___________________Ї</string>
-    <string name="ff_date_input_invalid_for_pattern">ґ_Date does not match expected pattern: %1$s______________________Ї</string>
-    <string name="ff_date_input_invalid_not_allowed">ґ_Date not allowed: %1$s_______________________Ї</string>
-    <string name="ff_date_input_invalid_year_range">ґ__Ї
-        ґ_Date out of expected year range %1$s - %2$s___________________________Ї
-ґ__________Ї    </string>
-    <string name="ff_date_input_label">ґ_Date_________Ї</string>
-    <string name="ff_date_input_no_input_description">ґ_None_________Ї</string>
-    <string name="ff_date_input_title">ґ_Select date____________Ї</string>
-    <string name="ff_date_picker_headline">ґ_"Selected date"________________Ї</string>
-    <string name="ff_date_picker_headline_description">ґ_Current selection: %1$s________________________Ї</string>
-    <string name="ff_date_picker_navigate_to_year_description">ґ_Navigate to year %1$s______________________Ї</string>
-    <string name="ff_date_picker_no_selection_description">ґ_None_________Ї</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">ґ_Scroll to show earlier years_____________________________Ї</string>
-    <string name="ff_date_picker_scroll_to_later_years">ґ_Scroll to show later years___________________________Ї</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">ґ_Switch to calendar input mode______________________________Ї</string>
-    <string name="ff_date_picker_switch_to_day_selection">ґ__Ї
-        ґ_"Swipe to select a year, or tap to switch back to selecting a day"______________________________________Ї
-ґ__________Ї    </string>
-    <string name="ff_date_picker_switch_to_input_mode">ґ_Switch to text input mode__________________________Ї</string>
-    <string name="ff_date_picker_switch_to_next_month">ґ_"Change to next month"_______________________Ї</string>
-    <string name="ff_date_picker_switch_to_previous_month">ґ_"Change to previous month"___________________________Ї</string>
-    <string name="ff_date_picker_switch_to_year_selection">ґ_"Switch to selecting a year"_____________________________Ї</string>
-    <string name="ff_date_picker_title">ґ_"Select date"______________Ї</string>
-    <string name="ff_date_picker_today_description">ґ_Today___________Ї</string>
-    <string name="ff_date_picker_year_picker_pane_title">ґ_Year picker visible____________________Ї</string>
-    <string name="ff_date_range_input_invalid_range_input">ґ_Invalid date range input_________________________Ї</string>
-    <string name="ff_date_range_input_title">ґ_Enter dates____________Ї</string>
-    <string name="ff_date_range_picker_day_in_range">ґ_In range_________________Ї</string>
-    <string name="ff_date_range_picker_end_headline">ґ_End date_________________Ї</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">ґ_Scroll to show the next month______________________________Ї</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">ґ_Scroll to show the previous month__________________Ї</string>
-    <string name="ff_date_range_picker_start_headline">ґ_Start date_____________________Ї</string>
-    <string name="ff_date_range_picker_title">ґ_Select dates_____________Ї</string>
+    <string name="ff_date_input_headline">Введена дата</string>
+    <string name="ff_date_input_headline_description">Введена дата: %1$s</string>
+    <string name="ff_date_input_invalid_for_pattern">Дата не відповідає очікуваному шаблону: %1$s</string>
+    <string name="ff_date_input_invalid_not_allowed">Дата не дозволена: %1$s</string>
+    <string name="ff_date_input_invalid_year_range">
+        Дата виходить за межі очікуваного діапазону років %1$s - %2$s
+    </string>
+    <string name="ff_date_input_label">Дата</string>
+    <string name="ff_date_input_no_input_description">Немає</string>
+    <string name="ff_date_input_title">Вибрати дату</string>
+    <string name="ff_date_picker_headline">"Вибрана дата"</string>
+    <string name="ff_date_picker_headline_description">Поточний вибір: %1$s</string>
+    <string name="ff_date_picker_navigate_to_year_description">Перейти до року %1$s</string>
+    <string name="ff_date_picker_no_selection_description">Немає</string>
+    <string name="ff_date_picker_scroll_to_earlier_years">Прокрутіть, щоб показати попередні роки</string>
+    <string name="ff_date_picker_scroll_to_later_years">Прокрутіть, щоб показати наступні роки</string>
+    <string name="ff_date_picker_switch_to_calendar_mode">Перейти в режим введення календаря</string>
+    <string name="ff_date_picker_switch_to_day_selection">
+        "Проведіть пальцем, щоб вибрати рік, або торкніться, щоб повернутися до вибору дня"
+    </string>
+    <string name="ff_date_picker_switch_to_input_mode">Перейти в режим введення тексту</string>
+    <string name="ff_date_picker_switch_to_next_month">"Змінити на наступний місяць"</string>
+    <string name="ff_date_picker_switch_to_previous_month">"Змінити на попередній місяць"</string>
+    <string name="ff_date_picker_switch_to_year_selection">"Перейти до вибору року"</string>
+    <string name="ff_date_picker_title">"Вибрати дату"</string>
+    <string name="ff_date_picker_today_description">Сьогодні</string>
+    <string name="ff_date_picker_year_picker_pane_title">Елемент вибору року відображається</string>
+    <string name="ff_date_range_input_invalid_range_input">Неприпустимі вхідні дані діапазону дат</string>
+    <string name="ff_date_range_input_title">Ввести дати</string>
+    <string name="ff_date_range_picker_day_in_range">В діапазоні</string>
+    <string name="ff_date_range_picker_end_headline">Кінцева дата</string>
+    <string name="ff_date_range_picker_scroll_to_next_month">Прокрутіть, щоб показати наступний місяць</string>
+    <string name="ff_date_range_picker_scroll_to_previous_month">Прокрутіть, щоб показати попередній місяць</string>
+    <string name="ff_date_range_picker_start_headline">Початкова дата</string>
+    <string name="ff_date_range_picker_title">Вибрати дати</string>
 
     <!-- Time Picker string values -->
-    <string name="ff_time_picker_am">ґ_AM_____Ї</string>
-    <string name="ff_time_picker_hour">ґ_Hour_________Ї</string>
-    <string name="ff_time_picker_hour_24h_suffix">ґ_%1$d hours_____________________Ї</string>
-    <string name="ff_time_picker_hour_selection">ґ_Select hour____________Ї</string>
-    <string name="ff_time_picker_hour_suffix">ґ_%1$d o\'clock______________Ї</string>
-    <string name="ff_time_picker_hour_text_field">ґ_for hour_________________Ї</string>
-    <string name="ff_time_picker_minute">ґ_Minute_____________Ї</string>
-    <string name="ff_time_picker_minute_selection">ґ_Select minutes_______________Ї</string>
-    <string name="ff_time_picker_minute_suffix">ґ_%1$d minutes_____________Ї</string>
-    <string name="ff_time_picker_minute_text_field">ґ_for minutes____________Ї</string>
-    <string name="ff_time_picker_period_toggle_description">ґ_Select AM or PM________________Ї</string>
-    <string name="ff_time_picker_pm">ґ_PM_____Ї</string>
-    <string name="take_photo">ґ_Take Photo_____________________Ї</string>
-    <string name="add_photo">ґ_Add Photo___________________Ї</string>
-    <string name="rename">ґ_Rename_____________Ї</string>
-    <string name="delete">ґ_Delete_____________Ї</string>
-    <string name="rename_attachment">ґ_Rename Attachment__________________Ї</string>
-    <string name="name">ґ_Name_________Ї</string>
+    <string name="ff_time_picker_am">AM</string>
+    <string name="ff_time_picker_hour">Година</string>
+    <string name="ff_time_picker_hour_24h_suffix">%1$d годин(-и)</string>
+    <string name="ff_time_picker_hour_selection">Вибрати годину</string>
+    <string name="ff_time_picker_hour_suffix">%1$d o\'clock</string>
+    <string name="ff_time_picker_hour_text_field">на годину</string>
+    <string name="ff_time_picker_minute">Хвилина</string>
+    <string name="ff_time_picker_minute_selection">Вибрати хвилини</string>
+    <string name="ff_time_picker_minute_suffix">%1$d хв</string>
+    <string name="ff_time_picker_minute_text_field">на хвилини</string>
+    <string name="ff_time_picker_period_toggle_description">Виберіть ранок або вечір</string>
+    <string name="ff_time_picker_pm">PM</string>
+    <string name="take_photo">Зробити фото</string>
+    <string name="add_photo">Додати фото</string>
+    <string name="rename">Змінити назву</string>
+    <string name="delete">Видалити</string>
+    <string name="rename_attachment">Перейменувати прикріплення</string>
+    <string name="name">Назва</string>
 </resources>

@@ -15,82 +15,82 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="enter_n_chars">ķ_Enter %1$d characters______________________ū</string>
-    <string name="enter_min_to_max_chars">ķ_Enter %1$d to %2$d characters______________________________ū</string>
-    <string name="maximum_n_chars">ķ_Maximum %1$d characters________________________ū</string>
-    <string name="no_value">ķ_No value_________________ū</string>
-    <string name="enter_value">ķ_Enter Value____________ū</string>
-    <string name="required">ķ_Required_________________ū</string>
-    <string name="today">ķ_Today___________ū</string>
-    <string name="now">ķ_Now_______ū</string>
-    <string name="cancel">ķ_Cancel_____________ū</string>
-    <string name="ok">ķ_OK_____ū</string>
-    <string name="done">ķ_Done_________ū</string>
-    <string name="filter">ķ_Filter %1$s____________ū</string>
-    <string name="numeric_range_helper_text">ķ_Enter value from %1$s to %2$s______________________________ū</string>
-    <string name="less_than_min_value">ķ_Less than minimum value %1$s_____________________________ū</string>
-    <string name="exceeds_max_value">ķ_Exceeds maximum value %1$s___________________________ū</string>
-    <string name="value_must_be_a_whole_number">ķ_Value must be a whole number_____________________________ū</string>
-    <string name="value_must_be_a_number">ķ_Value must be a number_______________________ū</string>
-    <string name="value_must_be_within_domain">ķ_Value must be within domain____________________________ū</string>
-    <string name="value_must_not_be_empty">ķ_Value must not be empty________________________ū</string>
-    <string name="min_datetime_helper_text">ķ_Date must be on or after %1$s______________________________ū</string>
-    <string name="max_datetime_helper_text">ķ_Date must be on or before %1$s_______________________________ū</string>
+    <string name="enter_n_chars">Ievadiet %1$d rakstzīmes</string>
+    <string name="enter_min_to_max_chars">Ievadiet %1$d līdz %2$d rakstzīmēm</string>
+    <string name="maximum_n_chars">Ne vairāk kā %1$d rakstzīmes</string>
+    <string name="no_value">Nav vērtības</string>
+    <string name="enter_value">Ievadiet vērtību</string>
+    <string name="required">Nepieciešams</string>
+    <string name="today">Šodien</string>
+    <string name="now">Tagad</string>
+    <string name="cancel">Atcelt</string>
+    <string name="ok">Labi</string>
+    <string name="done">Pabeigts</string>
+    <string name="filter">Filtrēt %1$s</string>
+    <string name="numeric_range_helper_text">Ievadiet vērtību no %1$s līdz %2$s</string>
+    <string name="less_than_min_value">Mazāk par minimālo vērtību %1$s</string>
+    <string name="exceeds_max_value">Pārsniedz maksimālo vērtību %1$s</string>
+    <string name="value_must_be_a_whole_number">Vērtībai jābūt veselam skaitlim</string>
+    <string name="value_must_be_a_number">Vērtībai ir jābūt skaitlim</string>
+    <string name="value_must_be_within_domain">Vērtībai ir jābūt domēnā</string>
+    <string name="value_must_not_be_empty">Vērtība nedrīkst būt tukša</string>
+    <string name="min_datetime_helper_text">Datumam jāsakrīt vai jābūt pēc %1$s</string>
+    <string name="max_datetime_helper_text">Datumam jāsakrīt vai jābūt pirms %1$s</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">ķ_Entered date_____________ū</string>
-    <string name="ff_date_input_headline_description">ķ_Entered date: %1$s___________________ū</string>
-    <string name="ff_date_input_invalid_for_pattern">ķ_Date does not match expected pattern: %1$s______________________ū</string>
-    <string name="ff_date_input_invalid_not_allowed">ķ_Date not allowed: %1$s_______________________ū</string>
-    <string name="ff_date_input_invalid_year_range">ķ__ū
-        ķ_Date out of expected year range %1$s - %2$s___________________________ū
-ķ__________ū    </string>
-    <string name="ff_date_input_label">ķ_Date_________ū</string>
-    <string name="ff_date_input_no_input_description">ķ_None_________ū</string>
-    <string name="ff_date_input_title">ķ_Select date____________ū</string>
-    <string name="ff_date_picker_headline">ķ_"Selected date"________________ū</string>
-    <string name="ff_date_picker_headline_description">ķ_Current selection: %1$s________________________ū</string>
-    <string name="ff_date_picker_navigate_to_year_description">ķ_Navigate to year %1$s______________________ū</string>
-    <string name="ff_date_picker_no_selection_description">ķ_None_________ū</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">ķ_Scroll to show earlier years_____________________________ū</string>
-    <string name="ff_date_picker_scroll_to_later_years">ķ_Scroll to show later years___________________________ū</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">ķ_Switch to calendar input mode______________________________ū</string>
-    <string name="ff_date_picker_switch_to_day_selection">ķ__ū
-        ķ_"Swipe to select a year, or tap to switch back to selecting a day"______________________________________ū
-ķ__________ū    </string>
-    <string name="ff_date_picker_switch_to_input_mode">ķ_Switch to text input mode__________________________ū</string>
-    <string name="ff_date_picker_switch_to_next_month">ķ_"Change to next month"_______________________ū</string>
-    <string name="ff_date_picker_switch_to_previous_month">ķ_"Change to previous month"___________________________ū</string>
-    <string name="ff_date_picker_switch_to_year_selection">ķ_"Switch to selecting a year"_____________________________ū</string>
-    <string name="ff_date_picker_title">ķ_"Select date"______________ū</string>
-    <string name="ff_date_picker_today_description">ķ_Today___________ū</string>
-    <string name="ff_date_picker_year_picker_pane_title">ķ_Year picker visible____________________ū</string>
-    <string name="ff_date_range_input_invalid_range_input">ķ_Invalid date range input_________________________ū</string>
-    <string name="ff_date_range_input_title">ķ_Enter dates____________ū</string>
-    <string name="ff_date_range_picker_day_in_range">ķ_In range_________________ū</string>
-    <string name="ff_date_range_picker_end_headline">ķ_End date_________________ū</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">ķ_Scroll to show the next month______________________________ū</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">ķ_Scroll to show the previous month__________________ū</string>
-    <string name="ff_date_range_picker_start_headline">ķ_Start date_____________________ū</string>
-    <string name="ff_date_range_picker_title">ķ_Select dates_____________ū</string>
+    <string name="ff_date_input_headline">Ievadīšanas datums</string>
+    <string name="ff_date_input_headline_description">Ievadīšanas datums: %1$s</string>
+    <string name="ff_date_input_invalid_for_pattern">Datums neatbilst paredzētajam modelim: %1$s</string>
+    <string name="ff_date_input_invalid_not_allowed">Datums nav atļauts: %1$s</string>
+    <string name="ff_date_input_invalid_year_range">
+        Datums ārpus paredzētā gadu diapazona: %1$s–%2$s
+    </string>
+    <string name="ff_date_input_label">Datums</string>
+    <string name="ff_date_input_no_input_description">Nav</string>
+    <string name="ff_date_input_title">Atlasīt datumu</string>
+    <string name="ff_date_picker_headline">"Atlasītais datums"</string>
+    <string name="ff_date_picker_headline_description">Pašreizējā atlase: %1$s</string>
+    <string name="ff_date_picker_navigate_to_year_description">Pāriet uz gadu %1$s</string>
+    <string name="ff_date_picker_no_selection_description">Nav</string>
+    <string name="ff_date_picker_scroll_to_earlier_years">Ritiniet, lai parādītu iepriekšējos gadus</string>
+    <string name="ff_date_picker_scroll_to_later_years">Ritiniet, lai parādītu vēlākos gadus</string>
+    <string name="ff_date_picker_switch_to_calendar_mode">Pārslēgt uz kalendāra ievades režīmu</string>
+    <string name="ff_date_picker_switch_to_day_selection">
+        "Pavelciet, lai izvēlētos gadu, vai pieskarieties, lai pārslēgtu atpakaļ uz dienas atlasi"
+    </string>
+    <string name="ff_date_picker_switch_to_input_mode">Pārslēgt uz teksta ievades režīmu</string>
+    <string name="ff_date_picker_switch_to_next_month">"Mainīt uz nākamo mēnesi"</string>
+    <string name="ff_date_picker_switch_to_previous_month">"Mainīt uz iepriekšējo mēnesi"</string>
+    <string name="ff_date_picker_switch_to_year_selection">"Pārslēgt uz gada atlasi"</string>
+    <string name="ff_date_picker_title">"Atlasīt datumu"</string>
+    <string name="ff_date_picker_today_description">Šodien</string>
+    <string name="ff_date_picker_year_picker_pane_title">Redzams gada atlasītājs</string>
+    <string name="ff_date_range_input_invalid_range_input">Nederīga datumu diapazona ievade</string>
+    <string name="ff_date_range_input_title">Ievadiet datumus</string>
+    <string name="ff_date_range_picker_day_in_range">Diapazonā</string>
+    <string name="ff_date_range_picker_end_headline">Beigu datums</string>
+    <string name="ff_date_range_picker_scroll_to_next_month">Ritiniet, lai parādītu nākamo mēnesi</string>
+    <string name="ff_date_range_picker_scroll_to_previous_month">Ritiniet, lai parādītu iepriekšējo mēnesi</string>
+    <string name="ff_date_range_picker_start_headline">Sākuma datums</string>
+    <string name="ff_date_range_picker_title">Atlasīt datumus</string>
 
     <!-- Time Picker string values -->
-    <string name="ff_time_picker_am">ķ_AM_____ū</string>
-    <string name="ff_time_picker_hour">ķ_Hour_________ū</string>
-    <string name="ff_time_picker_hour_24h_suffix">ķ_%1$d hours_____________________ū</string>
-    <string name="ff_time_picker_hour_selection">ķ_Select hour____________ū</string>
-    <string name="ff_time_picker_hour_suffix">ķ_%1$d o\'clock______________ū</string>
-    <string name="ff_time_picker_hour_text_field">ķ_for hour_________________ū</string>
-    <string name="ff_time_picker_minute">ķ_Minute_____________ū</string>
-    <string name="ff_time_picker_minute_selection">ķ_Select minutes_______________ū</string>
-    <string name="ff_time_picker_minute_suffix">ķ_%1$d minutes_____________ū</string>
-    <string name="ff_time_picker_minute_text_field">ķ_for minutes____________ū</string>
-    <string name="ff_time_picker_period_toggle_description">ķ_Select AM or PM________________ū</string>
-    <string name="ff_time_picker_pm">ķ_PM_____ū</string>
-    <string name="take_photo">ķ_Take Photo_____________________ū</string>
-    <string name="add_photo">ķ_Add Photo___________________ū</string>
-    <string name="rename">ķ_Rename_____________ū</string>
-    <string name="delete">ķ_Delete_____________ū</string>
-    <string name="rename_attachment">ķ_Rename Attachment__________________ū</string>
-    <string name="name">ķ_Name_________ū</string>
+    <string name="ff_time_picker_am">AM</string>
+    <string name="ff_time_picker_hour">Stunda</string>
+    <string name="ff_time_picker_hour_24h_suffix">%1$d stundas</string>
+    <string name="ff_time_picker_hour_selection">Atlasīt stundu</string>
+    <string name="ff_time_picker_hour_suffix">%1$d o\'pulkstenis</string>
+    <string name="ff_time_picker_hour_text_field">stundai</string>
+    <string name="ff_time_picker_minute">Minūte</string>
+    <string name="ff_time_picker_minute_selection">Atlasīt minūtes</string>
+    <string name="ff_time_picker_minute_suffix">%1$d minūtes</string>
+    <string name="ff_time_picker_minute_text_field">minūtēm</string>
+    <string name="ff_time_picker_period_toggle_description">Atlasīt AM vai PM</string>
+    <string name="ff_time_picker_pm">PM</string>
+    <string name="take_photo">Uzņemt fotoattēlu</string>
+    <string name="add_photo">Pievienot fotoattēlu</string>
+    <string name="rename">Pārdēvēt</string>
+    <string name="delete">Dzēst</string>
+    <string name="rename_attachment">Pārdēvēt pielikumu</string>
+    <string name="name">Nosaukums</string>
 </resources>

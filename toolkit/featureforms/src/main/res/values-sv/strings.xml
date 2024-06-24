@@ -15,82 +15,82 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="enter_n_chars">Å_Enter %1$d characters______________________ö</string>
-    <string name="enter_min_to_max_chars">Å_Enter %1$d to %2$d characters______________________________ö</string>
-    <string name="maximum_n_chars">Å_Maximum %1$d characters________________________ö</string>
-    <string name="no_value">Å_No value_________________ö</string>
-    <string name="enter_value">Å_Enter Value____________ö</string>
-    <string name="required">Å_Required_________________ö</string>
-    <string name="today">Å_Today___________ö</string>
-    <string name="now">Å_Now_______ö</string>
-    <string name="cancel">Å_Cancel_____________ö</string>
-    <string name="ok">Å_OK_____ö</string>
-    <string name="done">Å_Done_________ö</string>
-    <string name="filter">Å_Filter %1$s____________ö</string>
-    <string name="numeric_range_helper_text">Å_Enter value from %1$s to %2$s______________________________ö</string>
-    <string name="less_than_min_value">Å_Less than minimum value %1$s_____________________________ö</string>
-    <string name="exceeds_max_value">Å_Exceeds maximum value %1$s___________________________ö</string>
-    <string name="value_must_be_a_whole_number">Å_Value must be a whole number_____________________________ö</string>
-    <string name="value_must_be_a_number">Å_Value must be a number_______________________ö</string>
-    <string name="value_must_be_within_domain">Å_Value must be within domain____________________________ö</string>
-    <string name="value_must_not_be_empty">Å_Value must not be empty________________________ö</string>
-    <string name="min_datetime_helper_text">Å_Date must be on or after %1$s______________________________ö</string>
-    <string name="max_datetime_helper_text">Å_Date must be on or before %1$s_______________________________ö</string>
+    <string name="enter_n_chars">Ange %1$d tecken</string>
+    <string name="enter_min_to_max_chars">Ange %1$d till %2$d tecken</string>
+    <string name="maximum_n_chars">Maximum %1$d tecken</string>
+    <string name="no_value">Inget värde</string>
+    <string name="enter_value">Ange värde</string>
+    <string name="required">Obligatoriskt</string>
+    <string name="today">Idag</string>
+    <string name="now">Nu</string>
+    <string name="cancel">Avbryt</string>
+    <string name="ok">OK</string>
+    <string name="done">Klart</string>
+    <string name="filter">Filter %1$s</string>
+    <string name="numeric_range_helper_text">Ange ett värde mellan %1$s och %2$s</string>
+    <string name="less_than_min_value">Mindre än minimivärdet %1$s</string>
+    <string name="exceeds_max_value">Överskrider maximalt värde %1$s</string>
+    <string name="value_must_be_a_whole_number">Värdet måste vara ett heltal</string>
+    <string name="value_must_be_a_number">Värdet måste vara ett tal</string>
+    <string name="value_must_be_within_domain">Värdet måste vara inom domän</string>
+    <string name="value_must_not_be_empty">Värdet får inte vara tomt</string>
+    <string name="min_datetime_helper_text">Datum måste vara på eller efter %1$s</string>
+    <string name="max_datetime_helper_text">Datum måste vara på eller efter %1$s</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Å_Entered date_____________ö</string>
-    <string name="ff_date_input_headline_description">Å_Entered date: %1$s___________________ö</string>
-    <string name="ff_date_input_invalid_for_pattern">Å_Date does not match expected pattern: %1$s______________________ö</string>
-    <string name="ff_date_input_invalid_not_allowed">Å_Date not allowed: %1$s_______________________ö</string>
-    <string name="ff_date_input_invalid_year_range">Å__ö
-        Å_Date out of expected year range %1$s - %2$s___________________________ö
-Å__________ö    </string>
-    <string name="ff_date_input_label">Å_Date_________ö</string>
-    <string name="ff_date_input_no_input_description">Å_None_________ö</string>
-    <string name="ff_date_input_title">Å_Select date____________ö</string>
-    <string name="ff_date_picker_headline">Å_"Selected date"________________ö</string>
-    <string name="ff_date_picker_headline_description">Å_Current selection: %1$s________________________ö</string>
-    <string name="ff_date_picker_navigate_to_year_description">Å_Navigate to year %1$s______________________ö</string>
-    <string name="ff_date_picker_no_selection_description">Å_None_________ö</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Å_Scroll to show earlier years_____________________________ö</string>
-    <string name="ff_date_picker_scroll_to_later_years">Å_Scroll to show later years___________________________ö</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Å_Switch to calendar input mode______________________________ö</string>
-    <string name="ff_date_picker_switch_to_day_selection">Å__ö
-        Å_"Swipe to select a year, or tap to switch back to selecting a day"______________________________________ö
-Å__________ö    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Å_Switch to text input mode__________________________ö</string>
-    <string name="ff_date_picker_switch_to_next_month">Å_"Change to next month"_______________________ö</string>
-    <string name="ff_date_picker_switch_to_previous_month">Å_"Change to previous month"___________________________ö</string>
-    <string name="ff_date_picker_switch_to_year_selection">Å_"Switch to selecting a year"_____________________________ö</string>
-    <string name="ff_date_picker_title">Å_"Select date"______________ö</string>
-    <string name="ff_date_picker_today_description">Å_Today___________ö</string>
-    <string name="ff_date_picker_year_picker_pane_title">Å_Year picker visible____________________ö</string>
-    <string name="ff_date_range_input_invalid_range_input">Å_Invalid date range input_________________________ö</string>
-    <string name="ff_date_range_input_title">Å_Enter dates____________ö</string>
-    <string name="ff_date_range_picker_day_in_range">Å_In range_________________ö</string>
-    <string name="ff_date_range_picker_end_headline">Å_End date_________________ö</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Å_Scroll to show the next month______________________________ö</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Å_Scroll to show the previous month__________________ö</string>
-    <string name="ff_date_range_picker_start_headline">Å_Start date_____________________ö</string>
-    <string name="ff_date_range_picker_title">Å_Select dates_____________ö</string>
+    <string name="ff_date_input_headline">Angivet datum</string>
+    <string name="ff_date_input_headline_description">Angivet datum: %1$s</string>
+    <string name="ff_date_input_invalid_for_pattern">Datum matchar inte förväntat mönster: %1$s</string>
+    <string name="ff_date_input_invalid_not_allowed">Datum ej tillåtet: %1$s</string>
+    <string name="ff_date_input_invalid_year_range">
+        Datum ligger utanför förväntat årsintervall %1$s - %2$s
+    </string>
+    <string name="ff_date_input_label">Datum</string>
+    <string name="ff_date_input_no_input_description">Inga</string>
+    <string name="ff_date_input_title">Välj datum</string>
+    <string name="ff_date_picker_headline">"Valt datum"</string>
+    <string name="ff_date_picker_headline_description">Aktuellt urval: %1$s</string>
+    <string name="ff_date_picker_navigate_to_year_description">Navigera till år %1$s</string>
+    <string name="ff_date_picker_no_selection_description">Inga</string>
+    <string name="ff_date_picker_scroll_to_earlier_years">Bläddra för att visa tidigare år</string>
+    <string name="ff_date_picker_scroll_to_later_years">Bläddra för att visa senare år</string>
+    <string name="ff_date_picker_switch_to_calendar_mode">Växla till kalenderindataläge</string>
+    <string name="ff_date_picker_switch_to_day_selection">
+        "Svep för att välja ett år, eller tryck för att gå tillbaka och välja en dag"
+    </string>
+    <string name="ff_date_picker_switch_to_input_mode">Växla till textindataläge</string>
+    <string name="ff_date_picker_switch_to_next_month">"Ändra till nästa månad"</string>
+    <string name="ff_date_picker_switch_to_previous_month">"Ändra till föregående månad"</string>
+    <string name="ff_date_picker_switch_to_year_selection">"Växla för att välja ett år"</string>
+    <string name="ff_date_picker_title">"Välj datum"</string>
+    <string name="ff_date_picker_today_description">Idag</string>
+    <string name="ff_date_picker_year_picker_pane_title">Årsväljare synlig</string>
+    <string name="ff_date_range_input_invalid_range_input">Ogiltig inmatning av datumintervall</string>
+    <string name="ff_date_range_input_title">Ange datum</string>
+    <string name="ff_date_range_picker_day_in_range">I intervall</string>
+    <string name="ff_date_range_picker_end_headline">Slutdatum</string>
+    <string name="ff_date_range_picker_scroll_to_next_month">Bläddra för att visa nästa månad</string>
+    <string name="ff_date_range_picker_scroll_to_previous_month">Bläddra för att visa föregående månad</string>
+    <string name="ff_date_range_picker_start_headline">Startdatum</string>
+    <string name="ff_date_range_picker_title">Välj datum</string>
 
     <!-- Time Picker string values -->
-    <string name="ff_time_picker_am">Å_AM_____ö</string>
-    <string name="ff_time_picker_hour">Å_Hour_________ö</string>
-    <string name="ff_time_picker_hour_24h_suffix">Å_%1$d hours_____________________ö</string>
-    <string name="ff_time_picker_hour_selection">Å_Select hour____________ö</string>
-    <string name="ff_time_picker_hour_suffix">Å_%1$d o\'clock______________ö</string>
-    <string name="ff_time_picker_hour_text_field">Å_for hour_________________ö</string>
-    <string name="ff_time_picker_minute">Å_Minute_____________ö</string>
-    <string name="ff_time_picker_minute_selection">Å_Select minutes_______________ö</string>
-    <string name="ff_time_picker_minute_suffix">Å_%1$d minutes_____________ö</string>
-    <string name="ff_time_picker_minute_text_field">Å_for minutes____________ö</string>
-    <string name="ff_time_picker_period_toggle_description">Å_Select AM or PM________________ö</string>
-    <string name="ff_time_picker_pm">Å_PM_____ö</string>
-    <string name="take_photo">Å_Take Photo_____________________ö</string>
-    <string name="add_photo">Å_Add Photo___________________ö</string>
-    <string name="rename">Å_Rename_____________ö</string>
-    <string name="delete">Å_Delete_____________ö</string>
-    <string name="rename_attachment">Å_Rename Attachment__________________ö</string>
-    <string name="name">Å_Name_________ö</string>
+    <string name="ff_time_picker_am">AM</string>
+    <string name="ff_time_picker_hour">Timme</string>
+    <string name="ff_time_picker_hour_24h_suffix">%1$d timmar</string>
+    <string name="ff_time_picker_hour_selection">Välj timme</string>
+    <string name="ff_time_picker_hour_suffix">%1$d o\'klocka</string>
+    <string name="ff_time_picker_hour_text_field">för timme</string>
+    <string name="ff_time_picker_minute">Minut</string>
+    <string name="ff_time_picker_minute_selection">Välj minuter</string>
+    <string name="ff_time_picker_minute_suffix">%1$d minuter</string>
+    <string name="ff_time_picker_minute_text_field">för minuter</string>
+    <string name="ff_time_picker_period_toggle_description">Välj FM eller EM</string>
+    <string name="ff_time_picker_pm">PM</string>
+    <string name="take_photo">Ta ett foto</string>
+    <string name="add_photo">Lägg till foto</string>
+    <string name="rename">Byt namn</string>
+    <string name="delete">Ta bort</string>
+    <string name="rename_attachment">Byt namn på bilaga</string>
+    <string name="name">Namn</string>
 </resources>

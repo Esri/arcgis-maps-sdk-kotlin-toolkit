@@ -8,21 +8,21 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Einrichtung auswählen</string>
     <string name="floor_filter_no_results">Keine Ergebnisse gefunden.</string>
-    <string name="not_available">ä_Not available______________Ü</string>
+    <string name="not_available">Nicht verfügbar</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
-    <string name="floor_filter_site_selector_top_bar">ä_Site - %1$s____________Ü</string>
+    <string name="floor_filter_site_selector_top_bar">Standort: %1$s</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="site_facility_button">ä_Sites and facilities button____________________________Ü</string>
+    <string name="site_facility_button">Schaltfläche "Standorte und Einrichtungen"</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="floor_level_select_button">ä_Floor level select button__________________________Ü</string>
+    <string name="floor_level_select_button">Schaltfläche "Geschossebene auswählen"</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="site_item">ä_Site item___________________Ü</string>
+    <string name="site_item">Standortelement</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="facility_item">ä_Facility item______________Ü</string>
+    <string name="facility_item">Einrichtungselement</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="clear_search">ä_Clear search_____________Ü</string>
+    <string name="clear_search">Suche löschen</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="close">ä_Close___________Ü</string>
+    <string name="close">Schließen</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="go_back_to_site_selector">ä_Go back to site selector_________________________Ü</string>
+    <string name="go_back_to_site_selector">Zur Standortauswahl zurückkehren</string>
 </resources>

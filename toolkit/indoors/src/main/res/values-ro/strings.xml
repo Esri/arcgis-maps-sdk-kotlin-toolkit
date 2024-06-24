@@ -8,21 +8,21 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Selectați un punct de servicii</string>
     <string name="floor_filter_no_results">Nu a fost găsit niciun rezultat.</string>
-    <string name="not_available">Ă_Not available______________ș</string>
+    <string name="not_available">Indisponibil</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
-    <string name="floor_filter_site_selector_top_bar">Ă_Site - %1$s____________ș</string>
+    <string name="floor_filter_site_selector_top_bar">Amplasament - %1$s</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="site_facility_button">Ă_Sites and facilities button____________________________ș</string>
+    <string name="site_facility_button">Butonul Amplasamente și instalații</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="floor_level_select_button">Ă_Floor level select button__________________________ș</string>
+    <string name="floor_level_select_button">Butonul de selectare a nivelului etajului</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="site_item">Ă_Site item___________________ș</string>
+    <string name="site_item">Element amplasament</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="facility_item">Ă_Facility item______________ș</string>
+    <string name="facility_item">Element instalație</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="clear_search">Ă_Clear search_____________ș</string>
+    <string name="clear_search">Golire căutare</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="close">Ă_Close___________ș</string>
+    <string name="close">Închidere</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="go_back_to_site_selector">Ă_Go back to site selector_________________________ș</string>
+    <string name="go_back_to_site_selector">Reveniți la selectorul de amplasament</string>
 </resources>

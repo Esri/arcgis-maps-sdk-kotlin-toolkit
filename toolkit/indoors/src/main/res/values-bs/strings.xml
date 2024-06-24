@@ -8,21 +8,21 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Odaberi mjesto usluge</string>
     <string name="floor_filter_no_results">Nema rezultata.</string>
-    <string name="not_available">Č_Not available______________ž</string>
+    <string name="not_available">Nije dostupno</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
-    <string name="floor_filter_site_selector_top_bar">Č_Site - %1$s____________ž</string>
+    <string name="floor_filter_site_selector_top_bar">Web - mjesto %1$s</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="site_facility_button">Č_Sites and facilities button____________________________ž</string>
+    <string name="site_facility_button">Gumb za mjesta i objekte</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="floor_level_select_button">Č_Floor level select button__________________________ž</string>
+    <string name="floor_level_select_button">Tipka za odabir kata</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="site_item">Č_Site item___________________ž</string>
+    <string name="site_item">Stavka web-mjesta</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="facility_item">Č_Facility item______________ž</string>
+    <string name="facility_item">Stavka mjesta usluge</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="clear_search">Č_Clear search_____________ž</string>
+    <string name="clear_search">Očisti pretragu</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="close">Č_Close___________ž</string>
+    <string name="close">Zatvori</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="go_back_to_site_selector">Č_Go back to site selector_________________________ž</string>
+    <string name="go_back_to_site_selector">Idi natrag na odabirač web-mjesta</string>
 </resources>

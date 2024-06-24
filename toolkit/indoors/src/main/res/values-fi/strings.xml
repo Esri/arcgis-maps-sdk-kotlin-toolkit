@@ -8,21 +8,21 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Valitse palvelu</string>
     <string name="floor_filter_no_results">Tuloksia ei löytynyt.</string>
-    <string name="not_available">Å_Not available______________ö</string>
+    <string name="not_available">Ei käytettävissä</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
-    <string name="floor_filter_site_selector_top_bar">Å_Site - %1$s____________ö</string>
+    <string name="floor_filter_site_selector_top_bar">Paikka – %1$s</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="site_facility_button">Å_Sites and facilities button____________________________ö</string>
+    <string name="site_facility_button">Paikat ja palvelut -painike</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="floor_level_select_button">Å_Floor level select button__________________________ö</string>
+    <string name="floor_level_select_button">Kerrostason valintapainike</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="site_item">Å_Site item___________________ö</string>
+    <string name="site_item">Paikkakohde</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="facility_item">Å_Facility item______________ö</string>
+    <string name="facility_item">Palvelukohde</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="clear_search">Å_Clear search_____________ö</string>
+    <string name="clear_search">Tyhjennä haku</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="close">Å_Close___________ö</string>
+    <string name="close">Sulje</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="go_back_to_site_selector">Å_Go back to site selector_________________________ö</string>
+    <string name="go_back_to_site_selector">Palaa paikkavalitsimeen</string>
 </resources>
