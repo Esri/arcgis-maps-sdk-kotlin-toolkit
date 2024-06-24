@@ -37,6 +37,7 @@ import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class MapViewModel : ViewModel() {
@@ -61,16 +62,19 @@ class MapViewModel : ViewModel() {
     }
 
     private val _mapPoint = MutableStateFlow<Point?>(null)
-    val mapPoint: StateFlow<Point?> = _mapPoint
+    val mapPoint: StateFlow<Point?> = _mapPoint.asStateFlow()
+
+    private val _rotateOffsetWithGeoView = MutableStateFlow(false)
+    var rotateOffsetWithGeoView: StateFlow<Boolean> = _rotateOffsetWithGeoView.asStateFlow()
 
     private val _selectedGeoElement = MutableStateFlow<GeoElement?>(null)
-    val selectedGeoElement: StateFlow<GeoElement?> = _selectedGeoElement
+    val selectedGeoElement: StateFlow<GeoElement?> = _selectedGeoElement.asStateFlow()
 
     private val _selectedLayerName = MutableStateFlow("")
-    val selectedLayerName: StateFlow<String> = _selectedLayerName
+    val selectedLayerName: StateFlow<String> = _selectedLayerName.asStateFlow()
 
     private val _tapLocation = MutableStateFlow<Point?>(null)
-    val tapLocation: StateFlow<Point?> = _tapLocation
+    val tapLocation: StateFlow<Point?> = _tapLocation.asStateFlow()
 
     private val _offset = MutableStateFlow(Offset.Zero)
     val offset: StateFlow<Offset> = _offset
@@ -86,6 +90,10 @@ class MapViewModel : ViewModel() {
 
     fun setOffset(offset: Offset) {
         _offset.value = offset
+    }
+
+    fun toggleRotateOffsetWithGeoView() {
+        _rotateOffsetWithGeoView.value = !_rotateOffsetWithGeoView.value
     }
 
     fun setMapPoint(singleTapConfirmedEvent: SingleTapConfirmedEvent) {
@@ -127,8 +135,10 @@ class MapViewModel : ViewModel() {
     fun identify(singleTapConfirmedEvent: SingleTapConfirmedEvent) {
         currentIdentifyJob?.cancel()
         currentIdentifyJob = viewModelScope.launch {
-            val result =
-                mapViewProxy.identifyLayers(singleTapConfirmedEvent.screenCoordinate, 20.dp)
+            val result = mapViewProxy.identifyLayers(
+                screenCoordinate = singleTapConfirmedEvent.screenCoordinate,
+                tolerance = 1.dp
+            )
             result.onSuccess { identifyLayerResultList ->
                 if (identifyLayerResultList.isNotEmpty()) {
                     _selectedGeoElement.value = identifyLayerResultList[0].geoElements.firstOrNull()

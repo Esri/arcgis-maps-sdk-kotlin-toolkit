@@ -33,12 +33,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -63,6 +62,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
+import com.arcgismaps.geometry.Point
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import kotlin.math.roundToInt
 
@@ -75,9 +75,9 @@ fun TapLocationScreen(viewModel: MapViewModel) {
 
     val mapPoint = viewModel.mapPoint.collectAsState().value
     val offset = viewModel.offset.collectAsState().value
+    val rotateOffsetWithGeoView = viewModel.rotateOffsetWithGeoView.collectAsState().value
 
     var calloutVisibility by rememberSaveable { mutableStateOf(true) }
-    var rotateOffsetWithGeoView by rememberSaveable { mutableStateOf(false) }
     var showBottomSheet by remember { mutableStateOf(false) }
     val modalBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -129,13 +129,6 @@ fun TapLocationScreen(viewModel: MapViewModel) {
                                     htmlFlag = HtmlCompat.FROM_HTML_MODE_COMPACT
                                 )
                             }
-
-                            IconButton(onClick = viewModel::clearMapPoint) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Close,
-                                    contentDescription = "Clear Callout map point"
-                                )
-                            }
                         }
                     }
                 }
@@ -155,10 +148,12 @@ fun TapLocationScreen(viewModel: MapViewModel) {
                         calloutVisibility = calloutVisibility,
                         isCalloutRotationEnabled = rotateOffsetWithGeoView,
                         offset = offset,
+                        mapPoint = mapPoint,
                         onOffsetChange = { viewModel.setOffset(it) },
                         onVisibilityToggled = { calloutVisibility = !calloutVisibility },
+                        onClearMapPointRequest = { viewModel.clearMapPoint() },
                         onCalloutOffsetRotationToggled = {
-                            rotateOffsetWithGeoView = !rotateOffsetWithGeoView
+                            viewModel.toggleRotateOffsetWithGeoView()
                         }
                     )
                 }
@@ -188,9 +183,11 @@ fun CalloutOptions(
     calloutVisibility: Boolean,
     isCalloutRotationEnabled: Boolean,
     offset: Offset,
+    mapPoint: Point?,
     onVisibilityToggled: () -> Unit,
     onOffsetChange: (Offset) -> Unit,
     onCalloutOffsetRotationToggled: () -> Unit,
+    onClearMapPointRequest: () -> Unit,
 ) {
     Column(Modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -231,6 +228,12 @@ fun CalloutOptions(
                 label = { Text("Y-Axis offset (px)") },
                 textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.End)
             )
+        }
+        Spacer(modifier = Modifier.size(10.dp))
+        Button(
+            enabled = (mapPoint != null && calloutVisibility),
+            onClick = { onClearMapPointRequest() }) {
+            Text(text = "Clear Callout map point")
         }
     }
 }
