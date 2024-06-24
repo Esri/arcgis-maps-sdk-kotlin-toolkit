@@ -20,12 +20,14 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -58,11 +60,17 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -140,13 +148,22 @@ internal fun AttachmentFormElement(
 @Composable
 private fun Carousel(state: LazyListState, attachments: List<FormAttachmentState>) {
     LazyRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScrollbar(
+                state = state,
+                trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                height = 4.dp,
+                offsetY = 5.dp,
+                autoHide = false
+            ),
         state = state,
-        horizontalArrangement = Arrangement.spacedBy(15.dp),
     ) {
         items(attachments, key = {
             it.formAttachment.hashCode()
         }) { attachment ->
-            AttachmentTile(attachment)
+            AttachmentTile(state = attachment, modifier = Modifier.padding(end = 15.dp))
         }
     }
 }
@@ -441,6 +458,80 @@ private sealed class PickerStyle {
 
     data class File(val allowedMimeTypes: List<String>) : PickerStyle()
 }
+
+/**
+ * Creates a horizontal scrollbar for a [LazyRow] with the given [state]. [offsetY] can be used to
+ * adjust the offset of the scrollbar in the Y axis. This also adds the required padding to the
+ * [LazyRow] to accommodate the scrollbar. [autoHide] can be used to auto-hide the scrollbar when
+ * not scrolling. If the content of the [LazyRow] is not scrollable, the scrollbar will not be shown
+ * regardless of the [autoHide] value.
+ *
+ * Limitations:
+ * - The items in the [LazyRow] should have the same width including the padding.
+ * - Padding should be applied to the items in the [LazyRow] and not to the [LazyRow] itself.
+ *
+ * @param state The [LazyListState] of the [LazyRow].
+ * @param trackColor The color of the scrollbar track.
+ * @param color The color of the scrollbar.
+ * @param height The height of the scrollbar.
+ * @param offsetY The offset of the scrollbar in the Y axis, from the bottom of the [LazyRow].
+ * @param autoHide Whether the scrollbar should auto-hide when not scrolling.
+ */
+internal fun Modifier.horizontalScrollbar(
+    state: LazyListState,
+    trackColor: Color,
+    color: Color,
+    height: Dp,
+    offsetY: Dp,
+    autoHide: Boolean = true
+): Modifier = this
+    .padding(bottom = offsetY)
+    .then(
+        composed {
+            // fade in fast when scrolling, fade out slow when not scrolling
+            val duration = if (state.isScrollInProgress) 50 else 500
+            // animate the scrollbar alpha based on the scroll state
+            val alpha by animateFloatAsState(
+                targetValue = if (!autoHide || state.isScrollInProgress) 1f else 0f,
+                animationSpec = tween(durationMillis = duration),
+                label = ""
+            )
+
+            drawWithContent {
+                drawContent()
+
+                val firstVisibleElement =
+                    state.layoutInfo.visibleItemsInfo.firstOrNull() ?: return@drawWithContent
+                val itemWidth = firstVisibleElement.size.toFloat()
+                val totalWidth = itemWidth * state.layoutInfo.totalItemsCount
+                val scrollbarWidth = minOf(size.width / totalWidth, 1f) * size.width
+                // Do not draw scrollbar if it is not needed
+                if (scrollbarWidth >= size.width) return@drawWithContent
+                // Calculate the x offset of the scrollbar
+                val scrollBarOffsetX = (size.width / totalWidth) *
+                    (state.firstVisibleItemIndex * itemWidth + state.firstVisibleItemScrollOffset)
+                // Calculate the y offset of the scrollbar
+                val scrollBarOffsetY = size.height + height.toPx() + offsetY.toPx()
+
+                // draw the scroll bar track
+                drawRoundRect(
+                    color = trackColor,
+                    topLeft = Offset(0f, scrollBarOffsetY),
+                    size = androidx.compose.ui.geometry.Size(size.width, height.toPx()),
+                    cornerRadius = CornerRadius(10f, 10f),
+                    alpha = alpha
+                )
+                // draw the scroll bar
+                drawRoundRect(
+                    color = color,
+                    topLeft = Offset(scrollBarOffsetX, scrollBarOffsetY),
+                    size = androidx.compose.ui.geometry.Size(scrollbarWidth, height.toPx()),
+                    cornerRadius = CornerRadius(10f, 10f),
+                    alpha = alpha
+                )
+            }
+        }
+    )
 
 @Preview
 @Composable
