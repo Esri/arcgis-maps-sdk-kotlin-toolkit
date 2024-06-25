@@ -66,6 +66,7 @@ class MapViewModel(
     val layer: Layer?
         get() = _layer
 
+    @Suppress("unused")
     private val fourteenersId = "9f3a674e998f461580006e626611f9ad"
     @Suppress("unused")
     private val ranchoId = "dd94764601554f1ea958f2d81906c698"

@@ -284,8 +284,7 @@ internal fun PreviewAttachmentTile() {
             popupAttachmentType = PopupAttachmentType.Other,
             loadStatus = MutableStateFlow(LoadStatus.NotLoaded),
             contentType = "image/jpeg",
-            onLoadAttachment = { Result.success(Unit) },
-            onLoadThumbnail = null
+            onLoadAttachment = { Result.success(Unit) }
         )
     )
 }

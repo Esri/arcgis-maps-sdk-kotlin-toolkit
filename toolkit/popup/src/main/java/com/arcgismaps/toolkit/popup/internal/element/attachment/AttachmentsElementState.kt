@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.popup.internal.element.attachment
 
-import android.graphics.drawable.BitmapDrawable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.FileCopy
 import androidx.compose.material.icons.outlined.FilePresent
@@ -108,7 +107,6 @@ internal fun rememberAttachmentsElementState(
  * @param size The size of the attachment.
  * @param loadStatus The load status of the attachment.
  * @param onLoadAttachment A function that loads the attachment.
- * @param onLoadThumbnail A function that loads the thumbnail of the attachment.
  */
 internal class PopupAttachmentState(
     val name: String,
@@ -117,13 +115,13 @@ internal class PopupAttachmentState(
     val contentType: String,
     val loadStatus: StateFlow<LoadStatus>,
     private val onLoadAttachment: suspend () -> Result<Unit>,
-    private val onLoadThumbnail: (suspend () -> Result<BitmapDrawable?>)? = null
 ) {
-    private val _thumbnailUri: MutableState<String> = mutableStateOf("")
+
     private lateinit var _attachment: PopupAttachment
 
+    private val _thumbnailUri: MutableState<String> = mutableStateOf("")
     /**
-     * The thumbnail of the attachment. This is `null` until [loadAttachment] is called.
+     * The URI of the attachment image. Empty until [loadAttachment] is called.
      */
     val thumbnailUri: State<String> = _thumbnailUri
     val path: String
@@ -135,12 +133,7 @@ internal class PopupAttachmentState(
         popupAttachmentType = attachment.type,
         contentType = attachment.contentType,
         loadStatus = attachment.loadStatus,
-        onLoadAttachment = attachment::retryLoad,
-        onLoadThumbnail = if (attachment.type == PopupAttachmentType.Image) {
-            attachment::createFullImage
-        } else {
-            null
-        }
+        onLoadAttachment = attachment::retryLoad
     ) {
         _attachment = attachment
     }

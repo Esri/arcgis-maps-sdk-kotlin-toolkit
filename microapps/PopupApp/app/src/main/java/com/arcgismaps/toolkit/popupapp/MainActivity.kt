@@ -56,7 +56,6 @@ fun PopupApp(viewModel: MapViewModel) {
     MainScreen(viewModel)
 }
 
-
 class TestArcGISAuthenticationChallengeHandler(
     private val username: String,
     private val password: String
