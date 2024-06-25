@@ -72,6 +72,7 @@ import com.arcgismaps.mapping.view.SceneLocationVisibility
 import com.arcgismaps.mapping.view.SceneView
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.mapping.view.zero
+import com.arcgismaps.realtime.DynamicEntity
 import kotlinx.coroutines.flow.first
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.cos
@@ -139,14 +140,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         content: @Composable BoxScope.() -> Unit
     ) {
         if (this.isCalloutBeingDisplayed.compareAndSet(false, true)) {
-            val leaderLocation = this.computeLeaderLocationForGeoelement(geoElement, tapLocation) ?: return
-            this.CalloutInternal(
-                leaderLocation.location,
-                modifier,
-                leaderLocation.offset,
-                leaderLocation.rotateOffsetWithGeoView,
-                content
-            )
+            this.CalloutInternal(geoElement, modifier, tapLocation, content)
         }
     }
 
@@ -164,6 +158,41 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
      */
     internal fun reset() {
         isCalloutBeingDisplayed.set(false)
+    }
+
+    /**
+     * Creates a Callout at the specified geographical location on the GeoView.
+     *
+     * @since 200.5.0
+     */
+    @Composable
+    private fun CalloutInternal(
+        geoElement: GeoElement,
+        modifier: Modifier = Modifier,
+        tapLocation: Point? = null,
+        content: @Composable BoxScope.() -> Unit
+    ) {
+        var leaderLocation: LeaderLocation? by remember {
+            mutableStateOf(
+                this.computeLeaderLocationForGeoelement(geoElement, tapLocation)
+            )
+        }
+        if (geoElement is DynamicEntity) {
+            LaunchedEffect(geoElement) {
+                geoElement.dynamicEntityChangedEvent.collect {
+                    leaderLocation = this@GeoViewScope.computeLeaderLocationForGeoelement(geoElement, tapLocation)
+                }
+            }
+        }
+        leaderLocation?.let {
+            this.CalloutInternal(
+                it.location,
+                modifier,
+                it.offset,
+                it.rotateOffsetWithGeoView,
+                content
+            )
+        }
     }
 
     /**
