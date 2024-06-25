@@ -15,6 +15,7 @@
  */
 package com.arcgismaps.toolkit.popup.internal.ui.fileviewer
 
+import android.content.Intent
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -52,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.content.FileProvider
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
@@ -59,6 +61,7 @@ import coil.compose.AsyncImage
 import com.arcgismaps.toolkit.popup.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.io.File
 
 /**
  * A file viewer that can display different type of files.
@@ -67,64 +70,93 @@ import kotlinx.coroutines.launch
  */
 @Composable
 internal fun FileViewer(scope: CoroutineScope, fileState: ViewableFile, onDismissRequest: () -> Unit) {
-    Dialog(
-        onDismissRequest = onDismissRequest,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
-    ) {
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            topBar = {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(64.dp)
-                        .background(MaterialTheme.colorScheme.surface),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    IconButton(onClick = { onDismissRequest() }) {
-                        Icon(
-                            Icons.Rounded.Close,
-                            contentDescription = stringResource(id = R.string.close),
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                    Text(
-                        text = fileState.name,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = MaterialTheme.typography.headlineSmall.fontSize
-                    )
-                    Spacer(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                    )
-                    ViewerActions(
-                        coroutineScope = scope,
-                        viewableFile = fileState,
-                    )
-                }
-            }
+    if (fileState.type !is ViewableFileType.Other) {
+        Dialog(
+            onDismissRequest = onDismissRequest,
+            properties = DialogProperties(usePlatformDefaultWidth = false)
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(it),
-                contentAlignment = Alignment.Center
-            ) {
-                when (fileState.type) {
-                    is ViewableFileType.Image ->
-                        AsyncImage(
-                            modifier = Modifier.fillMaxSize(),
-                            model = fileState.path,
-                            contentDescription = stringResource(id = R.string.image),
-                        )
-
-                    is ViewableFileType.Video, ViewableFileType.Audio -> VideoViewer(fileState.path)
-                    is ViewableFileType.Other -> Text("Other")
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                topBar = {
+                    TopAppBar(fileState, scope, onDismissRequest)
                 }
+            ) {
+                FileViewerContent(Modifier.padding(it), fileState)
             }
         }
+    } else {
+        val uri = FileProvider.getUriForFile(
+            LocalContext.current.applicationContext,
+            "${LocalContext.current.applicationContext.applicationInfo.packageName}.arcgis.popup.fileprovider",
+            File(fileState.path)
+        )
+
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            setDataAndType(uri, fileState.contentType)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        LocalContext.current.startActivity(intent)
+        onDismissRequest()
+    }
+}
+
+@Composable
+private fun FileViewerContent(
+    modifier: Modifier,
+    fileState: ViewableFile
+) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
+        contentAlignment = Alignment.Center
+    ) {
+        when (fileState.type) {
+            is ViewableFileType.Image ->
+                AsyncImage(
+                    modifier = Modifier.fillMaxSize(),
+                    model = fileState.path,
+                    contentDescription = stringResource(id = R.string.image),
+                )
+
+            is ViewableFileType.Video, ViewableFileType.Audio -> VideoViewer(fileState.path)
+            else -> {
+                throw UnsupportedOperationException("Cannot view this file type")
+            }
+        }
+    }
+}
+
+@Composable
+private fun TopAppBar(fileState: ViewableFile, scope: CoroutineScope, onDismissRequest: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(64.dp)
+            .background(MaterialTheme.colorScheme.surface),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        IconButton(onClick = { onDismissRequest() }) {
+            Icon(
+                Icons.Rounded.Close,
+                contentDescription = stringResource(id = R.string.close),
+                tint = MaterialTheme.colorScheme.onSurface
+            )
+        }
+        Text(
+            text = fileState.name,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontSize = MaterialTheme.typography.headlineSmall.fontSize
+        )
+        Spacer(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+        )
+        ViewerActions(
+            coroutineScope = scope,
+            viewableFile = fileState,
+        )
     }
 }
 

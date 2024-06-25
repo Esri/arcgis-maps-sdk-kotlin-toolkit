@@ -141,10 +141,9 @@ internal suspend fun ViewableFile.share(context: Context) = withContext(Dispatch
         "${context.applicationContext.applicationInfo.packageName}.arcgis.popup.fileprovider",
         file
     )
-    val intent = Intent().apply {
-        action = Intent.ACTION_SEND
-        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    val intent = Intent(Intent.ACTION_SEND).apply {
         setDataAndType(uri, contentType)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         putExtra(Intent.EXTRA_STREAM, uri)
     }
 
