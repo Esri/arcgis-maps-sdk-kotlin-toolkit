@@ -133,7 +133,7 @@ public final class com/arcgismaps/toolkit/featureforms/theme/FeatureFormDefaults
 	public final fun groupElementTypography (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/featureforms/theme/GroupElementTypography;
 	public final fun radioButtonFieldColors-oq7We08 (JJJJJJJJLandroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/featureforms/theme/RadioButtonFieldColors;
 	public final fun radioButtonFieldTypography (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/featureforms/theme/RadioButtonFieldTypography;
-	public final fun readOnlyFieldColors-RGew2ao (JJJLandroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/featureforms/theme/ReadOnlyFieldColors;
+	public final fun readOnlyFieldColors-ro_MJ88 (JJJJLandroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/featureforms/theme/ReadOnlyFieldColors;
 	public final fun readOnlyFieldTypography (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/featureforms/theme/ReadOnlyFieldTypography;
 	public final fun typography (Lcom/arcgismaps/toolkit/featureforms/theme/EditableTextFieldTypography;Lcom/arcgismaps/toolkit/featureforms/theme/ReadOnlyFieldTypography;Lcom/arcgismaps/toolkit/featureforms/theme/GroupElementTypography;Lcom/arcgismaps/toolkit/featureforms/theme/RadioButtonFieldTypography;Landroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/featureforms/theme/FeatureFormTypography;
 }
@@ -223,9 +223,11 @@ public final class com/arcgismaps/toolkit/featureforms/theme/ReadOnlyFieldColors
 	public final fun component1-0d7_KjU ()J
 	public final fun component2-0d7_KjU ()J
 	public final fun component3-0d7_KjU ()J
-	public final fun copy-ysEtTa8 (JJJ)Lcom/arcgismaps/toolkit/featureforms/theme/ReadOnlyFieldColors;
-	public static synthetic fun copy-ysEtTa8$default (Lcom/arcgismaps/toolkit/featureforms/theme/ReadOnlyFieldColors;JJJILjava/lang/Object;)Lcom/arcgismaps/toolkit/featureforms/theme/ReadOnlyFieldColors;
+	public final fun component4-0d7_KjU ()J
+	public final fun copy-jRlVdoo (JJJJ)Lcom/arcgismaps/toolkit/featureforms/theme/ReadOnlyFieldColors;
+	public static synthetic fun copy-jRlVdoo$default (Lcom/arcgismaps/toolkit/featureforms/theme/ReadOnlyFieldColors;JJJJILjava/lang/Object;)Lcom/arcgismaps/toolkit/featureforms/theme/ReadOnlyFieldColors;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getErrorSupportingTextColor-0d7_KjU ()J
 	public final fun getLabelColor-0d7_KjU ()J
 	public final fun getSupportingTextColor-0d7_KjU ()J
 	public final fun getTextColor-0d7_KjU ()J

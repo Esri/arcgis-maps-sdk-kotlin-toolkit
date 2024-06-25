@@ -57,6 +57,7 @@ internal fun FormTextField(
         singleLine = state.singleLine,
         keyboardType = if (state.fieldType.isNumeric) KeyboardType.Number else KeyboardType.Ascii,
         showCharacterCount = showCharacterCount,
-        onFocusChange = state::onFocusChanged
+        onFocusChange = state::onFocusChanged,
+        hasValueExpression = state.hasValueExpression
     )
 }

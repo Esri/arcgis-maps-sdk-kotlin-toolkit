@@ -88,7 +88,8 @@ internal fun DateTimeField(
             }
         } else {
             null
-        }
+        },
+        hasValueExpression = state.hasValueExpression
     )
 
     LaunchedEffect(interactionSource) {
@@ -123,6 +124,7 @@ private fun DateTimeFieldPreview() {
                 maxEpochMillis = null,
                 shouldShowTime = true
             ),
+            hasValueExpression = false,
             scope = scope,
             updateValue = {},
             id = 1,

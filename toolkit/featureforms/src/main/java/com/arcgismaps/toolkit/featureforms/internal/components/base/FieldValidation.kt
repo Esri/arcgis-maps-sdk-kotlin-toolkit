@@ -19,6 +19,7 @@ package com.arcgismaps.toolkit.featureforms.internal.components.base
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.arcgismaps.toolkit.featureforms.R
 
@@ -28,12 +29,12 @@ internal sealed class ValidationErrorState(
 ) {
     data object NoError : ValidationErrorState()
     data object Required : ValidationErrorState()
-    class MinMaxCharConstraint(min: Int, max: Int) : ValidationErrorState(min, max)
-    class ExactCharConstraint(length: Int) : ValidationErrorState(length)
+    class MinMaxCharConstraint(min: Int, max: Int, hasValueExpression : Boolean) : ValidationErrorState(min, max, hasValueExpression)
+    class ExactCharConstraint(length: Int, hasValueExpression: Boolean) : ValidationErrorState(length, hasValueExpression)
     class MaxCharConstraint(max: Int) : ValidationErrorState(max)
     class MinNumericConstraint(min: String) : ValidationErrorState(min)
     class MaxNumericConstraint(max: String) : ValidationErrorState(max)
-    class MinMaxNumericConstraint(min: String, max: String) : ValidationErrorState(min, max)
+    class MinMaxNumericConstraint(min: String, max: String, hasValueExpression: Boolean) : ValidationErrorState(min, max, hasValueExpression)
     class MinDatetimeConstraint(min: String) : ValidationErrorState(min)
     class MaxDatetimeConstraint(max: String) : ValidationErrorState(max)
     data object NotANumber : ValidationErrorState()
@@ -54,11 +55,22 @@ internal sealed class ValidationErrorState(
             }
 
             is MinMaxCharConstraint -> {
-                stringResource(id = R.string.enter_min_to_max_chars, *formatArgs)
+                val hasValueExpression = formatArgs.last() as Boolean
+                if (hasValueExpression) {
+                    stringResource(id = R.string.value_must_be_from_to_characters, *formatArgs)
+                } else {
+                    stringResource(id = R.string.enter_min_to_max_chars, *formatArgs)
+                }
             }
 
             is ExactCharConstraint -> {
-                stringResource(id = R.string.enter_n_chars, *formatArgs)
+                val hasValueExpression = formatArgs.last() as Boolean
+                val length = formatArgs.first() as Int
+                if (hasValueExpression) {
+                    pluralStringResource(id = R.plurals.value_must_be_n_characters, length, length)
+                } else {
+                    pluralStringResource(id = R.plurals.enter_n_chars, length, length)
+                }
             }
 
             is MaxCharConstraint -> {
@@ -74,7 +86,12 @@ internal sealed class ValidationErrorState(
             }
 
             is MinMaxNumericConstraint -> {
-                stringResource(id = R.string.numeric_range_helper_text, *formatArgs)
+                val hasValueExpression = formatArgs.last() as Boolean
+                if (hasValueExpression) {
+                    stringResource(R.string.value_must_be_from_to, *formatArgs)
+                } else {
+                    stringResource(id = R.string.numeric_range_helper_text, *formatArgs)
+                }
             }
 
             is MinDatetimeConstraint -> {

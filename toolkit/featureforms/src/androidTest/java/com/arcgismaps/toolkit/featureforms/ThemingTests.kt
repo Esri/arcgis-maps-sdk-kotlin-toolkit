@@ -135,8 +135,11 @@ class ThemingTests {
         field.performTextInput("test")
         val text = composeTestRule.onNodeWithText("test", useUnmergedTree = true)
         text.assertIsDisplayed()
+        // bring focus to the field
+        field.performClick()
         // test focused text color
         text.assertTextColor(Color.Blue)
+        // clear focus from the field
         field.performImeAction()
         // test unfocused text color
         text.assertTextColor(Color.Black)

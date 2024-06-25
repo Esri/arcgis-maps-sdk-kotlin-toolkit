@@ -16,7 +16,10 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.attachment
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
 import android.text.format.Formatter
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -58,7 +61,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -68,7 +70,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -88,29 +89,33 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import coil.compose.AsyncImage
 import com.arcgismaps.LoadStatus
+import com.arcgismaps.mapping.featureforms.FormAttachmentType
 import com.arcgismaps.toolkit.featureforms.R
+import com.arcgismaps.toolkit.featureforms.internal.utils.AttachmentsFileProvider
 import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
 import com.arcgismaps.toolkit.featureforms.internal.utils.LocalDialogRequester
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
+import java.io.File
 
 @Composable
 internal fun AttachmentTile(
-    state: FormAttachmentState
+    state: FormAttachmentState,
+    modifier: Modifier = Modifier
 ) {
     val loadStatus by state.loadStatus.collectAsState()
-    val thumbnail by state.thumbnail
     val interactionSource = remember { MutableInteractionSource() }
+    val thumbnailUri by state.thumbnailUri
     val configuration = LocalViewConfiguration.current
     val haptic = LocalHapticFeedback.current
     var showContextMenu by remember { mutableStateOf(false) }
     val dialogRequester = LocalDialogRequester.current
-    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     Surface(
         onClick = {},
-        modifier = Modifier
+        modifier = modifier
             .width(92.dp)
             .height(75.dp)
             .clip(shape = RoundedCornerShape(8.dp))
@@ -123,13 +128,15 @@ internal fun AttachmentTile(
         Box(modifier = Modifier) {
             when (loadStatus) {
                 LoadStatus.Loaded -> LoadedView(
-                    thumbnail = thumbnail,
-                    title = state.name
+                    title = state.name,
+                    type = state.type,
+                    thumbnailUri = thumbnailUri
                 )
 
                 LoadStatus.Loading -> DefaultView(
                     title = state.name,
                     size = state.size,
+                    type = state.type,
                     isLoading = true,
                     isError = false
                 )
@@ -137,6 +144,7 @@ internal fun AttachmentTile(
                 LoadStatus.NotLoaded -> DefaultView(
                     title = state.name,
                     size = state.size,
+                    type = state.type,
                     isLoading = false,
                     isError = false
                 )
@@ -144,6 +152,7 @@ internal fun AttachmentTile(
                 is LoadStatus.FailedToLoad -> DefaultView(
                     title = state.name,
                     size = state.size,
+                    type = state.type,
                     isLoading = false,
                     isError = true
                 )
@@ -162,12 +171,15 @@ internal fun AttachmentTile(
                     },
                     onClick = {
                         showContextMenu = false
-                        dialogRequester.requestDialog(
-                            DialogType.RenameAttachmentDialog(
-                                stateId = state.elementStateId,
-                                name = state.name,
+                        state.formAttachment?.let {
+                            dialogRequester.requestDialog(
+                                DialogType.RenameAttachmentDialog(
+                                    stateId = state.elementStateId,
+                                    formAttachment = state.formAttachment,
+                                    name = state.name,
+                                )
                             )
-                        )
+                        }
                     })
                 DropdownMenuItem(
                     text = { Text(text = stringResource(R.string.delete)) },
@@ -184,7 +196,7 @@ internal fun AttachmentTile(
                     ),
                     onClick = {
                         showContextMenu = false
-                        scope.launch { state.deleteAttachment() }
+                        state.deleteAttachment()
                     })
             }
         }
@@ -198,10 +210,8 @@ internal fun AttachmentTile(
                     delay(configuration.longPressTimeoutMillis)
                     wasALongPress = true
                     // handle long press
-                    if (loadStatus is LoadStatus.Loaded) {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        showContextMenu = true
-                    }
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    showContextMenu = true
                 }
 
                 is PressInteraction.Release -> {
@@ -210,9 +220,26 @@ internal fun AttachmentTile(
                         // handle single tap
                         if (loadStatus is LoadStatus.NotLoaded || loadStatus is LoadStatus.FailedToLoad) {
                             // load attachment
-                            state.load()
+                            state.loadWithParentScope()
                         } else if (loadStatus is LoadStatus.Loaded) {
                             // open attachment
+                            val intent = Intent()
+                            intent.setAction(Intent.ACTION_VIEW)
+                            val uri = AttachmentsFileProvider.getUriForFile(
+                                context = context,
+                                file = File(state.filePath)
+                            )
+                            intent.setDataAndType(
+                                uri,
+                                state.contentType
+                            )
+                            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            try {
+                                context.startActivity(intent)
+                            } catch (e: ActivityNotFoundException) {
+                                // show a toast if there is no app to open the file type
+                                Toast.makeText(context, R.string.no_app_found, Toast.LENGTH_SHORT).show()
+                            }
                         }
                     }
                 }
@@ -223,27 +250,25 @@ internal fun AttachmentTile(
 
 @Composable
 private fun LoadedView(
-    thumbnail: ImageBitmap?,
     title: String,
+    type: FormAttachmentType,
+    thumbnailUri: String,
     modifier: Modifier = Modifier
 ) {
-    val attachmentType = remember(title) {
-        getAttachmentType(title)
-    }
     Box(
         modifier = modifier
             .fillMaxSize()
     ) {
-        if (thumbnail != null) {
-            Image(
-                bitmap = thumbnail,
+        if (thumbnailUri.isNotEmpty()) {
+            AsyncImage(
+                model = thumbnailUri,
                 contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
             )
         } else {
             Icon(
-                imageVector = attachmentType.getIcon(),
+                imageVector = type.getIcon(),
                 contentDescription = null,
                 modifier = Modifier
                     .padding(top = 10.dp, bottom = 25.dp)
@@ -278,13 +303,11 @@ private fun LoadedView(
 private fun DefaultView(
     title: String,
     size: Long,
+    type: FormAttachmentType,
     isLoading: Boolean,
     isError: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val attachmentType = remember(title) {
-        getAttachmentType(title)
-    }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -317,7 +340,7 @@ private fun DefaultView(
             )
         } else {
             Icon(
-                imageVector = attachmentType.getIcon(),
+                imageVector = type.getIcon(),
                 contentDescription = null,
                 modifier = Modifier.size(20.dp)
             )

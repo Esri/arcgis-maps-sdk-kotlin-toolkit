@@ -83,7 +83,8 @@ internal fun RadioButtonField(
             supportingText = state.description,
             isError = false,
             isRequired = required,
-            singleLine = true
+            singleLine = true,
+            hasValueExpression = state.hasValueExpression
         )
     }
 }

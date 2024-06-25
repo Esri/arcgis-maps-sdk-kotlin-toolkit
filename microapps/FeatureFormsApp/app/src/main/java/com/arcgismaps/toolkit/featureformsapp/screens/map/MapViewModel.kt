@@ -167,7 +167,7 @@ class MapViewModel @Inject constructor(
         featureForm.validationErrors.value.forEach { entry ->
             entry.value.forEach { error ->
                 featureForm.elements.getFormElement(entry.key)?.let { formElement ->
-                    if (formElement.isEditable.value) {
+                    if (formElement.isEditable.value || formElement.hasValueExpression) {
                         errors.add(
                             ErrorInfo(
                                 formElement.label,
@@ -180,17 +180,17 @@ class MapViewModel @Inject constructor(
         }
         // set the state to committing with the errors if any
         _uiState.value = UIState.Committing(
-            featureForm = state.featureForm,
+            featureForm = featureForm,
             errors = errors
         )
         // if there are no errors then update the feature
         return if (errors.isEmpty()) {
-            val feature = state.featureForm.feature
+            val feature = featureForm.feature
             val serviceFeatureTable =
                 feature.featureTable as? ServiceFeatureTable ?: return Result.failure(
                     IllegalStateException("cannot save feature edit without a ServiceFeatureTable")
                 )
-            val result = serviceFeatureTable.updateFeature(feature).map {
+            val result = featureForm.finishEditing().map {
                 serviceFeatureTable.serviceGeodatabase?.let { database ->
                     return@let if (database.serviceInfo?.canUseServiceGeodatabaseApplyEdits == true) {
                         database.applyEdits()

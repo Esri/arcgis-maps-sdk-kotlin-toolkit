@@ -16,17 +16,18 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.attachment
 
-import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -36,9 +37,11 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.Photo
 import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -57,23 +60,27 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.LoadStatus
+import androidx.compose.ui.window.Dialog
+import com.arcgismaps.mapping.featureforms.FormAttachmentType
 import com.arcgismaps.toolkit.featureforms.R
-import com.arcgismaps.toolkit.featureforms.internal.utils.AttachmentCaptureFileProvider
+import com.arcgismaps.toolkit.featureforms.internal.utils.AttachmentsFileProvider
 import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
 import com.arcgismaps.toolkit.featureforms.internal.utils.LocalDialogRequester
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import java.io.File
 import java.time.Instant
 
 @Composable
@@ -81,22 +88,17 @@ internal fun AttachmentFormElement(
     state: AttachmentElementState,
     modifier: Modifier = Modifier
 ) {
-    val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val editable by state.isEditable.collectAsState()
     AttachmentFormElement(
         label = state.label,
         description = state.description,
         editable = editable,
+        captureOptions = CaptureOptions.Any,
         stateId = state.id,
         attachments = state.attachments,
         lazyListState = state.lazyListState,
         hasCameraPermission = state.hasCameraPermissions(context),
-        onAttachmentAdded = { name, contentType, data ->
-            scope.launch {
-                state.addAttachment(name, contentType, data)
-            }
-        },
         modifier = modifier
     )
 }
@@ -106,16 +108,14 @@ internal fun AttachmentFormElement(
     label: String,
     description: String,
     editable: Boolean,
+    captureOptions: CaptureOptions,
     stateId: Int,
     attachments: List<FormAttachmentState>,
     lazyListState: LazyListState,
     hasCameraPermission: Boolean,
-    onAttachmentAdded: suspend (String, String, ByteArray) -> Unit,
     modifier: Modifier = Modifier,
     colors: AttachmentElementColors = AttachmentElementDefaults.colors()
 ) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     Card(
         modifier = modifier,
         shape = AttachmentElementDefaults.containerShape,
@@ -134,6 +134,7 @@ internal fun AttachmentFormElement(
                     // Add attachment button
                     AddAttachment(
                         stateId = stateId,
+                        captureOptions = captureOptions,
                         hasCameraPermission = hasCameraPermission
                     )
                 }
@@ -147,11 +148,22 @@ internal fun AttachmentFormElement(
 @Composable
 private fun Carousel(state: LazyListState, attachments: List<FormAttachmentState>) {
     LazyRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScrollbar(
+                state = state,
+                trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                height = 4.dp,
+                offsetY = 5.dp,
+                autoHide = false
+            ),
         state = state,
-        horizontalArrangement = Arrangement.spacedBy(15.dp),
     ) {
-        items(attachments, key = { it.hashCode() }) {
-            AttachmentTile(it)
+        items(attachments, key = {
+            it.formAttachment.hashCode()
+        }) { attachment ->
+            AttachmentTile(state = attachment, modifier = Modifier.padding(end = 15.dp))
         }
     }
 }
@@ -188,6 +200,7 @@ private fun Header(
 @Composable
 private fun AddAttachment(
     stateId: Int,
+    captureOptions: CaptureOptions,
     hasCameraPermission: Boolean,
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -209,7 +222,7 @@ private fun AddAttachment(
             offset = DpOffset.Zero,
             onDismissRequest = { showMenu = false }
         ) {
-            if (hasCameraPermission) {
+            if (hasCameraPermission && captureOptions.hasImageCapture()) {
                 DropdownMenuItem(
                     text = { Text(text = stringResource(R.string.take_photo)) },
                     trailingIcon = {
@@ -227,22 +240,53 @@ private fun AddAttachment(
                     }
                 )
             }
-            DropdownMenuItem(
-                text = { Text(text = stringResource(R.string.add_photo)) },
-                trailingIcon = {
-                    Icon(
-                        imageVector = Icons.Rounded.Photo,
-                        contentDescription = "Add Photo",
-                        modifier = Modifier.alpha(0.4f)
-                    )
-                },
-                onClick = {
-                    scope.launch {
-                        pickerStyle.emit(PickerStyle.PickImage)
-                        showMenu = false
+            if (captureOptions.hasVideoCapture()) {
+                // TODO: Add video capture
+            }
+            if (captureOptions.hasMediaCapture()) {
+                DropdownMenuItem(
+                    text = { Text(text = stringResource(R.string.add_from_gallery)) },
+                    trailingIcon = {
+                        Icon(
+                            imageVector = Icons.Rounded.Photo,
+                            contentDescription = "Add From Gallery",
+                            modifier = Modifier.alpha(0.4f)
+                        )
+                    },
+                    onClick = {
+                        scope.launch {
+                            val visualMediaType =
+                                if (captureOptions.hasImageCapture() && captureOptions.hasVideoCapture()) {
+                                    ActivityResultContracts.PickVisualMedia.ImageAndVideo
+                                } else if (captureOptions.hasImageCapture()) {
+                                    ActivityResultContracts.PickVisualMedia.ImageOnly
+                                } else {
+                                    ActivityResultContracts.PickVisualMedia.VideoOnly
+                                }
+                            pickerStyle.emit(PickerStyle.PickMedia(visualMediaType))
+                            showMenu = false
+                        }
                     }
-                }
-            )
+                )
+            }
+            if (captureOptions.hasFileCapture()) {
+                DropdownMenuItem(
+                    text = { Text(text = stringResource(R.string.add_file)) },
+                    trailingIcon = {
+                        Icon(
+                            imageVector = Icons.Rounded.Folder,
+                            contentDescription = "Add File",
+                            modifier = Modifier.alpha(0.4f)
+                        )
+                    },
+                    onClick = {
+                        scope.launch {
+                            pickerStyle.emit(PickerStyle.File(captureOptions.getAllowedMimeTypes()))
+                            showMenu = false
+                        }
+                    }
+                )
+            }
         }
     }
     LaunchedEffect(Unit) {
@@ -251,22 +295,28 @@ private fun AddAttachment(
                 PickerStyle.Camera -> {
                     dialogRequester.requestDialog(
                         DialogType.ImageCaptureDialog(
-                            stateId = stateId,
-                            contentType = "image/jpeg"
+                            stateId = stateId
                         )
                     )
                 }
 
-                PickerStyle.PickImage -> {
+                is PickerStyle.PickMedia -> {
                     dialogRequester.requestDialog(
-                        DialogType.ImagePickerDialog(
+                        DialogType.GalleryPickerDialog(
                             stateId = stateId,
-                            contentType = "image/jpeg"
+                            type = it.type
                         )
                     )
                 }
 
-                else -> {}
+                is PickerStyle.File -> {
+                    dialogRequester.requestDialog(
+                        DialogType.FilePickerDialog(
+                            stateId = stateId,
+                            allowedTypes = it.allowedMimeTypes
+                        )
+                    )
+                }
             }
         }
     }
@@ -274,10 +324,17 @@ private fun AddAttachment(
 
 /**
  * Launches the camera to capture an image. When an image is captured, the [onImageCaptured] callback
- * is invoked with the URI of the captured image.
+ * is invoked with the URI of the captured image. In case of a dismissal or if no image is captured,
+ * the [onDismissRequest] callback is invoked.
+ *
+ * @param onDismissRequest A request to dismiss the camera picker.
+ * @param onImageCaptured A callback to invoke when an image is captured.
  */
 @Composable
-internal fun ImageCapture(onImageCaptured: (Uri) -> Unit) {
+internal fun ImageCapture(
+    onDismissRequest: () -> Unit,
+    onImageCaptured: (Uri) -> Unit
+) {
     val context = LocalContext.current
     var hasLaunched by rememberSaveable {
         mutableStateOf(false)
@@ -288,14 +345,16 @@ internal fun ImageCapture(onImageCaptured: (Uri) -> Unit) {
             restore = { Uri.parse(it.first()) }
         )
     ) {
-        val file = context.createTempImageFile()
-        AttachmentCaptureFileProvider.getImageUri(file, context)
+        val timeStamp = Instant.now().toEpochMilli()
+        AttachmentsFileProvider.createTempFileWithUri("IMAGE_$timeStamp", ".jpg", context)
     }
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
         onResult = { success ->
             if (success) {
                 onImageCaptured(capturedImageUri)
+            } else {
+                onDismissRequest()
             }
         }
     )
@@ -308,50 +367,171 @@ internal fun ImageCapture(onImageCaptured: (Uri) -> Unit) {
 }
 
 /**
- * Launches the Gallery to select an image. When an image is selected, the [onImageSelected] callback
- * is invoked with the URI of the selected image.
+ * Launches the Gallery to select an image, video or both based on the [type]. When a selection is
+ * made, the [onMediaSelected] callback is invoked with the URI of the selected image/video. In case
+ * of a dismissal or if no media is selected, the [onDismissRequest] callback is invoked.
+ *
+ * @param type The type of media to select.
+ * @param onDismissRequest A request to dismiss the gallery picker.
+ * @param onMediaSelected A callback to invoke when a media file is selected.
  */
 @Composable
-internal fun ImagePicker(onImageSelected: (Uri) -> Unit) {
+internal fun GalleryPicker(
+    type: ActivityResultContracts.PickVisualMedia.VisualMediaType,
+    onDismissRequest: () -> Unit,
+    onMediaSelected: (Uri) -> Unit
+) {
+    var hasLaunched by rememberSaveable {
+        mutableStateOf(false)
+    }
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) {
         if (it != null) {
-            onImageSelected(it)
+            onMediaSelected(it)
+        } else {
+            onDismissRequest()
         }
     }
+    Dialog(onDismissRequest = onDismissRequest) {
+        CircularProgressIndicator(
+            modifier = Modifier.size(50.dp),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            strokeWidth = 5.dp
+        )
+    }
     LaunchedEffect(Unit) {
-        launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        if (!hasLaunched) {
+            hasLaunched = true
+            launcher.launch(PickVisualMediaRequest(type))
+        }
     }
 }
 
-internal fun List<FormAttachmentState>.getNewAttachmentNameForContentType(
-    contentType: String
-): String {
-    val (attachmentType: AttachmentType, ext: String) = when (contentType) {
-        "image/jpeg" -> Pair(AttachmentType.Image, "jpg")
-        else -> Pair(AttachmentType.Other, "")
+/**
+ * Launches the file picker to select a file based on the [allowedMimeTypes]. When a file is selected,
+ * the [onFileSelected] callback is invoked with the URI of the selected file. In case of a dismissal
+ * or if no file is selected, the [onDismissRequest] callback is invoked.
+ *
+ * @param allowedMimeTypes The list of allowed MIME types to select.
+ * @param onDismissRequest A request to dismiss the file picker.
+ * @param onFileSelected A callback to invoke when a file is selected.
+ */
+@Composable
+internal fun FilePicker(
+    allowedMimeTypes: List<String>,
+    onDismissRequest: () -> Unit,
+    onFileSelected: (Uri) -> Unit
+) {
+    var hasLaunched by rememberSaveable {
+        mutableStateOf(false)
     }
-    val count = this.count { it.type == attachmentType }
-    return "$attachmentType $count.$ext"
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {
+        if (it != null) {
+            onFileSelected(it)
+        } else {
+            onDismissRequest()
+        }
+    }
+    Dialog(onDismissRequest = onDismissRequest) {
+        CircularProgressIndicator(
+            modifier = Modifier.size(50.dp),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            strokeWidth = 5.dp
+        )
+    }
+    LaunchedEffect(Unit) {
+        if (!hasLaunched) {
+            hasLaunched = true
+            launcher.launch(allowedMimeTypes.toTypedArray())
+        }
+    }
 }
 
-internal fun Context.createTempImageFile(): File {
-    val timeStamp = Instant.now().toEpochMilli()
-    val dir = File(cacheDir, "feature_forms_attachments")
-    dir.mkdirs()
-    return File.createTempFile(
-        "IMAGE_$timeStamp",
-        ".jpg",
-        dir,
-    )
-}
-
+/**
+ * Determines the type of picker to launch.
+ */
 private sealed class PickerStyle {
-    data object File : PickerStyle()
     data object Camera : PickerStyle()
-    data object PickImage : PickerStyle()
+    data class PickMedia(val type: ActivityResultContracts.PickVisualMedia.VisualMediaType) :
+        PickerStyle()
+
+    data class File(val allowedMimeTypes: List<String>) : PickerStyle()
 }
+
+/**
+ * Creates a horizontal scrollbar for a [LazyRow] with the given [state]. [offsetY] can be used to
+ * adjust the offset of the scrollbar in the Y axis. This also adds the required padding to the
+ * [LazyRow] to accommodate the scrollbar. [autoHide] can be used to auto-hide the scrollbar when
+ * not scrolling. If the content of the [LazyRow] is not scrollable, the scrollbar will not be shown
+ * regardless of the [autoHide] value.
+ *
+ * Limitations:
+ * - The items in the [LazyRow] should have the same width including the padding.
+ * - Padding should be applied to the items in the [LazyRow] and not to the [LazyRow] itself.
+ *
+ * @param state The [LazyListState] of the [LazyRow].
+ * @param trackColor The color of the scrollbar track.
+ * @param color The color of the scrollbar.
+ * @param height The height of the scrollbar.
+ * @param offsetY The offset of the scrollbar in the Y axis, from the bottom of the [LazyRow].
+ * @param autoHide Whether the scrollbar should auto-hide when not scrolling.
+ */
+internal fun Modifier.horizontalScrollbar(
+    state: LazyListState,
+    trackColor: Color,
+    color: Color,
+    height: Dp,
+    offsetY: Dp,
+    autoHide: Boolean = true
+): Modifier = this
+    .padding(bottom = offsetY)
+    .then(
+        composed {
+            // fade in fast when scrolling, fade out slow when not scrolling
+            val duration = if (state.isScrollInProgress) 50 else 500
+            // animate the scrollbar alpha based on the scroll state
+            val alpha by animateFloatAsState(
+                targetValue = if (!autoHide || state.isScrollInProgress) 1f else 0f,
+                animationSpec = tween(durationMillis = duration),
+                label = ""
+            )
+
+            drawWithContent {
+                drawContent()
+
+                val firstVisibleElement =
+                    state.layoutInfo.visibleItemsInfo.firstOrNull() ?: return@drawWithContent
+                val itemWidth = firstVisibleElement.size.toFloat()
+                val totalWidth = itemWidth * state.layoutInfo.totalItemsCount
+                val scrollbarWidth = minOf(size.width / totalWidth, 1f) * size.width
+                // Do not draw scrollbar if it is not needed
+                if (scrollbarWidth >= size.width) return@drawWithContent
+                // Calculate the x offset of the scrollbar
+                val scrollBarOffsetX = (size.width / totalWidth) *
+                    (state.firstVisibleItemIndex * itemWidth + state.firstVisibleItemScrollOffset)
+                // Calculate the y offset of the scrollbar
+                val scrollBarOffsetY = size.height + height.toPx() + offsetY.toPx()
+
+                // draw the scroll bar track
+                drawRoundRect(
+                    color = trackColor,
+                    topLeft = Offset(0f, scrollBarOffsetY),
+                    size = androidx.compose.ui.geometry.Size(size.width, height.toPx()),
+                    cornerRadius = CornerRadius(10f, 10f),
+                    alpha = alpha
+                )
+                // draw the scroll bar
+                drawRoundRect(
+                    color = color,
+                    topLeft = Offset(scrollBarOffsetX, scrollBarOffsetY),
+                    size = androidx.compose.ui.geometry.Size(scrollbarWidth, height.toPx()),
+                    cornerRadius = CornerRadius(10f, 10f),
+                    alpha = alpha
+                )
+            }
+        }
+    )
 
 @Preview
 @Composable
@@ -360,21 +540,21 @@ private fun AttachmentFormElementPreview() {
         label = "Attachments",
         description = "Add attachments",
         editable = true,
+        captureOptions = CaptureOptions.Any,
         stateId = 1,
         attachments = listOf(
             FormAttachmentState(
                 "Photo 1.jpg",
                 2024,
+                "image/jpeg",
+                FormAttachmentType.Image,
                 1,
-                MutableStateFlow(LoadStatus.Loaded),
-                { Result.success(Unit) },
-                { Result.success(null) },
                 {},
+                "",
                 scope = rememberCoroutineScope()
             )
         ),
         lazyListState = LazyListState(),
         hasCameraPermission = true,
-        onAttachmentAdded = { _, _, _ -> }
     )
 }
