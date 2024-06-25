@@ -119,7 +119,7 @@ private fun FileViewerContent(
                     contentDescription = stringResource(id = R.string.image),
                 )
 
-            is ViewableFileType.Video -> Text("Video")
+            is ViewableFileType.Video, ViewableFileType.Audio -> VideoViewer(fileState.path)
             else -> {
                 throw UnsupportedOperationException("Cannot view this file type")
             }
