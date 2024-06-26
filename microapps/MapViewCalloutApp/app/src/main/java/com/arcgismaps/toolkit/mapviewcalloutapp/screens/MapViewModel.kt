@@ -28,20 +28,15 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.GeoElement
 import com.arcgismaps.mapping.Viewpoint
-import com.arcgismaps.mapping.layers.DynamicEntityLayer
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
-import com.arcgismaps.realtime.ArcGISStreamService
-import com.arcgismaps.realtime.ArcGISStreamServiceFilter
-import com.arcgismaps.realtime.DynamicEntityObservation
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class MapViewModel : ViewModel() {
@@ -56,34 +51,6 @@ class MapViewModel : ViewModel() {
         )
     }
 
-    // create ArcGIS Stream Service
-    private val streamService =
-        ArcGISStreamService("https://realtimegis2016.esri.com:6443/arcgis/rest/services/SandyVehicles/StreamServer")
-
-    private val streamServiceFilter = ArcGISStreamServiceFilter()
-
-    // layer displaying the dynamic entities on the map
-    private val dynamicEntityLayer: DynamicEntityLayer
-
-    // define ArcGIS map using Streets basemap
-    val mapWithDynamicEntities = ArcGISMap(BasemapStyle.ArcGISStreets).apply {
-        initialViewpoint = Viewpoint(40.559691, -111.869001, 150000.0)
-    }
-
-    init {
-        // set condition on the ArcGISStreamServiceFilter to limit the amount of data coming from the server
-        streamServiceFilter.whereClause = "speed > 0"
-        streamService.apply {
-            filter = streamServiceFilter
-            // sets the maximum time (in seconds) an observation remains in the application.
-            purgeOptions.maximumDuration = 300.0
-        }
-        dynamicEntityLayer = DynamicEntityLayer(streamService)
-
-        // add the dynamic entity layer to the map's operational layers
-        mapWithDynamicEntities.operationalLayers.add(dynamicEntityLayer)
-    }
-
     val arcGISMapWithFeatureLayer = ArcGISMap("http://www.arcgis.com/home/webmap/viewer.html?webmap=a58aafbd19994eb38f374e205d1b7b30")
 
     private val _mapPoint = MutableStateFlow<Point?>(null)
@@ -91,9 +58,6 @@ class MapViewModel : ViewModel() {
 
     private val _selectedGeoElement = MutableStateFlow<GeoElement?>(null)
     val selectedGeoElement: StateFlow<GeoElement?> = _selectedGeoElement
-
-    private val _dynamicEntityObservationId = MutableStateFlow<Long?>(null)
-    val dynamicEntityObservationId: StateFlow<Long?> = _dynamicEntityObservationId.asStateFlow()
 
     private val _tapLocation = MutableStateFlow<Point?>(null)
     val tapLocation: StateFlow<Point?> = _tapLocation
@@ -142,22 +106,6 @@ class MapViewModel : ViewModel() {
                 symbol = SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Cross, Color.red, 12.0f)
             )
         )
-    }
-
-    fun identifyOnDynamicEntity(singleTapConfirmedEvent: SingleTapConfirmedEvent) {
-        currentIdentifyJob?.cancel()
-        currentIdentifyJob = viewModelScope.launch {
-            val result =
-                mapViewProxy.identify(dynamicEntityLayer, singleTapConfirmedEvent.screenCoordinate, 20.dp)
-            result.onSuccess { identifyLayerResult ->
-                val observation = identifyLayerResult.geoElements.first() as DynamicEntityObservation
-                val entity = observation.dynamicEntity
-                _selectedGeoElement.value = entity
-                entity?.dynamicEntityChangedEvent?.collect { dynamicEntityChangedInfo ->
-                    _dynamicEntityObservationId.value = dynamicEntityChangedInfo.receivedObservation?.id
-                }
-            }
-        }
     }
 
     /**
