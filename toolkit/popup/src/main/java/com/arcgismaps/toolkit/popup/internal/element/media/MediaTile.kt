@@ -46,10 +46,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.arcgismaps.mapping.popup.PopupMediaType
+import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ViewableFile
+import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ViewableFileType
 
 @Composable
 internal fun MediaTile(
-    state: PopupMediaState
+    state: PopupMediaState,
+    onClicked: (ViewableFile) -> Unit
 ) {
     val colors = MediaElementDefaults.colors()
     val shapes = MediaElementDefaults.shapes()
@@ -64,7 +67,9 @@ internal fun MediaTile(
                 shape = shapes.tileShape
             )
             .clickable {
-                // TODO open media viewer here
+                onClicked(
+                    ViewableFile(name = state.title, path = state.imageUri.value, type = ViewableFileType.Image)
+                )
             }
     ) {
         val defaults = MediaElementDefaults.shapes()
@@ -189,6 +194,7 @@ internal fun PreviewMediaTile() {
             scope = rememberCoroutineScope(),
             chartFolder = "",
             imageGenerator = null
-        )
+        ),
+        onClicked = {}
     )
 }
