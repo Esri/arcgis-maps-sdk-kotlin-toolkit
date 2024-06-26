@@ -68,6 +68,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -117,7 +118,7 @@ internal fun AttachmentFormElement(
     colors: AttachmentElementColors = AttachmentElementDefaults.colors()
 ) {
     Card(
-        modifier = modifier,
+        modifier = modifier.semantics(mergeDescendants = true) {},
         shape = AttachmentElementDefaults.containerShape,
         border = BorderStroke(AttachmentElementDefaults.borderThickness, colors.borderColor)
     ) {
