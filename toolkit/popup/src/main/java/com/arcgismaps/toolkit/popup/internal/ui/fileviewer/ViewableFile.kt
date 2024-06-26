@@ -27,6 +27,7 @@ import android.provider.MediaStore
 import androidx.core.content.FileProvider
 import com.arcgismaps.mapping.popup.PopupAttachmentType
 import com.arcgismaps.toolkit.popup.R
+import com.arcgismaps.toolkit.popup.internal.element.attachment.PopupAttachmentState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parceler
@@ -53,6 +54,7 @@ private object ViewableFileTypeParceler : Parceler<ViewableFileType> {
         return when (parcel.readInt()) {
             0 -> ViewableFileType.Image
             1 -> ViewableFileType.Video
+            2 -> ViewableFileType.Audio
             else -> ViewableFileType.Other
         }
     }
@@ -62,7 +64,8 @@ private object ViewableFileTypeParceler : Parceler<ViewableFileType> {
             when (this) {
                 ViewableFileType.Image -> 0
                 ViewableFileType.Video -> 1
-                ViewableFileType.Other -> 2
+                ViewableFileType.Audio -> 2
+                ViewableFileType.Other -> 3
             }
         )
     }
@@ -71,14 +74,17 @@ private object ViewableFileTypeParceler : Parceler<ViewableFileType> {
 internal sealed class ViewableFileType {
     data object Image : ViewableFileType()
     data object Video : ViewableFileType()
+    data object Audio : ViewableFileType()
     data object Other : ViewableFileType()
 }
 
-internal fun PopupAttachmentType.toViewableFileType(): ViewableFileType = when (this) {
+internal fun PopupAttachmentState.getViewableFileType(): ViewableFileType = when (this.popupAttachmentType) {
     PopupAttachmentType.Image -> ViewableFileType.Image
     PopupAttachmentType.Video -> ViewableFileType.Video
-    PopupAttachmentType.Document,
-    PopupAttachmentType.Other -> ViewableFileType.Other
+    PopupAttachmentType.Document -> ViewableFileType.Other
+    PopupAttachmentType.Other ->
+        if (this.contentType.lowercase().contains("audio")) ViewableFileType.Audio else ViewableFileType.Other
+
 }
 
 /**
@@ -104,6 +110,7 @@ internal suspend fun ViewableFile.saveToDevice(context: Context): Result<Unit> =
         val contentCollection = when (type) {
             ViewableFileType.Video -> MediaStore.Video.Media.getContentUri(uri)
             ViewableFileType.Image -> MediaStore.Images.Media.getContentUri(uri)
+            ViewableFileType.Audio -> MediaStore.Audio.Media.getContentUri(uri)
             else -> throw UnsupportedOperationException("Cannot save this file type")
         }
         val destinationUri = context.contentResolver.insert(contentCollection, fileValues)
@@ -134,10 +141,9 @@ internal suspend fun ViewableFile.share(context: Context) = withContext(Dispatch
         "${context.applicationContext.applicationInfo.packageName}.arcgis.popup.fileprovider",
         file
     )
-    val intent = Intent().apply {
-        action = Intent.ACTION_SEND
-        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    val intent = Intent(Intent.ACTION_SEND).apply {
         setDataAndType(uri, contentType)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         putExtra(Intent.EXTRA_STREAM, uri)
     }
 

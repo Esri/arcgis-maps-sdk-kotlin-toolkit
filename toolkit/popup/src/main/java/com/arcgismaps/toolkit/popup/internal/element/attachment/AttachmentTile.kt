@@ -63,7 +63,7 @@ import com.arcgismaps.LoadStatus
 import com.arcgismaps.mapping.popup.PopupAttachmentType
 import com.arcgismaps.toolkit.popup.R
 import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ViewableFile
-import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.toViewableFileType
+import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.getViewableFileType
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
@@ -95,7 +95,7 @@ internal fun AttachmentTile(
                             state.name,
                             state.size,
                             state.path,
-                            state.popupAttachmentType.toViewableFileType(),
+                            state.getViewableFileType(),
                             state.contentType
                         )
                     )

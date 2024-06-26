@@ -39,6 +39,7 @@ import com.arcgismaps.toolkit.popup.internal.element.state.PopupElementState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.util.Objects
 
 /**
  * Represents the state of an [AttachmentsPopupElement]
@@ -119,6 +120,8 @@ internal class PopupAttachmentState(
 
     private lateinit var _attachment: PopupAttachment
 
+    private val attachmentsLoadStatus: MutableMap<String, Boolean> = mutableMapOf()
+
     private val _thumbnailUri: MutableState<String> = mutableStateOf("")
     /**
      * The URI of the attachment image. Empty until [loadAttachment] is called.
@@ -142,13 +145,24 @@ internal class PopupAttachmentState(
      * Loads the attachment and its thumbnail.
      */
     fun loadAttachment(scope: CoroutineScope) {
-        scope.launch {
-            onLoadAttachment().onSuccess {
-                _thumbnailUri.value = _attachment.filePath
+
+        val loaded = attachmentsLoadStatus[_attachment.uniqueIdentifier] ?: false
+        if (!loaded) {
+            scope.launch {
+                onLoadAttachment().onSuccess {
+                    attachmentsLoadStatus[_attachment.uniqueIdentifier] = true
+                    _thumbnailUri.value = _attachment.filePath
+                }.onFailure {
+                    attachmentsLoadStatus[_attachment.uniqueIdentifier] = false
+                }
             }
         }
     }
 }
+
+internal val PopupAttachment.uniqueIdentifier: String
+    get() = Objects.hash(this.name, this.size, this.type, this.contentType).toString()
+
 
 @Composable
 internal fun PopupAttachmentType.getIcon(): ImageVector = when (this) {
