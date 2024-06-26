@@ -36,6 +36,14 @@ class AttachmentTests : FeatureFormTestRunner(
     @get:Rule
     val composeTestRule = createComposeRule()
 
+    /**
+     * Test case 8.1:
+     * Given a `FeatureForm` with a `defaultAttachmentsElement` that has an image attachment
+     * When the `FeatureForm` is displayed
+     * Then the image attachment is displayed with the correct size and download icon
+     * And the attachment is downloaded correctly
+     * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-81-test-image-attachment-data
+     */
     @Test
     fun testImageAttachments() = runTest {
         composeTestRule.setContent {
