@@ -231,7 +231,7 @@ fun CalloutOptions(
         }
         Spacer(modifier = Modifier.size(10.dp))
         Button(
-            enabled = (mapPoint != null && calloutVisibility),
+            enabled = mapPoint != null,
             onClick = { onClearMapPointRequest() }) {
             Text(text = "Clear Callout map point")
         }
