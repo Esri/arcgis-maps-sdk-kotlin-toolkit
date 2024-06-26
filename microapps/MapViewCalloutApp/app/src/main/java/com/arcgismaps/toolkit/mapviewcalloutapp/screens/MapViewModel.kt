@@ -41,6 +41,7 @@ import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class MapViewModel : ViewModel() {
@@ -90,6 +91,9 @@ class MapViewModel : ViewModel() {
 
     private val _selectedGeoElement = MutableStateFlow<GeoElement?>(null)
     val selectedGeoElement: StateFlow<GeoElement?> = _selectedGeoElement
+
+    private val _dynamicEntityObservationId = MutableStateFlow<Long?>(null)
+    val dynamicEntityObservationId: StateFlow<Long?> = _dynamicEntityObservationId.asStateFlow()
 
     private val _tapLocation = MutableStateFlow<Point?>(null)
     val tapLocation: StateFlow<Point?> = _tapLocation
@@ -149,6 +153,9 @@ class MapViewModel : ViewModel() {
                 val observation = identifyLayerResult.geoElements.first() as DynamicEntityObservation
                 val entity = observation.dynamicEntity
                 _selectedGeoElement.value = entity
+                entity?.dynamicEntityChangedEvent?.collect { dynamicEntityChangedInfo ->
+                    _dynamicEntityObservationId.value = dynamicEntityChangedInfo.receivedObservation?.id
+                }
             }
         }
     }

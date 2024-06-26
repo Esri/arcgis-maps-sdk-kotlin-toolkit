@@ -26,17 +26,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.arcgismaps.geometry.Point
-import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.BasemapStyle
-import com.arcgismaps.mapping.GeoElement
 import com.arcgismaps.realtime.DynamicEntity
-import com.arcgismaps.realtime.DynamicEntityObservation
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import kotlin.math.roundToInt
 
@@ -50,42 +47,42 @@ import kotlin.math.roundToInt
 fun GraphicScreen(viewModel: MapViewModel){
 
     val selectedGeoElement = viewModel.selectedGeoElement.collectAsState().value
+    Log.e("TAG**", "recomposing graphic screen")
     var calloutVisibility by rememberSaveable { mutableStateOf(true) }
     var nullTapLocation by rememberSaveable { mutableStateOf(false) }
+
     Box{
+        Log.e("TAG**", "recomposing box")
         MapView(
             modifier = Modifier.fillMaxSize(),
             arcGISMap = viewModel.mapWithDynamicEntities,
             mapViewProxy = viewModel.mapViewProxy,
             graphicsOverlays = remember { listOf(viewModel.tapLocationGraphicsOverlay) },
             onSingleTapConfirmed = { singleTapConfirmedEvent ->
-//                viewModel.clearTapLocationAndGeoElement()
                 viewModel.setTapLocation(singleTapConfirmedEvent.mapPoint, nullTapLocation)
                 viewModel.identifyOnDynamicEntity(singleTapConfirmedEvent)
             },
             content = if (selectedGeoElement != null && calloutVisibility) {
                 {
-                    val tapLocation = viewModel.tapLocation.value
+                    Log.e("TAG**", "recomposing Callout")
                     Callout(
                         geoElement = selectedGeoElement,
                         modifier = Modifier.wrapContentSize(),
                         tapLocation = viewModel.tapLocation.value,
                     ) {
-                        val dynamicEntity = selectedGeoElement as DynamicEntity
-                        val location = dynamicEntity.geometry as Point
-                        CalloutContent(selectedGeoElement)
-//                        Text("""
-//                            |Vehicle Name: ${dynamicEntity.attributes["vehiclename"]}
-//                            |Vehicle type: ${dynamicEntity.attributes["vehicletype"]}
-//                            |Speed: ${dynamicEntity.attributes["speed"]}
-//                            |Heading: ${dynamicEntity.attributes["heading"]}
-//                            |Point: ${(selectedGeoElement as DynamicEntity).attributes["point_x"]},${(selectedGeoElement as DynamicEntity).attributes["point_y"]}
-//                            |Location: ${location.x.roundToInt()},${location.y.roundToInt()}
-//                        """.trimMargin())
-//                        Text("Tapped location: ${tapLocation?.x?.roundToInt()},${tapLocation?.y?.roundToInt()}")
-//                        Text("Tapped location: ${location.x.roundToInt()},${location.y.roundToInt()}")
-//                        Log.e("Point****", "Point: ${(selectedGeoElement as DynamicEntity).attributes["point_x"]},${(selectedGeoElement as DynamicEntity).attributes["point_y"]} ")
-//                        Text("Point: ${(selectedGeoElement as DynamicEntity).attributes["point_x"]},${(selectedGeoElement as DynamicEntity).attributes["point_y"]}")
+                        Log.e("TAG**", "recomposing Callout content")
+                        key(viewModel.dynamicEntityObservationId.collectAsState().value) {
+                            Text(
+                                """
+                            |Vehicle Name: ${selectedGeoElement.attributes["vehiclename"]}
+                            |Vehicle type: ${selectedGeoElement.attributes["vehicletype"]}
+                            |Speed: ${selectedGeoElement.attributes["speed"]}
+                            |Heading: ${selectedGeoElement.attributes["heading"]}
+                            |Point: ${(selectedGeoElement as DynamicEntity).attributes["point_x"]},${(selectedGeoElement).attributes["point_y"]}
+                            |Location: ${(selectedGeoElement.geometry as Point).x.roundToInt()},${(selectedGeoElement.geometry as Point).y.roundToInt()}
+                        """.trimMargin()
+                            )
+                        }
                     }
                 }
             } else {
