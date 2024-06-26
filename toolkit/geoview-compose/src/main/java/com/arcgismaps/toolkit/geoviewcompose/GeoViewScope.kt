@@ -177,6 +177,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
                 this.computeLeaderLocationForGeoelement(geoElement, tapLocation)
             )
         }
+        // update the Callout location when the dynamic entity changes
         if (geoElement is DynamicEntity) {
             LaunchedEffect(geoElement) {
                 geoElement.dynamicEntityChangedEvent.collect {
