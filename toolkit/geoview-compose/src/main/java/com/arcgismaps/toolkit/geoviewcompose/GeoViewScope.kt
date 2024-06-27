@@ -111,7 +111,13 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         rotateOffsetWithGeoView: Boolean = false,
         content: @Composable BoxScope.() -> Unit
     ) {
-        if (this.isCalloutBeingDisplayed.compareAndSet(false, true)) {
+        // Facilitates the recomposition of the first Callout
+        var allowCalloutRecomposition by remember { mutableStateOf(false) }
+
+        if (this.isCalloutBeingDisplayed.compareAndSet(false, true)
+            || allowCalloutRecomposition
+        ) {
+            allowCalloutRecomposition = true
             this.CalloutInternal(location, modifier, offset, rotateOffsetWithGeoView, content)
         }
     }
@@ -138,7 +144,13 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         tapLocation: Point? = null,
         content: @Composable BoxScope.() -> Unit
     ) {
-        if (this.isCalloutBeingDisplayed.compareAndSet(false, true)) {
+        // Facilitates the recomposition of the first Callout
+        var allowCalloutRecomposition by remember { mutableStateOf(false) }
+
+        if (this.isCalloutBeingDisplayed.compareAndSet(false, true)
+            || allowCalloutRecomposition
+        ) {
+            allowCalloutRecomposition = true
             val leaderLocation = this.computeLeaderLocationForGeoelement(geoElement, tapLocation) ?: return
             this.CalloutInternal(
                 leaderLocation.location,
@@ -187,7 +199,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
             )
         }
 
-        LaunchedEffect(location) {
+        LaunchedEffect(location, offset, rotateOffsetWithGeoView) {
             // Used to update screen coordinate when new location point is used
             leaderScreenCoordinate =
                 getLeaderScreenCoordinate(geoView, location, offset, rotateOffsetWithGeoView)
