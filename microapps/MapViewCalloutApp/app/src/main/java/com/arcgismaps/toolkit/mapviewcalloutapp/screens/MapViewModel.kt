@@ -64,9 +64,6 @@ class MapViewModel : ViewModel() {
     private val _mapPoint = MutableStateFlow<Point?>(null)
     val mapPoint: StateFlow<Point?> = _mapPoint.asStateFlow()
 
-    private val _rotateOffsetWithGeoView = MutableStateFlow(false)
-    var rotateOffsetWithGeoView: StateFlow<Boolean> = _rotateOffsetWithGeoView.asStateFlow()
-
     private val _selectedGeoElement = MutableStateFlow<GeoElement?>(null)
     val selectedGeoElement: StateFlow<GeoElement?> = _selectedGeoElement.asStateFlow()
 
@@ -90,10 +87,6 @@ class MapViewModel : ViewModel() {
 
     fun setOffset(offset: Offset) {
         _offset.value = offset
-    }
-
-    fun toggleRotateOffsetWithGeoView() {
-        _rotateOffsetWithGeoView.value = !_rotateOffsetWithGeoView.value
     }
 
     fun setMapPoint(singleTapConfirmedEvent: SingleTapConfirmedEvent) {

@@ -75,8 +75,8 @@ fun TapLocationScreen(viewModel: MapViewModel) {
 
     val mapPoint = viewModel.mapPoint.collectAsState().value
     val offset = viewModel.offset.collectAsState().value
-    val rotateOffsetWithGeoView = viewModel.rotateOffsetWithGeoView.collectAsState().value
 
+    var rotateOffsetWithGeoView by rememberSaveable { mutableStateOf(false) }
     var calloutVisibility by rememberSaveable { mutableStateOf(true) }
     var showBottomSheet by remember { mutableStateOf(false) }
     val modalBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -153,7 +153,7 @@ fun TapLocationScreen(viewModel: MapViewModel) {
                         onVisibilityToggled = { calloutVisibility = !calloutVisibility },
                         onClearMapPointRequest = { viewModel.clearMapPoint() },
                         onCalloutOffsetRotationToggled = {
-                            viewModel.toggleRotateOffsetWithGeoView()
+                            rotateOffsetWithGeoView = !rotateOffsetWithGeoView
                         }
                     )
                 }
