@@ -29,8 +29,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.mapping.popup.PopupAttachmentType
-import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ViewableFile
 import com.arcgismaps.toolkit.popup.internal.ui.ExpandableCard
+import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ViewableFile
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
@@ -97,10 +97,8 @@ private fun AttachmentsPopupElementPreview() {
                 size = 2024,
                 PopupAttachmentType.Image,
                 contentType = "image/jpeg",
-                MutableStateFlow(LoadStatus.Loaded),
-                { Result.success(Unit) },
-                { Result.success(null) }
-            )
+                MutableStateFlow(LoadStatus.Loaded)
+            ) { Result.success(Unit) }
         )
     )
 }

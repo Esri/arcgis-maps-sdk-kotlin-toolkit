@@ -66,6 +66,11 @@ class MapViewModel(
     val layer: Layer?
         get() = _layer
 
+    @Suppress("unused")
+    private val fourteenersId = "9f3a674e998f461580006e626611f9ad"
+    @Suppress("unused")
+    private val ranchoId = "dd94764601554f1ea958f2d81906c698"
+
     /**
      * The Popup read by the composition is held as a state variable.
      * We want the composition to recompose when the Popup changes.
@@ -76,8 +81,8 @@ class MapViewModel(
 
     val map = ArcGISMap(
         PortalItem(
-            Portal.arcGISOnline(Portal.Connection.Anonymous),
-            "9f3a674e998f461580006e626611f9ad"
+            Portal.arcGISOnline(Portal.Connection.Authenticated),
+            fourteenersId
         )
     ).apply {
         initialViewpoint = Viewpoint(
