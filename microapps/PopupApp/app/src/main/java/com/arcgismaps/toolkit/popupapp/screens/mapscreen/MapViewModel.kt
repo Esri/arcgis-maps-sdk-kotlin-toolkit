@@ -82,7 +82,7 @@ class MapViewModel(
     val map = ArcGISMap(
         PortalItem(
             Portal.arcGISOnline(Portal.Connection.Authenticated),
-            fourteenersId
+            ranchoId
         )
     ).apply {
         initialViewpoint = Viewpoint(
