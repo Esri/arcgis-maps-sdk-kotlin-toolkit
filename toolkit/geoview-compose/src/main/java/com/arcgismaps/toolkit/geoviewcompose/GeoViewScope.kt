@@ -111,7 +111,8 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         rotateOffsetWithGeoView: Boolean = false,
         content: @Composable BoxScope.() -> Unit
     ) {
-        // Facilitates the recomposition of the first Callout
+        // Enables the recomposition of the first Callout in the content lambda that is displayed
+        // on the MapView/SceneView
         var allowCalloutRecomposition by remember { mutableStateOf(false) }
 
         if (this.isCalloutBeingDisplayed.compareAndSet(false, true)
@@ -144,7 +145,8 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         tapLocation: Point? = null,
         content: @Composable BoxScope.() -> Unit
     ) {
-        // Facilitates the recomposition of the first Callout
+        // Enables the recomposition of the first Callout in the content lambda that is displayed
+        // on the MapView/SceneView
         var allowCalloutRecomposition by remember { mutableStateOf(false) }
 
         if (this.isCalloutBeingDisplayed.compareAndSet(false, true)
