@@ -187,7 +187,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
             )
         }
 
-        LaunchedEffect(location) {
+        LaunchedEffect(location, offset, rotateOffsetWithGeoView) {
             // Used to update screen coordinate when new location point is used
             leaderScreenCoordinate =
                 getLeaderScreenCoordinate(geoView, location, offset, rotateOffsetWithGeoView)
