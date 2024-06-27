@@ -57,6 +57,7 @@ fun GraphicScreen(viewModel: MapViewModel){
             mapViewProxy = viewModel.mapViewProxy,
             graphicsOverlays = remember { listOf(viewModel.tapLocationGraphicsOverlay) },
             onSingleTapConfirmed = { singleTapConfirmedEvent ->
+                viewModel.clearTapLocationAndGeoElement()
                 viewModel.setTapLocation(singleTapConfirmedEvent.mapPoint, nullTapLocation)
                 viewModel.identifyOnDynamicEntity(singleTapConfirmedEvent)
             },
