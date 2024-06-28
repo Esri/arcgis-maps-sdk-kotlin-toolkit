@@ -19,6 +19,12 @@
 package com.arcgismaps.toolkit.mapviewcalloutapp.screens
 
 import android.widget.TextView
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -63,6 +69,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
 import com.arcgismaps.geometry.Point
+import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import kotlin.math.roundToInt
 
@@ -73,13 +80,21 @@ import kotlin.math.roundToInt
 @Composable
 fun TapLocationScreen(viewModel: MapViewModel) {
 
-    val mapPoint = viewModel.mapPoint.collectAsState().value
+    val tappedPoint = viewModel.mapPoint.collectAsState().value
     val offset = viewModel.offset.collectAsState().value
-
+    var calloutLocation = remember { Point(-13185535.98, 4037766.28, SpatialReference(102100)) }
     var rotateOffsetWithGeoView by rememberSaveable { mutableStateOf(false) }
-    var calloutVisibility by rememberSaveable { mutableStateOf(true) }
+    var isCalloutEnabled by rememberSaveable { mutableStateOf(true) }
     var showBottomSheet by remember { mutableStateOf(false) }
     val modalBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val visibleState = remember { MutableTransitionState(false) }
+
+    if (tappedPoint != null && isCalloutEnabled) {
+        calloutLocation = tappedPoint
+        visibleState.targetState = true
+    } else {
+        visibleState.targetState = false
+    }
 
     // the value will be equivalent to half of device width in any orientation
     val mapViewInsets: Dp = LocalConfiguration.current.screenWidthDp.dp / 4
@@ -107,12 +122,19 @@ fun TapLocationScreen(viewModel: MapViewModel) {
             arcGISMap = viewModel.arcGISMap,
             insets = PaddingValues(horizontal = mapViewInsets),
             graphicsOverlays = remember { listOf(viewModel.tapLocationGraphicsOverlay) },
-            onSingleTapConfirmed = viewModel::setMapPoint,
-            content = if (mapPoint != null && calloutVisibility) {
-                {
+            onSingleTapConfirmed = {
+                viewModel.setMapPoint(it)
+            },
+            content =
+            {
+                AnimatedVisibility(
+                    visibleState = visibleState,
+                    enter = fadeIn(spring(stiffness = Spring.StiffnessLow)),
+                    exit = fadeOut(spring(stiffness = Spring.StiffnessLow))
+                ) {
                     Callout(
                         modifier = Modifier.fillMaxWidth(),
-                        location = mapPoint,
+                        location = calloutLocation,
                         rotateOffsetWithGeoView = rotateOffsetWithGeoView,
                         offset = offset
                     ) {
@@ -123,17 +145,15 @@ fun TapLocationScreen(viewModel: MapViewModel) {
                             Column {
                                 HtmlText(
                                     html = "<b>Tapped location</b>:<br>" +
-                                            "<i>x</i>    = ${mapPoint.x.roundToInt()}<br>" +
-                                            "<i>y</i>    = ${mapPoint.y.roundToInt()}<br>" +
-                                            "<i>wkid</i> = ${mapPoint.spatialReference?.wkid}",
+                                            "<i>x</i>    = ${calloutLocation.x.roundToInt()}<br>" +
+                                            "<i>y</i>    = ${calloutLocation.y.roundToInt()}<br>" +
+                                            "<i>wkid</i> = ${calloutLocation.spatialReference?.wkid}",
                                     htmlFlag = HtmlCompat.FROM_HTML_MODE_COMPACT
                                 )
                             }
                         }
                     }
                 }
-            } else {
-                null
             }
         )
 
@@ -145,13 +165,16 @@ fun TapLocationScreen(viewModel: MapViewModel) {
             ) {
                 Box(Modifier.navigationBarsPadding()) {
                     CalloutOptions(
-                        calloutVisibility = calloutVisibility,
+                        calloutVisibility = isCalloutEnabled,
                         isCalloutRotationEnabled = rotateOffsetWithGeoView,
                         offset = offset,
-                        mapPoint = mapPoint,
+                        mapPoint = calloutLocation,
                         onOffsetChange = { viewModel.setOffset(it) },
-                        onVisibilityToggled = { calloutVisibility = !calloutVisibility },
-                        onClearMapPointRequest = { viewModel.clearMapPoint() },
+                        onVisibilityToggled = { isCalloutEnabled = !isCalloutEnabled },
+                        onClearMapPointRequest = {
+                            calloutLocation = tappedPoint ?: return@CalloutOptions
+                            viewModel.clearMapPoint()
+                        },
                         onCalloutOffsetRotationToggled = {
                             rotateOffsetWithGeoView = !rotateOffsetWithGeoView
                         }
