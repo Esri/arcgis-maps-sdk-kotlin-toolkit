@@ -89,8 +89,8 @@ class MapViewModel : ViewModel() {
         _offset.value = offset
     }
 
-    fun setMapPoint(singleTapConfirmedEvent: SingleTapConfirmedEvent) {
-        _mapPoint.value = singleTapConfirmedEvent.mapPoint
+    fun setMapPoint(mapPoint: Point?) {
+        _mapPoint.value = mapPoint
 
         tapLocationGraphicsOverlay.graphics.clear()
         tapLocationGraphicsOverlay.graphics.add(

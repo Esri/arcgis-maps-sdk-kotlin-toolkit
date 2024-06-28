@@ -21,8 +21,6 @@ package com.arcgismaps.toolkit.mapviewcalloutapp.screens
 import android.widget.TextView
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.MutableTransitionState
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
@@ -51,6 +49,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -80,20 +79,31 @@ import kotlin.math.roundToInt
 @Composable
 fun TapLocationScreen(viewModel: MapViewModel) {
 
+
     val tappedPoint = viewModel.mapPoint.collectAsState().value
     val offset = viewModel.offset.collectAsState().value
-    val calloutLocation = remember { mutableStateOf(Point(-13185535.98, 4037766.28, SpatialReference(102100))) }
     var rotateOffsetWithGeoView by rememberSaveable { mutableStateOf(false) }
     var isCalloutEnabled by rememberSaveable { mutableStateOf(true) }
     var showBottomSheet by remember { mutableStateOf(false) }
     val modalBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val visibleState = remember { MutableTransitionState(false) }
+    val initialPoint = Point(-13185535.98, 4037766.28, SpatialReference(102100))
+    // default starting point of the Callout
+    val calloutLocation = remember { mutableStateOf(initialPoint) }
+    // animate to a visible transition state
+    val calloutVisibleState = remember { MutableTransitionState(false) }.apply {
+        targetState = true
+    }
 
     if (tappedPoint != null && isCalloutEnabled) {
         calloutLocation.value = tappedPoint
-        visibleState.targetState = true
+        calloutVisibleState.targetState = true
     } else {
-        visibleState.targetState = false
+        calloutVisibleState.targetState = false
+    }
+
+    // show callout on the starting point
+    LaunchedEffect(Unit){
+        viewModel.setMapPoint(initialPoint)
     }
 
     // the value will be equivalent to half of device width in any orientation
@@ -123,14 +133,14 @@ fun TapLocationScreen(viewModel: MapViewModel) {
             insets = PaddingValues(horizontal = mapViewInsets),
             graphicsOverlays = remember { listOf(viewModel.tapLocationGraphicsOverlay) },
             onSingleTapConfirmed = {
-                viewModel.setMapPoint(it)
+                viewModel.setMapPoint(it.mapPoint)
             },
             content =
             {
                 AnimatedVisibility(
-                    visibleState = visibleState,
-                    enter = fadeIn(spring(stiffness = Spring.StiffnessLow)),
-                    exit = fadeOut(spring(stiffness = Spring.StiffnessLow))
+                    visibleState = calloutVisibleState,
+                    enter = fadeIn(),
+                    exit = fadeOut()
                 ) {
                     Callout(
                         modifier = Modifier.fillMaxWidth(),
@@ -172,7 +182,6 @@ fun TapLocationScreen(viewModel: MapViewModel) {
                         onOffsetChange = { viewModel.setOffset(it) },
                         onVisibilityToggled = { isCalloutEnabled = !isCalloutEnabled },
                         onClearMapPointRequest = {
-                            calloutLocation.value = tappedPoint ?: return@CalloutOptions
                             viewModel.clearMapPoint()
                         },
                         onCalloutOffsetRotationToggled = {
