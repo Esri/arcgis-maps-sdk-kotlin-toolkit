@@ -78,18 +78,18 @@ import kotlin.math.roundToInt
 @Composable
 fun TapLocationScreen(viewModel: MapViewModel) {
 
-
-    val tappedPoint = viewModel.mapPoint.collectAsState().value
+    val mapPoint = viewModel.mapPoint.collectAsState().value
     val offset = viewModel.offset.collectAsState().value
+
     var rotateOffsetWithGeoView by rememberSaveable { mutableStateOf(false) }
-    var isCalloutEnabled by rememberSaveable { mutableStateOf(true) }
+    var calloutVisibility by rememberSaveable { mutableStateOf(true) }
     var showBottomSheet by remember { mutableStateOf(false) }
     val modalBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     // animate to a visible transition state
     val calloutVisibleState = remember { MutableTransitionState(false) }.apply {
         targetState = true
     }
-    calloutVisibleState.targetState = tappedPoint != null && isCalloutEnabled
+    calloutVisibleState.targetState = mapPoint != null && calloutVisibility
 
     // the value will be equivalent to half of device width in any orientation
     val mapViewInsets: Dp = LocalConfiguration.current.screenWidthDp.dp / 4
@@ -118,12 +118,11 @@ fun TapLocationScreen(viewModel: MapViewModel) {
             insets = PaddingValues(horizontal = mapViewInsets),
             graphicsOverlays = remember { listOf(viewModel.tapLocationGraphicsOverlay) },
             onSingleTapConfirmed = {
-                viewModel.setMapPoint(it.mapPoint)
+                viewModel.setMapPoint(it)
             },
-            content =
-            {
+            content = {
                 val lastMapPoint = remember { Ref<Point>() }
-                lastMapPoint.value = tappedPoint ?: lastMapPoint.value
+                lastMapPoint.value = mapPoint ?: lastMapPoint.value
 
                 AnimatedVisibility(
                     calloutVisibleState,
@@ -165,12 +164,12 @@ fun TapLocationScreen(viewModel: MapViewModel) {
             ) {
                 Box(Modifier.navigationBarsPadding()) {
                     CalloutOptions(
-                        calloutVisibility = isCalloutEnabled,
+                        calloutVisibility = calloutVisibility,
                         isCalloutRotationEnabled = rotateOffsetWithGeoView,
                         offset = offset,
-                        mapPoint = tappedPoint,
+                        mapPoint = mapPoint,
                         onOffsetChange = { viewModel.setOffset(it) },
-                        onVisibilityToggled = { isCalloutEnabled = !isCalloutEnabled },
+                        onVisibilityToggled = { calloutVisibility = !calloutVisibility },
                         onClearMapPointRequest = {
                             viewModel.clearMapPoint()
                         },
