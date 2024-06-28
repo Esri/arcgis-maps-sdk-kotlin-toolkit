@@ -136,19 +136,14 @@ fun TapLocationScreen(viewModel: MapViewModel) {
                             rotateOffsetWithGeoView = rotateOffsetWithGeoView,
                             offset = offset
                         ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Column {
-                                    HtmlText(
-                                        html = "<b>Tapped location</b>:<br>" +
-                                                "<i>x</i>    = ${it.x.roundToInt()}<br>" +
-                                                "<i>y</i>    = ${it.y.roundToInt()}<br>" +
-                                                "<i>wkid</i> = ${it.spatialReference?.wkid}",
-                                        htmlFlag = HtmlCompat.FROM_HTML_MODE_COMPACT
-                                    )
-                                }
+                            Column {
+                                HtmlText(
+                                    html = "<b>Tapped location</b>:<br>" +
+                                            "<i>x</i>    = ${it.x.roundToInt()}<br>" +
+                                            "<i>y</i>    = ${it.y.roundToInt()}<br>" +
+                                            "<i>wkid</i> = ${it.spatialReference?.wkid}",
+                                    htmlFlag = HtmlCompat.FROM_HTML_MODE_COMPACT
+                                )
                             }
                         }
                     }
