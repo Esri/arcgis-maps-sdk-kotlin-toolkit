@@ -15,82 +15,82 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="enter_n_chars">Č_Enter %1$d characters______________________ž</string>
-    <string name="enter_min_to_max_chars">Č_Enter %1$d to %2$d characters______________________________ž</string>
-    <string name="maximum_n_chars">Č_Maximum %1$d characters________________________ž</string>
-    <string name="no_value">Č_No value_________________ž</string>
-    <string name="enter_value">Č_Enter Value____________ž</string>
-    <string name="required">Č_Required_________________ž</string>
-    <string name="today">Č_Today___________ž</string>
-    <string name="now">Č_Now_______ž</string>
-    <string name="cancel">Č_Cancel_____________ž</string>
-    <string name="ok">Č_OK_____ž</string>
-    <string name="done">Č_Done_________ž</string>
-    <string name="filter">Č_Filter %1$s____________ž</string>
-    <string name="numeric_range_helper_text">Č_Enter value from %1$s to %2$s______________________________ž</string>
-    <string name="less_than_min_value">Č_Less than minimum value %1$s_____________________________ž</string>
-    <string name="exceeds_max_value">Č_Exceeds maximum value %1$s___________________________ž</string>
-    <string name="value_must_be_a_whole_number">Č_Value must be a whole number_____________________________ž</string>
-    <string name="value_must_be_a_number">Č_Value must be a number_______________________ž</string>
-    <string name="value_must_be_within_domain">Č_Value must be within domain____________________________ž</string>
-    <string name="value_must_not_be_empty">Č_Value must not be empty________________________ž</string>
-    <string name="min_datetime_helper_text">Č_Date must be on or after %1$s______________________________ž</string>
-    <string name="max_datetime_helper_text">Č_Date must be on or before %1$s_______________________________ž</string>
+    <string name="enter_n_chars">Unesite %1$d znakova</string>
+    <string name="enter_min_to_max_chars">Unesite %1$d do %2$d znaka/znakova</string>
+    <string name="maximum_n_chars">Maksimalno %1$d znakova</string>
+    <string name="no_value">Bez vrijednosti</string>
+    <string name="enter_value">Unesite vrijednost</string>
+    <string name="required">Potrebno</string>
+    <string name="today">Danas</string>
+    <string name="now">Sada</string>
+    <string name="cancel">Odustani</string>
+    <string name="ok">U redu</string>
+    <string name="done">Gotovo</string>
+    <string name="filter">Filtar %1$s</string>
+    <string name="numeric_range_helper_text">Unesite vrijednost od %1$s do %2$s</string>
+    <string name="less_than_min_value">Manje od minimalne vrijednosti %1$s</string>
+    <string name="exceeds_max_value">Premašuje maksimalnu vrijednost %1$s</string>
+    <string name="value_must_be_a_whole_number">Vrijednost mora biti cijeli broj</string>
+    <string name="value_must_be_a_number">Vrijednost mora biti broj</string>
+    <string name="value_must_be_within_domain">Vrijednost mora biti unutar domene</string>
+    <string name="value_must_not_be_empty">Vrijednost ne smije biti prazna</string>
+    <string name="min_datetime_helper_text">Datum mora biti na ili poslije %1$s</string>
+    <string name="max_datetime_helper_text">Datum početka mora biti na ili prije datuma %1$s.</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Č_Entered date_____________ž</string>
-    <string name="ff_date_input_headline_description">Č_Entered date: %1$s___________________ž</string>
-    <string name="ff_date_input_invalid_for_pattern">Č_Date does not match expected pattern: %1$s______________________ž</string>
-    <string name="ff_date_input_invalid_not_allowed">Č_Date not allowed: %1$s_______________________ž</string>
-    <string name="ff_date_input_invalid_year_range">Č__ž
-        Č_Date out of expected year range %1$s - %2$s___________________________ž
-Č__________ž    </string>
-    <string name="ff_date_input_label">Č_Date_________ž</string>
-    <string name="ff_date_input_no_input_description">Č_None_________ž</string>
-    <string name="ff_date_input_title">Č_Select date____________ž</string>
-    <string name="ff_date_picker_headline">Č_"Selected date"________________ž</string>
-    <string name="ff_date_picker_headline_description">Č_Current selection: %1$s________________________ž</string>
-    <string name="ff_date_picker_navigate_to_year_description">Č_Navigate to year %1$s______________________ž</string>
-    <string name="ff_date_picker_no_selection_description">Č_None_________ž</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Č_Scroll to show earlier years_____________________________ž</string>
-    <string name="ff_date_picker_scroll_to_later_years">Č_Scroll to show later years___________________________ž</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Č_Switch to calendar input mode______________________________ž</string>
-    <string name="ff_date_picker_switch_to_day_selection">Č__ž
-        Č_"Swipe to select a year, or tap to switch back to selecting a day"______________________________________ž
-Č__________ž    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Č_Switch to text input mode__________________________ž</string>
-    <string name="ff_date_picker_switch_to_next_month">Č_"Change to next month"_______________________ž</string>
-    <string name="ff_date_picker_switch_to_previous_month">Č_"Change to previous month"___________________________ž</string>
-    <string name="ff_date_picker_switch_to_year_selection">Č_"Switch to selecting a year"_____________________________ž</string>
-    <string name="ff_date_picker_title">Č_"Select date"______________ž</string>
-    <string name="ff_date_picker_today_description">Č_Today___________ž</string>
-    <string name="ff_date_picker_year_picker_pane_title">Č_Year picker visible____________________ž</string>
-    <string name="ff_date_range_input_invalid_range_input">Č_Invalid date range input_________________________ž</string>
-    <string name="ff_date_range_input_title">Č_Enter dates____________ž</string>
-    <string name="ff_date_range_picker_day_in_range">Č_In range_________________ž</string>
-    <string name="ff_date_range_picker_end_headline">Č_End date_________________ž</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Č_Scroll to show the next month______________________________ž</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Č_Scroll to show the previous month__________________ž</string>
-    <string name="ff_date_range_picker_start_headline">Č_Start date_____________________ž</string>
-    <string name="ff_date_range_picker_title">Č_Select dates_____________ž</string>
+    <string name="ff_date_input_headline">Uneseni datum</string>
+    <string name="ff_date_input_headline_description">Uneseni datum: %1$s</string>
+    <string name="ff_date_input_invalid_for_pattern">Datum ne odgovara očekivanom uzorku:: %1$s</string>
+    <string name="ff_date_input_invalid_not_allowed">Datum nije dopušten: %1$s</string>
+    <string name="ff_date_input_invalid_year_range">
+        Datum izvan očekivanog raspona godina %1$s - %2$s
+    </string>
+    <string name="ff_date_input_label">Datum</string>
+    <string name="ff_date_input_no_input_description">Nema</string>
+    <string name="ff_date_input_title">Odaberi datum</string>
+    <string name="ff_date_picker_headline">"Odabran datum"</string>
+    <string name="ff_date_picker_headline_description">Trenutačni odabir: %1$s</string>
+    <string name="ff_date_picker_navigate_to_year_description">Navigiraj na godinu %1$s</string>
+    <string name="ff_date_picker_no_selection_description">Nema</string>
+    <string name="ff_date_picker_scroll_to_earlier_years">Pomakni radi prikaza ranijih godina</string>
+    <string name="ff_date_picker_scroll_to_later_years">Pomakni radi prikaza kasnijih godina</string>
+    <string name="ff_date_picker_switch_to_calendar_mode">Prebaci na način unosa u kalendar</string>
+    <string name="ff_date_picker_switch_to_day_selection">
+        "Prevucite prstom za odabir godine ili dodirnite za povratak na odabir dana"
+    </string>
+    <string name="ff_date_picker_switch_to_input_mode">Prebaci na način unosa teksta</string>
+    <string name="ff_date_picker_switch_to_next_month">"Promijeni na sljedeći mjesec"</string>
+    <string name="ff_date_picker_switch_to_previous_month">"Promijeni na prethodni mjesec"</string>
+    <string name="ff_date_picker_switch_to_year_selection">"Prebaci na odabir godine"</string>
+    <string name="ff_date_picker_title">"Odaberi datum"</string>
+    <string name="ff_date_picker_today_description">Danas</string>
+    <string name="ff_date_picker_year_picker_pane_title">Odabirač godine vidljiv</string>
+    <string name="ff_date_range_input_invalid_range_input">Neispravni unos raspona datuma</string>
+    <string name="ff_date_range_input_title">Unesite datume</string>
+    <string name="ff_date_range_picker_day_in_range">U rasponu</string>
+    <string name="ff_date_range_picker_end_headline">Datum kraja</string>
+    <string name="ff_date_range_picker_scroll_to_next_month">Pomaknite se za prikaz sljedećeg mjeseca</string>
+    <string name="ff_date_range_picker_scroll_to_previous_month">Pomaknite se za prikaz prethodnog mjeseca</string>
+    <string name="ff_date_range_picker_start_headline">Datum početka</string>
+    <string name="ff_date_range_picker_title">Odaberi datume</string>
 
     <!-- Time Picker string values -->
-    <string name="ff_time_picker_am">Č_AM_____ž</string>
-    <string name="ff_time_picker_hour">Č_Hour_________ž</string>
-    <string name="ff_time_picker_hour_24h_suffix">Č_%1$d hours_____________________ž</string>
-    <string name="ff_time_picker_hour_selection">Č_Select hour____________ž</string>
-    <string name="ff_time_picker_hour_suffix">Č_%1$d o\'clock______________ž</string>
-    <string name="ff_time_picker_hour_text_field">Č_for hour_________________ž</string>
-    <string name="ff_time_picker_minute">Č_Minute_____________ž</string>
-    <string name="ff_time_picker_minute_selection">Č_Select minutes_______________ž</string>
-    <string name="ff_time_picker_minute_suffix">Č_%1$d minutes_____________ž</string>
-    <string name="ff_time_picker_minute_text_field">Č_for minutes____________ž</string>
-    <string name="ff_time_picker_period_toggle_description">Č_Select AM or PM________________ž</string>
-    <string name="ff_time_picker_pm">Č_PM_____ž</string>
-    <string name="take_photo">Č_Take Photo_____________________ž</string>
-    <string name="add_photo">Č_Add Photo___________________ž</string>
-    <string name="rename">Č_Rename_____________ž</string>
-    <string name="delete">Č_Delete_____________ž</string>
-    <string name="rename_attachment">Č_Rename Attachment__________________ž</string>
-    <string name="name">Č_Name_________ž</string>
+    <string name="ff_time_picker_am">Ujutro</string>
+    <string name="ff_time_picker_hour">Sat</string>
+    <string name="ff_time_picker_hour_24h_suffix">%1$d sati</string>
+    <string name="ff_time_picker_hour_selection">Odaberi sat</string>
+    <string name="ff_time_picker_hour_suffix">%1$d sati</string>
+    <string name="ff_time_picker_hour_text_field">za sat</string>
+    <string name="ff_time_picker_minute">Minuta</string>
+    <string name="ff_time_picker_minute_selection">Odaberi minute</string>
+    <string name="ff_time_picker_minute_suffix">%1$d minuta</string>
+    <string name="ff_time_picker_minute_text_field">za minute</string>
+    <string name="ff_time_picker_period_toggle_description">Odaberi AM ili PM</string>
+    <string name="ff_time_picker_pm">Popodne</string>
+    <string name="take_photo">Snimi fotografiju</string>
+    <string name="add_photo">Dodaj fotografiju</string>
+    <string name="rename">Preimenuj</string>
+    <string name="delete">Izbriši</string>
+    <string name="rename_attachment">Preimenuj privitak</string>
+    <string name="name">Naziv</string>
 </resources>

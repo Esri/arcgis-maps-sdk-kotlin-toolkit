@@ -15,82 +15,82 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="enter_n_chars">ก้_Enter %1$d characters______________________ษฺ</string>
-    <string name="enter_min_to_max_chars">ก้_Enter %1$d to %2$d characters______________________________ษฺ</string>
-    <string name="maximum_n_chars">ก้_Maximum %1$d characters________________________ษฺ</string>
-    <string name="no_value">ก้_No value_________________ษฺ</string>
-    <string name="enter_value">ก้_Enter Value____________ษฺ</string>
-    <string name="required">ก้_Required_________________ษฺ</string>
-    <string name="today">ก้_Today___________ษฺ</string>
-    <string name="now">ก้_Now_______ษฺ</string>
-    <string name="cancel">ก้_Cancel_____________ษฺ</string>
-    <string name="ok">ก้_OK_____ษฺ</string>
-    <string name="done">ก้_Done_________ษฺ</string>
-    <string name="filter">ก้_Filter %1$s____________ษฺ</string>
-    <string name="numeric_range_helper_text">ก้_Enter value from %1$s to %2$s______________________________ษฺ</string>
-    <string name="less_than_min_value">ก้_Less than minimum value %1$s_____________________________ษฺ</string>
-    <string name="exceeds_max_value">ก้_Exceeds maximum value %1$s___________________________ษฺ</string>
-    <string name="value_must_be_a_whole_number">ก้_Value must be a whole number_____________________________ษฺ</string>
-    <string name="value_must_be_a_number">ก้_Value must be a number_______________________ษฺ</string>
-    <string name="value_must_be_within_domain">ก้_Value must be within domain____________________________ษฺ</string>
-    <string name="value_must_not_be_empty">ก้_Value must not be empty________________________ษฺ</string>
-    <string name="min_datetime_helper_text">ก้_Date must be on or after %1$s______________________________ษฺ</string>
-    <string name="max_datetime_helper_text">ก้_Date must be on or before %1$s_______________________________ษฺ</string>
+    <string name="enter_n_chars">ป้อน %1$d อักขระ</string>
+    <string name="enter_min_to_max_chars">ป้อนอักขระ %1$d ถึง %2$d ตัว</string>
+    <string name="maximum_n_chars">สูงสุด %1$d อักขระ</string>
+    <string name="no_value">ไม่มีค่า</string>
+    <string name="enter_value">ป้อนค่า</string>
+    <string name="required">ต้องการ</string>
+    <string name="today">วันนี้</string>
+    <string name="now">ตอนนี้</string>
+    <string name="cancel">ยกเลิก</string>
+    <string name="ok">ตกลง</string>
+    <string name="done">สำเร็จ</string>
+    <string name="filter">ตัวกรอง %1$s</string>
+    <string name="numeric_range_helper_text">ป้อนค่าตั้งแต่ %1$s ถึง %2$s</string>
+    <string name="less_than_min_value">น้อยกว่าค่าขั้นต่ำ %1$s</string>
+    <string name="exceeds_max_value">เกินค่าสูงสุด %1$s</string>
+    <string name="value_must_be_a_whole_number">ค่าต้องเป็นจำนวนเต็ม</string>
+    <string name="value_must_be_a_number">ค่าต้องเป็นตัวเลข</string>
+    <string name="value_must_be_within_domain">ค่าต้องอยู่ภายในโดเมน</string>
+    <string name="value_must_not_be_empty">ค่าต้องไม่ว่างเปล่า</string>
+    <string name="min_datetime_helper_text">วันที่ต้องเท่ากับหรืออยู่หลังจาก %1$s</string>
+    <string name="max_datetime_helper_text">วันที่ต้องเท่ากับหรืออยู่ก่อนหน้า %1$s</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">ก้_Entered date_____________ษฺ</string>
-    <string name="ff_date_input_headline_description">ก้_Entered date: %1$s___________________ษฺ</string>
-    <string name="ff_date_input_invalid_for_pattern">ก้_Date does not match expected pattern: %1$s______________________ษฺ</string>
-    <string name="ff_date_input_invalid_not_allowed">ก้_Date not allowed: %1$s_______________________ษฺ</string>
-    <string name="ff_date_input_invalid_year_range">ก้__ษฺ
-        ก้_Date out of expected year range %1$s - %2$s___________________________ษฺ
-ก้__________ษฺ    </string>
-    <string name="ff_date_input_label">ก้_Date_________ษฺ</string>
-    <string name="ff_date_input_no_input_description">ก้_None_________ษฺ</string>
-    <string name="ff_date_input_title">ก้_Select date____________ษฺ</string>
-    <string name="ff_date_picker_headline">ก้_"Selected date"________________ษฺ</string>
-    <string name="ff_date_picker_headline_description">ก้_Current selection: %1$s________________________ษฺ</string>
-    <string name="ff_date_picker_navigate_to_year_description">ก้_Navigate to year %1$s______________________ษฺ</string>
-    <string name="ff_date_picker_no_selection_description">ก้_None_________ษฺ</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">ก้_Scroll to show earlier years_____________________________ษฺ</string>
-    <string name="ff_date_picker_scroll_to_later_years">ก้_Scroll to show later years___________________________ษฺ</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">ก้_Switch to calendar input mode______________________________ษฺ</string>
-    <string name="ff_date_picker_switch_to_day_selection">ก้__ษฺ
-        ก้_"Swipe to select a year, or tap to switch back to selecting a day"______________________________________ษฺ
-ก้__________ษฺ    </string>
-    <string name="ff_date_picker_switch_to_input_mode">ก้_Switch to text input mode__________________________ษฺ</string>
-    <string name="ff_date_picker_switch_to_next_month">ก้_"Change to next month"_______________________ษฺ</string>
-    <string name="ff_date_picker_switch_to_previous_month">ก้_"Change to previous month"___________________________ษฺ</string>
-    <string name="ff_date_picker_switch_to_year_selection">ก้_"Switch to selecting a year"_____________________________ษฺ</string>
-    <string name="ff_date_picker_title">ก้_"Select date"______________ษฺ</string>
-    <string name="ff_date_picker_today_description">ก้_Today___________ษฺ</string>
-    <string name="ff_date_picker_year_picker_pane_title">ก้_Year picker visible____________________ษฺ</string>
-    <string name="ff_date_range_input_invalid_range_input">ก้_Invalid date range input_________________________ษฺ</string>
-    <string name="ff_date_range_input_title">ก้_Enter dates____________ษฺ</string>
-    <string name="ff_date_range_picker_day_in_range">ก้_In range_________________ษฺ</string>
-    <string name="ff_date_range_picker_end_headline">ก้_End date_________________ษฺ</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">ก้_Scroll to show the next month______________________________ษฺ</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">ก้_Scroll to show the previous month__________________ษฺ</string>
-    <string name="ff_date_range_picker_start_headline">ก้_Start date_____________________ษฺ</string>
-    <string name="ff_date_range_picker_title">ก้_Select dates_____________ษฺ</string>
+    <string name="ff_date_input_headline">วันที่ที่ป้อน</string>
+    <string name="ff_date_input_headline_description">วันที่ที่ป้อน: %1$s</string>
+    <string name="ff_date_input_invalid_for_pattern">วันที่ไม่ตรงกับรูปแบบที่คาดไว้: %1$s</string>
+    <string name="ff_date_input_invalid_not_allowed">วันที่ที่ไม่ได้รับอนุญาต: %1$s</string>
+    <string name="ff_date_input_invalid_year_range">
+        วันที่อยู่นอกช่วงปีที่คาดไว้ %1$s - %2$s
+    </string>
+    <string name="ff_date_input_label">วันที่</string>
+    <string name="ff_date_input_no_input_description">ไม่มีเลย</string>
+    <string name="ff_date_input_title">เลือกวันที่</string>
+    <string name="ff_date_picker_headline">"วันที่ที่เลือก"</string>
+    <string name="ff_date_picker_headline_description">การเลือกปัจจุบัน: %1$s</string>
+    <string name="ff_date_picker_navigate_to_year_description">นำทางไปยังปี %1$s</string>
+    <string name="ff_date_picker_no_selection_description">ไม่มีเลย</string>
+    <string name="ff_date_picker_scroll_to_earlier_years">เลื่อนเพื่อแสดงปีช่วงก่อนหน้า</string>
+    <string name="ff_date_picker_scroll_to_later_years">เลื่อนเพื่อแสดงปีช่วงหลัง</string>
+    <string name="ff_date_picker_switch_to_calendar_mode">สลับเป็นโหมดอินพุทปฏิทิน</string>
+    <string name="ff_date_picker_switch_to_day_selection">
+        "ปัดเพื่อเลือกปี หรือแตะเพื่อสลับกลับไปเลือกวัน"
+    </string>
+    <string name="ff_date_picker_switch_to_input_mode">สลับเป็นโหมดอินพุทข้อความ</string>
+    <string name="ff_date_picker_switch_to_next_month">"เปลี่ยนเป็นเดือนถัดไป"</string>
+    <string name="ff_date_picker_switch_to_previous_month">"เปลี่ยนเป็นเดือนก่อนหน้า"</string>
+    <string name="ff_date_picker_switch_to_year_selection">"สลับเป็นการเลือกปี"</string>
+    <string name="ff_date_picker_title">"เลือกวันที่"</string>
+    <string name="ff_date_picker_today_description">วันนี้</string>
+    <string name="ff_date_picker_year_picker_pane_title">แสดงตัวเลือกปี</string>
+    <string name="ff_date_range_input_invalid_range_input">อินพุทช่วงวันที่ไม่ถูกต้อง</string>
+    <string name="ff_date_range_input_title">ป้อนวันที่</string>
+    <string name="ff_date_range_picker_day_in_range">อยู่ในช่วง</string>
+    <string name="ff_date_range_picker_end_headline">วันที่สิ้นสุด</string>
+    <string name="ff_date_range_picker_scroll_to_next_month">เลื่อนเพื่อแสดงเดือนถัดไป</string>
+    <string name="ff_date_range_picker_scroll_to_previous_month">เลื่อนเพื่อแสดงเดือนก่อนหน้า</string>
+    <string name="ff_date_range_picker_start_headline">วันที่เริ่มต้น</string>
+    <string name="ff_date_range_picker_title">เลือกวันที่</string>
 
     <!-- Time Picker string values -->
-    <string name="ff_time_picker_am">ก้_AM_____ษฺ</string>
-    <string name="ff_time_picker_hour">ก้_Hour_________ษฺ</string>
-    <string name="ff_time_picker_hour_24h_suffix">ก้_%1$d hours_____________________ษฺ</string>
-    <string name="ff_time_picker_hour_selection">ก้_Select hour____________ษฺ</string>
-    <string name="ff_time_picker_hour_suffix">ก้_%1$d o\'clock______________ษฺ</string>
-    <string name="ff_time_picker_hour_text_field">ก้_for hour_________________ษฺ</string>
-    <string name="ff_time_picker_minute">ก้_Minute_____________ษฺ</string>
-    <string name="ff_time_picker_minute_selection">ก้_Select minutes_______________ษฺ</string>
-    <string name="ff_time_picker_minute_suffix">ก้_%1$d minutes_____________ษฺ</string>
-    <string name="ff_time_picker_minute_text_field">ก้_for minutes____________ษฺ</string>
-    <string name="ff_time_picker_period_toggle_description">ก้_Select AM or PM________________ษฺ</string>
-    <string name="ff_time_picker_pm">ก้_PM_____ษฺ</string>
-    <string name="take_photo">ก้_Take Photo_____________________ษฺ</string>
-    <string name="add_photo">ก้_Add Photo___________________ษฺ</string>
-    <string name="rename">ก้_Rename_____________ษฺ</string>
-    <string name="delete">ก้_Delete_____________ษฺ</string>
-    <string name="rename_attachment">ก้_Rename Attachment__________________ษฺ</string>
-    <string name="name">ก้_Name_________ษฺ</string>
+    <string name="ff_time_picker_am">AM</string>
+    <string name="ff_time_picker_hour">ชั่วโมง</string>
+    <string name="ff_time_picker_hour_24h_suffix">%1$d ชั่วโมง</string>
+    <string name="ff_time_picker_hour_selection">เลือกชั่วโมง</string>
+    <string name="ff_time_picker_hour_suffix">%1$d นาฬิกา</string>
+    <string name="ff_time_picker_hour_text_field">สำหรับชั่วโมง</string>
+    <string name="ff_time_picker_minute">นาที</string>
+    <string name="ff_time_picker_minute_selection">เลือกนาที</string>
+    <string name="ff_time_picker_minute_suffix">%1$d นาที</string>
+    <string name="ff_time_picker_minute_text_field">สำหรับนาที</string>
+    <string name="ff_time_picker_period_toggle_description">เลือก AM หรือ PM</string>
+    <string name="ff_time_picker_pm">PM</string>
+    <string name="take_photo">ถ่ายภาพ</string>
+    <string name="add_photo">เพิ่มรูปถ่าย</string>
+    <string name="rename">เปลี่ยนชื่อ</string>
+    <string name="delete">ลบ</string>
+    <string name="rename_attachment">เปลี่ยนชื่อไฟล์แนบ</string>
+    <string name="name">ชื่อ</string>
 </resources>

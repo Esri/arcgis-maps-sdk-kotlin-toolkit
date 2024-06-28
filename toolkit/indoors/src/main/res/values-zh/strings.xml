@@ -8,21 +8,21 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">选择设施点</string>
     <string name="floor_filter_no_results">未找到任何结果。</string>
-    <string name="not_available">试_Not available______________验</string>
+    <string name="not_available">不可用</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
-    <string name="floor_filter_site_selector_top_bar">试_Site - %1$s____________验</string>
+    <string name="floor_filter_site_selector_top_bar">场所 - %1$s</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="site_facility_button">试_Sites and facilities button____________________________验</string>
+    <string name="site_facility_button">场所和设施点按钮</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="floor_level_select_button">试_Floor level select button__________________________验</string>
+    <string name="floor_level_select_button">楼层选择按钮</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="site_item">试_Site item___________________验</string>
+    <string name="site_item">场所项</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="facility_item">试_Facility item______________验</string>
+    <string name="facility_item">设施点项</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="clear_search">试_Clear search_____________验</string>
+    <string name="clear_search">清除搜索</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="close">试_Close___________验</string>
+    <string name="close">关闭</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="go_back_to_site_selector">试_Go back to site selector_________________________验</string>
+    <string name="go_back_to_site_selector">返回至场所选择器</string>
 </resources>

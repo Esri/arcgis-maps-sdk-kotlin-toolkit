@@ -8,21 +8,21 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Vælg en facilitet</string>
     <string name="floor_filter_no_results">Ingen resultater fundet.</string>
-    <string name="not_available">ø_Not available______________å</string>
+    <string name="not_available">Ikke tilgængelig</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
-    <string name="floor_filter_site_selector_top_bar">ø_Site - %1$s____________å</string>
+    <string name="floor_filter_site_selector_top_bar">Sted – %1$s</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="site_facility_button">ø_Sites and facilities button____________________________å</string>
+    <string name="site_facility_button">Knap til steder og faciliteter</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="floor_level_select_button">ø_Floor level select button__________________________å</string>
+    <string name="floor_level_select_button">Knap til valg af etageniveau</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="site_item">ø_Site item___________________å</string>
+    <string name="site_item">Stedelement</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="facility_item">ø_Facility item______________å</string>
+    <string name="facility_item">Facilitetselement</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="clear_search">ø_Clear search_____________å</string>
+    <string name="clear_search">Ryd søgning</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="close">ø_Close___________å</string>
+    <string name="close">Luk</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="go_back_to_site_selector">ø_Go back to site selector_________________________å</string>
+    <string name="go_back_to_site_selector">Gå tilbage til stedvælger</string>
 </resources>

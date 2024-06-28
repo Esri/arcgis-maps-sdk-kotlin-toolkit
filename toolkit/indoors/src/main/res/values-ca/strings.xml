@@ -8,21 +8,21 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Seleccioneu una instal·lació</string>
     <string name="floor_filter_no_results">No s\'ha trobat cap resultat.</string>
-    <string name="not_available">ó_Not available______________à</string>
+    <string name="not_available">No està disponible</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
-    <string name="floor_filter_site_selector_top_bar">ó_Site - %1$s____________à</string>
+    <string name="floor_filter_site_selector_top_bar">Lloc: %1$s</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="site_facility_button">ó_Sites and facilities button____________________________à</string>
+    <string name="site_facility_button">Botó de llocs i instal·lacions</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="floor_level_select_button">ó_Floor level select button__________________________à</string>
+    <string name="floor_level_select_button">Botó de selecció de la planta</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="site_item">ó_Site item___________________à</string>
+    <string name="site_item">Element de lloc</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="facility_item">ó_Facility item______________à</string>
+    <string name="facility_item">Element d\'instal·lació</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="clear_search">ó_Clear search_____________à</string>
+    <string name="clear_search">Esborra la cerca</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="close">ó_Close___________à</string>
+    <string name="close">Tanca</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="go_back_to_site_selector">ó_Go back to site selector_________________________à</string>
+    <string name="go_back_to_site_selector">Torna al selector de llocs</string>
 </resources>

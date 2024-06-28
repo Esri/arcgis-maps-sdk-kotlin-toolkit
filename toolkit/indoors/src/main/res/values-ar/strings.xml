@@ -8,21 +8,21 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">تحديد مرفق</string>
     <string name="floor_filter_no_results">لم يتم العثور على نتائج.</string>
-    <string name="not_available">بيت_Not available______________لاحقة</string>
+    <string name="not_available">غير متاح</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
-    <string name="floor_filter_site_selector_top_bar">بيت_Site - %1$s____________لاحقة</string>
+    <string name="floor_filter_site_selector_top_bar">الموقع - %1$s</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="site_facility_button">بيت_Sites and facilities button____________________________لاحقة</string>
+    <string name="site_facility_button">زر المواقع والمرافق</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="floor_level_select_button">بيت_Floor level select button__________________________لاحقة</string>
+    <string name="floor_level_select_button">زر تحديد مستوى الأرضية</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="site_item">بيت_Site item___________________لاحقة</string>
+    <string name="site_item">عنصر الموقع</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="facility_item">بيت_Facility item______________لاحقة</string>
+    <string name="facility_item">عنصر المرفق</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="clear_search">بيت_Clear search_____________لاحقة</string>
+    <string name="clear_search">مسح البحث</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="close">بيت_Close___________لاحقة</string>
+    <string name="close">إغلاق</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="go_back_to_site_selector">بيت_Go back to site selector_________________________لاحقة</string>
+    <string name="go_back_to_site_selector">العودة إلى محدد الموقع</string>
 </resources>

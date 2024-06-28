@@ -15,82 +15,82 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="enter_n_chars">ĺ_Enter %1$d characters______________________ľ</string>
-    <string name="enter_min_to_max_chars">ĺ_Enter %1$d to %2$d characters______________________________ľ</string>
-    <string name="maximum_n_chars">ĺ_Maximum %1$d characters________________________ľ</string>
-    <string name="no_value">ĺ_No value_________________ľ</string>
-    <string name="enter_value">ĺ_Enter Value____________ľ</string>
-    <string name="required">ĺ_Required_________________ľ</string>
-    <string name="today">ĺ_Today___________ľ</string>
-    <string name="now">ĺ_Now_______ľ</string>
-    <string name="cancel">ĺ_Cancel_____________ľ</string>
-    <string name="ok">ĺ_OK_____ľ</string>
-    <string name="done">ĺ_Done_________ľ</string>
-    <string name="filter">ĺ_Filter %1$s____________ľ</string>
-    <string name="numeric_range_helper_text">ĺ_Enter value from %1$s to %2$s______________________________ľ</string>
-    <string name="less_than_min_value">ĺ_Less than minimum value %1$s_____________________________ľ</string>
-    <string name="exceeds_max_value">ĺ_Exceeds maximum value %1$s___________________________ľ</string>
-    <string name="value_must_be_a_whole_number">ĺ_Value must be a whole number_____________________________ľ</string>
-    <string name="value_must_be_a_number">ĺ_Value must be a number_______________________ľ</string>
-    <string name="value_must_be_within_domain">ĺ_Value must be within domain____________________________ľ</string>
-    <string name="value_must_not_be_empty">ĺ_Value must not be empty________________________ľ</string>
-    <string name="min_datetime_helper_text">ĺ_Date must be on or after %1$s______________________________ľ</string>
-    <string name="max_datetime_helper_text">ĺ_Date must be on or before %1$s_______________________________ľ</string>
+    <string name="enter_n_chars">Zadajte %1$d znakov</string>
+    <string name="enter_min_to_max_chars">Zadajte %1$d až %2$d znakov</string>
+    <string name="maximum_n_chars">Maximálne %1$d znakov</string>
+    <string name="no_value">Žiadna hodnota</string>
+    <string name="enter_value">Zadajte hodnotu</string>
+    <string name="required">Vyžadované</string>
+    <string name="today">Dnes</string>
+    <string name="now">Teraz</string>
+    <string name="cancel">Zrušiť</string>
+    <string name="ok">OK</string>
+    <string name="done">Hotovo</string>
+    <string name="filter">Filter %1$s</string>
+    <string name="numeric_range_helper_text">Zadajte hodnotu od %1$s do %2$s</string>
+    <string name="less_than_min_value">Menej ako minimálna hodnota %1$s</string>
+    <string name="exceeds_max_value">Presahuje maximálnu hodnotu %1$s</string>
+    <string name="value_must_be_a_whole_number">Hodnota musí byť celé číslo</string>
+    <string name="value_must_be_a_number">Hodnota musí byť číslo</string>
+    <string name="value_must_be_within_domain">Hodnota musí byť v rámci domény</string>
+    <string name="value_must_not_be_empty">Hodnota nesmie byť prázdna</string>
+    <string name="min_datetime_helper_text">Dátum musí byť v deň alebo po %1$s</string>
+    <string name="max_datetime_helper_text">Dátum musí byť v deň alebo pred %1$s</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">ĺ_Entered date_____________ľ</string>
-    <string name="ff_date_input_headline_description">ĺ_Entered date: %1$s___________________ľ</string>
-    <string name="ff_date_input_invalid_for_pattern">ĺ_Date does not match expected pattern: %1$s______________________ľ</string>
-    <string name="ff_date_input_invalid_not_allowed">ĺ_Date not allowed: %1$s_______________________ľ</string>
-    <string name="ff_date_input_invalid_year_range">ĺ__ľ
-        ĺ_Date out of expected year range %1$s - %2$s___________________________ľ
-ĺ__________ľ    </string>
-    <string name="ff_date_input_label">ĺ_Date_________ľ</string>
-    <string name="ff_date_input_no_input_description">ĺ_None_________ľ</string>
-    <string name="ff_date_input_title">ĺ_Select date____________ľ</string>
-    <string name="ff_date_picker_headline">ĺ_"Selected date"________________ľ</string>
-    <string name="ff_date_picker_headline_description">ĺ_Current selection: %1$s________________________ľ</string>
-    <string name="ff_date_picker_navigate_to_year_description">ĺ_Navigate to year %1$s______________________ľ</string>
-    <string name="ff_date_picker_no_selection_description">ĺ_None_________ľ</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">ĺ_Scroll to show earlier years_____________________________ľ</string>
-    <string name="ff_date_picker_scroll_to_later_years">ĺ_Scroll to show later years___________________________ľ</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">ĺ_Switch to calendar input mode______________________________ľ</string>
-    <string name="ff_date_picker_switch_to_day_selection">ĺ__ľ
-        ĺ_"Swipe to select a year, or tap to switch back to selecting a day"______________________________________ľ
-ĺ__________ľ    </string>
-    <string name="ff_date_picker_switch_to_input_mode">ĺ_Switch to text input mode__________________________ľ</string>
-    <string name="ff_date_picker_switch_to_next_month">ĺ_"Change to next month"_______________________ľ</string>
-    <string name="ff_date_picker_switch_to_previous_month">ĺ_"Change to previous month"___________________________ľ</string>
-    <string name="ff_date_picker_switch_to_year_selection">ĺ_"Switch to selecting a year"_____________________________ľ</string>
-    <string name="ff_date_picker_title">ĺ_"Select date"______________ľ</string>
-    <string name="ff_date_picker_today_description">ĺ_Today___________ľ</string>
-    <string name="ff_date_picker_year_picker_pane_title">ĺ_Year picker visible____________________ľ</string>
-    <string name="ff_date_range_input_invalid_range_input">ĺ_Invalid date range input_________________________ľ</string>
-    <string name="ff_date_range_input_title">ĺ_Enter dates____________ľ</string>
-    <string name="ff_date_range_picker_day_in_range">ĺ_In range_________________ľ</string>
-    <string name="ff_date_range_picker_end_headline">ĺ_End date_________________ľ</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">ĺ_Scroll to show the next month______________________________ľ</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">ĺ_Scroll to show the previous month__________________ľ</string>
-    <string name="ff_date_range_picker_start_headline">ĺ_Start date_____________________ľ</string>
-    <string name="ff_date_range_picker_title">ĺ_Select dates_____________ľ</string>
+    <string name="ff_date_input_headline">Zadaný dátum</string>
+    <string name="ff_date_input_headline_description">Zadaný dátum: %1$s</string>
+    <string name="ff_date_input_invalid_for_pattern">Dátum nezodpovedá očakávanému vzoru: %1$s</string>
+    <string name="ff_date_input_invalid_not_allowed">Dátum nie je povolený: %1$s</string>
+    <string name="ff_date_input_invalid_year_range">
+        Dátum mimo očakávaného rozsahu rokov %1$s - %2$s
+    </string>
+    <string name="ff_date_input_label">Dátum</string>
+    <string name="ff_date_input_no_input_description">Žiadne</string>
+    <string name="ff_date_input_title">Vybrať dátum</string>
+    <string name="ff_date_picker_headline">"Vybraný dátum"</string>
+    <string name="ff_date_picker_headline_description">Aktuálny výber: %1$s</string>
+    <string name="ff_date_picker_navigate_to_year_description">Prejsť na rok %1$s</string>
+    <string name="ff_date_picker_no_selection_description">Žiadne</string>
+    <string name="ff_date_picker_scroll_to_earlier_years">Posúvaním zobrazíte predchádzajúce roky</string>
+    <string name="ff_date_picker_scroll_to_later_years">Posúvaním zobrazíte neskoršie roky</string>
+    <string name="ff_date_picker_switch_to_calendar_mode">Prepnúť do režimu zadávania kalendára</string>
+    <string name="ff_date_picker_switch_to_day_selection">
+        "Potiahnutím vyberte rok alebo ťuknutím na prepnite späť na výber dňa"
+    </string>
+    <string name="ff_date_picker_switch_to_input_mode">Prepnúť na režim zadávania textu</string>
+    <string name="ff_date_picker_switch_to_next_month">"Zmeniť na budúci mesiac"</string>
+    <string name="ff_date_picker_switch_to_previous_month">"Zmeniť na predchádzajúci mesiac"</string>
+    <string name="ff_date_picker_switch_to_year_selection">"Prepnúť na výber roka"</string>
+    <string name="ff_date_picker_title">"Vybrať dátum"</string>
+    <string name="ff_date_picker_today_description">Dnes</string>
+    <string name="ff_date_picker_year_picker_pane_title">Výber roka viditeľný</string>
+    <string name="ff_date_range_input_invalid_range_input">Neplatný vstup rozsahu dátumu</string>
+    <string name="ff_date_range_input_title">Zadať dátumy</string>
+    <string name="ff_date_range_picker_day_in_range">V rozsahu</string>
+    <string name="ff_date_range_picker_end_headline">Dátum ukončenia</string>
+    <string name="ff_date_range_picker_scroll_to_next_month">Posúvaním zobrazíte nasledujúci mesiac</string>
+    <string name="ff_date_range_picker_scroll_to_previous_month">Posúvaním zobrazíte predchádzajúci mesiac</string>
+    <string name="ff_date_range_picker_start_headline">Dátum začiatku</string>
+    <string name="ff_date_range_picker_title">Vybrať dátumy</string>
 
     <!-- Time Picker string values -->
-    <string name="ff_time_picker_am">ĺ_AM_____ľ</string>
-    <string name="ff_time_picker_hour">ĺ_Hour_________ľ</string>
-    <string name="ff_time_picker_hour_24h_suffix">ĺ_%1$d hours_____________________ľ</string>
-    <string name="ff_time_picker_hour_selection">ĺ_Select hour____________ľ</string>
-    <string name="ff_time_picker_hour_suffix">ĺ_%1$d o\'clock______________ľ</string>
-    <string name="ff_time_picker_hour_text_field">ĺ_for hour_________________ľ</string>
-    <string name="ff_time_picker_minute">ĺ_Minute_____________ľ</string>
-    <string name="ff_time_picker_minute_selection">ĺ_Select minutes_______________ľ</string>
-    <string name="ff_time_picker_minute_suffix">ĺ_%1$d minutes_____________ľ</string>
-    <string name="ff_time_picker_minute_text_field">ĺ_for minutes____________ľ</string>
-    <string name="ff_time_picker_period_toggle_description">ĺ_Select AM or PM________________ľ</string>
-    <string name="ff_time_picker_pm">ĺ_PM_____ľ</string>
-    <string name="take_photo">ĺ_Take Photo_____________________ľ</string>
-    <string name="add_photo">ĺ_Add Photo___________________ľ</string>
-    <string name="rename">ĺ_Rename_____________ľ</string>
-    <string name="delete">ĺ_Delete_____________ľ</string>
-    <string name="rename_attachment">ĺ_Rename Attachment__________________ľ</string>
-    <string name="name">ĺ_Name_________ľ</string>
+    <string name="ff_time_picker_am">Dopoludnia</string>
+    <string name="ff_time_picker_hour">Hodina</string>
+    <string name="ff_time_picker_hour_24h_suffix">%1$d hodín</string>
+    <string name="ff_time_picker_hour_selection">Vybrať hodinu</string>
+    <string name="ff_time_picker_hour_suffix">%1$d hodiny/hodín</string>
+    <string name="ff_time_picker_hour_text_field">na hodinu</string>
+    <string name="ff_time_picker_minute">Minúta</string>
+    <string name="ff_time_picker_minute_selection">Vybrať minúty</string>
+    <string name="ff_time_picker_minute_suffix">%1$d minút</string>
+    <string name="ff_time_picker_minute_text_field">na minúty</string>
+    <string name="ff_time_picker_period_toggle_description">Vybrať dopoludnie alebo popoludnie</string>
+    <string name="ff_time_picker_pm">Popoludní</string>
+    <string name="take_photo">Odfotiť</string>
+    <string name="add_photo">Pridať fotografiu</string>
+    <string name="rename">Premenovať</string>
+    <string name="delete">Zmazať</string>
+    <string name="rename_attachment">Premenovať prílohu</string>
+    <string name="name">Názov</string>
 </resources>

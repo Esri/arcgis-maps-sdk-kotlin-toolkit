@@ -15,82 +15,82 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="enter_n_chars">بيت_Enter %1$d characters______________________لاحقة</string>
-    <string name="enter_min_to_max_chars">بيت_Enter %1$d to %2$d characters______________________________لاحقة</string>
-    <string name="maximum_n_chars">بيت_Maximum %1$d characters________________________لاحقة</string>
-    <string name="no_value">بيت_No value_________________لاحقة</string>
-    <string name="enter_value">بيت_Enter Value____________لاحقة</string>
-    <string name="required">بيت_Required_________________لاحقة</string>
-    <string name="today">بيت_Today___________لاحقة</string>
-    <string name="now">بيت_Now_______لاحقة</string>
-    <string name="cancel">بيت_Cancel_____________لاحقة</string>
-    <string name="ok">بيت_OK_____لاحقة</string>
-    <string name="done">بيت_Done_________لاحقة</string>
-    <string name="filter">بيت_Filter %1$s____________لاحقة</string>
-    <string name="numeric_range_helper_text">بيت_Enter value from %1$s to %2$s______________________________لاحقة</string>
-    <string name="less_than_min_value">بيت_Less than minimum value %1$s_____________________________لاحقة</string>
-    <string name="exceeds_max_value">بيت_Exceeds maximum value %1$s___________________________لاحقة</string>
-    <string name="value_must_be_a_whole_number">بيت_Value must be a whole number_____________________________لاحقة</string>
-    <string name="value_must_be_a_number">بيت_Value must be a number_______________________لاحقة</string>
-    <string name="value_must_be_within_domain">بيت_Value must be within domain____________________________لاحقة</string>
-    <string name="value_must_not_be_empty">بيت_Value must not be empty________________________لاحقة</string>
-    <string name="min_datetime_helper_text">بيت_Date must be on or after %1$s______________________________لاحقة</string>
-    <string name="max_datetime_helper_text">بيت_Date must be on or before %1$s_______________________________لاحقة</string>
+    <string name="enter_n_chars">إدخال %1$d من الرموز</string>
+    <string name="enter_min_to_max_chars">إدخال %1$d إلى %2$d من الرموز</string>
+    <string name="maximum_n_chars">الحد الأقصى %1$d من الحروف</string>
+    <string name="no_value">لا توجد قيمة</string>
+    <string name="enter_value">إدخال قيمة</string>
+    <string name="required">مطلوب</string>
+    <string name="today">اليوم</string>
+    <string name="now">الآن</string>
+    <string name="cancel">إلغاء الأمر</string>
+    <string name="ok">موافق</string>
+    <string name="done">تم</string>
+    <string name="filter">عامل التصفية %1$s</string>
+    <string name="numeric_range_helper_text">إدخال قيمة من %1$s إلى %2$s</string>
+    <string name="less_than_min_value">أقل من أدنى قيمة %1$s</string>
+    <string name="exceeds_max_value">يتجاوز أقصى قيمة %1$s</string>
+    <string name="value_must_be_a_whole_number">يجب أن تكون القيمة رقمًا كاملاً</string>
+    <string name="value_must_be_a_number">يجب أن تكون القيمة رقمًا</string>
+    <string name="value_must_be_within_domain">يجب أن تكون القيمة ضمن النطاق</string>
+    <string name="value_must_not_be_empty">يجب ألا تكون القيمة فارغة</string>
+    <string name="min_datetime_helper_text">يجب أن يكون التاريخ في %1$s أو بعده</string>
+    <string name="max_datetime_helper_text">يجب أن يكون التاريخ في %1$s أو قبله</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">بيت_Entered date_____________لاحقة</string>
-    <string name="ff_date_input_headline_description">بيت_Entered date: %1$s___________________لاحقة</string>
-    <string name="ff_date_input_invalid_for_pattern">بيت_Date does not match expected pattern: %1$s______________________لاحقة</string>
-    <string name="ff_date_input_invalid_not_allowed">بيت_Date not allowed: %1$s_______________________لاحقة</string>
-    <string name="ff_date_input_invalid_year_range">بيت__لاحقة
-        بيت_Date out of expected year range %1$s - %2$s___________________________لاحقة
-بيت__________لاحقة    </string>
-    <string name="ff_date_input_label">بيت_Date_________لاحقة</string>
-    <string name="ff_date_input_no_input_description">بيت_None_________لاحقة</string>
-    <string name="ff_date_input_title">بيت_Select date____________لاحقة</string>
-    <string name="ff_date_picker_headline">بيت_"Selected date"________________لاحقة</string>
-    <string name="ff_date_picker_headline_description">بيت_Current selection: %1$s________________________لاحقة</string>
-    <string name="ff_date_picker_navigate_to_year_description">بيت_Navigate to year %1$s______________________لاحقة</string>
-    <string name="ff_date_picker_no_selection_description">بيت_None_________لاحقة</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">بيت_Scroll to show earlier years_____________________________لاحقة</string>
-    <string name="ff_date_picker_scroll_to_later_years">بيت_Scroll to show later years___________________________لاحقة</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">بيت_Switch to calendar input mode______________________________لاحقة</string>
-    <string name="ff_date_picker_switch_to_day_selection">بيت__لاحقة
-        بيت_"Swipe to select a year, or tap to switch back to selecting a day"______________________________________لاحقة
-بيت__________لاحقة    </string>
-    <string name="ff_date_picker_switch_to_input_mode">بيت_Switch to text input mode__________________________لاحقة</string>
-    <string name="ff_date_picker_switch_to_next_month">بيت_"Change to next month"_______________________لاحقة</string>
-    <string name="ff_date_picker_switch_to_previous_month">بيت_"Change to previous month"___________________________لاحقة</string>
-    <string name="ff_date_picker_switch_to_year_selection">بيت_"Switch to selecting a year"_____________________________لاحقة</string>
-    <string name="ff_date_picker_title">بيت_"Select date"______________لاحقة</string>
-    <string name="ff_date_picker_today_description">بيت_Today___________لاحقة</string>
-    <string name="ff_date_picker_year_picker_pane_title">بيت_Year picker visible____________________لاحقة</string>
-    <string name="ff_date_range_input_invalid_range_input">بيت_Invalid date range input_________________________لاحقة</string>
-    <string name="ff_date_range_input_title">بيت_Enter dates____________لاحقة</string>
-    <string name="ff_date_range_picker_day_in_range">بيت_In range_________________لاحقة</string>
-    <string name="ff_date_range_picker_end_headline">بيت_End date_________________لاحقة</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">بيت_Scroll to show the next month______________________________لاحقة</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">بيت_Scroll to show the previous month__________________لاحقة</string>
-    <string name="ff_date_range_picker_start_headline">بيت_Start date_____________________لاحقة</string>
-    <string name="ff_date_range_picker_title">بيت_Select dates_____________لاحقة</string>
+    <string name="ff_date_input_headline">التاريخ الذي تم إدخاله</string>
+    <string name="ff_date_input_headline_description">التاريخ الذي تم إدخاله: %1$s</string>
+    <string name="ff_date_input_invalid_for_pattern">التاريخ لا يتطابق مع النمط المتوقع: %1$s</string>
+    <string name="ff_date_input_invalid_not_allowed">التاريخ غير مسموح به: %1$s</string>
+    <string name="ff_date_input_invalid_year_range">
+        التاريخ خارج نطاق السنة المتوقعة %1$s -%2$s
+    </string>
+    <string name="ff_date_input_label">التاريخ</string>
+    <string name="ff_date_input_no_input_description">لا شيء</string>
+    <string name="ff_date_input_title">تحديد التاريخ</string>
+    <string name="ff_date_picker_headline">"التاريخ المحدد"</string>
+    <string name="ff_date_picker_headline_description">التحديد الحالي: %1$s</string>
+    <string name="ff_date_picker_navigate_to_year_description">انتقال إلى السنة %1$s</string>
+    <string name="ff_date_picker_no_selection_description">لا شيء</string>
+    <string name="ff_date_picker_scroll_to_earlier_years">التمرير لإظهار السنوات السابقة</string>
+    <string name="ff_date_picker_scroll_to_later_years">التمرير لإظهار السنوات اللاحقة</string>
+    <string name="ff_date_picker_switch_to_calendar_mode">التبديل إلى وضع إدخال التقويم</string>
+    <string name="ff_date_picker_switch_to_day_selection">
+        "اسحب لتحديد سنة، أو اضغط للتبديل مرة أخرى إلى تحديد يوم"
+    </string>
+    <string name="ff_date_picker_switch_to_input_mode">التبديل إلى وضع إدخال النص</string>
+    <string name="ff_date_picker_switch_to_next_month">"التغيير إلى الشهر القادم"</string>
+    <string name="ff_date_picker_switch_to_previous_month">"التغيير إلى الشهر السابق"</string>
+    <string name="ff_date_picker_switch_to_year_selection">"التبديل إلى اختيار سنة"</string>
+    <string name="ff_date_picker_title">"تحديد تاريخ"</string>
+    <string name="ff_date_picker_today_description">اليوم</string>
+    <string name="ff_date_picker_year_picker_pane_title">منتقي السنة مرئي</string>
+    <string name="ff_date_range_input_invalid_range_input">إدخال النطاق الزمني غير صالح</string>
+    <string name="ff_date_range_input_title">إدخال تواريخ</string>
+    <string name="ff_date_range_picker_day_in_range">ضمن النطاق</string>
+    <string name="ff_date_range_picker_end_headline">تاريخ الانتهاء</string>
+    <string name="ff_date_range_picker_scroll_to_next_month">التمرير لإظهار الشهر التالي</string>
+    <string name="ff_date_range_picker_scroll_to_previous_month">التمرير لإظهار الشهر السابق</string>
+    <string name="ff_date_range_picker_start_headline">تاريخ البدء</string>
+    <string name="ff_date_range_picker_title">تحديد التواريخ</string>
 
     <!-- Time Picker string values -->
-    <string name="ff_time_picker_am">بيت_AM_____لاحقة</string>
-    <string name="ff_time_picker_hour">بيت_Hour_________لاحقة</string>
-    <string name="ff_time_picker_hour_24h_suffix">بيت_%1$d hours_____________________لاحقة</string>
-    <string name="ff_time_picker_hour_selection">بيت_Select hour____________لاحقة</string>
-    <string name="ff_time_picker_hour_suffix">بيت_%1$d o\'clock______________لاحقة</string>
-    <string name="ff_time_picker_hour_text_field">بيت_for hour_________________لاحقة</string>
-    <string name="ff_time_picker_minute">بيت_Minute_____________لاحقة</string>
-    <string name="ff_time_picker_minute_selection">بيت_Select minutes_______________لاحقة</string>
-    <string name="ff_time_picker_minute_suffix">بيت_%1$d minutes_____________لاحقة</string>
-    <string name="ff_time_picker_minute_text_field">بيت_for minutes____________لاحقة</string>
-    <string name="ff_time_picker_period_toggle_description">بيت_Select AM or PM________________لاحقة</string>
-    <string name="ff_time_picker_pm">بيت_PM_____لاحقة</string>
-    <string name="take_photo">بيت_Take Photo_____________________لاحقة</string>
-    <string name="add_photo">بيت_Add Photo___________________لاحقة</string>
-    <string name="rename">بيت_Rename_____________لاحقة</string>
-    <string name="delete">بيت_Delete_____________لاحقة</string>
-    <string name="rename_attachment">بيت_Rename Attachment__________________لاحقة</string>
-    <string name="name">بيت_Name_________لاحقة</string>
+    <string name="ff_time_picker_am">صباحًا</string>
+    <string name="ff_time_picker_hour">ساعة</string>
+    <string name="ff_time_picker_hour_24h_suffix">%1$d من الساعات</string>
+    <string name="ff_time_picker_hour_selection">تحديد الساعة</string>
+    <string name="ff_time_picker_hour_suffix">%1$d o\'ساعة</string>
+    <string name="ff_time_picker_hour_text_field">لمدة ساعة</string>
+    <string name="ff_time_picker_minute">دقيقة</string>
+    <string name="ff_time_picker_minute_selection">تحديد الدقائق</string>
+    <string name="ff_time_picker_minute_suffix">%1$d من الدقائق</string>
+    <string name="ff_time_picker_minute_text_field">لمدة دقائق</string>
+    <string name="ff_time_picker_period_toggle_description">تحديد صباحًا أو مساءً</string>
+    <string name="ff_time_picker_pm">مساءً</string>
+    <string name="take_photo">التقاط صورة</string>
+    <string name="add_photo">إضافة صورة</string>
+    <string name="rename">إعادة تسمية</string>
+    <string name="delete">حذف</string>
+    <string name="rename_attachment">إعادة تسمية المرفق</string>
+    <string name="name">الاسم</string>
 </resources>

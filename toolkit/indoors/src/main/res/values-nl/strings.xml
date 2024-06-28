@@ -8,21 +8,21 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Selecteer een faciliteit</string>
     <string name="floor_filter_no_results">Kan geen resultaten vinden.</string>
-    <string name="not_available">Ĳ_Not available______________ä</string>
+    <string name="not_available">Niet beschikbaar</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
-    <string name="floor_filter_site_selector_top_bar">Ĳ_Site - %1$s____________ä</string>
+    <string name="floor_filter_site_selector_top_bar">Locatie - %1$s</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="site_facility_button">Ĳ_Sites and facilities button____________________________ä</string>
+    <string name="site_facility_button">Knop Locaties en faciliteiten</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="floor_level_select_button">Ĳ_Floor level select button__________________________ä</string>
+    <string name="floor_level_select_button">Selectieknop verdieping</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="site_item">Ĳ_Site item___________________ä</string>
+    <string name="site_item">Locatie-item</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="facility_item">Ĳ_Facility item______________ä</string>
+    <string name="facility_item">Faciliteit-item</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="clear_search">Ĳ_Clear search_____________ä</string>
+    <string name="clear_search">Zoekopdracht wissen</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="close">Ĳ_Close___________ä</string>
+    <string name="close">Sluiten</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="go_back_to_site_selector">Ĳ_Go back to site selector_________________________ä</string>
+    <string name="go_back_to_site_selector">Terug naar Site Selector</string>
 </resources>

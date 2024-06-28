@@ -8,21 +8,21 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">เลือกอาคารสถานที่</string>
     <string name="floor_filter_no_results">ไม่พบข้อมูล</string>
-    <string name="not_available">ก้_Not available______________ษฺ</string>
+    <string name="not_available">ไม่สามารถ</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
-    <string name="floor_filter_site_selector_top_bar">ก้_Site - %1$s____________ษฺ</string>
+    <string name="floor_filter_site_selector_top_bar">ไซต์ - %1$s</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="site_facility_button">ก้_Sites and facilities button____________________________ษฺ</string>
+    <string name="site_facility_button">ปุ่มไซต์และสิ่งอำนวยความสะดวก</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="floor_level_select_button">ก้_Floor level select button__________________________ษฺ</string>
+    <string name="floor_level_select_button">ปุ่มเลือกระดับชั้น</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="site_item">ก้_Site item___________________ษฺ</string>
+    <string name="site_item">รายการไซต์</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="facility_item">ก้_Facility item______________ษฺ</string>
+    <string name="facility_item">รายการสิ่งอำนวยความสะดวก</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="clear_search">ก้_Clear search_____________ษฺ</string>
+    <string name="clear_search">ลบคำค้นหา</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="close">ก้_Close___________ษฺ</string>
+    <string name="close">ปิด</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="go_back_to_site_selector">ก้_Go back to site selector_________________________ษฺ</string>
+    <string name="go_back_to_site_selector">กลับไปที่ตัวเลือกไซต์</string>
 </resources>

@@ -8,21 +8,21 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Vybrat zařízení</string>
     <string name="floor_filter_no_results">Nebyly nalezeny žádné výsledky.</string>
-    <string name="not_available">Ř_Not available______________ů</string>
+    <string name="not_available">Není k dispozici</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
-    <string name="floor_filter_site_selector_top_bar">Ř_Site - %1$s____________ů</string>
+    <string name="floor_filter_site_selector_top_bar">Místo – %1$s</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="site_facility_button">Ř_Sites and facilities button____________________________ů</string>
+    <string name="site_facility_button">Tlačítko míst a zařízení</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="floor_level_select_button">Ř_Floor level select button__________________________ů</string>
+    <string name="floor_level_select_button">Tlačítko výběru úrovně podlaží</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="site_item">Ř_Site item___________________ů</string>
+    <string name="site_item">Položka místa</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="facility_item">Ř_Facility item______________ů</string>
+    <string name="facility_item">Položka zařízení</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="clear_search">Ř_Clear search_____________ů</string>
+    <string name="clear_search">Vymazat vyhledávání</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="close">Ř_Close___________ů</string>
+    <string name="close">Zavřít</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="go_back_to_site_selector">Ř_Go back to site selector_________________________ů</string>
+    <string name="go_back_to_site_selector">Zpět k nástroji pro výběr místa</string>
 </resources>

@@ -15,82 +15,82 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="enter_n_chars">須_Enter %1$d characters______________________鷗</string>
-    <string name="enter_min_to_max_chars">須_Enter %1$d to %2$d characters______________________________鷗</string>
-    <string name="maximum_n_chars">須_Maximum %1$d characters________________________鷗</string>
-    <string name="no_value">須_No value_________________鷗</string>
-    <string name="enter_value">須_Enter Value____________鷗</string>
-    <string name="required">須_Required_________________鷗</string>
-    <string name="today">須_Today___________鷗</string>
-    <string name="now">須_Now_______鷗</string>
-    <string name="cancel">須_Cancel_____________鷗</string>
-    <string name="ok">須_OK_____鷗</string>
-    <string name="done">須_Done_________鷗</string>
-    <string name="filter">須_Filter %1$s____________鷗</string>
-    <string name="numeric_range_helper_text">須_Enter value from %1$s to %2$s______________________________鷗</string>
-    <string name="less_than_min_value">須_Less than minimum value %1$s_____________________________鷗</string>
-    <string name="exceeds_max_value">須_Exceeds maximum value %1$s___________________________鷗</string>
-    <string name="value_must_be_a_whole_number">須_Value must be a whole number_____________________________鷗</string>
-    <string name="value_must_be_a_number">須_Value must be a number_______________________鷗</string>
-    <string name="value_must_be_within_domain">須_Value must be within domain____________________________鷗</string>
-    <string name="value_must_not_be_empty">須_Value must not be empty________________________鷗</string>
-    <string name="min_datetime_helper_text">須_Date must be on or after %1$s______________________________鷗</string>
-    <string name="max_datetime_helper_text">須_Date must be on or before %1$s_______________________________鷗</string>
+    <string name="enter_n_chars">%1$d 文字を入力します</string>
+    <string name="enter_min_to_max_chars">%1$d ～ %2$d 文字で入力してください</string>
+    <string name="maximum_n_chars">最大 %1$d 文字</string>
+    <string name="no_value">値なし</string>
+    <string name="enter_value">値を入力</string>
+    <string name="required">必須</string>
+    <string name="today">今日</string>
+    <string name="now">現在</string>
+    <string name="cancel">キャンセル</string>
+    <string name="ok">OK</string>
+    <string name="done">終了</string>
+    <string name="filter">フィルター %1$s</string>
+    <string name="numeric_range_helper_text">%1$s ～ %2$s の値を入力してください</string>
+    <string name="less_than_min_value">最小値 %1$s 未満です</string>
+    <string name="exceeds_max_value">最大値 %1$s を超えています</string>
+    <string name="value_must_be_a_whole_number">整数を使用してください</string>
+    <string name="value_must_be_a_number">値を数値にする必要があります</string>
+    <string name="value_must_be_within_domain">値はドメイン内である必要があります</string>
+    <string name="value_must_not_be_empty">値は空にしてはなりません</string>
+    <string name="min_datetime_helper_text">日付は %1$s かそれ以降にする必要があります</string>
+    <string name="max_datetime_helper_text">日付は %1$s かそれ以前にする必要があります</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">須_Entered date_____________鷗</string>
-    <string name="ff_date_input_headline_description">須_Entered date: %1$s___________________鷗</string>
-    <string name="ff_date_input_invalid_for_pattern">須_Date does not match expected pattern: %1$s______________________鷗</string>
-    <string name="ff_date_input_invalid_not_allowed">須_Date not allowed: %1$s_______________________鷗</string>
-    <string name="ff_date_input_invalid_year_range">須__鷗
-        須_Date out of expected year range %1$s - %2$s___________________________鷗
-須__________鷗    </string>
-    <string name="ff_date_input_label">須_Date_________鷗</string>
-    <string name="ff_date_input_no_input_description">須_None_________鷗</string>
-    <string name="ff_date_input_title">須_Select date____________鷗</string>
-    <string name="ff_date_picker_headline">須_"Selected date"________________鷗</string>
-    <string name="ff_date_picker_headline_description">須_Current selection: %1$s________________________鷗</string>
-    <string name="ff_date_picker_navigate_to_year_description">須_Navigate to year %1$s______________________鷗</string>
-    <string name="ff_date_picker_no_selection_description">須_None_________鷗</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">須_Scroll to show earlier years_____________________________鷗</string>
-    <string name="ff_date_picker_scroll_to_later_years">須_Scroll to show later years___________________________鷗</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">須_Switch to calendar input mode______________________________鷗</string>
-    <string name="ff_date_picker_switch_to_day_selection">須__鷗
-        須_"Swipe to select a year, or tap to switch back to selecting a day"______________________________________鷗
-須__________鷗    </string>
-    <string name="ff_date_picker_switch_to_input_mode">須_Switch to text input mode__________________________鷗</string>
-    <string name="ff_date_picker_switch_to_next_month">須_"Change to next month"_______________________鷗</string>
-    <string name="ff_date_picker_switch_to_previous_month">須_"Change to previous month"___________________________鷗</string>
-    <string name="ff_date_picker_switch_to_year_selection">須_"Switch to selecting a year"_____________________________鷗</string>
-    <string name="ff_date_picker_title">須_"Select date"______________鷗</string>
-    <string name="ff_date_picker_today_description">須_Today___________鷗</string>
-    <string name="ff_date_picker_year_picker_pane_title">須_Year picker visible____________________鷗</string>
-    <string name="ff_date_range_input_invalid_range_input">須_Invalid date range input_________________________鷗</string>
-    <string name="ff_date_range_input_title">須_Enter dates____________鷗</string>
-    <string name="ff_date_range_picker_day_in_range">須_In range_________________鷗</string>
-    <string name="ff_date_range_picker_end_headline">須_End date_________________鷗</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">須_Scroll to show the next month______________________________鷗</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">須_Scroll to show the previous month__________________鷗</string>
-    <string name="ff_date_range_picker_start_headline">須_Start date_____________________鷗</string>
-    <string name="ff_date_range_picker_title">須_Select dates_____________鷗</string>
+    <string name="ff_date_input_headline">入力された日付</string>
+    <string name="ff_date_input_headline_description">入力された日付: %1$s</string>
+    <string name="ff_date_input_invalid_for_pattern">日付は予測されるパターンに一致しません: %1$s</string>
+    <string name="ff_date_input_invalid_not_allowed">日付は許可されていません: %1$s</string>
+    <string name="ff_date_input_invalid_year_range">
+        日付は予測される年の範囲 %1$s ～ %2$s を超えています
+    </string>
+    <string name="ff_date_input_label">日付</string>
+    <string name="ff_date_input_no_input_description">なし</string>
+    <string name="ff_date_input_title">日付の選択</string>
+    <string name="ff_date_picker_headline">"選択した日付"</string>
+    <string name="ff_date_picker_headline_description">現在の選択: %1$s</string>
+    <string name="ff_date_picker_navigate_to_year_description">%1$s 年に移動</string>
+    <string name="ff_date_picker_no_selection_description">なし</string>
+    <string name="ff_date_picker_scroll_to_earlier_years">スクロールして前の年を表示</string>
+    <string name="ff_date_picker_scroll_to_later_years">スクロールして次の年を表示</string>
+    <string name="ff_date_picker_switch_to_calendar_mode">カレンダー入力モードに切り替え</string>
+    <string name="ff_date_picker_switch_to_day_selection">
+        "スワイプして年を選択するか、タップして日付の選択に戻る"
+    </string>
+    <string name="ff_date_picker_switch_to_input_mode">テキスト入力モードに切り替え</string>
+    <string name="ff_date_picker_switch_to_next_month">"次月に変更"</string>
+    <string name="ff_date_picker_switch_to_previous_month">"前月に変更"</string>
+    <string name="ff_date_picker_switch_to_year_selection">"年の選択に切り替え"</string>
+    <string name="ff_date_picker_title">"日付の選択"</string>
+    <string name="ff_date_picker_today_description">今日</string>
+    <string name="ff_date_picker_year_picker_pane_title">年選択を表示</string>
+    <string name="ff_date_range_input_invalid_range_input">日付範囲の入力が無効です</string>
+    <string name="ff_date_range_input_title">日付の入力</string>
+    <string name="ff_date_range_picker_day_in_range">範囲内</string>
+    <string name="ff_date_range_picker_end_headline">終了日</string>
+    <string name="ff_date_range_picker_scroll_to_next_month">スクロールして次月を表示</string>
+    <string name="ff_date_range_picker_scroll_to_previous_month">スクロールして前月を表示</string>
+    <string name="ff_date_range_picker_start_headline">開始日</string>
+    <string name="ff_date_range_picker_title">日付の選択</string>
 
     <!-- Time Picker string values -->
-    <string name="ff_time_picker_am">須_AM_____鷗</string>
-    <string name="ff_time_picker_hour">須_Hour_________鷗</string>
-    <string name="ff_time_picker_hour_24h_suffix">須_%1$d hours_____________________鷗</string>
-    <string name="ff_time_picker_hour_selection">須_Select hour____________鷗</string>
-    <string name="ff_time_picker_hour_suffix">須_%1$d o\'clock______________鷗</string>
-    <string name="ff_time_picker_hour_text_field">須_for hour_________________鷗</string>
-    <string name="ff_time_picker_minute">須_Minute_____________鷗</string>
-    <string name="ff_time_picker_minute_selection">須_Select minutes_______________鷗</string>
-    <string name="ff_time_picker_minute_suffix">須_%1$d minutes_____________鷗</string>
-    <string name="ff_time_picker_minute_text_field">須_for minutes____________鷗</string>
-    <string name="ff_time_picker_period_toggle_description">須_Select AM or PM________________鷗</string>
-    <string name="ff_time_picker_pm">須_PM_____鷗</string>
-    <string name="take_photo">須_Take Photo_____________________鷗</string>
-    <string name="add_photo">須_Add Photo___________________鷗</string>
-    <string name="rename">須_Rename_____________鷗</string>
-    <string name="delete">須_Delete_____________鷗</string>
-    <string name="rename_attachment">須_Rename Attachment__________________鷗</string>
-    <string name="name">須_Name_________鷗</string>
+    <string name="ff_time_picker_am">AM</string>
+    <string name="ff_time_picker_hour">時間</string>
+    <string name="ff_time_picker_hour_24h_suffix">%1$d 時間</string>
+    <string name="ff_time_picker_hour_selection">時の選択</string>
+    <string name="ff_time_picker_hour_suffix">%1$d 時</string>
+    <string name="ff_time_picker_hour_text_field">時</string>
+    <string name="ff_time_picker_minute">分</string>
+    <string name="ff_time_picker_minute_selection">分の選択</string>
+    <string name="ff_time_picker_minute_suffix">%1$d 分</string>
+    <string name="ff_time_picker_minute_text_field">分</string>
+    <string name="ff_time_picker_period_toggle_description">AM/PM の選択</string>
+    <string name="ff_time_picker_pm">PM</string>
+    <string name="take_photo">写真の撮影</string>
+    <string name="add_photo">写真の追加</string>
+    <string name="rename">名前の変更</string>
+    <string name="delete">削除</string>
+    <string name="rename_attachment">添付ファイル名の変更</string>
+    <string name="name">名前</string>
 </resources>

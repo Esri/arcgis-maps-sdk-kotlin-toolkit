@@ -8,21 +8,21 @@
     <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">施設の選択</string>
     <string name="floor_filter_no_results">結果が見つかりません。</string>
-    <string name="not_available">須_Not available______________鷗</string>
+    <string name="not_available">利用できません</string>
     <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
-    <string name="floor_filter_site_selector_top_bar">須_Site - %1$s____________鷗</string>
+    <string name="floor_filter_site_selector_top_bar">サイト - %1$s</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="site_facility_button">須_Sites and facilities button____________________________鷗</string>
+    <string name="site_facility_button">サイトおよび施設ボタン</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="floor_level_select_button">須_Floor level select button__________________________鷗</string>
+    <string name="floor_level_select_button">フロア レベル選択ボタン</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="site_item">須_Site item___________________鷗</string>
+    <string name="site_item">サイト アイテム</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="facility_item">須_Facility item______________鷗</string>
+    <string name="facility_item">施設アイテム</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="clear_search">須_Clear search_____________鷗</string>
+    <string name="clear_search">検索の消去</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="close">須_Close___________鷗</string>
+    <string name="close">閉じる</string>
     <!-- This text is used to describe the UI element to support accessibility services -->
-    <string name="go_back_to_site_selector">須_Go back to site selector_________________________鷗</string>
+    <string name="go_back_to_site_selector">サイト セレクターに戻る</string>
 </resources>

@@ -15,82 +15,82 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="enter_n_chars">Ă_Enter %1$d characters______________________ș</string>
-    <string name="enter_min_to_max_chars">Ă_Enter %1$d to %2$d characters______________________________ș</string>
-    <string name="maximum_n_chars">Ă_Maximum %1$d characters________________________ș</string>
-    <string name="no_value">Ă_No value_________________ș</string>
-    <string name="enter_value">Ă_Enter Value____________ș</string>
-    <string name="required">Ă_Required_________________ș</string>
-    <string name="today">Ă_Today___________ș</string>
-    <string name="now">Ă_Now_______ș</string>
-    <string name="cancel">Ă_Cancel_____________ș</string>
-    <string name="ok">Ă_OK_____ș</string>
-    <string name="done">Ă_Done_________ș</string>
-    <string name="filter">Ă_Filter %1$s____________ș</string>
-    <string name="numeric_range_helper_text">Ă_Enter value from %1$s to %2$s______________________________ș</string>
-    <string name="less_than_min_value">Ă_Less than minimum value %1$s_____________________________ș</string>
-    <string name="exceeds_max_value">Ă_Exceeds maximum value %1$s___________________________ș</string>
-    <string name="value_must_be_a_whole_number">Ă_Value must be a whole number_____________________________ș</string>
-    <string name="value_must_be_a_number">Ă_Value must be a number_______________________ș</string>
-    <string name="value_must_be_within_domain">Ă_Value must be within domain____________________________ș</string>
-    <string name="value_must_not_be_empty">Ă_Value must not be empty________________________ș</string>
-    <string name="min_datetime_helper_text">Ă_Date must be on or after %1$s______________________________ș</string>
-    <string name="max_datetime_helper_text">Ă_Date must be on or before %1$s_______________________________ș</string>
+    <string name="enter_n_chars">Introduceți %1$d caractere</string>
+    <string name="enter_min_to_max_chars">Introduceți %1$d până la %2$d caractere</string>
+    <string name="maximum_n_chars">Maximum %1$d (de) caractere</string>
+    <string name="no_value">Fără valori</string>
+    <string name="enter_value">Introduceți o valoare</string>
+    <string name="required">Obligatoriu</string>
+    <string name="today">Astăzi</string>
+    <string name="now">Acum</string>
+    <string name="cancel">Anulare</string>
+    <string name="ok">OK</string>
+    <string name="done">Gata</string>
+    <string name="filter">Filtru %1$s</string>
+    <string name="numeric_range_helper_text">Introduceți o valoare de la %1$s la %2$s</string>
+    <string name="less_than_min_value">Mai puțin decât valoarea minimă %1$s</string>
+    <string name="exceeds_max_value">Depășește valoarea maximă %1$s</string>
+    <string name="value_must_be_a_whole_number">Valoarea trebuie să fie un număr întreg</string>
+    <string name="value_must_be_a_number">Valoarea trebuie să fie un număr</string>
+    <string name="value_must_be_within_domain">Valoarea trebuie să se încadreze în domeniu</string>
+    <string name="value_must_not_be_empty">Valoarea nu trebuie să fie goală</string>
+    <string name="min_datetime_helper_text">Data trebuie să fie la sau după %1$s</string>
+    <string name="max_datetime_helper_text">Data trebuie să fie la sau înainte de %1$s</string>
 
     <!-- Date Picker string values -->
-    <string name="ff_date_input_headline">Ă_Entered date_____________ș</string>
-    <string name="ff_date_input_headline_description">Ă_Entered date: %1$s___________________ș</string>
-    <string name="ff_date_input_invalid_for_pattern">Ă_Date does not match expected pattern: %1$s______________________ș</string>
-    <string name="ff_date_input_invalid_not_allowed">Ă_Date not allowed: %1$s_______________________ș</string>
-    <string name="ff_date_input_invalid_year_range">Ă__ș
-        Ă_Date out of expected year range %1$s - %2$s___________________________ș
-Ă__________ș    </string>
-    <string name="ff_date_input_label">Ă_Date_________ș</string>
-    <string name="ff_date_input_no_input_description">Ă_None_________ș</string>
-    <string name="ff_date_input_title">Ă_Select date____________ș</string>
-    <string name="ff_date_picker_headline">Ă_"Selected date"________________ș</string>
-    <string name="ff_date_picker_headline_description">Ă_Current selection: %1$s________________________ș</string>
-    <string name="ff_date_picker_navigate_to_year_description">Ă_Navigate to year %1$s______________________ș</string>
-    <string name="ff_date_picker_no_selection_description">Ă_None_________ș</string>
-    <string name="ff_date_picker_scroll_to_earlier_years">Ă_Scroll to show earlier years_____________________________ș</string>
-    <string name="ff_date_picker_scroll_to_later_years">Ă_Scroll to show later years___________________________ș</string>
-    <string name="ff_date_picker_switch_to_calendar_mode">Ă_Switch to calendar input mode______________________________ș</string>
-    <string name="ff_date_picker_switch_to_day_selection">Ă__ș
-        Ă_"Swipe to select a year, or tap to switch back to selecting a day"______________________________________ș
-Ă__________ș    </string>
-    <string name="ff_date_picker_switch_to_input_mode">Ă_Switch to text input mode__________________________ș</string>
-    <string name="ff_date_picker_switch_to_next_month">Ă_"Change to next month"_______________________ș</string>
-    <string name="ff_date_picker_switch_to_previous_month">Ă_"Change to previous month"___________________________ș</string>
-    <string name="ff_date_picker_switch_to_year_selection">Ă_"Switch to selecting a year"_____________________________ș</string>
-    <string name="ff_date_picker_title">Ă_"Select date"______________ș</string>
-    <string name="ff_date_picker_today_description">Ă_Today___________ș</string>
-    <string name="ff_date_picker_year_picker_pane_title">Ă_Year picker visible____________________ș</string>
-    <string name="ff_date_range_input_invalid_range_input">Ă_Invalid date range input_________________________ș</string>
-    <string name="ff_date_range_input_title">Ă_Enter dates____________ș</string>
-    <string name="ff_date_range_picker_day_in_range">Ă_In range_________________ș</string>
-    <string name="ff_date_range_picker_end_headline">Ă_End date_________________ș</string>
-    <string name="ff_date_range_picker_scroll_to_next_month">Ă_Scroll to show the next month______________________________ș</string>
-    <string name="ff_date_range_picker_scroll_to_previous_month">Ă_Scroll to show the previous month__________________ș</string>
-    <string name="ff_date_range_picker_start_headline">Ă_Start date_____________________ș</string>
-    <string name="ff_date_range_picker_title">Ă_Select dates_____________ș</string>
+    <string name="ff_date_input_headline">Data intrării</string>
+    <string name="ff_date_input_headline_description">Data intrării: %1$s</string>
+    <string name="ff_date_input_invalid_for_pattern">Data nu corespunde cu modelul preconizat: %1$s</string>
+    <string name="ff_date_input_invalid_not_allowed">Data nu este permisă: %1$s</string>
+    <string name="ff_date_input_invalid_year_range">
+        Data este în afara intervalului anual preconizat %1$s - %2$s
+    </string>
+    <string name="ff_date_input_label">Dată</string>
+    <string name="ff_date_input_no_input_description">Niciunul</string>
+    <string name="ff_date_input_title">Selectare dată</string>
+    <string name="ff_date_picker_headline">„Data selectată”</string>
+    <string name="ff_date_picker_headline_description">Selecția curentă: %1$s</string>
+    <string name="ff_date_picker_navigate_to_year_description">Navigați la anul %1$s</string>
+    <string name="ff_date_picker_no_selection_description">Niciunul</string>
+    <string name="ff_date_picker_scroll_to_earlier_years">Derulați pentru afișarea anilor anteriori</string>
+    <string name="ff_date_picker_scroll_to_later_years">Derulați pentru afișarea anilor ulteriori</string>
+    <string name="ff_date_picker_switch_to_calendar_mode">Comutați la modul de introducere în calendar</string>
+    <string name="ff_date_picker_switch_to_day_selection">
+        „Glisați pentru a selecta un an sau atingeți pentru a comuta înapoi la selectarea unei zile”
+    </string>
+    <string name="ff_date_picker_switch_to_input_mode">Comutați la modul de introducere text</string>
+    <string name="ff_date_picker_switch_to_next_month">„Schimbați la luna următoare”</string>
+    <string name="ff_date_picker_switch_to_previous_month">„Schimbați la luna anterioară”</string>
+    <string name="ff_date_picker_switch_to_year_selection">„Comutați la selectarea unui an”</string>
+    <string name="ff_date_picker_title">„Selectare dată”</string>
+    <string name="ff_date_picker_today_description">Astăzi</string>
+    <string name="ff_date_picker_year_picker_pane_title">Selector an vizibil</string>
+    <string name="ff_date_range_input_invalid_range_input">Introducere interval dată nevalid</string>
+    <string name="ff_date_range_input_title">Intrare date</string>
+    <string name="ff_date_range_picker_day_in_range">În interval</string>
+    <string name="ff_date_range_picker_end_headline">Data terminării</string>
+    <string name="ff_date_range_picker_scroll_to_next_month">Derulați pentru a afișa luna următoare</string>
+    <string name="ff_date_range_picker_scroll_to_previous_month">Derulați pentru a afișa luna anterioară</string>
+    <string name="ff_date_range_picker_start_headline">Data începerii</string>
+    <string name="ff_date_range_picker_title">Selectare date</string>
 
     <!-- Time Picker string values -->
-    <string name="ff_time_picker_am">Ă_AM_____ș</string>
-    <string name="ff_time_picker_hour">Ă_Hour_________ș</string>
-    <string name="ff_time_picker_hour_24h_suffix">Ă_%1$d hours_____________________ș</string>
-    <string name="ff_time_picker_hour_selection">Ă_Select hour____________ș</string>
-    <string name="ff_time_picker_hour_suffix">Ă_%1$d o\'clock______________ș</string>
-    <string name="ff_time_picker_hour_text_field">Ă_for hour_________________ș</string>
-    <string name="ff_time_picker_minute">Ă_Minute_____________ș</string>
-    <string name="ff_time_picker_minute_selection">Ă_Select minutes_______________ș</string>
-    <string name="ff_time_picker_minute_suffix">Ă_%1$d minutes_____________ș</string>
-    <string name="ff_time_picker_minute_text_field">Ă_for minutes____________ș</string>
-    <string name="ff_time_picker_period_toggle_description">Ă_Select AM or PM________________ș</string>
-    <string name="ff_time_picker_pm">Ă_PM_____ș</string>
-    <string name="take_photo">Ă_Take Photo_____________________ș</string>
-    <string name="add_photo">Ă_Add Photo___________________ș</string>
-    <string name="rename">Ă_Rename_____________ș</string>
-    <string name="delete">Ă_Delete_____________ș</string>
-    <string name="rename_attachment">Ă_Rename Attachment__________________ș</string>
-    <string name="name">Ă_Name_________ș</string>
+    <string name="ff_time_picker_am">AM</string>
+    <string name="ff_time_picker_hour">Oră</string>
+    <string name="ff_time_picker_hour_24h_suffix">%1$d ore</string>
+    <string name="ff_time_picker_hour_selection">Selectare oră</string>
+    <string name="ff_time_picker_hour_suffix">Ora %1$d</string>
+    <string name="ff_time_picker_hour_text_field">pentru oră</string>
+    <string name="ff_time_picker_minute">Minut</string>
+    <string name="ff_time_picker_minute_selection">Selectare minute</string>
+    <string name="ff_time_picker_minute_suffix">%1$d minute</string>
+    <string name="ff_time_picker_minute_text_field">pentru minute</string>
+    <string name="ff_time_picker_period_toggle_description">Selectați AM șu PM</string>
+    <string name="ff_time_picker_pm">PM</string>
+    <string name="take_photo">Realizare fotografie</string>
+    <string name="add_photo">Adăugare fotografie</string>
+    <string name="rename">Redenumire</string>
+    <string name="delete">Ștergere</string>
+    <string name="rename_attachment">Redenumire atașament</string>
+    <string name="name">Nume</string>
 </resources>
