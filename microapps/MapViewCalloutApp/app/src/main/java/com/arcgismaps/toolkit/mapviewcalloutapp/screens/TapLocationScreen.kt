@@ -49,7 +49,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -59,6 +58,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.node.Ref
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -68,7 +68,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
 import com.arcgismaps.geometry.Point
-import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import kotlin.math.roundToInt
 
@@ -86,25 +85,11 @@ fun TapLocationScreen(viewModel: MapViewModel) {
     var isCalloutEnabled by rememberSaveable { mutableStateOf(true) }
     var showBottomSheet by remember { mutableStateOf(false) }
     val modalBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val initialPoint = Point(-13185535.98, 4037766.28, SpatialReference(102100))
-    // default starting point of the Callout
-    val calloutLocation = remember { mutableStateOf(initialPoint) }
     // animate to a visible transition state
     val calloutVisibleState = remember { MutableTransitionState(false) }.apply {
         targetState = true
     }
-
-    if (tappedPoint != null && isCalloutEnabled) {
-        calloutLocation.value = tappedPoint
-        calloutVisibleState.targetState = true
-    } else {
-        calloutVisibleState.targetState = false
-    }
-
-    // show callout on the starting point
-    LaunchedEffect(Unit){
-        viewModel.setMapPoint(initialPoint)
-    }
+    calloutVisibleState.targetState = tappedPoint != null && isCalloutEnabled
 
     // the value will be equivalent to half of device width in any orientation
     val mapViewInsets: Dp = LocalConfiguration.current.screenWidthDp.dp / 4
@@ -137,29 +122,34 @@ fun TapLocationScreen(viewModel: MapViewModel) {
             },
             content =
             {
+                val lastMapPoint = remember { Ref<Point>() }
+                lastMapPoint.value = tappedPoint ?: lastMapPoint.value
+
                 AnimatedVisibility(
-                    visibleState = calloutVisibleState,
+                    calloutVisibleState,
                     enter = fadeIn(),
                     exit = fadeOut()
                 ) {
-                    Callout(
-                        modifier = Modifier.fillMaxWidth(),
-                        location = calloutLocation.value,
-                        rotateOffsetWithGeoView = rotateOffsetWithGeoView,
-                        offset = offset
-                    ) {
-                        Row(
+                    lastMapPoint.value?.let {
+                        Callout(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            location = it,
+                            rotateOffsetWithGeoView = rotateOffsetWithGeoView,
+                            offset = offset
                         ) {
-                            Column {
-                                HtmlText(
-                                    html = "<b>Tapped location</b>:<br>" +
-                                            "<i>x</i>    = ${calloutLocation.value.x.roundToInt()}<br>" +
-                                            "<i>y</i>    = ${calloutLocation.value.y.roundToInt()}<br>" +
-                                            "<i>wkid</i> = ${calloutLocation.value.spatialReference?.wkid}",
-                                    htmlFlag = HtmlCompat.FROM_HTML_MODE_COMPACT
-                                )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Column {
+                                    HtmlText(
+                                        html = "<b>Tapped location</b>:<br>" +
+                                                "<i>x</i>    = ${it.x.roundToInt()}<br>" +
+                                                "<i>y</i>    = ${it.y.roundToInt()}<br>" +
+                                                "<i>wkid</i> = ${it.spatialReference?.wkid}",
+                                        htmlFlag = HtmlCompat.FROM_HTML_MODE_COMPACT
+                                    )
+                                }
                             }
                         }
                     }
@@ -178,7 +168,7 @@ fun TapLocationScreen(viewModel: MapViewModel) {
                         calloutVisibility = isCalloutEnabled,
                         isCalloutRotationEnabled = rotateOffsetWithGeoView,
                         offset = offset,
-                        mapPoint = calloutLocation.value,
+                        mapPoint = tappedPoint,
                         onOffsetChange = { viewModel.setOffset(it) },
                         onVisibilityToggled = { isCalloutEnabled = !isCalloutEnabled },
                         onClearMapPointRequest = {
