@@ -16,12 +16,17 @@
 
 package com.arcgismaps.toolkit.popup.internal.util
 
+import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
+import coil.imageLoader
+import coil.request.ImageRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
+import java.util.Objects
 
 
 /**
@@ -34,7 +39,7 @@ import java.io.FileOutputStream
  */
 internal class ChartImageProvider(
     private val fileName: String,
-    private val folderName: String,
+    private val folderName: String = "popup_media",
     val chartGenerator: suspend () -> Bitmap
 ) {
     suspend fun get(): String = withContext(Dispatchers.IO) {
@@ -51,3 +56,36 @@ internal class ChartImageProvider(
             file.canonicalPath
         }
     }
+
+
+/**
+ * Saves a remote media image to disk. The file is saved locally so it may be shared.
+ *
+ * @property url the remote location of the image
+ * @property fileName the name to give to the local file
+ * @property folderName the folder within the cache in which to save files
+ */
+internal class MediaImageProvider(
+    private val url: String,
+    private val fileName: String = "media-${Objects.hash(url)}.png",
+    private val folderName: String = "popup_media"
+) {
+    suspend fun get(context: Context): String = withContext(Dispatchers.IO) {
+        val request = ImageRequest.Builder(context)
+            .data(url)
+            .crossfade(true)
+            .build()
+        val bitmap = (context.imageLoader.execute(request).drawable as? BitmapDrawable)?.bitmap
+            ?: throw IllegalStateException("couldn't load image at $url")
+        val directory = File(context.cacheDir, folderName)
+        directory.mkdirs()
+        val file = File(directory, fileName)
+        if (!file.exists()) {
+            file.createNewFile()
+            BufferedOutputStream(FileOutputStream(file)).use { bos ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, bos)
+            }
+        }
+        file.canonicalPath
+    }
+}

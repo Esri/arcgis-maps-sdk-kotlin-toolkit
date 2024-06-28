@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.popup.internal.element.media
 
+import android.content.Context
 import android.graphics.Bitmap
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
@@ -37,6 +38,7 @@ import com.arcgismaps.mapping.popup.PopupMedia
 import com.arcgismaps.mapping.popup.PopupMediaType
 import com.arcgismaps.toolkit.popup.internal.element.state.PopupElementState
 import com.arcgismaps.toolkit.popup.internal.util.ChartImageProvider
+import com.arcgismaps.toolkit.popup.internal.util.MediaImageProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.util.Objects
@@ -49,13 +51,13 @@ internal class MediaElementState(
     val description: String,
     val title: String,
     val media: List<PopupMediaState>,
-    override val id : Int = createId(),
+    override val id : Int = createId()
 ) : PopupElementState() {
 
-    constructor(mediaPopupElement: MediaPopupElement, scope: CoroutineScope, chartFolder: String, chartParams: ChartImageParameters): this(
+    constructor(mediaPopupElement: MediaPopupElement, scope: CoroutineScope, chartFolder: String, chartParams: ChartImageParameters, context: Context): this(
         description = mediaPopupElement.description,
         title = mediaPopupElement.title,
-        media = mediaPopupElement.media.map { PopupMediaState(it, scope, chartFolder, chartParams) }
+        media = mediaPopupElement.media.map { PopupMediaState(it, scope, chartFolder, chartParams, context) }
     )
 
     companion object {
@@ -63,12 +65,13 @@ internal class MediaElementState(
             element: MediaPopupElement,
             scope: CoroutineScope,
             chartFolder: String,
-            chartParams: ChartImageParameters
+            chartParams: ChartImageParameters,
+            context: Context
         ): Saver<MediaElementState, Any> = Saver(
             save = { null },
             restore = {
                 MediaElementState(
-                    element, scope, chartFolder, chartParams
+                    element, scope, chartFolder, chartParams, context
                 )
             }
         )
@@ -114,15 +117,17 @@ internal fun rememberMediaElementState(
     // the composition local context provides the cacheDir to be ultimately passed into
     // the chart provider so charts can be saved to disk.
     val mediaFolder = "${LocalContext.current.cacheDir.canonicalPath}/popup_media"
+    val context = LocalContext.current
     return rememberSaveable(
         inputs = arrayOf(popup, element),
-        saver = MediaElementState.Saver(element, scope, mediaFolder, chartParams)
+        saver = MediaElementState.Saver(element, scope, mediaFolder, chartParams, context)
     ) {
         MediaElementState(
             element,
             scope,
             mediaFolder,
-            chartParams
+            chartParams,
+            context
         )
     }
 }
@@ -139,6 +144,7 @@ internal fun rememberMediaElementState(
  * @property scope a CoroutineScope to use to acquire chart images
  * @property chartFolder the folder in which to save chart images
  * @property imageGenerator a lambda which generates charts. Is only invoked if type is chart.
+ * @param context Context to use to store media image files. It is not passed out of the constructor.
  */
 internal class PopupMediaState(
     val title: String,
@@ -149,7 +155,8 @@ internal class PopupMediaState(
     val type: PopupMediaType,
     private val scope: CoroutineScope,
     private val chartFolder: String,
-    private val imageGenerator: (suspend () -> Bitmap)? = null
+    private val imageGenerator: (suspend () -> Bitmap)? = null,
+    context: Context
 ) {
     private val _imageUri: MutableState<String> = mutableStateOf("")
 
@@ -160,7 +167,7 @@ internal class PopupMediaState(
 
     init {
         // charts only
-        if (!(type is PopupMediaType.Image || type is PopupMediaType.Unknown)) {
+        if (type.isChart) {
             scope.launch {
                 val fileName = "media-${Objects.hash(sourceUrl)}.png"
                 imageGenerator?.let {
@@ -169,8 +176,13 @@ internal class PopupMediaState(
                 }
 
             }
-        } else {
-            _imageUri.value = sourceUrl
+        } else if (type is PopupMediaType.Image) {
+            //_imageUri.value = sourceUrl
+            scope.launch {
+                val provider = MediaImageProvider(sourceUrl)
+                _imageUri.value = provider.get(context)
+
+            }
         }
     }
 
@@ -178,7 +190,8 @@ internal class PopupMediaState(
         media: PopupMedia,
         scope: CoroutineScope,
         chartFolder: String,
-        chartParams: ChartImageParameters
+        chartParams: ChartImageParameters,
+        context: Context
     ) : this(
         title = media.title,
         caption = media.caption,
@@ -190,6 +203,13 @@ internal class PopupMediaState(
         chartFolder = chartFolder,
         imageGenerator = {
             media.generateChart(chartParams).getOrThrow().image.bitmap
-        }
+        },
+        context = context
     )
 }
+
+private val PopupMediaType.isChart: Boolean
+    get() = when(this) {
+        is PopupMediaType.BarChart, is PopupMediaType.ColumnChart, is PopupMediaType.PieChart, is PopupMediaType.LineChart -> true
+        else -> false
+    }

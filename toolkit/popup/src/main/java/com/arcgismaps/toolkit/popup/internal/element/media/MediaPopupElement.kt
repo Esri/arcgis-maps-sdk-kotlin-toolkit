@@ -26,6 +26,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.popup.PopupMediaType
@@ -91,7 +92,8 @@ private fun MediaPopupElementPreview() {
                 sourceUrl = "https://i.postimg.cc/65yws9mR/Screenshot-2024-02-02-at-6-20-49-PM.png",
                 type = PopupMediaType.Image,
                 scope = rememberCoroutineScope(),
-                chartFolder = ""
+                chartFolder = "",
+                context = LocalContext.current
             )
         )
     )
