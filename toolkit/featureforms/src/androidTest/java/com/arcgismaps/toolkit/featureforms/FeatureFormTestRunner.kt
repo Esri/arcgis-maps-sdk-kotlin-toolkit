@@ -27,6 +27,7 @@ import com.arcgismaps.mapping.layers.FeatureLayer
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.BeforeClass
 
 /**
  * A test runner for feature form tests. This class is responsible for loading the map with the
@@ -47,11 +48,7 @@ open class FeatureFormTestRunner(
     @Before
     fun setup(): Unit = runTest {
         // If the feature form is already initialized, return
-        if (isInitialized) return@runTest
-        ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler =
-            FeatureFormsTestChallengeHandler(
-                BuildConfig.webMapUser, BuildConfig.webMapPassword
-            )
+        //if (isInitialized) return@runTest
         // Load the map
         val map = ArcGISMap(uri = uri)
         map.assertIsLoaded()
@@ -90,6 +87,15 @@ open class FeatureFormTestRunner(
 
         private val isInitialized : Boolean
             get() = ::featureForm.isInitialized
+
+        @JvmStatic
+        @BeforeClass
+        fun init() {
+            ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler =
+                FeatureFormsTestChallengeHandler(
+                    BuildConfig.webMapUser, BuildConfig.webMapPassword
+                )
+        }
     }
 }
 
