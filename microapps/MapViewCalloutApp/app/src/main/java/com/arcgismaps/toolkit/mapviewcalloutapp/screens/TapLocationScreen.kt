@@ -82,7 +82,7 @@ fun TapLocationScreen(viewModel: MapViewModel) {
 
     val tappedPoint = viewModel.mapPoint.collectAsState().value
     val offset = viewModel.offset.collectAsState().value
-    var calloutLocation = remember { Point(-13185535.98, 4037766.28, SpatialReference(102100)) }
+    val calloutLocation = remember { mutableStateOf(Point(-13185535.98, 4037766.28, SpatialReference(102100))) }
     var rotateOffsetWithGeoView by rememberSaveable { mutableStateOf(false) }
     var isCalloutEnabled by rememberSaveable { mutableStateOf(true) }
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -90,7 +90,7 @@ fun TapLocationScreen(viewModel: MapViewModel) {
     val visibleState = remember { MutableTransitionState(false) }
 
     if (tappedPoint != null && isCalloutEnabled) {
-        calloutLocation = tappedPoint
+        calloutLocation.value = tappedPoint
         visibleState.targetState = true
     } else {
         visibleState.targetState = false
@@ -134,7 +134,7 @@ fun TapLocationScreen(viewModel: MapViewModel) {
                 ) {
                     Callout(
                         modifier = Modifier.fillMaxWidth(),
-                        location = calloutLocation,
+                        location = calloutLocation.value,
                         rotateOffsetWithGeoView = rotateOffsetWithGeoView,
                         offset = offset
                     ) {
@@ -145,9 +145,9 @@ fun TapLocationScreen(viewModel: MapViewModel) {
                             Column {
                                 HtmlText(
                                     html = "<b>Tapped location</b>:<br>" +
-                                            "<i>x</i>    = ${calloutLocation.x.roundToInt()}<br>" +
-                                            "<i>y</i>    = ${calloutLocation.y.roundToInt()}<br>" +
-                                            "<i>wkid</i> = ${calloutLocation.spatialReference?.wkid}",
+                                            "<i>x</i>    = ${calloutLocation.value.x.roundToInt()}<br>" +
+                                            "<i>y</i>    = ${calloutLocation.value.y.roundToInt()}<br>" +
+                                            "<i>wkid</i> = ${calloutLocation.value.spatialReference?.wkid}",
                                     htmlFlag = HtmlCompat.FROM_HTML_MODE_COMPACT
                                 )
                             }
@@ -168,11 +168,11 @@ fun TapLocationScreen(viewModel: MapViewModel) {
                         calloutVisibility = isCalloutEnabled,
                         isCalloutRotationEnabled = rotateOffsetWithGeoView,
                         offset = offset,
-                        mapPoint = calloutLocation,
+                        mapPoint = calloutLocation.value,
                         onOffsetChange = { viewModel.setOffset(it) },
                         onVisibilityToggled = { isCalloutEnabled = !isCalloutEnabled },
                         onClearMapPointRequest = {
-                            calloutLocation = tappedPoint ?: return@CalloutOptions
+                            calloutLocation.value = tappedPoint ?: return@CalloutOptions
                             viewModel.clearMapPoint()
                         },
                         onCalloutOffsetRotationToggled = {
