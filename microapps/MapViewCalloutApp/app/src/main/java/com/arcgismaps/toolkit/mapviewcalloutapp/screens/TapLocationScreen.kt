@@ -18,6 +18,10 @@
 
 package com.arcgismaps.toolkit.mapviewcalloutapp.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -48,10 +52,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.node.Ref
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.geometry.Point
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import kotlin.math.roundToInt
 
@@ -67,6 +73,13 @@ fun TapLocationScreen(viewModel: MapViewModel) {
 
     var calloutVisibility by rememberSaveable { mutableStateOf(true) }
     var rotateOffsetWithGeoView by rememberSaveable { mutableStateOf(false) }
+
+    // animate to a visible transition state
+    val calloutVisibleState = remember { MutableTransitionState(false) }.apply {
+        targetState = true
+    }
+
+    calloutVisibleState.targetState = mapPoint != null && calloutVisibility
 
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
@@ -91,23 +104,33 @@ fun TapLocationScreen(viewModel: MapViewModel) {
         scaffoldState = bottomSheetScaffoldState,
     ) { paddingValues ->
         MapView(
-            modifier = Modifier.fillMaxSize().padding(paddingValues),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
             arcGISMap = viewModel.arcGISMap,
             graphicsOverlays = remember { listOf(viewModel.tapLocationGraphicsOverlay) },
             onSingleTapConfirmed = viewModel::setMapPoint,
-            content = if (mapPoint != null && calloutVisibility) {
-                {
-                    Callout(
-                        modifier = Modifier.wrapContentSize(),
-                        location = mapPoint,
-                        rotateOffsetWithGeoView = rotateOffsetWithGeoView,
-                        offset = offset
-                    ) {
-                        Text("Tapped location:\n${mapPoint.x.roundToInt()},${mapPoint.y.roundToInt()}")
+            content =
+            {
+                val lastMapPoint = remember { Ref<Point>() }
+                lastMapPoint.value = mapPoint ?: lastMapPoint.value
+
+                AnimatedVisibility(
+                    calloutVisibleState,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    lastMapPoint.value?.let {
+                        Callout(
+                            modifier = Modifier.wrapContentSize(),
+                            location = it,
+                            rotateOffsetWithGeoView = rotateOffsetWithGeoView,
+                            offset = offset
+                        ) {
+                            Text("Tapped location:\n${it.x.roundToInt()},${it.y.roundToInt()}")
+                        }
                     }
                 }
-            } else {
-                null
             }
         )
     }
