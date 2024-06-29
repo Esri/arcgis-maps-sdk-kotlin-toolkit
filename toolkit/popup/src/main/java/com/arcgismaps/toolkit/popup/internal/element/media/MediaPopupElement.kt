@@ -24,12 +24,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.mapping.popup.PopupMediaType
 import com.arcgismaps.toolkit.popup.internal.ui.ExpandableCard
 
 @Composable
@@ -74,27 +70,4 @@ private fun MediaGallery(state: LazyListState, media: List<PopupMediaState>) {
             MediaTile(it)
         }
     }
-}
-
-@Preview
-@Composable
-private fun MediaPopupElementPreview() {
-    MediaPopupElement(
-        title = "Media",
-        description = "description of Media",
-        stateId = 1,
-        media = listOf(
-            PopupMediaState(
-                title = "Photo 1.jpg",
-                caption = "caption",
-                refreshInterval = 1234L,
-                linkUrl = "",
-                sourceUrl = "https://i.postimg.cc/65yws9mR/Screenshot-2024-02-02-at-6-20-49-PM.png",
-                type = PopupMediaType.Image,
-                scope = rememberCoroutineScope(),
-                chartFolder = "",
-                context = LocalContext.current
-            )
-        )
-    )
 }

@@ -17,7 +17,7 @@
 package com.arcgismaps.toolkit.popup.internal.element.media
 
 import android.content.Context
-import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -30,6 +30,8 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import coil.imageLoader
+import coil.request.ImageRequest
 import com.arcgismaps.mapping.ChartImageParameters
 import com.arcgismaps.mapping.ChartImageStyle
 import com.arcgismaps.mapping.popup.MediaPopupElement
@@ -37,7 +39,6 @@ import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.mapping.popup.PopupMedia
 import com.arcgismaps.mapping.popup.PopupMediaType
 import com.arcgismaps.toolkit.popup.internal.element.state.PopupElementState
-import com.arcgismaps.toolkit.popup.internal.util.ChartImageProvider
 import com.arcgismaps.toolkit.popup.internal.util.MediaImageProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -54,10 +55,45 @@ internal class MediaElementState(
     override val id : Int = createId()
 ) : PopupElementState() {
 
-    constructor(mediaPopupElement: MediaPopupElement, scope: CoroutineScope, chartFolder: String, chartParams: ChartImageParameters, context: Context): this(
+    constructor(mediaPopupElement: MediaPopupElement, scope: CoroutineScope, mediaFolder: String, chartParams: ChartImageParameters, context: Context): this(
         description = mediaPopupElement.description,
         title = mediaPopupElement.title,
-        media = mediaPopupElement.media.map { PopupMediaState(it, scope, chartFolder, chartParams, context) }
+        media = mediaPopupElement.media.map {
+            if (it.type.isChart) {
+                PopupMediaState(
+                    it,
+                    scope,
+                    MediaImageProvider(
+                        fileName = "media-${Objects.hash(mediaPopupElement.title, it.title, it.caption)}",
+                        folderName = mediaFolder
+                    ) {
+                        it.generateChart(chartParams).getOrThrow().image.bitmap
+                    }
+                )
+            } else if (it.type is PopupMediaType.Image) {
+                val srcUrl = it.value?.sourceUrl
+                    ?: throw IllegalArgumentException("null sourceUrl for popup media")
+                PopupMediaState(
+                    it,
+                    scope,
+                    MediaImageProvider(
+                        fileName = "media-${Objects.hash(srcUrl)}",
+                        folderName = mediaFolder
+                    ) {
+                        val request = ImageRequest.Builder(context)
+                            .data(srcUrl)
+                            .crossfade(true)
+                            .build()
+                        (context.imageLoader.execute(request).drawable as? BitmapDrawable)?.bitmap
+                            ?: throw IllegalStateException("couldn't load image at $srcUrl")
+                    }
+                )
+
+            } else {
+                throw IllegalArgumentException("unknown media type")
+            }
+
+        }
     )
 
     companion object {
@@ -142,21 +178,17 @@ internal fun rememberMediaElementState(
  * @property sourceUrl the link to use to render the image for image type media
  * @property type the type of the PopupMedia
  * @property scope a CoroutineScope to use to acquire chart images
- * @property chartFolder the folder in which to save chart images
  * @property imageGenerator a lambda which generates charts. Is only invoked if type is chart.
- * @param context Context to use to store media image files. It is not passed out of the constructor.
  */
 internal class PopupMediaState(
     val title: String,
     val caption: String,
     @Suppress("unused") val refreshInterval: Long,
     @Suppress("unused") val linkUrl: String,
-    val sourceUrl: String,
+    private val sourceUrl: String,
     val type: PopupMediaType,
     private val scope: CoroutineScope,
-    private val chartFolder: String,
-    private val imageGenerator: (suspend () -> Bitmap)? = null,
-    context: Context
+    private val imageGenerator: MediaImageProvider
 ) {
     private val _imageUri: MutableState<String> = mutableStateOf("")
 
@@ -166,32 +198,15 @@ internal class PopupMediaState(
     val imageUri: State<String> = _imageUri
 
     init {
-        // charts only
-        if (type.isChart) {
-            scope.launch {
-                val fileName = "media-${Objects.hash(sourceUrl)}.png"
-                imageGenerator?.let {
-                    val provider = ChartImageProvider(fileName, chartFolder, it)
-                    _imageUri.value = provider.get()
-                }
-
-            }
-        } else if (type is PopupMediaType.Image) {
-            //_imageUri.value = sourceUrl
-            scope.launch {
-                val provider = MediaImageProvider(sourceUrl)
-                _imageUri.value = provider.get(context)
-
-            }
+        scope.launch {
+            _imageUri.value = imageGenerator.get()
         }
     }
 
     constructor(
         media: PopupMedia,
         scope: CoroutineScope,
-        chartFolder: String,
-        chartParams: ChartImageParameters,
-        context: Context
+        imageGenerator: MediaImageProvider
     ) : this(
         title = media.title,
         caption = media.caption,
@@ -200,11 +215,7 @@ internal class PopupMediaState(
         sourceUrl = media.value?.sourceUrl ?: "",
         type = media.type,
         scope = scope,
-        chartFolder = chartFolder,
-        imageGenerator = {
-            media.generateChart(chartParams).getOrThrow().image.bitmap
-        },
-        context = context
+        imageGenerator = imageGenerator
     )
 }
 
