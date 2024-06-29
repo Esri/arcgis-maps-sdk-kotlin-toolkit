@@ -26,7 +26,6 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -51,20 +50,22 @@ internal class AttachmentsElementState(
     override val id: Int = createId(),
 ) : PopupElementState() {
 
-    constructor(attachmentPopupElement: AttachmentsPopupElement) : this(
+    constructor(attachmentPopupElement: AttachmentsPopupElement, attachments: List<PopupAttachment>) : this(
         description = attachmentPopupElement.description,
         title = attachmentPopupElement.title,
-        attachments = attachmentPopupElement.attachments.map { PopupAttachmentState(it) }
+        attachments = attachments.map { PopupAttachmentState(it) }
     )
 
     companion object {
         fun Saver(
-            element: AttachmentsPopupElement
+            element: AttachmentsPopupElement,
+            attachments: List<PopupAttachment>
         ): Saver<AttachmentsElementState, Any> = Saver(
             save = { null },
             restore = {
                 AttachmentsElementState(
-                    element
+                    element,
+                    attachments
                 )
             }
         )
@@ -75,76 +76,51 @@ internal class AttachmentsElementState(
 @Composable
 internal fun rememberAttachmentsElementState(
     element: AttachmentsPopupElement,
-    popup: Popup
+    popup: Popup,
+    attachments: List<PopupAttachment>
 ): AttachmentsElementState {
-    val scope = rememberCoroutineScope()
     return rememberSaveable(
         inputs = arrayOf(popup, element),
-        saver = AttachmentsElementState.Saver(element)
+        saver = AttachmentsElementState.Saver(element, attachments)
     ) {
         AttachmentsElementState(
-            element
-        ).also {
-            // NOTE: core issue with PopupAttachments not abiding the instance id contract here.
-            // Loaded attachments are coming back NotLoaded after rotation.
-            // https://devtopia.esri.com/runtime/apollo/issues/681
-            it.attachments
-                .filter { state ->
-                    state.loadStatus.value == LoadStatus.Loaded
-                            && state.popupAttachmentType == PopupAttachmentType.Image
-                }
-                .forEach { state ->
-                    state.loadAttachment(scope)
-                }
-        }
+            element,
+            attachments
+        )
     }
 }
 
 /**
  * Represents the state of a [PopupAttachment].
  *
- * @param name The name of the attachment.
- * @param size The size of the attachment.
- * @param loadStatus The load status of the attachment.
- * @param onLoadAttachment A function that loads the attachment.
+ * @property attachment the popup attachment
  */
 internal class PopupAttachmentState(
-    val name: String,
-    val size: Long,
-    val popupAttachmentType: PopupAttachmentType,
-    val contentType: String,
-    val loadStatus: StateFlow<LoadStatus>,
-    private val onLoadAttachment: suspend () -> Result<Unit>,
+    private val attachment: PopupAttachment
 ) {
 
-    private lateinit var _attachment: PopupAttachment
+    val name: String = attachment.name
+    val size: Long = attachment.size
+    val popupAttachmentType: PopupAttachmentType = attachment.type
+    val contentType: String = attachment.contentType
+    val loadStatus: StateFlow<LoadStatus> = attachment.loadStatus
 
-    private val _thumbnailUri: MutableState<String> = mutableStateOf("")
+    private val _thumbnailUri: MutableState<String> = mutableStateOf(attachment.filePath)
+
     /**
      * The URI of the attachment image. Empty until [loadAttachment] is called.
      */
     val thumbnailUri: State<String> = _thumbnailUri
-    val path: String
-        get() = _attachment.filePath
-
-    constructor(attachment: PopupAttachment) : this(
-        name = attachment.name,
-        size = attachment.size,
-        popupAttachmentType = attachment.type,
-        contentType = attachment.contentType,
-        loadStatus = attachment.loadStatus,
-        onLoadAttachment = attachment::retryLoad
-    ) {
-        _attachment = attachment
-    }
 
     /**
      * Loads the attachment and its thumbnail.
      */
     fun loadAttachment(scope: CoroutineScope) {
-        scope.launch {
-            onLoadAttachment().onSuccess {
-                _thumbnailUri.value = _attachment.filePath
+        if (attachment.loadStatus.value !is LoadStatus.Loaded) {
+            scope.launch {
+                attachment.retryLoad().onSuccess {
+                    _thumbnailUri.value = attachment.filePath
+                }
             }
         }
     }

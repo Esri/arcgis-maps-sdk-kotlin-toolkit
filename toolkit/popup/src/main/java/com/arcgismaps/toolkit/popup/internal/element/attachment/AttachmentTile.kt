@@ -55,7 +55,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -64,7 +63,6 @@ import com.arcgismaps.mapping.popup.PopupAttachmentType
 import com.arcgismaps.toolkit.popup.R
 import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ViewableFile
 import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.getViewableFileType
-import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 internal fun AttachmentTile(
@@ -94,7 +92,7 @@ internal fun AttachmentTile(
                         ViewableFile(
                             state.name,
                             state.size,
-                            state.path,
+                            state.thumbnailUri.value,
                             state.getViewableFileType(),
                             state.contentType
                         )
@@ -271,20 +269,5 @@ private fun AttachmentSize(
         overflow = TextOverflow.Ellipsis,
         modifier = modifier
             .padding(horizontal = 1.dp)
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-internal fun PreviewAttachmentTile() {
-    AttachmentTile(
-        state = PopupAttachmentState(
-            name = "Some attachment",
-            size = 1234L,
-            popupAttachmentType = PopupAttachmentType.Other,
-            loadStatus = MutableStateFlow(LoadStatus.NotLoaded),
-            contentType = "image/jpeg",
-            onLoadAttachment = { Result.success(Unit) }
-        )
     )
 }

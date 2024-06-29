@@ -25,13 +25,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.LoadStatus
-import com.arcgismaps.mapping.popup.PopupAttachmentType
 import com.arcgismaps.toolkit.popup.internal.ui.ExpandableCard
 import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ViewableFile
-import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 internal fun AttachmentsPopupElement(
@@ -82,23 +78,4 @@ private fun AttachmentGallery(
             AttachmentTile(it, onSelectedAttachment)
         }
     }
-}
-
-@Preview
-@Composable
-private fun AttachmentsPopupElementPreview() {
-    AttachmentsPopupElement(
-        title = "Attachments",
-        description = "description of attachments",
-        stateId = 1,
-        attachments = listOf(
-            PopupAttachmentState(
-                name = "Photo 1.jpg",
-                size = 2024,
-                PopupAttachmentType.Image,
-                contentType = "image/jpeg",
-                MutableStateFlow(LoadStatus.Loaded)
-            ) { Result.success(Unit) }
-        )
-    )
 }

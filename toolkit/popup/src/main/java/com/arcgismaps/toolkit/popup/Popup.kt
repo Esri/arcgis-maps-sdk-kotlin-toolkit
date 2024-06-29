@@ -51,6 +51,7 @@ import com.arcgismaps.mapping.popup.AttachmentsPopupElement
 import com.arcgismaps.mapping.popup.FieldsPopupElement
 import com.arcgismaps.mapping.popup.MediaPopupElement
 import com.arcgismaps.mapping.popup.Popup
+import com.arcgismaps.mapping.popup.PopupAttachment
 import com.arcgismaps.mapping.popup.TextPopupElement
 import com.arcgismaps.toolkit.popup.internal.element.attachment.AttachmentsElementState
 import com.arcgismaps.toolkit.popup.internal.element.attachment.AttachmentsPopupElement
@@ -96,25 +97,43 @@ public fun Popup(popup: Popup, modifier: Modifier = Modifier) {
     Popup(stateData, modifier)
 }
 
+/**
+ * Maintain list of attachments outside of SDK
+ * https://devtopia.esri.com/runtime/apollo/issues/681
+ */
+private val attachments: MutableList<PopupAttachment> = mutableListOf()
+
 @Suppress("unused_parameter")
 @Composable
 private fun Popup(popupState: PopupState, modifier: Modifier = Modifier) {
     val popup = popupState.popup
     var evaluated by rememberSaveable(popup) { mutableStateOf(false) }
+    var fetched by rememberSaveable(popup) { mutableStateOf(false) }
 
     LaunchedEffect(popup) {
         popupState.popup.evaluateExpressions()
-        popupState.popup.evaluatedElements
-            .filterIsInstance<AttachmentsPopupElement>()
-            .firstOrNull()?.fetchAttachments()
+        if (!fetched) {
+            val element = popupState.popup.evaluatedElements
+                .filterIsInstance<AttachmentsPopupElement>()
+                .firstOrNull()
+
+            // make a copy of the attachments when first fetched.
+            attachments.clear()
+            element?.fetchAttachments()?.onSuccess {
+                attachments.addAll(element.attachments)
+            }
+
+            fetched = true
+        }
+
         evaluated = true
     }
 
-    Popup(popupState, evaluated)
+    Popup(popupState, evaluated && fetched)
 }
 
 @Composable
-private fun Popup(popupState: PopupState, evaluated: Boolean, modifier: Modifier = Modifier) {
+private fun Popup(popupState: PopupState, initialized: Boolean, modifier: Modifier = Modifier) {
     val scope = rememberCoroutineScope()
     val popup = popupState.popup
     val viewableFileState = rememberSaveable { mutableStateOf<ViewableFile?>(null) }
@@ -137,10 +156,10 @@ private fun Popup(popupState: PopupState, evaluated: Boolean, modifier: Modifier
                 .height(15.dp)
         )
         InitializingExpressions(modifier = Modifier.fillMaxWidth()) {
-            evaluated
+            initialized
         }
         HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
-        if (evaluated) {
+        if (initialized) {
             PopupBody(popupState) {
                 viewableFileState.value = it
             }
@@ -152,7 +171,7 @@ private fun Popup(popupState: PopupState, evaluated: Boolean, modifier: Modifier
 private fun PopupBody(popupState: PopupState, onFileClicked: (ViewableFile?) -> Unit = {}) {
     val popup = popupState.popup
     val lazyListState = rememberLazyListState()
-    val states = rememberStates(popup)
+    val states = rememberStates(popup, attachments)
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -232,7 +251,8 @@ internal fun InitializingExpressions(
  */
 @Composable
 internal fun rememberStates(
-    popup: Popup
+    popup: Popup,
+    attachments: List<PopupAttachment>
 ): PopupElementStateCollection {
     val states = mutablePopupElementStateCollection()
     popup.evaluatedElements.forEach { element ->
@@ -247,7 +267,11 @@ internal fun rememberStates(
             is AttachmentsPopupElement -> {
                 states.add(
                     element,
-                    rememberAttachmentsElementState(popup = popup, element = element)
+                    rememberAttachmentsElementState(
+                        popup = popup,
+                        element = element,
+                        attachments = attachments
+                    )
                 )
             }
 
