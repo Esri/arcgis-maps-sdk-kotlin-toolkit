@@ -183,8 +183,8 @@ internal fun rememberMediaElementState(
 internal class PopupMediaState(
     val title: String,
     val caption: String,
-    @Suppress("unused") val refreshInterval: Long,
-    @Suppress("unused") val linkUrl: String,
+    @Suppress("unused") private val refreshInterval: Long,
+    @Suppress("unused") private val linkUrl: String,
     private val sourceUrl: String,
     val type: PopupMediaType,
     private val scope: CoroutineScope,
