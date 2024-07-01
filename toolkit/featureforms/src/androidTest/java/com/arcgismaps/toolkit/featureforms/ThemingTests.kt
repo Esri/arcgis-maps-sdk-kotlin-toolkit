@@ -25,34 +25,19 @@ import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.data.ArcGISFeature
-import com.arcgismaps.data.QueryParameters
-import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.featureforms.FeatureForm
-import com.arcgismaps.mapping.featureforms.FieldFormElement
-import com.arcgismaps.mapping.featureforms.FormElement
-import com.arcgismaps.mapping.featureforms.GroupFormElement
-import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormColorScheme
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormDefaults
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTypography
-import junit.framework.TestCase
-import kotlinx.coroutines.test.runTest
-import org.junit.BeforeClass
+import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
 
-class ThemingTests {
-
+class ThemingTests : FeatureFormTestRunner(
+    uri = "https://www.arcgis.com/home/item.html?id=615e8fe546ef4d139fb9298515c2f40a",
+    objectId = 1
+) {
     @get:Rule
     val composeTestRule = createComposeRule()
-
-    private fun getFormElementWithLabel(label: String): FormElement {
-        return featureForm.elements.first {
-                it.label == label
-            }
-    }
 
     /**
      * Given a FeatureForm with a custom color scheme and typography for editable fields
@@ -84,8 +69,9 @@ class ThemingTests {
                 typography = typography
             )
         }
-        val formElement = getFormElementWithLabel("Text Box") as FieldFormElement
-        val label = composeTestRule.onNodeWithText(formElement.label, useUnmergedTree = true)
+        val formElement = featureForm.getFieldFormElementWithLabel("Text Box")
+        assertThat(formElement).isNotNull()
+        val label = composeTestRule.onNodeWithText(formElement!!.label, useUnmergedTree = true)
         label.assertIsDisplayed()
         label.assertTextStyle(
             TextStyle(
@@ -123,8 +109,9 @@ class ThemingTests {
                 colorScheme = colorScheme
             )
         }
-        val formElement = getFormElementWithLabel("An empty field") as FieldFormElement
-        val field = composeTestRule.onNodeWithText(formElement.label)
+        val formElement = featureForm.getFieldFormElementWithLabel("An empty field")
+        assertThat(formElement).isNotNull()
+        val field = composeTestRule.onNodeWithText(formElement!!.label)
         val placeholder = composeTestRule.onNodeWithText(formElement.hint, useUnmergedTree = true)
         placeholder.assertIsDisplayed()
         // test unfocused placeholder color
@@ -174,8 +161,9 @@ class ThemingTests {
                 typography = typography
             )
         }
-        val formElement = getFormElementWithLabel("Name") as FieldFormElement
-        val label = composeTestRule.onNodeWithText(formElement.label, useUnmergedTree = true)
+        val formElement = featureForm.getFieldFormElementWithLabel("Name")
+        assertThat(formElement).isNotNull()
+        val label = composeTestRule.onNodeWithText(formElement!!.label, useUnmergedTree = true)
         label.assertIsDisplayed()
         label.assertTextStyle(
             TextStyle(
@@ -218,8 +206,9 @@ class ThemingTests {
                 typography = typography
             )
         }
-        val formElement = getFormElementWithLabel("Radio Button") as FieldFormElement
-        val label = composeTestRule.onNodeWithText(formElement.label, useUnmergedTree = true)
+        val formElement = featureForm.getFieldFormElementWithLabel("Radio Button")
+        assertThat(formElement).isNotNull()
+        val label = composeTestRule.onNodeWithText(formElement!!.label, useUnmergedTree = true)
         label.assertIsDisplayed()
         label.assertTextStyle(
             TextStyle(
@@ -262,8 +251,9 @@ class ThemingTests {
                 typography = typography
             )
         }
-        val groupElement = getFormElementWithLabel("Group One") as GroupFormElement
-        val label = composeTestRule.onNodeWithText(groupElement.label, useUnmergedTree = true)
+        val groupElement = featureForm.getGroupFormElementWithLabel("Group One")
+        assertThat(groupElement).isNotNull()
+        val label = composeTestRule.onNodeWithText(groupElement!!.label, useUnmergedTree = true)
         label.assertIsDisplayed()
         label.assertTextStyle(
             TextStyle(
@@ -271,47 +261,9 @@ class ThemingTests {
                 color = Color.Blue
             )
         )
-        val supportingText = composeTestRule.onNodeWithText(groupElement.description, useUnmergedTree = true)
+        val supportingText =
+            composeTestRule.onNodeWithText(groupElement.description, useUnmergedTree = true)
         supportingText.assertIsDisplayed()
         supportingText.assertTextColor(Color.Green)
-    }
-
-    companion object {
-        private lateinit var featureForm: FeatureForm
-
-        @BeforeClass
-        @JvmStatic
-        fun setupClass() = runTest {
-            ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler =
-                FeatureFormsTestChallengeHandler(
-                    BuildConfig.webMapUser,
-                    BuildConfig.webMapPassword
-                )
-            val map =
-                ArcGISMap("https://runtimecoretest.maps.arcgis.com/home/item.html?id=615e8fe546ef4d139fb9298515c2f40a")
-            map.load().onFailure { TestCase.fail("failed to load webmap with ${it.message}") }
-            val featureLayer = map.operationalLayers.first() as? FeatureLayer
-            featureLayer?.let { layer ->
-                layer.load().onFailure { TestCase.fail("failed to load layer with ${it.message}") }
-                val featureFormDefinition = layer.featureFormDefinition!!
-                val parameters = QueryParameters().also {
-                    it.objectIds.add(1L)
-                    it.maxFeatures = 1
-                }
-                layer.featureTable?.queryFeatures(parameters)?.onSuccess { featureQueryResult ->
-                    val feature = featureQueryResult.find {
-                        it is ArcGISFeature
-                    } as? ArcGISFeature
-                    if (feature == null) TestCase.fail("failed to fetch feature")
-                    feature?.load()?.onFailure {
-                        TestCase.fail("failed to load feature with ${it.message}")
-                    }
-                    featureForm = FeatureForm(feature!!, featureFormDefinition)
-                    featureForm.evaluateExpressions()
-                }?.onFailure {
-                    TestCase.fail("failed to query features on layer's featuretable with ${it.message}")
-                }
-            }
-        }
     }
 }
