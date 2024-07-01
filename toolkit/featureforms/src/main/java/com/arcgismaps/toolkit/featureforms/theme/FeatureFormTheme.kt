@@ -296,7 +296,7 @@ public data class RadioButtonFieldColors internal constructor(
  * @property supportingTextColor the color used for the supporting text of this field.
  * @property outlineColor the color used for the outline of this field.
  * @property containerColor the color used for the container of this field.
- * @property tileLabelColor the color used for the label of an individual attachment tile.
+ * @property tileTextColor the color used for the text of an individual attachment tile.
  * @property tileBorderColor the color used for the border of an individual attachment tile.
  * @property scrollBarColor the color used for the scroll bar of the attachment list.
  * @since 200.5.0
@@ -306,7 +306,7 @@ public data class AttachmentsElementColors internal constructor(
     public val supportingTextColor: Color,
     public val outlineColor: Color,
     public val containerColor: Color,
-    public val tileLabelColor : Color,
+    public val tileTextColor : Color,
     public val tileBorderColor : Color,
     public val scrollBarColor : Color,
 )

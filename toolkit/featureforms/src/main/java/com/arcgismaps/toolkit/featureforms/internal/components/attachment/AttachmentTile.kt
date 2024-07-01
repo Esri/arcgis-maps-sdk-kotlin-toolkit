@@ -115,6 +115,7 @@ internal fun AttachmentTile(
     var showContextMenu by remember { mutableStateOf(false) }
     val dialogRequester = LocalDialogRequester.current
     val context = LocalContext.current
+    val colors = LocalColorScheme.current.attachmentsElementColors
     Surface(
         onClick = {},
         modifier = modifier
@@ -122,7 +123,7 @@ internal fun AttachmentTile(
             .height(75.dp)
             .clip(shape = RoundedCornerShape(8.dp))
             .border(
-                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline),
+                border = BorderStroke(0.5.dp, colors.tileBorderColor),
                 shape = RoundedCornerShape(8.dp)
             ),
         interactionSource = interactionSource
@@ -352,7 +353,7 @@ private fun DefaultView(
 private fun Title(
     text: String,
     modifier: Modifier = Modifier,
-    color: Color = LocalColorScheme.current.attachmentsElementColors.tileLabelColor,
+    color: Color = LocalColorScheme.current.attachmentsElementColors.tileTextColor,
     style: TextStyle = LocalTypography.current.attachmentsElementTypography.tileTextStyle
 ) {
     Text(
@@ -370,15 +371,14 @@ private fun Title(
 private fun Size(
     size: Long,
     modifier: Modifier = Modifier,
-    textStyle: TextStyle = LocalTypography.current.attachmentsElementTypography.tileTextStyle.copy(
-        fontWeight = FontWeight.W300,
-        fontSize = 9.sp
-    )
+    color : Color = LocalColorScheme.current.attachmentsElementColors.tileTextColor,
+    textStyle: TextStyle = LocalTypography.current.attachmentsElementTypography.tileTextStyle
 ) {
     val context = LocalContext.current
     val fileSize = Formatter.formatFileSize(context, size)
     Text(
         text = fileSize,
+        color = color,
         style = textStyle,
         overflow = TextOverflow.Ellipsis,
         modifier = modifier.padding(horizontal = 1.dp)
