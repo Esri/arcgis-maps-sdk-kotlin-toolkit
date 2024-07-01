@@ -36,6 +36,7 @@ public object FeatureFormDefaults {
      * @param readOnlyFieldColors The color scheme for the read-only field types.
      * @param radioButtonFieldColors The color scheme for the radio button field types.
      * @param groupElementColors The color scheme to use for any Group elements.
+     * @param attachmentsElementColors The color scheme to use for any Attachments elements.
      * @since 200.5.0
      */
     @Composable
@@ -166,10 +167,10 @@ public object FeatureFormDefaults {
     /**
      * Creates an instance of [ReadOnlyFieldColors] with default values from [MaterialTheme].
      *
-     * @param labelColor the color used for the label of this field
-     * @param textColor the color used for the text of this field
-     * @param supportingTextColor the color used for the supporting text of this field
-     * @param errorSupportingTextColor the color used for the supporting text of this field when in error state
+     * @param labelColor the color used for the label of this field.
+     * @param textColor the color used for the text of this field.
+     * @param supportingTextColor the color used for the supporting text of this field.
+     * @param errorSupportingTextColor the color used for the supporting text of this field when in error state.
      * @since 200.5.0
      */
     @Composable
@@ -190,9 +191,9 @@ public object FeatureFormDefaults {
     /**
      * Creates an instance of [GroupElementColors] with default values from [MaterialTheme].
      *
-     * @param labelColor the color used for the label of this field
-     * @param supportingTextColor the color used for the supporting text of this field
-     * @param outlineColor the color used for the outline of this field
+     * @param labelColor the color used for the label of this field.
+     * @param supportingTextColor the color used for the supporting text of this field.
+     * @param outlineColor the color used for the outline of this field.
      * @property containerColor the color used for the header container of this field. This contains
      * the label and supporting text of the field.
      * @property bodyColor the color used for the body of this field. The body
@@ -219,10 +220,10 @@ public object FeatureFormDefaults {
     /**
      * Creates an instance of [RadioButtonFieldColors] with default values from [MaterialTheme].
      *
-     * @param labelColor the color used for the label of this field
-     * @param textColor the color used for the text of RadioButton
-     * @param supportingTextColor the color used for the supporting text of this field
-     * @param outlineColor the color used for the outline of this field
+     * @param labelColor the color used for the label of this field.
+     * @param textColor the color used for the text of RadioButton.
+     * @param supportingTextColor the color used for the supporting text of this field.
+     * @param outlineColor the color used for the outline of this field.
      * @param selectedColor the color to use for the RadioButton when selected and enabled.
      * @param unselectedColor the color to use for the RadioButton when unselected and enabled.
      * @param disabledSelectedColor the color to use for the RadioButton when disabled and selected.
@@ -253,6 +254,17 @@ public object FeatureFormDefaults {
         )
     }
 
+    /**
+     * Creates an instance of [AttachmentsElementColors] with default values from [MaterialTheme].
+     *
+     * @param labelColor the color used for the label of this field.
+     * @param supportingTextColor the color used for the supporting text of this field.
+     * @param outlineColor the color used for the outline of this field.
+     * @param containerColor the color used for the container of this field.
+     * @param tileLabelColor the color used for the label of the individual attachment tile.
+     * @param tileBorderColor the color used for the border of the individual attachment tile.
+     * @param scrollBarColor the color used for the scroll bar in the attachment list.
+     */
     @Composable
     public fun attachmentsElementColors(
         labelColor : Color = Color.Unspecified,
@@ -281,6 +293,7 @@ public object FeatureFormDefaults {
      * @param readOnlyFieldTypography The typography for the read-only field types.
      * @param groupElementTypography The typography to use for any Group elements.
      * @param radioButtonFieldTypography The typography to use for the radio button field types.
+     * @param attachmentsElementTypography The typography to use for any Attachments elements.
      * @since 200.5.0
      */
     @Composable
@@ -303,9 +316,9 @@ public object FeatureFormDefaults {
     /**
      * Creates an instance of [EditableTextFieldTypography] with default values from [MaterialTheme].
      *
-     * @param labelStyle The style for the label of this field
-     * @param textStyle The style for the text of this field
-     * @param supportingTextStyle The style for the supporting text of this field
+     * @param labelStyle The style for the label of this field.
+     * @param textStyle The style for the text of this field.
+     * @param supportingTextStyle The style for the supporting text of this field.
      * @since 200.5.0
      */
     @Composable
@@ -324,9 +337,9 @@ public object FeatureFormDefaults {
     /**
      * Creates an instance of [ReadOnlyFieldTypography] with default values from [MaterialTheme].
      *
-     * @param labelStyle The style for the label of this field
-     * @param textStyle The style for the text of this field
-     * @param supportingTextStyle The style for the supporting text of this field
+     * @param labelStyle The style for the label of this field.
+     * @param textStyle The style for the text of this field.
+     * @param supportingTextStyle The style for the supporting text of this field.
      * @since 200.5.0
      */
     @Composable
@@ -345,8 +358,8 @@ public object FeatureFormDefaults {
     /**
      * Creates an instance of [GroupElementTypography] with default values from [MaterialTheme].
      *
-     * @param labelStyle The style for the label of this field
-     * @param supportingTextStyle The style for the supporting text of this field
+     * @param labelStyle The style for the label of this field.
+     * @param supportingTextStyle The style for the supporting text of this field.
      * @since 200.5.0
      */
     @Composable
@@ -363,9 +376,9 @@ public object FeatureFormDefaults {
     /**
      * Creates an instance of [RadioButtonFieldTypography] with default values from [MaterialTheme].
      *
-     * @param labelStyle The style for the label of this field
-     * @param optionStyle The style for the text of a RadioButton
-     * @param supportingTextStyle The style for the supporting text of this field
+     * @param labelStyle The style for the label of this field.
+     * @param optionStyle The style for the text of a RadioButton.
+     * @param supportingTextStyle The style for the supporting text of this field.
      * @since 200.5.0
      */
     @Composable
@@ -381,6 +394,14 @@ public object FeatureFormDefaults {
         )
     }
 
+    /**
+     * Creates an instance of [AttachmentsElementTypography] with default values from [MaterialTheme].
+     *
+     * @param labelStyle The style for the label of this field.
+     * @param supportingTextStyle The style for the supporting text of this field.
+     * @param tileTextStyle The style for the text of the individual attachment tile.
+     * @since 200.5.0
+     */
     @Composable
     public fun attachmentsElementTypography(
         labelStyle: TextStyle = MaterialTheme.typography.bodyLarge,

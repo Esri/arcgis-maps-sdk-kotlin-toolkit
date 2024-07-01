@@ -32,6 +32,7 @@ import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.GroupFormElement
+import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
 import com.arcgismaps.mapping.featureforms.RadioButtonsFormInput
 import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
@@ -121,6 +122,7 @@ internal fun FeatureFormTheme(
  * @property readOnlyFieldColors The color scheme for the read-only field types.
  * @property radioButtonFieldColors The color scheme for the radio button field types.
  * @property groupElementColors The color scheme to use for any Group elements.
+ * @property attachmentsElementColors The color scheme to use for any Attachments elements.
  * @since 200.5.0
  */
 @Immutable
@@ -284,6 +286,21 @@ public data class RadioButtonFieldColors internal constructor(
     public val disabledUnselectedColor: Color
 )
 
+/**
+ * Colors used for a [AttachmentsFormElement]. Attachments in the element are rendered as a list
+ * of tiles.
+ *
+ * Use [FeatureFormDefaults.attachmentsElementColors] to create a new instance with the default values.
+ *
+ * @property labelColor the color used for the label of this field.
+ * @property supportingTextColor the color used for the supporting text of this field.
+ * @property outlineColor the color used for the outline of this field.
+ * @property containerColor the color used for the container of this field.
+ * @property tileLabelColor the color used for the label of an individual attachment tile.
+ * @property tileBorderColor the color used for the border of an individual attachment tile.
+ * @property scrollBarColor the color used for the scroll bar of the attachment list.
+ * @since 200.5.0
+ */
 public data class AttachmentsElementColors internal constructor(
     public val labelColor: Color,
     public val supportingTextColor: Color,
@@ -307,6 +324,7 @@ public data class AttachmentsElementColors internal constructor(
  * @property readOnlyFieldTypography The typography for the read-only field types.
  * @property groupElementTypography The typography to use for any Group elements.
  * @property radioButtonFieldTypography The typography to use for the radio button field types.
+ * @property attachmentsElementTypography The typography to use for any Attachments elements.
  * @since 200.5.0
  */
 @Immutable
@@ -386,6 +404,17 @@ public data class RadioButtonFieldTypography internal constructor(
     public val supportingTextStyle: TextStyle
 )
 
+/**
+ * Typography used for a [AttachmentsFormElement]. Attachments in the element are rendered as a list
+ * of tiles.
+ *
+ * Use [FeatureFormDefaults.attachmentsElementTypography] to create a new instance with the default values.
+ *
+ * @property labelStyle The style for the label of this field.
+ * @property supportingTextStyle The style for the supporting text of this field.
+ * @property tileTextStyle The style for the text of an individual attachment tile.
+ * @since 200.5.0
+ */
 public data class AttachmentsElementTypography internal constructor(
     public val labelStyle: TextStyle,
     public val supportingTextStyle: TextStyle,

@@ -156,20 +156,24 @@ internal fun AttachmentFormElement(
                 }
             }
             Spacer(modifier = Modifier.height(20.dp))
-            Carousel(lazyListState, attachments)
+            Carousel(lazyListState, attachments, colors.scrollBarColor)
         }
     }
 }
 
 @Composable
-private fun Carousel(state: LazyListState, attachments: List<FormAttachmentState>) {
+private fun Carousel(
+    state: LazyListState,
+    attachments: List<FormAttachmentState>,
+    scrollBarColor: Color,
+) {
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
             .horizontalScrollbar(
                 state = state,
-                trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                trackColor = scrollBarColor.copy(alpha = 0.1f),
+                color = scrollBarColor,
                 height = 4.dp,
                 offsetY = 5.dp,
                 autoHide = false
