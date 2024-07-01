@@ -178,7 +178,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
     }
 
     /**
-     * Creates a Callout at the specified geographical location on the GeoView.
+     * Creates a Callout at the specified [geoElement] on the GeoView.
      *
      * @since 200.5.0
      */
@@ -191,14 +191,14 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
     ) {
         var leaderLocation: LeaderLocation? by remember {
             mutableStateOf(
-                this.computeLeaderLocationForGeoelement(geoElement, tapLocation)
+                computeLeaderLocationForGeoelement(geoElement, tapLocation)
             )
         }
         // update the Callout location when the dynamic entity changes
         if (geoElement is DynamicEntity) {
             LaunchedEffect(geoElement) {
                 geoElement.dynamicEntityChangedEvent.collect {
-                    leaderLocation = this@GeoViewScope.computeLeaderLocationForGeoelement(geoElement, tapLocation)
+                    leaderLocation = computeLeaderLocationForGeoelement(geoElement, tapLocation)
                 }
             }
         }
