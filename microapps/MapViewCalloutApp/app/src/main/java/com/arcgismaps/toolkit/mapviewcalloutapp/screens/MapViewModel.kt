@@ -92,9 +92,6 @@ class MapViewModel : ViewModel() {
     private val _selectedGeoElement = MutableStateFlow<GeoElement?>(null)
     val selectedGeoElement: StateFlow<GeoElement?> = _selectedGeoElement
 
-    private val _dynamicEntityObservationId = MutableStateFlow<Long?>(null)
-    val dynamicEntityObservationId: StateFlow<Long?> = _dynamicEntityObservationId.asStateFlow()
-
     private val _tapLocation = MutableStateFlow<Point?>(null)
     val tapLocation: StateFlow<Point?> = _tapLocation
 
@@ -153,9 +150,6 @@ class MapViewModel : ViewModel() {
                 val observation = identifyLayerResult.geoElements.first() as DynamicEntityObservation
                 val entity = observation.dynamicEntity
                 _selectedGeoElement.value = entity
-                entity?.dynamicEntityChangedEvent?.collect { dynamicEntityChangedInfo ->
-                    _dynamicEntityObservationId.value = dynamicEntityChangedInfo.receivedObservation?.id
-                }
             }
         }
     }

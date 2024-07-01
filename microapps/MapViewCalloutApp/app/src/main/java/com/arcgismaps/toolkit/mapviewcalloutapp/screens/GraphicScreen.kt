@@ -18,7 +18,6 @@
 
 package com.arcgismaps.toolkit.mapviewcalloutapp.screens
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.wrapContentSize
@@ -27,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -47,6 +47,7 @@ import kotlin.math.roundToInt
 fun GraphicScreen(viewModel: MapViewModel){
 
     val selectedGeoElement = viewModel.selectedGeoElement.collectAsState().value
+    var dynamicEntityObservationId by rememberSaveable { mutableLongStateOf(0L) }
     var calloutVisibility by rememberSaveable { mutableStateOf(true) }
     var nullTapLocation by rememberSaveable { mutableStateOf(false) }
 
@@ -67,8 +68,12 @@ fun GraphicScreen(viewModel: MapViewModel){
                         geoElement = selectedGeoElement,
                         modifier = Modifier.wrapContentSize(),
                         tapLocation = viewModel.tapLocation.value,
+                        onDynamicEntityChangedEvent = {
+                                dynamicEntityChangedInfo ->
+                               dynamicEntityObservationId = dynamicEntityChangedInfo.receivedObservation?.id ?: 0
+                        }
                     ) {
-                        key(viewModel.dynamicEntityObservationId.collectAsState().value) {
+                        key(dynamicEntityObservationId) {
                             Text(
                                 """
                             |Vehicle Name: ${selectedGeoElement.attributes["vehiclename"]}

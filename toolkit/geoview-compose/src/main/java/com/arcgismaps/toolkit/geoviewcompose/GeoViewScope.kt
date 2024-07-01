@@ -29,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
@@ -73,6 +74,7 @@ import com.arcgismaps.mapping.view.SceneView
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.mapping.view.zero
 import com.arcgismaps.realtime.DynamicEntity
+import com.arcgismaps.realtime.DynamicEntityChangedInfo
 import kotlinx.coroutines.flow.first
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.cos
@@ -131,11 +133,17 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
      * the location that Callout refers to. The body of the Callout is a rectangular area with curved corners
      * that contains the [content] lambda provided by the application. A thin border line is drawn around the entire Callout.
      *
+     * The Callout updates its automatically updates its location everytime the DynamicEntity changes if the geoelement is a
+     * DynamicEntity. The content of the Callout however will not be automatically updated.
+     *
      * Note: Only one Callout can be displayed at a time on the MapView.
      *
      * @param geoElement the GeoElement for which to display the Callout
      * @param modifier Modifier to be applied to the composable Callout
      * @param tapLocation a Point the user has tapped, or null if the Callout is not associated with a tap
+     * @param onDynamicEntityChangedEvent a callback that is invoked when the DynamicEntity changes. This event
+     * is raised any time an associated observation is received from a DynamicEntityDataSource or
+     * when an observation is purged from the local data cache.
      * @param content the content of the Callout
      * @since 200.5.0
      */
@@ -144,6 +152,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         geoElement: GeoElement,
         modifier: Modifier = Modifier,
         tapLocation: Point? = null,
+        onDynamicEntityChangedEvent: ((DynamicEntityChangedInfo) -> Unit)? = null,
         content: @Composable BoxScope.() -> Unit
     ) {
         // Enables the recomposition of the first Callout in the content lambda that is displayed
@@ -154,7 +163,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
             || allowCalloutRecomposition
         ) {
             allowCalloutRecomposition = true
-            this.CalloutInternal(geoElement, modifier, tapLocation, content)
+            this.CalloutInternal(geoElement, modifier, tapLocation, onDynamicEntityChangedEvent, content)
         }
     }
 
@@ -184,6 +193,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         geoElement: GeoElement,
         modifier: Modifier = Modifier,
         tapLocation: Point? = null,
+        onDynamicEntityChangedEvent: ((DynamicEntityChangedInfo) -> Unit)? = null,
         content: @Composable BoxScope.() -> Unit
     ) {
         var leaderLocation: LeaderLocation? by remember {
@@ -192,9 +202,11 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
             )
         }
         if (geoElement is DynamicEntity) {
+            val currentOnDynamicEntityChangedEvent by rememberUpdatedState(onDynamicEntityChangedEvent)
             LaunchedEffect(geoElement) {
                 geoElement.dynamicEntityChangedEvent.collect {
                     leaderLocation = this@GeoViewScope.computeLeaderLocationForGeoelement(geoElement, tapLocation)
+                    currentOnDynamicEntityChangedEvent?.invoke(it)
                 }
             }
         }
