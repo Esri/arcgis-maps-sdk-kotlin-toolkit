@@ -111,9 +111,7 @@ fun TapLocationScreen(viewModel: MapViewModel) {
                 .padding(contentPadding),
             arcGISMap = viewModel.arcGISMap,
             graphicsOverlays = remember { listOf(viewModel.tapLocationGraphicsOverlay) },
-            onSingleTapConfirmed = {
-                viewModel.setMapPoint(it)
-            },
+            onSingleTapConfirmed = viewModel::setMapPoint,
             content = {
                 val lastMapPoint = remember { Ref<Point>() }
                 lastMapPoint.value = mapPoint ?: lastMapPoint.value
