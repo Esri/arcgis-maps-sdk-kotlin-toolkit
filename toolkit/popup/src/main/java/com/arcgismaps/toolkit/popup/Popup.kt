@@ -168,7 +168,7 @@ private fun Popup(popupState: PopupState, initialized: Boolean, modifier: Modifi
 }
 
 @Composable
-private fun PopupBody(popupState: PopupState, onFileClicked: (ViewableFile?) -> Unit = {}) {
+private fun PopupBody(popupState: PopupState, onFileClicked: (ViewableFile) -> Unit = {}) {
     val popup = popupState.popup
     val lazyListState = rememberLazyListState()
     val states = rememberStates(popup, attachments)
@@ -194,7 +194,7 @@ private fun PopupBody(popupState: PopupState, onFileClicked: (ViewableFile?) -> 
                     item(contentType = AttachmentsPopupElement::class.java) {
                         AttachmentsPopupElement(
                             state = entry.state as AttachmentsElementState,
-                            onFileClicked
+                            onSelectedAttachment = onFileClicked
                         )
                     }
                 }
@@ -210,7 +210,8 @@ private fun PopupBody(popupState: PopupState, onFileClicked: (ViewableFile?) -> 
                 is MediaPopupElement -> {
                     item(contentType = MediaPopupElement::class.java) {
                         MediaPopupElement(
-                            entry.state as MediaElementState
+                            entry.state as MediaElementState,
+                            onClickedMedia = onFileClicked
                         )
                     }
                 }
