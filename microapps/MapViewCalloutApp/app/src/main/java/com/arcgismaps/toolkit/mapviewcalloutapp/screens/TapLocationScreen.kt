@@ -85,9 +85,8 @@ fun TapLocationScreen(viewModel: MapViewModel) {
     val modalBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     // animate to a visible transition state
     val calloutVisibleState = remember { MutableTransitionState(false) }.apply {
-        targetState = true
+        targetState = mapPoint != null && calloutVisibility
     }
-    calloutVisibleState.targetState = mapPoint != null && calloutVisibility
 
     Scaffold(
         floatingActionButton = {
