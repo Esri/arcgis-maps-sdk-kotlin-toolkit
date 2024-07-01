@@ -30,22 +30,17 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.data.ArcGISFeature
-import com.arcgismaps.data.QueryParameters
-import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
-import com.arcgismaps.mapping.layers.FeatureLayer
-import junit.framework.TestCase
-import kotlinx.coroutines.test.runTest
 import org.junit.Assert.fail
 import org.junit.Before
-import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
 
-class SwitchFieldTests {
+class SwitchFieldTests : FeatureFormTestRunner(
+    uri = "https://www.arcgis.com/home/item.html?id=ff98f13b32b349adb55da5528d9174dc",
+    objectId = 1
+) {
 
     @get:Rule
     val composeTestRule = createComposeRule()
@@ -151,45 +146,6 @@ class SwitchFieldTests {
         // validate that the options icon is visible
         // since combo box fields have an icon and switch fields do not
         comboBoxField.assertContentDescriptionContains("field icon").assertIsDisplayed()
-    }
-
-    companion object {
-        private lateinit var featureForm: FeatureForm
-
-        @BeforeClass
-        @JvmStatic
-        fun setupClass() = runTest {
-            ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler =
-                FeatureFormsTestChallengeHandler(
-                    BuildConfig.webMapUser,
-                    BuildConfig.webMapPassword
-                )
-            val map =
-                ArcGISMap("https://runtimecoretest.maps.arcgis.com/home/item.html?id=ff98f13b32b349adb55da5528d9174dc")
-            map.load().onFailure { TestCase.fail("failed to load webmap with ${it.message}") }
-            val featureLayer = map.operationalLayers.first() as? FeatureLayer
-            featureLayer?.let { layer ->
-                layer.load().onFailure { TestCase.fail("failed to load layer with ${it.message}") }
-                val featureFormDefinition = layer.featureFormDefinition!!
-                val parameters = QueryParameters().also {
-                    it.objectIds.add(1L)
-                    it.maxFeatures = 1
-                }
-                layer.featureTable?.queryFeatures(parameters)?.onSuccess { featureQueryResult ->
-                    val feature = featureQueryResult.find {
-                        it is ArcGISFeature
-                    } as? ArcGISFeature
-                    if (feature == null) TestCase.fail("failed to fetch feature")
-                    feature?.load()?.onFailure {
-                        TestCase.fail("failed to load feature with ${it.message}")
-                    }
-                    featureForm = FeatureForm(feature!!, featureFormDefinition)
-                    featureForm.evaluateExpressions()
-                }?.onFailure {
-                    TestCase.fail("failed to query features on layer's featuretable with ${it.message}")
-                }
-            }
-        }
     }
 }
 

@@ -71,6 +71,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -125,7 +126,7 @@ internal fun AttachmentFormElement(
     typography: AttachmentsElementTypography = LocalTypography.current.attachmentsElementTypography
 ) {
     Card(
-        modifier = modifier,
+        modifier = modifier.semantics(mergeDescendants = true) {},
         shape = RoundedCornerShape(5.dp),
         border = BorderStroke(1.dp, colors.outlineColor),
         colors = CardDefaults.cardColors(
