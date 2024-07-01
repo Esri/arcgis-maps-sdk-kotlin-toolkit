@@ -131,6 +131,9 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
      * the location that Callout refers to. The body of the Callout is a rectangular area with curved corners
      * that contains the [content] lambda provided by the application. A thin border line is drawn around the entire Callout.
      *
+     * If the given geoelement is a DynamicEntity then the Callout automatically updates its location everytime the
+     * DynamicEntity changes. The content of the Callout however will not be automatically updated.
+     *
      * Note: Only one Callout can be displayed at a time on the MapView.
      *
      * @param geoElement the GeoElement for which to display the Callout
