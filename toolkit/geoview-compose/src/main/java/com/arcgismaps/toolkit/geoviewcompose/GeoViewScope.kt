@@ -18,6 +18,12 @@
 package com.arcgismaps.toolkit.geoviewcompose
 
 import android.util.DisplayMetrics
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.AnimationVector2D
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.TwoWayConverter
+import androidx.compose.animation.core.animateValueAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -200,19 +206,33 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
                 getLeaderScreenCoordinate(geoView, location, offset, rotateOffsetWithGeoView)
             )
         }
+        var animationEnabled by remember { mutableStateOf(false) }
 
         LaunchedEffect(location, offset, rotateOffsetWithGeoView) {
             // Used to update screen coordinate when new location point is used
-            leaderScreenCoordinate =
-                getLeaderScreenCoordinate(geoView, location, offset, rotateOffsetWithGeoView)
-            // Used to update screen coordinate when viewpoint is changed
+            leaderScreenCoordinate = getLeaderScreenCoordinate(geoView, location, offset, rotateOffsetWithGeoView)
+            // animate to the new screen coord when Callout params are changed
+            animationEnabled = true
+        }
+
+        LaunchedEffect(leaderScreenCoordinate) {
+            // update screen coordinate when viewpoint is changed
             geoView.viewpointChanged.collect {
-                leaderScreenCoordinate =
-                    getLeaderScreenCoordinate(geoView, location, offset, rotateOffsetWithGeoView)
+                leaderScreenCoordinate = getLeaderScreenCoordinate(geoView, location, offset, rotateOffsetWithGeoView)
+                // disable animation when panning
+                animationEnabled = false
             }
         }
 
-        leaderScreenCoordinate?.let {
+        val animateToPoint by animateValueAsState(
+            typeConverter = screenCoordinateToVector,
+            targetValue = leaderScreenCoordinate!!,
+            label = "AnimateScreenCoordinate",
+            animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing)
+        )
+
+
+        (if (animationEnabled) animateToPoint else leaderScreenCoordinate)?.let {
             CalloutSubComposeLayout(
                 leaderScreenCoordinate = it,
                 maxSize = calloutContentMaxSize(
@@ -232,6 +252,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
                             leaderHeight = with(LocalDensity.current) { DefaultCalloutProperties.leaderSize.height.toPx() },
                             minSize = DefaultCalloutProperties.minSize
                         )
+                        .animateContentSize()
                 )
                 {
                     content.invoke(this)
@@ -799,6 +820,15 @@ private fun calloutPath(
         close()
     }
 }
+
+/**
+ * Convert [ScreenCoordinate] to an animatable 2D vector type.
+ */
+private val screenCoordinateToVector: TwoWayConverter<ScreenCoordinate, AnimationVector2D> =
+    TwoWayConverter(
+        { AnimationVector2D(v1 = it.x.toFloat(), v2 = it.y.toFloat()) },
+        { ScreenCoordinate(x = it.v1.toDouble(), y = it.v2.toDouble()) }
+    )
 
 /**
  * This function is used to wait for the GeoView to be ready to return positive values

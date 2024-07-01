@@ -45,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -63,7 +64,7 @@ private val calloutAppScreens = mutableListOf(
  * a [Callout] on a [MapView].
  */
 @Composable
-fun MainScreen(viewModel: MapViewModel) {
+fun MainScreen() {
     var currentScreen by remember { mutableStateOf("") }
     val navController = rememberNavController()
 
@@ -77,13 +78,16 @@ fun MainScreen(viewModel: MapViewModel) {
         currentScreen = currentScreen
     ) {
         composable(route = calloutAppScreens[0]) {
-            TapLocationScreen(viewModel)
+            val tapLocationViewModel: MapViewModel = viewModel()
+            TapLocationScreen(tapLocationViewModel)
         }
         composable(route = calloutAppScreens[1]) {
-            FeatureScreen(viewModel)
+            val featureViewModel: MapViewModel = viewModel()
+            FeatureScreen(featureViewModel)
         }
         composable(route = calloutAppScreens[2]) {
-            GraphicScreen()
+            val graphicsViewModel : MapViewModel = viewModel()
+            GraphicScreen(graphicsViewModel)
         }
     }
 }
