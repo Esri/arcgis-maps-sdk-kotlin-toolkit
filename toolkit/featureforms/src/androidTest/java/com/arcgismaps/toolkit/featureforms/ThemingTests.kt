@@ -18,11 +18,15 @@ package com.arcgismaps.toolkit.featureforms
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.printToLog
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormColorScheme
@@ -265,5 +269,63 @@ class ThemingTests : FeatureFormTestRunner(
             composeTestRule.onNodeWithText(groupElement.description, useUnmergedTree = true)
         supportingText.assertIsDisplayed()
         supportingText.assertTextColor(Color.Green)
+    }
+
+    /**
+     * Given a FeatureForm with a custom color scheme and typography for attachments elements
+     * When the FeatureForm is displayed
+     * Then the custom color scheme and typography are applied to the attachments form elements
+     */
+    @Test
+    fun testAttachmentsElementTheming() {
+        var colorScheme: FeatureFormColorScheme
+        var typography: FeatureFormTypography
+        composeTestRule.setContent {
+            colorScheme = FeatureFormDefaults.colorScheme(
+                attachmentsElementColors = FeatureFormDefaults.attachmentsElementColors(
+                    labelColor = Color.Red,
+                    tileTextColor = Color.Green
+                )
+            )
+            typography = FeatureFormDefaults.typography(
+                attachmentsElementTypography = FeatureFormDefaults.attachmentsElementTypography(
+                    labelStyle = TextStyle(
+                        fontWeight = FontWeight.ExtraBold
+                    ),
+                    tileTextStyle = TextStyle(
+                        fontWeight = FontWeight.ExtraBold,
+                    ),
+                )
+            )
+            FeatureForm(
+                featureForm = featureForm,
+                colorScheme = colorScheme,
+                typography = typography
+            )
+        }
+        val attachmentsElement = featureForm.defaultAttachmentsElement
+        assertThat(attachmentsElement).isNotNull()
+        // find the scrollable container
+        val lazyColumn = composeTestRule.onNodeWithContentDescription("lazy column")
+        lazyColumn.performScrollToNode(hasText(attachmentsElement!!.label))
+        // scroll until the attachments element is visible
+        val attachmentsField = composeTestRule.onNodeWithText(attachmentsElement.label)
+        attachmentsField.printToLog("label")
+        attachmentsField.assertIsDisplayed()
+        attachmentsField.assertTextStyle(
+            TextStyle(
+                fontWeight = FontWeight.ExtraBold,
+                color = Color.Red
+            )
+        )
+        // get the first attachment tile
+        val tile = attachmentsField.onChildWithText(attachmentsElement.attachments.first().name)
+        tile.assertIsDisplayed()
+        tile.assertTextStyle(
+            TextStyle(
+                fontWeight = FontWeight.ExtraBold,
+                color = Color.Green
+            )
+        )
     }
 }
