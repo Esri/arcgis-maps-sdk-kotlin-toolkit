@@ -33,7 +33,7 @@ import com.arcgismaps.toolkit.geoviewcompose.MapView
 //- add switch to enable/disable animation
 
 @Composable
-fun GraphicScreen(){
+fun GraphicScreen(mapViewModel: MapViewModel) {
     Box{
         MapView(
             modifier = Modifier.fillMaxSize(),
