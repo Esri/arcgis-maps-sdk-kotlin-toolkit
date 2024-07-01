@@ -26,7 +26,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,6 +33,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
@@ -59,11 +59,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.node.Ref
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
@@ -91,9 +89,6 @@ fun TapLocationScreen(viewModel: MapViewModel) {
     }
     calloutVisibleState.targetState = mapPoint != null && calloutVisibility
 
-    // the value will be equivalent to half of device width in any orientation
-    val mapViewInsets: Dp = LocalConfiguration.current.screenWidthDp.dp / 4
-
     Scaffold(
         floatingActionButton = {
             Box(
@@ -115,7 +110,6 @@ fun TapLocationScreen(viewModel: MapViewModel) {
                 .fillMaxSize()
                 .padding(contentPadding),
             arcGISMap = viewModel.arcGISMap,
-            insets = PaddingValues(horizontal = mapViewInsets),
             graphicsOverlays = remember { listOf(viewModel.tapLocationGraphicsOverlay) },
             onSingleTapConfirmed = {
                 viewModel.setMapPoint(it)
@@ -131,12 +125,12 @@ fun TapLocationScreen(viewModel: MapViewModel) {
                 ) {
                     lastMapPoint.value?.let {
                         Callout(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.wrapContentSize(),
                             location = it,
                             rotateOffsetWithGeoView = rotateOffsetWithGeoView,
                             offset = offset
                         ) {
-                            Column {
+                            Column(Modifier.padding(4.dp)) {
                                 HtmlText(
                                     html = "<b>Tapped location</b>:<br>" +
                                             "<i>x</i>    = ${it.x.roundToInt()}<br>" +
@@ -165,9 +159,7 @@ fun TapLocationScreen(viewModel: MapViewModel) {
                         mapPoint = mapPoint,
                         onOffsetChange = { viewModel.setOffset(it) },
                         onVisibilityToggled = { calloutVisibility = !calloutVisibility },
-                        onClearMapPointRequest = {
-                            viewModel.clearMapPoint()
-                        },
+                        onClearMapPointRequest = { viewModel.clearMapPoint() },
                         onCalloutOffsetRotationToggled = {
                             rotateOffsetWithGeoView = !rotateOffsetWithGeoView
                         }
