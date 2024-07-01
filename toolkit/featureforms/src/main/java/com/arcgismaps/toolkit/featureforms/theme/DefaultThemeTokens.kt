@@ -106,6 +106,15 @@ internal object DefaultThemeTokens {
             unselectedColor = ColorTokens.OnSurfaceVariant,
             disabledSelectedColor = ColorTokens.OnSurface.copy(alpha = 0.38f),
             disabledUnselectedColor = ColorTokens.OnSurface.copy(alpha = 0.38f)
+        ),
+        attachmentsElementColors = AttachmentsElementColors(
+            labelColor = Color.Unspecified,
+            supportingTextColor = Color.Unspecified,
+            outlineColor = ColorTokens.Outline,
+            containerColor = ColorTokens.Surface,
+            tileLabelColor = Color.Unspecified,
+            tileBorderColor = ColorTokens.Outline,
+            scrollBarColor = ColorTokens.OnSurface,
         )
     )
 
@@ -132,6 +141,11 @@ internal object DefaultThemeTokens {
             labelStyle = TypographyTokens.bodyMedium,
             optionStyle = TypographyTokens.bodyLarge,
             supportingTextStyle = TypographyTokens.bodySmall
+        ),
+        attachmentsElementTypography = AttachmentsElementTypography(
+            labelStyle = TypographyTokens.bodyMedium,
+            supportingTextStyle = TypographyTokens.bodySmall,
+            tileTextStyle = TypographyTokens.bodySmall
         )
     )
 }

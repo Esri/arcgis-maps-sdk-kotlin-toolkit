@@ -22,25 +22,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
-internal object AttachmentElementDefaults {
-    
-    val buttonBorderThickness = 2.dp
-    val borderThickness = 1.dp
-    val containerShape = RoundedCornerShape(5.dp)
-    val attachmentDetailShape = RoundedCornerShape(10.dp)
-    val attachmentShape = RoundedCornerShape(10.dp)
-    
-    @Composable
-    fun colors() : AttachmentElementColors = AttachmentElementColors(
-        containerColor = MaterialTheme.colorScheme.background,
-        carouselContainerColor = MaterialTheme.colorScheme.onBackground,
-        borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
-    )
-}
-
-internal data class AttachmentElementColors(
-    val containerColor : Color,
-    val carouselContainerColor: Color,
-    val borderColor : Color,
-)
+//internal object AttachmentElementDefaults {
+//
+//    val buttonBorderThickness = 2.dp
+//    val borderThickness = 1.dp
+//    val containerShape = RoundedCornerShape(5.dp)
+//    val attachmentDetailShape = RoundedCornerShape(10.dp)
+//    val attachmentShape = RoundedCornerShape(10.dp)
+//
+//    @Composable
+//    fun colors() : AttachmentElementColors = AttachmentElementColors(
+//        containerColor = MaterialTheme.colorScheme.background,
+//        carouselContainerColor = MaterialTheme.colorScheme.onBackground,
+//        borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
+//    )
+//}
+//
+//internal data class AttachmentElementColors(
+//    val containerColor : Color,
+//    val carouselContainerColor: Color,
+//    val borderColor : Color,
+//)
 

@@ -35,12 +35,14 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.Photo
 import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -68,6 +70,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -79,6 +82,10 @@ import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.utils.AttachmentsFileProvider
 import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
 import com.arcgismaps.toolkit.featureforms.internal.utils.LocalDialogRequester
+import com.arcgismaps.toolkit.featureforms.theme.AttachmentsElementColors
+import com.arcgismaps.toolkit.featureforms.theme.AttachmentsElementTypography
+import com.arcgismaps.toolkit.featureforms.theme.LocalColorScheme
+import com.arcgismaps.toolkit.featureforms.theme.LocalTypography
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -114,12 +121,16 @@ internal fun AttachmentFormElement(
     lazyListState: LazyListState,
     hasCameraPermission: Boolean,
     modifier: Modifier = Modifier,
-    colors: AttachmentElementColors = AttachmentElementDefaults.colors()
+    colors: AttachmentsElementColors = LocalColorScheme.current.attachmentsElementColors,
+    typography: AttachmentsElementTypography = LocalTypography.current.attachmentsElementTypography
 ) {
     Card(
         modifier = modifier,
-        shape = AttachmentElementDefaults.containerShape,
-        border = BorderStroke(AttachmentElementDefaults.borderThickness, colors.borderColor)
+        shape = RoundedCornerShape(5.dp),
+        border = BorderStroke(1.dp, colors.outlineColor),
+        colors = CardDefaults.cardColors(
+            containerColor = colors.containerColor
+        )
     ) {
         Column(
             modifier = Modifier.padding(15.dp)
@@ -127,7 +138,11 @@ internal fun AttachmentFormElement(
             Row {
                 Header(
                     title = label,
-                    description = description
+                    description = description,
+                    titleColor = colors.labelColor,
+                    titleTextStyle = typography.labelStyle,
+                    descriptionColor = colors.supportingTextColor,
+                    descriptionTextStyle = typography.supportingTextStyle
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 if (editable) {
@@ -172,6 +187,10 @@ private fun Carousel(state: LazyListState, attachments: List<FormAttachmentState
 private fun Header(
     title: String,
     description: String,
+    titleColor: Color,
+    titleTextStyle: TextStyle,
+    descriptionColor: Color,
+    descriptionTextStyle: TextStyle,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -181,14 +200,16 @@ private fun Header(
         Column {
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodyLarge,
+                color = titleColor,
+                style = titleTextStyle,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
             if (description.isNotEmpty()) {
                 Text(
                     text = description,
-                    style = MaterialTheme.typography.bodyMedium,
+                    color = descriptionColor,
+                    style = descriptionTextStyle,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )

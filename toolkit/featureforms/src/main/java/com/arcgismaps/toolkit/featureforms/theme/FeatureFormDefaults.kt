@@ -43,13 +43,15 @@ public object FeatureFormDefaults {
         editableTextFieldColors: EditableTextFieldColors = editableTextFieldColors(),
         readOnlyFieldColors: ReadOnlyFieldColors = readOnlyFieldColors(),
         radioButtonFieldColors: RadioButtonFieldColors = radioButtonFieldColors(),
-        groupElementColors: GroupElementColors = groupElementColors()
+        groupElementColors: GroupElementColors = groupElementColors(),
+        attachmentsElementColors: AttachmentsElementColors = attachmentsElementColors()
     ): FeatureFormColorScheme {
         return FeatureFormColorScheme(
             editableTextFieldColors = editableTextFieldColors,
             readOnlyFieldColors = readOnlyFieldColors,
             radioButtonFieldColors = radioButtonFieldColors,
-            groupElementColors = groupElementColors
+            groupElementColors = groupElementColors,
+            attachmentsElementColors = attachmentsElementColors
         )
     }
 
@@ -251,6 +253,27 @@ public object FeatureFormDefaults {
         )
     }
 
+    @Composable
+    public fun attachmentsElementColors(
+        labelColor : Color = Color.Unspecified,
+        supportingTextColor : Color = Color.Unspecified,
+        outlineColor : Color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f),
+        containerColor : Color = Color.Unspecified,
+        tileLabelColor : Color = MaterialTheme.colorScheme.onSurface,
+        tileBorderColor : Color = MaterialTheme.colorScheme.outline,
+        scrollBarColor : Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+    ): AttachmentsElementColors {
+        return AttachmentsElementColors(
+            labelColor = labelColor,
+            supportingTextColor = supportingTextColor,
+            outlineColor = outlineColor,
+            containerColor = containerColor,
+            tileLabelColor = tileLabelColor,
+            tileBorderColor = tileBorderColor,
+            scrollBarColor = scrollBarColor
+        )
+    }
+
     /**
      * Creates a [FeatureFormTypography] with default values.
      *
@@ -265,13 +288,15 @@ public object FeatureFormDefaults {
         editableTextFieldTypography: EditableTextFieldTypography = editableTextFieldTypography(),
         readOnlyFieldTypography: ReadOnlyFieldTypography = readOnlyFieldTypography(),
         groupElementTypography: GroupElementTypography = groupElementTypography(),
-        radioButtonFieldTypography: RadioButtonFieldTypography = radioButtonFieldTypography()
+        radioButtonFieldTypography: RadioButtonFieldTypography = radioButtonFieldTypography(),
+        attachmentsElementTypography: AttachmentsElementTypography = attachmentsElementTypography()
     ): FeatureFormTypography {
         return FeatureFormTypography(
             editableTextFieldTypography = editableTextFieldTypography,
             readOnlyFieldTypography = readOnlyFieldTypography,
             groupElementTypography = groupElementTypography,
-            radioButtonFieldTypography = radioButtonFieldTypography
+            radioButtonFieldTypography = radioButtonFieldTypography,
+            attachmentsElementTypography = attachmentsElementTypography
         )
     }
 
@@ -293,7 +318,6 @@ public object FeatureFormDefaults {
             labelStyle = labelStyle,
             textStyle = textStyle,
             supportingTextStyle = supportingTextStyle
-
         )
     }
 
@@ -315,7 +339,6 @@ public object FeatureFormDefaults {
             labelStyle = labelStyle,
             textStyle = textStyle,
             supportingTextStyle = supportingTextStyle
-
         )
     }
 
@@ -355,6 +378,19 @@ public object FeatureFormDefaults {
             labelStyle = labelStyle,
             optionStyle = optionStyle,
             supportingTextStyle = supportingTextStyle
+        )
+    }
+
+    @Composable
+    public fun attachmentsElementTypography(
+        labelStyle: TextStyle = MaterialTheme.typography.bodyLarge,
+        supportingTextStyle: TextStyle = MaterialTheme.typography.bodyMedium,
+        tileTextStyle: TextStyle = MaterialTheme.typography.labelSmall
+    ): AttachmentsElementTypography {
+        return AttachmentsElementTypography(
+            labelStyle = labelStyle,
+            supportingTextStyle = supportingTextStyle,
+            tileTextStyle = tileTextStyle
         )
     }
 }

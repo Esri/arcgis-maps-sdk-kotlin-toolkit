@@ -128,7 +128,8 @@ public data class FeatureFormColorScheme internal constructor(
     public val editableTextFieldColors: EditableTextFieldColors,
     public val readOnlyFieldColors: ReadOnlyFieldColors,
     public val radioButtonFieldColors: RadioButtonFieldColors,
-    public val groupElementColors: GroupElementColors
+    public val groupElementColors: GroupElementColors,
+    public val attachmentsElementColors: AttachmentsElementColors
 )
 
 /**
@@ -283,6 +284,16 @@ public data class RadioButtonFieldColors internal constructor(
     public val disabledUnselectedColor: Color
 )
 
+public data class AttachmentsElementColors internal constructor(
+    public val labelColor: Color,
+    public val supportingTextColor: Color,
+    public val outlineColor: Color,
+    public val containerColor: Color,
+    public val tileLabelColor : Color,
+    public val tileBorderColor : Color,
+    public val scrollBarColor : Color,
+)
+
 /**
  * A Typography system for the [FeatureForm] built on top of [MaterialTheme]. This can be used to
  * style the text and labels of the form elements.
@@ -303,7 +314,8 @@ public class FeatureFormTypography internal constructor(
     public val editableTextFieldTypography: EditableTextFieldTypography,
     public val readOnlyFieldTypography: ReadOnlyFieldTypography,
     public val groupElementTypography: GroupElementTypography,
-    public val radioButtonFieldTypography: RadioButtonFieldTypography
+    public val radioButtonFieldTypography: RadioButtonFieldTypography,
+    public val attachmentsElementTypography: AttachmentsElementTypography
 )
 
 /**
@@ -372,4 +384,10 @@ public data class RadioButtonFieldTypography internal constructor(
     public val labelStyle: TextStyle,
     public val optionStyle: TextStyle,
     public val supportingTextStyle: TextStyle
+)
+
+public data class AttachmentsElementTypography internal constructor(
+    public val labelStyle: TextStyle,
+    public val supportingTextStyle: TextStyle,
+    public val tileTextStyle: TextStyle,
 )
