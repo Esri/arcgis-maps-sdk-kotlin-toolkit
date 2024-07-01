@@ -228,7 +228,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
             typeConverter = screenCoordinateToVector,
             targetValue = leaderScreenCoordinate!!,
             label = "AnimateScreenCoordinate",
-            animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing)
+            animationSpec = tween(easing = FastOutSlowInEasing)
         )
 
 
