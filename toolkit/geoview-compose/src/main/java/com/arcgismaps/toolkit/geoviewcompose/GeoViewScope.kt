@@ -246,9 +246,6 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
             leaderScreenCoordinate = getLeaderScreenCoordinate(geoView, location, offset, rotateOffsetWithGeoView)
             // animate to the new screen coord when Callout params are changed
             animationEnabled = true
-        }
-
-        LaunchedEffect(leaderScreenCoordinate) {
             // update screen coordinate when viewpoint is changed
             geoView.viewpointChanged.collect {
                 leaderScreenCoordinate = getLeaderScreenCoordinate(geoView, location, offset, rotateOffsetWithGeoView)
