@@ -255,10 +255,6 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         }
 
         leaderScreenCoordinate?.let {
-            // While rotating, the screen coordinate may have NaN values
-            if (it.x.isNaN() || it.y.isNaN())
-                return@let
-
             val animateToPoint by animateValueAsState(
                 typeConverter = screenCoordinateToVector,
                 targetValue = it,
@@ -313,7 +309,16 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
     ): ScreenCoordinate? {
         val geoViewRotation = geoView.rotation()
         val locationToScreen = when (geoView) {
-            is MapView -> geoView.locationToScreen(location)
+            is MapView -> {
+                val locationToScreenCoordinate = geoView.locationToScreen(location)
+                // While rotating, the screen coordinate may have NaN values
+                if (!locationToScreenCoordinate.x.isNaN() && !locationToScreenCoordinate.y.isNaN()) {
+                    locationToScreenCoordinate
+                } else {
+                    null
+                }
+            }
+
             is SceneView -> {
                 val locationToScreenResult = geoView.locationToScreen(location)
                 if (locationToScreenResult?.visibility == SceneLocationVisibility.Visible) {
