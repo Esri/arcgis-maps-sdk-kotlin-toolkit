@@ -36,6 +36,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -53,6 +54,7 @@ import com.arcgismaps.mapping.popup.MediaPopupElement
 import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.mapping.popup.PopupAttachment
 import com.arcgismaps.mapping.popup.TextPopupElement
+import com.arcgismaps.realtime.DynamicEntity
 import com.arcgismaps.toolkit.popup.internal.element.attachment.AttachmentsElementState
 import com.arcgismaps.toolkit.popup.internal.element.attachment.AttachmentsPopupElement
 import com.arcgismaps.toolkit.popup.internal.element.attachment.rememberAttachmentsElementState
@@ -69,6 +71,11 @@ import com.arcgismaps.toolkit.popup.internal.element.textelement.TextPopupElemen
 import com.arcgismaps.toolkit.popup.internal.element.textelement.rememberTextElementState
 import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.FileViewer
 import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ViewableFile
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 @Immutable
 private data class PopupState(@Stable val popup: Popup)
@@ -97,6 +104,10 @@ public fun Popup(popup: Popup, modifier: Modifier = Modifier) {
     Popup(stateData, modifier)
 }
 
+private fun DynamicEntity.idChanged(scope: CoroutineScope): StateFlow<Long> {
+    return dynamicEntityChangedEvent.map { id }.stateIn(scope, SharingStarted.Eagerly, this.id)
+}
+
 /**
  * Maintain list of attachments outside of SDK
  * https://devtopia.esri.com/runtime/apollo/issues/681
@@ -107,9 +118,22 @@ private val attachments: MutableList<PopupAttachment> = mutableListOf()
 @Composable
 private fun Popup(popupState: PopupState, modifier: Modifier = Modifier) {
     val popup = popupState.popup
+    val dynamicEntity = popup.geoElement as? DynamicEntity
     var evaluated by rememberSaveable(popup) { mutableStateOf(false) }
+    var entityId by rememberSaveable(popup) { mutableLongStateOf(dynamicEntity?.id ?: -1) }
     var fetched by rememberSaveable(popup) { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
+    LaunchedEffect(popup) {
+        dynamicEntity?.dynamicEntityChangedEvent?.map { dynamicEntity.id }
+            ?.stateIn(coroutineScope, SharingStarted.Eagerly, entityId)?.collect { id ->
+            if (id != entityId) {
+                evaluated = false
+                popupState.popup.evaluateExpressions()
+                evaluated = true
+            }
+        }
+    }
     LaunchedEffect(popup) {
         popupState.popup.evaluateExpressions()
         if (!fetched) {
