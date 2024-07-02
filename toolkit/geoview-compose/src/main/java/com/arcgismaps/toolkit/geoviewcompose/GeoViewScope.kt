@@ -78,6 +78,7 @@ import com.arcgismaps.mapping.view.SceneLocationVisibility
 import com.arcgismaps.mapping.view.SceneView
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.mapping.view.zero
+import com.arcgismaps.realtime.DynamicEntity
 import kotlinx.coroutines.flow.first
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.cos
@@ -136,6 +137,9 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
      * the location that Callout refers to. The body of the Callout is a rectangular area with curved corners
      * that contains the [content] lambda provided by the application. A thin border line is drawn around the entire Callout.
      *
+     * If the given geoelement is a DynamicEntity then the Callout automatically updates its location everytime the
+     * DynamicEntity changes. The content of the Callout however will not be automatically updated.
+     *
      * Note: Only one Callout can be displayed at a time on the MapView.
      *
      * @param geoElement the GeoElement for which to display the Callout
@@ -159,14 +163,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
             || allowCalloutRecomposition
         ) {
             allowCalloutRecomposition = true
-            val leaderLocation = this.computeLeaderLocationForGeoelement(geoElement, tapLocation) ?: return
-            this.CalloutInternal(
-                leaderLocation.location,
-                modifier,
-                leaderLocation.offset,
-                leaderLocation.rotateOffsetWithGeoView,
-                content
-            )
+            this.CalloutInternal(geoElement, modifier, tapLocation, content)
         }
     }
 
@@ -184,6 +181,42 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
      */
     internal fun reset() {
         isCalloutBeingDisplayed.set(false)
+    }
+
+    /**
+     * Creates a Callout at the specified [geoElement] on the GeoView.
+     *
+     * @since 200.5.0
+     */
+    @Composable
+    private fun CalloutInternal(
+        geoElement: GeoElement,
+        modifier: Modifier = Modifier,
+        tapLocation: Point? = null,
+        content: @Composable BoxScope.() -> Unit
+    ) {
+        var leaderLocation: LeaderLocation? by remember {
+            mutableStateOf(
+                computeLeaderLocationForGeoelement(geoElement, tapLocation)
+            )
+        }
+        // update the Callout location when the dynamic entity changes
+        if (geoElement is DynamicEntity) {
+            LaunchedEffect(geoElement) {
+                geoElement.dynamicEntityChangedEvent.collect {
+                    leaderLocation = computeLeaderLocationForGeoelement(geoElement, tapLocation)
+                }
+            }
+        }
+        leaderLocation?.let {
+            this.CalloutInternal(
+                it.location,
+                modifier,
+                it.offset,
+                it.rotateOffsetWithGeoView,
+                content
+            )
+        }
     }
 
     /**
