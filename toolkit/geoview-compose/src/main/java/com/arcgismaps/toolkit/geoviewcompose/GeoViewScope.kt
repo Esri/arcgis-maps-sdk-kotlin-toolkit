@@ -224,17 +224,16 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
             }
         }
 
-        val animateToPoint by animateValueAsState(
-            typeConverter = screenCoordinateToVector,
-            targetValue = leaderScreenCoordinate!!,
-            label = "AnimateScreenCoordinate",
-            animationSpec = tween(easing = FastOutSlowInEasing)
-        )
+        leaderScreenCoordinate?.let {
+            val animateToPoint by animateValueAsState(
+                typeConverter = screenCoordinateToVector,
+                targetValue = it,
+                label = "AnimateScreenCoordinate",
+                animationSpec = tween(easing = FastOutSlowInEasing)
+            )
 
-
-        (if (animationEnabled) animateToPoint else leaderScreenCoordinate)?.let {
             CalloutSubComposeLayout(
-                leaderScreenCoordinate = it,
+                leaderScreenCoordinate = (if (animationEnabled) animateToPoint else it),
                 maxSize = calloutContentMaxSize(
                     geoView = geoView,
                     density = LocalDensity.current,
