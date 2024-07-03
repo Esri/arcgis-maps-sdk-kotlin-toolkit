@@ -184,6 +184,15 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
     }
 
     /**
+     * Convert [ScreenCoordinate] to an animatable 2D vector type.
+     */
+    private val screenCoordinateToVector: TwoWayConverter<ScreenCoordinate, AnimationVector2D> =
+        TwoWayConverter(
+            { AnimationVector2D(v1 = it.x.toFloat(), v2 = it.y.toFloat()) },
+            { ScreenCoordinate(x = it.v1.toDouble(), y = it.v2.toDouble()) }
+        )
+
+    /**
      * Creates a Callout at the specified [geoElement] on the GeoView.
      *
      * @since 200.5.0
@@ -312,14 +321,9 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
             is MapView -> geoView.locationToScreen(location).takeIf {
                 !it.x.isNaN() && !it.y.isNaN()
             }
-            is SceneView -> {
-                val locationToScreenResult = geoView.locationToScreen(location)
-                if (locationToScreenResult?.visibility == SceneLocationVisibility.Visible) {
-                    locationToScreenResult.screenPoint
-                } else {
-                    null
-                }
-            }
+            is SceneView -> geoView.locationToScreen(location)?.takeIf {
+                it.visibility == SceneLocationVisibility.Visible
+            }?.screenPoint
         }
         return locationToScreen?.let { screenCoordinate ->
             if (rotateOffsetWithGeoView && geoViewRotation != 0.0) {
@@ -851,15 +855,6 @@ private fun calloutPath(
         close()
     }
 }
-
-/**
- * Convert [ScreenCoordinate] to an animatable 2D vector type.
- */
-private val screenCoordinateToVector: TwoWayConverter<ScreenCoordinate, AnimationVector2D> =
-    TwoWayConverter(
-        { AnimationVector2D(v1 = it.x.toFloat(), v2 = it.y.toFloat()) },
-        { ScreenCoordinate(x = it.v1.toDouble(), y = it.v2.toDouble()) }
-    )
 
 /**
  * This function is used to wait for the GeoView to be ready to return positive values
