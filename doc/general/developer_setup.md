@@ -8,7 +8,7 @@ Requirements:
 
 and an internet connection to download dependencies expressed in gradle.
 
-For production use, [API Key authentication](https://developers.arcgis.com/documentation/security-and-authentication/api-key-authentication/) or [user authentication](https://developers.arcgis.com/security-and-authentication/user-authentication/) is required to access the ArcGIS location services provided by the ArcGIS Maps SDK for Kotlin toolkit components. Sign up for an ArcGIS account [here](https://developers.arcgis.com/kotlin/get-started/#1-sign-up-for-an-account).
+For production use, [API Key authentication](https://developers.arcgis.com/documentation/security-and-authentication/api-key-authentication/) or [user authentication](https://developers.arcgis.com/documentation/security-and-authentication/user-authentication/) is required to access the ArcGIS location services provided by the ArcGIS Maps SDK for Kotlin toolkit components. Sign up for an ArcGIS account [here](https://developers.arcgis.com/kotlin/get-started/#1-sign-up-for-an-account).
 
 ### Get Started
 
