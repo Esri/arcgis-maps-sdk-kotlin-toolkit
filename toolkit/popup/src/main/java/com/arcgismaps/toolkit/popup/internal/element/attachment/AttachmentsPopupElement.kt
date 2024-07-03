@@ -32,7 +32,7 @@ import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ViewableFile
 @Composable
 internal fun AttachmentsPopupElement(
     state: AttachmentsElementState,
-    onSelectedAttachment: (ViewableFile?) -> Unit = {}
+    onSelectedAttachment: (ViewableFile) -> Unit = {}
 ) {
     AttachmentsPopupElement(
         title = state.title,
@@ -49,7 +49,7 @@ private fun AttachmentsPopupElement(
     title: String,
     @Suppress("UNUSED_PARAMETER") stateId: Int,
     attachments: List<PopupAttachmentState>,
-    onSelectedAttachment: (ViewableFile?) -> Unit = {}
+    onSelectedAttachment: (ViewableFile) -> Unit = {}
 ) {
     ExpandableCard(
         title = title,

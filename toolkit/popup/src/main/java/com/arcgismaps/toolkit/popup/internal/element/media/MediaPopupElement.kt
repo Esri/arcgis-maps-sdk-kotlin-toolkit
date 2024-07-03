@@ -24,22 +24,22 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.mapping.popup.PopupMediaType
 import com.arcgismaps.toolkit.popup.internal.ui.ExpandableCard
+import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ViewableFile
 
 @Composable
 internal fun MediaPopupElement(
-    state: MediaElementState
+    state: MediaElementState,
+    onClickedMedia: (ViewableFile) -> Unit
 ) {
     MediaPopupElement(
         title = state.title,
         description = state.description,
         stateId = state.id,
-        media = state.media
+        media = state.media,
+        onClickedMedia = onClickedMedia
     )
 }
 
@@ -48,7 +48,8 @@ private fun MediaPopupElement(
     description: String,
     title: String,
     @Suppress("UNUSED_PARAMETER") stateId: Int,
-    media: List<PopupMediaState>
+    media: List<PopupMediaState>,
+    onClickedMedia: (ViewableFile) -> Unit
 ) {
     ExpandableCard(
         title = title,
@@ -58,41 +59,22 @@ private fun MediaPopupElement(
             modifier = Modifier.padding(MediaElementDefaults.shapes().galleryPadding)
         ) {
             val listState = rememberLazyListState()
-            MediaGallery(listState, media)
+            MediaGallery(listState, media, onClickedMedia)
         }
     }
 }
 
 @Composable
-private fun MediaGallery(state: LazyListState, media: List<PopupMediaState>) {
+private fun MediaGallery(state: LazyListState, media: List<PopupMediaState>, onClicked: (ViewableFile) -> Unit) {
     LazyRow(
         state = state,
         horizontalArrangement = Arrangement.spacedBy(15.dp),
     ) {
         items(media, key = { it.title + it.type + it.caption }) {
-            MediaTile(it)
+            MediaTile(
+                state = it,
+                onClicked = onClicked
+            )
         }
     }
-}
-
-@Preview
-@Composable
-private fun MediaPopupElementPreview() {
-    MediaPopupElement(
-        title = "Media",
-        description = "description of Media",
-        stateId = 1,
-        media = listOf(
-            PopupMediaState(
-                title = "Photo 1.jpg",
-                caption = "caption",
-                refreshInterval = 1234L,
-                linkUrl = "",
-                sourceUrl = "https://i.postimg.cc/65yws9mR/Screenshot-2024-02-02-at-6-20-49-PM.png",
-                type = PopupMediaType.Image,
-                scope = rememberCoroutineScope(),
-                chartFolder = ""
-            )
-        )
-    )
 }

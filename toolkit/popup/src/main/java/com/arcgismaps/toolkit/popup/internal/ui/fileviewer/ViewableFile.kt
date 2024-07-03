@@ -43,7 +43,7 @@ import java.io.IOException
 @Parcelize
 internal data class ViewableFile(
     val name: String,
-    val size: Long,
+    val size: Long = 0,
     val path: String,
     @TypeParceler<ViewableFileType, ViewableFileTypeParceler>() val type: ViewableFileType,
     val contentType: String = "image/jpeg"

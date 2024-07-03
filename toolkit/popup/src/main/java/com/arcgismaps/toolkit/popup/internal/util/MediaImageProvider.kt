@@ -23,31 +23,29 @@ import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
 
-
 /**
- * A Chart Image provider. Chart images are saved to disk for persistence and
- * so their URIs may be passed to Coil's AsyncImage composable function.
+ * A class to persist popup media images on disk
  *
- * @property fileName the name of the chart image file to save to disk
- * @property folderName the folder in which to save image files
- * @property chartGenerator a lambda which generates the chart bitmap
+ * @property fileName the name of the file to persist
+ * @property folderName the parent folder in which to save the popup media folder
+ * @property imageGenerator a lambda which provides the bits to persist as an image.
  */
-internal class ChartImageProvider(
+internal class MediaImageProvider(
     private val fileName: String,
     private val folderName: String,
-    val chartGenerator: suspend () -> Bitmap
+    private val imageGenerator: suspend () -> Bitmap
 ) {
     suspend fun get(): String = withContext(Dispatchers.IO) {
-            val bitmap = chartGenerator()
-            val directory = File(folderName)
-            directory.mkdirs()
-            val file = File(directory, fileName)
-            if (!file.exists()) {
-                file.createNewFile()
-                BufferedOutputStream(FileOutputStream(file)).use { bos ->
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, bos)
-                }
+        val bitmap = imageGenerator()
+        val directory = File(folderName)
+        directory.mkdirs()
+        val file = File(directory, fileName)
+        if (!file.exists()) {
+            file.createNewFile()
+            BufferedOutputStream(FileOutputStream(file)).use { bos ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, bos)
             }
-            file.canonicalPath
         }
+        file.canonicalPath
     }
+}
