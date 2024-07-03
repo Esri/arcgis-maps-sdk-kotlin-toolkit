@@ -27,16 +27,12 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.GeoElement
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.mapping.Viewpoint
-import com.arcgismaps.mapping.layers.DynamicEntityLayer
 import com.arcgismaps.mapping.layers.Layer
 import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.portal.Portal
-import com.arcgismaps.realtime.ArcGISStreamService
-import com.arcgismaps.realtime.ArcGISStreamServiceFilter
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -74,6 +70,8 @@ class MapViewModel(
     private val fourteenersId = "9f3a674e998f461580006e626611f9ad"
     @Suppress("unused")
     private val ranchoId = "dd94764601554f1ea958f2d81906c698"
+    @Suppress("unused")
+    private val streamServiceMap = "aef32323d1f248368b1663cfc938995e"
 
     /**
      * The Popup read by the composition is held as a state variable.
@@ -86,7 +84,7 @@ class MapViewModel(
     val map = ArcGISMap(
         PortalItem(
             Portal.arcGISOnline(Portal.Connection.Authenticated),
-            fourteenersId
+            streamServiceMap
         )
     ).apply {
         Viewpoint(40.559691, -111.869001, 150000.0)
@@ -94,33 +92,8 @@ class MapViewModel(
 
     val proxy: MapViewProxy = MapViewProxy()
 
-    // create ArcGIS Stream Service
-    private val streamService =
-        ArcGISStreamService("https://realtimegis2016.esri.com:6443/arcgis/rest/services/SandyVehicles/StreamServer")
-
-    private val streamServiceFilter = ArcGISStreamServiceFilter()
-
-    // layer displaying the dynamic entities on the map
-    val dynamicEntityLayer: DynamicEntityLayer
-
-    // define ArcGIS map using Streets basemap
-    val mapWithDynamicEntities = ArcGISMap(BasemapStyle.ArcGISStreets).apply {
-        initialViewpoint = Viewpoint(40.559691, -111.869001, 150000.0)
-    }
 
     init {
-        // set condition on the ArcGISStreamServiceFilter to limit the amount of data coming from the server
-        streamServiceFilter.whereClause = "speed > 0"
-        streamService.apply {
-            filter = streamServiceFilter
-            // sets the maximum time (in seconds) an observation remains in the application.
-            purgeOptions.maximumDuration = 300.0
-        }
-        dynamicEntityLayer = DynamicEntityLayer(streamService)
-
-        // add the dynamic entity layer to the map's operational layers
-        map.operationalLayers.add(dynamicEntityLayer)
-
         coroutineScope.launch {
             map.load()
         }

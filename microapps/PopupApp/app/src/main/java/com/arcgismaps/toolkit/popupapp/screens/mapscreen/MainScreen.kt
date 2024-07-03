@@ -41,6 +41,7 @@ import com.arcgismaps.data.Feature
 import com.arcgismaps.mapping.GeoElement
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.layers.Layer
+import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.realtime.DynamicEntityObservation
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import com.arcgismaps.toolkit.popup.Popup
@@ -96,31 +97,102 @@ fun MainScreen(viewModel: MapViewModel) {
                 .fillMaxSize(),
             onSingleTapConfirmed = {
                 scope.launch {
-                    viewModel.proxy.identify(
-                        layer = viewModel.dynamicEntityLayer,
+                    viewModel.proxy.identifyLayers(
                         screenCoordinate = it.screenCoordinate,
-                        tolerance = 220.dp,
+                        tolerance = 22.dp,
                         returnPopupsOnly = true
                     ).onSuccess { results ->
-                        val observation =
-                            results.geoElements.filterIsInstance<DynamicEntityObservation>().firstOrNull()
-                        val dynamicEntity = observation?.dynamicEntity
-                        if (dynamicEntity != null) {
-                            viewModel.setLayer(viewModel.dynamicEntityLayer)
-                            viewModel.setGeoElement(dynamicEntity)
-                            viewModel.setPopup(results.popups.first())
-                            scaffoldState.bottomSheetState.expand()
-                        } else {
+                        if (results.isEmpty()) {
+                            unselectFeature(viewModel.geoElement, viewModel.layer)
+                            viewModel.setPopup(null)
+                            viewModel.setLayer(null)
+                            viewModel.setGeoElement(null)
+                            if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
+                                scaffoldState.bottomSheetState.hide()
+                            }
                             withContext(Dispatchers.Main) {
                                 Toast.makeText(
                                     context,
-                                    "did not tap on DynamicEntity",
+                                    "Tap did not identify any Popups",
                                     Toast.LENGTH_LONG
                                 ).show()
                             }
+                        } else {
+                            try {
+                                val result = results.first()
+                                var popup = result.popups.first()
+                                val newLayer = result.layerContent
+                                var newGeoElement = popup.geoElement
+
+                                // if the identified GeoElement is a DynamicEntityObservation,
+                                // get the underlying DynamicEntity and create a new Popup with
+                                // the same definition.
+                                if (newGeoElement is DynamicEntityObservation && newGeoElement.dynamicEntity != null) {
+                                    val dynamicEntity = newGeoElement.dynamicEntity
+                                    if (dynamicEntity != null) {
+                                        newGeoElement = dynamicEntity
+                                        popup = Popup(
+                                            newGeoElement,
+                                            popup.popupDefinition
+                                        )
+                                    }
+                                }
+
+                                if (viewModel.geoElement.sameSelection(newGeoElement)) {
+                                    withContext(Dispatchers.Main) {
+                                        Toast.makeText(
+                                            context,
+                                            "the same GeoElement was selected",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }
+                                } else {
+                                    unselectFeature(
+                                        viewModel.geoElement,
+                                        viewModel.layer
+                                    )
+
+                                    when (newLayer) {
+                                        is FeatureLayer -> {
+                                            // the Popup exists on a FeatureLayer
+                                            if (newGeoElement is Feature) {
+                                                // the tap was on a Feature
+                                                // unselect any previously selected Feature
+                                                newLayer.selectFeature(newGeoElement)
+                                            }
+                                            // otherwise the tap was on some non-Feature GeoElement
+                                            viewModel.setLayer(newLayer)
+                                            viewModel.setGeoElement(newGeoElement)
+                                        }
+
+                                        is Layer -> {
+                                            // the popup exists on a non-FeatureLayer
+                                            viewModel.setLayer(newLayer)
+                                            viewModel.setGeoElement(newGeoElement)
+                                        }
+
+                                        else -> {
+                                            // the popup exists on a sublayer, which is a complication
+                                            // that doesn't offer any testing value for the Popup
+                                            // toolkit component.
+                                            throw IllegalStateException("popups on sublayers are not supported by the PopupApp")
+                                        }
+                                    }
+                                    viewModel.setPopup(popup)
+                                    scaffoldState.bottomSheetState.expand()
+                                }
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                withContext(Dispatchers.Main) {
+                                    Toast.makeText(
+                                        context,
+                                        "failed to create a Popup for the GeoElement",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            }
                         }
                     }
-
                 }
             }
         )
