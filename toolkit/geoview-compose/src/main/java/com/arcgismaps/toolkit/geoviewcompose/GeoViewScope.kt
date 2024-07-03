@@ -18,6 +18,12 @@
 package com.arcgismaps.toolkit.geoviewcompose
 
 import android.util.DisplayMetrics
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.AnimationVector2D
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.TwoWayConverter
+import androidx.compose.animation.core.animateValueAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -178,6 +184,15 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
     }
 
     /**
+     * Convert [ScreenCoordinate] to an animatable 2D vector type.
+     */
+    private val screenCoordinateToVector: TwoWayConverter<ScreenCoordinate, AnimationVector2D> =
+        TwoWayConverter(
+            { AnimationVector2D(v1 = it.x.toFloat(), v2 = it.y.toFloat()) },
+            { ScreenCoordinate(x = it.v1.toDouble(), y = it.v2.toDouble()) }
+        )
+
+    /**
      * Creates a Callout at the specified [geoElement] on the GeoView.
      *
      * @since 200.5.0
@@ -233,21 +248,31 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
                 getLeaderScreenCoordinate(geoView, location, offset, rotateOffsetWithGeoView)
             )
         }
+        var animationEnabled by remember { mutableStateOf(false) }
 
         LaunchedEffect(location, offset, rotateOffsetWithGeoView) {
             // Used to update screen coordinate when new location point is used
-            leaderScreenCoordinate =
-                getLeaderScreenCoordinate(geoView, location, offset, rotateOffsetWithGeoView)
-            // Used to update screen coordinate when viewpoint is changed
+            leaderScreenCoordinate = getLeaderScreenCoordinate(geoView, location, offset, rotateOffsetWithGeoView)
+            // animate to the new screen coordinate when Callout params are changed
+            animationEnabled = true
+            // update screen coordinate when viewpoint is changed
             geoView.viewpointChanged.collect {
-                leaderScreenCoordinate =
-                    getLeaderScreenCoordinate(geoView, location, offset, rotateOffsetWithGeoView)
+                leaderScreenCoordinate = getLeaderScreenCoordinate(geoView, location, offset, rotateOffsetWithGeoView)
+                // disable animation when panning
+                animationEnabled = false
             }
         }
 
         leaderScreenCoordinate?.let {
+            val animateToPoint by animateValueAsState(
+                typeConverter = screenCoordinateToVector,
+                targetValue = it,
+                label = "AnimateScreenCoordinate",
+                animationSpec = tween(easing = FastOutSlowInEasing)
+            )
+
             CalloutSubComposeLayout(
-                leaderScreenCoordinate = it,
+                leaderScreenCoordinate = (if (animationEnabled) animateToPoint else it),
                 maxSize = calloutContentMaxSize(
                     geoView = geoView,
                     density = LocalDensity.current,
@@ -265,6 +290,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
                             leaderHeight = with(LocalDensity.current) { DefaultCalloutProperties.leaderSize.height.toPx() },
                             minSize = DefaultCalloutProperties.minSize
                         )
+                        .animateContentSize()
                 )
                 {
                     content.invoke(this)
@@ -292,15 +318,12 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
     ): ScreenCoordinate? {
         val geoViewRotation = geoView.rotation()
         val locationToScreen = when (geoView) {
-            is MapView -> geoView.locationToScreen(location)
-            is SceneView -> {
-                val locationToScreenResult = geoView.locationToScreen(location)
-                if (locationToScreenResult?.visibility == SceneLocationVisibility.Visible) {
-                    locationToScreenResult.screenPoint
-                } else {
-                    null
-                }
+            is MapView -> geoView.locationToScreen(location).takeIf {
+                !it.x.isNaN() && !it.y.isNaN()
             }
+            is SceneView -> geoView.locationToScreen(location)?.takeIf {
+                it.visibility == SceneLocationVisibility.Visible
+            }?.screenPoint
         }
         return locationToScreen?.let { screenCoordinate ->
             if (rotateOffsetWithGeoView && geoViewRotation != 0.0) {
