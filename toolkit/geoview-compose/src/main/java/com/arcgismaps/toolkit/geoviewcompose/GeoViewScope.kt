@@ -244,7 +244,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         LaunchedEffect(location, offset, rotateOffsetWithGeoView) {
             // Used to update screen coordinate when new location point is used
             leaderScreenCoordinate = getLeaderScreenCoordinate(geoView, location, offset, rotateOffsetWithGeoView)
-            // animate to the new screen coord when Callout params are changed
+            // animate to the new screen coordinate when Callout params are changed
             animationEnabled = true
             // update screen coordinate when viewpoint is changed
             geoView.viewpointChanged.collect {
@@ -309,16 +309,9 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
     ): ScreenCoordinate? {
         val geoViewRotation = geoView.rotation()
         val locationToScreen = when (geoView) {
-            is MapView -> {
-                val locationToScreenCoordinate = geoView.locationToScreen(location)
-                // While rotating, the screen coordinate may have NaN values
-                if (!locationToScreenCoordinate.x.isNaN() && !locationToScreenCoordinate.y.isNaN()) {
-                    locationToScreenCoordinate
-                } else {
-                    null
-                }
+            is MapView -> geoView.locationToScreen(location).takeIf {
+                !it.x.isNaN() && !it.y.isNaN()
             }
-
             is SceneView -> {
                 val locationToScreenResult = geoView.locationToScreen(location)
                 if (locationToScreenResult?.visibility == SceneLocationVisibility.Visible) {

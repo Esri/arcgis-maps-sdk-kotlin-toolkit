@@ -21,12 +21,10 @@ package com.arcgismaps.toolkit.mapviewcalloutapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.toolkit.mapviewcalloutapp.screens.MainScreen
-import com.arcgismaps.toolkit.mapviewcalloutapp.screens.MapViewModel
 import com.esri.microappslib.theme.MicroAppTheme
 
 class MainActivity : ComponentActivity() {
