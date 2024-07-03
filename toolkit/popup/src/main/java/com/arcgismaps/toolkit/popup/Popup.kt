@@ -201,7 +201,7 @@ private fun PopupBody(popupState: PopupState, refreshed: Boolean, onFileClicked:
             animationSpec = spring(stiffness = Spring.StiffnessLow),
             targetAlpha = 0.5f
         )
-        ) {
+    ) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
