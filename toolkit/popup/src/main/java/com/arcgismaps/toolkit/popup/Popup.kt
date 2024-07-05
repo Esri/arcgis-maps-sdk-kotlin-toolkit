@@ -188,7 +188,7 @@ private fun Popup(popupState: PopupState, initialized: Boolean, refreshed: Boole
 }
 
 @Composable
-private fun PopupBody(popupState: PopupState, refreshed: Boolean, onFileClicked: (ViewableFile?) -> Unit = {}) {
+private fun PopupBody(popupState: PopupState, refreshed: Boolean, onFileClicked: (ViewableFile) -> Unit = {}) {
     val popup = popupState.popup
     val lazyListState = rememberLazyListState()
     val states = rememberStates(popup, attachments)
@@ -220,14 +220,14 @@ private fun PopupBody(popupState: PopupState, refreshed: Boolean, onFileClicked:
                         }
                     }
 
-                    is AttachmentsPopupElement -> {
-                        item(contentType = AttachmentsPopupElement::class.java) {
-                            AttachmentsPopupElement(
-                                state = entry.state as AttachmentsElementState,
-                                onFileClicked
-                            )
-                        }
+                is AttachmentsPopupElement -> {
+                    item(contentType = AttachmentsPopupElement::class.java) {
+                        AttachmentsPopupElement(
+                            state = entry.state as AttachmentsElementState,
+                            onSelectedAttachment = onFileClicked
+                        )
                     }
+                }
 
                     is FieldsPopupElement -> {
                         item(contentType = FieldsPopupElement::class.java) {
@@ -237,17 +237,17 @@ private fun PopupBody(popupState: PopupState, refreshed: Boolean, onFileClicked:
                         }
                     }
 
-                    is MediaPopupElement -> {
-                        item(contentType = MediaPopupElement::class.java) {
-                            MediaPopupElement(
-                                entry.state as MediaElementState
-                            )
-                        }
+                is MediaPopupElement -> {
+                    item(contentType = MediaPopupElement::class.java) {
+                        MediaPopupElement(
+                            entry.state as MediaElementState,
+                            onClickedMedia = onFileClicked
+                        )
                     }
+                }
 
-                    else -> {
-                        // other popup elements are not created
-                    }
+                else -> {
+                    // other popup elements are not created
                 }
             }
         }
