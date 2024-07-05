@@ -67,7 +67,7 @@ internal val RangeDomain.asDoubleTuple: MinMax<Double>
     get() {
         return when (fieldType) {
             FieldType.Int16 -> {
-                MinMax((minValue as? Int)?.toDouble(), (maxValue as? Int)?.toDouble())
+                MinMax((minValue as? Short)?.toDouble(), (maxValue as? Short)?.toDouble())
             }
 
             FieldType.Int32 -> {
@@ -98,7 +98,7 @@ internal val RangeDomain.asLongTuple: MinMax<Long>
     get() {
         return when (fieldType) {
             FieldType.Int16 -> {
-                MinMax((minValue as? Int)?.toLong(), (maxValue as? Int)?.toLong())
+                MinMax((minValue as? Short)?.toLong(), (maxValue as? Short)?.toLong())
             }
 
             FieldType.Int32 -> {
