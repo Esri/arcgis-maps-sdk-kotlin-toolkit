@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~
+  ~  Copyright 2023 Esri
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  ~
+  --><resources>
+    <string name="enter_n_chars">Insira %1$d caracteres</string>
+    <string name="enter_min_to_max_chars">Insira %1$d até %2$d caracteres</string>
+    <string name="maximum_n_chars">Máximo %1$d caracteres</string>
+    <string name="no_value">Sem valor</string>
+    <string name="enter_value">Inserir Valor</string>
+    <string name="required">Exigido</string>
+    <string name="today">Hoje</string>
+    <string name="now">Agora</string>
+    <string name="cancel">Cancelar</string>
+    <string name="ok">OK</string>
+    <string name="done">Concluir</string>
+    <string name="filter">Filtro %1$s</string>
+    <string name="numeric_range_helper_text">Insira o valor de %1$s para %2$s</string>
+    <string name="less_than_min_value">Menor que o valor mínimo %1$s</string>
+    <string name="exceeds_max_value">Excede o valor máximo %1$s</string>
+    <string name="value_must_be_a_whole_number">O valor deve ser um número inteiro</string>
+    <string name="value_must_be_a_number">O valor deve ser um número</string>
+    <string name="value_must_be_within_domain">O valor precisa estar dentro do domínio</string>
+    <string name="value_must_not_be_empty">O valor não deve estar vazio</string>
+    <string name="min_datetime_helper_text">A data deve ser igual ou posterior a %1$s</string>
+    <string name="max_datetime_helper_text">A data deve ser igual ou anterior a %1$s</string>
+
+    <!-- Date Picker string values -->
+    <string name="ff_date_input_headline">Data inserida</string>
+    <string name="ff_date_input_headline_description">Data inserida: %1$s</string>
+    <string name="ff_date_input_invalid_for_pattern">A data não corresponde ao padrão esperado: %1$s</string>
+    <string name="ff_date_input_invalid_not_allowed">Data não permitida: %1$s</string>
+    <string name="ff_date_input_invalid_year_range">
+        Data fora do intervalo esperado do ano %1$s - %2$s
+    </string>
+    <string name="ff_date_input_label">Data</string>
+    <string name="ff_date_input_no_input_description">Nenhum</string>
+    <string name="ff_date_input_title">Selecionar data</string>
+    <string name="ff_date_picker_headline">"Data selecionada"</string>
+    <string name="ff_date_picker_headline_description">Seleção atual: %1$s</string>
+    <string name="ff_date_picker_navigate_to_year_description">Ir para o ano %1$s</string>
+    <string name="ff_date_picker_no_selection_description">Nenhum</string>
+    <string name="ff_date_picker_scroll_to_earlier_years">Rolar para mostrar os anos anteriores</string>
+    <string name="ff_date_picker_scroll_to_later_years">Rolar para mostrar anos posteriores</string>
+    <string name="ff_date_picker_switch_to_calendar_mode">Alterar para o modo de entrada de calendário</string>
+    <string name="ff_date_picker_switch_to_day_selection">
+        "Deslize para selecionar um ano ou toque para voltar a selecionar um dia"
+    </string>
+    <string name="ff_date_picker_switch_to_input_mode">Alterar para o modo de entrada de texto</string>
+    <string name="ff_date_picker_switch_to_next_month">"Alterar para o próximo mês"</string>
+    <string name="ff_date_picker_switch_to_previous_month">"Alterar para o mês anterior"</string>
+    <string name="ff_date_picker_switch_to_year_selection">"Alterar para selecionar um ano"</string>
+    <string name="ff_date_picker_title">"Selecionar data"</string>
+    <string name="ff_date_picker_today_description">Hoje</string>
+    <string name="ff_date_picker_year_picker_pane_title">Seletor de ano visível</string>
+    <string name="ff_date_range_input_invalid_range_input">Entrada de período inválida</string>
+    <string name="ff_date_range_input_title">Inserir datas</string>
+    <string name="ff_date_range_picker_day_in_range">No intervalo</string>
+    <string name="ff_date_range_picker_end_headline">Data final</string>
+    <string name="ff_date_range_picker_scroll_to_next_month">Rolar para mostrar o próximo mês</string>
+    <string name="ff_date_range_picker_scroll_to_previous_month">Rolar para mostrar o mês anterior</string>
+    <string name="ff_date_range_picker_start_headline">Data inicial</string>
+    <string name="ff_date_range_picker_title">Selecionar datas</string>
+
+    <!-- Time Picker string values -->
+    <string name="ff_time_picker_am">AM</string>
+    <string name="ff_time_picker_hour">Hora</string>
+    <string name="ff_time_picker_hour_24h_suffix">%1$d horas</string>
+    <string name="ff_time_picker_hour_selection">Selecionar hora</string>
+    <string name="ff_time_picker_hour_suffix">%1$d o\'relógio</string>
+    <string name="ff_time_picker_hour_text_field">para hora</string>
+    <string name="ff_time_picker_minute">Minuto</string>
+    <string name="ff_time_picker_minute_selection">Selecionar minutos</string>
+    <string name="ff_time_picker_minute_suffix">%1$d minutos</string>
+    <string name="ff_time_picker_minute_text_field">para minutos</string>
+    <string name="ff_time_picker_period_toggle_description">Selecionar AM ou PM</string>
+    <string name="ff_time_picker_pm">PM</string>
+    <string name="take_photo">Tirar Foto</string>
+    <string name="add_photo">Adicionar foto</string>
+    <string name="rename">Renomear</string>
+    <string name="delete">Excluir</string>
+    <string name="rename_attachment">Renomear Anexo</string>
+    <string name="name">Nome</string>
+</resources>

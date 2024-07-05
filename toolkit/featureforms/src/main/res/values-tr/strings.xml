@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~
+  ~  Copyright 2023 Esri
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  ~
+  --><resources>
+    <string name="enter_n_chars">%1$d karakter girin</string>
+    <string name="enter_min_to_max_chars">%1$d - %2$d karakter girin</string>
+    <string name="maximum_n_chars">Maksimum %1$d karakter</string>
+    <string name="no_value">Değer yok</string>
+    <string name="enter_value">Değer Gir</string>
+    <string name="required">Gerekli</string>
+    <string name="today">Bugün</string>
+    <string name="now">Şimdi</string>
+    <string name="cancel">İptal</string>
+    <string name="ok">Tamam</string>
+    <string name="done">Bitti</string>
+    <string name="filter">%1$s filtrele</string>
+    <string name="numeric_range_helper_text">%1$s\'den %2$s\'e değer gir</string>
+    <string name="less_than_min_value">Minimum değerden daha küçük %1$s</string>
+    <string name="exceeds_max_value">Maksimum değeri aşıyor %1$s</string>
+    <string name="value_must_be_a_whole_number">Değer bir tam sayı olmalıdır</string>
+    <string name="value_must_be_a_number">Değer bir sayı olmalıdır</string>
+    <string name="value_must_be_within_domain">Değer, domain içinde olmalıdır</string>
+    <string name="value_must_not_be_empty">Değer boş olmamalıdır</string>
+    <string name="min_datetime_helper_text">Tarih %1$s veya daha sonra olmalıdır</string>
+    <string name="max_datetime_helper_text">Tarih %1$s veya daha önce olmalıdır</string>
+
+    <!-- Date Picker string values -->
+    <string name="ff_date_input_headline">Girilen tarih</string>
+    <string name="ff_date_input_headline_description">Girilen tarih: %1$s</string>
+    <string name="ff_date_input_invalid_for_pattern">Tarih beklenen kalıpla eşleşmiyor: %1$s</string>
+    <string name="ff_date_input_invalid_not_allowed">İzin verilmeyen tarih: %1$s</string>
+    <string name="ff_date_input_invalid_year_range">
+        Beklenen yıl aralığı %1$s - %2$s dışındaki tarih
+    </string>
+    <string name="ff_date_input_label">Tarih</string>
+    <string name="ff_date_input_no_input_description">Hiçbiri</string>
+    <string name="ff_date_input_title">Tarih seç</string>
+    <string name="ff_date_picker_headline">"Seçilen tarih"</string>
+    <string name="ff_date_picker_headline_description">Mevcut seçim: %1$s</string>
+    <string name="ff_date_picker_navigate_to_year_description">%1$s yılına git</string>
+    <string name="ff_date_picker_no_selection_description">Hiçbiri</string>
+    <string name="ff_date_picker_scroll_to_earlier_years">Önceki yılları göstermek için kaydır</string>
+    <string name="ff_date_picker_scroll_to_later_years">Sonraki yılları göstermek için kaydır</string>
+    <string name="ff_date_picker_switch_to_calendar_mode">Takvim giriş moduna geçin</string>
+    <string name="ff_date_picker_switch_to_day_selection">
+        "Yıl seçmek için kaydırın veya gün seçmeye geri dönmek için dokunun"
+    </string>
+    <string name="ff_date_picker_switch_to_input_mode">Metin giriş moduna geçin</string>
+    <string name="ff_date_picker_switch_to_next_month">"Sonraki aya değiştir"</string>
+    <string name="ff_date_picker_switch_to_previous_month">"Önceki aya değiştir"</string>
+    <string name="ff_date_picker_switch_to_year_selection">"Yıl seçimine değiştir"</string>
+    <string name="ff_date_picker_title">"Tarih seç"</string>
+    <string name="ff_date_picker_today_description">Bugün</string>
+    <string name="ff_date_picker_year_picker_pane_title">Yıl seçici görünür</string>
+    <string name="ff_date_range_input_invalid_range_input">Geçersiz tarih aralığı girdisi</string>
+    <string name="ff_date_range_input_title">Tarihleri gir</string>
+    <string name="ff_date_range_picker_day_in_range">Aralık içinde</string>
+    <string name="ff_date_range_picker_end_headline">Bitiş tarihi</string>
+    <string name="ff_date_range_picker_scroll_to_next_month">Sonraki ayı göstermek için kaydır</string>
+    <string name="ff_date_range_picker_scroll_to_previous_month">Önceki ayı göstermek için kaydır</string>
+    <string name="ff_date_range_picker_start_headline">Başlangıç tarihi</string>
+    <string name="ff_date_range_picker_title">Tarihleri seç</string>
+
+    <!-- Time Picker string values -->
+    <string name="ff_time_picker_am">AM</string>
+    <string name="ff_time_picker_hour">Saat</string>
+    <string name="ff_time_picker_hour_24h_suffix">%1$d saat</string>
+    <string name="ff_time_picker_hour_selection">Saat seç</string>
+    <string name="ff_time_picker_hour_suffix">%1$d o\'saat</string>
+    <string name="ff_time_picker_hour_text_field">saat için</string>
+    <string name="ff_time_picker_minute">Dakika</string>
+    <string name="ff_time_picker_minute_selection">Dakika seç</string>
+    <string name="ff_time_picker_minute_suffix">%1$d dakika</string>
+    <string name="ff_time_picker_minute_text_field">dakika için</string>
+    <string name="ff_time_picker_period_toggle_description">AM veya PM olarak seç</string>
+    <string name="ff_time_picker_pm">PM</string>
+    <string name="take_photo">Fotoğraf Çek</string>
+    <string name="add_photo">Fotoğraf Ekle</string>
+    <string name="rename">Yeniden Adlandır</string>
+    <string name="delete">Sil</string>
+    <string name="rename_attachment">Eki Yeniden Adlandır</string>
+    <string name="name">Adı</string>
+</resources>

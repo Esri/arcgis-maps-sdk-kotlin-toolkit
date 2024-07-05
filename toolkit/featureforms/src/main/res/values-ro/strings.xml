@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~
+  ~  Copyright 2023 Esri
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  ~
+  --><resources>
+    <string name="enter_n_chars">Introduceți %1$d caractere</string>
+    <string name="enter_min_to_max_chars">Introduceți %1$d până la %2$d caractere</string>
+    <string name="maximum_n_chars">Maximum %1$d (de) caractere</string>
+    <string name="no_value">Fără valori</string>
+    <string name="enter_value">Introduceți o valoare</string>
+    <string name="required">Obligatoriu</string>
+    <string name="today">Astăzi</string>
+    <string name="now">Acum</string>
+    <string name="cancel">Anulare</string>
+    <string name="ok">OK</string>
+    <string name="done">Gata</string>
+    <string name="filter">Filtru %1$s</string>
+    <string name="numeric_range_helper_text">Introduceți o valoare de la %1$s la %2$s</string>
+    <string name="less_than_min_value">Mai puțin decât valoarea minimă %1$s</string>
+    <string name="exceeds_max_value">Depășește valoarea maximă %1$s</string>
+    <string name="value_must_be_a_whole_number">Valoarea trebuie să fie un număr întreg</string>
+    <string name="value_must_be_a_number">Valoarea trebuie să fie un număr</string>
+    <string name="value_must_be_within_domain">Valoarea trebuie să se încadreze în domeniu</string>
+    <string name="value_must_not_be_empty">Valoarea nu trebuie să fie goală</string>
+    <string name="min_datetime_helper_text">Data trebuie să fie la sau după %1$s</string>
+    <string name="max_datetime_helper_text">Data trebuie să fie la sau înainte de %1$s</string>
+
+    <!-- Date Picker string values -->
+    <string name="ff_date_input_headline">Data intrării</string>
+    <string name="ff_date_input_headline_description">Data intrării: %1$s</string>
+    <string name="ff_date_input_invalid_for_pattern">Data nu corespunde cu modelul preconizat: %1$s</string>
+    <string name="ff_date_input_invalid_not_allowed">Data nu este permisă: %1$s</string>
+    <string name="ff_date_input_invalid_year_range">
+        Data este în afara intervalului anual preconizat %1$s - %2$s
+    </string>
+    <string name="ff_date_input_label">Dată</string>
+    <string name="ff_date_input_no_input_description">Niciunul</string>
+    <string name="ff_date_input_title">Selectare dată</string>
+    <string name="ff_date_picker_headline">„Data selectată”</string>
+    <string name="ff_date_picker_headline_description">Selecția curentă: %1$s</string>
+    <string name="ff_date_picker_navigate_to_year_description">Navigați la anul %1$s</string>
+    <string name="ff_date_picker_no_selection_description">Niciunul</string>
+    <string name="ff_date_picker_scroll_to_earlier_years">Derulați pentru afișarea anilor anteriori</string>
+    <string name="ff_date_picker_scroll_to_later_years">Derulați pentru afișarea anilor ulteriori</string>
+    <string name="ff_date_picker_switch_to_calendar_mode">Comutați la modul de introducere în calendar</string>
+    <string name="ff_date_picker_switch_to_day_selection">
+        „Glisați pentru a selecta un an sau atingeți pentru a comuta înapoi la selectarea unei zile”
+    </string>
+    <string name="ff_date_picker_switch_to_input_mode">Comutați la modul de introducere text</string>
+    <string name="ff_date_picker_switch_to_next_month">„Schimbați la luna următoare”</string>
+    <string name="ff_date_picker_switch_to_previous_month">„Schimbați la luna anterioară”</string>
+    <string name="ff_date_picker_switch_to_year_selection">„Comutați la selectarea unui an”</string>
+    <string name="ff_date_picker_title">„Selectare dată”</string>
+    <string name="ff_date_picker_today_description">Astăzi</string>
+    <string name="ff_date_picker_year_picker_pane_title">Selector an vizibil</string>
+    <string name="ff_date_range_input_invalid_range_input">Introducere interval dată nevalid</string>
+    <string name="ff_date_range_input_title">Intrare date</string>
+    <string name="ff_date_range_picker_day_in_range">În interval</string>
+    <string name="ff_date_range_picker_end_headline">Data terminării</string>
+    <string name="ff_date_range_picker_scroll_to_next_month">Derulați pentru a afișa luna următoare</string>
+    <string name="ff_date_range_picker_scroll_to_previous_month">Derulați pentru a afișa luna anterioară</string>
+    <string name="ff_date_range_picker_start_headline">Data începerii</string>
+    <string name="ff_date_range_picker_title">Selectare date</string>
+
+    <!-- Time Picker string values -->
+    <string name="ff_time_picker_am">AM</string>
+    <string name="ff_time_picker_hour">Oră</string>
+    <string name="ff_time_picker_hour_24h_suffix">%1$d ore</string>
+    <string name="ff_time_picker_hour_selection">Selectare oră</string>
+    <string name="ff_time_picker_hour_suffix">Ora %1$d</string>
+    <string name="ff_time_picker_hour_text_field">pentru oră</string>
+    <string name="ff_time_picker_minute">Minut</string>
+    <string name="ff_time_picker_minute_selection">Selectare minute</string>
+    <string name="ff_time_picker_minute_suffix">%1$d minute</string>
+    <string name="ff_time_picker_minute_text_field">pentru minute</string>
+    <string name="ff_time_picker_period_toggle_description">Selectați AM șu PM</string>
+    <string name="ff_time_picker_pm">PM</string>
+    <string name="take_photo">Realizare fotografie</string>
+    <string name="add_photo">Adăugare fotografie</string>
+    <string name="rename">Redenumire</string>
+    <string name="delete">Ștergere</string>
+    <string name="rename_attachment">Redenumire atașament</string>
+    <string name="name">Nume</string>
+</resources>

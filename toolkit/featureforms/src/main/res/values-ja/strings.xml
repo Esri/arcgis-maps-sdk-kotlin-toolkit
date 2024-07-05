@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~
+  ~  Copyright 2023 Esri
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  ~
+  --><resources>
+    <string name="enter_n_chars">%1$d 文字を入力します</string>
+    <string name="enter_min_to_max_chars">%1$d ～ %2$d 文字で入力してください</string>
+    <string name="maximum_n_chars">最大 %1$d 文字</string>
+    <string name="no_value">値なし</string>
+    <string name="enter_value">値を入力</string>
+    <string name="required">必須</string>
+    <string name="today">今日</string>
+    <string name="now">現在</string>
+    <string name="cancel">キャンセル</string>
+    <string name="ok">OK</string>
+    <string name="done">終了</string>
+    <string name="filter">フィルター %1$s</string>
+    <string name="numeric_range_helper_text">%1$s ～ %2$s の値を入力してください</string>
+    <string name="less_than_min_value">最小値 %1$s 未満です</string>
+    <string name="exceeds_max_value">最大値 %1$s を超えています</string>
+    <string name="value_must_be_a_whole_number">整数を使用してください</string>
+    <string name="value_must_be_a_number">値を数値にする必要があります</string>
+    <string name="value_must_be_within_domain">値はドメイン内である必要があります</string>
+    <string name="value_must_not_be_empty">値は空にしてはなりません</string>
+    <string name="min_datetime_helper_text">日付は %1$s かそれ以降にする必要があります</string>
+    <string name="max_datetime_helper_text">日付は %1$s かそれ以前にする必要があります</string>
+
+    <!-- Date Picker string values -->
+    <string name="ff_date_input_headline">入力された日付</string>
+    <string name="ff_date_input_headline_description">入力された日付: %1$s</string>
+    <string name="ff_date_input_invalid_for_pattern">日付は予測されるパターンに一致しません: %1$s</string>
+    <string name="ff_date_input_invalid_not_allowed">日付は許可されていません: %1$s</string>
+    <string name="ff_date_input_invalid_year_range">
+        日付は予測される年の範囲 %1$s ～ %2$s を超えています
+    </string>
+    <string name="ff_date_input_label">日付</string>
+    <string name="ff_date_input_no_input_description">なし</string>
+    <string name="ff_date_input_title">日付の選択</string>
+    <string name="ff_date_picker_headline">"選択した日付"</string>
+    <string name="ff_date_picker_headline_description">現在の選択: %1$s</string>
+    <string name="ff_date_picker_navigate_to_year_description">%1$s 年に移動</string>
+    <string name="ff_date_picker_no_selection_description">なし</string>
+    <string name="ff_date_picker_scroll_to_earlier_years">スクロールして前の年を表示</string>
+    <string name="ff_date_picker_scroll_to_later_years">スクロールして次の年を表示</string>
+    <string name="ff_date_picker_switch_to_calendar_mode">カレンダー入力モードに切り替え</string>
+    <string name="ff_date_picker_switch_to_day_selection">
+        "スワイプして年を選択するか、タップして日付の選択に戻る"
+    </string>
+    <string name="ff_date_picker_switch_to_input_mode">テキスト入力モードに切り替え</string>
+    <string name="ff_date_picker_switch_to_next_month">"次月に変更"</string>
+    <string name="ff_date_picker_switch_to_previous_month">"前月に変更"</string>
+    <string name="ff_date_picker_switch_to_year_selection">"年の選択に切り替え"</string>
+    <string name="ff_date_picker_title">"日付の選択"</string>
+    <string name="ff_date_picker_today_description">今日</string>
+    <string name="ff_date_picker_year_picker_pane_title">年選択を表示</string>
+    <string name="ff_date_range_input_invalid_range_input">日付範囲の入力が無効です</string>
+    <string name="ff_date_range_input_title">日付の入力</string>
+    <string name="ff_date_range_picker_day_in_range">範囲内</string>
+    <string name="ff_date_range_picker_end_headline">終了日</string>
+    <string name="ff_date_range_picker_scroll_to_next_month">スクロールして次月を表示</string>
+    <string name="ff_date_range_picker_scroll_to_previous_month">スクロールして前月を表示</string>
+    <string name="ff_date_range_picker_start_headline">開始日</string>
+    <string name="ff_date_range_picker_title">日付の選択</string>
+
+    <!-- Time Picker string values -->
+    <string name="ff_time_picker_am">AM</string>
+    <string name="ff_time_picker_hour">時間</string>
+    <string name="ff_time_picker_hour_24h_suffix">%1$d 時間</string>
+    <string name="ff_time_picker_hour_selection">時の選択</string>
+    <string name="ff_time_picker_hour_suffix">%1$d 時</string>
+    <string name="ff_time_picker_hour_text_field">時</string>
+    <string name="ff_time_picker_minute">分</string>
+    <string name="ff_time_picker_minute_selection">分の選択</string>
+    <string name="ff_time_picker_minute_suffix">%1$d 分</string>
+    <string name="ff_time_picker_minute_text_field">分</string>
+    <string name="ff_time_picker_period_toggle_description">AM/PM の選択</string>
+    <string name="ff_time_picker_pm">PM</string>
+    <string name="take_photo">写真の撮影</string>
+    <string name="add_photo">写真の追加</string>
+    <string name="rename">名前の変更</string>
+    <string name="delete">削除</string>
+    <string name="rename_attachment">添付ファイル名の変更</string>
+    <string name="name">名前</string>
+</resources>
