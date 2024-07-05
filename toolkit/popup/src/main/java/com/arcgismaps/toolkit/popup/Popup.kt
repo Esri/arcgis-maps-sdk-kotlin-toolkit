@@ -188,67 +188,72 @@ private fun Popup(popupState: PopupState, initialized: Boolean, refreshed: Boole
 }
 
 @Composable
-private fun PopupBody(popupState: PopupState, refreshed: Boolean, onFileClicked: (ViewableFile) -> Unit = {}) {
+private fun PopupBody(
+    popupState: PopupState,
+    refreshed: Boolean,
+    onFileClicked: (ViewableFile) -> Unit = {}
+) {
     val popup = popupState.popup
     val lazyListState = rememberLazyListState()
     val states = rememberStates(popup, attachments)
-    AnimatedVisibility(
-        visible = refreshed,
-        enter = fadeIn(
-            animationSpec = spring(stiffness = Spring.StiffnessHigh)
-        ),
-        exit = fadeOut(
-            animationSpec = spring(stiffness = Spring.StiffnessLow),
-            targetAlpha = 0.5f
-        )
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .semantics { contentDescription = "lazy column" },
+        state = lazyListState
     ) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .semantics { contentDescription = "lazy column" },
-            state = lazyListState
-        ) {
-            states.forEach { entry ->
-                val element = entry.popupElement
-                when (element) {
-                    is TextPopupElement -> {
-                        // a contentType is needed to reuse the TextPopupElement composable inside a LazyColumn
-                        item(contentType = TextPopupElement::class.java) {
-                            TextPopupElement(
-                                entry.state as TextElementState
-                            )
-                        }
+        states.forEach { entry ->
+            val element = entry.popupElement
+            when (element) {
+                is TextPopupElement -> {
+                    // a contentType is needed to reuse the TextPopupElement composable inside a LazyColumn
+                    item(contentType = TextPopupElement::class.java) {
+                        TextPopupElement(
+                            entry.state as TextElementState
+                        )
                     }
+                }
 
-                    is AttachmentsPopupElement -> {
-                        item(contentType = AttachmentsPopupElement::class.java) {
-                            AttachmentsPopupElement(
-                                state = entry.state as AttachmentsElementState,
-                                onSelectedAttachment = onFileClicked
-                            )
-                        }
+                is AttachmentsPopupElement -> {
+                    item(contentType = AttachmentsPopupElement::class.java) {
+                        AttachmentsPopupElement(
+                            state = entry.state as AttachmentsElementState,
+                            onSelectedAttachment = onFileClicked
+                        )
                     }
+                }
 
-                    is FieldsPopupElement -> {
-                        item(contentType = FieldsPopupElement::class.java) {
+                is FieldsPopupElement -> {
+                    item(contentType = FieldsPopupElement::class.java) {
+                        AnimatedVisibility(
+                            visible = refreshed,
+                            enter = fadeIn(
+                                animationSpec = spring(stiffness = Spring.StiffnessHigh)
+                            ),
+                            exit = fadeOut(
+                                animationSpec = spring(stiffness = Spring.StiffnessLow),
+                                targetAlpha = 0.5f
+                            )
+                        ) {
                             FieldsPopupElement(
                                 entry.state as FieldsElementState,
                             )
                         }
                     }
+                }
 
-                    is MediaPopupElement -> {
-                        item(contentType = MediaPopupElement::class.java) {
-                            MediaPopupElement(
-                                entry.state as MediaElementState,
-                                onClickedMedia = onFileClicked
-                            )
-                        }
+                is MediaPopupElement -> {
+                    item(contentType = MediaPopupElement::class.java) {
+                        MediaPopupElement(
+                            entry.state as MediaElementState,
+                            onClickedMedia = onFileClicked
+                        )
                     }
+                }
 
-                    else -> {
-                        // other popup elements are not created
-                    }
+                else -> {
+                    // other popup elements are not created
                 }
             }
         }
