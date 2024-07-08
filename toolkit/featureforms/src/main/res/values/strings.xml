@@ -109,4 +109,6 @@
     <string name="attachment_error">Error Adding Attachment</string>
     <string name="no_app_found">No application found to open this file type.</string>
     <string name="attachment_too_large">The File is too large. Please add a file less than 50 MB.</string>
+    <string name="attachment_is_empty">Empty files are not supported</string>
+    <string name="download_empty_file">Empty files cannot be downloaded</string>
 </resources>

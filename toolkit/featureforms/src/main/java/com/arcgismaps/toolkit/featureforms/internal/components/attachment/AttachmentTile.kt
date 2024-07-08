@@ -219,8 +219,13 @@ internal fun AttachmentTile(
                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         // handle single tap
                         if (loadStatus is LoadStatus.NotLoaded || loadStatus is LoadStatus.FailedToLoad) {
-                            // load attachment
-                            state.loadWithParentScope()
+                            if (state.size > 0) {
+                                // load attachment
+                                state.loadWithParentScope()
+                            } else {
+                                // show an error toast if the attachment is empty
+                                Toast.makeText(context, context.getString(R.string.download_empty_file), Toast.LENGTH_SHORT).show()
+                            }
                         } else if (loadStatus is LoadStatus.Loaded) {
                             // open attachment
                             val intent = Intent()
