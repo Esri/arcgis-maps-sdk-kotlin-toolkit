@@ -27,6 +27,10 @@
     </plurals>
     <string name="enter_min_to_max_chars">Enter %1$d to %2$d characters</string>
     <string name="value_must_be_from_to_characters">Value must be %1$d to %2$d characters</string>
+    <plurals name="maximum_n_chars">
+        <item quantity="one">Maximum %1$d character</item>
+        <item quantity="other">Maximum %1$d characters</item>
+    </plurals>
     <string name="maximum_n_chars">Maximum %1$d characters</string>
     <string name="no_value">No value</string>
     <string name="enter_value">Enter Value</string>
