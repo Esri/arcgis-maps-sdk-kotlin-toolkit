@@ -1,8 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
     <string name="floor_filter_view_filter_hint_sites">Filtruj miejsca…</string>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
     <string name="floor_filter_view_filter_hint_facilities">Filtruj placówki…</string>
+    <!-- This text is a label on a text field that can fit 24 chars -->
     <string name="floor_filter_select_site">Wybierz miejsce</string>
+    <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Wybierz placówkę</string>
     <string name="floor_filter_no_results">Nie znaleziono wyników.</string>
-    <string name="floor_filter_site_selector_top_bar">Miejsce\u0020-\u0020</string>
+    <string name="not_available">Niedostępne</string>
+    <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
+    <string name="floor_filter_site_selector_top_bar">Miejsce – %1$s</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_facility_button">Przycisk miejsc i infrastruktury</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="floor_level_select_button">Przycisk wyboru poziomu kondygnacji</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_item">Element miejsca</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="facility_item">Element infrastruktury</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="clear_search">Wyczyść wyszukiwanie</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="close">Zamknij</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="go_back_to_site_selector">Powrót do selektora miejsc</string>
 </resources>

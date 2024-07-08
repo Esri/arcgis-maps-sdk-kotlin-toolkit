@@ -1,8 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
     <string name="floor_filter_view_filter_hint_sites">Filtra els llocs…</string>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
     <string name="floor_filter_view_filter_hint_facilities">Filtra les instal·lacions…</string>
+    <!-- This text is a label on a text field that can fit 24 chars -->
     <string name="floor_filter_select_site">Seleccioneu un lloc</string>
+    <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Seleccioneu una instal·lació</string>
     <string name="floor_filter_no_results">No s\'ha trobat cap resultat.</string>
-    <string name="floor_filter_site_selector_top_bar">Lloc\u0020-\u0020</string>
+    <string name="not_available">No està disponible</string>
+    <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
+    <string name="floor_filter_site_selector_top_bar">Lloc: %1$s</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_facility_button">Botó de llocs i instal·lacions</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="floor_level_select_button">Botó de selecció de la planta</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_item">Element de lloc</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="facility_item">Element d\'instal·lació</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="clear_search">Esborra la cerca</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="close">Tanca</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="go_back_to_site_selector">Torna al selector de llocs</string>
 </resources>

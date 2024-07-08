@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~
+  ~  Copyright 2023 Esri
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  ~
+  --><resources>
+    <string name="enter_n_chars">Digitare %1$d caratteri</string>
+    <string name="enter_min_to_max_chars">Digitare%1$d a%2$d caratteri</string>
+    <string name="maximum_n_chars">Caratteri %1$d massimi</string>
+    <string name="no_value">Nessun valore</string>
+    <string name="enter_value">Inserisci valore</string>
+    <string name="required">Richiesti</string>
+    <string name="today">Oggi</string>
+    <string name="now">Adesso</string>
+    <string name="cancel">Annulla</string>
+    <string name="ok">OK</string>
+    <string name="done">Completato</string>
+    <string name="filter">Filtro %1$s</string>
+    <string name="numeric_range_helper_text">Inserire valore da%1$s a %2$s</string>
+    <string name="less_than_min_value">Minore del valore minimo %1$s</string>
+    <string name="exceeds_max_value">Supera il valore massimo %1$s</string>
+    <string name="value_must_be_a_whole_number">Il valore deve essere un numero intero</string>
+    <string name="value_must_be_a_number">Il valore deve essere un numero</string>
+    <string name="value_must_be_within_domain">Il valore deve rientrare nel dominio</string>
+    <string name="value_must_not_be_empty">Il valore non deve essere vuoto</string>
+    <string name="min_datetime_helper_text">La data deve essere corrispondente o successiva a %1$s</string>
+    <string name="max_datetime_helper_text">La data deve corrispondere o essere antecedente a %1$s</string>
+
+    <!-- Date Picker string values -->
+    <string name="ff_date_input_headline">Data inserita</string>
+    <string name="ff_date_input_headline_description">Data inserita: %1$s</string>
+    <string name="ff_date_input_invalid_for_pattern">La data non corrisponde al modello previsto: %1$s</string>
+    <string name="ff_date_input_invalid_not_allowed">Data non consentita: %1$s</string>
+    <string name="ff_date_input_invalid_year_range">
+        Data esterna all\'intervallo dell\'anno previsto %1$s - %2$s
+    </string>
+    <string name="ff_date_input_label">Data</string>
+    <string name="ff_date_input_no_input_description">Nessuno</string>
+    <string name="ff_date_input_title">Selezionare data</string>
+    <string name="ff_date_picker_headline">"Data selezionata"</string>
+    <string name="ff_date_picker_headline_description">Selezione corrente: %1$s</string>
+    <string name="ff_date_picker_navigate_to_year_description">Sposta all\'anno %1$s</string>
+    <string name="ff_date_picker_no_selection_description">Nessuno</string>
+    <string name="ff_date_picker_scroll_to_earlier_years">Scorrere per mostrare gli anni precedenti</string>
+    <string name="ff_date_picker_scroll_to_later_years">Scorrere per mostrare gli anni successivi</string>
+    <string name="ff_date_picker_switch_to_calendar_mode">Passa alla modalità di input calendario</string>
+    <string name="ff_date_picker_switch_to_day_selection">
+        "Trascinare per selezionare un anno, oppure premere per tornare alla selezione del giorno"
+    </string>
+    <string name="ff_date_picker_switch_to_input_mode">Passa alla modalità di input testo</string>
+    <string name="ff_date_picker_switch_to_next_month">"Cambia al mese successivo"</string>
+    <string name="ff_date_picker_switch_to_previous_month">"Cambia al mese precedente"</string>
+    <string name="ff_date_picker_switch_to_year_selection">"Passa alla selezione dell\'anno"</string>
+    <string name="ff_date_picker_title">"Seleziona data"</string>
+    <string name="ff_date_picker_today_description">Oggi</string>
+    <string name="ff_date_picker_year_picker_pane_title">Selettore anno visibile</string>
+    <string name="ff_date_range_input_invalid_range_input">Input di intervallo di date non valido</string>
+    <string name="ff_date_range_input_title">Inserire le date</string>
+    <string name="ff_date_range_picker_day_in_range">Nell\'intervallo</string>
+    <string name="ff_date_range_picker_end_headline">Data di fine</string>
+    <string name="ff_date_range_picker_scroll_to_next_month">Scorrere per mostrare il mese successivo</string>
+    <string name="ff_date_range_picker_scroll_to_previous_month">Scorrere per mostrare il mese precedente</string>
+    <string name="ff_date_range_picker_start_headline">Data di inizio</string>
+    <string name="ff_date_range_picker_title">Selezionare le date</string>
+
+    <!-- Time Picker string values -->
+    <string name="ff_time_picker_am">AM</string>
+    <string name="ff_time_picker_hour">Ora</string>
+    <string name="ff_time_picker_hour_24h_suffix">%1$d ore</string>
+    <string name="ff_time_picker_hour_selection">Selezionare l\'ora</string>
+    <string name="ff_time_picker_hour_suffix">%1$d in punto</string>
+    <string name="ff_time_picker_hour_text_field">per ora</string>
+    <string name="ff_time_picker_minute">Minuto</string>
+    <string name="ff_time_picker_minute_selection">Selezionare i minuti</string>
+    <string name="ff_time_picker_minute_suffix">%1$d minuti</string>
+    <string name="ff_time_picker_minute_text_field">per minuti</string>
+    <string name="ff_time_picker_period_toggle_description">Selezionare AM o PM</string>
+    <string name="ff_time_picker_pm">PM</string>
+    <string name="take_photo">Scatta una foto</string>
+    <string name="add_photo">Aggiungi foto</string>
+    <string name="rename">Rinomina</string>
+    <string name="delete">Elimina</string>
+    <string name="rename_attachment">Rinomina allegato</string>
+    <string name="name">Nome</string>
+</resources>
