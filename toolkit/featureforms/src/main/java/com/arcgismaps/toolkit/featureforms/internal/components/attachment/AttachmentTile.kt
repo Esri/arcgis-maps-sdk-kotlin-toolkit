@@ -221,6 +221,11 @@ internal fun AttachmentTile(
                         if (loadStatus is LoadStatus.NotLoaded || loadStatus is LoadStatus.FailedToLoad) {
                             // load attachment
                             state.loadWithParentScope()
+                            if (state.size == 0L) {
+                                // show an error toast if the attachment is empty since the load
+                                // will likely fail
+                                Toast.makeText(context, context.getString(R.string.download_empty_file), Toast.LENGTH_SHORT).show()
+                            }
                         } else if (loadStatus is LoadStatus.Loaded) {
                             // open attachment
                             val intent = Intent()
