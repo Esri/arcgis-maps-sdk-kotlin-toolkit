@@ -88,7 +88,6 @@
     <string name="ff_time_picker_period_toggle_description">DE/DU kiválasztása</string>
     <string name="ff_time_picker_pm">DU</string>
     <string name="take_photo">Fénykép készítése</string>
-    <string name="add_photo">Fénykép hozzáadása</string>
     <string name="rename">Átnevezés</string>
     <string name="delete">Törlés</string>
     <string name="rename_attachment">Csatolmány átnevezése</string>

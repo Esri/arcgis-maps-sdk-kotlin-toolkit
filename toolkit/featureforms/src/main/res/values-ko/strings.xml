@@ -88,7 +88,6 @@
     <string name="ff_time_picker_period_toggle_description">오전 또는 오후 선택</string>
     <string name="ff_time_picker_pm">오후</string>
     <string name="take_photo">사진 촬영</string>
-    <string name="add_photo">사진 추가</string>
     <string name="rename">이름 바꾸기</string>
     <string name="delete">삭제</string>
     <string name="rename_attachment">첨부 파일 이름 바꾸기</string>
