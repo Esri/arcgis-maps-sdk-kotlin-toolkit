@@ -361,7 +361,7 @@ internal fun computeWindowSizeClasses(context: Context): WindowSizeClass {
 }
 
 internal fun showError(context: Context, message: String) {
-    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+    Toast.makeText(context, message, Toast.LENGTH_LONG).show()
 }
 
 /**
@@ -408,7 +408,9 @@ private suspend fun AttachmentElementState.addAttachmentFromUri(
         }
     }
     // check if the size is within the limit of 50 MB
-    return@withContext if (size > 50_000_000) {
+    return@withContext if (size == 0L) {
+        Result.failure(Exception(context.getString(R.string.attachment_is_empty)))
+    } else if (size > 50_000_000) {
         Result.failure(Exception(context.getString(R.string.attachment_too_large)))
     } else {
         var result = Result.success(Unit)

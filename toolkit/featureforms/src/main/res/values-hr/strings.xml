@@ -88,7 +88,6 @@
     <string name="ff_time_picker_period_toggle_description">Odaberi AM ili PM</string>
     <string name="ff_time_picker_pm">Popodne</string>
     <string name="take_photo">Snimi fotografiju</string>
-    <string name="add_photo">Dodaj fotografiju</string>
     <string name="rename">Preimenuj</string>
     <string name="delete">Izbriši</string>
     <string name="rename_attachment">Preimenuj privitak</string>
