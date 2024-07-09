@@ -120,11 +120,11 @@ private fun Popup(popupState: PopupState, modifier: Modifier = Modifier) {
     var refreshed by rememberSaveable(dynamicEntity) { mutableStateOf(true) }
     if (dynamicEntity != null) {
         LaunchedEffect(popup) {
-            dynamicEntity.dynamicEntityChangedEvent.collect { info ->
+            dynamicEntity.dynamicEntityChangedEvent.collect {
                 refreshed = false
                 // briefly show the initializing screen so it is clear the entity just pulsed
                 // and values may have changed.
-                delay(400)
+                delay(300)
                 popupState.popup.evaluateExpressions()
                 refreshed = true
             }

@@ -92,7 +92,6 @@ class MapViewModel(
 
     val proxy: MapViewProxy = MapViewProxy()
 
-
     init {
         coroutineScope.launch {
             map.load()
