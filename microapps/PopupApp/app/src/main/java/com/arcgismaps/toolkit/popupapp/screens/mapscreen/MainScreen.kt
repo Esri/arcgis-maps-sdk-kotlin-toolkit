@@ -41,6 +41,8 @@ import com.arcgismaps.data.Feature
 import com.arcgismaps.mapping.GeoElement
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.layers.Layer
+import com.arcgismaps.mapping.popup.Popup
+import com.arcgismaps.realtime.DynamicEntityObservation
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import com.arcgismaps.toolkit.popup.Popup
 import kotlinx.coroutines.Dispatchers
@@ -117,52 +119,67 @@ fun MainScreen(viewModel: MapViewModel) {
                             }
                         } else {
                             try {
-                                results.forEach { result ->
-                                    result.popups.first().also {
-                                        val newLayer = result.layerContent
-                                        val newGeoElement = it.geoElement
+                                val result = results.first()
+                                var popup = result.popups.first()
+                                val newLayer = result.layerContent
+                                var newGeoElement = popup.geoElement
 
-                                        if (viewModel.geoElement.sameSelection(newGeoElement)) {
-                                            withContext(Dispatchers.Main) {
-                                                Toast.makeText(
-                                                    context,
-                                                    "the same GeoElement was selected",
-                                                    Toast.LENGTH_LONG
-                                                ).show()
+                                // if the identified GeoElement is a DynamicEntityObservation,
+                                // get the underlying DynamicEntity and create a new Popup with
+                                // the same definition.
+                                if (newGeoElement is DynamicEntityObservation && newGeoElement.dynamicEntity != null) {
+                                    val dynamicEntity = newGeoElement.dynamicEntity
+                                    if (dynamicEntity != null) {
+                                        newGeoElement = dynamicEntity
+                                        popup = Popup(
+                                            newGeoElement,
+                                            popup.popupDefinition
+                                        )
+                                    }
+                                }
+
+                                if (viewModel.geoElement.sameSelection(newGeoElement)) {
+                                    withContext(Dispatchers.Main) {
+                                        Toast.makeText(
+                                            context,
+                                            "the same GeoElement was selected",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }
+                                } else {
+                                    unselectFeature(
+                                        viewModel.geoElement,
+                                        viewModel.layer
+                                    )
+
+                                    when (newLayer) {
+                                        is FeatureLayer -> {
+                                            // the Popup exists on a FeatureLayer
+                                            if (newGeoElement is Feature) {
+                                                // the tap was on a Feature
+                                                // unselect any previously selected Feature
+                                                newLayer.selectFeature(newGeoElement)
                                             }
-                                        } else {
-                                            unselectFeature(viewModel.geoElement, viewModel.layer)
+                                            // otherwise the tap was on some non-Feature GeoElement
+                                            viewModel.setLayer(newLayer)
+                                            viewModel.setGeoElement(newGeoElement)
+                                        }
 
-                                            when (newLayer) {
-                                                is FeatureLayer -> {
-                                                    // the Popup exists on a FeatureLayer
-                                                    if (newGeoElement is Feature) {
-                                                        // the tap was on a Feature
-                                                        // unselect any previously selected Feature
-                                                        newLayer.selectFeature(newGeoElement)
-                                                    }
-                                                    // otherwise the tap was on some non-Feature GeoElement
-                                                    viewModel.setLayer(newLayer)
-                                                    viewModel.setGeoElement(newGeoElement)
-                                                }
+                                        is Layer -> {
+                                            // the popup exists on a non-FeatureLayer
+                                            viewModel.setLayer(newLayer)
+                                            viewModel.setGeoElement(newGeoElement)
+                                        }
 
-                                                is Layer -> {
-                                                    // the popup exists on a non-FeatureLayer
-                                                    viewModel.setLayer(newLayer)
-                                                    viewModel.setGeoElement(newGeoElement)
-                                                }
-
-                                                else -> {
-                                                    // the popup exists on a sublayer, which is a complication
-                                                    // that doesn't offer any testing value for the Popup
-                                                    // toolkit component.
-                                                    throw IllegalStateException("popups on sublayers are not supported by the PopupApp")
-                                                }
-                                            }
-                                            viewModel.setPopup(it)
-                                            scaffoldState.bottomSheetState.expand()
+                                        else -> {
+                                            // the popup exists on a sublayer, which is a complication
+                                            // that doesn't offer any testing value for the Popup
+                                            // toolkit component.
+                                            throw IllegalStateException("popups on sublayers are not supported by the PopupApp")
                                         }
                                     }
+                                    viewModel.setPopup(popup)
+                                    scaffoldState.bottomSheetState.expand()
                                 }
                             } catch (e: Exception) {
                                 e.printStackTrace()

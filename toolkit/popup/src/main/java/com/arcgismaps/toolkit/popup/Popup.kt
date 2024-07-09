@@ -18,7 +18,12 @@
 
 package com.arcgismaps.toolkit.popup
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -53,6 +58,7 @@ import com.arcgismaps.mapping.popup.MediaPopupElement
 import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.mapping.popup.PopupAttachment
 import com.arcgismaps.mapping.popup.TextPopupElement
+import com.arcgismaps.realtime.DynamicEntity
 import com.arcgismaps.toolkit.popup.internal.element.attachment.AttachmentsElementState
 import com.arcgismaps.toolkit.popup.internal.element.attachment.AttachmentsPopupElement
 import com.arcgismaps.toolkit.popup.internal.element.attachment.rememberAttachmentsElementState
@@ -69,6 +75,7 @@ import com.arcgismaps.toolkit.popup.internal.element.textelement.TextPopupElemen
 import com.arcgismaps.toolkit.popup.internal.element.textelement.rememberTextElementState
 import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.FileViewer
 import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ViewableFile
+import kotlinx.coroutines.delay
 
 @Immutable
 private data class PopupState(@Stable val popup: Popup)
@@ -107,9 +114,22 @@ private val attachments: MutableList<PopupAttachment> = mutableListOf()
 @Composable
 private fun Popup(popupState: PopupState, modifier: Modifier = Modifier) {
     val popup = popupState.popup
+    val dynamicEntity = (popup.geoElement as? DynamicEntity)
     var evaluated by rememberSaveable(popup) { mutableStateOf(false) }
     var fetched by rememberSaveable(popup) { mutableStateOf(false) }
-
+    var refreshed by rememberSaveable(dynamicEntity) { mutableStateOf(true) }
+    if (dynamicEntity != null) {
+        LaunchedEffect(popup) {
+            dynamicEntity.dynamicEntityChangedEvent.collect {
+                refreshed = false
+                // briefly show the initializing screen so it is clear the entity just pulsed
+                // and values may have changed.
+                delay(300)
+                popupState.popup.evaluateExpressions()
+                refreshed = true
+            }
+        }
+    }
     LaunchedEffect(popup) {
         popupState.popup.evaluateExpressions()
         if (!fetched) {
@@ -129,11 +149,11 @@ private fun Popup(popupState: PopupState, modifier: Modifier = Modifier) {
         evaluated = true
     }
 
-    Popup(popupState, evaluated && fetched)
+    Popup(popupState, evaluated && fetched, refreshed)
 }
 
 @Composable
-private fun Popup(popupState: PopupState, initialized: Boolean, modifier: Modifier = Modifier) {
+private fun Popup(popupState: PopupState, initialized: Boolean, refreshed: Boolean, modifier: Modifier = Modifier) {
     val scope = rememberCoroutineScope()
     val popup = popupState.popup
     val viewableFileState = rememberSaveable { mutableStateOf<ViewableFile?>(null) }
@@ -160,7 +180,7 @@ private fun Popup(popupState: PopupState, initialized: Boolean, modifier: Modifi
         }
         HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
         if (initialized) {
-            PopupBody(popupState) {
+            PopupBody(popupState, refreshed) {
                 viewableFileState.value = it
             }
         }
@@ -168,10 +188,15 @@ private fun Popup(popupState: PopupState, initialized: Boolean, modifier: Modifi
 }
 
 @Composable
-private fun PopupBody(popupState: PopupState, onFileClicked: (ViewableFile) -> Unit = {}) {
+private fun PopupBody(
+    popupState: PopupState,
+    refreshed: Boolean,
+    onFileClicked: (ViewableFile) -> Unit = {}
+) {
     val popup = popupState.popup
     val lazyListState = rememberLazyListState()
     val states = rememberStates(popup, attachments)
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -201,9 +226,20 @@ private fun PopupBody(popupState: PopupState, onFileClicked: (ViewableFile) -> U
 
                 is FieldsPopupElement -> {
                     item(contentType = FieldsPopupElement::class.java) {
-                        FieldsPopupElement(
-                            entry.state as FieldsElementState,
-                        )
+                        AnimatedVisibility(
+                            visible = refreshed,
+                            enter = fadeIn(
+                                animationSpec = spring(stiffness = Spring.StiffnessHigh)
+                            ),
+                            exit = fadeOut(
+                                animationSpec = spring(stiffness = Spring.StiffnessLow),
+                                targetAlpha = 0.5f
+                            )
+                        ) {
+                            FieldsPopupElement(
+                                entry.state as FieldsElementState,
+                            )
+                        }
                     }
                 }
 

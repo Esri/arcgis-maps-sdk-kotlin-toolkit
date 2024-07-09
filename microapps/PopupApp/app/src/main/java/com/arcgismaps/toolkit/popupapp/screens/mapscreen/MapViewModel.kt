@@ -70,6 +70,8 @@ class MapViewModel(
     private val fourteenersId = "9f3a674e998f461580006e626611f9ad"
     @Suppress("unused")
     private val ranchoId = "dd94764601554f1ea958f2d81906c698"
+    @Suppress("unused")
+    private val streamServiceMap = "aef32323d1f248368b1663cfc938995e"
 
     /**
      * The Popup read by the composition is held as a state variable.
@@ -82,14 +84,10 @@ class MapViewModel(
     val map = ArcGISMap(
         PortalItem(
             Portal.arcGISOnline(Portal.Connection.Authenticated),
-            fourteenersId
+            streamServiceMap
         )
     ).apply {
-        initialViewpoint = Viewpoint(
-            latitude = 34.052235,
-            longitude = -118.243683,
-            scale = 10e6
-        )
+        Viewpoint(40.559691, -111.869001, 150000.0)
     }
 
     val proxy: MapViewProxy = MapViewProxy()
