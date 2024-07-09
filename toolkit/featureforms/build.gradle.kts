@@ -67,6 +67,15 @@ android {
             kotlinOptions.freeCompilerArgs += "-Xexplicit-api=strict"
         }
     }
+
+    /**
+     * Configures the test report for connected (instrumented) tests to be copied to a central
+     * folder in the project's root directory.
+     */
+    testOptions {
+        val connectedTestReportsPath: String by project
+        reportDir = "$connectedTestReportsPath/${project.name}"
+    }
 }
 
 apiValidation {
@@ -82,7 +91,8 @@ apiValidation {
         "com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.ComposableSingletons\$DateTimePickerKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.date.ComposableSingletons\$DatePickerKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.time.ComposableSingletons\$TimePickerKt",
-        "com.arcgismaps.toolkit.featureforms.internal.components.formelement.ComposableSingletons\$AttachmentFormElementKt",
+        "com.arcgismaps.toolkit.featureforms.internal.components.attachment.ComposableSingletons\$AttachmentFormElementKt",
+        "com.arcgismaps.toolkit.featureforms.internal.components.attachment.ComposableSingletons\$AttachmentTileKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.formelement.ComposableSingletons\$GroupElementKt"
     )
     

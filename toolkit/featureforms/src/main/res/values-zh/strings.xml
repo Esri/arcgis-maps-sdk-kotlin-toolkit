@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~
+  ~  Copyright 2023 Esri
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  ~
+  --><resources>
+    <string name="enter_n_chars">输入 %1$d 个字符</string>
+    <string name="enter_min_to_max_chars">输入 %1$d，最多 %2$d 个字符</string>
+    <string name="maximum_n_chars">最多 %1$d 个字符</string>
+    <string name="no_value">无值</string>
+    <string name="enter_value">输入值</string>
+    <string name="required">必需项</string>
+    <string name="today">今天</string>
+    <string name="now">当前时间</string>
+    <string name="cancel">取消</string>
+    <string name="ok">确定</string>
+    <string name="done">完成</string>
+    <string name="filter">过滤 %1$s</string>
+    <string name="numeric_range_helper_text">输入介于 %1$s 和 %2$s 之间的值</string>
+    <string name="less_than_min_value">低于最小值 %1$s</string>
+    <string name="exceeds_max_value">超过最大值 %1$s</string>
+    <string name="value_must_be_a_whole_number">值必须是整数</string>
+    <string name="value_must_be_a_number">值必须是数字</string>
+    <string name="value_must_be_within_domain">值必须在域内</string>
+    <string name="value_must_not_be_empty">值不得为空</string>
+    <string name="min_datetime_helper_text">日期不得早于 %1$s</string>
+    <string name="max_datetime_helper_text">日期不得晚于 %1$s</string>
+
+    <!-- Date Picker string values -->
+    <string name="ff_date_input_headline">已输入日期</string>
+    <string name="ff_date_input_headline_description">已输入日期：%1$s</string>
+    <string name="ff_date_input_invalid_for_pattern">日期与预期模式不匹配：%1$s</string>
+    <string name="ff_date_input_invalid_not_allowed">无效日期：%1$s</string>
+    <string name="ff_date_input_invalid_year_range">
+        日期超出预期年份范围 %1$s - %2$s
+    </string>
+    <string name="ff_date_input_label">日期</string>
+    <string name="ff_date_input_no_input_description">无</string>
+    <string name="ff_date_input_title">选择日期</string>
+    <string name="ff_date_picker_headline">“已选日期”</string>
+    <string name="ff_date_picker_headline_description">当前选择：%1$s</string>
+    <string name="ff_date_picker_navigate_to_year_description">转至 %1$s 年</string>
+    <string name="ff_date_picker_no_selection_description">无</string>
+    <string name="ff_date_picker_scroll_to_earlier_years">滚动查看较早年份</string>
+    <string name="ff_date_picker_scroll_to_later_years">滚动查看较晚年份</string>
+    <string name="ff_date_picker_switch_to_calendar_mode">切换到日历输入模式</string>
+    <string name="ff_date_picker_switch_to_day_selection">
+        “滑动选择年份，或点击后切换到选择日期”
+    </string>
+    <string name="ff_date_picker_switch_to_input_mode">切换到文本输入模式</string>
+    <string name="ff_date_picker_switch_to_next_month">“更改为下个月”</string>
+    <string name="ff_date_picker_switch_to_previous_month">“更改为上个月”</string>
+    <string name="ff_date_picker_switch_to_year_selection">“切换到选择年份”</string>
+    <string name="ff_date_picker_title">“选择日期”</string>
+    <string name="ff_date_picker_today_description">今天</string>
+    <string name="ff_date_picker_year_picker_pane_title">年份选择器可见</string>
+    <string name="ff_date_range_input_invalid_range_input">日期范围无效输入</string>
+    <string name="ff_date_range_input_title">输入日期</string>
+    <string name="ff_date_range_picker_day_in_range">范围内</string>
+    <string name="ff_date_range_picker_end_headline">结束日期</string>
+    <string name="ff_date_range_picker_scroll_to_next_month">滚动显示下个月</string>
+    <string name="ff_date_range_picker_scroll_to_previous_month">滚动显示上个月</string>
+    <string name="ff_date_range_picker_start_headline">开始日期</string>
+    <string name="ff_date_range_picker_title">选择日期</string>
+
+    <!-- Time Picker string values -->
+    <string name="ff_time_picker_am">AM</string>
+    <string name="ff_time_picker_hour">小时</string>
+    <string name="ff_time_picker_hour_24h_suffix">%1$d 小时</string>
+    <string name="ff_time_picker_hour_selection">选择小时</string>
+    <string name="ff_time_picker_hour_suffix">%1$d 点</string>
+    <string name="ff_time_picker_hour_text_field">小时</string>
+    <string name="ff_time_picker_minute">分钟</string>
+    <string name="ff_time_picker_minute_selection">选择分钟</string>
+    <string name="ff_time_picker_minute_suffix">%1$d 分钟</string>
+    <string name="ff_time_picker_minute_text_field">分钟</string>
+    <string name="ff_time_picker_period_toggle_description">选择上午或下午</string>
+    <string name="ff_time_picker_pm">PM</string>
+    <string name="take_photo">拍照</string>
+    <string name="add_photo">添加照片</string>
+    <string name="rename">重命名</string>
+    <string name="delete">删除</string>
+    <string name="rename_attachment">重命名附件</string>
+    <string name="name">名称</string>
+</resources>

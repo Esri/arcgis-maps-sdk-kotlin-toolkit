@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~
+  ~  Copyright 2023 Esri
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  ~
+  --><resources>
+    <string name="enter_n_chars">Wprowadź następującą liczbę znaków: %1$d</string>
+    <string name="enter_min_to_max_chars">Wprowadź od %1$d do %2$d znaków</string>
+    <string name="maximum_n_chars">Maksymalna liczba znaków: %1$d</string>
+    <string name="no_value">Brak wartości</string>
+    <string name="enter_value">Wprowadź wartość</string>
+    <string name="required">Wymagane</string>
+    <string name="today">Dzisiaj</string>
+    <string name="now">Teraz</string>
+    <string name="cancel">Anuluj</string>
+    <string name="ok">OK</string>
+    <string name="done">Wykonano</string>
+    <string name="filter">Filtruj %1$s</string>
+    <string name="numeric_range_helper_text">Wprowadź wartość od %1$s do %2$s</string>
+    <string name="less_than_min_value">Wartość mniejsza niż minimalna %1$s</string>
+    <string name="exceeds_max_value">Przekracza wartość maksymalną %1$s</string>
+    <string name="value_must_be_a_whole_number">Wartość musi być liczbą całkowitą</string>
+    <string name="value_must_be_a_number">Wartość musi być liczbą</string>
+    <string name="value_must_be_within_domain">Wartość musi znajdować się w domenie</string>
+    <string name="value_must_not_be_empty">Wartość nie może być pusta</string>
+    <string name="min_datetime_helper_text">Data musi równa %1$s lub późniejsza</string>
+    <string name="max_datetime_helper_text">Data musi równa %1$s lub wcześniejsza</string>
+
+    <!-- Date Picker string values -->
+    <string name="ff_date_input_headline">Wprowadzona data</string>
+    <string name="ff_date_input_headline_description">Wprowadzona data: %1$s</string>
+    <string name="ff_date_input_invalid_for_pattern">Data nie pasuje do oczekiwanego wzorca: %1$s</string>
+    <string name="ff_date_input_invalid_not_allowed">Niedozwolona data: %1$s</string>
+    <string name="ff_date_input_invalid_year_range">
+        Data poza oczekiwanym zakresem lat %1$s - %2$s
+    </string>
+    <string name="ff_date_input_label">Data</string>
+    <string name="ff_date_input_no_input_description">Brak</string>
+    <string name="ff_date_input_title">Wybierz datę</string>
+    <string name="ff_date_picker_headline">"Wybrana data"</string>
+    <string name="ff_date_picker_headline_description">Bieżący wybór: %1$s</string>
+    <string name="ff_date_picker_navigate_to_year_description">Przejdź do roku %1$s</string>
+    <string name="ff_date_picker_no_selection_description">Brak</string>
+    <string name="ff_date_picker_scroll_to_earlier_years">Przewiń, aby wyświetlić wcześniejsze lata</string>
+    <string name="ff_date_picker_scroll_to_later_years">Przewiń, aby wyświetlić późniejsze lata</string>
+    <string name="ff_date_picker_switch_to_calendar_mode">Przełącz do trybu wprowadzania w kalendarzu</string>
+    <string name="ff_date_picker_switch_to_day_selection">
+        "Przesuń palcem, aby wybrać rok, lub dotknij, aby powrócić do wyboru dnia"
+    </string>
+    <string name="ff_date_picker_switch_to_input_mode">Przełącz do trybu wprowadzania tekstu</string>
+    <string name="ff_date_picker_switch_to_next_month">"Zmień na następny miesiąc"</string>
+    <string name="ff_date_picker_switch_to_previous_month">"Zmień na poprzedni miesiąc"</string>
+    <string name="ff_date_picker_switch_to_year_selection">"Przełącz na wybór roku"</string>
+    <string name="ff_date_picker_title">"Wybierz datę"</string>
+    <string name="ff_date_picker_today_description">Dzisiaj</string>
+    <string name="ff_date_picker_year_picker_pane_title">Okno wyboru roku jest widoczne</string>
+    <string name="ff_date_range_input_invalid_range_input">Wprowadzono nieprawidłowy zakres dat</string>
+    <string name="ff_date_range_input_title">Wprowadź daty</string>
+    <string name="ff_date_range_picker_day_in_range">W zakresie</string>
+    <string name="ff_date_range_picker_end_headline">Data końcowa</string>
+    <string name="ff_date_range_picker_scroll_to_next_month">Przewiń, aby wyświetlić następny miesiąc</string>
+    <string name="ff_date_range_picker_scroll_to_previous_month">Przewiń, aby wyświetlić poprzedni miesiąc</string>
+    <string name="ff_date_range_picker_start_headline">Data początkowa</string>
+    <string name="ff_date_range_picker_title">Wybierz daty</string>
+
+    <!-- Time Picker string values -->
+    <string name="ff_time_picker_am">przed południem</string>
+    <string name="ff_time_picker_hour">Godzina</string>
+    <string name="ff_time_picker_hour_24h_suffix">%1$d godz.</string>
+    <string name="ff_time_picker_hour_selection">Wybierz godzinę</string>
+    <string name="ff_time_picker_hour_suffix">%1$d</string>
+    <string name="ff_time_picker_hour_text_field">dla godziny</string>
+    <string name="ff_time_picker_minute">Minuta</string>
+    <string name="ff_time_picker_minute_selection">Wybierz minuty</string>
+    <string name="ff_time_picker_minute_suffix">%1$d min</string>
+    <string name="ff_time_picker_minute_text_field">dla minut</string>
+    <string name="ff_time_picker_period_toggle_description">Wybierz Rano lub Po południu</string>
+    <string name="ff_time_picker_pm">po południu</string>
+    <string name="take_photo">Zrób zdjęcie</string>
+    <string name="add_photo">Dodaj zdjęcie</string>
+    <string name="rename">Zmień nazwę</string>
+    <string name="delete">Usuń</string>
+    <string name="rename_attachment">Zmień nazwę załącznika</string>
+    <string name="name">Nazwa</string>
+</resources>

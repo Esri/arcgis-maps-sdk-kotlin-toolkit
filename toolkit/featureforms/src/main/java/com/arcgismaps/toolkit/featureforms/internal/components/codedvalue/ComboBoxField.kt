@@ -134,14 +134,15 @@ internal fun ComboBoxField(
             {
                 Icon(imageVector = Icons.AutoMirrored.Outlined.List, contentDescription = "field icon")
             }
-        } else null
+        } else null,
+        hasValueExpression = state.hasValueExpression
     )
 
     LaunchedEffect(interactionSource) {
         interactionSource.interactions.collect {
             if (it is PressInteraction.Release) {
                 if (isEditable) {
-                    dialogRequester.requestDialog(DialogType.ComboBoxDialog(state))
+                    dialogRequester.requestDialog(DialogType.ComboBoxDialog(state.id))
                 }
             }
         }
@@ -365,8 +366,13 @@ private fun ComboBoxPreview() {
             showNoValueOption = FormInputNoValueOption.Show,
             noValueLabel = "No value"
         ),
+        hasValueExpression = false,
         scope = scope,
-        onEditValue = {},
+        id = 1,
+        updateValue = {},
+        evaluateExpressions = {
+            return@ComboBoxFieldState Result.success(emptyList())
+        }
     )
     ComboBoxField(state = state)
 }

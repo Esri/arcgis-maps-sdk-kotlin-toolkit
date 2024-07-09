@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~
+  ~  Copyright 2023 Esri
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  ~
+  --><resources>
+    <string name="enter_n_chars">Vnesi %1$d znakov</string>
+    <string name="enter_min_to_max_chars">Vnesite %1$d do %2$d znakov</string>
+    <string name="maximum_n_chars">Maksimalno %1$d znakov</string>
+    <string name="no_value">Ni vrednosti</string>
+    <string name="enter_value">Vnesite vrednost</string>
+    <string name="required">Zahtevano</string>
+    <string name="today">Danes</string>
+    <string name="now">Zdaj</string>
+    <string name="cancel">Prekliči</string>
+    <string name="ok">V redu</string>
+    <string name="done">Končano</string>
+    <string name="filter">Filter %1$s</string>
+    <string name="numeric_range_helper_text">Vnesite vrednosti od %1$s do %2$s</string>
+    <string name="less_than_min_value">Manj kot najmanjša vrednost %1$s</string>
+    <string name="exceeds_max_value">Presega največjo vrednost %1$s</string>
+    <string name="value_must_be_a_whole_number">Vrednost mora biti celo število</string>
+    <string name="value_must_be_a_number">Vrednost mora biti število</string>
+    <string name="value_must_be_within_domain">Vrednost mora biti znotraj domene</string>
+    <string name="value_must_not_be_empty">Vrednost ne sme biti prazna</string>
+    <string name="min_datetime_helper_text">Datum mora biti na ali po %1$s</string>
+    <string name="max_datetime_helper_text">Datum mora biti na ali pred %1$s</string>
+
+    <!-- Date Picker string values -->
+    <string name="ff_date_input_headline">Vnesen datum</string>
+    <string name="ff_date_input_headline_description">Vnesen datum: %1$s</string>
+    <string name="ff_date_input_invalid_for_pattern">Se ne ujema s pričakovanim vzorcem: %1$s</string>
+    <string name="ff_date_input_invalid_not_allowed">Datum ni dovoljen: %1$s</string>
+    <string name="ff_date_input_invalid_year_range">
+        Datum je izven pričakovanega letnega razpona %1$s–%2$s
+    </string>
+    <string name="ff_date_input_label">Datum</string>
+    <string name="ff_date_input_no_input_description">Brez</string>
+    <string name="ff_date_input_title">Izberi datum</string>
+    <string name="ff_date_picker_headline">"Izbran datum"</string>
+    <string name="ff_date_picker_headline_description">Trenutna izbira: %1$s</string>
+    <string name="ff_date_picker_navigate_to_year_description">Navigiraj na leto %1$s</string>
+    <string name="ff_date_picker_no_selection_description">Brez</string>
+    <string name="ff_date_picker_scroll_to_earlier_years">Podrsaj za prikaz prejšnjih let</string>
+    <string name="ff_date_picker_scroll_to_later_years">Podrsaj za prikaz kasnejših let</string>
+    <string name="ff_date_picker_switch_to_calendar_mode">Preklopi na način vnosa v koledar</string>
+    <string name="ff_date_picker_switch_to_day_selection">
+        "Podrsaj za izbiro leta ali se dotakni Preklopi nazaj za izbiro dneva"
+    </string>
+    <string name="ff_date_picker_switch_to_input_mode">Preklopi na način vnosa besedila</string>
+    <string name="ff_date_picker_switch_to_next_month">"Spremeni na naslednji mesec"</string>
+    <string name="ff_date_picker_switch_to_previous_month">"Spremeni na pretekli mesec"</string>
+    <string name="ff_date_picker_switch_to_year_selection">"Preklopi na izbiro leta"</string>
+    <string name="ff_date_picker_title">"Izberi datum"</string>
+    <string name="ff_date_picker_today_description">Danes</string>
+    <string name="ff_date_picker_year_picker_pane_title">Izbirnik leta je viden</string>
+    <string name="ff_date_range_input_invalid_range_input">Neveljaven vnos datumskega razpona</string>
+    <string name="ff_date_range_input_title">Vnesi datume</string>
+    <string name="ff_date_range_picker_day_in_range">V razponu</string>
+    <string name="ff_date_range_picker_end_headline">Končni datum</string>
+    <string name="ff_date_range_picker_scroll_to_next_month">Podrsaj za prikaz naslednjega meseca</string>
+    <string name="ff_date_range_picker_scroll_to_previous_month">Podrsaj za prikaz prejšnjega meseca</string>
+    <string name="ff_date_range_picker_start_headline">Začetni datum</string>
+    <string name="ff_date_range_picker_title">Izberi datume</string>
+
+    <!-- Time Picker string values -->
+    <string name="ff_time_picker_am">dopoldne</string>
+    <string name="ff_time_picker_hour">Ura</string>
+    <string name="ff_time_picker_hour_24h_suffix">%1$d ur</string>
+    <string name="ff_time_picker_hour_selection">Izberi uro</string>
+    <string name="ff_time_picker_hour_suffix">%1$d o\'clock</string>
+    <string name="ff_time_picker_hour_text_field">za uro</string>
+    <string name="ff_time_picker_minute">Minuta</string>
+    <string name="ff_time_picker_minute_selection">Izberi minute</string>
+    <string name="ff_time_picker_minute_suffix">%1$d minut</string>
+    <string name="ff_time_picker_minute_text_field">za minute</string>
+    <string name="ff_time_picker_period_toggle_description">Izberi AM ali PM</string>
+    <string name="ff_time_picker_pm">popoldne</string>
+    <string name="take_photo">Fotografirajte</string>
+    <string name="add_photo">Dodaj fotografijo</string>
+    <string name="rename">Preimenuj</string>
+    <string name="delete">Izbriši</string>
+    <string name="rename_attachment">Preimenuj prilogo</string>
+    <string name="name">Ime</string>
+</resources>

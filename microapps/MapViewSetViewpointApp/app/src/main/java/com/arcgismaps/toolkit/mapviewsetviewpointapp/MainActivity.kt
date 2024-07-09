@@ -26,14 +26,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.toolkit.mapviewsetviewpointapp.screens.MainScreen
-import com.arcgismaps.toolkit.mapviewsetviewpointapp.ui.theme.MapViewSetViewpointAppTheme
+import com.esri.microappslib.theme.MicroAppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ArcGISEnvironment.apiKey = ApiKey.create(BuildConfig.API_KEY)
         setContent {
-            MapViewSetViewpointAppTheme {
+            MicroAppTheme {
                 MapViewSetViewpointApp()
             }
         }
@@ -48,7 +48,7 @@ fun MapViewSetViewpointApp() {
 @Preview(showBackground = true)
 @Composable
 fun AppPreview() {
-    MapViewSetViewpointAppTheme {
+    MicroAppTheme {
         MapViewSetViewpointApp()
     }
 }

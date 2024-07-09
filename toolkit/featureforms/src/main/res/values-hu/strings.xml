@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~
+  ~  Copyright 2023 Esri
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  ~
+  --><resources>
+    <string name="enter_n_chars">Adjon meg %1$d karaktert</string>
+    <string name="enter_min_to_max_chars">Adjon meg %1$d–%2$d karaktert</string>
+    <string name="maximum_n_chars">Maximum %1$d karakter</string>
+    <string name="no_value">Nincs érték</string>
+    <string name="enter_value">Adja meg az értéket</string>
+    <string name="required">Szükséges</string>
+    <string name="today">Ma</string>
+    <string name="now">Most</string>
+    <string name="cancel">Mégse</string>
+    <string name="ok">OK</string>
+    <string name="done">Kész</string>
+    <string name="filter">Szűrő %1$s</string>
+    <string name="numeric_range_helper_text">Adjon meg egy %1$s és %2$s közötti értéket</string>
+    <string name="less_than_min_value">Kisebb, mint a minimális %1$s érték</string>
+    <string name="exceeds_max_value">Több, mint a maximális %1$s érték</string>
+    <string name="value_must_be_a_whole_number">Az értéknek egész számnak kell lennie</string>
+    <string name="value_must_be_a_number">Az értéknek számnak kell lennie</string>
+    <string name="value_must_be_within_domain">Az értéknek tartományon belül kell lennie</string>
+    <string name="value_must_not_be_empty">Az érték nem lehet üres</string>
+    <string name="min_datetime_helper_text">A dátumnak a következő időpontra vagy azutánra kell esnie: %1$s</string>
+    <string name="max_datetime_helper_text">A dátumnak a következő időpontra vagy azelőttre kell esnie: %1$s</string>
+
+    <!-- Date Picker string values -->
+    <string name="ff_date_input_headline">Megadott dátum</string>
+    <string name="ff_date_input_headline_description">Megadott dátum: %1$s</string>
+    <string name="ff_date_input_invalid_for_pattern">Nem egyezik az elvárt mintával: %1$s</string>
+    <string name="ff_date_input_invalid_not_allowed">Nem megengedett dátum: %1$s</string>
+    <string name="ff_date_input_invalid_year_range">
+        A dátum nincs az elvárt %1$s–%2$s évtartományban
+    </string>
+    <string name="ff_date_input_label">Dátum</string>
+    <string name="ff_date_input_no_input_description">Egyik sem</string>
+    <string name="ff_date_input_title">Dátum kiválasztása</string>
+    <string name="ff_date_picker_headline">"Kiválasztott dátum"</string>
+    <string name="ff_date_picker_headline_description">Aktuális választás: %1$s</string>
+    <string name="ff_date_picker_navigate_to_year_description">Navigáljon a(z) %1$s évre</string>
+    <string name="ff_date_picker_no_selection_description">Egyik sem</string>
+    <string name="ff_date_picker_scroll_to_earlier_years">Görgessen a korábbi évek megjelenítéséhez</string>
+    <string name="ff_date_picker_scroll_to_later_years">Görgessen a későbbi évek megjelenítéséhez</string>
+    <string name="ff_date_picker_switch_to_calendar_mode">Váltás naptárbeviteli módra</string>
+    <string name="ff_date_picker_switch_to_day_selection">
+        "Legyintsen az év kiválasztásához, vagy koppintson, hogy visszaváltson a nap kiválasztására"
+    </string>
+    <string name="ff_date_picker_switch_to_input_mode">Váltás szövegbeviteli módra</string>
+    <string name="ff_date_picker_switch_to_next_month">"Váltás a következő hónapra"</string>
+    <string name="ff_date_picker_switch_to_previous_month">"Váltás az előző hónapra"</string>
+    <string name="ff_date_picker_switch_to_year_selection">"Váltás évkiválasztásra"</string>
+    <string name="ff_date_picker_title">"Dátum kiválasztása"</string>
+    <string name="ff_date_picker_today_description">Ma</string>
+    <string name="ff_date_picker_year_picker_pane_title">Látható évválasztó</string>
+    <string name="ff_date_range_input_invalid_range_input">A megadott dátumtartomány érvénytelen</string>
+    <string name="ff_date_range_input_title">Adjon meg dátumot</string>
+    <string name="ff_date_range_picker_day_in_range">Tartományban</string>
+    <string name="ff_date_range_picker_end_headline">Befejező dátum</string>
+    <string name="ff_date_range_picker_scroll_to_next_month">Görgessen a következő hónap megjelenítéséhez</string>
+    <string name="ff_date_range_picker_scroll_to_previous_month">Görgessen az előző hónap megjelenítéséhez</string>
+    <string name="ff_date_range_picker_start_headline">Kezdő dátum</string>
+    <string name="ff_date_range_picker_title">Dátum kiválasztása</string>
+
+    <!-- Time Picker string values -->
+    <string name="ff_time_picker_am">DE</string>
+    <string name="ff_time_picker_hour">Óra</string>
+    <string name="ff_time_picker_hour_24h_suffix">%1$d óra</string>
+    <string name="ff_time_picker_hour_selection">Óra kiválasztása</string>
+    <string name="ff_time_picker_hour_suffix">%1$d o\'óra</string>
+    <string name="ff_time_picker_hour_text_field">órához</string>
+    <string name="ff_time_picker_minute">Perc</string>
+    <string name="ff_time_picker_minute_selection">Perc kiválasztása</string>
+    <string name="ff_time_picker_minute_suffix">%1$d perc</string>
+    <string name="ff_time_picker_minute_text_field">perchez</string>
+    <string name="ff_time_picker_period_toggle_description">DE/DU kiválasztása</string>
+    <string name="ff_time_picker_pm">DU</string>
+    <string name="take_photo">Fénykép készítése</string>
+    <string name="add_photo">Fénykép hozzáadása</string>
+    <string name="rename">Átnevezés</string>
+    <string name="delete">Törlés</string>
+    <string name="rename_attachment">Csatolmány átnevezése</string>
+    <string name="name">Név</string>
+</resources>
