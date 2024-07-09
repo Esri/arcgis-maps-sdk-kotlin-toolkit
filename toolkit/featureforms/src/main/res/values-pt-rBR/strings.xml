@@ -88,7 +88,6 @@
     <string name="ff_time_picker_period_toggle_description">Selecionar AM ou PM</string>
     <string name="ff_time_picker_pm">PM</string>
     <string name="take_photo">Tirar Foto</string>
-    <string name="add_photo">Adicionar foto</string>
     <string name="rename">Renomear</string>
     <string name="delete">Excluir</string>
     <string name="rename_attachment">Renomear Anexo</string>

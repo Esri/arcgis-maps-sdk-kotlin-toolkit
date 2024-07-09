@@ -74,7 +74,8 @@ internal sealed class ValidationErrorState(
             }
 
             is MaxCharConstraint -> {
-                stringResource(id = R.string.maximum_n_chars, *formatArgs)
+                val count = formatArgs.first() as Int
+                pluralStringResource(id = R.plurals.maximum_n_chars, count, count)
             }
 
             is MinNumericConstraint -> {
