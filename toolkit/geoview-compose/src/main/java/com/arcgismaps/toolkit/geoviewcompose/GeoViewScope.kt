@@ -31,9 +31,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -49,10 +49,8 @@ import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.times
 import com.arcgismaps.data.Feature
 import com.arcgismaps.geometry.AngularUnit
 import com.arcgismaps.geometry.Geometry
@@ -79,6 +77,9 @@ import com.arcgismaps.mapping.view.SceneView
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.mapping.view.zero
 import com.arcgismaps.realtime.DynamicEntity
+import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutColorScheme
+import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutDefaults
+import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutTheme
 import kotlinx.coroutines.flow.first
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.cos
@@ -108,6 +109,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
      * @param rotateOffsetWithGeoView specifies whether the screen offset is rotated with the [GeoView]. The Screen offset
      *        will be rotated with the [GeoView] when true, false otherwise.
      *        This is useful if you are showing the callout for elements with symbology that does rotate with the [GeoView]
+     * @param colorScheme the styling options for the Callout's shape and color properties
      * @since 200.5.0
      */
     @Composable
@@ -116,6 +118,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         modifier: Modifier = Modifier,
         offset: Offset = Offset.Zero,
         rotateOffsetWithGeoView: Boolean = false,
+        colorScheme: CalloutColorScheme = CalloutDefaults.colorScheme(),
         content: @Composable BoxScope.() -> Unit
     ) {
         // Enables the recomposition of the first Callout in the content lambda that is displayed
@@ -126,7 +129,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
             || allowCalloutRecomposition
         ) {
             allowCalloutRecomposition = true
-            this.CalloutInternal(location, modifier, offset, rotateOffsetWithGeoView, content)
+            this.CalloutInternal(location, modifier, offset, rotateOffsetWithGeoView, colorScheme, content)
         }
     }
 
@@ -145,6 +148,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
      * @param geoElement the GeoElement for which to display the Callout
      * @param modifier Modifier to be applied to the composable Callout
      * @param tapLocation a Point the user has tapped, or null if the Callout is not associated with a tap
+     * @param colorScheme the styling options for the Callout's shape and color properties
      * @param content the content of the Callout
      * @since 200.5.0
      */
@@ -153,6 +157,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         geoElement: GeoElement,
         modifier: Modifier = Modifier,
         tapLocation: Point? = null,
+        colorScheme: CalloutColorScheme = CalloutDefaults.colorScheme(),
         content: @Composable BoxScope.() -> Unit
     ) {
         // Enables the recomposition of the first Callout in the content lambda that is displayed
@@ -163,7 +168,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
             || allowCalloutRecomposition
         ) {
             allowCalloutRecomposition = true
-            this.CalloutInternal(geoElement, modifier, tapLocation, content)
+            this.CalloutInternal(geoElement, modifier, tapLocation, colorScheme, content)
         }
     }
 
@@ -202,6 +207,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         geoElement: GeoElement,
         modifier: Modifier = Modifier,
         tapLocation: Point? = null,
+        colorScheme: CalloutColorScheme,
         content: @Composable BoxScope.() -> Unit
     ) {
         var leaderLocation: LeaderLocation? by remember {
@@ -223,6 +229,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
                 modifier,
                 it.offset,
                 it.rotateOffsetWithGeoView,
+                colorScheme,
                 content
             )
         }
@@ -239,6 +246,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         modifier: Modifier,
         offset: Offset,
         rotateOffsetWithGeoView: Boolean,
+        colorScheme: CalloutColorScheme,
         content: (@Composable BoxScope.() -> Unit)
     ) {
 
@@ -278,22 +286,24 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
                     density = LocalDensity.current,
                     displayMetrics = LocalContext.current.resources.displayMetrics
                 )) {
-                Box(
-                    modifier = modifier
-                        .drawCalloutContainer(
-                            cornerRadius = with(LocalDensity.current) { DefaultCalloutProperties.cornerRadius.toPx() },
-                            strokeBorderWidth = with(LocalDensity.current) { DefaultCalloutProperties.strokeBorderWidth.toPx() },
-                            strokeColor = DefaultCalloutProperties.strokeColor,
-                            backgroundColor = DefaultCalloutProperties.backgroundColor,
-                            calloutContentPadding = DefaultCalloutProperties.calloutContentPadding,
-                            leaderWidth = with(LocalDensity.current) { DefaultCalloutProperties.leaderSize.width.toPx() },
-                            leaderHeight = with(LocalDensity.current) { DefaultCalloutProperties.leaderSize.height.toPx() },
-                            minSize = DefaultCalloutProperties.minSize
-                        )
-                        .animateContentSize()
-                )
-                {
-                    content.invoke(this)
+                CalloutTheme{
+                    Box(
+                        modifier = modifier
+                            .drawCalloutContainer(
+                                cornerRadius = with(LocalDensity.current) { colorScheme.calloutShapeProperties.cornerRadius.toPx() },
+                                strokeBorderWidth = with(LocalDensity.current) { colorScheme.calloutShapeProperties.borderWidth.toPx() },
+                                strokeColor = colorScheme.calloutColorsProperties.borderColor,
+                                backgroundColor = colorScheme.calloutColorsProperties.backgroundColor,
+                                calloutContentPadding = colorScheme.calloutShapeProperties.calloutContentPadding,
+                                leaderWidth = with(LocalDensity.current) { colorScheme.calloutShapeProperties.leaderSize.width.toPx() },
+                                leaderHeight = with(LocalDensity.current) { colorScheme.calloutShapeProperties.leaderSize.height.toPx() },
+                                minSize = colorScheme.calloutShapeProperties.minSize
+                            )
+                            .animateContentSize()
+                    )
+                    {
+                        content.invoke(this)
+                    }
                 }
             }
         }
@@ -480,27 +490,6 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
             location = tapLocation.calloutLocation(geometry),
             offset = leaderPointOffset.offset,
             rotateOffsetWithGeoView = leaderPointOffset.rotatesWithGeoView
-        )
-    }
-
-    /**
-     * UI default properties for the [Callout] component.
-     */
-    private object DefaultCalloutProperties {
-        val cornerRadius: Dp = 10.dp
-        val strokeBorderWidth: Dp = 2.dp
-        val strokeColor: Color = Color.LightGray
-        val backgroundColor: Color = Color.White
-        val calloutContentPadding: PaddingValues = PaddingValues(
-            all = cornerRadius + (strokeBorderWidth / 2)
-        )
-        val leaderSize: DpSize = DpSize(
-            width = 12.dp,
-            height = 10.dp
-        )
-        val minSize: DpSize = DpSize(
-            width = strokeBorderWidth + (2 * cornerRadius),
-            height = strokeBorderWidth + (2 * cornerRadius)
         )
     }
 }
