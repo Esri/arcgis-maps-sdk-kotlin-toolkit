@@ -60,7 +60,6 @@ dependencyResolutionManagement {
         }
     }
 }
-gradle.startParameter.excludedTaskNames.addAll(listOf(":buildSrc:testClasses"))
 
 // fixes https://devtopia.esri.com/runtime/kotlin/issues/3863#issuecomment-4715101
 // fixes https://issuetracker.google.com/issues/315023802
@@ -95,6 +94,8 @@ include(":floor-filter-app")
 project(":floor-filter-app").projectDir = File(rootDir, "microapps/FloorFilterApp/app")
 include(":geoview-compose")
 project(":geoview-compose").projectDir = File(rootDir, "toolkit/geoview-compose")
+include(":map-view-callout-app")
+project(":map-view-callout-app").projectDir = File(rootDir, "microapps/MapViewCalloutApp/app")
 include(":map-view-location-display-app")
 project(":map-view-location-display-app").projectDir = File(rootDir, "microapps/mapviewlocationdisplayapp/app")
 include(":map-view-insets-app")
@@ -105,6 +106,8 @@ include(":map-view-set-viewpoint-app")
 project(":map-view-set-viewpoint-app").projectDir = File(rootDir, "microapps/mapviewsetviewpointapp/app")
 include(":map-view-identify-app")
 project(":map-view-identify-app").projectDir = File(rootDir, "microapps/mapviewidentifyapp/app")
+include(":scene-view-callout-app")
+project(":scene-view-callout-app").projectDir = File(rootDir, "microapps/SceneViewCalloutApp/app")
 include(":scene-view-analysis-overlay-app")
 project(":scene-view-analysis-overlay-app").projectDir = File(rootDir, "microapps/sceneviewanalysisoverlayapp/app")
 include(":scene-view-set-viewpoint-app")
@@ -113,7 +116,7 @@ include(":scene-view-camera-controller-app")
 project(":scene-view-camera-controller-app").projectDir = File(rootDir, "microapps/sceneviewcameracontrollerapp/app")
 include(":scene-view-lighting-options-app")
 project(":scene-view-lighting-options-app").projectDir = File(rootDir, "microapps/sceneviewlightingoptionsapp/app")
-include (":popup-app")
-project(":popup-app").projectDir = File(rootDir, "microapps/PopupApp/app")
-include (":popup")
+include(":popup")
 project(":popup").projectDir = File(rootDir, "toolkit/popup")
+include(":popup-app")
+project(":popup-app").projectDir = File(rootDir, "microapps/PopupApp/app")

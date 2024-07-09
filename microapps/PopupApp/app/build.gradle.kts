@@ -71,6 +71,16 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = libs.versions.androidxComposeCompiler.get()
     }
+
+    /**
+     * Configures the test report for connected (instrumented) tests to be copied to a central
+     * folder in the project's root directory.
+     */
+    testOptions {
+        val connectedTestReportsPath: String by project
+        reportDir = "$connectedTestReportsPath/${project.name}"
+    }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"

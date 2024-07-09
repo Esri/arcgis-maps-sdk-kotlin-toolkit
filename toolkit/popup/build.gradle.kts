@@ -61,6 +61,16 @@ android {
             kotlinOptions.freeCompilerArgs += "-Xexplicit-api=strict"
         }
     }
+
+    /**
+     * Configures the test report for connected (instrumented) tests to be copied to a central
+     * folder in the project's root directory.
+     */
+    testOptions {
+        val connectedTestReportsPath: String by project
+        reportDir = "$connectedTestReportsPath/${project.name}"
+    }
+
 }
 
 apiValidation {
