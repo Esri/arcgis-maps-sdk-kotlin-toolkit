@@ -27,6 +27,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -55,27 +56,44 @@ internal class MediaElementState(
     override val id : Int = createId()
 ) : PopupElementState() {
 
-    constructor(mediaPopupElement: MediaPopupElement, scope: CoroutineScope, mediaFolder: String, chartParams: ChartImageParameters, context: Context): this(
+    constructor(
+        mediaPopupElement: MediaPopupElement,
+        scope: CoroutineScope,
+        mediaFolder: String,
+        chartParams: ChartImageParameters,
+        context: Context,
+        models: List<String> = listOf()
+    ) : this(
         description = mediaPopupElement.description,
         title = mediaPopupElement.title,
-        media = mediaPopupElement.media.map {
-            if (it.type.isChart) {
+        media = mediaPopupElement.media.mapIndexed { index, media ->
+            if (media.type.isChart) {
                 PopupMediaState(
-                    it,
+                    media,
                     scope,
+                    if (models.size > index) {
+                        models[index]
+                    } else {
+                        ""
+                    },
                     MediaImageProvider(
-                        fileName = "media-${Objects.hash(mediaPopupElement.title, it.title, it.caption)}",
+                        fileName = "media-${Objects.hash(mediaPopupElement.title, media.title, media.caption)}",
                         folderName = mediaFolder
                     ) {
-                        it.generateChart(chartParams).getOrThrow().image.bitmap
+                        media.generateChart(chartParams).getOrThrow().image.bitmap
                     }
                 )
-            } else if (it.type is PopupMediaType.Image) {
-                val srcUrl = it.value?.sourceUrl
+            } else if (media.type is PopupMediaType.Image) {
+                val srcUrl = media.value?.sourceUrl
                     ?: throw IllegalArgumentException("null sourceUrl for popup media")
                 PopupMediaState(
-                    it,
+                    media,
                     scope,
+                    if (models.size > index) {
+                        models[index]
+                    } else {
+                        ""
+                    },
                     MediaImageProvider(
                         fileName = "media-${Objects.hash(srcUrl)}",
                         folderName = mediaFolder
@@ -103,8 +121,8 @@ internal class MediaElementState(
             chartFolder: String,
             chartParams: ChartImageParameters,
             context: Context
-        ): Saver<MediaElementState, Any> = Saver(
-            save = { null },
+        ): Saver<MediaElementState, Any> = listSaver(
+            save = { it.media.map { media -> media.imageUri.value } },
             restore = {
                 MediaElementState(
                     element, scope, chartFolder, chartParams, context
@@ -187,6 +205,7 @@ internal class PopupMediaState(
     @Suppress("unused") private val linkUrl: String,
     private val sourceUrl: String,
     val type: PopupMediaType,
+    uri: String,
     private val scope: CoroutineScope,
     private val imageGenerator: MediaImageProvider
 ) {
@@ -198,14 +217,19 @@ internal class PopupMediaState(
     val imageUri: State<String> = _imageUri
 
     init {
-        scope.launch {
-            _imageUri.value = imageGenerator.get()
+        if (uri.isNotEmpty()) {
+            _imageUri.value = uri
+        } else {
+            scope.launch {
+                _imageUri.value = imageGenerator.get()
+            }
         }
     }
 
     constructor(
         media: PopupMedia,
         scope: CoroutineScope,
+        uri: String,
         imageGenerator: MediaImageProvider
     ) : this(
         title = media.title,
@@ -214,6 +238,7 @@ internal class PopupMediaState(
         linkUrl = media.value?.linkUrl ?: "",
         sourceUrl = media.value?.sourceUrl ?: "",
         type = media.type,
+        uri = uri,
         scope = scope,
         imageGenerator = imageGenerator
     )
