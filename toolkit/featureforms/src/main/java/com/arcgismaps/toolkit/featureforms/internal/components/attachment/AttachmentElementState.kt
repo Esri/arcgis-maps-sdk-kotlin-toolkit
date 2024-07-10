@@ -115,7 +115,7 @@ internal class AttachmentElementState(
      */
     private fun buildAttachmentStates(list: List<FormAttachment>) {
         attachments.clear()
-        list.forEach { formAttachment ->
+        list.asReversed().forEach { formAttachment ->
             // create a new state
             val state = FormAttachmentState(
                 name = formAttachment.name,
