@@ -78,7 +78,8 @@ apiValidation {
     // compose compiler generates public singletons for internal compose functions. this may be resolved in the compose
     // compiler.
     val composableSingletons = listOf(
-        "com.arcgismaps.toolkit.popup.ComposableSingletons\$ExpandableCardKt"
+        "com.arcgismaps.toolkit.popup.internal.ui.ComposableSingletons\$ExpandableCardKt",
+        "com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ComposableSingletons\$FileViewerKt"
     )
 
     ignoredClasses.addAll(composableSingletons)
