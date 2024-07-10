@@ -232,7 +232,7 @@ public data class ReadOnlyFieldColors internal constructor(
     public val labelColor: Color,
     public val textColor: Color,
     public val supportingTextColor: Color,
-    public val errorSupportingTextColor : Color
+    public val errorSupportingTextColor: Color
 )
 
 /**
@@ -306,9 +306,9 @@ public data class AttachmentsElementColors internal constructor(
     public val supportingTextColor: Color,
     public val outlineColor: Color,
     public val containerColor: Color,
-    public val tileTextColor : Color,
-    public val tileBorderColor : Color,
-    public val scrollBarColor : Color,
+    public val tileTextColor: Color,
+    public val tileBorderColor: Color,
+    public val scrollBarColor: Color,
 )
 
 /**

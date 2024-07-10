@@ -371,7 +371,7 @@ private fun Title(
 private fun Size(
     size: Long,
     modifier: Modifier = Modifier,
-    color : Color = LocalColorScheme.current.attachmentsElementColors.tileTextColor,
+    color: Color = LocalColorScheme.current.attachmentsElementColors.tileTextColor,
     textStyle: TextStyle = LocalTypography.current.attachmentsElementTypography.tileTextStyle
 ) {
     val context = LocalContext.current

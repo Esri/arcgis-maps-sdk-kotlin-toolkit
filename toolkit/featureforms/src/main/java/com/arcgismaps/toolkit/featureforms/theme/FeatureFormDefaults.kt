@@ -178,7 +178,7 @@ public object FeatureFormDefaults {
         labelColor: Color = Color.Unspecified,
         textColor: Color = Color.Unspecified,
         supportingTextColor: Color = Color.Unspecified,
-        errorSupportingTextColor : Color = MaterialTheme.colorScheme.error
+        errorSupportingTextColor: Color = MaterialTheme.colorScheme.error
     ): ReadOnlyFieldColors {
         return ReadOnlyFieldColors(
             labelColor = labelColor,
@@ -267,13 +267,13 @@ public object FeatureFormDefaults {
      */
     @Composable
     public fun attachmentsElementColors(
-        labelColor : Color = Color.Unspecified,
-        supportingTextColor : Color = Color.Unspecified,
-        outlineColor : Color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f),
-        containerColor : Color = Color.Unspecified,
-        tileTextColor : Color = MaterialTheme.colorScheme.onSurface,
-        tileBorderColor : Color = MaterialTheme.colorScheme.outline,
-        scrollBarColor : Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+        labelColor: Color = Color.Unspecified,
+        supportingTextColor: Color = Color.Unspecified,
+        outlineColor: Color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f),
+        containerColor: Color = Color.Unspecified,
+        tileTextColor: Color = MaterialTheme.colorScheme.onSurface,
+        tileBorderColor: Color = MaterialTheme.colorScheme.outline,
+        scrollBarColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
     ): AttachmentsElementColors {
         return AttachmentsElementColors(
             labelColor = labelColor,
