@@ -48,7 +48,7 @@ internal val LocalShapes: ProvidableCompositionLocal<CalloutShapes> =
     }
 
 /**
- * Provides compose functions to access the current theme values.
+ * Provides compose functions to access the current color and shape values.
  */
 internal object CalloutTheme {
 
@@ -70,13 +70,14 @@ internal object CalloutTheme {
 }
 
 /**
- * Provides a default [CalloutTheme] to the given [content] so that the Callout can be
- * customized.
+ * Provides a default [CalloutTheme] & [CalloutShapes] to the given [content]
+ * so that the Callout can be customized.
  *
  * The default value for the [colorScheme] is based on the current [MaterialTheme].
  * See [CalloutDefaults.colors] for the exact configuration used.
  *
  * @param colorScheme The [CalloutColors] to use for this compose hierarchy
+ * @param shapes The [CalloutShapes] to use for this compose hierarchy
  *
  * A complete definition for the [CalloutTheme] to use. A default is provided based
  * on the current [MaterialTheme].
@@ -133,7 +134,7 @@ public object CalloutDefaults {
     }
 
     /**
-     * Creates an instance of [CalloutColors] with default values from [MaterialTheme].
+     * Creates an instance of [CalloutShapes] with default values.
 
      * @since 200.5.0
      */

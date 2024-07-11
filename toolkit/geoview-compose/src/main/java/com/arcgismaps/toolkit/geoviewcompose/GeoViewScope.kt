@@ -110,7 +110,8 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
      * @param rotateOffsetWithGeoView specifies whether the screen offset is rotated with the [GeoView]. The Screen offset
      *        will be rotated with the [GeoView] when true, false otherwise.
      *        This is useful if you are showing the callout for elements with symbology that does rotate with the [GeoView]
-     * @param colorScheme the styling options for the Callout's shape and color properties
+     * @param colorScheme the styling options for the Callout's color properties
+     * @param shape the styling options for the Callout's container shape
      * @since 200.5.0
      */
     @Composable
@@ -151,6 +152,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
      * @param modifier Modifier to be applied to the composable Callout
      * @param tapLocation a Point the user has tapped, or null if the Callout is not associated with a tap
      * @param colorScheme the styling options for the Callout's shape and color properties
+     * @param shape the styling options for the Callout's container shape
      * @param content the content of the Callout
      * @since 200.5.0
      */
