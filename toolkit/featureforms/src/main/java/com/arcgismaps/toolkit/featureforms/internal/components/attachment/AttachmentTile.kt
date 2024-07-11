@@ -96,6 +96,8 @@ import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.utils.AttachmentsFileProvider
 import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
 import com.arcgismaps.toolkit.featureforms.internal.utils.LocalDialogRequester
+import com.arcgismaps.toolkit.featureforms.theme.LocalColorScheme
+import com.arcgismaps.toolkit.featureforms.theme.LocalTypography
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import java.io.File
@@ -113,6 +115,7 @@ internal fun AttachmentTile(
     var showContextMenu by remember { mutableStateOf(false) }
     val dialogRequester = LocalDialogRequester.current
     val context = LocalContext.current
+    val colors = LocalColorScheme.current.attachmentsElementColors
     Surface(
         onClick = {},
         modifier = modifier
@@ -120,7 +123,7 @@ internal fun AttachmentTile(
             .height(75.dp)
             .clip(shape = RoundedCornerShape(8.dp))
             .border(
-                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline),
+                border = BorderStroke(0.5.dp, colors.tileBorderColor),
                 shape = RoundedCornerShape(8.dp)
             ),
         interactionSource = interactionSource
@@ -243,7 +246,8 @@ internal fun AttachmentTile(
                                 context.startActivity(intent)
                             } catch (e: ActivityNotFoundException) {
                                 // show a toast if there is no app to open the file type
-                                Toast.makeText(context, R.string.no_app_found, Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, R.string.no_app_found, Toast.LENGTH_SHORT)
+                                    .show()
                             }
                         }
                     }
@@ -281,16 +285,13 @@ private fun LoadedView(
                     .align(Alignment.Center)
             )
         }
+
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
                 .height(20.dp)
-                .background(
-                    MaterialTheme.colorScheme.onBackground.copy(
-                        alpha = 0.7f
-                    )
-                ),
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)),
             verticalArrangement = Arrangement.Center
         ) {
             Title(
@@ -298,7 +299,6 @@ private fun LoadedView(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 5.dp),
-                color = MaterialTheme.colorScheme.background
             )
         }
     }
@@ -358,8 +358,8 @@ private fun DefaultView(
 private fun Title(
     text: String,
     modifier: Modifier = Modifier,
-    color: Color = Color.Unspecified,
-    style: TextStyle = MaterialTheme.typography.labelSmall
+    color: Color = LocalColorScheme.current.attachmentsElementColors.tileTextColor,
+    style: TextStyle = LocalTypography.current.attachmentsElementTypography.tileTextStyle
 ) {
     Text(
         text = text,
@@ -374,20 +374,19 @@ private fun Title(
 
 @Composable
 private fun Size(
-    size: Long, modifier:
-    Modifier = Modifier
+    size: Long,
+    modifier: Modifier = Modifier,
+    color: Color = LocalColorScheme.current.attachmentsElementColors.tileTextColor,
+    textStyle: TextStyle = LocalTypography.current.attachmentsElementTypography.tileTextStyle
 ) {
     val context = LocalContext.current
     val fileSize = Formatter.formatFileSize(context, size)
     Text(
         text = fileSize,
-        style = MaterialTheme.typography.labelSmall.copy(
-            fontWeight = FontWeight.W300,
-            fontSize = 9.sp
-        ),
+        color = color,
+        style = textStyle,
         overflow = TextOverflow.Ellipsis,
-        modifier = modifier
-            .padding(horizontal = 1.dp)
+        modifier = modifier.padding(horizontal = 1.dp)
     )
 }
 
