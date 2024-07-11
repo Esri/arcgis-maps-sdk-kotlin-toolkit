@@ -88,7 +88,6 @@
     <string name="ff_time_picker_period_toggle_description">Izberi AM ali PM</string>
     <string name="ff_time_picker_pm">popoldne</string>
     <string name="take_photo">Fotografirajte</string>
-    <string name="add_photo">Dodaj fotografijo</string>
     <string name="rename">Preimenuj</string>
     <string name="delete">Izbriši</string>
     <string name="rename_attachment">Preimenuj prilogo</string>

@@ -221,6 +221,11 @@ internal fun AttachmentTile(
                         if (loadStatus is LoadStatus.NotLoaded || loadStatus is LoadStatus.FailedToLoad) {
                             // load attachment
                             state.loadWithParentScope()
+                            if (state.size == 0L) {
+                                // show an error toast if the attachment is empty since the load
+                                // will likely fail
+                                Toast.makeText(context, context.getString(R.string.download_empty_file), Toast.LENGTH_SHORT).show()
+                            }
                         } else if (loadStatus is LoadStatus.Loaded) {
                             // open attachment
                             val intent = Intent()
@@ -262,14 +267,14 @@ private fun LoadedView(
         if (thumbnailUri.isNotEmpty()) {
             AsyncImage(
                 model = thumbnailUri,
-                contentDescription = null,
+                contentDescription = "Thumbnail",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
         } else {
             Icon(
                 imageVector = type.getIcon(),
-                contentDescription = null,
+                contentDescription = "Thumbnail",
                 modifier = Modifier
                     .padding(top = 10.dp, bottom = 25.dp)
                     .fillMaxSize(0.8f)
@@ -322,7 +327,7 @@ private fun DefaultView(
             Size(size = size)
             Icon(
                 imageVector = Icons.Outlined.ArrowDownward,
-                contentDescription = null,
+                contentDescription = "Download",
                 modifier = Modifier.size(11.dp)
             )
         }
@@ -334,14 +339,14 @@ private fun DefaultView(
         } else if (isError) {
             Image(
                 imageVector = Icons.Outlined.ErrorOutline,
-                contentDescription = null,
+                contentDescription = "Error",
                 modifier = Modifier.size(20.dp),
                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.error)
             )
         } else {
             Icon(
                 imageVector = type.getIcon(),
-                contentDescription = null,
+                contentDescription = "Placeholder",
                 modifier = Modifier.size(20.dp)
             )
         }

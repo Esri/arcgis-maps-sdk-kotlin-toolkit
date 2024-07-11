@@ -88,7 +88,6 @@
     <string name="ff_time_picker_period_toggle_description">בחר AM או PM</string>
     <string name="ff_time_picker_pm">PM</string>
     <string name="take_photo">צלם תמונה</string>
-    <string name="add_photo">הוסף תמונה</string>
     <string name="rename">שנה שם</string>
     <string name="delete">מחק</string>
     <string name="rename_attachment">שנה שם קובץ מצורף</string>

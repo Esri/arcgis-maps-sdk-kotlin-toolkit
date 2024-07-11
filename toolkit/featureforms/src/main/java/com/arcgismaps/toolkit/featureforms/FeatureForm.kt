@@ -352,14 +352,12 @@ internal fun rememberStates(
                 states.add(element, groupState)
             }
 
-            is AttachmentsFormElement -> {
-                val state = rememberAttachmentElementState(form, element)
-                states.add(element, state)
-            }
-
             else -> {}
         }
     }
+    // The Toolkit currently only supports AttachmentsFormElements via the
+    // default attachments element. Once AttachmentsFormElements can be authored
+    // the switch case above should have a case added for AttachmentsFormElement.
     if (form.defaultAttachmentsElement != null) {
         val state = rememberAttachmentElementState(form, form.defaultAttachmentsElement!!)
         states.add(form.defaultAttachmentsElement!!, state)

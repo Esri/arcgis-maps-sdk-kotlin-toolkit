@@ -30,44 +30,24 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
-import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.data.ArcGISFeature
-import com.arcgismaps.data.QueryParameters
-import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
-import com.arcgismaps.mapping.featureforms.FeatureForm
-import com.arcgismaps.mapping.featureforms.FeatureFormDefinition
-import com.arcgismaps.mapping.featureforms.FieldFormElement
-import com.arcgismaps.mapping.layers.FeatureLayer
-import junit.framework.TestCase.fail
-import kotlinx.coroutines.test.runTest
+import com.google.common.truth.Truth.assertThat
 import org.junit.Before
-import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
 
-class ComboBoxFieldTests {
+class ComboBoxFieldTests : FeatureFormTestRunner(
+    uri = "https://www.arcgis.com/home/item.html?id=ed930cf0eb724ea49c6bccd8fd3dd9af",
+    objectId = 2
+) {
     private val descriptionSemanticLabel = "supporting text"
     private val clearTextSemanticLabel = "Clear text button"
     private val optionsIconSemanticLabel = "field icon"
     private val comboBoxDialogListSemanticLabel = "ComboBoxDialogLazyColumn"
     private val comboBoxDialogDoneButtonSemanticLabel = "combo box done selection"
     private val noValueRowSemanticLabel = "no value row"
+    private var errorTextColor: Color? = null
     private lateinit var context: Context
-
-    private val featureForm by lazy {
-        sharedFeatureForm!!
-    }
-
-    private var errorTextColor : Color? = null
-
-    private fun getFormElementWithLabel(label: String): FieldFormElement {
-        return featureForm.elements
-            .filterIsInstance<FieldFormElement>()
-            .first {
-                it.label == label
-            }
-    }
 
     @Before
     fun setUp() {
@@ -95,8 +75,9 @@ class ComboBoxFieldTests {
      */
     @Test
     fun testClearValueNoValueLabel() {
-        val formElement = getFormElementWithLabel("Combo String")
-        val input = formElement.input as ComboBoxFormInput
+        val formElement = featureForm.getFieldFormElementWithLabel("Combo String")
+        assertThat(formElement).isNotNull()
+        val input = formElement!!.input as ComboBoxFormInput
         // find the field with the the label
         val comboBoxField = composeTestRule.onNodeWithText(formElement.label)
         // assert it is displayed and not focused
@@ -136,8 +117,9 @@ class ComboBoxFieldTests {
      */
     @Test
     fun testNoValueAndNoValueLabel() {
-        val formElement = getFormElementWithLabel("Combo Integer")
-        val input = formElement.input as ComboBoxFormInput
+        val formElement = featureForm.getFieldFormElementWithLabel("Combo Integer")
+        assertThat(formElement).isNotNull()
+        val input = formElement!!.input as ComboBoxFormInput
         // find the field with the the label
         val comboBoxField = composeTestRule.onNodeWithText(formElement.label)
         // assert it is displayed and not focused
@@ -174,8 +156,9 @@ class ComboBoxFieldTests {
      */
     @Test
     fun testEnteredValueWithComboBoxPicker() {
-        val formElement = getFormElementWithLabel("Combo String")
-        val input = formElement.input as ComboBoxFormInput
+        val formElement = featureForm.getFieldFormElementWithLabel("Combo String")
+        assertThat(formElement).isNotNull()
+        val input = formElement!!.input as ComboBoxFormInput
         // find the field with the the label
         val comboBoxField = composeTestRule.onNodeWithText(formElement.label)
         // assert it is displayed and not focused
@@ -220,8 +203,9 @@ class ComboBoxFieldTests {
      */
     @Test
     fun testNoValueRow() {
-        val formElement = getFormElementWithLabel("Combo String")
-        val input = formElement.input as ComboBoxFormInput
+        val formElement = featureForm.getFieldFormElementWithLabel("Combo String")
+        assertThat(formElement).isNotNull()
+        val input = formElement!!.input as ComboBoxFormInput
         // find the field with the the label
         val comboBoxField = composeTestRule.onNodeWithText(formElement.label)
         // assert it is displayed and not focused
@@ -262,8 +246,9 @@ class ComboBoxFieldTests {
      */
     @Test
     fun testRequiredValueWithComboBoxPicker() {
-        val formElement = getFormElementWithLabel("Required Combo Box")
-        val input = formElement.input as ComboBoxFormInput
+        val formElement = featureForm.getFieldFormElementWithLabel("Required Combo Box")
+        assertThat(formElement).isNotNull()
+        val input = formElement!!.input as ComboBoxFormInput
         val requiredLabel = "${formElement.label} *"
         // find the field with the the label
         val comboBoxField = composeTestRule.onNodeWithText(requiredLabel)
@@ -279,11 +264,13 @@ class ComboBoxFieldTests {
         comboBoxField.performClick()
         // find and tap the done button
         val doneButton =
-            composeTestRule.onNodeWithContentDescription(comboBoxDialogDoneButtonSemanticLabel).performClick()
+            composeTestRule.onNodeWithContentDescription(comboBoxDialogDoneButtonSemanticLabel)
+                .performClick()
         // assert "Enter Value" placeholder is visible
         comboBoxField.assertTextEquals(requiredLabel, context.getString(R.string.enter_value))
         // validate required text is visible and is in error color
-        comboBoxField.onChildWithText(context.getString(R.string.required)).assertTextColor(errorTextColor!!)
+        comboBoxField.onChildWithText(context.getString(R.string.required))
+            .assertTextColor(errorTextColor!!)
         // open the picker again
         comboBoxField.performClick()
         // find the dialog
@@ -315,8 +302,9 @@ class ComboBoxFieldTests {
      */
     @Test
     fun testNoValueOptionHidden() {
-        val formElement = getFormElementWithLabel("Combo No Value False")
-        val input = formElement.input as ComboBoxFormInput
+        val formElement = featureForm.getFieldFormElementWithLabel("Combo No Value False")
+        assertThat(formElement).isNotNull()
+        val input = formElement!!.input as ComboBoxFormInput
         // find the field with the the label
         val comboBoxField = composeTestRule.onNodeWithText(formElement.label)
         // assert it is displayed and not focused
@@ -349,45 +337,5 @@ class ComboBoxFieldTests {
         doneButton.performClick()
         // validate the selection has changed
         comboBoxField.assertTextEquals(formElement.label, codedValueToSelect)
-    }
-
-    companion object {
-        private var sharedFeatureFormDefinition: FeatureFormDefinition? = null
-        private var sharedFeatureForm: FeatureForm? = null
-        private var sharedFeature: ArcGISFeature? = null
-        private var sharedMap: ArcGISMap? = null
-
-        @BeforeClass
-        @JvmStatic
-        fun setupClass() = runTest {
-            ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler =
-                FeatureFormsTestChallengeHandler(
-                    BuildConfig.webMapUser,
-                    BuildConfig.webMapPassword
-                )
-
-            sharedMap =
-                ArcGISMap("https://runtimecoretest.maps.arcgis.com/home/item.html?id=ed930cf0eb724ea49c6bccd8fd3dd9af")
-            sharedMap?.load()?.onFailure { fail("failed to load webmap with ${it.message}") }
-            val featureLayer = sharedMap?.operationalLayers?.first() as? FeatureLayer
-            featureLayer?.let { layer ->
-                layer.load().onFailure { fail("failed to load layer with ${it.message}") }
-                sharedFeatureFormDefinition = layer.featureFormDefinition!!
-                val parameters = QueryParameters().also {
-                    it.objectIds.add(2L)
-                    it.maxFeatures = 1
-                }
-                layer.featureTable?.queryFeatures(parameters)?.onSuccess {
-                    sharedFeature = it.filterIsInstance<ArcGISFeature>().firstOrNull()
-                    if (sharedFeature == null) fail("failed to fetch feature")
-                    sharedFeature?.load()
-                        ?.onFailure { fail("failed to load feature with ${it.message}") }
-                    sharedFeatureForm = FeatureForm(sharedFeature!!, sharedFeatureFormDefinition!!)
-                    sharedFeatureForm!!.evaluateExpressions()
-                }?.onFailure {
-                    fail("failed to query features on layer's featuretable with ${it.message}")
-                }
-            }
-        }
     }
 }

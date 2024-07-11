@@ -88,7 +88,6 @@
     <string name="ff_time_picker_period_toggle_description">選擇 AM 或 PM</string>
     <string name="ff_time_picker_pm">下午</string>
     <string name="take_photo">拍照</string>
-    <string name="add_photo">新增相片</string>
     <string name="rename">重新命名</string>
     <string name="delete">刪除</string>
     <string name="rename_attachment">重新命名附件</string>

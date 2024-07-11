@@ -29,24 +29,17 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
-import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.data.ArcGISFeature
-import com.arcgismaps.data.QueryParameters
-import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.RadioButtonsFormInput
-import com.arcgismaps.mapping.layers.FeatureLayer
-import junit.framework.TestCase
-import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
 import org.junit.Assert.fail
 import org.junit.Before
-import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
 
-class RadioButtonFieldTests {
-
+class RadioButtonFieldTests : FeatureFormTestRunner(
+    uri = "https://www.arcgis.com/home/item.html?id=476e9b4180234961809485c8eff83d5d",
+    objectId = 1
+) {
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -163,45 +156,6 @@ class RadioButtonFieldTests {
         // assert the no value label is not visible by catching the assertion error
         assertThrows(AssertionError::class.java) {
             radioField.onChildWithText(input.noValueLabel)
-        }
-    }
-
-    companion object {
-        private lateinit var featureForm: FeatureForm
-
-        @BeforeClass
-        @JvmStatic
-        fun setupClass() = runTest {
-            ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler =
-                FeatureFormsTestChallengeHandler(
-                    BuildConfig.webMapUser,
-                    BuildConfig.webMapPassword
-                )
-            val map =
-                ArcGISMap("https://runtimecoretest.maps.arcgis.com/home/item.html?id=476e9b4180234961809485c8eff83d5d")
-            map.load().onFailure { TestCase.fail("failed to load webmap with ${it.message}") }
-            val featureLayer = map.operationalLayers.first() as? FeatureLayer
-            featureLayer?.let { layer ->
-                layer.load().onFailure { TestCase.fail("failed to load layer with ${it.message}") }
-                val featureFormDefinition = layer.featureFormDefinition!!
-                val parameters = QueryParameters().also {
-                    it.objectIds.add(1L)
-                    it.maxFeatures = 1
-                }
-                layer.featureTable?.queryFeatures(parameters)?.onSuccess { featureQueryResult ->
-                    val feature = featureQueryResult.find {
-                        it is ArcGISFeature
-                    } as? ArcGISFeature
-                    if (feature == null) TestCase.fail("failed to fetch feature")
-                    feature?.load()?.onFailure {
-                        TestCase.fail("failed to load feature with ${it.message}")
-                    }
-                    featureForm = FeatureForm(feature!!, featureFormDefinition)
-                    featureForm.evaluateExpressions()
-                }?.onFailure {
-                    TestCase.fail("failed to query features on layer's featuretable with ${it.message}")
-                }
-            }
         }
     }
 }

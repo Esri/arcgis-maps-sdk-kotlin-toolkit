@@ -88,7 +88,6 @@
     <string name="ff_time_picker_period_toggle_description">Vælg AM eller PM</string>
     <string name="ff_time_picker_pm">PM</string>
     <string name="take_photo">Tag foto</string>
-    <string name="add_photo">Tilføj foto</string>
     <string name="rename">Omdøb</string>
     <string name="delete">Slet</string>
     <string name="rename_attachment">Omdøb vedhæftning</string>

@@ -88,7 +88,6 @@
     <string name="ff_time_picker_period_toggle_description">เลือก AM หรือ PM</string>
     <string name="ff_time_picker_pm">PM</string>
     <string name="take_photo">ถ่ายภาพ</string>
-    <string name="add_photo">เพิ่มรูปถ่าย</string>
     <string name="rename">เปลี่ยนชื่อ</string>
     <string name="delete">ลบ</string>
     <string name="rename_attachment">เปลี่ยนชื่อไฟล์แนบ</string>

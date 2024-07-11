@@ -88,7 +88,6 @@
     <string name="ff_time_picker_period_toggle_description">AM/PM の選択</string>
     <string name="ff_time_picker_pm">PM</string>
     <string name="take_photo">写真の撮影</string>
-    <string name="add_photo">写真の追加</string>
     <string name="rename">名前の変更</string>
     <string name="delete">削除</string>
     <string name="rename_attachment">添付ファイル名の変更</string>

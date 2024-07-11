@@ -88,7 +88,6 @@
     <string name="ff_time_picker_period_toggle_description">AM veya PM olarak seç</string>
     <string name="ff_time_picker_pm">PM</string>
     <string name="take_photo">Fotoğraf Çek</string>
-    <string name="add_photo">Fotoğraf Ekle</string>
     <string name="rename">Yeniden Adlandır</string>
     <string name="delete">Sil</string>
     <string name="rename_attachment">Eki Yeniden Adlandır</string>

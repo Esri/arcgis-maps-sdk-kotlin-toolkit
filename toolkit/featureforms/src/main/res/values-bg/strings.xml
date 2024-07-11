@@ -88,7 +88,6 @@
     <string name="ff_time_picker_period_toggle_description">Изберете AM (преди обяд) или PM (следобед)</string>
     <string name="ff_time_picker_pm">След обяд</string>
     <string name="take_photo">Направете снимка</string>
-    <string name="add_photo">Добавяне на снимка</string>
     <string name="rename">Преименуване</string>
     <string name="delete">Изтриване</string>
     <string name="rename_attachment">Преименуване на прикачен файл</string>
