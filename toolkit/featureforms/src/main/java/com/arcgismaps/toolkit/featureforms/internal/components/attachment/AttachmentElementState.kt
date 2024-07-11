@@ -131,7 +131,7 @@ internal class AttachmentElementState(
             // if the attachment is already loaded then re-load the new state
             // this is useful during a configuration change when the form attachment
             // objects have already been loaded by the state object.
-            if (formAttachment.loadStatus.value is LoadStatus.Loaded) {
+            if (formAttachment.loadStatus.value is LoadStatus.Loaded || formAttachment.isLocal) {
                 state.loadWithParentScope()
             }
             attachments.add(state)
