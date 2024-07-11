@@ -40,11 +40,9 @@ internal class MediaImageProvider(
         val directory = File(folderName)
         directory.mkdirs()
         val file = File(directory, fileName)
-        if (!file.exists()) {
-            file.createNewFile()
-            BufferedOutputStream(FileOutputStream(file)).use { bos ->
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, bos)
-            }
+        file.createNewFile()
+        BufferedOutputStream(FileOutputStream(file)).use { bos ->
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, bos)
         }
         file.canonicalPath
     }

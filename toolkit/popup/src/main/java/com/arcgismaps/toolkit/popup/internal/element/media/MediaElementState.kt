@@ -77,7 +77,7 @@ internal class MediaElementState(
                         ""
                     },
                     MediaImageProvider(
-                        fileName = "media-${Objects.hash(mediaPopupElement.title, media.title, media.caption)}",
+                        fileName = "media-${Objects.hash(mediaPopupElement.title, media.title, media.caption)}.png",
                         folderName = mediaFolder
                     ) {
                         media.generateChart(chartParams).getOrThrow().image.bitmap
@@ -173,7 +173,7 @@ internal fun rememberMediaElementState(
     val mediaFolder = "${LocalContext.current.cacheDir.canonicalPath}/popup_media"
     val context = LocalContext.current
     return rememberSaveable(
-        inputs = arrayOf(popup, element),
+        inputs = arrayOf(popup, element.toJson()),
         saver = MediaElementState.Saver(element, scope, mediaFolder, chartParams, context)
     ) {
         MediaElementState(
