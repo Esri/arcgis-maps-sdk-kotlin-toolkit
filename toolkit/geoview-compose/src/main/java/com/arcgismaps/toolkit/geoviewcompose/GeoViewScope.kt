@@ -292,23 +292,24 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
                     density = LocalDensity.current,
                     displayMetrics = LocalContext.current.resources.displayMetrics
                 )) {
-                CalloutTheme{
-                    Box(
-                        modifier = modifier
-                            .drawCalloutContainer(
-                                cornerRadius = with(LocalDensity.current) { shape.cornerRadius.toPx() },
-                                strokeBorderWidth = with(LocalDensity.current) { shape.borderWidth.toPx() },
-                                strokeColor = colorScheme.borderColor,
-                                backgroundColor = colorScheme.backgroundColor,
-                                calloutContentPadding = shape.calloutContentPadding,
-                                leaderWidth = with(LocalDensity.current) { shape.leaderSize.width.toPx() },
-                                leaderHeight = with(LocalDensity.current) { shape.leaderSize.height.toPx() },
-                                minSize = shape.minSize
-                            )
-                            .animateContentSize()
-                    )
-                    {
-                        content.invoke(this)
+                CalloutTheme {
+                    with(LocalDensity.current) {
+                        Box(
+                            modifier = modifier
+                                .drawCalloutContainer(
+                                    cornerRadius = shape.cornerRadius.toPx(),
+                                    strokeBorderWidth = shape.borderWidth.toPx(),
+                                    strokeColor = colorScheme.borderColor,
+                                    backgroundColor = colorScheme.backgroundColor,
+                                    calloutContentPadding = shape.calloutContentPadding,
+                                    leaderWidth = shape.leaderSize.width.toPx(),
+                                    leaderHeight = shape.leaderSize.height.toPx(),
+                                    minSize = shape.minSize
+                                )
+                                .animateContentSize()
+                        ) {
+                            content.invoke(this)
+                        }
                     }
                 }
             }
