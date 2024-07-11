@@ -272,7 +272,7 @@ internal class FormAttachmentState(
      * The name of the attachment. Setting the name will update the [FormAttachment.name] property.
      * This is backed by a [MutableState] and can be observed by the composition.
      */
-    var name : String
+    var name: String
         get() = _name.value
         set(value) {
             formAttachment?.name = value
@@ -523,15 +523,18 @@ internal fun FormAttachmentType.getIcon(): ImageVector = when (this) {
 /**
  * Returns a new attachment name based on the content type.
  */
-internal fun List<FormAttachmentState>.getNewAttachmentNameForContentType(contentType: String): String {
-    val prefix = when {
-        contentType.startsWith("image/") -> "Image"
-        contentType.startsWith("video/") -> "Video"
-        else -> "Attachment"
-    }
-    val count = this.count { entry ->
-        entry.contentType.split("/").firstOrNull()
-            .equals(contentType.split("/").firstOrNull(), ignoreCase = true)
+internal fun AttachmentElementState.getNewAttachmentNameForContentType(contentType: String): String {
+    // use the content type prefix to generate a new attachment name
+    val prefix = contentType.split("/").firstOrNull()?.replaceFirstChar(Char::titlecase)
+        ?: "Attachment"
+    var count = attachments.count { entry ->
+        // count the number of attachments with the same content type
+        entry.contentType == contentType
     } + 1
-    return "$prefix $count"
+    // create a set of attachment names to check for duplicates
+    val names = attachments.mapTo(hashSetOf()) { it.name }
+    while (names.contains("${prefix}$count")) {
+        count++
+    }
+    return "${prefix}$count"
 }
