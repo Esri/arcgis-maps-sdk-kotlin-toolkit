@@ -77,8 +77,9 @@ import com.arcgismaps.mapping.view.SceneView
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.mapping.view.zero
 import com.arcgismaps.realtime.DynamicEntity
-import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutColorScheme
+import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutColors
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutDefaults
+import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutShapes
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutTheme
 import kotlinx.coroutines.flow.first
 import java.util.concurrent.atomic.AtomicBoolean
@@ -118,7 +119,8 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         modifier: Modifier = Modifier,
         offset: Offset = Offset.Zero,
         rotateOffsetWithGeoView: Boolean = false,
-        colorScheme: CalloutColorScheme = CalloutDefaults.colorScheme(),
+        colorScheme: CalloutColors = CalloutDefaults.colors(),
+        shape: CalloutShapes = CalloutDefaults.shapes(),
         content: @Composable BoxScope.() -> Unit
     ) {
         // Enables the recomposition of the first Callout in the content lambda that is displayed
@@ -129,7 +131,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
             || allowCalloutRecomposition
         ) {
             allowCalloutRecomposition = true
-            this.CalloutInternal(location, modifier, offset, rotateOffsetWithGeoView, colorScheme, content)
+            this.CalloutInternal(location, modifier, offset, rotateOffsetWithGeoView, colorScheme, shape, content)
         }
     }
 
@@ -157,7 +159,8 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         geoElement: GeoElement,
         modifier: Modifier = Modifier,
         tapLocation: Point? = null,
-        colorScheme: CalloutColorScheme = CalloutDefaults.colorScheme(),
+        colorScheme: CalloutColors = CalloutDefaults.colors(),
+        shape: CalloutShapes = CalloutDefaults.shapes(),
         content: @Composable BoxScope.() -> Unit
     ) {
         // Enables the recomposition of the first Callout in the content lambda that is displayed
@@ -168,7 +171,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
             || allowCalloutRecomposition
         ) {
             allowCalloutRecomposition = true
-            this.CalloutInternal(geoElement, modifier, tapLocation, colorScheme, content)
+            this.CalloutInternal(geoElement, modifier, tapLocation, colorScheme, shape, content)
         }
     }
 
@@ -207,7 +210,8 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         geoElement: GeoElement,
         modifier: Modifier = Modifier,
         tapLocation: Point? = null,
-        colorScheme: CalloutColorScheme,
+        colorScheme: CalloutColors,
+        shape: CalloutShapes,
         content: @Composable BoxScope.() -> Unit
     ) {
         var leaderLocation: LeaderLocation? by remember {
@@ -230,6 +234,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
                 it.offset,
                 it.rotateOffsetWithGeoView,
                 colorScheme,
+                shape,
                 content
             )
         }
@@ -246,7 +251,8 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         modifier: Modifier,
         offset: Offset,
         rotateOffsetWithGeoView: Boolean,
-        colorScheme: CalloutColorScheme,
+        colorScheme: CalloutColors,
+        shape: CalloutShapes,
         content: (@Composable BoxScope.() -> Unit)
     ) {
 
@@ -290,14 +296,14 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
                     Box(
                         modifier = modifier
                             .drawCalloutContainer(
-                                cornerRadius = with(LocalDensity.current) { colorScheme.calloutShapeProperties.cornerRadius.toPx() },
-                                strokeBorderWidth = with(LocalDensity.current) { colorScheme.calloutShapeProperties.borderWidth.toPx() },
-                                strokeColor = colorScheme.calloutColorsProperties.borderColor,
-                                backgroundColor = colorScheme.calloutColorsProperties.backgroundColor,
-                                calloutContentPadding = colorScheme.calloutShapeProperties.calloutContentPadding,
-                                leaderWidth = with(LocalDensity.current) { colorScheme.calloutShapeProperties.leaderSize.width.toPx() },
-                                leaderHeight = with(LocalDensity.current) { colorScheme.calloutShapeProperties.leaderSize.height.toPx() },
-                                minSize = colorScheme.calloutShapeProperties.minSize
+                                cornerRadius = with(LocalDensity.current) { shape.cornerRadius.toPx() },
+                                strokeBorderWidth = with(LocalDensity.current) { shape.borderWidth.toPx() },
+                                strokeColor = colorScheme.borderColor,
+                                backgroundColor = colorScheme.backgroundColor,
+                                calloutContentPadding = shape.calloutContentPadding,
+                                leaderWidth = with(LocalDensity.current) { shape.leaderSize.width.toPx() },
+                                leaderHeight = with(LocalDensity.current) { shape.leaderSize.height.toPx() },
+                                minSize = shape.minSize
                             )
                             .animateContentSize()
                     )

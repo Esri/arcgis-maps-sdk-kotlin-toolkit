@@ -32,11 +32,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 
 /**
- * CompositionLocal used to pass a [CalloutColorScheme] down the tree.
+ * CompositionLocal used to pass [CalloutColors] down the tree.
  */
-internal val LocalColorScheme: ProvidableCompositionLocal<CalloutColorScheme> =
+internal val LocalColorScheme: ProvidableCompositionLocal<CalloutColors> =
     compositionLocalOf {
         DefaultThemeTokens.colorScheme
+    }
+
+/**
+ * CompositionLocal used to pass [CalloutShapes] down the tree.
+ */
+internal val LocalShapes: ProvidableCompositionLocal<CalloutShapes> =
+    compositionLocalOf {
+        DefaultThemeTokens.shapes
     }
 
 /**
@@ -45,12 +53,20 @@ internal val LocalColorScheme: ProvidableCompositionLocal<CalloutColorScheme> =
 internal object CalloutTheme {
 
     /**
-     * Retrieves the current [CalloutColorScheme].
+     * Retrieves the current [CalloutColors].
      */
-    val colorScheme: CalloutColorScheme
+    val colorScheme: CalloutColors
         @Composable
         @ReadOnlyComposable
         get() = LocalColorScheme.current
+
+    /**
+     * Retrieves the current [CalloutShapes].
+     */
+    val shapes: CalloutShapes
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalShapes.current
 }
 
 /**
@@ -58,9 +74,9 @@ internal object CalloutTheme {
  * customized.
  *
  * The default value for the [colorScheme] is based on the current [MaterialTheme].
- * See [CalloutDefaults.colorScheme] for the exact configuration used.
+ * See [CalloutDefaults.colors] for the exact configuration used.
  *
- * @param colorScheme A [CalloutColorScheme] to use for this compose hierarchy
+ * @param colorScheme The [CalloutColors] to use for this compose hierarchy
  *
  * A complete definition for the [CalloutTheme] to use. A default is provided based
  * on the current [MaterialTheme].
@@ -68,23 +84,19 @@ internal object CalloutTheme {
  */
 @Composable
 internal fun CalloutTheme(
-    colorScheme: CalloutColorScheme = CalloutDefaults.colorScheme(),
+    colorScheme: CalloutColors = CalloutDefaults.colors(),
+    shapes: CalloutShapes = CalloutDefaults.shapes(),
     content: @Composable () -> Unit
 ) {
     CompositionLocalProvider(LocalColorScheme provides colorScheme) {
-        content()
+        CompositionLocalProvider(LocalShapes provides shapes) {
+            content()
+        }
     }
 }
 
-
 @Immutable
-public data class CalloutColorScheme internal constructor(
-    public val calloutShapeProperties: CalloutShapeProperties,
-    public val calloutColorsProperties: CalloutColorsProperties
-)
-
-@Immutable
-public data class CalloutShapeProperties internal constructor(
+public data class CalloutShapes internal constructor(
     public val cornerRadius: Dp,
     public val leaderSize: DpSize,
     public val borderWidth: Dp,
@@ -94,7 +106,7 @@ public data class CalloutShapeProperties internal constructor(
 
 
 @Immutable
-public data class CalloutColorsProperties internal constructor(
+public data class CalloutColors internal constructor(
     public val backgroundColor: Color,
     public val borderColor: Color
 )
@@ -105,44 +117,28 @@ public data class CalloutColorsProperties internal constructor(
 public object CalloutDefaults {
 
     /**
-     * Creates a [CalloutColorScheme] with default values.
+     * Creates an instance of [CalloutColors] with default values from [MaterialTheme].
 
      * @since 200.5.0
      */
     @Composable
-    public fun colorScheme(
-        calloutColorsProperties: CalloutColorsProperties = colorProperties(),
-        calloutShapeProperties: CalloutShapeProperties = shapeProperties()
-    ): CalloutColorScheme {
-        return CalloutColorScheme(
-            calloutColorsProperties = calloutColorsProperties,
-            calloutShapeProperties = calloutShapeProperties
-        )
-    }
-
-    /**
-     * Creates an instance of [CalloutColorsProperties] with default values from [MaterialTheme].
-
-     * @since 200.5.0
-     */
-    @Composable
-    public fun colorProperties(
+    public fun colors(
         backgroundColor: Color = MaterialTheme.colorScheme.background,
         borderColor: Color = MaterialTheme.colorScheme.outlineVariant
-    ): CalloutColorsProperties {
-        return CalloutColorsProperties(
+    ): CalloutColors {
+        return CalloutColors(
             backgroundColor = backgroundColor,
             borderColor = borderColor
         )
     }
 
     /**
-     * Creates an instance of [CalloutColorsProperties] with default values from [MaterialTheme].
+     * Creates an instance of [CalloutColors] with default values from [MaterialTheme].
 
      * @since 200.5.0
      */
     @Composable
-    public fun shapeProperties(
+    public fun shapes(
         cornerRadius: Dp = 10.dp,
         borderWidth: Dp = 2.dp,
         leaderSize: DpSize = DpSize(width = 12.dp, height = 10.dp),
@@ -153,8 +149,8 @@ public object CalloutDefaults {
             width = borderWidth + (2 * cornerRadius),
             height = borderWidth + (2 * cornerRadius)
         )
-    ): CalloutShapeProperties {
-        return CalloutShapeProperties(
+    ): CalloutShapes {
+        return CalloutShapes(
             cornerRadius = cornerRadius,
             leaderSize = leaderSize,
             borderWidth = borderWidth,

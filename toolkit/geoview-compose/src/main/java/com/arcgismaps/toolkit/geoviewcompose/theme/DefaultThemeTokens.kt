@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.times
 import com.arcgismaps.toolkit.geoviewcompose.theme.DefaultThemeTokens.colorScheme
 
 /**
- * Provides a default [CalloutColorScheme] via [colorScheme].
+ * Provides a default [CalloutColors] and [CalloutShapes] via [colorScheme] and [shapes].
  *
  * Creates a default theme from statically defined tokens. Do not use this at runtime, instead the
  * CalloutColorScheme must always be specified from the current MaterialTheme.
@@ -32,18 +32,17 @@ import com.arcgismaps.toolkit.geoviewcompose.theme.DefaultThemeTokens.colorSchem
  */
 internal object DefaultThemeTokens {
 
-    val colorScheme: CalloutColorScheme = CalloutColorScheme(
-        calloutColorsProperties = CalloutColorsProperties(
-            backgroundColor = CalloutTokens.Background,
-            borderColor = CalloutTokens.Outline
-        ),
-        calloutShapeProperties = CalloutShapeProperties(
-            cornerRadius = CalloutTokens.CornerRadius,
-            borderWidth = CalloutTokens.OutlineWidth,
-            leaderSize = CalloutTokens.LeaderSize,
-            calloutContentPadding = CalloutTokens.CalloutContentPadding,
-            minSize = CalloutTokens.MinContentSize
-        )
+    val colorScheme: CalloutColors = CalloutColors(
+        backgroundColor = CalloutTokens.Background,
+        borderColor = CalloutTokens.Outline
+    )
+
+    val shapes: CalloutShapes = CalloutShapes(
+        cornerRadius = CalloutTokens.CornerRadius,
+        borderWidth = CalloutTokens.OutlineWidth,
+        leaderSize = CalloutTokens.LeaderSize,
+        calloutContentPadding = CalloutTokens.CalloutContentPadding,
+        minSize = CalloutTokens.MinContentSize
     )
 }
 
