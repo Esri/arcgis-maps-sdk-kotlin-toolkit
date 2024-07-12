@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?><!--
+  ~ Copyright 2024 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="show_or_hide_popup_element_content">כן_expand popup element content_____________________________ש</string>
+    <string name="share">כן_Share___________ש</string>
+    <string name="save">כן_Save_________ש</string>
+    <string name="save_successful">כן_Save successful________________ש</string>
+    <string name="save_failed">כן_Save failed____________ש</string>
+    <string name="more">כן_More_________ש</string>
+    <string name="image">כן_Image___________ש</string>
+    <string name="video">כן_Video___________ש</string>
+    <string name="other">כן_Other___________ש</string>
+    <string name="close">כן_Back_________ש</string>
+    <string name="attachment_thumbnail">כן_attachment thumbnail_____________________ש</string>
+</resources>
