@@ -200,6 +200,7 @@ internal fun AttachmentTile(
                     onClick = {
                         showContextMenu = false
                         state.deleteAttachment()
+                        Toast.makeText(context, context.getString(R.string.attachment_deleted, state.name), Toast.LENGTH_SHORT).show()
                     })
             }
         }

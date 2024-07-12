@@ -387,7 +387,7 @@ private suspend fun AttachmentElementState.addAttachmentFromUri(
         return@withContext Result.failure(Exception(context.getString(R.string.attachment_error)))
     }
     // generate a name for the attachment
-    var name = "${getNewAttachmentNameForContentType(contentType)}.$extension"
+    var name = getNewAttachmentNameForContentType(contentType, extension)
     // size of the attachment
     var size = 0L
     // get the name and size of the attachment
@@ -417,7 +417,7 @@ private suspend fun AttachmentElementState.addAttachmentFromUri(
         context.readBytes(uri).onFailure {
             result = Result.failure(it)
         }.onSuccess { data ->
-            addAttachment(name, contentType, data)
+            result = addAttachment(name, contentType, data)
         }
         result
     }

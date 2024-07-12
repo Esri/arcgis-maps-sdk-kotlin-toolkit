@@ -115,7 +115,7 @@ internal class AttachmentElementState(
      */
     private fun buildAttachmentStates(list: List<FormAttachment>) {
         attachments.clear()
-        list.forEach { formAttachment ->
+        list.asReversed().forEach { formAttachment ->
             // create a new state
             val state = FormAttachmentState(
                 name = formAttachment.name,
@@ -131,7 +131,7 @@ internal class AttachmentElementState(
             // if the attachment is already loaded then re-load the new state
             // this is useful during a configuration change when the form attachment
             // objects have already been loaded by the state object.
-            if (formAttachment.loadStatus.value is LoadStatus.Loaded) {
+            if (formAttachment.loadStatus.value is LoadStatus.Loaded || formAttachment.isLocal) {
                 state.loadWithParentScope()
             }
             attachments.add(state)
@@ -141,8 +141,9 @@ internal class AttachmentElementState(
     /**
      * Adds an attachment with the given [name], [contentType], and [data].
      */
-    fun addAttachment(name: String, contentType: String, data: ByteArray) {
-        val formAttachment = formElement.addAttachment(name, contentType, data)
+    fun addAttachment(name: String, contentType: String, data: ByteArray): Result<Unit> {
+        val formAttachment = formElement.addAttachmentOrNull(name, contentType, data)
+            ?: return Result.failure(Exception("Failed to add attachment"))
         // create a new state
         val state = FormAttachmentState(
             name = formAttachment.name,
@@ -165,6 +166,7 @@ internal class AttachmentElementState(
             lazyListState.scrollToItem(0)
             evaluateExpressions()
         }
+        return Result.success(Unit)
     }
 
     /**
@@ -402,11 +404,8 @@ internal class FormAttachmentState(
         val bitmap = try {
             when (type) {
                 is FormAttachmentType.Image -> {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        ThumbnailUtils.createImageThumbnail(File(filePath), thumbnailSize, null)
-                    } else {
-                        ThumbnailUtils.createImageThumbnail(filePath, 1)
-                    }
+                    formAttachment.createThumbnail(thumbnailSize.width, thumbnailSize.height)
+                        .getOrThrow().bitmap
                 }
 
                 FormAttachmentType.Video -> {
@@ -521,9 +520,16 @@ internal fun FormAttachmentType.getIcon(): ImageVector = when (this) {
 }
 
 /**
- * Returns a new attachment name based on the content type.
+ * Returns a new attachment name based on the [contentType] and [extension].
+ *
+ * @param contentType The content type of the attachment.
+ * @param extension The file extension of the attachment.
+ * @return A new attachment name including the file extension specified by [extension].
  */
-internal fun AttachmentElementState.getNewAttachmentNameForContentType(contentType: String): String {
+internal fun AttachmentElementState.getNewAttachmentNameForContentType(
+    contentType: String,
+    extension: String
+): String {
     // use the content type prefix to generate a new attachment name
     val prefix = contentType.split("/").firstOrNull()?.replaceFirstChar(Char::titlecase)
         ?: "Attachment"
@@ -533,8 +539,8 @@ internal fun AttachmentElementState.getNewAttachmentNameForContentType(contentTy
     } + 1
     // create a set of attachment names to check for duplicates
     val names = attachments.mapTo(hashSetOf()) { it.name }
-    while (names.contains("${prefix}$count")) {
+    while (names.contains("${prefix}$count.$extension")) {
         count++
     }
-    return "${prefix}$count"
+    return "${prefix}$count.$extension"
 }
