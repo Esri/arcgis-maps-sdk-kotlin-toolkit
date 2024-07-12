@@ -185,22 +185,28 @@ class MapViewModel @Inject constructor(
         )
         // if there are no errors then update the feature
         return if (errors.isEmpty()) {
-            val feature = featureForm.feature
             val serviceFeatureTable =
-                feature.featureTable as? ServiceFeatureTable ?: return Result.failure(
+                featureForm.feature.featureTable as? ServiceFeatureTable ?: return Result.failure(
                     IllegalStateException("cannot save feature edit without a ServiceFeatureTable")
                 )
-            val result = featureForm.finishEditing().map {
+            var result = Result.success(Unit)
+            featureForm.finishEditing().onSuccess {
                 serviceFeatureTable.serviceGeodatabase?.let { database ->
-                    return@let if (database.serviceInfo?.canUseServiceGeodatabaseApplyEdits == true) {
-                        database.applyEdits()
+                    if (database.serviceInfo?.canUseServiceGeodatabaseApplyEdits == true) {
+                        database.applyEdits().onFailure {
+                            result = Result.failure(it)
+                        }
                     } else {
-                        serviceFeatureTable.applyEdits()
+                        serviceFeatureTable.applyEdits().onFailure {
+                            result = Result.failure(it)
+                        }
                     }
                 }
-                feature.refresh()
+                featureForm.feature.refresh()
                 // unselect the feature after the edits have been saved
-                (feature.featureTable?.layer as FeatureLayer).clearSelection()
+                (featureForm.feature.featureTable?.layer as FeatureLayer).clearSelection()
+            }.onFailure {
+                result = Result.failure(it)
             }
             // set the state to not editing since the feature was updated successfully
             _uiState.value = UIState.NotEditing
