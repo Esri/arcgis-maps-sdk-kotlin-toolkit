@@ -521,9 +521,13 @@ internal fun FormAttachmentType.getIcon(): ImageVector = when (this) {
 }
 
 /**
- * Returns a new attachment name based on the content type.
+ * Returns a new attachment name based on the [contentType] and [extension].
+ *
+ * @param contentType The content type of the attachment.
+ * @param extension The file extension of the attachment.
+ * @return A new attachment name including the file extension specified by [extension].
  */
-internal fun AttachmentElementState.getNewAttachmentNameForContentType(contentType: String): String {
+internal fun AttachmentElementState.getNewAttachmentNameForContentType(contentType: String, extension : String): String {
     // use the content type prefix to generate a new attachment name
     val prefix = contentType.split("/").firstOrNull()?.replaceFirstChar(Char::titlecase)
         ?: "Attachment"
@@ -533,8 +537,8 @@ internal fun AttachmentElementState.getNewAttachmentNameForContentType(contentTy
     } + 1
     // create a set of attachment names to check for duplicates
     val names = attachments.mapTo(hashSetOf()) { it.name }
-    while (names.contains("${prefix}$count")) {
+    while (names.contains("${prefix}$count.$extension")) {
         count++
     }
-    return "${prefix}$count"
+    return "${prefix}$count.$extension"
 }
