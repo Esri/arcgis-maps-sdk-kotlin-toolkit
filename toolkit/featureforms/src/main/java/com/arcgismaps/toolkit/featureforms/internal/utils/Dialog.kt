@@ -417,7 +417,7 @@ private suspend fun AttachmentElementState.addAttachmentFromUri(
         context.readBytes(uri).onFailure {
             result = Result.failure(it)
         }.onSuccess { data ->
-            addAttachment(name, contentType, data)
+            result = addAttachment(name, contentType, data)
         }
         result
     }

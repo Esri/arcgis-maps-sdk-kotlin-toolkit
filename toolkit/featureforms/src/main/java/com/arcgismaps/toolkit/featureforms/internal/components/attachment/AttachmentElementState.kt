@@ -141,8 +141,9 @@ internal class AttachmentElementState(
     /**
      * Adds an attachment with the given [name], [contentType], and [data].
      */
-    fun addAttachment(name: String, contentType: String, data: ByteArray) {
-        val formAttachment = formElement.addAttachment(name, contentType, data)
+    fun addAttachment(name: String, contentType: String, data: ByteArray): Result<Unit> {
+        val formAttachment = formElement.addAttachmentOrNull(name, contentType, data)
+            ?: return Result.failure(Exception("Failed to add attachment"))
         // create a new state
         val state = FormAttachmentState(
             name = formAttachment.name,
@@ -165,6 +166,7 @@ internal class AttachmentElementState(
             lazyListState.scrollToItem(0)
             evaluateExpressions()
         }
+        return Result.success(Unit)
     }
 
     /**
@@ -402,11 +404,8 @@ internal class FormAttachmentState(
         val bitmap = try {
             when (type) {
                 is FormAttachmentType.Image -> {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        ThumbnailUtils.createImageThumbnail(File(filePath), thumbnailSize, null)
-                    } else {
-                        ThumbnailUtils.createImageThumbnail(filePath, 1)
-                    }
+                    formAttachment.createThumbnail(thumbnailSize.width, thumbnailSize.height)
+                        .getOrThrow().bitmap
                 }
 
                 FormAttachmentType.Video -> {
@@ -527,7 +526,10 @@ internal fun FormAttachmentType.getIcon(): ImageVector = when (this) {
  * @param extension The file extension of the attachment.
  * @return A new attachment name including the file extension specified by [extension].
  */
-internal fun AttachmentElementState.getNewAttachmentNameForContentType(contentType: String, extension : String): String {
+internal fun AttachmentElementState.getNewAttachmentNameForContentType(
+    contentType: String,
+    extension: String
+): String {
     // use the content type prefix to generate a new attachment name
     val prefix = contentType.split("/").firstOrNull()?.replaceFirstChar(Char::titlecase)
         ?: "Attachment"
