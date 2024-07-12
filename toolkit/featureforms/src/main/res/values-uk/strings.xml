@@ -15,8 +15,20 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="enter_n_chars">Введіть %1$d символи(-ів)</string>
+    <plurals name="enter_n_chars">
+        <item quantity="one">ґ_Enter %1$d character_____________________Ї</item>
+        <item quantity="other">ґ_Enter %1$d characters______________________Ї</item>
+    </plurals>
+    <plurals name="value_must_be_n_characters">
+        <item quantity="one">ґ_Value must be %1$d character_____________________________Ї</item>
+        <item quantity="other">ґ_Value must be %1$d characters______________________________Ї</item>
+    </plurals>
     <string name="enter_min_to_max_chars">Ввести від %1$d до %2$d символів</string>
+    <string name="value_must_be_from_to_characters">ґ_Value must be %1$d to %2$d characters____________________Ї</string>
+    <plurals name="maximum_n_chars">
+        <item quantity="one">ґ_Maximum %1$d character_______________________Ї</item>
+        <item quantity="other">ґ_Maximum %1$d characters________________________Ї</item>
+    </plurals>
     <string name="maximum_n_chars">Максимум %1$d символи</string>
     <string name="no_value">Немає значення</string>
     <string name="enter_value">Ввести значення</string>
@@ -28,6 +40,7 @@
     <string name="done">Готово</string>
     <string name="filter">Фільтр %1$s</string>
     <string name="numeric_range_helper_text">Ввести значення від %1$s до %2$s</string>
+    <string name="value_must_be_from_to">ґ_Value must be from %1$s to %2$s_________________Ї</string>
     <string name="less_than_min_value">Менше мінімального значення %1$s</string>
     <string name="exceeds_max_value">Перевищує максимальне значення %1$s</string>
     <string name="value_must_be_a_whole_number">Значення повинно бути цілим числом</string>
@@ -87,9 +100,17 @@
     <string name="ff_time_picker_minute_text_field">на хвилини</string>
     <string name="ff_time_picker_period_toggle_description">Виберіть ранок або вечір</string>
     <string name="ff_time_picker_pm">PM</string>
+
     <string name="take_photo">Зробити фото</string>
+    <string name="add_from_gallery">ґ_Add From Gallery_________________Ї</string>
     <string name="rename">Змінити назву</string>
     <string name="delete">Видалити</string>
     <string name="rename_attachment">Перейменувати прикріплення</string>
     <string name="name">Назва</string>
+    <string name="add_file">ґ_Add From Files_______________Ї</string>
+    <string name="attachment_error">ґ_Error Adding Attachment________________________Ї</string>
+    <string name="no_app_found">ґ_No application found to open this file type_______________________Ї.</string>
+    <string name="attachment_too_large">ґ_The File is too large. Please add a file less than 50 MB______________________________Ї.</string>
+    <string name="attachment_is_empty">ґ_Empty files are not supported______________________________Ї</string>
+    <string name="download_empty_file">ґ_Empty files cannot be downloaded_________________Ї</string>
 </resources>

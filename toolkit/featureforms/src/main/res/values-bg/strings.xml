@@ -15,8 +15,20 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="enter_n_chars">Въведете %1$d символа</string>
+    <plurals name="enter_n_chars">
+        <item quantity="one">й_Enter %1$d character_____________________й</item>
+        <item quantity="other">й_Enter %1$d characters______________________й</item>
+    </plurals>
+    <plurals name="value_must_be_n_characters">
+        <item quantity="one">й_Value must be %1$d character_____________________________й</item>
+        <item quantity="other">й_Value must be %1$d characters______________________________й</item>
+    </plurals>
     <string name="enter_min_to_max_chars">Въведете от %1$d до %2$d символа</string>
+    <string name="value_must_be_from_to_characters">й_Value must be %1$d to %2$d characters____________________й</string>
+    <plurals name="maximum_n_chars">
+        <item quantity="one">й_Maximum %1$d character_______________________й</item>
+        <item quantity="other">й_Maximum %1$d characters________________________й</item>
+    </plurals>
     <string name="maximum_n_chars">Максимум %1$d символа</string>
     <string name="no_value">Без стойност</string>
     <string name="enter_value">Въведете стойност</string>
@@ -28,6 +40,7 @@
     <string name="done">Готово</string>
     <string name="filter">Филтър %1$s</string>
     <string name="numeric_range_helper_text">Въведете стойност от %1$s до %2$s</string>
+    <string name="value_must_be_from_to">й_Value must be from %1$s to %2$s_________________й</string>
     <string name="less_than_min_value">По-малко от минималната стойност %1$s</string>
     <string name="exceeds_max_value">Надвишава максималната стойност %1$s</string>
     <string name="value_must_be_a_whole_number">Стойността трябва да е цяло число.</string>
@@ -87,9 +100,17 @@
     <string name="ff_time_picker_minute_text_field">за минути</string>
     <string name="ff_time_picker_period_toggle_description">Изберете AM (преди обяд) или PM (следобед)</string>
     <string name="ff_time_picker_pm">След обяд</string>
+
     <string name="take_photo">Направете снимка</string>
+    <string name="add_from_gallery">й_Add From Gallery_________________й</string>
     <string name="rename">Преименуване</string>
     <string name="delete">Изтриване</string>
     <string name="rename_attachment">Преименуване на прикачен файл</string>
     <string name="name">Име</string>
+    <string name="add_file">й_Add From Files_______________й</string>
+    <string name="attachment_error">й_Error Adding Attachment________________________й</string>
+    <string name="no_app_found">й_No application found to open this file type_______________________й.</string>
+    <string name="attachment_too_large">й_The File is too large. Please add a file less than 50 MB______________________________й.</string>
+    <string name="attachment_is_empty">й_Empty files are not supported______________________________й</string>
+    <string name="download_empty_file">й_Empty files cannot be downloaded_________________й</string>
 </resources>

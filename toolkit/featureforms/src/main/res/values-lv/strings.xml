@@ -15,8 +15,20 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="enter_n_chars">Ievadiet %1$d rakstzīmes</string>
+    <plurals name="enter_n_chars">
+        <item quantity="one">ķ_Enter %1$d character_____________________ū</item>
+        <item quantity="other">ķ_Enter %1$d characters______________________ū</item>
+    </plurals>
+    <plurals name="value_must_be_n_characters">
+        <item quantity="one">ķ_Value must be %1$d character_____________________________ū</item>
+        <item quantity="other">ķ_Value must be %1$d characters______________________________ū</item>
+    </plurals>
     <string name="enter_min_to_max_chars">Ievadiet %1$d līdz %2$d rakstzīmēm</string>
+    <string name="value_must_be_from_to_characters">ķ_Value must be %1$d to %2$d characters____________________ū</string>
+    <plurals name="maximum_n_chars">
+        <item quantity="one">ķ_Maximum %1$d character_______________________ū</item>
+        <item quantity="other">ķ_Maximum %1$d characters________________________ū</item>
+    </plurals>
     <string name="maximum_n_chars">Ne vairāk kā %1$d rakstzīmes</string>
     <string name="no_value">Nav vērtības</string>
     <string name="enter_value">Ievadiet vērtību</string>
@@ -28,6 +40,7 @@
     <string name="done">Pabeigts</string>
     <string name="filter">Filtrēt %1$s</string>
     <string name="numeric_range_helper_text">Ievadiet vērtību no %1$s līdz %2$s</string>
+    <string name="value_must_be_from_to">ķ_Value must be from %1$s to %2$s_________________ū</string>
     <string name="less_than_min_value">Mazāk par minimālo vērtību %1$s</string>
     <string name="exceeds_max_value">Pārsniedz maksimālo vērtību %1$s</string>
     <string name="value_must_be_a_whole_number">Vērtībai jābūt veselam skaitlim</string>
@@ -87,9 +100,17 @@
     <string name="ff_time_picker_minute_text_field">minūtēm</string>
     <string name="ff_time_picker_period_toggle_description">Atlasīt AM vai PM</string>
     <string name="ff_time_picker_pm">PM</string>
+
     <string name="take_photo">Uzņemt fotoattēlu</string>
+    <string name="add_from_gallery">ķ_Add From Gallery_________________ū</string>
     <string name="rename">Pārdēvēt</string>
     <string name="delete">Dzēst</string>
     <string name="rename_attachment">Pārdēvēt pielikumu</string>
     <string name="name">Nosaukums</string>
+    <string name="add_file">ķ_Add From Files_______________ū</string>
+    <string name="attachment_error">ķ_Error Adding Attachment________________________ū</string>
+    <string name="no_app_found">ķ_No application found to open this file type_______________________ū.</string>
+    <string name="attachment_too_large">ķ_The File is too large. Please add a file less than 50 MB______________________________ū.</string>
+    <string name="attachment_is_empty">ķ_Empty files are not supported______________________________ū</string>
+    <string name="download_empty_file">ķ_Empty files cannot be downloaded_________________ū</string>
 </resources>
