@@ -15,8 +15,20 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="enter_n_chars">%1$d 文字を入力します</string>
+    <plurals name="enter_n_chars">
+        <item quantity="one">須_Enter %1$d character_____________________鷗</item>
+        <item quantity="other">須_Enter %1$d characters______________________鷗</item>
+    </plurals>
+    <plurals name="value_must_be_n_characters">
+        <item quantity="one">須_Value must be %1$d character_____________________________鷗</item>
+        <item quantity="other">須_Value must be %1$d characters______________________________鷗</item>
+    </plurals>
     <string name="enter_min_to_max_chars">%1$d ～ %2$d 文字で入力してください</string>
+    <string name="value_must_be_from_to_characters">須_Value must be %1$d to %2$d characters____________________鷗</string>
+    <plurals name="maximum_n_chars">
+        <item quantity="one">須_Maximum %1$d character_______________________鷗</item>
+        <item quantity="other">須_Maximum %1$d characters________________________鷗</item>
+    </plurals>
     <string name="maximum_n_chars">最大 %1$d 文字</string>
     <string name="no_value">値なし</string>
     <string name="enter_value">値を入力</string>
@@ -28,6 +40,7 @@
     <string name="done">終了</string>
     <string name="filter">フィルター %1$s</string>
     <string name="numeric_range_helper_text">%1$s ～ %2$s の値を入力してください</string>
+    <string name="value_must_be_from_to">須_Value must be from %1$s to %2$s_________________鷗</string>
     <string name="less_than_min_value">最小値 %1$s 未満です</string>
     <string name="exceeds_max_value">最大値 %1$s を超えています</string>
     <string name="value_must_be_a_whole_number">整数を使用してください</string>
@@ -87,9 +100,17 @@
     <string name="ff_time_picker_minute_text_field">分</string>
     <string name="ff_time_picker_period_toggle_description">AM/PM の選択</string>
     <string name="ff_time_picker_pm">PM</string>
+
     <string name="take_photo">写真の撮影</string>
+    <string name="add_from_gallery">須_Add From Gallery_________________鷗</string>
     <string name="rename">名前の変更</string>
     <string name="delete">削除</string>
     <string name="rename_attachment">添付ファイル名の変更</string>
     <string name="name">名前</string>
+    <string name="add_file">須_Add From Files_______________鷗</string>
+    <string name="attachment_error">須_Error Adding Attachment________________________鷗</string>
+    <string name="no_app_found">須_No application found to open this file type_______________________鷗.</string>
+    <string name="attachment_too_large">須_The File is too large. Please add a file less than 50 MB______________________________鷗.</string>
+    <string name="attachment_is_empty">須_Empty files are not supported______________________________鷗</string>
+    <string name="download_empty_file">須_Empty files cannot be downloaded_________________鷗</string>
 </resources>

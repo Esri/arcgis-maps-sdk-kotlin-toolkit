@@ -15,8 +15,20 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="enter_n_chars">Zadejte %1$d znaků</string>
+    <plurals name="enter_n_chars">
+        <item quantity="one">Ř_Enter %1$d character_____________________ů</item>
+        <item quantity="other">Ř_Enter %1$d characters______________________ů</item>
+    </plurals>
+    <plurals name="value_must_be_n_characters">
+        <item quantity="one">Ř_Value must be %1$d character_____________________________ů</item>
+        <item quantity="other">Ř_Value must be %1$d characters______________________________ů</item>
+    </plurals>
     <string name="enter_min_to_max_chars">Zadejte %1$d až %2$d znaků</string>
+    <string name="value_must_be_from_to_characters">Ř_Value must be %1$d to %2$d characters____________________ů</string>
+    <plurals name="maximum_n_chars">
+        <item quantity="one">Ř_Maximum %1$d character_______________________ů</item>
+        <item quantity="other">Ř_Maximum %1$d characters________________________ů</item>
+    </plurals>
     <string name="maximum_n_chars">Maximálně %1$d znaků</string>
     <string name="no_value">Žádná hodnota</string>
     <string name="enter_value">Zadat hodnotu</string>
@@ -28,6 +40,7 @@
     <string name="done">Hotovo</string>
     <string name="filter">Filtr %1$s</string>
     <string name="numeric_range_helper_text">Zadejte hodnotu od %1$s do %2$s</string>
+    <string name="value_must_be_from_to">Ř_Value must be from %1$s to %2$s_________________ů</string>
     <string name="less_than_min_value">Menší než minimální hodnota %1$s</string>
     <string name="exceeds_max_value">Překračuje maximální hodnotu %1$s</string>
     <string name="value_must_be_a_whole_number">Hodnota musí být celé číslo</string>
@@ -87,9 +100,17 @@
     <string name="ff_time_picker_minute_text_field">pro minuty</string>
     <string name="ff_time_picker_period_toggle_description">Zvolte dopoledne/odpoledne</string>
     <string name="ff_time_picker_pm">odpoledne</string>
+
     <string name="take_photo">Vyfotografovat</string>
+    <string name="add_from_gallery">Ř_Add From Gallery_________________ů</string>
     <string name="rename">Přejmenovat</string>
     <string name="delete">Odstranit</string>
     <string name="rename_attachment">Přejmenovat přílohu</string>
     <string name="name">Název</string>
+    <string name="add_file">Ř_Add From Files_______________ů</string>
+    <string name="attachment_error">Ř_Error Adding Attachment________________________ů</string>
+    <string name="no_app_found">Ř_No application found to open this file type_______________________ů.</string>
+    <string name="attachment_too_large">Ř_The File is too large. Please add a file less than 50 MB______________________________ů.</string>
+    <string name="attachment_is_empty">Ř_Empty files are not supported______________________________ů</string>
+    <string name="download_empty_file">Ř_Empty files cannot be downloaded_________________ů</string>
 </resources>

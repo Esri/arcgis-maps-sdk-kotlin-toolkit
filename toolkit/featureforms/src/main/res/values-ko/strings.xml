@@ -15,8 +15,20 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="enter_n_chars">%1$d자 입력</string>
+    <plurals name="enter_n_chars">
+        <item quantity="one">한_Enter %1$d character_____________________빠</item>
+        <item quantity="other">한_Enter %1$d characters______________________빠</item>
+    </plurals>
+    <plurals name="value_must_be_n_characters">
+        <item quantity="one">한_Value must be %1$d character_____________________________빠</item>
+        <item quantity="other">한_Value must be %1$d characters______________________________빠</item>
+    </plurals>
     <string name="enter_min_to_max_chars">%1$d~%2$d자 입력</string>
+    <string name="value_must_be_from_to_characters">한_Value must be %1$d to %2$d characters____________________빠</string>
+    <plurals name="maximum_n_chars">
+        <item quantity="one">한_Maximum %1$d character_______________________빠</item>
+        <item quantity="other">한_Maximum %1$d characters________________________빠</item>
+    </plurals>
     <string name="maximum_n_chars">최대 %1$d자</string>
     <string name="no_value">값이 없음</string>
     <string name="enter_value">값 입력</string>
@@ -28,6 +40,7 @@
     <string name="done">완료</string>
     <string name="filter">필터 %1$s</string>
     <string name="numeric_range_helper_text">%1$s~%2$s의 값 입력</string>
+    <string name="value_must_be_from_to">한_Value must be from %1$s to %2$s_________________빠</string>
     <string name="less_than_min_value">최소값(%1$s)보다 작음</string>
     <string name="exceeds_max_value">최대값(%1$s)을 초과함</string>
     <string name="value_must_be_a_whole_number">값은 정수여야 함</string>
@@ -87,9 +100,17 @@
     <string name="ff_time_picker_minute_text_field">분의 경우</string>
     <string name="ff_time_picker_period_toggle_description">오전 또는 오후 선택</string>
     <string name="ff_time_picker_pm">오후</string>
+
     <string name="take_photo">사진 촬영</string>
+    <string name="add_from_gallery">한_Add From Gallery_________________빠</string>
     <string name="rename">이름 바꾸기</string>
     <string name="delete">삭제</string>
     <string name="rename_attachment">첨부 파일 이름 바꾸기</string>
     <string name="name">이름</string>
+    <string name="add_file">한_Add From Files_______________빠</string>
+    <string name="attachment_error">한_Error Adding Attachment________________________빠</string>
+    <string name="no_app_found">한_No application found to open this file type_______________________빠.</string>
+    <string name="attachment_too_large">한_The File is too large. Please add a file less than 50 MB______________________________빠.</string>
+    <string name="attachment_is_empty">한_Empty files are not supported______________________________빠</string>
+    <string name="download_empty_file">한_Empty files cannot be downloaded_________________빠</string>
 </resources>

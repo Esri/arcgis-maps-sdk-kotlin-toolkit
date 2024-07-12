@@ -15,8 +15,20 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="enter_n_chars">Indtast %1$d tegn</string>
+    <plurals name="enter_n_chars">
+        <item quantity="one">ø_Enter %1$d character_____________________å</item>
+        <item quantity="other">ø_Enter %1$d characters______________________å</item>
+    </plurals>
+    <plurals name="value_must_be_n_characters">
+        <item quantity="one">ø_Value must be %1$d character_____________________________å</item>
+        <item quantity="other">ø_Value must be %1$d characters______________________________å</item>
+    </plurals>
     <string name="enter_min_to_max_chars">Indtast fra %1$d til %2$d tegn</string>
+    <string name="value_must_be_from_to_characters">ø_Value must be %1$d to %2$d characters____________________å</string>
+    <plurals name="maximum_n_chars">
+        <item quantity="one">ø_Maximum %1$d character_______________________å</item>
+        <item quantity="other">ø_Maximum %1$d characters________________________å</item>
+    </plurals>
     <string name="maximum_n_chars">Maks. %1$d tegn</string>
     <string name="no_value">Ingen værdi</string>
     <string name="enter_value">Indtast værdi</string>
@@ -28,6 +40,7 @@
     <string name="done">Udført</string>
     <string name="filter">Filtrér %1$s</string>
     <string name="numeric_range_helper_text">Indtast en værdi fra %1$s til %2$s</string>
+    <string name="value_must_be_from_to">ø_Value must be from %1$s to %2$s_________________å</string>
     <string name="less_than_min_value">Mindre end minimumværdien %1$s</string>
     <string name="exceeds_max_value">Overskrider maksimumværdien %1$s</string>
     <string name="value_must_be_a_whole_number">Værdien skal være et helt tal</string>
@@ -87,9 +100,17 @@
     <string name="ff_time_picker_minute_text_field">for minutter</string>
     <string name="ff_time_picker_period_toggle_description">Vælg AM eller PM</string>
     <string name="ff_time_picker_pm">PM</string>
+
     <string name="take_photo">Tag foto</string>
+    <string name="add_from_gallery">ø_Add From Gallery_________________å</string>
     <string name="rename">Omdøb</string>
     <string name="delete">Slet</string>
     <string name="rename_attachment">Omdøb vedhæftning</string>
     <string name="name">Navn</string>
+    <string name="add_file">ø_Add From Files_______________å</string>
+    <string name="attachment_error">ø_Error Adding Attachment________________________å</string>
+    <string name="no_app_found">ø_No application found to open this file type_______________________å.</string>
+    <string name="attachment_too_large">ø_The File is too large. Please add a file less than 50 MB______________________________å.</string>
+    <string name="attachment_is_empty">ø_Empty files are not supported______________________________å</string>
+    <string name="download_empty_file">ø_Empty files cannot be downloaded_________________å</string>
 </resources>
