@@ -34,6 +34,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -248,18 +249,18 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
                 getLeaderScreenCoordinate(geoView, location, offset, rotateOffsetWithGeoView)
             )
         }
-        var animationEnabled by remember { mutableStateOf(false) }
+        var animationDuration by remember { mutableIntStateOf(300) }
 
         LaunchedEffect(location, offset, rotateOffsetWithGeoView) {
             // Used to update screen coordinate when new location point is used
             leaderScreenCoordinate = getLeaderScreenCoordinate(geoView, location, offset, rotateOffsetWithGeoView)
             // animate to the new screen coordinate when Callout params are changed
-            animationEnabled = true
+            animationDuration = 300
             // update screen coordinate when viewpoint is changed
             geoView.viewpointChanged.collect {
                 leaderScreenCoordinate = getLeaderScreenCoordinate(geoView, location, offset, rotateOffsetWithGeoView)
                 // disable animation when panning
-                animationEnabled = false
+                animationDuration = 0
             }
         }
 
@@ -268,11 +269,14 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
                 typeConverter = screenCoordinateToVector,
                 targetValue = it,
                 label = "AnimateScreenCoordinate",
-                animationSpec = tween(easing = FastOutSlowInEasing)
+                animationSpec = tween(
+                    easing = FastOutSlowInEasing,
+                    durationMillis = animationDuration
+                )
             )
 
             CalloutSubComposeLayout(
-                leaderScreenCoordinate = (if (animationEnabled) animateToPoint else it),
+                leaderScreenCoordinate = animateToPoint,
                 maxSize = calloutContentMaxSize(
                     geoView = geoView,
                     density = LocalDensity.current,
