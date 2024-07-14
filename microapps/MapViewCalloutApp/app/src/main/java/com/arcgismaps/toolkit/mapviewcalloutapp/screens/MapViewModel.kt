@@ -18,29 +18,40 @@
 
 package com.arcgismaps.toolkit.mapviewcalloutapp.screens
 
+import android.app.Application
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.arcgismaps.Color
+import com.arcgismaps.arcgisservices.LabelingPlacement
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.GeoElement
 import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.mapping.labeling.LabelDefinition
+import com.arcgismaps.mapping.labeling.SimpleLabelExpression
+import com.arcgismaps.mapping.layers.DynamicEntityLayer
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
+import com.arcgismaps.mapping.symbology.TextSymbol
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
+import com.arcgismaps.realtime.CustomDynamicEntityDataSource
+import com.arcgismaps.realtime.DynamicEntityObservation
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
+import com.arcgismaps.toolkit.mapviewcalloutapp.R
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.io.File
+import kotlin.time.Duration.Companion.milliseconds
 
-class MapViewModel : ViewModel() {
+class MapViewModel(application: Application) : AndroidViewModel(application) {
 
     val mapViewProxy = MapViewProxy()
 
@@ -79,6 +90,70 @@ class MapViewModel : ViewModel() {
     val tapLocationGraphicsOverlay: GraphicsOverlay = GraphicsOverlay()
 
     private var currentIdentifyJob: Job? = null
+
+    private val provisionPath: String by lazy {
+        application.getExternalFilesDir(null)?.path.toString() + File.separator
+    }
+
+    // Create a new custom feed provider that processes observations from a JSON file.
+    // This takes the path to the simulation file, field name that will be used as the entity id,
+    // and the delay between each observation that is processed.
+    // In this example we are using a json file as our custom data source.
+    // This field value should be a unique identifier for each entity.
+    // Adjusting the value for the delay will change the speed at which the entities and their
+    // observations are displayed.
+    private val feedProvider = CustomEntityFeedProvider(
+        fileName = "$provisionPath/AIS_MarineCadastre_SelectedVessels_CustomDataSource.jsonl",
+        entityIdField = "MMSI",
+        delayDuration = 10.milliseconds
+    )
+
+    private val dynamicEntityDataSource = CustomDynamicEntityDataSource(feedProvider)
+
+    // Create the dynamic entity layer using the custom data source.
+    private val dynamicEntityLayer = DynamicEntityLayer(dynamicEntityDataSource).apply {
+        trackDisplayProperties.apply {
+            // Set up the track display properties, these properties will be used to configure the appearance of the track line and previous observations.
+            showPreviousObservations = true
+            showTrackLine = true
+            maximumObservations = 20
+        }
+
+        // Define the label expression to be used, in this case we will use the "VesselName" for each of the dynamic entities.
+        val simpleLabelExpression = SimpleLabelExpression("[VesselName]")
+
+        // Set the text symbol color and size for the labels.
+        val labelSymbol = TextSymbol().apply {
+            color = Color.red
+            size = 12.0F
+        }
+
+        // Add the label definition to the dynamic entity layer and enable labels.
+        labelDefinitions.add(LabelDefinition(simpleLabelExpression, labelSymbol).apply {
+            // Set the label position.
+            placement = LabelingPlacement.PointAboveCenter
+        })
+        labelsEnabled = true
+    }
+
+    val mapWithDynamicEntities =  ArcGISMap(BasemapStyle.ArcGISOceans).apply {
+        initialViewpoint = Viewpoint(47.984, -123.657, 3e6)
+        // Add the dynamic entity layer to the map.
+        operationalLayers.add(dynamicEntityLayer)
+    }
+
+    private val _dynamicEntityObservationId = MutableStateFlow<Long?>(null)
+    val dynamicEntityObservationId: StateFlow<Long?> = _dynamicEntityObservationId.asStateFlow()
+
+    init {
+
+        viewModelScope.launch {
+            dynamicEntityLayer.load().getOrThrow()
+            mapWithDynamicEntities.load().getOrThrow()
+            dynamicEntityDataSource.connect().getOrThrow()
+        }
+    }
+
 
     fun clearMapPoint() {
         _mapPoint.value = null
@@ -136,6 +211,23 @@ class MapViewModel : ViewModel() {
                 if (identifyLayerResultList.isNotEmpty()) {
                     _selectedGeoElement.value = identifyLayerResultList[0].geoElements.firstOrNull()
                     _selectedLayerName.value = identifyLayerResultList[0].layerContent.name
+                }
+            }
+        }
+    }
+
+
+    fun identifyOnDynamicEntity(singleTapConfirmedEvent: SingleTapConfirmedEvent) {
+        currentIdentifyJob?.cancel()
+        currentIdentifyJob = viewModelScope.launch {
+            val result =
+                mapViewProxy.identify(dynamicEntityLayer, singleTapConfirmedEvent.screenCoordinate, 20.dp)
+            result.onSuccess { identifyLayerResult ->
+                val observation = identifyLayerResult.geoElements.first() as DynamicEntityObservation
+                val entity = observation.dynamicEntity
+                _selectedGeoElement.value = entity
+                entity?.dynamicEntityChangedEvent?.collect { dynamicEntityChangedInfo ->
+                    _dynamicEntityObservationId.value = dynamicEntityChangedInfo.receivedObservation?.id
                 }
             }
         }

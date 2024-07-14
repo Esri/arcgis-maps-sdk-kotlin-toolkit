@@ -84,6 +84,7 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.compose.navigation)
+    implementation(libs.serialization)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.bundles.composeTest)

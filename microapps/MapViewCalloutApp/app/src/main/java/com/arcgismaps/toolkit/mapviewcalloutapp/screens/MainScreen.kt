@@ -56,7 +56,7 @@ import com.arcgismaps.toolkit.geoviewcompose.MapView
 private val calloutAppScreens = mutableListOf(
     "Show Callout on a tap location",
     "Show Callout on a Feature",
-    "Show Callout on a Graphic"
+    "Show Callout on a Dynamic Entity"
 )
 
 /**
@@ -87,7 +87,7 @@ fun MainScreen() {
         }
         composable(route = calloutAppScreens[2]) {
             val graphicsViewModel : MapViewModel = viewModel()
-            GraphicScreen(graphicsViewModel)
+            DynamicEntityScreen(graphicsViewModel)
         }
     }
 }
