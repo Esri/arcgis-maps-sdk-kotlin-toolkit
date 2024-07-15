@@ -20,11 +20,7 @@ package com.arcgismaps.toolkit.geoviewcompose.theme
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.ProvidableCompositionLocal
-import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
@@ -32,70 +28,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 
 /**
- * CompositionLocal used to pass [CalloutColors] down the tree.
- */
-internal val LocalColorScheme: ProvidableCompositionLocal<CalloutColors> =
-    compositionLocalOf {
-        DefaultThemeTokens.colorScheme
-    }
-
-/**
- * CompositionLocal used to pass [CalloutShapes] down the tree.
- */
-internal val LocalShapes: ProvidableCompositionLocal<CalloutShapes> =
-    compositionLocalOf {
-        DefaultThemeTokens.shapes
-    }
-
-/**
- * Provides compose functions to access the current color and shape values.
- */
-internal object CalloutTheme {
-
-    /**
-     * Retrieves the current [CalloutColors].
-     */
-    val colorScheme: CalloutColors
-        @Composable
-        @ReadOnlyComposable
-        get() = LocalColorScheme.current
-
-    /**
-     * Retrieves the current [CalloutShapes].
-     */
-    val shapes: CalloutShapes
-        @Composable
-        @ReadOnlyComposable
-        get() = LocalShapes.current
-}
-
-/**
- * Provides a default [CalloutTheme] & [CalloutShapes] to the given [content]
- * so that the Callout can be customized.
+ * Shape styling properties for the Callout container.
  *
- * The default value for the [colorScheme] is based on the current [MaterialTheme].
- * See [CalloutDefaults.colors] for the exact configuration used.
+ * @param cornerRadius The corner radius of the Callout container.
+ * @param leaderSize The [DpSize] for the width and height of the leader.
+ * @param borderWidth The width of the outline stroke around the Callout container.
+ * @param calloutContentPadding Padding values used for the content inside the Callout container.
+ * @param minSize The minimum size for the Callout container.
  *
- * @param colorScheme The [CalloutColors] to use for this compose hierarchy
- * @param shapes The [CalloutShapes] to use for this compose hierarchy
- *
- * A complete definition for the [CalloutTheme] to use. A default is provided based
- * on the current [MaterialTheme].
- * @param content The content to which the theme should be applied.
+ * @since 200.5.0
  */
-@Composable
-internal fun CalloutTheme(
-    colorScheme: CalloutColors = CalloutDefaults.colors(),
-    shapes: CalloutShapes = CalloutDefaults.shapes(),
-    content: @Composable () -> Unit
-) {
-    CompositionLocalProvider(LocalColorScheme provides colorScheme) {
-        CompositionLocalProvider(LocalShapes provides shapes) {
-            content()
-        }
-    }
-}
-
 @Immutable
 public data class CalloutShapes internal constructor(
     public val cornerRadius: Dp,
@@ -105,7 +47,14 @@ public data class CalloutShapes internal constructor(
     val minSize: DpSize
 )
 
-
+/**
+ * Color styling properties for the Callout container.
+ *
+ * @param backgroundColor The color used for the Callout container's background color.
+ * @param borderColor The color used for the outline stroke around the Callout container.
+ *
+ * @since 200.5.0
+ */
 @Immutable
 public data class CalloutColors internal constructor(
     public val backgroundColor: Color,
@@ -114,12 +63,17 @@ public data class CalloutColors internal constructor(
 
 /**
  * Contains the default values used by Callout.
+ *
+ * @since 200.5.0
  */
 public object CalloutDefaults {
 
     /**
      * Creates an instance of [CalloutColors] with default values from [MaterialTheme].
-
+     *
+     * @param backgroundColor The color used for the Callout container's background color.
+     * @param borderColor The color used for the outline stroke around the Callout container.
+     *
      * @since 200.5.0
      */
     @Composable
@@ -135,7 +89,13 @@ public object CalloutDefaults {
 
     /**
      * Creates an instance of [CalloutShapes] with default values.
-
+     *
+     * @param cornerRadius The corner radius of the Callout container.
+     * @param borderWidth The width of the outline stroke around the Callout container.
+     * @param leaderSize The [DpSize] for the width and height of the leader.
+     * @param calloutContentPadding Padding values used for the content inside the Callout container.
+     * @param minSize The minimum size for the Callout container.
+     *
      * @since 200.5.0
      */
     @Composable
