@@ -43,7 +43,10 @@ import com.arcgismaps.realtime.DynamicEntity
 import com.arcgismaps.toolkit.popup.internal.element.state.PopupElementState
 import com.arcgismaps.toolkit.popup.internal.util.MediaImageProvider
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.UUID
 
@@ -69,52 +72,30 @@ internal class MediaElementState(
         description = mediaPopupElement.description,
         title = mediaPopupElement.title,
         media = mediaPopupElement.media.mapIndexed { index, media ->
+            val model = models.getOrNull(index) ?: ""
             if (media.type.isChart) {
-                PopupMediaState(
-                    media,
-                    scope,
-                    if (models.size > index) {
-                        models[index]
-                    } else {
-                        ""
-                    },
-                    MediaImageProvider(
-                        folderName = mediaFolder,
-                        media = media,
-                    ) {
-                        it.generateChart(chartParams).getOrThrow().image.bitmap
-                    }
-                )
-            } else if (media.type is PopupMediaType.Image) {
-                val srcUrl = media.value?.sourceUrl
-                    ?: throw IllegalArgumentException("null sourceUrl for popup media")
-                PopupMediaState(
-                    media,
-                    scope,
-                    if (models.size > index) {
-                        models[index]
-                    } else {
-                        ""
-                    },
-                    MediaImageProvider(
-                        folderName = mediaFolder,
-                        media = media
-                    ) {
-                        val request = ImageRequest.Builder(context)
-                            .data(srcUrl)
-                            .crossfade(true)
-                            .build()
-                        (context.imageLoader.execute(request).drawable as? BitmapDrawable)?.bitmap
-                            ?: throw IllegalStateException("couldn't load image at $srcUrl")
-                    }
-                )
-
+                PopupMediaState.createChartMediaState(media, model, scope, mediaFolder, chartParams)
             } else {
-                throw IllegalArgumentException("unknown media type")
+                PopupMediaState.createImageMediaState(media, model, scope, mediaFolder, context)
             }
-
         }
     )
+
+    /**
+     * Update the PopupMedia so that a new chart image can be acquired. Only necessary
+     * for DynamicEntity Popups.
+     *
+     * @param newElement the new MediaPopupElement which contains the new PopupMedia
+     * @param scope the current CoroutineScope of the Composition.
+     */
+    fun updateMediaElement(newElement: MediaPopupElement, scope: CoroutineScope) {
+        newElement.media.forEachIndexed { index, medium ->
+            if (medium.type.isChart) {
+                media.getOrNull(index)?.updateMedia(medium, scope)
+            }
+        }
+    }
+
     companion object {
         fun Saver(
             element: MediaPopupElement,
@@ -185,16 +166,15 @@ internal fun rememberMediaElementState(
             context
         )
     }.apply {
-        if (popup.geoElement is DynamicEntity) {
-            media.forEachIndexed { index, medium ->
-                val newMedia = media[index]
-                if (newMedia.type.isChart) {
-                    medium.updateMedia(element.media[index], scope)
-                }
-            }
+        val geoElement = popup.geoElement
+        if (geoElement is DynamicEntity) {
+            // For dynamic entities
+            // update chart providers to use the new instances of PopupMedia to reacquire updated charts.
+            updateMediaElement(element, scope)
         }
     }
 }
+
 
 /**
  * Represents the state of a [PopupMedia value].
@@ -259,10 +239,64 @@ internal class PopupMediaState(
         scope.launch {
             val oldMedia = File(_imageUri.value)
             val img = imageGenerator.get("${UUID.randomUUID()}.png")
-            println("transition got new image with media $media")
             _imageUri.value = img
             if (oldMedia.exists()) {
                 oldMedia.delete()
+            }
+        }
+    }
+
+    companion object {
+        internal fun createChartMediaState(
+            media: PopupMedia,
+            model: String,
+            scope: CoroutineScope,
+            imageFolder: String,
+            chartParams: ChartImageParameters
+        ): PopupMediaState = PopupMediaState(
+            media,
+            scope,
+            model,
+            MediaImageProvider(
+                folderName = imageFolder,
+                media = media,
+            ) {
+                it.generateChart(chartParams).getOrThrow().image.bitmap
+            }
+        )
+
+        internal fun createImageMediaState(
+            media: PopupMedia,
+            model: String,
+            scope: CoroutineScope,
+            imageFolder: String,
+            context: Context
+        ): PopupMediaState {
+            val srcUrl = media.value?.sourceUrl
+                ?: throw IllegalArgumentException("null sourceUrl for popup media")
+            return PopupMediaState(
+                media,
+                scope,
+                model,
+                MediaImageProvider(
+                    folderName = imageFolder,
+                    media = media
+                ) {
+                    val request = ImageRequest.Builder(context)
+                        .data(srcUrl)
+                        .crossfade(true)
+                        .build()
+                    (context.imageLoader.execute(request).drawable as? BitmapDrawable)?.bitmap
+                        ?: throw IllegalStateException("couldn't load image at $srcUrl")
+                }
+            ).apply {
+                scope.launch {
+                    withContext(Dispatchers.IO) {
+                        // update the image according to the refresh interval
+                        delay(refreshInterval * 60 * 10_000)
+                        updateMedia(media, scope)
+                    }
+                }
             }
         }
     }

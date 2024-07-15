@@ -18,8 +18,6 @@
 
 package com.arcgismaps.toolkit.popup
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.TweenSpec
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -38,6 +36,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -72,7 +71,6 @@ import com.arcgismaps.toolkit.popup.internal.element.textelement.TextPopupElemen
 import com.arcgismaps.toolkit.popup.internal.element.textelement.rememberTextElementState
 import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.FileViewer
 import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ViewableFile
-import java.util.UUID
 
 @Immutable
 private data class PopupState(@Stable val popup: Popup)
@@ -114,7 +112,7 @@ private fun Popup(popupState: PopupState, modifier: Modifier = Modifier) {
     val dynamicEntity = (popup.geoElement as? DynamicEntity)
     var evaluated by rememberSaveable(popup) { mutableStateOf(false) }
     var fetched by rememberSaveable(popup) { mutableStateOf(false) }
-    var refreshed by rememberSaveable(dynamicEntity) { mutableStateOf(UUID.randomUUID()) }
+    var refreshed by rememberSaveable(dynamicEntity) { mutableLongStateOf(dynamicEntity?.id ?: -1) }
     if (dynamicEntity != null) {
         LaunchedEffect(popup) {
             dynamicEntity.dynamicEntityChangedEvent.collect {
@@ -122,7 +120,7 @@ private fun Popup(popupState: PopupState, modifier: Modifier = Modifier) {
                 // and values may have changed.
                 //delay(300)
                 popupState.popup.evaluateExpressions()
-                refreshed = UUID.randomUUID()
+                refreshed = it.receivedObservation?.id ?: -1
             }
         }
     }
@@ -149,7 +147,7 @@ private fun Popup(popupState: PopupState, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun Popup(popupState: PopupState, initialized: Boolean, refreshed: UUID, modifier: Modifier = Modifier) {
+private fun Popup(popupState: PopupState, initialized: Boolean, refreshed: Long, modifier: Modifier = Modifier) {
     val scope = rememberCoroutineScope()
     val popup = popupState.popup
     val viewableFileState = rememberSaveable { mutableStateOf<ViewableFile?>(null) }
@@ -183,29 +181,22 @@ private fun Popup(popupState: PopupState, initialized: Boolean, refreshed: UUID,
     }
 }
 
+/**
+ * The body of the Popup composable
+ *
+ * @param popupState the immutable state object containing the Popup.
+ * @param refreshed indicates that a new evaluation of elements has occurred. Only for DynamicEntity
+ * @param onFileClicked the callback to display an attachment or media image
+ */
 @Composable
 private fun PopupBody(
     popupState: PopupState,
-    refreshed: UUID,
+    refreshed: Long,
     onFileClicked: (ViewableFile) -> Unit = {}
 ) {
     val popup = popupState.popup
     val lazyListState = rememberLazyListState()
     val states = rememberStates(popup, attachments)
-    var uuid by remember { mutableStateOf(refreshed) }
-    println("recomposing")
-
-    if (uuid != refreshed) {
-        uuid = refreshed
-    }
-
-    val alphaAnimation = remember(refreshed) {
-        Animatable(0f)
-    }
-    LaunchedEffect(refreshed) {
-        alphaAnimation.animateTo(1f, animationSpec = TweenSpec(durationMillis = 1000))
-    }
-
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -237,9 +228,7 @@ private fun PopupBody(
                     item(contentType = FieldsPopupElement::class.java) {
                         FieldsPopupElement(
                             state = entry.state as FieldsElementState,
-                            modifier = Modifier.graphicsLayer {
-                                alpha = alphaAnimation.value
-                            }
+                            refreshed = refreshed
                         )
                     }
                 }

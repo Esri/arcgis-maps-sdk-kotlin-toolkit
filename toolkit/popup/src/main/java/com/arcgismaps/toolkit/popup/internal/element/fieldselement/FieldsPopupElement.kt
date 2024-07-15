@@ -18,6 +18,8 @@ package com.arcgismaps.toolkit.popup.internal.element.fieldselement
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.TweenSpec
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.text.ClickableText
@@ -25,8 +27,11 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -43,13 +48,23 @@ import com.arcgismaps.toolkit.popup.internal.ui.ExpandableCard
 @Composable
 internal fun FieldsPopupElement(
     state: FieldsElementState,
-    modifier: Modifier = Modifier
+    refreshed: Long
 ) {
+    val alphaAnimation = remember(refreshed) {
+        Animatable(0f)
+    }
+
+    LaunchedEffect(refreshed) {
+        alphaAnimation.animateTo(1f, animationSpec = TweenSpec(durationMillis = 1000))
+    }
+
     val localContext = LocalContext.current
     ExpandableCard(
         title = state.title,
         description = state.description,
-        modifier = modifier
+        modifier = Modifier.graphicsLayer {
+            alpha = alphaAnimation.value
+        }
     ) {
         Column {
             state.fieldsToFormattedValues.forEach {
@@ -109,6 +124,6 @@ private fun FieldsPopupElementPreview() {
         ),
         id = 0
     )
-    FieldsPopupElement(state)
+    FieldsPopupElement(state, 0L)
 }
 
