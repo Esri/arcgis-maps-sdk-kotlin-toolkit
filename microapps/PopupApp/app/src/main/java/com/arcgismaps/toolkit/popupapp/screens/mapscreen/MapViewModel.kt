@@ -84,7 +84,7 @@ class MapViewModel(
     val map = ArcGISMap(
         PortalItem(
             Portal.arcGISOnline(Portal.Connection.Authenticated),
-            streamServiceMap
+            fourteenersId
         )
     ).apply {
         Viewpoint(40.559691, -111.869001, 150000.0)
