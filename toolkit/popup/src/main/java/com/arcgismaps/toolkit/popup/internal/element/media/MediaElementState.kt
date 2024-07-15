@@ -290,11 +290,13 @@ internal class PopupMediaState(
                         ?: throw IllegalStateException("couldn't load image at $srcUrl")
                 }
             ).apply {
-                scope.launch {
-                    withContext(Dispatchers.IO) {
-                        // update the image according to the refresh interval
-                        delay(refreshInterval * 60 * 10_000)
-                        updateMedia(media, scope)
+                if (refreshInterval > 0) {
+                    scope.launch {
+                        withContext(Dispatchers.IO) {
+                            // update the image according to the refresh interval
+                            delay(refreshInterval)
+                            updateMedia(media, scope)
+                        }
                     }
                 }
             }

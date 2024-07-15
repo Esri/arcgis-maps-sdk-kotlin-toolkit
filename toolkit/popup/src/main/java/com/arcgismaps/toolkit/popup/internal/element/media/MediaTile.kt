@@ -32,9 +32,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -83,31 +80,12 @@ internal fun MediaTile(
         val padding = if (state.type is PopupMediaType.Image)
             defaults.mediaImagePadding
         else defaults.mediaChartPadding
-        var transitioned by rememberSaveable(model) { mutableStateOf(false) }
-        println("transitioned $transitioned")
-//        LaunchedEffect(model) {
-//            delay(3000)
-//            transitioned = true
-//        }
-//        AnimatedVisibility(
-//            visible = transitioned,
-//            enter = fadeIn(
-//                animationSpec = spring(stiffness = Spring.StiffnessHigh)
-//            ),
-//            exit = fadeOut(
-//                animationSpec = spring(stiffness = Spring.StiffnessLow),
-//                targetAlpha = 0.5f
-//            )
-//        ) {
-//            if (transitioned) {
-                MediaView(
-                    model = model,
-                    title = state.title,
-                    caption = state.caption,
-                    modifier = Modifier.padding(padding)
-                )
-//            }
-//        }
+        MediaView(
+            model = model,
+            title = state.title,
+            caption = state.caption,
+            modifier = Modifier.padding(padding)
+        )
     }
 }
 
