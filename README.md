@@ -7,8 +7,9 @@ The ArcGIS Maps SDK for Kotlin Toolkit contains components that will simplify yo
 * **[Authenticator](toolkit/authentication)** - Displays a user interface when network and ArcGIS authentication challenges occur.
 * **[Compass](toolkit/compass)** - Shows a compass direction when the map is rotated. Auto-hides when the map points north.
 * **[FeatureForms](toolkit/featureforms)** - Provides a UI for editing feature attributes.
-* **[GeoView-Compose](toolkit/geoview-compose)** - Compose wrappers for the MapView and SceneView.
 * **[FloorFilter](toolkit/indoors)** - Allows filtering of floor plan data in a geo view by a site, a facility in the site, or a floor in the facility.
+* **[GeoView-Compose](toolkit/geoview-compose)** - Compose wrappers for the MapView and SceneView.
+* **[Popup](toolkit/popup)** - View field values of features in a layer using the Popup API.
 
 ## API Reference
 
@@ -41,10 +42,12 @@ repositories {
 The *ArcGIS Maps SDK for Kotlin Toolkit* is released with a "bill of materials" (`BOM`). The releasable BOM is versioned and represents a set of versions of the toolkit components which are compatible with one another. You may specify dependencies as follows
 
 ```
-implementation(platform("com.esri:arcgis-maps-kotlin-toolkit-bom:200.4.0"))
+implementation(platform("com.esri:arcgis-maps-kotlin-toolkit-bom:200.5.0"))
 implementation("com.esri:arcgis-maps-kotlin-toolkit-authentication")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-compass")
+implementation("com.esri:arcgis-maps-kotlin-toolkit-geoview-compose")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-indoors")
+implementation("com.esri:arcgis-maps-kotlin-toolkit-popup")
 ```
 
 The template and TemplateApp modules are for bootstrapping new modules.

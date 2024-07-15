@@ -6,6 +6,8 @@
 
 The Popup toolkit component enables users to view field values of features in a layer using the `Popup` API that has been configured externally (using either in the Web Map Viewer or the Fields Maps web app).
 
+![Screenshot](screenshot.png)
+
 ## Behavior
 
 To see it in action, check out the [microapp](../../microapps/PopupApp).

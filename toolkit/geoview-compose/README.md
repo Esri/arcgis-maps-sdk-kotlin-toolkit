@@ -114,7 +114,32 @@ MapView(
 )
 ```
 
-An example of how to identify features and graphics is available in the [MapView Identify App](../../microapps/MapViewIdentifyApp/README.md).
+### Display a Callout
+
+To display a Callout, use the `content` lambda on `MapView` to call the Callout from the provided `MapViewScope`:
+
+```kotlin
+MapView(
+    modifier = Modifier.fillMaxSize(),
+    arcGISMap = arcGISMapWithFeatureLayer,
+    onSingleTapConfirmed = { identifyGeoElement(it) },
+    content = {
+        if (selectedGeoElement != null) {
+            Callout(
+                modifier = Modifier.wrapContentSize(),
+                geoElement = selectedGeoElement,
+                tapLocation = tapLocation,
+            ) {
+                Column { // Callout content
+                    Text(text = "Tapped Point: ${tapLocation.x},${tapLocation.y}")
+                }
+            }
+        }
+    }
+)
+```
+
+An example of how to use the Callout on a point or geo-element is available in the [MapView Callout App](../../microapps/MapViewCalloutApp/README.md).
 
 ### Other Examples:
 
@@ -125,5 +150,7 @@ Other microapps that demonstrate various workflows with the composable `MapView`
 - [SceneView Analysis Overlay App](../../microapps/SceneViewAnalysisOverlayApp/README.md) demonstrates the use of `AnalysisOverlay`
 - [SceneView Camera Controller App](../../microapps/SceneViewCameraControllerApp/README.md) demonstrates the use of the `CameraController`
 - [SceneView Lighting Options App](../../microapps/SceneViewLightingOptionsApp/README.md) demonstrates the use of various lighting options with the `SceneView`
+- [MapView CalloutApp](../../microapps/MapViewCalloutApp/README.md) demontrates the use of Callout with the `MapView`
+- [SceneView CalloutApp](../../microapps/MapViewCalloutApp/README.md) demontrates the use of Callout with the `SceneView`
 
 
