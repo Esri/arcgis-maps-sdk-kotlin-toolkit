@@ -114,6 +114,8 @@ MapView(
 )
 ```
 
+An example of how to identify features and graphics is available in the [MapView Identify App](../../microapps/MapViewIdentifyApp/README.md).
+
 ### Display a Callout
 
 To display a Callout, use the `content` lambda on `MapView` to call the Callout from the provided `MapViewScope`:
@@ -128,7 +130,7 @@ MapView(
             Callout(
                 modifier = Modifier.wrapContentSize(),
                 geoElement = selectedGeoElement,
-                tapLocation = tapLocation,
+                tapLocation = tapLocation
             ) {
                 Column { // Callout content
                     Text(text = "Tapped Point: ${tapLocation.x},${tapLocation.y}")
