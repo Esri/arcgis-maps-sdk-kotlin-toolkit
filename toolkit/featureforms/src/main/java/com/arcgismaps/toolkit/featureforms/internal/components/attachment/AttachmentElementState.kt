@@ -19,7 +19,7 @@ package com.arcgismaps.toolkit.featureforms.internal.components.attachment
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
-import android.graphics.Bitmap.CompressFormat
+import android.graphics.Bitmap
 import android.media.ThumbnailUtils
 import android.os.Build
 import android.util.Size
@@ -50,7 +50,6 @@ import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FormAttachment
 import com.arcgismaps.mapping.featureforms.FormAttachmentType
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormElementState
-import com.arcgismaps.toolkit.featureforms.internal.utils.AttachmentsFileProvider
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -59,9 +58,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.BufferedOutputStream
 import java.io.File
-import java.io.FileOutputStream
 import java.util.Objects
 
 
@@ -298,17 +295,12 @@ internal class FormAttachmentState(
     val filePath: String
         get() = formAttachment?.filePath ?: ""
 
-    private var _thumbnailUri: MutableState<String> = mutableStateOf("")
+    private var _thumbnail: MutableState<Bitmap?> = mutableStateOf(null)
 
     /**
-     * The URI of the thumbnail image. This is empty until [load] is called.
+     * The thumbnail image. This is null until [load] is called.
      */
-    val thumbnailUri: State<String> = _thumbnailUri
-
-    /**
-     * The directory where the attachments are stored as defined in the [AttachmentsFileProvider].
-     */
-    private val attachmentsDir = "feature_forms_attachments"
+    val thumbnail: State<Bitmap?> = _thumbnail
 
     /**
      * The size of the thumbnail image.
@@ -387,21 +379,13 @@ internal class FormAttachmentState(
     }
 
     /**
-     * Creates a thumbnail image for the attachment. If the thumbnail already exists, it will not be
-     * recreated.
+     * Creates a thumbnail image for the attachment.
      */
     private suspend fun createThumbnail() = withContext(Dispatchers.IO) {
         if (formAttachment == null) {
             return@withContext
         }
-        val directory = File(filesDir, attachmentsDir)
-        directory.mkdirs()
-        val file = File(directory, "thumb_$id")
-        if (file.exists()) {
-            _thumbnailUri.value = file.absolutePath
-            return@withContext
-        }
-        val bitmap = try {
+        _thumbnail.value = try {
             when (type) {
                 is FormAttachmentType.Image -> {
                     formAttachment.createThumbnail(thumbnailSize.width, thumbnailSize.height)
@@ -420,14 +404,7 @@ internal class FormAttachmentState(
             }
         } catch (ex: Exception) {
             null
-        } ?: return@withContext
-
-        // create and write to the thumbnail file if the bitmap is not null
-        file.createNewFile()
-        BufferedOutputStream(FileOutputStream(file)).use { bos ->
-            bitmap.compress(CompressFormat.JPEG, 85, bos)
         }
-        _thumbnailUri.value = file.absolutePath
     }
 }
 
