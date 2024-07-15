@@ -253,7 +253,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         offset: Offset,
         rotateOffsetWithGeoView: Boolean,
         colorScheme: CalloutColors,
-        shape: CalloutShapes,
+        shapes: CalloutShapes,
         content: (@Composable BoxScope.() -> Unit)
     ) {
 
@@ -297,14 +297,14 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
                     Box(
                         modifier = modifier
                             .drawCalloutContainer(
-                                cornerRadius = shape.cornerRadius.toPx(),
-                                strokeBorderWidth = shape.borderWidth.toPx(),
+                                cornerRadius = shapes.cornerRadius.toPx(),
+                                strokeBorderWidth = shapes.borderWidth.toPx(),
                                 strokeColor = colorScheme.borderColor,
                                 backgroundColor = colorScheme.backgroundColor,
-                                calloutContentPadding = shape.calloutContentPadding,
-                                leaderWidth = shape.leaderSize.width.toPx(),
-                                leaderHeight = shape.leaderSize.height.toPx(),
-                                minSize = shape.minSize
+                                calloutContentPadding = shapes.calloutContentPadding,
+                                leaderWidth = shapes.leaderSize.width.toPx(),
+                                leaderHeight = shapes.leaderSize.height.toPx(),
+                                minSize = shapes.minSize
                             )
                             .animateContentSize()
                     ) {
