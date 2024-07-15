@@ -79,6 +79,7 @@ internal fun ExpandableCard(
                 title = title,
                 description = description,
                 expandable = toggleable,
+                colors = colors,
                 isExpanded = expanded
             ) {
                 if (toggleable) {
@@ -99,6 +100,7 @@ private fun ExpandableHeader(
     title: String = "",
     description: String = "",
     expandable: Boolean,
+    colors: ExpandableCardColors,
     isExpanded: Boolean,
     onClick: () -> Unit
 ) {
@@ -123,6 +125,7 @@ private fun ExpandableHeader(
         ) {
             Text(
                 text = title,
+                color = colors.headerTextColor,
                 style = MaterialTheme.typography.titleMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -130,6 +133,7 @@ private fun ExpandableHeader(
             if (description.isNotEmpty() && isExpanded) {
                 Text(
                     text = description,
+                    color = colors.headerTextColor,
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Normal,
                     maxLines = 1,
@@ -157,6 +161,7 @@ private fun ExpandableHeader(
 internal fun ExpandableHeaderPreview() {
     ExpandableHeader(
         title = "The Title",
+        colors = ExpandableCardDefaults.colors(),
         description = "the description",
         expandable = true,
         isExpanded = true
