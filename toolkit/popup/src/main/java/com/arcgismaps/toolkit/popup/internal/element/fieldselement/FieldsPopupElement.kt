@@ -41,11 +41,15 @@ import com.arcgismaps.toolkit.popup.internal.ui.ExpandableCard
  * @since 200.5.0
  */
 @Composable
-internal fun FieldsPopupElement(state: FieldsElementState) {
+internal fun FieldsPopupElement(
+    state: FieldsElementState,
+    modifier: Modifier = Modifier
+) {
     val localContext = LocalContext.current
     ExpandableCard(
         title = state.title,
         description = state.description,
+        modifier = modifier
     ) {
         Column {
             state.fieldsToFormattedValues.forEach {

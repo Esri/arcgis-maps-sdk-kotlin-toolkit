@@ -39,11 +39,13 @@ import com.arcgismaps.mapping.popup.MediaPopupElement
 import com.arcgismaps.mapping.popup.Popup
 import com.arcgismaps.mapping.popup.PopupMedia
 import com.arcgismaps.mapping.popup.PopupMediaType
+import com.arcgismaps.realtime.DynamicEntity
 import com.arcgismaps.toolkit.popup.internal.element.state.PopupElementState
 import com.arcgismaps.toolkit.popup.internal.util.MediaImageProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import java.util.Objects
+import java.io.File
+import java.util.UUID
 
 /**
  * Represents the state of an [MediaPopupElement]
@@ -77,10 +79,10 @@ internal class MediaElementState(
                         ""
                     },
                     MediaImageProvider(
-                        fileName = "media-${Objects.hash(mediaPopupElement.title, media.title, media.caption)}.png",
-                        folderName = mediaFolder
+                        folderName = mediaFolder,
+                        media = media,
                     ) {
-                        media.generateChart(chartParams).getOrThrow().image.bitmap
+                        it.generateChart(chartParams).getOrThrow().image.bitmap
                     }
                 )
             } else if (media.type is PopupMediaType.Image) {
@@ -95,8 +97,8 @@ internal class MediaElementState(
                         ""
                     },
                     MediaImageProvider(
-                        fileName = "media-${Objects.hash(srcUrl)}",
-                        folderName = mediaFolder
+                        folderName = mediaFolder,
+                        media = media
                     ) {
                         val request = ImageRequest.Builder(context)
                             .data(srcUrl)
@@ -113,7 +115,6 @@ internal class MediaElementState(
 
         }
     )
-
     companion object {
         fun Saver(
             element: MediaPopupElement,
@@ -183,6 +184,15 @@ internal fun rememberMediaElementState(
             chartParams,
             context
         )
+    }.apply {
+        if (popup.geoElement is DynamicEntity) {
+            media.forEachIndexed { index, medium ->
+                val newMedia = media[index]
+                if (newMedia.type.isChart) {
+                    medium.updateMedia(element.media[index], scope)
+                }
+            }
+        }
     }
 }
 
@@ -195,7 +205,8 @@ internal fun rememberMediaElementState(
  * @property linkUrl the link to use to view the media for image type media in the media viewer
  * @property sourceUrl the link to use to render the image for image type media
  * @property type the type of the PopupMedia
- * @property scope a CoroutineScope to use to acquire chart images
+ * @param uri the path to the media image omn disk, or empty if the image is not yet persisted.
+ * @param scope a CoroutineScope to use to acquire chart images
  * @property imageGenerator a lambda which generates charts. Is only invoked if type is chart.
  */
 internal class PopupMediaState(
@@ -206,7 +217,7 @@ internal class PopupMediaState(
     private val sourceUrl: String,
     val type: PopupMediaType,
     uri: String,
-    private val scope: CoroutineScope,
+    scope: CoroutineScope,
     private val imageGenerator: MediaImageProvider
 ) {
     private val _imageUri: MutableState<String> = mutableStateOf("")
@@ -221,7 +232,7 @@ internal class PopupMediaState(
             _imageUri.value = uri
         } else {
             scope.launch {
-                _imageUri.value = imageGenerator.get()
+                _imageUri.value = imageGenerator.get("${UUID.randomUUID()}.png")
             }
         }
     }
@@ -242,6 +253,19 @@ internal class PopupMediaState(
         scope = scope,
         imageGenerator = imageGenerator
     )
+
+    fun updateMedia(media: PopupMedia, scope: CoroutineScope) {
+        imageGenerator.media = media
+        scope.launch {
+            val oldMedia = File(_imageUri.value)
+            val img = imageGenerator.get("${UUID.randomUUID()}.png")
+            println("transition got new image with media $media")
+            _imageUri.value = img
+            if (oldMedia.exists()) {
+                oldMedia.delete()
+            }
+        }
+    }
 }
 
 private val PopupMediaType.isChart: Boolean
