@@ -17,6 +17,7 @@
 package com.arcgismaps.toolkit.popup.internal.util
 
 import android.graphics.Bitmap
+import com.arcgismaps.mapping.popup.PopupMedia
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.BufferedOutputStream
@@ -26,17 +27,17 @@ import java.io.FileOutputStream
 /**
  * A class to persist popup media images on disk
  *
- * @property fileName the name of the file to persist
- * @property folderName the parent folder in which to save the popup media folder
+ * @property folderName the name of the folder in which to persist the image
+ * @property media the [PopupMedia] which the image represents
  * @property imageGenerator a lambda which provides the bits to persist as an image.
  */
 internal class MediaImageProvider(
-    private val fileName: String,
     private val folderName: String,
-    private val imageGenerator: suspend () -> Bitmap
+    var media: PopupMedia,
+    private val imageGenerator: suspend (PopupMedia) -> Bitmap
 ) {
-    suspend fun get(): String = withContext(Dispatchers.IO) {
-        val bitmap = imageGenerator()
+    suspend fun get(fileName: String): String = withContext(Dispatchers.IO) {
+        val bitmap = imageGenerator(media)
         val directory = File(folderName)
         directory.mkdirs()
         val file = File(directory, fileName)

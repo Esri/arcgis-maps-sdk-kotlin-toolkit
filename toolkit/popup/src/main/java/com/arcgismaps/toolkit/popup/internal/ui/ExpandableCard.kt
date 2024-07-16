@@ -54,6 +54,7 @@ import com.arcgismaps.toolkit.popup.R
  */
 @Composable
 internal fun ExpandableCard(
+    modifier: Modifier = Modifier,
     title: String = "",
     description: String = "",
     toggleable: Boolean = true,
@@ -70,7 +71,7 @@ internal fun ExpandableCard(
         ),
         border = BorderStroke(shapes.borderThickness, colors.borderColor),
         shape = shapes.containerShape,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(shapes.padding)
     ) {
