@@ -31,7 +31,8 @@ internal object ExpandableCardDefaults {
         borderThickness = 1.dp
     )
     @Composable
-    fun colors() : AttachmentElementColors = AttachmentElementColors(
+    fun colors() : ExpandableCardColors = ExpandableCardColors(
+        headerTextColor = MaterialTheme.colorScheme.onBackground,
         containerColor = MaterialTheme.colorScheme.background,
         galleryContainerColor = MaterialTheme.colorScheme.onBackground,
         borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
@@ -44,7 +45,8 @@ internal data class ExpandableCardShapes(
     val borderThickness: Dp
 )
 
-internal data class AttachmentElementColors(
+internal data class ExpandableCardColors(
+    val headerTextColor: Color,
     val containerColor : Color,
     val galleryContainerColor: Color,
     val borderColor : Color,

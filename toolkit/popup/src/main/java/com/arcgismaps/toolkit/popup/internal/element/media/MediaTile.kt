@@ -38,11 +38,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.DefaultAlpha
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.arcgismaps.mapping.popup.PopupMediaType
 import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ViewableFile
 import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ViewableFileType
@@ -66,7 +68,11 @@ internal fun MediaTile(
             )
             .clickable {
                 onClicked(
-                    ViewableFile(name = state.title, path = state.imageUri.value, type = ViewableFileType.Image)
+                    ViewableFile(
+                        name = state.title,
+                        path = state.imageUri.value,
+                        type = ViewableFileType.Image
+                    )
                 )
             }
     ) {
@@ -130,50 +136,54 @@ internal fun MediaView(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        AsyncImage(
-            model = model,
-            contentDescription = title,
-            contentScale = ContentScale.FillBounds,
-            modifier = modifier.fillMaxSize(),
-            alignment = Alignment.Center,
-            alpha = DefaultAlpha,
-            colorFilter = null
-        )
-        Column(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .height(
-                    if (title.isNotEmpty() && caption.isNotEmpty()) {
-                        40.dp
-                    } else if (title.isNotEmpty() || caption.isNotEmpty()) {
-                        20.dp
-                    } else {
-                        0.dp
-                    }
-                )
-                .background(
-                    MaterialTheme.colorScheme.onBackground.copy(
-                        alpha = 0.7f
-                    )
-                ),
-            verticalArrangement = Arrangement.Center
-        ) {
-            Title(
-                text = title,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 5.dp),
-                color = MaterialTheme.colorScheme.background
-            )
-            Caption(
-                text = caption,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 5.dp),
-                color = MaterialTheme.colorScheme.background.copy(alpha = 0.7f)
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(model)
+                    .crossfade(1000)
+                    .build(),
+                contentDescription = title,
+                contentScale = ContentScale.FillBounds,
+                modifier = modifier.fillMaxSize(),
+                alignment = Alignment.Center,
+                alpha = DefaultAlpha,
+                colorFilter = null
             )
 
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .height(
+                        if (title.isNotEmpty() && caption.isNotEmpty()) {
+                            40.dp
+                        } else if (title.isNotEmpty() || caption.isNotEmpty()) {
+                            20.dp
+                        } else {
+                            0.dp
+                        }
+                    )
+                    .background(
+                        MaterialTheme.colorScheme.onBackground.copy(
+                            alpha = 0.7f
+                        )
+                    ),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Title(
+                    text = title,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 5.dp),
+                    color = MaterialTheme.colorScheme.background
+                )
+                Caption(
+                    text = caption,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 5.dp),
+                    color = MaterialTheme.colorScheme.background.copy(alpha = 0.7f)
+                )
+
+            }
         }
-    }
 }
