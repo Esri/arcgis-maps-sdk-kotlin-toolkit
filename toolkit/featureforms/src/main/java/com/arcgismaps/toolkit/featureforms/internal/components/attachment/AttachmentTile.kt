@@ -18,6 +18,7 @@ package com.arcgismaps.toolkit.featureforms.internal.components.attachment
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.graphics.Bitmap
 import android.text.format.Formatter
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
@@ -109,7 +110,7 @@ internal fun AttachmentTile(
 ) {
     val loadStatus by state.loadStatus.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
-    val thumbnailUri by state.thumbnailUri
+    val thumbnail by state.thumbnail
     val configuration = LocalViewConfiguration.current
     val haptic = LocalHapticFeedback.current
     var showContextMenu by remember { mutableStateOf(false) }
@@ -133,7 +134,7 @@ internal fun AttachmentTile(
                 LoadStatus.Loaded -> LoadedView(
                     title = state.name,
                     type = state.type,
-                    thumbnailUri = thumbnailUri
+                    thumbnail = thumbnail
                 )
 
                 LoadStatus.Loading -> DefaultView(
@@ -262,16 +263,16 @@ internal fun AttachmentTile(
 private fun LoadedView(
     title: String,
     type: FormAttachmentType,
-    thumbnailUri: String,
+    thumbnail: Bitmap?,
     modifier: Modifier = Modifier
 ) {
     Box(
         modifier = modifier
             .fillMaxSize()
     ) {
-        if (thumbnailUri.isNotEmpty()) {
+        if (thumbnail != null) {
             AsyncImage(
-                model = thumbnailUri,
+                model = thumbnail,
                 contentDescription = "Thumbnail",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
