@@ -88,7 +88,7 @@ internal class MediaElementState(
      * @param newElement the new MediaPopupElement which contains the new PopupMedia
      * @param scope the current CoroutineScope of the Composition.
      */
-    fun updateMediaElement(newElement: MediaPopupElement, scope: CoroutineScope) {
+    internal fun updateMediaElement(newElement: MediaPopupElement, scope: CoroutineScope) {
         newElement.media.forEachIndexed { index, medium ->
             if (medium.type.isChart) {
                 media.getOrNull(index)?.updateMedia(medium, scope)
@@ -97,7 +97,7 @@ internal class MediaElementState(
     }
 
     companion object {
-        fun Saver(
+        internal fun Saver(
             element: MediaPopupElement,
             scope: CoroutineScope,
             chartFolder: String,
@@ -175,7 +175,6 @@ internal fun rememberMediaElementState(
     }
 }
 
-
 /**
  * Represents the state of a [PopupMedia value].
  *
@@ -234,7 +233,7 @@ internal class PopupMediaState(
         imageGenerator = imageGenerator
     )
 
-    fun updateMedia(media: PopupMedia, scope: CoroutineScope) {
+    internal fun updateMedia(media: PopupMedia, scope: CoroutineScope) {
         imageGenerator.media = media
         scope.launch {
             val oldMedia = File(_imageUri.value)

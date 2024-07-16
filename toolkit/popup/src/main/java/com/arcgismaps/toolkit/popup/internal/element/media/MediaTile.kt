@@ -148,8 +148,7 @@ internal fun MediaView(
                 alpha = DefaultAlpha,
                 colorFilter = null
             )
-            if (title == "speed with time")
-                println("transition AsyncImage called with model $model")
+
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)

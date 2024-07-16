@@ -112,15 +112,14 @@ private fun Popup(popupState: PopupState, modifier: Modifier = Modifier) {
     val dynamicEntity = (popup.geoElement as? DynamicEntity)
     var evaluated by rememberSaveable(popup) { mutableStateOf(false) }
     var fetched by rememberSaveable(popup) { mutableStateOf(false) }
-    var refreshed by rememberSaveable(dynamicEntity) { mutableLongStateOf(dynamicEntity?.id ?: -1) }
+    var lastUpdatedEntityId by rememberSaveable(dynamicEntity) { mutableLongStateOf(dynamicEntity?.id ?: -1) }
     if (dynamicEntity != null) {
         LaunchedEffect(popup) {
             dynamicEntity.dynamicEntityChangedEvent.collect {
                 // briefly show the initializing screen so it is clear the entity just pulsed
                 // and values may have changed.
-                //delay(300)
                 popupState.popup.evaluateExpressions()
-                refreshed = it.receivedObservation?.id ?: -1
+                lastUpdatedEntityId = it.receivedObservation?.id ?: -1
             }
         }
     }
@@ -143,7 +142,7 @@ private fun Popup(popupState: PopupState, modifier: Modifier = Modifier) {
         evaluated = true
     }
 
-    Popup(popupState, evaluated && fetched, refreshed)
+    Popup(popupState, evaluated && fetched, lastUpdatedEntityId)
 }
 
 @Composable
