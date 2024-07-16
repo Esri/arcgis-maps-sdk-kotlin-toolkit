@@ -55,6 +55,12 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = libs.versions.androidxComposeCompiler.get()
     }
+    testOptions {
+        targetSdk = libs.versions.compileSdk.get().toInt()
+    }
+    lint {
+        targetSdk = libs.versions.compileSdk.get().toInt()
+    }
 }
 
 dependencies {
