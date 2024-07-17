@@ -303,6 +303,13 @@ internal class FormAttachmentState(
     val thumbnail: State<Bitmap?> = _thumbnail
 
     /**
+     * The maximum attachment size in bytes that can be loaded. If [size] is greater than this limit,
+     * then the attachment will fail to load with an [AttachmentSizeLimitExceededException] when
+     * [load] is called.
+     */
+    val maxAttachmentSize = 50_000_000L
+
+    /**
      * The size of the thumbnail image.
      */
     private val thumbnailSize = Size(368, 300)
@@ -327,12 +334,11 @@ internal class FormAttachmentState(
         _loadStatus.value = LoadStatus.Loading
         var result = Result.success(Unit)
         try {
-            if (formAttachment == null) {
-                result = Result.failure(Exception("Form attachment is null"))
-            } else {
-                formAttachment.retryLoad().onFailure {
-                    result = Result.failure(it)
-                }.onSuccess {
+            result = when {
+                formAttachment == null -> Result.failure(IllegalStateException("Form attachment is null"))
+                formAttachment.size == 0L -> Result.failure(EmptyAttachmentException())
+                formAttachment.size > maxAttachmentSize -> Result.failure(AttachmentSizeLimitExceededException(maxAttachmentSize))
+                else -> formAttachment.retryLoad().onSuccess {
                     createThumbnail()
                 }
             }
@@ -403,6 +409,9 @@ internal class FormAttachmentState(
                 else -> null
             }
         } catch (ex: Exception) {
+            if (ex is CancellationException) {
+                throw ex
+            }
             null
         }
     }
@@ -521,3 +530,15 @@ internal fun AttachmentElementState.getNewAttachmentNameForContentType(
     }
     return "${prefix}$count.$extension"
 }
+
+/**
+ * Exception indicating that the attachment size exceeds the maximum limit.
+ *
+ * @param limit The maximum attachment size limit in bytes.
+ */
+internal class AttachmentSizeLimitExceededException(val limit : Long) : Exception("Attachment size exceeds the maximum limit of $limit MB")
+
+/**
+ * Exception indicating that the attachment size is 0.
+ */
+internal class EmptyAttachmentException : Exception("Attachment size is 0")

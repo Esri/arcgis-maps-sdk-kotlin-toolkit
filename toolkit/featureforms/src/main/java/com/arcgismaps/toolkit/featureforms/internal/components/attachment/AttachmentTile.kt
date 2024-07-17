@@ -184,7 +184,9 @@ internal fun AttachmentTile(
                                 )
                             )
                         }
-                    })
+                    },
+                    enabled = state.size <= state.maxAttachmentSize
+                )
                 DropdownMenuItem(
                     text = { Text(text = stringResource(R.string.delete)) },
                     leadingIcon = {
@@ -215,8 +217,11 @@ internal fun AttachmentTile(
                     delay(configuration.longPressTimeoutMillis)
                     wasALongPress = true
                     // handle long press
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    showContextMenu = true
+                    if (state.size > 0) {
+                        // show context menu only if the attachment is not empty
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        showContextMenu = true
+                    }
                 }
 
                 is PressInteraction.Release -> {
@@ -226,11 +231,6 @@ internal fun AttachmentTile(
                         if (loadStatus is LoadStatus.NotLoaded || loadStatus is LoadStatus.FailedToLoad) {
                             // load attachment
                             state.loadWithParentScope()
-                            if (state.size == 0L) {
-                                // show an error toast if the attachment is empty since the load
-                                // will likely fail
-                                Toast.makeText(context, context.getString(R.string.download_empty_file), Toast.LENGTH_SHORT).show()
-                            }
                         } else if (loadStatus is LoadStatus.Loaded) {
                             // open attachment
                             val intent = Intent()
@@ -254,6 +254,29 @@ internal fun AttachmentTile(
                         }
                     }
                 }
+            }
+        }
+    }
+    LaunchedEffect(Unit) {
+        state.loadStatus.collectLatest {
+            // show an error toast if the attachment failed to load
+            if (it is LoadStatus.FailedToLoad) {
+                val message = when(it.error) {
+                    is AttachmentSizeLimitExceededException -> {
+                        val limit = (it.error as AttachmentSizeLimitExceededException).limit
+                        val limitFormatted = Formatter.formatFileSize(context, limit)
+                        context.getString(R.string.attachment_size_limit_exceeded, limitFormatted)
+                    }
+
+                    is EmptyAttachmentException ->{
+                        context.getString(R.string.download_empty_file)
+                    }
+
+                    else ->{
+                        it.error.localizedMessage
+                    }
+                }
+                Toast.makeText(context, message, Toast.LENGTH_LONG).show()
             }
         }
     }
