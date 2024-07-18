@@ -36,36 +36,36 @@ import com.arcgismaps.toolkit.geoviewcompose.MapView
 @Composable
 fun DynamicEntityScreen(viewModel: MapViewModel) {
     Box {
+        // load and connect to the custom dynamic entities
+        viewModel.loadDynamicEntities()
+
         MapView(
             modifier = Modifier.fillMaxSize(),
             arcGISMap = viewModel.mapWithDynamicEntities,
             mapViewProxy = viewModel.mapViewProxy,
-            graphicsOverlays = remember { listOf(viewModel.tapLocationGraphicsOverlay) },
-            insets = PaddingValues(horizontal = 30.dp),
-            onSingleTapConfirmed = { singleTapConfirmedEvent ->
-                viewModel.identifyOnDynamicEntity(singleTapConfirmedEvent)
-            },
-            content =
-            {
+            onSingleTapConfirmed = viewModel::identifyOnDynamicEntity,
+            content = {
+                // collect new observations made and retrieve info of each observation
+                val selectedDynamicEntity = viewModel.selectedDynamicEntity
+                    .collectAsState().value ?: return@MapView
+                val receivedObservation = selectedDynamicEntity.dynamicEntityChangedEvent
+                    .collectAsState(null).value?.receivedObservation ?: return@MapView
 
-                val selectedGeoElement = viewModel.selectedGeoElement.collectAsState().value
-                    ?: return@MapView
                 Callout(
-                    geoElement = selectedGeoElement,
+                    geoElement = selectedDynamicEntity,
                     modifier = Modifier.wrapContentSize(),
                 ) {
-                    key(viewModel.dynamicEntityObservationId.collectAsState().value) {
+                    key(receivedObservation.id) {
                         Column {
                             Text(
-                                text = "${selectedGeoElement.attributes}",
+                                text = receivedObservation.attributes.entries
+                                    .joinToString(separator = "\n") { "${it.key}: ${it.value}" },
                                 style = MaterialTheme.typography.labelSmall
                             )
-
                         }
                     }
                 }
             }
-
         )
     }
 }

@@ -32,6 +32,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -145,7 +146,8 @@ fun NavScreenSwitcher(
         ) {
             Text(
                 modifier = Modifier.padding(24.dp),
-                text = "Select screen to launch"
+                text = "Select screen to launch",
+                style = MaterialTheme.typography.titleMedium
             )
 
             val (selectedOption, onOptionSelected) = remember { mutableStateOf(calloutScreenNames[0]) }
@@ -163,7 +165,7 @@ fun NavScreenSwitcher(
                                 onClick = { onOptionSelected(calloutScreen) },
                                 role = Role.RadioButton
                             )
-                            .padding(horizontal = 16.dp),
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         RadioButton(

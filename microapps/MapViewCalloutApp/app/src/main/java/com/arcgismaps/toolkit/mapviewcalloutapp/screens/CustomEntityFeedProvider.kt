@@ -40,29 +40,26 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.double
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import java.io.File
-import java.io.IOException
+import java.io.InputStream
 import kotlin.time.Duration
 
 /**
- * Implements the [EntityFeedProvider] interface on the [CustomDynamicEntityDataSource] to provide
+ * Implements the EntityFeedProvider interface on the [CustomDynamicEntityDataSource] to provide
  * feed events from a JSON file for the custom dynamic entity data source. Uses a buffered reader to
  * process lines in the file and emit feed events for each observation. Uses the [onConnect] to
  * start reading the file and [onDisconnect] to cancel the coroutine job as required.
  *
- * @param fileName The path to the simulation file.
+ * @param fileInputStream The input stream to the simulation file.
  * @param entityIdField The field name that will be used as the entity id.
  * @param delayDuration The delay between each observation that is processed.
  */
 class CustomEntityFeedProvider(
-    fileName: String,
+    private val fileInputStream: InputStream,
     private val entityIdField: String,
     private val delayDuration: Duration
 ) : CustomDynamicEntityDataSource.EntityFeedProvider {
 
     private val scope = CoroutineScope(Dispatchers.Default)
-
-    private val observationsFile = File(fileName)
 
     // Create a shared flow to emit feed events.
     private val _feed = MutableSharedFlow<CustomDynamicEntityDataSource.FeedEvent>(
@@ -81,10 +78,6 @@ class CustomEntityFeedProvider(
      * starts reading the file asynchronously. It is important to process the custom data source asynchronously and let the `onConnect` function return immediately.
      */
     override suspend fun onConnect() {
-        if (!observationsFile.exists()) {
-            throw IOException("Observations file does not exist.")
-        }
-
         readObservationsFileAsync()
     }
 
@@ -112,7 +105,7 @@ class CustomEntityFeedProvider(
         feedJob = scope.launch(Dispatchers.IO) {
             try {
                 // While no call to cancel the job has been made.
-                observationsFile.bufferedReader().use { reader ->
+                fileInputStream.bufferedReader().use { reader ->
                     // Read the next line from the file.
                     for (line in reader.lines()) {
                         // Adjusting the value for the delay will change the speed at which the
@@ -128,11 +121,11 @@ class CustomEntityFeedProvider(
                     throw e
                 }
                 withContext(NonCancellable) {
-                    // Signal that an error occured. This will change the CustomDynamicEntityDataSource's connectionStatus to Failed.
+                    // Signal that an error occurred. This will change the CustomDynamicEntityDataSource's connectionStatus to Failed.
                     _feed.tryEmit(
                         CustomDynamicEntityDataSource.FeedEvent.ConnectionFailure(
-                            e,
-                            true
+                            cause = e,
+                            reconnect = true
                         )
                     )
                 }
@@ -176,24 +169,11 @@ class CustomEntityFeedProvider(
     /**
      * Defines the schema for the custom data source.
      */
-   private val schema: List<Field> by lazy { 
+    private val schema: List<Field> by lazy {
         listOf(
             Field(FieldType.Text, "MMSI", "", 256),
-            Field(FieldType.Float64, "BaseDateTime", "", 8),
-            Field(FieldType.Float64, "LAT", "", 8),
-            Field(FieldType.Float64, "LONG", "", 8),
             Field(FieldType.Float64, "SOG", "", 8),
-            Field(FieldType.Float64, "COG", "", 8),
-            Field(FieldType.Float64, "Heading", "", 8),
-            Field(FieldType.Text, "VesselName", "", 256),
-            Field(FieldType.Text, "IMO", "", 256),
-            Field(FieldType.Text, "CallSign", "", 256),
-            Field(FieldType.Text, "VesselType", "", 256),
-            Field(FieldType.Text, "Status", "", 256),
-            Field(FieldType.Float64, "Length", "", 8),
-            Field(FieldType.Float64, "Width", "", 8),
-            Field(FieldType.Text, "Cargo", "", 256),
-            Field(FieldType.Text, "globalid", "", 256)
+            Field(FieldType.Float64, "COG", "", 8)
         )
     }
 }

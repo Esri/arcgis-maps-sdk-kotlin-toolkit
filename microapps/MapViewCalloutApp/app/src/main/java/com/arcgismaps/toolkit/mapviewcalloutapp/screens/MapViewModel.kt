@@ -41,13 +41,14 @@ import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.realtime.CustomDynamicEntityDataSource
 import com.arcgismaps.realtime.DynamicEntityObservation
+import com.arcgismaps.realtime.DynamicEntity
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
+import com.arcgismaps.toolkit.mapviewcalloutapp.R
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.io.File
 import kotlin.time.Duration.Companion.milliseconds
 
 class MapViewModel(application: Application) : AndroidViewModel(application) {
@@ -77,6 +78,9 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
     private val _selectedGeoElement = MutableStateFlow<GeoElement?>(null)
     val selectedGeoElement: StateFlow<GeoElement?> = _selectedGeoElement.asStateFlow()
 
+    private val _selectedDynamicEntity = MutableStateFlow<DynamicEntity?>(null)
+    val selectedDynamicEntity : StateFlow<DynamicEntity?> = _selectedDynamicEntity.asStateFlow()
+
     private val _selectedLayerName = MutableStateFlow("")
     val selectedLayerName: StateFlow<String> = _selectedLayerName.asStateFlow()
 
@@ -90,10 +94,6 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
 
     private var currentIdentifyJob: Job? = null
 
-    private val provisionPath: String by lazy {
-        application.getExternalFilesDir(null)?.path.toString() + File.separator
-    }
-
     // Create a new custom feed provider that processes observations from a JSON file.
     // This takes the path to the simulation file, field name that will be used as the entity id,
     // and the delay between each observation that is processed.
@@ -102,9 +102,9 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
     // Adjusting the value for the delay will change the speed at which the entities and their
     // observations are displayed.
     private val feedProvider = CustomEntityFeedProvider(
-        fileName = "$provisionPath/AIS_MarineCadastre_SelectedVessels_CustomDataSource.jsonl",
+        fileInputStream = application.resources.openRawResource(R.raw.ais_marinecadastre_selectedvessels_customdatasource),
         entityIdField = "MMSI",
-        delayDuration = 10.milliseconds
+        delayDuration = 25.milliseconds
     )
 
     private val dynamicEntityDataSource = CustomDynamicEntityDataSource(feedProvider)
@@ -141,18 +141,13 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
         operationalLayers.add(dynamicEntityLayer)
     }
 
-    private val _dynamicEntityObservationId = MutableStateFlow<Long?>(null)
-    val dynamicEntityObservationId: StateFlow<Long?> = _dynamicEntityObservationId.asStateFlow()
-
-    init {
-
+    fun loadDynamicEntities(){
         viewModelScope.launch {
             dynamicEntityLayer.load().getOrThrow()
             mapWithDynamicEntities.load().getOrThrow()
             dynamicEntityDataSource.connect().getOrThrow()
         }
     }
-
 
     fun clearMapPoint() {
         _mapPoint.value = null
@@ -216,23 +211,29 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
     }
 
 
+    /**
+     * Identifies the tapped screen coordinate in the provided [singleTapConfirmedEvent]. The
+     * identified [DynamicEntity] is set to [_selectedGeoElement].
+     *
+     * @since 200.5.0
+     */
     fun identifyOnDynamicEntity(singleTapConfirmedEvent: SingleTapConfirmedEvent) {
         currentIdentifyJob?.cancel()
         currentIdentifyJob = viewModelScope.launch {
-            val result =
-                mapViewProxy.identify(dynamicEntityLayer, singleTapConfirmedEvent.screenCoordinate, 20.dp)
+            val result = mapViewProxy.identify(
+                layer = dynamicEntityLayer,
+                screenCoordinate = singleTapConfirmedEvent.screenCoordinate,
+                tolerance = 20.dp
+            )
             result.onSuccess { identifyLayerResult ->
                 val observation = identifyLayerResult.geoElements.firstOrNull() as? DynamicEntityObservation
+                // set to null if no observation was identified
                 if (observation == null){
-                    _selectedGeoElement.value = null
-                    _dynamicEntityObservationId.value = null
+                    _selectedDynamicEntity.value = null
                     return@onSuccess
                 }
-                val entity = observation.dynamicEntity
-                _selectedGeoElement.value = entity
-                entity?.dynamicEntityChangedEvent?.collect { dynamicEntityChangedInfo ->
-                    _dynamicEntityObservationId.value = dynamicEntityChangedInfo.receivedObservation?.id
-                }
+                // update the selected geo-element to the identified dynamic entity
+                _selectedDynamicEntity.value = observation.dynamicEntity
             }
         }
     }
