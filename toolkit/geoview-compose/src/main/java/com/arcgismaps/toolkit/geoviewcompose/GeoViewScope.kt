@@ -30,8 +30,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -136,10 +136,8 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
             this.CalloutInternal(location, modifier, offset, rotateOffsetWithGeoView, colorScheme, shapes, content)
         }
 
-        DisposableEffect(Unit) {
-            onDispose {
-                reset()
-            }
+        SideEffect {
+            reset()
         }
     }
 
@@ -183,10 +181,8 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
             this.CalloutInternal(geoElement, modifier, tapLocation, colorScheme, shapes, content)
         }
 
-        DisposableEffect(Unit) {
-            onDispose {
-                reset()
-            }
+        SideEffect {
+            reset()
         }
     }
 
@@ -202,7 +198,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
      *
      * @since 200.5.0
      */
-    internal fun reset() {
+    private fun reset() {
         isCalloutBeingDisplayed.set(false)
     }
 
