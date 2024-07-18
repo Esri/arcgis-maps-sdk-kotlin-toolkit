@@ -24,24 +24,20 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.arcgismaps.Color
-import com.arcgismaps.arcgisservices.LabelingPlacement
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.GeoElement
 import com.arcgismaps.mapping.Viewpoint
-import com.arcgismaps.mapping.labeling.LabelDefinition
-import com.arcgismaps.mapping.labeling.SimpleLabelExpression
 import com.arcgismaps.mapping.layers.DynamicEntityLayer
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
-import com.arcgismaps.mapping.symbology.TextSymbol
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.realtime.CustomDynamicEntityDataSource
-import com.arcgismaps.realtime.DynamicEntityObservation
 import com.arcgismaps.realtime.DynamicEntity
+import com.arcgismaps.realtime.DynamicEntityObservation
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import com.arcgismaps.toolkit.mapviewcalloutapp.R
 import kotlinx.coroutines.Job
@@ -117,22 +113,6 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
             showTrackLine = true
             maximumObservations = 20
         }
-
-        // Define the label expression to be used, in this case we will use the "VesselName" for each of the dynamic entities.
-        val simpleLabelExpression = SimpleLabelExpression("[VesselName]")
-
-        // Set the text symbol color and size for the labels.
-        val labelSymbol = TextSymbol().apply {
-            color = Color.red
-            size = 12.0F
-        }
-
-        // Add the label definition to the dynamic entity layer and enable labels.
-        labelDefinitions.add(LabelDefinition(simpleLabelExpression, labelSymbol).apply {
-            // Set the label position.
-            placement = LabelingPlacement.PointAboveCenter
-        })
-        labelsEnabled = true
     }
 
     val mapWithDynamicEntities =  ArcGISMap(BasemapStyle.ArcGISOceans).apply {
