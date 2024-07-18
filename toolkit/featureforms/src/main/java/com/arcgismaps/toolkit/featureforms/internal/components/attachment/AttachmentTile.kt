@@ -18,6 +18,7 @@ package com.arcgismaps.toolkit.featureforms.internal.components.attachment
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.graphics.Bitmap
 import android.text.format.Formatter
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
@@ -96,6 +97,8 @@ import com.arcgismaps.toolkit.featureforms.R
 import com.arcgismaps.toolkit.featureforms.internal.utils.AttachmentsFileProvider
 import com.arcgismaps.toolkit.featureforms.internal.utils.DialogType
 import com.arcgismaps.toolkit.featureforms.internal.utils.LocalDialogRequester
+import com.arcgismaps.toolkit.featureforms.theme.LocalColorScheme
+import com.arcgismaps.toolkit.featureforms.theme.LocalTypography
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import java.io.File
@@ -107,12 +110,13 @@ internal fun AttachmentTile(
 ) {
     val loadStatus by state.loadStatus.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
-    val thumbnailUri by state.thumbnailUri
+    val thumbnail by state.thumbnail
     val configuration = LocalViewConfiguration.current
     val haptic = LocalHapticFeedback.current
     var showContextMenu by remember { mutableStateOf(false) }
     val dialogRequester = LocalDialogRequester.current
     val context = LocalContext.current
+    val colors = LocalColorScheme.current.attachmentsElementColors
     Surface(
         onClick = {},
         modifier = modifier
@@ -120,7 +124,7 @@ internal fun AttachmentTile(
             .height(75.dp)
             .clip(shape = RoundedCornerShape(8.dp))
             .border(
-                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline),
+                border = BorderStroke(0.5.dp, colors.tileBorderColor),
                 shape = RoundedCornerShape(8.dp)
             ),
         interactionSource = interactionSource
@@ -130,7 +134,7 @@ internal fun AttachmentTile(
                 LoadStatus.Loaded -> LoadedView(
                     title = state.name,
                     type = state.type,
-                    thumbnailUri = thumbnailUri
+                    thumbnail = thumbnail
                 )
 
                 LoadStatus.Loading -> DefaultView(
@@ -180,7 +184,9 @@ internal fun AttachmentTile(
                                 )
                             )
                         }
-                    })
+                    },
+                    enabled = state.size <= state.maxAttachmentSize
+                )
                 DropdownMenuItem(
                     text = { Text(text = stringResource(R.string.delete)) },
                     leadingIcon = {
@@ -197,6 +203,7 @@ internal fun AttachmentTile(
                     onClick = {
                         showContextMenu = false
                         state.deleteAttachment()
+                        Toast.makeText(context, context.getString(R.string.attachment_deleted, state.name), Toast.LENGTH_SHORT).show()
                     })
             }
         }
@@ -210,8 +217,11 @@ internal fun AttachmentTile(
                     delay(configuration.longPressTimeoutMillis)
                     wasALongPress = true
                     // handle long press
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    showContextMenu = true
+                    if (state.size > 0) {
+                        // show context menu only if the attachment is not empty
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        showContextMenu = true
+                    }
                 }
 
                 is PressInteraction.Release -> {
@@ -221,11 +231,6 @@ internal fun AttachmentTile(
                         if (loadStatus is LoadStatus.NotLoaded || loadStatus is LoadStatus.FailedToLoad) {
                             // load attachment
                             state.loadWithParentScope()
-                            if (state.size == 0L) {
-                                // show an error toast if the attachment is empty since the load
-                                // will likely fail
-                                Toast.makeText(context, context.getString(R.string.download_empty_file), Toast.LENGTH_SHORT).show()
-                            }
                         } else if (loadStatus is LoadStatus.Loaded) {
                             // open attachment
                             val intent = Intent()
@@ -243,11 +248,35 @@ internal fun AttachmentTile(
                                 context.startActivity(intent)
                             } catch (e: ActivityNotFoundException) {
                                 // show a toast if there is no app to open the file type
-                                Toast.makeText(context, R.string.no_app_found, Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, R.string.no_app_found, Toast.LENGTH_SHORT)
+                                    .show()
                             }
                         }
                     }
                 }
+            }
+        }
+    }
+    LaunchedEffect(Unit) {
+        state.loadStatus.collectLatest {
+            // show an error toast if the attachment failed to load
+            if (it is LoadStatus.FailedToLoad) {
+                val message = when(it.error) {
+                    is AttachmentSizeLimitExceededException -> {
+                        val limit = (it.error as AttachmentSizeLimitExceededException).limit
+                        val limitFormatted = Formatter.formatFileSize(context, limit)
+                        context.getString(R.string.attachment_size_limit_exceeded, limitFormatted)
+                    }
+
+                    is EmptyAttachmentException ->{
+                        context.getString(R.string.download_empty_file)
+                    }
+
+                    else ->{
+                        it.error.localizedMessage
+                    }
+                }
+                Toast.makeText(context, message, Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -257,16 +286,16 @@ internal fun AttachmentTile(
 private fun LoadedView(
     title: String,
     type: FormAttachmentType,
-    thumbnailUri: String,
+    thumbnail: Bitmap?,
     modifier: Modifier = Modifier
 ) {
     Box(
         modifier = modifier
             .fillMaxSize()
     ) {
-        if (thumbnailUri.isNotEmpty()) {
+        if (thumbnail != null) {
             AsyncImage(
-                model = thumbnailUri,
+                model = thumbnail,
                 contentDescription = "Thumbnail",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
@@ -281,16 +310,13 @@ private fun LoadedView(
                     .align(Alignment.Center)
             )
         }
+
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
                 .height(20.dp)
-                .background(
-                    MaterialTheme.colorScheme.onBackground.copy(
-                        alpha = 0.7f
-                    )
-                ),
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)),
             verticalArrangement = Arrangement.Center
         ) {
             Title(
@@ -298,7 +324,6 @@ private fun LoadedView(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 5.dp),
-                color = MaterialTheme.colorScheme.background
             )
         }
     }
@@ -358,8 +383,8 @@ private fun DefaultView(
 private fun Title(
     text: String,
     modifier: Modifier = Modifier,
-    color: Color = Color.Unspecified,
-    style: TextStyle = MaterialTheme.typography.labelSmall
+    color: Color = LocalColorScheme.current.attachmentsElementColors.tileTextColor,
+    style: TextStyle = LocalTypography.current.attachmentsElementTypography.tileTextStyle
 ) {
     Text(
         text = text,
@@ -374,20 +399,19 @@ private fun Title(
 
 @Composable
 private fun Size(
-    size: Long, modifier:
-    Modifier = Modifier
+    size: Long,
+    modifier: Modifier = Modifier,
+    color: Color = LocalColorScheme.current.attachmentsElementColors.tileTextColor,
+    textStyle: TextStyle = LocalTypography.current.attachmentsElementTypography.tileTextStyle
 ) {
     val context = LocalContext.current
     val fileSize = Formatter.formatFileSize(context, size)
     Text(
         text = fileSize,
-        style = MaterialTheme.typography.labelSmall.copy(
-            fontWeight = FontWeight.W300,
-            fontSize = 9.sp
-        ),
+        color = color,
+        style = textStyle,
         overflow = TextOverflow.Ellipsis,
-        modifier = modifier
-            .padding(horizontal = 1.dp)
+        modifier = modifier.padding(horizontal = 1.dp)
     )
 }
 

@@ -57,6 +57,7 @@ class LoginViewModel @Inject constructor(
     val loginState = _loginState.asStateFlow()
 
     private val oAuthRedirectUri = "featureformsapp://auth"
+    private val clientId = "iFmvhJGQEKGK1Ahf"
 
     /**
      * Save this url to the search history.
@@ -76,10 +77,10 @@ class LoginViewModel @Inject constructor(
         _loginState.value = LoginState.Loading
         viewModelScope.launch(Dispatchers.IO) {
             authenticatorState.oAuthUserConfiguration =
-                if (useOAuth && BuildConfig.clientId.isNotBlank())
+                if (useOAuth)
                     OAuthUserConfiguration(
                         portalUrl = url,
-                        clientId = BuildConfig.clientId,
+                        clientId = clientId,
                         redirectUrl = oAuthRedirectUri,
                     )
                 else null

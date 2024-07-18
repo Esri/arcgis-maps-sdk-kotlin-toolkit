@@ -19,7 +19,7 @@ package com.arcgismaps.toolkit.featureforms.internal.components.attachment
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
-import android.graphics.Bitmap.CompressFormat
+import android.graphics.Bitmap
 import android.media.ThumbnailUtils
 import android.os.Build
 import android.util.Size
@@ -50,7 +50,6 @@ import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FormAttachment
 import com.arcgismaps.mapping.featureforms.FormAttachmentType
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormElementState
-import com.arcgismaps.toolkit.featureforms.internal.utils.AttachmentsFileProvider
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -59,9 +58,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.BufferedOutputStream
 import java.io.File
-import java.io.FileOutputStream
 import java.util.Objects
 
 
@@ -115,7 +112,7 @@ internal class AttachmentElementState(
      */
     private fun buildAttachmentStates(list: List<FormAttachment>) {
         attachments.clear()
-        list.forEach { formAttachment ->
+        list.asReversed().forEach { formAttachment ->
             // create a new state
             val state = FormAttachmentState(
                 name = formAttachment.name,
@@ -131,7 +128,7 @@ internal class AttachmentElementState(
             // if the attachment is already loaded then re-load the new state
             // this is useful during a configuration change when the form attachment
             // objects have already been loaded by the state object.
-            if (formAttachment.loadStatus.value is LoadStatus.Loaded) {
+            if (formAttachment.loadStatus.value is LoadStatus.Loaded || formAttachment.isLocal) {
                 state.loadWithParentScope()
             }
             attachments.add(state)
@@ -141,8 +138,9 @@ internal class AttachmentElementState(
     /**
      * Adds an attachment with the given [name], [contentType], and [data].
      */
-    fun addAttachment(name: String, contentType: String, data: ByteArray) {
-        val formAttachment = formElement.addAttachment(name, contentType, data)
+    fun addAttachment(name: String, contentType: String, data: ByteArray): Result<Unit> {
+        val formAttachment = formElement.addAttachmentOrNull(name, contentType, data)
+            ?: return Result.failure(Exception("Failed to add attachment"))
         // create a new state
         val state = FormAttachmentState(
             name = formAttachment.name,
@@ -165,6 +163,7 @@ internal class AttachmentElementState(
             lazyListState.scrollToItem(0)
             evaluateExpressions()
         }
+        return Result.success(Unit)
     }
 
     /**
@@ -272,7 +271,7 @@ internal class FormAttachmentState(
      * The name of the attachment. Setting the name will update the [FormAttachment.name] property.
      * This is backed by a [MutableState] and can be observed by the composition.
      */
-    var name : String
+    var name: String
         get() = _name.value
         set(value) {
             formAttachment?.name = value
@@ -296,17 +295,19 @@ internal class FormAttachmentState(
     val filePath: String
         get() = formAttachment?.filePath ?: ""
 
-    private var _thumbnailUri: MutableState<String> = mutableStateOf("")
+    private var _thumbnail: MutableState<Bitmap?> = mutableStateOf(null)
 
     /**
-     * The URI of the thumbnail image. This is empty until [load] is called.
+     * The thumbnail image. This is null until [load] is called.
      */
-    val thumbnailUri: State<String> = _thumbnailUri
+    val thumbnail: State<Bitmap?> = _thumbnail
 
     /**
-     * The directory where the attachments are stored as defined in the [AttachmentsFileProvider].
+     * The maximum attachment size in bytes that can be loaded. If [size] is greater than this limit,
+     * then the attachment will fail to load with an [AttachmentSizeLimitExceededException] when
+     * [load] is called.
      */
-    private val attachmentsDir = "feature_forms_attachments"
+    val maxAttachmentSize = 50_000_000L
 
     /**
      * The size of the thumbnail image.
@@ -333,12 +334,11 @@ internal class FormAttachmentState(
         _loadStatus.value = LoadStatus.Loading
         var result = Result.success(Unit)
         try {
-            if (formAttachment == null) {
-                result = Result.failure(Exception("Form attachment is null"))
-            } else {
-                formAttachment.retryLoad().onFailure {
-                    result = Result.failure(it)
-                }.onSuccess {
+            result = when {
+                formAttachment == null -> Result.failure(IllegalStateException("Form attachment is null"))
+                formAttachment.size == 0L -> Result.failure(EmptyAttachmentException())
+                formAttachment.size > maxAttachmentSize -> Result.failure(AttachmentSizeLimitExceededException(maxAttachmentSize))
+                else -> formAttachment.retryLoad().onSuccess {
                     createThumbnail()
                 }
             }
@@ -385,28 +385,17 @@ internal class FormAttachmentState(
     }
 
     /**
-     * Creates a thumbnail image for the attachment. If the thumbnail already exists, it will not be
-     * recreated.
+     * Creates a thumbnail image for the attachment.
      */
     private suspend fun createThumbnail() = withContext(Dispatchers.IO) {
         if (formAttachment == null) {
             return@withContext
         }
-        val directory = File(filesDir, attachmentsDir)
-        directory.mkdirs()
-        val file = File(directory, "thumb_$id")
-        if (file.exists()) {
-            _thumbnailUri.value = file.absolutePath
-            return@withContext
-        }
-        val bitmap = try {
+        _thumbnail.value = try {
             when (type) {
                 is FormAttachmentType.Image -> {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        ThumbnailUtils.createImageThumbnail(File(filePath), thumbnailSize, null)
-                    } else {
-                        ThumbnailUtils.createImageThumbnail(filePath, 1)
-                    }
+                    formAttachment.createThumbnail(thumbnailSize.width, thumbnailSize.height)
+                        .getOrThrow().bitmap
                 }
 
                 FormAttachmentType.Video -> {
@@ -420,15 +409,11 @@ internal class FormAttachmentState(
                 else -> null
             }
         } catch (ex: Exception) {
+            if (ex is CancellationException) {
+                throw ex
+            }
             null
-        } ?: return@withContext
-
-        // create and write to the thumbnail file if the bitmap is not null
-        file.createNewFile()
-        BufferedOutputStream(FileOutputStream(file)).use { bos ->
-            bitmap.compress(CompressFormat.JPEG, 85, bos)
         }
-        _thumbnailUri.value = file.absolutePath
     }
 }
 
@@ -521,17 +506,39 @@ internal fun FormAttachmentType.getIcon(): ImageVector = when (this) {
 }
 
 /**
- * Returns a new attachment name based on the content type.
+ * Returns a new attachment name based on the [contentType] and [extension].
+ *
+ * @param contentType The content type of the attachment.
+ * @param extension The file extension of the attachment.
+ * @return A new attachment name including the file extension specified by [extension].
  */
-internal fun List<FormAttachmentState>.getNewAttachmentNameForContentType(contentType: String): String {
-    val prefix = when {
-        contentType.startsWith("image/") -> "Image"
-        contentType.startsWith("video/") -> "Video"
-        else -> "Attachment"
-    }
-    val count = this.count { entry ->
-        entry.contentType.split("/").firstOrNull()
-            .equals(contentType.split("/").firstOrNull(), ignoreCase = true)
+internal fun AttachmentElementState.getNewAttachmentNameForContentType(
+    contentType: String,
+    extension: String
+): String {
+    // use the content type prefix to generate a new attachment name
+    val prefix = contentType.split("/").firstOrNull()?.replaceFirstChar(Char::titlecase)
+        ?: "Attachment"
+    var count = attachments.count { entry ->
+        // count the number of attachments with the same content type
+        entry.contentType == contentType
     } + 1
-    return "$prefix $count"
+    // create a set of attachment names to check for duplicates
+    val names = attachments.mapTo(hashSetOf()) { it.name }
+    while (names.contains("${prefix}$count.$extension")) {
+        count++
+    }
+    return "${prefix}$count.$extension"
 }
+
+/**
+ * Exception indicating that the attachment size exceeds the maximum limit.
+ *
+ * @param limit The maximum attachment size limit in bytes.
+ */
+internal class AttachmentSizeLimitExceededException(val limit : Long) : Exception("Attachment size exceeds the maximum limit of $limit MB")
+
+/**
+ * Exception indicating that the attachment size is 0.
+ */
+internal class EmptyAttachmentException : Exception("Attachment size is 0")
