@@ -54,6 +54,7 @@ import com.arcgismaps.toolkit.popup.R
  */
 @Composable
 internal fun ExpandableCard(
+    modifier: Modifier = Modifier,
     title: String = "",
     description: String = "",
     toggleable: Boolean = true,
@@ -70,7 +71,7 @@ internal fun ExpandableCard(
         ),
         border = BorderStroke(shapes.borderThickness, colors.borderColor),
         shape = shapes.containerShape,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(shapes.padding)
     ) {
@@ -79,6 +80,7 @@ internal fun ExpandableCard(
                 title = title,
                 description = description,
                 expandable = toggleable,
+                colors = colors,
                 isExpanded = expanded
             ) {
                 if (toggleable) {
@@ -99,6 +101,7 @@ private fun ExpandableHeader(
     title: String = "",
     description: String = "",
     expandable: Boolean,
+    colors: ExpandableCardColors,
     isExpanded: Boolean,
     onClick: () -> Unit
 ) {
@@ -123,6 +126,7 @@ private fun ExpandableHeader(
         ) {
             Text(
                 text = title,
+                color = colors.headerTextColor,
                 style = MaterialTheme.typography.titleMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -130,6 +134,7 @@ private fun ExpandableHeader(
             if (description.isNotEmpty() && isExpanded) {
                 Text(
                     text = description,
+                    color = colors.headerTextColor,
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Normal,
                     maxLines = 1,
@@ -157,6 +162,7 @@ private fun ExpandableHeader(
 internal fun ExpandableHeaderPreview() {
     ExpandableHeader(
         title = "The Title",
+        colors = ExpandableCardDefaults.colors(),
         description = "the description",
         expandable = true,
         isExpanded = true

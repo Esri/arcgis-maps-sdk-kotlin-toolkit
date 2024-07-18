@@ -18,12 +18,7 @@
 
 package com.arcgismaps.toolkit.popup
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,6 +29,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,6 +37,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -75,7 +72,6 @@ import com.arcgismaps.toolkit.popup.internal.element.textelement.TextPopupElemen
 import com.arcgismaps.toolkit.popup.internal.element.textelement.rememberTextElementState
 import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.FileViewer
 import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ViewableFile
-import kotlinx.coroutines.delay
 
 @Immutable
 private data class PopupState(@Stable val popup: Popup)
@@ -117,16 +113,14 @@ private fun Popup(popupState: PopupState, modifier: Modifier = Modifier) {
     val dynamicEntity = (popup.geoElement as? DynamicEntity)
     var evaluated by rememberSaveable(popup) { mutableStateOf(false) }
     var fetched by rememberSaveable(popup) { mutableStateOf(false) }
-    var refreshed by rememberSaveable(dynamicEntity) { mutableStateOf(true) }
+    var lastUpdatedEntityId by rememberSaveable(dynamicEntity) { mutableLongStateOf(dynamicEntity?.id ?: -1) }
     if (dynamicEntity != null) {
         LaunchedEffect(popup) {
             dynamicEntity.dynamicEntityChangedEvent.collect {
-                refreshed = false
                 // briefly show the initializing screen so it is clear the entity just pulsed
                 // and values may have changed.
-                delay(300)
                 popupState.popup.evaluateExpressions()
-                refreshed = true
+                lastUpdatedEntityId = it.receivedObservation?.id ?: -1
             }
         }
     }
@@ -149,11 +143,11 @@ private fun Popup(popupState: PopupState, modifier: Modifier = Modifier) {
         evaluated = true
     }
 
-    Popup(popupState, evaluated && fetched, refreshed)
+    Popup(popupState, evaluated && fetched, lastUpdatedEntityId)
 }
 
 @Composable
-private fun Popup(popupState: PopupState, initialized: Boolean, refreshed: Boolean, modifier: Modifier = Modifier) {
+private fun Popup(popupState: PopupState, initialized: Boolean, refreshed: Long, modifier: Modifier = Modifier) {
     val scope = rememberCoroutineScope()
     val popup = popupState.popup
     val viewableFileState = rememberSaveable { mutableStateOf<ViewableFile?>(null) }
@@ -168,6 +162,7 @@ private fun Popup(popupState: PopupState, initialized: Boolean, refreshed: Boole
     ) {
         Text(
             text = popup.title,
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(horizontal = 15.dp)
         )
         Spacer(
@@ -187,16 +182,22 @@ private fun Popup(popupState: PopupState, initialized: Boolean, refreshed: Boole
     }
 }
 
+/**
+ * The body of the Popup composable
+ *
+ * @param popupState the immutable state object containing the Popup.
+ * @param refreshed indicates that a new evaluation of elements has occurred. Only for DynamicEntity
+ * @param onFileClicked the callback to display an attachment or media image
+ */
 @Composable
 private fun PopupBody(
     popupState: PopupState,
-    refreshed: Boolean,
+    refreshed: Long,
     onFileClicked: (ViewableFile) -> Unit = {}
 ) {
     val popup = popupState.popup
     val lazyListState = rememberLazyListState()
     val states = rememberStates(popup, attachments)
-
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -226,20 +227,10 @@ private fun PopupBody(
 
                 is FieldsPopupElement -> {
                     item(contentType = FieldsPopupElement::class.java) {
-                        AnimatedVisibility(
-                            visible = refreshed,
-                            enter = fadeIn(
-                                animationSpec = spring(stiffness = Spring.StiffnessHigh)
-                            ),
-                            exit = fadeOut(
-                                animationSpec = spring(stiffness = Spring.StiffnessLow),
-                                targetAlpha = 0.5f
-                            )
-                        ) {
-                            FieldsPopupElement(
-                                entry.state as FieldsElementState,
-                            )
-                        }
+                        FieldsPopupElement(
+                            state = entry.state as FieldsElementState,
+                            refreshed = refreshed
+                        )
                     }
                 }
 

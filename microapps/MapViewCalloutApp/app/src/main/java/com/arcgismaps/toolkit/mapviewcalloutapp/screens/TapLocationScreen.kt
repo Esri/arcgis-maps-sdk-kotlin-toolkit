@@ -43,6 +43,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -58,6 +59,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.node.Ref
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -133,7 +135,8 @@ fun TapLocationScreen(viewModel: MapViewModel) {
                                             "<i>x</i>    = ${it.x.roundToInt()}<br>" +
                                             "<i>y</i>    = ${it.y.roundToInt()}<br>" +
                                             "<i>wkid</i> = ${it.spatialReference?.wkid}",
-                                    htmlFlag = HtmlCompat.FROM_HTML_MODE_COMPACT
+                                    htmlFlag = HtmlCompat.FROM_HTML_MODE_COMPACT,
+                                    textColor = MaterialTheme.colorScheme.onBackground,
                                 )
                             }
                         }
@@ -172,11 +175,14 @@ fun TapLocationScreen(viewModel: MapViewModel) {
  * Currently, Compose does not provide a tool to buildAnnotatedString for HTML styled spannable text.
  */
 @Composable
-fun HtmlText(modifier: Modifier = Modifier, html: String, htmlFlag: Int) {
+fun HtmlText(modifier: Modifier = Modifier, html: String, htmlFlag: Int, textColor: Color) {
     AndroidView(
         modifier = modifier,
         factory = { context -> TextView(context) },
-        update = { it.text = HtmlCompat.fromHtml(html, htmlFlag) }
+        update = {
+            it.text = HtmlCompat.fromHtml(html, htmlFlag)
+            it.setTextColor(textColor.hashCode())
+        }
     )
 }
 

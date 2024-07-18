@@ -206,7 +206,6 @@ public fun MapView(
 
         if (isMapViewReady.value) {
             content?.let {
-                mapViewScope.reset()
                 mapViewScope.it()
             }
         }

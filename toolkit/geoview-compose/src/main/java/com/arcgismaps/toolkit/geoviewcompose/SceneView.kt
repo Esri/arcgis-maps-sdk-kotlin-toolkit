@@ -211,7 +211,6 @@ public fun SceneView(
 
         if (isSceneViewReady.value) {
             content?.let {
-                sceneViewScope.reset()
                 sceneViewScope.it()
             }
         }
