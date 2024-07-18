@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import com.arcgismaps.data.ArcGISFeature
+import com.arcgismaps.data.FeatureEditResult
 import com.arcgismaps.data.ServiceFeatureTable
 import com.arcgismaps.exceptions.FeatureFormValidationException
 import com.arcgismaps.mapping.ArcGISMap
@@ -93,6 +94,10 @@ sealed class UIState {
         val featureForm: FeatureForm,
         val errors: List<ErrorInfo>
     ) : UIState()
+
+    data class Submitted(
+        val result : Result<List<FeatureEditResult>>
+    ) : UIState()
 }
 
 /**
@@ -158,7 +163,7 @@ class MapViewModel @Inject constructor(
      *
      * @return a Result indicating success, or any error encountered.
      */
-    suspend fun commitEdits(): Result<Unit> {
+    suspend fun commitEdits(): Result<List<FeatureEditResult>> {
         val state = (_uiState.value as? UIState.Editing)
             ?: return Result.failure(IllegalStateException("Not in editing state"))
         // build the list of errors
@@ -189,12 +194,31 @@ class MapViewModel @Inject constructor(
                 featureForm.feature.featureTable as? ServiceFeatureTable ?: return Result.failure(
                     IllegalStateException("cannot save feature edit without a ServiceFeatureTable")
                 )
-            var result = Result.success(Unit)
+            var result = Result.success(emptyList<FeatureEditResult>())
             featureForm.finishEditing().onSuccess {
+
+                val x = if (serviceFeatureTable.serviceGeodatabase?.serviceInfo?.canUseServiceGeodatabaseApplyEdits == true) {
+                    serviceFeatureTable.serviceGeodatabase!!.applyEdits().map { featureTableEditResults ->
+                        buildList {
+                            featureTableEditResults.forEach { featureTableEditResult ->
+                                featureTableEditResult.editResults.forEach { featureEditResult ->
+                                    add(featureEditResult)
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    serviceFeatureTable.applyEdits()
+                }
+
                 serviceFeatureTable.serviceGeodatabase?.let { database ->
                     if (database.serviceInfo?.canUseServiceGeodatabaseApplyEdits == true) {
-                        database.applyEdits().onFailure {
+                     val x =  database.applyEdits().onFailure {
                             result = Result.failure(it)
+                        }.map {
+                            it.map {
+                                it
+                            }
                         }
                     } else {
                         serviceFeatureTable.applyEdits().onFailure {
@@ -214,7 +238,7 @@ class MapViewModel @Inject constructor(
         } else {
             // even though there are errors send a success result since the operation was successful
             // and the control is back with the UI
-            Result.success(Unit)
+            Result.success(emptyList())
         }
     }
 

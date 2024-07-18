@@ -75,6 +75,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
+import com.arcgismaps.data.FeatureEditResult
 import com.arcgismaps.exceptions.FeatureFormValidationException
 import com.arcgismaps.toolkit.featureforms.FeatureForm
 import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
@@ -212,6 +213,13 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
         }
     }
     when (uiState) {
+        is UIState.Submitted -> {
+            val result = (uiState as UIState.Submitted).result
+            FeatureEditsDialog(result = result) {
+                mapViewModel.setDefaultState()
+            }
+        }
+
         is UIState.Committing -> {
             SubmitForm(errors = (uiState as UIState.Committing).errors) {
                 mapViewModel.cancelCommit()
@@ -251,7 +259,23 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
             }
         )
     }
+}
 
+@Composable
+fun FeatureEditsDialog(
+    result : Result<List<FeatureEditResult>>,
+    onDismissRequest: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        confirmButton = {
+            Button(onClick = onDismissRequest) {
+                Text(text = stringResource(R.string.okay))
+            }
+        },
+        title = { /*TODO*/ },
+        text = { /*TODO*/ }
+    )
 }
 
 @Composable
