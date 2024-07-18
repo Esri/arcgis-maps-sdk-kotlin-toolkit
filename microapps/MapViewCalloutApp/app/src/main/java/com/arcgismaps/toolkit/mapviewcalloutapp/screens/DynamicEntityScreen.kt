@@ -35,7 +35,6 @@ import com.arcgismaps.toolkit.geoviewcompose.MapView
 
 @Composable
 fun DynamicEntityScreen(viewModel: MapViewModel) {
-    val selectedGeoElement = viewModel.selectedGeoElement.collectAsState().value
     Box {
         MapView(
             modifier = Modifier.fillMaxSize(),
@@ -46,27 +45,27 @@ fun DynamicEntityScreen(viewModel: MapViewModel) {
             onSingleTapConfirmed = { singleTapConfirmedEvent ->
                 viewModel.identifyOnDynamicEntity(singleTapConfirmedEvent)
             },
-            content = if (selectedGeoElement != null) {
-                {
-                    Callout(
-                        geoElement = selectedGeoElement,
-                        modifier = Modifier.wrapContentSize(),
-                        tapLocation = viewModel.tapLocation.value,
-                    ) {
-                        key(viewModel.dynamicEntityObservationId.collectAsState().value) {
-                            Column {
-                                Text(
-                                    text = "${selectedGeoElement.attributes}",
-                                    style = MaterialTheme.typography.labelSmall
-                                )
+            content =
+            {
 
-                            }
+                val selectedGeoElement = viewModel.selectedGeoElement.collectAsState().value
+                    ?: return@MapView
+                Callout(
+                    geoElement = selectedGeoElement,
+                    modifier = Modifier.wrapContentSize(),
+                ) {
+                    key(viewModel.dynamicEntityObservationId.collectAsState().value) {
+                        Column {
+                            Text(
+                                text = "${selectedGeoElement.attributes}",
+                                style = MaterialTheme.typography.labelSmall
+                            )
+
                         }
                     }
                 }
-            } else {
-                null
             }
+
         )
     }
 }

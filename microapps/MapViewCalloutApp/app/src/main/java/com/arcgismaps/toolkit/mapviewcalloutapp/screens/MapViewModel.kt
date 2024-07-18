@@ -42,7 +42,6 @@ import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.realtime.CustomDynamicEntityDataSource
 import com.arcgismaps.realtime.DynamicEntityObservation
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
-import com.arcgismaps.toolkit.mapviewcalloutapp.R
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -223,7 +222,12 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
             val result =
                 mapViewProxy.identify(dynamicEntityLayer, singleTapConfirmedEvent.screenCoordinate, 20.dp)
             result.onSuccess { identifyLayerResult ->
-                val observation = identifyLayerResult.geoElements.first() as DynamicEntityObservation
+                val observation = identifyLayerResult.geoElements.firstOrNull() as? DynamicEntityObservation
+                if (observation == null){
+                    _selectedGeoElement.value = null
+                    _dynamicEntityObservationId.value = null
+                    return@onSuccess
+                }
                 val entity = observation.dynamicEntity
                 _selectedGeoElement.value = entity
                 entity?.dynamicEntityChangedEvent?.collect { dynamicEntityChangedInfo ->
