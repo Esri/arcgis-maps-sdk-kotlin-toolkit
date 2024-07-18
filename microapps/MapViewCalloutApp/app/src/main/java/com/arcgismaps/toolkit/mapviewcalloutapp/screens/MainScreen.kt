@@ -51,12 +51,14 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.arcgismaps.mapping.layers.NoDataTileBehavior
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 
 private val calloutAppScreens = mutableListOf(
     "Show Callout on a tap location",
     "Show Callout on a Feature",
-    "Show Callout on a Graphic"
+    "Show Callout on a Graphic",
+    "Show Two Callouts"
 )
 
 /**
@@ -88,6 +90,10 @@ fun MainScreen() {
         composable(route = calloutAppScreens[2]) {
             val graphicsViewModel : MapViewModel = viewModel()
             GraphicScreen(graphicsViewModel)
+        }
+        composable(route = calloutAppScreens[3]) {
+            val twoCalloutsViewModel: MapViewModel = viewModel()
+            ShowTwoCalloutsScreen(twoCalloutsViewModel)
         }
     }
 }
