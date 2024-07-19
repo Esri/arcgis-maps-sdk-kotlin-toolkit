@@ -66,7 +66,7 @@ MapView(
 ```
 
 **Note:** 
-- For API level 28 and below, you must include `WRITE_EXTERNAL_STORAGE` permission on your app to enable saving media to device storage.
+- For API level 28 and below, you must include WRITE_EXTERNAL_STORAGE permission in your `AndroidManifest.xml` to enable saving media to device storage.
 
 #### Rendering the composable Popup function
 

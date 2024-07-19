@@ -129,6 +129,14 @@ MapView(
         if (selectedGeoElement != null) {
             Callout(
                 modifier = Modifier.wrapContentSize(),
+                shapes = CalloutDefaults.shapes(
+                    cornerRadius = 15.dp,
+                    leaderSize = DpSize(width = 12.dp, height = 10.dp)
+                ),
+                colorScheme = CalloutDefaults.colors(
+                    borderColor = MaterialTheme.colorScheme.outlineVariant,
+                    backgroundColor = MaterialTheme.colorScheme.background
+                )
                 geoElement = selectedGeoElement,
                 tapLocation = tapLocation
             ) {
