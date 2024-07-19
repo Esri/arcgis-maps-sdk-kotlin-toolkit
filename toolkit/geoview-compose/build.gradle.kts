@@ -20,6 +20,11 @@ plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("artifact-deploy")
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+}
+
+secrets {
+    defaultPropertiesFileName = "secrets.defaults.properties"
 }
 
 android {
@@ -47,6 +52,7 @@ android {
     }
     @Suppress("UnstableApiUsage")
     buildFeatures {
+        buildConfig = true
         compose = true
     }
     composeOptions {
