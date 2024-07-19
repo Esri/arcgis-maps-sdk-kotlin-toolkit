@@ -160,6 +160,7 @@ public fun UsernamePasswordAuthenticator(
             ) {
                 Button(
                     modifier = Modifier.padding(4.dp).fillMaxWidth(),
+                    enabled = usernameFieldText.isNotEmpty() && passwordFieldText.isNotEmpty(),
                     onClick = { submitUsernamePassword() }
                 ) {
                     Text(stringResource(id = R.string.login))
