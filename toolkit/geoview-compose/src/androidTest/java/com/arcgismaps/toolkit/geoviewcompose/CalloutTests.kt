@@ -24,11 +24,12 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.material3.Text
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.lifecycle.ViewModel
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
@@ -50,50 +51,94 @@ import org.junit.Test
  *
  * @since 200.5.0
  */
+@OptIn(ExperimentalTestApi::class)
 class CalloutTests {
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<CalloutTestActivity>()
 
-    private val calloutContainerContentDescription = "CalloutContainerLayout"
+    private val calloutContainerLabel = "CalloutContainerLayout"
+    private val timeoutMillis = 10000L
 
     @Test
-    fun isCalloutDisplayed() = runTest {
-        composeTestRule.apply {
-            // display Callout
-            activity.viewModel.showCallout()
+    fun testCalloutVisibility() = runTest {
+        val viewModel = composeTestRule.activity.viewModel
+        // set the current test case
+        viewModel.setCurrentTestCase(CalloutTestCases.testCalloutVisibility)
+        // display Callout
+        viewModel.showCallout()
+        // verify Callout is displayed
+        composeTestRule.waitUntilExactlyOneExists(
+            matcher = hasContentDescription(calloutContainerLabel),
+            timeoutMillis = timeoutMillis
+        )
 
-            // verify Callout is displayed
-            waitUntil(10000) {
-                composeTestRule.onAllNodesWithContentDescription(label = calloutContainerContentDescription)
-                    .fetchSemanticsNodes(errorMessageOnFail = "Callout is not displayed").size == 1
-            }
-        }
+        // hide Callout
+        viewModel.hideCallout()
+        // verify Callout is hidden
+        composeTestRule.waitUntilDoesNotExist(
+            matcher = hasContentDescription(calloutContainerLabel),
+            timeoutMillis = timeoutMillis
+        )
+
     }
 
     @Test
     fun attemptToDisplayMultipleCallouts() = runTest {
+        val viewModel = composeTestRule.activity.viewModel
+        // set the current test case
+        viewModel.setCurrentTestCase(CalloutTestCases.attemptToDisplayMultipleCallouts)
+        // display Callout
+        viewModel.showCallout()
+        // verify only one Callout displayed
+        composeTestRule.waitUntilExactlyOneExists(
+            matcher = hasContentDescription(calloutContainerLabel),
+            timeoutMillis = timeoutMillis
+        )
 
+        // verify first Callout is being displayed
+        composeTestRule.waitUntilExactlyOneExists(
+            matcher = hasContentDescription("CALLOUT#1"),
+            timeoutMillis = timeoutMillis
+        )
+
+        // verify other two Callouts are not being displayed
+        composeTestRule.waitUntilDoesNotExist(
+            matcher = hasContentDescription("CALLOUT#2"),
+            timeoutMillis = timeoutMillis
+        )
+        composeTestRule.waitUntilDoesNotExist(
+            matcher = hasContentDescription("CALLOUT#3"),
+            timeoutMillis = timeoutMillis
+        )
+
+        // hide the Callout
+        viewModel.hideCallout()
+        // verify no Callout is visible
+        composeTestRule.waitUntilDoesNotExist(
+            matcher = hasContentDescription(calloutContainerLabel),
+            timeoutMillis = timeoutMillis
+        )
     }
 
     @Test
     fun testSwitchingBetweenMultipleCallouts() = runTest {
-
+        // TODO
     }
 
     @Test
     fun testCalloutResetViaStateChanges() = runTest {
-
+        // TODO
     }
 
     @Test
     fun testCalloutOnRotation() = runTest {
-
+        // TODO
     }
 
     @Test
     fun testCalloutTheming() = runTest {
-
+        // TODO
     }
 
 
@@ -110,10 +155,15 @@ class CalloutTestActivity() : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ArcGISEnvironment.apiKey = ApiKey.create(BuildConfig.API_KEY)
+
         setContent {
+
             val currentTestCase = viewModel.currentTestCase.collectAsState().value
+            val isCalloutVisible = viewModel.isCalloutVisible.collectAsState().value
+            val point = viewModel.calloutLocation.collectAsState().value
+
             when (currentTestCase) {
-                CalloutTestCases.isCalloutDisplayed -> {
+                CalloutTestCases.testCalloutVisibility -> {
                     MapView(
                         arcGISMap = ArcGISMap(BasemapStyle.ArcGISTopographic).apply {
                             initialViewpoint = Viewpoint(
@@ -123,8 +173,8 @@ class CalloutTestActivity() : ComponentActivity() {
                             )
                         },
                         content = {
-                            if (viewModel.isCalloutVisible) {
-                                Callout(location = viewModel.calloutLocation) {
+                            if (isCalloutVisible) {
+                                Callout(location = point) {
                                     Text(text = "Hello World")
                                 }
                             }
@@ -132,7 +182,46 @@ class CalloutTestActivity() : ComponentActivity() {
                     )
                 }
 
-                CalloutTestCases.attemptToDisplayMultipleCallouts -> TODO()
+                CalloutTestCases.attemptToDisplayMultipleCallouts -> {
+                    MapView(
+                        arcGISMap = ArcGISMap(BasemapStyle.ArcGISTopographic).apply {
+                            initialViewpoint = Viewpoint(
+                                latitude = 39.8,
+                                longitude = -98.6,
+                                scale = 10e7
+                            )
+                        },
+                        content = {
+                            if (isCalloutVisible) {
+                                Callout(location = point) {
+                                    Text(
+                                        modifier = Modifier.semantics {
+                                            contentDescription = "CALLOUT#1"
+                                        },
+                                        text = "I am Callout #1"
+                                    )
+                                }
+                                Callout(location = point) {
+                                    Text(
+                                        modifier = Modifier.semantics {
+                                            contentDescription = "CALLOUT#2"
+                                        },
+                                        text = "I am Callout #2"
+                                    )
+                                }
+                                Callout(location = point) {
+                                    Text(
+                                        modifier = Modifier.semantics {
+                                            contentDescription = "CALLOUT#3"
+                                        },
+                                        text = "I am Callout #3"
+                                    )
+                                }
+                            }
+                        }
+                    )
+                }
+
                 CalloutTestCases.testSwitchingBetweenMultipleCallouts -> TODO()
                 CalloutTestCases.testCalloutResetViaStateChanges -> TODO()
                 CalloutTestCases.testCalloutOnRotation -> TODO()
@@ -151,28 +240,35 @@ class CalloutTestActivity() : ComponentActivity() {
  */
 class CalloutTestViewModel : ViewModel() {
 
-    private val _currentTestCase = MutableStateFlow(CalloutTestCases.isCalloutDisplayed)
+    // Point location for California, USA.
+    private val initialPoint = Point(-117.191, 34.0306, SpatialReference.wgs84())
+
+    private val _currentTestCase = MutableStateFlow(CalloutTestCases.testCalloutVisibility)
     val currentTestCase: StateFlow<CalloutTestCases> = _currentTestCase.asStateFlow()
 
-    //
-    var isCalloutVisible by mutableStateOf(false)
+    private val _calloutLocation = MutableStateFlow(initialPoint)
+    val calloutLocation: StateFlow<Point> = _calloutLocation.asStateFlow()
 
-    // Point location for California, USA.
-    var calloutLocation by mutableStateOf(Point(-117.191, 34.0306, SpatialReference.wgs84()))
+    private val _isCalloutVisible = MutableStateFlow(false)
+    val isCalloutVisible: StateFlow<Boolean> = _isCalloutVisible.asStateFlow()
 
     fun showCallout() {
-        isCalloutVisible = true
+        _isCalloutVisible.value = true
     }
 
 
     fun hideCallout() {
-        isCalloutVisible = false
+        _isCalloutVisible.value = false
+    }
+
+    fun setCurrentTestCase(testCase: CalloutTestCases) {
+        _currentTestCase.value = testCase
     }
 
 }
 
 enum class CalloutTestCases {
-    isCalloutDisplayed,
+    testCalloutVisibility,
     attemptToDisplayMultipleCallouts,
     testSwitchingBetweenMultipleCallouts,
     testCalloutResetViaStateChanges,
