@@ -6,6 +6,8 @@
 
 The Popup toolkit component enables users to view field values of features in a layer using the `Popup` API that has been configured externally (using either in the Web Map Viewer or the Fields Maps web app).
 
+![Screenshot](screenshot.png)
+
 ## Behavior
 
 To see it in action, check out the [microapp](../../microapps/PopupApp).
@@ -62,6 +64,9 @@ MapView(
     }
 )
 ```
+
+**Note:** 
+- For API level 28 and below, you must include WRITE_EXTERNAL_STORAGE permission in your `AndroidManifest.xml` to enable saving media to device storage.
 
 #### Rendering the composable Popup function
 
