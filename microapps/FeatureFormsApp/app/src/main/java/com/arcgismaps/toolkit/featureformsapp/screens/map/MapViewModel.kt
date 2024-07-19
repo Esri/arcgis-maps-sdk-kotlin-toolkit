@@ -96,7 +96,7 @@ sealed class UIState {
     ) : UIState()
 
     data class Submitted(
-        val result : Result<List<FeatureEditResult>>
+        val result: Result<List<FeatureEditResult>>
     ) : UIState()
 }
 
@@ -163,7 +163,7 @@ class MapViewModel @Inject constructor(
      *
      * @return a Result indicating success, or any error encountered.
      */
-    suspend fun commitEdits(): Result<List<FeatureEditResult>> {
+    suspend fun commitEdits(): Result<Unit> {
         val state = (_uiState.value as? UIState.Editing)
             ?: return Result.failure(IllegalStateException("Not in editing state"))
         // build the list of errors
@@ -188,57 +188,42 @@ class MapViewModel @Inject constructor(
             featureForm = featureForm,
             errors = errors
         )
-        // if there are no errors then update the feature
+        // if there are no errors then apply the edits
         return if (errors.isEmpty()) {
             val serviceFeatureTable =
                 featureForm.feature.featureTable as? ServiceFeatureTable ?: return Result.failure(
                     IllegalStateException("cannot save feature edit without a ServiceFeatureTable")
                 )
-            var result = Result.success(emptyList<FeatureEditResult>())
+            var result = Result.success(Unit)
             featureForm.finishEditing().onSuccess {
-
-                val x = if (serviceFeatureTable.serviceGeodatabase?.serviceInfo?.canUseServiceGeodatabaseApplyEdits == true) {
-                    serviceFeatureTable.serviceGeodatabase!!.applyEdits().map { featureTableEditResults ->
-                        buildList {
-                            featureTableEditResults.forEach { featureTableEditResult ->
-                                featureTableEditResult.editResults.forEach { featureEditResult ->
-                                    add(featureEditResult)
+                val featureEditResults =
+                    if (serviceFeatureTable.serviceGeodatabase?.serviceInfo?.canUseServiceGeodatabaseApplyEdits == true) {
+                        serviceFeatureTable.serviceGeodatabase!!.applyEdits()
+                            .map { featureTableEditResults ->
+                                buildList {
+                                    featureTableEditResults.forEach { featureTableEditResult ->
+                                        featureTableEditResult.editResults.forEach { featureEditResult ->
+                                            add(featureEditResult)
+                                        }
+                                    }
                                 }
                             }
-                        }
-                    }
-                } else {
-                    serviceFeatureTable.applyEdits()
-                }
-
-                serviceFeatureTable.serviceGeodatabase?.let { database ->
-                    if (database.serviceInfo?.canUseServiceGeodatabaseApplyEdits == true) {
-                     val x =  database.applyEdits().onFailure {
-                            result = Result.failure(it)
-                        }.map {
-                            it.map {
-                                it
-                            }
-                        }
                     } else {
-                        serviceFeatureTable.applyEdits().onFailure {
-                            result = Result.failure(it)
-                        }
+                        serviceFeatureTable.applyEdits()
                     }
-                }
                 featureForm.feature.refresh()
                 // unselect the feature after the edits have been saved
                 (featureForm.feature.featureTable?.layer as FeatureLayer).clearSelection()
+                _uiState.value = UIState.Submitted(featureEditResults)
+                result = Result.success(Unit)
             }.onFailure {
                 result = Result.failure(it)
             }
-            // set the state to not editing since the feature was updated successfully
-            _uiState.value = UIState.NotEditing
             result
         } else {
             // even though there are errors send a success result since the operation was successful
             // and the control is back with the UI
-            Result.success(emptyList())
+            Result.success(Unit)
         }
     }
 
@@ -369,14 +354,16 @@ fun List<FormElement>.getFormElement(fieldName: String): FieldFormElement? {
  * Returns true if the layer has a feature form definition. If the layer is a [GroupLayer] then
  * this function will return true if any of the layers in the group have a feature form definition.
  */
-private suspend fun Layer.hasFeatureFormDefinition(): Boolean = when(this) {
+private suspend fun Layer.hasFeatureFormDefinition(): Boolean = when (this) {
     is FeatureLayer -> {
         load()
         featureFormDefinition != null
     }
+
     is GroupLayer -> {
         load()
         layers.any { it.hasFeatureFormDefinition() }
     }
+
     else -> false
 }

@@ -266,6 +266,7 @@ fun FeatureEditsDialog(
     result : Result<List<FeatureEditResult>>,
     onDismissRequest: () -> Unit
 ) {
+    val featureEditResults = result.getOrNull()
     AlertDialog(
         onDismissRequest = onDismissRequest,
         confirmButton = {
