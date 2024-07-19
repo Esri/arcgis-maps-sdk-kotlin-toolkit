@@ -125,19 +125,16 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         shapes: CalloutShapes = CalloutDefaults.shapes(),
         content: @Composable BoxScope.() -> Unit
     ) {
-        // Enables the recomposition of the first Callout in the content lambda that is displayed
-        // on the MapView/SceneView
-        var allowCalloutRecomposition by remember { mutableStateOf(false) }
-
-        if (this.isCalloutBeingDisplayed.compareAndSet(false, true)
-            || allowCalloutRecomposition
-        ) {
-            allowCalloutRecomposition = true
+        if (this.isCalloutBeingDisplayed.compareAndSet(false, true)) {
             this.CalloutInternal(location, modifier, offset, rotateOffsetWithGeoView, colorScheme, shapes, content)
-        }
 
-        SideEffect {
-            reset()
+            SideEffect {
+                // The SideEffect is executed after every successful (re)composition. This means that it runs at the
+                // end of the GeoView's content lambda from which this Callout function was called. Resetting at this point
+                // allows us to run the callout code at subsequent recomposition but also to prevent multiple callouts from
+                // being rendered within a single (re)composition pass.
+                reset()
+            }
         }
     }
 
@@ -170,19 +167,15 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         shapes: CalloutShapes = CalloutDefaults.shapes(),
         content: @Composable BoxScope.() -> Unit
     ) {
-        // Enables the recomposition of the first Callout in the content lambda that is displayed
-        // on the MapView/SceneView
-        var allowCalloutRecomposition by remember { mutableStateOf(false) }
-
-        if (this.isCalloutBeingDisplayed.compareAndSet(false, true)
-            || allowCalloutRecomposition
-        ) {
-            allowCalloutRecomposition = true
+        if (this.isCalloutBeingDisplayed.compareAndSet(false, true)) {
             this.CalloutInternal(geoElement, modifier, tapLocation, colorScheme, shapes, content)
-        }
-
-        SideEffect {
-            reset()
+            SideEffect {
+                // The SideEffect is executed after every successful (re)composition. This means that it runs at the
+                // end of the GeoView's content lambda from which this Callout function was called. Resetting at this point
+                // allows us to run the callout code at subsequent recomposition but also to prevent multiple callouts from
+                // being rendered within a single (re)composition pass.
+                reset()
+            }
         }
     }
 
