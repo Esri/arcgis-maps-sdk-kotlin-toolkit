@@ -113,11 +113,13 @@ public fun UsernamePasswordAuthenticator(
             var passwordFieldText by rememberSaveable { mutableStateOf("") }
 
             fun submitUsernamePassword() {
-                usernamePasswordChallenge.continueWithCredentials(
-                    usernameFieldText,
-                    passwordFieldText
-                )
-                passwordFieldText = ""
+                if (usernameFieldText.isNotEmpty() && passwordFieldText.isNotEmpty()) {
+                    usernamePasswordChallenge.continueWithCredentials(
+                        usernameFieldText,
+                        passwordFieldText
+                    )
+                    passwordFieldText = ""
+                }
             }
 
             val keyboardActions = remember {
@@ -136,7 +138,6 @@ public fun UsernamePasswordAuthenticator(
                     keyboardType = KeyboardType.Email,
                     imeAction = ImeAction.Next
                 ),
-                keyboardActions = keyboardActions,
                 label = { Text(text = stringResource(id = R.string.username_label)) },
                 singleLine = true
             )
