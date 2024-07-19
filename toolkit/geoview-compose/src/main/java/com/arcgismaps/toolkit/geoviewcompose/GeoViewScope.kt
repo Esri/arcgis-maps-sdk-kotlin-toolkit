@@ -169,6 +169,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
     ) {
         if (this.isCalloutBeingDisplayed.compareAndSet(false, true)) {
             this.CalloutInternal(geoElement, modifier, tapLocation, colorScheme, shapes, content)
+
             SideEffect {
                 // The SideEffect is executed after every successful (re)composition. This means that it runs at the
                 // end of the GeoView's content lambda from which this Callout function was called. Resetting at this point
