@@ -3,6 +3,8 @@ package com.arcgismaps.toolkit.authentication
 import android.view.KeyEvent
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -83,6 +85,31 @@ class UsernamePasswordTests {
         }.await()
         assert(response is NetworkAuthenticationChallengeResponse.ContinueWithCredential)
     }
+
+    /**
+     * Given a Dialog Authenticator
+     * When the username or password fields are empty
+     * Then the login button should be disabled
+     * And when the username and password fields are both filled
+     * Then the login button should be enabled
+     *
+     * @since 200.5.0
+     */
+    @Test
+    fun loginButtonEnabledState() = runTest {
+        val response = testUsernamePasswordChallengeWithStateRestoration {
+            composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.login)).assertIsNotEnabled()
+            composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.username_label))
+                .performTextInput("testuser")
+            composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.login)).assertIsNotEnabled()
+            composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.password_label))
+                .performTextInput("testPassword")
+            composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.login)).assertIsEnabled()
+            composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.login)).performClick()
+        }.await()
+        assert(response is NetworkAuthenticationChallengeResponse.ContinueWithCredential)
+    }
+
 
     /**
      * Given a Dialog Authenticator
