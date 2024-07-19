@@ -20,10 +20,10 @@ import android.net.Uri
 import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.TweenSpec
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -69,9 +70,10 @@ internal fun FieldsPopupElement(
         Column {
             state.fieldsToFormattedValues.forEach {
                 // Display the field
-                Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
+                Column {
                     ListItem(
                         headlineContent = { Text(text = it.key) },
+                        colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
                         supportingContent = {
                             // build annotated string if the text is an URL
                             if (it.value.startsWith("https")) {
@@ -80,6 +82,7 @@ internal fun FieldsPopupElement(
                                     withStyle(
                                         style = SpanStyle(
                                             color = Color.Blue,
+                                            fontWeight = FontWeight.Bold,
                                             textDecoration = TextDecoration.Underline
                                         )
                                     ) {
@@ -101,7 +104,7 @@ internal fun FieldsPopupElement(
                                         }
                                 })
                             } else {
-                                Text(text = it.value.ifEmpty { "--" })
+                                Text(text = it.value.ifEmpty { "--" }, color = MaterialTheme.colorScheme.onBackground)
                             }
                         }
                     )
