@@ -65,8 +65,12 @@ android {
      * folder in the project's root directory.
      */
     testOptions {
+        targetSdk = libs.versions.compileSdk.get().toInt()
         val connectedTestReportsPath: String by project
         reportDir = "$connectedTestReportsPath/${project.name}"
+    }
+    lint {
+        targetSdk = libs.versions.compileSdk.get().toInt()
     }
 }
 
