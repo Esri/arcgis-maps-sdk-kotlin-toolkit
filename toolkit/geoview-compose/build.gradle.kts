@@ -20,11 +20,6 @@ plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("artifact-deploy")
-    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
-}
-
-secrets {
-    defaultPropertiesFileName = "secrets.defaults.properties"
 }
 
 android {
@@ -86,5 +81,6 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
+    androidTestImplementation(libs.androidx.uiautomator)
     debugImplementation(libs.bundles.debug)
 }

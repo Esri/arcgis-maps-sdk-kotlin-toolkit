@@ -8,7 +8,7 @@
     <application android:requestLegacyExternalStorage="true">
 
         <activity
-            android:name="com.arcgismaps.toolkit.geoviewcompose.CalloutTestActivity"
+            android:name="com.arcgismaps.toolkit.geoviewcompose.callout.CalloutTestActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:taskAffinity="">
