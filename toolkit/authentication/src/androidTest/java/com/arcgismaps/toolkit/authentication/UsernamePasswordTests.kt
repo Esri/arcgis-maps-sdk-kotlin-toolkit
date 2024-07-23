@@ -124,7 +124,8 @@ class UsernamePasswordTests {
             .performTextInput("testuser")
         composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.login)).assertIsNotEnabled()
         // verify the login button is disabled when only the password field is filled
-        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.username_label)).performTextClearance()
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.username_label))
+            .performTextClearance()
         composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.password_label))
             .performTextInput("testPassword")
         composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.login)).assertIsNotEnabled()
@@ -142,7 +143,10 @@ class UsernamePasswordTests {
      * Then the keyboard should be displayed with ImeAction.Send
      *
      * When the the ImeAction.Send is clicked
-     * Then the form should not be submitted when the fields are empty
+     * And both text fields are empty
+     * Then the credentials should not be submitted
+     *
+     * @since 200.5.0
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
@@ -150,7 +154,7 @@ class UsernamePasswordTests {
         val usernamePasswordChallengeMock = mockk<UsernamePasswordChallenge>()
         every { usernamePasswordChallengeMock.url } returns "https://arcgis.com"
         every { usernamePasswordChallengeMock.additionalMessage } answers { MutableStateFlow("") }
-        every { usernamePasswordChallengeMock.continueWithCredentials(any(),any())} just Runs
+        every { usernamePasswordChallengeMock.continueWithCredentials(any(), any()) } just Runs
 
         composeTestRule.setContent {
             UsernamePasswordAuthenticator(usernamePasswordChallengeMock)
@@ -166,7 +170,7 @@ class UsernamePasswordTests {
         composeTestRule.onNode(hasImeAction(ImeAction.Send)).assertExists()
         // verify that clicking on ImeAction.Send will not submit the form when the fields are empty
         composeTestRule.onNode(hasImeAction(ImeAction.Send)).performImeAction()
-        verify (exactly = 0) { usernamePasswordChallengeMock.continueWithCredentials(any(),any()) }
+        verify(exactly = 0) { usernamePasswordChallengeMock.continueWithCredentials(any(), any()) }
     }
 
 
