@@ -47,7 +47,6 @@ android {
     }
     @Suppress("UnstableApiUsage")
     buildFeatures {
-        buildConfig = true
         compose = true
     }
     composeOptions {
