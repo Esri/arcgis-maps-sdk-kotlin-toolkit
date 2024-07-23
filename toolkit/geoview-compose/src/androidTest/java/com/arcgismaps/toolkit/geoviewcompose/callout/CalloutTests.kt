@@ -18,11 +18,11 @@
 
 package com.arcgismaps.toolkit.geoviewcompose.callout
 
-import androidx.compose.foundation.background
-import androidx.compose.ui.Modifier
+import android.graphics.Bitmap
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.semantics.SemanticsNode
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
@@ -31,13 +31,14 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.IntSize
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
+import com.arcgismaps.toolkit.geoviewcompose.GeoViewScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 
 
 /**
- * Tests the Callout
+ * Tests for Callout on the [GeoViewScope] class.
  *
  * @since 200.5.0
  */
@@ -204,7 +205,7 @@ class CalloutTests {
     fun testCalloutOnRotation() = runTest {
         val viewModel = composeTestRule.activity.viewModel
         // set the current test case
-        viewModel.setCurrentTestCase(CalloutTestCases.TestCalloutOnRotation)
+        viewModel.setCurrentTestCase(CalloutTestCases.TestCalloutVisibility)
 
         // set orientation to Portrait
         val uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).apply {
@@ -261,15 +262,17 @@ class CalloutTests {
             timeoutMillis = timeoutMillis
         )
 
-        val calloutContainerNode =
-            composeTestRule.onAllNodesWithContentDescription(calloutContainerLabel).onFirst()
-                .fetchSemanticsNode()
+        val calloutContainerNodeInteraction = composeTestRule
+            .onAllNodesWithContentDescription(label = calloutContainerLabel, useUnmergedTree = true)
+            .onFirst()
 
-        assert(calloutContainerNode.layoutInfo.getModifierInfo()
-            .filter { it.modifier == Modifier.background(Color.Red) }.size == 1
-        )
-        assert(calloutContainerNode.size == IntSize(200, 200))
+        val calloutBitmap = calloutContainerNodeInteraction.captureToImage().asAndroidBitmap()
+        // test if the Callout contains a Red background Color
+        assert(calloutBitmap.containsColor(Color.Red.hashCode()))
 
+        val calloutContainerNode = calloutContainerNodeInteraction.fetchSemanticsNode()
+        // test Callout Size excluding leader height and border width
+        assert(calloutContainerNode.size == IntSize(442, 416))
 
         // hide Callout
         viewModel.hideCallout()
@@ -281,17 +284,21 @@ class CalloutTests {
     }
 }
 
-private fun hasBackground(node: SemanticsNode, color: Color): Boolean {
-    return node.layoutInfo.getModifierInfo().filter { modifierInfo ->
-        modifierInfo.modifier == Modifier.background(color)
-    }.size == 1
-}
-
 enum class CalloutTestCases {
     TestCalloutVisibility,
     AttemptToDisplayMultipleCallouts,
     TestSwitchingBetweenMultipleCallouts,
     TestCalloutResetViaStateChanges,
-    TestCalloutOnRotation,
     TestCalloutTheming
+}
+
+fun Bitmap.containsColor(color: Int): Boolean {
+    for (x in 0 until width) {
+        for (y in 0 until height) {
+            if (getPixel(x, y) == color) {
+                return true
+            }
+        }
+    }
+    return false
 }
