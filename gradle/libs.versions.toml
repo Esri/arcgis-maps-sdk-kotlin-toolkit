@@ -78,7 +78,6 @@ room-compiler = { group = "androidx.room", name = "room-compiler", version.ref =
 room-ext = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 dokka-versioning = { group = "org.jetbrains.dokka", name = "versioning-plugin", version.ref = "dokka" }
-androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }

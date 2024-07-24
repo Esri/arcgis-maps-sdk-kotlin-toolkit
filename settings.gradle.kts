@@ -120,3 +120,6 @@ include(":popup")
 project(":popup").projectDir = File(rootDir, "toolkit/popup")
 include(":popup-app")
 project(":popup-app").projectDir = File(rootDir, "microapps/PopupApp/app")
+include(":viewpoint-persistence-tests-app")
+project(":viewpoint-persistence-tests-app").projectDir = File(rootDir, "microapps/viewpointpersistencetestsapp/app")
+
