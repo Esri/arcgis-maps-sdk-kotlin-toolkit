@@ -219,7 +219,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         shapes: CalloutShapes,
         content: @Composable BoxScope.() -> Unit
     ) {
-        var leaderLocation: LeaderLocation? by remember {
+        var leaderLocation: LeaderLocation? by remember(geoElement) {
             mutableStateOf(
                 computeLeaderLocationForGeoelement(geoElement, tapLocation)
             )
