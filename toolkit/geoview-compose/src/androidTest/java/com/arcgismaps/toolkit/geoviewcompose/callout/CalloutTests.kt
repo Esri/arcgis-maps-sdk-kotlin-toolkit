@@ -32,10 +32,11 @@ import androidx.compose.ui.unit.IntSize
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import com.arcgismaps.toolkit.geoviewcompose.GeoViewScope
+import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutColors
+import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutShapes
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
-
 
 /**
  * Tests for Callout on the [GeoViewScope] class.
@@ -51,6 +52,13 @@ class CalloutTests {
     private val calloutContainerLabel = "CalloutContainerLayout"
     private val timeoutMillis = 10000L
 
+    /**
+     * GIVEN a Callout is wrapped in a boolean if check
+     * WHEN the boolean visibility property changes
+     * THEN verify the Callout visibility status on MapView.
+     *
+     * @since 200.5.0
+     */
     @Test
     fun testCalloutVisibility() = runTest {
         val viewModel = composeTestRule.activity.viewModel
@@ -73,6 +81,14 @@ class CalloutTests {
         )
     }
 
+
+    /**
+     * GIVEN three Callouts are wrapped in a boolean if check
+     * WHEN the boolean visibility property changes
+     * THEN verify the only first Callout is visible on MapView.
+     *
+     * @since 200.5.0
+     */
     @Test
     fun attemptToDisplayMultipleCallouts() = runTest {
         val viewModel = composeTestRule.activity.viewModel
@@ -108,6 +124,13 @@ class CalloutTests {
         )
     }
 
+    /**
+     * GIVEN two Callouts which can switch between each other on a boolean change
+     * WHEN the boolean property changes
+     * THEN verify that the one expected Callout is visible on MapView.
+     *
+     * @since 200.5.0
+     */
     @Test
     fun testSwitchingBetweenMultipleCallouts() = runTest {
 
@@ -163,6 +186,13 @@ class CalloutTests {
         )
     }
 
+    /**
+     * GIVEN a Callout which is displayed on the MapView
+     * WHEN state changes are collected from the MapViewScope
+     * THEN verify Callout has been recomposed triggering a reset.
+     *
+     * @since 200.5.0
+     */
     @Test
     fun testCalloutResetViaStateChanges() = runTest {
         val viewModel = composeTestRule.activity.viewModel
@@ -201,6 +231,13 @@ class CalloutTests {
         )
     }
 
+    /**
+     * GIVEN a Callout which is displayed on the MapView
+     * WHEN device is rotated to landscape then to portrait
+     * THEN verify Callout is visible on each orientation.
+     *
+     * @since 200.5.0
+     */
     @Test
     fun testCalloutOnRotation() = runTest {
         val viewModel = composeTestRule.activity.viewModel
@@ -249,6 +286,13 @@ class CalloutTests {
         )
     }
 
+    /**
+     * GIVEN a Callout which is displayed on the MapView
+     * WHEN a [CalloutShapes] with minContentSize and a [CalloutColors] with backgroundColor is applied to the Callout
+     * THEN verify Callout displays with the expected theme and shape.
+     *
+     * @since 200.5.0
+     */
     @Test
     fun testCalloutTheming() = runTest {
         val viewModel = composeTestRule.activity.viewModel

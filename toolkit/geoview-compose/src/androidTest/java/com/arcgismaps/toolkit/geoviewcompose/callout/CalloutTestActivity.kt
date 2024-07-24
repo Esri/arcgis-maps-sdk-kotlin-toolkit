@@ -59,10 +59,8 @@ class CalloutTestActivity : ComponentActivity() {
     val viewModel: CalloutTestViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // ArcGISEnvironment.apiKey = ApiKey.create(BuildConfig.API_KEY)
 
         setContent {
-
             val currentTestCase = viewModel.currentTestCase.collectAsState().value
             val isCalloutVisible = viewModel.isCalloutVisible.collectAsState().value
             val point = viewModel.calloutLocation.collectAsState().value
@@ -257,7 +255,6 @@ class CalloutTestViewModel : ViewModel() {
     private val _isCalloutVisible = MutableStateFlow(false)
     val isCalloutVisible: StateFlow<Boolean> = _isCalloutVisible.asStateFlow()
 
-
     private val _calloutRecompositionCount = MutableStateFlow(0)
     val calloutRecompositionCount: StateFlow<Int> = _calloutRecompositionCount.asStateFlow()
 
@@ -265,7 +262,6 @@ class CalloutTestViewModel : ViewModel() {
         _calloutLocation.value = initialPoint
         _isCalloutVisible.value = true
     }
-
 
     fun hideCallout() {
         _isCalloutVisible.value = false
@@ -282,5 +278,4 @@ class CalloutTestViewModel : ViewModel() {
     fun calloutWasRecomposed() {
         _calloutRecompositionCount.value++
     }
-
 }
