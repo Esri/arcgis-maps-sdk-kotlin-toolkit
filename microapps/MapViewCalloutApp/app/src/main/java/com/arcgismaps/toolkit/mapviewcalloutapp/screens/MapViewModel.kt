@@ -139,6 +139,8 @@ class MapViewModel : ViewModel() {
                 if (identifyLayerResultList.isNotEmpty()) {
                     _selectedGeoElement.value = identifyLayerResultList[0].geoElements.firstOrNull()
                     _selectedLayerName.value = identifyLayerResultList[0].layerContent.name
+                } else {
+                    _selectedGeoElement.value = null
                 }
             }
         }
