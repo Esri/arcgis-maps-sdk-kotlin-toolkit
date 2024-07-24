@@ -18,13 +18,14 @@
 
 package com.arcgismaps.toolkit.featureformsapp.screens.map
 
+import android.app.Application
 import android.widget.Toast
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.data.ServiceFeatureTable
 import com.arcgismaps.exceptions.FeatureFormValidationException
@@ -32,16 +33,21 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.mapping.featureforms.FormElement
+import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.layers.FeatureLayer
-import com.arcgismaps.mapping.view.MapView
+import com.arcgismaps.mapping.layers.GroupLayer
+import com.arcgismaps.mapping.layers.Layer
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
-import com.arcgismaps.toolkit.composablemap.MapInterface
-import com.arcgismaps.toolkit.composablemap.MapInterfaceImpl
 import com.arcgismaps.toolkit.featureforms.ValidationErrorVisibility
 import com.arcgismaps.toolkit.featureformsapp.data.PortalItemRepository
+import com.arcgismaps.toolkit.featureformsapp.di.ApplicationScope
+import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
@@ -51,15 +57,25 @@ sealed class UIState {
     /**
      * Currently not editing.
      */
-    object NotEditing : UIState()
-    
+    data object NotEditing : UIState()
+
+    /**
+     * Loading state that indicates the map is being loaded.
+     */
+    data object Loading : UIState()
+
+    /**
+     * No feature form definition available.
+     */
+    data object NoFeatureFormDefinition : UIState()
+
     /**
      * Currently selecting a new Feature
      */
     data class Switching(
         val oldState: Editing,
         val newFeature: ArcGISFeature
-    ): UIState()
+    ) : UIState()
 
     /**
      * In editing state with the [featureForm] with the validation error visibility given by
@@ -86,26 +102,51 @@ sealed class UIState {
 data class ErrorInfo(val fieldName: String, val error: FeatureFormValidationException)
 
 /**
+ * Base class for context aware AndroidViewModel. This class must have only a single application
+ * parameter.
+ */
+open class BaseMapViewModel(application: Application) : AndroidViewModel(application)
+
+/**
  * A view model for the FeatureForms MapView UI
  * @constructor to be invoked by injection
  */
 @HiltViewModel
 class MapViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val portalItemRepository: PortalItemRepository
-) : ViewModel(),
-    MapInterface by MapInterfaceImpl(ArcGISMap()) {
+    portalItemRepository: PortalItemRepository,
+    application: Application,
+    @ApplicationScope private val scope: CoroutineScope
+) : BaseMapViewModel(application) {
     private val itemId: String = savedStateHandle["uri"]!!
-    lateinit var portalItem: PortalItem
 
-    private val _uiState: MutableState<UIState> = mutableStateOf(UIState.NotEditing)
+    val proxy: MapViewProxy = MapViewProxy()
+
+    var portalItem: PortalItem = portalItemRepository(itemId)
+        ?: throw IllegalStateException("portal item not found with id $itemId")
+
+    val map: ArcGISMap = ArcGISMap(portalItem)
+
+    private val _uiState: MutableState<UIState> = mutableStateOf(UIState.Loading)
     val uiState: State<UIState>
         get() = _uiState
 
     init {
-        viewModelScope.launch {
-            portalItem = portalItemRepository(itemId) ?: return@launch
-            setMap(ArcGISMap(portalItem))
+        scope.launch {
+            // check if this map has a FeatureFormDefinition on any of its layers
+            checkFeatureFormDefinition()
+        }
+    }
+
+    private suspend fun checkFeatureFormDefinition() {
+        map.load()
+        val layer = map.operationalLayers.firstOrNull {
+            it.hasFeatureFormDefinition()
+        }
+        _uiState.value = if (layer == null) {
+            UIState.NoFeatureFormDefinition
+        } else {
+            UIState.NotEditing
         }
     }
 
@@ -125,8 +166,8 @@ class MapViewModel @Inject constructor(
         val featureForm = state.featureForm
         featureForm.validationErrors.value.forEach { entry ->
             entry.value.forEach { error ->
-                featureForm.getFormElement(entry.key)?.let { formElement ->
-                    if (formElement.isEditable.value) {
+                featureForm.elements.getFormElement(entry.key)?.let { formElement ->
+                    if (formElement.isEditable.value || formElement.hasValueExpression) {
                         errors.add(
                             ErrorInfo(
                                 formElement.label,
@@ -139,22 +180,33 @@ class MapViewModel @Inject constructor(
         }
         // set the state to committing with the errors if any
         _uiState.value = UIState.Committing(
-            featureForm = state.featureForm,
+            featureForm = featureForm,
             errors = errors
         )
         // if there are no errors then update the feature
         return if (errors.isEmpty()) {
-            val feature = state.featureForm.feature
             val serviceFeatureTable =
-                feature.featureTable as? ServiceFeatureTable ?: return Result.failure(
+                featureForm.feature.featureTable as? ServiceFeatureTable ?: return Result.failure(
                     IllegalStateException("cannot save feature edit without a ServiceFeatureTable")
                 )
-            val result = serviceFeatureTable.updateFeature(feature).map {
-                serviceFeatureTable.serviceGeodatabase?.applyEdits()
-                    ?: throw IllegalStateException("cannot apply feature edit without a ServiceGeodatabase")
-                feature.refresh()
+            var result = Result.success(Unit)
+            featureForm.finishEditing().onSuccess {
+                serviceFeatureTable.serviceGeodatabase?.let { database ->
+                    if (database.serviceInfo?.canUseServiceGeodatabaseApplyEdits == true) {
+                        database.applyEdits().onFailure {
+                            result = Result.failure(it)
+                        }
+                    } else {
+                        serviceFeatureTable.applyEdits().onFailure {
+                            result = Result.failure(it)
+                        }
+                    }
+                }
+                featureForm.feature.refresh()
                 // unselect the feature after the edits have been saved
-                (feature.featureTable?.layer as FeatureLayer).clearSelection()
+                (featureForm.feature.featureTable?.layer as FeatureLayer).clearSelection()
+            }.onFailure {
+                result = Result.failure(it)
             }
             // set the state to not editing since the feature was updated successfully
             _uiState.value = UIState.NotEditing
@@ -182,7 +234,7 @@ class MapViewModel @Inject constructor(
         )
         return Result.success(Unit)
     }
-    
+
     fun selectNewFeature() =
         (_uiState.value as? UIState.Switching)?.let { prevState ->
             prevState.oldState.featureForm.discardEdits()
@@ -190,9 +242,14 @@ class MapViewModel @Inject constructor(
             layer.clearSelection()
             layer.selectFeature(prevState.newFeature)
             _uiState.value =
-                UIState.Editing(featureForm = FeatureForm(prevState.newFeature, layer.featureFormDefinition!!))
+                UIState.Editing(
+                    featureForm = FeatureForm(
+                        prevState.newFeature,
+                        layer.featureFormDefinition!!
+                    )
+                )
         }
-    
+
     fun continueEditing() =
         (_uiState.value as? UIState.Switching)?.let { prevState ->
             _uiState.value = prevState.oldState
@@ -208,41 +265,42 @@ class MapViewModel @Inject constructor(
         } ?: return Result.failure(IllegalStateException("Not in editing state"))
     }
 
-    context(MapView, CoroutineScope) override fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {
-            launch {
-                this@MapView.identifyLayers(
-                    screenCoordinate = singleTapEvent.screenCoordinate,
-                    tolerance = 22.0,
-                    returnPopupsOnly = false
-                ).onSuccess { results ->
-                    try {
-                        results.forEach { result ->
-                            result.geoElements.firstOrNull {
-                                it is ArcGISFeature && (it.featureTable?.layer as? FeatureLayer)?.featureFormDefinition != null
-                            }?.let {
-                                if (_uiState.value is UIState.Editing) {
-                                    val currentState = _uiState.value as UIState.Editing
-                                    val newFeature = it as ArcGISFeature
-                                    _uiState.value = UIState.Switching(
-                                        oldState = currentState,
-                                        newFeature = newFeature
-                                    )
-                                } else if (_uiState.value is UIState.NotEditing) {
-                                    val feature = it as ArcGISFeature
-                                    val layer = feature.featureTable!!.layer as FeatureLayer
-                                    val featureForm =
-                                        FeatureForm(feature, layer.featureFormDefinition!!)
-                                    // select the feature
-                                    layer.selectFeature(feature)
-                                    // set the UI to an editing state with the FeatureForm
-                                    _uiState.value = UIState.Editing(featureForm)
-                                }
+    fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {
+        scope.launch {
+            proxy.identifyLayers(
+                screenCoordinate = singleTapEvent.screenCoordinate,
+                tolerance = 22.dp,
+                returnPopupsOnly = false
+            ).onSuccess { results ->
+                try {
+                    results.forEach { result ->
+                        result.geoElements.firstOrNull {
+                            it is ArcGISFeature && (it.featureTable?.layer as? FeatureLayer)?.featureFormDefinition != null
+                        }?.let {
+                            if (_uiState.value is UIState.Editing) {
+                                val currentState = _uiState.value as UIState.Editing
+                                val newFeature = it as ArcGISFeature
+                                _uiState.value = UIState.Switching(
+                                    oldState = currentState,
+                                    newFeature = newFeature
+                                )
+                            } else if (_uiState.value is UIState.NotEditing) {
+                                val feature = it as ArcGISFeature
+                                val layer = feature.featureTable!!.layer as FeatureLayer
+                                val featureForm =
+                                    FeatureForm(feature, layer.featureFormDefinition!!)
+                                // select the feature
+                                layer.selectFeature(feature)
+                                // set the UI to an editing state with the FeatureForm
+                                _uiState.value = UIState.Editing(featureForm)
                             }
                         }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    withContext(Dispatchers.Main) {
                         Toast.makeText(
-                            context,
+                            getApplication<Application>().applicationContext,
                             "failed to create a FeatureForm for the feature",
                             Toast.LENGTH_LONG
                         ).show()
@@ -250,18 +308,51 @@ class MapViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun setDefaultState() {
+        _uiState.value = UIState.NotEditing
+    }
 }
 
 /**
  * Returns the [FieldFormElement] with the given [fieldName] in the [FeatureForm]. If none exists
  * null is returned.
  */
-fun FeatureForm.getFormElement(fieldName: String): FieldFormElement? {
-    return elements.firstNotNullOfOrNull {
-        if (it is FieldFormElement && it.fieldName == fieldName) {
-            it
+fun List<FormElement>.getFormElement(fieldName: String): FieldFormElement? {
+    val fieldElements = filterIsInstance<FieldFormElement>()
+    val element = if (fieldElements.isNotEmpty()) {
+        fieldElements.firstNotNullOfOrNull {
+            if (it.fieldName == fieldName) it else null
+        }
+    } else {
+        null
+    }
+
+    return element ?: run {
+        val groupElements = filterIsInstance<GroupFormElement>()
+        if (groupElements.isNotEmpty()) {
+            groupElements.firstNotNullOfOrNull {
+                it.elements.getFormElement(fieldName)
+            }
         } else {
             null
         }
     }
+}
+
+/**
+ * Returns true if the layer has a feature form definition. If the layer is a [GroupLayer] then
+ * this function will return true if any of the layers in the group have a feature form definition.
+ */
+private suspend fun Layer.hasFeatureFormDefinition(): Boolean = when(this) {
+    is FeatureLayer -> {
+        load()
+        featureFormDefinition != null
+    }
+    is GroupLayer -> {
+        load()
+        layers.any { it.hasFeatureFormDefinition() }
+    }
+    else -> false
 }

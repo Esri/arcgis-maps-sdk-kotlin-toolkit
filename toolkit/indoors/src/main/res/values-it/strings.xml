@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
+    <string name="floor_filter_view_filter_hint_sites">Filtra siti...</string>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
+    <string name="floor_filter_view_filter_hint_facilities">Filtra servizi...</string>
+    <!-- This text is a label on a text field that can fit 24 chars -->
+    <string name="floor_filter_select_site">Seleziona un sito</string>
+    <!-- This text is a label on a text field that can fit 23 chars -->
+    <string name="floor_filter_select_facility">Seleziona un servizio</string>
+    <string name="floor_filter_no_results">Risultati non trovati.</string>
+    <string name="not_available">Non disponibile</string>
+    <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
+    <string name="floor_filter_site_selector_top_bar">Sito - %1$s</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_facility_button">Pulsante siti e servizi</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="floor_level_select_button">Pulsante selezione livello di piano</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_item">Elemento sito</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="facility_item">Elemento servizio</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="clear_search">Cancella ricerca</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="close">Chiudi</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="go_back_to_site_selector">Torna alla selezione del sito</string>
+</resources>

@@ -17,8 +17,20 @@
   -->
 
 <resources>
-    <string name="enter_n_chars">Enter %1$d characters</string>
+    <plurals name="enter_n_chars">
+        <item quantity="one">Enter %1$d character</item>
+        <item quantity="other">Enter %1$d characters</item>
+    </plurals>
+    <plurals name="value_must_be_n_characters">
+        <item quantity="one">Value must be %1$d character</item>
+        <item quantity="other">Value must be %1$d characters</item>
+    </plurals>
     <string name="enter_min_to_max_chars">Enter %1$d to %2$d characters</string>
+    <string name="value_must_be_from_to_characters">Value must be %1$d to %2$d characters</string>
+    <plurals name="maximum_n_chars">
+        <item quantity="one">Maximum %1$d character</item>
+        <item quantity="other">Maximum %1$d characters</item>
+    </plurals>
     <string name="maximum_n_chars">Maximum %1$d characters</string>
     <string name="no_value">No value</string>
     <string name="enter_value">Enter Value</string>
@@ -30,12 +42,15 @@
     <string name="done">Done</string>
     <string name="filter">Filter %1$s</string>
     <string name="numeric_range_helper_text">Enter value from %1$s to %2$s</string>
+    <string name="value_must_be_from_to">Value must be from %1$s to %2$s</string>
     <string name="less_than_min_value">Less than minimum value %1$s</string>
     <string name="exceeds_max_value">Exceeds maximum value %1$s</string>
     <string name="value_must_be_a_whole_number">Value must be a whole number</string>
     <string name="value_must_be_a_number">Value must be a number</string>
     <string name="value_must_be_within_domain">Value must be within domain</string>
     <string name="value_must_not_be_empty">Value must not be empty</string>
+    <string name="min_datetime_helper_text">Date must be on or after %1$s</string>
+    <string name="max_datetime_helper_text">Date must be on or before %1$s</string>
 
     <!-- Date Picker string values -->
     <string name="ff_date_input_headline">Entered date</string>
@@ -87,4 +102,19 @@
     <string name="ff_time_picker_minute_text_field">for minutes</string>
     <string name="ff_time_picker_period_toggle_description">Select AM or PM</string>
     <string name="ff_time_picker_pm">PM</string>
+
+    <string name="take_photo">Take Photo</string>
+    <string name="add_from_gallery">Add From Gallery</string>
+    <string name="rename">Rename</string>
+    <string name="delete">Delete</string>
+    <string name="rename_attachment">Rename Attachment</string>
+    <string name="name">Name</string>
+    <string name="add_file">Add From Files</string>
+    <string name="attachment_error">Error Adding Attachment</string>
+    <string name="no_app_found">No application found to open this file type.</string>
+    <string name="attachment_too_large">The File is too large. Please add a file less than 50 MB.</string>
+    <string name="attachment_is_empty">Empty files are not supported</string>
+    <string name="download_empty_file">Empty files cannot be downloaded</string>
+    <string name="attachment_deleted">%1s was deleted successfully</string>
+    <string name="attachment_size_limit_exceeded">Attachments larger than %1$s cannot be downloaded</string>
 </resources>

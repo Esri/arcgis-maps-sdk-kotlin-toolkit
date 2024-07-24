@@ -29,13 +29,11 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -111,10 +109,6 @@ fun MainScreen() {
         topBar = {
             var optionsExpanded by remember { mutableStateOf(false) }
             TopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
-                ),
                 title = {
                     Text("SceneView Lighting Options App")
                 },
@@ -296,7 +290,7 @@ fun SunTimeOptions(
  * @param currentLightingMode the current sun lighting mode set on the composable SceneView
  * @param setSunLighting called when the sun lighting mode should be changed
  * @param onDismissRequest called when the dialog should be dismissed
- * @since 200.4.9
+ * @since 200.4.0
  */
 @Composable
 fun SunLightingOptions(

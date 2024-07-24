@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
+    <string name="floor_filter_view_filter_hint_sites">Filtrēt vietas</string>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
+    <string name="floor_filter_view_filter_hint_facilities">Filtrēt iespējas</string>
+    <!-- This text is a label on a text field that can fit 24 chars -->
+    <string name="floor_filter_select_site">Izvēlēties vietu</string>
+    <!-- This text is a label on a text field that can fit 23 chars -->
+    <string name="floor_filter_select_facility">Izvēlieties infrastruktūras objektu</string>
+    <string name="floor_filter_no_results">Rezultāti nav atrasti.</string>
+    <string name="not_available">Nav pieejami</string>
+    <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
+    <string name="floor_filter_site_selector_top_bar">Vieta — %1$s</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_facility_button">Vietu un iekārtu poga</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="floor_level_select_button">Stāva līmeņa atlases poga</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_item">Vietas vienība</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="facility_item">Aprīkojuma vienība</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="clear_search">Notīrīt meklēšanas gadījumu</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="close">Aizvērt</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="go_back_to_site_selector">Doties atpakaļ uz vietu atlasītāju</string>
+</resources>

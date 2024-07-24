@@ -30,36 +30,26 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
-import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.data.ArcGISFeature
-import com.arcgismaps.data.QueryParameters
-import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.featureforms.FeatureForm
-import com.arcgismaps.mapping.featureforms.FeatureFormDefinition
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
-import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextField
 import com.arcgismaps.toolkit.featureforms.internal.components.text.rememberFormTextFieldState
 import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.fail
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
-import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
 
-class FormTextFieldTests {
+class FormTextFieldTests : FeatureFormTestRunner(
+    uri = "https://www.arcgis.com/home/item.html?id=5d69e2301ad14ec8a73b568dfc29450a",
+    objectId = 1
+) {
     private val labelSemanticLabel = "label"
     private val supportingTextSemanticLabel = "supporting text"
     private val outlinedTextFieldSemanticLabel = "outlined text field"
     private val charCountSemanticLabel = "char count"
     private val clearTextSemanticLabel = "Clear text button"
-    
-    private val featureForm by lazy {
-        sharedFeatureForm!!
-    }
 
     private val field by lazy {
         featureForm.elements
@@ -68,18 +58,18 @@ class FormTextFieldTests {
                 it.label == "Single Line No Value, Placeholder or Description"
             }
     }
-    
+
     private val errorTextColor = Color(
         red = 0.7019608f,
         green = 0.14901961f,
         blue = 0.11764706f
     )
-    
+
     @get:Rule
     val composeTestRule = createComposeRule()
-    
+
     @Before
-    fun setContent()  = runTest {
+    fun setContent() = runTest {
         composeTestRule.setContent {
             val scope = rememberCoroutineScope()
             val state = rememberFormTextFieldState(
@@ -95,14 +85,15 @@ class FormTextFieldTests {
         }
         featureForm.evaluateExpressions()
     }
-    
+
     @After
     fun clearText() {
-        val outlinedTextField = composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
+        val outlinedTextField =
+            composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
         // clear out any text added to this empty field during tests
         outlinedTextField.performTextClearance()
     }
-    
+
     /**
      * Test case 1.1:
      * Given a FormTextField with no value, placeholder, or description
@@ -114,10 +105,13 @@ class FormTextFieldTests {
     fun testNoValueUnfocusedState() = runTest {
         val label = composeTestRule.onNodeWithContentDescription(labelSemanticLabel)
         label.assertIsDisplayed()
-        
-        composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true).assertDoesNotExist()
+
+        composeTestRule.onNode(
+            hasContentDescription(supportingTextSemanticLabel),
+            useUnmergedTree = true
+        ).assertDoesNotExist()
     }
-    
+
     /**
      * Test case 1.1:
      * Given a FormTextField with no value, placeholder, description, but with a max length.
@@ -127,15 +121,19 @@ class FormTextFieldTests {
      */
     @Test
     fun testNoValueFocusedState() = runTest {
-        val outlinedTextField = composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
+        val outlinedTextField =
+            composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
         outlinedTextField.performClick()
         outlinedTextField.assertIsFocused()
         val label = composeTestRule.onNodeWithContentDescription(labelSemanticLabel)
         label.assertIsDisplayed()
-        
-        composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true).assertDoesNotExist()
+
+        composeTestRule.onNode(
+            hasContentDescription(supportingTextSemanticLabel),
+            useUnmergedTree = true
+        ).assertDoesNotExist()
     }
-    
+
     /**
      * Test case 1.2:
      * Given a FormTextField with no value, placeholder, or description
@@ -145,25 +143,35 @@ class FormTextFieldTests {
      */
     @Test
     fun testEnteredValueFocusedState() = runTest {
-        val outlinedTextField = composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
+        val outlinedTextField =
+            composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
         val text = "lorem ipsum"
         outlinedTextField.performTextInput(text)
         outlinedTextField.assertIsFocused()
         val label = composeTestRule.onNodeWithContentDescription(labelSemanticLabel)
         label.assertIsDisplayed()
-        
-        composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true).assertDoesNotExist()
-        
+
+        composeTestRule.onNode(
+            hasContentDescription(supportingTextSemanticLabel),
+            useUnmergedTree = true
+        ).assertDoesNotExist()
+
         val charCountNode =
-            composeTestRule.onNode(hasContentDescription(charCountSemanticLabel), useUnmergedTree = true)
+            composeTestRule.onNode(
+                hasContentDescription(charCountSemanticLabel),
+                useUnmergedTree = true
+            )
         val charCountText = charCountNode.getTextString()
         charCountNode.assertIsDisplayed()
         assertEquals(text.length.toString(), charCountText)
-        
-        val clearButton = composeTestRule.onNode(hasContentDescription(clearTextSemanticLabel), useUnmergedTree = true)
+
+        val clearButton = composeTestRule.onNode(
+            hasContentDescription(clearTextSemanticLabel),
+            useUnmergedTree = true
+        )
         clearButton.assertExists()
     }
-    
+
     /**
      * Test case 1.2:
      * Given a FormTextField with no value, placeholder, or description
@@ -173,26 +181,38 @@ class FormTextFieldTests {
      */
     @Test
     fun testEnteredValueUnfocusedState() {
-        val outlinedTextField = composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel, useUnmergedTree = true)
+        val outlinedTextField = composeTestRule.onNodeWithContentDescription(
+            outlinedTextFieldSemanticLabel,
+            useUnmergedTree = true
+        )
         val text = "lorem ipsum"
         outlinedTextField.performTextInput(text)
         outlinedTextField.assertIsFocused()
         val label = composeTestRule.onNodeWithContentDescription(labelSemanticLabel)
         label.assertIsDisplayed()
-        
-        composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true).assertDoesNotExist()
-        
+
+        composeTestRule.onNode(
+            hasContentDescription(supportingTextSemanticLabel),
+            useUnmergedTree = true
+        ).assertDoesNotExist()
+
         outlinedTextField.performImeAction()
         outlinedTextField.assertIsNotFocused()
-        
+
         val charCountNode =
-            composeTestRule.onNode(hasContentDescription(charCountSemanticLabel), useUnmergedTree = true)
+            composeTestRule.onNode(
+                hasContentDescription(charCountSemanticLabel),
+                useUnmergedTree = true
+            )
         charCountNode.assertDoesNotExist()
-        
-        val clearButton = composeTestRule.onNode(hasContentDescription(clearTextSemanticLabel), useUnmergedTree = true)
+
+        val clearButton = composeTestRule.onNode(
+            hasContentDescription(clearTextSemanticLabel),
+            useUnmergedTree = true
+        )
         clearButton.assertExists()
     }
-    
+
     /**
      * Test case 1.3:
      * Given a FormTextField with no value, placeholder, or description
@@ -203,7 +223,8 @@ class FormTextFieldTests {
     @Test
     fun testErrorValueFocusedState() = runTest {
         val maxLength = (field.input as TextBoxFormInput).maxLength.toInt()
-        val outlinedTextField = composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
+        val outlinedTextField =
+            composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
         val text = buildString {
             repeat(maxLength + 1) {
                 append("x")
@@ -213,24 +234,33 @@ class FormTextFieldTests {
         outlinedTextField.assertIsFocused()
         val label = composeTestRule.onNodeWithContentDescription(labelSemanticLabel)
         label.assertIsDisplayed()
-        
-        val supportingText = composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true)
+
+        val supportingText = composeTestRule.onNode(
+            hasContentDescription(supportingTextSemanticLabel),
+            useUnmergedTree = true
+        )
         supportingText.assertIsDisplayed()
-        
+
         assertEquals("Maximum $maxLength characters", supportingText.getTextString())
         supportingText.assertTextColor(errorTextColor)
-        
+
         val charCountNode =
-            composeTestRule.onNode(hasContentDescription(charCountSemanticLabel), useUnmergedTree = true)
+            composeTestRule.onNode(
+                hasContentDescription(charCountSemanticLabel),
+                useUnmergedTree = true
+            )
         val charCountText = charCountNode.getTextString()
         charCountNode.assertIsDisplayed()
         assertEquals(text.length.toString(), charCountText)
         charCountNode.assertTextColor(errorTextColor)
-        
-        val clearButton = composeTestRule.onNode(hasContentDescription(clearTextSemanticLabel), useUnmergedTree = true)
+
+        val clearButton = composeTestRule.onNode(
+            hasContentDescription(clearTextSemanticLabel),
+            useUnmergedTree = true
+        )
         clearButton.assertExists()
     }
-    
+
     /**
      * Test case 1.3:
      * Given a FormTextField with no value, placeholder, or description
@@ -240,7 +270,8 @@ class FormTextFieldTests {
      */
     @Test
     fun testErrorValueUnfocusedState() = runTest {
-        val outlinedTextField = composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
+        val outlinedTextField =
+            composeTestRule.onNodeWithContentDescription(outlinedTextFieldSemanticLabel)
         val maxLength = (field.input as TextBoxFormInput).maxLength.toInt()
         val text = buildString {
             repeat(maxLength + 1) {
@@ -251,58 +282,29 @@ class FormTextFieldTests {
         outlinedTextField.assertIsFocused()
         val label = composeTestRule.onNodeWithContentDescription(labelSemanticLabel)
         label.assertIsDisplayed()
-        
-        val supportingText = composeTestRule.onNode(hasContentDescription(supportingTextSemanticLabel), useUnmergedTree = true)
+
+        val supportingText = composeTestRule.onNode(
+            hasContentDescription(supportingTextSemanticLabel),
+            useUnmergedTree = true
+        )
         supportingText.assertIsDisplayed()
         assertEquals("Maximum $maxLength characters", supportingText.getTextString())
-        
+
         outlinedTextField.performImeAction()
         outlinedTextField.assertIsNotFocused()
         supportingText.assertTextColor(errorTextColor)
-        
+
         val charCountNode =
-            composeTestRule.onNode(hasContentDescription(charCountSemanticLabel), useUnmergedTree = true)
+            composeTestRule.onNode(
+                hasContentDescription(charCountSemanticLabel),
+                useUnmergedTree = true
+            )
         charCountNode.assertDoesNotExist()
-        
-        val clearButton = composeTestRule.onNode(hasContentDescription(clearTextSemanticLabel), useUnmergedTree = true)
+
+        val clearButton = composeTestRule.onNode(
+            hasContentDescription(clearTextSemanticLabel),
+            useUnmergedTree = true
+        )
         clearButton.assertExists()
     }
-    
-    companion object {
-        var sharedFeatureFormDefinition: FeatureFormDefinition? = null
-        var sharedFeatureForm: FeatureForm? = null
-        var sharedFeature: ArcGISFeature? = null
-        var sharedMap: ArcGISMap? = null
-        
-        @BeforeClass
-        @JvmStatic
-        fun setupClass() = runTest {
-            ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler =
-                FeatureFormsTestChallengeHandler(
-                    BuildConfig.webMapUser,
-                    BuildConfig.webMapPassword
-                )
-            
-            sharedMap =
-                ArcGISMap("https://runtimecoretest.maps.arcgis.com/home/item.html?id=5d69e2301ad14ec8a73b568dfc29450a")
-            sharedMap?.load()?.onFailure { fail("failed to load webmap with ${it.message}") }
-            val featureLayer = sharedMap?.operationalLayers?.first() as? FeatureLayer
-            featureLayer?.let { layer ->
-                layer.load().onFailure { fail("failed to load layer with ${it.message}") }
-                sharedFeatureFormDefinition = layer.featureFormDefinition!!
-                val parameters = QueryParameters().also {
-                    it.whereClause = "1=1"
-                    it.maxFeatures = 1
-                }
-                layer.featureTable?.queryFeatures(parameters)?.onSuccess {
-                    sharedFeature = it.filterIsInstance<ArcGISFeature>().first()
-                    sharedFeature?.load()?.onFailure { fail("failed to load feature with ${it.message}") }
-                    sharedFeatureForm = FeatureForm(sharedFeature!!, sharedFeatureFormDefinition!!)
-                }?.onFailure {
-                    fail("failed to query features on layer's featuretable with ${it.message}")
-                }
-            }
-        }
-    }
-    
 }

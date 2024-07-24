@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~
+  ~  Copyright 2023 Esri
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  ~
+  --><resources>
+    <string name="enter_n_chars">إدخال %1$d من الرموز</string>
+    <string name="enter_min_to_max_chars">إدخال %1$d إلى %2$d من الرموز</string>
+    <string name="maximum_n_chars">الحد الأقصى %1$d من الحروف</string>
+    <string name="no_value">لا توجد قيمة</string>
+    <string name="enter_value">إدخال قيمة</string>
+    <string name="required">مطلوب</string>
+    <string name="today">اليوم</string>
+    <string name="now">الآن</string>
+    <string name="cancel">إلغاء الأمر</string>
+    <string name="ok">موافق</string>
+    <string name="done">تم</string>
+    <string name="filter">عامل التصفية %1$s</string>
+    <string name="numeric_range_helper_text">إدخال قيمة من %1$s إلى %2$s</string>
+    <string name="less_than_min_value">أقل من أدنى قيمة %1$s</string>
+    <string name="exceeds_max_value">يتجاوز أقصى قيمة %1$s</string>
+    <string name="value_must_be_a_whole_number">يجب أن تكون القيمة رقمًا كاملاً</string>
+    <string name="value_must_be_a_number">يجب أن تكون القيمة رقمًا</string>
+    <string name="value_must_be_within_domain">يجب أن تكون القيمة ضمن النطاق</string>
+    <string name="value_must_not_be_empty">يجب ألا تكون القيمة فارغة</string>
+    <string name="min_datetime_helper_text">يجب أن يكون التاريخ في %1$s أو بعده</string>
+    <string name="max_datetime_helper_text">يجب أن يكون التاريخ في %1$s أو قبله</string>
+
+    <!-- Date Picker string values -->
+    <string name="ff_date_input_headline">التاريخ الذي تم إدخاله</string>
+    <string name="ff_date_input_headline_description">التاريخ الذي تم إدخاله: %1$s</string>
+    <string name="ff_date_input_invalid_for_pattern">التاريخ لا يتطابق مع النمط المتوقع: %1$s</string>
+    <string name="ff_date_input_invalid_not_allowed">التاريخ غير مسموح به: %1$s</string>
+    <string name="ff_date_input_invalid_year_range">
+        التاريخ خارج نطاق السنة المتوقعة %1$s -%2$s
+    </string>
+    <string name="ff_date_input_label">التاريخ</string>
+    <string name="ff_date_input_no_input_description">لا شيء</string>
+    <string name="ff_date_input_title">تحديد التاريخ</string>
+    <string name="ff_date_picker_headline">"التاريخ المحدد"</string>
+    <string name="ff_date_picker_headline_description">التحديد الحالي: %1$s</string>
+    <string name="ff_date_picker_navigate_to_year_description">انتقال إلى السنة %1$s</string>
+    <string name="ff_date_picker_no_selection_description">لا شيء</string>
+    <string name="ff_date_picker_scroll_to_earlier_years">التمرير لإظهار السنوات السابقة</string>
+    <string name="ff_date_picker_scroll_to_later_years">التمرير لإظهار السنوات اللاحقة</string>
+    <string name="ff_date_picker_switch_to_calendar_mode">التبديل إلى وضع إدخال التقويم</string>
+    <string name="ff_date_picker_switch_to_day_selection">
+        "اسحب لتحديد سنة، أو اضغط للتبديل مرة أخرى إلى تحديد يوم"
+    </string>
+    <string name="ff_date_picker_switch_to_input_mode">التبديل إلى وضع إدخال النص</string>
+    <string name="ff_date_picker_switch_to_next_month">"التغيير إلى الشهر القادم"</string>
+    <string name="ff_date_picker_switch_to_previous_month">"التغيير إلى الشهر السابق"</string>
+    <string name="ff_date_picker_switch_to_year_selection">"التبديل إلى اختيار سنة"</string>
+    <string name="ff_date_picker_title">"تحديد تاريخ"</string>
+    <string name="ff_date_picker_today_description">اليوم</string>
+    <string name="ff_date_picker_year_picker_pane_title">منتقي السنة مرئي</string>
+    <string name="ff_date_range_input_invalid_range_input">إدخال النطاق الزمني غير صالح</string>
+    <string name="ff_date_range_input_title">إدخال تواريخ</string>
+    <string name="ff_date_range_picker_day_in_range">ضمن النطاق</string>
+    <string name="ff_date_range_picker_end_headline">تاريخ الانتهاء</string>
+    <string name="ff_date_range_picker_scroll_to_next_month">التمرير لإظهار الشهر التالي</string>
+    <string name="ff_date_range_picker_scroll_to_previous_month">التمرير لإظهار الشهر السابق</string>
+    <string name="ff_date_range_picker_start_headline">تاريخ البدء</string>
+    <string name="ff_date_range_picker_title">تحديد التواريخ</string>
+
+    <!-- Time Picker string values -->
+    <string name="ff_time_picker_am">صباحًا</string>
+    <string name="ff_time_picker_hour">ساعة</string>
+    <string name="ff_time_picker_hour_24h_suffix">%1$d من الساعات</string>
+    <string name="ff_time_picker_hour_selection">تحديد الساعة</string>
+    <string name="ff_time_picker_hour_suffix">%1$d o\'ساعة</string>
+    <string name="ff_time_picker_hour_text_field">لمدة ساعة</string>
+    <string name="ff_time_picker_minute">دقيقة</string>
+    <string name="ff_time_picker_minute_selection">تحديد الدقائق</string>
+    <string name="ff_time_picker_minute_suffix">%1$d من الدقائق</string>
+    <string name="ff_time_picker_minute_text_field">لمدة دقائق</string>
+    <string name="ff_time_picker_period_toggle_description">تحديد صباحًا أو مساءً</string>
+    <string name="ff_time_picker_pm">مساءً</string>
+    <string name="take_photo">التقاط صورة</string>
+    <string name="rename">إعادة تسمية</string>
+    <string name="delete">حذف</string>
+    <string name="rename_attachment">إعادة تسمية المرفق</string>
+    <string name="name">الاسم</string>
+</resources>

@@ -23,6 +23,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.mapping.featureforms.FormExpressionEvaluationError
 import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValidationErrors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -31,11 +32,14 @@ import kotlinx.coroutines.launch
  * A concrete class for use with a [ComboBoxField].
  */
 internal class ComboBoxFieldState(
+    id : Int,
     properties: CodedValueFieldProperties,
     initialValue: Any? = properties.value.value,
+    hasValueExpression : Boolean,
     scope: CoroutineScope,
-    onEditValue: ((Any?) -> Unit),
-) : CodedValueFieldState(properties, initialValue, scope, onEditValue) {
+    updateValue: (Any?) -> Unit,
+    evaluateExpressions: suspend () -> Result<List<FormExpressionEvaluationError>>
+) : CodedValueFieldState(id, properties, initialValue, hasValueExpression, scope, updateValue, evaluateExpressions) {
 
     companion object {
         /**
@@ -56,6 +60,7 @@ internal class ComboBoxFieldState(
             restore = { list ->
                 val input = formElement.input as ComboBoxFormInput
                 ComboBoxFieldState(
+                    id = formElement.hashCode(),
                     properties = CodedValueFieldProperties(
                         label = formElement.label,
                         placeholder = formElement.hint,
@@ -71,11 +76,10 @@ internal class ComboBoxFieldState(
                         fieldType = formElement.fieldType
                     ),
                     initialValue = list[0],
+                    hasValueExpression = formElement.hasValueExpression,
                     scope = scope,
-                    onEditValue = { newValue ->
-                        formElement.updateValue(newValue)
-                        scope.launch { form.evaluateExpressions() }
-                    },
+                    updateValue = formElement::updateValue,
+                    evaluateExpressions = form::evaluateExpressions
                 ).apply {
                     onFocusChanged(list[1] as Boolean)
                 }
@@ -95,6 +99,7 @@ internal fun rememberComboBoxFieldState(
 ) {
     val input = field.input as ComboBoxFormInput
     ComboBoxFieldState(
+        id = field.hashCode(),
         properties = CodedValueFieldProperties(
             label = field.label,
             placeholder = field.hint,
@@ -109,10 +114,9 @@ internal fun rememberComboBoxFieldState(
             noValueLabel = input.noValueLabel,
             fieldType = field.fieldType
         ),
+        hasValueExpression = field.hasValueExpression,
         scope = scope,
-        onEditValue = {
-            field.updateValue(it)
-            scope.launch { form.evaluateExpressions() }
-        },
+        updateValue = field::updateValue,
+        evaluateExpressions = form::evaluateExpressions
     )
 }

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
+    <string name="floor_filter_view_filter_hint_sites">Filtriranje lokacija…</string>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
+    <string name="floor_filter_view_filter_hint_facilities">Filtriranje objekata…</string>
+    <!-- This text is a label on a text field that can fit 24 chars -->
+    <string name="floor_filter_select_site">Izaberite lokaciju</string>
+    <!-- This text is a label on a text field that can fit 23 chars -->
+    <string name="floor_filter_select_facility">Izaberite objekat</string>
+    <string name="floor_filter_no_results">Nema pronađenih rezultata.</string>
+    <string name="not_available">Nije dostupno</string>
+    <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
+    <string name="floor_filter_site_selector_top_bar">Sajt - %1$s</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_facility_button">Dugme lokacije i objekti</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="floor_level_select_button">Dugme za odabir sprata</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_item">Stavka lokacije</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="facility_item">Stavka objekta</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="clear_search">Obriši pretragu</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="close">Zatvori</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="go_back_to_site_selector">Vrati se na birač lokacije</string>
+</resources>

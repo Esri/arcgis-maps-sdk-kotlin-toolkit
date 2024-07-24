@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
+    <string name="floor_filter_view_filter_hint_sites">Filter sites..</string>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
+    <string name="floor_filter_view_filter_hint_facilities">Φιλτράρισμα εγκαταστάσεων...</string>
+    <!-- This text is a label on a text field that can fit 24 chars -->
+    <string name="floor_filter_select_site">Επιλέξτε site</string>
+    <!-- This text is a label on a text field that can fit 23 chars -->
+    <string name="floor_filter_select_facility">Επιλέξτε εγκατάσταση</string>
+    <string name="floor_filter_no_results">Δεν βρέθηκαν αποτελέσματα.</string>
+    <string name="not_available">Μη διαθέσιμο</string>
+    <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
+    <string name="floor_filter_site_selector_top_bar">Ιστότοπος - %1$s</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_facility_button">Κουμπί ιστότοπων και εγκαταστάσεων</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="floor_level_select_button">Κουμπί επιλογής επιπέδου ορόφου</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_item">Αντικείμενο ιστότοπου</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="facility_item">Αντικείμενο εγκατάστασης</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="clear_search">Εκκαθάριση αναζήτησης</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="close">Κλείσιμο</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="go_back_to_site_selector">Επιστροφή στον επιλογέα ιστότοπου</string>
+</resources>

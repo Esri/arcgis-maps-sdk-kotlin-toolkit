@@ -27,15 +27,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -45,18 +49,20 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.mapping.featureforms.FormElement
 import com.arcgismaps.mapping.featureforms.GroupFormElement
 import com.arcgismaps.mapping.featureforms.RadioButtonsFormInput
 import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentFormElement
+import com.arcgismaps.toolkit.featureforms.internal.components.attachment.rememberAttachmentElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseGroupState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormStateCollection
@@ -71,6 +77,10 @@ import com.arcgismaps.toolkit.featureforms.internal.components.formelement.Field
 import com.arcgismaps.toolkit.featureforms.internal.components.formelement.GroupElement
 import com.arcgismaps.toolkit.featureforms.internal.components.text.rememberFormTextFieldState
 import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
+import com.arcgismaps.toolkit.featureforms.theme.FeatureFormColorScheme
+import com.arcgismaps.toolkit.featureforms.theme.FeatureFormDefaults
+import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTheme
+import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTypography
 import kotlinx.coroutines.CoroutineScope
 
 /**
@@ -93,8 +103,16 @@ public sealed class ValidationErrorVisibility {
 
 /**
  * A composable Form toolkit component that enables users to edit field values of features in a
- * layer using forms that have been configured externally (using either in the the Web Map Viewer
- * or the Fields Maps web app).
+ * layer using forms that have been configured externally. Forms may be configured in the [Web Map Viewer](https://www.arcgis.com/home/webmap/viewer.html)
+ * or [Fields Maps Designer](https://www.arcgis.com/apps/fieldmaps/)).
+ *
+ * The colors and typography for the Form can use customized using [FeatureFormColorScheme] and
+ * [FeatureFormTypography]. This customization is built on top of [MaterialTheme].
+ * If a custom color is specified in both the color scheme and the typography, the color from the
+ * color scheme will take precedence and will be merged with the text style, if one is provided.
+ *
+ * Note : Even though the [FeatureForm] class is not stable, there exists an internal mechanism to
+ * enable smart recompositions.
  *
  * @param featureForm The [FeatureForm] configuration.
  * @param modifier The [Modifier] to be applied to layout corresponding to the content of this
@@ -102,6 +120,8 @@ public sealed class ValidationErrorVisibility {
  * @param validationErrorVisibility The [ValidationErrorVisibility] that determines the behavior of
  * when the validation errors are visible. Default is [ValidationErrorVisibility.Automatic] which
  * indicates errors are only visible once the respective field gains focus.
+ * @param colorScheme The [FeatureFormColorScheme] to use for the FeatureForm.
+ * @param typography The [FeatureFormTypography] to use for the FeatureForm.
  *
  * @since 200.4.0
  */
@@ -109,12 +129,58 @@ public sealed class ValidationErrorVisibility {
 public fun FeatureForm(
     featureForm: FeatureForm,
     modifier: Modifier = Modifier,
+    validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic,
+    colorScheme: FeatureFormColorScheme = FeatureFormDefaults.colorScheme(),
+    typography: FeatureFormTypography = FeatureFormDefaults.typography()
+) {
+    val stateData = remember(featureForm) {
+        StateData(featureForm)
+    }
+    FeatureFormTheme(colorScheme, typography) {
+        FeatureForm(
+            stateData = stateData,
+            modifier = modifier,
+            validationErrorVisibility = validationErrorVisibility
+        )
+    }
+}
+
+/**
+ * A wrapper to hold state data. This provides a [Stable] class to enable smart recompositions,
+ * since [FeatureForm] is not stable.
+ */
+@Immutable
+internal data class StateData(@Stable val featureForm: FeatureForm)
+
+/**
+ * This composable uses the [StateData] class to display a [FeatureForm].
+ */
+@Composable
+private fun FeatureForm(
+    stateData: StateData,
+    modifier: Modifier = Modifier,
     validationErrorVisibility: ValidationErrorVisibility = ValidationErrorVisibility.Automatic
 ) {
+    val featureForm = stateData.featureForm
+    // hold the list of form elements in a mutable state to make them observable
+    val formElements = remember(featureForm) {
+        mutableStateOf(featureForm.elements)
+    }
     val scope = rememberCoroutineScope()
-    val states = rememberStates(form = featureForm, scope = scope)
-    FeatureFormBody(form = featureForm, states = states, modifier = modifier)
-    FeatureFormDialog()
+    val states = rememberStates(
+        form = featureForm,
+        elements = formElements.value,
+        scope = scope
+    )
+    FeatureFormBody(
+        form = featureForm,
+        states = states,
+        modifier = modifier
+    ) {
+        // expressions evaluated, load attachments
+        formElements.value = featureForm.elements
+    }
+    FeatureFormDialog(states)
     // launch a new side effect in a launched effect when validationErrorVisibility changes
     LaunchedEffect(validationErrorVisibility) {
         // if it set to always show errors force each field to validate itself and show any errors
@@ -136,16 +202,21 @@ public fun FeatureForm(
 }
 
 @Composable
-private fun FeatureFormTitle(featureForm: FeatureForm) {
+private fun FeatureFormTitle(featureForm: FeatureForm, modifier: Modifier = Modifier) {
     val title by featureForm.title.collectAsState()
-    Text(text = title, style = TextStyle(fontWeight = FontWeight.Bold))
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleMedium,
+        modifier = modifier
+    )
 }
 
 @Composable
 private fun FeatureFormBody(
     form: FeatureForm,
     states: FormStateCollection,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onExpressionsEvaluated: () -> Unit
 ) {
     var initialEvaluation by rememberSaveable(form) { mutableStateOf(false) }
     val lazyListState = rememberLazyListState()
@@ -154,7 +225,10 @@ private fun FeatureFormBody(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // title
-        FeatureFormTitle(featureForm = form)
+        FeatureFormTitle(
+            featureForm = form,
+            modifier = Modifier.padding(horizontal = 15.dp)
+        )
         Spacer(
             modifier = Modifier
                 .fillMaxWidth()
@@ -163,7 +237,7 @@ private fun FeatureFormBody(
         InitializingExpressions(modifier = Modifier.fillMaxWidth()) {
             initialEvaluation
         }
-        Divider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
+        HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 2.dp)
         // form content
         LazyColumn(
             modifier = Modifier
@@ -187,6 +261,15 @@ private fun FeatureFormBody(
                             )
                         }
 
+                        is AttachmentsFormElement -> {
+                            AttachmentFormElement(
+                                state = entry.getState(),
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 15.dp, vertical = 10.dp)
+                            )
+                        }
+
                         else -> {
                             // other form elements are not created
                         }
@@ -195,10 +278,12 @@ private fun FeatureFormBody(
             }
         }
     }
+
     LaunchedEffect(form) {
         // ensure expressions are evaluated
         form.evaluateExpressions()
         initialEvaluation = true
+        onExpressionsEvaluated()
     }
 }
 
@@ -232,10 +317,11 @@ internal fun InitializingExpressions(
 @Composable
 internal fun rememberStates(
     form: FeatureForm,
+    elements: List<FormElement>,
     scope: CoroutineScope
 ): FormStateCollection {
     val states = MutableFormStateCollection()
-    form.elements.forEach { element ->
+    elements.forEach { element ->
         when (element) {
             is FieldFormElement -> {
                 val state = rememberFieldState(element, form, scope)
@@ -266,8 +352,15 @@ internal fun rememberStates(
                 states.add(element, groupState)
             }
 
-            else -> { }
+            else -> {}
         }
+    }
+    // The Toolkit currently only supports AttachmentsFormElements via the
+    // default attachments element. Once AttachmentsFormElements can be authored
+    // the switch case above should have a case added for AttachmentsFormElement.
+    if (form.defaultAttachmentsElement != null) {
+        val state = rememberAttachmentElementState(form, form.defaultAttachmentsElement!!)
+        states.add(form.defaultAttachmentsElement!!, state)
     }
     return states
 }

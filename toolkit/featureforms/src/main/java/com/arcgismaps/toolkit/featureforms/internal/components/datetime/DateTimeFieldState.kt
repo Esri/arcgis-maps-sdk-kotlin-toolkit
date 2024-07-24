@@ -25,16 +25,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.mapping.featureforms.FormExpressionEvaluationError
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FieldProperties
 import com.arcgismaps.toolkit.featureforms.internal.components.base.ValidationErrorState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValidationErrors
-import com.arcgismaps.toolkit.featureforms.internal.components.text.FormTextFieldState
-import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFieldProperties
 import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValueAsStateFlow
+import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFieldProperties
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import java.time.Instant
 
 internal class DateTimeFieldProperties(
@@ -59,19 +58,27 @@ internal class DateTimeFieldProperties(
  * @param initialValue optional initial value to set for this field. It is set to the value of
  * [DateTimeFieldProperties.value] by default.
  * @param scope a [CoroutineScope] to start [StateFlow] collectors on.
- * @param onEditValue a callback to invoke when the user edits result in a change of value. This
- * is called on [FormTextFieldState.onValueChanged]
+ * @param updateValue a function that is invoked when the user edits result in a change of value. This
+ * is called in [BaseFieldState.onValueChanged].
+ * @param evaluateExpressions a function that is invoked to evaluate all form expressions. This is
+ * called after a successful [updateValue].
  */
 internal class DateTimeFieldState(
+    id : Int,
     properties: DateTimeFieldProperties,
     initialValue: Instant? = properties.value.value,
+    hasValueExpression : Boolean,
     scope: CoroutineScope,
-    onEditValue: (Any?) -> Unit,
+    updateValue: (Any?) -> Unit,
+    evaluateExpressions: suspend () -> Result<List<FormExpressionEvaluationError>>
 ) : BaseFieldState<Instant?>(
+    id = id,
     properties = properties,
     initialValue = initialValue,
+    hasValueExpression = hasValueExpression,
     scope = scope,
-    onEditValue = onEditValue,
+    updateValue = updateValue,
+    evaluateExpressions = evaluateExpressions
 ) {
     val minEpochMillis: Instant? = properties.minEpochMillis
 
@@ -93,6 +100,7 @@ internal class DateTimeFieldState(
             restore = { list ->
                 val input = field.input as DateTimePickerFormInput
                 DateTimeFieldState(
+                    id = field.hashCode(),
                     properties = DateTimeFieldProperties(
                         label = field.label,
                         placeholder = field.hint,
@@ -107,11 +115,10 @@ internal class DateTimeFieldState(
                         shouldShowTime = input.includeTime
                     ),
                     initialValue = list[0] as Instant?,
+                    hasValueExpression = field.hasValueExpression,
                     scope = scope,
-                    onEditValue = {
-                        field.updateValue(it)
-                        scope.launch { form.evaluateExpressions() }
-                    },
+                    updateValue = field::updateValue,
+                    evaluateExpressions = form::evaluateExpressions
                 ).apply {
                     onFocusChanged(list[1] as Boolean)
                 }
@@ -137,6 +144,7 @@ internal fun rememberDateTimeFieldState(
     )
 ) {
     DateTimeFieldState(
+        id = field.hashCode(),
         properties = DateTimeFieldProperties(
             label = field.label,
             placeholder = field.hint,
@@ -150,10 +158,9 @@ internal fun rememberDateTimeFieldState(
             maxEpochMillis = maxEpochMillis,
             shouldShowTime = shouldShowTime
         ),
+        hasValueExpression = field.hasValueExpression,
         scope = scope,
-        onEditValue = {
-            field.updateValue(it)
-            scope.launch { form.evaluateExpressions() }
-        },
+        updateValue = field::updateValue,
+        evaluateExpressions = form::evaluateExpressions
     )
 }

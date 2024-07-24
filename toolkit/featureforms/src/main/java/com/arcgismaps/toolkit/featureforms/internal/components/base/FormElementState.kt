@@ -16,17 +16,21 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.base
 
-import kotlinx.coroutines.flow.StateFlow
+import androidx.compose.runtime.Immutable
 import com.arcgismaps.mapping.featureforms.FormElement
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Base state class for a [FormElement].
  *
+ * @param id Unique identifier for the field.
  * @param label Title for the field.
  * @param description Description text for the field.
  * @param isVisible Property that indicates if the field is visible.
  */
+@Immutable
 internal abstract class FormElementState(
+    val id : Int,
     val label : String,
     val description: String,
     val isVisible : StateFlow<Boolean>

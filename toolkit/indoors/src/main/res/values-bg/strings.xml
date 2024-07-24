@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
+    <string name="floor_filter_view_filter_hint_sites">Филтриране на сайтове...</string>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
+    <string name="floor_filter_view_filter_hint_facilities">Филтриране на съоръжения…</string>
+    <!-- This text is a label on a text field that can fit 24 chars -->
+    <string name="floor_filter_select_site">Избиране на сайт</string>
+    <!-- This text is a label on a text field that can fit 23 chars -->
+    <string name="floor_filter_select_facility">Избиране на съоръжение</string>
+    <string name="floor_filter_no_results">Няма намерени резултати.</string>
+    <string name="not_available">Не е налично</string>
+    <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
+    <string name="floor_filter_site_selector_top_bar">Сайт - %1$s</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_facility_button">Бутон за сайт и съоръжения</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="floor_level_select_button">Бутон за избор на ниво на етажа</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_item">Елемент на сайт</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="facility_item">Елемент на съоръжение</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="clear_search">Изчистване на търсене</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="close">Затваряне</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="go_back_to_site_selector">Връщане на селектора за сайт</string>
+</resources>

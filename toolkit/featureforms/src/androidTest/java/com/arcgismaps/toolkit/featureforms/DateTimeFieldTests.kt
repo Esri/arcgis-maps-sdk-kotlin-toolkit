@@ -28,45 +28,28 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextClearance
 import androidx.test.platform.app.InstrumentationRegistry
-import com.arcgismaps.data.ArcGISFeature
-import com.arcgismaps.data.QueryParameters
-import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.featureforms.FeatureForm
-import com.arcgismaps.mapping.featureforms.FeatureFormDefinition
-import com.arcgismaps.mapping.featureforms.FieldFormElement
-import com.arcgismaps.mapping.layers.FeatureLayer
-import junit.framework.TestCase
+import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
-import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
 
-class DateTimeFieldTests {
-    
+class DateTimeFieldTests : FeatureFormTestRunner(
+    uri = "https://www.arcgis.com/home/item.html?id=ec09090060664cbda8d814e017337837",
+    objectId = 1
+) {
     private lateinit var context: Context
-    private val featureForm by lazy {
-        sharedFeatureForm!!
-    }
-    
-    private fun getFormElementWithLabel(label: String): FieldFormElement {
-        return featureForm.elements
-            .filterIsInstance<FieldFormElement>()
-            .first {
-                it.label == label
-            }
-    }
-    
+
     @get:Rule
     val composeTestRule = createComposeRule()
-    
-    
+
+
     @Before
     fun setUp() {
         context = InstrumentationRegistry.getInstrumentation().context
     }
-    
+
     @Before
     fun setContent() {
         composeTestRule.setContent {
@@ -75,13 +58,16 @@ class DateTimeFieldTests {
             )
         }
     }
-    
+
     @After
     fun closeDialog() {
         try {
             // this is needed for running successive tests that open the date time picker dialog.
             val dialogSurface =
-                composeTestRule.onNodeWithContentDescription("DateTimePickerDialogSurface", useUnmergedTree = true)
+                composeTestRule.onNodeWithContentDescription(
+                    "DateTimePickerDialogSurface",
+                    useUnmergedTree = true
+                )
             dialogSurface.assertIsDisplayed()
             val cancel = dialogSurface.onChildWithContentDescription("cancel")
             cancel.performClick()
@@ -89,7 +75,7 @@ class DateTimeFieldTests {
             // dialog wasn't open.
         }
     }
-    
+
     /**
      * Given a required datetime field with a value
      * when it is not focused
@@ -100,11 +86,12 @@ class DateTimeFieldTests {
      */
     @Test
     fun testRequiredUnfocusedValue() {
-        val formElement = getFormElementWithLabel("Required Date")
+        val formElement = featureForm.getFieldFormElementWithLabel("Required Date")
+        assertThat(formElement).isNotNull()
         // find the field with the the label
         val col = composeTestRule.onNodeWithContentDescription("lazy column")
         col.performScrollToIndex(8)
-        val dateTimeField = composeTestRule.onNodeWithText("${formElement.label} *")
+        val dateTimeField = composeTestRule.onNodeWithText("${formElement!!.label} *")
 
         val textMatcher = hasText("No value")
         assert(textMatcher.matches(dateTimeField.fetchSemanticsNode())) {
@@ -115,12 +102,12 @@ class DateTimeFieldTests {
         val helperMatcher = hasText("Date Entry is Required")
         assert(helperMatcher.matches(helper.fetchSemanticsNode())) {
             "expected helper text: Date Entry is Required"
-            
+
         }
         val iconMatcher = hasContentDescription("date time picker button")
         assert(iconMatcher.matches(dateTimeField.fetchSemanticsNode()))
     }
-    
+
     /**
      * Given a required datetime field with a value
      * when it is not focused
@@ -131,25 +118,29 @@ class DateTimeFieldTests {
      */
     @Test
     fun testRequiredFocusedValue() {
-        val formElement = getFormElementWithLabel("Required Date")
+        val formElement = featureForm.getFieldFormElementWithLabel("Required Date")
+        assertThat(formElement).isNotNull()
         // find the field with the the label
         val col = composeTestRule.onNodeWithContentDescription("lazy column")
         col.performScrollToIndex(8)
-        val dateTimeField = composeTestRule.onNodeWithText("${formElement.label} *")
+        val dateTimeField = composeTestRule.onNodeWithText("${formElement!!.label} *")
         val iconMatcher = hasContentDescription("date time picker button")
         assert(iconMatcher.matches(dateTimeField.fetchSemanticsNode()))
         dateTimeField.assertHasClickAction()
         dateTimeField.performClick()
-    
+
         val dialogSurface =
-            composeTestRule.onNodeWithContentDescription("DateTimePickerDialogSurface", useUnmergedTree = true)
+            composeTestRule.onNodeWithContentDescription(
+                "DateTimePickerDialogSurface",
+                useUnmergedTree = true
+            )
         dialogSurface.assertIsDisplayed()
         val today = dialogSurface.onChildWithContentDescription("current date or time button")
         today.assertIsDisplayed()
         val helperTextInDialog = dialogSurface.onChildWithText("Date Entry is Required", true)
         helperTextInDialog.assertIsDisplayed()
     }
-    
+
     /**
      * Given a FieldFormElement with an editable datetime input
      * When the date value is displayed
@@ -158,10 +149,11 @@ class DateTimeFieldTests {
      */
     @Test
     fun testClearEditableDateTime() = runTest {
-        val formElement = getFormElementWithLabel("Launch Date and Time for Apollo 11")
-        val dateTimeField = composeTestRule.onNodeWithText(formElement.label)
+        val formElement = featureForm.getFieldFormElementWithLabel("Launch Date and Time for Apollo 11")
+        assertThat(formElement).isNotNull()
+        val dateTimeField = composeTestRule.onNodeWithText(formElement!!.label)
         dateTimeField.assertIsDisplayed()
-        
+
         // assert the text is non empty before asserting the clear button.
         assert(
             try {
@@ -174,11 +166,11 @@ class DateTimeFieldTests {
         val clearButton = dateTimeField.onChildWithContentDescription("Clear text button", true)
         clearButton.assertIsDisplayed()
         clearButton.performClick()
-        
+
         // now assert the field has the placeholder text because it is empty.
         dateTimeField.assertEditableTextEquals("No value")
     }
-    
+
     /**
      * Given a FieldFormElement with a date time input, and dateOnly set to true
      * When the date value is displayed
@@ -187,12 +179,13 @@ class DateTimeFieldTests {
      */
     @Test
     fun testDateOnly() = runTest {
-        val formElement = getFormElementWithLabel("Launch Date for Apollo 11")
+        val formElement = featureForm.getFieldFormElementWithLabel("Launch Date for Apollo 11")
+        assertThat(formElement).isNotNull()
         // find the field with the the label
-        val dateTimeField = composeTestRule.onNodeWithText(formElement.label)
+        val dateTimeField = composeTestRule.onNodeWithText(formElement!!.label)
         dateTimeField.assertIsDisplayed()
         dateTimeField.performTextClearance()
-        
+
         val helper = dateTimeField.onChildWithContentDescription("supporting text")
         val helperMatcher = hasText("Enter the Date for the Apollo 11 launch")
         assert(helperMatcher.matches(helper.fetchSemanticsNode())) {
@@ -200,17 +193,21 @@ class DateTimeFieldTests {
         }
         val clearButton = dateTimeField.onChildWithContentDescription("Clear text button", true)
         clearButton.assertIsDisplayed()
-        
+
         dateTimeField.performClick()
-        
+
         val dialogSurface =
-            composeTestRule.onNodeWithContentDescription("DateTimePickerDialogSurface", useUnmergedTree = true)
+            composeTestRule.onNodeWithContentDescription(
+                "DateTimePickerDialogSurface",
+                useUnmergedTree = true
+            )
         dialogSurface.assertIsDisplayed()
         val today = dialogSurface.onChildWithContentDescription("current date or time button")
         today.assertIsDisplayed()
-        val helperTextInDialog = dialogSurface.onChildWithText("Enter the Date for the Apollo 11 launch", true)
+        val helperTextInDialog =
+            dialogSurface.onChildWithText("Enter the Date for the Apollo 11 launch", true)
         helperTextInDialog.assertIsDisplayed()
-        
+
         assert(
             try {
                 dialogSurface.onChildWithContentDescription("toggle date and time")
@@ -219,38 +216,5 @@ class DateTimeFieldTests {
                 true
             }
         )
-    }
-    
-    
-    companion object {
-        var sharedFeatureFormDefinition: FeatureFormDefinition? = null
-        var sharedFeatureForm: FeatureForm? = null
-        var sharedFeature: ArcGISFeature? = null
-        var sharedMap: ArcGISMap? = null
-        
-        @BeforeClass
-        @JvmStatic
-        fun setupClass() = runTest {
-            sharedMap =
-                ArcGISMap("https://runtimecoretest.maps.arcgis.com/home/item.html?id=ec09090060664cbda8d814e017337837")
-            sharedMap?.load()?.onFailure { TestCase.fail("failed to load webmap with ${it.message}") }
-            val featureLayer = sharedMap?.operationalLayers?.first() as? FeatureLayer
-            featureLayer?.let { layer ->
-                layer.load().onFailure { TestCase.fail("failed to load layer with ${it.message}") }
-                sharedFeatureFormDefinition = layer.featureFormDefinition!!
-                val parameters = QueryParameters().also {
-                    it.whereClause = "1=1"
-                    it.maxFeatures = 1
-                }
-                layer.featureTable?.queryFeatures(parameters)?.onSuccess {
-                    sharedFeature = it.filterIsInstance<ArcGISFeature>().first()
-                    sharedFeature?.load()?.onFailure { TestCase.fail("failed to load feature with ${it.message}") }
-                    sharedFeatureForm = FeatureForm(sharedFeature!!, sharedFeatureFormDefinition!!)
-                    sharedFeatureForm?.evaluateExpressions()
-                }?.onFailure {
-                    TestCase.fail("failed to query features on layer's featuretable with ${it.message}")
-                }
-            }
-        }
     }
 }

@@ -24,6 +24,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
+import com.arcgismaps.toolkit.featureforms.internal.components.base.ValidationErrorState
+import com.arcgismaps.toolkit.featureforms.internal.components.datetime.formattedDateTime
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.toDateMillis
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.toDateTimeInUtcZone
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.toZonedDateTime
@@ -133,6 +135,13 @@ internal interface DateTimePickerState {
      * The current date time value. Use [setDateTime] to set this state.
      */
     val dateTime: State<UtcDateTime>
+
+    /**
+     * The initial error state of the selected date time value based on the value in the Field.
+     * Note this isn't a state variable because it cannot be changed based on a user input to the
+     * DatePicker.
+     */
+    val initialError: ValidationErrorState
     
     /**
      * A timestamp that represents the selected date and time in UTC milliseconds from the epoch.
@@ -219,6 +228,7 @@ private class DateTimePickerStateImpl(
     override val minDateTime: Instant?,
     override val maxDateTime: Instant?,
     initialValue: Instant?,
+    override val initialError: ValidationErrorState,
     override val label: String,
     override val description: String = "",
     pickerInput: DateTimePickerInput
@@ -226,6 +236,7 @@ private class DateTimePickerStateImpl(
     override var dateTime = mutableStateOf(
         UtcDateTime.create(initialValue?.toEpochMilli())
     )
+
     override val selectedDateTimeMillis: Long?
         get() = dateTime.value.epochMillis
     
@@ -238,7 +249,7 @@ private class DateTimePickerStateImpl(
     override fun setDateTime(date: Long?, hour: Int, minute: Int) {
         dateTime.value = UtcDateTime.createFromPickerValues(date, hour, minute)
     }
-   
+
     override fun togglePickerInput() {
         activePickerInput.value = if (activePickerInput.value == DateTimePickerInput.Date) {
             DateTimePickerInput.Time
@@ -317,6 +328,7 @@ internal fun DateTimePickerState(
     minDateTime: Instant? = null,
     maxDateTime: Instant? = null,
     initialValue: Instant? = null,
+    initialError: ValidationErrorState,
     label: String,
     description: String = "",
     pickerInput: DateTimePickerInput
@@ -325,6 +337,7 @@ internal fun DateTimePickerState(
     minDateTime,
     maxDateTime,
     initialValue,
+    initialError,
     label,
     description,
     pickerInput
@@ -349,6 +362,7 @@ internal fun rememberDateTimePickerState(
     minDateTime: Instant? = null,
     maxDateTime: Instant? = null,
     initialValue: Instant? = null,
+    initialError: ValidationErrorState,
     label: String,
     description: String = "",
     pickerInput: DateTimePickerInput
@@ -358,6 +372,7 @@ internal fun rememberDateTimePickerState(
         minDateTime,
         maxDateTime,
         initialValue,
+        initialError,
         label,
         description,
         pickerInput
@@ -372,10 +387,16 @@ internal fun rememberDateTimePickerState(
  */
 internal fun dateTimePickerStateSaver(): Saver<DateTimePickerState, Any> = listSaver(
     save = {
-        listOf(it.pickerStyle,
+        listOf(
+            it.pickerStyle,
             it.minDateTime?.toEpochMilli(),
             it.maxDateTime?.toEpochMilli(),
             it.dateTime.value.epochMillis,
+            when (it.initialError) {
+                is ValidationErrorState.NoError -> 0
+                is ValidationErrorState.MinDatetimeConstraint -> -1
+                else -> { 1 }
+            },
             it.label,
             it.description,
             it.activePickerInput.value
@@ -385,14 +406,22 @@ internal fun dateTimePickerStateSaver(): Saver<DateTimePickerState, Any> = listS
         // note: passes the date time picker state exactly as saved to
         // set the initial view of the dialog based on how it was saved,
         // not on initial conditions.
+        val min  = it[1]?.let { Instant.ofEpochMilli(it as Long) }
+        val max = it[2]?.let { Instant.ofEpochMilli(it as Long) }
+        val includeTime = (it[0] as DateTimePickerStyle) != DateTimePickerStyle.Date
         DateTimePickerStateImpl(
             it[0] as DateTimePickerStyle,
-            it[1]?.let { Instant.ofEpochMilli(it as Long) },
-            it[2]?.let { Instant.ofEpochMilli(it as Long) },
+            min,
+            max,
             it[3]?.let { Instant.ofEpochMilli(it as Long) },
-            it[4] as String,
+            when (it[4]) {
+              0 -> ValidationErrorState.NoError
+              -1 -> ValidationErrorState.MinDatetimeConstraint(min!!.formattedDateTime(includeTime))
+              else ->  ValidationErrorState.MinDatetimeConstraint(max!!.formattedDateTime(includeTime))
+            },
             it[5] as String,
-            it[6] as DateTimePickerInput
+            it[6] as String,
+            it[7] as DateTimePickerInput
         )
     }
 )

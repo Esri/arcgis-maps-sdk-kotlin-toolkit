@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright 2023 Esri
+ *  Copyright 2024 Esri
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -58,6 +58,19 @@ android {
         if ("Test" !in name) {
             kotlinOptions.freeCompilerArgs += "-Xexplicit-api=strict"
         }
+    }
+
+    /**
+     * Configures the test report for connected (instrumented) tests to be copied to a central
+     * folder in the project's root directory.
+     */
+    testOptions {
+        targetSdk = libs.versions.compileSdk.get().toInt()
+        val connectedTestReportsPath: String by project
+        reportDir = "$connectedTestReportsPath/${project.name}"
+    }
+    lint {
+        targetSdk = libs.versions.compileSdk.get().toInt()
     }
 }
 

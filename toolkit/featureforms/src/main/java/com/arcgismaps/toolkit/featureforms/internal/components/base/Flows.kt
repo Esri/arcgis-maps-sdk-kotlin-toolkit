@@ -18,9 +18,11 @@ package com.arcgismaps.toolkit.featureforms.internal.components.base
 
 import com.arcgismaps.data.RangeDomain
 import com.arcgismaps.exceptions.FeatureFormValidationException
+import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
+import com.arcgismaps.toolkit.featureforms.internal.components.datetime.formattedDateTime
 import com.arcgismaps.toolkit.featureforms.internal.utils.asDoubleTuple
 import com.arcgismaps.toolkit.featureforms.internal.utils.asLongTuple
 import com.arcgismaps.toolkit.featureforms.internal.utils.format
@@ -106,7 +108,7 @@ private fun createValidationErrorStates(
                     )
                 }
 
-                is FeatureFormValidationException.IncorrectValueTypeError -> {
+                is FeatureFormValidationException.IncorrectValueTypeException -> {
                     if (formElement.fieldType.isFloatingPoint) {
                         add(ValidationErrorState.NotANumber)
                     } else if (formElement.fieldType.isIntegerType) {
@@ -129,6 +131,22 @@ private fun createValidationErrorStates(
                 is FeatureFormValidationException.MaxNumericConstraintException -> {
                     hasMaxRangeError = true
                 }
+
+                is FeatureFormValidationException.LessThanMinimumDateTimeException -> {
+                    val dateTimePickerInput = formElement.input as DateTimePickerFormInput
+                    val formatted = dateTimePickerInput.min?.formattedDateTime(dateTimePickerInput.includeTime)
+                    if (formatted != null) {
+                        add(ValidationErrorState.MinDatetimeConstraint(formatted))
+                    }
+                }
+
+                is FeatureFormValidationException.MaxDateTimeConstraintException -> {
+                    val dateTimePickerInput = formElement.input as DateTimePickerFormInput
+                    val formatted = dateTimePickerInput.max?.formattedDateTime(dateTimePickerInput.includeTime)
+                    if (formatted != null) {
+                        add(ValidationErrorState.MaxDatetimeConstraint(formatted))
+                    }
+                }
             }
             if (formElement.input is TextBoxFormInput || formElement.input is TextAreaFormInput) {
                 if (!formElement.fieldType.isNumeric && (hasMinCharError || hasMaxCharError)) {
@@ -141,9 +159,20 @@ private fun createValidationErrorStates(
                     }
                     if (min > 0 && max > 0) {
                         if (min == max) {
-                            add(ValidationErrorState.ExactCharConstraint(min))
+                            add(
+                                ValidationErrorState.ExactCharConstraint(
+                                    min,
+                                    formElement.hasValueExpression
+                                )
+                            )
                         } else {
-                            add(ValidationErrorState.MinMaxCharConstraint(min, max))
+                            add(
+                                ValidationErrorState.MinMaxCharConstraint(
+                                    min,
+                                    max,
+                                    formElement.hasValueExpression
+                                )
+                            )
                         }
                     } else {
                         add(ValidationErrorState.MaxCharConstraint(max))
@@ -164,7 +193,8 @@ private fun createValidationErrorStates(
                         add(
                             ValidationErrorState.MinMaxNumericConstraint(
                                 min.format(),
-                                max.format()
+                                max.format(),
+                                formElement.hasValueExpression
                             )
                         )
                     } else if (min != null) {

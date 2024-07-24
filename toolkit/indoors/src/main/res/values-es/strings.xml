@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
+    <string name="floor_filter_view_filter_hint_sites">Filtrar sitios...</string>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
+    <string name="floor_filter_view_filter_hint_facilities">Filtrar instalaciones…</string>
+    <!-- This text is a label on a text field that can fit 24 chars -->
+    <string name="floor_filter_select_site">Seleccionar un sitio</string>
+    <!-- This text is a label on a text field that can fit 23 chars -->
+    <string name="floor_filter_select_facility">Seleccionar una instalación</string>
+    <string name="floor_filter_no_results">No se encontraron resultados.</string>
+    <string name="not_available">No disponible</string>
+    <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
+    <string name="floor_filter_site_selector_top_bar">Sitio - %1$s</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_facility_button">Botón Sitios e instalaciones</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="floor_level_select_button">Botón Selección de nivel de suelo</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_item">Elemento de sitio</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="facility_item">Elemento de instalación</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="clear_search">Borrar búsqueda</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="close">Cerrar</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="go_back_to_site_selector">Volver al selector de sitios</string>
+</resources>

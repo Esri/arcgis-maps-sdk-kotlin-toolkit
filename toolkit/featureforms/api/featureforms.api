@@ -1,5 +1,5 @@
 public final class com/arcgismaps/toolkit/featureforms/FeatureFormKt {
-	public static final fun FeatureForm (Lcom/arcgismaps/mapping/featureforms/FeatureForm;Landroidx/compose/ui/Modifier;Lcom/arcgismaps/toolkit/featureforms/ValidationErrorVisibility;Landroidx/compose/runtime/Composer;II)V
+	public static final fun FeatureForm (Lcom/arcgismaps/mapping/featureforms/FeatureForm;Landroidx/compose/ui/Modifier;Lcom/arcgismaps/toolkit/featureforms/ValidationErrorVisibility;Lcom/arcgismaps/toolkit/featureforms/theme/FeatureFormColorScheme;Lcom/arcgismaps/toolkit/featureforms/theme/FeatureFormTypography;Landroidx/compose/runtime/Composer;II)V
 }
 
 public abstract class com/arcgismaps/toolkit/featureforms/ValidationErrorVisibility {
@@ -14,5 +14,282 @@ public final class com/arcgismaps/toolkit/featureforms/ValidationErrorVisibility
 public final class com/arcgismaps/toolkit/featureforms/ValidationErrorVisibility$Visible : com/arcgismaps/toolkit/featureforms/ValidationErrorVisibility {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/arcgismaps/toolkit/featureforms/ValidationErrorVisibility$Visible;
+}
+
+public final class com/arcgismaps/toolkit/featureforms/theme/AttachmentsElementColors {
+	public static final field $stable I
+	public final fun component1-0d7_KjU ()J
+	public final fun component2-0d7_KjU ()J
+	public final fun component3-0d7_KjU ()J
+	public final fun component4-0d7_KjU ()J
+	public final fun component5-0d7_KjU ()J
+	public final fun component6-0d7_KjU ()J
+	public final fun component7-0d7_KjU ()J
+	public final fun copy-4JmcsL4 (JJJJJJJ)Lcom/arcgismaps/toolkit/featureforms/theme/AttachmentsElementColors;
+	public static synthetic fun copy-4JmcsL4$default (Lcom/arcgismaps/toolkit/featureforms/theme/AttachmentsElementColors;JJJJJJJILjava/lang/Object;)Lcom/arcgismaps/toolkit/featureforms/theme/AttachmentsElementColors;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getContainerColor-0d7_KjU ()J
+	public final fun getLabelColor-0d7_KjU ()J
+	public final fun getOutlineColor-0d7_KjU ()J
+	public final fun getScrollBarColor-0d7_KjU ()J
+	public final fun getSupportingTextColor-0d7_KjU ()J
+	public final fun getTileBorderColor-0d7_KjU ()J
+	public final fun getTileTextColor-0d7_KjU ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/featureforms/theme/AttachmentsElementTypography {
+	public static final field $stable I
+	public final fun component1 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component2 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component3 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun copy (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;)Lcom/arcgismaps/toolkit/featureforms/theme/AttachmentsElementTypography;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/featureforms/theme/AttachmentsElementTypography;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/featureforms/theme/AttachmentsElementTypography;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLabelStyle ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getSupportingTextStyle ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getTileTextStyle ()Landroidx/compose/ui/text/TextStyle;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/featureforms/theme/EditableTextFieldColors {
+	public static final field $stable I
+	public final fun component1-0d7_KjU ()J
+	public final fun component10-0d7_KjU ()J
+	public final fun component11-0d7_KjU ()J
+	public final fun component12-0d7_KjU ()J
+	public final fun component13-0d7_KjU ()J
+	public final fun component14-0d7_KjU ()J
+	public final fun component15-0d7_KjU ()J
+	public final fun component16-0d7_KjU ()J
+	public final fun component17-0d7_KjU ()J
+	public final fun component18-0d7_KjU ()J
+	public final fun component19-0d7_KjU ()J
+	public final fun component2-0d7_KjU ()J
+	public final fun component20-0d7_KjU ()J
+	public final fun component21-0d7_KjU ()J
+	public final fun component22-0d7_KjU ()J
+	public final fun component23-0d7_KjU ()J
+	public final fun component24-0d7_KjU ()J
+	public final fun component25-0d7_KjU ()J
+	public final fun component26-0d7_KjU ()J
+	public final fun component27-0d7_KjU ()J
+	public final fun component28-0d7_KjU ()J
+	public final fun component29-0d7_KjU ()J
+	public final fun component3-0d7_KjU ()J
+	public final fun component30-0d7_KjU ()J
+	public final fun component31-0d7_KjU ()J
+	public final fun component32-0d7_KjU ()J
+	public final fun component33-0d7_KjU ()J
+	public final fun component4-0d7_KjU ()J
+	public final fun component5-0d7_KjU ()J
+	public final fun component6-0d7_KjU ()J
+	public final fun component7-0d7_KjU ()J
+	public final fun component8-0d7_KjU ()J
+	public final fun component9 ()Landroidx/compose/foundation/text/selection/TextSelectionColors;
+	public final fun copy-T0n5EvI (JJJJJJJJLandroidx/compose/foundation/text/selection/TextSelectionColors;JJJJJJJJJJJJJJJJJJJJJJJJ)Lcom/arcgismaps/toolkit/featureforms/theme/EditableTextFieldColors;
+	public static synthetic fun copy-T0n5EvI$default (Lcom/arcgismaps/toolkit/featureforms/theme/EditableTextFieldColors;JJJJJJJJLandroidx/compose/foundation/text/selection/TextSelectionColors;JJJJJJJJJJJJJJJJJJJJJJJJIILjava/lang/Object;)Lcom/arcgismaps/toolkit/featureforms/theme/EditableTextFieldColors;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCursorColor-0d7_KjU ()J
+	public final fun getErrorContainerColor-0d7_KjU ()J
+	public final fun getErrorCursorColor-0d7_KjU ()J
+	public final fun getErrorIndicatorColor-0d7_KjU ()J
+	public final fun getErrorLabelColor-0d7_KjU ()J
+	public final fun getErrorLeadingIconColor-0d7_KjU ()J
+	public final fun getErrorPlaceholderColor-0d7_KjU ()J
+	public final fun getErrorPrefixColor-0d7_KjU ()J
+	public final fun getErrorSuffixColor-0d7_KjU ()J
+	public final fun getErrorSupportingTextColor-0d7_KjU ()J
+	public final fun getErrorTextColor-0d7_KjU ()J
+	public final fun getErrorTrailingIconColor-0d7_KjU ()J
+	public final fun getFocusedContainerColor-0d7_KjU ()J
+	public final fun getFocusedIndicatorColor-0d7_KjU ()J
+	public final fun getFocusedLabelColor-0d7_KjU ()J
+	public final fun getFocusedLeadingIconColor-0d7_KjU ()J
+	public final fun getFocusedPlaceholderColor-0d7_KjU ()J
+	public final fun getFocusedPrefixColor-0d7_KjU ()J
+	public final fun getFocusedSuffixColor-0d7_KjU ()J
+	public final fun getFocusedSupportingTextColor-0d7_KjU ()J
+	public final fun getFocusedTextColor-0d7_KjU ()J
+	public final fun getFocusedTrailingIconColor-0d7_KjU ()J
+	public final fun getTextSelectionColors ()Landroidx/compose/foundation/text/selection/TextSelectionColors;
+	public final fun getUnfocusedContainerColor-0d7_KjU ()J
+	public final fun getUnfocusedIndicatorColor-0d7_KjU ()J
+	public final fun getUnfocusedLabelColor-0d7_KjU ()J
+	public final fun getUnfocusedLeadingIconColor-0d7_KjU ()J
+	public final fun getUnfocusedPlaceholderColor-0d7_KjU ()J
+	public final fun getUnfocusedPrefixColor-0d7_KjU ()J
+	public final fun getUnfocusedSuffixColor-0d7_KjU ()J
+	public final fun getUnfocusedSupportingTextColor-0d7_KjU ()J
+	public final fun getUnfocusedTextColor-0d7_KjU ()J
+	public final fun getUnfocusedTrailingIconColor-0d7_KjU ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/featureforms/theme/EditableTextFieldTypography {
+	public static final field $stable I
+	public final fun component1 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component2 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component3 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun copy (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;)Lcom/arcgismaps/toolkit/featureforms/theme/EditableTextFieldTypography;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/featureforms/theme/EditableTextFieldTypography;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/featureforms/theme/EditableTextFieldTypography;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLabelStyle ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getSupportingTextStyle ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getTextStyle ()Landroidx/compose/ui/text/TextStyle;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/featureforms/theme/FeatureFormColorScheme {
+	public static final field $stable I
+	public final fun component1 ()Lcom/arcgismaps/toolkit/featureforms/theme/EditableTextFieldColors;
+	public final fun component2 ()Lcom/arcgismaps/toolkit/featureforms/theme/ReadOnlyFieldColors;
+	public final fun component3 ()Lcom/arcgismaps/toolkit/featureforms/theme/RadioButtonFieldColors;
+	public final fun component4 ()Lcom/arcgismaps/toolkit/featureforms/theme/GroupElementColors;
+	public final fun component5 ()Lcom/arcgismaps/toolkit/featureforms/theme/AttachmentsElementColors;
+	public final fun copy (Lcom/arcgismaps/toolkit/featureforms/theme/EditableTextFieldColors;Lcom/arcgismaps/toolkit/featureforms/theme/ReadOnlyFieldColors;Lcom/arcgismaps/toolkit/featureforms/theme/RadioButtonFieldColors;Lcom/arcgismaps/toolkit/featureforms/theme/GroupElementColors;Lcom/arcgismaps/toolkit/featureforms/theme/AttachmentsElementColors;)Lcom/arcgismaps/toolkit/featureforms/theme/FeatureFormColorScheme;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/featureforms/theme/FeatureFormColorScheme;Lcom/arcgismaps/toolkit/featureforms/theme/EditableTextFieldColors;Lcom/arcgismaps/toolkit/featureforms/theme/ReadOnlyFieldColors;Lcom/arcgismaps/toolkit/featureforms/theme/RadioButtonFieldColors;Lcom/arcgismaps/toolkit/featureforms/theme/GroupElementColors;Lcom/arcgismaps/toolkit/featureforms/theme/AttachmentsElementColors;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/featureforms/theme/FeatureFormColorScheme;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAttachmentsElementColors ()Lcom/arcgismaps/toolkit/featureforms/theme/AttachmentsElementColors;
+	public final fun getEditableTextFieldColors ()Lcom/arcgismaps/toolkit/featureforms/theme/EditableTextFieldColors;
+	public final fun getGroupElementColors ()Lcom/arcgismaps/toolkit/featureforms/theme/GroupElementColors;
+	public final fun getRadioButtonFieldColors ()Lcom/arcgismaps/toolkit/featureforms/theme/RadioButtonFieldColors;
+	public final fun getReadOnlyFieldColors ()Lcom/arcgismaps/toolkit/featureforms/theme/ReadOnlyFieldColors;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/featureforms/theme/FeatureFormDefaults {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/featureforms/theme/FeatureFormDefaults;
+	public final fun attachmentsElementColors-69fazGs (JJJJJJJLandroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/featureforms/theme/AttachmentsElementColors;
+	public final fun attachmentsElementTypography (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/featureforms/theme/AttachmentsElementTypography;
+	public final fun colorScheme (Lcom/arcgismaps/toolkit/featureforms/theme/EditableTextFieldColors;Lcom/arcgismaps/toolkit/featureforms/theme/ReadOnlyFieldColors;Lcom/arcgismaps/toolkit/featureforms/theme/RadioButtonFieldColors;Lcom/arcgismaps/toolkit/featureforms/theme/GroupElementColors;Lcom/arcgismaps/toolkit/featureforms/theme/AttachmentsElementColors;Landroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/featureforms/theme/FeatureFormColorScheme;
+	public final fun editableTextFieldColors-s9joTbY (JJJJJJJJLandroidx/compose/foundation/text/selection/TextSelectionColors;JJJJJJJJJJJJJJJJJJJJJJJJLandroidx/compose/runtime/Composer;IIIIII)Lcom/arcgismaps/toolkit/featureforms/theme/EditableTextFieldColors;
+	public final fun editableTextFieldTypography (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/featureforms/theme/EditableTextFieldTypography;
+	public final fun groupElementColors-zjMxDiM (JJJJJLandroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/featureforms/theme/GroupElementColors;
+	public final fun groupElementTypography (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/featureforms/theme/GroupElementTypography;
+	public final fun radioButtonFieldColors-oq7We08 (JJJJJJJJLandroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/featureforms/theme/RadioButtonFieldColors;
+	public final fun radioButtonFieldTypography (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/featureforms/theme/RadioButtonFieldTypography;
+	public final fun readOnlyFieldColors-ro_MJ88 (JJJJLandroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/featureforms/theme/ReadOnlyFieldColors;
+	public final fun readOnlyFieldTypography (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/featureforms/theme/ReadOnlyFieldTypography;
+	public final fun typography (Lcom/arcgismaps/toolkit/featureforms/theme/EditableTextFieldTypography;Lcom/arcgismaps/toolkit/featureforms/theme/ReadOnlyFieldTypography;Lcom/arcgismaps/toolkit/featureforms/theme/GroupElementTypography;Lcom/arcgismaps/toolkit/featureforms/theme/RadioButtonFieldTypography;Lcom/arcgismaps/toolkit/featureforms/theme/AttachmentsElementTypography;Landroidx/compose/runtime/Composer;II)Lcom/arcgismaps/toolkit/featureforms/theme/FeatureFormTypography;
+}
+
+public final class com/arcgismaps/toolkit/featureforms/theme/FeatureFormTypography {
+	public static final field $stable I
+	public final fun getAttachmentsElementTypography ()Lcom/arcgismaps/toolkit/featureforms/theme/AttachmentsElementTypography;
+	public final fun getEditableTextFieldTypography ()Lcom/arcgismaps/toolkit/featureforms/theme/EditableTextFieldTypography;
+	public final fun getGroupElementTypography ()Lcom/arcgismaps/toolkit/featureforms/theme/GroupElementTypography;
+	public final fun getRadioButtonFieldTypography ()Lcom/arcgismaps/toolkit/featureforms/theme/RadioButtonFieldTypography;
+	public final fun getReadOnlyFieldTypography ()Lcom/arcgismaps/toolkit/featureforms/theme/ReadOnlyFieldTypography;
+}
+
+public final class com/arcgismaps/toolkit/featureforms/theme/GroupElementColors {
+	public static final field $stable I
+	public final fun component1-0d7_KjU ()J
+	public final fun component2-0d7_KjU ()J
+	public final fun component3-0d7_KjU ()J
+	public final fun component4-0d7_KjU ()J
+	public final fun component5-0d7_KjU ()J
+	public final fun copy-t635Npw (JJJJJ)Lcom/arcgismaps/toolkit/featureforms/theme/GroupElementColors;
+	public static synthetic fun copy-t635Npw$default (Lcom/arcgismaps/toolkit/featureforms/theme/GroupElementColors;JJJJJILjava/lang/Object;)Lcom/arcgismaps/toolkit/featureforms/theme/GroupElementColors;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBodyColor-0d7_KjU ()J
+	public final fun getContainerColor-0d7_KjU ()J
+	public final fun getLabelColor-0d7_KjU ()J
+	public final fun getOutlineColor-0d7_KjU ()J
+	public final fun getSupportingTextColor-0d7_KjU ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/featureforms/theme/GroupElementTypography {
+	public static final field $stable I
+	public final fun component1 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component2 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun copy (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;)Lcom/arcgismaps/toolkit/featureforms/theme/GroupElementTypography;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/featureforms/theme/GroupElementTypography;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/featureforms/theme/GroupElementTypography;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLabelStyle ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getSupportingTextStyle ()Landroidx/compose/ui/text/TextStyle;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/featureforms/theme/RadioButtonFieldColors {
+	public static final field $stable I
+	public final fun component1-0d7_KjU ()J
+	public final fun component2-0d7_KjU ()J
+	public final fun component3-0d7_KjU ()J
+	public final fun component4-0d7_KjU ()J
+	public final fun component5-0d7_KjU ()J
+	public final fun component6-0d7_KjU ()J
+	public final fun component7-0d7_KjU ()J
+	public final fun component8-0d7_KjU ()J
+	public final fun copy-FD3wquc (JJJJJJJJ)Lcom/arcgismaps/toolkit/featureforms/theme/RadioButtonFieldColors;
+	public static synthetic fun copy-FD3wquc$default (Lcom/arcgismaps/toolkit/featureforms/theme/RadioButtonFieldColors;JJJJJJJJILjava/lang/Object;)Lcom/arcgismaps/toolkit/featureforms/theme/RadioButtonFieldColors;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDisabledSelectedColor-0d7_KjU ()J
+	public final fun getDisabledUnselectedColor-0d7_KjU ()J
+	public final fun getLabelColor-0d7_KjU ()J
+	public final fun getOutlineColor-0d7_KjU ()J
+	public final fun getSelectedColor-0d7_KjU ()J
+	public final fun getSupportingTextColor-0d7_KjU ()J
+	public final fun getTextColor-0d7_KjU ()J
+	public final fun getUnselectedColor-0d7_KjU ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/featureforms/theme/RadioButtonFieldTypography {
+	public static final field $stable I
+	public final fun component1 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component2 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component3 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun copy (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;)Lcom/arcgismaps/toolkit/featureforms/theme/RadioButtonFieldTypography;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/featureforms/theme/RadioButtonFieldTypography;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/featureforms/theme/RadioButtonFieldTypography;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLabelStyle ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getOptionStyle ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getSupportingTextStyle ()Landroidx/compose/ui/text/TextStyle;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/featureforms/theme/ReadOnlyFieldColors {
+	public static final field $stable I
+	public final fun component1-0d7_KjU ()J
+	public final fun component2-0d7_KjU ()J
+	public final fun component3-0d7_KjU ()J
+	public final fun component4-0d7_KjU ()J
+	public final fun copy-jRlVdoo (JJJJ)Lcom/arcgismaps/toolkit/featureforms/theme/ReadOnlyFieldColors;
+	public static synthetic fun copy-jRlVdoo$default (Lcom/arcgismaps/toolkit/featureforms/theme/ReadOnlyFieldColors;JJJJILjava/lang/Object;)Lcom/arcgismaps/toolkit/featureforms/theme/ReadOnlyFieldColors;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getErrorSupportingTextColor-0d7_KjU ()J
+	public final fun getLabelColor-0d7_KjU ()J
+	public final fun getSupportingTextColor-0d7_KjU ()J
+	public final fun getTextColor-0d7_KjU ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/featureforms/theme/ReadOnlyFieldTypography {
+	public static final field $stable I
+	public final fun component1 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component2 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component3 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun copy (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;)Lcom/arcgismaps/toolkit/featureforms/theme/ReadOnlyFieldTypography;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/featureforms/theme/ReadOnlyFieldTypography;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/featureforms/theme/ReadOnlyFieldTypography;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLabelStyle ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getSupportingTextStyle ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getTextStyle ()Landroidx/compose/ui/text/TextStyle;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 

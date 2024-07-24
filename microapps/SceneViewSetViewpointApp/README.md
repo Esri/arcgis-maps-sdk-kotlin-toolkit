@@ -2,9 +2,7 @@
 
 This micro-app demonstrates setting the viewpoint on a composable `SceneView`.
 
-|SceneView Set Viewpoint|
-|:--:|
-|![image](screenshot.png)|
+![image](screenshot.png)
 
 ## Usage
 

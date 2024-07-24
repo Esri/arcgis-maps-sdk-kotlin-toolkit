@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~
+  ~  Copyright 2023 Esri
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  ~
+  --><resources>
+    <string name="enter_n_chars">Introduïu %1$d caràcters</string>
+    <string name="enter_min_to_max_chars">Introduïu entre %1$d i %2$d caràcters</string>
+    <string name="maximum_n_chars">%1$d caràcters com a màxim</string>
+    <string name="no_value">No hi ha cap valor</string>
+    <string name="enter_value">Introduïu un valor</string>
+    <string name="required">Obligatori</string>
+    <string name="today">Avui</string>
+    <string name="now">Ara</string>
+    <string name="cancel">Cancel·la</string>
+    <string name="ok">D\'acord</string>
+    <string name="done">Fet</string>
+    <string name="filter">Filtra %1$s</string>
+    <string name="numeric_range_helper_text">Introduïu un valor d\'entre %1$s i %2$s</string>
+    <string name="less_than_min_value">Inferior al valor mínim %1$s</string>
+    <string name="exceeds_max_value">Supera el valor màxim %1$s</string>
+    <string name="value_must_be_a_whole_number">El valor ha de ser un nombre enter</string>
+    <string name="value_must_be_a_number">El valor ha de ser un nombre</string>
+    <string name="value_must_be_within_domain">El valor ha de ser dins del domini</string>
+    <string name="value_must_not_be_empty">El valor no pot ser buit</string>
+    <string name="min_datetime_helper_text">La data de finalització ha de ser el dia %1$s o posterior</string>
+    <string name="max_datetime_helper_text">La data ha de ser el dia %1$s o anterior</string>
+
+    <!-- Date Picker string values -->
+    <string name="ff_date_input_headline">Data introduïda</string>
+    <string name="ff_date_input_headline_description">Data introduïda: %1$s</string>
+    <string name="ff_date_input_invalid_for_pattern">La data no coincideix amb el patró esperat: %1$s</string>
+    <string name="ff_date_input_invalid_not_allowed">Data no permesa: %1$s</string>
+    <string name="ff_date_input_invalid_year_range">
+        La data està fora de l\'interval d\'anys esperat %1$s-%2$s
+    </string>
+    <string name="ff_date_input_label">Data</string>
+    <string name="ff_date_input_no_input_description">Cap</string>
+    <string name="ff_date_input_title">Seleccioneu la data</string>
+    <string name="ff_date_picker_headline">"Data seleccionada"</string>
+    <string name="ff_date_picker_headline_description">Selecció actual: %1$s</string>
+    <string name="ff_date_picker_navigate_to_year_description">Ves a l\'any %1$s</string>
+    <string name="ff_date_picker_no_selection_description">Cap</string>
+    <string name="ff_date_picker_scroll_to_earlier_years">Desplaceu-vos per veure els anys anteriors</string>
+    <string name="ff_date_picker_scroll_to_later_years">Desplaceu-vos per veure els anys posteriors</string>
+    <string name="ff_date_picker_switch_to_calendar_mode">Canvia al mode d\'entrada de calendari</string>
+    <string name="ff_date_picker_switch_to_day_selection">
+        "Feu lliscar el dit per seleccionar un any o toqueu per canviar a la selecció d\'un dia"
+    </string>
+    <string name="ff_date_picker_switch_to_input_mode">Canvia al mode d\'entrada de text</string>
+    <string name="ff_date_picker_switch_to_next_month">"Canvia al mes següent"</string>
+    <string name="ff_date_picker_switch_to_previous_month">"Canvia al mes anterior"</string>
+    <string name="ff_date_picker_switch_to_year_selection">"Canvia a la selecció d\'un any"</string>
+    <string name="ff_date_picker_title">"Seleccioneu una data"</string>
+    <string name="ff_date_picker_today_description">Avui</string>
+    <string name="ff_date_picker_year_picker_pane_title">Selector d\'any visible</string>
+    <string name="ff_date_range_input_invalid_range_input">Entrada d\'interval de dates no vàlida</string>
+    <string name="ff_date_range_input_title">Introduïu les dates</string>
+    <string name="ff_date_range_picker_day_in_range">A l\'interval</string>
+    <string name="ff_date_range_picker_end_headline">Data de finalització</string>
+    <string name="ff_date_range_picker_scroll_to_next_month">Desplaceu-vos per mostrar el mes següent</string>
+    <string name="ff_date_range_picker_scroll_to_previous_month">Desplaceu-vos per mostrar el mes anterior</string>
+    <string name="ff_date_range_picker_start_headline">Data d\'inici</string>
+    <string name="ff_date_range_picker_title">Seleccioneu les dates</string>
+
+    <!-- Time Picker string values -->
+    <string name="ff_time_picker_am">AM</string>
+    <string name="ff_time_picker_hour">Hora</string>
+    <string name="ff_time_picker_hour_24h_suffix">%1$d hores</string>
+    <string name="ff_time_picker_hour_selection">Seleccioneu l\'hora</string>
+    <string name="ff_time_picker_hour_suffix">%1$d en punt</string>
+    <string name="ff_time_picker_hour_text_field">per hora</string>
+    <string name="ff_time_picker_minute">Minut</string>
+    <string name="ff_time_picker_minute_selection">Seleccioneu els minuts</string>
+    <string name="ff_time_picker_minute_suffix">%1$d minuts</string>
+    <string name="ff_time_picker_minute_text_field">per minuts</string>
+    <string name="ff_time_picker_period_toggle_description">Seleccioneu am o pm</string>
+    <string name="ff_time_picker_pm">PM</string>
+    <string name="take_photo">Feu una foto</string>
+    <string name="rename">Canvia el nom</string>
+    <string name="delete">Suprimeix</string>
+    <string name="rename_attachment">Canvia el nom del fitxer adjunt</string>
+    <string name="name">Nom</string>
+</resources>

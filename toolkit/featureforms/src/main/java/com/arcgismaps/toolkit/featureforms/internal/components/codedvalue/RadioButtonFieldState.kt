@@ -22,23 +22,29 @@ import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.mapping.featureforms.FormExpressionEvaluationError
 import com.arcgismaps.mapping.featureforms.RadioButtonsFormInput
 import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValidationErrors
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 internal typealias RadioButtonFieldProperties = CodedValueFieldProperties
 
 internal class RadioButtonFieldState(
+    id : Int,
     properties: RadioButtonFieldProperties,
     initialValue: Any? = properties.value.value,
+    hasValueExpression : Boolean,
     scope: CoroutineScope,
-    onEditValue: ((Any?) -> Unit)
+    updateValue: (Any?) -> Unit,
+    evaluateExpressions: suspend () -> Result<List<FormExpressionEvaluationError>>
 ) : CodedValueFieldState(
+    id,
     properties = properties,
     initialValue = initialValue,
+    hasValueExpression = hasValueExpression,
     scope = scope,
-    onEditValue = onEditValue
+    updateValue = updateValue,
+    evaluateExpressions = evaluateExpressions
 ) {
 
     /**
@@ -71,6 +77,7 @@ internal class RadioButtonFieldState(
             restore = { list ->
                 val input = formElement.input as RadioButtonsFormInput
                 RadioButtonFieldState(
+                    id = formElement.hashCode(),
                     properties = RadioButtonFieldProperties(
                         label = formElement.label,
                         placeholder = formElement.hint,
@@ -86,11 +93,10 @@ internal class RadioButtonFieldState(
                         noValueLabel = input.noValueLabel
                     ),
                     initialValue = list[0],
+                    hasValueExpression = formElement.hasValueExpression,
                     scope = scope,
-                    onEditValue = { newValue ->
-                        formElement.updateValue(newValue)
-                        scope.launch { form.evaluateExpressions() }
-                    },
+                    updateValue = formElement::updateValue,
+                    evaluateExpressions = form::evaluateExpressions
                 )
             }
         )
@@ -108,6 +114,7 @@ internal fun rememberRadioButtonFieldState(
 ) {
     val input = field.input as RadioButtonsFormInput
     RadioButtonFieldState(
+        id = field.hashCode(),
         properties = RadioButtonFieldProperties(
             label = field.label,
             placeholder = field.hint,
@@ -122,10 +129,9 @@ internal fun rememberRadioButtonFieldState(
             showNoValueOption = input.noValueOption,
             noValueLabel = input.noValueLabel
         ),
+        hasValueExpression = field.hasValueExpression,
         scope = scope,
-        onEditValue = {
-            field.updateValue(it)
-            scope.launch { form.evaluateExpressions() }
-        },
+        updateValue = field::updateValue,
+        evaluateExpressions = form::evaluateExpressions
     )
 }

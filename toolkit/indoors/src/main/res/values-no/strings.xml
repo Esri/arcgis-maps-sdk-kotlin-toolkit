@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
+    <string name="floor_filter_view_filter_hint_sites">Filtrer steder ...</string>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
+    <string name="floor_filter_view_filter_hint_facilities">Filtrer fasiliteter ...</string>
+    <!-- This text is a label on a text field that can fit 24 chars -->
+    <string name="floor_filter_select_site">Velg et område</string>
+    <!-- This text is a label on a text field that can fit 23 chars -->
+    <string name="floor_filter_select_facility">Velg en fasilitet</string>
+    <string name="floor_filter_no_results">Fant ingen resultater.</string>
+    <string name="not_available">Ikke tilgjengelig</string>
+    <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
+    <string name="floor_filter_site_selector_top_bar">Område - %1$s</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_facility_button">Knapp for områder og fasiliteter</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="floor_level_select_button">Knapp for valg av etasje</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_item">Områdeelement</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="facility_item">Fasilitetelement</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="clear_search">Tøm søk</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="close">Lukk</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="go_back_to_site_selector">Gå tilbake til områdevelgeren</string>
+</resources>

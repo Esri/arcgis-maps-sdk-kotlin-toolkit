@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
+    <string name="floor_filter_view_filter_hint_sites">Siteleri filtrele...</string>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
+    <string name="floor_filter_view_filter_hint_facilities">Tesisleri filtrele...</string>
+    <!-- This text is a label on a text field that can fit 24 chars -->
+    <string name="floor_filter_select_site">Bir site seç</string>
+    <!-- This text is a label on a text field that can fit 23 chars -->
+    <string name="floor_filter_select_facility">Bir tesis seç</string>
+    <string name="floor_filter_no_results">Herhangi bir sonuç bulunamadı.</string>
+    <string name="not_available">Mevcut değil</string>
+    <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
+    <string name="floor_filter_site_selector_top_bar">Şantiye - %1$s</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_facility_button">Şantiye ve tesisler düğmesi</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="floor_level_select_button">Kat seviyesi seçme düğmesi</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_item">Şantiye ögesi</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="facility_item">Tesis ögesi</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="clear_search">Aramayı temizle</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="close">Kapat</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="go_back_to_site_selector">Şantiye seçiciye geri dön</string>
+</resources>
