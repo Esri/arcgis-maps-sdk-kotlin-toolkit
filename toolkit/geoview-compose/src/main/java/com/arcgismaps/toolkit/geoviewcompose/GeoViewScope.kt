@@ -224,6 +224,11 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
                 computeLeaderLocationForGeoelement(geoElement, tapLocation)
             )
         }
+
+        LaunchedEffect(geoElement) {
+            leaderLocation = computeLeaderLocationForGeoelement(geoElement, tapLocation)
+        }
+
         // update the Callout location when the dynamic entity changes
         if (geoElement is DynamicEntity) {
             LaunchedEffect(geoElement) {

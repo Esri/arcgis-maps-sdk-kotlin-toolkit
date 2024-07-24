@@ -20,24 +20,65 @@ package com.arcgismaps.toolkit.mapviewcalloutapp.screens
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import com.arcgismaps.Color
+import com.arcgismaps.geometry.AngularUnit
+import com.arcgismaps.geometry.CubicBezierSegment
+import com.arcgismaps.geometry.EllipticArcSegment
+import com.arcgismaps.geometry.GeodesicEllipseParameters
+import com.arcgismaps.geometry.Geometry
+import com.arcgismaps.geometry.GeometryEngine
+import com.arcgismaps.geometry.LinearUnit
+import com.arcgismaps.geometry.MutablePart
+import com.arcgismaps.geometry.Point
+import com.arcgismaps.geometry.Polygon
+import com.arcgismaps.geometry.PolygonBuilder
+import com.arcgismaps.geometry.PolylineBuilder
+import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
+import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.mapping.symbology.SimpleFillSymbol
+import com.arcgismaps.mapping.symbology.SimpleFillSymbolStyle
+import com.arcgismaps.mapping.symbology.SimpleLineSymbol
+import com.arcgismaps.mapping.symbology.SimpleLineSymbolStyle
+import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
+import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
+import com.arcgismaps.mapping.symbology.SimpleRenderer
+import com.arcgismaps.mapping.view.Graphic
+import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.toolkit.geoviewcompose.MapView
-
-// TODO Case c.
-//- Show a MapView with a map with a GraphicLayer with some graphics
-//- Display callout using Point(tap location) on a Graphic (with some HTML content ??)
-//- Display a graphic at the tapped location
-//- add switch to enable/disable animation
 
 @Composable
 fun GraphicScreen(mapViewModel: MapViewModel) {
-    Box{
+    Box {
+
+        // This causes unnecessary MapView recompositions.
+        // TODO: val selectedGeoelement = mapViewModel.selectedGeoElement.collectAsState().value
+
         MapView(
             modifier = Modifier.fillMaxSize(),
-            arcGISMap = ArcGISMap(BasemapStyle.ArcGISTopographic)
-        )
+            arcGISMap = ArcGISMap(BasemapStyle.ArcGISTopographic).apply {
+                initialViewpoint = Viewpoint(15.169193, 16.333479, 1e8)
+            },
+            mapViewProxy = mapViewModel.mapViewProxy,
+            graphicsOverlays = rememberSaveable { mapViewModel.customGraphicsOverlay },
+            onSingleTapConfirmed = mapViewModel::identifyGraphicsOverlays
+        ) {
+
+            // This works only with LaunchedEffect(geoElement) in CalloutInternal
+            val selectedGeoelement = mapViewModel.selectedGeoElement.collectAsState().value
+
+            if (selectedGeoelement != null) {
+                Callout(geoElement = selectedGeoelement) {
+                    Text(text = "${selectedGeoelement.attributes}")
+                }
+            }
+        }
     }
 }
