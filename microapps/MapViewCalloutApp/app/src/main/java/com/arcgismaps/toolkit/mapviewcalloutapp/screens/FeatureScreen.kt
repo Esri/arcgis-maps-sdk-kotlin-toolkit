@@ -100,7 +100,7 @@ fun FeatureScreen(viewModel: MapViewModel) {
             graphicsOverlays = remember { listOf(viewModel.tapLocationGraphicsOverlay) },
             onSingleTapConfirmed = { singleTapConfirmedEvent ->
                 viewModel.apply {
-                    // clears the tapped location
+                    // clears the tapped location and graphic
                     clearTapLocationAndGraphic()
                     // sets the new tapped location and adds a graphic
                     setTapLocation(singleTapConfirmedEvent.mapPoint, nullTapLocation)
