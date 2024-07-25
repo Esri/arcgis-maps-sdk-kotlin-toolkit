@@ -64,8 +64,12 @@ class CalloutTests {
         val viewModel = composeTestRule.activity.viewModel
         // set the current test case
         viewModel.setCurrentTestCase(CalloutTestCases.TestCalloutVisibility)
+        composeTestRule.waitForIdle()
+
         // display Callout
         viewModel.showCallout()
+        composeTestRule.waitForIdle()
+
         // verify Callout is displayed
         composeTestRule.waitUntilExactlyOneExists(
             matcher = hasContentDescription(calloutContainerLabel),
@@ -74,6 +78,8 @@ class CalloutTests {
 
         // hide Callout
         viewModel.hideCallout()
+        composeTestRule.waitForIdle()
+
         // verify Callout is hidden
         composeTestRule.waitUntilDoesNotExist(
             matcher = hasContentDescription(calloutContainerLabel),
@@ -94,9 +100,10 @@ class CalloutTests {
         val viewModel = composeTestRule.activity.viewModel
         // set the current test case
         viewModel.setCurrentTestCase(CalloutTestCases.AttemptToDisplayMultipleCallouts)
+        composeTestRule.waitForIdle()
+
         // display Callout
         viewModel.showCallout()
-
         composeTestRule.waitForIdle()
 
         // verify first Callout is being displayed
@@ -117,6 +124,8 @@ class CalloutTests {
 
         // hide the Callout
         viewModel.hideCallout()
+        composeTestRule.waitForIdle()
+
         // verify no Callout is visible
         composeTestRule.waitUntilDoesNotExist(
             matcher = hasContentDescription(calloutContainerLabel),
@@ -137,8 +146,12 @@ class CalloutTests {
         val viewModel = composeTestRule.activity.viewModel
         // set the current test case
         viewModel.setCurrentTestCase(CalloutTestCases.TestSwitchingBetweenMultipleCallouts)
+        composeTestRule.waitForIdle()
+
         // display Callout
         viewModel.showCallout()
+        composeTestRule.waitForIdle()
+
         // verify only one Callout displayed
         composeTestRule.waitUntilExactlyOneExists(
             matcher = hasContentDescription(calloutContainerLabel),
@@ -179,6 +192,8 @@ class CalloutTests {
 
         // hide the Callout
         viewModel.hideCallout()
+        composeTestRule.waitForIdle()
+
         // verify no Callout is visible
         composeTestRule.waitUntilDoesNotExist(
             matcher = hasContentDescription(calloutContainerLabel),
@@ -198,8 +213,12 @@ class CalloutTests {
         val viewModel = composeTestRule.activity.viewModel
         // set the current test case
         viewModel.setCurrentTestCase(CalloutTestCases.TestCalloutResetViaStateChanges)
+        composeTestRule.waitForIdle()
+
         // display Callout
         viewModel.showCallout()
+        composeTestRule.waitForIdle()
+
         // verify Callout is displayed
         composeTestRule.waitUntilExactlyOneExists(
             matcher = hasContentDescription(calloutContainerLabel),
@@ -208,10 +227,12 @@ class CalloutTests {
 
         // get the current recomposition count for the initial Callout
         val initialRecompositionCount = viewModel.calloutRecompositionCount.value
+        composeTestRule.waitForIdle()
 
         // Collect a state change from within MapViewScope
         // this should trigger the Callout reset()
         viewModel.updatePointToNewLocation()
+        composeTestRule.waitForIdle()
 
         // verify Callout is displayed
         composeTestRule.waitUntilExactlyOneExists(
@@ -221,9 +242,12 @@ class CalloutTests {
 
         // check to see if Callout was recomposed via a Reset state change in MapViewScope
         assert(initialRecompositionCount != viewModel.calloutRecompositionCount.value)
+        composeTestRule.waitForIdle()
 
         // hide Callout
         viewModel.hideCallout()
+        composeTestRule.waitForIdle()
+
         // verify Callout is hidden
         composeTestRule.waitUntilDoesNotExist(
             matcher = hasContentDescription(calloutContainerLabel),
@@ -243,14 +267,18 @@ class CalloutTests {
         val viewModel = composeTestRule.activity.viewModel
         // set the current test case
         viewModel.setCurrentTestCase(CalloutTestCases.TestCalloutVisibility)
+        composeTestRule.waitForIdle()
 
         // set orientation to Portrait
         val uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).apply {
             setOrientationPortrait()
         }
+        composeTestRule.waitForIdle()
 
         // display Callout
         viewModel.showCallout()
+        composeTestRule.waitForIdle()
+
         // verify Callout is displayed
         composeTestRule.waitUntilExactlyOneExists(
             matcher = hasContentDescription(calloutContainerLabel),
@@ -279,6 +307,8 @@ class CalloutTests {
 
         // hide Callout
         viewModel.hideCallout()
+        composeTestRule.waitForIdle()
+
         // verify Callout is hidden
         composeTestRule.waitUntilDoesNotExist(
             matcher = hasContentDescription(calloutContainerLabel),
@@ -298,8 +328,12 @@ class CalloutTests {
         val viewModel = composeTestRule.activity.viewModel
         // set the current test case
         viewModel.setCurrentTestCase(CalloutTestCases.TestCalloutTheming)
+        composeTestRule.waitForIdle()
+
         // display Callout
         viewModel.showCallout()
+        composeTestRule.waitForIdle()
+
         // verify Callout is displayed
         composeTestRule.waitUntilExactlyOneExists(
             matcher = hasContentDescription(calloutContainerLabel),
@@ -320,6 +354,8 @@ class CalloutTests {
 
         // hide Callout
         viewModel.hideCallout()
+        composeTestRule.waitForIdle()
+
         // verify Callout is hidden
         composeTestRule.waitUntilDoesNotExist(
             matcher = hasContentDescription(calloutContainerLabel),
