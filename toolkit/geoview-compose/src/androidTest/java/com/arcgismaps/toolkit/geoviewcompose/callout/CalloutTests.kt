@@ -21,22 +21,23 @@ package com.arcgismaps.toolkit.geoviewcompose.callout
 import android.graphics.Bitmap
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
-import androidx.compose.ui.semantics.text
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
-import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.IntSize
 import com.arcgismaps.toolkit.geoviewcompose.GeoViewScope
-import kotlinx.coroutines.test.runTest
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutColors
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutShapes
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 
@@ -176,10 +177,16 @@ class CalloutTests {
     @Test
     fun testCalloutResetViaStateChanges() = runTest {
         val calloutScenarios = CalloutScenarios()
+        var recompositionCount by mutableStateOf(0)
         composeTestRule.setContent {
             CompositionLocalProvider {
                 val mapViewModel = compositionLocalOf { MapViewModel() }
-                calloutScenarios.ResetViaStateChanges(mapViewModel.current)
+                calloutScenarios.ResetViaStateChanges(
+                    mapViewModel = mapViewModel.current,
+                    onCalloutRecomposed = {
+                        recompositionCount = it
+                    }
+                )
             }
         }
 
@@ -189,12 +196,7 @@ class CalloutTests {
             timeoutMillis = timeoutMillis
         )
 
-        // get the current recomposition count for the initial Callout
-        val initialRecompositionCount = composeTestRule
-            .onNodeWithTag(calloutScenarios.recompositionCounterLabel)
-            .fetchSemanticsNode()
-            .config
-            .text
+        val initialRecompositionCount = recompositionCount
 
         // Collect a state change from within MapViewScope
         // this should trigger the Callout reset()
@@ -207,11 +209,7 @@ class CalloutTests {
         )
 
         // get the current recomposition count after performing state change
-        val currentRecompositionCount = composeTestRule
-            .onNodeWithTag(calloutScenarios.recompositionCounterLabel)
-            .fetchSemanticsNode()
-            .config
-            .text
+        val currentRecompositionCount = recompositionCount
 
         // check to see if Callout was recomposed via a Reset state change in MapViewScope
         assert(initialRecompositionCount != currentRecompositionCount)

@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,7 +33,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.DpSize
@@ -59,11 +59,12 @@ class MapViewModel : ViewModel() {
     }
 }
 
-
+/**
+ * Composable Scenarios for the [CalloutTests]
+ */
 class CalloutScenarios {
 
     val toggleButtonLabel = "ToggleCallout"
-    val recompositionCounterLabel = "RecompositionCounter"
 
     @Composable
     fun CalloutVisibility() {
@@ -157,8 +158,12 @@ class CalloutScenarios {
 
 
     @Composable
-    fun ResetViaStateChanges(mapViewModel: MapViewModel) {
+    fun ResetViaStateChanges(mapViewModel: MapViewModel, onCalloutRecomposed: (Int) -> Unit = {}) {
         var calloutRecompositionCount by rememberSaveable { mutableStateOf(0) }
+
+        LaunchedEffect(calloutRecompositionCount) {
+            onCalloutRecomposed(calloutRecompositionCount)
+        }
 
         Column {
             MapView(
@@ -176,10 +181,6 @@ class CalloutScenarios {
                     // update recomposition counter
                     calloutRecompositionCount++
                 }
-            )
-            Text(
-                modifier = Modifier.testTag(recompositionCounterLabel),
-                text = calloutRecompositionCount.toString()
             )
             Button(onClick = { mapViewModel.updatePointToNewLocation() }) {
                 Text(text = toggleButtonLabel)
