@@ -34,8 +34,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -70,6 +70,7 @@ import com.arcgismaps.mapping.symbology.MarkerSymbol
 import com.arcgismaps.mapping.symbology.Symbol
 import com.arcgismaps.mapping.symbology.SymbolAngleAlignment
 import com.arcgismaps.mapping.view.DoubleXY
+import com.arcgismaps.mapping.view.DrawStatus
 import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsRenderingMode
@@ -82,7 +83,7 @@ import com.arcgismaps.realtime.DynamicEntity
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutColors
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutDefaults
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutShapes
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.takeWhile
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.cos
 import kotlin.math.roundToInt
@@ -219,7 +220,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
         shapes: CalloutShapes,
         content: @Composable BoxScope.() -> Unit
     ) {
-        var leaderLocation: LeaderLocation? by remember {
+        var leaderLocation: LeaderLocation? by remember(geoElement) {
             mutableStateOf(
                 computeLeaderLocationForGeoelement(geoElement, tapLocation)
             )
@@ -871,7 +872,7 @@ private fun calloutPath(
 internal fun GeoView.rememberIsReady(): State<Boolean> {
     val isGeoViewReady = remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        this@rememberIsReady.drawStatus.first()
+        this@rememberIsReady.drawStatus.takeWhile { it != DrawStatus.Completed}.collect{}
         isGeoViewReady.value = true
     }
     return isGeoViewReady

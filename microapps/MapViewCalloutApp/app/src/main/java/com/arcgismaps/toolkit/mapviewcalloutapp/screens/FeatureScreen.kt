@@ -100,14 +100,12 @@ fun FeatureScreen(viewModel: MapViewModel) {
             graphicsOverlays = remember { listOf(viewModel.tapLocationGraphicsOverlay) },
             onSingleTapConfirmed = { singleTapConfirmedEvent ->
                 viewModel.apply {
-                    // clears the tapped location and reset selected geoelement
-                    clearTapLocationAndGeoElement()
+                    // clears the tapped location and graphic
+                    clearTapLocationAndGraphic()
                     // sets the new tapped location and adds a graphic
                     setTapLocation(singleTapConfirmedEvent.mapPoint, nullTapLocation)
                     // identify the tapped layer and the features attributes
                     identify(singleTapConfirmedEvent)
-                    // animate the map to recenter to tapped point
-                    recenterMap(singleTapConfirmedEvent.mapPoint)
                 }
             },
             content = if (selectedGeoElement != null && calloutVisibility) {
@@ -116,12 +114,15 @@ fun FeatureScreen(viewModel: MapViewModel) {
                         modifier = Modifier
                             .wrapContentSize()
                             .height(200.dp)
-                            .widthIn(max = 500.dp),
+                            .widthIn(max = 300.dp),
                         geoElement = selectedGeoElement,
                         tapLocation = viewModel.tapLocation.value,
                     ) {
                         CalloutContent(
-                            onCloseIconClick = viewModel::clearTapLocationAndGeoElement,
+                            onCloseIconClick = {
+                                viewModel.clearSelectedGeoElement()
+                                viewModel.clearTapLocationAndGraphic()
+                            },
                             selectedElementAttributes = filterAttributes(selectedGeoElement.attributes),
                             layerName = selectedLayerName
                         )
