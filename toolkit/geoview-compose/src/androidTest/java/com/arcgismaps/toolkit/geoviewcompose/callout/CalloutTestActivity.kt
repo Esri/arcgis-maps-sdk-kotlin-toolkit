@@ -18,11 +18,8 @@
 
 package com.arcgismaps.toolkit.geoviewcompose.callout
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,10 +27,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.DpSize
@@ -49,181 +48,168 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+val initialPoint = Point(-117.0, 34.0, SpatialReference.wgs84())
+private val secondaryPoint = Point(-120.0, 36.0, SpatialReference.wgs84())
 
-/**
- * This activity is used to test the Callout
- *
- * @since 200.5.0
- */
-class CalloutTestActivity : ComponentActivity() {
-    val viewModel: CalloutTestViewModel by viewModels()
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+class MapViewModel : ViewModel() {
+    private val _calloutLocation = MutableStateFlow(initialPoint)
+    val calloutLocation: StateFlow<Point> = _calloutLocation.asStateFlow()
+    fun updatePointToNewLocation() {
+        _calloutLocation.value = secondaryPoint
+    }
+}
 
-        setContent {
-            val currentTestCase = viewModel.currentTestCase.collectAsState().value
-            val isCalloutVisible = viewModel.isCalloutVisible.collectAsState().value
-            val point = viewModel.calloutLocation.collectAsState().value
 
-            when (currentTestCase) {
-                CalloutTestCases.TestCalloutVisibility -> {
-                    MapView(
-                        arcGISMap = ArcGISMap(SpatialReference.wgs84()).apply {
-                            initialViewpoint = Viewpoint(
-                                latitude = 39.8,
-                                longitude = -98.6,
-                                scale = 10e7
-                            )
-                        },
-                        content = {
-                            if (isCalloutVisible) {
-                                Callout(location = point) {
-                                    Text(text = "Hello World")
-                                }
-                            }
-                        }
-                    )
-                }
+class CalloutScenarios {
 
-                CalloutTestCases.AttemptToDisplayMultipleCallouts -> {
-                    MapView(
-                        arcGISMap = ArcGISMap(SpatialReference.wgs84()).apply {
-                            initialViewpoint = Viewpoint(
-                                latitude = 39.8,
-                                longitude = -98.6,
-                                scale = 10e7
-                            )
-                        },
-                        content = {
-                            if (isCalloutVisible) {
-                                Callout(location = point) {
-                                    Text(
-                                        modifier = Modifier.semantics {
-                                            contentDescription = "CALLOUT#1"
-                                        },
-                                        text = "I am Callout #1"
-                                    )
-                                }
-                                Callout(location = point) {
-                                    Text(
-                                        modifier = Modifier.semantics {
-                                            contentDescription = "CALLOUT#2"
-                                        },
-                                        text = "I am Callout #2"
-                                    )
-                                }
-                                Callout(location = point) {
-                                    Text(
-                                        modifier = Modifier.semantics {
-                                            contentDescription = "CALLOUT#3"
-                                        },
-                                        text = "I am Callout #3"
-                                    )
-                                }
-                            }
-                        }
-                    )
-                }
+    val toggleButtonLabel = "ToggleCallout"
+    val recompositionCounterLabel = "RecompositionCounter"
 
-                CalloutTestCases.TestSwitchingBetweenMultipleCallouts -> {
-                    var isShowingFirstCallout by remember { mutableStateOf(true) }
-
-                    Column {
-                        MapView(
-                            modifier = Modifier.weight(1f),
-                            arcGISMap = ArcGISMap(SpatialReference.wgs84()).apply {
-                                initialViewpoint = Viewpoint(
-                                    latitude = 39.8,
-                                    longitude = -98.6,
-                                    scale = 10e7
-                                )
-                            },
-                            content = {
-                                if (isCalloutVisible) {
-                                    if (isShowingFirstCallout) {
-                                        Callout(location = point) {
-                                            Text(
-                                                modifier = Modifier.semantics {
-                                                    contentDescription = "CALLOUT#1"
-                                                },
-                                                text = "I am Callout #1"
-                                            )
-                                        }
-                                    } else {
-                                        Callout(location = point) {
-                                            Text(
-                                                modifier = Modifier.semantics {
-                                                    contentDescription = "CALLOUT#2"
-                                                },
-                                                text = "I am Callout #2"
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        )
-
-                        Button(
-                            modifier = Modifier.semantics { contentDescription = "SwitchCallouts" },
-                            onClick = {
-                                isShowingFirstCallout = !isShowingFirstCallout
-                            }) {
-                            Text(text = "SwitchCallouts")
+    @Composable
+    fun CalloutVisibility() {
+        var isCalloutVisible by remember { mutableStateOf(true) }
+        Column {
+            MapView(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f),
+                arcGISMap = ArcGISMap(SpatialReference.wgs84()).apply {
+                    initialViewpoint = Viewpoint(39.8, -98.6, 10e7)
+                },
+                content = {
+                    if (isCalloutVisible) {
+                        Callout(location = initialPoint) {
+                            Text(text = "Hello World")
                         }
                     }
                 }
+            )
+            Button(onClick = { isCalloutVisible = !isCalloutVisible }) {
+                Text(text = toggleButtonLabel)
+            }
+        }
+    }
 
-                CalloutTestCases.TestCalloutResetViaStateChanges -> {
-                    MapView(
-                        arcGISMap = ArcGISMap(SpatialReference.wgs84()).apply {
-                            initialViewpoint = Viewpoint(
-                                latitude = 39.8,
-                                longitude = -98.6,
-                                scale = 10e7
-                            )
-                        },
-                        content = {
-                            val calloutLocation = viewModel.calloutLocation.collectAsState().value
-                            if (isCalloutVisible) {
-                                Callout(location = calloutLocation) {
-                                    Text(text = "Hello World")
-                                }
-
-                                // update recomposition counter
-                                viewModel.calloutWasRecomposed()
-                            }
-                        }
+    @Composable
+    fun AttemptToDisplayMultipleCallouts() {
+        MapView(
+            arcGISMap = ArcGISMap(SpatialReference.wgs84()).apply {
+                initialViewpoint = Viewpoint(39.8, -98.6, 10e7)
+            },
+            content = {
+                Callout(location = initialPoint) {
+                    Text(
+                        modifier = Modifier.semantics { contentDescription = "CALLOUT#1" },
+                        text = "I am Callout #1"
                     )
                 }
-
-                CalloutTestCases.TestCalloutTheming -> {
-                    MapView(
-                        arcGISMap = ArcGISMap(SpatialReference.wgs84()).apply {
-                            initialViewpoint = Viewpoint(
-                                latitude = 39.8,
-                                longitude = -98.6,
-                                scale = 10e7
-                            )
-                        },
-                        content = {
-                            if (isCalloutVisible) {
-                                Callout(
-                                    location = point,
-                                    shapes = CalloutDefaults.shapes(
-                                        minSize = convertIntSizeToDpSize(IntSize(500,500))
-                                    ),
-                                    colorScheme = CalloutDefaults.colors(
-                                        backgroundColor = Color.Red
-                                    )
-                                ) {
-                                    Text(text = "Hello World")
-                                }
-                            }
-                        }
+                Callout(location = initialPoint) {
+                    Text(
+                        modifier = Modifier.semantics { contentDescription = "CALLOUT#2" },
+                        text = "I am Callout #2"
+                    )
+                }
+                Callout(location = initialPoint) {
+                    Text(
+                        modifier = Modifier.semantics { contentDescription = "CALLOUT#3" },
+                        text = "I am Callout #3"
                     )
                 }
             }
+        )
+    }
+
+    @Composable
+    fun SwitchBetweenMultipleCallouts() {
+        var isShowingFirstCallout by remember { mutableStateOf(true) }
+
+        Column {
+            MapView(
+                modifier = Modifier.weight(1f),
+                arcGISMap = ArcGISMap(SpatialReference.wgs84()).apply {
+                    initialViewpoint = Viewpoint(39.8, -98.6, 10e7)
+                },
+                content = {
+                    if (isShowingFirstCallout) {
+                        Callout(location = initialPoint) {
+                            Text(
+                                modifier = Modifier.semantics { contentDescription = "CALLOUT#1" },
+                                text = "I am Callout #1"
+                            )
+                        }
+                    } else {
+                        Callout(location = secondaryPoint) {
+                            Text(
+                                modifier = Modifier.semantics { contentDescription = "CALLOUT#2" },
+                                text = "I am Callout #2"
+                            )
+                        }
+                    }
+                }
+            )
+
+            Button(
+                onClick = { isShowingFirstCallout = !isShowingFirstCallout }) {
+                Text(text = toggleButtonLabel)
+            }
         }
+    }
+
+
+    @Composable
+    fun ResetViaStateChanges(mapViewModel: MapViewModel) {
+        var calloutRecompositionCount by rememberSaveable { mutableStateOf(0) }
+
+        Column {
+            MapView(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f),
+                arcGISMap = ArcGISMap(SpatialReference.wgs84()).apply {
+                    initialViewpoint = Viewpoint(39.8, -98.6, 10e7)
+                },
+                content = {
+                    val calloutLocation = mapViewModel.calloutLocation.collectAsState().value
+                    Callout(location = calloutLocation) {
+                        Text(text = "Hello World")
+                    }
+                    // update recomposition counter
+                    calloutRecompositionCount++
+                }
+            )
+            Text(
+                modifier = Modifier.testTag(recompositionCounterLabel),
+                text = calloutRecompositionCount.toString()
+            )
+            Button(onClick = { mapViewModel.updatePointToNewLocation() }) {
+                Text(text = toggleButtonLabel)
+            }
+        }
+    }
+
+    @Composable
+    fun CalloutTheming() {
+        MapView(
+            arcGISMap = ArcGISMap(SpatialReference.wgs84()).apply {
+                initialViewpoint = Viewpoint(
+                    latitude = 39.8,
+                    longitude = -98.6,
+                    scale = 10e7
+                )
+            },
+            content = {
+                Callout(
+                    location = initialPoint,
+                    shapes = CalloutDefaults.shapes(
+                        minSize = convertIntSizeToDpSize(IntSize(500, 500))
+                    ),
+                    colorScheme = CalloutDefaults.colors(
+                        backgroundColor = Color.Red
+                    )
+                ) {
+                    Text(text = "Hello World")
+                }
+            })
     }
 
     @Composable
@@ -232,50 +218,5 @@ class CalloutTestActivity : ComponentActivity() {
         return with(density) {
             DpSize(intSize.width.toDp(), intSize.height.toDp())
         }
-    }
-}
-
-/**
- * ViewModel for the [CalloutTestActivity] for testing
- *
- * @since 200.5.0
- *
- */
-class CalloutTestViewModel : ViewModel() {
-
-    // Point location for California, USA.
-    private val initialPoint = Point(-117.191, 34.0306, SpatialReference.wgs84())
-
-    private val _currentTestCase = MutableStateFlow(CalloutTestCases.TestCalloutVisibility)
-    val currentTestCase: StateFlow<CalloutTestCases> = _currentTestCase.asStateFlow()
-
-    private val _calloutLocation = MutableStateFlow(initialPoint)
-    val calloutLocation: StateFlow<Point> = _calloutLocation.asStateFlow()
-
-    private val _isCalloutVisible = MutableStateFlow(false)
-    val isCalloutVisible: StateFlow<Boolean> = _isCalloutVisible.asStateFlow()
-
-    private val _calloutRecompositionCount = MutableStateFlow(0)
-    val calloutRecompositionCount: StateFlow<Int> = _calloutRecompositionCount.asStateFlow()
-
-    fun showCallout() {
-        _calloutLocation.value = initialPoint
-        _isCalloutVisible.value = true
-    }
-
-    fun hideCallout() {
-        _isCalloutVisible.value = false
-    }
-
-    fun setCurrentTestCase(testCase: CalloutTestCases) {
-        _currentTestCase.value = testCase
-    }
-
-    fun updatePointToNewLocation() {
-        _calloutLocation.value = Point(-117.191, 35.0306, SpatialReference.wgs84())
-    }
-
-    fun calloutWasRecomposed() {
-        _calloutRecompositionCount.value++
     }
 }

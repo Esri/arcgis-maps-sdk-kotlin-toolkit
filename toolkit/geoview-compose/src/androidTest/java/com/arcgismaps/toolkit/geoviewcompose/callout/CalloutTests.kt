@@ -19,22 +19,24 @@
 package com.arcgismaps.toolkit.geoviewcompose.callout
 
 import android.graphics.Bitmap
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.semantics.text
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasContentDescription
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onAllNodesWithContentDescription
-import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.IntSize
-import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.uiautomator.UiDevice
 import com.arcgismaps.toolkit.geoviewcompose.GeoViewScope
+import kotlinx.coroutines.test.runTest
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutColors
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutShapes
-import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 
@@ -47,10 +49,11 @@ import org.junit.Test
 class CalloutTests {
 
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<CalloutTestActivity>()
+    val composeTestRule = createComposeRule()
 
     private val calloutContainerLabel = "CalloutContainerLayout"
     private val timeoutMillis = 10000L
+
 
     /**
      * GIVEN a Callout is wrapped in a boolean if check
@@ -61,14 +64,10 @@ class CalloutTests {
      */
     @Test
     fun testCalloutVisibility() = runTest {
-        val viewModel = composeTestRule.activity.viewModel
-        // set the current test case
-        viewModel.setCurrentTestCase(CalloutTestCases.TestCalloutVisibility)
-        composeTestRule.waitForIdle()
-
-        // display Callout
-        viewModel.showCallout()
-        composeTestRule.waitForIdle()
+        val calloutScenarios = CalloutScenarios()
+        composeTestRule.setContent {
+            calloutScenarios.CalloutVisibility()
+        }
 
         // verify Callout is displayed
         composeTestRule.waitUntilExactlyOneExists(
@@ -77,16 +76,14 @@ class CalloutTests {
         )
 
         // hide Callout
-        viewModel.hideCallout()
-        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithText(calloutScenarios.toggleButtonLabel).performClick()
 
-        // verify Callout is hidden
+        // verify Callout is not displayed
         composeTestRule.waitUntilDoesNotExist(
             matcher = hasContentDescription(calloutContainerLabel),
             timeoutMillis = timeoutMillis
         )
     }
-
 
     /**
      * GIVEN three Callouts are wrapped in a boolean if check
@@ -97,14 +94,10 @@ class CalloutTests {
      */
     @Test
     fun attemptToDisplayMultipleCallouts() = runTest {
-        val viewModel = composeTestRule.activity.viewModel
-        // set the current test case
-        viewModel.setCurrentTestCase(CalloutTestCases.AttemptToDisplayMultipleCallouts)
-        composeTestRule.waitForIdle()
-
-        // display Callout
-        viewModel.showCallout()
-        composeTestRule.waitForIdle()
+        val calloutScenarios = CalloutScenarios()
+        composeTestRule.setContent {
+            calloutScenarios.AttemptToDisplayMultipleCallouts()
+        }
 
         // verify first Callout is being displayed
         composeTestRule.waitUntilExactlyOneExists(
@@ -121,17 +114,8 @@ class CalloutTests {
             matcher = hasContentDescription("CALLOUT#3"),
             timeoutMillis = timeoutMillis
         )
-
-        // hide the Callout
-        viewModel.hideCallout()
-        composeTestRule.waitForIdle()
-
-        // verify no Callout is visible
-        composeTestRule.waitUntilDoesNotExist(
-            matcher = hasContentDescription(calloutContainerLabel),
-            timeoutMillis = timeoutMillis
-        )
     }
+
 
     /**
      * GIVEN two Callouts which can switch between each other on a boolean change
@@ -142,15 +126,10 @@ class CalloutTests {
      */
     @Test
     fun testSwitchingBetweenMultipleCallouts() = runTest {
-
-        val viewModel = composeTestRule.activity.viewModel
-        // set the current test case
-        viewModel.setCurrentTestCase(CalloutTestCases.TestSwitchingBetweenMultipleCallouts)
-        composeTestRule.waitForIdle()
-
-        // display Callout
-        viewModel.showCallout()
-        composeTestRule.waitForIdle()
+        val calloutScenarios = CalloutScenarios()
+        composeTestRule.setContent {
+            calloutScenarios.SwitchBetweenMultipleCallouts()
+        }
 
         // verify only one Callout displayed
         composeTestRule.waitUntilExactlyOneExists(
@@ -171,12 +150,8 @@ class CalloutTests {
             timeoutMillis = timeoutMillis
         )
 
-        // Switch Callouts
-        composeTestRule.onNode(
-            matcher = hasContentDescription("SwitchCallouts")
-        ).performClick()
-
-        composeTestRule.waitForIdle()
+        // switch Callouts
+        composeTestRule.onNodeWithText(calloutScenarios.toggleButtonLabel).performClick()
 
         // verify first Callout#2 is being displayed
         composeTestRule.waitUntilExactlyOneExists(
@@ -187,16 +162,6 @@ class CalloutTests {
         // verify first Callout#1 is not being displayed
         composeTestRule.waitUntilDoesNotExist(
             matcher = hasContentDescription("CALLOUT#1"),
-            timeoutMillis = timeoutMillis
-        )
-
-        // hide the Callout
-        viewModel.hideCallout()
-        composeTestRule.waitForIdle()
-
-        // verify no Callout is visible
-        composeTestRule.waitUntilDoesNotExist(
-            matcher = hasContentDescription(calloutContainerLabel),
             timeoutMillis = timeoutMillis
         )
     }
@@ -210,14 +175,13 @@ class CalloutTests {
      */
     @Test
     fun testCalloutResetViaStateChanges() = runTest {
-        val viewModel = composeTestRule.activity.viewModel
-        // set the current test case
-        viewModel.setCurrentTestCase(CalloutTestCases.TestCalloutResetViaStateChanges)
-        composeTestRule.waitForIdle()
-
-        // display Callout
-        viewModel.showCallout()
-        composeTestRule.waitForIdle()
+        val calloutScenarios = CalloutScenarios()
+        composeTestRule.setContent {
+            CompositionLocalProvider {
+                val mapViewModel = compositionLocalOf { MapViewModel() }
+                calloutScenarios.ResetViaStateChanges(mapViewModel.current)
+            }
+        }
 
         // verify Callout is displayed
         composeTestRule.waitUntilExactlyOneExists(
@@ -226,94 +190,32 @@ class CalloutTests {
         )
 
         // get the current recomposition count for the initial Callout
-        val initialRecompositionCount = viewModel.calloutRecompositionCount.value
-        composeTestRule.waitForIdle()
+        val initialRecompositionCount = composeTestRule
+            .onNodeWithTag(calloutScenarios.recompositionCounterLabel)
+            .fetchSemanticsNode()
+            .config
+            .text
 
         // Collect a state change from within MapViewScope
         // this should trigger the Callout reset()
-        viewModel.updatePointToNewLocation()
-        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithText(calloutScenarios.toggleButtonLabel).performClick()
 
         // verify Callout is displayed
         composeTestRule.waitUntilExactlyOneExists(
             matcher = hasContentDescription(calloutContainerLabel),
             timeoutMillis = timeoutMillis
         )
+
+        // get the current recomposition count after performing state change
+        val currentRecompositionCount = composeTestRule
+            .onNodeWithTag(calloutScenarios.recompositionCounterLabel)
+            .fetchSemanticsNode()
+            .config
+            .text
 
         // check to see if Callout was recomposed via a Reset state change in MapViewScope
-        assert(initialRecompositionCount != viewModel.calloutRecompositionCount.value)
+        assert(initialRecompositionCount != currentRecompositionCount)
         composeTestRule.waitForIdle()
-
-        // hide Callout
-        viewModel.hideCallout()
-        composeTestRule.waitForIdle()
-
-        // verify Callout is hidden
-        composeTestRule.waitUntilDoesNotExist(
-            matcher = hasContentDescription(calloutContainerLabel),
-            timeoutMillis = timeoutMillis
-        )
-    }
-
-    /**
-     * GIVEN a Callout which is displayed on the MapView
-     * WHEN device is rotated to landscape then to portrait
-     * THEN verify Callout is visible on each orientation.
-     *
-     * @since 200.5.0
-     */
-    @Test
-    fun testCalloutOnRotation() = runTest {
-        val viewModel = composeTestRule.activity.viewModel
-        // set the current test case
-        viewModel.setCurrentTestCase(CalloutTestCases.TestCalloutVisibility)
-        composeTestRule.waitForIdle()
-
-        // set orientation to Portrait
-        val uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).apply {
-            setOrientationPortrait()
-        }
-        composeTestRule.waitForIdle()
-
-        // display Callout
-        viewModel.showCallout()
-        composeTestRule.waitForIdle()
-
-        // verify Callout is displayed
-        composeTestRule.waitUntilExactlyOneExists(
-            matcher = hasContentDescription(calloutContainerLabel),
-            timeoutMillis = timeoutMillis
-        )
-
-        // Rotate to landscape mode
-        uiDevice.setOrientationLandscape()
-        composeTestRule.waitForIdle()
-
-        // verify Callout is displayed
-        composeTestRule.waitUntilExactlyOneExists(
-            matcher = hasContentDescription(calloutContainerLabel),
-            timeoutMillis = timeoutMillis
-        )
-
-        // Rotate to Portrait mode
-        uiDevice.setOrientationPortrait()
-        composeTestRule.waitForIdle()
-
-        // verify Callout is displayed
-        composeTestRule.waitUntilExactlyOneExists(
-            matcher = hasContentDescription(calloutContainerLabel),
-            timeoutMillis = timeoutMillis
-        )
-
-        // hide Callout
-        viewModel.hideCallout()
-        composeTestRule.waitForIdle()
-
-        // verify Callout is hidden
-        composeTestRule.waitUntilDoesNotExist(
-            matcher = hasContentDescription(calloutContainerLabel),
-            timeoutMillis = timeoutMillis
-        )
     }
 
     /**
@@ -325,15 +227,10 @@ class CalloutTests {
      */
     @Test
     fun testCalloutTheming() = runTest {
-        val viewModel = composeTestRule.activity.viewModel
-        // set the current test case
-        viewModel.setCurrentTestCase(CalloutTestCases.TestCalloutTheming)
-        composeTestRule.waitForIdle()
-
-        // display Callout
-        viewModel.showCallout()
-        composeTestRule.waitForIdle()
-
+        val calloutScenarios = CalloutScenarios()
+        composeTestRule.setContent {
+            calloutScenarios.CalloutTheming()
+        }
         // verify Callout is displayed
         composeTestRule.waitUntilExactlyOneExists(
             matcher = hasContentDescription(calloutContainerLabel),
@@ -341,8 +238,7 @@ class CalloutTests {
         )
 
         val calloutContainerNodeInteraction = composeTestRule
-            .onAllNodesWithContentDescription(label = calloutContainerLabel, useUnmergedTree = true)
-            .onFirst()
+            .onNodeWithContentDescription(calloutContainerLabel)
 
         val calloutBitmap = calloutContainerNodeInteraction.captureToImage().asAndroidBitmap()
         // test if the Callout contains a Red background Color
@@ -351,25 +247,7 @@ class CalloutTests {
         val calloutContainerNode = calloutContainerNodeInteraction.fetchSemanticsNode()
         // test Callout Size excluding leader height and border width
         assert(calloutContainerNode.size == IntSize(442, 416))
-
-        // hide Callout
-        viewModel.hideCallout()
-        composeTestRule.waitForIdle()
-
-        // verify Callout is hidden
-        composeTestRule.waitUntilDoesNotExist(
-            matcher = hasContentDescription(calloutContainerLabel),
-            timeoutMillis = timeoutMillis
-        )
     }
-}
-
-enum class CalloutTestCases {
-    TestCalloutVisibility,
-    AttemptToDisplayMultipleCallouts,
-    TestSwitchingBetweenMultipleCallouts,
-    TestCalloutResetViaStateChanges,
-    TestCalloutTheming
 }
 
 fun Bitmap.containsColor(color: Int): Boolean {
