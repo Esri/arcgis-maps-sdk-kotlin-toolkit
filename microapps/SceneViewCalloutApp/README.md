@@ -1,13 +1,10 @@
-# MapView Callout Micro-app
+# SceneView Callout Micro-app
 
-This micro-app demonstrates the use of `Callout` with a composable `MapView`. `Callout` is a composable function which renders an empty composable Box placed at some point or GeoElement on a Map. The content of the composable Box is customizable, while the container of the Box is a stylable rectangular shape with a leader line positioned at the point of the tap or GeoElement passed into the `Callout` composable functions.
+This micro-app demonstrates the use of `Callout` with a composable `SceneView`. `Callout` is a composable function which renders an empty composable Box placed at some point or GeoElement on a Scene. The content of the composable Box is customizable, while the container of the Box is a stylable rectangular shape with a leader line positioned at the point of the tap or GeoElement passed into the `Callout` composable functions.
 
 ## Usage
 
-The application starts with a choice of two screens
-* A `MapView` with `Callout`s placed at the location of user taps on the screen.
-* A `MapView` with `Callout`s placed on GeoElements tapped by the user.
+The application presents a screen with a `SceneView` which when tapped will show a `Callout` and a red graphic cross indicating the tapped location.
+For more information on the composable `Callout` component and how it works, see it's section in the composable GeoView [Readme](../../toolkit/geoview-compose/README#display-a-callout).
 
-
-
-For more information on the composable `MapView` component and how it works, see it's [Readme](../../toolkit/geoview-compose/README.md).
+![scene-view-callout](https://github.com/user-attachments/assets/ed237ebf-3b69-4459-adde-2d7554326ba4)
