@@ -4,7 +4,7 @@
 
 ## Description
 
-The FeatureForm toolkit component enables users to edit field values of features in a layer using the `FeatureForm` API that has been configured externally (using either in the Web Map Viewer or the Fields Maps web app).
+The FeatureForm toolkit component enables users to edit field values and attachments of features in a layer using the `FeatureForm` API that has been configured externally (using either in the Web Map Viewer or the Fields Maps web app).
 
 ## Behavior
 
@@ -99,7 +99,7 @@ FeatureForm(
 
 ## Theming and Customization
 
-`FeatureForm` uses the material3 theming system. The following `colors` and `typography` are used by the respective fields.
+`FeatureForm` uses the material3 theming system. These styles and colors are customizable through the `FeatureForms` composable function's public API. The following `colors` and `typography` are used by the respective fields.
 
 #### Text Fields
 - Outline color - `MaterialTheme.colorScheme.outline`
