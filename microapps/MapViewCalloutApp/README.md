@@ -5,7 +5,7 @@ This micro-app demonstrates the use of `Callout` with a composable `MapView`. `C
 ## Usage
 
 The application starts with a choice of two screens
-* A `MapView` with `Callout`s placed at the location of user taps on the screen.
+* A `MapView` that displays a `Callout` at the location where the user taps on the screen.
 * A `MapView` with `Callout`s placed on GeoElements tapped by the user.
 * For more information on the composable `Callout` component and how it works, see its section in the composable GeoView [Readme](../../toolkit/geoview-compose#display-a-callout).
 
