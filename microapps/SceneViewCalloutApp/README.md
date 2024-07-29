@@ -1,6 +1,6 @@
 # SceneView Callout Micro-app
 
-This micro-app demonstrates the use of `Callout` with a composable `SceneView`. `Callout` is a composable function which renders an empty composable Box placed at some point or GeoElement on a Scene. The content of the composable Box is customizable, while the container of the Box is a stylable rectangular shape with a leader line positioned at the point of the tap or GeoElement passed into the `Callout` composable functions.
+This micro-app showcases the use of `Callout` with a composable `SceneView`. Callout is a composable function that renders an empty composable Box at a specified point or GeoElement on a Scene. The content of the composable Box is customizable, and the container is a stylable rectangular shape with a leader line positioned at the tap location or GeoElement passed into the `Callout` composable function.
 
 ## Usage
 
