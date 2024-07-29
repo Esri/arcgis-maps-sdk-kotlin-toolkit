@@ -4,7 +4,7 @@ This micro-app demonstrates the use of `Callout` with a composable `SceneView`. 
 
 ## Usage
 
-The application presents a screen with a `SceneView` which when tapped will show a `Callout` and a red graphic cross indicating the tapped location.
+The application displays a screen containing a `SceneView` that, when tapped, shows a Callout and a red graphic cross marking the tapped location.
 For more information on the composable `Callout` component and how it works, see its section in the composable GeoView [Readme](../../toolkit/geoview-compose#display-a-callout).
 
 ![scene-view-callout](https://github.com/user-attachments/assets/ed237ebf-3b69-4459-adde-2d7554326ba4)
