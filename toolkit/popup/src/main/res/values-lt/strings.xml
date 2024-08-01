@@ -13,15 +13,15 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="show_or_hide_popup_element_content">Į_expand popup element content_____________________________š</string>
-    <string name="share">Į_Share___________š</string>
-    <string name="save">Į_Save_________š</string>
-    <string name="save_successful">Į_Save successful________________š</string>
-    <string name="save_failed">Į_Save failed____________š</string>
-    <string name="more">Į_More_________š</string>
-    <string name="image">Į_Image___________š</string>
-    <string name="video">Į_Video___________š</string>
-    <string name="other">Į_Other___________š</string>
-    <string name="close">Į_Back_________š</string>
-    <string name="attachment_thumbnail">Į_attachment thumbnail_____________________š</string>
+    <string name="show_or_hide_popup_element_content">išplėsti iškylančio elemento turinį</string>
+    <string name="share">Bendrinti</string>
+    <string name="save">Įrašyti</string>
+    <string name="save_successful">Įrašyta sėkmingai</string>
+    <string name="save_failed">Įrašyti nepavyko</string>
+    <string name="more">Daugiau</string>
+    <string name="image">Paveikslėlis</string>
+    <string name="video">Vaizdo įrašas</string>
+    <string name="other">Kita</string>
+    <string name="close">Atgal</string>
+    <string name="attachment_thumbnail">priedo miniatiūra</string>
 </resources>

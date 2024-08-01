@@ -16,18 +16,18 @@
   ~
   --><resources>
     <plurals name="enter_n_chars">
-        <item quantity="one">Š_Enter %1$d character_____________________ä</item>
-        <item quantity="other">Š_Enter %1$d characters______________________ä</item>
+        <item quantity="one">Sisestage %1$d tähemärk</item>
+        <item quantity="other">Sisestage %1$d tähemärki</item>
     </plurals>
     <plurals name="value_must_be_n_characters">
-        <item quantity="one">Š_Value must be %1$d character_____________________________ä</item>
-        <item quantity="other">Š_Value must be %1$d characters______________________________ä</item>
+        <item quantity="one">Väärtus peab olema %1$d tähemärk</item>
+        <item quantity="other">Väärtus peab olema %1$d tähemärki</item>
     </plurals>
     <string name="enter_min_to_max_chars">Sisestage %1$d kuni %2$d tähemärki</string>
-    <string name="value_must_be_from_to_characters">Š_Value must be %1$d to %2$d characters____________________ä</string>
+    <string name="value_must_be_from_to_characters">Väärtus peab olema %1$d kuni %2$d tähemärki</string>
     <plurals name="maximum_n_chars">
-        <item quantity="one">Š_Maximum %1$d character_______________________ä</item>
-        <item quantity="other">Š_Maximum %1$d characters________________________ä</item>
+        <item quantity="one">Maksimaalne tähemärkide arv: %1$d</item>
+        <item quantity="other">Maksimaalne tähemärkide arv: %1$d</item>
     </plurals>
     <string name="maximum_n_chars">Maksimaalne tähemärkide arv: %1$d</string>
     <string name="no_value">Väärtus puudub</string>
@@ -40,7 +40,7 @@
     <string name="done">Valmis</string>
     <string name="filter">Filtreeri %1$s</string>
     <string name="numeric_range_helper_text">Sisestage väärtus vahemikus %1$s kuni %2$s</string>
-    <string name="value_must_be_from_to">Š_Value must be from %1$s to %2$s_________________ä</string>
+    <string name="value_must_be_from_to">Väärtus peab olema vahemikus %1$s kuni %2$s</string>
     <string name="less_than_min_value">Väiksem kui miinimumväärtus %1$s</string>
     <string name="exceeds_max_value">Ületab maksimumväärtust %1$s</string>
     <string name="value_must_be_a_whole_number">Väärtus peab olema täisarv</string>
@@ -102,15 +102,15 @@
     <string name="ff_time_picker_pm">p.l.</string>
 
     <string name="take_photo">Pildista</string>
-    <string name="add_from_gallery">Š_Add From Gallery_________________ä</string>
+    <string name="add_from_gallery">Lisa galeriist</string>
     <string name="rename">Nimeta ümber</string>
     <string name="delete">Kustuta</string>
     <string name="rename_attachment">Nimeta manus ümber</string>
     <string name="name">Nimi</string>
-    <string name="add_file">Š_Add From Files_______________ä</string>
-    <string name="attachment_error">Š_Error Adding Attachment________________________ä</string>
-    <string name="no_app_found">Š_No application found to open this file type_______________________ä.</string>
-    <string name="attachment_too_large">Š_The File is too large. Please add a file less than 50 MB______________________________ä.</string>
-    <string name="attachment_is_empty">Š_Empty files are not supported______________________________ä</string>
-    <string name="download_empty_file">Š_Empty files cannot be downloaded_________________ä</string>
+    <string name="add_file">Lisa failide hulgast</string>
+    <string name="attachment_error">Manuse lisamise tõrge</string>
+    <string name="no_app_found">Selle failitüübi avamiseks rakendust ei leitud.</string>
+    <string name="attachment_too_large">Fail on liiga suur Lisa fail, mis on väiksem kui 50 MB.</string>
+    <string name="attachment_is_empty">Tühje faile ei toetata</string>
+    <string name="download_empty_file">Tühje faile ei saa alla laadida</string>
 </resources>

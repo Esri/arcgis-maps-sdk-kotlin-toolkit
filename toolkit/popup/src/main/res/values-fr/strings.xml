@@ -13,15 +13,15 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="show_or_hide_popup_element_content">æ_expand popup element content_____________________________Â</string>
-    <string name="share">æ_Share___________Â</string>
-    <string name="save">æ_Save_________Â</string>
-    <string name="save_successful">æ_Save successful________________Â</string>
-    <string name="save_failed">æ_Save failed____________Â</string>
-    <string name="more">æ_More_________Â</string>
-    <string name="image">æ_Image___________Â</string>
-    <string name="video">æ_Video___________Â</string>
-    <string name="other">æ_Other___________Â</string>
-    <string name="close">æ_Back_________Â</string>
-    <string name="attachment_thumbnail">æ_attachment thumbnail_____________________Â</string>
+    <string name="show_or_hide_popup_element_content">développer le contenu de l’élément de fenêtre contextuelle</string>
+    <string name="share">Partager</string>
+    <string name="save">Enregistrer</string>
+    <string name="save_successful">L’enregistrement a été effectué</string>
+    <string name="save_failed">Échec de l’enregistrement</string>
+    <string name="more">Plus</string>
+    <string name="image">Image</string>
+    <string name="video">Vidéo</string>
+    <string name="other">Autre</string>
+    <string name="close">Retour</string>
+    <string name="attachment_thumbnail">miniature de la pièce jointe</string>
 </resources>

@@ -16,18 +16,18 @@
   ~
   --><resources>
     <plurals name="enter_n_chars">
-        <item quantity="one">بيت_Enter %1$d character_____________________لاحقة</item>
-        <item quantity="other">بيت_Enter %1$d characters______________________لاحقة</item>
+        <item quantity="one">أدخل %1$d أحرف</item>
+        <item quantity="other">إدخال %1$d من الرموز</item>
     </plurals>
     <plurals name="value_must_be_n_characters">
-        <item quantity="one">بيت_Value must be %1$d character_____________________________لاحقة</item>
-        <item quantity="other">بيت_Value must be %1$d characters______________________________لاحقة</item>
+        <item quantity="one">يجب أن تتكون القيمة من %1$d حرف</item>
+        <item quantity="other">يجب أن تتكون القيمة من %1$d من الحروف</item>
     </plurals>
     <string name="enter_min_to_max_chars">إدخال %1$d إلى %2$d من الرموز</string>
-    <string name="value_must_be_from_to_characters">بيت_Value must be %1$d to %2$d characters____________________لاحقة</string>
+    <string name="value_must_be_from_to_characters">يجب أن تكون القيمة %1$d إلى %2$d من الأحرف</string>
     <plurals name="maximum_n_chars">
-        <item quantity="one">بيت_Maximum %1$d character_______________________لاحقة</item>
-        <item quantity="other">بيت_Maximum %1$d characters________________________لاحقة</item>
+        <item quantity="one">الحد الأقصى %1$d حرف</item>
+        <item quantity="other">الحد الأقصى %1$d من الحروف</item>
     </plurals>
     <string name="maximum_n_chars">الحد الأقصى %1$d من الحروف</string>
     <string name="no_value">لا توجد قيمة</string>
@@ -40,7 +40,7 @@
     <string name="done">تم</string>
     <string name="filter">عامل التصفية %1$s</string>
     <string name="numeric_range_helper_text">إدخال قيمة من %1$s إلى %2$s</string>
-    <string name="value_must_be_from_to">بيت_Value must be from %1$s to %2$s_________________لاحقة</string>
+    <string name="value_must_be_from_to">يجب أن تتراوح القيمة بين %1$s و %2$s.</string>
     <string name="less_than_min_value">أقل من أدنى قيمة %1$s</string>
     <string name="exceeds_max_value">يتجاوز أقصى قيمة %1$s</string>
     <string name="value_must_be_a_whole_number">يجب أن تكون القيمة رقمًا كاملاً</string>
@@ -102,15 +102,15 @@
     <string name="ff_time_picker_pm">مساءً</string>
 
     <string name="take_photo">التقاط صورة</string>
-    <string name="add_from_gallery">بيت_Add From Gallery_________________لاحقة</string>
+    <string name="add_from_gallery">إضافة من المعرض</string>
     <string name="rename">إعادة تسمية</string>
     <string name="delete">حذف</string>
     <string name="rename_attachment">إعادة تسمية المرفق</string>
     <string name="name">الاسم</string>
-    <string name="add_file">بيت_Add From Files_______________لاحقة</string>
-    <string name="attachment_error">بيت_Error Adding Attachment________________________لاحقة</string>
-    <string name="no_app_found">بيت_No application found to open this file type_______________________لاحقة.</string>
-    <string name="attachment_too_large">بيت_The File is too large. Please add a file less than 50 MB______________________________لاحقة.</string>
-    <string name="attachment_is_empty">بيت_Empty files are not supported______________________________لاحقة</string>
-    <string name="download_empty_file">بيت_Empty files cannot be downloaded_________________لاحقة</string>
+    <string name="add_file">إضافة من الملفات</string>
+    <string name="attachment_error">حدث خطأ في أثناء إضافة المرفق</string>
+    <string name="no_app_found">لم يتم العثور على تطبيق لفتح هذا النوع من الملفات.</string>
+    <string name="attachment_too_large">الملف كبير للغاية. يرجى إضافة ملف أقل من 50 ميجابايت.</string>
+    <string name="attachment_is_empty">الملفات الفارغة غير مدعومة</string>
+    <string name="download_empty_file">لا يمكن تنزيل الملفات الفارغة</string>
 </resources>

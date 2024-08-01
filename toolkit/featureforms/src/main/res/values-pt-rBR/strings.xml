@@ -16,18 +16,18 @@
   ~
   --><resources>
     <plurals name="enter_n_chars">
-        <item quantity="one">ã_Enter %1$d character_____________________Ç</item>
-        <item quantity="other">ã_Enter %1$d characters______________________Ç</item>
+        <item quantity="one">Insirir %1$d caractere</item>
+        <item quantity="other">Insira %1$d caracteres</item>
     </plurals>
     <plurals name="value_must_be_n_characters">
-        <item quantity="one">ã_Value must be %1$d character_____________________________Ç</item>
-        <item quantity="other">ã_Value must be %1$d characters______________________________Ç</item>
+        <item quantity="one">O valor deve ser %1$d caractere</item>
+        <item quantity="other">O valor deve ser %1$d caracteres</item>
     </plurals>
     <string name="enter_min_to_max_chars">Insira %1$d até %2$d caracteres</string>
-    <string name="value_must_be_from_to_characters">ã_Value must be %1$d to %2$d characters____________________Ç</string>
+    <string name="value_must_be_from_to_characters">O valor deve ser %1$d para %2$d caracteres</string>
     <plurals name="maximum_n_chars">
-        <item quantity="one">ã_Maximum %1$d character_______________________Ç</item>
-        <item quantity="other">ã_Maximum %1$d characters________________________Ç</item>
+        <item quantity="one">Máximo %1$d caracteres</item>
+        <item quantity="other">Máximo %1$d caracteres</item>
     </plurals>
     <string name="maximum_n_chars">Máximo %1$d caracteres</string>
     <string name="no_value">Sem valor</string>
@@ -40,7 +40,7 @@
     <string name="done">Concluir</string>
     <string name="filter">Filtro %1$s</string>
     <string name="numeric_range_helper_text">Insira o valor de %1$s para %2$s</string>
-    <string name="value_must_be_from_to">ã_Value must be from %1$s to %2$s_________________Ç</string>
+    <string name="value_must_be_from_to">O valor deve ser de %1$s até %2$s</string>
     <string name="less_than_min_value">Menor que o valor mínimo %1$s</string>
     <string name="exceeds_max_value">Excede o valor máximo %1$s</string>
     <string name="value_must_be_a_whole_number">O valor deve ser um número inteiro</string>
@@ -102,15 +102,15 @@
     <string name="ff_time_picker_pm">PM</string>
 
     <string name="take_photo">Tirar Foto</string>
-    <string name="add_from_gallery">ã_Add From Gallery_________________Ç</string>
+    <string name="add_from_gallery">Adicionar da Galeria</string>
     <string name="rename">Renomear</string>
     <string name="delete">Excluir</string>
     <string name="rename_attachment">Renomear Anexo</string>
     <string name="name">Nome</string>
-    <string name="add_file">ã_Add From Files_______________Ç</string>
-    <string name="attachment_error">ã_Error Adding Attachment________________________Ç</string>
-    <string name="no_app_found">ã_No application found to open this file type_______________________Ç.</string>
-    <string name="attachment_too_large">ã_The File is too large. Please add a file less than 50 MB______________________________Ç.</string>
-    <string name="attachment_is_empty">ã_Empty files are not supported______________________________Ç</string>
-    <string name="download_empty_file">ã_Empty files cannot be downloaded_________________Ç</string>
+    <string name="add_file">Adicionar de Arquivos</string>
+    <string name="attachment_error">Erro ao Adicionar Anexo</string>
+    <string name="no_app_found">Nenhum aplicativo encontrado para abrir este tipo de arquivo.</string>
+    <string name="attachment_too_large">O Arquivo é muito grande. Adicione um arquivo com menos de 50 MB.</string>
+    <string name="attachment_is_empty">Arquivos vazios não são suportados</string>
+    <string name="download_empty_file">Arquivos vazios não podem ser baixados</string>
 </resources>

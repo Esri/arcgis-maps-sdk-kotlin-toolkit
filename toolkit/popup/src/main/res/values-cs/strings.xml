@@ -13,15 +13,15 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="show_or_hide_popup_element_content">Ř_expand popup element content_____________________________ů</string>
-    <string name="share">Ř_Share___________ů</string>
-    <string name="save">Ř_Save_________ů</string>
-    <string name="save_successful">Ř_Save successful________________ů</string>
-    <string name="save_failed">Ř_Save failed____________ů</string>
-    <string name="more">Ř_More_________ů</string>
-    <string name="image">Ř_Image___________ů</string>
-    <string name="video">Ř_Video___________ů</string>
-    <string name="other">Ř_Other___________ů</string>
-    <string name="close">Ř_Back_________ů</string>
-    <string name="attachment_thumbnail">Ř_attachment thumbnail_____________________ů</string>
+    <string name="show_or_hide_popup_element_content">rozbalit obsah vyskakovacího prvku</string>
+    <string name="share">Sdílet</string>
+    <string name="save">Uložit</string>
+    <string name="save_successful">Uložení bylo úspěšné</string>
+    <string name="save_failed">Uložení se nezdařilo</string>
+    <string name="more">Více</string>
+    <string name="image">Obrázek</string>
+    <string name="video">Video</string>
+    <string name="other">Jiné</string>
+    <string name="close">Zpět</string>
+    <string name="attachment_thumbnail">miniatura přílohy</string>
 </resources>

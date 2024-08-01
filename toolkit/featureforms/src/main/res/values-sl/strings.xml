@@ -16,18 +16,18 @@
   ~
   --><resources>
     <plurals name="enter_n_chars">
-        <item quantity="one">Š_Enter %1$d character_____________________č</item>
-        <item quantity="other">Š_Enter %1$d characters______________________č</item>
+        <item quantity="one">Vnesi %1$d znak</item>
+        <item quantity="other">Vnesi %1$d znakov</item>
     </plurals>
     <plurals name="value_must_be_n_characters">
-        <item quantity="one">Š_Value must be %1$d character_____________________________č</item>
-        <item quantity="other">Š_Value must be %1$d characters______________________________č</item>
+        <item quantity="one">Vrednost mora biti %1$d znak</item>
+        <item quantity="other">Vrednost mora biti %1$d znakov</item>
     </plurals>
     <string name="enter_min_to_max_chars">Vnesite %1$d do %2$d znakov</string>
-    <string name="value_must_be_from_to_characters">Š_Value must be %1$d to %2$d characters____________________č</string>
+    <string name="value_must_be_from_to_characters">Vrednost mora biti od %1$d do %2$d znakov</string>
     <plurals name="maximum_n_chars">
-        <item quantity="one">Š_Maximum %1$d character_______________________č</item>
-        <item quantity="other">Š_Maximum %1$d characters________________________č</item>
+        <item quantity="one">Maksimalno %1$d znakov</item>
+        <item quantity="other">Maksimalno %1$d znakov</item>
     </plurals>
     <string name="maximum_n_chars">Maksimalno %1$d znakov</string>
     <string name="no_value">Ni vrednosti</string>
@@ -40,7 +40,7 @@
     <string name="done">Končano</string>
     <string name="filter">Filter %1$s</string>
     <string name="numeric_range_helper_text">Vnesite vrednosti od %1$s do %2$s</string>
-    <string name="value_must_be_from_to">Š_Value must be from %1$s to %2$s_________________č</string>
+    <string name="value_must_be_from_to">Vrednost mora biti od %1$s do %2$s</string>
     <string name="less_than_min_value">Manj kot najmanjša vrednost %1$s</string>
     <string name="exceeds_max_value">Presega največjo vrednost %1$s</string>
     <string name="value_must_be_a_whole_number">Vrednost mora biti celo število</string>
@@ -102,15 +102,15 @@
     <string name="ff_time_picker_pm">popoldne</string>
 
     <string name="take_photo">Fotografirajte</string>
-    <string name="add_from_gallery">Š_Add From Gallery_________________č</string>
+    <string name="add_from_gallery">Dodaj iz galerije</string>
     <string name="rename">Preimenuj</string>
     <string name="delete">Izbriši</string>
     <string name="rename_attachment">Preimenuj prilogo</string>
     <string name="name">Ime</string>
-    <string name="add_file">Š_Add From Files_______________č</string>
-    <string name="attachment_error">Š_Error Adding Attachment________________________č</string>
-    <string name="no_app_found">Š_No application found to open this file type_______________________č.</string>
-    <string name="attachment_too_large">Š_The File is too large. Please add a file less than 50 MB______________________________č.</string>
-    <string name="attachment_is_empty">Š_Empty files are not supported______________________________č</string>
-    <string name="download_empty_file">Š_Empty files cannot be downloaded_________________č</string>
+    <string name="add_file">Dodaj iz datotek</string>
+    <string name="attachment_error">Napaka pri dodajanju priloge</string>
+    <string name="no_app_found">Ni najdene aplikacije za odpiranje te vrste datoteke.</string>
+    <string name="attachment_too_large">Datoteka je prevelika. Dodajte datoteko manjšo od 50 MB.</string>
+    <string name="attachment_is_empty">Prazne datoteke niso podprte</string>
+    <string name="download_empty_file">Praznih datotek ni mogoče prenesti</string>
 </resources>

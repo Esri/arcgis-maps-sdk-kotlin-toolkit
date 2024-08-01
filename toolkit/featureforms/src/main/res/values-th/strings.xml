@@ -16,18 +16,18 @@
   ~
   --><resources>
     <plurals name="enter_n_chars">
-        <item quantity="one">ก้_Enter %1$d character_____________________ษฺ</item>
-        <item quantity="other">ก้_Enter %1$d characters______________________ษฺ</item>
+        <item quantity="one">ป้อน %1$d ตัวอักขระ</item>
+        <item quantity="other">ป้อน %1$d อักขระ</item>
     </plurals>
     <plurals name="value_must_be_n_characters">
-        <item quantity="one">ก้_Value must be %1$d character_____________________________ษฺ</item>
-        <item quantity="other">ก้_Value must be %1$d characters______________________________ษฺ</item>
+        <item quantity="one">ค่าต้องมีความยาว %1$d ตัวอักขระ</item>
+        <item quantity="other">ค่าต้องมีความยาว %1$d ตัวอักขระ</item>
     </plurals>
     <string name="enter_min_to_max_chars">ป้อนอักขระ %1$d ถึง %2$d ตัว</string>
-    <string name="value_must_be_from_to_characters">ก้_Value must be %1$d to %2$d characters____________________ษฺ</string>
+    <string name="value_must_be_from_to_characters">ค่าต้องอยู่ระหว่าง %1$d ถึง %2$d อักขระ</string>
     <plurals name="maximum_n_chars">
-        <item quantity="one">ก้_Maximum %1$d character_______________________ษฺ</item>
-        <item quantity="other">ก้_Maximum %1$d characters________________________ษฺ</item>
+        <item quantity="one">สูงสุด %1$d อักขระ</item>
+        <item quantity="other">สูงสุด %1$d อักขระ</item>
     </plurals>
     <string name="maximum_n_chars">สูงสุด %1$d อักขระ</string>
     <string name="no_value">ไม่มีค่า</string>
@@ -40,7 +40,7 @@
     <string name="done">สำเร็จ</string>
     <string name="filter">ตัวกรอง %1$s</string>
     <string name="numeric_range_helper_text">ป้อนค่าตั้งแต่ %1$s ถึง %2$s</string>
-    <string name="value_must_be_from_to">ก้_Value must be from %1$s to %2$s_________________ษฺ</string>
+    <string name="value_must_be_from_to">ค่าต้องอยู่ระหว่าง %1$s ถึง %2$s</string>
     <string name="less_than_min_value">น้อยกว่าค่าขั้นต่ำ %1$s</string>
     <string name="exceeds_max_value">เกินค่าสูงสุด %1$s</string>
     <string name="value_must_be_a_whole_number">ค่าต้องเป็นจำนวนเต็ม</string>
@@ -102,15 +102,15 @@
     <string name="ff_time_picker_pm">PM</string>
 
     <string name="take_photo">ถ่ายภาพ</string>
-    <string name="add_from_gallery">ก้_Add From Gallery_________________ษฺ</string>
+    <string name="add_from_gallery">เพิ่มจากแกลเลอรี</string>
     <string name="rename">เปลี่ยนชื่อ</string>
     <string name="delete">ลบ</string>
     <string name="rename_attachment">เปลี่ยนชื่อไฟล์แนบ</string>
     <string name="name">ชื่อ</string>
-    <string name="add_file">ก้_Add From Files_______________ษฺ</string>
-    <string name="attachment_error">ก้_Error Adding Attachment________________________ษฺ</string>
-    <string name="no_app_found">ก้_No application found to open this file type_______________________ษฺ.</string>
-    <string name="attachment_too_large">ก้_The File is too large. Please add a file less than 50 MB______________________________ษฺ.</string>
-    <string name="attachment_is_empty">ก้_Empty files are not supported______________________________ษฺ</string>
-    <string name="download_empty_file">ก้_Empty files cannot be downloaded_________________ษฺ</string>
+    <string name="add_file">เพิ่มจากไฟล์</string>
+    <string name="attachment_error">ข้อผิดพลาดในการเพิ่มไฟล์แนบ</string>
+    <string name="no_app_found">ไม่พบแอปพลิเคชันที่จะใช้เปิดไฟล์ประเภทนี้</string>
+    <string name="attachment_too_large">ไฟล์ใหญ่เกินไป โปรดเพิ่มไฟล์ที่มีขนาดไม่เกิน 50 MB</string>
+    <string name="attachment_is_empty">ไม่รองรับไฟล์เปล่า</string>
+    <string name="download_empty_file">ไม่สามารถดาวน์โหลดไฟล์เปล่าได้</string>
 </resources>

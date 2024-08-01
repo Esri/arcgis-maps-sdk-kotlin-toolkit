@@ -16,18 +16,18 @@
   ~
   --><resources>
     <plurals name="enter_n_chars">
-        <item quantity="one">Č_Enter %1$d character_____________________ž</item>
-        <item quantity="other">Č_Enter %1$d characters______________________ž</item>
+        <item quantity="one">Unesite %1$d znak</item>
+        <item quantity="other">Unesite %1$d znakova</item>
     </plurals>
     <plurals name="value_must_be_n_characters">
-        <item quantity="one">Č_Value must be %1$d character_____________________________ž</item>
-        <item quantity="other">Č_Value must be %1$d characters______________________________ž</item>
+        <item quantity="one">Vrijednost treba biti %1$d znak</item>
+        <item quantity="other">Vrijednost treba biti %1$d znakova</item>
     </plurals>
     <string name="enter_min_to_max_chars">Unesite %1$d do %2$d znaka/znakova</string>
-    <string name="value_must_be_from_to_characters">Č_Value must be %1$d to %2$d characters____________________ž</string>
+    <string name="value_must_be_from_to_characters">Vrijednost mora biti %1$d do %2$d znakova</string>
     <plurals name="maximum_n_chars">
-        <item quantity="one">Č_Maximum %1$d character_______________________ž</item>
-        <item quantity="other">Č_Maximum %1$d characters________________________ž</item>
+        <item quantity="one">Maksimalno %1$d znak</item>
+        <item quantity="other">Maksimalno %1$d znakova</item>
     </plurals>
     <string name="maximum_n_chars">Maksimalno %1$d znakova</string>
     <string name="no_value">Bez vrijednosti</string>
@@ -40,7 +40,7 @@
     <string name="done">Gotovo</string>
     <string name="filter">Filtar %1$s</string>
     <string name="numeric_range_helper_text">Unesite vrijednost od %1$s do %2$s</string>
-    <string name="value_must_be_from_to">Č_Value must be from %1$s to %2$s_________________ž</string>
+    <string name="value_must_be_from_to">Vrijednost mora biti od %1$s do %2$s</string>
     <string name="less_than_min_value">Manje od minimalne vrijednosti %1$s</string>
     <string name="exceeds_max_value">Premašuje maksimalnu vrijednost %1$s</string>
     <string name="value_must_be_a_whole_number">Vrijednost mora biti cijeli broj</string>
@@ -102,15 +102,15 @@
     <string name="ff_time_picker_pm">Popodne</string>
 
     <string name="take_photo">Snimi fotografiju</string>
-    <string name="add_from_gallery">Č_Add From Gallery_________________ž</string>
+    <string name="add_from_gallery">Dodaj iz galerije</string>
     <string name="rename">Preimenuj</string>
     <string name="delete">Izbriši</string>
     <string name="rename_attachment">Preimenuj privitak</string>
     <string name="name">Naziv</string>
-    <string name="add_file">Č_Add From Files_______________ž</string>
-    <string name="attachment_error">Č_Error Adding Attachment________________________ž</string>
-    <string name="no_app_found">Č_No application found to open this file type_______________________ž.</string>
-    <string name="attachment_too_large">Č_The File is too large. Please add a file less than 50 MB______________________________ž.</string>
-    <string name="attachment_is_empty">Č_Empty files are not supported______________________________ž</string>
-    <string name="download_empty_file">Č_Empty files cannot be downloaded_________________ž</string>
+    <string name="add_file">Dodaj iz datoteka</string>
+    <string name="attachment_error">Pogreška prilikom dodavanja privitka.</string>
+    <string name="no_app_found">Nije pronađena aplikacija za otvaranje ove vrste datoteka.</string>
+    <string name="attachment_too_large">Datoteka je prevelika. Dodajte datoteku manju od 50 MB.</string>
+    <string name="attachment_is_empty">Prazne datoteke nisu podržane</string>
+    <string name="download_empty_file">Prazne datoteke ne mogu se preuzeti</string>
 </resources>

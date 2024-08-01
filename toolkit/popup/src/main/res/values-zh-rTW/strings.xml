@@ -13,15 +13,15 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="show_or_hide_popup_element_content">試_expand popup element content_____________________________驗</string>
-    <string name="share">試_Share___________驗</string>
-    <string name="save">試_Save_________驗</string>
-    <string name="save_successful">試_Save successful________________驗</string>
-    <string name="save_failed">試_Save failed____________驗</string>
-    <string name="more">試_More_________驗</string>
-    <string name="image">試_Image___________驗</string>
-    <string name="video">試_Video___________驗</string>
-    <string name="other">試_Other___________驗</string>
-    <string name="close">試_Back_________驗</string>
-    <string name="attachment_thumbnail">試_attachment thumbnail_____________________驗</string>
+    <string name="show_or_hide_popup_element_content">展開快顯元素內容</string>
+    <string name="share">共用</string>
+    <string name="save">儲存</string>
+    <string name="save_successful">儲存成功</string>
+    <string name="save_failed">儲存失敗</string>
+    <string name="more">更多</string>
+    <string name="image">圖像</string>
+    <string name="video">影片</string>
+    <string name="other">其他</string>
+    <string name="close">上一步</string>
+    <string name="attachment_thumbnail">附件縮圖</string>
 </resources>

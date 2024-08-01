@@ -16,18 +16,18 @@
   ~
   --><resources>
     <plurals name="enter_n_chars">
-        <item quantity="one">ó_Enter %1$d character_____________________à</item>
-        <item quantity="other">ó_Enter %1$d characters______________________à</item>
+        <item quantity="one">Introduïu %1$d caràcter</item>
+        <item quantity="other">Introduïu %1$d caràcters</item>
     </plurals>
     <plurals name="value_must_be_n_characters">
-        <item quantity="one">ó_Value must be %1$d character_____________________________à</item>
-        <item quantity="other">ó_Value must be %1$d characters______________________________à</item>
+        <item quantity="one">El valor ha de tenir %1$d caràcter</item>
+        <item quantity="other">El valor ha de tenir %1$d caràcters</item>
     </plurals>
     <string name="enter_min_to_max_chars">Introduïu entre %1$d i %2$d caràcters</string>
-    <string name="value_must_be_from_to_characters">ó_Value must be %1$d to %2$d characters____________________à</string>
+    <string name="value_must_be_from_to_characters">El valor ha de tenir entre %1$d i %2$d caràcters</string>
     <plurals name="maximum_n_chars">
-        <item quantity="one">ó_Maximum %1$d character_______________________à</item>
-        <item quantity="other">ó_Maximum %1$d characters________________________à</item>
+        <item quantity="one">%1$d caràcter com a màxim</item>
+        <item quantity="other">%1$d caràcters com a màxim</item>
     </plurals>
     <string name="maximum_n_chars">%1$d caràcters com a màxim</string>
     <string name="no_value">No hi ha cap valor</string>
@@ -40,7 +40,7 @@
     <string name="done">Fet</string>
     <string name="filter">Filtra %1$s</string>
     <string name="numeric_range_helper_text">Introduïu un valor d\'entre %1$s i %2$s</string>
-    <string name="value_must_be_from_to">ó_Value must be from %1$s to %2$s_________________à</string>
+    <string name="value_must_be_from_to">El valor ha de ser d\'entre %1$s i %2$s</string>
     <string name="less_than_min_value">Inferior al valor mínim %1$s</string>
     <string name="exceeds_max_value">Supera el valor màxim %1$s</string>
     <string name="value_must_be_a_whole_number">El valor ha de ser un nombre enter</string>
@@ -102,15 +102,15 @@
     <string name="ff_time_picker_pm">PM</string>
 
     <string name="take_photo">Feu una foto</string>
-    <string name="add_from_gallery">ó_Add From Gallery_________________à</string>
+    <string name="add_from_gallery">Afegeix des de la galeria</string>
     <string name="rename">Canvia el nom</string>
     <string name="delete">Suprimeix</string>
     <string name="rename_attachment">Canvia el nom del fitxer adjunt</string>
     <string name="name">Nom</string>
-    <string name="add_file">ó_Add From Files_______________à</string>
-    <string name="attachment_error">ó_Error Adding Attachment________________________à</string>
-    <string name="no_app_found">ó_No application found to open this file type_______________________à.</string>
-    <string name="attachment_too_large">ó_The File is too large. Please add a file less than 50 MB______________________________à.</string>
-    <string name="attachment_is_empty">ó_Empty files are not supported______________________________à</string>
-    <string name="download_empty_file">ó_Empty files cannot be downloaded_________________à</string>
+    <string name="add_file">Afegeix des dels fitxers</string>
+    <string name="attachment_error">Error en afegir el fitxer adjunt</string>
+    <string name="no_app_found">No s\'ha trobat cap aplicació per obrir aquest tipus de fitxer.</string>
+    <string name="attachment_too_large">El fitxer és massa gran. Afegiu un fitxer de menys de 50 MB.</string>
+    <string name="attachment_is_empty">No s\'admeten fitxers buits</string>
+    <string name="download_empty_file">No es poden baixar fitxers buits</string>
 </resources>

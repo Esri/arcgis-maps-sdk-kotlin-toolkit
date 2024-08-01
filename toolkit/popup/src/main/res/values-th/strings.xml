@@ -13,15 +13,15 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="show_or_hide_popup_element_content">ก้_expand popup element content_____________________________ษฺ</string>
-    <string name="share">ก้_Share___________ษฺ</string>
-    <string name="save">ก้_Save_________ษฺ</string>
-    <string name="save_successful">ก้_Save successful________________ษฺ</string>
-    <string name="save_failed">ก้_Save failed____________ษฺ</string>
-    <string name="more">ก้_More_________ษฺ</string>
-    <string name="image">ก้_Image___________ษฺ</string>
-    <string name="video">ก้_Video___________ษฺ</string>
-    <string name="other">ก้_Other___________ษฺ</string>
-    <string name="close">ก้_Back_________ษฺ</string>
-    <string name="attachment_thumbnail">ก้_attachment thumbnail_____________________ษฺ</string>
+    <string name="show_or_hide_popup_element_content">ขยายหัวข้อองค์ประกอบป็อปอัพ</string>
+    <string name="share">แชร์</string>
+    <string name="save">จัดเก็บ</string>
+    <string name="save_successful">บันทึกสำเร็จ</string>
+    <string name="save_failed">บันทึกไม่สำเร็จ</string>
+    <string name="more">กว่า</string>
+    <string name="image">รูปภาพ</string>
+    <string name="video">วิดีโอ</string>
+    <string name="other">อื่น ๆ</string>
+    <string name="close">กลับ</string>
+    <string name="attachment_thumbnail">ภาพตัวอย่างไฟล์แนบ</string>
 </resources>

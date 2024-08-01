@@ -16,18 +16,18 @@
   ~
   --><resources>
     <plurals name="enter_n_chars">
-        <item quantity="one">Đ_Enter %1$d character_____________________ớ</item>
-        <item quantity="other">Đ_Enter %1$d characters______________________ớ</item>
+        <item quantity="one">Nhập %1$d ký tự</item>
+        <item quantity="other">Nhập %1$d ký tự</item>
     </plurals>
     <plurals name="value_must_be_n_characters">
-        <item quantity="one">Đ_Value must be %1$d character_____________________________ớ</item>
-        <item quantity="other">Đ_Value must be %1$d characters______________________________ớ</item>
+        <item quantity="one">Giá trị phải chứa %1$d ký tự</item>
+        <item quantity="other">Giá trị phải chứa %1$d ký tự</item>
     </plurals>
     <string name="enter_min_to_max_chars">Nhập %1$d đến %2$d ký tự</string>
-    <string name="value_must_be_from_to_characters">Đ_Value must be %1$d to %2$d characters____________________ớ</string>
+    <string name="value_must_be_from_to_characters">Giá trị phải từ %1$d đến %2$d ký tự</string>
     <plurals name="maximum_n_chars">
-        <item quantity="one">Đ_Maximum %1$d character_______________________ớ</item>
-        <item quantity="other">Đ_Maximum %1$d characters________________________ớ</item>
+        <item quantity="one">Giới hạn tối đa %1$d ký tự</item>
+        <item quantity="other">Giới hạn tối đa %1$d ký tự</item>
     </plurals>
     <string name="maximum_n_chars">Giới hạn tối đa %1$d ký tự</string>
     <string name="no_value">Không có giá trị</string>
@@ -40,7 +40,7 @@
     <string name="done">Hoàn tất</string>
     <string name="filter">Bộ lọc %1$s</string>
     <string name="numeric_range_helper_text">Nhập giá trị trong khoảng từ %1$s đến %2$s</string>
-    <string name="value_must_be_from_to">Đ_Value must be from %1$s to %2$s_________________ớ</string>
+    <string name="value_must_be_from_to">Giá trị phải từ %1$s đến %2$s</string>
     <string name="less_than_min_value">Dưới giá trị tối thiểu %1$s</string>
     <string name="exceeds_max_value">Vượt quá giá trị tối đa %1$s</string>
     <string name="value_must_be_a_whole_number">Giá trị phải là một số nguyên</string>
@@ -102,15 +102,15 @@
     <string name="ff_time_picker_pm">CH</string>
 
     <string name="take_photo">Chụp Ảnh</string>
-    <string name="add_from_gallery">Đ_Add From Gallery_________________ớ</string>
+    <string name="add_from_gallery">Thêm Từ Thư viện</string>
     <string name="rename">Đổi tên</string>
     <string name="delete">Xóa</string>
     <string name="rename_attachment">Đổi tên Tệp đính kèm</string>
     <string name="name">Tên</string>
-    <string name="add_file">Đ_Add From Files_______________ớ</string>
-    <string name="attachment_error">Đ_Error Adding Attachment________________________ớ</string>
-    <string name="no_app_found">Đ_No application found to open this file type_______________________ớ.</string>
-    <string name="attachment_too_large">Đ_The File is too large. Please add a file less than 50 MB______________________________ớ.</string>
-    <string name="attachment_is_empty">Đ_Empty files are not supported______________________________ớ</string>
-    <string name="download_empty_file">Đ_Empty files cannot be downloaded_________________ớ</string>
+    <string name="add_file">Thêm Từ Tệp</string>
+    <string name="attachment_error">Lỗi khi Thêm Tệp đính kèm</string>
+    <string name="no_app_found">Không tìm thấy ứng dụng để mở loại tệp này.</string>
+    <string name="attachment_too_large">Tệp quá lớn. Vui lòng thêm tệp dưới 50 MB.</string>
+    <string name="attachment_is_empty">Không hỗ trợ tệp rỗng</string>
+    <string name="download_empty_file">Không thể tải xuống tệp rỗng</string>
 </resources>

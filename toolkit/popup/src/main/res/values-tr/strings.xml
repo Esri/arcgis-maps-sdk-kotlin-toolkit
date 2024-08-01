@@ -13,15 +13,15 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="show_or_hide_popup_element_content">ı_expand popup element content_____________________________İ</string>
-    <string name="share">ı_Share___________İ</string>
-    <string name="save">ı_Save_________İ</string>
-    <string name="save_successful">ı_Save successful________________İ</string>
-    <string name="save_failed">ı_Save failed____________İ</string>
-    <string name="more">ı_More_________İ</string>
-    <string name="image">ı_Image___________İ</string>
-    <string name="video">ı_Video___________İ</string>
-    <string name="other">ı_Other___________İ</string>
-    <string name="close">ı_Back_________İ</string>
-    <string name="attachment_thumbnail">ı_attachment thumbnail_____________________İ</string>
+    <string name="show_or_hide_popup_element_content">açılır pencere ögesi içeriğini genişlet</string>
+    <string name="share">Paylaş</string>
+    <string name="save">Kaydet</string>
+    <string name="save_successful">Kaydetme başarılı</string>
+    <string name="save_failed">Kaydetme başarısız</string>
+    <string name="more">Dahası</string>
+    <string name="image">Görüntü</string>
+    <string name="video">Video</string>
+    <string name="other">Diğer</string>
+    <string name="close">Geri</string>
+    <string name="attachment_thumbnail">ek küçük resim</string>
 </resources>

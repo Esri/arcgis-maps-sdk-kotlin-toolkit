@@ -13,15 +13,15 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="show_or_hide_popup_element_content">Ж_expand popup element content_____________________________Я</string>
-    <string name="share">Ж_Share___________Я</string>
-    <string name="save">Ж_Save_________Я</string>
-    <string name="save_successful">Ж_Save successful________________Я</string>
-    <string name="save_failed">Ж_Save failed____________Я</string>
-    <string name="more">Ж_More_________Я</string>
-    <string name="image">Ж_Image___________Я</string>
-    <string name="video">Ж_Video___________Я</string>
-    <string name="other">Ж_Other___________Я</string>
-    <string name="close">Ж_Back_________Я</string>
-    <string name="attachment_thumbnail">Ж_attachment thumbnail_____________________Я</string>
+    <string name="show_or_hide_popup_element_content">развернуть содержимое элемента всплывающего окна</string>
+    <string name="share">Общий доступ</string>
+    <string name="save">Сохранить</string>
+    <string name="save_successful">Успешно сохранено</string>
+    <string name="save_failed">Не удалось сохранить</string>
+    <string name="more">Еще</string>
+    <string name="image">Изображение</string>
+    <string name="video">Видео</string>
+    <string name="other">Прочее</string>
+    <string name="close">Назад</string>
+    <string name="attachment_thumbnail">образец вложения</string>
 </resources>

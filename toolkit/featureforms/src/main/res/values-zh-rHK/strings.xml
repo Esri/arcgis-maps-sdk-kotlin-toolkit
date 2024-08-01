@@ -16,18 +16,18 @@
   ~
   --><resources>
     <plurals name="enter_n_chars">
-        <item quantity="one">試_Enter %1$d character_____________________驗</item>
-        <item quantity="other">試_Enter %1$d characters______________________驗</item>
+        <item quantity="one">輸入 %1$d 個字元</item>
+        <item quantity="other">輸入 %1$d 個字元</item>
     </plurals>
     <plurals name="value_must_be_n_characters">
-        <item quantity="one">試_Value must be %1$d character_____________________________驗</item>
-        <item quantity="other">試_Value must be %1$d characters______________________________驗</item>
+        <item quantity="one">值必須為 %1$d 個字元</item>
+        <item quantity="other">值必須為 %1$d 個字元</item>
     </plurals>
     <string name="enter_min_to_max_chars">輸入 %1$d 到 %2$d 個字元</string>
-    <string name="value_must_be_from_to_characters">試_Value must be %1$d to %2$d characters____________________驗</string>
+    <string name="value_must_be_from_to_characters">值必須為 %1$d 到 %2$d 個字元</string>
     <plurals name="maximum_n_chars">
-        <item quantity="one">試_Maximum %1$d character_______________________驗</item>
-        <item quantity="other">試_Maximum %1$d characters________________________驗</item>
+        <item quantity="one">最多 %1$d 個字元</item>
+        <item quantity="other">最多 %1$d 個字元</item>
     </plurals>
     <string name="maximum_n_chars">最多 %1$d 個字元</string>
     <string name="no_value">無值</string>
@@ -40,7 +40,7 @@
     <string name="done">完成</string>
     <string name="filter">篩選器 %1$s</string>
     <string name="numeric_range_helper_text">輸入 %1$s 到 %2$s 的值</string>
-    <string name="value_must_be_from_to">試_Value must be from %1$s to %2$s_________________驗</string>
+    <string name="value_must_be_from_to">值必須介於 %1$s 到 %2$s</string>
     <string name="less_than_min_value">小於最小值 %1$s</string>
     <string name="exceeds_max_value">超過最大值 %1$s</string>
     <string name="value_must_be_a_whole_number">值必須是整數</string>
@@ -102,15 +102,15 @@
     <string name="ff_time_picker_pm">下午</string>
 
     <string name="take_photo">拍照</string>
-    <string name="add_from_gallery">試_Add From Gallery_________________驗</string>
+    <string name="add_from_gallery">從圖庫新增</string>
     <string name="rename">重新命名</string>
     <string name="delete">刪除</string>
     <string name="rename_attachment">重新命名附件</string>
     <string name="name">名稱</string>
-    <string name="add_file">試_Add From Files_______________驗</string>
-    <string name="attachment_error">試_Error Adding Attachment________________________驗</string>
-    <string name="no_app_found">試_No application found to open this file type_______________________驗.</string>
-    <string name="attachment_too_large">試_The File is too large. Please add a file less than 50 MB______________________________驗.</string>
-    <string name="attachment_is_empty">試_Empty files are not supported______________________________驗</string>
-    <string name="download_empty_file">試_Empty files cannot be downloaded_________________驗</string>
+    <string name="add_file">從檔案新增</string>
+    <string name="attachment_error">新增附件時出錯</string>
+    <string name="no_app_found">找不到開啟此檔案類型的應用程式。</string>
+    <string name="attachment_too_large">檔案太大。 請新增小於 50 MB 的檔案。</string>
+    <string name="attachment_is_empty">不支援空白檔案</string>
+    <string name="download_empty_file">無法下載空白檔案</string>
 </resources>

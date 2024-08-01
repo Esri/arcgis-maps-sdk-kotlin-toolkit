@@ -16,18 +16,18 @@
   ~
   --><resources>
     <plurals name="enter_n_chars">
-        <item quantity="one">ı_Enter %1$d character_____________________İ</item>
-        <item quantity="other">ı_Enter %1$d characters______________________İ</item>
+        <item quantity="one">%1$d karakter gir</item>
+        <item quantity="other">%1$d karakter girin</item>
     </plurals>
     <plurals name="value_must_be_n_characters">
-        <item quantity="one">ı_Value must be %1$d character_____________________________İ</item>
-        <item quantity="other">ı_Value must be %1$d characters______________________________İ</item>
+        <item quantity="one">Değer %1$d karakter olmalıdır</item>
+        <item quantity="other">Değer %1$d karakter olmalıdır</item>
     </plurals>
     <string name="enter_min_to_max_chars">%1$d - %2$d karakter girin</string>
-    <string name="value_must_be_from_to_characters">ı_Value must be %1$d to %2$d characters____________________İ</string>
+    <string name="value_must_be_from_to_characters">Değer %1$d - %2$d karakter olmalıdır</string>
     <plurals name="maximum_n_chars">
-        <item quantity="one">ı_Maximum %1$d character_______________________İ</item>
-        <item quantity="other">ı_Maximum %1$d characters________________________İ</item>
+        <item quantity="one">Maksimum %1$d karakter</item>
+        <item quantity="other">Maksimum %1$d karakter</item>
     </plurals>
     <string name="maximum_n_chars">Maksimum %1$d karakter</string>
     <string name="no_value">Değer yok</string>
@@ -40,7 +40,7 @@
     <string name="done">Bitti</string>
     <string name="filter">%1$s filtrele</string>
     <string name="numeric_range_helper_text">%1$s\'den %2$s\'e değer gir</string>
-    <string name="value_must_be_from_to">ı_Value must be from %1$s to %2$s_________________İ</string>
+    <string name="value_must_be_from_to">Değer %1$s\'den %2$s\'e olmalıdır</string>
     <string name="less_than_min_value">Minimum değerden daha küçük %1$s</string>
     <string name="exceeds_max_value">Maksimum değeri aşıyor %1$s</string>
     <string name="value_must_be_a_whole_number">Değer bir tam sayı olmalıdır</string>
@@ -102,15 +102,15 @@
     <string name="ff_time_picker_pm">PM</string>
 
     <string name="take_photo">Fotoğraf Çek</string>
-    <string name="add_from_gallery">ı_Add From Gallery_________________İ</string>
+    <string name="add_from_gallery">Galeriden Ekle</string>
     <string name="rename">Yeniden Adlandır</string>
     <string name="delete">Sil</string>
     <string name="rename_attachment">Eki Yeniden Adlandır</string>
     <string name="name">Adı</string>
-    <string name="add_file">ı_Add From Files_______________İ</string>
-    <string name="attachment_error">ı_Error Adding Attachment________________________İ</string>
-    <string name="no_app_found">ı_No application found to open this file type_______________________İ.</string>
-    <string name="attachment_too_large">ı_The File is too large. Please add a file less than 50 MB______________________________İ.</string>
-    <string name="attachment_is_empty">ı_Empty files are not supported______________________________İ</string>
-    <string name="download_empty_file">ı_Empty files cannot be downloaded_________________İ</string>
+    <string name="add_file">Dosyalardan Ekle</string>
+    <string name="attachment_error">Ek Ekleme Hatası</string>
+    <string name="no_app_found">Bu dosya türünü açmak için herhangi bir uygulama bulunamadı.</string>
+    <string name="attachment_too_large">Dosya fazla büyük. Lütfen 50 MB\'den küçük bir dosya ekleyin.</string>
+    <string name="attachment_is_empty">Boş dosyalar desteklenmez</string>
+    <string name="download_empty_file">Boş dosyalar indirilemez</string>
 </resources>

@@ -13,15 +13,15 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="show_or_hide_popup_element_content">ґ_expand popup element content_____________________________Ї</string>
-    <string name="share">ґ_Share___________Ї</string>
-    <string name="save">ґ_Save_________Ї</string>
-    <string name="save_successful">ґ_Save successful________________Ї</string>
-    <string name="save_failed">ґ_Save failed____________Ї</string>
-    <string name="more">ґ_More_________Ї</string>
-    <string name="image">ґ_Image___________Ї</string>
-    <string name="video">ґ_Video___________Ї</string>
-    <string name="other">ґ_Other___________Ї</string>
-    <string name="close">ґ_Back_________Ї</string>
-    <string name="attachment_thumbnail">ґ_attachment thumbnail_____________________Ї</string>
+    <string name="show_or_hide_popup_element_content">розгорнути вміст елементу спливаючого вікна</string>
+    <string name="share">Поділитися</string>
+    <string name="save">Зберегти</string>
+    <string name="save_successful">Збережено</string>
+    <string name="save_failed">Не вдалося зберегти</string>
+    <string name="more">Більше</string>
+    <string name="image">Зображення</string>
+    <string name="video">Відео</string>
+    <string name="other">Інше</string>
+    <string name="close">Назад</string>
+    <string name="attachment_thumbnail">зразок прикріплення</string>
 </resources>

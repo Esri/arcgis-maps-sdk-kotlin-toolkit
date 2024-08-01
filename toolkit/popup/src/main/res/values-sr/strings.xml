@@ -13,15 +13,15 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="show_or_hide_popup_element_content">Č_expand popup element content_____________________________ž</string>
-    <string name="share">Č_Share___________ž</string>
-    <string name="save">Č_Save_________ž</string>
-    <string name="save_successful">Č_Save successful________________ž</string>
-    <string name="save_failed">Č_Save failed____________ž</string>
-    <string name="more">Č_More_________ž</string>
-    <string name="image">Č_Image___________ž</string>
-    <string name="video">Č_Video___________ž</string>
-    <string name="other">Č_Other___________ž</string>
-    <string name="close">Č_Back_________ž</string>
-    <string name="attachment_thumbnail">Č_attachment thumbnail_____________________ž</string>
+    <string name="show_or_hide_popup_element_content">proširi sadržaj iskačućeg elementa</string>
+    <string name="share">Podeli</string>
+    <string name="save">Sačuvaj</string>
+    <string name="save_successful">Uspešno sačuvano</string>
+    <string name="save_failed">Čuvanje nije uspelo</string>
+    <string name="more">Više</string>
+    <string name="image">Snimak</string>
+    <string name="video">Video zapis</string>
+    <string name="other">Ostalo</string>
+    <string name="close">Nazad</string>
+    <string name="attachment_thumbnail">sličica priloga</string>
 </resources>

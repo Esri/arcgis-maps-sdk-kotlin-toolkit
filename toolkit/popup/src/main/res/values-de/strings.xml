@@ -13,15 +13,15 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="show_or_hide_popup_element_content">ä_expand popup element content_____________________________Ü</string>
-    <string name="share">ä_Share___________Ü</string>
-    <string name="save">ä_Save_________Ü</string>
-    <string name="save_successful">ä_Save successful________________Ü</string>
-    <string name="save_failed">ä_Save failed____________Ü</string>
-    <string name="more">ä_More_________Ü</string>
-    <string name="image">ä_Image___________Ü</string>
-    <string name="video">ä_Video___________Ü</string>
-    <string name="other">ä_Other___________Ü</string>
-    <string name="close">ä_Back_________Ü</string>
-    <string name="attachment_thumbnail">ä_attachment thumbnail_____________________Ü</string>
+    <string name="show_or_hide_popup_element_content">Inhalt des Pop-up-Elements einblenden</string>
+    <string name="share">Freigeben</string>
+    <string name="save">Speichern</string>
+    <string name="save_successful">Speichern erfolgreich</string>
+    <string name="save_failed">Fehler beim Speichern</string>
+    <string name="more">Mehr</string>
+    <string name="image">Bild</string>
+    <string name="video">Video</string>
+    <string name="other">Andere</string>
+    <string name="close">Zurück</string>
+    <string name="attachment_thumbnail">Miniaturansicht der Anlage</string>
 </resources>

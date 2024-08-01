@@ -16,18 +16,18 @@
   ~
   --><resources>
     <plurals name="enter_n_chars">
-        <item quantity="one">Ĳ_Enter %1$d character_____________________ä</item>
-        <item quantity="other">Ĳ_Enter %1$d characters______________________ä</item>
+        <item quantity="one">Voer %1$d teken in</item>
+        <item quantity="other">Voer %1$d tekens in</item>
     </plurals>
     <plurals name="value_must_be_n_characters">
-        <item quantity="one">Ĳ_Value must be %1$d character_____________________________ä</item>
-        <item quantity="other">Ĳ_Value must be %1$d characters______________________________ä</item>
+        <item quantity="one">Waarde moet uit %1$d teken bestaan</item>
+        <item quantity="other">Waarde moet uit %1$d tekens bestaan</item>
     </plurals>
     <string name="enter_min_to_max_chars">Voer %1$d tot %2$d tekens in</string>
-    <string name="value_must_be_from_to_characters">Ĳ_Value must be %1$d to %2$d characters____________________ä</string>
+    <string name="value_must_be_from_to_characters">De waarde moet uit %1$d tot %2$d tekens bestaan</string>
     <plurals name="maximum_n_chars">
-        <item quantity="one">Ĳ_Maximum %1$d character_______________________ä</item>
-        <item quantity="other">Ĳ_Maximum %1$d characters________________________ä</item>
+        <item quantity="one">Maximum %1$d teken</item>
+        <item quantity="other">Maximum %1$d tekens</item>
     </plurals>
     <string name="maximum_n_chars">Maximum %1$d tekens</string>
     <string name="no_value">Geen waarde</string>
@@ -40,7 +40,7 @@
     <string name="done">Gereed</string>
     <string name="filter">Filter %1$s</string>
     <string name="numeric_range_helper_text">Voer waarde in van %1$s tot %2$s</string>
-    <string name="value_must_be_from_to">Ĳ_Value must be from %1$s to %2$s_________________ä</string>
+    <string name="value_must_be_from_to">De waarde moet tussen %1$s en %2$s liggen.</string>
     <string name="less_than_min_value">Minder dan minimumwaarde %1$s</string>
     <string name="exceeds_max_value">Meer dan maximumwaarde %1$s</string>
     <string name="value_must_be_a_whole_number">Waarde moet een geheel getal zijn</string>
@@ -102,15 +102,15 @@
     <string name="ff_time_picker_pm">PM</string>
 
     <string name="take_photo">Foto maken</string>
-    <string name="add_from_gallery">Ĳ_Add From Gallery_________________ä</string>
+    <string name="add_from_gallery">Toevoegen uit galerij</string>
     <string name="rename">Naam wijzigen</string>
     <string name="delete">Verwijderen</string>
     <string name="rename_attachment">Naam bijlage wijzigen</string>
     <string name="name">Naam</string>
-    <string name="add_file">Ĳ_Add From Files_______________ä</string>
-    <string name="attachment_error">Ĳ_Error Adding Attachment________________________ä</string>
-    <string name="no_app_found">Ĳ_No application found to open this file type_______________________ä.</string>
-    <string name="attachment_too_large">Ĳ_The File is too large. Please add a file less than 50 MB______________________________ä.</string>
-    <string name="attachment_is_empty">Ĳ_Empty files are not supported______________________________ä</string>
-    <string name="download_empty_file">Ĳ_Empty files cannot be downloaded_________________ä</string>
+    <string name="add_file">Toevoegen uit bestanden</string>
+    <string name="attachment_error">Fout bij toevoegen bijlage</string>
+    <string name="no_app_found">Kan geen applicatie vinden voor het openen van dit bestandstype.</string>
+    <string name="attachment_too_large">Het bestand is te groot Voeg een bestand toe dat kleiner is dan 50 MB.</string>
+    <string name="attachment_is_empty">Er is geen ondersteuning voor lege bestanden</string>
+    <string name="download_empty_file">Kan geen lege bestanden downloaden</string>
 </resources>

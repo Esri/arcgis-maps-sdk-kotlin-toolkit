@@ -13,15 +13,15 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="show_or_hide_popup_element_content">Š_expand popup element content_____________________________ä</string>
-    <string name="share">Š_Share___________ä</string>
-    <string name="save">Š_Save_________ä</string>
-    <string name="save_successful">Š_Save successful________________ä</string>
-    <string name="save_failed">Š_Save failed____________ä</string>
-    <string name="more">Š_More_________ä</string>
-    <string name="image">Š_Image___________ä</string>
-    <string name="video">Š_Video___________ä</string>
-    <string name="other">Š_Other___________ä</string>
-    <string name="close">Š_Back_________ä</string>
-    <string name="attachment_thumbnail">Š_attachment thumbnail_____________________ä</string>
+    <string name="show_or_hide_popup_element_content">laiendada hüpikakna elemendi sisu</string>
+    <string name="share">Jagamine</string>
+    <string name="save">Salvesta</string>
+    <string name="save_successful">Salvestamine õnnestus</string>
+    <string name="save_failed">Salvestamine ebaõnnestus</string>
+    <string name="more">Rohkem</string>
+    <string name="image">Pilt</string>
+    <string name="video">Video</string>
+    <string name="other">Muu</string>
+    <string name="close">Tagasi</string>
+    <string name="attachment_thumbnail">manuse pisipilt</string>
 </resources>

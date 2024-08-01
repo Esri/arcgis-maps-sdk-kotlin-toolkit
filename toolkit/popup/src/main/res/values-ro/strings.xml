@@ -13,15 +13,15 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="show_or_hide_popup_element_content">Ă_expand popup element content_____________________________ș</string>
-    <string name="share">Ă_Share___________ș</string>
-    <string name="save">Ă_Save_________ș</string>
-    <string name="save_successful">Ă_Save successful________________ș</string>
-    <string name="save_failed">Ă_Save failed____________ș</string>
-    <string name="more">Ă_More_________ș</string>
-    <string name="image">Ă_Image___________ș</string>
-    <string name="video">Ă_Video___________ș</string>
-    <string name="other">Ă_Other___________ș</string>
-    <string name="close">Ă_Back_________ș</string>
-    <string name="attachment_thumbnail">Ă_attachment thumbnail_____________________ș</string>
+    <string name="show_or_hide_popup_element_content">extindere conținut element pop-up</string>
+    <string name="share">Partajare</string>
+    <string name="save">Salvare</string>
+    <string name="save_successful">Salvare reușită</string>
+    <string name="save_failed">Salvare eșuată</string>
+    <string name="more">Mai mult</string>
+    <string name="image">Imagine</string>
+    <string name="video">Video</string>
+    <string name="other">Altele</string>
+    <string name="close">Înapoi</string>
+    <string name="attachment_thumbnail">miniatură atașată</string>
 </resources>
