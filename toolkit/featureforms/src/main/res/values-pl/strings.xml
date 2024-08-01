@@ -16,18 +16,18 @@
   ~
   --><resources>
     <plurals name="enter_n_chars">
-        <item quantity="one">ł_Enter %1$d character_____________________ą</item>
-        <item quantity="other">ł_Enter %1$d characters______________________ą</item>
+        <item quantity="one">Wprowadź %1$d znak</item>
+        <item quantity="other">Wprowadź następującą liczbę znaków: %1$d</item>
     </plurals>
     <plurals name="value_must_be_n_characters">
-        <item quantity="one">ł_Value must be %1$d character_____________________________ą</item>
-        <item quantity="other">ł_Value must be %1$d characters______________________________ą</item>
+        <item quantity="one">Wartość musi zawierać %1$d znak</item>
+        <item quantity="other">Wartość musi zawierać następującą liczbę znaków: %1$d</item>
     </plurals>
     <string name="enter_min_to_max_chars">Wprowadź od %1$d do %2$d znaków</string>
-    <string name="value_must_be_from_to_characters">ł_Value must be %1$d to %2$d characters____________________ą</string>
+    <string name="value_must_be_from_to_characters">Wartość musi zawierać od %1$d do %2$d znaków</string>
     <plurals name="maximum_n_chars">
-        <item quantity="one">ł_Maximum %1$d character_______________________ą</item>
-        <item quantity="other">ł_Maximum %1$d characters________________________ą</item>
+        <item quantity="one">Maksymalna liczba znaków: %1$d</item>
+        <item quantity="other">Maksymalna liczba znaków: %1$d</item>
     </plurals>
     <string name="maximum_n_chars">Maksymalna liczba znaków: %1$d</string>
     <string name="no_value">Brak wartości</string>
@@ -40,7 +40,7 @@
     <string name="done">Wykonano</string>
     <string name="filter">Filtruj %1$s</string>
     <string name="numeric_range_helper_text">Wprowadź wartość od %1$s do %2$s</string>
-    <string name="value_must_be_from_to">ł_Value must be from %1$s to %2$s_________________ą</string>
+    <string name="value_must_be_from_to">Wartość pola musi być z zakresu od %1$s do %2$s</string>
     <string name="less_than_min_value">Wartość mniejsza niż minimalna %1$s</string>
     <string name="exceeds_max_value">Przekracza wartość maksymalną %1$s</string>
     <string name="value_must_be_a_whole_number">Wartość musi być liczbą całkowitą</string>
@@ -102,15 +102,15 @@
     <string name="ff_time_picker_pm">po południu</string>
 
     <string name="take_photo">Zrób zdjęcie</string>
-    <string name="add_from_gallery">ł_Add From Gallery_________________ą</string>
+    <string name="add_from_gallery">Dodaj z galerii</string>
     <string name="rename">Zmień nazwę</string>
     <string name="delete">Usuń</string>
     <string name="rename_attachment">Zmień nazwę załącznika</string>
     <string name="name">Nazwa</string>
-    <string name="add_file">ł_Add From Files_______________ą</string>
-    <string name="attachment_error">ł_Error Adding Attachment________________________ą</string>
-    <string name="no_app_found">ł_No application found to open this file type_______________________ą.</string>
-    <string name="attachment_too_large">ł_The File is too large. Please add a file less than 50 MB______________________________ą.</string>
-    <string name="attachment_is_empty">ł_Empty files are not supported______________________________ą</string>
-    <string name="download_empty_file">ł_Empty files cannot be downloaded_________________ą</string>
+    <string name="add_file">Dodaj z plików</string>
+    <string name="attachment_error">Błąd podczas dodawania załącznika</string>
+    <string name="no_app_found">Nie znaleziono aplikacji do otwarcia tego typu pliku.</string>
+    <string name="attachment_too_large">Plik jest za duży. Dodaj plik o rozmiarze mniejszym niż 50 MB.</string>
+    <string name="attachment_is_empty">Puste pliki nie są obsługiwane</string>
+    <string name="download_empty_file">Nie można pobrać pustych plików</string>
 </resources>

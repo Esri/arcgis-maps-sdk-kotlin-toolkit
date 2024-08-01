@@ -16,18 +16,18 @@
   ~
   --><resources>
     <plurals name="enter_n_chars">
-        <item quantity="one">ĺ_Enter %1$d character_____________________ľ</item>
-        <item quantity="other">ĺ_Enter %1$d characters______________________ľ</item>
+        <item quantity="one">Zadajte %1$d znak</item>
+        <item quantity="other">Zadajte %1$d znakov</item>
     </plurals>
     <plurals name="value_must_be_n_characters">
-        <item quantity="one">ĺ_Value must be %1$d character_____________________________ľ</item>
-        <item quantity="other">ĺ_Value must be %1$d characters______________________________ľ</item>
+        <item quantity="one">Hodnota musí mať %1$d znak</item>
+        <item quantity="other">Hodnota musí mať %1$d znakov</item>
     </plurals>
     <string name="enter_min_to_max_chars">Zadajte %1$d až %2$d znakov</string>
-    <string name="value_must_be_from_to_characters">ĺ_Value must be %1$d to %2$d characters____________________ľ</string>
+    <string name="value_must_be_from_to_characters">Hodnota musí byť od %1$d do %2$d znakov</string>
     <plurals name="maximum_n_chars">
-        <item quantity="one">ĺ_Maximum %1$d character_______________________ľ</item>
-        <item quantity="other">ĺ_Maximum %1$d characters________________________ľ</item>
+        <item quantity="one">Maximálne %1$d znakov</item>
+        <item quantity="other">Maximálne %1$d znakov</item>
     </plurals>
     <string name="maximum_n_chars">Maximálne %1$d znakov</string>
     <string name="no_value">Žiadna hodnota</string>
@@ -40,7 +40,7 @@
     <string name="done">Hotovo</string>
     <string name="filter">Filter %1$s</string>
     <string name="numeric_range_helper_text">Zadajte hodnotu od %1$s do %2$s</string>
-    <string name="value_must_be_from_to">ĺ_Value must be from %1$s to %2$s_________________ľ</string>
+    <string name="value_must_be_from_to">Hodnota musí byť od %1$s do %2$s</string>
     <string name="less_than_min_value">Menej ako minimálna hodnota %1$s</string>
     <string name="exceeds_max_value">Presahuje maximálnu hodnotu %1$s</string>
     <string name="value_must_be_a_whole_number">Hodnota musí byť celé číslo</string>
@@ -102,15 +102,15 @@
     <string name="ff_time_picker_pm">Popoludní</string>
 
     <string name="take_photo">Odfotiť</string>
-    <string name="add_from_gallery">ĺ_Add From Gallery_________________ľ</string>
+    <string name="add_from_gallery">Pridať z Galérie</string>
     <string name="rename">Premenovať</string>
     <string name="delete">Zmazať</string>
     <string name="rename_attachment">Premenovať prílohu</string>
     <string name="name">Názov</string>
-    <string name="add_file">ĺ_Add From Files_______________ľ</string>
-    <string name="attachment_error">ĺ_Error Adding Attachment________________________ľ</string>
-    <string name="no_app_found">ĺ_No application found to open this file type_______________________ľ.</string>
-    <string name="attachment_too_large">ĺ_The File is too large. Please add a file less than 50 MB______________________________ľ.</string>
-    <string name="attachment_is_empty">ĺ_Empty files are not supported______________________________ľ</string>
-    <string name="download_empty_file">ĺ_Empty files cannot be downloaded_________________ľ</string>
+    <string name="add_file">Pridať zo súborov</string>
+    <string name="attachment_error">Chyba pri pridávaní prílohy</string>
+    <string name="no_app_found">Na otvorenie tohto typu súboru nie je k dispozícii žiadna aplikácia.</string>
+    <string name="attachment_too_large">Súbor je príliš veľký. Pridajte súbor menší ako 50 MB.</string>
+    <string name="attachment_is_empty">Prázdne súbory nie sú podporované</string>
+    <string name="download_empty_file">Prázdne súbory nie je možné stiahnuť</string>
 </resources>

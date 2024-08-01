@@ -13,15 +13,15 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="show_or_hide_popup_element_content">한_expand popup element content_____________________________빠</string>
-    <string name="share">한_Share___________빠</string>
-    <string name="save">한_Save_________빠</string>
-    <string name="save_successful">한_Save successful________________빠</string>
-    <string name="save_failed">한_Save failed____________빠</string>
-    <string name="more">한_More_________빠</string>
-    <string name="image">한_Image___________빠</string>
-    <string name="video">한_Video___________빠</string>
-    <string name="other">한_Other___________빠</string>
-    <string name="close">한_Back_________빠</string>
-    <string name="attachment_thumbnail">한_attachment thumbnail_____________________빠</string>
+    <string name="show_or_hide_popup_element_content">팝업 요소 콘텐츠 확장</string>
+    <string name="share">공유</string>
+    <string name="save">저장</string>
+    <string name="save_successful">저장 성공</string>
+    <string name="save_failed">저장 실패</string>
+    <string name="more">자세히</string>
+    <string name="image">이미지</string>
+    <string name="video">비디오</string>
+    <string name="other">기타</string>
+    <string name="close">뒤로</string>
+    <string name="attachment_thumbnail">첨부 파일 썸네일</string>
 </resources>

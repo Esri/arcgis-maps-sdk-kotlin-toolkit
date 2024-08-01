@@ -13,15 +13,15 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="show_or_hide_popup_element_content">í_expand popup element content_____________________________ő</string>
-    <string name="share">í_Share___________ő</string>
-    <string name="save">í_Save_________ő</string>
-    <string name="save_successful">í_Save successful________________ő</string>
-    <string name="save_failed">í_Save failed____________ő</string>
-    <string name="more">í_More_________ő</string>
-    <string name="image">í_Image___________ő</string>
-    <string name="video">í_Video___________ő</string>
-    <string name="other">í_Other___________ő</string>
-    <string name="close">í_Back_________ő</string>
-    <string name="attachment_thumbnail">í_attachment thumbnail_____________________ő</string>
+    <string name="show_or_hide_popup_element_content">előugró ablak elem tartalmának kibontása</string>
+    <string name="share">Megosztás</string>
+    <string name="save">Mentés</string>
+    <string name="save_successful">Mentés sikeres</string>
+    <string name="save_failed">Mentés sikertelen</string>
+    <string name="more">Továbbiak</string>
+    <string name="image">Kép</string>
+    <string name="video">Videó</string>
+    <string name="other">Egyéb</string>
+    <string name="close">Vissza</string>
+    <string name="attachment_thumbnail">csatolmány bélyegkép</string>
 </resources>

@@ -13,15 +13,15 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="show_or_hide_popup_element_content">ng_expand popup element content_____________________________ny</string>
-    <string name="share">ng_Share___________ny</string>
-    <string name="save">ng_Save_________ny</string>
-    <string name="save_successful">ng_Save successful________________ny</string>
-    <string name="save_failed">ng_Save failed____________ny</string>
-    <string name="more">ng_More_________ny</string>
-    <string name="image">ng_Image___________ny</string>
-    <string name="video">ng_Video___________ny</string>
-    <string name="other">ng_Other___________ny</string>
-    <string name="close">ng_Back_________ny</string>
-    <string name="attachment_thumbnail">ng_attachment thumbnail_____________________ny</string>
+    <string name="show_or_hide_popup_element_content">perluas konten elemen popup</string>
+    <string name="share">Bagikan</string>
+    <string name="save">Simpan</string>
+    <string name="save_successful">Berhasil menyimpan</string>
+    <string name="save_failed">Gagal menyimpan</string>
+    <string name="more">Lainnya</string>
+    <string name="image">Citra</string>
+    <string name="video">Video</string>
+    <string name="other">Lainnya</string>
+    <string name="close">Kembali</string>
+    <string name="attachment_thumbnail">thumbnail lampiran</string>
 </resources>

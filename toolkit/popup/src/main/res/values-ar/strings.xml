@@ -13,15 +13,15 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="show_or_hide_popup_element_content">بيت_expand popup element content_____________________________لاحقة</string>
-    <string name="share">بيت_Share___________لاحقة</string>
-    <string name="save">بيت_Save_________لاحقة</string>
-    <string name="save_successful">بيت_Save successful________________لاحقة</string>
-    <string name="save_failed">بيت_Save failed____________لاحقة</string>
-    <string name="more">بيت_More_________لاحقة</string>
-    <string name="image">بيت_Image___________لاحقة</string>
-    <string name="video">بيت_Video___________لاحقة</string>
-    <string name="other">بيت_Other___________لاحقة</string>
-    <string name="close">بيت_Back_________لاحقة</string>
-    <string name="attachment_thumbnail">بيت_attachment thumbnail_____________________لاحقة</string>
+    <string name="show_or_hide_popup_element_content">توسيع محتوى العنصر المنبثق</string>
+    <string name="share">مشاركة</string>
+    <string name="save">حفظ</string>
+    <string name="save_successful">نجح الحفظ</string>
+    <string name="save_failed">فشل الحفظ</string>
+    <string name="more">المزيد</string>
+    <string name="image">صورة</string>
+    <string name="video">مقاطع الفيديو</string>
+    <string name="other">أخرى</string>
+    <string name="close">السابق</string>
+    <string name="attachment_thumbnail">صورة مصغرة للمرفق</string>
 </resources>

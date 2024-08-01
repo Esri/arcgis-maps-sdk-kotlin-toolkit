@@ -13,15 +13,15 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="show_or_hide_popup_element_content">Ĳ_expand popup element content_____________________________ä</string>
-    <string name="share">Ĳ_Share___________ä</string>
-    <string name="save">Ĳ_Save_________ä</string>
-    <string name="save_successful">Ĳ_Save successful________________ä</string>
-    <string name="save_failed">Ĳ_Save failed____________ä</string>
-    <string name="more">Ĳ_More_________ä</string>
-    <string name="image">Ĳ_Image___________ä</string>
-    <string name="video">Ĳ_Video___________ä</string>
-    <string name="other">Ĳ_Other___________ä</string>
-    <string name="close">Ĳ_Back_________ä</string>
-    <string name="attachment_thumbnail">Ĳ_attachment thumbnail_____________________ä</string>
+    <string name="show_or_hide_popup_element_content">pop-upelement content uitbreiden</string>
+    <string name="share">Delen</string>
+    <string name="save">Opslaan</string>
+    <string name="save_successful">Opslaan is gelukt</string>
+    <string name="save_failed">Kan niet opslaan</string>
+    <string name="more">Meer</string>
+    <string name="image">Afbeelding</string>
+    <string name="video">Video</string>
+    <string name="other">Overige</string>
+    <string name="close">Terug</string>
+    <string name="attachment_thumbnail">thumbnail bijlage</string>
 </resources>

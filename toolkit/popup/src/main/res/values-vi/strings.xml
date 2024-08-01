@@ -13,15 +13,15 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="show_or_hide_popup_element_content">Đ_expand popup element content_____________________________ớ</string>
-    <string name="share">Đ_Share___________ớ</string>
-    <string name="save">Đ_Save_________ớ</string>
-    <string name="save_successful">Đ_Save successful________________ớ</string>
-    <string name="save_failed">Đ_Save failed____________ớ</string>
-    <string name="more">Đ_More_________ớ</string>
-    <string name="image">Đ_Image___________ớ</string>
-    <string name="video">Đ_Video___________ớ</string>
-    <string name="other">Đ_Other___________ớ</string>
-    <string name="close">Đ_Back_________ớ</string>
-    <string name="attachment_thumbnail">Đ_attachment thumbnail_____________________ớ</string>
+    <string name="show_or_hide_popup_element_content">mở rộng nội dung phần tử cửa sổ pop-up</string>
+    <string name="share">Chia sẻ</string>
+    <string name="save">Lưu</string>
+    <string name="save_successful">Lưu thành công</string>
+    <string name="save_failed">Không thể lưu</string>
+    <string name="more">Khác</string>
+    <string name="image">Hình ảnh</string>
+    <string name="video">Video</string>
+    <string name="other">Khác</string>
+    <string name="close">Quay lại</string>
+    <string name="attachment_thumbnail">hình thu nhỏ của tệp đính kèm</string>
 </resources>

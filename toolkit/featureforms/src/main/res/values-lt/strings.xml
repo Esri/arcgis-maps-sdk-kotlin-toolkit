@@ -16,18 +16,18 @@
   ~
   --><resources>
     <plurals name="enter_n_chars">
-        <item quantity="one">Į_Enter %1$d character_____________________š</item>
-        <item quantity="other">Į_Enter %1$d characters______________________š</item>
+        <item quantity="one">Įveskite %1$d simbolį</item>
+        <item quantity="other">Įveskite %1$d simb.</item>
     </plurals>
     <plurals name="value_must_be_n_characters">
-        <item quantity="one">Į_Value must be %1$d character_____________________________š</item>
-        <item quantity="other">Į_Value must be %1$d characters______________________________š</item>
+        <item quantity="one">Reikšmė turi būti %1$d simbolis</item>
+        <item quantity="other">Reikšmė turi būti %1$d simboliai</item>
     </plurals>
     <string name="enter_min_to_max_chars">Įveskite %1$d iki %2$d simbolių</string>
-    <string name="value_must_be_from_to_characters">Į_Value must be %1$d to %2$d characters____________________š</string>
+    <string name="value_must_be_from_to_characters">Reikšmė turi būti nuo %1$d iki %2$d simbolių</string>
     <plurals name="maximum_n_chars">
-        <item quantity="one">Į_Maximum %1$d character_______________________š</item>
-        <item quantity="other">Į_Maximum %1$d characters________________________š</item>
+        <item quantity="one">Maks. %1$d simbolis</item>
+        <item quantity="other">Maks. %1$d simboliai (-ių)</item>
     </plurals>
     <string name="maximum_n_chars">Maks. %1$d simboliai (-ių)</string>
     <string name="no_value">Nėra reikšmės</string>
@@ -40,7 +40,7 @@
     <string name="done">Atlikta</string>
     <string name="filter">Filtruoti %1$s</string>
     <string name="numeric_range_helper_text">Įveskite reikšmę nuo %1$s iki %2$s</string>
-    <string name="value_must_be_from_to">Į_Value must be from %1$s to %2$s_________________š</string>
+    <string name="value_must_be_from_to">Reikšmė turi būti nuo %1$s iki %2$s</string>
     <string name="less_than_min_value">Mažiau negu minimali reikšmė %1$s</string>
     <string name="exceeds_max_value">Viršija maksimalią reikšmę %1$s</string>
     <string name="value_must_be_a_whole_number">Reikšmė turi būti sveikasis skaičius</string>
@@ -102,15 +102,15 @@
     <string name="ff_time_picker_pm">popiet</string>
 
     <string name="take_photo">Fotografuoti</string>
-    <string name="add_from_gallery">Į_Add From Gallery_________________š</string>
+    <string name="add_from_gallery">Pridėti iš galerijos</string>
     <string name="rename">Pervardinti</string>
     <string name="delete">Ištrinti</string>
     <string name="rename_attachment">Pervardinti priedą</string>
     <string name="name">Pavadinimas</string>
-    <string name="add_file">Į_Add From Files_______________š</string>
-    <string name="attachment_error">Į_Error Adding Attachment________________________š</string>
-    <string name="no_app_found">Į_No application found to open this file type_______________________š.</string>
-    <string name="attachment_too_large">Į_The File is too large. Please add a file less than 50 MB______________________________š.</string>
-    <string name="attachment_is_empty">Į_Empty files are not supported______________________________š</string>
-    <string name="download_empty_file">Į_Empty files cannot be downloaded_________________š</string>
+    <string name="add_file">Pridėti iš failų</string>
+    <string name="attachment_error">Pridedant priedą įvyko klaida</string>
+    <string name="no_app_found">Nerasta programėlės šio tipo failui atidaryti.</string>
+    <string name="attachment_too_large">Failas yra per didelis. Pridėkite mažesnį nei 50 MB failą.</string>
+    <string name="attachment_is_empty">Tušti failai nėra palaikomi</string>
+    <string name="download_empty_file">Negalima atsisiųsti tuščių failų</string>
 </resources>

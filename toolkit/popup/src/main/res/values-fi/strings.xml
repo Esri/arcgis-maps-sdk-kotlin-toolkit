@@ -13,15 +13,15 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="show_or_hide_popup_element_content">Å_expand popup element content_____________________________ö</string>
-    <string name="share">Å_Share___________ö</string>
-    <string name="save">Å_Save_________ö</string>
-    <string name="save_successful">Å_Save successful________________ö</string>
-    <string name="save_failed">Å_Save failed____________ö</string>
-    <string name="more">Å_More_________ö</string>
-    <string name="image">Å_Image___________ö</string>
-    <string name="video">Å_Video___________ö</string>
-    <string name="other">Å_Other___________ö</string>
-    <string name="close">Å_Back_________ö</string>
-    <string name="attachment_thumbnail">Å_attachment thumbnail_____________________ö</string>
+    <string name="show_or_hide_popup_element_content">laajenna ponnahdusikkunaelementin sisältö</string>
+    <string name="share">Jaa</string>
+    <string name="save">Tallenna</string>
+    <string name="save_successful">Tallennus onnistui</string>
+    <string name="save_failed">Tallennus epäonnistui</string>
+    <string name="more">Lisää</string>
+    <string name="image">Kuva</string>
+    <string name="video">Video</string>
+    <string name="other">Muu</string>
+    <string name="close">Takaisin</string>
+    <string name="attachment_thumbnail">liitteen pikkukuva</string>
 </resources>

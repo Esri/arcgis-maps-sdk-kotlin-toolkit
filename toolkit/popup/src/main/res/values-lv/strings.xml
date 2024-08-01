@@ -13,15 +13,15 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="show_or_hide_popup_element_content">ķ_expand popup element content_____________________________ū</string>
-    <string name="share">ķ_Share___________ū</string>
-    <string name="save">ķ_Save_________ū</string>
-    <string name="save_successful">ķ_Save successful________________ū</string>
-    <string name="save_failed">ķ_Save failed____________ū</string>
-    <string name="more">ķ_More_________ū</string>
-    <string name="image">ķ_Image___________ū</string>
-    <string name="video">ķ_Video___________ū</string>
-    <string name="other">ķ_Other___________ū</string>
-    <string name="close">ķ_Back_________ū</string>
-    <string name="attachment_thumbnail">ķ_attachment thumbnail_____________________ū</string>
+    <string name="show_or_hide_popup_element_content">izvērst uznirstošā elementa saturu</string>
+    <string name="share">Koplietot</string>
+    <string name="save">Saglabāt</string>
+    <string name="save_successful">Saglabāšana veiksmīga</string>
+    <string name="save_failed">Saglabāšana neizdevās</string>
+    <string name="more">Vairāk</string>
+    <string name="image">Attēls</string>
+    <string name="video">Video</string>
+    <string name="other">Cits</string>
+    <string name="close">Atpakaļ</string>
+    <string name="attachment_thumbnail">pielikuma sīktēls</string>
 </resources>

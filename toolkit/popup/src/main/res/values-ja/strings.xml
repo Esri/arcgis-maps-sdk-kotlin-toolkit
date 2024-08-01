@@ -13,15 +13,15 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="show_or_hide_popup_element_content">須_expand popup element content_____________________________鷗</string>
-    <string name="share">須_Share___________鷗</string>
-    <string name="save">須_Save_________鷗</string>
-    <string name="save_successful">須_Save successful________________鷗</string>
-    <string name="save_failed">須_Save failed____________鷗</string>
-    <string name="more">須_More_________鷗</string>
-    <string name="image">須_Image___________鷗</string>
-    <string name="video">須_Video___________鷗</string>
-    <string name="other">須_Other___________鷗</string>
-    <string name="close">須_Back_________鷗</string>
-    <string name="attachment_thumbnail">須_attachment thumbnail_____________________鷗</string>
+    <string name="show_or_hide_popup_element_content">ポップアップ エレメント コンテンツの展開</string>
+    <string name="share">共有</string>
+    <string name="save">保存</string>
+    <string name="save_successful">保存に成功しました</string>
+    <string name="save_failed">保存できませんでした</string>
+    <string name="more">詳細</string>
+    <string name="image">画像</string>
+    <string name="video">ビデオ</string>
+    <string name="other">その他</string>
+    <string name="close">戻る</string>
+    <string name="attachment_thumbnail">添付ファイルのサムネイル</string>
 </resources>
