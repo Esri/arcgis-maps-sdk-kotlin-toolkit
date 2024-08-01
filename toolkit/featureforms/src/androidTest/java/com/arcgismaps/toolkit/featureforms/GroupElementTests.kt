@@ -20,46 +20,29 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertTextContains
-import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildren
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onParent
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
-import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.data.ArcGISFeature
-import com.arcgismaps.data.QueryParameters
-import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.featureforms.FeatureForm
-import com.arcgismaps.mapping.featureforms.FeatureFormDefinition
 import com.arcgismaps.mapping.featureforms.GroupFormElement
-import com.arcgismaps.mapping.layers.FeatureLayer
-import junit.framework.TestCase
-import kotlinx.coroutines.test.runTest
+import com.google.common.truth.Truth.assertThat
 import org.junit.Before
-import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
 
-class GroupElementTests {
-
-    private val featureForm by lazy {
-        sharedFeatureForm!!
-    }
-
+class GroupElementTests : FeatureFormTestRunner(
+    uri = "https://www.arcgis.com/home/item.html?id=97495f67bd2e442dbbac485232375b07",
+    objectId = 1
+) {
     @get:Rule
     val composeTestRule = createComposeRule()
-
-    private fun getGroupElementWithLabel(label: String): GroupFormElement {
-        return featureForm.elements
-            .filterIsInstance<GroupFormElement>()
-            .first {
-                it.label == label
-            }
-    }
 
     @Before
     fun setContent() {
@@ -76,8 +59,10 @@ class GroupElementTests {
      */
     @Test
     fun testInitialState() {
-        val groupFormElement1 = getGroupElementWithLabel("Group with Multiple Form Elements")
-        val groupElement1 = composeTestRule.onNodeWithText(groupFormElement1.label)
+        val groupFormElement1 =
+            featureForm.getGroupFormElementWithLabel("Group with Multiple Form Elements")
+        assertThat(groupFormElement1).isNotNull()
+        val groupElement1 = composeTestRule.onNodeWithText(groupFormElement1!!.label)
         groupElement1.assertIsDisplayed()
         // assert description is displayed
         groupElement1.assertTextContains(groupFormElement1.description)
@@ -103,11 +88,12 @@ class GroupElementTests {
     @Test
     fun testVisibility() {
         val groupElementToTest =
-            getGroupElementWithLabel("Group with children that are visible dependent")
+            featureForm.getGroupFormElementWithLabel("Group with children that are visible dependent")
+        assertThat(groupElementToTest).isNotNull()
         // find the scrollable container
-        val lazyColumn = composeTestRule.onNode(hasScrollAction())
+        val lazyColumn = composeTestRule.onNodeWithContentDescription("lazy column")
         // scroll until the group is visible
-        lazyColumn.performScrollToNode(hasText(groupElementToTest.label))
+        lazyColumn.performScrollToNode(hasText(groupElementToTest!!.label))
         // find the group and check if displayed
         val groupElement = composeTestRule.onNodeWithText(groupElementToTest.label)
         groupElement.assertIsDisplayed()
@@ -115,51 +101,17 @@ class GroupElementTests {
         groupElement.assertTextContains(groupElementToTest.description)
         // assert only the header is visible and other field elements are not
         assert(groupElement.onParent().onChildren().fetchSemanticsNodes().count() == 1)
-        // find and click on the radio button option
-        composeTestRule.onNodeWithText("show invisible form element").performClick()
+        // find the radio button option that enables the group element's children visibility
+        val radioButtonLabel = "show invisible form element"
+        val radioButton = composeTestRule.onNodeWithText(radioButtonLabel)
+        // scroll to the radio button and click it
+        lazyColumn.performScrollToNode(hasText(radioButtonLabel))
+        radioButton.performClick()
+        radioButton.assertIsSelected()
+        // scroll back to the group element
+        lazyColumn.performScrollToNode(hasText(groupElementToTest.label))
         // assert the and other field elements are visible
         assert(groupElement.onParent().onChildren().fetchSemanticsNodes().count() > 1)
-    }
-
-    companion object {
-        private var sharedFeatureFormDefinition: FeatureFormDefinition? = null
-        private var sharedFeatureForm: FeatureForm? = null
-        private var sharedFeature: ArcGISFeature? = null
-        private var sharedMap: ArcGISMap? = null
-
-        @BeforeClass
-        @JvmStatic
-        fun setupClass() = runTest {
-            ArcGISEnvironment.authenticationManager.arcGISAuthenticationChallengeHandler =
-                FeatureFormsTestChallengeHandler(
-                    BuildConfig.webMapUser,
-                    BuildConfig.webMapPassword
-                )
-
-            sharedMap =
-                ArcGISMap("https://runtimecoretest.maps.arcgis.com/apps/mapviewer/index.html?webmap=97495f67bd2e442dbbac485232375b07")
-            sharedMap?.load()
-                ?.onFailure { TestCase.fail("failed to load webmap with ${it.message}") }
-            val featureLayer = sharedMap?.operationalLayers?.first() as? FeatureLayer
-            featureLayer?.let { layer ->
-                layer.load().onFailure { TestCase.fail("failed to load layer with ${it.message}") }
-                sharedFeatureFormDefinition = layer.featureFormDefinition!!
-                val parameters = QueryParameters().also {
-                    it.objectIds.add(1L)
-                    it.maxFeatures = 1
-                }
-                layer.featureTable?.queryFeatures(parameters)?.onSuccess {
-                    sharedFeature = it.filterIsInstance<ArcGISFeature>().firstOrNull()
-                    if (sharedFeature == null) TestCase.fail("failed to fetch feature")
-                    sharedFeature?.load()
-                        ?.onFailure { TestCase.fail("failed to load feature with ${it.message}") }
-                    sharedFeatureForm = FeatureForm(sharedFeature!!, sharedFeatureFormDefinition!!)
-                    sharedFeatureForm!!.evaluateExpressions()
-                }?.onFailure {
-                    TestCase.fail("failed to query features on layer's featuretable with ${it.message}")
-                }
-            }
-        }
     }
 }
 
@@ -170,3 +122,11 @@ internal fun SemanticsNodeInteraction.isToggled(): Boolean {
     val semantics = fetchSemanticsNode()
     return semantics.config[SemanticsProperties.ToggleableState] == ToggleableState.On
 }
+
+/**
+ * Returns a [GroupFormElement] with the given [label] if it exists. Else a null is returned.
+ */
+internal fun FeatureForm.getGroupFormElementWithLabel(label: String): GroupFormElement? =
+    elements.find {
+        it is GroupFormElement && it.label == label
+    } as? GroupFormElement

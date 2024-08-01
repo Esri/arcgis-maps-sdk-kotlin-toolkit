@@ -25,6 +25,7 @@ import com.arcgismaps.data.CodedValue
 import com.arcgismaps.data.FieldType
 import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
+import com.arcgismaps.mapping.featureforms.FormExpressionEvaluationError
 import com.arcgismaps.mapping.featureforms.FormInputNoValueOption
 import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
@@ -72,20 +73,28 @@ internal class SwitchFieldProperties(
  * @param properties the [SwitchFieldProperties] associated with this state.
  * @property initialValue the initial value to set for this field. This value should be a CodedValue code or subtype.
  * @param scope a [CoroutineScope] to start [StateFlow] collectors on.
- * @param onEditValue a callback to invoke when the user edits result in a change of value. This
- * is called on [SwitchFieldState.onValueChanged].
+ * @param updateValue a function that is invoked when the user edits result in a change of value. This
+ * is called in [BaseFieldState.onValueChanged].
+ * @param evaluateExpressions a function that is invoked to evaluate all form expressions. This is
+ * called after a successful [updateValue].
  */
 @Stable
 internal class SwitchFieldState(
+    id : Int,
     properties: SwitchFieldProperties,
     val initialValue: Any? = properties.value.value,
+    hasValueExpression : Boolean,
     scope: CoroutineScope,
-    onEditValue: ((Any?) -> Unit)
+    updateValue: (Any?) -> Unit,
+    evaluateExpressions: suspend () -> Result<List<FormExpressionEvaluationError>>
 ) : CodedValueFieldState(
+    id = id,
     properties = properties,
     scope = scope,
     initialValue = initialValue,
-    onEditValue = onEditValue
+    hasValueExpression = hasValueExpression,
+    updateValue = updateValue,
+    evaluateExpressions = evaluateExpressions
 ) {
     /**
      * The CodedValue that represents the "on" state of the Switch.
@@ -118,6 +127,7 @@ internal class SwitchFieldState(
             restore = { list ->
                 val input = formElement.input as SwitchFormInput
                 SwitchFieldState(
+                    id = formElement.hashCode(),
                     properties = SwitchFieldProperties(
                         label = formElement.label,
                         placeholder = formElement.hint,
@@ -138,11 +148,10 @@ internal class SwitchFieldState(
                         noValueLabel = noValueString
                     ),
                     initialValue = list[0],
+                    hasValueExpression = formElement.hasValueExpression,
                     scope = scope,
-                    onEditValue = { code ->
-                        formElement.updateValue(code)
-                        scope.launch { form.evaluateExpressions() }
-                    },
+                    updateValue = formElement::updateValue,
+                    evaluateExpressions = form::evaluateExpressions
                 )
             }
         )
@@ -164,6 +173,7 @@ internal fun rememberSwitchFieldState(
     val fallback = initialValue.isEmpty()
         || (field.value.value != input.onValue.code && field.value.value != input.offValue.code)
     SwitchFieldState(
+        id = field.hashCode(),
         properties = SwitchFieldProperties(
             label = field.label,
             placeholder = field.hint,
@@ -183,10 +193,9 @@ internal fun rememberSwitchFieldState(
                 FormInputNoValueOption.Hide,
             noValueLabel = noValueString
         ),
+        hasValueExpression = field.hasValueExpression,
         scope = scope,
-        onEditValue = {
-            field.updateValue(it)
-            scope.launch { form.evaluateExpressions() }
-        },
+        updateValue = field::updateValue,
+        evaluateExpressions = form::evaluateExpressions
     )
 }

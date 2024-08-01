@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~
+  ~  Copyright 2023 Esri
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  ~
+  --><resources>
+    <string name="enter_n_chars">ป้อน %1$d อักขระ</string>
+    <string name="enter_min_to_max_chars">ป้อนอักขระ %1$d ถึง %2$d ตัว</string>
+    <string name="maximum_n_chars">สูงสุด %1$d อักขระ</string>
+    <string name="no_value">ไม่มีค่า</string>
+    <string name="enter_value">ป้อนค่า</string>
+    <string name="required">ต้องการ</string>
+    <string name="today">วันนี้</string>
+    <string name="now">ตอนนี้</string>
+    <string name="cancel">ยกเลิก</string>
+    <string name="ok">ตกลง</string>
+    <string name="done">สำเร็จ</string>
+    <string name="filter">ตัวกรอง %1$s</string>
+    <string name="numeric_range_helper_text">ป้อนค่าตั้งแต่ %1$s ถึง %2$s</string>
+    <string name="less_than_min_value">น้อยกว่าค่าขั้นต่ำ %1$s</string>
+    <string name="exceeds_max_value">เกินค่าสูงสุด %1$s</string>
+    <string name="value_must_be_a_whole_number">ค่าต้องเป็นจำนวนเต็ม</string>
+    <string name="value_must_be_a_number">ค่าต้องเป็นตัวเลข</string>
+    <string name="value_must_be_within_domain">ค่าต้องอยู่ภายในโดเมน</string>
+    <string name="value_must_not_be_empty">ค่าต้องไม่ว่างเปล่า</string>
+    <string name="min_datetime_helper_text">วันที่ต้องเท่ากับหรืออยู่หลังจาก %1$s</string>
+    <string name="max_datetime_helper_text">วันที่ต้องเท่ากับหรืออยู่ก่อนหน้า %1$s</string>
+
+    <!-- Date Picker string values -->
+    <string name="ff_date_input_headline">วันที่ที่ป้อน</string>
+    <string name="ff_date_input_headline_description">วันที่ที่ป้อน: %1$s</string>
+    <string name="ff_date_input_invalid_for_pattern">วันที่ไม่ตรงกับรูปแบบที่คาดไว้: %1$s</string>
+    <string name="ff_date_input_invalid_not_allowed">วันที่ที่ไม่ได้รับอนุญาต: %1$s</string>
+    <string name="ff_date_input_invalid_year_range">
+        วันที่อยู่นอกช่วงปีที่คาดไว้ %1$s - %2$s
+    </string>
+    <string name="ff_date_input_label">วันที่</string>
+    <string name="ff_date_input_no_input_description">ไม่มีเลย</string>
+    <string name="ff_date_input_title">เลือกวันที่</string>
+    <string name="ff_date_picker_headline">"วันที่ที่เลือก"</string>
+    <string name="ff_date_picker_headline_description">การเลือกปัจจุบัน: %1$s</string>
+    <string name="ff_date_picker_navigate_to_year_description">นำทางไปยังปี %1$s</string>
+    <string name="ff_date_picker_no_selection_description">ไม่มีเลย</string>
+    <string name="ff_date_picker_scroll_to_earlier_years">เลื่อนเพื่อแสดงปีช่วงก่อนหน้า</string>
+    <string name="ff_date_picker_scroll_to_later_years">เลื่อนเพื่อแสดงปีช่วงหลัง</string>
+    <string name="ff_date_picker_switch_to_calendar_mode">สลับเป็นโหมดอินพุทปฏิทิน</string>
+    <string name="ff_date_picker_switch_to_day_selection">
+        "ปัดเพื่อเลือกปี หรือแตะเพื่อสลับกลับไปเลือกวัน"
+    </string>
+    <string name="ff_date_picker_switch_to_input_mode">สลับเป็นโหมดอินพุทข้อความ</string>
+    <string name="ff_date_picker_switch_to_next_month">"เปลี่ยนเป็นเดือนถัดไป"</string>
+    <string name="ff_date_picker_switch_to_previous_month">"เปลี่ยนเป็นเดือนก่อนหน้า"</string>
+    <string name="ff_date_picker_switch_to_year_selection">"สลับเป็นการเลือกปี"</string>
+    <string name="ff_date_picker_title">"เลือกวันที่"</string>
+    <string name="ff_date_picker_today_description">วันนี้</string>
+    <string name="ff_date_picker_year_picker_pane_title">แสดงตัวเลือกปี</string>
+    <string name="ff_date_range_input_invalid_range_input">อินพุทช่วงวันที่ไม่ถูกต้อง</string>
+    <string name="ff_date_range_input_title">ป้อนวันที่</string>
+    <string name="ff_date_range_picker_day_in_range">อยู่ในช่วง</string>
+    <string name="ff_date_range_picker_end_headline">วันที่สิ้นสุด</string>
+    <string name="ff_date_range_picker_scroll_to_next_month">เลื่อนเพื่อแสดงเดือนถัดไป</string>
+    <string name="ff_date_range_picker_scroll_to_previous_month">เลื่อนเพื่อแสดงเดือนก่อนหน้า</string>
+    <string name="ff_date_range_picker_start_headline">วันที่เริ่มต้น</string>
+    <string name="ff_date_range_picker_title">เลือกวันที่</string>
+
+    <!-- Time Picker string values -->
+    <string name="ff_time_picker_am">AM</string>
+    <string name="ff_time_picker_hour">ชั่วโมง</string>
+    <string name="ff_time_picker_hour_24h_suffix">%1$d ชั่วโมง</string>
+    <string name="ff_time_picker_hour_selection">เลือกชั่วโมง</string>
+    <string name="ff_time_picker_hour_suffix">%1$d นาฬิกา</string>
+    <string name="ff_time_picker_hour_text_field">สำหรับชั่วโมง</string>
+    <string name="ff_time_picker_minute">นาที</string>
+    <string name="ff_time_picker_minute_selection">เลือกนาที</string>
+    <string name="ff_time_picker_minute_suffix">%1$d นาที</string>
+    <string name="ff_time_picker_minute_text_field">สำหรับนาที</string>
+    <string name="ff_time_picker_period_toggle_description">เลือก AM หรือ PM</string>
+    <string name="ff_time_picker_pm">PM</string>
+    <string name="take_photo">ถ่ายภาพ</string>
+    <string name="rename">เปลี่ยนชื่อ</string>
+    <string name="delete">ลบ</string>
+    <string name="rename_attachment">เปลี่ยนชื่อไฟล์แนบ</string>
+    <string name="name">ชื่อ</string>
+</resources>

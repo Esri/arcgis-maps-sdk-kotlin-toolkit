@@ -1,8 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
     <string name="floor_filter_view_filter_hint_sites">Фільтр сайтів...</string>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
     <string name="floor_filter_view_filter_hint_facilities">Фільтр пунктів обслуговування...</string>
+    <!-- This text is a label on a text field that can fit 24 chars -->
     <string name="floor_filter_select_site">Вибрати сайт</string>
+    <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Вибрати пункт обслуговування</string>
     <string name="floor_filter_no_results">Результати не знайдено.</string>
-    <string name="floor_filter_site_selector_top_bar">Site\u0020-\u0020</string>
+    <string name="not_available">Не доступно</string>
+    <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
+    <string name="floor_filter_site_selector_top_bar">Майданчик - %1$s</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_facility_button">Кнопка «Майданчики та споруди»</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="floor_level_select_button">Кнопка вибору рівня поверху</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_item">Елемент майданчика</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="facility_item">Елемент споруди</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="clear_search">Очистити пошук</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="close">Закрити</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="go_back_to_site_selector">Повернутися до селектора майданчика</string>
 </resources>

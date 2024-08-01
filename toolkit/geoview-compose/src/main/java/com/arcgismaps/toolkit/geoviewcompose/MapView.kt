@@ -17,7 +17,9 @@
 
 package com.arcgismaps.toolkit.geoviewcompose
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -30,6 +32,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -114,6 +117,7 @@ import kotlinx.coroutines.launch
  * @param onTwoPointerTap lambda invoked when a user taps two pointers on the composable MapView
  * @param onPan lambda invoked when a user drags a pointer or pointers across composable MapView
  * @param onDrawStatusChanged lambda invoked when the draw status of the composable MapView is changed
+ * @param content the content of the composable MapView
  * @sample com.arcgismaps.toolkit.geoviewcompose.samples.MapViewSample
  * @see
  * - <a href="https://developers.arcgis.com/kotlin/maps-2d/tutorials/display-a-map/">Display a map tutorial</a>
@@ -161,35 +165,51 @@ public fun MapView(
     onLongPress: ((LongPressEvent) -> Unit)? = null,
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
-    onDrawStatusChanged: ((DrawStatus) -> Unit)? = null
+    onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
+    content: (@Composable MapViewScope.() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val mapView = remember { MapView(context) }
     val layoutDirection = LocalLayoutDirection.current
 
-    AndroidView(
-        modifier = modifier.semantics { contentDescription = "MapView" },
-        factory = { mapView },
-        update = {
-            it.map = arcGISMap
-            it.selectionProperties = selectionProperties
-            it.interactionOptions = mapViewInteractionOptions
-            it.locationDisplay = locationDisplay
-            it.labeling = viewLabelProperties
-            it.wrapAroundMode = wrapAroundMode
-            it.geometryEditor = geometryEditor
-            it.grid = grid
-            it.backgroundGrid = backgroundGrid
-            it.isAttributionBarVisible = isAttributionBarVisible
-            it.setTimeExtent(timeExtent)
-            if (it.graphicsOverlays != graphicsOverlays) {
-                it.graphicsOverlays.apply {
-                    clear()
-                    addAll(graphicsOverlays)
+    // The MapView is wrapped in a Box to ensure that the Callout is drawn on top of the MapView and
+    // that the Callout is clipped to its bounds
+    Box(modifier = modifier.clipToBounds()) {
+        AndroidView(
+            modifier = Modifier
+                .fillMaxSize()
+                .semantics { contentDescription = "MapView" },
+            factory = { mapView },
+            update = {
+                it.map = arcGISMap
+                it.selectionProperties = selectionProperties
+                it.interactionOptions = mapViewInteractionOptions
+                it.locationDisplay = locationDisplay
+                it.labeling = viewLabelProperties
+                it.wrapAroundMode = wrapAroundMode
+                it.geometryEditor = geometryEditor
+                it.grid = grid
+                it.backgroundGrid = backgroundGrid
+                it.isAttributionBarVisible = isAttributionBarVisible
+                it.setTimeExtent(timeExtent)
+                if (it.graphicsOverlays != graphicsOverlays) {
+                    it.graphicsOverlays.apply {
+                        clear()
+                        addAll(graphicsOverlays)
+                    }
                 }
+            })
+
+        val mapViewScope = remember { MapViewScope(mapView) }
+        val isMapViewReady = mapView.rememberIsReady()
+
+        if (isMapViewReady.value) {
+            content?.let {
+                mapViewScope.it()
             }
-        })
+        }
+    }
 
     DisposableEffect(Unit) {
         lifecycleOwner.lifecycle.addObserver(mapView)
@@ -509,6 +529,13 @@ public inline fun rememberLocationDisplay(
         LocationDisplay().apply(init)
     }
 }
+
+/**
+ * The receiver class of the [MapView] content lambda.
+ *
+ * @since 200.5.0
+ */
+public class MapViewScope internal constructor(mapView: MapView) : GeoViewScope(mapView)
 
 /**
  * Contains default values for the composable MapView.

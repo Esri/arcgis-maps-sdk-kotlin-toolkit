@@ -16,4 +16,17 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <application>
+        <provider
+            android:name="com.arcgismaps.toolkit.featureforms.internal.utils.AttachmentsFileProvider"
+            android:authorities="${applicationId}.com.arcgismaps.toolkit.featureforms.attachmentsfileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/feature_forms_attachments" />
+        </provider>
+    </application>
 </manifest>

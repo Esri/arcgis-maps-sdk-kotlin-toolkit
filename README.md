@@ -7,8 +7,10 @@ The ArcGIS Maps SDK for Kotlin Toolkit contains components that will simplify yo
 * **[Authenticator](toolkit/authentication)** - Displays a user interface when network and ArcGIS authentication challenges occur.
 * **[Compass](toolkit/compass)** - Shows a compass direction when the map is rotated. Auto-hides when the map points north.
 * **[FeatureForms](toolkit/featureforms)** - Provides a UI for editing feature attributes.
-* **[GeoView-Compose](toolkit/geoview-compose)** - Compose wrappers for the MapView and SceneView.
 * **[FloorFilter](toolkit/indoors)** - Allows filtering of floor plan data in a geo view by a site, a facility in the site, or a floor in the facility.
+* **[GeoView-Compose](toolkit/geoview-compose)** - Compose wrappers for the MapView and SceneView.
+  * **[Callout](toolkit/geoview-compose#display-a-callout)** - Draws a callout on the GeoView to display Composable content.
+* **[Popup](toolkit/popup)** - View field values of features in a layer using the Popup API.
 
 ## API Reference
 
@@ -41,10 +43,12 @@ repositories {
 The *ArcGIS Maps SDK for Kotlin Toolkit* is released with a "bill of materials" (`BOM`). The releasable BOM is versioned and represents a set of versions of the toolkit components which are compatible with one another. You may specify dependencies as follows
 
 ```
-implementation(platform("com.esri:arcgis-maps-kotlin-toolkit-bom:200.4.0"))
+implementation(platform("com.esri:arcgis-maps-kotlin-toolkit-bom:200.5.0"))
 implementation("com.esri:arcgis-maps-kotlin-toolkit-authentication")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-compass")
+implementation("com.esri:arcgis-maps-kotlin-toolkit-geoview-compose")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-indoors")
+implementation("com.esri:arcgis-maps-kotlin-toolkit-popup")
 ```
 
 The template and TemplateApp modules are for bootstrapping new modules.
@@ -62,10 +66,13 @@ Esri welcomes contributions from anyone and everyone. Please see our [guidelines
 ### Creating a New Toolkit Component
 
 A new toolkit component can be added to this project by running the bash script at the top level
-`./new-component-starter.sh -n NameOfNewComponent"`
+`./new-component-starter.sh`
 
-This will create a new library module for the new component, and a new app module which depends on the library.
+This script will prompt for you to input a name for the new component and ask if you want to create a new app module for it.
 Capitalization isn't necessary, but it won't capitalize anything but the first letter if none is specified.
+
+A new microapp can be added by running the bash script `./new-microapp-starter.sh`. 
+This script will prompt for you to input a name for the new microapp.
 
 This script requires bash 4.0 or higher.
 
@@ -93,6 +100,24 @@ The apps are not released but are useful for working on a particular component i
 The template and TemplateApp modules are for bootstrapping new modules.
 
 Please see the [package structure](doc/general/developer_setup.md#package-structure) documentation for more details.
+
+### Testing
+
+#### Running Local Tests
+
+In order to run *local* (non-instrumented) tests of all modules and get an aggregated test report, run the following at the root folder of the project:
+```
+./gradlew testAggregatedReport --continue
+```
+The test report for local tests can be located under `arcgis-maps-sdk-kotlin-toolkit/build/reports`.
+
+#### Running Connected Tests
+
+In order to run *connected* (instrumented) tests of all modules and get the test reports in a centralized folder, run the following at the root folder of the project:
+```
+./gradlew connectedDebugAndroidTest --continue
+```
+The test reports for connected tests can be located under `arcgis-maps-sdk-kotlin-toolkit/connectedTestReports`.
 
 ## Licensing
 

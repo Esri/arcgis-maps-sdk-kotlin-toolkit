@@ -49,6 +49,10 @@ android {
     buildFeatures {
         compose = true
     }
+    packagingOptions {
+        exclude("META-INF/LICENSE-notice.md")
+        exclude("META-INF/LICENSE.md")
+    }
     composeOptions {
         kotlinCompilerExtensionVersion = libs.versions.androidxComposeCompiler.get()
     }
@@ -59,6 +63,19 @@ android {
         if ("Test" !in name) {
             kotlinOptions.freeCompilerArgs += "-Xexplicit-api=strict"
         }
+    }
+
+    /**
+     * Configures the test report for connected (instrumented) tests to be copied to a central
+     * folder in the project's root directory.
+     */
+    testOptions {
+        targetSdk = libs.versions.compileSdk.get().toInt()
+        val connectedTestReportsPath: String by project
+        reportDir = "$connectedTestReportsPath/${project.name}"
+    }
+    lint {
+        targetSdk = libs.versions.compileSdk.get().toInt()
     }
 }
 
@@ -73,4 +90,8 @@ dependencies {
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
     debugImplementation(libs.bundles.debug)
+
+    // uiautomator
+    androidTestImplementation(libs.androidx.uiautomator)
+    androidTestImplementation(libs.mockk.android)
 }

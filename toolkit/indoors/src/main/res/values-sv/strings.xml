@@ -1,8 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
     <string name="floor_filter_view_filter_hint_sites">Filtrera webbplatser...</string>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
     <string name="floor_filter_view_filter_hint_facilities">Filtrera inrättningar...</string>
+    <!-- This text is a label on a text field that can fit 24 chars -->
     <string name="floor_filter_select_site">Välj en webbplats</string>
+    <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Välj en anläggning</string>
     <string name="floor_filter_no_results">Inga resultat hittades.</string>
-    <string name="floor_filter_site_selector_top_bar">Site\u0020-\u0020</string>
+    <string name="not_available">Inte tillgänglig</string>
+    <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
+    <string name="floor_filter_site_selector_top_bar">Plats - %1$s</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_facility_button">Knappen Platser och inrättningar</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="floor_level_select_button">Knappen Välj golvnivå</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_item">Platsobjekt</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="facility_item">Inrättningsobjekt</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="clear_search">Rensa sökning</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="close">Stäng</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="go_back_to_site_selector">Gå tillbaka till platsväljaren</string>
 </resources>

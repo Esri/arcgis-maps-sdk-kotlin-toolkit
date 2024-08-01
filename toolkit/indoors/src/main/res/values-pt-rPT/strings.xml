@@ -1,8 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
     <string name="floor_filter_view_filter_hint_sites">Filtrar locais…</string>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
     <string name="floor_filter_view_filter_hint_facilities">Filtrar instalações…</string>
+    <!-- This text is a label on a text field that can fit 24 chars -->
     <string name="floor_filter_select_site">Selecionar um local</string>
+    <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Selecione uma instalação</string>
     <string name="floor_filter_no_results">Não foram encontrados resultados.</string>
-    <string name="floor_filter_site_selector_top_bar">Local\u0020-\u0020</string>
+    <string name="not_available">Não disponível</string>
+    <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
+    <string name="floor_filter_site_selector_top_bar">Local - %1$s</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_facility_button">Botão Locais e instalações</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="floor_level_select_button">Botão de seleção do piso</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_item">Item de local</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="facility_item">Item de instalação</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="clear_search">Limpar pesquisa</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="close">Fechar</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="go_back_to_site_selector">Voltar ao seletor de locais</string>
 </resources>

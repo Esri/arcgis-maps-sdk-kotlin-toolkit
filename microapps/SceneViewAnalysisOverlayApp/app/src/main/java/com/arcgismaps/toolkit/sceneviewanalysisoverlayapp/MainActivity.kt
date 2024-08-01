@@ -26,7 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.toolkit.sceneviewanalysisoverlayapp.screens.MainScreen
-import com.arcgismaps.toolkit.sceneviewanalysisoverlayapp.ui.theme.SceneViewAnalysisOverlayAppTheme
+import com.esri.microappslib.theme.MicroAppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,7 +34,7 @@ class MainActivity : ComponentActivity() {
         ArcGISEnvironment.apiKey =
             ApiKey.create(BuildConfig.API_KEY)
         setContent {
-            SceneViewAnalysisOverlayAppTheme {
+            MicroAppTheme {
                 SceneViewAnalysisOverlayApp()
             }
         }
@@ -49,7 +49,7 @@ fun SceneViewAnalysisOverlayApp() {
 @Preview(showBackground = true)
 @Composable
 fun AppPreview() {
-    SceneViewAnalysisOverlayAppTheme {
+    MicroAppTheme {
         SceneViewAnalysisOverlayApp()
     }
 }

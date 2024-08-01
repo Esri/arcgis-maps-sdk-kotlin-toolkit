@@ -1,8 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
     <string name="floor_filter_view_filter_hint_sites">Filtruoti vietas...</string>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
     <string name="floor_filter_view_filter_hint_facilities">Filtruoti įrenginius...</string>
+    <!-- This text is a label on a text field that can fit 24 chars -->
     <string name="floor_filter_select_site">Pasirinkti vietą</string>
+    <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Pasirinkti įrenginį</string>
     <string name="floor_filter_no_results">Nieko nerasta.</string>
-    <string name="floor_filter_site_selector_top_bar">Vieta\u0020-\u0020</string>
+    <string name="not_available">Nėra</string>
+    <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
+    <string name="floor_filter_site_selector_top_bar">Sklypas - %1$s</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_facility_button">Sklypų ir pastatų mygtukas</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="floor_level_select_button">Aukštų lygio pasirinkimo mygtukas</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_item">Sklypo elementas</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="facility_item">Pastato elementas</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="clear_search">Valyti paiešką</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="close">Uždaryti</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="go_back_to_site_selector">Grįžti į sklypo išrinkiklį</string>
 </resources>
