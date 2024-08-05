@@ -84,5 +84,6 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
+    androidTestImplementation(libs.androidx.uiautomator)
     debugImplementation(libs.bundles.debug)
 }
