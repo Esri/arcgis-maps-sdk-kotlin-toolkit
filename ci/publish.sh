@@ -67,9 +67,20 @@ function _check_options_and_set_variables() {
   fi
 }
 
+function _publishReleaseCandidate() {
+  _log "Publish the release candidate build to artifactory"
+  if ! ${apps_path}/arcgis-maps-sdk-kotlin-toolkit/ci/run_gradle_task.sh -t publish -x "-PartifactoryUsername=${ARTIFACTORY_USR} -PartifactoryPassword=${ARTIFACTORY_PSW} -PversionNumber=${BUILDVER} -PbuildNumber=${BUILDNUM} -PsdkVersionNumber=${BUILDVER} -PsdkBuildNumber=${BUILDNUM} -PfinalBuild=true" ; then
+    echo "error: Running the publish gradle task failed for the release candidate"
+    exit 1
+  fi
+}
+
 function _publish() {
   _log "Publish the release build to artifactory"
-  if ! ${apps_path}/arcgis-maps-sdk-kotlin-toolkit/ci/run_gradle_task.sh -v -t publish -x "-PartifactoryUsername=${ARTIFACTORY_USR} -PartifactoryPassword=${ARTIFACTORY_PSW} -PversionNumber=${BUILDVER} -PbuildNumber=${BUILDNUM}" ; then
+
+  if [ ! -z "${FINAL_BUILD}" ]; then
+    _publishReleaseCandidate
+  elif ! ${apps_path}/arcgis-maps-sdk-kotlin-toolkit/ci/run_gradle_task.sh -t publish -x "-PartifactoryUsername=${ARTIFACTORY_USR} -PartifactoryPassword=${ARTIFACTORY_PSW} -PversionNumber=${BUILDVER} -PbuildNumber=${BUILDNUM}" ; then
     echo "error: Running the publish gradle task failed"
     exit 1
   fi

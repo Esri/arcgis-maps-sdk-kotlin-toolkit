@@ -31,8 +31,8 @@ val artifactoryUsername: String by project
 val artifactoryPassword: String by project
 val versionNumber: String by project
 val buildNumber: String by project
-val ignoreBuildNumber: String by project
-val artifactVersion: String = if (ignoreBuildNumber == "true") {
+val finalBuild: String by project
+val artifactVersion: String = if (finalBuild == "true") {
     versionNumber
 } else {
     "$versionNumber-$buildNumber"

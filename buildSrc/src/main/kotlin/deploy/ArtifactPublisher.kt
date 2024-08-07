@@ -21,10 +21,12 @@ package deploy
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
-import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
-import org.gradle.kotlin.dsl.*
 import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.configurationcache.extensions.capitalized
+import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.get
+import org.gradle.kotlin.dsl.provideDelegate
 import java.net.URI
 
 /**
@@ -45,9 +47,9 @@ class ArtifactPublisher : Plugin<Project> {
         val artifactoryUsername: String by project
         val artifactoryPassword: String by project
         val versionNumber: String by project
-        val ignoreBuildNumber: String by project
+        val finalBuild: String by project
         val buildNumber: String by project
-        val artifactVersion: String = if (ignoreBuildNumber == "true") {
+        val artifactVersion: String = if (finalBuild == "true") {
             versionNumber
         } else {
             "$versionNumber-$buildNumber"
