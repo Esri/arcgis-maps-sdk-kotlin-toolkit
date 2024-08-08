@@ -28,6 +28,9 @@ pluginManagement {
 val sdkVersionNumber: String by settings
 // The build number of the ArcGIS Maps SDK for Kotlin dependency
 val sdkBuildNumber: String by settings
+// Ignore the build number and pick up the released version of the SDK dependency
+val finalBuild: String = (providers.gradleProperty("finalBuild").orNull ?: "false")
+    .run { if (this != "false") "true" else "false" }
 
 dependencyResolutionManagement {
     @Suppress("UnstableApiUsage")
@@ -50,11 +53,13 @@ dependencyResolutionManagement {
     
     versionCatalogs {
         create("arcgis") {
-            val versionAndBuild = if (sdkBuildNumber.isNotEmpty()) {
-                "$sdkVersionNumber-$sdkBuildNumber"
-            } else {
+            val versionAndBuild = if (finalBuild == "true" || sdkBuildNumber.isEmpty()) {
+                logger.log(LogLevel.WARN,"requested RC build of the SDK $sdkVersionNumber")
                 sdkVersionNumber
+            } else {
+                "$sdkVersionNumber-$sdkBuildNumber"
             }
+
             version("mapsSdk", versionAndBuild)
             library("mapsSdk", "com.esri", "arcgis-maps-kotlin").versionRef("mapsSdk")
         }
