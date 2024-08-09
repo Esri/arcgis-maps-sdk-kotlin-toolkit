@@ -18,35 +18,20 @@
 
 package com.arcgismaps.toolkit.tabletoparapp.screens
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Viewpoint
-import com.arcgismaps.toolkit.ar.SceneView
-import com.arcgismaps.toolkit.ar.TabletopArView
-import com.arcgismaps.toolkit.ar.TabletopArView2
-import com.arcgismaps.toolkit.geoviewcompose.MapView
+import com.arcgismaps.toolkit.ar.TableTopSceneView
 
 @Composable
 fun MainScreen() {
-    val arcGISScene = remember { ArcGISScene(BasemapStyle.ArcGISImagery).apply { initialViewpoint = Viewpoint(34.056295, -117.195800, 100000.0) } }
-    TabletopArView2 { tabletopArViewState ->
-        Column {
-            Text(text = "Tabletop AR")
-            SceneView(
-                arcGISScene = remember {
-                    ArcGISScene(BasemapStyle.ArcGISTopographic)
-                },
-                tabletopArViewState = tabletopArViewState
-            )
-        }
+    val arcGISScene = remember { ArcGISScene(BasemapStyle.ArcGISImagery).apply { initialViewpoint = Viewpoint(34.056295, -117.195800, 10000000.0) } }
+    Box(modifier = Modifier.fillMaxSize()) {
+        TableTopSceneView(arcGISScene = arcGISScene, modifier = Modifier.fillMaxSize())
     }
 }

@@ -1,6 +1,10 @@
 package com.arcgismaps.toolkit.ar
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -25,7 +29,6 @@ import com.arcgismaps.mapping.view.LongPressEvent
 import com.arcgismaps.mapping.view.PanChangeEvent
 import com.arcgismaps.mapping.view.RotationChangeEvent
 import com.arcgismaps.mapping.view.ScaleChangeEvent
-import com.arcgismaps.mapping.view.SceneView
 import com.arcgismaps.mapping.view.SceneViewInteractionOptions
 import com.arcgismaps.mapping.view.SelectionProperties
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
@@ -40,9 +43,101 @@ import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewScope
 import java.time.Instant
 
+@Composable
+public fun TableTopSceneView(
+    arcGISScene: ArcGISScene,
+    modifier: Modifier = Modifier,
+    onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
+    onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
+    graphicsOverlays: List<GraphicsOverlay> = remember { emptyList() },
+    sceneViewProxy: SceneViewProxy = remember { SceneViewProxy() },
+    sceneViewInteractionOptions: SceneViewInteractionOptions = remember { SceneViewInteractionOptions() },
+    viewLabelProperties: ViewLabelProperties = remember { ViewLabelProperties() },
+    selectionProperties: SelectionProperties = remember { SelectionProperties() },
+    isAttributionBarVisible: Boolean = true,
+    onAttributionTextChanged: ((String) -> Unit)? = null,
+    onAttributionBarLayoutChanged: ((AttributionBarLayoutChangeEvent) -> Unit)? = null,
+    analysisOverlays: List<AnalysisOverlay> = remember { emptyList() },
+    imageOverlays: List<ImageOverlay> = remember { emptyList() },
+    timeExtent: TimeExtent? = null,
+    onTimeExtentChanged: ((TimeExtent?) -> Unit)? = null,
+    sunTime: Instant = SceneViewDefaults.DefaultSunTime,
+    sunLighting: LightingMode = LightingMode.NoLight,
+    ambientLightColor: Color = SceneViewDefaults.DefaultAmbientLightColor,
+    onNavigationChanged: ((isNavigating: Boolean) -> Unit)? = null,
+    onSpatialReferenceChanged: ((spatialReference: SpatialReference?) -> Unit)? = null,
+    onLayerViewStateChanged: ((GeoView.GeoViewLayerViewStateChanged) -> Unit)? = null,
+    onInteractingChanged: ((isInteracting: Boolean) -> Unit)? = null,
+    onCurrentViewpointCameraChanged: ((camera: Camera) -> Unit)? = null,
+    onRotate: ((RotationChangeEvent) -> Unit)? = null,
+    onScale: ((ScaleChangeEvent) -> Unit)? = null,
+    onUp: ((UpEvent) -> Unit)? = null,
+    onDown: ((DownEvent) -> Unit)? = null,
+    onSingleTapConfirmed: ((SingleTapConfirmedEvent) -> Unit)? = null,
+    onDoubleTap: ((DoubleTapEvent) -> Unit)? = null,
+    onLongPress: ((LongPressEvent) -> Unit)? = null,
+    onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
+    onPan: ((PanChangeEvent) -> Unit)? = null,
+    onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
+    content: (@Composable SceneViewScope.() -> Unit)? = null
+) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Icon(imageVector = Icons.Default.Face, contentDescription = null, modifier = Modifier.fillMaxSize(), tint = Color.Red)
+
+        val cameraController = remember { TransformationMatrixCameraController() }
+        SceneView(
+            arcGISScene = arcGISScene,
+            modifier = modifier,
+            onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
+            onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
+            graphicsOverlays = graphicsOverlays,
+            sceneViewProxy = sceneViewProxy,
+            sceneViewInteractionOptions = sceneViewInteractionOptions,
+            viewLabelProperties = viewLabelProperties,
+            selectionProperties = selectionProperties,
+            isAttributionBarVisible = isAttributionBarVisible,
+            onAttributionTextChanged = onAttributionTextChanged,
+            onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
+            cameraController = cameraController,
+            analysisOverlays = analysisOverlays,
+            imageOverlays = imageOverlays,
+            atmosphereEffect = AtmosphereEffect.None,
+            timeExtent = timeExtent,
+            onTimeExtentChanged = onTimeExtentChanged,
+            spaceEffect = SpaceEffect.Transparent,
+            sunTime = sunTime,
+            sunLighting = sunLighting,
+            ambientLightColor = ambientLightColor,
+            onNavigationChanged = onNavigationChanged,
+            onSpatialReferenceChanged = {
+//                onSpatialReferenceChanged(it)
+                if (onSpatialReferenceChanged != null) {
+                    onSpatialReferenceChanged(it)
+                }
+            },
+            onLayerViewStateChanged = onLayerViewStateChanged,
+            onInteractingChanged = onInteractingChanged,
+            onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged,
+            onRotate = onRotate,
+            onScale = onScale,
+            onUp = onUp,
+            onDown = onDown,
+            onSingleTapConfirmed = onSingleTapConfirmed,
+            onDoubleTap = onDoubleTap,
+            onLongPress = onLongPress,
+            onTwoPointerTap = onTwoPointerTap,
+            onPan = onPan,
+            onDrawStatusChanged = onDrawStatusChanged,
+            content = content
+        )
+    }
+}
 
 @Composable
-public fun TabletopArView2(sceneViewProxy: SceneViewProxy = remember { SceneViewProxy() }, content: @Composable (tabletopArViewState: TabletopArViewState) -> Unit) {
+public fun TabletopArView2(
+    sceneViewProxy: SceneViewProxy = remember { SceneViewProxy() },
+    content: @Composable (tabletopArViewState: TabletopArViewState) -> Unit
+) {
     val tabletopArViewState = remember { TabletopArViewState(sceneViewProxy) }
     Box {
         content(tabletopArViewState)
@@ -146,7 +241,10 @@ public fun SceneView(
 )
 
 @Composable
-public fun TabletopArView(sceneViewProxy: SceneViewProxy = remember { SceneViewProxy() }, content: @Composable TabletopArScope.() -> Unit) {
+public fun TabletopArView(
+    sceneViewProxy: SceneViewProxy = remember { SceneViewProxy() },
+    content: @Composable TabletopArScope.() -> Unit
+) {
     val tabletopArScope = remember { TabletopArScope(sceneViewProxy) }
     Box {
         tabletopArScope.content()
