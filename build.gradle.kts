@@ -38,6 +38,38 @@ buildscript {
         // before any dependent subproject uses its symbols to configure a dokka task.
         classpath(libs.dokka.versioning)
     }
+    val finalBuild: Boolean = (project.properties["finalBuild"] ?: "false")
+        .run { this == "true" }
+
+    if (finalBuild) {
+        check(project.hasProperty("versionNumber"))
+        project.logger.info("release candidate build requested version ${project.properties["versionNumber"]}")
+    } else if (!project.hasProperty("versionNumber") && !project.hasProperty("buildNum")) {
+        // both version number and build number must be set
+        java.util.Properties().run {
+            try {
+                File(project.projectDir, "../buildnum/buildnum.txt")
+                    .reader()
+                    .use {
+                        load(it)
+                    }
+                this["BUILDVER"]?.let {
+                    project.extra.set("versionNumber", it)
+                }
+                this["BUILDNUM"]?.let {
+                    project.extra.set("buildNumber", it)
+                }
+                check(project.hasProperty("versionNumber"))
+                check(project.hasProperty("buildNumber"))
+                project.logger.info("version and build number set from buildnum.txt to ${project.properties["versionNumber"]}-${project.properties["buildNumber"]}")
+            } catch (t: Throwable) {
+                // The buildnum file is not there. ignore it and log a warning.
+                project.logger.warn("the buildnum.txt file is missing or not readable")
+                project.extra.set("versionNumber", "0.0.0")
+                project.extra.set("buildNumber", "SNAPSHOT")
+            }
+        }
+    }
 }
 
 // Path to the centralized folder in root directory where test reports for connected tests end up
@@ -77,3 +109,4 @@ fun getModulesExcept(vararg modulesToExclude: String): List<String> =
             }
             .filter { !modulesToExclude.contains(it) } // exclude specified modules
     }
+
