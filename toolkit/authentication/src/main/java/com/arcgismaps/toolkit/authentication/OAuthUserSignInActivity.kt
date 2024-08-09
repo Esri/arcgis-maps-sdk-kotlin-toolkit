@@ -22,8 +22,13 @@ package com.arcgismaps.toolkit.authentication
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.browser.customtabs.CustomTabsClient
+import androidx.browser.customtabs.CustomTabsIntent
+import androidx.browser.customtabs.CustomTabsService
+import androidx.browser.customtabs.CustomTabsSession
 import androidx.lifecycle.Lifecycle
 import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
 
@@ -172,6 +177,7 @@ public class OAuthUserSignInActivity : ComponentActivity() {
             }
 
         override fun parseResult(resultCode: Int, intent: Intent?): String? {
+            intent?.data?.toString()?.let { Log.d("CustomTabs", it) }
             return if (resultCode == RESULT_CODE_SUCCESS) {
                 intent?.getStringExtra(KEY_INTENT_EXTRA_OAUTH_RESPONSE_URL)
             } else {
