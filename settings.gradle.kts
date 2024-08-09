@@ -24,13 +24,23 @@ pluginManagement {
     }
 }
 
+// For finalBuilds ignore the build number and pick up the released version of the SDK dependency
+val finalBuild: Boolean = (providers.gradleProperty("finalBuild").orNull ?: "false")
+    .run { this == "true" }
+
 // The version of the ArcGIS Maps SDK for Kotlin dependency
-val sdkVersionNumber: String by settings
-// The build number of the ArcGIS Maps SDK for Kotlin dependency
+val sdkVersionNumber: String = if (finalBuild) {
+    // for final build we depend on the same version of the SDK as the version we are building.
+    providers.gradleProperty("versionNumber").orNull
+        ?: throw IllegalStateException("versionNumber must be set to publish")
+} else {
+    // otherwise use the version found in gradle.properties
+    providers.gradleProperty("sdkVersionNumber").orNull
+        ?: throw IllegalStateException("sdkVersionNumber must be set")
+}
+
+// The build number of the ArcGIS Maps SDK for Kotlin dependency from gradle.properties
 val sdkBuildNumber: String by settings
-// Ignore the build number and pick up the released version of the SDK dependency
-val finalBuild: String = (providers.gradleProperty("finalBuild").orNull ?: "false")
-    .run { if (this != "false") "true" else "false" }
 
 dependencyResolutionManagement {
     @Suppress("UnstableApiUsage")
@@ -50,11 +60,13 @@ dependencyResolutionManagement {
             )
         }
     }
-    
+
     versionCatalogs {
         create("arcgis") {
-            val versionAndBuild = if (finalBuild == "true" || sdkBuildNumber.isEmpty()) {
-                logger.log(LogLevel.WARN,"requested RC build of the SDK $sdkVersionNumber")
+            val versionAndBuild = if (finalBuild) {
+                logger.warn(
+                    "requested release candidate for the SDK dependency $sdkVersionNumber"
+                )
                 sdkVersionNumber
             } else {
                 "$sdkVersionNumber-$sdkBuildNumber"

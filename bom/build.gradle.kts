@@ -31,8 +31,9 @@ val artifactoryUsername: String by project
 val artifactoryPassword: String by project
 val versionNumber: String by project
 val buildNumber: String by project
-val finalBuild: String by project
-val artifactVersion: String = if (finalBuild == "true") {
+val finalBuild: Boolean = (project.properties["finalBuild"] ?: "false")
+    .run { this == "true" }
+val artifactVersion: String = if (finalBuild) {
     versionNumber
 } else {
     "$versionNumber-$buildNumber"

@@ -23,13 +23,6 @@ plugins {
 }
 
 val versionNumber: String by project
-val buildNumber: String by project
-val finalBuild: String by project
-val artifactVersion: String = if (finalBuild == "true") {
-    versionNumber
-} else {
-    "$versionNumber-$buildNumber"
-}
 
 // make this project get evaluated after all the other projects
 // so that we can be sure the logic to determine released components

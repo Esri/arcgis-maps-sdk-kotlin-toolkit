@@ -38,14 +38,13 @@ buildscript {
         // before any dependent subproject uses its symbols to configure a dokka task.
         classpath(libs.dokka.versioning)
     }
+    val finalBuild: Boolean = (project.properties["finalBuild"] ?: "false")
+        .run { this == "true" }
 
-    if (!project.hasProperty("finalBuild") || project.properties["finalBuild"] != "true") {
-        project.extra.set("finalBuild", "false")
-    } else {
-        project.logger.warn("release candidate build requested")
-    }
-
-    if (!project.hasProperty("versionNumber") || !project.hasProperty("buildNumber")) {
+    if (finalBuild) {
+        check(project.hasProperty("versionNumber"))
+        project.logger.info("release candidate build requested version ${project.properties["versionNumber"]}")
+    } else if (!project.hasProperty("versionNumber") && !project.hasProperty("buildNum")) {
         // both version number and build number must be set
         java.util.Properties().run {
             try {
@@ -70,8 +69,6 @@ buildscript {
                 project.extra.set("buildNumber", "SNAPSHOT")
             }
         }
-    } else {
-        project.logger.info("version and build number set from properties to ${project.properties["versionNumber"]}-${project.properties["buildNumber"]}")
     }
 }
 
