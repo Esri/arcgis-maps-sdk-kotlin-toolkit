@@ -43,7 +43,7 @@ fun makeMockArcGISAuthenticationChallenge() = mockk<ArcGISAuthenticationChalleng
 fun createSuccessfulRedirectIntent(redirectUrl: String): Intent {
     return Intent().apply {
         data = Uri.parse("$redirectUrl?code=12345")
-        flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+        flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
     }
 }
 

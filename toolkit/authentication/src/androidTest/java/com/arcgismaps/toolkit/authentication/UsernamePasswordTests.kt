@@ -3,12 +3,18 @@ package com.arcgismaps.toolkit.authentication
 import android.view.KeyEvent
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasImeAction
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performImeAction
+import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.text.input.ImeAction
 import androidx.test.platform.app.InstrumentationRegistry
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallengeResponse
@@ -16,13 +22,18 @@ import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallenge
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationChallengeResponse
 import com.arcgismaps.httpcore.authentication.NetworkAuthenticationType
 import com.arcgismaps.httpcore.authentication.TokenCredential
+import io.mockk.Runs
 import io.mockk.coEvery
+import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
+import io.mockk.verify
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -40,7 +51,7 @@ import org.junit.rules.TestRule
  */
 class UsernamePasswordTests {
 
-    val authenticatorState = AuthenticatorState()
+    private val authenticatorState = AuthenticatorState()
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
@@ -83,6 +94,85 @@ class UsernamePasswordTests {
         }.await()
         assert(response is NetworkAuthenticationChallengeResponse.ContinueWithCredential)
     }
+
+    /**
+     * Given an UsernamePasswordAuthenticator
+     * When the username or password fields are empty
+     * Then the login button should be disabled
+     * And when the username and password fields are both filled
+     * Then the login button should be enabled
+     *
+     * @since 200.5.0
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun loginButtonEnabledState() = runTest {
+        composeTestRule.setContent {
+            UsernamePasswordAuthenticator(
+                UsernamePasswordChallenge(
+                    url = "https://arcgis.com",
+                    onUsernamePasswordReceived = { _, _ -> },
+                    onCancel = {}
+                )
+            )
+        }
+        advanceUntilIdle()
+        // verify the login button is disabled when the fields are empty
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.login)).assertIsNotEnabled()
+        // verify the login button is disabled when only the username field is filled
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.username_label))
+            .performTextInput("testuser")
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.login)).assertIsNotEnabled()
+        // verify the login button is disabled when only the password field is filled
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.username_label))
+            .performTextClearance()
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.password_label))
+            .performTextInput("testPassword")
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.login)).assertIsNotEnabled()
+        // verify it is enabled when both are filled
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.username_label))
+            .performTextInput("testuser")
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.login)).assertIsEnabled()
+    }
+
+    /**
+     * Given an UsernamePasswordAuthenticator
+     * When the username field is clicked
+     * Then the keyboard should be displayed with ImeAction.Next
+     * And when the password field is clicked
+     * Then the keyboard should be displayed with ImeAction.Send
+     *
+     * When the the ImeAction.Send is clicked
+     * And both text fields are empty
+     * Then the credentials should not be submitted
+     *
+     * @since 200.5.0
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun keyboardActions() = runTest {
+        val usernamePasswordChallengeMock = mockk<UsernamePasswordChallenge>()
+        every { usernamePasswordChallengeMock.url } returns "https://arcgis.com"
+        every { usernamePasswordChallengeMock.additionalMessage } answers { MutableStateFlow("") }
+        every { usernamePasswordChallengeMock.continueWithCredentials(any(), any()) } just Runs
+
+        composeTestRule.setContent {
+            UsernamePasswordAuthenticator(usernamePasswordChallengeMock)
+        }
+
+        // ensure the dialog prompt is displayed as expected
+        advanceUntilIdle()
+        // verify that clicking on the username field displays the keyboard with ImeAction.Next
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.username_label)).performClick()
+        composeTestRule.onNode(hasImeAction(ImeAction.Next)).assertExists()
+        // verify that clicking on the password field displays the keyboard with ImeAction.Send
+        composeTestRule.onNodeWithText(composeTestRule.activity.getString(R.string.password_label)).performClick()
+        composeTestRule.onNode(hasImeAction(ImeAction.Send)).assertExists()
+        // verify that clicking on ImeAction.Send will not submit the form when the fields are empty
+        composeTestRule.onNode(hasImeAction(ImeAction.Send)).performImeAction()
+        verify(exactly = 0) { usernamePasswordChallengeMock.continueWithCredentials(any(), any()) }
+    }
+
 
     /**
      * Given a Dialog Authenticator
