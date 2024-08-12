@@ -19,6 +19,7 @@
 package com.arcgismaps.toolkit.geoviewcompose.callout
 
 import android.graphics.Bitmap
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
@@ -177,17 +178,10 @@ class CalloutTests {
     @Test
     fun testCalloutResetViaStateChanges() = runTest {
         val calloutScenarios = CalloutScenarios()
-        var recompositionCount by mutableStateOf(0)
+        val mapViewModel = MapViewModel()
+
         composeTestRule.setContent {
-            CompositionLocalProvider {
-                val mapViewModel = compositionLocalOf { MapViewModel() }
-                calloutScenarios.ResetViaStateChanges(
-                    mapViewModel = mapViewModel.current,
-                    onCalloutRecomposed = {
-                        recompositionCount = it
-                    }
-                )
-            }
+            calloutScenarios.ResetViaStateChanges(mapViewModel)
         }
 
         // verify Callout is displayed
@@ -196,7 +190,7 @@ class CalloutTests {
             timeoutMillis = timeoutMillis
         )
 
-        val initialRecompositionCount = recompositionCount
+        val initialRecompositionCount = mapViewModel.calloutRecompositionCount.value
 
         // Collect a state change from within MapViewScope
         // this should trigger the Callout reset()
@@ -209,7 +203,7 @@ class CalloutTests {
         )
 
         // get the current recomposition count after performing state change
-        val currentRecompositionCount = recompositionCount
+        val currentRecompositionCount = mapViewModel.calloutRecompositionCount.value
 
         // check to see if Callout was recomposed via a Reset state change in MapViewScope
         assert(initialRecompositionCount != currentRecompositionCount)

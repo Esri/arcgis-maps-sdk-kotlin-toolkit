@@ -51,11 +51,24 @@ import kotlinx.coroutines.flow.asStateFlow
 val initialPoint = Point(-117.0, 34.0, SpatialReference.wgs84())
 private val secondaryPoint = Point(-120.0, 36.0, SpatialReference.wgs84())
 
+/**
+ * ViewModel for the [CalloutTests] that contains the [CalloutScenarios] helper functions
+ * for testing CalloutResetViaStateChanges
+ *
+ * @since 200.5.0
+ */
 class MapViewModel : ViewModel() {
     private val _calloutLocation = MutableStateFlow(initialPoint)
     val calloutLocation: StateFlow<Point> = _calloutLocation.asStateFlow()
+    private val _calloutRecompositionCount = MutableStateFlow(0)
+    val calloutRecompositionCount: StateFlow<Int> = _calloutRecompositionCount.asStateFlow()
+
     fun updatePointToNewLocation() {
         _calloutLocation.value = secondaryPoint
+    }
+
+    fun updateCalloutRecompositionCount() {
+        _calloutRecompositionCount.value++
     }
 }
 
@@ -158,13 +171,7 @@ class CalloutScenarios {
 
 
     @Composable
-    fun ResetViaStateChanges(mapViewModel: MapViewModel, onCalloutRecomposed: (Int) -> Unit = {}) {
-        var calloutRecompositionCount by rememberSaveable { mutableStateOf(0) }
-
-        LaunchedEffect(calloutRecompositionCount) {
-            onCalloutRecomposed(calloutRecompositionCount)
-        }
-
+    fun ResetViaStateChanges(mapViewModel: MapViewModel) {
         Column {
             MapView(
                 modifier = Modifier
@@ -179,7 +186,7 @@ class CalloutScenarios {
                         Text(text = "Hello World")
                     }
                     // update recomposition counter
-                    calloutRecompositionCount++
+                    mapViewModel.updateCalloutRecompositionCount()
                 }
             )
             Button(onClick = { mapViewModel.updatePointToNewLocation() }) {
