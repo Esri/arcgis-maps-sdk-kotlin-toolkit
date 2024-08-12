@@ -19,12 +19,6 @@
 package com.arcgismaps.toolkit.geoviewcompose.callout
 
 import android.graphics.Bitmap
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.compositionLocalOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -38,6 +32,7 @@ import androidx.compose.ui.unit.IntSize
 import com.arcgismaps.toolkit.geoviewcompose.GeoViewScope
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutColors
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutShapes
+import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -206,7 +201,7 @@ class CalloutTests {
         val currentRecompositionCount = mapViewModel.calloutRecompositionCount.value
 
         // check to see if Callout was recomposed via a Reset state change in MapViewScope
-        assert(initialRecompositionCount != currentRecompositionCount)
+        assertThat(initialRecompositionCount).isNotEqualTo(currentRecompositionCount)
         composeTestRule.waitForIdle()
     }
 
