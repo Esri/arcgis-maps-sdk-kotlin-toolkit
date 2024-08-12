@@ -83,7 +83,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     testImplementation(libs.bundles.unitTest)
-    androidTestImplementation(libs.truth)
     androidTestImplementation(libs.bundles.composeTest)
     androidTestImplementation(libs.androidx.uiautomator)
     debugImplementation(libs.bundles.debug)
