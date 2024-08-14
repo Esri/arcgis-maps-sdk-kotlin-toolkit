@@ -61,7 +61,7 @@ function convertTemplateApp {
 function addToSettings {
     # remove the final "app" from the componentName, then add "-app" to get the projectName
     local projectName="${componentName%app}-app"
-    echo "include (\":${projectName}\")" >> settings.gradle.kts
+    echo "include(\":${projectName}\")" >> settings.gradle.kts
     echo "project(\":${projectName}\").projectDir = File(rootDir, \"microapps/${appDirName}/app\")" >>  settings.gradle.kts
 }
 

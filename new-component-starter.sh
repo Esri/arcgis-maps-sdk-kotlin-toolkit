@@ -89,7 +89,7 @@
     # appends a new project to the list of projects in settings.gradle.kts.
     # this is additive, and will add the same name each time it is run.
     function addToSettings {
-	echo "include (\":${componentName}\")" >> settings.gradle.kts
+	echo "include(\":${componentName}\")" >> settings.gradle.kts
 	echo "project(\":${componentName}\").projectDir = File(rootDir, \"toolkit/${componentName}\")" >>  settings.gradle.kts
     }
 
