@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~
+  ~  Copyright 2023 Esri
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  ~
+  --><resources>
+    <string name="enter_n_chars">Zadajte %1$d znakov</string>
+    <string name="enter_min_to_max_chars">Zadajte %1$d až %2$d znakov</string>
+    <string name="maximum_n_chars">Maximálne %1$d znakov</string>
+    <string name="no_value">Žiadna hodnota</string>
+    <string name="enter_value">Zadajte hodnotu</string>
+    <string name="required">Vyžadované</string>
+    <string name="today">Dnes</string>
+    <string name="now">Teraz</string>
+    <string name="cancel">Zrušiť</string>
+    <string name="ok">OK</string>
+    <string name="done">Hotovo</string>
+    <string name="filter">Filter %1$s</string>
+    <string name="numeric_range_helper_text">Zadajte hodnotu od %1$s do %2$s</string>
+    <string name="less_than_min_value">Menej ako minimálna hodnota %1$s</string>
+    <string name="exceeds_max_value">Presahuje maximálnu hodnotu %1$s</string>
+    <string name="value_must_be_a_whole_number">Hodnota musí byť celé číslo</string>
+    <string name="value_must_be_a_number">Hodnota musí byť číslo</string>
+    <string name="value_must_be_within_domain">Hodnota musí byť v rámci domény</string>
+    <string name="value_must_not_be_empty">Hodnota nesmie byť prázdna</string>
+    <string name="min_datetime_helper_text">Dátum musí byť v deň alebo po %1$s</string>
+    <string name="max_datetime_helper_text">Dátum musí byť v deň alebo pred %1$s</string>
+
+    <!-- Date Picker string values -->
+    <string name="ff_date_input_headline">Zadaný dátum</string>
+    <string name="ff_date_input_headline_description">Zadaný dátum: %1$s</string>
+    <string name="ff_date_input_invalid_for_pattern">Dátum nezodpovedá očakávanému vzoru: %1$s</string>
+    <string name="ff_date_input_invalid_not_allowed">Dátum nie je povolený: %1$s</string>
+    <string name="ff_date_input_invalid_year_range">
+        Dátum mimo očakávaného rozsahu rokov %1$s - %2$s
+    </string>
+    <string name="ff_date_input_label">Dátum</string>
+    <string name="ff_date_input_no_input_description">Žiadne</string>
+    <string name="ff_date_input_title">Vybrať dátum</string>
+    <string name="ff_date_picker_headline">"Vybraný dátum"</string>
+    <string name="ff_date_picker_headline_description">Aktuálny výber: %1$s</string>
+    <string name="ff_date_picker_navigate_to_year_description">Prejsť na rok %1$s</string>
+    <string name="ff_date_picker_no_selection_description">Žiadne</string>
+    <string name="ff_date_picker_scroll_to_earlier_years">Posúvaním zobrazíte predchádzajúce roky</string>
+    <string name="ff_date_picker_scroll_to_later_years">Posúvaním zobrazíte neskoršie roky</string>
+    <string name="ff_date_picker_switch_to_calendar_mode">Prepnúť do režimu zadávania kalendára</string>
+    <string name="ff_date_picker_switch_to_day_selection">
+        "Potiahnutím vyberte rok alebo ťuknutím na prepnite späť na výber dňa"
+    </string>
+    <string name="ff_date_picker_switch_to_input_mode">Prepnúť na režim zadávania textu</string>
+    <string name="ff_date_picker_switch_to_next_month">"Zmeniť na budúci mesiac"</string>
+    <string name="ff_date_picker_switch_to_previous_month">"Zmeniť na predchádzajúci mesiac"</string>
+    <string name="ff_date_picker_switch_to_year_selection">"Prepnúť na výber roka"</string>
+    <string name="ff_date_picker_title">"Vybrať dátum"</string>
+    <string name="ff_date_picker_today_description">Dnes</string>
+    <string name="ff_date_picker_year_picker_pane_title">Výber roka viditeľný</string>
+    <string name="ff_date_range_input_invalid_range_input">Neplatný vstup rozsahu dátumu</string>
+    <string name="ff_date_range_input_title">Zadať dátumy</string>
+    <string name="ff_date_range_picker_day_in_range">V rozsahu</string>
+    <string name="ff_date_range_picker_end_headline">Dátum ukončenia</string>
+    <string name="ff_date_range_picker_scroll_to_next_month">Posúvaním zobrazíte nasledujúci mesiac</string>
+    <string name="ff_date_range_picker_scroll_to_previous_month">Posúvaním zobrazíte predchádzajúci mesiac</string>
+    <string name="ff_date_range_picker_start_headline">Dátum začiatku</string>
+    <string name="ff_date_range_picker_title">Vybrať dátumy</string>
+
+    <!-- Time Picker string values -->
+    <string name="ff_time_picker_am">Dopoludnia</string>
+    <string name="ff_time_picker_hour">Hodina</string>
+    <string name="ff_time_picker_hour_24h_suffix">%1$d hodín</string>
+    <string name="ff_time_picker_hour_selection">Vybrať hodinu</string>
+    <string name="ff_time_picker_hour_suffix">%1$d hodiny/hodín</string>
+    <string name="ff_time_picker_hour_text_field">na hodinu</string>
+    <string name="ff_time_picker_minute">Minúta</string>
+    <string name="ff_time_picker_minute_selection">Vybrať minúty</string>
+    <string name="ff_time_picker_minute_suffix">%1$d minút</string>
+    <string name="ff_time_picker_minute_text_field">na minúty</string>
+    <string name="ff_time_picker_period_toggle_description">Vybrať dopoludnie alebo popoludnie</string>
+    <string name="ff_time_picker_pm">Popoludní</string>
+    <string name="take_photo">Odfotiť</string>
+    <string name="rename">Premenovať</string>
+    <string name="delete">Zmazať</string>
+    <string name="rename_attachment">Premenovať prílohu</string>
+    <string name="name">Názov</string>
+</resources>

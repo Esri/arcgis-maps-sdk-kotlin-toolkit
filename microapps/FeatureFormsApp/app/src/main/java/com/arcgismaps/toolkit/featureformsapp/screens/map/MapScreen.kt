@@ -24,7 +24,9 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -38,16 +40,19 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -81,7 +86,9 @@ import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.SheetValue
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.StandardBottomSheet
 import com.arcgismaps.toolkit.featureformsapp.screens.bottomsheet.rememberStandardBottomSheetState
 import com.arcgismaps.toolkit.geoviewcompose.MapView
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -121,27 +128,36 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
         modifier = Modifier.fillMaxSize(),
         topBar = {
             val scope = rememberCoroutineScope()
-            // show the top bar which changes available actions based on if the FeatureForm is
-            // being shown and is in edit mode
-            TopFormBar(
-                title = mapViewModel.portalItem.title,
-                editingMode = uiState !is UIState.NotEditing,
-                onClose = {
-                    showDiscardEditsDialog = true
-                },
-                onSave = {
-                    scope.launch {
-                        mapViewModel.commitEdits().onFailure {
-                            Log.w("Forms", "Applying edits failed : ${it.message}")
-                            Toast.makeText(
-                                context,
-                                "Applying edits failed : ${it.message}",
-                                Toast.LENGTH_LONG
-                            ).show()
+            Box {
+                // show the top bar which changes available actions based on if the FeatureForm is
+                // being shown and is in edit mode
+                TopFormBar(
+                    title = mapViewModel.portalItem.title,
+                    editingMode = uiState is UIState.Editing,
+                    onClose = {
+                        showDiscardEditsDialog = true
+                    },
+                    onSave = {
+                        scope.launch {
+                            mapViewModel.commitEdits().onFailure {
+                                Log.w("Forms", "Applying edits failed : ${it.message}")
+                                withContext(Dispatchers.Main) {
+                                    Toast.makeText(
+                                        context,
+                                        "Applying edits failed : ${it.message}",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            }
                         }
-                    }
-                }) {
-                onBackPressed()
+                    }) {
+                    onBackPressed()
+                }
+                if (uiState is UIState.Loading) {
+                    LinearProgressIndicator(modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter))
+                }
             }
         }
     ) { padding ->
@@ -195,11 +211,35 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
             }
         }
     }
-    if (uiState is UIState.Committing) {
-        SubmitForm(errors = (uiState as UIState.Committing).errors) {
-            mapViewModel.cancelCommit()
+    when (uiState) {
+        is UIState.Committing -> {
+            SubmitForm(errors = (uiState as UIState.Committing).errors) {
+                mapViewModel.cancelCommit()
+            }
         }
+
+        is UIState.Switching -> {
+            DiscardEditsDialog(
+                onConfirm = { mapViewModel.selectNewFeature() },
+                onCancel = { mapViewModel.continueEditing() }
+            )
+        }
+
+        is UIState.NoFeatureFormDefinition -> {
+            NoFormDefinitionDialog(
+                onConfirm = {
+                    mapViewModel.setDefaultState()
+                },
+                onCancel = {
+                    mapViewModel.setDefaultState()
+                    onBackPressed()
+                }
+            )
+        }
+
+        else -> {}
     }
+
     if (showDiscardEditsDialog) {
         DiscardEditsDialog(
             onConfirm = {
@@ -211,12 +251,7 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
             }
         )
     }
-    if (uiState is UIState.Switching) {
-        DiscardEditsDialog(
-            onConfirm = { mapViewModel.selectNewFeature() },
-            onCancel = { mapViewModel.continueEditing() }
-        )
-    }
+
 }
 
 @Composable
@@ -238,6 +273,37 @@ fun DiscardEditsDialog(onConfirm: () -> Unit, onCancel: () -> Unit) {
         },
         text = {
             Text(text = stringResource(R.string.all_changes_will_be_lost))
+        }
+    )
+}
+
+@Composable
+fun NoFormDefinitionDialog(
+    onConfirm: () -> Unit,
+    onCancel: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = {},
+        title = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = stringResource(R.string.no_featureform_found), modifier = Modifier.weight(1f))
+                Image(imageVector = Icons.Rounded.Warning, contentDescription = null)
+            }
+        },
+        confirmButton = {
+            Button(onClick = onConfirm) {
+                Text(text = stringResource(R.string.okay))
+            }
+        },
+        dismissButton = {
+            Button(onClick = onCancel) {
+                Text(text = stringResource(R.string.exit))
+            }
+        },
+        text = {
+            Text(text = stringResource(R.string.no_featureform_description))
         }
     )
 }
@@ -270,7 +336,7 @@ fun TopFormBar(
                 }
             } else {
                 IconButton(onClick = onBackPressed) {
-                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                    Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                 }
             }
         },
@@ -289,9 +355,7 @@ fun TopFormBar(
 private fun SubmitForm(errors: List<ErrorInfo>, onDismissRequest: () -> Unit) {
     if (errors.isEmpty()) {
         // show a progress dialog if no errors are present
-        AlertDialog(
-            onDismissRequest = { /* cannot be dismissed */ },
-        ) {
+        BasicAlertDialog(onDismissRequest = { /* cannot be dismissed */ }) {
             Card(modifier = Modifier.wrapContentSize()) {
                 Column(
                     modifier = Modifier.padding(15.dp),

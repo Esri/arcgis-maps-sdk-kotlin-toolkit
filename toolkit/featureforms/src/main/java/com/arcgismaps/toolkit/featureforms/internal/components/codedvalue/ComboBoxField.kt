@@ -33,10 +33,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.List
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -126,22 +126,23 @@ internal fun ComboBoxField(
         isError = isError,
         isRequired = isRequired,
         singleLine = true,
-        trailingIcon = Icons.Outlined.List,
+        trailingIcon = Icons.AutoMirrored.Outlined.List,
         interactionSource = interactionSource,
         onFocusChange = state::onFocusChanged,
         trailingContent = if (isRequired) {
             // if required then do not show a clear icon
             {
-                Icon(imageVector = Icons.Outlined.List, contentDescription = "field icon")
+                Icon(imageVector = Icons.AutoMirrored.Outlined.List, contentDescription = "field icon")
             }
-        } else null
+        } else null,
+        hasValueExpression = state.hasValueExpression
     )
 
     LaunchedEffect(interactionSource) {
         interactionSource.interactions.collect {
             if (it is PressInteraction.Release) {
                 if (isEditable) {
-                    dialogRequester.requestDialog(DialogType.ComboBoxDialog(state))
+                    dialogRequester.requestDialog(DialogType.ComboBoxDialog(state.id))
                 }
             }
         }
@@ -269,7 +270,7 @@ internal fun ComboBoxDialog(
                         )
                     }
                 }
-                Divider(modifier = Modifier.fillMaxWidth())
+                HorizontalDivider(modifier = Modifier.fillMaxWidth())
                 LazyColumn(modifier = Modifier
                     .fillMaxWidth()
                     .semantics {
@@ -365,8 +366,13 @@ private fun ComboBoxPreview() {
             showNoValueOption = FormInputNoValueOption.Show,
             noValueLabel = "No value"
         ),
+        hasValueExpression = false,
         scope = scope,
-        onEditValue = {},
+        id = 1,
+        updateValue = {},
+        evaluateExpressions = {
+            return@ComboBoxFieldState Result.success(emptyList())
+        }
     )
     ComboBoxField(state = state)
 }

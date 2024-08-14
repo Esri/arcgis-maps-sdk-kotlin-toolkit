@@ -57,7 +57,6 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-    @Suppress("UnstableApiUsage")
     buildFeatures {
         compose = true
         buildConfig = true
@@ -70,6 +69,15 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+
+    /**
+     * Configures the test report for connected (instrumented) tests to be copied to a central
+     * folder in the project's root directory.
+     */
+    testOptions {
+        val connectedTestReportsPath: String by project
+        reportDir = "$connectedTestReportsPath/${project.name}"
     }
 }
 
@@ -97,6 +105,7 @@ dependencies {
     implementation(libs.androidx.window)
     implementation(libs.androidx.window.core)
     // compose
+    implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -104,6 +113,8 @@ dependencies {
     implementation(libs.androidx.compose.navigation)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     testImplementation(libs.bundles.unitTest)
+    testImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.bundles.composeTest)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
     debugImplementation(libs.bundles.debug)
 }

@@ -10,11 +10,9 @@ for editing Feature attributes.
 The application provides a web map gallery and a map viewer which invokes the form when Features are tapped.
 Authentication is optional but limited to specific public web maps.
 
-To authenticate ArcGIS Online with username and password, please provide values in `local.properties` as follows
+To login to your ArcGIS Online account, click the `Sign in with ArcGIS Online` button in the app. This will open the OAuth page in a new browser window where you can enter the account credentials. 
+Once you have signed in, you can access the web maps that are shared with your account.
 
-```
-webMapUser=XXX
-webMapPassword=YYY
-```
+If you'd rather use an ArcGIS Enterprise account, click the `Sign in with ArcGIS Enterprise` button in the app. This will open a dialog prompting for an Enterprise URL followed by another dialog to enter your credentials.
 
 For more information on the `FeatureForm` component and how it works, see it's [Readme](../../toolkit/featureforms/README.md).

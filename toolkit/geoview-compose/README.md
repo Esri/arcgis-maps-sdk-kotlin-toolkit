@@ -116,6 +116,41 @@ MapView(
 
 An example of how to identify features and graphics is available in the [MapView Identify App](../../microapps/MapViewIdentifyApp/README.md).
 
+### Display a Callout
+
+To display a Callout, use the `content` lambda parameter of the `MapView` or `SceneView` to call the [Callout](./src/main/java/com/arcgismaps/toolkit/geoviewcompose/GeoViewScope.kt#L120) composable function: 
+
+```kotlin
+MapView(
+    modifier = Modifier.fillMaxSize(),
+    arcGISMap = arcGISMapWithFeatureLayer,
+    onSingleTapConfirmed = { identifyGeoElement(it) },
+    content = {
+        if (selectedGeoElement != null) {
+            Callout(
+                modifier = Modifier.wrapContentSize(),
+                shapes = CalloutDefaults.shapes(
+                    cornerRadius = 15.dp,
+                    leaderSize = DpSize(width = 12.dp, height = 10.dp)
+                ),
+                colorScheme = CalloutDefaults.colors(
+                    borderColor = MaterialTheme.colorScheme.outlineVariant,
+                    backgroundColor = MaterialTheme.colorScheme.background
+                )
+                geoElement = selectedGeoElement,
+                tapLocation = tapLocation
+            ) {
+                Column { // Callout content
+                    Text(text = "Tapped Point: ${tapLocation.x},${tapLocation.y}")
+                }
+            }
+        }
+    }
+)
+```
+
+An example of how to use the Callout on a point or geo-element is available in the [MapView Callout App](../../microapps/MapViewCalloutApp/README.md).
+
 ### Other Examples:
 
 Other microapps that demonstrate various workflows with the composable `MapView` and `SceneView` are available:
@@ -125,5 +160,7 @@ Other microapps that demonstrate various workflows with the composable `MapView`
 - [SceneView Analysis Overlay App](../../microapps/SceneViewAnalysisOverlayApp/README.md) demonstrates the use of `AnalysisOverlay`
 - [SceneView Camera Controller App](../../microapps/SceneViewCameraControllerApp/README.md) demonstrates the use of the `CameraController`
 - [SceneView Lighting Options App](../../microapps/SceneViewLightingOptionsApp/README.md) demonstrates the use of various lighting options with the `SceneView`
+- [MapView CalloutApp](../../microapps/MapViewCalloutApp/README.md) demontrates the use of Callout with the `MapView`
+- [SceneView CalloutApp](../../microapps/MapViewCalloutApp/README.md) demontrates the use of Callout with the `SceneView`
 
 

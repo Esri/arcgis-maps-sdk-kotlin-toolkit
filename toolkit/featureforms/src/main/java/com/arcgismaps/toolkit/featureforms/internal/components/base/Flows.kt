@@ -159,9 +159,20 @@ private fun createValidationErrorStates(
                     }
                     if (min > 0 && max > 0) {
                         if (min == max) {
-                            add(ValidationErrorState.ExactCharConstraint(min))
+                            add(
+                                ValidationErrorState.ExactCharConstraint(
+                                    min,
+                                    formElement.hasValueExpression
+                                )
+                            )
                         } else {
-                            add(ValidationErrorState.MinMaxCharConstraint(min, max))
+                            add(
+                                ValidationErrorState.MinMaxCharConstraint(
+                                    min,
+                                    max,
+                                    formElement.hasValueExpression
+                                )
+                            )
                         }
                     } else {
                         add(ValidationErrorState.MaxCharConstraint(max))
@@ -182,7 +193,8 @@ private fun createValidationErrorStates(
                         add(
                             ValidationErrorState.MinMaxNumericConstraint(
                                 min.format(),
-                                max.format()
+                                max.format(),
+                                formElement.hasValueExpression
                             )
                         )
                     } else if (min != null) {

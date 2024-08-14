@@ -18,6 +18,7 @@ package com.arcgismaps.toolkit.featureformsapp.screens.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.authentication.AuthenticatorState
 import com.arcgismaps.toolkit.featureformsapp.BuildConfig
@@ -33,7 +34,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 
 @HiltViewModel
@@ -41,9 +41,6 @@ class LoginViewModel @Inject constructor(
     private val portalSettings: PortalSettings,
     private val urlHistoryDao: UrlHistoryDao
 ) : ViewModel() {
-
-    private data class Credentials(val username: String = "", val password: String = "")
-
     val authenticatorState = AuthenticatorState()
 
     val urlHistory: StateFlow<List<String>> = urlHistoryDao.observeAll().map { urlEntries ->
@@ -59,51 +56,34 @@ class LoginViewModel @Inject constructor(
     private val _loginState: MutableStateFlow<LoginState> = MutableStateFlow(LoginState.NotLoggedIn)
     val loginState = _loginState.asStateFlow()
 
-    private var credentials: Credentials? = Credentials()
+    private val oAuthRedirectUri = "featureformsapp://auth"
+    private val clientId = "iFmvhJGQEKGK1Ahf"
 
-    init {
+    /**
+     * Save this url to the search history.
+     */
+    fun addUrlToHistory(url: String) {
         viewModelScope.launch {
-            launch {
-                authenticatorState.pendingUsernamePasswordChallenge.collect {
-                    if (credentials != null) {
-                        it?.continueWithCredentials(credentials!!.username, credentials!!.password)
-                    }
-                }
-            }
-        }
-    }
-
-    fun loginWithDefaultCredentials() {
-        credentials = Credentials(BuildConfig.webMapUser, BuildConfig.webMapPassword)
-        _loginState.value = LoginState.Loading
-        viewModelScope.launch(Dispatchers.IO) {
-            // set a timeout of 20s
-            val result = withTimeoutOrNull(20000) {
-                authenticatorState.oAuthUserConfiguration = null
-                portalSettings.setPortalUrl(portalSettings.defaultPortalUrl)
-                portalSettings.setPortalConnection(Portal.Connection.Authenticated)
-                val portal =
-                    Portal(portalSettings.defaultPortalUrl, Portal.Connection.Authenticated)
-                portal.load().onFailure {
-                    _loginState.value = LoginState.Failed(it.message ?: "")
-                }.onSuccess {
-                    _loginState.value = LoginState.Success
-                }
-            }
-            if (result == null) {
-                _loginState.value = LoginState.Failed("Operation timed out")
-            }
-        }
-    }
-
-    fun loginWithArcGISEnterprise(url: String) {
-        credentials = null
-        _loginState.value = LoginState.Loading
-        viewModelScope.launch(Dispatchers.IO) {
             if (url.isNotEmpty()) {
                 urlHistoryDao.insert(UrlEntry(url))
             }
-            authenticatorState.oAuthUserConfiguration = null
+        }
+    }
+
+    /**
+     * Authenticate the user with the given portal [url]. Default [url] is ArcGIS Online.
+     */
+    fun login(url: String = portalSettings.defaultPortalUrl, useOAuth: Boolean) {
+        _loginState.value = LoginState.Loading
+        viewModelScope.launch(Dispatchers.IO) {
+            authenticatorState.oAuthUserConfiguration =
+                if (useOAuth)
+                    OAuthUserConfiguration(
+                        portalUrl = url,
+                        clientId = clientId,
+                        redirectUrl = oAuthRedirectUri,
+                    )
+                else null
             portalSettings.setPortalUrl(url)
             portalSettings.setPortalConnection(Portal.Connection.Authenticated)
             val portal = Portal(url, Portal.Connection.Authenticated)
@@ -115,6 +95,9 @@ class LoginViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Skip authentication and use the portal as an anonymous user to load any public content.
+     */
     fun skipSignIn() {
         viewModelScope.launch {
             portalSettings.setPortalUrl(portalSettings.defaultPortalUrl)

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~
+  ~  Copyright 2023 Esri
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  ~
+  --><resources>
+    <string name="enter_n_chars">Įveskite %1$d simb.</string>
+    <string name="enter_min_to_max_chars">Įveskite %1$d iki %2$d simbolių</string>
+    <string name="maximum_n_chars">Maks. %1$d simboliai (-ių)</string>
+    <string name="no_value">Nėra reikšmės</string>
+    <string name="enter_value">Įvesti reikšmę</string>
+    <string name="required">Privalomas</string>
+    <string name="today">Šiandien</string>
+    <string name="now">Dabar</string>
+    <string name="cancel">Atšaukti</string>
+    <string name="ok">Gerai</string>
+    <string name="done">Atlikta</string>
+    <string name="filter">Filtruoti %1$s</string>
+    <string name="numeric_range_helper_text">Įveskite reikšmę nuo %1$s iki %2$s</string>
+    <string name="less_than_min_value">Mažiau negu minimali reikšmė %1$s</string>
+    <string name="exceeds_max_value">Viršija maksimalią reikšmę %1$s</string>
+    <string name="value_must_be_a_whole_number">Reikšmė turi būti sveikasis skaičius</string>
+    <string name="value_must_be_a_number">Reikšmė turi būti skaitmuo</string>
+    <string name="value_must_be_within_domain">Reikšmė turi patekti į srities aprėptį</string>
+    <string name="value_must_not_be_empty">Reikšmė negali būti tuščia</string>
+    <string name="min_datetime_helper_text">Data turi būti %1$s arba vėlesnė</string>
+    <string name="max_datetime_helper_text">Data turi būti %1$s arba ankstesnė</string>
+
+    <!-- Date Picker string values -->
+    <string name="ff_date_input_headline">Įvesta data</string>
+    <string name="ff_date_input_headline_description">Įvesta data: %1$s</string>
+    <string name="ff_date_input_invalid_for_pattern">Neatitinka numatytos struktūros: %1$s</string>
+    <string name="ff_date_input_invalid_not_allowed">Data neleidžiama: %1$s</string>
+    <string name="ff_date_input_invalid_year_range">
+        Data nepatenka į numatytą intervalą %1$s–%2$s
+    </string>
+    <string name="ff_date_input_label">Data</string>
+    <string name="ff_date_input_no_input_description">Nėra</string>
+    <string name="ff_date_input_title">Pasirinkti datą</string>
+    <string name="ff_date_picker_headline">"Pasirinkta data"</string>
+    <string name="ff_date_picker_headline_description">Dabartinis pasirinkimas: %1$s</string>
+    <string name="ff_date_picker_navigate_to_year_description">Eiti į %1$s metus</string>
+    <string name="ff_date_picker_no_selection_description">Nėra</string>
+    <string name="ff_date_picker_scroll_to_earlier_years">Paslinkite, jei norite peržiūrėti praėjusius metus</string>
+    <string name="ff_date_picker_scroll_to_later_years">Paslinkite, jei norite peržiūrėti metus ateityje</string>
+    <string name="ff_date_picker_switch_to_calendar_mode">Perjungti į kalendoriaus įvesties režimą</string>
+    <string name="ff_date_picker_switch_to_day_selection">
+        "Braukite, jei norite pasirinkti metus, arba palieskite, jei norite grįžti prie dienos pasirinkimo"
+    </string>
+    <string name="ff_date_picker_switch_to_input_mode">Perjungti į teksto įvesties režimą</string>
+    <string name="ff_date_picker_switch_to_next_month">"Pakeisti į kitą mėnesį"</string>
+    <string name="ff_date_picker_switch_to_previous_month">"Pakeisti į ankstesnį mėnesį"</string>
+    <string name="ff_date_picker_switch_to_year_selection">"Perjungti į metų pasirinkimą"</string>
+    <string name="ff_date_picker_title">"Pasirinkti datą"</string>
+    <string name="ff_date_picker_today_description">Šiandien</string>
+    <string name="ff_date_picker_year_picker_pane_title">Matomas metų parinkiklis</string>
+    <string name="ff_date_range_input_invalid_range_input">Negalima datų intervalo įvestis</string>
+    <string name="ff_date_range_input_title">Įvesti datas</string>
+    <string name="ff_date_range_picker_day_in_range">Patenka į intervalą</string>
+    <string name="ff_date_range_picker_end_headline">Pabaigos data</string>
+    <string name="ff_date_range_picker_scroll_to_next_month">Paslinkite, jei norite peržiūrėti kitą mėnesį</string>
+    <string name="ff_date_range_picker_scroll_to_previous_month">Paslinkite, jei norite peržiūrėti ankstesnį mėnesį</string>
+    <string name="ff_date_range_picker_start_headline">Pradžios data</string>
+    <string name="ff_date_range_picker_title">Pasirinkti datas</string>
+
+    <!-- Time Picker string values -->
+    <string name="ff_time_picker_am">priešpiet</string>
+    <string name="ff_time_picker_hour">Valanda</string>
+    <string name="ff_time_picker_hour_24h_suffix">%1$d val.</string>
+    <string name="ff_time_picker_hour_selection">Pasirinkti valandą</string>
+    <string name="ff_time_picker_hour_suffix">%1$d val.</string>
+    <string name="ff_time_picker_hour_text_field">valandai</string>
+    <string name="ff_time_picker_minute">Minutė</string>
+    <string name="ff_time_picker_minute_selection">Pasirinkti minutes</string>
+    <string name="ff_time_picker_minute_suffix">%1$d min.</string>
+    <string name="ff_time_picker_minute_text_field">minutėms</string>
+    <string name="ff_time_picker_period_toggle_description">Pasirinkti priešpiet ar popiet</string>
+    <string name="ff_time_picker_pm">popiet</string>
+    <string name="take_photo">Fotografuoti</string>
+    <string name="rename">Pervardinti</string>
+    <string name="delete">Ištrinti</string>
+    <string name="rename_attachment">Pervardinti priedą</string>
+    <string name="name">Pavadinimas</string>
+</resources>

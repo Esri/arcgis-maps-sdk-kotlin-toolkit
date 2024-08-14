@@ -1,8 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?><resources>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
     <string name="floor_filter_view_filter_hint_sites">Filtriraj mjesta...</string>
+    <!-- This text is used as a hint on a text field to add text to filter a list-->
     <string name="floor_filter_view_filter_hint_facilities">Filtriraj mjesta usluge...</string>
+    <!-- This text is a label on a text field that can fit 24 chars -->
     <string name="floor_filter_select_site">Odaberi mjesto</string>
+    <!-- This text is a label on a text field that can fit 23 chars -->
     <string name="floor_filter_select_facility">Odaberi mjesto usluge</string>
     <string name="floor_filter_no_results">Nema rezultata.</string>
-    <string name="floor_filter_site_selector_top_bar">Mjesto\u0020-\u0020</string>
+    <string name="not_available">Nije dostupno</string>
+    <!-- This text is a label on a text field that displays the name of the site after the hyphen -->
+    <string name="floor_filter_site_selector_top_bar">Web - mjesto %1$s</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_facility_button">Gumb za mjesta i objekte</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="floor_level_select_button">Tipka za odabir kata</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="site_item">Stavka web-mjesta</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="facility_item">Stavka mjesta usluge</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="clear_search">Očisti pretragu</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="close">Zatvori</string>
+    <!-- This text is used to describe the UI element to support accessibility services -->
+    <string name="go_back_to_site_selector">Idi natrag na odabirač web-mjesta</string>
 </resources>
