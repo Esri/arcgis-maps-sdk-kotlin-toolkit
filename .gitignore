@@ -23,7 +23,7 @@ proguard/
 .classpath
 bin/
 gen/
-/.settings
+.settings/
 .vscode/
 
 # OS generated files #
