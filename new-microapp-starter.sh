@@ -83,7 +83,7 @@ if [[ ! "${appDirName}" =~ .+App$ ]] ; then
     appDirName="${composableFunctionName}App"
 fi
 
-echo copying and converting app files, componentName $componentName composableFunctionName $composableFunctionName  time 1 minute.
+echo copying and converting app files, componentName $componentName composableFunctionName $composableFunctionName estimated time 1 minute.
 copyTemplateApp
 convertTemplateApp
 addToSettings
