@@ -24,7 +24,7 @@ plugins {
     id("artifact-deploy")
 }
 android {
-    namespace = "com.arcgismaps.toolkit.utilitynetwork"
+    namespace = "com.arcgismaps.toolkit.utilitynetworks"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {

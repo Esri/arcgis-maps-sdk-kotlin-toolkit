@@ -4,7 +4,7 @@
 
 ## Description
 
-The UtilityNetwork toolkit component provides composable UI components for interacting with [UtilityNetworks](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.utilitynetworks/-utility-network/index.html?query=class%20UtilityNetwork).
+The UtilityNetworks toolkit component provides composable UI components for interacting with [UtilityNetworks](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.utilitynetworks/-utility-network/index.html?query=class%20UtilityNetwork).
 
 Screenshot TBA
 <!-- ![Screenshot](screenshot.png) -->
@@ -23,7 +23,7 @@ The `Trace` function is a composable function that provides configuration of net
 
 To get started, set up a `composable MapView` as described [here](../geoview-compose/README.md).
 
-Ensure the MapView's [ArcGISMap]([GeoElements](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping/-arc-g-i-s-map/index.html?query=class%20ArcGISMap) has at least one UtilityNetwork in its definition.
+Ensure the MapView's [ArcGISMap](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping/-arc-g-i-s-map/index.html?query=class%20ArcGISMap) has at least one UtilityNetwork in its definition.
 
 ```kotlin
 // set up some variables
