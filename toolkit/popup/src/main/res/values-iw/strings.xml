@@ -13,15 +13,15 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="show_or_hide_popup_element_content">כן_expand popup element content_____________________________ש</string>
-    <string name="share">כן_Share___________ש</string>
-    <string name="save">כן_Save_________ש</string>
-    <string name="save_successful">כן_Save successful________________ש</string>
-    <string name="save_failed">כן_Save failed____________ש</string>
-    <string name="more">כן_More_________ש</string>
-    <string name="image">כן_Image___________ש</string>
-    <string name="video">כן_Video___________ש</string>
-    <string name="other">כן_Other___________ש</string>
-    <string name="close">כן_Back_________ש</string>
-    <string name="attachment_thumbnail">כן_attachment thumbnail_____________________ש</string>
+    <string name="show_or_hide_popup_element_content">הרחב תוכן רכיב קופץ</string>
+    <string name="share">שתף</string>
+    <string name="save">שמור</string>
+    <string name="save_successful">נשמר בהצלחה</string>
+    <string name="save_failed">שמירה נכשלה</string>
+    <string name="more">עוד</string>
+    <string name="image">תמונה</string>
+    <string name="video">וידאו</string>
+    <string name="other">אחר</string>
+    <string name="close">חזור</string>
+    <string name="attachment_thumbnail">תמונה ממוזערת של צורפה</string>
 </resources>
