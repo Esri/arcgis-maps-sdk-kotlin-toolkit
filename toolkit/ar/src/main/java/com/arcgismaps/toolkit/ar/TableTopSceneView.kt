@@ -54,7 +54,7 @@ public fun TableTopSceneView(
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
     graphicsOverlays: List<GraphicsOverlay> = remember { emptyList() },
-    sceneViewProxy: SceneViewProxy = remember { SceneViewProxy() },
+    tableTopSceneViewProxy: TableTopSceneViewProxy = remember { TableTopSceneViewProxy() },
     sceneViewInteractionOptions: SceneViewInteractionOptions = remember { SceneViewInteractionOptions() },
     viewLabelProperties: ViewLabelProperties = remember { ViewLabelProperties() },
     selectionProperties: SelectionProperties = remember { SelectionProperties() },
@@ -83,6 +83,7 @@ public fun TableTopSceneView(
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
+    // TODO: Create TableTopArScope
     content: (@Composable SceneViewScope.() -> Unit)? = null
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -95,7 +96,7 @@ public fun TableTopSceneView(
             onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
             onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
             graphicsOverlays = graphicsOverlays,
-            sceneViewProxy = sceneViewProxy,
+            sceneViewProxy = tableTopSceneViewProxy.sceneViewProxy,
             sceneViewInteractionOptions = sceneViewInteractionOptions,
             viewLabelProperties = viewLabelProperties,
             selectionProperties = selectionProperties,
