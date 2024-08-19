@@ -1,5 +1,4 @@
 /*
- *
  *  Copyright 2024 Esri
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,16 +12,22 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *
  */
 
 package com.arcgismaps.toolkit.utilitynetwork
 
-import kotlinx.coroutines.flow.StateFlow
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import com.arcgismaps.utilitynetworks.UtilityNetwork
 
 /**
- * An interface to pass into the UtilityNetwork composable function.
+ * A composable UI component to set up and run a [com.arcgismaps.utilitynetworks.UtilityNetwork.trace]
+ * on a [com.arcgismaps.toolkit.geoviewcompose.MapView].
+ *
+ * @param utilityNetwork a [UtilityNetwork]
+ * @since 200.6.0
  */
-public interface UtilityNetworkInterface {
-    public val someProperty: StateFlow<String>
+@Composable
+public fun Trace(utilityNetwork: UtilityNetwork) {
+    Text(text = utilityNetwork.name)
 }

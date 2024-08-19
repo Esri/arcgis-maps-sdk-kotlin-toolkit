@@ -92,6 +92,7 @@ testAggregation {
         "microapps-lib",
         "template",
         "template-app",
+        "utilitynetworktrace-app",
         "composable-map").forEach {
         this.modules.include(project(":$it"))
     }

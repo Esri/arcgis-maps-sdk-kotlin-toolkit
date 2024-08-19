@@ -71,21 +71,12 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-
-    /**
-     * Configures the test report for connected (instrumented) tests to be copied to a central
-     * folder in the project's root directory.
-     */
-    @Suppress("UnstableApiUsage")
-    testOptions {
-        val connectedTestReportsPath: String by project
-        reportDir = "$connectedTestReportsPath/${project.name}"
-    }
 }
 
 dependencies {
     implementation(project(":geoview-compose"))
     implementation(project(":microapps-lib"))
+    implementation(project(":utilitynetwork"))
     implementation(arcgis.mapsSdk)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
@@ -93,8 +84,5 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-    testImplementation(libs.bundles.unitTest)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.bundles.composeTest)
     debugImplementation(libs.bundles.debug)
 }
