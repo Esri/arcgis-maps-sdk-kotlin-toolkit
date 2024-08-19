@@ -18,6 +18,7 @@ package com.arcgismaps.toolkit.utilitynetwork
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import com.arcgismaps.utilitynetworks.UtilityNetwork
 
 /**
@@ -28,6 +29,6 @@ import com.arcgismaps.utilitynetworks.UtilityNetwork
  * @since 200.6.0
  */
 @Composable
-public fun Trace(utilityNetwork: UtilityNetwork) {
+public fun Trace(utilityNetwork: UtilityNetwork, @Suppress("unused_parameter") modifier: Modifier = Modifier) {
     Text(text = utilityNetwork.name)
 }
