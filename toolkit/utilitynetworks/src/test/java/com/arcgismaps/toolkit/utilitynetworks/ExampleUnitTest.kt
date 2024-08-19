@@ -1,4 +1,5 @@
 /*
+ *
  *  Copyright 2024 Esri
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,23 +13,22 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
+ *
  */
 
-package com.arcgismaps.toolkit.utilitynetwork
+package com.arcgismaps.toolkit.utilitynetworks
 
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import com.arcgismaps.utilitynetworks.UtilityNetwork
+import org.junit.Assert.assertEquals
+import org.junit.Test
 
 /**
- * A composable UI component to set up and run a [com.arcgismaps.utilitynetworks.UtilityNetwork.trace]
- * on a [com.arcgismaps.toolkit.geoviewcompose.MapView].
+ * Example local unit test, which will execute on the development machine (host).
  *
- * @param utilityNetwork a [UtilityNetwork]
- * @since 200.6.0
+ * See [testing documentation](http://d.android.com/tools/testing).
  */
-@Composable
-public fun Trace(utilityNetwork: UtilityNetwork, @Suppress("unused_parameter") modifier: Modifier = Modifier) {
-    Text(text = utilityNetwork.name)
+class ExampleUnitTest {
+    @Test
+    fun addition_isCorrect() {
+        assertEquals(4, 2 + 2)
+    }
 }

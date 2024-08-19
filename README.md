@@ -11,7 +11,7 @@ The ArcGIS Maps SDK for Kotlin Toolkit contains components that will simplify yo
 * **[GeoView-Compose](toolkit/geoview-compose)** - Compose wrappers for the MapView and SceneView.
   * **[Callout](toolkit/geoview-compose#display-a-callout)** - Draws a callout on the GeoView to display Composable content.
 * **[Popup](toolkit/popup)** - View field values of features in a layer using the Popup API.
-* **[UtilityNetworkTrace](toolkit/utilitynetwork)** - Configure, run, and visualize UtilityNetworkTraces on a composable MapView.
+* **[UtilityNetworkTrace](toolkit/utilitynetworks)** - Configure, run, and visualize UtilityNetworkTraces on a composable MapView.
 
 ## API Reference
 
@@ -51,7 +51,7 @@ implementation("com.esri:arcgis-maps-kotlin-toolkit-featureforms")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-geoview-compose")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-indoors")
 implementation("com.esri:arcgis-maps-kotlin-toolkit-popup")
-implementation("com.esri:arcgis-maps-kotlin-toolkit-utilitynetwork")
+implementation("com.esri:arcgis-maps-kotlin-toolkit-utilitynetworks")
 
 ```
 

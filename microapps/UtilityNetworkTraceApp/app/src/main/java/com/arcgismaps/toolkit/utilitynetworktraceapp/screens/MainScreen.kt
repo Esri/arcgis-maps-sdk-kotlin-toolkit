@@ -40,7 +40,7 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.geoviewcompose.MapView
-import com.arcgismaps.toolkit.utilitynetwork.Trace
+import com.arcgismaps.toolkit.utilitynetworks.Trace
 
 private val napervilleUtilities = "471eb0bf37074b1fbb972b1da70fb310"
 
