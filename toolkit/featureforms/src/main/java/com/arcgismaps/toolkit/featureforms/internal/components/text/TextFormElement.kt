@@ -34,7 +34,7 @@ internal fun TextFormElement(state: TextFormElementState, modifier: Modifier = M
         Column(modifier = modifier) {
             Text(text = state.label)
             if (state.format == FormTextFormat.Markdown) {
-                Markdown(text = text)
+                MarkdownV2(text = text)
             } else {
                 Text(text = text)
             }

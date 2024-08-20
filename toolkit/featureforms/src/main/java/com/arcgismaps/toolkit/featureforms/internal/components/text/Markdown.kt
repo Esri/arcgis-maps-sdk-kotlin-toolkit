@@ -92,7 +92,7 @@ internal fun Markdown(text: String, modifier: Modifier = Modifier) {
     )
 }
 
-internal fun parseMarkdown(
+private fun parseMarkdown(
     text: String,
     typography: Typography,
     colors: ColorScheme
