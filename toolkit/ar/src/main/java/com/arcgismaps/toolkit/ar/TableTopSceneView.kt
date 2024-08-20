@@ -38,8 +38,6 @@ import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
-import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
-import com.arcgismaps.toolkit.geoviewcompose.SceneViewScope
 import java.time.Instant
 
 /**
@@ -83,11 +81,15 @@ public fun TableTopSceneView(
     onTwoPointerTap: ((TwoPointerTapEvent) -> Unit)? = null,
     onPan: ((PanChangeEvent) -> Unit)? = null,
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
-    // TODO: Create TableTopArScope
-    content: (@Composable SceneViewScope.() -> Unit)? = null
+    content: (@Composable TableTopSceneViewScope.() -> Unit)? = null
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
-        Icon(imageVector = Icons.Default.Face, contentDescription = null, modifier = Modifier.fillMaxSize(), tint = Color.Red)
+        Icon(
+            imageVector = Icons.Default.Face,
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            tint = Color.Red
+        )
 
         val cameraController = remember { TransformationMatrixCameraController() }
         SceneView(
@@ -131,7 +133,9 @@ public fun TableTopSceneView(
             onTwoPointerTap = onTwoPointerTap,
             onPan = onPan,
             onDrawStatusChanged = onDrawStatusChanged,
-            content = content
+            content = {
+                content?.invoke(TableTopSceneViewScope(this))
+            }
         )
     }
 }
