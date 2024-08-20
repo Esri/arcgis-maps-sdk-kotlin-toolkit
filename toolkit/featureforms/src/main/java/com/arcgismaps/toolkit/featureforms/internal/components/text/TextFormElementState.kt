@@ -26,6 +26,16 @@ import com.arcgismaps.mapping.featureforms.TextFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormElementState
 import kotlinx.coroutines.flow.StateFlow
 
+/**
+ * Represents the state of a [TextFormElement].
+ *
+ * @param id Unique identifier for the form element.
+ * @param label The label of the form element.
+ * @param description The description of the form element.
+ * @param isVisible The visibility state of the form element.
+ * @property text The text to be displayed.
+ * @property format The format of the text.
+ */
 internal class TextFormElementState(
     id: Int,
     label: String,
@@ -39,24 +49,18 @@ internal class TextFormElementState(
     description = description,
     isVisible = isVisible
 ) {
-
     companion object {
         fun Saver(
             formElement: TextFormElement,
         ): Saver<TextFormElementState, Any> = listSaver(
             save = {
-                listOf(
-                    it.id,
-                    it.label,
-                    it.description,
-                    it.isVisible.value
-                )
+                listOf(it.id)
             },
             restore = {
                 TextFormElementState(
-                    id = it[0] as Int,
-                    label = it[1] as String,
-                    description = it[2] as String,
+                    id = it[0],
+                    label = formElement.label,
+                    description = formElement.description,
                     isVisible = formElement.isVisible,
                     text = formElement.text,
                     format = formElement.textFormat

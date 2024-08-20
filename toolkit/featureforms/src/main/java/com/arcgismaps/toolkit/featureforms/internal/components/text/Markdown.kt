@@ -18,42 +18,41 @@ package com.arcgismaps.toolkit.featureforms.internal.components.text
 
 import android.util.Log
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.style.TextGeometricTransform
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import org.commonmark.ext.gfm.strikethrough.Strikethrough
 import org.commonmark.ext.gfm.strikethrough.StrikethroughExtension
 import org.commonmark.node.BulletList
 import org.commonmark.node.Code
-import org.commonmark.node.Document
 import org.commonmark.node.Emphasis
 import org.commonmark.node.HardLineBreak
 import org.commonmark.node.Heading
 import org.commonmark.node.Link
-import org.commonmark.node.ListItem
+import org.commonmark.node.ListBlock
 import org.commonmark.node.Node
 import org.commonmark.node.OrderedList
 import org.commonmark.node.Paragraph
@@ -61,120 +60,221 @@ import org.commonmark.node.SoftLineBreak
 import org.commonmark.node.StrongEmphasis
 import org.commonmark.node.Text
 import org.commonmark.parser.Parser
+import org.commonmark.node.Document
 
 private const val URL_LINK = "URL_LINK"
 
+/**
+ * Renders a markdown formatted text.
+ *
+ * @param text The markdown formatted text.
+ * @param modifier The modifier to be applied to the composable.
+ */
 @Composable
 internal fun Markdown(text: String, modifier: Modifier = Modifier) {
-    val typography = MaterialTheme.typography
-    val colors = MaterialTheme.colorScheme
-    val markdownText = remember {
-        parseMarkdown(text, typography, colors)
+    val document = remember(text) {
+        Parser.builder()
+            .extensions(listOf(StrikethroughExtension.create()))
+            .build()
+            .parse(text)
     }
-    val layoutResult = remember { mutableStateOf<TextLayoutResult?>(null) }
+    Column(modifier = modifier) {
+        MarkdownTree(document)
+    }
+}
+
+/**
+ * Entry point for parsing and rendering the markdown tree.
+ *
+ * @param root The root node of the markdown tree. This can be a [Document] node.
+ */
+@Composable
+private fun MarkdownTree(root: Node) {
+    root.forEachChild { node ->
+        when (node) {
+            is Paragraph -> Paragraph(
+                paragraph = node,
+                modifier = Modifier.padding(vertical = 4.dp)
+            )
+
+            is Heading -> Heading(heading = node, modifier = Modifier.padding(vertical = 8.dp))
+            is BulletList -> ListNode(
+                node = node,
+                level = 0,
+                isOrdered = false,
+                modifier = Modifier.padding(vertical = 4.dp)
+            )
+
+            is OrderedList -> ListNode(
+                node = node,
+                level = 0,
+                isOrdered = true,
+                modifier = Modifier.padding(vertical = 4.dp)
+            )
+
+            else -> Log.w("Markdown", "Unsupported node type: ${node.javaClass.simpleName}")
+        }
+    }
+}
+
+/**
+ * Renders a markdown node and its children recursively. The tree is built as an [AnnotatedString]
+ * and displayed using a [Text] that supports tap gestures on links.
+ *
+ * @param node The markdown node to render.
+ * @param modifier The modifier to be applied to the composable.
+ * @param textStyle The text style to be applied to the text.
+ * @param prefix A prefix string that will be prepended to the text.
+ */
+@Composable
+private fun MarkdownNode(
+    node: Node,
+    modifier: Modifier = Modifier,
+    textStyle: TextStyle = TextStyle.Default,
+    prefix: AnnotatedString? = null,
+) {
+    val uriHandler = LocalUriHandler.current
+    var layoutResult by remember {
+        mutableStateOf<TextLayoutResult?>(null)
+    }
+    val text = buildAnnotatedString {
+        withStyle(textStyle.toSpanStyle()) {
+            prefix?.let { append(it) }
+            parseMarkdownTree(node)
+        }
+    }
     Text(
-        text = markdownText,
+        text = text,
         modifier = modifier.pointerInput(Unit) {
             detectTapGestures { offsetPosition ->
-                if (layoutResult.value != null) {
-                    val position = layoutResult.value!!.getOffsetForPosition(offsetPosition)
-                    markdownText.getStringAnnotations(position, position).firstOrNull()
-                        ?.let { annotation ->
-                            if (annotation.tag == URL_LINK) {
-                                Log.e("TAG", "URL: ${annotation.item}")
-                            }
+                if (layoutResult != null) {
+                    val position = layoutResult!!.getOffsetForPosition(offsetPosition)
+                    text.getStringAnnotations(position, position).firstOrNull()?.let { annotation ->
+                        if (annotation.tag == URL_LINK) {
+                            uriHandler.openUri(annotation.item)
                         }
+                    }
                 }
             }
         },
-        lineHeight = 25.sp,
-        onTextLayout = { layoutResult.value = it }
+        style = textStyle,
+        onTextLayout = { layoutResult = it }
     )
 }
 
-private fun parseMarkdown(
-    text: String,
-    typography: Typography,
-    colors: ColorScheme
-): AnnotatedString {
-    val parser = Parser.builder()
-        .extensions(listOf(StrikethroughExtension.create()))
-        .build()
-    val document = parser.parse(text)
-    return buildAnnotatedString {
-        visitMarkdownNode(document, typography, colors)
-    }
+/**
+ * Renders a markdown [Paragraph].
+ */
+@Composable
+private fun Paragraph(paragraph: Paragraph, modifier: Modifier = Modifier) {
+    MarkdownNode(
+        node = paragraph,
+        textStyle = MaterialTheme.typography.bodyMedium,
+        modifier = modifier
+    )
 }
 
-private fun AnnotatedString.Builder.visitMarkdownNode(
-    node: Node,
-    typography: Typography,
-    colors: ColorScheme
+/**
+ * Renders a markdown [Heading].
+ */
+@Composable
+private fun Heading(heading: Heading, modifier: Modifier = Modifier) {
+    val typography = MaterialTheme.typography
+    val textStyle = when (heading.level) {
+        in 1..3 -> typography.titleLarge
+        4 -> typography.titleMedium
+        5 -> typography.titleSmall
+        else -> typography.titleSmall
+    }.copy(fontWeight = FontWeight.Bold)
+    MarkdownNode(
+        node = heading,
+        textStyle = textStyle,
+        modifier = modifier
+    )
+}
+
+/**
+ * Renders a markdown [BulletList] or [OrderedList] based on the [isOrdered] flag. This also
+ * supports nested lists that are rendered recursively. For nested lists, the nesting level is
+ * determined by the [level] parameter.
+ *
+ * @param node The list node to render.
+ * @param level The nesting level of the list.
+ * @param isOrdered Flag to indicate if the list is ordered.
+ * @param modifier The modifier to be applied to the composable.
+ */
+@Composable
+private fun ListNode(
+    node: ListBlock,
+    level: Int,
+    isOrdered: Boolean,
+    modifier: Modifier = Modifier
 ) {
-    when (node) {
-        is Document -> {
-            visitChildren(node, typography, colors)
-        }
-
-        is Paragraph -> {
-            withStyle(typography.bodyMedium.toSpanStyle()) {
-                visitChildren(node, typography, colors)
-                appendLine()
+    var number = if (isOrdered) (node as OrderedList).startNumber else 0
+    Column(
+        modifier = modifier
+    ) {
+        node.forEachChild { child ->
+            val bullet = if (isOrdered) "${number++}. " else when (level % 3) {
+                0 -> "• "
+                1 -> "◦ "
+                else -> "▪ "
             }
-        }
-
-        is Heading -> {
-            val style = when (node.level) {
-                in 1..3 -> typography.titleLarge
-                4 -> typography.titleMedium
-                5 -> typography.titleSmall
-                else -> typography.titleSmall
-            }.copy(fontWeight = FontWeight.Bold)
-            withStyle(style = style.toSpanStyle()) {
-                withStyle(style = style.toParagraphStyle()) {
-                    visitChildren(node, typography, colors)
-                    appendLine()
+            child.forEachChild { nestedChild ->
+                when (nestedChild) {
+                    is OrderedList -> ListNode(nestedChild, level + 1, true)
+                    is BulletList -> ListNode(nestedChild, level + 1, false)
+                    else -> MarkdownNode(
+                        node = nestedChild,
+                        textStyle = MaterialTheme.typography.bodyMedium,
+                        prefix = buildAnnotatedString {
+                            append("${" ".repeat((level + 1) * 4)}$bullet")
+                        }
+                    )
                 }
             }
         }
+    }
+}
 
-        is Text -> {
-            Log.e(
-                "TAG",
-                "visitMarkdownNode: \"${node.literal}\", parent: ${node.parent.javaClass.simpleName}"
-            )
-            append(node.literal)
-        }
-
-        is Emphasis -> withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
-            visitChildren(node, typography, colors)
-        }
-
-        is StrongEmphasis -> withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-            visitChildren(node, typography, colors)
-        }
-
-        is Strikethrough -> {
-            withStyle(SpanStyle(textDecoration = TextDecoration.LineThrough)) {
-                visitChildren(node, typography, colors)
+/**
+ * Parses the markdown tree recursively and builds an [AnnotatedString] with the appropriate styles.
+ *
+ * @param parent The parent node to parse.
+ */
+@Composable
+private fun AnnotatedString.Builder.parseMarkdownTree(
+    parent: Node
+) : AnnotatedString.Builder {
+    val colors = MaterialTheme.colorScheme
+    parent.forEachChild { node ->
+        when (node) {
+            is Text -> append(node.literal)
+            is Emphasis -> withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
+                parseMarkdownTree(node)
             }
-        }
 
-        is Link -> {
-            withStyle(
+            is StrongEmphasis -> withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                parseMarkdownTree(node)
+            }
+
+            is Strikethrough -> withStyle(SpanStyle(textDecoration = TextDecoration.LineThrough)) {
+                parseMarkdownTree(node)
+            }
+
+            is Link -> withStyle(
                 SpanStyle(
                     color = Color.Blue,
                     textDecoration = TextDecoration.Underline
                 )
             ) {
                 pushStringAnnotation(URL_LINK, node.destination)
-                visitChildren(node, typography, colors)
+                parseMarkdownTree(node)
                 pop()
             }
-        }
 
-        is Code -> {
-            withStyle(
+
+            is Code -> withStyle(
                 SpanStyle(
                     color = colors.onSurfaceVariant,
                     fontFamily = FontFamily.Monospace,
@@ -183,126 +283,29 @@ private fun AnnotatedString.Builder.visitMarkdownNode(
             ) {
                 append(node.literal)
             }
-        }
 
-        is BulletList -> {
-            withStyle(
-                SpanStyle(
-                    textGeometricTransform = TextGeometricTransform(),
-                    baselineShift = BaselineShift.Subscript
-                )
-            ) {
-                parseBulletList(node, typography, colors, 0)
-                appendLine()
-            }
-        }
-
-        is OrderedList -> {
-            withStyle(
-                SpanStyle(
-                    textGeometricTransform = TextGeometricTransform(),
-                    baselineShift = BaselineShift.Subscript
-                )
-            ) {
-                parseOrderedList(node, typography, colors, 0)
-                appendLine()
-            }
-        }
-
-        is SoftLineBreak -> {
-            append(" ")
-        }
-
-        is HardLineBreak -> {
-            appendLine()
-        }
-
-        else -> {
-            Log.w(
-                "Markdown",
-                "visitMarkdownNode: Unsupported node type: ${node.javaClass.simpleName}"
-            )
+            is SoftLineBreak -> append(" ")
+            is HardLineBreak -> appendLine()
+            else -> Log.w("Markdown", "Unsupported node type: ${node.javaClass.simpleName}")
         }
     }
+    return this
 }
 
-
-private fun AnnotatedString.Builder.visitChildren(
-    node: Node,
-    typography: Typography,
-    colors: ColorScheme
-) {
-    var child = node.firstChild
-    while (child != null) {
-        visitMarkdownNode(child, typography, colors)
-        child = child.next
-    }
-}
-
-private fun AnnotatedString.Builder.parseOrderedList(
-    node: OrderedList,
-    typography: Typography,
-    colors: ColorScheme,
-    level: Int
-) {
-    var number = 1
-    var child = node.firstChild
-    while (child != null) {
-        if (child is ListItem) {
-            append("${" ".repeat((level + 1) * 4)}${number++}. ")
-            parseListItem(child, typography, colors, level)
-        }
-        child = child.next
-    }
-}
-
-private fun AnnotatedString.Builder.parseBulletList(
-    node: BulletList,
-    typography: Typography,
-    colors: ColorScheme,
-    level: Int
-) {
-    val bullet = when (level % 3) {
-        0 -> "•"
-        1 -> "◦"
-        else -> "▪"
-    }
-    var child = node.firstChild
-    while (child != null) {
-        if (child is ListItem) {
-            append("${" ".repeat((level + 1) * 4)}$bullet ")
-            parseListItem(child, typography, colors, level)
-        }
-        child = child.next
-    }
-}
-
-private fun AnnotatedString.Builder.parseListItem(
-    node: ListItem,
-    typography: Typography,
-    colors: ColorScheme,
-    level: Int
-) {
-    var child = node.firstChild
-    while (child != null) {
-        when (child) {
-            is OrderedList -> {
-                parseOrderedList(child, typography, colors, level + 1)
-            }
-
-            is BulletList -> {
-                parseBulletList(child, typography, colors, level + 1)
-            }
-
-            else -> visitMarkdownNode(child, typography, colors)
-        }
-        child = child.next
+/**
+ * Iterates over the children of a node and applies the specified action to each child.
+ */
+private inline fun Node.forEachChild(action: (Node) -> Unit) {
+    var node = firstChild
+    while (node != null) {
+        action(node)
+        node = node.next
     }
 }
 
 @Composable
 @Preview(showBackground = true)
-private fun MarkdownPreviewV2() {
+private fun MarkdownPreview() {
     val markdownText = """
         # General formatting
 
@@ -311,6 +314,7 @@ private fun MarkdownPreviewV2() {
         _Italicized text_  
         ~~Strikethrough text~~  
         ***Bold and italicized text***
+        
         [Link](https://www.arcgis.com)
         
         ## Lists

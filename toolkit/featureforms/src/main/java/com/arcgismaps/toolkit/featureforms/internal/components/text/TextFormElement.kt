@@ -17,43 +17,54 @@
 package com.arcgismaps.toolkit.featureforms.internal.components.text
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.featureforms.FormTextFormat
+import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTheme
 import kotlinx.coroutines.flow.MutableStateFlow
+import com.arcgismaps.mapping.featureforms.TextFormElement
 
+/**
+ * A composable that displays a [TextFormElement].
+ *
+ * @param state The state of the [TextFormElement].
+ * @param modifier The modifier to be applied to the composable.
+ */
 @Composable
 internal fun TextFormElement(state: TextFormElementState, modifier: Modifier = Modifier) {
     val text by state.text.collectAsState()
     val visible by state.isVisible.collectAsState()
     if (visible) {
         Column(modifier = modifier) {
-            Text(text = state.label)
             if (state.format == FormTextFormat.Markdown) {
-                MarkdownV2(text = text)
+                Markdown(text = text)
             } else {
                 Text(text = text)
             }
-            Text(text = state.description)
         }
     }
 }
 
 @Composable
-@Preview
+@Preview(showBackground = true, showSystemUi = true)
 internal fun TextFormElementPreview() {
-    TextFormElement(
-        TextFormElementState(
-            id = 0,
-            label = "Label",
-            description = "Description",
-            isVisible = MutableStateFlow(true),
-            text = MutableStateFlow("Text"),
-            format = FormTextFormat.PlainText
+    FeatureFormTheme {
+        TextFormElement(
+            TextFormElementState(
+                id = 0,
+                label = "Label",
+                description = "Description",
+                isVisible = MutableStateFlow(true),
+                text = MutableStateFlow("A **Text form element**"),
+                format = FormTextFormat.Markdown
+            ),
+            modifier = Modifier.padding(16.dp)
         )
-    )
+    }
 }
