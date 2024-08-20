@@ -41,7 +41,7 @@ internal class TextFormElementState(
     label: String,
     description: String,
     isVisible: StateFlow<Boolean>,
-    val text : StateFlow<String>,
+    val text: StateFlow<String>,
     val format: FormTextFormat,
 ) : FormElementState(
     id = id,

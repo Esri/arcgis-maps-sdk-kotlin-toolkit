@@ -245,7 +245,7 @@ private fun ListNode(
 @Composable
 private fun AnnotatedString.Builder.parseMarkdownTree(
     parent: Node
-) : AnnotatedString.Builder {
+): AnnotatedString.Builder {
     val colors = MaterialTheme.colorScheme
     parent.forEachChild { node ->
         when (node) {
