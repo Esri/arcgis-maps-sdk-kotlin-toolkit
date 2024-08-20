@@ -106,8 +106,7 @@ apiValidation {
 
 dependencies {
     api(arcgis.mapsSdk)
-    implementation(libs.commonmark)
-    implementation(libs.commonmark.strikethrough)
+    implementation(libs.bundles.commonmark)
     implementation(platform(libs.coil.bom))
     implementation(libs.coil.compose)
     implementation(platform(libs.androidx.compose.bom))

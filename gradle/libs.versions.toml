@@ -99,6 +99,11 @@ core = [
     "androidx-core-ktx"
 ]
 
+commonmark = [
+    "commonmark",
+    "commonmark-strikethrough"
+]
+
 composeCore = [
     "androidx-compose-material3",
     "androidx-compose-ui",
