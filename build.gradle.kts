@@ -28,6 +28,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.dokka) apply false
     alias(libs.plugins.gmazzo.test.aggregation)
+    alias(libs.plugins.compose.compiler) apply false
 }
 
 buildscript {
@@ -92,6 +93,7 @@ testAggregation {
         "microapps-lib",
         "template",
         "template-app",
+        "utility-network-trace-app",
         "composable-map").forEach {
         this.modules.include(project(":$it"))
     }

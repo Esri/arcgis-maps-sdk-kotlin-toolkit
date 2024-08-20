@@ -1,0 +1,4 @@
+public final class com/arcgismaps/toolkit/utilitynetwork/TraceKt {
+	public static final fun Trace (Lcom/arcgismaps/utilitynetworks/UtilityNetwork;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+}
+
