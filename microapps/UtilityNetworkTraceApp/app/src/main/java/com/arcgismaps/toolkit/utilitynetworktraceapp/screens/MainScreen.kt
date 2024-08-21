@@ -79,7 +79,9 @@ fun MainScreen() {
                 label = "popup",
                 modifier = Modifier.heightIn(min = 0.dp, max = 400.dp)
             ) {
-                Trace(utilityNetwork = arcGISMap.utilityNetworks.first())
+                Trace(
+                    arcGISMap = arcGISMap
+                )
             }
         },
         modifier = Modifier.fillMaxSize(),
