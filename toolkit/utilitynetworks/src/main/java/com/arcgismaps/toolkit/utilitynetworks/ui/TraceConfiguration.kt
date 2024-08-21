@@ -54,9 +54,9 @@ import com.arcgismaps.utilitynetworks.UtilityNetwork
  * @since 200.6.0
  */
 @Composable
-internal fun TraceConfiguration(traceConfiguration: List<SelectableItem>) {
+internal fun TraceConfiguration(traceTypes: List<SelectableItem>, onPerformTrace: () -> Unit) {
     val observableTraceConfiguration = remember { mutableStateListOf<SelectableItem>() }
-    observableTraceConfiguration.addAll(traceConfiguration)
+    observableTraceConfiguration.addAll(traceTypes)
     Surface(
         color = MaterialTheme.colorScheme.surface,
         modifier = Modifier
@@ -81,7 +81,7 @@ internal fun TraceConfiguration(traceConfiguration: List<SelectableItem>) {
                 AddTracePoint()
             }
             item {
-                Button(onClick = { /*TODO*/ }) {
+                Button(onClick = { onPerformTrace() }) {
                     Text( stringResource(id = R.string.trace))
                 }
             }
@@ -166,7 +166,7 @@ private fun TraceToolPreview() {
             SelectableItem("Trace 2", false),
             SelectableItem("Trace 3", false),
             SelectableItem("Trace 4", false)
-        )
+        ), {}
     )
 }
 
