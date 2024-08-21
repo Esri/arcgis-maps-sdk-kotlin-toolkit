@@ -19,6 +19,10 @@ package com.arcgismaps.toolkit.utilitynetworktraceapp.screens
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -33,6 +37,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.LoadStatus
@@ -79,7 +86,9 @@ fun MainScreen() {
                 label = "popup",
                 modifier = Modifier.heightIn(min = 0.dp, max = 400.dp)
             ) {
-                Trace(utilityNetwork = arcGISMap.utilityNetworks.first())
+                Trace(
+                    arcGISMap = arcGISMap
+                )
             }
         },
         modifier = Modifier.fillMaxSize(),

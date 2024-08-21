@@ -16,10 +16,23 @@
 
 package com.arcgismaps.toolkit.utilitynetworks
 
+import android.util.Log
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import com.arcgismaps.Guid
+import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.utilitynetworks.UtilityElementTraceResult
 import com.arcgismaps.utilitynetworks.UtilityNetwork
+import com.arcgismaps.utilitynetworks.UtilityTraceParameters
+import com.arcgismaps.utilitynetworks.UtilityTraceType
+import kotlinx.coroutines.launch
 
 /**
  * A composable UI component to set up and run a [com.arcgismaps.utilitynetworks.UtilityNetwork.trace]
@@ -29,6 +42,69 @@ import com.arcgismaps.utilitynetworks.UtilityNetwork
  * @since 200.6.0
  */
 @Composable
-public fun Trace(utilityNetwork: UtilityNetwork, @Suppress("unused_parameter") modifier: Modifier = Modifier) {
-    Text(text = utilityNetwork.name)
+public fun Trace(
+    arcGISMap: ArcGISMap,
+//    graphicsOverlay: GraphicsOverlay,
+//    mapPoint: Point,
+    @Suppress("unused_parameter")
+    modifier: Modifier = Modifier,
+    ) {
+    val coroutineScope = rememberCoroutineScope()
+    LaunchedEffect(arcGISMap) {
+        arcGISMap.load().onSuccess {
+            arcGISMap.utilityNetworks.forEach {
+                it.load().onFailure {
+                    // Handle error
+                }.onSuccess {
+
+                }
+            }
+        }.onFailure {
+            // Handle error
+        }
+        if (arcGISMap.utilityNetworks.isEmpty()) {
+            // Handle error
+        }
+    }
+
+    val utilityNetwork = arcGISMap.utilityNetworks.first()
+    Row(
+        modifier = Modifier
+            .fillMaxSize(),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Button(onClick = {
+            coroutineScope.launch {
+                // Run a trace
+                val utilityNetworkDefinition = utilityNetwork.definition
+                val utilityNetworkSource =
+                    utilityNetworkDefinition!!.getNetworkSource("Electric Distribution Line")
+                val utilityAssetGroup = utilityNetworkSource!!.getAssetGroup("Medium Voltage")
+                val utilityAssetType =
+                    utilityAssetGroup!!.getAssetType("Underground Three Phase")
+                val startingLocation = utilityNetwork.createElementOrNull(
+                    utilityAssetType!!,
+                    Guid("0B1F4188-79FD-4DED-87C9-9E3C3F13BA77")
+                )
+
+                val utilityTraceParameters = UtilityTraceParameters(
+                    UtilityTraceType.Connected,
+                    listOf(startingLocation!!)
+                )
+
+                val traceResults = utilityNetwork.trace(
+                    utilityTraceParameters
+                ).onSuccess {
+                    // Handle trace results
+                    val traceResult = it[0]
+                    Log.i("UtilityNetworkTraceApp", "Trace results: $it")
+                    Log.i("UtilityNetworkTraceApp", "Trace result element size: ${(traceResult as UtilityElementTraceResult).elements.size}")
+                }.onFailure {
+                    // Handle error
+                }
+            }
+        }) {
+            Text(text = "Trace")
+        }
+    }
 }
