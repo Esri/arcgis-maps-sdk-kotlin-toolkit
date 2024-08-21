@@ -106,7 +106,8 @@ composeCore = [
 composeTest = [
     "androidx-test-ext",
     "androidx-test-espresso-core",
-    "androidx-compose-ui-test"
+    "androidx-compose-ui-test",
+    "truth"
 ]
 
 debug = [
