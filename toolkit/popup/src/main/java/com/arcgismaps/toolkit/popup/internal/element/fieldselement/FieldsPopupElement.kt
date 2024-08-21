@@ -39,7 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
-import com.arcgismaps.toolkit.popup.internal.ui.ExpandableCard
+import com.arcgismaps.toolkit.ui.ExpandableCard
 
 /**
  * Composable that displays the fields of a popup element.
