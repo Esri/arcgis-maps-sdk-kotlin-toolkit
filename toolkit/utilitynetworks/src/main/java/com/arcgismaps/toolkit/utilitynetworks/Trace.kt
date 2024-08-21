@@ -16,9 +16,14 @@
 
 package com.arcgismaps.toolkit.utilitynetworks
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import com.arcgismaps.toolkit.utilitynetworks.ui.SelectableItem
+import com.arcgismaps.toolkit.utilitynetworks.ui.TraceConfiguration
+import com.arcgismaps.utilitynetworks.UtilityNamedTraceConfiguration
 import com.arcgismaps.utilitynetworks.UtilityNetwork
 
 /**
@@ -30,5 +35,13 @@ import com.arcgismaps.utilitynetworks.UtilityNetwork
  */
 @Composable
 public fun Trace(utilityNetwork: UtilityNetwork, @Suppress("unused_parameter") modifier: Modifier = Modifier) {
-    Text(text = utilityNetwork.name)
+    val availableTraces = remember { mutableStateListOf<UtilityNamedTraceConfiguration>() }
+    LaunchedEffect(key1 = null) {
+        val result = utilityNetwork.queryNamedTraceConfigurations().getOrNull()
+        result?.forEach {
+            availableTraces.add(it)
+        }
+    }
+
+    TraceConfiguration(availableTraces.map { SelectableItem(it.name, false) })
 }

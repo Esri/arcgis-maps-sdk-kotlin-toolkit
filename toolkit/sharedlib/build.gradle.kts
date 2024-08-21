@@ -38,6 +38,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
+    implementation(libs.androidx.material.icons)
     implementation(libs.bundles.core)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)

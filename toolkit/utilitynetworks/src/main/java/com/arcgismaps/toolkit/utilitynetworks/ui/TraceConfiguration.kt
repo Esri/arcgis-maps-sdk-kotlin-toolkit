@@ -1,0 +1,178 @@
+/**
+ *  Copyright 2024 Esri
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+package com.arcgismaps.toolkit.utilitynetworks.ui
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material3.Button
+import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.ui.ExpandableCard
+import com.arcgismaps.toolkit.utilitynetworks.R
+import com.arcgismaps.utilitynetworks.UtilityNetwork
+
+/**
+ * A composable used to run a trace on a [UtilityNetwork].
+ * This composable is used to select the trace configuration and starting points for the trace.
+ *
+ * @since 200.6.0
+ */
+@Composable
+internal fun TraceConfiguration(traceConfiguration: List<SelectableItem>) {
+    val observableTraceConfiguration = remember { mutableStateListOf<SelectableItem>() }
+    observableTraceConfiguration.addAll(traceConfiguration)
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        LazyColumn(modifier = Modifier.padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            item {
+                TraceTypes(
+                    observableTraceConfiguration,
+                    onTraceSelected = { index ->
+                        observableTraceConfiguration[index] =
+                            observableTraceConfiguration[index].copy(selected = !observableTraceConfiguration[index].selected)
+                        observableTraceConfiguration.forEachIndexed { i, _ ->
+                            if (i != index) {
+                                observableTraceConfiguration[i] = observableTraceConfiguration[i].copy(selected = false)
+                            }
+                        }
+                    }
+                )
+            }
+            item {
+                AddTracePoint()
+            }
+            item {
+                Button(onClick = { /*TODO*/ }) {
+                    Text( stringResource(id = R.string.trace))
+                }
+            }
+
+
+        }
+    }
+}
+
+/**
+ * A composable used to add starting points for the trace.
+ *
+ * @since 200.6.0
+ */
+@Composable
+private fun AddTracePoint() {
+    val startingPoints = remember { mutableStateListOf<String>() }
+    var counter by remember { mutableIntStateOf(startingPoints.size) }
+    ExpandableCard(title = "${stringResource(id = R.string.starting_points)} (${counter})") {
+        Column {
+            ElevatedButton(
+                onClick = {
+                    startingPoints.add("Point ${counter++}")
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(stringResource(id = R.string.add_starting_point))
+            }
+            startingPoints.forEach {
+                ExpandableCard(title = it, toggleable = false)
+            }
+        }
+
+    }
+}
+
+/**
+ * A composable used to display the trace types.
+ *
+ * @since 200.6.0
+ */
+@Composable
+private fun TraceTypes(utilityTraces: List<SelectableItem>, onTraceSelected: (Int) -> Unit) {
+    ExpandableCard(title = stringResource(id = R.string.trace_types), toggleable = true) {
+        Column {
+            utilityTraces.forEachIndexed { index, item ->
+                FilterChip(
+                    onClick = { onTraceSelected(index) },
+                    label = {
+                        Text(item.title)
+                    },
+                    selected = item.selected,
+                    leadingIcon = if (item.selected) {
+                        {
+                            Icon(
+                                imageVector = Icons.Filled.Done,
+                                contentDescription = "Done icon",
+                                modifier = Modifier.size(FilterChipDefaults.IconSize)
+                            )
+                        }
+                    } else {
+                        null
+                    },
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                        .fillMaxWidth()
+                )
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun TraceToolPreview() {
+    TraceConfiguration(
+        listOf(
+            SelectableItem("Trace 1", false),
+            SelectableItem("Trace 2", false),
+            SelectableItem("Trace 3", false),
+            SelectableItem("Trace 4", false)
+        )
+    )
+}
+
+/**
+ * A data class to represent a selectable item.
+ *
+ * @since 200.6.0
+ */
+internal data class SelectableItem(val title: String, var selected: Boolean)
