@@ -32,6 +32,7 @@ import com.arcgismaps.utilitynetworks.UtilityElementTraceResult
 import com.arcgismaps.utilitynetworks.UtilityNetwork
 import com.arcgismaps.utilitynetworks.UtilityTraceParameters
 import com.arcgismaps.utilitynetworks.UtilityTraceType
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 /**
@@ -74,37 +75,41 @@ public fun Trace(
         horizontalArrangement = Arrangement.Center
     ) {
         Button(onClick = {
-            coroutineScope.launch {
-                // Run a trace
-                val utilityNetworkDefinition = utilityNetwork.definition
-                val utilityNetworkSource =
-                    utilityNetworkDefinition!!.getNetworkSource("Electric Distribution Line")
-                val utilityAssetGroup = utilityNetworkSource!!.getAssetGroup("Medium Voltage")
-                val utilityAssetType =
-                    utilityAssetGroup!!.getAssetType("Underground Three Phase")
-                val startingLocation = utilityNetwork.createElementOrNull(
-                    utilityAssetType!!,
-                    Guid("0B1F4188-79FD-4DED-87C9-9E3C3F13BA77")
-                )
-
-                val utilityTraceParameters = UtilityTraceParameters(
-                    UtilityTraceType.Connected,
-                    listOf(startingLocation!!)
-                )
-
-                val traceResults = utilityNetwork.trace(
-                    utilityTraceParameters
-                ).onSuccess {
-                    // Handle trace results
-                    val traceResult = it[0]
-                    Log.i("UtilityNetworkTraceApp", "Trace results: $it")
-                    Log.i("UtilityNetworkTraceApp", "Trace result element size: ${(traceResult as UtilityElementTraceResult).elements.size}")
-                }.onFailure {
-                    // Handle error
-                }
-            }
+            trace(coroutineScope, utilityNetwork)
         }) {
             Text(text = "Trace")
+        }
+    }
+}
+
+private fun trace(coroutineScope: CoroutineScope, utilityNetwork: UtilityNetwork) {
+    coroutineScope.launch {
+        // Run a trace
+        val utilityNetworkDefinition = utilityNetwork.definition
+        val utilityNetworkSource =
+            utilityNetworkDefinition!!.getNetworkSource("Electric Distribution Line")
+        val utilityAssetGroup = utilityNetworkSource!!.getAssetGroup("Medium Voltage")
+        val utilityAssetType =
+            utilityAssetGroup!!.getAssetType("Underground Three Phase")
+        val startingLocation = utilityNetwork.createElementOrNull(
+            utilityAssetType!!,
+            Guid("0B1F4188-79FD-4DED-87C9-9E3C3F13BA77")
+        )
+
+        val utilityTraceParameters = UtilityTraceParameters(
+            UtilityTraceType.Connected,
+            listOf(startingLocation!!)
+        )
+
+        val traceResults = utilityNetwork.trace(
+            utilityTraceParameters
+        ).onSuccess {
+            // Handle trace results
+            val traceResult = it[0]
+            Log.i("UtilityNetworkTraceApp", "Trace results: $it")
+            Log.i("UtilityNetworkTraceApp", "Trace result element size: ${(traceResult as UtilityElementTraceResult).elements.size}")
+        }.onFailure {
+            // Handle error
         }
     }
 }
