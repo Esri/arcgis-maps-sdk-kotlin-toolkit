@@ -17,6 +17,6 @@
 <resources>
     <string name="starting_points">Starting Points </string>
     <string name="trace">Trace</string>
-    <string name="add_starting_point">add new starting point</string>
-    <string name="trace_types">Trace Types\n</string>
+    <string name="add_starting_point">Add new starting point</string>
+    <string name="trace_configuration">Trace Configuration</string>
 </resources>

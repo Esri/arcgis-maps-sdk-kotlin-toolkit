@@ -129,7 +129,7 @@ private fun TracePointEditor() {
  */
 @Composable
 private fun TraceTypesPicker(utilityTraces: List<SelectableItem>, onTraceSelected: (Int) -> Unit) {
-    ExpandableCard(title = stringResource(id = R.string.trace_types), toggleable = true) {
+    ExpandableCard(title = stringResource(id = R.string.trace_configuration), toggleable = true) {
         Column {
             utilityTraces.forEachIndexed { index, item ->
                 FilterChip(
