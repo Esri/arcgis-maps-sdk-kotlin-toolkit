@@ -83,6 +83,11 @@ dependencies {
     implementation(libs.bundles.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.arcore)
+
+    // Obj - a simple Wavefront OBJ file loader
+    // https://github.com/javagl/Obj
+    implementation(libs.obj)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)
     debugImplementation(libs.bundles.debug)

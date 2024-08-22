@@ -38,6 +38,7 @@ import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
+import com.google.ar.core.Session
 import java.time.Instant
 
 /**
@@ -48,6 +49,7 @@ import java.time.Instant
 @Composable
 public fun TableTopSceneView(
     arcGISScene: ArcGISScene,
+    session: Session,
     modifier: Modifier = Modifier,
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
@@ -83,18 +85,13 @@ public fun TableTopSceneView(
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
     content: (@Composable TableTopSceneViewScope.() -> Unit)? = null
 ) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        Icon(
-            imageVector = Icons.Default.Face,
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            tint = Color.Red
-        )
+    Box(modifier = modifier) {
+        ARSurfaceView(session = session)
 
         val cameraController = remember { TransformationMatrixCameraController() }
         SceneView(
             arcGISScene = arcGISScene,
-            modifier = modifier,
+            modifier = Modifier.fillMaxSize(),
             onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
             onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
             graphicsOverlays = graphicsOverlays,
