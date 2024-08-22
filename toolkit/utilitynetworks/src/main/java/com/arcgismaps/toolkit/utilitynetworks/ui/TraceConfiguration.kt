@@ -49,7 +49,8 @@ import com.arcgismaps.utilitynetworks.UtilityNetwork
 
 /**
  * A composable used to run a trace on a [UtilityNetwork].
- * This composable is used to select the trace configuration and starting points for the trace.
+ *
+ * Provides options to select the trace configuration and add starting points for a trace.
  *
  * @since 200.6.0
  */
@@ -64,7 +65,7 @@ internal fun TraceConfiguration(traceTypes: List<SelectableItem>, onPerformTrace
     ) {
         LazyColumn(modifier = Modifier.padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             item {
-                TraceTypes(
+                TraceTypesPicker(
                     observableTraceConfiguration,
                     onTraceSelected = { index ->
                         observableTraceConfiguration[index] =
@@ -78,7 +79,7 @@ internal fun TraceConfiguration(traceTypes: List<SelectableItem>, onPerformTrace
                 )
             }
             item {
-                AddTracePoint()
+                TracePointEditor()
             }
             item {
                 Button(onClick = { onPerformTrace() }) {
@@ -97,7 +98,7 @@ internal fun TraceConfiguration(traceTypes: List<SelectableItem>, onPerformTrace
  * @since 200.6.0
  */
 @Composable
-private fun AddTracePoint() {
+private fun TracePointEditor() {
     val startingPoints = remember { mutableStateListOf<String>() }
     var counter by remember { mutableIntStateOf(startingPoints.size) }
     ExpandableCard(title = "${stringResource(id = R.string.starting_points)} (${counter})") {
@@ -122,12 +123,12 @@ private fun AddTracePoint() {
 }
 
 /**
- * A composable used to display the trace types.
+ * A composable used to display the available trace types.
  *
  * @since 200.6.0
  */
 @Composable
-private fun TraceTypes(utilityTraces: List<SelectableItem>, onTraceSelected: (Int) -> Unit) {
+private fun TraceTypesPicker(utilityTraces: List<SelectableItem>, onTraceSelected: (Int) -> Unit) {
     ExpandableCard(title = stringResource(id = R.string.trace_types), toggleable = true) {
         Column {
             utilityTraces.forEachIndexed { index, item ->

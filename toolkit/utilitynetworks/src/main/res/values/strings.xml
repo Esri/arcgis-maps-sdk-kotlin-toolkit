@@ -16,7 +16,7 @@
 
 <resources>
     <string name="starting_points">Starting Points </string>
-    <string name="trace">trace</string>
+    <string name="trace">Trace</string>
     <string name="add_starting_point">add new starting point</string>
     <string name="trace_types">Trace Types\n</string>
 </resources>

@@ -50,7 +50,7 @@ import androidx.compose.ui.unit.dp
  * @since 200.5.0
  */
 @Composable
-public fun ExpandableCard(
+fun ExpandableCard(
     modifier: Modifier = Modifier,
     title: String = "",
     description: String = "",
