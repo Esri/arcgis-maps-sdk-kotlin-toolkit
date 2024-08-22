@@ -181,11 +181,13 @@ private fun Paragraph(paragraph: Paragraph, modifier: Modifier = Modifier) {
 private fun Heading(heading: Heading, modifier: Modifier = Modifier) {
     val typography = MaterialTheme.typography
     val textStyle = when (heading.level) {
-        in 1..3 -> typography.titleLarge
-        4 -> typography.titleMedium
-        5 -> typography.titleSmall
+        in 1..3 -> typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+        // Designer only supports 4, 5, and 6 levels of headings.
+        4 -> typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+        5 -> typography.titleMedium
+        6 -> typography.titleSmall
         else -> typography.titleSmall
-    }.copy(fontWeight = FontWeight.Bold)
+    }
     MarkdownNode(
         node = heading,
         textStyle = textStyle,
