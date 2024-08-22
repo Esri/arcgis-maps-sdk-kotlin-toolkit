@@ -55,7 +55,7 @@ import com.arcgismaps.utilitynetworks.UtilityNetwork
  * @since 200.6.0
  */
 @Composable
-internal fun TraceConfiguration(traceTypes: List<SelectableItem>, onPerformTrace: () -> Unit) {
+internal fun TraceOptions(traceTypes: List<SelectableItem>, onPerformTrace: () -> Unit) {
     val observableTraceConfiguration = remember { mutableStateListOf<SelectableItem>() }
     observableTraceConfiguration.addAll(traceTypes)
     Surface(
@@ -65,7 +65,7 @@ internal fun TraceConfiguration(traceTypes: List<SelectableItem>, onPerformTrace
     ) {
         LazyColumn(modifier = Modifier.padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             item {
-                TraceTypesPicker(
+                TraceConfiguration(
                     observableTraceConfiguration,
                     onTraceSelected = { index ->
                         observableTraceConfiguration[index] =
@@ -79,7 +79,7 @@ internal fun TraceConfiguration(traceTypes: List<SelectableItem>, onPerformTrace
                 )
             }
             item {
-                TracePointEditor()
+                StartingPointsEditor()
             }
             item {
                 Button(onClick = { onPerformTrace() }) {
@@ -93,42 +93,12 @@ internal fun TraceConfiguration(traceTypes: List<SelectableItem>, onPerformTrace
 }
 
 /**
- * A composable used to add starting points for the trace.
- *
- * @since 200.6.0
- */
-@Composable
-private fun TracePointEditor() {
-    val startingPoints = remember { mutableStateListOf<String>() }
-    var counter by remember { mutableIntStateOf(startingPoints.size) }
-    ExpandableCard(title = "${stringResource(id = R.string.starting_points)} (${counter})") {
-        Column {
-            ElevatedButton(
-                onClick = {
-                    startingPoints.add("Point ${counter++}")
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text(stringResource(id = R.string.add_starting_point))
-            }
-            startingPoints.forEach {
-                ExpandableCard(title = it, toggleable = false)
-            }
-        }
-
-    }
-}
-
-/**
  * A composable used to display the available trace types.
  *
  * @since 200.6.0
  */
 @Composable
-private fun TraceTypesPicker(utilityTraces: List<SelectableItem>, onTraceSelected: (Int) -> Unit) {
+private fun TraceConfiguration(utilityTraces: List<SelectableItem>, onTraceSelected: (Int) -> Unit) {
     ExpandableCard(title = stringResource(id = R.string.trace_configuration), toggleable = true) {
         Column {
             utilityTraces.forEachIndexed { index, item ->
@@ -158,10 +128,40 @@ private fun TraceTypesPicker(utilityTraces: List<SelectableItem>, onTraceSelecte
     }
 }
 
+/**
+ * A composable used to add starting points for the trace.
+ *
+ * @since 200.6.0
+ */
+@Composable
+private fun StartingPointsEditor() {
+    val startingPoints = remember { mutableStateListOf<String>() }
+    var counter by remember { mutableIntStateOf(startingPoints.size) }
+    ExpandableCard(title = "${stringResource(id = R.string.starting_points)} (${counter})") {
+        Column {
+            ElevatedButton(
+                onClick = {
+                    startingPoints.add("Point ${counter++}")
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(stringResource(id = R.string.add_starting_point))
+            }
+            startingPoints.forEach {
+                ExpandableCard(title = it, toggleable = false)
+            }
+        }
+
+    }
+}
+
 @Preview
 @Composable
-private fun TraceToolPreview() {
-    TraceConfiguration(
+private fun TraceOptionsPreview() {
+    TraceOptions(
         listOf(
             SelectableItem("Trace 1", false),
             SelectableItem("Trace 2", false),

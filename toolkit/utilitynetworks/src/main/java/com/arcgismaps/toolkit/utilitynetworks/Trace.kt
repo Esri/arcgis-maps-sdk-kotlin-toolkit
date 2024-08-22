@@ -24,7 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import com.arcgismaps.toolkit.utilitynetworks.ui.SelectableItem
-import com.arcgismaps.toolkit.utilitynetworks.ui.TraceConfiguration
+import com.arcgismaps.toolkit.utilitynetworks.ui.TraceOptions
 import com.arcgismaps.utilitynetworks.UtilityNamedTraceConfiguration
 import com.arcgismaps.Guid
 import com.arcgismaps.mapping.ArcGISMap
@@ -77,7 +77,7 @@ public fun Trace(
             availableTraces.add(it)
         }
     }
-    TraceConfiguration(
+    TraceOptions(
         traceTypes = availableTraces.map { SelectableItem(it.name, false) },
         onPerformTrace = { trace(coroutineScope, utilityNetwork) }
     )
