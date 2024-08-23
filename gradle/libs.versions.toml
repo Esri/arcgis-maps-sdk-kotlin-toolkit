@@ -29,6 +29,8 @@ mockkAndroid = "1.13.10"
 room = "2.6.1"
 truth = "1.4.2"
 uiautomator = "2.3.0"
+arcore = "1.45.0"
+obj = "0.4.0"
 
 [libraries]
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose"}
@@ -78,6 +80,8 @@ room-compiler = { group = "androidx.room", name = "room-compiler", version.ref =
 room-ext = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 dokka-versioning = { group = "org.jetbrains.dokka", name = "versioning-plugin", version.ref = "dokka" }
+arcore = { group = "com.google.ar", name = "core", version.ref = "arcore" }
+obj = { module = "de.javagl:obj", version.ref = "obj" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }

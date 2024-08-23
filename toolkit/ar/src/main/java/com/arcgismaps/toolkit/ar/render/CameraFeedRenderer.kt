@@ -23,7 +23,8 @@ import java.nio.FloatBuffer
 public class CameraFeedRenderer(
     context: Context,
     private val session: Session,
-    private val assets: AssetManager
+    private val assets: AssetManager,
+    private val onFrame: (Frame) -> Unit,
 ) :
     SurfaceDrawHandler.Renderer, DefaultLifecycleObserver {
 
@@ -184,6 +185,7 @@ public class CameraFeedRenderer(
         )
 
         virtualSceneRenderer.onDrawFrame(surfaceDrawHandler, mesh, frame.camera)
+        onFrame(frame)
     }
 
     public fun handleTap(frame: Frame) {

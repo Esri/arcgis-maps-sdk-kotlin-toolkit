@@ -6,7 +6,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.arcgismaps.geometry.SpatialReference
@@ -17,6 +20,7 @@ import com.arcgismaps.mapping.view.AnalysisOverlay
 import com.arcgismaps.mapping.view.AtmosphereEffect
 import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
 import com.arcgismaps.mapping.view.Camera
+import com.arcgismaps.mapping.view.DeviceOrientation
 import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
 import com.arcgismaps.mapping.view.DrawStatus
@@ -32,12 +36,15 @@ import com.arcgismaps.mapping.view.SceneViewInteractionOptions
 import com.arcgismaps.mapping.view.SelectionProperties
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.SpaceEffect
+import com.arcgismaps.mapping.view.TransformationMatrix
 import com.arcgismaps.mapping.view.TransformationMatrixCameraController
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
+import com.google.ar.core.Frame
+import com.google.ar.core.Pose
 import com.google.ar.core.Session
 import java.time.Instant
 
@@ -86,9 +93,28 @@ public fun TableTopSceneView(
     content: (@Composable TableTopSceneViewScope.() -> Unit)? = null
 ) {
     Box(modifier = modifier) {
-        ARSurfaceView(session = session)
-
+        tableTopSceneViewProxy.sceneViewProxy.setManualRenderingEnabled(true)
         val cameraController = remember { TransformationMatrixCameraController() }
+        val initialTransformationMatrix = TransformationMatrix.createIdentityMatrix()
+        cameraController.transformationMatrix = initialTransformationMatrix
+        val onFrame: (Frame) -> Unit = {
+            val newMatrix = initialTransformationMatrix + (it.camera.displayOrientedPose.transformationMatrix)
+            cameraController.transformationMatrix = newMatrix
+            val imageIntrinsics = it.camera.imageIntrinsics
+            tableTopSceneViewProxy.sceneViewProxy.setFieldOfViewFromLensIntrinsics(
+                imageIntrinsics.focalLength[0],
+                imageIntrinsics.focalLength[1],
+                imageIntrinsics.principalPoint[0],
+                imageIntrinsics.principalPoint[1],
+                imageIntrinsics.imageDimensions[0].toFloat(),
+                imageIntrinsics.imageDimensions[1].toFloat(),
+                // TODO:
+                deviceOrientation = DeviceOrientation.Portrait
+            )
+            tableTopSceneViewProxy.sceneViewProxy.renderFrame()
+        }
+        ARSurfaceView(session = session, onFrame)
+
         SceneView(
             arcGISScene = arcGISScene,
             modifier = Modifier.fillMaxSize(),
@@ -136,3 +162,16 @@ public fun TableTopSceneView(
         )
     }
 }
+
+public val Pose.transformationMatrix: TransformationMatrix
+    get() {
+        return TransformationMatrix.createWithQuaternionAndTranslation(
+            rotationQuaternion[0].toDouble(),
+            rotationQuaternion[1].toDouble(),
+            rotationQuaternion[2].toDouble(),
+            rotationQuaternion[3].toDouble(),
+            translation[0].toDouble(),
+            translation[1].toDouble(),
+            translation[2].toDouble()
+        )
+    }
