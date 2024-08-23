@@ -69,16 +69,16 @@ public fun Trace(
     }
 
     val utilityNetwork = arcGISMap.utilityNetworks.first()
-    val availableTraces = remember { mutableStateListOf<UtilityNamedTraceConfiguration>() }
+    val availableTraceConfigurations = remember(utilityNetwork) { mutableStateListOf<UtilityNamedTraceConfiguration>() }
 
-    LaunchedEffect(key1 = null) {
+    LaunchedEffect(key1 = utilityNetwork) {
         val result = utilityNetwork.queryNamedTraceConfigurations().getOrNull()
         result?.forEach {
-            availableTraces.add(it)
+            availableTraceConfigurations.add(it)
         }
     }
     TraceOptions(
-        traceTypes = availableTraces.map { SelectableItem(it.name, false) },
+        traceConfigurations = availableTraceConfigurations.map { SelectableItem(it.name, false) },
         onPerformTrace = { trace(coroutineScope, utilityNetwork) }
     )
 }

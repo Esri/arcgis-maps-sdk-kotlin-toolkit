@@ -55,9 +55,9 @@ import com.arcgismaps.utilitynetworks.UtilityNetwork
  * @since 200.6.0
  */
 @Composable
-internal fun TraceOptions(traceTypes: List<SelectableItem>, onPerformTrace: () -> Unit) {
-    val observableTraceConfiguration = remember { mutableStateListOf<SelectableItem>() }
-    observableTraceConfiguration.addAll(traceTypes)
+internal fun TraceOptions(traceConfigurations: List<SelectableItem>, onPerformTrace: () -> Unit) {
+    val observableTraceConfigurations = remember { mutableStateListOf<SelectableItem>() }
+    observableTraceConfigurations.addAll(traceConfigurations)
     Surface(
         color = MaterialTheme.colorScheme.surface,
         modifier = Modifier
@@ -66,13 +66,13 @@ internal fun TraceOptions(traceTypes: List<SelectableItem>, onPerformTrace: () -
         LazyColumn(modifier = Modifier.padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             item {
                 TraceConfiguration(
-                    observableTraceConfiguration,
+                    observableTraceConfigurations,
                     onTraceSelected = { index ->
-                        observableTraceConfiguration[index] =
-                            observableTraceConfiguration[index].copy(selected = !observableTraceConfiguration[index].selected)
-                        observableTraceConfiguration.forEachIndexed { i, _ ->
+                        observableTraceConfigurations[index] =
+                            observableTraceConfigurations[index].copy(selected = !observableTraceConfigurations[index].selected)
+                        observableTraceConfigurations.forEachIndexed { i, _ ->
                             if (i != index) {
-                                observableTraceConfiguration[i] = observableTraceConfiguration[i].copy(selected = false)
+                                observableTraceConfigurations[i] = observableTraceConfigurations[i].copy(selected = false)
                             }
                         }
                     }
