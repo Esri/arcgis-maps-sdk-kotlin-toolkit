@@ -21,6 +21,7 @@ logger.warn("WARNING: The module composable-map is deprecated. Please use the mo
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 android {
@@ -49,9 +50,6 @@ android {
     @Suppress("UnstableApiUsage")
     buildFeatures {
         compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.androidxComposeCompiler.get()
     }
     // If this were not an android project, we would just write `explicitApi()` in the Kotlin scope.
     // but as an android project could write `freeCompilerArgs = listOf("-Xexplicit-api=strict")`

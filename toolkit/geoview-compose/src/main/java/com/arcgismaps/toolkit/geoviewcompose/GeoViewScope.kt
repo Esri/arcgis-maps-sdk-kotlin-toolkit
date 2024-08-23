@@ -50,6 +50,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -315,6 +317,7 @@ public sealed class GeoViewScope protected constructor(private val geoView: GeoV
                                 minSize = shapes.minSize
                             )
                             .animateContentSize()
+                            .semantics { contentDescription = "CalloutContainerLayout" },
                     ) {
                         content.invoke(this)
                     }
