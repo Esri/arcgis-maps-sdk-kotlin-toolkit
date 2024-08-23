@@ -61,6 +61,7 @@ import com.arcgismaps.mapping.featureforms.RadioButtonsFormInput
 import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
+import com.arcgismaps.mapping.featureforms.TextFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.rememberAttachmentElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
@@ -75,7 +76,9 @@ import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.rememb
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.rememberDateTimeFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.formelement.FieldElement
 import com.arcgismaps.toolkit.featureforms.internal.components.formelement.GroupElement
+import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.text.rememberFormTextFieldState
+import com.arcgismaps.toolkit.featureforms.internal.components.text.rememberTextFormElementState
 import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormColorScheme
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormDefaults
@@ -270,6 +273,15 @@ private fun FeatureFormBody(
                             )
                         }
 
+                        is TextFormElement -> {
+                            TextFormElement(
+                                state = entry.getState(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 15.dp, vertical = 10.dp)
+                            )
+                        }
+
                         else -> {
                             // other form elements are not created
                         }
@@ -350,6 +362,11 @@ internal fun rememberStates(
                     fieldStates = fieldStateCollection
                 )
                 states.add(element, groupState)
+            }
+
+            is TextFormElement -> {
+                val state = rememberTextFormElementState(element, form)
+                states.add(element, state)
             }
 
             else -> {}
