@@ -25,8 +25,6 @@ import android.security.KeyChain
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BasicAlertDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -82,34 +80,27 @@ public fun Authenticator(
  * For alternate behavior, see the [Authenticator] component.
  *
  * @param authenticatorState the object that holds the state to handle authentication challenges.
- * @param modifier the [Modifier] to be applied to this DialogAuthenticator.
  * @param onPendingOAuthUserSignIn if not null, this will be called when an OAuth challenge is pending
  * and the browser should be launched. Use this if you wish to handle OAuth challenges from your own
  * activity rather than using the [OAuthUserSignInActivity].
  * @see Authenticator
  * @since 200.2.0
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 public fun DialogAuthenticator(
     authenticatorState: AuthenticatorState,
-    modifier: Modifier = Modifier,
     onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)? = null,
 ) {
-    val showDialog = authenticatorState.isDisplayed.collectAsStateWithLifecycle(initialValue = false).value
+    val showDialog =
+        authenticatorState.isDisplayed.collectAsStateWithLifecycle(initialValue = false).value
     if (showDialog) {
         Surface {
             AuthenticatorDelegate(
                 authenticatorState = authenticatorState,
-                modifier = modifier,
-                onPendingOAuthUserSignIn,
+                modifier = Modifier.clip(MaterialTheme.shapes.extraLarge),
+                onPendingOAuthUserSignIn = onPendingOAuthUserSignIn,
             ) { authenticationPrompt ->
-                BasicAlertDialog(
-                    onDismissRequest = authenticatorState::dismissAll,
-                    modifier = Modifier.clip(MaterialTheme.shapes.extraLarge),
-                ) {
-                    authenticationPrompt()
-                }
+                authenticationPrompt()
             }
         }
     }
@@ -139,10 +130,11 @@ private fun AuthenticatorDelegate(
     container: (@Composable (@Composable () -> Unit) -> Unit)? = null
 ) {
 
-    val hasActivePrompt = authenticatorState.isDisplayed.collectAsStateWithLifecycle(initialValue = false).value
+    val hasActivePrompt =
+        authenticatorState.isDisplayed.collectAsStateWithLifecycle(initialValue = false).value
     // Dismiss all prompts when the back button is pressed, only if there is an active prompt.
     BackHandler(enabled = hasActivePrompt) {
-            authenticatorState.dismissAll()
+        authenticatorState.dismissAll()
     }
 
     val pendingOAuthUserSignIn =
@@ -171,10 +163,10 @@ private fun AuthenticatorDelegate(
     pendingUsernamePasswordChallenge?.let {
         if (container != null) {
             container {
-                UsernamePasswordAuthenticator(it, modifier)
+                UsernamePasswordAuthenticator(it, modifier, authenticatorState)
             }
         } else {
-            UsernamePasswordAuthenticator(it, modifier)
+            UsernamePasswordAuthenticator(it, modifier, authenticatorState)
         }
     }
 
