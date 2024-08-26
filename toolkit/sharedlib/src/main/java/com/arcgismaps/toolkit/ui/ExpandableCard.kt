@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2024 Esri
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,8 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
-package com.arcgismaps.toolkit.popup.internal.ui
+package com.arcgismaps.toolkit.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
@@ -40,12 +39,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.toolkit.popup.R
 
 /**
  * Composable Card that has the ability to expand and collapse its [content].
@@ -53,7 +50,7 @@ import com.arcgismaps.toolkit.popup.R
  * @since 200.5.0
  */
 @Composable
-internal fun ExpandableCard(
+fun ExpandableCard(
     modifier: Modifier = Modifier,
     title: String = "",
     description: String = "",
@@ -150,7 +147,7 @@ private fun ExpandableHeader(
                     modifier = Modifier
                         .padding(16.dp),
                     imageVector = if (it) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore,
-                    contentDescription = stringResource(R.string.show_or_hide_popup_element_content)
+                    contentDescription = "Expand"
                 )
             }
         }
@@ -183,4 +180,12 @@ private fun ExpandableCardPreview() {
         )
     }
 }
+
+internal fun Modifier.applyIf(condition: Boolean, then: Modifier.() -> Modifier): Modifier =
+    if (condition) {
+        then()
+    } else {
+        this
+    }
+
 

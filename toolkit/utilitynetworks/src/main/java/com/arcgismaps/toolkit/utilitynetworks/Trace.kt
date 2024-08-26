@@ -17,15 +17,15 @@
 package com.arcgismaps.toolkit.utilitynetworks
 
 import android.util.Log
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import com.arcgismaps.toolkit.utilitynetworks.ui.SelectableItem
+import com.arcgismaps.toolkit.utilitynetworks.ui.TraceOptions
+import com.arcgismaps.utilitynetworks.UtilityNamedTraceConfiguration
 import com.arcgismaps.Guid
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.utilitynetworks.UtilityElementTraceResult
@@ -49,7 +49,7 @@ public fun Trace(
 //    mapPoint: Point,
     @Suppress("unused_parameter")
     modifier: Modifier = Modifier,
-    ) {
+) {
     val coroutineScope = rememberCoroutineScope()
     LaunchedEffect(arcGISMap) {
         arcGISMap.load().onSuccess {
@@ -69,17 +69,18 @@ public fun Trace(
     }
 
     val utilityNetwork = arcGISMap.utilityNetworks.first()
-    Row(
-        modifier = Modifier
-            .fillMaxSize(),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Button(onClick = {
-            trace(coroutineScope, utilityNetwork)
-        }) {
-            Text(text = "Trace")
+    val availableTraceConfigurations = remember(utilityNetwork) { mutableStateListOf<UtilityNamedTraceConfiguration>() }
+
+    LaunchedEffect(key1 = utilityNetwork) {
+        val result = utilityNetwork.queryNamedTraceConfigurations().getOrNull()
+        result?.forEach {
+            availableTraceConfigurations.add(it)
         }
     }
+    TraceOptions(
+        traceConfigurations = availableTraceConfigurations.map { SelectableItem(it.name, false) },
+        onPerformTrace = { trace(coroutineScope, utilityNetwork) }
+    )
 }
 
 private fun trace(coroutineScope: CoroutineScope, utilityNetwork: UtilityNetwork) {
@@ -107,7 +108,10 @@ private fun trace(coroutineScope: CoroutineScope, utilityNetwork: UtilityNetwork
             // Handle trace results
             val traceResult = it[0]
             Log.i("UtilityNetworkTraceApp", "Trace results: $it")
-            Log.i("UtilityNetworkTraceApp", "Trace result element size: ${(traceResult as UtilityElementTraceResult).elements.size}")
+            Log.i(
+                "UtilityNetworkTraceApp",
+                "Trace result element size: ${(traceResult as UtilityElementTraceResult).elements.size}"
+            )
         }.onFailure {
             // Handle error
         }

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2024 Esri
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,8 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
-package com.arcgismaps.toolkit.popup.internal.ui
+package com.arcgismaps.toolkit.ui
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -25,7 +24,8 @@ import androidx.compose.ui.unit.dp
 
 
 internal object ExpandableCardDefaults {
-    @Composable fun shapes(): ExpandableCardShapes = ExpandableCardShapes(
+    @Composable
+    fun shapes(): ExpandableCardShapes = ExpandableCardShapes(
         padding = 16.dp,
         containerShape = RoundedCornerShape(5.dp),
         borderThickness = 1.dp
@@ -51,4 +51,3 @@ internal data class ExpandableCardColors(
     val galleryContainerColor: Color,
     val borderColor : Color,
 )
-
