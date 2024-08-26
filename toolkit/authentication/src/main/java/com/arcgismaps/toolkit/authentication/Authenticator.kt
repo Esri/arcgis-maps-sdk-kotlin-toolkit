@@ -80,6 +80,7 @@ public fun Authenticator(
  * For alternate behavior, see the [Authenticator] component.
  *
  * @param authenticatorState the object that holds the state to handle authentication challenges.
+ * @param modifier the [Modifier] to be applied to this DialogAuthenticator.
  * @param onPendingOAuthUserSignIn if not null, this will be called when an OAuth challenge is pending
  * and the browser should be launched. Use this if you wish to handle OAuth challenges from your own
  * activity rather than using the [OAuthUserSignInActivity].
@@ -89,6 +90,7 @@ public fun Authenticator(
 @Composable
 public fun DialogAuthenticator(
     authenticatorState: AuthenticatorState,
+    modifier: Modifier = Modifier,
     onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)? = null,
 ) {
     val showDialog =
@@ -97,12 +99,13 @@ public fun DialogAuthenticator(
         Surface {
             AuthenticatorDelegate(
                 authenticatorState = authenticatorState,
-                modifier = Modifier.clip(MaterialTheme.shapes.extraLarge),
+                modifier = modifier.clip(MaterialTheme.shapes.extraLarge),
                 onPendingOAuthUserSignIn = onPendingOAuthUserSignIn,
             ) { authenticationPrompt ->
                 authenticationPrompt()
             }
         }
+
     }
 }
 
