@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FilterChip
@@ -32,6 +33,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -40,9 +42,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.data.Feature
 import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardDefaults
 import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardTheme
@@ -66,7 +70,7 @@ internal fun TraceOptions(configurations: List<SelectableItem>, onPerformTrace: 
             .fillMaxSize()
     ) {
         ExpandableCardTheme(
-            shapes = ExpandableCardDefaults.shapes(padding = 4.dp)
+            shapes = ExpandableCardDefaults.shapes(padding = 40.dp)
         ) {
             LazyColumn(
                 modifier = Modifier.padding(10.dp),
@@ -95,8 +99,6 @@ internal fun TraceOptions(configurations: List<SelectableItem>, onPerformTrace: 
                         Text(stringResource(id = R.string.trace))
                     }
                 }
-
-
             }
         }
     }
@@ -138,6 +140,12 @@ private fun TraceConfiguration(utilityTraces: List<SelectableItem>, onTraceSelec
     }
 }
 
+private data class StartingPointRowData(
+    val name: String,
+    val symbol: ImageVector = Icons.Filled.ThumbUp,
+    val feature: Feature? = null
+)
+
 /**
  * A composable used to add starting points for the trace.
  *
@@ -145,27 +153,56 @@ private fun TraceConfiguration(utilityTraces: List<SelectableItem>, onTraceSelec
  */
 @Composable
 private fun StartingPointsEditor() {
-    val startingPoints = remember { mutableStateListOf<String>() }
+    val startingPoints = remember { mutableStateListOf<StartingPointRowData>(StartingPointRowData(name = "Test Starting Point")) }
     var counter by remember { mutableIntStateOf(startingPoints.size) }
-    ExpandableCard(title = "${stringResource(id = R.string.starting_points)} (${counter})") {
-        Column {
-            ElevatedButton(
-                onClick = {
-                    startingPoints.add("Point ${counter++}")
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text(stringResource(id = R.string.add_starting_point))
+    ExpandableCardTheme(
+        shapes = ExpandableCardDefaults.shapes(padding = 20.dp)
+    ) {
+        ExpandableCard(title = "${stringResource(id = R.string.starting_points)} (${counter})") {
+            Column {
+                ElevatedButton(
+                    onClick = {
+                        startingPoints.add(StartingPointRowData("Point ${counter++}"))
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(stringResource(id = R.string.add_starting_point))
+                }
+                startingPoints.forEach {
+                    StartingPointRow(StartingPointRowData(name = it.name))
+                }
             }
-            startingPoints.forEach {
-                ExpandableCard(title = it, toggleable = false)
-            }
-        }
 
+        }
     }
+}
+
+@Composable
+private fun StartingPointRow(data: StartingPointRowData) {
+    TextField(
+        value = data.name,
+        onValueChange = {},
+        modifier = Modifier.fillMaxWidth(),
+        readOnly = true,
+        enabled = false,
+        leadingIcon = {
+            Icon(
+                imageVector = data.symbol,
+                contentDescription = null
+            )
+        }
+    )
+}
+
+@Preview
+@Composable
+private fun StartingPointRowPreview() {
+    StartingPointRow(
+        data = StartingPointRowData("FOOO")
+    )
 }
 
 @Preview
