@@ -23,12 +23,12 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import com.arcgismaps.toolkit.utilitynetworks.ui.SelectableItem
-import com.arcgismaps.toolkit.utilitynetworks.ui.TraceOptions
-import com.arcgismaps.utilitynetworks.UtilityNamedTraceConfiguration
 import com.arcgismaps.Guid
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.toolkit.utilitynetworks.ui.SelectableItem
+import com.arcgismaps.toolkit.utilitynetworks.ui.TraceOptions
 import com.arcgismaps.utilitynetworks.UtilityElementTraceResult
+import com.arcgismaps.utilitynetworks.UtilityNamedTraceConfiguration
 import com.arcgismaps.utilitynetworks.UtilityNetwork
 import com.arcgismaps.utilitynetworks.UtilityTraceParameters
 import com.arcgismaps.utilitynetworks.UtilityTraceType
@@ -39,7 +39,6 @@ import kotlinx.coroutines.launch
  * A composable UI component to set up and run a [com.arcgismaps.utilitynetworks.UtilityNetwork.trace]
  * on a [com.arcgismaps.toolkit.geoviewcompose.MapView].
  *
- * @param utilityNetwork a [UtilityNetwork]
  * @since 200.6.0
  */
 @Composable
@@ -78,7 +77,7 @@ public fun Trace(
         }
     }
     TraceOptions(
-        traceConfigurations = availableTraceConfigurations.map { SelectableItem(it.name, false) },
+        configurations = availableTraceConfigurations.map { SelectableItem(it.name, false) },
         onPerformTrace = { trace(coroutineScope, utilityNetwork) }
     )
 }

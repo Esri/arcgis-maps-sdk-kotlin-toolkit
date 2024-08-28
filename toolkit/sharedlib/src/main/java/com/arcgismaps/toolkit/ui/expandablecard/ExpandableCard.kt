@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2024 Esri
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.arcgismaps.toolkit.ui
+package com.arcgismaps.toolkit.ui.expandablecard
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
@@ -43,6 +43,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardColorScheme
+import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardDefaults
+import com.arcgismaps.toolkit.ui.expandablecard.theme.LocalColorScheme
+import com.arcgismaps.toolkit.ui.expandablecard.theme.LocalShapes
 
 /**
  * Composable Card that has the ability to expand and collapse its [content].
@@ -57,10 +61,10 @@ fun ExpandableCard(
     toggleable: Boolean = true,
     content: @Composable () -> Unit = {}
 ) {
-    // TODO: promote to public theme.
-    val shapes = ExpandableCardDefaults.shapes()
-    val colors = ExpandableCardDefaults.colors()
+    val shapes = LocalShapes.current
+    val colors = LocalColorScheme.current
     var expanded by rememberSaveable { mutableStateOf(true) }
+
 
     Card(
         colors = CardDefaults.cardColors(
@@ -98,7 +102,7 @@ private fun ExpandableHeader(
     title: String = "",
     description: String = "",
     expandable: Boolean,
-    colors: ExpandableCardColors,
+    colors: ExpandableCardColorScheme,
     isExpanded: Boolean,
     onClick: () -> Unit
 ) {
@@ -159,7 +163,7 @@ private fun ExpandableHeader(
 internal fun ExpandableHeaderPreview() {
     ExpandableHeader(
         title = "The Title",
-        colors = ExpandableCardDefaults.colors(),
+        colors = ExpandableCardDefaults.colorScheme(),
         description = "the description",
         expandable = true,
         isExpanded = true
