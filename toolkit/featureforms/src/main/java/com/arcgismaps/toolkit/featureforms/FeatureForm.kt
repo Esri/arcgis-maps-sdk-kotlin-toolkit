@@ -54,6 +54,7 @@ import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
+import com.arcgismaps.mapping.featureforms.FormInput
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormElement
 import com.arcgismaps.mapping.featureforms.GroupFormElement
@@ -108,6 +109,22 @@ public sealed class ValidationErrorVisibility {
  * A composable Form toolkit component that enables users to edit field values of features in a
  * layer using forms that have been configured externally. Forms may be configured in the [Web Map Viewer](https://www.arcgis.com/home/webmap/viewer.html)
  * or [Fields Maps Designer](https://www.arcgis.com/apps/fieldmaps/)).
+ *
+ * The [FeatureForm] component supports the following [FormElement] types as part of its configuration.
+ * - [AttachmentsFormElement]
+ * - [FieldFormElement] with the following [FormInput] types -
+ *     * [ComboBoxFormInput]
+ *     * [DateTimePickerFormInput]
+ *     * [RadioButtonsFormInput]
+ *     * [SwitchFormInput]
+ *     * [TextAreaFormInput]
+ *     * [TextBoxFormInput]
+ * - [GroupFormElement]
+ * - [TextFormElement]
+ *
+ * Note : Any [AttachmentsFormElement] present in the [FeatureForm.elements] collection are not
+ * currently supported. A default attachments editing support is provided using the
+ * [FeatureForm.defaultAttachmentsElement] property.
  *
  * The colors and typography for the Form can use customized using [FeatureFormColorScheme] and
  * [FeatureFormTypography]. This customization is built on top of [MaterialTheme].
