@@ -16,19 +16,20 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.text
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.featureforms.FormTextFormat
+import com.arcgismaps.mapping.featureforms.TextFormElement
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormTheme
 import kotlinx.coroutines.flow.MutableStateFlow
-import com.arcgismaps.mapping.featureforms.TextFormElement
 
 /**
  * A composable that displays a [TextFormElement].
@@ -41,7 +42,11 @@ internal fun TextFormElement(state: TextFormElementState, modifier: Modifier = M
     val text by state.text.collectAsState()
     val visible by state.isVisible.collectAsState()
     if (visible) {
-        Column(modifier = modifier) {
+        // do not merge semantics for this composable so that each markdown/plain-text element
+        // is treated as a separate node in the semantic tree
+        Surface(
+            modifier = modifier.semantics(mergeDescendants = false) {}
+        ) {
             if (state.format == FormTextFormat.Markdown) {
                 Markdown(text = text)
             } else {
