@@ -63,7 +63,7 @@ internal class TextFormElementState(
                     description = formElement.description,
                     isVisible = formElement.isVisible,
                     text = formElement.text,
-                    format = formElement.textFormat
+                    format = formElement.format
                 )
             }
         )
@@ -84,6 +84,6 @@ internal fun rememberTextFormElementState(
         description = element.description,
         isVisible = element.isVisible,
         text = element.text,
-        format = element.textFormat
+        format = element.format
     )
 }
