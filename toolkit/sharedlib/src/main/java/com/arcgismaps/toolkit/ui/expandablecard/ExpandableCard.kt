@@ -65,7 +65,6 @@ fun ExpandableCard(
     val colors = LocalColorScheme.current
     var expanded by rememberSaveable { mutableStateOf(true) }
 
-
     Card(
         colors = CardDefaults.cardColors(
             containerColor = colors.containerColor
