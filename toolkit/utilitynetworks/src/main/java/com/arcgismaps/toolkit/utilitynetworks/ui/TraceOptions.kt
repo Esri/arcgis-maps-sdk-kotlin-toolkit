@@ -47,6 +47,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -161,6 +162,7 @@ private fun TraceConfiguration(utilityTraces: List<SelectableItem>) {
     }
 }
 
+@Immutable
 private data class StartingPointRowData(
     val name: String,
     val symbol: ImageVector = Icons.Filled.ThumbUp,
@@ -174,7 +176,7 @@ private data class StartingPointRowData(
  */
 @Composable
 private fun StartingPointsEditor() {
-    val startingPoints = remember { mutableStateListOf(StartingPointRowData(name = "Test Starting Point")) }
+    val startingPoints = mutableListOf(StartingPointRowData(name = "Test Starting Point"))
     var counter by remember { mutableIntStateOf(1) }
     ExpandableCardTheme(
         shapes = ExpandableCardDefaults.shapes(padding = 10.dp)
@@ -203,6 +205,7 @@ private fun StartingPointsEditor() {
                 startingPoints.forEach {
                     val row = StartingPointRowData(name = it.name)
                     StartingPointRow(row) {
+                        println("removing row with name ${row.name}")
                         startingPoints.remove(row)
                         counter -= 1
                     }
@@ -224,8 +227,9 @@ private fun StartingPointRow(
     onDelete: () -> Unit = {}
 ) {
     val density = LocalDensity.current
+    var deleteActive by remember { mutableStateOf(false) }
     val state = rememberSaveable(
-        inputs = emptyArray(),
+        inputs = arrayOf(data),
         saver = AnchoredDraggableState.Saver(
             confirmValueChange = { _ -> true },
             positionalThreshold = { distance: Float -> distance * 0.9f },
@@ -257,7 +261,10 @@ private fun StartingPointRow(
 
     if (!state.offset.isNaN() && state.offset < 5.0) {
         // delete if dragged all the way across
-        onDelete()
+        LaunchedEffect(Unit) {
+            deleteActive = false
+            onDelete()
+        }
     }
     Row {
         Box(
@@ -296,7 +303,7 @@ private fun StartingPointRow(
                 }
             )
 
-            var deleteActive by remember { mutableStateOf(false) }
+
             var indicationState by remember { mutableStateOf(false) }
             val animatedOffset: Dp by animateDpAsState(
                 targetValue = if (indicationState) 6.dp else 0.dp,
