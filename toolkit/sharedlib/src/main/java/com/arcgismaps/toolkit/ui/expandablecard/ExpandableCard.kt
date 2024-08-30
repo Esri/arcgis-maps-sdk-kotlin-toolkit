@@ -108,7 +108,7 @@ private fun ExpandableHeader(
     onClick: () -> Unit
 ) {
     if (title.isEmpty() && description == null && !expandable) return
-    val shapes = ExpandableCardDefaults.shapes()
+    val shapes = LocalShapes.current
     Row(
         Modifier
             .fillMaxWidth()

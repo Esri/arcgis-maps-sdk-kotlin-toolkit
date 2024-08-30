@@ -67,8 +67,8 @@ object ExpandableCardDefaults {
      */
     @Composable
     fun typography(
-        headerStyle: TextStyle = headerStyleTypography(),
-        bodyStyle: TextStyle = bodyStyleTypography(),
+        headerStyle: TextStyle = MaterialTheme.typography.bodyLarge,
+        bodyStyle: TextStyle = MaterialTheme.typography.bodyMedium,
         readOnlyTextStyle: TextStyle = MaterialTheme.typography.bodyLarge
     ): ExpandableCardTypography {
         return ExpandableCardTypography(
@@ -77,13 +77,6 @@ object ExpandableCardDefaults {
             readOnlyTextStyle = readOnlyTextStyle
         )
     }
-
-    @Composable
-    private fun headerStyleTypography(): TextStyle = MaterialTheme.typography.bodyLarge
-
-    @Composable
-    private fun bodyStyleTypography(): TextStyle = MaterialTheme.typography.bodyMedium
-
 
     /**
      * Creates a [ExpandableCardShapes] with default values.
@@ -95,9 +88,9 @@ object ExpandableCardDefaults {
      */
     @Composable
     fun shapes(
-        padding: Dp = padding(),
-        containerShape: RoundedCornerShape = containerShape(),
-        borderThickness: Dp = borderThickness()
+        padding: Dp = 16.dp,
+        containerShape: RoundedCornerShape = RoundedCornerShape(5.dp),
+        borderThickness: Dp = 1.dp
     ): ExpandableCardShapes {
         return ExpandableCardShapes(
             padding = padding,
@@ -105,14 +98,4 @@ object ExpandableCardDefaults {
             borderThickness = borderThickness
         )
     }
-
-    @Composable
-    private fun padding(): Dp = 16.dp
-
-    @Composable
-    private fun containerShape(): RoundedCornerShape = RoundedCornerShape(5.dp)
-
-    @Composable
-    private fun borderThickness(): Dp = 1.dp
-
 }

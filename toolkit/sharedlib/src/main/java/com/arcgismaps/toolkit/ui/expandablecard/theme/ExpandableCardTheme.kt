@@ -93,11 +93,12 @@ internal object ExpandableCardTheme {
  * See [ExpandableCardDefaults.colorScheme], [ExpandableCardDefaults.typography], and
  * [ExpandableCardDefaults.shapes] for the exact configuration used.
  *
- * A complete definition for the [ExpandableCardTheme] to use. A default is provided based
- * on the current [MaterialTheme].
- * @param colorScheme An [ExpandableCardColorScheme] to use for this compose hierarchy
- * @param typography An [ExpandableCardTypography] to use for this compose hierarchy
- * @param shapes An [ExpandableCardShapes] to use for this compose hierarchy
+ * @param colorScheme An [ExpandableCardColorScheme] to use for this compose hierarchy.
+ * Default is [ExpandableCardDefaults.colorScheme].
+ * @param typography An [ExpandableCardTypography] to use for this compose hierarchy.
+ * Default is [ExpandableCardDefaults.typography].
+ * @param shapes An [ExpandableCardShapes] to use for this compose hierarchy.
+ * Default is [ExpandableCardDefaults.shapes].
  * @param content The content to which the theme should be applied.
  */
 @Composable

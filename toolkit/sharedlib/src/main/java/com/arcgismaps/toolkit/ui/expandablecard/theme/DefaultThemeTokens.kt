@@ -64,6 +64,10 @@ internal object DefaultThemeTokens {
         readOnlyTextStyle = TypographyTokens.bodyLarge,
     )
 
+    /**
+     * The default values provided are hardcoded based on the material 3 typography.
+     * See [androidx.compose.material3.Typography]
+     */
     val shapes: ExpandableCardShapes = ExpandableCardShapes(
         padding = 16.dp,
         containerShape = RoundedCornerShape(5.dp),
