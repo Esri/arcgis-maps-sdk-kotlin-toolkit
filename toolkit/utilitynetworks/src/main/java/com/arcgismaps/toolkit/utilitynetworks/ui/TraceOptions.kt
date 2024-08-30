@@ -44,8 +44,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
-import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardDefaults
-import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardTheme
 import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.utilitynetworks.UtilityNetwork
 
@@ -65,38 +63,32 @@ internal fun TraceOptions(configurations: List<SelectableItem>, onPerformTrace: 
         modifier = Modifier
             .fillMaxSize()
     ) {
-        ExpandableCardTheme(
-            shapes = ExpandableCardDefaults.shapes(padding = 4.dp)
+        LazyColumn(
+            modifier = Modifier.padding(10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            LazyColumn(
-                modifier = Modifier.padding(10.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                item {
-                    TraceConfiguration(
-                        traceConfigurations
-                    ) { index ->
-                        traceConfigurations[index] =
-                            traceConfigurations[index].copy(selected = !traceConfigurations[index].selected)
-                        traceConfigurations.forEachIndexed { i, _ ->
-                            if (i != index) {
-                                traceConfigurations[i] =
-                                    traceConfigurations[i].copy(selected = false)
-                            }
+            item {
+                TraceConfiguration(
+                    traceConfigurations
+                ) { index ->
+                    traceConfigurations[index] =
+                        traceConfigurations[index].copy(selected = !traceConfigurations[index].selected)
+                    traceConfigurations.forEachIndexed { i, _ ->
+                        if (i != index) {
+                            traceConfigurations[i] =
+                                traceConfigurations[i].copy(selected = false)
                         }
                     }
-
-                }
-                item {
-                    StartingPointsEditor()
-                }
-                item {
-                    Button(onClick = { onPerformTrace() }) {
-                        Text(stringResource(id = R.string.trace))
-                    }
                 }
 
-
+            }
+            item {
+                StartingPointsEditor()
+            }
+            item {
+                Button(onClick = { onPerformTrace() }) {
+                    Text(stringResource(id = R.string.trace))
+                }
             }
         }
     }
@@ -109,7 +101,10 @@ internal fun TraceOptions(configurations: List<SelectableItem>, onPerformTrace: 
  */
 @Composable
 private fun TraceConfiguration(utilityTraces: List<SelectableItem>, onTraceSelected: (Int) -> Unit) {
-    ExpandableCard(title = stringResource(id = R.string.trace_configuration), toggleable = true) {
+    ExpandableCard(
+        title = stringResource(id = R.string.trace_configuration),
+        padding = 4.dp
+    ) {
         Column {
             utilityTraces.forEachIndexed { index, item ->
                 FilterChip(
@@ -147,7 +142,10 @@ private fun TraceConfiguration(utilityTraces: List<SelectableItem>, onTraceSelec
 private fun StartingPointsEditor() {
     val startingPoints = remember { mutableStateListOf<String>() }
     var counter by remember { mutableIntStateOf(startingPoints.size) }
-    ExpandableCard(title = "${stringResource(id = R.string.starting_points)} (${counter})") {
+    ExpandableCard(
+        title = "${stringResource(id = R.string.starting_points)} (${counter})",
+        padding = 4.dp
+    ) {
         Column {
             ElevatedButton(
                 onClick = {

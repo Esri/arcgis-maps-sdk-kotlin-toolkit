@@ -25,8 +25,6 @@ import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.Dp
 import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 
 /**
@@ -38,15 +36,7 @@ internal val LocalColorScheme: ProvidableCompositionLocal<ExpandableCardColorSch
     }
 
 /**
- * CompositionLocal used to pass a [ExpandableCardTypography] down the tree.
- */
-internal val LocalTypography: ProvidableCompositionLocal<ExpandableCardTypography> =
-    compositionLocalOf {
-        DefaultThemeTokens.typography
-    }
-
-/**
- * CompositionLocal used to pass a [ExpandableCardTypography] down the tree.
+ * CompositionLocal used to pass a [ExpandableCardShapes] down the tree.
  */
 internal val LocalShapes: ProvidableCompositionLocal<ExpandableCardShapes> =
     compositionLocalOf {
@@ -68,15 +58,6 @@ internal object ExpandableCardTheme {
         get() = LocalColorScheme.current
 
     /**
-     * Retrieves the current [ExpandableCardTypography].
-     */
-    @Suppress("unused")
-    val typography: ExpandableCardTypography
-        @Composable
-        @ReadOnlyComposable
-        get() = LocalTypography.current
-
-    /**
      * Retrieves the current [ExpandableCardShapes].
      */
     val shapes: ExpandableCardShapes
@@ -89,28 +70,25 @@ internal object ExpandableCardTheme {
  * Provides a default [ExpandableCardTheme] to the given [content] so that the ExpandableCard can be
  * customized.
  *
- * The default value for the [colorScheme] and [typography] is based on the current [MaterialTheme].
- * See [ExpandableCardDefaults.colorScheme], [ExpandableCardDefaults.typography], and
- * [ExpandableCardDefaults.shapes] for the exact configuration used.
+ * The default value for the [colorScheme] and [shapes] is based on the current [MaterialTheme].
+ * See [ExpandableCardDefaults.colorScheme], and [ExpandableCardDefaults.shapes] for the
+ * exact configuration used.
  *
  * @param colorScheme An [ExpandableCardColorScheme] to use for this compose hierarchy.
  * Default is [ExpandableCardDefaults.colorScheme].
- * @param typography An [ExpandableCardTypography] to use for this compose hierarchy.
- * Default is [ExpandableCardDefaults.typography].
  * @param shapes An [ExpandableCardShapes] to use for this compose hierarchy.
  * Default is [ExpandableCardDefaults.shapes].
  * @param content The content to which the theme should be applied.
  */
+@Suppress("unused")
 @Composable
 fun ExpandableCardTheme(
     colorScheme: ExpandableCardColorScheme = ExpandableCardDefaults.colorScheme(),
-    typography: ExpandableCardTypography = ExpandableCardDefaults.typography(),
     shapes: ExpandableCardShapes = ExpandableCardDefaults.shapes(),
     content: @Composable () -> Unit
 ) {
     CompositionLocalProvider(
         LocalColorScheme provides colorScheme,
-        LocalTypography provides typography,
         LocalShapes provides shapes
     ) {
         content()
@@ -133,23 +111,9 @@ fun ExpandableCardTheme(
 data class ExpandableCardColorScheme internal constructor(
     val headerTextColor: Color,
     val containerColor: Color,
-    val galleryContainerColor: Color,
     val borderColor: Color
 )
-/**
- * A Typography system for the [ExpandableCard] built on top of [MaterialTheme].
- *
- * Use [ExpandableCardDefaults.typography] to create a new instance with the default values.
- *
- * @property headerStyle The typography for the ExpandableCard Header.
- * @property bodyStyle The typography for the ExpandableCard Body.
- * @since 200.6.0
- */
-@Immutable
-class ExpandableCardTypography internal constructor(
-    val headerStyle: TextStyle,
-    val bodyStyle: TextStyle
-)
+
 
 /**
  * A Shapes specification for the [ExpandableCard] built on top of [MaterialTheme].
@@ -160,7 +124,5 @@ class ExpandableCardTypography internal constructor(
  */
 @Immutable
 class ExpandableCardShapes internal constructor(
-    val padding: Dp,
-    val containerShape: RoundedCornerShape,
-    val borderThickness: Dp
+    val containerShape: RoundedCornerShape
 )
