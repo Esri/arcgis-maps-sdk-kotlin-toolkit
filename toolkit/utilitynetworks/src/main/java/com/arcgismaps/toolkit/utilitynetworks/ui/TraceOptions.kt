@@ -18,13 +18,9 @@ package com.arcgismaps.toolkit.utilitynetworks.ui
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.AnchoredDraggableState
-import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -57,6 +53,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -79,6 +76,9 @@ import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardDefaults
 import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardTheme
 import com.arcgismaps.toolkit.ui.expandablecard.theme.LocalColorScheme
 import com.arcgismaps.toolkit.ui.expandablecard.theme.LocalTypography
+import com.arcgismaps.toolkit.ui.gestures.AnchoredDraggableState
+import com.arcgismaps.toolkit.ui.gestures.DraggableAnchors
+import com.arcgismaps.toolkit.ui.gestures.anchoredDraggable
 import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.utilitynetworks.UtilityNetwork
 import kotlinx.coroutines.delay
@@ -217,7 +217,6 @@ private enum class DragAnchors(val fraction: Float) {
     DeletePosition(0f),
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun StartingPointRow(
     data: StartingPointRowData,
@@ -225,15 +224,30 @@ private fun StartingPointRow(
     onDelete: () -> Unit = {}
 ) {
     val density = LocalDensity.current
-    val state = remember {
+    val state = rememberSaveable(
+        inputs = emptyArray(),
+        saver = AnchoredDraggableState.Saver(
+            confirmValueChange = { _ -> true },
+            positionalThreshold = { distance: Float -> distance * 0.9f },
+            velocityThreshold = { with(density) { 10000.dp.toPx() } },
+            animationSpec = {
+                spring(
+                    dampingRatio = Spring.DampingRatioLowBouncy,
+                    stiffness = Spring.StiffnessLow,
+                )
+            }
+        )
+    ) {
         AnchoredDraggableState(
             initialValue = DragAnchors.NeutralPosition,
             positionalThreshold = { distance: Float -> distance * 0.9f },
             velocityThreshold = { with(density) { 10000.dp.toPx() } },
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioLowBouncy,
-                stiffness = Spring.StiffnessLow,
-            )
+            animationSpec = {
+                spring(
+                    dampingRatio = Spring.DampingRatioLowBouncy,
+                    stiffness = Spring.StiffnessLow,
+                )
+            }
         )
     }
     val contentWidth = 40.dp
