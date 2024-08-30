@@ -59,7 +59,6 @@ fun ExpandableCard(
     modifier: Modifier = Modifier,
     title: String = "",
     description: (@Composable () -> Unit)? = null,
-//    description: String = "",
     toggleable: Boolean = true,
     content: @Composable () -> Unit = {}
 ) {
