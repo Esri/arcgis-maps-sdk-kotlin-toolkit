@@ -205,7 +205,6 @@ private fun StartingPointsEditor() {
                 startingPoints.forEach {
                     val row = StartingPointRowData(name = it.name)
                     StartingPointRow(row) {
-                        println("removing row with name ${row.name}")
                         startingPoints.remove(row)
                         counter -= 1
                     }
