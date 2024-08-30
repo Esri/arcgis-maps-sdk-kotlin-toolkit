@@ -47,6 +47,7 @@ import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardColorScheme
 import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardDefaults
 import com.arcgismaps.toolkit.ui.expandablecard.theme.LocalColorScheme
 import com.arcgismaps.toolkit.ui.expandablecard.theme.LocalShapes
+import com.arcgismaps.toolkit.ui.modifier.applyIf
 
 /**
  * Composable Card that has the ability to expand and collapse its [content].
@@ -57,7 +58,8 @@ import com.arcgismaps.toolkit.ui.expandablecard.theme.LocalShapes
 fun ExpandableCard(
     modifier: Modifier = Modifier,
     title: String = "",
-    description: String = "",
+    description: (@Composable () -> Unit)? = null,
+//    description: String = "",
     toggleable: Boolean = true,
     content: @Composable () -> Unit = {}
 ) {
@@ -99,13 +101,13 @@ fun ExpandableCard(
 @Composable
 private fun ExpandableHeader(
     title: String = "",
-    description: String = "",
+    description: (@Composable () -> Unit)? = null,
     expandable: Boolean,
     colors: ExpandableCardColorScheme,
     isExpanded: Boolean,
     onClick: () -> Unit
 ) {
-    if (title.isEmpty() && description.isEmpty() && !expandable) return
+    if (title.isEmpty() && description == null && !expandable) return
     val shapes = ExpandableCardDefaults.shapes()
     Row(
         Modifier
@@ -131,15 +133,17 @@ private fun ExpandableHeader(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            if (description.isNotEmpty() && isExpanded) {
-                Text(
-                    text = description,
-                    color = colors.headerTextColor,
-                    style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.Normal,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+            if (description != null && isExpanded) {
+                description()
+                // TODO: add this back to Popup invocations
+//                Text(
+//                    text = description,
+//                    color = colors.headerTextColor,
+//                    style = MaterialTheme.typography.bodySmall,
+//                    fontWeight = FontWeight.Normal,
+//                    maxLines = 1,
+//                    overflow = TextOverflow.Ellipsis
+//                )
             }
 
         }
@@ -163,7 +167,16 @@ internal fun ExpandableHeaderPreview() {
     ExpandableHeader(
         title = "The Title",
         colors = ExpandableCardDefaults.colorScheme(),
-        description = "the description",
+        description = {
+            Text(
+                    text = "the description",
+                    color = LocalColorScheme.current.headerTextColor,
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.Normal,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+        },
         expandable = true,
         isExpanded = true
     ) {}
@@ -173,8 +186,18 @@ internal fun ExpandableHeaderPreview() {
 @Composable
 private fun ExpandableCardPreview() {
     ExpandableCard(
-        description = "Foo",
-        title = "Title"
+        title = "Title",
+        description = {
+            Text(
+                text = "the description",
+                color = LocalColorScheme.current.headerTextColor,
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.Normal,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
     ) {
         Text(
             "Hello World",
@@ -183,12 +206,3 @@ private fun ExpandableCardPreview() {
         )
     }
 }
-
-internal fun Modifier.applyIf(condition: Boolean, then: Modifier.() -> Modifier): Modifier =
-    if (condition) {
-        then()
-    } else {
-        this
-    }
-
-

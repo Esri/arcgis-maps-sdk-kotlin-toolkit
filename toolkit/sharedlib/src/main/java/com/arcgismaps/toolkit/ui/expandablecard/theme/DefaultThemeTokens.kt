@@ -47,6 +47,8 @@ internal object DefaultThemeTokens {
      */
     val colorScheme: ExpandableCardColorScheme = ExpandableCardColorScheme(
         headerTextColor = ColorTokens.OnSurface,
+        readOnlyTextColor = Color.Unspecified,
+        headerButtonTextColor = ColorTokens.OnPrimary,
         containerColor = ColorTokens.PrimaryContainer,
         galleryContainerColor = ColorTokens.OnBackground,
         borderColor = ColorTokens.Outline.copy(alpha = 0.6f)
@@ -58,7 +60,8 @@ internal object DefaultThemeTokens {
      */
     val typography: ExpandableCardTypography = ExpandableCardTypography(
         headerStyle = TypographyTokens.bodyLarge,
-        bodyStyle = TypographyTokens.bodyMedium
+        bodyStyle = TypographyTokens.bodyMedium,
+        readOnlyTextStyle = TypographyTokens.bodyLarge,
     )
 
     val shapes: ExpandableCardShapes = ExpandableCardShapes(

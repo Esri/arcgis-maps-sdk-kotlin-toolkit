@@ -15,7 +15,9 @@
  */
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,33 +25,33 @@ import androidx.compose.foundation.gestures.AnchoredDraggableState
 import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.anchoredDraggable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.sharp.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -58,20 +60,28 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.data.Feature
 import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardDefaults
 import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardTheme
+import com.arcgismaps.toolkit.ui.expandablecard.theme.LocalColorScheme
+import com.arcgismaps.toolkit.ui.expandablecard.theme.LocalTypography
 import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.utilitynetworks.UtilityNetwork
+import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
 /**
@@ -91,7 +101,7 @@ internal fun TraceOptions(configurations: List<SelectableItem>, onPerformTrace: 
             .fillMaxSize()
     ) {
         ExpandableCardTheme(
-            shapes = ExpandableCardDefaults.shapes(padding = 40.dp)
+            shapes = ExpandableCardDefaults.shapes(padding = 10.dp)
         ) {
             LazyColumn(
                 modifier = Modifier.padding(10.dp),
@@ -100,17 +110,7 @@ internal fun TraceOptions(configurations: List<SelectableItem>, onPerformTrace: 
                 item {
                     TraceConfiguration(
                         traceConfigurations
-                    ) { index ->
-                        traceConfigurations[index] =
-                            traceConfigurations[index].copy(selected = !traceConfigurations[index].selected)
-                        traceConfigurations.forEachIndexed { i, _ ->
-                            if (i != index) {
-                                traceConfigurations[i] =
-                                    traceConfigurations[i].copy(selected = false)
-                            }
-                        }
-                    }
-
+                    )
                 }
                 item {
                     StartingPointsEditor()
@@ -131,17 +131,14 @@ internal fun TraceOptions(configurations: List<SelectableItem>, onPerformTrace: 
  * @since 200.6.0
  */
 @Composable
-private fun TraceConfiguration(utilityTraces: List<SelectableItem>, onTraceSelected: (Int) -> Unit) {
+private fun TraceConfiguration(utilityTraces: List<SelectableItem>) {
     ExpandableCard(title = stringResource(id = R.string.trace_configuration), toggleable = true) {
+        var selectedTrace: SelectableItem? by remember { mutableStateOf(null) }
         Column {
             utilityTraces.forEachIndexed { index, item ->
-                FilterChip(
-                    onClick = { onTraceSelected(index) },
-                    label = {
-                        Text(item.title)
-                    },
-                    selected = item.selected,
-                    leadingIcon = if (item.selected) {
+                ReadOnlyTextField(
+                    text = item.title,
+                    leadingIcon = if (item.title == selectedTrace?.title) {
                         {
                             Icon(
                                 imageVector = Icons.Filled.Done,
@@ -155,6 +152,9 @@ private fun TraceConfiguration(utilityTraces: List<SelectableItem>, onTraceSelec
                     modifier = Modifier
                         .padding(horizontal = 8.dp)
                         .fillMaxWidth()
+                        .clickable {
+                            selectedTrace = utilityTraces[index]
+                        }
                 )
             }
         }
@@ -174,30 +174,38 @@ private data class StartingPointRowData(
  */
 @Composable
 private fun StartingPointsEditor() {
-    val startingPoints = remember { mutableStateListOf<StartingPointRowData>(StartingPointRowData(name = "Test Starting Point")) }
-    var counter by remember { mutableIntStateOf(startingPoints.size) }
+    val startingPoints = remember { mutableStateListOf(StartingPointRowData(name = "Test Starting Point")) }
+    var counter by remember { mutableIntStateOf(1) }
     ExpandableCardTheme(
-        shapes = ExpandableCardDefaults.shapes(padding = 20.dp)
+        shapes = ExpandableCardDefaults.shapes(padding = 10.dp)
     ) {
-        ExpandableCard(title = "${stringResource(id = R.string.starting_points)} (${counter})") {
-            Column {
-                ElevatedButton(
-                    onClick = {
-                        startingPoints.add(StartingPointRowData("Point ${counter++}"))
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(10.dp),
-                    shape = RoundedCornerShape(8.dp)
+        ExpandableCard(
+            title = "${stringResource(id = R.string.starting_points)} (${counter})",
+             description = {
+                 ElevatedButton(
+                     onClick = {
+                         startingPoints.add(StartingPointRowData("Point ${counter++}"))
+                     },
+                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text(stringResource(id = R.string.add_starting_point))
-                }
+                     Text(
+                         text = stringResource(id = R.string.add_starting_point),
+                         color = LocalColorScheme.current.headerTextColor,
+                         style = MaterialTheme.typography.bodyMedium,
+                         fontWeight = FontWeight.Normal,
+                         maxLines = 1,
+                         overflow = TextOverflow.Ellipsis
+                     )
+                 }
+             }
+        ) {
+            Column {
                 startingPoints.forEach {
                     val row = StartingPointRowData(name = it.name)
-//                    StartingPointRow(row) {
-//                        startingPoints.remove(row)
-//                    }
-                    StartingPointRow(row)
+                    StartingPointRow(row) {
+                        startingPoints.remove(row)
+                        counter -= 1
+                    }
                 }
             }
         }
@@ -205,7 +213,7 @@ private fun StartingPointsEditor() {
 }
 
 private enum class DragAnchors(val fraction: Float) {
-    NeutralPosition(.96f),
+    NeutralPosition(.97f),
     DeletePosition(0f),
 }
 
@@ -214,175 +222,188 @@ private enum class DragAnchors(val fraction: Float) {
 private fun StartingPointRow(
     data: StartingPointRowData,
     modifier: Modifier = Modifier,
+    onDelete: () -> Unit = {}
 ) {
     val density = LocalDensity.current
-    val positionalThreshold = { distance: Float -> distance * 0.5f }
-    val velocityThreshold = { with(density) { 100.dp.toPx() } }
-    val animationSpec = tween<Float>()
     val state = remember {
         AnchoredDraggableState(
             initialValue = DragAnchors.NeutralPosition,
-            positionalThreshold = positionalThreshold,
-            velocityThreshold = velocityThreshold,
-            animationSpec = animationSpec,
+            positionalThreshold = { distance: Float -> distance * 0.9f },
+            velocityThreshold = { with(density) { 10000.dp.toPx() } },
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioLowBouncy,
+                stiffness = Spring.StiffnessLow,
+            )
         )
     }
     val contentWidth = 40.dp
     val contentSizeWidth = with(density) { contentWidth.toPx() }
     var layoutWidth by remember { mutableIntStateOf(0) }
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .onSizeChanged { layoutSize ->
-                val dragEndPoint = layoutSize.width - contentSizeWidth
-                layoutWidth = layoutSize.width
-                state.updateAnchors(
-                    DraggableAnchors {
-                        DragAnchors.entries
-                            .forEach { anchor ->
-                                anchor at dragEndPoint * anchor.fraction
-                            }
-                    }
-                )
-            }
-//            .drawBehind {
-//                val offset = state.offset
-//                if (!offset.isNaN()) {
-//                    drawRect(
-//                        brush = SolidColor(Color.Red),
-//                        topLeft = Offset(x = offset, y = 0f)
-//                    )
-//                }
-//            }
-    ) {
-        var active by remember { mutableStateOf(false)}
-        TextField(
-            value = data.name,
-            onValueChange = {},
+    var neutralOffset = 0f
+
+    if (!state.offset.isNaN() && state.offset < 5.0) {
+        // delete if dragged all the way across
+        onDelete()
+    }
+    Row {
+        Box(
             modifier = modifier
                 .fillMaxWidth()
-                .clickable { active = !active },
-            readOnly = true,
-            enabled = false,
-            leadingIcon = {
-                Icon(
-                    imageVector = data.symbol,
-                    contentDescription = null
-                )
-            }
-        )
-
-        val width = if (!state.offset.isNaN()) {
-            with(density) {
-                (layoutWidth - state.offset).toDp()
-            }
-        } else {
-            40.dp
-        }
-        DraggableContent(
-            modifier = modifier
-                .width(width)
-                .align(Alignment.CenterStart)
-                .offset {
-                    if (!state.offset.isNaN()) {
-                        IntOffset(
-                            x = state
-                                .requireOffset()
-                                .roundToInt(),
-                            y = 0,
+                .fillMaxHeight()
+                .clip(shape = RoundedCornerShape(8.dp))
+                .onSizeChanged { layoutSize ->
+                    val dragEndPoint = layoutSize.width - contentSizeWidth
+                    layoutWidth = layoutSize.width
+                    state
+                        .updateAnchors(
+                            DraggableAnchors {
+                                DragAnchors.entries
+                                    .forEach { anchor ->
+                                        anchor at dragEndPoint * anchor.fraction
+                                    }
+                            }
                         )
-                    } else {
-                        IntOffset(0, 0)
+                        .also {
+                            neutralOffset = state.requireOffset()
+                        }
+                }
+        ) {
+            ReadOnlyTextField(
+                text = data.name,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(55.dp),
+                leadingIcon = {
+                    Icon(
+                        imageVector = data.symbol,
+                        contentDescription = null,
+                        modifier = Modifier.padding(14.dp)
+                    )
+                }
+            )
+
+            var deleteActive by remember { mutableStateOf(false) }
+            var indicationState by remember { mutableStateOf(false) }
+            val animatedOffset: Dp by animateDpAsState(
+                targetValue = if (indicationState) 6.dp else 0.dp,
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioHighBouncy,
+                    stiffness = Spring.StiffnessVeryLow,
+                ),
+                finishedListener = {
+                    indicationState = false
+                                   },
+                label = ""
+            )
+
+            LaunchedEffect(deleteActive) {
+                delay(2500)
+                while (deleteActive) {
+                    delay(2000)
+                    if (!state.offset.isNaN() && state.offset == neutralOffset) {
+                        deleteActive = false
                     }
                 }
-                .anchoredDraggable(state, Orientation.Horizontal),
-        )
+            }
+            val indicationBounce = with(density) {
+                animatedOffset.toPx().roundToInt()
+            }
+
+            val width = if (!state.offset.isNaN()) {
+                with(density) {
+                    (layoutWidth - state.offset).toDp() + animatedOffset
+                }
+            } else {
+                40.dp
+            }
+            DraggableContent(
+                deleteActive,
+                modifier = modifier
+                    .width(width)
+                    .height(55.dp)
+                    .align(Alignment.CenterStart)
+                    .offset {
+                        if (!state.offset.isNaN()) {
+                            IntOffset(
+                                x = state
+                                    .requireOffset()
+                                    .roundToInt()
+                                        - indicationBounce,
+                                y = 0,
+                            )
+                        } else {
+                            IntOffset(0, 0)
+                        }
+                    }
+                    .anchoredDraggable(
+                        state,
+                        enabled = deleteActive,
+                        orientation = Orientation.Horizontal
+                    )
+            ) {
+                deleteActive = !deleteActive
+                if (deleteActive) {
+                    indicationState = true
+                }
+            }
+        }
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
-//@Composable
-//private fun StartingPointRow(data: StartingPointRowData, onDelete:()->Unit) {
-//    val density = LocalDensity.current
-//    val state = remember {
-//        AnchoredDraggableState(
-//            // 2
-//            initialValue = DragAnchors.Start,
-//            // 3
-//            positionalThreshold = { distance: Float -> distance * 0.5f },
-//            // 4
-//            velocityThreshold = { with(density) { 100.dp.toPx() } },
-//            // 5
-//            animationSpec = tween(),
-//        ).apply {
-//            // 6
-//            updateAnchors(
-//                // 7
-//                DraggableAnchors {
-//                    (DragAnchors.Start as DragAnchors) at 0f
-//                    (DragAnchors.End as DragAnchors) at 400f
-//                }
-//            )
-//        }
-//    }
-//    var active by remember { mutableStateOf(false) }
-//    TextField(
-//        value = data.name,
-//        onValueChange = {},
-//        modifier = Modifier.fillMaxWidth().clickable { active = !active }.anchoredDraggable() { },
-//        readOnly = true,
-//        enabled = false,
-//        leadingIcon = {
-//            Icon(
-//                imageVector = data.symbol,
-//                contentDescription = null
-//            )
-//        },
-//        trailingIcon = if (active) {
-//            {
-//                Icon(imageVector = Icons.Filled.Edit, contentDescription = null, modifier = Modifier.pointerInput(Unit) {
-//                    detectTapGestures (
-//                        onLongPress = {
-//                            active = false
-//                            onDelete()
-//                        }
-//                    )
-//                })
-//            }
-//        } else {
-//            null
-//        }
-//    )
-//}
 
 @Composable
 internal fun DraggableContent(
+    isActive: Boolean,
     modifier: Modifier = Modifier,
+    onTap: () -> Unit = {}
 ) {
     Row(
         modifier = modifier
-            .background(Color.Red),
-        horizontalArrangement = Arrangement.End
+            .background(if (isActive) Color.Red else Color.Unspecified)
+            .clickable {
+                onTap()
+            }
     ) {
         Icon(
-            imageVector = Icons.Filled.Menu,
-            modifier = modifier
-                .width(40.dp)
-                .background(color = Color.Red),
+            imageVector = Icons.Sharp.Delete,
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .padding(14.dp),
             contentDescription = null,
         )
-        Spacer(modifier = modifier.background(Color.Red).weight(1f))
     }
-
 }
 
-@Preview
 @Composable
-private fun StartingPointRowPreview() {
-//    StartingPointRow(
-//        data = StartingPointRowData("FOOO")
-//    ) {}
+private fun ReadOnlyTextField(
+    text: String,
+    modifier: Modifier = Modifier,
+    maxLines: Int = 1,
+    leadingIcon: (@Composable () -> Unit)? = null
+) {
+    val colors = LocalColorScheme.current
+    val typography = LocalTypography.current
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            // merge descendants semantics to make them part of the parent node
+            .semantics(mergeDescendants = true) {},
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        leadingIcon?.invoke()
+        SelectionContainer(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
+        ) {
+            Text(
+                text = text.ifEmpty { "--" },
+                color = colors.readOnlyTextColor,
+                style = typography.readOnlyTextStyle,
+                maxLines = maxLines
+            )
+        }
+    }
 }
+
 
 @Preview
 @Composable

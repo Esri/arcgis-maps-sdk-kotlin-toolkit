@@ -32,7 +32,7 @@ import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 /**
  * CompositionLocal used to pass a [ExpandableCardColorScheme] down the tree.
  */
-internal val LocalColorScheme: ProvidableCompositionLocal<ExpandableCardColorScheme> =
+val LocalColorScheme: ProvidableCompositionLocal<ExpandableCardColorScheme> =
     compositionLocalOf {
         DefaultThemeTokens.colorScheme
     }
@@ -40,7 +40,7 @@ internal val LocalColorScheme: ProvidableCompositionLocal<ExpandableCardColorSch
 /**
  * CompositionLocal used to pass a [ExpandableCardTypography] down the tree.
  */
-internal val LocalTypography: ProvidableCompositionLocal<ExpandableCardTypography> =
+val LocalTypography: ProvidableCompositionLocal<ExpandableCardTypography> =
     compositionLocalOf {
         DefaultThemeTokens.typography
     }
@@ -131,6 +131,8 @@ fun ExpandableCardTheme(
 @Immutable
 data class ExpandableCardColorScheme internal constructor(
     val headerTextColor: Color,
+    val readOnlyTextColor: Color,
+    val headerButtonTextColor: Color,
     val containerColor: Color,
     val galleryContainerColor: Color,
     val borderColor: Color
@@ -147,7 +149,8 @@ data class ExpandableCardColorScheme internal constructor(
 @Immutable
 class ExpandableCardTypography internal constructor(
     val headerStyle: TextStyle,
-    val bodyStyle: TextStyle
+    val bodyStyle: TextStyle,
+    val readOnlyTextStyle: TextStyle
 )
 
 /**

@@ -42,13 +42,16 @@ object ExpandableCardDefaults {
     @Composable
     fun colorScheme(
         headerTextColor: Color = MaterialTheme.colorScheme.onBackground,
+        readOnlyTextColor: Color = Color.Unspecified,
+        headerButtonTextColor: Color = MaterialTheme.colorScheme.onPrimary,
         containerColor: Color = MaterialTheme.colorScheme.background,
         galleryContainerColor: Color = MaterialTheme.colorScheme.onBackground,
         borderColor: Color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
-
     ): ExpandableCardColorScheme {
         return ExpandableCardColorScheme(
             headerTextColor = headerTextColor,
+            readOnlyTextColor = readOnlyTextColor,
+            headerButtonTextColor = headerButtonTextColor,
             containerColor = containerColor,
             galleryContainerColor = galleryContainerColor,
             borderColor = borderColor
@@ -65,11 +68,13 @@ object ExpandableCardDefaults {
     @Composable
     fun typography(
         headerStyle: TextStyle = headerStyleTypography(),
-        bodyStyle: TextStyle = bodyStyleTypography()
+        bodyStyle: TextStyle = bodyStyleTypography(),
+        readOnlyTextStyle: TextStyle = MaterialTheme.typography.bodyLarge
     ): ExpandableCardTypography {
         return ExpandableCardTypography(
             headerStyle = headerStyle,
-            bodyStyle = bodyStyle
+            bodyStyle = bodyStyle,
+            readOnlyTextStyle = readOnlyTextStyle
         )
     }
 
