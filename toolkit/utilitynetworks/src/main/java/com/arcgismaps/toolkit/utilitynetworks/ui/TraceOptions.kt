@@ -65,6 +65,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -73,10 +74,8 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.data.Feature
 import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
-import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardDefaults
 import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardTheme
 import com.arcgismaps.toolkit.ui.expandablecard.theme.LocalColorScheme
-import com.arcgismaps.toolkit.ui.expandablecard.theme.LocalTypography
 import com.arcgismaps.toolkit.ui.gestures.AnchoredDraggableState
 import com.arcgismaps.toolkit.ui.gestures.DraggableAnchors
 import com.arcgismaps.toolkit.ui.gestures.anchoredDraggable
@@ -101,9 +100,7 @@ internal fun TraceOptions(configurations: List<SelectableItem>, onPerformTrace: 
         modifier = Modifier
             .fillMaxSize()
     ) {
-        ExpandableCardTheme(
-            shapes = ExpandableCardDefaults.shapes(padding = 10.dp)
-        ) {
+        ExpandableCardTheme {
             LazyColumn(
                 modifier = Modifier.padding(10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -176,38 +173,36 @@ private data class StartingPointRowData(
  */
 @Composable
 private fun StartingPointsEditor() {
-    val startingPoints = mutableListOf(StartingPointRowData(name = "Test Starting Point"))
+    val startingPoints = remember { mutableStateListOf(StartingPointRowData(name = "Test Starting Point"))}
     var counter by remember { mutableIntStateOf(1) }
-    ExpandableCardTheme(
-        shapes = ExpandableCardDefaults.shapes(padding = 10.dp)
+    ExpandableCard(
+        title = "${stringResource(id = R.string.starting_points)} (${counter})",
+        description = {
+            ElevatedButton(
+                onClick = {
+                    startingPoints.add(StartingPointRowData("Point ${counter++}"))
+                },
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(
+                    text = stringResource(id = R.string.add_starting_point),
+                    color = LocalColorScheme.current.headerTextColor,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Normal,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        },
+        padding = 4.dp
     ) {
-        ExpandableCard(
-            title = "${stringResource(id = R.string.starting_points)} (${counter})",
-             description = {
-                 ElevatedButton(
-                     onClick = {
-                         startingPoints.add(StartingPointRowData("Point ${counter++}"))
-                     },
-                     shape = RoundedCornerShape(8.dp)
-                ) {
-                     Text(
-                         text = stringResource(id = R.string.add_starting_point),
-                         color = LocalColorScheme.current.headerTextColor,
-                         style = MaterialTheme.typography.bodyMedium,
-                         fontWeight = FontWeight.Normal,
-                         maxLines = 1,
-                         overflow = TextOverflow.Ellipsis
-                     )
-                 }
-             }
-        ) {
-            Column {
-                startingPoints.forEach {
-                    val row = StartingPointRowData(name = it.name)
-                    StartingPointRow(row) {
-                        startingPoints.remove(row)
-                        counter -= 1
-                    }
+        Column {
+            startingPoints.forEach {
+                println("adding row for ${it.name}")
+                val row = StartingPointRowData(name = it.name)
+                StartingPointRow(row) {
+                    startingPoints.remove(row)
+                    counter -= 1
                 }
             }
         }
@@ -398,11 +393,11 @@ internal fun DraggableContent(
 private fun ReadOnlyTextField(
     text: String,
     modifier: Modifier = Modifier,
+    textStyle: TextStyle = MaterialTheme.typography.bodyLarge,
     maxLines: Int = 1,
     leadingIcon: (@Composable () -> Unit)? = null
 ) {
     val colors = LocalColorScheme.current
-    val typography = LocalTypography.current
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -417,7 +412,7 @@ private fun ReadOnlyTextField(
             Text(
                 text = text.ifEmpty { "--" },
                 color = colors.readOnlyTextColor,
-                style = typography.readOnlyTextStyle,
+                style = textStyle,
                 maxLines = maxLines
             )
         }

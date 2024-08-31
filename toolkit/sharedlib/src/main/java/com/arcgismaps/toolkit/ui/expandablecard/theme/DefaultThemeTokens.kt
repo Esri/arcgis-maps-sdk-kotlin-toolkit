@@ -27,11 +27,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arcgismaps.toolkit.ui.expandablecard.theme.DefaultThemeTokens.colorScheme
-import com.arcgismaps.toolkit.ui.expandablecard.theme.DefaultThemeTokens.typography
+import com.arcgismaps.toolkit.ui.expandablecard.theme.DefaultThemeTokens.shapes
 
 /**
- * Provides a default [ExpandableCardColorScheme] via [colorScheme] and a default [ExpandableCardTypography]
- * via [typography].
+ * Provides a default [ExpandableCardColorScheme] via [colorScheme] and a default [ExpandableCardShapes]
+ * via [shapes].
  *
  * Creates a default theme from statically defined tokens. Do not use this at runtime, instead the
  * ExpandableCardTheme must always be specified from the current MaterialTheme.
@@ -50,7 +50,6 @@ internal object DefaultThemeTokens {
         readOnlyTextColor = Color.Unspecified,
         headerButtonTextColor = ColorTokens.OnPrimary,
         containerColor = ColorTokens.PrimaryContainer,
-        galleryContainerColor = ColorTokens.OnBackground,
         borderColor = ColorTokens.Outline.copy(alpha = 0.6f)
     )
 
@@ -58,20 +57,8 @@ internal object DefaultThemeTokens {
      * The default values provided are hardcoded based on the material 3 typography.
      * See [androidx.compose.material3.Typography]
      */
-    val typography: ExpandableCardTypography = ExpandableCardTypography(
-        headerStyle = TypographyTokens.bodyLarge,
-        bodyStyle = TypographyTokens.bodyMedium,
-        readOnlyTextStyle = TypographyTokens.bodyLarge,
-    )
-
-    /**
-     * The default values provided are hardcoded based on the material 3 typography.
-     * See [androidx.compose.material3.Typography]
-     */
     val shapes: ExpandableCardShapes = ExpandableCardShapes(
-        padding = 16.dp,
         containerShape = RoundedCornerShape(5.dp),
-        borderThickness = 1.dp
     )
 }
 

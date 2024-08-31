@@ -42,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardColorScheme
 import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardDefaults
@@ -60,6 +61,8 @@ fun ExpandableCard(
     title: String = "",
     description: (@Composable () -> Unit)? = null,
     toggleable: Boolean = true,
+    padding: Dp = 16.dp,
+    borderThickness: Dp = 1.dp,
     content: @Composable () -> Unit = {}
 ) {
     val shapes = LocalShapes.current
@@ -70,11 +73,11 @@ fun ExpandableCard(
         colors = CardDefaults.cardColors(
             containerColor = colors.containerColor
         ),
-        border = BorderStroke(shapes.borderThickness, colors.borderColor),
+        border = BorderStroke(borderThickness, colors.borderColor),
         shape = shapes.containerShape,
         modifier = modifier
             .fillMaxWidth()
-            .padding(shapes.padding)
+            .padding(padding)
     ) {
         Column {
             ExpandableHeader(
@@ -104,10 +107,10 @@ private fun ExpandableHeader(
     expandable: Boolean,
     colors: ExpandableCardColorScheme,
     isExpanded: Boolean,
+    padding: Dp = 16.dp,
     onClick: () -> Unit
 ) {
     if (title.isEmpty() && description == null && !expandable) return
-    val shapes = LocalShapes.current
     Row(
         Modifier
             .fillMaxWidth()
@@ -122,7 +125,7 @@ private fun ExpandableHeader(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(shapes.padding)
+                .padding(padding)
                 .weight(0.5f)
         ) {
             Text(

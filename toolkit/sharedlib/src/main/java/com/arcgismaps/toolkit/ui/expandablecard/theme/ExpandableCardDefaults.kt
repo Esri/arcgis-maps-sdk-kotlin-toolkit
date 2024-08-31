@@ -20,8 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 
@@ -35,7 +33,6 @@ object ExpandableCardDefaults {
      *
      * @param headerTextColor The color scheme for the card header
      * @param containerColor The color scheme for the card container
-     * @param galleryContainerColor The color scheme for the card's gallery, if any.
      * @param borderColor The color scheme for the card's border.
      * @since 200.6.0
      */
@@ -45,7 +42,6 @@ object ExpandableCardDefaults {
         readOnlyTextColor: Color = Color.Unspecified,
         headerButtonTextColor: Color = MaterialTheme.colorScheme.onPrimary,
         containerColor: Color = MaterialTheme.colorScheme.background,
-        galleryContainerColor: Color = MaterialTheme.colorScheme.onBackground,
         borderColor: Color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
     ): ExpandableCardColorScheme {
         return ExpandableCardColorScheme(
@@ -53,49 +49,22 @@ object ExpandableCardDefaults {
             readOnlyTextColor = readOnlyTextColor,
             headerButtonTextColor = headerButtonTextColor,
             containerColor = containerColor,
-            galleryContainerColor = galleryContainerColor,
             borderColor = borderColor
-        )
-    }
-
-    /**
-     * Creates a [ExpandableCardTypography] with default values.
-     *
-     * @param headerStyle The typography for the card header
-     * @param bodyStyle The typography for card body
-     * @since 200.6.0
-     */
-    @Composable
-    fun typography(
-        headerStyle: TextStyle = MaterialTheme.typography.bodyLarge,
-        bodyStyle: TextStyle = MaterialTheme.typography.bodyMedium,
-        readOnlyTextStyle: TextStyle = MaterialTheme.typography.bodyLarge
-    ): ExpandableCardTypography {
-        return ExpandableCardTypography(
-            headerStyle = headerStyle,
-            bodyStyle = bodyStyle,
-            readOnlyTextStyle = readOnlyTextStyle
         )
     }
 
     /**
      * Creates a [ExpandableCardShapes] with default values.
      *
-     * @param padding The internal padding of the card body
      * @param containerShape the shape of the card
-     * @param borderThickness the thickness of the card border
      * @since 200.6.0
      */
     @Composable
     fun shapes(
-        padding: Dp = 16.dp,
         containerShape: RoundedCornerShape = RoundedCornerShape(5.dp),
-        borderThickness: Dp = 1.dp
     ): ExpandableCardShapes {
         return ExpandableCardShapes(
-            padding = padding,
-            containerShape = containerShape,
-            borderThickness = borderThickness
+            containerShape = containerShape
         )
     }
 }
