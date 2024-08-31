@@ -101,10 +101,7 @@ public fun UsernamePasswordAuthenticator(
             modifier = Modifier.fillMaxWidth(0.92f),
             properties = DialogProperties(usePlatformDefaultWidth = false),
             title = {
-                Text(
-                    text = "Authentication Required",
-                    textAlign = TextAlign.Center
-                )
+                Text(text = "Authentication Required")
             },
             text = {
                 Column(
@@ -117,8 +114,6 @@ public fun UsernamePasswordAuthenticator(
                         style = MaterialTheme.typography.titleSmall,
                         textAlign = TextAlign.Start
                     )
-
-                    // Spacer(modifier = Modifier.height(4.dp))
 
                     val keyboardActions = remember {
                         KeyboardActions(
