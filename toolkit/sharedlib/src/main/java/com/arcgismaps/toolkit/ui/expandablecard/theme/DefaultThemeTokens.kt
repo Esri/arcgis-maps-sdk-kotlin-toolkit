@@ -47,6 +47,7 @@ internal object DefaultThemeTokens {
      */
     val colorScheme: ExpandableCardColorScheme = ExpandableCardColorScheme(
         headerTextColor = ColorTokens.OnSurface,
+        headerBackgroundColor = ColorTokens.Background,
         readOnlyTextColor = Color.Unspecified,
         headerButtonTextColor = ColorTokens.OnPrimary,
         containerColor = ColorTokens.PrimaryContainer,
@@ -59,6 +60,16 @@ internal object DefaultThemeTokens {
      */
     val shapes: ExpandableCardShapes = ExpandableCardShapes(
         containerShape = RoundedCornerShape(5.dp),
+        borderThickness = 1.dp
+    )
+
+    /**
+     * The default values provided are hardcoded based on the material 3 typography.
+     * See [androidx.compose.material3.Typography]
+     */
+    val typography: ExpandableCardTypography = ExpandableCardTypography(
+        titleStyle = TypographyTokens.bodyLarge,
+        descriptionStyle = TypographyTokens.bodyMedium
     )
 }
 

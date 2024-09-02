@@ -20,6 +20,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 
@@ -41,6 +43,7 @@ object ExpandableCardDefaults {
         headerTextColor: Color = MaterialTheme.colorScheme.onBackground,
         readOnlyTextColor: Color = Color.Unspecified,
         headerButtonTextColor: Color = MaterialTheme.colorScheme.onPrimary,
+        headerBackgroundColor: Color = MaterialTheme.colorScheme.surface,
         containerColor: Color = MaterialTheme.colorScheme.background,
         borderColor: Color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
     ): ExpandableCardColorScheme {
@@ -48,6 +51,7 @@ object ExpandableCardDefaults {
             headerTextColor = headerTextColor,
             readOnlyTextColor = readOnlyTextColor,
             headerButtonTextColor = headerButtonTextColor,
+            headerBackgroundColor = headerBackgroundColor,
             containerColor = containerColor,
             borderColor = borderColor
         )
@@ -62,9 +66,29 @@ object ExpandableCardDefaults {
     @Composable
     fun shapes(
         containerShape: RoundedCornerShape = RoundedCornerShape(5.dp),
+        borderThickness: Dp = 1.dp
     ): ExpandableCardShapes {
         return ExpandableCardShapes(
-            containerShape = containerShape
+            containerShape = containerShape,
+            borderThickness = borderThickness
+        )
+    }
+
+    /**
+     * Creates a [ExpandableCardTypography] with default values.
+     *
+     * @param headerStyle the text style for the header of the card.
+     * @param bodyStyle the text style for the body of the card.
+     * @since 200.6.0
+     */
+    @Composable
+    fun typography(
+        headerStyle: TextStyle = MaterialTheme.typography.titleMedium,
+        bodyStyle: TextStyle = MaterialTheme.typography.bodyMedium
+    ): ExpandableCardTypography {
+        return ExpandableCardTypography(
+            titleStyle = headerStyle,
+            descriptionStyle = bodyStyle
         )
     }
 }

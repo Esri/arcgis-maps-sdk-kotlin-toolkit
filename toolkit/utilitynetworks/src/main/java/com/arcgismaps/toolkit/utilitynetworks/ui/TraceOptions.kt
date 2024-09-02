@@ -74,8 +74,8 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.data.Feature
 import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
-import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardTheme
-import com.arcgismaps.toolkit.ui.expandablecard.theme.LocalColorScheme
+import com.arcgismaps.toolkit.ui.expandablecard.theme.LocalExpandableCardColorScheme
+import com.arcgismaps.toolkit.ui.expandablecard.theme.LocalExpandableCardTypography
 import com.arcgismaps.toolkit.ui.gestures.AnchoredDraggableState
 import com.arcgismaps.toolkit.ui.gestures.DraggableAnchors
 import com.arcgismaps.toolkit.ui.gestures.anchoredDraggable
@@ -100,23 +100,21 @@ internal fun TraceOptions(configurations: List<SelectableItem>, onPerformTrace: 
         modifier = Modifier
             .fillMaxSize()
     ) {
-        ExpandableCardTheme {
-            LazyColumn(
-                modifier = Modifier.padding(10.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                item {
-                    TraceConfiguration(
-                        traceConfigurations
-                    )
-                }
-                item {
-                    StartingPointsEditor()
-                }
-                item {
-                    Button(onClick = { onPerformTrace() }) {
-                        Text(stringResource(id = R.string.trace))
-                    }
+        LazyColumn(
+            modifier = Modifier.padding(10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            item {
+                TraceConfiguration(
+                    traceConfigurations
+                )
+            }
+            item {
+                StartingPointsEditor()
+            }
+            item {
+                Button(onClick = { onPerformTrace() }) {
+                    Text(stringResource(id = R.string.trace))
                 }
             }
         }
@@ -186,8 +184,8 @@ private fun StartingPointsEditor() {
             ) {
                 Text(
                     text = stringResource(id = R.string.add_starting_point),
-                    color = LocalColorScheme.current.headerTextColor,
-                    style = MaterialTheme.typography.bodyMedium,
+                    color = LocalExpandableCardColorScheme.current.headerTextColor,
+                    style = LocalExpandableCardTypography.current.descriptionStyle,
                     fontWeight = FontWeight.Normal,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -397,7 +395,7 @@ private fun ReadOnlyTextField(
     maxLines: Int = 1,
     leadingIcon: (@Composable () -> Unit)? = null
 ) {
-    val colors = LocalColorScheme.current
+    val colors = LocalExpandableCardColorScheme.current
     Row(
         modifier = modifier
             .fillMaxWidth()
