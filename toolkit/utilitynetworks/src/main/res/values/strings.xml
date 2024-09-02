@@ -19,4 +19,8 @@
     <string name="trace">Trace</string>
     <string name="add_starting_point">Add new starting point</string>
     <string name="trace_configuration">Trace Configuration</string>
+    <string name="advanced_options">Advanced Options</string>
+    <string name="name">Name</string>
+    <string name="zoom_to_result">Zoom to result</string>
+    <string name="color">Color</string>
 </resources>
