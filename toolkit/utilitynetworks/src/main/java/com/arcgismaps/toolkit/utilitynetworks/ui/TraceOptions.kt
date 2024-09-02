@@ -102,8 +102,7 @@ internal fun TraceOptions(configurations: List<SelectableItem>, onPerformTrace: 
 @Composable
 private fun TraceConfiguration(utilityTraces: List<SelectableItem>, onTraceSelected: (Int) -> Unit) {
     ExpandableCard(
-        title = stringResource(id = R.string.trace_configuration),
-        padding = 4.dp
+        title = stringResource(id = R.string.trace_configuration)
     ) {
         Column {
             utilityTraces.forEachIndexed { index, item ->
@@ -143,8 +142,7 @@ private fun StartingPointsEditor() {
     val startingPoints = remember { mutableStateListOf<String>() }
     var counter by remember { mutableIntStateOf(startingPoints.size) }
     ExpandableCard(
-        title = "${stringResource(id = R.string.starting_points)} (${counter})",
-        padding = 4.dp
+        title = "${stringResource(id = R.string.starting_points)} (${counter})"
     ) {
         Column {
             ElevatedButton(

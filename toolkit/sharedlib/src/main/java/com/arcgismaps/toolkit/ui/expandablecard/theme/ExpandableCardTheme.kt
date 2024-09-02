@@ -25,6 +25,8 @@ import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
 import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 
 /**
@@ -43,6 +45,13 @@ internal val LocalShapes: ProvidableCompositionLocal<ExpandableCardShapes> =
         DefaultThemeTokens.shapes
     }
 
+/**
+ * CompositionLocal used to pass a [ExpandableCardShapes] down the tree.
+ */
+internal val LocalTypography: ProvidableCompositionLocal<ExpandableCardTypography> =
+    compositionLocalOf {
+        DefaultThemeTokens.typography
+    }
 
 /**
  * Provides compose functions to access the current theme values.
@@ -64,6 +73,14 @@ internal object ExpandableCardTheme {
         @Composable
         @ReadOnlyComposable
         get() = LocalShapes.current
+
+    /**
+     * Retrieves the current [ExpandableCardTypography].
+     */
+    val typography: ExpandableCardTypography
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalTypography.current
 }
 
 /**
@@ -78,18 +95,22 @@ internal object ExpandableCardTheme {
  * Default is [ExpandableCardDefaults.colorScheme].
  * @param shapes An [ExpandableCardShapes] to use for this compose hierarchy.
  * Default is [ExpandableCardDefaults.shapes].
+ * @param typography An [ExpandableCardTypography] to use for this compose hierarchy.
+ * Default is [ExpandableCardDefaults.typography]
  * @param content The content to which the theme should be applied.
  */
 @Suppress("unused")
 @Composable
-fun ExpandableCardTheme(
+internal fun ExpandableCardTheme(
     colorScheme: ExpandableCardColorScheme = ExpandableCardDefaults.colorScheme(),
     shapes: ExpandableCardShapes = ExpandableCardDefaults.shapes(),
+    typography: ExpandableCardTypography = ExpandableCardDefaults.typography(),
     content: @Composable () -> Unit
 ) {
     CompositionLocalProvider(
         LocalColorScheme provides colorScheme,
-        LocalShapes provides shapes
+        LocalShapes provides shapes,
+        LocalTypography provides typography
     ) {
         content()
     }
@@ -110,10 +131,10 @@ fun ExpandableCardTheme(
 @Immutable
 data class ExpandableCardColorScheme internal constructor(
     val headerTextColor: Color,
+    val headerBackgroundColor: Color,
     val containerColor: Color,
     val borderColor: Color
 )
-
 
 /**
  * A Shapes specification for the [ExpandableCard] built on top of [MaterialTheme].
@@ -124,5 +145,20 @@ data class ExpandableCardColorScheme internal constructor(
  */
 @Immutable
 class ExpandableCardShapes internal constructor(
-    val containerShape: RoundedCornerShape
+    val containerShape: RoundedCornerShape,
+    val borderThickness: Dp
 )
+
+/**
+ * A typography specification for the [ExpandableCard] built on top of [MaterialTheme].
+ *
+ * Use [ExpandableCardDefaults.typography] to create a new instance with the default values.
+ *
+ * @since 200.6.0
+ */
+@Immutable
+class ExpandableCardTypography internal constructor(
+    val titleStyle: TextStyle,
+    val descriptionStyle: TextStyle
+)
+
