@@ -56,6 +56,7 @@ val LocalExpandableCardTypography: ProvidableCompositionLocal<ExpandableCardTypo
 /**
  * Provides compose functions to access the current theme values.
  */
+@Suppress("unused")
 internal object ExpandableCardTheme {
 
     /**
@@ -87,8 +88,8 @@ internal object ExpandableCardTheme {
  * Provides a default [ExpandableCardTheme] to the given [content] so that the ExpandableCard can be
  * customized.
  *
- * The default value for the [colorScheme] and [shapes] is based on the current [MaterialTheme].
- * See [ExpandableCardDefaults.colorScheme], [ExpandableCardDefaults.shapes], and
+ * The default value for the [colorScheme], [shapes], and [typography] is based on the current
+ * [MaterialTheme]. See [ExpandableCardDefaults.colorScheme], [ExpandableCardDefaults.shapes], and
  * [ExpandableCardDefaults.shapes] for the exact configuration used.
  *
  * @param colorScheme An [ExpandableCardColorScheme] to use for this compose hierarchy.

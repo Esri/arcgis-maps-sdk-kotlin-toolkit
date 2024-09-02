@@ -28,7 +28,7 @@ import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 /**
  * Contains the default values used by [ExpandableCard].
  */
-object ExpandableCardDefaults {
+internal object ExpandableCardDefaults {
 
     /**
      * Creates a [ExpandableCardColorScheme] with default values.
