@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2024 Esri
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.arcgismaps.toolkit.ui
+package com.arcgismaps.toolkit.ui.expandablecard
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
@@ -42,7 +42,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.ui.expandablecard.theme.DefaultThemeTokens.typography
+import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardColorScheme
+import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardDefaults
+import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardShapes
+import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardTheme
+import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardTypography
 
 /**
  * Composable Card that has the ability to expand and collapse its [content].
@@ -55,40 +62,49 @@ fun ExpandableCard(
     title: String = "",
     description: String = "",
     toggleable: Boolean = true,
+    padding: Dp = 16.dp,
+    colorScheme: ExpandableCardColorScheme = ExpandableCardDefaults.colorScheme(),
+    shapes: ExpandableCardShapes = ExpandableCardDefaults.shapes(),
+    typography: ExpandableCardTypography = ExpandableCardDefaults.typography(),
     content: @Composable () -> Unit = {}
 ) {
-    // TODO: promote to public theme.
-    val shapes = ExpandableCardDefaults.shapes()
-    val colors = ExpandableCardDefaults.colors()
     var expanded by rememberSaveable { mutableStateOf(true) }
 
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = colors.containerColor
-        ),
-        border = BorderStroke(shapes.borderThickness, colors.borderColor),
-        shape = shapes.containerShape,
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(shapes.padding)
+    ExpandableCardTheme(
+        colorScheme = colorScheme,
+        shapes = shapes,
+        typography = typography
     ) {
-        Column {
-            ExpandableHeader(
-                title = title,
-                description = description,
-                expandable = toggleable,
-                colors = colors,
-                isExpanded = expanded
-            ) {
-                if (toggleable) {
-                    expanded = !expanded
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = colorScheme.containerColor
+            ),
+            border = BorderStroke(shapes.borderThickness, colorScheme.borderColor),
+            shape = shapes.containerShape,
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(padding)
+        ) {
+            Column {
+                ExpandableHeader(
+                    title = title,
+                    description = description,
+                    expandable = toggleable,
+                    padding = padding,
+                    colors = colorScheme,
+                    typography = typography,
+                    isExpanded = expanded
+                ) {
+                    if (toggleable) {
+                        expanded = !expanded
+                    }
                 }
-            }
 
-            AnimatedVisibility(visible = expanded) {
-                content()
-            }
+                AnimatedVisibility(visible = expanded) {
+                    content()
+                }
 
+            }
         }
     }
 }
@@ -98,12 +114,13 @@ private fun ExpandableHeader(
     title: String = "",
     description: String = "",
     expandable: Boolean,
-    colors: ExpandableCardColors,
+    padding: Dp,
+    colors: ExpandableCardColorScheme,
+    typography: ExpandableCardTypography,
     isExpanded: Boolean,
     onClick: () -> Unit
 ) {
     if (title.isEmpty() && description.isEmpty() && !expandable) return
-    val shapes = ExpandableCardDefaults.shapes()
     Row(
         Modifier
             .fillMaxWidth()
@@ -112,19 +129,19 @@ private fun ExpandableHeader(
                     onClick()
                 }
             }
-            .background(MaterialTheme.colorScheme.surface),
+            .background(colors.headerBackgroundColor),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(shapes.padding)
+                .padding(padding)
                 .weight(0.5f)
         ) {
             Text(
                 text = title,
                 color = colors.headerTextColor,
-                style = MaterialTheme.typography.titleMedium,
+                style = typography.titleStyle,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -132,7 +149,7 @@ private fun ExpandableHeader(
                 Text(
                     text = description,
                     color = colors.headerTextColor,
-                    style = MaterialTheme.typography.bodySmall,
+                    style = typography.descriptionStyle,
                     fontWeight = FontWeight.Normal,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -159,9 +176,11 @@ private fun ExpandableHeader(
 internal fun ExpandableHeaderPreview() {
     ExpandableHeader(
         title = "The Title",
-        colors = ExpandableCardDefaults.colors(),
+        colors = ExpandableCardDefaults.colorScheme(),
         description = "the description",
+        padding = 16.dp,
         expandable = true,
+        typography = typography,
         isExpanded = true
     ) {}
 }
@@ -175,7 +194,7 @@ private fun ExpandableCardPreview() {
     ) {
         Text(
             "Hello World",
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.headlineLarge,
             modifier = Modifier.padding(16.dp)
         )
     }

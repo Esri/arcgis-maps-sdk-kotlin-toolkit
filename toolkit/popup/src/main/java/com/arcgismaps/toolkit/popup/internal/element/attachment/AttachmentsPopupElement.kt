@@ -26,8 +26,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.toolkit.ui.ExpandableCard
 import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ViewableFile
+import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 
 @Composable
 internal fun AttachmentsPopupElement(
