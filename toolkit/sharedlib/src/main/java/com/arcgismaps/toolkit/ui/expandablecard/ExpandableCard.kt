@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2024 Esri
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -148,17 +148,7 @@ private fun ExpandableHeader(
             )
             if (description != null && isExpanded) {
                 description()
-                // TODO: add this back to Popup invocations
-//                Text(
-//                    text = description,
-//                    color = colors.headerTextColor,
-//                    style = MaterialTheme.typography.bodySmall,
-//                    fontWeight = FontWeight.Normal,
-//                    maxLines = 1,
-//                    overflow = TextOverflow.Ellipsis
-//                )
             }
-
         }
 
         if (expandable) {

@@ -29,8 +29,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ViewableFile
 import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
+import com.arcgismaps.toolkit.popup.internal.ui.fileviewer.ViewableFile
 import com.arcgismaps.toolkit.ui.expandablecard.theme.LocalExpandableCardColorScheme
 import com.arcgismaps.toolkit.ui.expandablecard.theme.LocalExpandableCardTypography
 
