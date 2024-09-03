@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.utilitynetworks
 
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
@@ -24,31 +23,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.core.os.trace
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.arcgismaps.toolkit.utilitynetworks.ui.SelectableItem
-import com.arcgismaps.toolkit.utilitynetworks.ui.TraceOptions
-import com.arcgismaps.utilitynetworks.UtilityNamedTraceConfiguration
-import com.arcgismaps.Guid
-import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.utilitynetworks.UtilityElementTraceResult
-import com.arcgismaps.utilitynetworks.UtilityNetwork
-import com.arcgismaps.utilitynetworks.UtilityTraceParameters
-import com.arcgismaps.utilitynetworks.UtilityTraceType
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 /**
  * A composable UI component to set up and run a [com.arcgismaps.utilitynetworks.UtilityNetwork.trace]
  * on a [com.arcgismaps.toolkit.geoviewcompose.MapView].
  *
- * @param utilityNetwork a [UtilityNetwork]
  * @since 200.6.0
  */
 @Composable
@@ -68,7 +50,7 @@ public fun Trace(
         Column {
             Text(text = traceState.traceResult.collectAsStateWithLifecycle().value?.toString() ?: "Null")
             Button(onClick = { traceState.trace() }) {
-                Text( stringResource(id = R.string.trace))
+                Text(stringResource(id = R.string.trace))
             }
         }
     }
