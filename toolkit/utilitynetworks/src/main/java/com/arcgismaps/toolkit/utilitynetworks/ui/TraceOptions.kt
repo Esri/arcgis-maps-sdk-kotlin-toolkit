@@ -43,7 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.toolkit.ui.ExpandableCard
+import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.utilitynetworks.UtilityNetwork
 
@@ -55,39 +55,41 @@ import com.arcgismaps.utilitynetworks.UtilityNetwork
  * @since 200.6.0
  */
 @Composable
-internal fun TraceOptions(traceConfigurations: List<SelectableItem>, onPerformTrace: () -> Unit) {
-    val observableTraceConfigurations = remember { mutableStateListOf<SelectableItem>() }
-    observableTraceConfigurations.addAll(traceConfigurations)
+internal fun TraceOptions(configurations: List<SelectableItem>, onPerformTrace: () -> Unit) {
+    val traceConfigurations = remember { mutableStateListOf<SelectableItem>() }
+    traceConfigurations.addAll(configurations)
     Surface(
         color = MaterialTheme.colorScheme.surface,
         modifier = Modifier
             .fillMaxSize()
     ) {
-        LazyColumn(modifier = Modifier.padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        LazyColumn(
+            modifier = Modifier.padding(10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             item {
                 TraceConfiguration(
-                    observableTraceConfigurations,
-                    onTraceSelected = { index ->
-                        observableTraceConfigurations[index] =
-                            observableTraceConfigurations[index].copy(selected = !observableTraceConfigurations[index].selected)
-                        observableTraceConfigurations.forEachIndexed { i, _ ->
-                            if (i != index) {
-                                observableTraceConfigurations[i] = observableTraceConfigurations[i].copy(selected = false)
-                            }
+                    traceConfigurations
+                ) { index ->
+                    traceConfigurations[index] =
+                        traceConfigurations[index].copy(selected = !traceConfigurations[index].selected)
+                    traceConfigurations.forEachIndexed { i, _ ->
+                        if (i != index) {
+                            traceConfigurations[i] =
+                                traceConfigurations[i].copy(selected = false)
                         }
                     }
-                )
+                }
+
             }
             item {
                 StartingPointsEditor()
             }
             item {
                 Button(onClick = { onPerformTrace() }) {
-                    Text( stringResource(id = R.string.trace))
+                    Text(stringResource(id = R.string.trace))
                 }
             }
-
-
         }
     }
 }
@@ -99,7 +101,9 @@ internal fun TraceOptions(traceConfigurations: List<SelectableItem>, onPerformTr
  */
 @Composable
 private fun TraceConfiguration(utilityTraces: List<SelectableItem>, onTraceSelected: (Int) -> Unit) {
-    ExpandableCard(title = stringResource(id = R.string.trace_configuration), toggleable = true) {
+    ExpandableCard(
+        title = stringResource(id = R.string.trace_configuration)
+    ) {
         Column {
             utilityTraces.forEachIndexed { index, item ->
                 FilterChip(
@@ -137,7 +141,9 @@ private fun TraceConfiguration(utilityTraces: List<SelectableItem>, onTraceSelec
 private fun StartingPointsEditor() {
     val startingPoints = remember { mutableStateListOf<String>() }
     var counter by remember { mutableIntStateOf(startingPoints.size) }
-    ExpandableCard(title = "${stringResource(id = R.string.starting_points)} (${counter})") {
+    ExpandableCard(
+        title = "${stringResource(id = R.string.starting_points)} (${counter})"
+    ) {
         Column {
             ElevatedButton(
                 onClick = {
@@ -167,8 +173,8 @@ private fun TraceOptionsPreview() {
             SelectableItem("Trace 2", false),
             SelectableItem("Trace 3", false),
             SelectableItem("Trace 4", false)
-        ), {}
-    )
+        )
+    ) {}
 }
 
 /**
