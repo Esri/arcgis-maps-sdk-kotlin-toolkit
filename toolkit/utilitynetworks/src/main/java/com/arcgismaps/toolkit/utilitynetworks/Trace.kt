@@ -17,12 +17,21 @@
 package com.arcgismaps.toolkit.utilitynetworks
 
 import android.util.Log
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.core.os.trace
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.toolkit.utilitynetworks.ui.SelectableItem
 import com.arcgismaps.toolkit.utilitynetworks.ui.TraceOptions
 import com.arcgismaps.utilitynetworks.UtilityNamedTraceConfiguration
@@ -44,76 +53,24 @@ import kotlinx.coroutines.launch
  */
 @Composable
 public fun Trace(
-    arcGISMap: ArcGISMap,
-//    graphicsOverlay: GraphicsOverlay,
-//    mapPoint: Point,
+    traceState: TraceState,
     @Suppress("unused_parameter")
     modifier: Modifier = Modifier,
 ) {
-    val coroutineScope = rememberCoroutineScope()
-    LaunchedEffect(arcGISMap) {
-        arcGISMap.load().onSuccess {
-            arcGISMap.utilityNetworks.forEach {
-                it.load().onFailure {
-                    // Handle error
-                }.onSuccess {
+    // if the traceConfigurations are not available, that means the traceState is not ready so return
+    if (traceState.traceConfigurations.collectAsStateWithLifecycle().value == null) return
 
-                }
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        Column {
+            Text(text = traceState.traceResult.collectAsStateWithLifecycle().value?.toString() ?: "Null")
+            Button(onClick = { traceState.trace() }) {
+                Text( stringResource(id = R.string.trace))
             }
-        }.onFailure {
-            // Handle error
-        }
-        if (arcGISMap.utilityNetworks.isEmpty()) {
-            // Handle error
-        }
-    }
-
-    val utilityNetwork = arcGISMap.utilityNetworks.first()
-    val availableTraceConfigurations = remember(utilityNetwork) { mutableStateListOf<UtilityNamedTraceConfiguration>() }
-
-    LaunchedEffect(key1 = utilityNetwork) {
-        val result = utilityNetwork.queryNamedTraceConfigurations().getOrNull()
-        result?.forEach {
-            availableTraceConfigurations.add(it)
-        }
-    }
-    TraceOptions(
-        traceConfigurations = availableTraceConfigurations.map { SelectableItem(it.name, false) },
-        onPerformTrace = { trace(coroutineScope, utilityNetwork) }
-    )
-}
-
-private fun trace(coroutineScope: CoroutineScope, utilityNetwork: UtilityNetwork) {
-    coroutineScope.launch {
-        // Run a trace
-        val utilityNetworkDefinition = utilityNetwork.definition
-        val utilityNetworkSource =
-            utilityNetworkDefinition!!.getNetworkSource("Electric Distribution Line")
-        val utilityAssetGroup = utilityNetworkSource!!.getAssetGroup("Medium Voltage")
-        val utilityAssetType =
-            utilityAssetGroup!!.getAssetType("Underground Three Phase")
-        val startingLocation = utilityNetwork.createElementOrNull(
-            utilityAssetType!!,
-            Guid("0B1F4188-79FD-4DED-87C9-9E3C3F13BA77")
-        )
-
-        val utilityTraceParameters = UtilityTraceParameters(
-            UtilityTraceType.Connected,
-            listOf(startingLocation!!)
-        )
-
-        val traceResults = utilityNetwork.trace(
-            utilityTraceParameters
-        ).onSuccess {
-            // Handle trace results
-            val traceResult = it[0]
-            Log.i("UtilityNetworkTraceApp", "Trace results: $it")
-            Log.i(
-                "UtilityNetworkTraceApp",
-                "Trace result element size: ${(traceResult as UtilityElementTraceResult).elements.size}"
-            )
-        }.onFailure {
-            // Handle error
         }
     }
 }
+
