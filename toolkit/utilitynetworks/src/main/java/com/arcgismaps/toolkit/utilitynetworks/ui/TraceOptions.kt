@@ -45,6 +45,7 @@ import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.icons.sharp.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -66,6 +67,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onSizeChanged
@@ -78,6 +80,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.data.Feature
@@ -212,28 +215,31 @@ internal fun AdvancedOptions(
                     }
                 )
 
-                DropdownMenu(expanded = displayPicker, onDismissRequest = {}) {
-                    Row {
-
-                        Box(modifier = Modifier
-                            .size(30.dp)
-                            .background(Color.Red)
-                            .clickable {
-                                currentSelectedColor = Color.Red
-                                displayPicker = false
-                            }
-                        )
-                        Box(modifier = Modifier
-                            .size(30.dp)
-                            .background(Color.Red)
-                            .clickable {
-                                currentSelectedColor = Color.Green
-                                displayPicker = false
-                            }
-                        )
-                    }
+                DropdownMenu(
+                    expanded = displayPicker,
+                    offset = DpOffset.Zero,
+                    onDismissRequest = { displayPicker = false },
+                    modifier = Modifier
+                        .shadow(2.dp)
+                ) {
+                    DropdownMenuItem(
+                        text = { Text(text = stringResource(R.string.red)) },
+                        trailingIcon = {
+                            Box(modifier = Modifier
+                                .size(30.dp)
+                                .background(Color.Red)
+                                .clickable {
+                                    currentSelectedColor = Color.Red
+                                    displayPicker = false
+                                }
+                            )
+                        },
+                        onClick = {
+                            currentSelectedColor = Color.Red
+                            displayPicker = false
+                        }
+                    )
                 }
-
             }
 
             if (showZoomToResult) {
@@ -286,6 +292,7 @@ private fun AdvancedOptionsRow(name: String, modifier: Modifier = Modifier, trai
             text = name,
             modifier = Modifier
                 .padding(horizontal = 2.dp)
+                .weight(1f)
                 .align(Alignment.CenterVertically),
         )
 

@@ -23,4 +23,5 @@
     <string name="name">Name</string>
     <string name="zoom_to_result">Zoom to result</string>
     <string name="color">Color</string>
+    <string name="red">Red</string>
 </resources>
