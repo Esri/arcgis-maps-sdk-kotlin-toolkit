@@ -40,7 +40,9 @@ public class UsernamePasswordChallenge(
     private var onCancel: (() -> Unit)? = onCancel
     private val _additionalMessage: MutableStateFlow<String?> = MutableStateFlow(null)
     public val additionalMessage: StateFlow<String?> = _additionalMessage.asStateFlow()
-    public val hostname: String? = Uri.parse(url).host
+    public val hostname: String by lazy {
+        Uri.parse(url).host ?: url
+    }
 
 
     /**

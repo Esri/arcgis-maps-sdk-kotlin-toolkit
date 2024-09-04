@@ -46,38 +46,30 @@ internal fun ServerTrustAuthenticator(
     serverTrustChallenge: ServerTrustChallenge,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier
-            .background(MaterialTheme.colorScheme.background)
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        AlertDialog(
-            title = {
-                // another issue has been posted to add a title string and localize it
-            },
-            text = {
-                val hostname = serverTrustChallenge.challenge.hostname
-                Text(
-                    text = stringResource(id = R.string.server_trust_message, hostname),
-                    style = MaterialTheme.typography.titleSmall,
-                    textAlign = TextAlign.Start
-                )
-            },
-            onDismissRequest = { serverTrustChallenge.distrust() },
-            confirmButton = {
-                TextButton(
-                    onClick = { serverTrustChallenge.trust() }) {
-                    Text(text = stringResource(id = R.string.allow_connection))
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { serverTrustChallenge.distrust() }) {
-                    Text(stringResource(id = R.string.cancel))
-                }
+    AlertDialog(
+        title = {
+            // another issue has been posted to add a title string and localize it
+        },
+        text = {
+            val hostname = serverTrustChallenge.challenge.hostname
+            Text(
+                text = stringResource(id = R.string.server_trust_message, hostname),
+                style = MaterialTheme.typography.titleSmall,
+                textAlign = TextAlign.Start
+            )
+        },
+        onDismissRequest = { serverTrustChallenge.distrust() },
+        confirmButton = {
+            TextButton(
+                onClick = { serverTrustChallenge.trust() }) {
+                Text(text = stringResource(id = R.string.allow_connection))
             }
-        )
-    }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = { serverTrustChallenge.distrust() }) {
+                Text(stringResource(id = R.string.cancel))
+            }
+        }
+    )
 }

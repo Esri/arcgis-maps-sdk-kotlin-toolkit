@@ -86,6 +86,7 @@ public fun Authenticator(
 @Composable
 public fun DialogAuthenticator(
     authenticatorState: AuthenticatorState,
+    modifier: Modifier = Modifier,
     onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)? = null,
 ) {
     val showDialog =
@@ -107,7 +108,7 @@ public fun DialogAuthenticator(
 /**
  * Listens for [AuthenticatorState] changes and displays the corresponding authentication component on the screen.
  *
- * If a different container is desired for [ServerTrustAuthenticator] and [UsernamePasswordAuthenticatorImpl], then it
+ * If a different container is desired for [ServerTrustAuthenticator] and [UsernamePasswordAuthenticator], then it
  * should be defined in the [container] lambda. Additionally, the argument should be invoked inside this container
  * otherwise this will not work.
  *
@@ -117,7 +118,7 @@ public fun DialogAuthenticator(
  * and the browser should be launched. Use this if you wish to handle OAuth challenges from your own
  * activity rather than using the [OAuthUserSignInActivity].
  * @param container if not null, the passed component will be used as a container for [ServerTrustAuthenticator] and
- * [UsernamePasswordAuthenticatorImpl]. This lambda passes a component which must be called in the content of the container.
+ * [UsernamePasswordAuthenticator]. This lambda passes a component which must be called in the content of the container.
  * @since 200.4.0
  */
 @Composable
