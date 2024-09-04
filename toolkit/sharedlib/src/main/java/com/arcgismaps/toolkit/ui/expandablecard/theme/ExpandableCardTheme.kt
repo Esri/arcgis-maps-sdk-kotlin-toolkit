@@ -139,7 +139,6 @@ data class ExpandableCardColorScheme internal constructor(
     val borderColor: Color
 )
 
-
 /**
  * A Shapes specification for the [ExpandableCard] built on top of [MaterialTheme].
  *

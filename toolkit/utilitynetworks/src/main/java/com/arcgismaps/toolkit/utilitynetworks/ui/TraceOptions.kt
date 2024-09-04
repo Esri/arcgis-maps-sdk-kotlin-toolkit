@@ -142,7 +142,11 @@ internal fun TraceOptions(configurations: List<SelectableItem>, onPerformTrace: 
  */
 @Composable
 private fun TraceConfiguration(utilityTraces: List<SelectableItem>) {
-    ExpandableCard(title = stringResource(id = R.string.trace_configuration), toggleable = true) {
+    ExpandableCard(
+        title = stringResource(id = R.string.trace_configuration),
+        toggleable = true,
+        padding = 4.dp
+    ) {
         var selectedTrace: SelectableItem? by remember { mutableStateOf(null) }
         Column {
             utilityTraces.forEachIndexed { index, item ->
