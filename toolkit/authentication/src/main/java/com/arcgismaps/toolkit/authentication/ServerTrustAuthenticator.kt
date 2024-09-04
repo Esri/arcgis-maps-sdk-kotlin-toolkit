@@ -25,14 +25,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.window.DialogProperties
@@ -59,33 +57,24 @@ internal fun ServerTrustAuthenticator(
             modifier = Modifier.fillMaxWidth(0.92f),
             properties = DialogProperties(usePlatformDefaultWidth = false),
             title = {
-                Text(text = "Untrusted Host")
+                Text(
+                    text = stringResource(id = R.string.untrusted_host),
+                    textAlign = TextAlign.Start
+                )
             },
             text = {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.SpaceBetween,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    val hostname = serverTrustChallenge.challenge.hostname
-                    Text(
-                        text = "The certificate provided by $hostname is not signed by a trusted authority.",
-                        style = MaterialTheme.typography.titleSmall,
-                        textAlign = TextAlign.Start
-                    )
-                }
+                val hostname = serverTrustChallenge.challenge.hostname
+                Text(
+                    text = stringResource(id = R.string.server_trust_message, hostname),
+                    style = MaterialTheme.typography.titleSmall,
+                    textAlign = TextAlign.Start
+                )
             },
             onDismissRequest = { serverTrustChallenge.distrust() },
             confirmButton = {
                 TextButton(
-                    colors = ButtonColors(
-                        containerColor = Color.Transparent,
-                        disabledContentColor = Color.Transparent,
-                        contentColor = MaterialTheme.colorScheme.error,
-                        disabledContainerColor = Color.Transparent
-                    ),
                     onClick = { serverTrustChallenge.trust() }) {
-                    Text(text = "Allow Connection")
+                    Text(text = stringResource(id = R.string.allow_connection))
                 }
             },
             dismissButton = {

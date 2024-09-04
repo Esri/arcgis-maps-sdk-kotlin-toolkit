@@ -25,11 +25,9 @@ import android.security.KeyChain
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.httpcore.authentication.ArcGISAuthenticationChallenge
@@ -45,7 +43,6 @@ import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
  * All Authentication components will be displayed in full screen. See [DialogAuthenticator] for alternate behavior.
  *
  * @param authenticatorState the object that holds the state to handle authentication challenges.
- * @param modifier the [Modifier] to apply to this Authenticator.
  * @param onPendingOAuthUserSignIn if not null, this will be called when an OAuth challenge is pending
  * and the browser should be launched. Use this if you wish to handle OAuth challenges from your own
  * activity rather than using the [OAuthUserSignInActivity].
@@ -80,7 +77,6 @@ public fun Authenticator(
  * For alternate behavior, see the [Authenticator] component.
  *
  * @param authenticatorState the object that holds the state to handle authentication challenges.
- * @param modifier the [Modifier] to be applied to this DialogAuthenticator.
  * @param onPendingOAuthUserSignIn if not null, this will be called when an OAuth challenge is pending
  * and the browser should be launched. Use this if you wish to handle OAuth challenges from your own
  * activity rather than using the [OAuthUserSignInActivity].
@@ -90,7 +86,6 @@ public fun Authenticator(
 @Composable
 public fun DialogAuthenticator(
     authenticatorState: AuthenticatorState,
-    modifier: Modifier = Modifier,
     onPendingOAuthUserSignIn: ((OAuthUserSignIn) -> Unit)? = null,
 ) {
     val showDialog =
@@ -99,7 +94,7 @@ public fun DialogAuthenticator(
         Surface {
             AuthenticatorDelegate(
                 authenticatorState = authenticatorState,
-                modifier = modifier.clip(MaterialTheme.shapes.extraLarge),
+                //modifier = modifier.clip(MaterialTheme.shapes.extraLarge),
                 onPendingOAuthUserSignIn = onPendingOAuthUserSignIn,
             ) { authenticationPrompt ->
                 authenticationPrompt()
@@ -166,10 +161,17 @@ private fun AuthenticatorDelegate(
     pendingUsernamePasswordChallenge?.let {
         if (container != null) {
             container {
-                UsernamePasswordAuthenticator(it, modifier, authenticatorState)
+                UsernamePasswordAuthenticator(it, modifier, onDismiss = {
+                    authenticatorState.dismissAll()
+                }
+                )
             }
         } else {
-            UsernamePasswordAuthenticator(it, modifier, authenticatorState)
+            UsernamePasswordAuthenticator(it, modifier, onDismiss =
+            {
+                authenticatorState.dismissAll()
+            }
+            )
         }
     }
 

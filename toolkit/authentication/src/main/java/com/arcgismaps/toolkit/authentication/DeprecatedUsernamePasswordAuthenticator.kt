@@ -1,3 +1,21 @@
+/*
+ *
+ *  Copyright 2023 Esri
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
 package com.arcgismaps.toolkit.authentication
 
 import android.net.Uri
@@ -36,10 +54,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-
 
 /**
  * Displays a username and password prompt to the user.
@@ -47,11 +63,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
  * @param usernamePasswordChallenge the pending [UsernamePasswordChallenge] that initiated this prompt.
  * @since 200.2.0
  */
+@Deprecated(message = "")
 @Composable
-internal fun UsernamePasswordAuthenticator(
+public fun UsernamePasswordAuthenticatorDeprecated(
     usernamePasswordChallenge: UsernamePasswordChallenge,
     modifier: Modifier = Modifier,
-    onDismiss: () -> Unit
+    authenticatorState: AuthenticatorState
 ) {
     Column(
         modifier = modifier
@@ -85,26 +102,20 @@ internal fun UsernamePasswordAuthenticator(
             modifier = Modifier.fillMaxWidth(0.92f),
             properties = DialogProperties(usePlatformDefaultWidth = false),
             title = {
-                Text(
-                    text = stringResource(id = R.string.authentication_required),
-                    textAlign = TextAlign.Start
-                )
+                Text(text = "Authentication Required")
             },
             text = {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.SpaceBetween,
-                    // Left aligning the supporting text here
-                    horizontalAlignment = Alignment.Start
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = stringResource(
-                            id = R.string.username_password_login_message_modified,
-                            hostname!!
-                        ),
+                        text = "You need to sign in to access the following: $hostname",
                         style = MaterialTheme.typography.titleSmall,
                         textAlign = TextAlign.Start
                     )
+
                     val keyboardActions = remember {
                         KeyboardActions(
                             onSend = { submitUsernamePassword() }
@@ -117,40 +128,33 @@ internal fun UsernamePasswordAuthenticator(
                         )
                     }
 
-                    Column(
-                        // This is used to align the inputs with the title and the supporting text
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.Start,
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        OutlinedTextField(
-                            modifier = Modifier.moveFocusOnTabEvent(focusManager) { submitUsernamePassword() },
-                            value = usernameFieldText,
-                            onValueChange = { it: String -> usernameFieldText = it },
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Email,
-                                imeAction = ImeAction.Next
-                            ),
-                            label = { Text(text = stringResource(id = R.string.username_label)) },
-                            singleLine = true
-                        )
-                        OutlinedTextField(
-                            modifier = Modifier.moveFocusOnTabEvent(focusManager) { submitUsernamePassword() },
-                            value = passwordFieldText,
-                            onValueChange = { it: String -> passwordFieldText = it },
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Password,
-                                imeAction = ImeAction.Send
-                            ),
-                            keyboardActions = keyboardActions,
-                            label = { Text(text = stringResource(id = R.string.password_label)) },
-                            singleLine = true,
-                            visualTransformation = PasswordVisualTransformation()
-                        )
-                    }
+                    OutlinedTextField(
+                        modifier = Modifier.moveFocusOnTabEvent(focusManager) { submitUsernamePassword() },
+                        value = usernameFieldText,
+                        onValueChange = { it: String -> usernameFieldText = it },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Email,
+                            imeAction = ImeAction.Next
+                        ),
+                        label = { Text(text = stringResource(id = R.string.username_label)) },
+                        singleLine = true
+                    )
+                    OutlinedTextField(
+                        modifier = Modifier.moveFocusOnTabEvent(focusManager) { submitUsernamePassword() },
+                        value = passwordFieldText,
+                        onValueChange = { it: String -> passwordFieldText = it },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Password,
+                            imeAction = ImeAction.Send
+                        ),
+                        keyboardActions = keyboardActions,
+                        label = { Text(text = stringResource(id = R.string.password_label)) },
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation()
+                    )
                 }
             },
-            onDismissRequest = onDismiss,
+            onDismissRequest = authenticatorState::dismissAll,
             confirmButton = {
                 TextButton(
                     enabled = usernameFieldText.isNotEmpty() && passwordFieldText.isNotEmpty(),
