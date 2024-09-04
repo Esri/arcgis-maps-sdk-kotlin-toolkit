@@ -21,6 +21,7 @@ package com.arcgismaps.toolkit.utilitynetworktraceapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,19 +41,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.TokenCredential
 import com.arcgismaps.toolkit.utilitynetworktraceapp.screens.MainScreen
+import com.arcgismaps.toolkit.utilitynetworktraceapp.screens.TraceViewModel
 import com.esri.microappslib.theme.MicroAppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val traceViewModel: TraceViewModel by viewModels()
         setContent {
             MicroAppTheme {
-                UtilityNetworkTraceApp()
+                UtilityNetworkTraceApp(traceViewModel)
             }
         }
     }
@@ -60,7 +62,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UtilityNetworkTraceApp() {
+fun UtilityNetworkTraceApp(traceViewModel: TraceViewModel) {
     var initialized by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -79,7 +81,7 @@ fun UtilityNetworkTraceApp() {
             topBar = { TopAppBar(title = { Text("UtilityNetworkTraceApp") }) }
         ) {
             Box(Modifier.padding(it)) {
-                MainScreen()
+                MainScreen(traceViewModel)
             }
         }
     } else {
@@ -92,14 +94,5 @@ fun UtilityNetworkTraceApp() {
                 modifier = Modifier.size(32.dp)
             )
         }
-    }
-
-}
-
-@Preview(showBackground = true)
-@Composable
-fun AppPreview() {
-    MicroAppTheme {
-        UtilityNetworkTraceApp()
     }
 }
