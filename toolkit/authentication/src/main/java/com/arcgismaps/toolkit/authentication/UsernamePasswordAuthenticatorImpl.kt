@@ -1,21 +1,3 @@
-/*
- *
- *  Copyright 2023 Esri
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
- */
-
 package com.arcgismaps.toolkit.authentication
 
 import android.net.Uri
@@ -54,8 +36,10 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 
 /**
  * Displays a username and password prompt to the user.
@@ -63,12 +47,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
  * @param usernamePasswordChallenge the pending [UsernamePasswordChallenge] that initiated this prompt.
  * @since 200.2.0
  */
-@Deprecated(message = "")
 @Composable
-public fun UsernamePasswordAuthenticatorDeprecated(
+internal fun UsernamePasswordAuthenticatorImpl(
     usernamePasswordChallenge: UsernamePasswordChallenge,
-    modifier: Modifier = Modifier,
-    authenticatorState: AuthenticatorState
+    modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
@@ -79,10 +61,7 @@ public fun UsernamePasswordAuthenticatorDeprecated(
     ) {
         val additionalInfo =
             usernamePasswordChallenge.additionalMessage.collectAsStateWithLifecycle().value
-
-        val url = usernamePasswordChallenge.url
-        val uri = Uri.parse(url)
-        val hostname = uri.host
+        val hostName = usernamePasswordChallenge.hostname!!
 
         val focusManager = LocalFocusManager.current
         var usernameFieldText by rememberSaveable { mutableStateOf("") }
@@ -102,20 +81,23 @@ public fun UsernamePasswordAuthenticatorDeprecated(
             modifier = Modifier.fillMaxWidth(0.92f),
             properties = DialogProperties(usePlatformDefaultWidth = false),
             title = {
-                Text(text = "Authentication Required")
+            // another issue has been posted to add a title string and localize it
             },
             text = {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.SpaceBetween,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    // Left aligning the supporting text here
+                    horizontalAlignment = Alignment.Start
                 ) {
                     Text(
-                        text = "You need to sign in to access the following: $hostname",
+                        text = stringResource(
+                            id = R.string.username_password_login_message,
+                            hostName
+                        ),
                         style = MaterialTheme.typography.titleSmall,
                         textAlign = TextAlign.Start
                     )
-
                     val keyboardActions = remember {
                         KeyboardActions(
                             onSend = { submitUsernamePassword() }
@@ -128,38 +110,45 @@ public fun UsernamePasswordAuthenticatorDeprecated(
                         )
                     }
 
-                    OutlinedTextField(
-                        modifier = Modifier.moveFocusOnTabEvent(focusManager) { submitUsernamePassword() },
-                        value = usernameFieldText,
-                        onValueChange = { it: String -> usernameFieldText = it },
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Email,
-                            imeAction = ImeAction.Next
-                        ),
-                        label = { Text(text = stringResource(id = R.string.username_label)) },
-                        singleLine = true
-                    )
-                    OutlinedTextField(
-                        modifier = Modifier.moveFocusOnTabEvent(focusManager) { submitUsernamePassword() },
-                        value = passwordFieldText,
-                        onValueChange = { it: String -> passwordFieldText = it },
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Password,
-                            imeAction = ImeAction.Send
-                        ),
-                        keyboardActions = keyboardActions,
-                        label = { Text(text = stringResource(id = R.string.password_label)) },
-                        singleLine = true,
-                        visualTransformation = PasswordVisualTransformation()
-                    )
+                    Column(
+                        // This is used to align the inputs with the title and the supporting text
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.Start,
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        OutlinedTextField(
+                            modifier = Modifier.moveFocusOnTabEvent(focusManager) { submitUsernamePassword() },
+                            value = usernameFieldText,
+                            onValueChange = { it: String -> usernameFieldText = it },
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Email,
+                                imeAction = ImeAction.Next
+                            ),
+                            label = { Text(text = stringResource(id = R.string.username_label)) },
+                            singleLine = true
+                        )
+                        OutlinedTextField(
+                            modifier = Modifier.moveFocusOnTabEvent(focusManager) { submitUsernamePassword() },
+                            value = passwordFieldText,
+                            onValueChange = { it: String -> passwordFieldText = it },
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Password,
+                                imeAction = ImeAction.Send
+                            ),
+                            keyboardActions = keyboardActions,
+                            label = { Text(text = stringResource(id = R.string.password_label)) },
+                            singleLine = true,
+                            visualTransformation = PasswordVisualTransformation()
+                        )
+                    }
                 }
             },
-            onDismissRequest = authenticatorState::dismissAll,
+            onDismissRequest = { usernamePasswordChallenge.cancel() },
             confirmButton = {
                 TextButton(
                     enabled = usernameFieldText.isNotEmpty() && passwordFieldText.isNotEmpty(),
                     onClick = { submitUsernamePassword() }) {
-                    Text(text = "Sign In")
+                    Text(text = stringResource(id = R.string.login))
                 }
             },
             dismissButton = {

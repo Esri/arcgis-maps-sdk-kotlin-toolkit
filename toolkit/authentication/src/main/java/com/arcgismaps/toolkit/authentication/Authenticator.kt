@@ -107,7 +107,7 @@ public fun DialogAuthenticator(
 /**
  * Listens for [AuthenticatorState] changes and displays the corresponding authentication component on the screen.
  *
- * If a different container is desired for [ServerTrustAuthenticator] and [UsernamePasswordAuthenticator], then it
+ * If a different container is desired for [ServerTrustAuthenticator] and [UsernamePasswordAuthenticatorImpl], then it
  * should be defined in the [container] lambda. Additionally, the argument should be invoked inside this container
  * otherwise this will not work.
  *
@@ -117,7 +117,7 @@ public fun DialogAuthenticator(
  * and the browser should be launched. Use this if you wish to handle OAuth challenges from your own
  * activity rather than using the [OAuthUserSignInActivity].
  * @param container if not null, the passed component will be used as a container for [ServerTrustAuthenticator] and
- * [UsernamePasswordAuthenticator]. This lambda passes a component which must be called in the content of the container.
+ * [UsernamePasswordAuthenticatorImpl]. This lambda passes a component which must be called in the content of the container.
  * @since 200.4.0
  */
 @Composable
@@ -161,17 +161,10 @@ private fun AuthenticatorDelegate(
     pendingUsernamePasswordChallenge?.let {
         if (container != null) {
             container {
-                UsernamePasswordAuthenticator(it, modifier, onDismiss = {
-                    authenticatorState.dismissAll()
-                }
-                )
+                UsernamePasswordAuthenticatorImpl(it, modifier)
             }
         } else {
-            UsernamePasswordAuthenticator(it, modifier, onDismiss =
-            {
-                authenticatorState.dismissAll()
-            }
-            )
+            UsernamePasswordAuthenticatorImpl(it, modifier)
         }
     }
 

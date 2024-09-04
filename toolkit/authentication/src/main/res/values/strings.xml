@@ -29,8 +29,4 @@
     <string name="password_label">Password</string>
     <!-- This text is on a button that can fit 24 chars -->
     <string name="login">Login</string>
-
-    <string name="untrusted_host" translatable="false">Untrusted Host</string>
-    <string name="authentication_required" translatable="false">Authentication Required</string>
-    <string name="username_password_login_message_modified" translatable="false">You need to sign in to access %1$s</string>
 </resources>

@@ -54,13 +54,8 @@ internal fun ServerTrustAuthenticator(
         verticalArrangement = Arrangement.Center
     ) {
         AlertDialog(
-            modifier = Modifier.fillMaxWidth(0.92f),
-            properties = DialogProperties(usePlatformDefaultWidth = false),
             title = {
-                Text(
-                    text = stringResource(id = R.string.untrusted_host),
-                    textAlign = TextAlign.Start
-                )
+                // another issue has been posted to add a title string and localize it
             },
             text = {
                 val hostname = serverTrustChallenge.challenge.hostname
