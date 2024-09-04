@@ -24,6 +24,6 @@ class TraceViewModel : ViewModel() {
 
     val graphicsOverlay = GraphicsOverlay()
 
-    val traceState = TraceState(arcGISMap, viewModelScope, mapViewProxy, graphicsOverlay)
+    val traceState = TraceState(arcGISMap, viewModelScope)
 
 }
