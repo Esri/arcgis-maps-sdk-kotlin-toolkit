@@ -41,7 +41,6 @@ internal object ExpandableCardDefaults {
     @Composable
     fun colorScheme(
         headerTextColor: Color = MaterialTheme.colorScheme.onBackground,
-        readOnlyTextColor: Color = Color.Unspecified,
         headerButtonTextColor: Color = MaterialTheme.colorScheme.onPrimary,
         headerBackgroundColor: Color = MaterialTheme.colorScheme.surface,
         containerColor: Color = MaterialTheme.colorScheme.background,
@@ -49,7 +48,6 @@ internal object ExpandableCardDefaults {
     ): ExpandableCardColorScheme {
         return ExpandableCardColorScheme(
             headerTextColor = headerTextColor,
-            readOnlyTextColor = readOnlyTextColor,
             headerButtonTextColor = headerButtonTextColor,
             headerBackgroundColor = headerBackgroundColor,
             containerColor = containerColor,

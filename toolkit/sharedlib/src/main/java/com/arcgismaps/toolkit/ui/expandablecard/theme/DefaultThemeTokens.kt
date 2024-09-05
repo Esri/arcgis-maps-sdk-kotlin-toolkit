@@ -48,7 +48,6 @@ internal object DefaultThemeTokens {
     val colorScheme: ExpandableCardColorScheme = ExpandableCardColorScheme(
         headerTextColor = ColorTokens.OnSurface,
         headerBackgroundColor = ColorTokens.Background,
-        readOnlyTextColor = Color.Unspecified,
         headerButtonTextColor = ColorTokens.OnPrimary,
         containerColor = ColorTokens.PrimaryContainer,
         borderColor = ColorTokens.Outline.copy(alpha = 0.6f)
