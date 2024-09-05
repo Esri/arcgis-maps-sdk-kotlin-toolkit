@@ -1,5 +1,6 @@
 package com.arcgismaps.toolkit.authentication
 
+import android.net.Uri
 import android.view.KeyEvent
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
@@ -287,7 +288,7 @@ class UsernamePasswordTests {
                 DialogAuthenticator(authenticatorState = authenticatorState)
             }
             // issue the challenge
-            val hostname = "https://arcgis.com"
+            val hostname = Uri.parse("https://arcgis.com").host
             val challenge = makeMockArcGISAuthenticationChallenge()
             val challengeResponse = async {
                 authenticatorState.handleArcGISAuthenticationChallenge(challenge)
