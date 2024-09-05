@@ -31,6 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
  * Displays a trust or distrust server prompt to the user.
  *
  * @param serverTrustChallenge the pending [ServerTrustChallenge] that initiated this prompt.
+ * @param modifier the [Modifier] to be applied to this ServerTrustAuthenticator.
  * @since 200.2.0
  */
 @Composable

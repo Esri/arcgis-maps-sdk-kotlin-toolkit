@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
  * Displays a username and password prompt to the user.
  *
  * @param usernamePasswordChallenge the pending [UsernamePasswordChallenge] that initiated this prompt.
+ * @param modifier the [Modifier] to be applied to this UsernamePasswordAuthenticator.
  * @since 200.2.0
  */
 @Composable

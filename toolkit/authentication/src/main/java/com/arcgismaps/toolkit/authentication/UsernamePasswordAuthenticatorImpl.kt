@@ -40,6 +40,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
  * Displays a username and password prompt to the user.
  *
  * @param usernamePasswordChallenge the pending [UsernamePasswordChallenge] that initiated this prompt.
+ * @param modifier the [Modifier] to be applied to this UsernamePasswordAuthenticatorImpl.
  * @since 200.2.0
  */
 @Composable
