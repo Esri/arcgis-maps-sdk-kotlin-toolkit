@@ -198,14 +198,11 @@ private fun ExpandableCardPreview() {
                 horizontalArrangement = Arrangement.Center
             ) {
                 ElevatedButton(
-                    onClick = {
-                        // startingPoints.add(StartingPointRowData("Point ${counter++}"))
-                    },
+                    onClick = {},
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
                         text = "the description",
-                        //modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Center,
                         color = ExpandableCardDefaults.colorScheme().headerTextColor,
                         style = ExpandableCardDefaults.typography().descriptionStyle,
