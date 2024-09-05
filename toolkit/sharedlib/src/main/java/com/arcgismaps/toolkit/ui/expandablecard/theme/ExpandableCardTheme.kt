@@ -148,6 +148,7 @@ data class ExpandableCardColorScheme internal constructor(
 @Immutable
 class ExpandableCardShapes internal constructor(
     val containerShape: RoundedCornerShape,
+    val headerInternalPadding: Dp,
     val borderThickness: Dp
 )
 

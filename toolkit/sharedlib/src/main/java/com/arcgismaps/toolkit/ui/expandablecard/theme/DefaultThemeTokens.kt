@@ -59,6 +59,7 @@ internal object DefaultThemeTokens {
      */
     val shapes: ExpandableCardShapes = ExpandableCardShapes(
         containerShape = RoundedCornerShape(5.dp),
+        headerInternalPadding = 16.dp,
         borderThickness = 1.dp
     )
 

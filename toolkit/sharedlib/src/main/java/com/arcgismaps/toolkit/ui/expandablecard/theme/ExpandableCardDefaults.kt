@@ -64,10 +64,12 @@ internal object ExpandableCardDefaults {
     @Composable
     fun shapes(
         containerShape: RoundedCornerShape = RoundedCornerShape(5.dp),
+        headerInternalPadding: Dp = 16.dp,
         borderThickness: Dp = 1.dp
     ): ExpandableCardShapes {
         return ExpandableCardShapes(
             containerShape = containerShape,
+            headerInternalPadding,
             borderThickness = borderThickness
         )
     }

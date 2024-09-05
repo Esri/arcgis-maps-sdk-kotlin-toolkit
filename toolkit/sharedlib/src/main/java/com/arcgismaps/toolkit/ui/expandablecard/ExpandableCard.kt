@@ -44,6 +44,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.ui.expandablecard.theme.DefaultThemeTokens.shapes
 import com.arcgismaps.toolkit.ui.expandablecard.theme.DefaultThemeTokens.typography
 import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardColorScheme
 import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardDefaults
@@ -90,8 +91,8 @@ fun ExpandableCard(
                     title = title,
                     description = description,
                     expandable = toggleable,
-                    padding = padding,
                     colors = colorScheme,
+                    shapes = shapes,
                     typography = typography,
                     isExpanded = expanded
                 ) {
@@ -114,8 +115,8 @@ private fun ExpandableHeader(
     title: String = "",
     description: (@Composable () -> Unit)? = null,
     expandable: Boolean,
-    padding: Dp,
     colors: ExpandableCardColorScheme,
+    shapes: ExpandableCardShapes,
     typography: ExpandableCardTypography,
     isExpanded: Boolean,
     onClick: () -> Unit
@@ -131,7 +132,7 @@ private fun ExpandableHeader(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(padding)
+                .padding(shapes.headerInternalPadding)
                 .weight(0.5f)
         ) {
             Text(
@@ -175,9 +176,9 @@ private fun ExpandableHeaderPreview() {
                     overflow = TextOverflow.Ellipsis
                 )
         },
-        padding = 16.dp,
         expandable = true,
         typography = typography,
+        shapes = shapes,
         isExpanded = true
     ) {}
 }
