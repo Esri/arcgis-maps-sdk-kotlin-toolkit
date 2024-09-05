@@ -43,14 +43,9 @@ import androidx.compose.ui.unit.sp
  */
 private val style = TextStyle(
     color = Color.Black,
-
-    // below line is used to add font
-    // size for our text field
     fontSize = 15.sp,
     fontWeight = FontWeight.SemiBold,
     fontStyle = FontStyle.Normal,
-
-    // below line is used to change font family.
     fontFamily = FontFamily.SansSerif,
     letterSpacing = 0.5.sp,
     textDecoration = TextDecoration.None,
