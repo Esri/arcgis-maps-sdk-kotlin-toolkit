@@ -28,7 +28,7 @@ import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 /**
  * Contains the default values used by [ExpandableCard].
  */
-object ExpandableCardDefaults {
+internal object ExpandableCardDefaults {
 
     /**
      * Creates a [ExpandableCardColorScheme] with default values.
@@ -41,13 +41,14 @@ object ExpandableCardDefaults {
     @Composable
     fun colorScheme(
         headerTextColor: Color = MaterialTheme.colorScheme.onBackground,
+        headerButtonTextColor: Color = MaterialTheme.colorScheme.onPrimary,
         headerBackgroundColor: Color = MaterialTheme.colorScheme.surface,
         containerColor: Color = MaterialTheme.colorScheme.background,
         borderColor: Color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
-
     ): ExpandableCardColorScheme {
         return ExpandableCardColorScheme(
             headerTextColor = headerTextColor,
+            headerButtonTextColor = headerButtonTextColor,
             headerBackgroundColor = headerBackgroundColor,
             containerColor = containerColor,
             borderColor = borderColor
@@ -63,10 +64,12 @@ object ExpandableCardDefaults {
     @Composable
     fun shapes(
         containerShape: RoundedCornerShape = RoundedCornerShape(5.dp),
+        headerInternalPadding: Dp = 16.dp,
         borderThickness: Dp = 1.dp
     ): ExpandableCardShapes {
         return ExpandableCardShapes(
             containerShape = containerShape,
+            headerInternalPadding,
             borderThickness = borderThickness
         )
     }
