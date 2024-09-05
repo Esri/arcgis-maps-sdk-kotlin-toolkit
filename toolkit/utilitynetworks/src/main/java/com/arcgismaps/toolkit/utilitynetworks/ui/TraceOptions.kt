@@ -59,11 +59,14 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -77,13 +80,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.arcgismaps.data.Feature
 import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 import com.arcgismaps.toolkit.ui.expandablecard.theme.LocalExpandableCardColorScheme
@@ -197,7 +205,7 @@ internal fun AdvancedOptions(
         Column {
             if (showName) {
                 AdvancedOptionsRow(name = stringResource(id = R.string.name)) {
-                    var text by remember {mutableStateOf("test trace result name") }
+                    var text by rememberSaveable { mutableStateOf("test trace result name") }
                     TextField(
                         value = text,
                         onValueChange = { newValue ->
@@ -205,23 +213,23 @@ internal fun AdvancedOptions(
                             onNameChange(newValue)
                         },
                         modifier = Modifier.defaultMinSize(minWidth = 1.dp),
-                        maxLines = 1
+                        maxLines = 1,
+                        shape = RoundedCornerShape(8.dp)
                     )
                 }
             }
 
             // Color picker
             AdvancedOptionsRow(name = stringResource(id = R.string.color)) {
-                var currentSelectedColor by remember { mutableStateOf(Color.Red) }
-                var displayPicker by remember { mutableStateOf(false) }
-
+                var currentSelectedColor by rememberSaveable(saver = ColorSaver.Saver()) { mutableStateOf(Color.Red) }
+                var displayPicker by rememberSaveable { mutableStateOf(false) }
                 Box {
-                    TraceColors.SpectrumRing(
+                    TraceColors.SpectralRing(
+                        currentSelectedColor,
                         modifier = Modifier
                             .padding(4.dp)
                             .size(36.dp)
                             .clip(CircleShape)
-                            .background(currentSelectedColor)
                             .clickable {
                                 displayPicker = true
                             }
@@ -263,7 +271,7 @@ internal fun AdvancedOptions(
             }
 
             if (showZoomToResult) {
-                var isEnabled by remember { mutableStateOf(false) }
+                var isEnabled by rememberSaveable { mutableStateOf(false) }
                 val interactionSource = remember { MutableInteractionSource() }
                 LaunchedEffect(Unit) {
                     interactionSource.interactions.collect {
@@ -284,7 +292,6 @@ internal fun AdvancedOptions(
                             if (newState) {
                                 onZoomRequested()
                             }
-                            println("onCheckedChange")
                         },
                         modifier = Modifier
                             .semantics { contentDescription = "switch" }
@@ -579,7 +586,21 @@ internal fun DraggableContent(
 private fun ReadOnlyTextField(
     text: String,
     modifier: Modifier = Modifier,
-    textStyle: TextStyle = MaterialTheme.typography.bodyLarge,
+    textStyle: TextStyle = TextStyle(
+        color = Color.Black,
+
+        // below line is used to add font
+        // size for our text field
+        fontSize = 15.sp,
+        fontWeight = FontWeight.SemiBold,
+        fontStyle = FontStyle.Normal,
+
+        // below line is used to change font family.
+        fontFamily = FontFamily.SansSerif,
+        letterSpacing = 0.5.sp,
+        textDecoration = TextDecoration.None,
+        textAlign = TextAlign.Start
+    ),
     maxLines: Int = 1,
     leadingIcon: (@Composable () -> Unit)? = null
 ) {
@@ -604,6 +625,21 @@ private fun ReadOnlyTextField(
     }
 }
 
+internal object ColorSaver {
+    fun Saver(): Saver<MutableState<Color>, Any> = listSaver(
+        save = {
+            listOf(
+                it.value.component1(),
+                it.value.component2(),
+                it.value.component3(),
+                it.value.component4()
+            )
+        },
+        restore = { list ->
+            mutableStateOf(Color(red = list[0], green = list[1], blue = list[2], alpha = list[3]))
+        }
+    )
+}
 
 @Preview
 @Composable

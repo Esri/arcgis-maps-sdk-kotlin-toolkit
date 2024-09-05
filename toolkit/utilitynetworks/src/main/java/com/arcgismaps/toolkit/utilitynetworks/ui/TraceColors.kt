@@ -17,17 +17,23 @@
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 
 /**
- * A model for a simple color picker. Also Provides a composable for use as an Icon or Button.
+ * A model for a simple color picker.
  *
  * @since 200.6.0
  */
@@ -59,22 +65,31 @@ internal object TraceColors {
     private val sweepColors = mutableListOf(colors.last()).also {it.addAll(colors)}
     private val brush = Brush.sweepGradient(sweepColors)
 
+    /**
+     * A composable for use as an Icon or Button which provides a gradient ring
+     * spanning the colors in colorMap.
+     *
+     * @param backgroundFill a color for use as the background of the ring.
+     * @param modifier the modifier.
+     */
     @Composable
-    fun SpectrumRing(modifier: Modifier = Modifier) {
-        val bgColor = MaterialTheme.colorScheme.background
-        Canvas(modifier = modifier.aspectRatio(1f)) {
-            val canvasWidth = size.width
+    fun SpectralRing(backgroundFill: Color, modifier: Modifier = Modifier) {
+        Box(modifier = modifier.clip(CircleShape).background(backgroundFill)) {
+            val bgColor = MaterialTheme.colorScheme.background
+            Canvas(modifier = Modifier.aspectRatio(1f)) {
+                val canvasWidth = size.width
 
-            drawCircle(
-                brush = brush,
-                style = Stroke(canvasWidth * 0.05f),
-                radius = canvasWidth * .47f
-            )
-            drawCircle(
-                color = bgColor,
-                style = Stroke(canvasWidth * 0.05f),
-                radius = canvasWidth * .42f
-            )
+                drawCircle(
+                    brush = brush,
+                    style = Stroke(canvasWidth * 0.13f),
+                    radius = canvasWidth * .45f
+                )
+                drawCircle(
+                    color = bgColor,
+                    style = Stroke(canvasWidth * 0.05f),
+                    radius = canvasWidth * .40f
+                )
+            }
         }
     }
 }
@@ -82,5 +97,5 @@ internal object TraceColors {
 @Preview
 @Composable
 private fun SpectrumRingPreview() {
-    TraceColors.SpectrumRing()
+    TraceColors.SpectralRing(Color.Red, modifier = Modifier.size(100.dp))
 }
