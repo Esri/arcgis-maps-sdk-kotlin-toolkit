@@ -16,7 +16,9 @@
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -140,20 +142,25 @@ private fun StartingPointsEditor() {
     ExpandableCard(
         title = "${stringResource(id = R.string.starting_points)} (${counter})",
         description = {
-            ElevatedButton(
-                onClick = {
-                    startingPoints.add(StartingPointRowData("Point ${counter++}"))
-                },
-                shape = RoundedCornerShape(8.dp)
+            Row (
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
             ) {
-                Text(
-                    text = stringResource(id = R.string.add_starting_point),
-                    color = LocalExpandableCardColorScheme.current.headerTextColor,
-                    style = LocalExpandableCardTypography.current.descriptionStyle,
-                    fontWeight = FontWeight.Normal,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                ElevatedButton(
+                    onClick = {
+                        startingPoints.add(StartingPointRowData("Point ${counter++}"))
+                    },
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.add_starting_point),
+                        color = LocalExpandableCardColorScheme.current.headerTextColor,
+                        style = LocalExpandableCardTypography.current.descriptionStyle,
+                        fontWeight = FontWeight.Normal,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
         },
         padding = 4.dp
