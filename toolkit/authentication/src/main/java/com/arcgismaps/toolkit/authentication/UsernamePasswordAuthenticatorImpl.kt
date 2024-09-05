@@ -41,7 +41,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
  *
  * @param usernamePasswordChallenge the pending [UsernamePasswordChallenge] that initiated this prompt.
  * @param modifier the [Modifier] to be applied to this UsernamePasswordAuthenticatorImpl.
- * @since 200.2.0
+ * @since 200.6.0
  */
 @Composable
 internal fun UsernamePasswordAuthenticatorImpl(
@@ -67,14 +67,11 @@ internal fun UsernamePasswordAuthenticatorImpl(
     }
 
     AlertDialog(
-        title = {
-            // another issue has been posted to add a title string and localize it
-        },
+        modifier = modifier,
         text = {
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.SpaceBetween,
-                // Left aligning the supporting text here
                 horizontalAlignment = Alignment.Start
             ) {
                 Text(

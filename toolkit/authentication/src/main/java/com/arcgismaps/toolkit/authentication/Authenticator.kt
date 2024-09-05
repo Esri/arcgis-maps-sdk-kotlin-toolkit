@@ -151,10 +151,10 @@ private fun AuthenticatorDelegate(
     pendingServerTrustChallenge?.let {
         if (container != null) {
             container {
-                ServerTrustAuthenticator(it)
+                ServerTrustAuthenticator(it, modifier)
             }
         } else {
-            ServerTrustAuthenticator(it)
+            ServerTrustAuthenticator(it, modifier)
         }
     }
 
@@ -164,10 +164,10 @@ private fun AuthenticatorDelegate(
     pendingUsernamePasswordChallenge?.let {
         if (container != null) {
             container {
-                UsernamePasswordAuthenticatorImpl(it)
+                UsernamePasswordAuthenticatorImpl(it, modifier)
             }
         } else {
-            UsernamePasswordAuthenticatorImpl(it)
+            UsernamePasswordAuthenticatorImpl(it, modifier)
         }
     }
 

@@ -40,9 +40,7 @@ internal fun ServerTrustAuthenticator(
     modifier: Modifier = Modifier
 ) {
     AlertDialog(
-        title = {
-            // another issue has been posted to add a title string and localize it
-        },
+        modifier = modifier,
         text = {
             val hostname = serverTrustChallenge.challenge.hostname
             Text(
