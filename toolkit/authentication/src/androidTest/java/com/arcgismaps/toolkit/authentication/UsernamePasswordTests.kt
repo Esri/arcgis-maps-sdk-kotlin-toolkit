@@ -153,7 +153,7 @@ class UsernamePasswordTests {
     @Test
     fun keyboardActions() = runTest {
         val usernamePasswordChallengeMock = mockk<UsernamePasswordChallenge>()
-        every { usernamePasswordChallengeMock.url } returns "https://arcgis.com"
+        every { usernamePasswordChallengeMock.hostname } returns "arcgis.com"
         every { usernamePasswordChallengeMock.additionalMessage } answers { MutableStateFlow("") }
         every { usernamePasswordChallengeMock.continueWithCredentials(any(), any()) } just Runs
 
