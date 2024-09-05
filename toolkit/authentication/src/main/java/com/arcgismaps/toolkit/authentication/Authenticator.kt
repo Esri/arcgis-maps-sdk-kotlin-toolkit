@@ -43,6 +43,7 @@ import com.arcgismaps.httpcore.authentication.OAuthUserSignIn
  * All Authentication components will be displayed in full screen. See [DialogAuthenticator] for alternate behavior.
  *
  * @param authenticatorState the object that holds the state to handle authentication challenges.
+ * @param modifier the [Modifier] to apply to this Authenticator.
  * @param onPendingOAuthUserSignIn if not null, this will be called when an OAuth challenge is pending
  * and the browser should be launched. Use this if you wish to handle OAuth challenges from your own
  * activity rather than using the [OAuthUserSignInActivity].
@@ -96,6 +97,7 @@ public fun DialogAuthenticator(
         Surface {
             AuthenticatorDelegate(
                 authenticatorState = authenticatorState,
+                modifier = modifier,
                 onPendingOAuthUserSignIn = onPendingOAuthUserSignIn,
             ) { authenticationPrompt ->
                 authenticationPrompt()
