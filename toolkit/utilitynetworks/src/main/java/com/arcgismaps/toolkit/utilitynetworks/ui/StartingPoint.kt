@@ -72,7 +72,7 @@ import kotlin.math.roundToInt
  * @since 200.6.0
  */
 @Immutable
-internal data class StartingPointRowData(
+internal data class StartingPointData(
     val name: String,
     val symbol: ImageVector = Icons.Filled.ThumbUp,
     val feature: Feature? = null
@@ -100,8 +100,8 @@ private const val DELETE_THRESHOLD = 5f
  * @since 200.6.0
  */
 @Composable
-internal fun StartingPointRow(
-    data: StartingPointRowData,
+internal fun StartingPoint(
+    data: StartingPointData,
     modifier: Modifier = Modifier,
     onDelete: () -> Unit = {}
 ) {

@@ -137,7 +137,7 @@ private fun TraceConfiguration(utilityTraces: List<SelectableItem>) {
  */
 @Composable
 private fun StartingPointsEditor() {
-    val startingPoints = remember { mutableStateListOf(StartingPointRowData(name = "Test Starting Point"))}
+    val startingPoints = remember { mutableStateListOf(StartingPointData(name = "Test Starting Point"))}
     var counter by remember { mutableIntStateOf(1) }
     ExpandableCard(
         title = "${stringResource(id = R.string.starting_points)} (${counter})",
@@ -148,7 +148,7 @@ private fun StartingPointsEditor() {
             ) {
                 ElevatedButton(
                     onClick = {
-                        startingPoints.add(StartingPointRowData("Point ${counter++}"))
+                        startingPoints.add(StartingPointData("Point ${counter++}"))
                     },
                     shape = RoundedCornerShape(8.dp)
                 ) {
@@ -167,9 +167,8 @@ private fun StartingPointsEditor() {
     ) {
         Column {
             startingPoints.forEach {
-                println("adding row for ${it.name}")
-                val row = StartingPointRowData(name = it.name)
-                StartingPointRow(row) {
+                val row = StartingPointData(name = it.name)
+                StartingPoint(row) {
                     startingPoints.remove(row)
                     counter -= 1
                 }
