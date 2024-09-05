@@ -44,7 +44,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
  */
 @Composable
 internal fun UsernamePasswordAuthenticatorImpl(
-    usernamePasswordChallenge: UsernamePasswordChallenge
+    usernamePasswordChallenge: UsernamePasswordChallenge,
+    modifier: Modifier = Modifier
 ) {
     val additionalInfo =
         usernamePasswordChallenge.additionalMessage.collectAsStateWithLifecycle().value

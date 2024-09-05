@@ -33,6 +33,7 @@ public fun UsernamePasswordAuthenticator(
     modifier: Modifier = Modifier
 ) {
     UsernamePasswordAuthenticatorImpl(
-        usernamePasswordChallenge = usernamePasswordChallenge
+        usernamePasswordChallenge = usernamePasswordChallenge,
+        modifier = modifier
     )
 }
