@@ -32,7 +32,7 @@ import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 /**
  * CompositionLocal used to pass a [ExpandableCardColorScheme] down the tree.
  */
-internal val LocalColorScheme: ProvidableCompositionLocal<ExpandableCardColorScheme> =
+val LocalExpandableCardColorScheme: ProvidableCompositionLocal<ExpandableCardColorScheme> =
     compositionLocalOf {
         DefaultThemeTokens.colorScheme
     }
@@ -40,7 +40,7 @@ internal val LocalColorScheme: ProvidableCompositionLocal<ExpandableCardColorSch
 /**
  * CompositionLocal used to pass a [ExpandableCardShapes] down the tree.
  */
-internal val LocalShapes: ProvidableCompositionLocal<ExpandableCardShapes> =
+val LocalExpandableCardShapes: ProvidableCompositionLocal<ExpandableCardShapes> =
     compositionLocalOf {
         DefaultThemeTokens.shapes
     }
@@ -48,7 +48,7 @@ internal val LocalShapes: ProvidableCompositionLocal<ExpandableCardShapes> =
 /**
  * CompositionLocal used to pass a [ExpandableCardShapes] down the tree.
  */
-internal val LocalTypography: ProvidableCompositionLocal<ExpandableCardTypography> =
+val LocalExpandableCardTypography: ProvidableCompositionLocal<ExpandableCardTypography> =
     compositionLocalOf {
         DefaultThemeTokens.typography
     }
@@ -56,6 +56,7 @@ internal val LocalTypography: ProvidableCompositionLocal<ExpandableCardTypograph
 /**
  * Provides compose functions to access the current theme values.
  */
+@Suppress("unused")
 internal object ExpandableCardTheme {
 
     /**
@@ -64,7 +65,7 @@ internal object ExpandableCardTheme {
     val colorScheme: ExpandableCardColorScheme
         @Composable
         @ReadOnlyComposable
-        get() = LocalColorScheme.current
+        get() = LocalExpandableCardColorScheme.current
 
     /**
      * Retrieves the current [ExpandableCardShapes].
@@ -72,7 +73,7 @@ internal object ExpandableCardTheme {
     val shapes: ExpandableCardShapes
         @Composable
         @ReadOnlyComposable
-        get() = LocalShapes.current
+        get() = LocalExpandableCardShapes.current
 
     /**
      * Retrieves the current [ExpandableCardTypography].
@@ -80,16 +81,16 @@ internal object ExpandableCardTheme {
     val typography: ExpandableCardTypography
         @Composable
         @ReadOnlyComposable
-        get() = LocalTypography.current
+        get() = LocalExpandableCardTypography.current
 }
 
 /**
  * Provides a default [ExpandableCardTheme] to the given [content] so that the ExpandableCard can be
  * customized.
  *
- * The default value for the [colorScheme] and [shapes] is based on the current [MaterialTheme].
- * See [ExpandableCardDefaults.colorScheme], and [ExpandableCardDefaults.shapes] for the
- * exact configuration used.
+ * The default value for the [colorScheme], [shapes], and [typography] is based on the current
+ * [MaterialTheme]. See [ExpandableCardDefaults.colorScheme], [ExpandableCardDefaults.shapes], and
+ * [ExpandableCardDefaults.shapes] for the exact configuration used.
  *
  * @param colorScheme An [ExpandableCardColorScheme] to use for this compose hierarchy.
  * Default is [ExpandableCardDefaults.colorScheme].
@@ -108,9 +109,9 @@ internal fun ExpandableCardTheme(
     content: @Composable () -> Unit
 ) {
     CompositionLocalProvider(
-        LocalColorScheme provides colorScheme,
-        LocalShapes provides shapes,
-        LocalTypography provides typography
+        LocalExpandableCardColorScheme provides colorScheme,
+        LocalExpandableCardShapes provides shapes,
+        LocalExpandableCardTypography provides typography
     ) {
         content()
     }
@@ -131,6 +132,7 @@ internal fun ExpandableCardTheme(
 @Immutable
 data class ExpandableCardColorScheme internal constructor(
     val headerTextColor: Color,
+    val headerButtonTextColor: Color,
     val headerBackgroundColor: Color,
     val containerColor: Color,
     val borderColor: Color
@@ -146,6 +148,7 @@ data class ExpandableCardColorScheme internal constructor(
 @Immutable
 class ExpandableCardShapes internal constructor(
     val containerShape: RoundedCornerShape,
+    val headerInternalPadding: Dp,
     val borderThickness: Dp
 )
 

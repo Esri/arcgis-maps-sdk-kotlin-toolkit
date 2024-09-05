@@ -37,9 +37,12 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
+import com.arcgismaps.toolkit.ui.expandablecard.theme.LocalExpandableCardColorScheme
+import com.arcgismaps.toolkit.ui.expandablecard.theme.LocalExpandableCardTypography
 
 /**
  * Composable that displays the fields of a popup element.
@@ -62,7 +65,16 @@ internal fun FieldsPopupElement(
     val localContext = LocalContext.current
     ExpandableCard(
         title = state.title,
-        description = state.description,
+        description = {
+            Text(
+                text = state.description,
+                color = LocalExpandableCardColorScheme.current.headerTextColor,
+                style = LocalExpandableCardTypography.current.descriptionStyle,
+                fontWeight = FontWeight.Normal,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        },
         modifier = Modifier.graphicsLayer {
             alpha = alphaAnimation.value
         }
