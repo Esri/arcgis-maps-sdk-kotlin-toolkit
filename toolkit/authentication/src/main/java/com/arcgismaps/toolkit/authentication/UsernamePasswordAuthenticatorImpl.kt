@@ -1,14 +1,10 @@
 package com.arcgismaps.toolkit.authentication
 
-import android.net.Uri
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -37,7 +33,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 
@@ -49,115 +44,105 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
  */
 @Composable
 internal fun UsernamePasswordAuthenticatorImpl(
-    usernamePasswordChallenge: UsernamePasswordChallenge,
-    modifier: Modifier = Modifier
+    usernamePasswordChallenge: UsernamePasswordChallenge
 ) {
-    Column(
-        modifier = modifier
-            .background(MaterialTheme.colorScheme.background)
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        val additionalInfo =
-            usernamePasswordChallenge.additionalMessage.collectAsStateWithLifecycle().value
-        val hostName = usernamePasswordChallenge.hostname!!
+    val additionalInfo =
+        usernamePasswordChallenge.additionalMessage.collectAsStateWithLifecycle().value
+    val hostName = usernamePasswordChallenge.hostname
 
-        val focusManager = LocalFocusManager.current
-        var usernameFieldText by rememberSaveable { mutableStateOf("") }
-        var passwordFieldText by rememberSaveable { mutableStateOf("") }
+    val focusManager = LocalFocusManager.current
+    var usernameFieldText by rememberSaveable { mutableStateOf("") }
+    var passwordFieldText by rememberSaveable { mutableStateOf("") }
 
-        fun submitUsernamePassword() {
-            if (usernameFieldText.isNotEmpty() && passwordFieldText.isNotEmpty()) {
-                usernamePasswordChallenge.continueWithCredentials(
-                    usernameFieldText,
-                    passwordFieldText
+    fun submitUsernamePassword() {
+        if (usernameFieldText.isNotEmpty() && passwordFieldText.isNotEmpty()) {
+            usernamePasswordChallenge.continueWithCredentials(
+                usernameFieldText,
+                passwordFieldText
+            )
+            passwordFieldText = ""
+        }
+    }
+
+    AlertDialog(
+        title = {
+            // another issue has been posted to add a title string and localize it
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.SpaceBetween,
+                // Left aligning the supporting text here
+                horizontalAlignment = Alignment.Start
+            ) {
+                Text(
+                    text = stringResource(
+                        id = R.string.username_password_login_message,
+                        hostName
+                    ),
+                    style = MaterialTheme.typography.titleSmall,
+                    textAlign = TextAlign.Start
                 )
-                passwordFieldText = ""
+                val keyboardActions = remember {
+                    KeyboardActions(
+                        onSend = { submitUsernamePassword() }
+                    )
+                }
+                if (additionalInfo != null) {
+                    Text(
+                        text = additionalInfo,
+                        style = MaterialTheme.typography.labelLarge.copy(color = Color.Red)
+                    )
+                }
+
+                Column(
+                    // This is used to align the inputs with the title and the supporting text
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.Start,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    OutlinedTextField(
+                        modifier = Modifier.moveFocusOnTabEvent(focusManager) { submitUsernamePassword() },
+                        value = usernameFieldText,
+                        onValueChange = { it: String -> usernameFieldText = it },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Email,
+                            imeAction = ImeAction.Next
+                        ),
+                        label = { Text(text = stringResource(id = R.string.username_label)) },
+                        singleLine = true
+                    )
+                    OutlinedTextField(
+                        modifier = Modifier.moveFocusOnTabEvent(focusManager) { submitUsernamePassword() },
+                        value = passwordFieldText,
+                        onValueChange = { it: String -> passwordFieldText = it },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Password,
+                            imeAction = ImeAction.Send
+                        ),
+                        keyboardActions = keyboardActions,
+                        label = { Text(text = stringResource(id = R.string.password_label)) },
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation()
+                    )
+                }
+            }
+        },
+        onDismissRequest = { usernamePasswordChallenge.cancel() },
+        confirmButton = {
+            TextButton(
+                enabled = usernameFieldText.isNotEmpty() && passwordFieldText.isNotEmpty(),
+                onClick = { submitUsernamePassword() }) {
+                Text(text = stringResource(id = R.string.login))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = { usernamePasswordChallenge.cancel() }) {
+                Text(stringResource(id = R.string.cancel))
             }
         }
+    )
 
-        AlertDialog(
-            modifier = Modifier.fillMaxWidth(0.92f),
-            properties = DialogProperties(usePlatformDefaultWidth = false),
-            title = {
-            // another issue has been posted to add a title string and localize it
-            },
-            text = {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.SpaceBetween,
-                    // Left aligning the supporting text here
-                    horizontalAlignment = Alignment.Start
-                ) {
-                    Text(
-                        text = stringResource(
-                            id = R.string.username_password_login_message,
-                            hostName
-                        ),
-                        style = MaterialTheme.typography.titleSmall,
-                        textAlign = TextAlign.Start
-                    )
-                    val keyboardActions = remember {
-                        KeyboardActions(
-                            onSend = { submitUsernamePassword() }
-                        )
-                    }
-                    if (additionalInfo != null) {
-                        Text(
-                            text = additionalInfo,
-                            style = MaterialTheme.typography.labelLarge.copy(color = Color.Red)
-                        )
-                    }
-
-                    Column(
-                        // This is used to align the inputs with the title and the supporting text
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.Start,
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        OutlinedTextField(
-                            modifier = Modifier.moveFocusOnTabEvent(focusManager) { submitUsernamePassword() },
-                            value = usernameFieldText,
-                            onValueChange = { it: String -> usernameFieldText = it },
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Email,
-                                imeAction = ImeAction.Next
-                            ),
-                            label = { Text(text = stringResource(id = R.string.username_label)) },
-                            singleLine = true
-                        )
-                        OutlinedTextField(
-                            modifier = Modifier.moveFocusOnTabEvent(focusManager) { submitUsernamePassword() },
-                            value = passwordFieldText,
-                            onValueChange = { it: String -> passwordFieldText = it },
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Password,
-                                imeAction = ImeAction.Send
-                            ),
-                            keyboardActions = keyboardActions,
-                            label = { Text(text = stringResource(id = R.string.password_label)) },
-                            singleLine = true,
-                            visualTransformation = PasswordVisualTransformation()
-                        )
-                    }
-                }
-            },
-            onDismissRequest = { usernamePasswordChallenge.cancel() },
-            confirmButton = {
-                TextButton(
-                    enabled = usernameFieldText.isNotEmpty() && passwordFieldText.isNotEmpty(),
-                    onClick = { submitUsernamePassword() }) {
-                    Text(text = stringResource(id = R.string.login))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { usernamePasswordChallenge.cancel() }) {
-                    Text(stringResource(id = R.string.cancel))
-                }
-            }
-        )
-    }
 }
 
 private fun Modifier.moveFocusOnTabEvent(focusManager: FocusManager, onEnter: () -> Unit) =
