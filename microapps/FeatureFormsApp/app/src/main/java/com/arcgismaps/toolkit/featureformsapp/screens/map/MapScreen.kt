@@ -44,6 +44,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -64,6 +65,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -341,8 +343,16 @@ fun FeatureItem(
             Text(text = feature.label)
         },
         leadingContent = {
-            bitmap?.let {
-                Image(bitmap = bitmap!!.asImageBitmap(), contentDescription = null)
+            Surface(
+                modifier = Modifier.size(40.dp),
+                shape = CircleShape,
+                // set the color of the surface to white since the bitmap does not support
+                // dark mode
+                color = Color.White
+            ) {
+                bitmap?.let {
+                    Image(bitmap = bitmap!!.asImageBitmap(), contentDescription = null, modifier = Modifier.padding(10.dp))
+                }
             }
         },
         colors = ListItemDefaults.colors(
@@ -657,11 +667,7 @@ suspend fun ArcGISFeature.getSymbol(resources: Resources): Bitmap? {
         else -> null
     }
     val symbol = renderer?.getSymbol(this) ?: return null
-    symbol.createSwatch(resources.displayMetrics.density)
-        .onSuccess { bitmap ->
-            return bitmap.bitmap
-        }
-    return null
+    return symbol.createSwatch(resources.displayMetrics.density).getOrNull()?.bitmap
 }
 
 /**
