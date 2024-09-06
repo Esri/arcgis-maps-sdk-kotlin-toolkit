@@ -15,7 +15,10 @@
  */
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -26,7 +29,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -36,14 +38,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
+import com.arcgismaps.toolkit.ui.expandablecard.theme.LocalExpandableCardColorScheme
+import com.arcgismaps.toolkit.ui.expandablecard.theme.LocalExpandableCardTypography
 import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.utilitynetworks.UtilityNetwork
 
@@ -70,17 +77,7 @@ internal fun TraceOptions(configurations: List<SelectableItem>, onPerformTrace: 
             item {
                 TraceConfiguration(
                     traceConfigurations
-                ) { index ->
-                    traceConfigurations[index] =
-                        traceConfigurations[index].copy(selected = !traceConfigurations[index].selected)
-                    traceConfigurations.forEachIndexed { i, _ ->
-                        if (i != index) {
-                            traceConfigurations[i] =
-                                traceConfigurations[i].copy(selected = false)
-                        }
-                    }
-                }
-
+                )
             }
             item {
                 StartingPointsEditor()
@@ -100,19 +97,17 @@ internal fun TraceOptions(configurations: List<SelectableItem>, onPerformTrace: 
  * @since 200.6.0
  */
 @Composable
-private fun TraceConfiguration(utilityTraces: List<SelectableItem>, onTraceSelected: (Int) -> Unit) {
+private fun TraceConfiguration(utilityTraces: List<SelectableItem>) {
     ExpandableCard(
-        title = stringResource(id = R.string.trace_configuration)
+        title = stringResource(id = R.string.trace_configuration),
+        padding = 4.dp
     ) {
+        var selectedTrace: SelectableItem? by remember { mutableStateOf(null) }
         Column {
             utilityTraces.forEachIndexed { index, item ->
-                FilterChip(
-                    onClick = { onTraceSelected(index) },
-                    label = {
-                        Text(item.title)
-                    },
-                    selected = item.selected,
-                    leadingIcon = if (item.selected) {
+                ReadOnlyTextField(
+                    text = item.title,
+                    leadingIcon = if (item.title == selectedTrace?.title) {
                         {
                             Icon(
                                 imageVector = Icons.Filled.Done,
@@ -126,6 +121,9 @@ private fun TraceConfiguration(utilityTraces: List<SelectableItem>, onTraceSelec
                     modifier = Modifier
                         .padding(horizontal = 8.dp)
                         .fillMaxWidth()
+                        .clickable {
+                            selectedTrace = utilityTraces[index]
+                        }
                 )
             }
         }
@@ -139,28 +137,43 @@ private fun TraceConfiguration(utilityTraces: List<SelectableItem>, onTraceSelec
  */
 @Composable
 private fun StartingPointsEditor() {
-    val startingPoints = remember { mutableStateListOf<String>() }
-    var counter by remember { mutableIntStateOf(startingPoints.size) }
+    val startingPoints = remember { mutableStateListOf(StartingPointData(name = "Test Starting Point"))}
+    var counter by remember { mutableIntStateOf(1) }
     ExpandableCard(
-        title = "${stringResource(id = R.string.starting_points)} (${counter})"
+        title = "${stringResource(id = R.string.starting_points)} (${counter})",
+        description = {
+            Row (
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                ElevatedButton(
+                    onClick = {
+                        startingPoints.add(StartingPointData("Point ${counter++}"))
+                    },
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.add_starting_point),
+                        color = LocalExpandableCardColorScheme.current.headerTextColor,
+                        style = LocalExpandableCardTypography.current.descriptionStyle,
+                        fontWeight = FontWeight.Normal,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        },
+        padding = 4.dp
     ) {
         Column {
-            ElevatedButton(
-                onClick = {
-                    startingPoints.add("Point ${counter++}")
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text(stringResource(id = R.string.add_starting_point))
-            }
             startingPoints.forEach {
-                ExpandableCard(title = it, toggleable = false)
+                val row = StartingPointData(name = it.name)
+                StartingPoint(row) {
+                    startingPoints.remove(row)
+                    counter -= 1
+                }
             }
         }
-
     }
 }
 

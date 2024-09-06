@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2024 Esri
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,15 +20,18 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ExpandLess
 import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -40,10 +43,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.ui.expandablecard.theme.DefaultThemeTokens.shapes
 import com.arcgismaps.toolkit.ui.expandablecard.theme.DefaultThemeTokens.typography
 import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardColorScheme
 import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardDefaults
@@ -60,7 +65,7 @@ import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardTypography
 fun ExpandableCard(
     modifier: Modifier = Modifier,
     title: String = "",
-    description: String = "",
+    description: (@Composable () -> Unit)? = null,
     toggleable: Boolean = true,
     padding: Dp = 16.dp,
     colorScheme: ExpandableCardColorScheme = ExpandableCardDefaults.colorScheme(),
@@ -90,8 +95,8 @@ fun ExpandableCard(
                     title = title,
                     description = description,
                     expandable = toggleable,
-                    padding = padding,
                     colors = colorScheme,
+                    shapes = shapes,
                     typography = typography,
                     isExpanded = expanded
                 ) {
@@ -112,30 +117,26 @@ fun ExpandableCard(
 @Composable
 private fun ExpandableHeader(
     title: String = "",
-    description: String = "",
+    description: (@Composable () -> Unit)? = null,
     expandable: Boolean,
-    padding: Dp,
     colors: ExpandableCardColorScheme,
+    shapes: ExpandableCardShapes,
     typography: ExpandableCardTypography,
     isExpanded: Boolean,
     onClick: () -> Unit
 ) {
-    if (title.isEmpty() && description.isEmpty() && !expandable) return
+    if (title.isEmpty() && description == null && !expandable) return
     Row(
         Modifier
+            .then(if(expandable) Modifier.clickable { onClick() } else Modifier)
             .fillMaxWidth()
-            .applyIf(expandable) {
-                clickable {
-                    onClick()
-                }
-            }
             .background(colors.headerBackgroundColor),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(padding)
+                .padding(shapes.headerInternalPadding)
                 .weight(0.5f)
         ) {
             Text(
@@ -145,17 +146,9 @@ private fun ExpandableHeader(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            if (description.isNotEmpty() && isExpanded) {
-                Text(
-                    text = description,
-                    color = colors.headerTextColor,
-                    style = typography.descriptionStyle,
-                    fontWeight = FontWeight.Normal,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+            if (description != null && isExpanded) {
+                description()
             }
-
         }
 
         if (expandable) {
@@ -173,14 +166,23 @@ private fun ExpandableHeader(
 
 @Preview
 @Composable
-internal fun ExpandableHeaderPreview() {
+private fun ExpandableHeaderPreview() {
     ExpandableHeader(
         title = "The Title",
         colors = ExpandableCardDefaults.colorScheme(),
-        description = "the description",
-        padding = 16.dp,
+        description = {
+            Text(
+                    text = "the description",
+                    color = ExpandableCardDefaults.colorScheme().headerTextColor,
+                    style = ExpandableCardDefaults.typography().descriptionStyle,
+                    fontWeight = FontWeight.Normal,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+        },
         expandable = true,
         typography = typography,
+        shapes = shapes,
         isExpanded = true
     ) {}
 }
@@ -189,8 +191,29 @@ internal fun ExpandableHeaderPreview() {
 @Composable
 private fun ExpandableCardPreview() {
     ExpandableCard(
-        description = "Foo",
-        title = "Title"
+        title = "Title",
+        description = {
+            Row (
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                ElevatedButton(
+                    onClick = {},
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = "the description",
+                        textAlign = TextAlign.Center,
+                        color = ExpandableCardDefaults.colorScheme().headerTextColor,
+                        style = ExpandableCardDefaults.typography().descriptionStyle,
+                        fontWeight = FontWeight.Normal,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
+
     ) {
         Text(
             "Hello World",
@@ -199,12 +222,3 @@ private fun ExpandableCardPreview() {
         )
     }
 }
-
-internal fun Modifier.applyIf(condition: Boolean, then: Modifier.() -> Modifier): Modifier =
-    if (condition) {
-        then()
-    } else {
-        this
-    }
-
-
