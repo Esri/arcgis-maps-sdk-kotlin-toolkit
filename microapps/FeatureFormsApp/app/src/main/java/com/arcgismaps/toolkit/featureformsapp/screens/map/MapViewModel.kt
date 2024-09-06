@@ -344,6 +344,12 @@ class MapViewModel @Inject constructor(
                 layer.selectFeature(feature)
                 // set the UI to an editing state with the FeatureForm
                 _uiState.value = UIState.Editing(featureForm)
+                scope.launch {
+                    // set the viewpoint to the feature extent
+                    feature.geometry?.let {
+                        proxy.setViewpointGeometry(it.extent, 50.0)
+                    }
+                }
             }
             is UIState.Editing -> {
                 // if the current state is editing then switch to the switching state
