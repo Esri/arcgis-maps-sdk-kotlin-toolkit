@@ -16,14 +16,19 @@
  *
  */
 
-
 plugins {
-    alias(libs.plugins.binary.compatibility.validator) apply true
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("artifact-deploy")
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    alias(libs.plugins.binary.compatibility.validator) apply true
 }
+
+secrets {
+    defaultPropertiesFileName = "secrets.defaults.properties"
+}
+
 android {
     namespace = "com.arcgismaps.toolkit.utilitynetworks"
     compileSdk = libs.versions.compileSdk.get().toInt()
@@ -49,6 +54,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     // If this were not an android project, we would just write `explicitApi()` in the Kotlin scope.
     // but as an android project could write `freeCompilerArgs = listOf("-Xexplicit-api=strict")`
@@ -85,6 +91,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.activity.compose)
     testImplementation(libs.bundles.unitTest)
+    androidTestImplementation(libs.truth)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.bundles.composeTest)
     debugImplementation(libs.bundles.debug)
 }

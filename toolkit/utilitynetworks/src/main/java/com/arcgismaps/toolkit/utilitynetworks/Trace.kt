@@ -16,16 +16,24 @@
 
 package com.arcgismaps.toolkit.utilitynetworks
 
+import androidx.annotation.VisibleForTesting
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
+@VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+public val traceSurfaceContentDescription: String = "trace component surface"
 
 /**
  * A composable UI component to set up and run a [com.arcgismaps.utilitynetworks.UtilityNetwork.trace]
@@ -37,20 +45,28 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 public fun Trace(
     traceState: TraceState,
     @Suppress("unused_parameter")
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
-    // if the traceConfigurations are not available, that means the traceState is not ready so return
-    if (traceState.traceConfigurations.collectAsStateWithLifecycle().value == null) return
-
     Surface(
         color = MaterialTheme.colorScheme.surface,
         modifier = Modifier
             .fillMaxSize()
+            .semantics { contentDescription = traceSurfaceContentDescription }
     ) {
-        Column {
-            Text(text = traceState.traceResult.collectAsStateWithLifecycle().value?.toString() ?: "Null")
-            Button(onClick = { traceState.trace() }) {
-                Text(stringResource(id = R.string.trace))
+        val configurations = traceState.traceConfigurations.collectAsStateWithLifecycle()
+        if (configurations.value != null) {
+            Column {
+                Text(
+                    text = traceState.traceResult.collectAsStateWithLifecycle().value?.toString()
+                        ?: "Null"
+                )
+                Button(onClick = { traceState.trace() }) {
+                    Text(stringResource(id = R.string.trace))
+                }
+            }
+        } else {
+            Box {
+                CircularProgressIndicator()
             }
         }
     }

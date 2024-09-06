@@ -34,7 +34,7 @@ import kotlinx.coroutines.launch
  *
  * @since 200.6.0
  */
-public sealed interface TraceState {
+public interface TraceState {
 
     public val traceConfigurations: StateFlow<List<UtilityNamedTraceConfiguration>?>
 
