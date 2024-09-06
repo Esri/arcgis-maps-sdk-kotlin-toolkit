@@ -283,6 +283,8 @@ class MapViewModel @Inject constructor(
      * and sets the UI state to select a feature if multiple features are identified.
      */
     fun onSingleTapConfirmed(singleTapEvent: SingleTapConfirmedEvent) {
+        // do not identify layers if the state is editing
+        if (_uiState.value is UIState.Editing) return
         scope.launch {
             proxy.identifyLayers(
                 screenCoordinate = singleTapEvent.screenCoordinate,
