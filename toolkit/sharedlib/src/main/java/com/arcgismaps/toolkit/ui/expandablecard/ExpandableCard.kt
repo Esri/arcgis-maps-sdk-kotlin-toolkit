@@ -20,15 +20,18 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ExpandLess
 import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -40,10 +43,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.ui.expandablecard.theme.DefaultThemeTokens.shapes
 import com.arcgismaps.toolkit.ui.expandablecard.theme.DefaultThemeTokens.typography
 import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardColorScheme
 import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardDefaults
@@ -63,13 +68,14 @@ fun ExpandableCard(
     title: String = "",
     description: (@Composable () -> Unit)? = null,
     toggleable: Boolean = true,
+    initialExpandedState: Boolean = true,
     padding: Dp = 16.dp,
     colorScheme: ExpandableCardColorScheme = ExpandableCardDefaults.colorScheme(),
     shapes: ExpandableCardShapes = ExpandableCardDefaults.shapes(),
     typography: ExpandableCardTypography = ExpandableCardDefaults.typography(),
     content: @Composable () -> Unit = {}
 ) {
-    var expanded by rememberSaveable { mutableStateOf(true) }
+    var expanded by rememberSaveable { mutableStateOf(initialExpandedState) }
 
     ExpandableCardTheme(
         colorScheme = colorScheme,
@@ -91,8 +97,8 @@ fun ExpandableCard(
                     title = title,
                     description = description,
                     expandable = toggleable,
-                    padding = padding,
                     colors = colorScheme,
+                    shapes = shapes,
                     typography = typography,
                     isExpanded = expanded
                 ) {
@@ -115,8 +121,8 @@ private fun ExpandableHeader(
     title: String = "",
     description: (@Composable () -> Unit)? = null,
     expandable: Boolean,
-    padding: Dp,
     colors: ExpandableCardColorScheme,
+    shapes: ExpandableCardShapes,
     typography: ExpandableCardTypography,
     isExpanded: Boolean,
     onClick: () -> Unit
@@ -136,7 +142,7 @@ private fun ExpandableHeader(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(padding)
+                .padding(shapes.headerInternalPadding)
                 .weight(0.5f)
         ) {
             Text(
@@ -166,7 +172,7 @@ private fun ExpandableHeader(
 
 @Preview
 @Composable
-internal fun ExpandableHeaderPreview() {
+private fun ExpandableHeaderPreview() {
     ExpandableHeader(
         title = "The Title",
         colors = ExpandableCardDefaults.colorScheme(),
@@ -180,9 +186,9 @@ internal fun ExpandableHeaderPreview() {
                     overflow = TextOverflow.Ellipsis
                 )
         },
-        padding = 16.dp,
         expandable = true,
         typography = typography,
+        shapes = shapes,
         isExpanded = true
     ) {}
 }
@@ -193,14 +199,25 @@ private fun ExpandableCardPreview() {
     ExpandableCard(
         title = "Title",
         description = {
-            Text(
-                text = "the description",
-                color = ExpandableCardDefaults.colorScheme().headerTextColor,
-                style = ExpandableCardDefaults.typography().descriptionStyle,
-                fontWeight = FontWeight.Normal,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            Row (
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                ElevatedButton(
+                    onClick = {},
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = "the description",
+                        textAlign = TextAlign.Center,
+                        color = ExpandableCardDefaults.colorScheme().headerTextColor,
+                        style = ExpandableCardDefaults.typography().descriptionStyle,
+                        fontWeight = FontWeight.Normal,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
         }
 
     ) {

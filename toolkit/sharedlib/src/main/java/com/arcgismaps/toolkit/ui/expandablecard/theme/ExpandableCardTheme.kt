@@ -132,7 +132,6 @@ internal fun ExpandableCardTheme(
 @Immutable
 data class ExpandableCardColorScheme internal constructor(
     val headerTextColor: Color,
-    val readOnlyTextColor: Color,
     val headerButtonTextColor: Color,
     val headerBackgroundColor: Color,
     val containerColor: Color,
@@ -149,6 +148,7 @@ data class ExpandableCardColorScheme internal constructor(
 @Immutable
 class ExpandableCardShapes internal constructor(
     val containerShape: RoundedCornerShape,
+    val headerInternalPadding: Dp,
     val borderThickness: Dp
 )
 

@@ -46,16 +46,18 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
+
     }
     buildFeatures {
         compose = true
     }
-    // If this were not an android project, we would just write `explicitApi()` in the Kotlin scope.
-    // but as an android project could write `freeCompilerArgs = listOf("-Xexplicit-api=strict")`
-    // in the kotlinOptions above, but that would enforce api rules on the test code, which we don't want.
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        if ("Test" !in name) {
-            kotlinOptions.freeCompilerArgs += "-Xexplicit-api=strict"
+
+    kotlin {
+        compilerOptions {
+            if ("Test" !in this.moduleName.get()) {
+                freeCompilerArgs.add("-Xexplicit-api=strict")
+            }
+
         }
     }
 
@@ -77,10 +79,12 @@ android {
 dependencies {
     api(arcgis.mapsSdk)
     implementation(project(":sharedlib"))
+    implementation(project(":geoview-compose"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
     implementation(libs.bundles.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.activity.compose)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.bundles.composeTest)

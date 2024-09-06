@@ -15,12 +15,8 @@
  */
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
@@ -29,22 +25,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.ThumbUp
-import androidx.compose.material.icons.sharp.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -57,7 +47,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -73,36 +62,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.arcgismaps.data.Feature
 import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 import com.arcgismaps.toolkit.ui.expandablecard.theme.LocalExpandableCardColorScheme
 import com.arcgismaps.toolkit.ui.expandablecard.theme.LocalExpandableCardTypography
-import com.arcgismaps.toolkit.ui.gestures.AnchoredDraggableState
-import com.arcgismaps.toolkit.ui.gestures.DraggableAnchors
-import com.arcgismaps.toolkit.ui.gestures.anchoredDraggable
 import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.utilitynetworks.UtilityNetwork
-import kotlinx.coroutines.delay
-import kotlin.math.roundToInt
 
 /**
  * A composable used to run a trace on a [UtilityNetwork].
@@ -153,7 +125,6 @@ internal fun TraceOptions(configurations: List<SelectableItem>, onPerformTrace: 
 private fun TraceConfiguration(utilityTraces: List<SelectableItem>) {
     ExpandableCard(
         title = stringResource(id = R.string.trace_configuration),
-        toggleable = true,
         padding = 4.dp
     ) {
         var selectedTrace: SelectableItem? by remember { mutableStateOf(null) }
@@ -185,6 +156,53 @@ private fun TraceConfiguration(utilityTraces: List<SelectableItem>) {
 }
 
 /**
+ * A composable used to add starting points for the trace.
+ *
+ * @since 200.6.0
+ */
+@Composable
+private fun StartingPointsEditor() {
+    val startingPoints = remember { mutableStateListOf(StartingPointData(name = "Test Starting Point"))}
+    var counter by remember { mutableIntStateOf(1) }
+    ExpandableCard(
+        title = "${stringResource(id = R.string.starting_points)} (${counter})",
+        description = {
+            Row (
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                ElevatedButton(
+                    onClick = {
+                        startingPoints.add(StartingPointData("Point ${counter++}"))
+                    },
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.add_starting_point),
+                        color = LocalExpandableCardColorScheme.current.headerTextColor,
+                        style = LocalExpandableCardTypography.current.descriptionStyle,
+                        fontWeight = FontWeight.Normal,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        },
+        padding = 4.dp
+    ) {
+        Column {
+            startingPoints.forEach {
+                val row = StartingPointData(name = it.name)
+                StartingPoint(row) {
+                    startingPoints.remove(row)
+                    counter -= 1
+                }
+            }
+        }
+    }
+}
+
+/**
  * A composable used to display the advanced options
  *
  * @since 200.6.0
@@ -200,6 +218,7 @@ internal fun AdvancedOptions(
     ExpandableCard(
         title = stringResource(id = R.string.advanced_options),
         toggleable = true,
+        initialExpandedState = false,
         padding = 4.dp
     ) {
         Column {
@@ -297,12 +316,28 @@ internal fun AdvancedOptions(
                             .semantics { contentDescription = "switch" }
                             .padding(horizontal = 4.dp),
                         enabled = true,
-                       interactionSource = interactionSource
+                        interactionSource = interactionSource
                     )
                 }
             }
         }
     }
+}
+
+private object ColorSaver {
+    fun Saver(): Saver<MutableState<Color>, Any> = listSaver(
+        save = {
+            listOf(
+                it.value.component1(),
+                it.value.component2(),
+                it.value.component3(),
+                it.value.component4()
+            )
+        },
+        restore = {
+            mutableStateOf(Color(red = it[0], green = it[1], blue = it[2], alpha = it[3]))
+        }
+    )
 }
 
 @Composable
@@ -350,295 +385,6 @@ private fun AdvancedOptionsRowPreview() {
             enabled = isEnabled
         )
     }
-}
-
-@Immutable
-private data class StartingPointRowData(
-    val name: String,
-    val symbol: ImageVector = Icons.Filled.ThumbUp,
-    val feature: Feature? = null
-)
-
-/**
- * A composable used to add starting points for the trace.
- *
- * @since 200.6.0
- */
-@Composable
-private fun StartingPointsEditor() {
-    val startingPoints = remember { mutableStateListOf(StartingPointRowData(name = "Test Starting Point"))}
-    var counter by remember { mutableIntStateOf(1) }
-    ExpandableCard(
-        title = "${stringResource(id = R.string.starting_points)} (${counter})",
-        description = {
-            ElevatedButton(
-                onClick = {
-                    startingPoints.add(StartingPointRowData("Point ${counter++}"))
-                },
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text(
-                    text = stringResource(id = R.string.add_starting_point),
-                    color = LocalExpandableCardColorScheme.current.headerTextColor,
-                    style = LocalExpandableCardTypography.current.descriptionStyle,
-                    fontWeight = FontWeight.Normal,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-        },
-        padding = 4.dp
-    ) {
-        Column {
-            startingPoints.forEach {
-                println("adding row for ${it.name}")
-                val row = StartingPointRowData(name = it.name)
-                StartingPointRow(row) {
-                    startingPoints.remove(row)
-                    counter -= 1
-                }
-            }
-        }
-    }
-}
-
-private enum class DragAnchors(val fraction: Float) {
-    NeutralPosition(.97f),
-    DeletePosition(0f),
-}
-
-@Composable
-private fun StartingPointRow(
-    data: StartingPointRowData,
-    modifier: Modifier = Modifier,
-    onDelete: () -> Unit = {}
-) {
-    val density = LocalDensity.current
-    var deleteActive by remember { mutableStateOf(false) }
-    val state = rememberSaveable(
-        inputs = arrayOf(data),
-        saver = AnchoredDraggableState.Saver(
-            confirmValueChange = { _ -> true },
-            positionalThreshold = { distance: Float -> distance * 0.9f },
-            velocityThreshold = { with(density) { 10000.dp.toPx() } },
-            animationSpec = {
-                spring(
-                    dampingRatio = Spring.DampingRatioLowBouncy,
-                    stiffness = Spring.StiffnessLow,
-                )
-            }
-        )
-    ) {
-        AnchoredDraggableState(
-            initialValue = DragAnchors.NeutralPosition,
-            positionalThreshold = { distance: Float -> distance * 0.9f },
-            velocityThreshold = { with(density) { 10000.dp.toPx() } },
-            animationSpec = {
-                spring(
-                    dampingRatio = Spring.DampingRatioLowBouncy,
-                    stiffness = Spring.StiffnessLow,
-                )
-            }
-        )
-    }
-    val contentWidth = 40.dp
-    val contentSizeWidth = with(density) { contentWidth.toPx() }
-    var layoutWidth by remember { mutableIntStateOf(0) }
-    var neutralOffset = 0f
-
-    if (!state.offset.isNaN() && state.offset < 5.0) {
-        // delete if dragged all the way across
-        LaunchedEffect(Unit) {
-            deleteActive = false
-            onDelete()
-        }
-    }
-    Row {
-        Box(
-            modifier = modifier
-                .fillMaxWidth()
-                .fillMaxHeight()
-                .clip(shape = RoundedCornerShape(8.dp))
-                .onSizeChanged { layoutSize ->
-                    val dragEndPoint = layoutSize.width - contentSizeWidth
-                    layoutWidth = layoutSize.width
-                    state
-                        .updateAnchors(
-                            DraggableAnchors {
-                                DragAnchors.entries
-                                    .forEach { anchor ->
-                                        anchor at dragEndPoint * anchor.fraction
-                                    }
-                            }
-                        )
-                        .also {
-                            neutralOffset = state.requireOffset()
-                        }
-                }
-        ) {
-            ReadOnlyTextField(
-                text = data.name,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(55.dp),
-                leadingIcon = {
-                    Icon(
-                        imageVector = data.symbol,
-                        contentDescription = null,
-                        modifier = Modifier.padding(14.dp)
-                    )
-                }
-            )
-
-
-            var indicationState by remember { mutableStateOf(false) }
-            val animatedOffset: Dp by animateDpAsState(
-                targetValue = if (indicationState) 6.dp else 0.dp,
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioHighBouncy,
-                    stiffness = Spring.StiffnessVeryLow,
-                ),
-                finishedListener = {
-                    indicationState = false
-                                   },
-                label = ""
-            )
-
-            LaunchedEffect(deleteActive) {
-                delay(2500)
-                while (deleteActive) {
-                    delay(2000)
-                    if (!state.offset.isNaN() && state.offset == neutralOffset) {
-                        deleteActive = false
-                    }
-                }
-            }
-            val indicationBounce = with(density) {
-                animatedOffset.toPx().roundToInt()
-            }
-
-            val width = if (!state.offset.isNaN()) {
-                with(density) {
-                    (layoutWidth - state.offset).toDp() + animatedOffset
-                }
-            } else {
-                40.dp
-            }
-            DraggableContent(
-                deleteActive,
-                modifier = modifier
-                    .width(width)
-                    .height(55.dp)
-                    .align(Alignment.CenterStart)
-                    .offset {
-                        if (!state.offset.isNaN()) {
-                            IntOffset(
-                                x = state
-                                    .requireOffset()
-                                    .roundToInt()
-                                        - indicationBounce,
-                                y = 0,
-                            )
-                        } else {
-                            IntOffset(0, 0)
-                        }
-                    }
-                    .anchoredDraggable(
-                        state,
-                        enabled = deleteActive,
-                        orientation = Orientation.Horizontal
-                    )
-            ) {
-                deleteActive = !deleteActive
-                if (deleteActive) {
-                    indicationState = true
-                }
-            }
-        }
-    }
-}
-
-
-@Composable
-internal fun DraggableContent(
-    isActive: Boolean,
-    modifier: Modifier = Modifier,
-    onTap: () -> Unit = {}
-) {
-    Row(
-        modifier = modifier
-            .background(if (isActive) Color.Red else Color.Unspecified)
-            .clickable {
-                onTap()
-            }
-    ) {
-        Icon(
-            imageVector = Icons.Sharp.Delete,
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-                .padding(14.dp),
-            contentDescription = null,
-        )
-    }
-}
-
-@Composable
-private fun ReadOnlyTextField(
-    text: String,
-    modifier: Modifier = Modifier,
-    textStyle: TextStyle = TextStyle(
-        color = Color.Black,
-
-        // below line is used to add font
-        // size for our text field
-        fontSize = 15.sp,
-        fontWeight = FontWeight.SemiBold,
-        fontStyle = FontStyle.Normal,
-
-        // below line is used to change font family.
-        fontFamily = FontFamily.SansSerif,
-        letterSpacing = 0.5.sp,
-        textDecoration = TextDecoration.None,
-        textAlign = TextAlign.Start
-    ),
-    maxLines: Int = 1,
-    leadingIcon: (@Composable () -> Unit)? = null
-) {
-    val colors = LocalExpandableCardColorScheme.current
-    Row(
-        modifier = modifier
-            // merge descendants semantics to make them part of the parent node
-            .semantics(mergeDescendants = true) {},
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        leadingIcon?.invoke()
-        SelectionContainer(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
-        ) {
-            Text(
-                text = text.ifEmpty { "--" },
-                color = colors.readOnlyTextColor,
-                style = textStyle,
-                maxLines = maxLines
-            )
-        }
-    }
-}
-
-internal object ColorSaver {
-    fun Saver(): Saver<MutableState<Color>, Any> = listSaver(
-        save = {
-            listOf(
-                it.value.component1(),
-                it.value.component2(),
-                it.value.component3(),
-                it.value.component4()
-            )
-        },
-        restore = { list ->
-            mutableStateOf(Color(red = list[0], green = list[1], blue = list[2], alpha = list[3]))
-        }
-    )
 }
 
 @Preview

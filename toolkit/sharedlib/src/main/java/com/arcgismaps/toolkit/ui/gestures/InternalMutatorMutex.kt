@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2023 The Android Open Source Project
  *
@@ -17,6 +16,10 @@
 
 package com.arcgismaps.toolkit.ui.gestures
 
+/**
+ * This is a copy of androidx.compose.foundation.gestures.InternalMutatorMutex until that API is
+ * promoted to stable in foundation.
+ */
 import androidx.compose.foundation.MutatePriority
 import androidx.compose.runtime.Stable
 import kotlinx.coroutines.CancellationException

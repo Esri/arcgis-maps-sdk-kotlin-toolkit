@@ -22,7 +22,7 @@ package com.arcgismaps.toolkit.ui.gestures
 
 /**
  * This is a copy of androidx.compose.foundation.gestures.AnchoredDraggable until that API is
- * promoted to stable in foundation. Any changes there should be replicated here.
+ * promoted to stable in foundation.
  */
 import android.annotation.SuppressLint
 import androidx.annotation.FloatRange
