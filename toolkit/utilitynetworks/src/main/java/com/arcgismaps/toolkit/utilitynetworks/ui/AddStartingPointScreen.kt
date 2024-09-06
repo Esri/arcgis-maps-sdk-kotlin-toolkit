@@ -29,6 +29,11 @@ import androidx.compose.ui.Modifier
 import com.arcgismaps.toolkit.utilitynetworks.AddStartingPointMode
 import com.arcgismaps.toolkit.utilitynetworks.TraceState
 
+/**
+ * A composable screen that shows the UI to add a starting point for a trace.
+ *
+ * @since 200.6.0
+ */
 @Composable
 internal fun AddStartingPointScreen(traceState: TraceState, onPointSelected: () -> Unit) {
     LaunchedEffect(key1 = null) {
@@ -40,7 +45,7 @@ internal fun AddStartingPointScreen(traceState: TraceState, onPointSelected: () 
     }
 
     Surface(modifier = Modifier.fillMaxSize()) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Top) {
             Button(onClick = { onPointSelected() }) {
                 Text(text = "Cancel Starting Point Selection")
             }

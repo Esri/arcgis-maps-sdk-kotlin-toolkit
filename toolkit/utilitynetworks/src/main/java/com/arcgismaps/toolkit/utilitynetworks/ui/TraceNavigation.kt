@@ -24,7 +24,10 @@ import com.arcgismaps.toolkit.utilitynetworks.AddStartingPointMode
 import com.arcgismaps.toolkit.utilitynetworks.TraceState
 
 /**
+ * A composable UI component to set up the navigation for the trace workflow.
  *
+ * @param navController The navigation controller to use for navigation
+ * @param traceState The state of the trace workflow
  * @since 200.6.0
  */
 @Composable
@@ -33,10 +36,10 @@ internal fun TraceNavHost(navController: NavHostController, traceState: TraceSta
         composable(TraceOptions.route) {
             TraceOptions(
                 configurations = emptyList(),
-                onPerformTrace = {
+                onPerformTraceButtonClicked = {
                     navController.navigate(TraceResults.route)
                 },
-                onAddStartingPoint = {
+                onAddStartingPointButtonClicked = {
                     traceState.updateAddStartPointMode(AddStartingPointMode.Start)
                     navController.navigate(AddStartingPoint.route)
                 })
@@ -56,7 +59,10 @@ internal fun TraceNavHost(navController: NavHostController, traceState: TraceSta
     }
 }
 
-
+/**
+ * Defines a route for the trace tool screens.
+ * @since 200.6.0
+ */
 internal sealed interface TraceRoute {
     val route: String
 }

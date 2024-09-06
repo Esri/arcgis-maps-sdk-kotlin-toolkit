@@ -64,8 +64,8 @@ import com.arcgismaps.utilitynetworks.UtilityNetwork
 @Composable
 internal fun TraceOptions(
     configurations: List<SelectableItem>,
-    onPerformTrace: () -> Unit,
-    onAddStartingPoint: () -> Unit
+    onPerformTraceButtonClicked: () -> Unit,
+    onAddStartingPointButtonClicked: () -> Unit
 ) {
     val traceConfigurations = remember { mutableStateListOf<SelectableItem>() }
     traceConfigurations.addAll(configurations)
@@ -79,15 +79,13 @@ internal fun TraceOptions(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item {
-                TraceConfiguration(
-                    traceConfigurations
-                )
+                TraceConfiguration(traceConfigurations)
             }
             item {
-                StartingPointsEditor(onAddStartingPoint)
+                StartingPointsEditor(onAddStartingPointButtonClicked)
             }
             item {
-                Button(onClick = { onPerformTrace() }) {
+                Button(onClick = { onPerformTraceButtonClicked() }) {
                     Text(stringResource(id = R.string.trace))
                 }
             }
@@ -140,7 +138,7 @@ private fun TraceConfiguration(utilityTraces: List<SelectableItem>) {
  * @since 200.6.0
  */
 @Composable
-private fun StartingPointsEditor(onAddNewStartingPoint: () -> Unit) {
+private fun StartingPointsEditor(showAddStartingPointScreen: () -> Unit) {
     val startingPoints = remember { mutableStateListOf(StartingPointData(name = "Test Starting Point")) }
     var counter by remember { mutableIntStateOf(1) }
     ExpandableCard(
@@ -152,8 +150,7 @@ private fun StartingPointsEditor(onAddNewStartingPoint: () -> Unit) {
             ) {
                 ElevatedButton(
                     onClick = {
-                        onAddNewStartingPoint()
-//                        startingPoints.add(StartingPointData("Point ${counter++}"))
+                        showAddStartingPointScreen()
                     },
                     shape = RoundedCornerShape(8.dp)
                 ) {
@@ -192,8 +189,8 @@ private fun TraceOptionsPreview() {
             SelectableItem("Trace 3", false),
             SelectableItem("Trace 4", false)
         ),
-        onPerformTrace = {},
-        onAddStartingPoint = {}
+        onPerformTraceButtonClicked = {},
+        onAddStartingPointButtonClicked = {}
     )
 }
 
