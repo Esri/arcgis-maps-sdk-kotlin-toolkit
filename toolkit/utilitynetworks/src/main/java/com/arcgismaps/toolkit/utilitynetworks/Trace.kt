@@ -16,16 +16,19 @@
 
 package com.arcgismaps.toolkit.utilitynetworks
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.compose.rememberNavController
+import com.arcgismaps.toolkit.utilitynetworks.ui.TraceNavHost
 
 /**
  * A composable UI component to set up and run a [com.arcgismaps.utilitynetworks.UtilityNetwork.trace]
@@ -38,21 +41,32 @@ public fun Trace(
     traceState: TraceState,
     @Suppress("unused_parameter")
     modifier: Modifier = Modifier,
+    onAddStartingPointModeChanged: (AddStartingPointMode) -> Unit = {},
 ) {
     // if the traceConfigurations are not available, that means the traceState is not ready so return
     if (traceState.traceConfigurations.collectAsStateWithLifecycle().value == null) return
+
+    val navController = rememberNavController()
+    // The current state of the add starting point mode
+    var currentState by remember {
+        mutableStateOf<AddStartingPointMode>(AddStartingPointMode.Stop)
+    }
+    // Observe the add starting point mode changes
+    LaunchedEffect(key1 = traceState) {
+        traceState.addStartingPointMode.collect {
+            if (it != currentState) {
+                currentState = it
+                onAddStartingPointModeChanged(it)
+            }
+        }
+    }
 
     Surface(
         color = MaterialTheme.colorScheme.surface,
         modifier = Modifier
             .fillMaxSize()
     ) {
-        Column {
-            Text(text = traceState.traceResult.collectAsStateWithLifecycle().value?.toString() ?: "Null")
-            Button(onClick = { traceState.trace() }) {
-                Text(stringResource(id = R.string.trace))
-            }
-        }
+        TraceNavHost(navController, traceState)
     }
 }
 

@@ -19,6 +19,7 @@ package com.arcgismaps.toolkit.utilitynetworks
 import android.util.Log
 import com.arcgismaps.Guid
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.utilitynetworks.UtilityElementTraceResult
 import com.arcgismaps.utilitynetworks.UtilityNamedTraceConfiguration
 import com.arcgismaps.utilitynetworks.UtilityNetwork
@@ -27,6 +28,7 @@ import com.arcgismaps.utilitynetworks.UtilityTraceType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 /**
@@ -35,12 +37,27 @@ import kotlinx.coroutines.launch
  * @since 200.6.0
  */
 public sealed interface TraceState {
-
     public val traceConfigurations: StateFlow<List<UtilityNamedTraceConfiguration>?>
-
     public val traceResult: StateFlow<UtilityElementTraceResult?>
-
+    public val addStartingPointMode: StateFlow<AddStartingPointMode>
+    public fun addStartingPoint(point: SingleTapConfirmedEvent)
+    public fun updateAddStartPointMode(status: AddStartingPointMode)
     public fun trace()
+}
+
+/**
+ * Represents the mode when adding starting points.
+ */
+public sealed class AddStartingPointMode {
+    /**
+     * Utility Network Trace tool is in add starting points mode.
+     */
+    public data object Start : AddStartingPointMode()
+
+    /**
+     * Utility Network Trace tool is not adding starting points.
+     */
+    public data object Stop : AddStartingPointMode()
 }
 
 /**
@@ -59,24 +76,27 @@ private class TraceStateImpl(
     private var _traceResult = MutableStateFlow<UtilityElementTraceResult?>(null)
     override val traceResult: StateFlow<UtilityElementTraceResult?> = _traceResult
 
+    private var _addStartingPointMode = MutableStateFlow<AddStartingPointMode>(AddStartingPointMode.Stop)
+    override val addStartingPointMode: StateFlow<AddStartingPointMode> = _addStartingPointMode.asStateFlow()
+
     private var utilityNetwork: UtilityNetwork? = null
 
     init {
         coroutineScope.launch {
-                arcGISMap.load().onSuccess {
-                    arcGISMap.utilityNetworks.forEach {
-                        it.load().onFailure {
-                            // Handle error
-                        }.onSuccess {
+            arcGISMap.load().onSuccess {
+                arcGISMap.utilityNetworks.forEach {
+                    it.load().onFailure {
+                        // Handle error
+                    }.onSuccess {
 
-                        }
                     }
-                }.onFailure {
-                    // Handle error
                 }
-                if (arcGISMap.utilityNetworks.isEmpty()) {
-                    // Handle error
-                }
+            }.onFailure {
+                // Handle error
+            }
+            if (arcGISMap.utilityNetworks.isEmpty()) {
+                // Handle error
+            }
 
             utilityNetwork = arcGISMap.utilityNetworks.first()
             _traceConfigurations.value = utilityNetwork?.queryNamedTraceConfigurations()?.getOrNull()
@@ -116,6 +136,18 @@ private class TraceStateImpl(
                 // Handle error
             }
         }
+    }
+
+    override fun addStartingPoint(point: SingleTapConfirmedEvent) {
+        if (_addStartingPointMode.value is AddStartingPointMode.Start) {
+            // TODO: identify
+            // TODO: add point to graphic overlay
+            _addStartingPointMode.value = AddStartingPointMode.Stop
+        }
+    }
+
+    override fun updateAddStartPointMode(status: AddStartingPointMode) {
+        _addStartingPointMode.value = status
     }
 }
 

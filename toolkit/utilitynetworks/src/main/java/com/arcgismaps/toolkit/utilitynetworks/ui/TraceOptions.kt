@@ -62,7 +62,11 @@ import com.arcgismaps.utilitynetworks.UtilityNetwork
  * @since 200.6.0
  */
 @Composable
-internal fun TraceOptions(configurations: List<SelectableItem>, onPerformTrace: () -> Unit) {
+internal fun TraceOptions(
+    configurations: List<SelectableItem>,
+    onPerformTrace: () -> Unit,
+    onAddStartingPoint: () -> Unit
+) {
     val traceConfigurations = remember { mutableStateListOf<SelectableItem>() }
     traceConfigurations.addAll(configurations)
     Surface(
@@ -80,7 +84,7 @@ internal fun TraceOptions(configurations: List<SelectableItem>, onPerformTrace: 
                 )
             }
             item {
-                StartingPointsEditor()
+                StartingPointsEditor(onAddStartingPoint)
             }
             item {
                 Button(onClick = { onPerformTrace() }) {
@@ -136,19 +140,20 @@ private fun TraceConfiguration(utilityTraces: List<SelectableItem>) {
  * @since 200.6.0
  */
 @Composable
-private fun StartingPointsEditor() {
-    val startingPoints = remember { mutableStateListOf(StartingPointData(name = "Test Starting Point"))}
+private fun StartingPointsEditor(onAddNewStartingPoint: () -> Unit) {
+    val startingPoints = remember { mutableStateListOf(StartingPointData(name = "Test Starting Point")) }
     var counter by remember { mutableIntStateOf(1) }
     ExpandableCard(
         title = "${stringResource(id = R.string.starting_points)} (${counter})",
         description = {
-            Row (
+            Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center
             ) {
                 ElevatedButton(
                     onClick = {
-                        startingPoints.add(StartingPointData("Point ${counter++}"))
+                        onAddNewStartingPoint()
+//                        startingPoints.add(StartingPointData("Point ${counter++}"))
                     },
                     shape = RoundedCornerShape(8.dp)
                 ) {
@@ -186,8 +191,10 @@ private fun TraceOptionsPreview() {
             SelectableItem("Trace 2", false),
             SelectableItem("Trace 3", false),
             SelectableItem("Trace 4", false)
-        )
-    ) {}
+        ),
+        onPerformTrace = {},
+        onAddStartingPoint = {}
+    )
 }
 
 /**

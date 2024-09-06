@@ -18,27 +18,32 @@ package com.arcgismaps.toolkit.utilitynetworks.ui
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
-import androidx.navigation.NavOptions
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.arcgismaps.toolkit.utilitynetworks.AddStartingPointMode
+import com.arcgismaps.toolkit.utilitynetworks.TraceState
 
 /**
  *
  * @since 200.6.0
  */
 @Composable
-internal fun TraceNavHost(navController: NavHostController) {
+internal fun TraceNavHost(navController: NavHostController, traceState: TraceState) {
     NavHost(navController = navController, startDestination = TraceOptions.route) {
         composable(TraceOptions.route) {
-            TraceOptions(onPerformTrace = {
-                navController.navigate(TraceResults.route)
-            },
-                onPointSelected = {
+            TraceOptions(
+                configurations = emptyList(),
+                onPerformTrace = {
+                    navController.navigate(TraceResults.route)
+                },
+                onAddStartingPoint = {
+                    traceState.updateAddStartPointMode(AddStartingPointMode.Start)
                     navController.navigate(AddStartingPoint.route)
                 })
         }
         composable(AddStartingPoint.route) {
-            StartingPoints(
+            AddStartingPointScreen(
+                traceState,
                 onPointSelected = {
                     navController.navigate(TraceOptions.route)
                 }
@@ -52,19 +57,19 @@ internal fun TraceNavHost(navController: NavHostController) {
 }
 
 
-internal sealed interface TraceDestination {
+internal sealed interface TraceRoute {
     val route: String
 }
 
-internal data object TraceOptions : TraceDestination {
+internal data object TraceOptions : TraceRoute {
     override val route = "trace_options"
 }
 
-internal data object TraceResults : TraceDestination {
+internal data object TraceResults : TraceRoute {
     override val route = "trace_results"
 }
 
-internal data object AddStartingPoint : TraceDestination {
+internal data object AddStartingPoint : TraceRoute {
     override val route = "add_starting_point"
 }
-//TODO: Add FeatureAttributes destination
+//TODO: Add FeatureAttributes route
