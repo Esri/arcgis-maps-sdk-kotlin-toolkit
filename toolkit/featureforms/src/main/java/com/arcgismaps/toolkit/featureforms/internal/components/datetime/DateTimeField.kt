@@ -30,6 +30,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,39 +46,40 @@ internal fun DateTimeField(
     state: DateTimeFieldState,
     modifier: Modifier = Modifier
 ) {
+    val currentState by rememberUpdatedState(newValue = state)
     val dialogRequester = LocalDialogRequester.current
-    val isEditable by state.isEditable.collectAsState()
-    val isRequired by state.isRequired.collectAsState()
-    val value by state.value
-    val interactionSource = remember(state) { MutableInteractionSource() }
+    val isEditable by currentState.isEditable.collectAsState()
+    val isRequired by currentState.isRequired.collectAsState()
+    val value by currentState.value
+    val interactionSource = remember { MutableInteractionSource() }
     val isError = value.error !is ValidationErrorState.NoError
     // if any errors are present, show the error as the supporting text
     val supportingText = if (!isError) {
-        state.description
+        currentState.description
     } else {
         value.error.getString()
     }
 
     BaseTextField(
-        text = value.data?.formattedDateTime(state.shouldShowTime) ?: "",
+        text = value.data?.formattedDateTime(currentState.shouldShowTime) ?: "",
         onValueChange = {
             // the only allowable change is to clear the text
             if (it.isEmpty()) {
-                state.onValueChanged(null)
+                currentState.onValueChanged(null)
             }
         },
         modifier = modifier,
         readOnly = true,
         isEditable = isEditable,
-        label = state.label,
-        placeholder = state.placeholder.ifEmpty { stringResource(id = R.string.no_value) },
+        label = currentState.label,
+        placeholder = currentState.placeholder.ifEmpty { stringResource(id = R.string.no_value) },
         supportingText = supportingText,
         isError = isError,
         isRequired = isRequired,
         singleLine = true,
         interactionSource = interactionSource,
         trailingIcon = Icons.Rounded.EditCalendar,
-        onFocusChange = state::onFocusChanged,
+        onFocusChange = currentState::onFocusChanged,
         trailingContent =
         if (isRequired) {
             {
@@ -89,7 +91,7 @@ internal fun DateTimeField(
         } else {
             null
         },
-        hasValueExpression = state.hasValueExpression
+        hasValueExpression = currentState.hasValueExpression
     )
 
     LaunchedEffect(interactionSource) {
@@ -98,7 +100,7 @@ internal fun DateTimeField(
                 // request to show the date picker dialog only when the touch is released
                 // the dialog is responsible for updating the value on the state
                 if (isEditable) {
-                    dialogRequester.requestDialog(DialogType.DateTimeDialog(state.id))
+                    dialogRequester.requestDialog(DialogType.DateTimeDialog(currentState.id))
                 }
             }
         }
