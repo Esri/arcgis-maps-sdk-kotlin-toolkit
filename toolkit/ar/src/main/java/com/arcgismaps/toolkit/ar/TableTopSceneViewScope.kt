@@ -2,13 +2,11 @@ package com.arcgismaps.toolkit.ar
 
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.GeoElement
 import com.arcgismaps.mapping.view.GeoView
-import com.arcgismaps.mapping.view.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewScope
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutColors
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutDefaults
@@ -45,7 +43,15 @@ public class TableTopSceneViewScope internal constructor(private val sceneViewSc
         colorScheme: CalloutColors = CalloutDefaults.colors(),
         shapes: CalloutShapes = CalloutDefaults.shapes(),
         content: @Composable BoxScope.() -> Unit
-    ): Unit = sceneViewScope.Callout(location, modifier, offset, rotateOffsetWithGeoView, colorScheme, shapes, content)
+    ): Unit = sceneViewScope.Callout(
+        location,
+        modifier,
+        offset,
+        rotateOffsetWithGeoView,
+        colorScheme,
+        shapes,
+        content
+    )
 
     /**
      * Creates a Callout at the specified [geoElement] or the [tapLocation] location on the MapView. The Callout is a composable
@@ -75,5 +81,6 @@ public class TableTopSceneViewScope internal constructor(private val sceneViewSc
         colorScheme: CalloutColors = CalloutDefaults.colors(),
         shapes: CalloutShapes = CalloutDefaults.shapes(),
         content: @Composable BoxScope.() -> Unit
-    ): Unit = sceneViewScope.Callout(geoElement, modifier, tapLocation, colorScheme, shapes, content)
+    ): Unit =
+        sceneViewScope.Callout(geoElement, modifier, tapLocation, colorScheme, shapes, content)
 }

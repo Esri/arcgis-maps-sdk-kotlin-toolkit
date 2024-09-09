@@ -2,14 +2,8 @@ package com.arcgismaps.toolkit.ar
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Face
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.arcgismaps.geometry.SpatialReference
@@ -98,7 +92,8 @@ public fun TableTopSceneView(
         val initialTransformationMatrix = TransformationMatrix.createIdentityMatrix()
         cameraController.transformationMatrix = initialTransformationMatrix
         val onFrame: (Frame) -> Unit = {
-            val newMatrix = initialTransformationMatrix + (it.camera.displayOrientedPose.transformationMatrix)
+            val newMatrix =
+                initialTransformationMatrix + (it.camera.displayOrientedPose.transformationMatrix)
             cameraController.transformationMatrix = newMatrix
             val imageIntrinsics = it.camera.imageIntrinsics
             tableTopSceneViewProxy.sceneViewProxy.setFieldOfViewFromLensIntrinsics(

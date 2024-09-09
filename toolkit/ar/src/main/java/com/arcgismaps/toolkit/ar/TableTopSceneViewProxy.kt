@@ -18,7 +18,7 @@ import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
-public final class TableTopSceneViewProxy internal constructor(internal val sceneViewProxy: SceneViewProxy) {
+public class TableTopSceneViewProxy internal constructor(internal val sceneViewProxy: SceneViewProxy) {
 
     public constructor() : this(SceneViewProxy())
 
