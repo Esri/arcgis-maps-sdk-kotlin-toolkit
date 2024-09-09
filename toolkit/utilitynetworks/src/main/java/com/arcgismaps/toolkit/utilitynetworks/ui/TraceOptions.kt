@@ -240,53 +240,7 @@ internal fun AdvancedOptions(
 
             // Color picker
             AdvancedOptionsRow(name = stringResource(id = R.string.color)) {
-                var currentSelectedColor by rememberSaveable(saver = ColorSaver.Saver()) { mutableStateOf(Color.Red) }
-                var displayPicker by rememberSaveable { mutableStateOf(false) }
-                Box {
-                    TraceColors.SpectralRing(
-                        currentSelectedColor,
-                        modifier = Modifier
-                            .padding(4.dp)
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .clickable {
-                                displayPicker = true
-                            }
-                    )
-
-                    MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp))) {
-                        DropdownMenu(
-                            expanded = displayPicker,
-                            offset = DpOffset.Zero,
-                            onDismissRequest = { displayPicker = false },
-                        ) {
-                            DropdownMenuItem(
-                                text = {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        TraceColors.colors.forEach {
-                                            Box(modifier = Modifier
-                                                .size(40.dp)
-                                                .padding(8.dp)
-                                                .clip(CircleShape)
-                                                .background(it)
-                                                .clickable {
-                                                    currentSelectedColor = it
-                                                    displayPicker = false
-                                                }
-                                            )
-                                        }
-
-                                    }
-                                },
-                                onClick = {},
-                                contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp)
-                            )
-                        }
-                    }
-                }
+                ColorPicker()
             }
 
             if (showZoomToResult) {
@@ -319,6 +273,62 @@ internal fun AdvancedOptions(
                         interactionSource = interactionSource
                     )
                 }
+            }
+        }
+    }
+}
+
+/**
+ * A simple ColorPicker which spans the colors defined in [TraceColors.colors].
+ *
+ * @since 200.6.0
+ */
+@Composable
+internal fun ColorPicker() {
+    var currentSelectedColor by rememberSaveable(saver = ColorSaver.Saver()) { mutableStateOf(Color.Red) }
+    var displayPicker by rememberSaveable { mutableStateOf(false) }
+    Box {
+        TraceColors.SpectralRing(
+            currentSelectedColor,
+            modifier = Modifier
+                .padding(4.dp)
+                .size(36.dp)
+                .clip(CircleShape)
+                .clickable {
+                    displayPicker = true
+                }
+        )
+
+        MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp))) {
+            DropdownMenu(
+                expanded = displayPicker,
+                offset = DpOffset.Zero,
+                onDismissRequest = { displayPicker = false },
+            ) {
+                DropdownMenuItem(
+                    text = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            TraceColors.colors.forEach {
+                                Box(modifier = Modifier
+                                    .size(40.dp)
+                                    .padding(8.dp)
+                                    .clip(CircleShape)
+                                    .background(it)
+                                    .clickable {
+                                        currentSelectedColor = it
+                                        displayPicker = false
+                                    }
+                                )
+                            }
+
+                        }
+                    },
+                    onClick = {},
+                    contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp)
+                )
             }
         }
     }
@@ -361,7 +371,6 @@ private fun AdvancedOptionsRow(name: String, modifier: Modifier = Modifier, trai
         trailingTool()
     }
 }
-
 
 @Preview
 @Composable

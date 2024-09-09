@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -38,32 +39,29 @@ import androidx.compose.ui.unit.dp
  * @since 200.6.0
  */
 internal object TraceColors {
-    private val colorMap = mapOf(
-        0 to Color.Green,
-        1 to Color.Blue,
-        2 to Color.Red,
-        3 to Color.Yellow,
-        4 to Color.Black
+    val colors = listOf(
+        Color.Green,
+        Color.Blue,
+        Color.Red,
+        Color.Yellow,
+        Color.Black
     )
-
-    val colors: List<Color> = colorMap.values.toList()
 
     private var chosenColor: Int = 0
 
     /**
-     * For automatic choosing of colors for trace results
+     * Returns the next color in the sequence.
      *
      * @since 200.6.0
      */
     @Suppress("unused")
     internal fun nextColor(): Color {
-        return colorMap[chosenColor]!!.also {
-            chosenColor = (chosenColor+1).mod(colorMap.size)
+        return colors[chosenColor].also {
+            chosenColor = (chosenColor+1).mod(colors.size)
         }
     }
 
     private val sweepColors = mutableListOf(colors.last()).also {it.addAll(colors)}
-    private val brush = Brush.sweepGradient(sweepColors)
 
     /**
      * A composable for use as an Icon or Button which provides a gradient ring
@@ -71,11 +69,13 @@ internal object TraceColors {
      *
      * @param backgroundFill a color for use as the background of the ring.
      * @param modifier the modifier.
+     * @Since 200.6.0
      */
     @Composable
     fun SpectralRing(backgroundFill: Color, modifier: Modifier = Modifier) {
         Box(modifier = modifier.clip(CircleShape).background(backgroundFill)) {
             val bgColor = MaterialTheme.colorScheme.background
+            val brush = remember { Brush.sweepGradient(sweepColors) }
             Canvas(modifier = Modifier.aspectRatio(1f)) {
                 val canvasWidth = size.width
 
