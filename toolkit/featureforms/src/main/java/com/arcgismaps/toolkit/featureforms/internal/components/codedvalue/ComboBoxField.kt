@@ -95,7 +95,7 @@ internal fun ComboBoxField(
     val value by state.value
     val isEditable by state.isEditable.collectAsState()
     val isRequired by state.isRequired.collectAsState()
-    val interactionSource = remember { MutableInteractionSource() }
+    val interactionSource = remember(state) { MutableInteractionSource() }
     val placeholder = if (isRequired) {
         stringResource(R.string.enter_value)
     } else if (state.showNoValueOption == FormInputNoValueOption.Show) {

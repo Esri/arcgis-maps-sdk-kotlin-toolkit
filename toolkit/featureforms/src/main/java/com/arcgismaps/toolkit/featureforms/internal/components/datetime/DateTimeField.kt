@@ -49,7 +49,7 @@ internal fun DateTimeField(
     val isEditable by state.isEditable.collectAsState()
     val isRequired by state.isRequired.collectAsState()
     val value by state.value
-    val interactionSource = remember { MutableInteractionSource() }
+    val interactionSource = remember(state) { MutableInteractionSource() }
     val isError = value.error !is ValidationErrorState.NoError
     // if any errors are present, show the error as the supporting text
     val supportingText = if (!isError) {

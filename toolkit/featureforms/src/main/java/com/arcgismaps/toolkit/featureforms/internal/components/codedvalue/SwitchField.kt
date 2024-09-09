@@ -37,7 +37,7 @@ internal fun SwitchField(state: SwitchFieldState, modifier: Modifier = Modifier)
     val checkedState = codeValue.data == state.onValue.code
     val value = if (checkedState) state.onValue.name else state.offValue.name
     val isEditable by state.isEditable.collectAsState()
-    val interactionSource = remember { MutableInteractionSource() }
+    val interactionSource = remember(state) { MutableInteractionSource() }
     BaseTextField(
         text = value,
         onValueChange = {
