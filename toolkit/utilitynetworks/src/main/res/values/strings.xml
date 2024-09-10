@@ -15,12 +15,19 @@
   -->
 
 <resources>
-    <string name="starting_points">Starting Points </string>
-    <string name="trace">Trace</string>
-    <string name="add_starting_point">Add new starting point</string>
+    <string name="new_trace">New trace</string>
+    <string name="results">Results</string>
     <string name="trace_configuration">Trace Configuration</string>
+    <string name="starting_points">Starting Points</string>
     <string name="advanced_options">Advanced Options</string>
     <string name="name">Name</string>
-    <string name="zoom_to_result">Zoom to result</string>
     <string name="color">Color</string>
+    <string name="zoom_to_result">Zoom to result</string>
+    <string name="trace">Trace</string>
+    <string name="add_starting_point">Add new starting point</string>
+    <string name="cancel_starting_point_selection">Cancel starting point selection</string>
+    <string name="trace_result_with_count">Trace %1$d of %2$d</string>
+    <string name="feature_results">Feature Results</string>
+    <string name="function_results">Function Results</string>
+    <string name="clear_all_results">Clear all results</string>
 </resources>
