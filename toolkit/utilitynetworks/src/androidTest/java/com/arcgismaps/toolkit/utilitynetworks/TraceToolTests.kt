@@ -20,7 +20,6 @@ package com.arcgismaps.toolkit.utilitynetworks
 
 import android.content.Context
 import android.util.Log
-import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -58,7 +57,6 @@ class TraceToolTests : UtilityNetworksTestRunner(
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    @OptIn(ExperimentalTestApi::class)
     @Before
     fun setContent() = runTest {
         composeTestRule.setContent {
@@ -118,7 +116,7 @@ class TraceToolTests : UtilityNetworksTestRunner(
      * @since 200.6.0
      */
     @Test
-    fun testTest() {
+    fun testTraceToolSurface() {
         val surface = composeTestRule.onNodeWithContentDescription(traceSurfaceContentDescription)
         surface.assertExists("the base surface of the Trace tool composable does not exist")
     }
