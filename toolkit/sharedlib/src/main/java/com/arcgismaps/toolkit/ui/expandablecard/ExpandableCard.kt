@@ -55,6 +55,7 @@ import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardDefaults
 import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardShapes
 import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardTheme
 import com.arcgismaps.toolkit.ui.expandablecard.theme.ExpandableCardTypography
+import com.arcgismaps.toolkit.ui.modifier.applyIf
 
 /**
  * Composable Card that has the ability to expand and collapse its [content].
@@ -67,13 +68,14 @@ fun ExpandableCard(
     title: String = "",
     description: (@Composable () -> Unit)? = null,
     toggleable: Boolean = true,
+    initialExpandedState: Boolean = true,
     padding: Dp = 16.dp,
     colorScheme: ExpandableCardColorScheme = ExpandableCardDefaults.colorScheme(),
     shapes: ExpandableCardShapes = ExpandableCardDefaults.shapes(),
     typography: ExpandableCardTypography = ExpandableCardDefaults.typography(),
     content: @Composable () -> Unit = {}
 ) {
-    var expanded by rememberSaveable { mutableStateOf(true) }
+    var expanded by rememberSaveable { mutableStateOf(initialExpandedState) }
 
     ExpandableCardTheme(
         colorScheme = colorScheme,
@@ -128,8 +130,12 @@ private fun ExpandableHeader(
     if (title.isEmpty() && description == null && !expandable) return
     Row(
         Modifier
-            .then(if(expandable) Modifier.clickable { onClick() } else Modifier)
             .fillMaxWidth()
+            .applyIf(expandable) {
+                clickable {
+                    onClick()
+                }
+            }
             .background(colors.headerBackgroundColor),
         verticalAlignment = Alignment.CenterVertically
     ) {

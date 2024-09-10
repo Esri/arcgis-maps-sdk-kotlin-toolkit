@@ -16,16 +16,16 @@
 
 package com.arcgismaps.toolkit.utilitynetworks
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.arcgismaps.toolkit.utilitynetworks.ui.SelectableItem
+import com.arcgismaps.toolkit.utilitynetworks.ui.TraceOptions
+import kotlinx.coroutines.launch
 
 /**
  * A composable UI component to set up and run a [com.arcgismaps.utilitynetworks.UtilityNetwork.trace]
@@ -47,10 +47,10 @@ public fun Trace(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        Column {
-            Text(text = traceState.traceResult.collectAsStateWithLifecycle().value?.toString() ?: "Null")
-            Button(onClick = { traceState.trace() }) {
-                Text(stringResource(id = R.string.trace))
+        val scope = rememberCoroutineScope()
+        TraceOptions(configurations = listOf(SelectableItem("test trace configuration remove me", false))) {
+            scope.launch {
+                traceState.trace()
             }
         }
     }
