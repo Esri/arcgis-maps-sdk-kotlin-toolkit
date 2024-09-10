@@ -25,6 +25,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -33,10 +34,11 @@ import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseTextFiel
 
 @Composable
 internal fun SwitchField(state: SwitchFieldState, modifier: Modifier = Modifier) {
-    val codeValue by state.value
-    val checkedState = codeValue.data == state.onValue.code
-    val value = if (checkedState) state.onValue.name else state.offValue.name
-    val isEditable by state.isEditable.collectAsState()
+    val currentState by rememberUpdatedState(newValue = state)
+    val codeValue by currentState.value
+    val checkedState by rememberUpdatedState (codeValue.data == currentState.onValue.code)
+    val value = if (checkedState) currentState.onValue.name else currentState.offValue.name
+    val isEditable by currentState.isEditable.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
     BaseTextField(
         text = value,
@@ -46,24 +48,24 @@ internal fun SwitchField(state: SwitchFieldState, modifier: Modifier = Modifier)
         modifier = modifier,
         readOnly = true,
         isEditable = isEditable,
-        label = state.label,
-        placeholder = state.placeholder,
-        supportingText = state.description,
+        label = currentState.label,
+        placeholder = currentState.placeholder,
+        supportingText = currentState.description,
         isError = false,
         isRequired = false,
         singleLine = true,
         interactionSource = interactionSource,
-        hasValueExpression = state.hasValueExpression
+        hasValueExpression = currentState.hasValueExpression
     ) {
         Switch(
             checked = checkedState,
             onCheckedChange = { newState ->
                 val code = if (newState) {
-                    state.onValue.code
+                    currentState.onValue.code
                 } else {
-                    state.offValue.code
+                    currentState.offValue.code
                 }
-                state.onValueChanged(code)
+                currentState.onValueChanged(code)
             },
             modifier = Modifier
                 .semantics { contentDescription = "switch" }
@@ -72,16 +74,16 @@ internal fun SwitchField(state: SwitchFieldState, modifier: Modifier = Modifier)
         )
     }
 
-    LaunchedEffect(codeValue) {
+    LaunchedEffect(interactionSource) {
         interactionSource.interactions.collect {
             if (isEditable) {
                 if (it is PressInteraction.Release) {
                     val code = if (checkedState) {
-                        state.offValue.code
+                        currentState.offValue.code
                     } else {
-                        state.onValue.code
+                        currentState.onValue.code
                     }
-                    state.onValueChanged(code)
+                    currentState.onValueChanged(code)
                 }
             }
         }
