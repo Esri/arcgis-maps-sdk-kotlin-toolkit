@@ -28,6 +28,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.dokka) apply false
     alias(libs.plugins.gmazzo.test.aggregation)
+    alias(libs.plugins.compose.compiler) apply false
 }
 
 buildscript {
