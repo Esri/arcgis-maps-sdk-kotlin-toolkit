@@ -38,7 +38,7 @@ import com.arcgismaps.toolkit.utilitynetworks.TraceState
 internal fun AddStartingPointScreen(traceState: TraceState, onStopPointSelection: () -> Unit) {
     LaunchedEffect(key1 = traceState.addStartingPointMode) {
         traceState.addStartingPointMode.collect {
-            if (it == AddStartingPointMode.Stop) {
+            if (it == AddStartingPointMode.Stopped) {
                 onStopPointSelection()
             }
         }
@@ -48,8 +48,7 @@ internal fun AddStartingPointScreen(traceState: TraceState, onStopPointSelection
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Top) {
             Button(
                 onClick = {
-                    onStopPointSelection()
-                    traceState.updateAddStartPointMode(AddStartingPointMode.Stop)
+                    traceState.updateAddStartPointMode(AddStartingPointMode.Stopped)
                 }) {
                 Text(text = "Cancel Starting Point Selection")
             }

@@ -37,10 +37,11 @@ internal fun TraceNavHost(navController: NavHostController, traceState: TraceSta
             TraceOptions(
                 configurations = emptyList(),
                 onPerformTraceButtonClicked = {
+                    // TODO: Add call to perform trace
                     navController.navigate(TraceResults.route)
                 },
                 onAddStartingPointButtonClicked = {
-                    traceState.updateAddStartPointMode(AddStartingPointMode.Start)
+                    traceState.updateAddStartPointMode(AddStartingPointMode.Started)
                     navController.navigate(AddStartingPoint.route)
                 })
         }

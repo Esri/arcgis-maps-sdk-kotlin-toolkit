@@ -43,7 +43,7 @@ import com.arcgismaps.toolkit.utilitynetworks.Trace
 fun MainScreen(viewModel: TraceViewModel) {
 
     val loadState by viewModel.arcGISMap.loadStatus.collectAsState()
-    
+
     val addStartingPointMode by viewModel.traceState.addStartingPointMode.collectAsState()
     val scaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
@@ -53,9 +53,9 @@ fun MainScreen(viewModel: TraceViewModel) {
     )
 
     LaunchedEffect(key1 = addStartingPointMode) {
-        if (addStartingPointMode == AddStartingPointMode.Start) {
+        if (addStartingPointMode == AddStartingPointMode.Started) {
             scaffoldState.bottomSheetState.partialExpand()
-        } else {
+        } else if (addStartingPointMode == AddStartingPointMode.Stopped) {
             scaffoldState.bottomSheetState.expand()
         }
     }

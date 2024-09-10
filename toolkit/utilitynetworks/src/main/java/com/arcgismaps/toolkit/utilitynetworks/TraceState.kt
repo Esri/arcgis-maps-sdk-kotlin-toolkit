@@ -47,17 +47,29 @@ public sealed interface TraceState {
 
 /**
  * Represents the mode when adding starting points.
+ *
+ * @since 200.6.0
  */
 public sealed class AddStartingPointMode {
     /**
      * Utility Network Trace tool is in add starting points mode.
+     * @since 200.6.0
      */
-    public data object Start : AddStartingPointMode()
+    public data object Started : AddStartingPointMode()
 
     /**
      * Utility Network Trace tool is not adding starting points.
+     *
+     * @since 200.6.0
      */
-    public data object Stop : AddStartingPointMode()
+    public data object Stopped : AddStartingPointMode()
+
+    /**
+     * Utility Network Trace is neither started nor stopped.
+     *
+     * @since 200.6.0
+     */
+    public data object None : AddStartingPointMode()
 }
 
 /**
@@ -76,7 +88,7 @@ private class TraceStateImpl(
     private var _traceResult = MutableStateFlow<UtilityElementTraceResult?>(null)
     override val traceResult: StateFlow<UtilityElementTraceResult?> = _traceResult
 
-    private var _addStartingPointMode = MutableStateFlow<AddStartingPointMode>(AddStartingPointMode.Stop)
+    private var _addStartingPointMode = MutableStateFlow<AddStartingPointMode>(AddStartingPointMode.None)
     override val addStartingPointMode: StateFlow<AddStartingPointMode> = _addStartingPointMode.asStateFlow()
 
     private var utilityNetwork: UtilityNetwork? = null
@@ -139,10 +151,10 @@ private class TraceStateImpl(
     }
 
     override fun addStartingPoint(point: SingleTapConfirmedEvent) {
-        if (_addStartingPointMode.value is AddStartingPointMode.Start) {
+        if (_addStartingPointMode.value is AddStartingPointMode.Started) {
             // TODO: identify
             // TODO: add point to graphic overlay
-            _addStartingPointMode.value = AddStartingPointMode.Stop
+            _addStartingPointMode.value = AddStartingPointMode.Stopped
         }
     }
 
