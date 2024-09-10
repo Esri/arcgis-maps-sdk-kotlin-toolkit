@@ -35,18 +35,22 @@ import com.arcgismaps.toolkit.utilitynetworks.TraceState
  * @since 200.6.0
  */
 @Composable
-internal fun AddStartingPointScreen(traceState: TraceState, onPointSelected: () -> Unit) {
-    LaunchedEffect(key1 = null) {
+internal fun AddStartingPointScreen(traceState: TraceState, onStopPointSelection: () -> Unit) {
+    LaunchedEffect(key1 = traceState.addStartingPointMode) {
         traceState.addStartingPointMode.collect {
             if (it == AddStartingPointMode.Stop) {
-                onPointSelected()
+                onStopPointSelection()
             }
         }
     }
 
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Top) {
-            Button(onClick = { onPointSelected() }) {
+            Button(
+                onClick = {
+                    onStopPointSelection()
+                    traceState.updateAddStartPointMode(AddStartingPointMode.Stop)
+                }) {
                 Text(text = "Cancel Starting Point Selection")
             }
         }

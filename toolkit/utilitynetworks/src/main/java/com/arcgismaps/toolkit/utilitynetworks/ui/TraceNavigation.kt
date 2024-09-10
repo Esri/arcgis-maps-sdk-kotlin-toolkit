@@ -47,7 +47,7 @@ internal fun TraceNavHost(navController: NavHostController, traceState: TraceSta
         composable(AddStartingPoint.route) {
             AddStartingPointScreen(
                 traceState,
-                onPointSelected = {
+                onStopPointSelection = {
                     navController.navigate(TraceOptions.route)
                 }
             )
