@@ -108,7 +108,8 @@ public sealed class ValidationErrorVisibility {
 /**
  * A composable Form toolkit component that enables users to edit field values of features in a
  * layer using forms that have been configured externally. Forms may be configured in the [Web Map Viewer](https://www.arcgis.com/home/webmap/viewer.html)
- * or [Fields Maps Designer](https://www.arcgis.com/apps/fieldmaps/)).
+ * or [Fields Maps Designer](https://www.arcgis.com/apps/fieldmaps/)) and can be obtained from either
+ * an `ArcGISFeature`, `ArcGISFeatureTable`, `FeatureLayer` or `SubtypeSublayer`.
  *
  * The [FeatureForm] component supports the following [FormElement] types as part of its configuration.
  * - [AttachmentsFormElement]
