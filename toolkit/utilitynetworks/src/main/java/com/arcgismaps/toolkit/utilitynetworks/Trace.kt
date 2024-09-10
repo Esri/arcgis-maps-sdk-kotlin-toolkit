@@ -16,12 +16,17 @@
 
 package com.arcgismaps.toolkit.utilitynetworks
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.toolkit.utilitynetworks.ui.SelectableItem
 import com.arcgismaps.toolkit.utilitynetworks.ui.TraceOptions
@@ -39,18 +44,37 @@ public fun Trace(
     @Suppress("unused_parameter")
     modifier: Modifier = Modifier,
 ) {
+    val configs = traceState.traceConfigurations.collectAsStateWithLifecycle()
     // if the traceConfigurations are not available, that means the traceState is not ready so return
-    if (traceState.traceConfigurations.collectAsStateWithLifecycle().value == null) return
+    if (configs.value == null) {
+        Surface(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier
+                    .size(100.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+    } else {
 
-    Surface(
-        color = MaterialTheme.colorScheme.surface,
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        val scope = rememberCoroutineScope()
-        TraceOptions(configurations = listOf(SelectableItem("test trace configuration remove me", false))) {
-            scope.launch {
-                traceState.trace()
+        Surface(
+            color = MaterialTheme.colorScheme.surface,
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            val scope = rememberCoroutineScope()
+            TraceOptions(
+                configurations = listOf(
+                    SelectableItem(
+                        "test trace configuration remove me",
+                        false
+                    )
+                )
+            ) {
+                scope.launch {
+                    traceState.trace()
+                }
             }
         }
     }
