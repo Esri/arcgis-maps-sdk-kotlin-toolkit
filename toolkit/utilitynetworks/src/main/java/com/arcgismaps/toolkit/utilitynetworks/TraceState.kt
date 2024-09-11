@@ -48,33 +48,6 @@ public sealed interface TraceState {
 }
 
 /**
- * Represents the mode when adding starting points.
- *
- * @since 200.6.0
- */
-public sealed class AddStartingPointMode {
-    /**
-     * Utility Network Trace tool is in add starting points mode.
-     * @since 200.6.0
-     */
-    public data object Started : AddStartingPointMode()
-
-    /**
-     * Utility Network Trace tool is not adding starting points.
-     *
-     * @since 200.6.0
-     */
-    public data object Stopped : AddStartingPointMode()
-
-    /**
-     * Utility Network Trace is neither started nor stopped.
-     *
-     * @since 200.6.0
-     */
-    public data object None : AddStartingPointMode()
-}
-
-/**
  * Default implementation for [TraceState].
  *
  * @since 200.6.0
@@ -161,6 +134,33 @@ private class TraceStateImpl(
     override fun updateAddStartPointMode(status: AddStartingPointMode) {
         _addStartingPointMode.value = status
     }
+}
+
+/**
+ * Represents the mode when adding starting points.
+ *
+ * @since 200.6.0
+ */
+public sealed class AddStartingPointMode {
+    /**
+     * Utility Network Trace tool is in add starting points mode.
+     * @since 200.6.0
+     */
+    public data object Started : AddStartingPointMode()
+
+    /**
+     * Utility Network Trace tool is not adding starting points.
+     *
+     * @since 200.6.0
+     */
+    public data object Stopped : AddStartingPointMode()
+
+    /**
+     * Utility Network Trace is neither started nor stopped.
+     *
+     * @since 200.6.0
+     */
+    public data object None : AddStartingPointMode()
 }
 
 /**
