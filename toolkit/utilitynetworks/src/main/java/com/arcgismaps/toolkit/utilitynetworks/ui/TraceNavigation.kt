@@ -32,28 +32,28 @@ import com.arcgismaps.toolkit.utilitynetworks.TraceState
  */
 @Composable
 internal fun TraceNavHost(navController: NavHostController, traceState: TraceState) {
-    NavHost(navController = navController, startDestination = TraceNavRoute.TraceOptions.route) {
-        composable(TraceNavRoute.TraceOptions.route) {
+    NavHost(navController = navController, startDestination = TraceNavRoute.TraceOptions.name) {
+        composable(TraceNavRoute.TraceOptions.name) {
             TraceOptionsScreen(
                 configurations = emptyList(),
                 onPerformTraceButtonClicked = {
                     // TODO: Add call to perform trace
-                    navController.navigate(TraceNavRoute.TraceResults.route)
+                    navController.navigate(TraceNavRoute.TraceResults.name)
                 },
                 onAddStartingPointButtonClicked = {
                     traceState.updateAddStartPointMode(AddStartingPointMode.Started)
-                    navController.navigate(TraceNavRoute.AddStartingPoint.route)
+                    navController.navigate(TraceNavRoute.AddStartingPoint.name)
                 })
         }
-        composable(TraceNavRoute.AddStartingPoint.route) {
+        composable(TraceNavRoute.AddStartingPoint.name) {
             AddStartingPointScreen(
                 traceState,
                 onStopPointSelection = {
-                    navController.navigate(TraceNavRoute.TraceOptions.route)
+                    navController.navigate(TraceNavRoute.TraceOptions.name)
                 }
             )
         }
-        composable(TraceNavRoute.TraceResults.route) {
+        composable(TraceNavRoute.TraceResults.name) {
             // TODO: Add TraceResults composable
         }
     }
@@ -64,9 +64,9 @@ internal fun TraceNavHost(navController: NavHostController, traceState: TraceSta
  *
  * @since 200.6.0
  */
-private enum class TraceNavRoute(val route: String) {
-    TraceOptions("trace_options"),
-    AddStartingPoint("add_starting_point"),
-    TraceResults("trace_results")
+private enum class TraceNavRoute {
+    TraceOptions,
+    AddStartingPoint,
+    TraceResults
     //TODO: Add FeatureAttributes route
 }
