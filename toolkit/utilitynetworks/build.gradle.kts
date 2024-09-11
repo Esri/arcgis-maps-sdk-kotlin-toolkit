@@ -51,11 +51,13 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
+
     }
     buildFeatures {
         compose = true
         buildConfig = true
     }
+    
     // If this were not an android project, we would just write `explicitApi()` in the Kotlin scope.
     // but as an android project could write `freeCompilerArgs = listOf("-Xexplicit-api=strict")`
     // in the kotlinOptions above, but that would enforce api rules on the test code, which we don't want.
@@ -78,6 +80,18 @@ android {
     lint {
         targetSdk = libs.versions.compileSdk.get().toInt()
     }
+}
+
+apiValidation {
+    // todo: remove when this is resolved https://github.com/Kotlin/binary-compatibility-validator/issues/74
+    // compose compiler generates public singletons for internal compose functions. this may be resolved in the compose
+    // compiler.
+    val composableSingletons = listOf(
+        "com.arcgismaps.toolkit.utilitynetworks.ComposableSingletons\$TraceKt",
+        "com.arcgismaps.toolkit.utilitynetworks.ui.ComposableSingletons\$TraceOptionsKt"
+    )
+
+    ignoredClasses.addAll(composableSingletons)
 }
 
 dependencies {

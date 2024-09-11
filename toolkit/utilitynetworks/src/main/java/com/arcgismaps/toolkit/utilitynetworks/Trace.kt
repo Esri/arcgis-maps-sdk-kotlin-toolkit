@@ -18,19 +18,22 @@ package com.arcgismaps.toolkit.utilitynetworks
 
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.arcgismaps.toolkit.utilitynetworks.ui.SelectableItem
+import com.arcgismaps.toolkit.utilitynetworks.ui.TraceOptions
+import kotlinx.coroutines.launch
 
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
 public val traceSurfaceContentDescription: String = "trace component surface"
@@ -47,26 +50,36 @@ public fun Trace(
     @Suppress("unused_parameter")
     modifier: Modifier = Modifier
 ) {
+    val configs = traceState.traceConfigurations.collectAsStateWithLifecycle()
+
     Surface(
         color = MaterialTheme.colorScheme.surface,
         modifier = Modifier
             .fillMaxSize()
             .semantics { contentDescription = traceSurfaceContentDescription }
     ) {
-        val configurations = traceState.traceConfigurations.collectAsStateWithLifecycle()
-        if (configurations.value != null) {
-            Column {
-                Text(
-                    text = traceState.traceResult.collectAsStateWithLifecycle().value?.toString()
-                        ?: "Null"
-                )
-                Button(onClick = { traceState.trace() }) {
-                    Text(stringResource(id = R.string.trace))
-                }
+        val scope = rememberCoroutineScope()
+
+        if (configs.value == null) {
+            Box(
+                modifier = Modifier
+                    .size(100.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
             }
         } else {
-            Box {
-                CircularProgressIndicator()
+            TraceOptions(
+                configurations = listOf(
+                    SelectableItem(
+                        "test trace configuration remove me",
+                        false
+                    )
+                )
+            ) {
+                scope.launch {
+                    traceState.trace()
+                }
             }
         }
     }

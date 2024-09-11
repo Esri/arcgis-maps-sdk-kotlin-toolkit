@@ -69,7 +69,7 @@ class TraceToolTests : UtilityNetworksTestRunner(
                 override val traceResult: StateFlow<UtilityElementTraceResult?> =
                     _traceResult.asStateFlow()
 
-                override fun trace() = runTest {
+                override suspend fun trace() {
                     val utilityNetworkDefinition = utilityNetwork.definition
                     val utilityNetworkSource =
                         utilityNetworkDefinition?.getNetworkSource("Electric Distribution Line")
