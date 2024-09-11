@@ -35,7 +35,7 @@ import kotlinx.coroutines.launch
  *
  * @since 200.6.0
  */
-public sealed class TraceState(
+public class TraceState(
     private val arcGISMap: ArcGISMap,
     coroutineScope: CoroutineScope
 ) {
