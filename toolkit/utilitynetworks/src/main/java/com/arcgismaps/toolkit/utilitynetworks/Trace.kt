@@ -23,14 +23,12 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.arcgismaps.toolkit.utilitynetworks.ui.SelectableItem
-import com.arcgismaps.toolkit.utilitynetworks.ui.TraceOptions
-import kotlinx.coroutines.launch
+import androidx.navigation.compose.rememberNavController
+import com.arcgismaps.toolkit.utilitynetworks.ui.TraceNavHost
 
 /**
  * A composable UI component to set up and run a [com.arcgismaps.utilitynetworks.UtilityNetwork.trace]
@@ -58,24 +56,14 @@ public fun Trace(
         }
     } else {
 
+        val navController = rememberNavController()
+
         Surface(
             color = MaterialTheme.colorScheme.surface,
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            val scope = rememberCoroutineScope()
-            TraceOptions(
-                configurations = listOf(
-                    SelectableItem(
-                        "test trace configuration remove me",
-                        false
-                    )
-                )
-            ) {
-                scope.launch {
-                    traceState.trace()
-                }
-            }
+            TraceNavHost(navController, traceState)
         }
     }
 }
