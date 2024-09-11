@@ -175,7 +175,7 @@ private fun StartingPointsEditor(showAddStartingPointScreen: () -> Unit) {
     ExpandableCard(
         title = "${stringResource(id = R.string.starting_points)} (${counter})",
         description = {
-            Row (
+            Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center
             ) {
@@ -243,7 +243,7 @@ internal fun AdvancedOptions(
                         },
                         modifier = Modifier.defaultMinSize(minWidth = 1.dp),
                         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
-                        keyboardActions = KeyboardActions(onDone =  {
+                        keyboardActions = KeyboardActions(onDone = {
                             focusManager.clearFocus()
                         }),
                         maxLines = 1,
