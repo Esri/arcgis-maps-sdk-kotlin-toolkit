@@ -17,14 +17,11 @@
 package com.arcgismaps.toolkit.utilitynetworks
 
 import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.LoadStatus
-import com.arcgismaps.Loadable
 import com.arcgismaps.httpcore.authentication.TokenCredential
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.PortalItem
 import com.arcgismaps.portal.Portal
-import com.arcgismaps.utilitynetworks.UtilityNetwork
-import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 
@@ -37,20 +34,21 @@ import org.junit.Before
  * @property itemId the item id on agol to load as a webmap
  * @since 200.6.0
   */
-open class UtilityNetworksTestRunner(
+open class TraceToolTestRunner(
     private val url: String,
     private val itemId: String
 ) {
     /**
-     * The utility network
+     * The trace tool TraceState object
      */
-    lateinit var utilityNetwork: UtilityNetwork
-        private set
+    private var _traceState: TraceState? = null
+    internal val traceState: TraceState
+        get() = _traceState ?: throw IllegalStateException("trace state is not initialized")
 
     @Before
     fun setup(): Unit = runTest {
         // If the utility network is already initialized, return
-        if (::utilityNetwork.isInitialized && utilityNetwork.loadStatus.value == LoadStatus.Loaded) return@runTest
+        if (_traceState != null) return@runTest
         // Set the authentication challenge handler
         val tokenCred =
             TokenCredential.create(
@@ -67,17 +65,6 @@ open class UtilityNetworksTestRunner(
                 itemId
             )
         )
-        map.assertIsLoaded()
-        utilityNetwork = map.utilityNetworks.first()
-        utilityNetwork.assertIsLoaded()
+        _traceState = TraceState(map, coroutineScope = TestScope())
     }
-}
-
-/**
- * TODO: share in shared test module
- */
-suspend fun Loadable.assertIsLoaded() {
-    val result = load()
-    assertThat(loadStatus.value).isEqualTo(LoadStatus.Loaded)
-    assertThat(result.isSuccess).isTrue()
 }

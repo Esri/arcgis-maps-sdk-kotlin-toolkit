@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.utilitynetworks
 
-import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -35,8 +34,7 @@ import com.arcgismaps.toolkit.utilitynetworks.ui.SelectableItem
 import com.arcgismaps.toolkit.utilitynetworks.ui.TraceOptions
 import kotlinx.coroutines.launch
 
-@VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-public val traceSurfaceContentDescription: String = "trace component surface"
+internal const val traceSurfaceContentDescription: String = "trace component surface"
 
 /**
  * A composable UI component to set up and run a [com.arcgismaps.utilitynetworks.UtilityNetwork.trace]

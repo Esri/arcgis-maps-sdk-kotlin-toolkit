@@ -19,19 +19,10 @@
 package com.arcgismaps.toolkit.utilitynetworks
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.arcgismaps.Guid
-import com.arcgismaps.utilitynetworks.UtilityElementTraceResult
-import com.arcgismaps.utilitynetworks.UtilityNamedTraceConfiguration
-import com.arcgismaps.utilitynetworks.UtilityTraceParameters
-import com.arcgismaps.utilitynetworks.UtilityTraceType
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -44,7 +35,7 @@ import org.junit.runner.RunWith
  * See [testing documentation](http://d.android.com/tools/testing).
  */
 @RunWith(AndroidJUnit4::class)
-class TraceToolTests : UtilityNetworksTestRunner(
+class TraceToolTests : TraceToolTestRunner(
     url = "https://sampleserver7.arcgisonline.com/portal/sharing/rest",
     itemId = "471eb0bf37074b1fbb972b1da70fb310"
 ) {
@@ -60,48 +51,6 @@ class TraceToolTests : UtilityNetworksTestRunner(
     @Before
     fun setContent() = runTest {
         composeTestRule.setContent {
-            val traceState: TraceState = object : TraceState {
-                private val _traceConfigurations = MutableStateFlow(null)
-                override val traceConfigurations: StateFlow<List<UtilityNamedTraceConfiguration>?> =
-                    _traceConfigurations.asStateFlow()
-
-                private val _traceResult = MutableStateFlow<UtilityElementTraceResult?>(null)
-                override val traceResult: StateFlow<UtilityElementTraceResult?> =
-                    _traceResult.asStateFlow()
-
-                override suspend fun trace() {
-                    val utilityNetworkDefinition = utilityNetwork.definition
-                    val utilityNetworkSource =
-                        utilityNetworkDefinition?.getNetworkSource("Electric Distribution Line")
-                    val utilityAssetGroup = utilityNetworkSource?.getAssetGroup("Medium Voltage")
-                    val utilityAssetType =
-                        utilityAssetGroup?.getAssetType("Underground Three Phase")
-                    val startingLocation = utilityNetwork.createElementOrNull(
-                        utilityAssetType!!,
-                        Guid("0B1F4188-79FD-4DED-87C9-9E3C3F13BA77")
-                    )
-
-                    val utilityTraceParameters = UtilityTraceParameters(
-                        UtilityTraceType.Connected,
-                        listOf(startingLocation!!)
-                    )
-
-                    utilityNetwork.trace(
-                        utilityTraceParameters
-                    ).onSuccess {
-                        // Handle trace results
-                        _traceResult.value = it[0] as UtilityElementTraceResult
-                        Log.i("UtilityNetworkTraceApp", "Trace results: $it")
-                        Log.i(
-                            "UtilityNetworkTraceApp",
-                            "Trace result element size: ${(_traceResult.value)?.elements?.size}"
-                        )
-                    }.onFailure {
-                        // Handle error
-                    }
-                }
-            }
-
             Trace(
                 traceState = traceState
             )
