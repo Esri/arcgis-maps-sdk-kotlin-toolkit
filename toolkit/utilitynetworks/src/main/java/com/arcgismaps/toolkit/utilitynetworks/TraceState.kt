@@ -19,6 +19,7 @@ package com.arcgismaps.toolkit.utilitynetworks
 import android.util.Log
 import com.arcgismaps.Guid
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.utilitynetworks.UtilityElementTraceResult
 import com.arcgismaps.utilitynetworks.UtilityNamedTraceConfiguration
 import com.arcgismaps.utilitynetworks.UtilityNetwork
@@ -40,7 +41,9 @@ public sealed interface TraceState {
     public val traceConfigurations: StateFlow<List<UtilityNamedTraceConfiguration>?>
 
     public val traceResult: StateFlow<UtilityElementTraceResult?>
-
+    public val addStartingPointMode: StateFlow<AddStartingPointMode>
+    public fun addStartingPoint(point: SingleTapConfirmedEvent)
+    public fun updateAddStartPointMode(status: AddStartingPointMode)
     public suspend fun trace()
 }
 
@@ -60,23 +63,26 @@ private class TraceStateImpl(
     private var _traceResult = MutableStateFlow<UtilityElementTraceResult?>(null)
     override val traceResult: StateFlow<UtilityElementTraceResult?> = _traceResult.asStateFlow()
 
+    private var _addStartingPointMode = MutableStateFlow<AddStartingPointMode>(AddStartingPointMode.None)
+    override val addStartingPointMode: StateFlow<AddStartingPointMode> = _addStartingPointMode.asStateFlow()
+
     private var utilityNetwork: UtilityNetwork? = null
 
     init {
         coroutineScope.launch {
-                arcGISMap.load().onSuccess {
-                    arcGISMap.utilityNetworks.forEach {
-                        it.load().onFailure {
-                            // Handle error
-                        }.onSuccess {
+            arcGISMap.load().onSuccess {
+                arcGISMap.utilityNetworks.forEach {
+                    it.load().onFailure {
+                        // Handle error
+                    }.onSuccess {
 
-                        }
                     }
-                }.onFailure {
-                    // Handle error
                 }
-//                if (arcGISMap.utilityNetworks.isEmpty()) {
-//                    // Handle error
+            }.onFailure {
+                // Handle error
+            }
+//            if (arcGISMap.utilityNetworks.isEmpty()) {
+                // //Handle error
 //                }
 
             utilityNetwork = arcGISMap.utilityNetworks.first()
@@ -116,6 +122,45 @@ private class TraceStateImpl(
             // Handle error
         }
     }
+
+    override fun addStartingPoint(point: SingleTapConfirmedEvent) {
+        if (_addStartingPointMode.value is AddStartingPointMode.Started) {
+            // TODO: identify
+            // TODO: add point to graphic overlay
+            _addStartingPointMode.value = AddStartingPointMode.Stopped
+        }
+    }
+
+    override fun updateAddStartPointMode(status: AddStartingPointMode) {
+        _addStartingPointMode.value = status
+    }
+}
+
+/**
+ * Represents the mode when adding starting points.
+ *
+ * @since 200.6.0
+ */
+public sealed class AddStartingPointMode {
+    /**
+     * Utility Network Trace tool is in add starting points mode.
+     * @since 200.6.0
+     */
+    public data object Started : AddStartingPointMode()
+
+    /**
+     * Utility Network Trace tool is not adding starting points.
+     *
+     * @since 200.6.0
+     */
+    public data object Stopped : AddStartingPointMode()
+
+    /**
+     * Utility Network Trace is neither started nor stopped.
+     *
+     * @since 200.6.0
+     */
+    public data object None : AddStartingPointMode()
 }
 
 /**
