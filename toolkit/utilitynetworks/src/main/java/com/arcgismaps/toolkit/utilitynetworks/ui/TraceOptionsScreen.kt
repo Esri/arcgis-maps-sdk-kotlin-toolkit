@@ -62,7 +62,7 @@ import com.arcgismaps.utilitynetworks.UtilityNetwork
  * @since 200.6.0
  */
 @Composable
-internal fun TraceOptions(
+internal fun TraceOptionsScreen(
     configurations: List<SelectableItem>,
     onPerformTraceButtonClicked: () -> Unit,
     onAddStartingPointButtonClicked: () -> Unit
@@ -182,7 +182,7 @@ private fun StartingPointsEditor(showAddStartingPointScreen: () -> Unit) {
 @Preview
 @Composable
 private fun TraceOptionsPreview() {
-    TraceOptions(
+    TraceOptionsScreen(
         listOf(
             SelectableItem("Trace 1", false),
             SelectableItem("Trace 2", false),

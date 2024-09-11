@@ -32,51 +32,41 @@ import com.arcgismaps.toolkit.utilitynetworks.TraceState
  */
 @Composable
 internal fun TraceNavHost(navController: NavHostController, traceState: TraceState) {
-    NavHost(navController = navController, startDestination = TraceOptions.route) {
-        composable(TraceOptions.route) {
-            TraceOptions(
+    NavHost(navController = navController, startDestination = TraceNavRoute.TraceOptions.route) {
+        composable(TraceNavRoute.TraceOptions.route) {
+            TraceOptionsScreen(
                 configurations = emptyList(),
                 onPerformTraceButtonClicked = {
                     // TODO: Add call to perform trace
-                    navController.navigate(TraceResults.route)
+                    navController.navigate(TraceNavRoute.TraceResults.route)
                 },
                 onAddStartingPointButtonClicked = {
                     traceState.updateAddStartPointMode(AddStartingPointMode.Started)
-                    navController.navigate(AddStartingPoint.route)
+                    navController.navigate(TraceNavRoute.AddStartingPoint.route)
                 })
         }
-        composable(AddStartingPoint.route) {
+        composable(TraceNavRoute.AddStartingPoint.route) {
             AddStartingPointScreen(
                 traceState,
                 onStopPointSelection = {
-                    navController.navigate(TraceOptions.route)
+                    navController.navigate(TraceNavRoute.TraceOptions.route)
                 }
             )
         }
-        composable(TraceResults.route) {
+        composable(TraceNavRoute.TraceResults.route) {
             // TODO: Add TraceResults composable
         }
-
     }
 }
 
 /**
- * Defines a route for the trace tool screens.
+ * Defines a navigation route for the trace tool screens.
+ *
  * @since 200.6.0
  */
-internal sealed interface TraceRoute {
-    val route: String
+private enum class TraceNavRoute(val route: String) {
+    TraceOptions("trace_options"),
+    AddStartingPoint("add_starting_point"),
+    TraceResults("trace_results")
+    //TODO: Add FeatureAttributes route
 }
-
-internal data object TraceOptions : TraceRoute {
-    override val route = "trace_options"
-}
-
-internal data object TraceResults : TraceRoute {
-    override val route = "trace_results"
-}
-
-internal data object AddStartingPoint : TraceRoute {
-    override val route = "add_starting_point"
-}
-//TODO: Add FeatureAttributes route
