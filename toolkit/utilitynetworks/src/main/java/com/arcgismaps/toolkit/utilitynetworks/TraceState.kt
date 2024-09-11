@@ -35,56 +35,32 @@ import kotlinx.coroutines.launch
  *
  * @since 200.6.0
  */
-public sealed interface TraceState {
-
-    public val traceConfigurations: StateFlow<List<UtilityNamedTraceConfiguration>?>
-
-    public val traceResult: StateFlow<UtilityElementTraceResult?>
-
-    public suspend fun trace()
-}
-
-/**
- * Default implementation for [TraceState].
- *
- * @since 200.6.0
- */
-private class TraceStateImpl(
-    val arcGISMap: ArcGISMap,
+public sealed class TraceState(
+    private val arcGISMap: ArcGISMap,
     coroutineScope: CoroutineScope
-) : TraceState {
+) {
 
     private val _traceConfigurations = MutableStateFlow<List<UtilityNamedTraceConfiguration>?>(null)
-    override val traceConfigurations: StateFlow<List<UtilityNamedTraceConfiguration>?> = _traceConfigurations.asStateFlow()
+    public val traceConfigurations: StateFlow<List<UtilityNamedTraceConfiguration>?> = _traceConfigurations.asStateFlow()
 
     private var _traceResult = MutableStateFlow<UtilityElementTraceResult?>(null)
-    override val traceResult: StateFlow<UtilityElementTraceResult?> = _traceResult.asStateFlow()
+    public val traceResult: StateFlow<UtilityElementTraceResult?> = _traceResult.asStateFlow()
 
     private var utilityNetwork: UtilityNetwork? = null
 
     init {
         coroutineScope.launch {
-                arcGISMap.load().onSuccess {
-                    arcGISMap.utilityNetworks.forEach {
-                        it.load().onFailure {
-                            // Handle error
-                        }.onSuccess {
-
-                        }
-                    }
-                }.onFailure {
-                    // Handle error
+            arcGISMap.load().onSuccess {
+                arcGISMap.utilityNetworks.forEach {
+                    it.load()
                 }
-//                if (arcGISMap.utilityNetworks.isEmpty()) {
-//                    // Handle error
-//                }
-
+            }
             utilityNetwork = arcGISMap.utilityNetworks.first()
             _traceConfigurations.value = utilityNetwork?.queryNamedTraceConfigurations()?.getOrNull()
         }
     }
 
-    override suspend fun trace() {
+    public suspend fun trace() {
         // Run a trace
         val utilityNetworkDefinition = utilityNetwork?.definition
         val utilityNetworkSource =
@@ -117,18 +93,3 @@ private class TraceStateImpl(
         }
     }
 }
-
-/**
- * Factory function for the creating TraceState.
- *
- * @param arcGISMap the map containing the UtilityNetworks
- * @param coroutineScope scope for [TraceState] that it can use to load the [arcGISMap] and the
- *        UtilityNetworks
- *
- * @since 200.6.0
- */
-public fun TraceState(
-    arcGISMap: ArcGISMap,
-    coroutineScope: CoroutineScope
-): TraceState =
-    TraceStateImpl(arcGISMap, coroutineScope)
