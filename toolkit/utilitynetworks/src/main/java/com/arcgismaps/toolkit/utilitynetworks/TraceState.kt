@@ -37,12 +37,14 @@ import kotlinx.coroutines.launch
  * @since 200.6.0
  */
 public sealed interface TraceState {
+
     public val traceConfigurations: StateFlow<List<UtilityNamedTraceConfiguration>?>
+
     public val traceResult: StateFlow<UtilityElementTraceResult?>
     public val addStartingPointMode: StateFlow<AddStartingPointMode>
     public fun addStartingPoint(point: SingleTapConfirmedEvent)
     public fun updateAddStartPointMode(status: AddStartingPointMode)
-    public fun trace()
+    public suspend fun trace()
 }
 
 /**
@@ -78,15 +80,15 @@ public sealed class AddStartingPointMode {
  * @since 200.6.0
  */
 private class TraceStateImpl(
-    var arcGISMap: ArcGISMap,
-    var coroutineScope: CoroutineScope
+    val arcGISMap: ArcGISMap,
+    coroutineScope: CoroutineScope
 ) : TraceState {
 
     private val _traceConfigurations = MutableStateFlow<List<UtilityNamedTraceConfiguration>?>(null)
-    override val traceConfigurations: StateFlow<List<UtilityNamedTraceConfiguration>?> = _traceConfigurations
+    override val traceConfigurations: StateFlow<List<UtilityNamedTraceConfiguration>?> = _traceConfigurations.asStateFlow()
 
     private var _traceResult = MutableStateFlow<UtilityElementTraceResult?>(null)
-    override val traceResult: StateFlow<UtilityElementTraceResult?> = _traceResult
+    override val traceResult: StateFlow<UtilityElementTraceResult?> = _traceResult.asStateFlow()
 
     private var _addStartingPointMode = MutableStateFlow<AddStartingPointMode>(AddStartingPointMode.None)
     override val addStartingPointMode: StateFlow<AddStartingPointMode> = _addStartingPointMode.asStateFlow()
@@ -106,47 +108,45 @@ private class TraceStateImpl(
             }.onFailure {
                 // Handle error
             }
-            if (arcGISMap.utilityNetworks.isEmpty()) {
-                // Handle error
-            }
+//            if (arcGISMap.utilityNetworks.isEmpty()) {
+                // //Handle error
+//                }
 
             utilityNetwork = arcGISMap.utilityNetworks.first()
             _traceConfigurations.value = utilityNetwork?.queryNamedTraceConfigurations()?.getOrNull()
         }
     }
 
-    override fun trace() {
-        coroutineScope.launch {
-            // Run a trace
-            val utilityNetworkDefinition = utilityNetwork?.definition
-            val utilityNetworkSource =
-                utilityNetworkDefinition!!.getNetworkSource("Electric Distribution Line")
-            val utilityAssetGroup = utilityNetworkSource!!.getAssetGroup("Medium Voltage")
-            val utilityAssetType =
-                utilityAssetGroup!!.getAssetType("Underground Three Phase")
-            val startingLocation = utilityNetwork?.createElementOrNull(
-                utilityAssetType!!,
-                Guid("0B1F4188-79FD-4DED-87C9-9E3C3F13BA77")
-            )
+    override suspend fun trace() {
+        // Run a trace
+        val utilityNetworkDefinition = utilityNetwork?.definition
+        val utilityNetworkSource =
+            utilityNetworkDefinition!!.getNetworkSource("Electric Distribution Line")
+        val utilityAssetGroup = utilityNetworkSource!!.getAssetGroup("Medium Voltage")
+        val utilityAssetType =
+            utilityAssetGroup!!.getAssetType("Underground Three Phase")
+        val startingLocation = utilityNetwork?.createElementOrNull(
+            utilityAssetType!!,
+            Guid("0B1F4188-79FD-4DED-87C9-9E3C3F13BA77")
+        )
 
-            val utilityTraceParameters = UtilityTraceParameters(
-                UtilityTraceType.Connected,
-                listOf(startingLocation!!)
-            )
+        val utilityTraceParameters = UtilityTraceParameters(
+            UtilityTraceType.Connected,
+            listOf(startingLocation!!)
+        )
 
-            val traceResultList = utilityNetwork?.trace(
-                utilityTraceParameters
-            )?.onSuccess {
-                // Handle trace results
-                _traceResult.value = it[0] as UtilityElementTraceResult
-                Log.i("UtilityNetworkTraceApp", "Trace results: $it")
-                Log.i(
-                    "UtilityNetworkTraceApp",
-                    "Trace result element size: ${(_traceResult.value)?.elements?.size}"
-                )
-            }?.onFailure {
-                // Handle error
-            }
+        utilityNetwork?.trace(
+            utilityTraceParameters
+        )?.onSuccess {
+            // Handle trace results
+            _traceResult.value = it[0] as UtilityElementTraceResult
+            Log.i("UtilityNetworkTraceApp", "Trace results: $it")
+            Log.i(
+                "UtilityNetworkTraceApp",
+                "Trace result element size: ${(_traceResult.value)?.elements?.size}"
+            )
+        }?.onFailure {
+            // Handle error
         }
     }
 
