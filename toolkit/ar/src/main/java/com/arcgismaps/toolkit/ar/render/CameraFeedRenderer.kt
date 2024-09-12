@@ -10,6 +10,7 @@ import com.google.ar.core.Coordinates2d
 import com.google.ar.core.Frame
 import com.google.ar.core.HitResult
 import com.google.ar.core.Plane
+import com.google.ar.core.Point
 import com.google.ar.core.Session
 import com.google.ar.core.exceptions.CameraNotAvailableException
 import java.nio.ByteBuffer
@@ -32,8 +33,8 @@ public class CameraFeedRenderer(
 
     private val projectionMatrix: FloatArray = FloatArray(16)
     private lateinit var planeRenderer: PlaneRenderer
-
     private val zNear = 0.1f
+
     private val zFar = 100f
 
     // must initialize texture names before drawing the background
@@ -58,7 +59,6 @@ public class CameraFeedRenderer(
                 ByteOrder.nativeOrder()
             ).asFloatBuffer()
 
-
     // normalized device coordinates for the quad
     // used as a reference for transforming the camera tex coordinates when the viewport changes
     private val ndcQuadCoordsBuffer = ByteBuffer.allocateDirect(2 * 4 * 4)
@@ -69,6 +69,7 @@ public class CameraFeedRenderer(
                 /*0:*/-1f, -1f,  /*1:*/+1f, -1f,  /*2:*/-1f, +1f,  /*3:*/+1f, +1f,
             )
         )
+
 
     // used to draw the camera feed on the quad
     private lateinit var cameraColorTexture: Texture
@@ -89,7 +90,7 @@ public class CameraFeedRenderer(
             .setDepthWrite(false)
     }
 
-    private val virtualSceneRenderer = VirtualSceneRenderer(zNear, zFar)
+    private var lastTap: MotionEvent? = null
 
 
     override fun onSurfaceCreated(surfaceDrawHandler: SurfaceDrawHandler) {
@@ -125,14 +126,11 @@ public class CameraFeedRenderer(
         mesh =
             Mesh(Mesh.PrimitiveMode.TRIANGLE_STRIP, null, vertexBuffers)
 
-        virtualSceneRenderer.onSurfaceCreated(assets)
-
         planeRenderer = PlaneRenderer(surfaceDrawHandler, assets)
     }
 
     override fun onSurfaceChanged(surfaceDrawHandler: SurfaceDrawHandler, width: Int, height: Int) {
         displayRotationHelper.onSurfaceChanged(width, height)
-        virtualSceneRenderer.onSurfaceChanged(surfaceDrawHandler, width, height)
     }
 
     override fun onDrawFrame(surfaceDrawHandler: SurfaceDrawHandler) {
@@ -186,12 +184,18 @@ public class CameraFeedRenderer(
             projectionMatrix
         )
 
-        virtualSceneRenderer.onDrawFrame(surfaceDrawHandler, mesh, frame.camera)
         onFrame(frame)
     }
 
-    public fun handleTap(frame: Frame, onTap: (HitResult?) -> Unit) {
-        virtualSceneRenderer.handleTap(frame, onTap)
+    public fun handleTap(frame: Frame, onTap: ((HitResult?) -> Unit)) {
+        val tap = lastTap ?: return
+        val hit = frame.hitTest(tap).firstOrNull { it.trackable is Plane || it.trackable is Point }
+        onTap(hit)
+        lastTap = null
+    }
+
+    public fun onClick(it: MotionEvent) {
+        lastTap = it
     }
 
     /**
@@ -237,6 +241,4 @@ public class CameraFeedRenderer(
     override fun onPause(owner: LifecycleOwner) {
         displayRotationHelper.onPause()
     }
-
-    public fun onClick(it: MotionEvent): Unit = virtualSceneRenderer.onClick(it)
 }
