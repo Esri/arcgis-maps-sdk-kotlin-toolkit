@@ -18,11 +18,9 @@
 
 package com.arcgismaps.toolkit.utilitynetworks
 
-import android.content.Context
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.platform.app.InstrumentationRegistry
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -39,11 +37,6 @@ class TraceToolTests : TraceToolTestRunner(
     url = "https://sampleserver7.arcgisonline.com/portal/sharing/rest",
     itemId = "471eb0bf37074b1fbb972b1da70fb310"
 ) {
-    private lateinit var context: Context
-    @Before
-    fun setUp() {
-        context = InstrumentationRegistry.getInstrumentation().context
-    }
 
     @get:Rule
     val composeTestRule = createComposeRule()
