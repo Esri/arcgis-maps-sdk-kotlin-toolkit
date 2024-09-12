@@ -100,25 +100,27 @@ internal fun TraceOptionsScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        LazyColumn(
-            modifier = Modifier.padding(10.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            item {
-                TraceConfiguration(
-                    traceConfigurations
-                )
-            }
-            item {
-                StartingPointsEditor(onAddStartingPointButtonClicked)
-            }
-            item {
-                AdvancedOptions()
-            }
-            item {
-                Button(onClick = { onPerformTraceButtonClicked() }) {
-                    Text(stringResource(id = R.string.trace))
+        Column (horizontalAlignment = Alignment.CenterHorizontally) {
+            LazyColumn(
+                modifier = Modifier
+                    .padding(3.dp)
+                    .weight(1f),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                item {
+                    TraceConfiguration(
+                        traceConfigurations
+                    )
                 }
+                item {
+                    StartingPointsEditor(onAddStartingPointButtonClicked)
+                }
+                item {
+                    AdvancedOptions()
+                }
+            }
+            Button(onClick = { onPerformTraceButtonClicked() }) {
+                Text(stringResource(id = R.string.trace))
             }
         }
     }

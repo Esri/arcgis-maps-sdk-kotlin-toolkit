@@ -17,9 +17,18 @@
 package com.arcgismaps.toolkit.utilitynetworks
 
 import android.util.Log
+import androidx.compose.ui.unit.dp
+import com.arcgismaps.Color
 import com.arcgismaps.Guid
+import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
+import com.arcgismaps.mapping.GeoElement
+import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
+import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
+import com.arcgismaps.mapping.view.Graphic
+import com.arcgismaps.mapping.view.GraphicsOverlay
+import com.arcgismaps.mapping.view.ScreenCoordinate
+import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import com.arcgismaps.utilitynetworks.UtilityElementTraceResult
 import com.arcgismaps.utilitynetworks.UtilityNamedTraceConfiguration
 import com.arcgismaps.utilitynetworks.UtilityNetwork
@@ -42,7 +51,8 @@ public sealed interface TraceState {
 
     public val traceResult: StateFlow<UtilityElementTraceResult?>
     public val addStartingPointMode: StateFlow<AddStartingPointMode>
-    public fun addStartingPoint(point: SingleTapConfirmedEvent)
+    public val selectedGeoElementsAsStartingPoints: StateFlow<List<GeoElement>>
+    public fun addStartingPoint(mapPoint: Point)
     public fun updateAddStartPointMode(status: AddStartingPointMode)
     public suspend fun trace()
 }
@@ -54,7 +64,9 @@ public sealed interface TraceState {
  */
 private class TraceStateImpl(
     val arcGISMap: ArcGISMap,
-    coroutineScope: CoroutineScope
+    val coroutineScope: CoroutineScope,
+    val graphicsOverlay: GraphicsOverlay,
+    val mapViewProxy: MapViewProxy
 ) : TraceState {
 
     private val _traceConfigurations = MutableStateFlow<List<UtilityNamedTraceConfiguration>?>(null)
@@ -65,6 +77,16 @@ private class TraceStateImpl(
 
     private var _addStartingPointMode = MutableStateFlow<AddStartingPointMode>(AddStartingPointMode.None)
     override val addStartingPointMode: StateFlow<AddStartingPointMode> = _addStartingPointMode.asStateFlow()
+
+    private val _selectedGeoElementsAsStartingPoints: MutableStateFlow<MutableList<GeoElement>> =
+        MutableStateFlow(
+            mutableListOf()
+        )
+    override val selectedGeoElementsAsStartingPoints: StateFlow<List<GeoElement>> =
+        _selectedGeoElementsAsStartingPoints.asStateFlow()
+
+    private lateinit var tapPoint: Point
+    private var screenPoint: ScreenCoordinate? = null
 
     private var utilityNetwork: UtilityNetwork? = null
 
@@ -123,16 +145,45 @@ private class TraceStateImpl(
         }
     }
 
-    override fun addStartingPoint(point: SingleTapConfirmedEvent) {
+    override fun addStartingPoint(mapPoint: Point) {
         if (_addStartingPointMode.value is AddStartingPointMode.Started) {
-            // TODO: identify
-            // TODO: add point to graphic overlay
-            _addStartingPointMode.value = AddStartingPointMode.Stopped
+            tapPoint = mapPoint
+            screenPoint = mapViewProxy.locationToScreenOrNull(mapPoint)
+            screenPoint?.let { identifyFeatures(it, coroutineScope) }
         }
     }
 
     override fun updateAddStartPointMode(status: AddStartingPointMode) {
         _addStartingPointMode.value = status
+    }
+
+    private fun identifyFeatures(screenCoordinate: ScreenCoordinate, coroutineScope: CoroutineScope) {
+        coroutineScope.launch {
+            val result = mapViewProxy.identifyLayers(
+                screenCoordinate = screenCoordinate,
+                tolerance = 10.dp
+            )
+            result.onSuccess { identifyLayerResultList ->
+                if (identifyLayerResultList.isNotEmpty()) {
+                    identifyLayerResultList.forEach { identifyLayerResult ->
+                        identifyLayerResult.geoElements.forEach { geoElement ->
+                            _selectedGeoElementsAsStartingPoints.value.add(geoElement)
+                        }
+                    }
+                    addTapLocationToGraphicsOverlay(tapPoint)
+                    _addStartingPointMode.value = AddStartingPointMode.Stopped
+                }
+            }
+        }
+    }
+
+    private fun addTapLocationToGraphicsOverlay(mapPoint: Point) {
+        graphicsOverlay.graphics.add(
+            Graphic(
+                geometry = mapPoint,
+                symbol = SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Cross, Color.green, 20.0f)
+            )
+        )
     }
 }
 
@@ -169,11 +220,14 @@ public sealed class AddStartingPointMode {
  * @param arcGISMap the map containing the UtilityNetworks
  * @param coroutineScope scope for [TraceState] that it can use to load the [arcGISMap] and the
  *        UtilityNetworks
+ * @param graphicsOverlay The graphics overlay to show tap location
  *
  * @since 200.6.0
  */
 public fun TraceState(
     arcGISMap: ArcGISMap,
-    coroutineScope: CoroutineScope
+    coroutineScope: CoroutineScope,
+    graphicsOverlay: GraphicsOverlay,
+    mapViewProxy: MapViewProxy
 ): TraceState =
-    TraceStateImpl(arcGISMap, coroutineScope)
+    TraceStateImpl(arcGISMap, coroutineScope, graphicsOverlay, mapViewProxy)

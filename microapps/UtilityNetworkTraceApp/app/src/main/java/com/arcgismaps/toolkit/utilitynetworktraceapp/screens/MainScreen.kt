@@ -67,7 +67,7 @@ fun MainScreen(viewModel: TraceViewModel) {
                 enter = slideInVertically { h -> h },
                 exit = slideOutVertically { h -> h },
                 label = "popup",
-                modifier = Modifier.heightIn(min = 0.dp, max = 400.dp)
+                modifier = Modifier.heightIn(min = 0.dp, max = 250.dp)
             ) {
                 Trace(viewModel.traceState)
             }
@@ -84,8 +84,10 @@ fun MainScreen(viewModel: TraceViewModel) {
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize(),
-            onSingleTapConfirmed = {
-                viewModel.traceState.addStartingPoint(it)
+            onSingleTapConfirmed = { singleTapConfirmedEvent ->
+                singleTapConfirmedEvent.mapPoint?.let {
+                    viewModel.traceState.addStartingPoint(it)
+                }
             }
         )
     }
