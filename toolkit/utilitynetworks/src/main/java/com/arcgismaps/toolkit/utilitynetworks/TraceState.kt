@@ -85,9 +85,6 @@ private class TraceStateImpl(
     override val selectedGeoElementsAsStartingPoints: StateFlow<List<GeoElement>> =
         _selectedGeoElementsAsStartingPoints.asStateFlow()
 
-    private lateinit var tapPoint: Point
-    private var screenPoint: ScreenCoordinate? = null
-
     private var utilityNetwork: UtilityNetwork? = null
 
     init {
@@ -147,9 +144,8 @@ private class TraceStateImpl(
 
     override fun addStartingPoint(mapPoint: Point) {
         if (_addStartingPointMode.value is AddStartingPointMode.Started) {
-            tapPoint = mapPoint
-            screenPoint = mapViewProxy.locationToScreenOrNull(mapPoint)
-            screenPoint?.let { identifyFeatures(it, coroutineScope) }
+            val screenPoint = mapViewProxy.locationToScreenOrNull(mapPoint)
+            screenPoint?.let { identifyFeatures(mapPoint, it, coroutineScope) }
         }
     }
 
@@ -157,7 +153,7 @@ private class TraceStateImpl(
         _addStartingPointMode.value = status
     }
 
-    private fun identifyFeatures(screenCoordinate: ScreenCoordinate, coroutineScope: CoroutineScope) {
+    private fun identifyFeatures(mapPoint: Point, screenCoordinate: ScreenCoordinate, coroutineScope: CoroutineScope) {
         coroutineScope.launch {
             val result = mapViewProxy.identifyLayers(
                 screenCoordinate = screenCoordinate,
@@ -170,7 +166,7 @@ private class TraceStateImpl(
                             _selectedGeoElementsAsStartingPoints.value.add(geoElement)
                         }
                     }
-                    addTapLocationToGraphicsOverlay(tapPoint)
+                    addTapLocationToGraphicsOverlay(mapPoint)
                     _addStartingPointMode.value = AddStartingPointMode.Stopped
                 }
             }
