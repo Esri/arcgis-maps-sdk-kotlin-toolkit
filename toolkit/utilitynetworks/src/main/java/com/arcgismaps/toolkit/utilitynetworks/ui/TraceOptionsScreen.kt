@@ -88,7 +88,11 @@ import com.arcgismaps.utilitynetworks.UtilityNetwork
  * @since 200.6.0
  */
 @Composable
-internal fun TraceOptions(configurations: List<SelectableItem>, onPerformTrace: () -> Unit) {
+internal fun TraceOptionsScreen(
+    configurations: List<SelectableItem>,
+    onPerformTraceButtonClicked: () -> Unit,
+    onAddStartingPointButtonClicked: () -> Unit
+) {
     val traceConfigurations = remember { mutableStateListOf<SelectableItem>() }
     traceConfigurations.addAll(configurations)
     Surface(
@@ -106,13 +110,13 @@ internal fun TraceOptions(configurations: List<SelectableItem>, onPerformTrace: 
                 )
             }
             item {
-                StartingPointsEditor()
+                StartingPointsEditor(onAddStartingPointButtonClicked)
             }
             item {
                 AdvancedOptions()
             }
             item {
-                Button(onClick = { onPerformTrace() }) {
+                Button(onClick = { onPerformTraceButtonClicked() }) {
                     Text(stringResource(id = R.string.trace))
                 }
             }
@@ -165,19 +169,20 @@ private fun TraceConfiguration(utilityTraces: List<SelectableItem>) {
  * @since 200.6.0
  */
 @Composable
-private fun StartingPointsEditor() {
-    val startingPoints = remember { mutableStateListOf(StartingPointData(name = "Test Starting Point"))}
+private fun StartingPointsEditor(showAddStartingPointScreen: () -> Unit) {
+    val startingPoints = remember { mutableStateListOf(StartingPointData(name = "Test Starting Point")) }
     var counter by remember { mutableIntStateOf(1) }
     ExpandableCard(
         title = "${stringResource(id = R.string.starting_points)} (${counter})",
         description = {
-            Row (
+            Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center
             ) {
                 ElevatedButton(
                     onClick = {
                         startingPoints.add(StartingPointData("Point ${counter++}"))
+                        showAddStartingPointScreen()
                     },
                     shape = RoundedCornerShape(8.dp)
                 ) {
@@ -238,7 +243,7 @@ internal fun AdvancedOptions(
                         },
                         modifier = Modifier.defaultMinSize(minWidth = 1.dp),
                         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
-                        keyboardActions = KeyboardActions(onDone =  {
+                        keyboardActions = KeyboardActions(onDone = {
                             focusManager.clearFocus()
                         }),
                         maxLines = 1,
@@ -407,14 +412,16 @@ private fun AdvancedOptionsRowPreview() {
 @Preview
 @Composable
 private fun TraceOptionsPreview() {
-    TraceOptions(
+    TraceOptionsScreen(
         listOf(
             SelectableItem("Trace 1", false),
             SelectableItem("Trace 2", false),
             SelectableItem("Trace 3", false),
             SelectableItem("Trace 4", false)
-        )
-    ) {}
+        ),
+        onPerformTraceButtonClicked = {},
+        onAddStartingPointButtonClicked = {}
+    )
 }
 
 /**
