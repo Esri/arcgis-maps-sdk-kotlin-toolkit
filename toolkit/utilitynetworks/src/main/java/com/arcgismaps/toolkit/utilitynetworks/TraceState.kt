@@ -19,6 +19,7 @@ package com.arcgismaps.toolkit.utilitynetworks
 import android.util.Log
 import com.arcgismaps.Guid
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.utilitynetworks.UtilityElementTraceResult
 import com.arcgismaps.utilitynetworks.UtilityNamedTraceConfiguration
 import com.arcgismaps.utilitynetworks.UtilityNetwork
@@ -45,6 +46,9 @@ public class TraceState(
 
     private var _traceResult = MutableStateFlow<UtilityElementTraceResult?>(null)
     public val traceResult: StateFlow<UtilityElementTraceResult?> = _traceResult.asStateFlow()
+
+    private var _addStartingPointMode = MutableStateFlow<AddStartingPointMode>(AddStartingPointMode.None)
+    public val addStartingPointMode: StateFlow<AddStartingPointMode> = _addStartingPointMode.asStateFlow()
 
     private var utilityNetwork: UtilityNetwork? = null
 
@@ -92,4 +96,43 @@ public class TraceState(
             // Handle error
         }
     }
+
+    public fun addStartingPoint(point: SingleTapConfirmedEvent) {
+        if (_addStartingPointMode.value is AddStartingPointMode.Started) {
+            // TODO: identify
+            // TODO: add point to graphic overlay
+            _addStartingPointMode.value = AddStartingPointMode.Stopped
+        }
+    }
+
+    public fun updateAddStartPointMode(status: AddStartingPointMode) {
+        _addStartingPointMode.value = status
+    }
+}
+
+/**
+ * Represents the mode when adding starting points.
+ *
+ * @since 200.6.0
+ */
+public sealed class AddStartingPointMode {
+    /**
+     * Utility Network Trace tool is in add starting points mode.
+     * @since 200.6.0
+     */
+    public data object Started : AddStartingPointMode()
+
+    /**
+     * Utility Network Trace tool is not adding starting points.
+     *
+     * @since 200.6.0
+     */
+    public data object Stopped : AddStartingPointMode()
+
+    /**
+     * Utility Network Trace is neither started nor stopped.
+     *
+     * @since 200.6.0
+     */
+    public data object None : AddStartingPointMode()
 }

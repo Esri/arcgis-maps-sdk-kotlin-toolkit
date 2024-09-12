@@ -28,12 +28,14 @@ import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.toolkit.geoviewcompose.MapView
+import com.arcgismaps.toolkit.utilitynetworks.AddStartingPointMode
 import com.arcgismaps.toolkit.utilitynetworks.Trace
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,12 +44,22 @@ fun MainScreen(viewModel: TraceViewModel) {
 
     val loadState by viewModel.arcGISMap.loadStatus.collectAsState()
 
+    val addStartingPointMode by viewModel.traceState.addStartingPointMode.collectAsState()
     val scaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
             initialValue = SheetValue.Hidden,
             skipHiddenState = false
         )
     )
+
+    LaunchedEffect(key1 = addStartingPointMode) {
+        if (addStartingPointMode == AddStartingPointMode.Started) {
+            scaffoldState.bottomSheetState.partialExpand()
+        } else if (addStartingPointMode == AddStartingPointMode.Stopped) {
+            scaffoldState.bottomSheetState.expand()
+        }
+    }
+
     BottomSheetScaffold(
         sheetContent = {
             AnimatedVisibility(
@@ -57,9 +69,7 @@ fun MainScreen(viewModel: TraceViewModel) {
                 label = "popup",
                 modifier = Modifier.heightIn(min = 0.dp, max = 400.dp)
             ) {
-                Trace(
-                    viewModel.traceState
-                )
+                Trace(viewModel.traceState)
             }
         },
         modifier = Modifier.fillMaxSize(),
@@ -73,7 +83,10 @@ fun MainScreen(viewModel: TraceViewModel) {
             graphicsOverlays = listOf(viewModel.graphicsOverlay),
             modifier = Modifier
                 .padding(padding)
-                .fillMaxSize()
+                .fillMaxSize(),
+            onSingleTapConfirmed = {
+                viewModel.traceState.addStartingPoint(it)
+            }
         )
     }
 }
