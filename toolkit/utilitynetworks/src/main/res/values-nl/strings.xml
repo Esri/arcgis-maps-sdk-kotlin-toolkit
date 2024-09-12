@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><!--
+  ~ Copyright 2024 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="new_trace">Ĳ_New trace___________________ä</string>
+    <string name="results">Ĳ_Results_______________ä</string>
+    <string name="trace_configuration">Ĳ_Trace Configuration____________________ä</string>
+    <string name="starting_points">Ĳ_Starting Points________________ä</string>
+    <string name="advanced_options">Ĳ_Advanced Options_________________ä</string>
+    <string name="name">Ĳ_Name_________ä</string>
+    <string name="color">Ĳ_Color___________ä</string>
+    <string name="zoom_to_result">Ĳ_Zoom to result_______________ä</string>
+    <string name="trace">Ĳ_Trace___________ä</string>
+    <string name="add_starting_point">Ĳ_Add new starting point_______________________ä</string>
+    <string name="cancel_starting_point_selection">Ĳ_Cancel starting point selection_________________ä</string>
+    <string name="trace_result_with_count">Ĳ_Trace %1$d of %2$d___________________ä</string>
+    <string name="feature_results">Ĳ_Feature Results________________ä</string>
+    <string name="function_results">Ĳ_Function Results_________________ä</string>
+    <string name="clear_all_results">Ĳ_Clear all results__________________ä</string>
+</resources>

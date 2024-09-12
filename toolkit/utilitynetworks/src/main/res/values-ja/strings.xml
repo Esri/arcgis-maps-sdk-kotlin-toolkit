@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><!--
+  ~ Copyright 2024 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="new_trace">須_New trace___________________鷗</string>
+    <string name="results">須_Results_______________鷗</string>
+    <string name="trace_configuration">須_Trace Configuration____________________鷗</string>
+    <string name="starting_points">須_Starting Points________________鷗</string>
+    <string name="advanced_options">須_Advanced Options_________________鷗</string>
+    <string name="name">須_Name_________鷗</string>
+    <string name="color">須_Color___________鷗</string>
+    <string name="zoom_to_result">須_Zoom to result_______________鷗</string>
+    <string name="trace">須_Trace___________鷗</string>
+    <string name="add_starting_point">須_Add new starting point_______________________鷗</string>
+    <string name="cancel_starting_point_selection">須_Cancel starting point selection_________________鷗</string>
+    <string name="trace_result_with_count">須_Trace %1$d of %2$d___________________鷗</string>
+    <string name="feature_results">須_Feature Results________________鷗</string>
+    <string name="function_results">須_Function Results_________________鷗</string>
+    <string name="clear_all_results">須_Clear all results__________________鷗</string>
+</resources>

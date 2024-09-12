@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><!--
+  ~ Copyright 2024 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="new_trace">한_New trace___________________빠</string>
+    <string name="results">한_Results_______________빠</string>
+    <string name="trace_configuration">한_Trace Configuration____________________빠</string>
+    <string name="starting_points">한_Starting Points________________빠</string>
+    <string name="advanced_options">한_Advanced Options_________________빠</string>
+    <string name="name">한_Name_________빠</string>
+    <string name="color">한_Color___________빠</string>
+    <string name="zoom_to_result">한_Zoom to result_______________빠</string>
+    <string name="trace">한_Trace___________빠</string>
+    <string name="add_starting_point">한_Add new starting point_______________________빠</string>
+    <string name="cancel_starting_point_selection">한_Cancel starting point selection_________________빠</string>
+    <string name="trace_result_with_count">한_Trace %1$d of %2$d___________________빠</string>
+    <string name="feature_results">한_Feature Results________________빠</string>
+    <string name="function_results">한_Function Results_________________빠</string>
+    <string name="clear_all_results">한_Clear all results__________________빠</string>
+</resources>
