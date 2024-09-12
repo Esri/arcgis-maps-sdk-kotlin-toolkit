@@ -15,8 +15,20 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="enter_n_chars">输入 %1$d 个字符</string>
+    <plurals name="enter_n_chars">
+        <item quantity="one">输入 %1$d 个字符</item>
+        <item quantity="other">输入 %1$d 个字符</item>
+    </plurals>
+    <plurals name="value_must_be_n_characters">
+        <item quantity="one">值必须为 %1$d 个字符</item>
+        <item quantity="other">值必须为 %1$d 个字符</item>
+    </plurals>
     <string name="enter_min_to_max_chars">输入 %1$d，最多 %2$d 个字符</string>
+    <string name="value_must_be_from_to_characters">值必须为 %1$d 到 %2$d 个字符</string>
+    <plurals name="maximum_n_chars">
+        <item quantity="one">最多 %1$d 个字符</item>
+        <item quantity="other">最多 %1$d 个字符</item>
+    </plurals>
     <string name="maximum_n_chars">最多 %1$d 个字符</string>
     <string name="no_value">无值</string>
     <string name="enter_value">输入值</string>
@@ -28,6 +40,7 @@
     <string name="done">完成</string>
     <string name="filter">过滤 %1$s</string>
     <string name="numeric_range_helper_text">输入介于 %1$s 和 %2$s 之间的值</string>
+    <string name="value_must_be_from_to">值必须介于 %1$s 和 %2$s 之间</string>
     <string name="less_than_min_value">低于最小值 %1$s</string>
     <string name="exceeds_max_value">超过最大值 %1$s</string>
     <string name="value_must_be_a_whole_number">值必须是整数</string>
@@ -87,9 +100,19 @@
     <string name="ff_time_picker_minute_text_field">分钟</string>
     <string name="ff_time_picker_period_toggle_description">选择上午或下午</string>
     <string name="ff_time_picker_pm">PM</string>
+
     <string name="take_photo">拍照</string>
+    <string name="add_from_gallery">从图库添加</string>
     <string name="rename">重命名</string>
     <string name="delete">删除</string>
     <string name="rename_attachment">重命名附件</string>
     <string name="name">名称</string>
+    <string name="add_file">从文件添加</string>
+    <string name="attachment_error">添加附件时出错</string>
+    <string name="no_app_found">未找到可以打开此文件类型的应用程序。</string>
+    <string name="attachment_too_large">文件过大。 请添加小于 50 MB 的文件。</string>
+    <string name="attachment_is_empty">不支持空文件</string>
+    <string name="download_empty_file">无法下载空文件</string>
+    <string name="attachment_deleted">试_%1s was deleted successfully_____________________________验</string>
+    <string name="attachment_size_limit_exceeded">试_Attachments larger than %1$s cannot be downloaded__________________________验</string>
 </resources>

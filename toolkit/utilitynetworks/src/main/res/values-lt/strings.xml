@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><!--
+  ~ Copyright 2024 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="new_trace">Į_New trace___________________š</string>
+    <string name="results">Į_Results_______________š</string>
+    <string name="trace_configuration">Į_Trace Configuration____________________š</string>
+    <string name="starting_points">Į_Starting Points________________š</string>
+    <string name="advanced_options">Į_Advanced Options_________________š</string>
+    <string name="name">Į_Name_________š</string>
+    <string name="color">Į_Color___________š</string>
+    <string name="zoom_to_result">Į_Zoom to result_______________š</string>
+    <string name="trace">Į_Trace___________š</string>
+    <string name="add_starting_point">Į_Add new starting point_______________________š</string>
+    <string name="cancel_starting_point_selection">Į_Cancel starting point selection_________________š</string>
+    <string name="trace_result_with_count">Į_Trace %1$d of %2$d___________________š</string>
+    <string name="feature_results">Į_Feature Results________________š</string>
+    <string name="function_results">Į_Function Results_________________š</string>
+    <string name="clear_all_results">Į_Clear all results__________________š</string>
+</resources>
