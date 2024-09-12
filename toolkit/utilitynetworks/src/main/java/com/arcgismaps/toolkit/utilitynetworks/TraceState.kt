@@ -42,12 +42,33 @@ public class TraceState(
 ) {
 
     private val _traceConfigurations = MutableStateFlow<List<UtilityNamedTraceConfiguration>?>(null)
+
+    /**
+     * The named trace configurations of the Utility Network
+     *
+     * @since 200.6.0
+     */
     public val traceConfigurations: StateFlow<List<UtilityNamedTraceConfiguration>?> = _traceConfigurations.asStateFlow()
 
-    private var _traceResult = MutableStateFlow<UtilityElementTraceResult?>(null)
+    private val _traceResult = MutableStateFlow<UtilityElementTraceResult?>(null)
+
+    /**
+     * The results of running the  trace operation on the Utility Network from the selected
+     * starting point(s).
+     *
+     * @since 200.6.0
+     */
     public val traceResult: StateFlow<UtilityElementTraceResult?> = _traceResult.asStateFlow()
 
-    private var _addStartingPointMode = MutableStateFlow<AddStartingPointMode>(AddStartingPointMode.None)
+    private val _addStartingPointMode = MutableStateFlow<AddStartingPointMode>(AddStartingPointMode.None)
+
+    /**
+     * Governs taps on the map. When the mode is [AddStartingPointMode.Started] taps will identify starting points
+     * and pass underlying Features to this object.
+     *
+     * @since 200.6.0
+     * @see AddStartingPointMode]
+     */
     public val addStartingPointMode: StateFlow<AddStartingPointMode> = _addStartingPointMode.asStateFlow()
 
     private var utilityNetwork: UtilityNetwork? = null
@@ -64,6 +85,9 @@ public class TraceState(
         }
     }
 
+    /**
+     * TBD
+     */
     public suspend fun trace() {
         // Run a trace
         val utilityNetworkDefinition = utilityNetwork?.definition
@@ -97,6 +121,13 @@ public class TraceState(
         }
     }
 
+    /**
+     * A single tap handler to identify starting points on the map. Call this method
+     * from [com.arcgismaps.toolkit.geoviewcompose.GeoViewProxy.identify].
+     *
+     * @param point the event raised by a single tap on the map
+     * @since 200.6.0
+     */
     public fun addStartingPoint(point: SingleTapConfirmedEvent) {
         if (_addStartingPointMode.value is AddStartingPointMode.Started) {
             // TODO: identify
@@ -105,6 +136,14 @@ public class TraceState(
         }
     }
 
+    /**
+     * Set the mode of the state object to activate or deactivate the identification of
+     * `Features` in [com.arcgismaps.toolkit.geoviewcompose.MapViewEventHandler] response
+     * to single tap events.
+     *
+     * @param status the updated mode
+     * @since 200.6.0
+     */
     public fun updateAddStartPointMode(status: AddStartingPointMode) {
         _addStartingPointMode.value = status
     }
