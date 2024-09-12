@@ -8,6 +8,7 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.google.ar.core.Coordinates2d
 import com.google.ar.core.Frame
+import com.google.ar.core.HitResult
 import com.google.ar.core.Plane
 import com.google.ar.core.Session
 import com.google.ar.core.exceptions.CameraNotAvailableException
@@ -25,6 +26,7 @@ public class CameraFeedRenderer(
     private val session: Session,
     private val assets: AssetManager,
     private val onFrame: (Frame) -> Unit,
+    private val onTap: (hit: HitResult?) -> Unit,
 ) :
     SurfaceDrawHandler.Renderer, DefaultLifecycleObserver {
 
@@ -171,7 +173,7 @@ public class CameraFeedRenderer(
             drawBackground(surfaceDrawHandler)
         }
 
-        handleTap(frame)
+        handleTap(frame, onTap)
 
 
         val camera = frame.camera
@@ -188,8 +190,8 @@ public class CameraFeedRenderer(
         onFrame(frame)
     }
 
-    public fun handleTap(frame: Frame) {
-        virtualSceneRenderer.handleTap(frame)
+    public fun handleTap(frame: Frame, onTap: (HitResult?) -> Unit) {
+        virtualSceneRenderer.handleTap(frame, onTap)
     }
 
     /**

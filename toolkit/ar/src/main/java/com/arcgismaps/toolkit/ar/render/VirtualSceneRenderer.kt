@@ -6,6 +6,7 @@ import android.view.MotionEvent
 import com.google.ar.core.Anchor
 import com.google.ar.core.Camera
 import com.google.ar.core.Frame
+import com.google.ar.core.HitResult
 import com.google.ar.core.Plane
 import com.google.ar.core.Point
 import com.google.ar.core.Trackable
@@ -88,22 +89,10 @@ public class VirtualSceneRenderer(private val zNear: Float, private val zFar: Fl
         }
     }
 
-    public fun handleTap(frame: Frame) {
+    public fun handleTap(frame: Frame, onTap: ((HitResult?) -> Unit)) {
         val tap = lastTap ?: return
         val hit = frame.hitTest(tap).firstOrNull { it.trackable is Plane || it.trackable is Point }
-        if (hit != null) {
-            // Cap the number of objects created. This avoids overloading both the
-            // rendering system and ARCore.
-            if (wrappedAnchors.size >= 20) {
-                wrappedAnchors[0].anchor.detach()
-                wrappedAnchors.removeAt(0)
-            }
-
-            // Adding an Anchor tells ARCore that it should track this position in
-            // space. This anchor is created on the Plane to place the 3D model
-            // in the correct position relative both to the world and to the plane.
-            wrappedAnchors.add(WrappedAnchor(hit.createAnchor(), hit.trackable))
-        }
+        onTap(hit)
         lastTap = null
     }
 

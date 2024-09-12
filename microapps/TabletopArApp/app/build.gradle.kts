@@ -92,6 +92,7 @@ dependencies {
     implementation(project(":geoview-compose"))
     implementation(project(":microapps-lib"))
     implementation(project(":ar"))
+    implementation(project(":authentication"))
     implementation(libs.arcore)
     implementation(arcgis.mapsSdk)
     implementation(platform(libs.androidx.compose.bom))

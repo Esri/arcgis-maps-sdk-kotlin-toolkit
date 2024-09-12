@@ -42,6 +42,8 @@ import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.ar.TableTopSceneView
 import com.arcgismaps.toolkit.ar.TableTopSceneViewProxy
+import com.arcgismaps.toolkit.authentication.AuthenticatorState
+import com.arcgismaps.toolkit.authentication.DialogAuthenticator
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.esri.microappslib.theme.MicroAppTheme
 import com.google.ar.core.ArCoreApk
@@ -85,6 +87,9 @@ class MainActivity : ComponentActivity() {
                 session.collectAsState().value?.let { session ->
                     TableTopSceneView(
                         arcGISScene = arcGISScene,
+                        Point(0.0, 0.0),
+                        1_000.0,
+                        1_000.0,
                         session = session,
                         modifier = Modifier.fillMaxSize(),
                         tableTopSceneViewProxy = tableTopSceneViewProxy,
@@ -102,6 +107,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
+                DialogAuthenticator(authenticatorState = remember { AuthenticatorState() })
             }
         }
     }

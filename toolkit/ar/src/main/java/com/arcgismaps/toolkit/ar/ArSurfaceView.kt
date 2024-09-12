@@ -14,17 +14,18 @@ import androidx.lifecycle.LifecycleOwner
 import com.arcgismaps.toolkit.ar.render.CameraFeedRenderer
 import com.arcgismaps.toolkit.ar.render.SurfaceDrawHandler
 import com.google.ar.core.Frame
+import com.google.ar.core.HitResult
 import com.google.ar.core.Session
 
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-public fun ARSurfaceView(session: Session, onFrame: (Frame) -> Unit) {
+public fun ARSurfaceView(session: Session, onFrame: (Frame) -> Unit, onTap: (hit: HitResult?) -> Unit) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val surfaceView = GLSurfaceView(context)
 
-    val cameraFeedRenderer = CameraFeedRenderer(context, session, context.assets, onFrame).apply {
+    val cameraFeedRenderer = CameraFeedRenderer(context, session, context.assets, onFrame, onTap).apply {
         // I don't understand the circular dependency between SurfaceDrawHandler and CameraFeedRenderer
         this.surfaceDrawHandler = SurfaceDrawHandler(surfaceView, this)
         lifecycleOwner.lifecycle.addObserver(this)
