@@ -2,13 +2,11 @@ public final class com/arcgismaps/toolkit/utilitynetworks/TraceKt {
 	public static final fun Trace (Lcom/arcgismaps/toolkit/utilitynetworks/TraceState;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
 }
 
-public abstract interface class com/arcgismaps/toolkit/utilitynetworks/TraceState {
-	public abstract fun getTraceConfigurations ()Lkotlinx/coroutines/flow/StateFlow;
-	public abstract fun getTraceResult ()Lkotlinx/coroutines/flow/StateFlow;
-	public abstract fun trace ()V
-}
-
-public final class com/arcgismaps/toolkit/utilitynetworks/TraceStateKt {
-	public static final fun TraceState (Lcom/arcgismaps/mapping/ArcGISMap;Lkotlinx/coroutines/CoroutineScope;)Lcom/arcgismaps/toolkit/utilitynetworks/TraceState;
+public final class com/arcgismaps/toolkit/utilitynetworks/TraceState {
+	public static final field $stable I
+	public fun <init> (Lcom/arcgismaps/mapping/ArcGISMap;Lkotlinx/coroutines/CoroutineScope;)V
+	public final fun getTraceConfigurations ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getTraceResult ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun trace (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
