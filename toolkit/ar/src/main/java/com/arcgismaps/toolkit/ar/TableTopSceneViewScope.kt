@@ -41,7 +41,7 @@ import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutShapes
 public class TableTopSceneViewScope internal constructor(private val sceneViewScope: SceneViewScope) {
     /**
      * Displays a Callout at the specified geographical location on the TableTopSceneView. The Callout is a composable
-     * that can be used to display additional information about a location on the map. The additional information is
+     * that can be used to display additional information about a location on the scene. The additional information is
      * passed as a content composable that contains text and/or other content. It has a leader that points to
      * the location that Callout refers to. The body of the Callout is a rectangular area with curved corners
      * that contains the content lambda provided by the application. A thin border line is drawn around the entire Callout.
@@ -73,7 +73,7 @@ public class TableTopSceneViewScope internal constructor(private val sceneViewSc
 
     /**
      * Creates a Callout at the specified [geoElement] or the [tapLocation] location on the TableTopSceneView. The Callout is a composable
-     * that can be used to display additional information about a location on the map. The additional information is
+     * that can be used to display additional information about a location on the scene. The additional information is
      * passed as a [content] composable that contains text and/or other content. It has a leader that points to
      * the location that Callout refers to. The body of the Callout is a rectangular area with curved corners
      * that contains the [content] lambda provided by the application. A thin border line is drawn around the entire Callout.
