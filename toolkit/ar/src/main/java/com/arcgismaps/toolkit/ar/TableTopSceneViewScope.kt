@@ -27,11 +27,17 @@ import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.GeoElement
 import com.arcgismaps.mapping.view.GeoView
 import com.arcgismaps.mapping.view.SceneView
+import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewScope
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutColors
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutDefaults
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutShapes
 
+/**
+ * The receiver class of the [TableTopSceneView] content lambda.
+ *
+ * @since 200.6.0
+ */
 public class TableTopSceneViewScope internal constructor(private val sceneViewScope: SceneViewScope) {
     /**
      * Displays a Callout at the specified geographical location on the GeoView. The Callout is a composable
