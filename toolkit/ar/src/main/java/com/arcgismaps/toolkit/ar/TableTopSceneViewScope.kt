@@ -40,7 +40,7 @@ import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutShapes
  */
 public class TableTopSceneViewScope internal constructor(private val sceneViewScope: SceneViewScope) {
     /**
-     * Displays a Callout at the specified geographical location on the GeoView. The Callout is a composable
+     * Displays a Callout at the specified geographical location on the TableTopSceneView. The Callout is a composable
      * that can be used to display additional information about a location on the map. The additional information is
      * passed as a content composable that contains text and/or other content. It has a leader that points to
      * the location that Callout refers to. The body of the Callout is a rectangular area with curved corners
@@ -52,9 +52,9 @@ public class TableTopSceneViewScope internal constructor(private val sceneViewSc
      * @param modifier Modifier to be applied to the composable Callout
      * @param content the content of the Callout
      * @param offset the offset in screen coordinates from the geographical location at which to place the callout
-     * @param rotateOffsetWithGeoView specifies whether the screen offset is rotated with the [GeoView]. The Screen offset
-     *        will be rotated with the [GeoView] when true, false otherwise.
-     *        This is useful if you are showing the callout for elements with symbology that does rotate with the [GeoView]
+     * @param rotateOffsetWithGeoView specifies whether the screen offset is rotated with the [TableTopSceneView]. The Screen offset
+     *        will be rotated with the [TableTopSceneView] when true, false otherwise.
+     *        This is useful if you are showing the callout for elements with symbology that does rotate with the [TableTopSceneView]
      * @param colorScheme the styling options for the Callout's color properties
      * @param shapes the styling options for the Callout's container shape
      * @since 200.6.0
@@ -72,7 +72,7 @@ public class TableTopSceneViewScope internal constructor(private val sceneViewSc
     ): Unit = sceneViewScope.Callout(location, modifier, offset, rotateOffsetWithGeoView, colorScheme, shapes, content)
 
     /**
-     * Creates a Callout at the specified [geoElement] or the [tapLocation] location on the MapView. The Callout is a composable
+     * Creates a Callout at the specified [geoElement] or the [tapLocation] location on the TableTopSceneView. The Callout is a composable
      * that can be used to display additional information about a location on the map. The additional information is
      * passed as a [content] composable that contains text and/or other content. It has a leader that points to
      * the location that Callout refers to. The body of the Callout is a rectangular area with curved corners
@@ -81,7 +81,7 @@ public class TableTopSceneViewScope internal constructor(private val sceneViewSc
      * If the given geoelement is a DynamicEntity then the Callout automatically updates its location everytime the
      * DynamicEntity changes. The content of the Callout however will not be automatically updated.
      *
-     * Note: Only one Callout can be displayed at a time on the MapView.
+     * Note: Only one Callout can be displayed at a time on the TableTopSceneView.
      *
      * @param geoElement the GeoElement for which to display the Callout
      * @param modifier Modifier to be applied to the composable Callout
