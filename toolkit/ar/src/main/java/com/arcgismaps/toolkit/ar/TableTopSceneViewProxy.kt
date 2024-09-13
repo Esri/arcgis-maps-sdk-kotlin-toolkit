@@ -19,6 +19,7 @@
 package com.arcgismaps.toolkit.ar
 
 import android.graphics.drawable.BitmapDrawable
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.unit.Dp
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.Bookmark
@@ -32,10 +33,23 @@ import com.arcgismaps.mapping.view.IdentifyLayerResult
 import com.arcgismaps.mapping.view.LayerViewState
 import com.arcgismaps.mapping.view.LocationToScreenResult
 import com.arcgismaps.mapping.view.ScreenCoordinate
+import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
+/**
+ * Used to perform operations on a [TableTopSceneView].
+ *
+ * There should be a one-to-one relationship between a TableTopSceneViewProxy and a [TableTopSceneView]. This
+ * relationship is established by passing an instance of TableTopSceneViewProxy to the [TableTopSceneView] function.
+ * Operations can only be performed once the associated composable TableTopSceneView has entered the composition.
+ * Operations performed when the associated composable TableTopSceneView is not in the composition will fail gracefully,
+ * i.e. won't throw exceptions but won't return a successful result.
+ *
+ * @since 200.6.0
+ */
+@Stable
 public final class TableTopSceneViewProxy internal constructor(internal val sceneViewProxy: SceneViewProxy) {
 
     public constructor() : this(SceneViewProxy())
