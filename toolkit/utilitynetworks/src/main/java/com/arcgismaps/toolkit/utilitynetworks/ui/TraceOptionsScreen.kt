@@ -78,6 +78,7 @@ import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 import com.arcgismaps.toolkit.ui.expandablecard.theme.LocalExpandableCardColorScheme
 import com.arcgismaps.toolkit.ui.expandablecard.theme.LocalExpandableCardTypography
 import com.arcgismaps.toolkit.utilitynetworks.R
+import com.arcgismaps.utilitynetworks.UtilityNamedTraceConfiguration
 import com.arcgismaps.utilitynetworks.UtilityNetwork
 
 /**
@@ -89,12 +90,12 @@ import com.arcgismaps.utilitynetworks.UtilityNetwork
  */
 @Composable
 internal fun TraceOptionsScreen(
-    configurations: List<SelectableItem>,
+    configurations: List<UtilityNamedTraceConfiguration>,
+    selectedConfig: UtilityNamedTraceConfiguration?,
+    onConfigSelected: (UtilityNamedTraceConfiguration)->Unit,
     onPerformTraceButtonClicked: () -> Unit,
     onAddStartingPointButtonClicked: () -> Unit
 ) {
-    val traceConfigurations = remember { mutableStateListOf<SelectableItem>() }
-    traceConfigurations.addAll(configurations)
     Surface(
         color = MaterialTheme.colorScheme.surface,
         modifier = Modifier
@@ -107,10 +108,14 @@ internal fun TraceOptionsScreen(
                     .weight(1f),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+
                 item {
                     TraceConfiguration(
-                        traceConfigurations
-                    )
+                        configurations,
+                        selectedConfig,
+                    ) { newConfig ->
+                        onConfigSelected(newConfig)
+                    }
                 }
                 item {
                     StartingPointsEditor(onAddStartingPointButtonClicked)
@@ -132,17 +137,17 @@ internal fun TraceOptionsScreen(
  * @since 200.6.0
  */
 @Composable
-private fun TraceConfiguration(utilityTraces: List<SelectableItem>) {
+private fun TraceConfiguration(configs: List<UtilityNamedTraceConfiguration>, selectedConfig: UtilityNamedTraceConfiguration?, onTraceSelected: (UtilityNamedTraceConfiguration)->Unit) {
     ExpandableCard(
         title = stringResource(id = R.string.trace_configuration),
         padding = 4.dp
     ) {
-        var selectedTrace: SelectableItem? by remember { mutableStateOf(null) }
+        //var selectedConfiguration: String by remember { mutableStateOf(selectedConfigName) }
         Column {
-            utilityTraces.forEachIndexed { index, item ->
+            configs.forEachIndexed { index, item ->
                 ReadOnlyTextField(
-                    text = item.title,
-                    leadingIcon = if (item.title == selectedTrace?.title) {
+                    text = item.name,
+                    leadingIcon = if (item.name == selectedConfig?.name) {
                         {
                             Icon(
                                 imageVector = Icons.Filled.Done,
@@ -157,7 +162,7 @@ private fun TraceConfiguration(utilityTraces: List<SelectableItem>) {
                         .padding(horizontal = 8.dp)
                         .fillMaxWidth()
                         .clickable {
-                            selectedTrace = utilityTraces[index]
+                            onTraceSelected(configs[index])
                         }
                 )
             }
@@ -410,25 +415,3 @@ private fun AdvancedOptionsRowPreview() {
         )
     }
 }
-
-@Preview
-@Composable
-private fun TraceOptionsPreview() {
-    TraceOptionsScreen(
-        listOf(
-            SelectableItem("Trace 1", false),
-            SelectableItem("Trace 2", false),
-            SelectableItem("Trace 3", false),
-            SelectableItem("Trace 4", false)
-        ),
-        onPerformTraceButtonClicked = {},
-        onAddStartingPointButtonClicked = {}
-    )
-}
-
-/**
- * A data class to represent a selectable item.
- *
- * @since 200.6.0
- */
-internal data class SelectableItem(val title: String, var selected: Boolean)

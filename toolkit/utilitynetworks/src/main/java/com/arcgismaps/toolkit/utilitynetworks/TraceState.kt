@@ -17,6 +17,9 @@
 package com.arcgismaps.toolkit.utilitynetworks
 
 import android.util.Log
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.Color
 import com.arcgismaps.Guid
@@ -47,13 +50,15 @@ import kotlinx.coroutines.launch
  */
 public sealed interface TraceState {
 
-    public val traceConfigurations: StateFlow<List<UtilityNamedTraceConfiguration>?>
+    public val traceConfigurations: StateFlow<List<UtilityNamedTraceConfiguration>>
 
     public val traceResult: StateFlow<UtilityElementTraceResult?>
     public val addStartingPointMode: StateFlow<AddStartingPointMode>
     public val selectedGeoElementsAsStartingPoints: StateFlow<List<GeoElement>>
+    public val selectedTraceConfiguration: State<UtilityNamedTraceConfiguration?>
     public fun addStartingPoint(mapPoint: Point)
     public fun updateAddStartPointMode(status: AddStartingPointMode)
+    public fun setSelectedTraceConfiguration(config: UtilityNamedTraceConfiguration)
     public suspend fun trace()
 }
 
@@ -69,14 +74,17 @@ private class TraceStateImpl(
     val mapViewProxy: MapViewProxy
 ) : TraceState {
 
-    private val _traceConfigurations = MutableStateFlow<List<UtilityNamedTraceConfiguration>?>(null)
-    override val traceConfigurations: StateFlow<List<UtilityNamedTraceConfiguration>?> = _traceConfigurations.asStateFlow()
+    private val _traceConfigurations = MutableStateFlow<List<UtilityNamedTraceConfiguration>>(emptyList())
+    override val traceConfigurations: StateFlow<List<UtilityNamedTraceConfiguration>> = _traceConfigurations.asStateFlow()
 
     private var _traceResult = MutableStateFlow<UtilityElementTraceResult?>(null)
     override val traceResult: StateFlow<UtilityElementTraceResult?> = _traceResult.asStateFlow()
 
     private var _addStartingPointMode = MutableStateFlow<AddStartingPointMode>(AddStartingPointMode.None)
     override val addStartingPointMode: StateFlow<AddStartingPointMode> = _addStartingPointMode.asStateFlow()
+
+    private var _selectedTraceConfiguration: MutableState<UtilityNamedTraceConfiguration?> = mutableStateOf(null)
+    override val selectedTraceConfiguration: State<UtilityNamedTraceConfiguration?> = _selectedTraceConfiguration
 
     private val _selectedGeoElementsAsStartingPoints: MutableStateFlow<MutableList<GeoElement>> =
         MutableStateFlow(
@@ -88,7 +96,9 @@ private class TraceStateImpl(
     private lateinit var tapPoint: Point
     private var screenPoint: ScreenCoordinate? = null
 
-    private var utilityNetwork: UtilityNetwork? = null
+    private var _utilityNetwork: UtilityNetwork? = null
+    private val utilityNetwork: UtilityNetwork
+        get() = _utilityNetwork ?: throw IllegalStateException("utility network cannot be null")
 
     init {
         coroutineScope.launch {
@@ -107,20 +117,23 @@ private class TraceStateImpl(
                 // //Handle error
 //                }
 
-            utilityNetwork = arcGISMap.utilityNetworks.first()
-            _traceConfigurations.value = utilityNetwork?.queryNamedTraceConfigurations()?.getOrNull()
+            _utilityNetwork = arcGISMap.utilityNetworks.first()
+            _traceConfigurations.value = utilityNetwork.queryNamedTraceConfigurations().getOrThrow()
         }
     }
 
+    override fun setSelectedTraceConfiguration(config: UtilityNamedTraceConfiguration) {
+        _selectedTraceConfiguration.value = config
+    }
     override suspend fun trace() {
         // Run a trace
-        val utilityNetworkDefinition = utilityNetwork?.definition
+        val utilityNetworkDefinition = utilityNetwork.definition
         val utilityNetworkSource =
             utilityNetworkDefinition!!.getNetworkSource("Electric Distribution Line")
         val utilityAssetGroup = utilityNetworkSource!!.getAssetGroup("Medium Voltage")
         val utilityAssetType =
             utilityAssetGroup!!.getAssetType("Underground Three Phase")
-        val startingLocation = utilityNetwork?.createElementOrNull(
+        val startingLocation = utilityNetwork.createElementOrNull(
             utilityAssetType!!,
             Guid("0B1F4188-79FD-4DED-87C9-9E3C3F13BA77")
         )
@@ -130,9 +143,9 @@ private class TraceStateImpl(
             listOf(startingLocation!!)
         )
 
-        utilityNetwork?.trace(
+        utilityNetwork.trace(
             utilityTraceParameters
-        )?.onSuccess {
+        ).onSuccess {
             // Handle trace results
             _traceResult.value = it[0] as UtilityElementTraceResult
             Log.i("UtilityNetworkTraceApp", "Trace results: $it")
@@ -140,7 +153,7 @@ private class TraceStateImpl(
                 "UtilityNetworkTraceApp",
                 "Trace result element size: ${(_traceResult.value)?.elements?.size}"
             )
-        }?.onFailure {
+        }.onFailure {
             // Handle error
         }
     }

@@ -17,6 +17,7 @@
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -34,8 +35,9 @@ import com.arcgismaps.toolkit.utilitynetworks.TraceState
 internal fun TraceNavHost(navController: NavHostController, traceState: TraceState) {
     NavHost(navController = navController, startDestination = TraceNavRoute.TraceOptions.name) {
         composable(TraceNavRoute.TraceOptions.name) {
+            val configs = traceState.traceConfigurations.collectAsStateWithLifecycle()
             TraceOptionsScreen(
-                configurations = emptyList(),
+                configurations = configs.value,
                 onPerformTraceButtonClicked = {
                     // TODO: Add call to perform trace
                     navController.navigate(TraceNavRoute.TraceResults.name)
@@ -43,7 +45,12 @@ internal fun TraceNavHost(navController: NavHostController, traceState: TraceSta
                 onAddStartingPointButtonClicked = {
                     traceState.updateAddStartPointMode(AddStartingPointMode.Started)
                     navController.navigate(TraceNavRoute.AddStartingPoint.name)
-                })
+                },
+                selectedConfig = traceState.selectedTraceConfiguration.value,
+                onConfigSelected = { newConfig ->
+                    traceState.setSelectedTraceConfiguration(newConfig)
+                }
+            )
         }
         composable(TraceNavRoute.AddStartingPoint.name) {
             AddStartingPointScreen(
