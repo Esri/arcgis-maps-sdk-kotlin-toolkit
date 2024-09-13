@@ -239,7 +239,7 @@ public final class TableTopSceneViewProxy internal constructor(internal val scen
     public fun setViewpoint(viewpoint: Viewpoint): Unit = sceneViewProxy.setViewpoint(viewpoint)
 
     /**
-     * Animate the geo view to the new viewpoint, taking the given duration to complete the navigation.
+     * Animate the TableTopSceneView to the new viewpoint, taking the given duration to complete the navigation.
      *
      * @param viewpoint the new viewpoint
      * @param duration the duration of the animation
