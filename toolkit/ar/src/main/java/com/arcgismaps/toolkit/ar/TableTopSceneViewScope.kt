@@ -20,14 +20,10 @@ package com.arcgismaps.toolkit.ar
 
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.GeoElement
-import com.arcgismaps.mapping.view.GeoView
-import com.arcgismaps.mapping.view.SceneView
-import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewScope
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutColors
 import com.arcgismaps.toolkit.geoviewcompose.theme.CalloutDefaults
@@ -46,7 +42,7 @@ public class TableTopSceneViewScope internal constructor(private val sceneViewSc
      * the location that Callout refers to. The body of the Callout is a rectangular area with curved corners
      * that contains the content lambda provided by the application. A thin border line is drawn around the entire Callout.
      *
-     * Note: Only one Callout can be displayed at a time on the GeoView.
+     * Note: Only one Callout can be displayed at a time on the TableTopSceneView.
      *
      * @param location the geographical location at which to display the Callout
      * @param modifier Modifier to be applied to the composable Callout

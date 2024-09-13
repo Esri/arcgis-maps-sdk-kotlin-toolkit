@@ -33,7 +33,6 @@ import com.arcgismaps.mapping.view.IdentifyLayerResult
 import com.arcgismaps.mapping.view.LayerViewState
 import com.arcgismaps.mapping.view.LocationToScreenResult
 import com.arcgismaps.mapping.view.ScreenCoordinate
-import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
