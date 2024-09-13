@@ -15,8 +15,20 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="enter_n_chars">Saisir %1$d caractères</string>
+    <plurals name="enter_n_chars">
+        <item quantity="one">Saisir %1$d caractère</item>
+        <item quantity="other">Saisir %1$d caractères</item>
+    </plurals>
+    <plurals name="value_must_be_n_characters">
+        <item quantity="one">La valeur doit comporter %1$d caractère</item>
+        <item quantity="other">La valeur doit comporter %1$d caractères</item>
+    </plurals>
     <string name="enter_min_to_max_chars">Saisir %1$d à %2$d caractères</string>
+    <string name="value_must_be_from_to_characters">La valeur doit comporter entre %1$d et %2$d caractères</string>
+    <plurals name="maximum_n_chars">
+        <item quantity="one">%1$d caractère au maximum</item>
+        <item quantity="other">%1$d caractères au maximum</item>
+    </plurals>
     <string name="maximum_n_chars">%1$d caractères au maximum</string>
     <string name="no_value">Aucune valeur</string>
     <string name="enter_value">Saisir une valeur</string>
@@ -28,6 +40,7 @@
     <string name="done">Terminé</string>
     <string name="filter">Filtrer %1$s</string>
     <string name="numeric_range_helper_text">Saisir une valeur comprise entre %1$s et %2$s</string>
+    <string name="value_must_be_from_to">La valeur doit être comprise entre %1$s et %2$s</string>
     <string name="less_than_min_value">Inférieure à la valeur minimale %1$s</string>
     <string name="exceeds_max_value">Supérieure à la valeur maximale %1$s</string>
     <string name="value_must_be_a_whole_number">La valeur doit être un nombre entier</string>
@@ -87,9 +100,17 @@
     <string name="ff_time_picker_minute_text_field">pour les minutes</string>
     <string name="ff_time_picker_period_toggle_description">Sélectionner AM ou PM</string>
     <string name="ff_time_picker_pm">PM</string>
+
     <string name="take_photo">Prendre une photo</string>
+    <string name="add_from_gallery">Ajouter à partir de la bibliothèque</string>
     <string name="rename">Renommer</string>
     <string name="delete">Supprimer</string>
     <string name="rename_attachment">Renommer la pièce jointe</string>
     <string name="name">Nom</string>
+    <string name="add_file">Ajouter à partir de fichiers</string>
+    <string name="attachment_error">Erreur lors de l’ajout de la pièce jointe</string>
+    <string name="no_app_found">Aucune application trouvée pour ouvrir ce type de fichier.</string>
+    <string name="attachment_too_large">Le fichier est trop volumineux. Ajoutez un fichier de moins de 50 Mo.</string>
+    <string name="attachment_is_empty">Les fichiers vides ne sont pas pris en charge</string>
+    <string name="download_empty_file">Il n’est pas possible de télécharger des fichiers vides</string>
 </resources>

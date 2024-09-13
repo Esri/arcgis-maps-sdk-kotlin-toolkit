@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.authentication
 
+import android.net.Uri
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -39,6 +40,10 @@ public class UsernamePasswordChallenge(
     private var onCancel: (() -> Unit)? = onCancel
     private val _additionalMessage: MutableStateFlow<String?> = MutableStateFlow(null)
     public val additionalMessage: StateFlow<String?> = _additionalMessage.asStateFlow()
+    public val hostname: String by lazy {
+        Uri.parse(url).host ?: url
+    }
+
 
     /**
      * Completes the challenge with the credentials. Note that either [continueWithCredentials] or [cancel]

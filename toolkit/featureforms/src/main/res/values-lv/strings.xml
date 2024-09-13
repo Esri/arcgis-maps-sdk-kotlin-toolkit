@@ -15,8 +15,20 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="enter_n_chars">Ievadiet %1$d rakstzīmes</string>
+    <plurals name="enter_n_chars">
+        <item quantity="one">Ievadīt %1$d rakstzīmi</item>
+        <item quantity="other">Ievadiet %1$d rakstzīmes</item>
+    </plurals>
+    <plurals name="value_must_be_n_characters">
+        <item quantity="one">Vērtībai ir jābūt %1$d rakstzīmei</item>
+        <item quantity="other">Vērtībai ir jābūt %1$d rakstzīmēm</item>
+    </plurals>
     <string name="enter_min_to_max_chars">Ievadiet %1$d līdz %2$d rakstzīmēm</string>
+    <string name="value_must_be_from_to_characters">Vērtībai ir jābūt no %1$d līdz %2$d rakstzīmēm</string>
+    <plurals name="maximum_n_chars">
+        <item quantity="one">Ne vairāk kā %1$d rakstzīme</item>
+        <item quantity="other">Ne vairāk kā %1$d rakstzīmes</item>
+    </plurals>
     <string name="maximum_n_chars">Ne vairāk kā %1$d rakstzīmes</string>
     <string name="no_value">Nav vērtības</string>
     <string name="enter_value">Ievadiet vērtību</string>
@@ -28,6 +40,7 @@
     <string name="done">Pabeigts</string>
     <string name="filter">Filtrēt %1$s</string>
     <string name="numeric_range_helper_text">Ievadiet vērtību no %1$s līdz %2$s</string>
+    <string name="value_must_be_from_to">Vērtībai ir jābūt no %1$s līdz %2$s</string>
     <string name="less_than_min_value">Mazāk par minimālo vērtību %1$s</string>
     <string name="exceeds_max_value">Pārsniedz maksimālo vērtību %1$s</string>
     <string name="value_must_be_a_whole_number">Vērtībai jābūt veselam skaitlim</string>
@@ -87,9 +100,17 @@
     <string name="ff_time_picker_minute_text_field">minūtēm</string>
     <string name="ff_time_picker_period_toggle_description">Atlasīt AM vai PM</string>
     <string name="ff_time_picker_pm">PM</string>
+
     <string name="take_photo">Uzņemt fotoattēlu</string>
+    <string name="add_from_gallery">Pievienot no galerijas</string>
     <string name="rename">Pārdēvēt</string>
     <string name="delete">Dzēst</string>
     <string name="rename_attachment">Pārdēvēt pielikumu</string>
     <string name="name">Nosaukums</string>
+    <string name="add_file">Pievienot no failiem</string>
+    <string name="attachment_error">Pievienojot pielikumu, radās kļūda</string>
+    <string name="no_app_found">Nav atrasta šī failu tipa atvēršanai piemērota lietotne.</string>
+    <string name="attachment_too_large">Fails ir pārāk liels. Pievienot failu, kura izmērs ir mazāks par 50 MB.</string>
+    <string name="attachment_is_empty">Tukši faili netiek atbalstīti</string>
+    <string name="download_empty_file">Tukšu failu lejupielāde nav iespējama</string>
 </resources>

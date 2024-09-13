@@ -15,8 +15,20 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="enter_n_chars">Geben Sie %1$d Zeichen ein.</string>
+    <plurals name="enter_n_chars">
+        <item quantity="one">Geben Sie %1$d Zeichen ein.</item>
+        <item quantity="other">Geben Sie %1$d Zeichen ein.</item>
+    </plurals>
+    <plurals name="value_must_be_n_characters">
+        <item quantity="one">Wert muss %1$d Zeichen enthalten.</item>
+        <item quantity="other">Wert muss %1$d Zeichen enthalten.</item>
+    </plurals>
     <string name="enter_min_to_max_chars">Geben Sie %1$d bis %2$d Zeichen ein.</string>
+    <string name="value_must_be_from_to_characters">Wert muss zwischen %1$d und %2$d Zeichen enthalten</string>
+    <plurals name="maximum_n_chars">
+        <item quantity="one">Maximal %1$d Zeichen</item>
+        <item quantity="other">Maximal %1$d Zeichen</item>
+    </plurals>
     <string name="maximum_n_chars">Maximal %1$d Zeichen</string>
     <string name="no_value">Kein Wert</string>
     <string name="enter_value">Wert eingeben</string>
@@ -28,6 +40,7 @@
     <string name="done">Fertig</string>
     <string name="filter">%1$s filtern</string>
     <string name="numeric_range_helper_text">Geben Sie einen Wert zwischen %1$s und %2$s ein.</string>
+    <string name="value_must_be_from_to">Wert muss zwischen %1$s und %2$s liegen</string>
     <string name="less_than_min_value">Kleiner als Minimalwert %1$s</string>
     <string name="exceeds_max_value">Größer als Maximalwert %1$s</string>
     <string name="value_must_be_a_whole_number">Der Wert muss eine ganze Zahl sein</string>
@@ -87,9 +100,17 @@
     <string name="ff_time_picker_minute_text_field">für Minuten</string>
     <string name="ff_time_picker_period_toggle_description">AM oder PM auswählen</string>
     <string name="ff_time_picker_pm">PM</string>
+
     <string name="take_photo">Foto aufnehmen</string>
+    <string name="add_from_gallery">Aus Galerie hinzufügen</string>
     <string name="rename">Umbenennen</string>
     <string name="delete">Löschen</string>
     <string name="rename_attachment">Anlage umbenennen</string>
     <string name="name">Name</string>
+    <string name="add_file">Aus Dateien hinzufügen</string>
+    <string name="attachment_error">Anlage konnte nicht hinzugefügt werden.</string>
+    <string name="no_app_found">Keine Anwendung zum Öffnen dieses Dateityps gefunden.</string>
+    <string name="attachment_too_large">Die Datei ist zu groß. Fügen Sie eine Datei mit weniger als 50 MB hinzu.</string>
+    <string name="attachment_is_empty">Leere Dateien werden nicht unterstützt.</string>
+    <string name="download_empty_file">Leere Dateien können nicht heruntergeladen werden.</string>
 </resources>

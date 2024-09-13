@@ -15,8 +15,20 @@
   ~  limitations under the License.
   ~
   --><resources>
-    <string name="enter_n_chars">Введите %1$d знаков</string>
+    <plurals name="enter_n_chars">
+        <item quantity="one">Ввести %1$d символ</item>
+        <item quantity="other">Введите %1$d знаков</item>
+    </plurals>
+    <plurals name="value_must_be_n_characters">
+        <item quantity="one">Значение должно содержать %1$d символ</item>
+        <item quantity="other">Значение должно содержать %1$d символов</item>
+    </plurals>
     <string name="enter_min_to_max_chars">Введите от %1$d до %2$d знаков</string>
+    <string name="value_must_be_from_to_characters">Значение должно содержать от %1$d до %2$d символов</string>
+    <plurals name="maximum_n_chars">
+        <item quantity="one">Максимум %1$d символа</item>
+        <item quantity="other">Максимум %1$d символов</item>
+    </plurals>
     <string name="maximum_n_chars">Максимум %1$d символов</string>
     <string name="no_value">Нет значения</string>
     <string name="enter_value">Введите значение</string>
@@ -28,6 +40,7 @@
     <string name="done">Готово</string>
     <string name="filter">Фильтр %1$s</string>
     <string name="numeric_range_helper_text">Введите значение от %1$s до %2$s</string>
+    <string name="value_must_be_from_to">Значение должно содержать от %1$s до %2$s символов</string>
     <string name="less_than_min_value">Меньше минимального значения %1$s</string>
     <string name="exceeds_max_value">Превышает максимальное значение %1$s</string>
     <string name="value_must_be_a_whole_number">Значение должно быть целым числом</string>
@@ -87,9 +100,17 @@
     <string name="ff_time_picker_minute_text_field">в течение минут</string>
     <string name="ff_time_picker_period_toggle_description">Выбрать AM или PM</string>
     <string name="ff_time_picker_pm">PM</string>
+
     <string name="take_photo">Сделать фотографию</string>
+    <string name="add_from_gallery">Добавить из галереи</string>
     <string name="rename">Переименовать</string>
     <string name="delete">Удалить</string>
     <string name="rename_attachment">Переименовать вложение</string>
     <string name="name">Имя</string>
+    <string name="add_file">Добавить из файлов</string>
+    <string name="attachment_error">Ошибка добавления вложения</string>
+    <string name="no_app_found">Не найдено приложение для открытия этого типа файлов.</string>
+    <string name="attachment_too_large">Этот файл слишком большой. Добавьте файл размером меньше 50 MB.</string>
+    <string name="attachment_is_empty">Пустые файлы не поддерживаются</string>
+    <string name="download_empty_file">Пустые файлы невозможно загрузить</string>
 </resources>
