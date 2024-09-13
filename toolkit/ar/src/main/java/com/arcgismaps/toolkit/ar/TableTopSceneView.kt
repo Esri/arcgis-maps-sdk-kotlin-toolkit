@@ -59,7 +59,7 @@ import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
 import java.time.Instant
 
 /**
- * Displays a [SceneView] in a tabletop AR environment.
+ * A scene view that provides an augmented reality table top experience.
  *
  * @since 200.6.0
  */
