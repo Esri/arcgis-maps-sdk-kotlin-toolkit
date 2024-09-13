@@ -61,7 +61,7 @@ import java.time.Instant
 /**
  * Displays a [SceneView] in a tabletop AR environment.
  *
- * @since 200.5.0
+ * @since 200.6.0
  */
 @Composable
 public fun TableTopSceneView(

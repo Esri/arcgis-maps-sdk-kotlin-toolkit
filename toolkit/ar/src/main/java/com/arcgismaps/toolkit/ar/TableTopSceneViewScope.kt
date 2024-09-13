@@ -51,7 +51,7 @@ public class TableTopSceneViewScope internal constructor(private val sceneViewSc
      *        This is useful if you are showing the callout for elements with symbology that does rotate with the [GeoView]
      * @param colorScheme the styling options for the Callout's color properties
      * @param shapes the styling options for the Callout's container shape
-     * @since 200.5.0
+     * @since 200.6.0
      */
 
     @Composable
@@ -83,7 +83,7 @@ public class TableTopSceneViewScope internal constructor(private val sceneViewSc
      * @param colorScheme the styling options for the Callout's shape and color properties
      * @param shapes the styling options for the Callout's container shape
      * @param content the content of the Callout
-     * @since 200.5.0
+     * @since 200.6.0
      */
     @Composable
     public fun Callout(

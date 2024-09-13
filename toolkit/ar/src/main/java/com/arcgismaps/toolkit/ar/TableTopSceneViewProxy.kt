@@ -44,7 +44,7 @@ public final class TableTopSceneViewProxy internal constructor(internal val scen
      * True if continuous panning across the international date line is enabled in the GeoView, false otherwise.
      * A null value represents that it is currently undetermined.
      *
-     * @since 200.4.0
+     * @since 200.6.0
      */
     public val isWrapAroundEnabled: Boolean?
         get() = sceneViewProxy.isWrapAroundEnabled
@@ -53,7 +53,7 @@ public final class TableTopSceneViewProxy internal constructor(internal val scen
      * Exports an image snapshot of the current composable MapView or SceneView.
      *
      * @return A [Result] containing a [BitmapDrawable], or failure
-     * @since 200.4.0
+     * @since 200.6.0
      */
     public suspend fun exportImage(): Result<BitmapDrawable> = sceneViewProxy.exportImage()
 
@@ -80,7 +80,7 @@ public final class TableTopSceneViewProxy internal constructor(internal val scen
      * @param returnPopupsOnly whether the graphics property of the result is populated
      * @param maximumResults maximum size of the result set of graphics to return. A null value indicates unlimited results
      * @return A [Result] containing an [IdentifyGraphicsOverlayResult], or failure
-     * @since 200.4.0
+     * @since 200.6.0
      */
     public suspend fun identify(
         graphicsOverlay: GraphicsOverlay,
@@ -120,7 +120,7 @@ public final class TableTopSceneViewProxy internal constructor(internal val scen
      * @param maximumResults maximum size of the result set of graphics to return. A null value indicates unlimited results
      * @return A [Result] containing a [List] of [IdentifyGraphicsOverlayResult] containing one entry for each
      * overlay in the view, or failure. Each entry holds a [GraphicsOverlay] and a [List] of [com.arcgismaps.mapview.Graphic]s
-     * @since 200.4.0
+     * @since 200.6.0
      */
     public suspend fun identifyGraphicsOverlays(
         screenCoordinate: ScreenCoordinate,
@@ -157,7 +157,7 @@ public final class TableTopSceneViewProxy internal constructor(internal val scen
      * @param maximumResults maximum size of the result set of GeoElements (element type dependent on target layer) to
      * return per layer or sublayer. A null value indicates unlimited results
      * @return A [Result] containing an [IdentifyLayerResult], or failure
-     * @since 200.4.0
+     * @since 200.6.0
      */
     public suspend fun identify(
         layer: Layer,
@@ -196,7 +196,7 @@ public final class TableTopSceneViewProxy internal constructor(internal val scen
      * @return A [Result] containing a [List] of [IdentifyLayerResult], containing one entry for each layer in the
      * view that supports identify, or failure. Each entry contains a [Layer] and a [List] of elements of the type
      * contained by the layer (e.g. [com.arcgismaps.data.Feature] for an [com.arcgismaps.mapping.layers.FeatureLayer])
-     * @since 200.4.0
+     * @since 200.6.0
      */
     public suspend fun identifyLayers(
         screenCoordinate: ScreenCoordinate,
@@ -212,7 +212,7 @@ public final class TableTopSceneViewProxy internal constructor(internal val scen
      * @param bookmark bookmark to set
      * @return a [Result] indicating whether the viewpoint was successfully set.
      * A success result with a value of false may indicate the operation was cancelled.
-     * @since 200.4.0
+     * @since 200.6.0
      */
     public suspend fun setBookmark(bookmark: Bookmark): Result<Boolean> =
         sceneViewProxy.setBookmark(bookmark)
@@ -221,7 +221,7 @@ public final class TableTopSceneViewProxy internal constructor(internal val scen
      * Change the geo view to the new viewpoint. The viewpoint is updated instantaneously.
      *
      * @param viewpoint the new viewpoint
-     * @since 200.4.0
+     * @since 200.6.0
      */
     public fun setViewpoint(viewpoint: Viewpoint): Unit = sceneViewProxy.setViewpoint(viewpoint)
 
@@ -232,7 +232,7 @@ public final class TableTopSceneViewProxy internal constructor(internal val scen
      * @param duration the duration of the animation
      * @return a [Result] indicating whether the viewpoint was successfully set.
      * A success result with a value of false may indicate the operation was cancelled.
-     * @since 200.4.0
+     * @since 200.6.0
      */
     public suspend fun setViewpointAnimated(
         viewpoint: Viewpoint,
@@ -245,7 +245,7 @@ public final class TableTopSceneViewProxy internal constructor(internal val scen
      * @param layer the layer to retrieve the view state from
      * @return the [LayerViewState] of the provided layer, or null if this proxy's GeoView is not
      * part of the composition
-     * @since 200.4.0
+     * @since 200.6.0
      */
     public fun getLayerViewState(layer: Layer): LayerViewState? =
         sceneViewProxy.getLayerViewState(layer)
@@ -263,7 +263,7 @@ public final class TableTopSceneViewProxy internal constructor(internal val scen
      *
      * @param point a location defined within the spatial reference of the scene view
      * @return A location to screen result object. If an error occurs, null is returned.
-     * @since 200.4.0
+     * @since 200.6.0
      */
     public fun locationToScreen(point: Point): LocationToScreenResult? =
         sceneViewProxy.locationToScreen(point)
@@ -280,7 +280,7 @@ public final class TableTopSceneViewProxy internal constructor(internal val scen
      *
      * @param screenCoordinate a pixel coordinate relative to the upper-left corner of the screen.
      * @return A [Result] containing a [Point] or an exception.
-     * @since 200.4.0
+     * @since 200.6.0
      */
     public suspend fun screenToLocation(screenCoordinate: ScreenCoordinate): Result<Point> =
         sceneViewProxy.screenToLocation(screenCoordinate)
@@ -295,7 +295,7 @@ public final class TableTopSceneViewProxy internal constructor(internal val scen
      *
      * @param screenCoordinate the screen point, in pixels
      * @return a [Point] object, or null if the location could not be determined
-     * @since 200.4.0
+     * @since 200.6.0
      */
     public fun screenToBaseSurface(screenCoordinate: ScreenCoordinate): Point? =
         sceneViewProxy.screenToBaseSurface(screenCoordinate)
@@ -308,7 +308,7 @@ public final class TableTopSceneViewProxy internal constructor(internal val scen
      *
      * A null value represents that it is currently undetermined.
      *
-     * @since 200.4.0
+     * @since 200.6.0
      */
     public val fieldOfView: Double?
         get() = sceneViewProxy.fieldOfView
@@ -321,7 +321,7 @@ public final class TableTopSceneViewProxy internal constructor(internal val scen
      *
      * The default value is 1.0.
      * A null value represents that it is currently undetermined.
-     * @since 200.4.0
+     * @since 200.6.0
      */
     public val fieldOfViewDistortionRatio: Double?
         get() = sceneViewProxy.fieldOfViewDistortionRatio
@@ -331,7 +331,7 @@ public final class TableTopSceneViewProxy internal constructor(internal val scen
      * The viewpoint is updated instantaneously.
      *
      * @param camera the new camera
-     * @since 200.4.0
+     * @since 200.6.0
      */
     public fun setViewpointCamera(camera: Camera): Unit = sceneViewProxy.setViewpointCamera(camera)
 
@@ -342,7 +342,7 @@ public final class TableTopSceneViewProxy internal constructor(internal val scen
      * @param duration the duration of the animation
      * @return a [Result] indicating whether the viewpoint was successfully set.
      * A success result with a value of false may indicate the operation was cancelled.
-     * @since 200.4.0
+     * @since 200.6.0
      */
     public suspend fun setViewpointCameraAnimated(
         camera: Camera,
