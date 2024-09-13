@@ -48,7 +48,7 @@ public class TraceState(
      *
      * @since 200.6.0
      */
-    public val traceConfigurations: StateFlow<List<UtilityNamedTraceConfiguration>?> = _traceConfigurations.asStateFlow()
+    internal val traceConfigurations: StateFlow<List<UtilityNamedTraceConfiguration>?> = _traceConfigurations.asStateFlow()
 
     private val _traceResult = MutableStateFlow<UtilityElementTraceResult?>(null)
 
@@ -58,7 +58,7 @@ public class TraceState(
      *
      * @since 200.6.0
      */
-    public val traceResult: StateFlow<UtilityElementTraceResult?> = _traceResult.asStateFlow()
+    internal val traceResult: StateFlow<UtilityElementTraceResult?> = _traceResult.asStateFlow()
 
     private val _addStartingPointMode = MutableStateFlow<AddStartingPointMode>(AddStartingPointMode.None)
 
@@ -123,7 +123,7 @@ public class TraceState(
 
     /**
      * A single tap handler to identify starting points on the map. Call this method
-     * from [com.arcgismaps.toolkit.geoviewcompose.GeoViewProxy.identify].
+     * from [com.arcgismaps.toolkit.geoviewcompose.MapView] onSingleTapConfirmed lambda.
      *
      * @param point the event raised by a single tap on the map
      * @since 200.6.0
@@ -138,7 +138,7 @@ public class TraceState(
 
     /**
      * Set the mode of the state object to activate or deactivate the identification of
-     * `Features` in [com.arcgismaps.toolkit.geoviewcompose.MapViewEventHandler] response
+     * `GeoElements` in [com.arcgismaps.toolkit.geoviewcompose.MapView] onSingleTapConfirmed response
      * to single tap events.
      *
      * @param status the updated mode
