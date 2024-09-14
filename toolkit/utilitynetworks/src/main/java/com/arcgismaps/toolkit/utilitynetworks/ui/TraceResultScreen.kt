@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.LocationOn
@@ -31,6 +32,7 @@ import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -42,10 +44,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
+import com.arcgismaps.toolkit.utilitynetworks.R
 
+/**
+ * Composable that displays the trace results.
+ *
+ * @since 200.6.0
+ */
 @Composable
 internal fun TraceResultScreen(
     traceResults: TraceResults,
@@ -54,16 +64,16 @@ internal fun TraceResultScreen(
     onClearAllResults: () -> Unit
 ) {
     Surface(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            TraceTitle(traceResults.traceName, onZoomToResults = onZoomToResults, onDeleteResult = onDeleteResult)
-            FunctionResult(traceResults.functionResults)
-            Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
-                Button(onClick = onClearAllResults) {
-                    Text("Clear all results")
-                }
+        LazyColumn {
+            item {
+                TraceTitle(traceResults.traceName, onZoomToResults = onZoomToResults, onDeleteResult = onDeleteResult)
             }
-
-
+            item {
+                FunctionResult(traceResults.functionResults)
+            }
+            item {
+                ClearAllResultsButton(onClearAllResults)
+            }
         }
     }
 }
@@ -84,7 +94,7 @@ private fun TraceTitle(traceName: String, onZoomToResults: () -> Unit, onDeleteR
                 Text(
                     modifier = Modifier.padding(end = 8.dp),
                     text = traceName,
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.headlineMedium
                 )
                 Icon(
                     imageVector = Icons.Outlined.MoreVert,
@@ -98,14 +108,14 @@ private fun TraceTitle(traceName: String, onZoomToResults: () -> Unit, onDeleteR
                     expanded = false
                 }) {
                 DropdownMenuItem(
-                    text = { Text("Zoom To") },
+                    text = { Text(stringResource(R.string.zoom_to_result)) },
                     onClick = onZoomToResults,
-                    leadingIcon = { Icon(Icons.Outlined.LocationOn, contentDescription = "") }
+                    leadingIcon = { Icon(Icons.Outlined.LocationOn, contentDescription = "Zoom to trace result") }
                 )
                 DropdownMenuItem(
-                    text = { Text("Delete") },
+                    text = { Text(stringResource(R.string.delete)) },
                     onClick = onDeleteResult,
-                    leadingIcon = { Icon(Icons.Outlined.Clear, contentDescription = "") }
+                    leadingIcon = { Icon(Icons.Outlined.Clear, contentDescription = "Delete trace result") }
                 )
             }
         }
@@ -115,53 +125,105 @@ private fun TraceTitle(traceName: String, onZoomToResults: () -> Unit, onDeleteR
 
 @Composable
 private fun FunctionResult(functionResults: List<FunctionResult>) {
-    ExpandableCard(
-        title = "${resultCountText(functionResults.size)} Function Results",
-    ) {
+    Surface(modifier = Modifier.fillMaxWidth()) {
         Column {
-            functionResults.forEach { functionResult ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 32.dp, end = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(text = functionResult.name, style = MaterialTheme.typography.titleMedium)
-                    Text(text = functionResult.value, style = MaterialTheme.typography.titleMedium)
+            TraceResultSection(stringResource(R.string.function_results), value = functionResults.size.toString()) {
+                Column {
+                    functionResults.forEach { functionResult ->
+                        HorizontalDivider()
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 32.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(text = functionResult.name, style = MaterialTheme.typography.titleMedium)
+                            Column(horizontalAlignment = Alignment.End) {
+                                Text(
+                                    text = functionResult.functionType,
+                                    style = MaterialTheme.typography.titleSmall,
+                                    color = Color.Gray
+                                )
+                                Text(text = functionResult.value, style = MaterialTheme.typography.titleMedium)
+                            }
+                        }
+                    }
                 }
             }
         }
     }
 }
 
-private fun resultCountText(count: Int): String {
-    val max = 100
-    return "(${if (count > max) "$max+" else count.toString()})"
+@Composable
+internal fun TraceResultSection(title: String, value: String, content: @Composable () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 16.dp)
+    ) {
+        Text(
+            title,
+            color = Color.Gray,
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
+        )
+        ExpandableCard(
+            initialExpandedState = false,
+            title = value,
+            padding = 0.dp,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        ) {
+            content()
+        }
+    }
 }
+
+@Composable
+private fun ClearAllResultsButton(onClearAllResults: () -> Unit) {
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 16.dp)
+    ) {
+        Button(onClick = onClearAllResults) {
+            Text(stringResource(R.string.clear_all_results))
+        }
+    }
+}
+
 @Composable
 @Preview
 private fun TraceResultScreenPreview() {
     val traceResults = TraceResults(
         traceName = "Trace Name",
         functionResults = listOf(
-            FunctionResult("Function 1", "Value 1"),
-            FunctionResult("Function 2", "Value 2"),
-            FunctionResult("Function 3", "Value 3"),
-            FunctionResult("Function 1", "Value 1"),
-            FunctionResult("Function 2", "Value 2"),
-            FunctionResult("Function 3", "Value 3"),
-            FunctionResult("Function 1", "Value 1"),
-            FunctionResult("Function 2", "Value 2"),
-            FunctionResult("Function 3", "Value 3"),
-            FunctionResult("Function 1", "Value 1"),
-            FunctionResult("Function 2", "Value 2"),
-            FunctionResult("Function 3", "Value 3"),
-
-
-        )
+            FunctionResult("Function 1", "1", "Add"),
+            FunctionResult("Function 2", " 2", "Average"),
+            FunctionResult("Function 3", " 3", "Count"),
+            FunctionResult("Function 1", "1", "Max"),
+            FunctionResult("Function 2", "2", "Min"),
+            FunctionResult("Function 3", "3", "Subtract"),
+            )
     )
     TraceResultScreen(traceResults, onClearAllResults = {}, onDeleteResult = {}, onZoomToResults = {})
 }
-
+/**
+ * Data class to hold the trace results.
+ *
+ * @param traceName The name of the trace.
+ * @param functionResults The list of function results.
+ * @since 200.6.0
+ */
 internal data class TraceResults(val traceName: String, val functionResults: List<FunctionResult>)
-internal data class FunctionResult(val name: String, val value: String)
+
+/**
+ * Data class to hold the function result.
+ *
+ * @param name The name of the function result.
+ * @param value The value of the function result.
+ * @param functionType The type of the function result.
+ * @since 200.6.0
+ */
+internal data class FunctionResult(val name: String, val value: String, val functionType: String)
