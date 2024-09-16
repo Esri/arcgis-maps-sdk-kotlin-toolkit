@@ -104,11 +104,10 @@ internal fun TraceOptionsScreen(
         Column (horizontalAlignment = Alignment.CenterHorizontally) {
             LazyColumn(
                 modifier = Modifier
-                    .padding(3.dp)
+                    .padding(10.dp, 3.dp)
                     .weight(1f),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
                 item {
                     TraceConfiguration(
                         configurations,
