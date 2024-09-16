@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -98,54 +99,11 @@ public fun TableTopSceneView(
 ) {
     Box(modifier = modifier) {
         tableTopSceneViewProxy.sceneViewProxy.setManualRenderingEnabled(true)
-        val cameraController = remember { TransformationMatrixCameraController() }
+        val tableTopSceneViewState = remember { TableTopSceneViewState(arcGISSceneAnchor, clippingDistance, translationFactor, tableTopSceneViewProxy) }
 
-        var hasInitializedAnchor: Boolean by remember { mutableStateOf(false) }
-        val identityMatrix = remember { TransformationMatrix.createIdentityMatrix() }
-        var anchor: Anchor? by remember { mutableStateOf(null) }
+        ARSurfaceView(session = session, tableTopSceneViewState::onFrame, tableTopSceneViewState::onTap)
 
-        DisposableEffect(Unit) {
-            onDispose {
-                anchor?.detach()
-                anchor = null
-            }
-        }
-
-        cameraController.clippingDistance = clippingDistance
-        cameraController.setTranslationFactor(translationFactor)
-        cameraController.setOriginCamera(Camera(arcGISSceneAnchor, 0.0, 90.0, 0.0))
-
-        val onFrame: (Frame) -> Unit = {
-            anchor?.let { anchor ->
-                val anchorPosition = identityMatrix - anchor.pose.transformationMatrix
-                val cameraPosition = anchorPosition + it.camera.displayOrientedPose.transformationMatrix
-                cameraController.transformationMatrix = cameraPosition
-                val imageIntrinsics = it.camera.imageIntrinsics
-                tableTopSceneViewProxy.sceneViewProxy.setFieldOfViewFromLensIntrinsics(
-                    imageIntrinsics.focalLength[0],
-                    imageIntrinsics.focalLength[1],
-                    imageIntrinsics.principalPoint[0],
-                    imageIntrinsics.principalPoint[1],
-                    imageIntrinsics.imageDimensions[0].toFloat(),
-                    imageIntrinsics.imageDimensions[1].toFloat(),
-                    // TODO:
-                    deviceOrientation = DeviceOrientation.Portrait
-                )
-                tableTopSceneViewProxy.sceneViewProxy.renderFrame()
-            }
-        }
-
-        val onTap: (hit: HitResult?) -> Unit = {
-            it?.let { hitResult ->
-                if (!hasInitializedAnchor) {
-                    anchor = hitResult.createAnchor()
-                    hasInitializedAnchor = true
-                }
-            }
-        }
-        ARSurfaceView(session = session, onFrame, onTap)
-
-        if (hasInitializedAnchor) {
+        if (tableTopSceneViewState.ready.collectAsState().value) {
             SceneView(
                 arcGISScene = arcGISScene,
                 modifier = Modifier.fillMaxSize(),
@@ -159,7 +117,7 @@ public fun TableTopSceneView(
                 isAttributionBarVisible = isAttributionBarVisible,
                 onAttributionTextChanged = onAttributionTextChanged,
                 onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
-                cameraController = cameraController,
+                cameraController = tableTopSceneViewState.cameraController,
                 analysisOverlays = analysisOverlays,
                 imageOverlays = imageOverlays,
                 atmosphereEffect = AtmosphereEffect.None,
