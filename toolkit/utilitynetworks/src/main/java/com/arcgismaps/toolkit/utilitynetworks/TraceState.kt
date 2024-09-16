@@ -149,33 +149,30 @@ public class TraceState(
      * A single tap handler to identify starting points on the map. Call this method
      * from [com.arcgismaps.toolkit.geoviewcompose.MapView] onSingleTapConfirmed lambda.
      *
-     * @param point the event raised by a single tap on the map
-     * @param coroutineScope the coroutine scope to launch the coroutine to perform the identify operation
+     * @param mapPoint the point on the map user tapped on to identify starting points
      * @since 200.6.0
      */
-    public fun addStartingPoint(mapPoint: Point, coroutineScope: CoroutineScope) {
+    public suspend fun addStartingPoint(mapPoint: Point) {
         if (_addStartingPointMode.value is AddStartingPointMode.Started) {
             val screenPoint = mapViewProxy.locationToScreenOrNull(mapPoint)
-            screenPoint?.let { identifyFeatures(mapPoint, it, coroutineScope) }
+            screenPoint?.let { identifyFeatures(mapPoint, it) }
         }
     }
 
-    private fun identifyFeatures(mapPoint: Point, screenCoordinate: ScreenCoordinate, coroutineScope: CoroutineScope) {
-        coroutineScope.launch {
-            val result = mapViewProxy.identifyLayers(
-                screenCoordinate = screenCoordinate,
-                tolerance = 10.dp
-            )
-            result.onSuccess { identifyLayerResultList ->
-                if (identifyLayerResultList.isNotEmpty()) {
-                    identifyLayerResultList.forEach { identifyLayerResult ->
-                        identifyLayerResult.geoElements.forEach { geoElement ->
-                            _selectedGeoElementsAsStartingPoints.value.add(geoElement)
-                        }
+    private suspend fun identifyFeatures(mapPoint: Point, screenCoordinate: ScreenCoordinate) {
+        val result = mapViewProxy.identifyLayers(
+            screenCoordinate = screenCoordinate,
+            tolerance = 10.dp
+        )
+        result.onSuccess { identifyLayerResultList ->
+            if (identifyLayerResultList.isNotEmpty()) {
+                identifyLayerResultList.forEach { identifyLayerResult ->
+                    identifyLayerResult.geoElements.forEach { geoElement ->
+                        _selectedGeoElementsAsStartingPoints.value.add(geoElement)
                     }
-                    addTapLocationToGraphicsOverlay(mapPoint)
-                    _addStartingPointMode.value = AddStartingPointMode.Stopped
                 }
+                addTapLocationToGraphicsOverlay(mapPoint)
+                _addStartingPointMode.value = AddStartingPointMode.Stopped
             }
         }
     }
