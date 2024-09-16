@@ -22,7 +22,6 @@ import com.arcgismaps.Color
 import com.arcgismaps.Guid
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.utilitynetworks.UtilityElementTraceResult
 import com.arcgismaps.utilitynetworks.UtilityNamedTraceConfiguration
 import com.arcgismaps.utilitynetworks.UtilityNetwork
