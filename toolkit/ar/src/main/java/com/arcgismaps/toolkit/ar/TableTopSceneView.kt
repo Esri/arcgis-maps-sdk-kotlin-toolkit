@@ -3,6 +3,7 @@ package com.arcgismaps.toolkit.ar
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,6 +42,7 @@ import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
+import com.google.ar.core.Anchor
 import com.google.ar.core.Frame
 import com.google.ar.core.HitResult
 import com.google.ar.core.Pose
@@ -98,43 +100,52 @@ public fun TableTopSceneView(
         tableTopSceneViewProxy.sceneViewProxy.setManualRenderingEnabled(true)
         val cameraController = remember { TransformationMatrixCameraController() }
 
-        var hasSetInitialTransformationMatrix: Boolean by remember { mutableStateOf(false) }
+        var hasInitializedAnchor: Boolean by remember { mutableStateOf(false) }
         val identityMatrix = remember { TransformationMatrix.createIdentityMatrix() }
-        var initialTransformationMatrix: TransformationMatrix by remember { mutableStateOf(identityMatrix) }
+        var anchor: Anchor? by remember { mutableStateOf(null) }
+
+        DisposableEffect(Unit) {
+            onDispose {
+                anchor?.detach()
+                anchor = null
+            }
+        }
 
         cameraController.clippingDistance = clippingDistance
         cameraController.setTranslationFactor(translationFactor)
         cameraController.setOriginCamera(Camera(arcGISSceneAnchor, 0.0, 90.0, 0.0))
 
         val onFrame: (Frame) -> Unit = {
-            // put the scene camera position at the origin + ar camera position (which is relative to the origin)
-            cameraController.transformationMatrix =
-                initialTransformationMatrix + (it.camera.displayOrientedPose.transformationMatrix)
-            val imageIntrinsics = it.camera.imageIntrinsics
-            tableTopSceneViewProxy.sceneViewProxy.setFieldOfViewFromLensIntrinsics(
-                imageIntrinsics.focalLength[0],
-                imageIntrinsics.focalLength[1],
-                imageIntrinsics.principalPoint[0],
-                imageIntrinsics.principalPoint[1],
-                imageIntrinsics.imageDimensions[0].toFloat(),
-                imageIntrinsics.imageDimensions[1].toFloat(),
-                // TODO:
-                deviceOrientation = DeviceOrientation.Portrait
-            )
-            tableTopSceneViewProxy.sceneViewProxy.renderFrame()
+            anchor?.let { anchor ->
+                val anchorPosition = identityMatrix - anchor.pose.transformationMatrix
+                val cameraPosition = anchorPosition + it.camera.displayOrientedPose.transformationMatrix
+                cameraController.transformationMatrix = cameraPosition
+                val imageIntrinsics = it.camera.imageIntrinsics
+                tableTopSceneViewProxy.sceneViewProxy.setFieldOfViewFromLensIntrinsics(
+                    imageIntrinsics.focalLength[0],
+                    imageIntrinsics.focalLength[1],
+                    imageIntrinsics.principalPoint[0],
+                    imageIntrinsics.principalPoint[1],
+                    imageIntrinsics.imageDimensions[0].toFloat(),
+                    imageIntrinsics.imageDimensions[1].toFloat(),
+                    // TODO:
+                    deviceOrientation = DeviceOrientation.Portrait
+                )
+                tableTopSceneViewProxy.sceneViewProxy.renderFrame()
+            }
         }
 
         val onTap: (hit: HitResult?) -> Unit = {
             it?.let { hitResult ->
-                if (!hasSetInitialTransformationMatrix) {
-                    initialTransformationMatrix = identityMatrix - hitResult.hitPose.transformationMatrix
-                    hasSetInitialTransformationMatrix = true
+                if (!hasInitializedAnchor) {
+                    anchor = hitResult.createAnchor()
+                    hasInitializedAnchor = true
                 }
             }
         }
         ARSurfaceView(session = session, onFrame, onTap)
 
-        if (hasSetInitialTransformationMatrix) {
+        if (hasInitializedAnchor) {
             SceneView(
                 arcGISScene = arcGISScene,
                 modifier = Modifier.fillMaxSize(),
