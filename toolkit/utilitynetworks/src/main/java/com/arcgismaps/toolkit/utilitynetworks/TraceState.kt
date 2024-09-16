@@ -17,14 +17,23 @@
 package com.arcgismaps.toolkit.utilitynetworks
 
 import android.util.Log
+import androidx.compose.ui.unit.dp
+import com.arcgismaps.Color
 import com.arcgismaps.Guid
+import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.utilitynetworks.UtilityElementTraceResult
 import com.arcgismaps.utilitynetworks.UtilityNamedTraceConfiguration
 import com.arcgismaps.utilitynetworks.UtilityNetwork
 import com.arcgismaps.utilitynetworks.UtilityTraceParameters
 import com.arcgismaps.utilitynetworks.UtilityTraceType
+import com.arcgismaps.mapping.GeoElement
+import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
+import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
+import com.arcgismaps.mapping.view.Graphic
+import com.arcgismaps.mapping.view.GraphicsOverlay
+import com.arcgismaps.mapping.view.ScreenCoordinate
+import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -38,7 +47,9 @@ import kotlinx.coroutines.launch
  */
 public class TraceState(
     private val arcGISMap: ArcGISMap,
-    coroutineScope: CoroutineScope
+    coroutineScope: CoroutineScope,
+    private val graphicsOverlay: GraphicsOverlay,
+    private val mapViewProxy: MapViewProxy
 ) {
 
     private val _traceConfigurations = MutableStateFlow<List<UtilityNamedTraceConfiguration>?>(null)
@@ -70,6 +81,19 @@ public class TraceState(
      * @see AddStartingPointMode]
      */
     public val addStartingPointMode: StateFlow<AddStartingPointMode> = _addStartingPointMode.asStateFlow()
+
+    private val _selectedGeoElementsAsStartingPoints: MutableStateFlow<MutableList<GeoElement>> =
+        MutableStateFlow(
+            mutableListOf()
+        )
+
+    /**
+     * The selected `GeoElements` on the map that are used as starting points for the trace.
+     *
+     * @since 200.6.0
+     */
+    internal val selectedGeoElementsAsStartingPoints: StateFlow<List<GeoElement>> =
+        _selectedGeoElementsAsStartingPoints.asStateFlow()
 
     private var utilityNetwork: UtilityNetwork? = null
 
@@ -125,15 +149,41 @@ public class TraceState(
      * A single tap handler to identify starting points on the map. Call this method
      * from [com.arcgismaps.toolkit.geoviewcompose.MapView] onSingleTapConfirmed lambda.
      *
-     * @param point the event raised by a single tap on the map
+     * @param mapPoint the point on the map user tapped on to identify starting points
      * @since 200.6.0
      */
-    public fun addStartingPoint(point: SingleTapConfirmedEvent) {
+    public suspend fun addStartingPoint(mapPoint: Point) {
         if (_addStartingPointMode.value is AddStartingPointMode.Started) {
-            // TODO: identify
-            // TODO: add point to graphic overlay
-            _addStartingPointMode.value = AddStartingPointMode.Stopped
+            val screenPoint = mapViewProxy.locationToScreenOrNull(mapPoint)
+            screenPoint?.let { identifyFeatures(mapPoint, it) }
         }
+    }
+
+    private suspend fun identifyFeatures(mapPoint: Point, screenCoordinate: ScreenCoordinate) {
+        val result = mapViewProxy.identifyLayers(
+            screenCoordinate = screenCoordinate,
+            tolerance = 10.dp
+        )
+        result.onSuccess { identifyLayerResultList ->
+            if (identifyLayerResultList.isNotEmpty()) {
+                identifyLayerResultList.forEach { identifyLayerResult ->
+                    identifyLayerResult.geoElements.forEach { geoElement ->
+                        _selectedGeoElementsAsStartingPoints.value.add(geoElement)
+                    }
+                }
+                addTapLocationToGraphicsOverlay(mapPoint)
+                _addStartingPointMode.value = AddStartingPointMode.Stopped
+            }
+        }
+    }
+
+    private fun addTapLocationToGraphicsOverlay(mapPoint: Point) {
+        graphicsOverlay.graphics.add(
+            Graphic(
+                geometry = mapPoint,
+                symbol = SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Cross, Color.green, 20.0f)
+            )
+        )
     }
 
     /**

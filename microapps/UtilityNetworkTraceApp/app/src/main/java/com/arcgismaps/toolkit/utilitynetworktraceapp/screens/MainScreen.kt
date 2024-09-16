@@ -31,18 +31,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import com.arcgismaps.toolkit.utilitynetworks.AddStartingPointMode
 import com.arcgismaps.toolkit.utilitynetworks.Trace
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(viewModel: TraceViewModel) {
 
     val loadState by viewModel.arcGISMap.loadStatus.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
 
     val addStartingPointMode by viewModel.traceState.addStartingPointMode.collectAsState()
     val scaffoldState = rememberBottomSheetScaffoldState(
@@ -67,7 +70,7 @@ fun MainScreen(viewModel: TraceViewModel) {
                 enter = slideInVertically { h -> h },
                 exit = slideOutVertically { h -> h },
                 label = "popup",
-                modifier = Modifier.heightIn(min = 0.dp, max = 400.dp)
+                modifier = Modifier.heightIn(min = 0.dp, max = 250.dp)
             ) {
                 Trace(viewModel.traceState)
             }
@@ -84,8 +87,12 @@ fun MainScreen(viewModel: TraceViewModel) {
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize(),
-            onSingleTapConfirmed = {
-                viewModel.traceState.addStartingPoint(it)
+            onSingleTapConfirmed = { singleTapConfirmedEvent ->
+                singleTapConfirmedEvent.mapPoint?.let {
+                    coroutineScope.launch {
+                        viewModel.traceState.addStartingPoint(it)
+                    }
+                }
             }
         )
     }
