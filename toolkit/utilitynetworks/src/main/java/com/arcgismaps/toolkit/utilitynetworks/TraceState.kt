@@ -19,7 +19,9 @@ package com.arcgismaps.toolkit.utilitynetworks
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.Color
 import com.arcgismaps.Guid
@@ -48,84 +50,79 @@ import kotlinx.coroutines.launch
  *
  * @since 200.6.0
  */
-public sealed interface TraceState {
-
-    public val traceConfigurations: StateFlow<List<UtilityNamedTraceConfiguration>>
-
-    public val traceResult: StateFlow<UtilityElementTraceResult?>
-    public val addStartingPointMode: StateFlow<AddStartingPointMode>
-    public val selectedGeoElementsAsStartingPoints: StateFlow<List<GeoElement>>
-    public val selectedTraceConfiguration: State<UtilityNamedTraceConfiguration?>
-    public fun addStartingPoint(mapPoint: Point)
-    public fun updateAddStartPointMode(status: AddStartingPointMode)
-    public fun setSelectedTraceConfiguration(config: UtilityNamedTraceConfiguration)
-    public suspend fun trace()
-}
-
-/**
- * Default implementation for [TraceState].
- *
- * @since 200.6.0
- */
-private class TraceStateImpl(
-    val arcGISMap: ArcGISMap,
-    val coroutineScope: CoroutineScope,
-    val graphicsOverlay: GraphicsOverlay,
-    val mapViewProxy: MapViewProxy
-) : TraceState {
+public class TraceState(
+    private val arcGISMap: ArcGISMap,
+    coroutineScope: CoroutineScope,
+    private val graphicsOverlay: GraphicsOverlay,
+    private val mapViewProxy: MapViewProxy
+) {
 
     private val _traceConfigurations = MutableStateFlow<List<UtilityNamedTraceConfiguration>>(emptyList())
-    override val traceConfigurations: StateFlow<List<UtilityNamedTraceConfiguration>> = _traceConfigurations.asStateFlow()
 
-    private var _traceResult = MutableStateFlow<UtilityElementTraceResult?>(null)
-    override val traceResult: StateFlow<UtilityElementTraceResult?> = _traceResult.asStateFlow()
+    /**
+     * The named trace configurations of the Utility Network
+     *
+     * @since 200.6.0
+     */
+    internal val traceConfigurations: StateFlow<List<UtilityNamedTraceConfiguration>> = _traceConfigurations.asStateFlow()
 
-    private var _addStartingPointMode = MutableStateFlow<AddStartingPointMode>(AddStartingPointMode.None)
-    override val addStartingPointMode: StateFlow<AddStartingPointMode> = _addStartingPointMode.asStateFlow()
+    private val _traceResult = MutableStateFlow<UtilityElementTraceResult?>(null)
+
+    /**
+     * The results of running the  trace operation on the Utility Network from the selected
+     * starting point(s).
+     *
+     * @since 200.6.0
+     */
+    internal val traceResult: StateFlow<UtilityElementTraceResult?> = _traceResult.asStateFlow()
+
+    private val _addStartingPointMode = MutableStateFlow<AddStartingPointMode>(AddStartingPointMode.None)
+
+    /**
+     * Governs taps on the map. When the mode is [AddStartingPointMode.Started] taps will identify starting points
+     * and pass underlying Features to this object.
+     *
+     * @since 200.6.0
+     * @see AddStartingPointMode]
+     */
+    public val addStartingPointMode: StateFlow<AddStartingPointMode> = _addStartingPointMode.asStateFlow()
 
     private var _selectedTraceConfiguration: MutableState<UtilityNamedTraceConfiguration?> = mutableStateOf(null)
-    override val selectedTraceConfiguration: State<UtilityNamedTraceConfiguration?> = _selectedTraceConfiguration
+    public val selectedTraceConfiguration: State<UtilityNamedTraceConfiguration?> = _selectedTraceConfiguration
 
-    private val _selectedGeoElementsAsStartingPoints: MutableStateFlow<MutableList<GeoElement>> =
-        MutableStateFlow(
-            mutableListOf()
-        )
-    override val selectedGeoElementsAsStartingPoints: StateFlow<List<GeoElement>> =
-        _selectedGeoElementsAsStartingPoints.asStateFlow()
-
-    private lateinit var tapPoint: Point
-    private var screenPoint: ScreenCoordinate? = null
+    private val _selectedGeoElementsAsStartingPoints: SnapshotStateList<GeoElement> = mutableStateListOf()
+    /**
+     * The selected `GeoElements` on the map that are used as starting points for the trace.
+     *
+     * @since 200.6.0
+     */
+    internal val selectedGeoElementsAsStartingPoints: List<GeoElement> = _selectedGeoElementsAsStartingPoints
 
     private var _utilityNetwork: UtilityNetwork? = null
     private val utilityNetwork: UtilityNetwork
         get() = _utilityNetwork ?: throw IllegalStateException("utility network cannot be null")
 
+
     init {
         coroutineScope.launch {
             arcGISMap.load().onSuccess {
                 arcGISMap.utilityNetworks.forEach {
-                    it.load().onFailure {
-                        // Handle error
-                    }.onSuccess {
-
-                    }
+                    it.load()
                 }
-            }.onFailure {
-                // Handle error
             }
-//            if (arcGISMap.utilityNetworks.isEmpty()) {
-                // //Handle error
-//                }
-
             _utilityNetwork = arcGISMap.utilityNetworks.first()
             _traceConfigurations.value = utilityNetwork.queryNamedTraceConfigurations().getOrThrow()
         }
     }
 
-    override fun setSelectedTraceConfiguration(config: UtilityNamedTraceConfiguration) {
+    public fun setSelectedTraceConfiguration(config: UtilityNamedTraceConfiguration) {
         _selectedTraceConfiguration.value = config
     }
-    override suspend fun trace() {
+
+    /**
+     * TBD
+     */
+    public suspend fun trace() {
         // Run a trace
         val utilityNetworkDefinition = utilityNetwork.definition
         val utilityNetworkSource =
@@ -158,34 +155,34 @@ private class TraceStateImpl(
         }
     }
 
-    override fun addStartingPoint(mapPoint: Point) {
+    /**
+     * A single tap handler to identify starting points on the map. Call this method
+     * from [com.arcgismaps.toolkit.geoviewcompose.MapView] onSingleTapConfirmed lambda.
+     *
+     * @param mapPoint the point on the map user tapped on to identify starting points
+     * @since 200.6.0
+     */
+    public suspend fun addStartingPoint(mapPoint: Point) {
         if (_addStartingPointMode.value is AddStartingPointMode.Started) {
-            tapPoint = mapPoint
-            screenPoint = mapViewProxy.locationToScreenOrNull(mapPoint)
-            screenPoint?.let { identifyFeatures(it, coroutineScope) }
+            val screenPoint = mapViewProxy.locationToScreenOrNull(mapPoint)
+            screenPoint?.let { identifyFeatures(mapPoint, it) }
         }
     }
 
-    override fun updateAddStartPointMode(status: AddStartingPointMode) {
-        _addStartingPointMode.value = status
-    }
-
-    private fun identifyFeatures(screenCoordinate: ScreenCoordinate, coroutineScope: CoroutineScope) {
-        coroutineScope.launch {
-            val result = mapViewProxy.identifyLayers(
-                screenCoordinate = screenCoordinate,
-                tolerance = 10.dp
-            )
-            result.onSuccess { identifyLayerResultList ->
-                if (identifyLayerResultList.isNotEmpty()) {
-                    identifyLayerResultList.forEach { identifyLayerResult ->
-                        identifyLayerResult.geoElements.forEach { geoElement ->
-                            _selectedGeoElementsAsStartingPoints.value.add(geoElement)
-                        }
+    private suspend fun identifyFeatures(mapPoint: Point, screenCoordinate: ScreenCoordinate) {
+        val result = mapViewProxy.identifyLayers(
+            screenCoordinate = screenCoordinate,
+            tolerance = 10.dp
+        )
+        result.onSuccess { identifyLayerResultList ->
+            if (identifyLayerResultList.isNotEmpty()) {
+                identifyLayerResultList.forEach { identifyLayerResult ->
+                    identifyLayerResult.geoElements.forEach { geoElement ->
+                        _selectedGeoElementsAsStartingPoints.add(geoElement)
                     }
-                    addTapLocationToGraphicsOverlay(tapPoint)
-                    _addStartingPointMode.value = AddStartingPointMode.Stopped
                 }
+                addTapLocationToGraphicsOverlay(mapPoint)
+                _addStartingPointMode.value = AddStartingPointMode.Stopped
             }
         }
     }
@@ -197,6 +194,18 @@ private class TraceStateImpl(
                 symbol = SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Cross, Color.green, 20.0f)
             )
         )
+    }
+
+    /**
+     * Set the mode of the state object to activate or deactivate the identification of
+     * `GeoElements` in [com.arcgismaps.toolkit.geoviewcompose.MapView] onSingleTapConfirmed response
+     * to single tap events.
+     *
+     * @param status the updated mode
+     * @since 200.6.0
+     */
+    public fun updateAddStartPointMode(status: AddStartingPointMode) {
+        _addStartingPointMode.value = status
     }
 }
 
@@ -226,21 +235,3 @@ public sealed class AddStartingPointMode {
      */
     public data object None : AddStartingPointMode()
 }
-
-/**
- * Factory function for the creating TraceState.
- *
- * @param arcGISMap the map containing the UtilityNetworks
- * @param coroutineScope scope for [TraceState] that it can use to load the [arcGISMap] and the
- *        UtilityNetworks
- * @param graphicsOverlay The graphics overlay to show tap location
- *
- * @since 200.6.0
- */
-public fun TraceState(
-    arcGISMap: ArcGISMap,
-    coroutineScope: CoroutineScope,
-    graphicsOverlay: GraphicsOverlay,
-    mapViewProxy: MapViewProxy
-): TraceState =
-    TraceStateImpl(arcGISMap, coroutineScope, graphicsOverlay, mapViewProxy)
