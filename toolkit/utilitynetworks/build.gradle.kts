@@ -16,14 +16,19 @@
  *
  */
 
-
 plugins {
-    alias(libs.plugins.binary.compatibility.validator) apply true
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("artifact-deploy")
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    alias(libs.plugins.binary.compatibility.validator) apply true
 }
+
+secrets {
+    defaultPropertiesFileName = "secrets.defaults.properties"
+}
+
 android {
     namespace = "com.arcgismaps.toolkit.utilitynetworks"
     compileSdk = libs.versions.compileSdk.get().toInt()
@@ -50,14 +55,15 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
-
-    kotlin {
-        compilerOptions {
-            if ("Test" !in this.moduleName.get()) {
-                freeCompilerArgs.add("-Xexplicit-api=strict")
-            }
-
+    
+    // If this were not an android project, we would just write `explicitApi()` in the Kotlin scope.
+    // but as an android project could write `freeCompilerArgs = listOf("-Xexplicit-api=strict")`
+    // in the kotlinOptions above, but that would enforce api rules on the test code, which we don't want.
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        if ("Test" !in name) {
+            kotlinOptions.freeCompilerArgs += "-Xexplicit-api=strict"
         }
     }
 
@@ -100,6 +106,8 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.navigation)
     testImplementation(libs.bundles.unitTest)
+    androidTestImplementation(libs.truth)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.bundles.composeTest)
     debugImplementation(libs.bundles.debug)
 }

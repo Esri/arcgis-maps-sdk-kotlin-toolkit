@@ -33,6 +33,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewModelScope
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import com.arcgismaps.toolkit.utilitynetworks.AddStartingPointMode
@@ -86,7 +87,7 @@ fun MainScreen(viewModel: TraceViewModel) {
                 .fillMaxSize(),
             onSingleTapConfirmed = { singleTapConfirmedEvent ->
                 singleTapConfirmedEvent.mapPoint?.let {
-                    viewModel.traceState.addStartingPoint(it)
+                    viewModel.traceState.addStartingPoint(it, viewModel.viewModelScope)
                 }
             }
         )

@@ -25,10 +25,14 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import com.arcgismaps.toolkit.utilitynetworks.ui.TraceNavHost
+
+internal const val traceSurfaceContentDescription: String = "trace component surface"
 
 /**
  * A composable UI component to set up and run a [com.arcgismaps.utilitynetworks.UtilityNetwork.trace]
@@ -40,12 +44,17 @@ import com.arcgismaps.toolkit.utilitynetworks.ui.TraceNavHost
 public fun Trace(
     traceState: TraceState,
     @Suppress("unused_parameter")
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     val configs = traceState.traceConfigurations.collectAsStateWithLifecycle()
-    // if the traceConfigurations are not available, that means the traceState is not ready so return
-    if (configs.value == null) {
-        Surface(modifier = Modifier.fillMaxSize()) {
+
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        modifier = Modifier
+            .fillMaxSize()
+            .semantics { contentDescription = traceSurfaceContentDescription }
+    ) {
+        if (configs.value == null) {
             Box(
                 modifier = Modifier
                     .size(100.dp),
@@ -53,16 +62,8 @@ public fun Trace(
             ) {
                 CircularProgressIndicator()
             }
-        }
-    } else {
-
-        val navController = rememberNavController()
-
-        Surface(
-            color = MaterialTheme.colorScheme.surface,
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
+        } else {
+            val navController = rememberNavController()
             TraceNavHost(navController, traceState)
         }
     }
