@@ -93,7 +93,7 @@ internal fun TraceOptionsScreen(
     startingPoints: List<StartingPoint>,
     selectedConfig: UtilityNamedTraceConfiguration?,
     onStartingPointRemoved: (StartingPoint) -> Unit,
-    onConfigSelected: (UtilityNamedTraceConfiguration)->Unit,
+    onConfigSelected: (UtilityNamedTraceConfiguration) -> Unit,
     onPerformTraceButtonClicked: () -> Unit,
     onAddStartingPointButtonClicked: () -> Unit
 ) {
@@ -112,7 +112,7 @@ internal fun TraceOptionsScreen(
                 item {
                     TraceConfigurations(
                         configurations,
-                        selectedConfig,
+                        selectedConfig
                     ) { newConfig ->
                         onConfigSelected(newConfig)
                     }
@@ -141,7 +141,7 @@ internal fun TraceOptionsScreen(
  * @since 200.6.0
  */
 @Composable
-private fun TraceConfigurations(configs: List<UtilityNamedTraceConfiguration>, selectedConfig: UtilityNamedTraceConfiguration?, onTraceSelected: (UtilityNamedTraceConfiguration)->Unit) {
+private fun TraceConfigurations(configs: List<UtilityNamedTraceConfiguration>, selectedConfig: UtilityNamedTraceConfiguration?, onTraceSelected: (UtilityNamedTraceConfiguration) -> Unit) {
     ExpandableCard(
         title = stringResource(id = R.string.trace_configuration),
         padding = 4.dp
@@ -180,7 +180,11 @@ private fun TraceConfigurations(configs: List<UtilityNamedTraceConfiguration>, s
  * @since 200.6.0
  */
 @Composable
-private fun StartingPoints(startingPoints: List<StartingPoint>, showAddStartingPointScreen: () -> Unit, onStartingPointRemoved: (StartingPoint)->Unit) {
+private fun StartingPoints(
+    startingPoints: List<StartingPoint>,
+    showAddStartingPointScreen: () -> Unit,
+    onStartingPointRemoved: (StartingPoint) -> Unit
+) {
        ExpandableCard(
         title = "${stringResource(id = R.string.starting_points)} (${startingPoints.size})",
         description = {

@@ -121,7 +121,7 @@ public class TraceState(
         }
     }
 
-    public fun setSelectedTraceConfiguration(config: UtilityNamedTraceConfiguration) {
+    internal fun setSelectedTraceConfiguration(config: UtilityNamedTraceConfiguration) {
         _selectedTraceConfiguration.value = config
     }
 
