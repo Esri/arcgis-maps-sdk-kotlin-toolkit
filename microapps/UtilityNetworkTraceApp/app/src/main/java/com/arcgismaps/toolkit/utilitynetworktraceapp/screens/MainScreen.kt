@@ -31,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -38,16 +39,48 @@ import com.arcgismaps.LoadStatus
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import com.arcgismaps.toolkit.utilitynetworks.AddStartingPointMode
 import com.arcgismaps.toolkit.utilitynetworks.Trace
+import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.PortalItem
+import com.arcgismaps.portal.Portal
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+
+import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
+
+import com.arcgismaps.geometry.Point
+import com.arcgismaps.mapping.view.GraphicsOverlay
+
 import kotlinx.coroutines.launch
+
+private val napervilleUtilities = "471eb0bf37074b1fbb972b1da70fb310"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(viewModel: TraceViewModel) {
+fun MainScreen() {
 
-    val loadState by viewModel.arcGISMap.loadStatus.collectAsState()
+    val arcGISMap by remember {
+        mutableStateOf(
+            ArcGISMap(
+                PortalItem(
+                    Portal.arcGISOnline(connection = Portal.Connection.Anonymous),
+                    napervilleUtilities
+                )
+            )
+        )
+    }
+
+    val mapViewProxy = remember { MapViewProxy() }
+
+    val graphicsOverlay = remember { GraphicsOverlay() }
+
+    val tapPoint = remember { mutableStateOf<Point?>(null) }
+
+    val loadState by arcGISMap.loadStatus.collectAsState()
+
+    val inAddStartingPointMode = remember { mutableStateOf(false) }
+
     val coroutineScope = rememberCoroutineScope()
 
-    val addStartingPointMode by viewModel.traceState.addStartingPointMode.collectAsState()
     val scaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
             initialValue = SheetValue.Hidden,
@@ -55,11 +88,12 @@ fun MainScreen(viewModel: TraceViewModel) {
         )
     )
 
-    LaunchedEffect(key1 = addStartingPointMode) {
+    val onAddStartingPointModeChanged: (AddStartingPointMode) -> Unit = { addStartingPointMode ->
         if (addStartingPointMode == AddStartingPointMode.Started) {
-            scaffoldState.bottomSheetState.partialExpand()
+            inAddStartingPointMode.value = true
+            coroutineScope.launch { scaffoldState.bottomSheetState.partialExpand() }
         } else if (addStartingPointMode == AddStartingPointMode.Stopped) {
-            scaffoldState.bottomSheetState.expand()
+            coroutineScope.launch { scaffoldState.bottomSheetState.expand() }
         }
     }
 
@@ -72,7 +106,7 @@ fun MainScreen(viewModel: TraceViewModel) {
                 label = "popup",
                 modifier = Modifier.heightIn(min = 0.dp, max = 250.dp)
             ) {
-                Trace(viewModel.traceState)
+                Trace(arcGISMap, mapViewProxy, graphicsOverlay, tapPoint.value, onAddStartingPointModeChanged)
             }
         },
         modifier = Modifier.fillMaxSize(),
@@ -81,17 +115,18 @@ fun MainScreen(viewModel: TraceViewModel) {
         topBar = null
     ) { padding ->
         MapView(
-            arcGISMap = viewModel.arcGISMap,
-            mapViewProxy = viewModel.mapViewProxy,
-            graphicsOverlays = listOf(viewModel.graphicsOverlay),
+            arcGISMap = arcGISMap,
+            mapViewProxy = mapViewProxy,
+            graphicsOverlays = listOf(graphicsOverlay),
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize(),
             onSingleTapConfirmed = { singleTapConfirmedEvent ->
                 singleTapConfirmedEvent.mapPoint?.let {
-                    coroutineScope.launch {
-                        viewModel.traceState.addStartingPoint(it)
+                    if (inAddStartingPointMode.value) {
+                        tapPoint.value = it
                     }
+//                        viewModel.traceState.addStartingPoint(it)
                 }
             }
         )

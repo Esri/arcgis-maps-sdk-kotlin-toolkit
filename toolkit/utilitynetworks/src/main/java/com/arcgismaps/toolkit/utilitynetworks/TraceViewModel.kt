@@ -18,6 +18,8 @@ package com.arcgismaps.toolkit.utilitynetworks
 
 import android.util.Log
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.arcgismaps.Color
 import com.arcgismaps.Guid
 import com.arcgismaps.geometry.Point
@@ -34,7 +36,6 @@ import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -45,12 +46,12 @@ import kotlinx.coroutines.launch
  *
  * @since 200.6.0
  */
-public class TraceState(
+public class TraceViewModel(
     private val arcGISMap: ArcGISMap,
-    coroutineScope: CoroutineScope,
     private val graphicsOverlay: GraphicsOverlay,
-    private val mapViewProxy: MapViewProxy
-) {
+    private val mapViewProxy: MapViewProxy,
+    private val onAddStartingPointModeChanged: (AddStartingPointMode) -> Unit
+) : ViewModel(){
 
     private val _traceConfigurations = MutableStateFlow<List<UtilityNamedTraceConfiguration>?>(null)
 
@@ -98,7 +99,7 @@ public class TraceState(
     private var utilityNetwork: UtilityNetwork? = null
 
     init {
-        coroutineScope.launch {
+        viewModelScope.launch {
             arcGISMap.load().onSuccess {
                 arcGISMap.utilityNetworks.forEach {
                     it.load()
@@ -152,14 +153,15 @@ public class TraceState(
      * @param mapPoint the point on the map user tapped on to identify starting points
      * @since 200.6.0
      */
-    public suspend fun addStartingPoint(mapPoint: Point) {
+    public fun addStartingPoint(mapPoint: Point) {
         if (_addStartingPointMode.value is AddStartingPointMode.Started) {
             val screenPoint = mapViewProxy.locationToScreenOrNull(mapPoint)
             screenPoint?.let { identifyFeatures(mapPoint, it) }
         }
     }
 
-    private suspend fun identifyFeatures(mapPoint: Point, screenCoordinate: ScreenCoordinate) {
+    private fun identifyFeatures(mapPoint: Point, screenCoordinate: ScreenCoordinate) {
+        viewModelScope.launch {
         val result = mapViewProxy.identifyLayers(
             screenCoordinate = screenCoordinate,
             tolerance = 10.dp
@@ -174,6 +176,7 @@ public class TraceState(
                 addTapLocationToGraphicsOverlay(mapPoint)
                 _addStartingPointMode.value = AddStartingPointMode.Stopped
             }
+        }
         }
     }
 
@@ -196,6 +199,7 @@ public class TraceState(
      */
     public fun updateAddStartPointMode(status: AddStartingPointMode) {
         _addStartingPointMode.value = status
+        onAddStartingPointModeChanged(status)
     }
 }
 

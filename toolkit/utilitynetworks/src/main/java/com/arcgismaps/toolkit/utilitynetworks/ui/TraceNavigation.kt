@@ -16,23 +16,30 @@
 
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
+import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.arcgismaps.geometry.Point
 import com.arcgismaps.toolkit.utilitynetworks.AddStartingPointMode
-import com.arcgismaps.toolkit.utilitynetworks.TraceState
+import com.arcgismaps.toolkit.utilitynetworks.TraceViewModel
 
 /**
  * A composable UI component to set up the navigation for the trace workflow.
  *
  * @param navController The navigation controller to use for navigation
- * @param traceState The state of the trace workflow
+ * @param traceViewModel The state of the trace workflow
  * @since 200.6.0
  */
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-internal fun TraceNavHost(navController: NavHostController, traceState: TraceState) {
-    NavHost(navController = navController, startDestination = TraceNavRoute.TraceOptions.name) {
+internal fun TraceNavHost(navController: NavHostController, traceViewModel: TraceViewModel, mapPoint: Point?) {
+    var startDestination = TraceNavRoute.TraceOptions.name
+    if (traceViewModel.addStartingPointMode.value == AddStartingPointMode.Started) {
+        startDestination = TraceNavRoute.AddStartingPoint.name
+    }
+    NavHost(navController = navController, startDestination = startDestination) {
         composable(TraceNavRoute.TraceOptions.name) {
             TraceOptionsScreen(
                 configurations = emptyList(),
@@ -41,13 +48,14 @@ internal fun TraceNavHost(navController: NavHostController, traceState: TraceSta
                     navController.navigate(TraceNavRoute.TraceResults.name)
                 },
                 onAddStartingPointButtonClicked = {
-                    traceState.updateAddStartPointMode(AddStartingPointMode.Started)
+                    traceViewModel.updateAddStartPointMode(AddStartingPointMode.Started)
                     navController.navigate(TraceNavRoute.AddStartingPoint.name)
                 })
         }
         composable(TraceNavRoute.AddStartingPoint.name) {
             AddStartingPointScreen(
-                traceState,
+                traceViewModel,
+                mapPoint,
                 onStopPointSelection = {
                     navController.navigate(TraceNavRoute.TraceOptions.name)
                 }

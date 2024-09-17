@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.utilitynetworks
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -29,7 +30,12 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
+import com.arcgismaps.geometry.Point
+import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.view.GraphicsOverlay
+import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import com.arcgismaps.toolkit.utilitynetworks.ui.TraceNavHost
 
 internal const val traceSurfaceContentDescription: String = "trace component surface"
@@ -42,11 +48,20 @@ internal const val traceSurfaceContentDescription: String = "trace component sur
  */
 @Composable
 public fun Trace(
-    traceState: TraceState,
+    arcGISMap: ArcGISMap,
+    mapViewProxy: MapViewProxy,
+    graphicsOverlay: GraphicsOverlay,
+    mapPoint: Point?,
+    onAddStartingPointModeChanged: (AddStartingPointMode) -> Unit,
     @Suppress("unused_parameter")
     modifier: Modifier = Modifier
 ) {
-    val configs = traceState.traceConfigurations.collectAsStateWithLifecycle()
+    Log.d("Trace", "Trace Composable RECOMPOSED")
+    val traceViewModel: TraceViewModel = viewModel {
+        TraceViewModel(arcGISMap, graphicsOverlay, mapViewProxy, onAddStartingPointModeChanged)
+    }
+
+    val configs = traceViewModel.traceConfigurations.collectAsStateWithLifecycle()
 
     Surface(
         color = MaterialTheme.colorScheme.surface,
@@ -64,7 +79,7 @@ public fun Trace(
             }
         } else {
             val navController = rememberNavController()
-            TraceNavHost(navController, traceState)
+            TraceNavHost(navController, traceViewModel, mapPoint)
         }
     }
 }
