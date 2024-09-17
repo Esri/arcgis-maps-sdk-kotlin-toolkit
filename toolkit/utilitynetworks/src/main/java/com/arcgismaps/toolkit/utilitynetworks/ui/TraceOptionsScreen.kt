@@ -146,7 +146,6 @@ private fun TraceConfigurations(configs: List<UtilityNamedTraceConfiguration>, s
         title = stringResource(id = R.string.trace_configuration),
         padding = 4.dp
     ) {
-        //var selectedConfiguration: String by remember { mutableStateOf(selectedConfigName) }
         Column {
             configs.forEachIndexed { index, item ->
                 ReadOnlyTextField(
@@ -213,7 +212,7 @@ private fun StartingPoints(
     ) {
         Column {
             startingPoints.forEach {
-                StartingPoint(it) {
+                StartingPointRow(it) {
                     onStartingPointRemoved(it)
                 }
             }

@@ -19,13 +19,14 @@ package com.arcgismaps.toolkit.utilitynetworks.ui
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -46,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -81,7 +83,7 @@ private const val DELETE_THRESHOLD = 5f
  * @since 200.6.0
  */
 @Composable
-internal fun StartingPoint(
+internal fun StartingPointRow(
     data: StartingPoint,
     modifier: Modifier = Modifier,
     onDelete: () -> Unit = {}
@@ -126,10 +128,28 @@ internal fun StartingPoint(
             onDelete()
         }
     }
-    Row {
+    Row(
+        horizontalArrangement = Arrangement.Center
+    ) {
+        val metrics = LocalDensity.current
+        var bitmap: ImageBitmap? by remember { mutableStateOf(null)}
+        LaunchedEffect(Unit) {
+            bitmap = data.getDrawable(metrics.density).bitmap.asImageBitmap()
+        }
+        bitmap?.let {
+                Image(
+                    bitmap = it,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .width(50.dp)
+                        .padding(15.dp),
+                    contentDescription = null,
+                )
+        }
         Box(
             modifier = modifier
                 .fillMaxSize()
+                .align(Alignment.CenterVertically)
                 .clip(shape = RoundedCornerShape(8.dp))
                 .onSizeChanged { layoutSize ->
                     val dragEndPoint = layoutSize.width - contentSizeWidth
@@ -148,21 +168,11 @@ internal fun StartingPoint(
                         }
                 }
         ) {
-
             ReadOnlyTextField(
                 text = data.name,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 15.dp, end = 5.dp )
-                    .height(65.dp),
-                leadingIcon = {
-                    Icon(
-                        bitmap = data.symbol.bitmap.asImageBitmap(),
-                        modifier = Modifier
-                            .padding(top = 5.dp, bottom = 5.dp),
-                        contentDescription = null,
-                    )
-                }
+                    .padding(start = 5.dp, end = 25.dp )
+                    .height(65.dp)
             )
 
 

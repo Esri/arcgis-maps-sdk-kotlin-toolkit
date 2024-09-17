@@ -33,6 +33,7 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
+import com.arcgismaps.mapping.symbology.Symbol
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.ScreenCoordinate
@@ -112,9 +113,9 @@ public class TraceState(
 
     init {
         coroutineScope.launch {
-            arcGISMap.load()
+            arcGISMap.load().getOrThrow()
             arcGISMap.utilityNetworks.forEach {
-                it.load()
+                it.load().getOrThrow()
             }
             _utilityNetwork = arcGISMap.utilityNetworks.first()
             _traceConfigurations.value = utilityNetwork.queryNamedTraceConfigurations().getOrThrow()
@@ -179,16 +180,15 @@ public class TraceState(
         _startingPoints.remove(startingPoint)
     }
 
-    private suspend fun addStartingPoint(feature: ArcGISFeature) = try {
+    private fun addStartingPoint(feature: ArcGISFeature) = try {
         // TODO: add fraction-along to the element.
+        // https://devtopia.esri.com/runtime/kotlin/issues/4491
         val utilityElement = utilityNetwork.createElementOrNull(feature)
             ?: throw IllegalArgumentException("could not create utility element from ArcGISFeature")
 
-        // TODO: symbols are too small.
         val symbol = (feature.featureTable?.layer as FeatureLayer)
                 .renderer
                 ?.getSymbol(feature)
-                ?.createSwatch(1.0f)?.getOrThrow()
             ?: throw IllegalArgumentException("could not create drawable from feature symbol")
 
         _startingPoints.add(
@@ -201,8 +201,7 @@ public class TraceState(
 
     } catch (e: Throwable) {
         if (e is CancellationException) throw e
-        println("handle error")
-
+        Unit
     }
 
     private suspend fun identifyFeatures(mapPoint: Point, screenCoordinate: ScreenCoordinate) {
@@ -273,6 +272,9 @@ public sealed class AddStartingPointMode {
 }
 
 @Immutable
-internal data class StartingPoint(val feature: ArcGISFeature, val utilityElement: UtilityElement, val symbol: BitmapDrawable) {
+internal data class StartingPoint(val feature: ArcGISFeature, val utilityElement: UtilityElement, val symbol: Symbol) {
     val name: String = utilityElement.assetType.name
+
+    suspend fun getDrawable(metrics: Float): BitmapDrawable =
+        symbol.createSwatch(metrics).getOrThrow()
 }
