@@ -64,7 +64,7 @@ internal class SnapFlingBehavior(
     private val snapAnimationSpec: AnimationSpec<Float>,
     private val density: Density
 ) : FlingBehavior {
-
+    private val MinFlingVelocityDp = 400.dp
     private val visibleItemsInfo: List<LazyListItemInfo>
         get() = lazyListState.layoutInfo.visibleItemsInfo
 
@@ -345,7 +345,6 @@ internal class SnapFlingBehavior(
 
     private val DefaultScrollMotionDurationScaleFactor = 1f
 
-    private val MinFlingVelocityDp = 400.dp
 }
 
 private class AnimationResult<T, V : AnimationVector>(

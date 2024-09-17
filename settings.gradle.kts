@@ -24,9 +24,22 @@ pluginManagement {
     }
 }
 
+// For finalBuilds ignore the build number and pick up the released version of the SDK dependency
+val finalBuild: Boolean = (providers.gradleProperty("finalBuild").orNull ?: "false")
+    .run { this == "true" }
+
 // The version of the ArcGIS Maps SDK for Kotlin dependency
-val sdkVersionNumber: String by settings
-// The build number of the ArcGIS Maps SDK for Kotlin dependency
+val sdkVersionNumber: String = if (finalBuild) {
+    // for final build we depend on the same version of the SDK as the version we are building.
+    providers.gradleProperty("versionNumber").orNull
+        ?: throw IllegalStateException("versionNumber must be set to publish")
+} else {
+    // otherwise use the version found in gradle.properties
+    providers.gradleProperty("sdkVersionNumber").orNull
+        ?: throw IllegalStateException("sdkVersionNumber must be set")
+}
+
+// The build number of the ArcGIS Maps SDK for Kotlin dependency from gradle.properties
 val sdkBuildNumber: String by settings
 
 dependencyResolutionManagement {
@@ -47,14 +60,18 @@ dependencyResolutionManagement {
             )
         }
     }
-    
+
     versionCatalogs {
         create("arcgis") {
-            val versionAndBuild = if (sdkBuildNumber.isNotEmpty()) {
-                "$sdkVersionNumber-$sdkBuildNumber"
-            } else {
+            val versionAndBuild = if (finalBuild) {
+                logger.warn(
+                    "requested release candidate for the SDK dependency $sdkVersionNumber"
+                )
                 sdkVersionNumber
+            } else {
+                "$sdkVersionNumber-$sdkBuildNumber"
             }
+
             version("mapsSdk", versionAndBuild)
             library("mapsSdk", "com.esri", "arcgis-maps-kotlin").versionRef("mapsSdk")
         }
@@ -122,5 +139,5 @@ include(":popup-app")
 project(":popup-app").projectDir = File(rootDir, "microapps/PopupApp/app")
 include(":ar")
 project(":ar").projectDir = File(rootDir, "toolkit/ar")
-include(":tabletop-ar-app")
-project(":tabletop-ar-app").projectDir = File(rootDir, "microapps/TabletopArApp/app")
+include(":ar-tabletop-app")
+project(":ar-tabletop-app").projectDir = File(rootDir, "microapps/ArTabletopApp/app")

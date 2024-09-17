@@ -19,6 +19,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
@@ -57,15 +58,12 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-    @Suppress("UnstableApiUsage")
+
     buildFeatures {
         compose = true
         buildConfig = true
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.androidxComposeCompiler.get()
-    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -76,16 +74,11 @@ android {
      * Configures the test report for connected (instrumented) tests to be copied to a central
      * folder in the project's root directory.
      */
+    @Suppress("UnstableApiUsage")
     testOptions {
         val connectedTestReportsPath: String by project
         reportDir = "$connectedTestReportsPath/${project.name}"
     }
-}
-
-// context receivers are not experimental anymore, but AS thinks they are.
-//https://youtrack.jetbrains.com/issue/KTIJ-21063
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class).all {
-    kotlinOptions.freeCompilerArgs += "-Xcontext-receivers"
 }
 
 dependencies {
