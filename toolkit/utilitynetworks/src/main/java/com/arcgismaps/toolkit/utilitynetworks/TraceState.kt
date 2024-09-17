@@ -20,14 +20,8 @@ import android.util.Log
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.Color
 import com.arcgismaps.Guid
-import com.arcgismaps.LoadStatus
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.utilitynetworks.UtilityElementTraceResult
-import com.arcgismaps.utilitynetworks.UtilityNamedTraceConfiguration
-import com.arcgismaps.utilitynetworks.UtilityNetwork
-import com.arcgismaps.utilitynetworks.UtilityTraceParameters
-import com.arcgismaps.utilitynetworks.UtilityTraceType
 import com.arcgismaps.mapping.GeoElement
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
@@ -35,11 +29,14 @@ import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
-import kotlinx.coroutines.CoroutineScope
+import com.arcgismaps.utilitynetworks.UtilityElementTraceResult
+import com.arcgismaps.utilitynetworks.UtilityNamedTraceConfiguration
+import com.arcgismaps.utilitynetworks.UtilityNetwork
+import com.arcgismaps.utilitynetworks.UtilityTraceParameters
+import com.arcgismaps.utilitynetworks.UtilityTraceType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
 /**
  * Represents the state for the Trace.
@@ -48,12 +45,20 @@ import kotlinx.coroutines.launch
  */
 public class TraceState(
     private val arcGISMap: ArcGISMap,
-    coroutineScope: CoroutineScope,
     private val graphicsOverlay: GraphicsOverlay,
     private val mapViewProxy: MapViewProxy
 ) {
 
     private val _traceConfigurations = MutableStateFlow<List<UtilityNamedTraceConfiguration>?>(null)
+
+    private val _initializationStatus = MutableStateFlow<InitializationStatus>(InitializationStatus.NotInitialized)
+
+    /**
+     * The status of the initialization of the state object.
+     *
+     * @since 200.6.0
+     */
+    public val initializationStatus: StateFlow<InitializationStatus> = _initializationStatus
 
     /**
      * The named trace configurations of the Utility Network
@@ -98,35 +103,28 @@ public class TraceState(
 
     private var utilityNetwork: UtilityNetwork? = null
 
-//    init {
-//        coroutineScope.launch {
-//            arcGISMap.load().onSuccess {
-//                arcGISMap.utilityNetworks.forEach {
-//                    it.load()
-//                }
-//            }
-//            utilityNetwork = arcGISMap.utilityNetworks.first()
-//            _traceConfigurations.value = utilityNetwork?.queryNamedTraceConfigurations()?.getOrNull()
-//        }
-//    }
-
     /**
      * Initializes the state object by loading the map, the Utility Networks contained in the map
      * and its trace configurations.
      *
+     * @return the [Result] indicating if the initialization was successful or not
      * @since 200.6.0
      */
     public suspend fun initialize(): Result<Unit> {
+        _initializationStatus.value = InitializationStatus.Initializing
         var result = Result.success(Unit)
         arcGISMap.load().onSuccess {
             arcGISMap.utilityNetworks.forEach { utilityNetwork ->
                 utilityNetwork.load().onFailure { error ->
                     result = Result.failure(error)
+                    _initializationStatus.value = InitializationStatus.FailedToInitialize(error)
                 }
             }
         }.onFailure {
             result = Result.failure(it)
+            _initializationStatus.value = InitializationStatus.FailedToInitialize(it)
         }
+        _initializationStatus.value = InitializationStatus.Initialized
         utilityNetwork = arcGISMap.utilityNetworks.first()
         _traceConfigurations.value = utilityNetwork?.queryNamedTraceConfigurations()?.getOrNull()
         return result
@@ -223,6 +221,41 @@ public class TraceState(
 }
 
 /**
+ * Represents the status of the initialization of the state object.
+ *
+ * @since 200.6.0
+ */
+public sealed class InitializationStatus {
+    /**
+     * The state object is initialized and ready to use.
+     *
+     * @since 200.6.0
+     */
+    public data object Initialized : InitializationStatus()
+
+    /**
+     * The state object is initializing.
+     *
+     * @since 200.6.0
+     */
+    public data object Initializing : InitializationStatus()
+
+    /**
+     * The state object is not initialized.
+     *
+     * @since 200.6.0
+     */
+    public data object NotInitialized : InitializationStatus()
+
+    /**
+     * The state object failed to initialize.
+     *
+     * @since 200.6.0
+     */
+    public data class FailedToInitialize(val error: Throwable) : InitializationStatus()
+}
+
+/**
  * Represents the mode when adding starting points.
  *
  * @since 200.6.0
@@ -230,6 +263,7 @@ public class TraceState(
 public sealed class AddStartingPointMode {
     /**
      * Utility Network Trace tool is in add starting points mode.
+     *
      * @since 200.6.0
      */
     public data object Started : AddStartingPointMode()

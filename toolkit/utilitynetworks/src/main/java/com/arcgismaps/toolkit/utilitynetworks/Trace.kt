@@ -22,9 +22,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
@@ -33,7 +33,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import com.arcgismaps.toolkit.utilitynetworks.ui.TraceNavHost
-import kotlinx.coroutines.launch
 
 internal const val traceSurfaceContentDescription: String = "trace component surface"
 
@@ -49,12 +48,11 @@ public fun Trace(
     @Suppress("unused_parameter")
     modifier: Modifier = Modifier
 ) {
-    val coroutineScope = rememberCoroutineScope()
     LaunchedEffect(key1 = traceState) {
         traceState.initialize()
     }
 
-    val configs = traceState.traceConfigurations.collectAsStateWithLifecycle()
+    val initializationStatus = traceState.initializationStatus.collectAsStateWithLifecycle()
 
     Surface(
         color = MaterialTheme.colorScheme.surface,
@@ -62,13 +60,17 @@ public fun Trace(
             .fillMaxSize()
             .semantics { contentDescription = traceSurfaceContentDescription }
     ) {
-        if (configs.value == null) {
+        if (initializationStatus.value != InitializationStatus.Initialized) {
             Box(
                 modifier = Modifier
                     .size(100.dp),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator()
+                if (initializationStatus.value == InitializationStatus.NotInitialized || initializationStatus.value == InitializationStatus.Initializing) {
+                    CircularProgressIndicator()
+                } else if (initializationStatus.value is InitializationStatus.FailedToInitialize) {
+                    Text(text = (initializationStatus.value as InitializationStatus.FailedToInitialize).error.message ?: "Failed to initialize")
+                }
             }
         } else {
             val navController = rememberNavController()
