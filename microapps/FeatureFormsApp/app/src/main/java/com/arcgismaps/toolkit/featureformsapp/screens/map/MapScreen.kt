@@ -250,9 +250,8 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
         }
 
         is UIState.Error -> {
-            val state = uiState as UIState.Error
             ErrorDialog(
-                error = state,
+                error = uiState as UIState.Error,
                 onContinue = {
                     mapViewModel.cancelCommit()
                 },
