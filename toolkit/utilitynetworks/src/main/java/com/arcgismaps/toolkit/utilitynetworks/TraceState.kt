@@ -16,7 +16,9 @@
 
 package com.arcgismaps.toolkit.utilitynetworks
 
+import android.graphics.drawable.BitmapDrawable
 import android.util.Log
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
@@ -25,20 +27,23 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.Color
 import com.arcgismaps.Guid
+import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISMap
-import com.arcgismaps.mapping.GeoElement
+import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.ScreenCoordinate
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
+import com.arcgismaps.utilitynetworks.UtilityElement
 import com.arcgismaps.utilitynetworks.UtilityElementTraceResult
 import com.arcgismaps.utilitynetworks.UtilityNamedTraceConfiguration
 import com.arcgismaps.utilitynetworks.UtilityNetwork
 import com.arcgismaps.utilitynetworks.UtilityTraceParameters
 import com.arcgismaps.utilitynetworks.UtilityTraceType
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -88,15 +93,17 @@ public class TraceState(
     public val addStartingPointMode: StateFlow<AddStartingPointMode> = _addStartingPointMode.asStateFlow()
 
     private var _selectedTraceConfiguration: MutableState<UtilityNamedTraceConfiguration?> = mutableStateOf(null)
-    public val selectedTraceConfiguration: State<UtilityNamedTraceConfiguration?> = _selectedTraceConfiguration
 
-    private val _selectedGeoElementsAsStartingPoints: SnapshotStateList<GeoElement> = mutableStateListOf()
     /**
-     * The selected `GeoElements` on the map that are used as starting points for the trace.
+     * The selected trace configuration for the TraceParameters that define the trace.
      *
      * @since 200.6.0
      */
-    internal val selectedGeoElementsAsStartingPoints: List<GeoElement> = _selectedGeoElementsAsStartingPoints
+    public val selectedTraceConfiguration: State<UtilityNamedTraceConfiguration?> = _selectedTraceConfiguration
+
+    private val _startingPoints: SnapshotStateList<StartingPoint> = mutableStateListOf()
+
+    internal val startingPoints: List<StartingPoint> = _startingPoints
 
     private var _utilityNetwork: UtilityNetwork? = null
     private val utilityNetwork: UtilityNetwork
@@ -169,6 +176,33 @@ public class TraceState(
         }
     }
 
+    internal fun removeStartingPoint(startingPoint: StartingPoint) {
+        _startingPoints.remove(startingPoint)
+    }
+
+    private suspend fun addStartingPoint(feature: ArcGISFeature, mapPoint: Point) = try {
+        val utilityElement = utilityNetwork.createElementOrNull(feature)
+            ?: throw IllegalArgumentException("could not create utility element from ArcGISFeature")
+
+        val symbol = (feature.featureTable?.layer as FeatureLayer)
+                .renderer
+                ?.getSymbol(feature)
+                ?.createSwatch(1.0f)?.getOrThrow()
+            ?: throw IllegalArgumentException("could not create symbol from feature")
+        val newStartingPoint = StartingPoint(
+            feature = feature,
+            utilityElement = utilityElement,
+            point  = mapPoint,
+            symbol = symbol
+        )
+        _startingPoints.add(newStartingPoint)
+
+    } catch (e: Throwable) {
+        if (e is CancellationException) throw e
+        println("handle error")
+
+    }
+
     private suspend fun identifyFeatures(mapPoint: Point, screenCoordinate: ScreenCoordinate) {
         val result = mapViewProxy.identifyLayers(
             screenCoordinate = screenCoordinate,
@@ -177,8 +211,8 @@ public class TraceState(
         result.onSuccess { identifyLayerResultList ->
             if (identifyLayerResultList.isNotEmpty()) {
                 identifyLayerResultList.forEach { identifyLayerResult ->
-                    identifyLayerResult.geoElements.forEach { geoElement ->
-                        _selectedGeoElementsAsStartingPoints.add(geoElement)
+                    identifyLayerResult.geoElements.filterIsInstance<ArcGISFeature>().forEach { feature ->
+                        addStartingPoint(feature, mapPoint)
                     }
                 }
                 addTapLocationToGraphicsOverlay(mapPoint)
@@ -234,4 +268,9 @@ public sealed class AddStartingPointMode {
      * @since 200.6.0
      */
     public data object None : AddStartingPointMode()
+}
+
+@Immutable
+internal data class StartingPoint(val feature: ArcGISFeature, val utilityElement: UtilityElement, val point: Point, val symbol: BitmapDrawable) {
+    val name: String = utilityElement.assetType.name
 }

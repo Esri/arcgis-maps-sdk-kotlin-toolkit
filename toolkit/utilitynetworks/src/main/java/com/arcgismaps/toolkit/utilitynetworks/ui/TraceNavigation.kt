@@ -38,6 +38,7 @@ internal fun TraceNavHost(navController: NavHostController, traceState: TraceSta
             val configs = traceState.traceConfigurations.collectAsStateWithLifecycle()
             TraceOptionsScreen(
                 configurations = configs.value,
+                startingPoints = traceState.startingPoints,
                 onPerformTraceButtonClicked = {
                     // TODO: Add call to perform trace
                     navController.navigate(TraceNavRoute.TraceResults.name)
@@ -47,6 +48,7 @@ internal fun TraceNavHost(navController: NavHostController, traceState: TraceSta
                     navController.navigate(TraceNavRoute.AddStartingPoint.name)
                 },
                 selectedConfig = traceState.selectedTraceConfiguration.value,
+                onStartingPointRemoved = { traceState.removeStartingPoint(it) },
                 onConfigSelected = { newConfig ->
                     traceState.setSelectedTraceConfiguration(newConfig)
                 }

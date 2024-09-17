@@ -69,7 +69,7 @@ dependencyResolutionManagement {
                 )
                 sdkVersionNumber
             } else {
-                "$sdkVersionNumber-$sdkBuildNumber"
+                "200.5.0"
             }
 
             version("mapsSdk", versionAndBuild)

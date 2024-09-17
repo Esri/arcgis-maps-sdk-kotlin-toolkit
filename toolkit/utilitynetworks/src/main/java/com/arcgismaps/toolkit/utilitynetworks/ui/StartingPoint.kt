@@ -32,11 +32,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.icons.sharp.Delete
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -48,35 +46,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.data.Feature
 import com.arcgismaps.toolkit.ui.gestures.AnchoredDraggableState
 import com.arcgismaps.toolkit.ui.gestures.DraggableAnchors
 import com.arcgismaps.toolkit.ui.gestures.anchoredDraggable
+import com.arcgismaps.toolkit.utilitynetworks.StartingPoint
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
-
-
-/**
- * The data model to represent a starting point. This may just be a Feature or GeoElement, but it is
- * good to house it in an immutable object to aid composition performance.
- *
- * @property name the name of the starting point.
- * @property symbol the symbology of the starting point, intended to hold the Feature's symbol
- * @property feature the Feature which defines the starting point.
- * @since 200.6.0
- */
-@Immutable
-internal data class StartingPointData(
-    val name: String,
-    val symbol: ImageVector = Icons.Filled.ThumbUp,
-    val feature: Feature? = null
-)
 
 private enum class DragAnchors(val fraction: Float) {
     NeutralPosition(.97f),
@@ -101,7 +82,7 @@ private const val DELETE_THRESHOLD = 5f
  */
 @Composable
 internal fun StartingPoint(
-    data: StartingPointData,
+    data: StartingPoint,
     modifier: Modifier = Modifier,
     onDelete: () -> Unit = {}
 ) {
@@ -167,6 +148,7 @@ internal fun StartingPoint(
                         }
                 }
         ) {
+
             ReadOnlyTextField(
                 text = data.name,
                 modifier = Modifier
@@ -174,7 +156,7 @@ internal fun StartingPoint(
                     .height(55.dp),
                 leadingIcon = {
                     Icon(
-                        imageVector = data.symbol,
+                        bitmap = data.symbol.bitmap.asImageBitmap(),
                         contentDescription = null,
                         modifier = Modifier.padding(14.dp)
                     )

@@ -52,8 +52,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
@@ -78,6 +76,7 @@ import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 import com.arcgismaps.toolkit.ui.expandablecard.theme.LocalExpandableCardColorScheme
 import com.arcgismaps.toolkit.ui.expandablecard.theme.LocalExpandableCardTypography
 import com.arcgismaps.toolkit.utilitynetworks.R
+import com.arcgismaps.toolkit.utilitynetworks.StartingPoint
 import com.arcgismaps.utilitynetworks.UtilityNamedTraceConfiguration
 import com.arcgismaps.utilitynetworks.UtilityNetwork
 
@@ -91,7 +90,9 @@ import com.arcgismaps.utilitynetworks.UtilityNetwork
 @Composable
 internal fun TraceOptionsScreen(
     configurations: List<UtilityNamedTraceConfiguration>,
+    startingPoints: List<StartingPoint>,
     selectedConfig: UtilityNamedTraceConfiguration?,
+    onStartingPointRemoved: (StartingPoint) -> Unit,
     onConfigSelected: (UtilityNamedTraceConfiguration)->Unit,
     onPerformTraceButtonClicked: () -> Unit,
     onAddStartingPointButtonClicked: () -> Unit
@@ -109,7 +110,7 @@ internal fun TraceOptionsScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 item {
-                    TraceConfiguration(
+                    TraceConfigurations(
                         configurations,
                         selectedConfig,
                     ) { newConfig ->
@@ -117,7 +118,11 @@ internal fun TraceOptionsScreen(
                     }
                 }
                 item {
-                    StartingPointsEditor(onAddStartingPointButtonClicked)
+                    StartingPoints(
+                        startingPoints,
+                        onAddStartingPointButtonClicked,
+                        onStartingPointRemoved
+                    )
                 }
                 item {
                     AdvancedOptions()
@@ -136,7 +141,7 @@ internal fun TraceOptionsScreen(
  * @since 200.6.0
  */
 @Composable
-private fun TraceConfiguration(configs: List<UtilityNamedTraceConfiguration>, selectedConfig: UtilityNamedTraceConfiguration?, onTraceSelected: (UtilityNamedTraceConfiguration)->Unit) {
+private fun TraceConfigurations(configs: List<UtilityNamedTraceConfiguration>, selectedConfig: UtilityNamedTraceConfiguration?, onTraceSelected: (UtilityNamedTraceConfiguration)->Unit) {
     ExpandableCard(
         title = stringResource(id = R.string.trace_configuration),
         padding = 4.dp
@@ -175,11 +180,9 @@ private fun TraceConfiguration(configs: List<UtilityNamedTraceConfiguration>, se
  * @since 200.6.0
  */
 @Composable
-private fun StartingPointsEditor(showAddStartingPointScreen: () -> Unit) {
-    val startingPoints = remember { mutableStateListOf(StartingPointData(name = "Test Starting Point")) }
-    var counter by remember { mutableIntStateOf(1) }
-    ExpandableCard(
-        title = "${stringResource(id = R.string.starting_points)} (${counter})",
+private fun StartingPoints(startingPoints: List<StartingPoint>, showAddStartingPointScreen: () -> Unit, onStartingPointRemoved: (StartingPoint)->Unit) {
+       ExpandableCard(
+        title = "${stringResource(id = R.string.starting_points)} (${startingPoints.size})",
         description = {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -187,7 +190,6 @@ private fun StartingPointsEditor(showAddStartingPointScreen: () -> Unit) {
             ) {
                 ElevatedButton(
                     onClick = {
-                        startingPoints.add(StartingPointData("Point ${counter++}"))
                         showAddStartingPointScreen()
                     },
                     shape = RoundedCornerShape(8.dp)
@@ -207,10 +209,8 @@ private fun StartingPointsEditor(showAddStartingPointScreen: () -> Unit) {
     ) {
         Column {
             startingPoints.forEach {
-                val row = StartingPointData(name = it.name)
-                StartingPoint(row) {
-                    startingPoints.remove(row)
-                    counter -= 1
+                StartingPoint(it) {
+                    onStartingPointRemoved(it)
                 }
             }
         }
