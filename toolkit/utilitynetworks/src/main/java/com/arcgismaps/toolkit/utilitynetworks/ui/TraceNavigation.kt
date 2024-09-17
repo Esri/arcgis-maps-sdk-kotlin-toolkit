@@ -40,7 +40,6 @@ internal fun TraceNavHost(navController: NavHostController, traceState: TraceSta
             TraceOptionsScreen(
                 configurations = emptyList(),
                 onPerformTraceButtonClicked = {
-                    // TODO: Add call to perform trace
                     coroutineScope.launch {
                         traceState.trace()
                     }

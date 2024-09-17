@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.LocationOn
@@ -38,6 +39,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -101,22 +103,24 @@ private fun TraceTitle(traceName: String, onZoomToResults: () -> Unit, onDeleteR
                     contentDescription = ""
                 )
             }
-            DropdownMenu(
-                modifier = Modifier.padding(start = 8.dp, end = 16.dp),
-                expanded = expanded,
-                onDismissRequest = {
-                    expanded = false
-                }) {
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.zoom_to_result)) },
-                    onClick = onZoomToResults,
-                    leadingIcon = { Icon(Icons.Outlined.LocationOn, contentDescription = "Zoom to trace result") }
-                )
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.delete)) },
-                    onClick = onDeleteResult,
-                    leadingIcon = { Icon(Icons.Outlined.Clear, contentDescription = "Delete trace result") }
-                )
+            MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp))) {
+                DropdownMenu(
+                    modifier = Modifier.padding(start = 8.dp, end = 16.dp),
+                    expanded = expanded,
+                    onDismissRequest = {
+                        expanded = false
+                    }) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.zoom_to_result)) },
+                        onClick = onZoomToResults,
+                        leadingIcon = { Icon(Icons.Outlined.LocationOn, contentDescription = "Zoom to trace result") }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.delete)) },
+                        onClick = onDeleteResult,
+                        leadingIcon = { Icon(Icons.Outlined.Clear, contentDescription = "Delete trace result") }
+                    )
+                }
             }
         }
     }
@@ -205,10 +209,11 @@ private fun TraceResultScreenPreview() {
             FunctionResult("Function 1", "1", "Max"),
             FunctionResult("Function 2", "2", "Min"),
             FunctionResult("Function 3", "3", "Subtract"),
-            )
+        )
     )
     TraceResultScreen(traceResults, onClearAllResults = {}, onDeleteResult = {}, onZoomToResults = {})
 }
+
 /**
  * Data class to hold the trace results.
  *
@@ -216,6 +221,7 @@ private fun TraceResultScreenPreview() {
  * @param functionResults The list of function results.
  * @since 200.6.0
  */
+@Immutable
 internal data class TraceResults(val traceName: String, val functionResults: List<FunctionResult>)
 
 /**
@@ -226,4 +232,5 @@ internal data class TraceResults(val traceName: String, val functionResults: Lis
  * @param functionType The type of the function result.
  * @since 200.6.0
  */
+@Immutable
 internal data class FunctionResult(val name: String, val value: String, val functionType: String)
