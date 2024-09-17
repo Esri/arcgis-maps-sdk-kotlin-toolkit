@@ -72,9 +72,7 @@ public fun Activity.launchCustomTabs(pendingSignIn: OAuthUserSignIn?): Unit {
  * @since 200.2.0
  */
 internal fun Activity.launchCustomTabs(authorizeUrl: String, useIncognito: Boolean?) {
-    CustomTabsIntent.Builder().apply {
-        setShareState(CustomTabsIntent.SHARE_STATE_OFF)
-    }.build().apply {
+    CustomTabsIntent.Builder().build().apply {
         if (useIncognito == true) {
             intent.putExtra("com.google.android.apps.chrome.EXTRA_OPEN_NEW_INCOGNITO_TAB", true)
         }
