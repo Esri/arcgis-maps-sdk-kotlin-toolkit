@@ -23,6 +23,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
@@ -31,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import com.arcgismaps.toolkit.utilitynetworks.ui.TraceNavHost
+import kotlinx.coroutines.launch
 
 internal const val traceSurfaceContentDescription: String = "trace component surface"
 
@@ -46,6 +49,11 @@ public fun Trace(
     @Suppress("unused_parameter")
     modifier: Modifier = Modifier
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    LaunchedEffect(key1 = traceState) {
+        traceState.initialize()
+    }
+
     val configs = traceState.traceConfigurations.collectAsStateWithLifecycle()
 
     Surface(

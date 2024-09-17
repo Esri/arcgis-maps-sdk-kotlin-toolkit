@@ -20,6 +20,7 @@ import android.util.Log
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.Color
 import com.arcgismaps.Guid
+import com.arcgismaps.LoadStatus
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.utilitynetworks.UtilityElementTraceResult
@@ -97,16 +98,38 @@ public class TraceState(
 
     private var utilityNetwork: UtilityNetwork? = null
 
-    init {
-        coroutineScope.launch {
-            arcGISMap.load().onSuccess {
-                arcGISMap.utilityNetworks.forEach {
-                    it.load()
+//    init {
+//        coroutineScope.launch {
+//            arcGISMap.load().onSuccess {
+//                arcGISMap.utilityNetworks.forEach {
+//                    it.load()
+//                }
+//            }
+//            utilityNetwork = arcGISMap.utilityNetworks.first()
+//            _traceConfigurations.value = utilityNetwork?.queryNamedTraceConfigurations()?.getOrNull()
+//        }
+//    }
+
+    /**
+     * Initializes the state object by loading the map, the Utility Networks contained in the map
+     * and its trace configurations.
+     *
+     * @since 200.6.0
+     */
+    public suspend fun initialize(): Result<Unit> {
+        var result = Result.success(Unit)
+        arcGISMap.load().onSuccess {
+            arcGISMap.utilityNetworks.forEach { utilityNetwork ->
+                utilityNetwork.load().onFailure { error ->
+                    result = Result.failure(error)
                 }
             }
-            utilityNetwork = arcGISMap.utilityNetworks.first()
-            _traceConfigurations.value = utilityNetwork?.queryNamedTraceConfigurations()?.getOrNull()
+        }.onFailure {
+            result = Result.failure(it)
         }
+        utilityNetwork = arcGISMap.utilityNetworks.first()
+        _traceConfigurations.value = utilityNetwork?.queryNamedTraceConfigurations()?.getOrNull()
+        return result
     }
 
     /**
