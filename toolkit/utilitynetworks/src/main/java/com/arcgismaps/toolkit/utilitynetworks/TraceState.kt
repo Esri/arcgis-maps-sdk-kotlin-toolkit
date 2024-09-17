@@ -49,8 +49,6 @@ public class TraceState(
     private val mapViewProxy: MapViewProxy
 ) {
 
-    private val _traceConfigurations = MutableStateFlow<List<UtilityNamedTraceConfiguration>?>(null)
-
     private val _initializationStatus = MutableStateFlow<InitializationStatus>(InitializationStatus.NotInitialized)
 
     /**
@@ -59,6 +57,8 @@ public class TraceState(
      * @since 200.6.0
      */
     public val initializationStatus: StateFlow<InitializationStatus> = _initializationStatus
+
+    private val _traceConfigurations = MutableStateFlow<List<UtilityNamedTraceConfiguration>?>(null)
 
     /**
      * The named trace configurations of the Utility Network
