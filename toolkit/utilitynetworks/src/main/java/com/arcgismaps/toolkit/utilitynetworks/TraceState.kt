@@ -112,10 +112,9 @@ public class TraceState(
 
     init {
         coroutineScope.launch {
-            arcGISMap.load().onSuccess {
-                arcGISMap.utilityNetworks.forEach {
-                    it.load()
-                }
+            arcGISMap.load()
+            arcGISMap.utilityNetworks.forEach {
+                it.load()
             }
             _utilityNetwork = arcGISMap.utilityNetworks.first()
             _traceConfigurations.value = utilityNetwork.queryNamedTraceConfigurations().getOrThrow()
@@ -180,22 +179,25 @@ public class TraceState(
         _startingPoints.remove(startingPoint)
     }
 
-    private suspend fun addStartingPoint(feature: ArcGISFeature, mapPoint: Point) = try {
+    private suspend fun addStartingPoint(feature: ArcGISFeature) = try {
+        // TODO: add fraction-along to the element.
         val utilityElement = utilityNetwork.createElementOrNull(feature)
             ?: throw IllegalArgumentException("could not create utility element from ArcGISFeature")
 
+        // TODO: symbols are too small.
         val symbol = (feature.featureTable?.layer as FeatureLayer)
                 .renderer
                 ?.getSymbol(feature)
                 ?.createSwatch(1.0f)?.getOrThrow()
-            ?: throw IllegalArgumentException("could not create symbol from feature")
-        val newStartingPoint = StartingPoint(
-            feature = feature,
-            utilityElement = utilityElement,
-            point  = mapPoint,
-            symbol = symbol
+            ?: throw IllegalArgumentException("could not create drawable from feature symbol")
+
+        _startingPoints.add(
+            StartingPoint(
+                feature = feature,
+                utilityElement = utilityElement,
+                symbol = symbol
+            )
         )
-        _startingPoints.add(newStartingPoint)
 
     } catch (e: Throwable) {
         if (e is CancellationException) throw e
@@ -212,7 +214,7 @@ public class TraceState(
             if (identifyLayerResultList.isNotEmpty()) {
                 identifyLayerResultList.forEach { identifyLayerResult ->
                     identifyLayerResult.geoElements.filterIsInstance<ArcGISFeature>().forEach { feature ->
-                        addStartingPoint(feature, mapPoint)
+                        addStartingPoint(feature)
                     }
                 }
                 addTapLocationToGraphicsOverlay(mapPoint)
@@ -271,6 +273,6 @@ public sealed class AddStartingPointMode {
 }
 
 @Immutable
-internal data class StartingPoint(val feature: ArcGISFeature, val utilityElement: UtilityElement, val point: Point, val symbol: BitmapDrawable) {
+internal data class StartingPoint(val feature: ArcGISFeature, val utilityElement: UtilityElement, val symbol: BitmapDrawable) {
     val name: String = utilityElement.assetType.name
 }

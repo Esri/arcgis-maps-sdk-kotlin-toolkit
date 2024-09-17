@@ -32,7 +32,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.sharp.Delete
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -153,12 +153,14 @@ internal fun StartingPoint(
                 text = data.name,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(55.dp),
+                    .padding(start = 15.dp, end = 5.dp )
+                    .height(65.dp),
                 leadingIcon = {
                     Icon(
                         bitmap = data.symbol.bitmap.asImageBitmap(),
+                        modifier = Modifier
+                            .padding(top = 5.dp, bottom = 5.dp),
                         contentDescription = null,
-                        modifier = Modifier.padding(14.dp)
                     )
                 }
             )
@@ -245,7 +247,7 @@ private fun DeletableRow(
             }
     ) {
         Icon(
-            imageVector = Icons.Sharp.Delete,
+            imageVector = Icons.Outlined.Delete,
             modifier = Modifier
                 .align(Alignment.CenterVertically)
                 .padding(14.dp),
