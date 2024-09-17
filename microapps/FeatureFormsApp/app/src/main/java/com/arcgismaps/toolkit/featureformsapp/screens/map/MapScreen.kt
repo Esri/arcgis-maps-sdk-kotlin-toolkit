@@ -227,7 +227,6 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
     when (uiState) {
         is UIState.Validating, is UIState.FinishingEdits, is UIState.Committing -> {
             ProgressDialog()
-            //SubmitForm(state.errors, mapViewModel::setDefaultState)
         }
 
         is UIState.Switching -> {
