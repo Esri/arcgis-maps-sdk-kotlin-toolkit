@@ -132,21 +132,31 @@ public class TraceState(
         _selectedTraceConfiguration.value = config
     }
 
+//    private var _currentTraceElementResults: List<UtilityElement> = emptyList()
+//    internal val currentTraceElementResults: List<UtilityElement> = _currentTraceElementResults
+
+    private var _currentTraceRun: TraceRun? = null
+    internal val currentTraceRun: TraceRun
+        get() = _currentTraceRun ?: throw IllegalStateException("TraceRun cannot be null")
+
+//    private var _traceResultsAvailable: MutableStateFlow<Boolean> = MutableStateFlow(false)
+//    internal val traceResultsAvailable: StateFlow<Boolean> = _traceResultsAvailable.asStateFlow()
+
     /**
      * TBD
      */
-    public suspend fun trace() {
+    public suspend fun trace() : Boolean {
         // Run a trace
-        val traceConfiguration = selectedTraceConfiguration.value ?: return // this should be handled in UI
+        val traceConfiguration = selectedTraceConfiguration.value ?: return false // this should be handled in UI
 
         if (startingPoints.isEmpty() && traceConfiguration.minimumStartingLocations == UtilityMinimumStartingLocations.One) {
             // TODO: Handle error
-            return
+            return false
         }
 
         if (startingPoints.size < 2 && traceConfiguration.minimumStartingLocations == UtilityMinimumStartingLocations.Many) {
             // TODO: Handle error
-            return
+            return false
         }
 
         val utilityTraceParameters = UtilityTraceParameters(traceConfiguration, startingPoints.map { it.utilityElement })
@@ -169,10 +179,9 @@ public class TraceState(
             Log.i("UtilityNetworkTraceApp", "Trace failed: $it")
         }
 
-        var currentTraceElementResults : List<UtilityElement> = emptyList()
         val currentTraceFunctionResults : MutableList<UtilityTraceFunctionOutput> = mutableListOf()
         val currentTraceGraphics : MutableList<Graphic> = mutableListOf()
-
+        var currentTraceElementResults: List<UtilityElement> = emptyList()
 
         for (result in traceResults) {
             Log.i("UtilityNetworkTraceApp", "Trace result: $result")
@@ -207,6 +216,13 @@ public class TraceState(
                 }
             }
         }
+        _currentTraceRun = TraceRun(
+            name = traceConfiguration.name,
+            featureResults = currentTraceElementResults,
+            functionResults = currentTraceFunctionResults,
+            geometryResults = currentTraceGraphics
+        )
+        return true
     }
 
     private fun createGraphic(geometry: Geometry, style: SimpleLineSymbolStyle, color: Color) =
@@ -333,6 +349,7 @@ internal data class StartingPoint(val feature: ArcGISFeature, val utilityElement
         symbol.createSwatch(screenScale).getOrThrow()
 }
 
+<<<<<<< Updated upstream
 /**
  * Returns [this] Result, but if it is a failure with the specified exception type, then it throws the exception.
  *
@@ -348,3 +365,12 @@ internal inline fun <reified T : Throwable, R> Result<R>.except(): Result<R> = o
 internal inline fun <T, R> T.runCatchingCancellable(block: T.() -> R): Result<R> =
     runCatching(block)
         .except<CancellationException, R>()
+
+@Immutable
+internal data class TraceRun(
+    val name: String,
+    val featureResults: List<UtilityElement>,
+    val functionResults: List<UtilityTraceFunctionOutput>,
+    val geometryResults: MutableList<Graphic> = mutableListOf()
+)
+

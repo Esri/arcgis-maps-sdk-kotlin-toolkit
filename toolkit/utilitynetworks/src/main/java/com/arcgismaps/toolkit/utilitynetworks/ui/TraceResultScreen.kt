@@ -52,6 +52,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 import com.arcgismaps.toolkit.utilitynetworks.R
+import com.arcgismaps.toolkit.utilitynetworks.TraceRun
+import com.arcgismaps.utilitynetworks.UtilityElement
 
 /**
  * Composable that displays the trace results.
@@ -60,7 +62,7 @@ import com.arcgismaps.toolkit.utilitynetworks.R
  */
 @Composable
 internal fun TraceResultScreen(
-    traceResults: TraceResults,
+    traceRun: TraceRun,
     onDeleteResult: () -> Unit,
     onZoomToResults: () -> Unit,
     onClearAllResults: () -> Unit
@@ -68,10 +70,10 @@ internal fun TraceResultScreen(
     Surface(modifier = Modifier.fillMaxSize()) {
         LazyColumn {
             item {
-                TraceTitle(traceResults.traceName, onZoomToResults = onZoomToResults, onDeleteResult = onDeleteResult)
+                TraceTitle(traceRun.name, onZoomToResults = onZoomToResults, onDeleteResult = onDeleteResult)
             }
             item {
-                FunctionResult(traceResults.functionResults)
+                FeatureResult(traceRun.featureResults)
             }
             item {
                 ClearAllResultsButton(onClearAllResults)
@@ -128,12 +130,14 @@ private fun TraceTitle(traceName: String, onZoomToResults: () -> Unit, onDeleteR
 
 
 @Composable
-private fun FunctionResult(functionResults: List<FunctionResult>) {
+private fun FeatureResult(featureResults: List<UtilityElement>) {
+    val assetGroupNames = featureResults.map { it.assetGroup.name }.distinct()
+
     Surface(modifier = Modifier.fillMaxWidth()) {
         Column {
-            TraceResultSection(stringResource(R.string.function_results), value = functionResults.size.toString()) {
+            TraceResultSection(stringResource(R.string.function_results), value = featureResults.size.toString()) {
                 Column {
-                    functionResults.forEach { functionResult ->
+                    assetGroupNames.forEach { assetGroupName ->
                         HorizontalDivider()
                         Row(
                             modifier = Modifier
@@ -142,14 +146,19 @@ private fun FunctionResult(functionResults: List<FunctionResult>) {
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(text = functionResult.name, style = MaterialTheme.typography.titleMedium)
+                            Text(text = assetGroupName, style = MaterialTheme.typography.titleMedium)
                             Column(horizontalAlignment = Alignment.End) {
+//                                Text(
+//                                    text = functionResult.functionType,
+//                                    style = MaterialTheme.typography.titleSmall,
+//                                    color = Color.Gray
+//                                )
                                 Text(
-                                    text = functionResult.functionType,
-                                    style = MaterialTheme.typography.titleSmall,
-                                    color = Color.Gray
+                                    text = elementsInAssetGroup(
+                                        assetGroupName,
+                                        featureResults
+                                    ).size.toString(), style = MaterialTheme.typography.titleMedium
                                 )
-                                Text(text = functionResult.value, style = MaterialTheme.typography.titleMedium)
                             }
                         }
                     }
@@ -157,6 +166,10 @@ private fun FunctionResult(functionResults: List<FunctionResult>) {
             }
         }
     }
+}
+
+private fun elementsInAssetGroup(assetGroup: String, featureResults: List<UtilityElement>): List<UtilityElement> {
+    return featureResults.filter { it.assetGroup.name == assetGroup }
 }
 
 @Composable
@@ -197,22 +210,22 @@ private fun ClearAllResultsButton(onClearAllResults: () -> Unit) {
     }
 }
 
-@Composable
-@Preview
-private fun TraceResultScreenPreview() {
-    val traceResults = TraceResults(
-        traceName = "Trace Name",
-        functionResults = listOf(
-            FunctionResult("Function 1", "1", "Add"),
-            FunctionResult("Function 2", " 2", "Average"),
-            FunctionResult("Function 3", " 3", "Count"),
-            FunctionResult("Function 1", "1", "Max"),
-            FunctionResult("Function 2", "2", "Min"),
-            FunctionResult("Function 3", "3", "Subtract"),
-        )
-    )
-    TraceResultScreen(traceResults, onClearAllResults = {}, onDeleteResult = {}, onZoomToResults = {})
-}
+//@Composable
+//@Preview
+//private fun TraceResultScreenPreview() {
+//    val traceResults = TraceResults(
+//        traceName = "Trace Name",
+//        functionResults = listOf(
+//            FunctionResult("Function 1", "1", "Add"),
+//            FunctionResult("Function 2", " 2", "Average"),
+//            FunctionResult("Function 3", " 3", "Count"),
+//            FunctionResult("Function 1", "1", "Max"),
+//            FunctionResult("Function 2", "2", "Min"),
+//            FunctionResult("Function 3", "3", "Subtract"),
+//        )
+//    )
+//    TraceResultScreen(traceResults, onClearAllResults = {}, onDeleteResult = {}, onZoomToResults = {})
+//}
 
 /**
  * Data class to hold the trace results.
