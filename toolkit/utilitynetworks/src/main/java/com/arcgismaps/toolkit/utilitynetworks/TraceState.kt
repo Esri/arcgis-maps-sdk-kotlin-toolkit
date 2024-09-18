@@ -142,6 +142,8 @@ public class TraceState(
 //    private var _traceResultsAvailable: MutableStateFlow<Boolean> = MutableStateFlow(false)
 //    internal val traceResultsAvailable: StateFlow<Boolean> = _traceResultsAvailable.asStateFlow()
 
+    private val currentTraceGraphics : MutableList<Graphic> = mutableListOf()
+
     /**
      * TBD
      */
@@ -180,7 +182,7 @@ public class TraceState(
         }
 
         val currentTraceFunctionResults : MutableList<UtilityTraceFunctionOutput> = mutableListOf()
-        val currentTraceGraphics : MutableList<Graphic> = mutableListOf()
+//        val currentTraceGraphics : MutableList<Graphic> = mutableListOf()
         var currentTraceElementResults: List<UtilityElement> = emptyList()
 
         for (result in traceResults) {
@@ -293,12 +295,12 @@ public class TraceState(
     }
 
     private fun addTapLocationToGraphicsOverlay(mapPoint: Point) {
-        graphicsOverlay.graphics.add(
-            Graphic(
-                geometry = mapPoint,
-                symbol = SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Cross, Color.green, 20.0f)
-            )
+        val graphic = Graphic(
+            geometry = mapPoint,
+            symbol = SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Cross, Color.green, 20.0f)
         )
+        graphicsOverlay.graphics.add(graphic)
+        currentTraceGraphics.add(graphic)
     }
 
     /**
@@ -349,7 +351,6 @@ internal data class StartingPoint(val feature: ArcGISFeature, val utilityElement
         symbol.createSwatch(screenScale).getOrThrow()
 }
 
-<<<<<<< Updated upstream
 /**
  * Returns [this] Result, but if it is a failure with the specified exception type, then it throws the exception.
  *

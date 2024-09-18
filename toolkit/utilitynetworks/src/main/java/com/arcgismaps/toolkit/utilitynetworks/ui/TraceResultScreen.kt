@@ -54,6 +54,7 @@ import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.toolkit.utilitynetworks.TraceRun
 import com.arcgismaps.utilitynetworks.UtilityElement
+import com.arcgismaps.utilitynetworks.UtilityTraceFunctionOutput
 
 /**
  * Composable that displays the trace results.
@@ -74,6 +75,9 @@ internal fun TraceResultScreen(
             }
             item {
                 FeatureResult(traceRun.featureResults)
+            }
+            item {
+                FunctionResult(traceRun.functionResults)
             }
             item {
                 ClearAllResultsButton(onClearAllResults)
@@ -128,14 +132,13 @@ private fun TraceTitle(traceName: String, onZoomToResults: () -> Unit, onDeleteR
     }
 }
 
-
 @Composable
 private fun FeatureResult(featureResults: List<UtilityElement>) {
     val assetGroupNames = featureResults.map { it.assetGroup.name }.distinct()
 
     Surface(modifier = Modifier.fillMaxWidth()) {
         Column {
-            TraceResultSection(stringResource(R.string.function_results), value = featureResults.size.toString()) {
+            TraceResultSection(stringResource(R.string.feature_results), value = featureResults.size.toString()) {
                 Column {
                     assetGroupNames.forEach { assetGroupName ->
                         HorizontalDivider()
@@ -148,11 +151,6 @@ private fun FeatureResult(featureResults: List<UtilityElement>) {
                         ) {
                             Text(text = assetGroupName, style = MaterialTheme.typography.titleMedium)
                             Column(horizontalAlignment = Alignment.End) {
-//                                Text(
-//                                    text = functionResult.functionType,
-//                                    style = MaterialTheme.typography.titleSmall,
-//                                    color = Color.Gray
-//                                )
                                 Text(
                                     text = elementsInAssetGroup(
                                         assetGroupName,
@@ -170,6 +168,38 @@ private fun FeatureResult(featureResults: List<UtilityElement>) {
 
 private fun elementsInAssetGroup(assetGroup: String, featureResults: List<UtilityElement>): List<UtilityElement> {
     return featureResults.filter { it.assetGroup.name == assetGroup }
+}
+
+@Composable
+private fun FunctionResult(functionResults: List<UtilityTraceFunctionOutput>) {
+    Surface(modifier = Modifier.fillMaxWidth()) {
+        Column {
+            TraceResultSection(stringResource(R.string.function_results), value = functionResults.size.toString()) {
+                Column {
+                    functionResults.forEach { functionResult ->
+                        HorizontalDivider()
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 32.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(text = functionResult.function.networkAttribute.name, style = MaterialTheme.typography.titleMedium)
+                            Column(horizontalAlignment = Alignment.End) {
+                                Text(
+                                    text = functionResult.function.functionType::class.simpleName ?: "",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    color = Color.Gray
+                                )
+                                Text(text = (functionResult.result as Double).toInt().toString(), style = MaterialTheme.typography.titleMedium)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable
