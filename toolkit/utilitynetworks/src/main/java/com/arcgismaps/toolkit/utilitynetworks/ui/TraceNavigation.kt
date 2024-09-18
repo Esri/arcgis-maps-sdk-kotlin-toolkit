@@ -18,6 +18,7 @@ package com.arcgismaps.toolkit.utilitynetworks.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -37,8 +38,10 @@ internal fun TraceNavHost(navController: NavHostController, traceState: TraceSta
     val coroutineScope = rememberCoroutineScope()
     NavHost(navController = navController, startDestination = TraceNavRoute.TraceOptions.name) {
         composable(TraceNavRoute.TraceOptions.name) {
+            val configs = traceState.traceConfigurations.collectAsStateWithLifecycle()
             TraceOptionsScreen(
-                configurations = emptyList(),
+                configurations = configs.value,
+                startingPoints = traceState.startingPoints,
                 onPerformTraceButtonClicked = {
                     coroutineScope.launch {
                         traceState.trace()
@@ -48,7 +51,13 @@ internal fun TraceNavHost(navController: NavHostController, traceState: TraceSta
                 onAddStartingPointButtonClicked = {
                     traceState.updateAddStartPointMode(AddStartingPointMode.Started)
                     navController.navigate(TraceNavRoute.AddStartingPoint.name)
-                })
+                },
+                selectedConfig = traceState.selectedTraceConfiguration.value,
+                onStartingPointRemoved = { traceState.removeStartingPoint(it) },
+                onConfigSelected = { newConfig ->
+                    traceState.setSelectedTraceConfiguration(newConfig)
+                }
+            )
         }
         composable(TraceNavRoute.AddStartingPoint.name) {
             AddStartingPointScreen(

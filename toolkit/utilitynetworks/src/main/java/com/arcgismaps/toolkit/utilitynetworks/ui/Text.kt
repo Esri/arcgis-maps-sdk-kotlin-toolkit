@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -57,6 +58,7 @@ private val style = TextStyle(
  *
  * @param text the value
  * @param modifier the modifier
+ * @param overflow the overflow strategy to apply
  * @param maxLines the number of lines to allow for the text.
  * @since 200.6.0
  */
@@ -64,6 +66,7 @@ private val style = TextStyle(
 internal fun ReadOnlyTextField(
     text: String,
     modifier: Modifier = Modifier,
+    overflow: TextOverflow = TextOverflow.Ellipsis,
     maxLines: Int = 1,
     leadingIcon: (@Composable () -> Unit)? = null
 ) {
@@ -82,6 +85,7 @@ internal fun ReadOnlyTextField(
                 text = text.ifEmpty { "--" },
                 color = Color.Unspecified,
                 style = style,
+                overflow = overflow,
                 maxLines = maxLines
             )
         }
