@@ -180,7 +180,11 @@ public class TraceState(
         _startingPoints.remove(startingPoint)
     }
 
-    private fun addStartingPoint(feature: ArcGISFeature) = try {
+    /**
+     * This private method is called from a suspend function and so swallows any failures except
+     * CancellationExceptions.
+     */
+    private fun processAndAddStartingPoint(feature: ArcGISFeature) = runCatchingCancellable {
         // TODO: add fraction-along to the element.
         // https://devtopia.esri.com/runtime/kotlin/issues/4491
         val utilityElement = utilityNetwork.createElementOrNull(feature)
@@ -199,9 +203,6 @@ public class TraceState(
             )
         )
 
-    } catch (e: Throwable) {
-        if (e is CancellationException) throw e
-        Unit
     }
 
     private suspend fun identifyFeatures(mapPoint: Point, screenCoordinate: ScreenCoordinate) {
@@ -213,7 +214,7 @@ public class TraceState(
             if (identifyLayerResultList.isNotEmpty()) {
                 identifyLayerResultList.forEach { identifyLayerResult ->
                     identifyLayerResult.geoElements.filterIsInstance<ArcGISFeature>().forEach { feature ->
-                        addStartingPoint(feature)
+                        processAndAddStartingPoint(feature)
                     }
                 }
                 addTapLocationToGraphicsOverlay(mapPoint)
@@ -275,6 +276,22 @@ public sealed class AddStartingPointMode {
 internal data class StartingPoint(val feature: ArcGISFeature, val utilityElement: UtilityElement, val symbol: Symbol) {
     val name: String = utilityElement.assetType.name
 
-    suspend fun getDrawable(metrics: Float): BitmapDrawable =
-        symbol.createSwatch(metrics).getOrThrow()
+    suspend fun getDrawable(screenScale: Float): BitmapDrawable =
+        symbol.createSwatch(screenScale).getOrThrow()
 }
+
+/**
+ * Returns [this] Result, but if it is a failure with the specified exception type, then it throws the exception.
+ *
+ * @param T a [Throwable] type which should be thrown instead of encapsulated in the [Result].
+ */
+internal inline fun <reified T : Throwable, R> Result<R>.except(): Result<R> = onFailure { if (it is T) throw it }
+
+/**
+ * Runs the specified [block] with [this] value as its receiver and catches any exceptions, returning a `Result` with the
+ * result of the block or the exception. If the exception is a [CancellationException], the exception will not be encapsulated
+ * in the failure but will be rethrown.
+ */
+internal inline fun <T, R> T.runCatchingCancellable(block: T.() -> R): Result<R> =
+    runCatching(block)
+        .except<CancellationException, R>()
