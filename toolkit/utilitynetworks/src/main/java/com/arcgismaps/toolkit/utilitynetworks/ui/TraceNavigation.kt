@@ -39,9 +39,9 @@ import kotlinx.coroutines.launch
 internal fun TraceNavHost(navController: NavHostController, traceState: TraceState) {
     val coroutineScope = rememberCoroutineScope()
     val traceResultAvailable = remember { mutableStateOf(false) }
-//    if (traceResultAvailable.value) {
-//        navController.navigate(TraceNavRoute.TraceResults.name)
-//    }
+    if (traceResultAvailable.value) {
+        navController.navigate(TraceNavRoute.TraceResults.name)
+    }
 
     NavHost(navController = navController, startDestination = TraceNavRoute.TraceOptions.name) {
         composable(TraceNavRoute.TraceOptions.name) {
@@ -84,9 +84,6 @@ internal fun TraceNavHost(navController: NavHostController, traceState: TraceSta
 
                 })
         }
-    }
-    if (traceResultAvailable.value) {
-        navController.navigate(TraceNavRoute.TraceResults.name)
     }
 }
 
