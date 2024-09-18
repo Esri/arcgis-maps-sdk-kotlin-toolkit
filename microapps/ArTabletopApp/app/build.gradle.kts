@@ -58,6 +58,7 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+    @Suppress("UnstableApiUsage")
     buildFeatures {
         compose = true
         buildConfig = true
@@ -82,6 +83,7 @@ dependencies {
     implementation(project(":geoview-compose"))
     implementation(project(":microapps-lib"))
     implementation(project(":ar"))
+    implementation(libs.arcore)
     implementation(arcgis.mapsSdk)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)

@@ -49,7 +49,7 @@ import kotlin.time.Duration.Companion.seconds
  * @since 200.6.0
  */
 @Stable
-public final class TableTopSceneViewProxy internal constructor(internal val sceneViewProxy: SceneViewProxy) {
+public class TableTopSceneViewProxy internal constructor(internal val sceneViewProxy: SceneViewProxy) {
 
     public constructor() : this(SceneViewProxy())
 
