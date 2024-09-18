@@ -54,7 +54,7 @@ public fun Trace(
             .fillMaxSize()
             .semantics { contentDescription = traceSurfaceContentDescription }
     ) {
-        if (configs.value == null) {
+        if (configs.value.isEmpty()) {
             Box(
                 modifier = Modifier
                     .size(100.dp),

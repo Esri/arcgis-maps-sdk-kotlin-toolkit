@@ -52,8 +52,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
@@ -78,6 +76,8 @@ import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 import com.arcgismaps.toolkit.ui.expandablecard.theme.LocalExpandableCardColorScheme
 import com.arcgismaps.toolkit.ui.expandablecard.theme.LocalExpandableCardTypography
 import com.arcgismaps.toolkit.utilitynetworks.R
+import com.arcgismaps.toolkit.utilitynetworks.StartingPoint
+import com.arcgismaps.utilitynetworks.UtilityNamedTraceConfiguration
 import com.arcgismaps.utilitynetworks.UtilityNetwork
 
 /**
@@ -89,12 +89,14 @@ import com.arcgismaps.utilitynetworks.UtilityNetwork
  */
 @Composable
 internal fun TraceOptionsScreen(
-    configurations: List<SelectableItem>,
+    configurations: List<UtilityNamedTraceConfiguration>,
+    startingPoints: List<StartingPoint>,
+    selectedConfig: UtilityNamedTraceConfiguration?,
+    onStartingPointRemoved: (StartingPoint) -> Unit,
+    onConfigSelected: (UtilityNamedTraceConfiguration) -> Unit,
     onPerformTraceButtonClicked: () -> Unit,
     onAddStartingPointButtonClicked: () -> Unit
 ) {
-    val traceConfigurations = remember { mutableStateListOf<SelectableItem>() }
-    traceConfigurations.addAll(configurations)
     Surface(
         color = MaterialTheme.colorScheme.surface,
         modifier = Modifier
@@ -108,12 +110,19 @@ internal fun TraceOptionsScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 item {
-                    TraceConfiguration(
-                        traceConfigurations
-                    )
+                    TraceConfigurations(
+                        configurations,
+                        selectedConfig
+                    ) { newConfig ->
+                        onConfigSelected(newConfig)
+                    }
                 }
                 item {
-                    StartingPointsEditor(onAddStartingPointButtonClicked)
+                    StartingPoints(
+                        startingPoints,
+                        onAddStartingPointButtonClicked,
+                        onStartingPointRemoved
+                    )
                 }
                 item {
                     AdvancedOptions()
@@ -132,17 +141,16 @@ internal fun TraceOptionsScreen(
  * @since 200.6.0
  */
 @Composable
-private fun TraceConfiguration(utilityTraces: List<SelectableItem>) {
+private fun TraceConfigurations(configs: List<UtilityNamedTraceConfiguration>, selectedConfig: UtilityNamedTraceConfiguration?, onTraceSelected: (UtilityNamedTraceConfiguration) -> Unit) {
     ExpandableCard(
         title = stringResource(id = R.string.trace_configuration),
         padding = 4.dp
     ) {
-        var selectedTrace: SelectableItem? by remember { mutableStateOf(null) }
         Column {
-            utilityTraces.forEachIndexed { index, item ->
+            configs.forEachIndexed { index, item ->
                 ReadOnlyTextField(
-                    text = item.title,
-                    leadingIcon = if (item.title == selectedTrace?.title) {
+                    text = item.name,
+                    leadingIcon = if (item.name == selectedConfig?.name) {
                         {
                             Icon(
                                 imageVector = Icons.Filled.Done,
@@ -157,7 +165,7 @@ private fun TraceConfiguration(utilityTraces: List<SelectableItem>) {
                         .padding(horizontal = 8.dp)
                         .fillMaxWidth()
                         .clickable {
-                            selectedTrace = utilityTraces[index]
+                            onTraceSelected(configs[index])
                         }
                 )
             }
@@ -171,11 +179,13 @@ private fun TraceConfiguration(utilityTraces: List<SelectableItem>) {
  * @since 200.6.0
  */
 @Composable
-private fun StartingPointsEditor(showAddStartingPointScreen: () -> Unit) {
-    val startingPoints = remember { mutableStateListOf(StartingPointData(name = "Test Starting Point")) }
-    var counter by remember { mutableIntStateOf(1) }
-    ExpandableCard(
-        title = "${stringResource(id = R.string.starting_points)} (${counter})",
+private fun StartingPoints(
+    startingPoints: List<StartingPoint>,
+    showAddStartingPointScreen: () -> Unit,
+    onStartingPointRemoved: (StartingPoint) -> Unit
+) {
+       ExpandableCard(
+        title = "${stringResource(id = R.string.starting_points)} (${startingPoints.size})",
         description = {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -183,7 +193,6 @@ private fun StartingPointsEditor(showAddStartingPointScreen: () -> Unit) {
             ) {
                 ElevatedButton(
                     onClick = {
-                        startingPoints.add(StartingPointData("Point ${counter++}"))
                         showAddStartingPointScreen()
                     },
                     shape = RoundedCornerShape(8.dp)
@@ -203,10 +212,8 @@ private fun StartingPointsEditor(showAddStartingPointScreen: () -> Unit) {
     ) {
         Column {
             startingPoints.forEach {
-                val row = StartingPointData(name = it.name)
-                StartingPoint(row) {
-                    startingPoints.remove(row)
-                    counter -= 1
+                StartingPointRow(it) {
+                    onStartingPointRemoved(it)
                 }
             }
         }
@@ -410,25 +417,3 @@ private fun AdvancedOptionsRowPreview() {
         )
     }
 }
-
-@Preview
-@Composable
-private fun TraceOptionsPreview() {
-    TraceOptionsScreen(
-        listOf(
-            SelectableItem("Trace 1", false),
-            SelectableItem("Trace 2", false),
-            SelectableItem("Trace 3", false),
-            SelectableItem("Trace 4", false)
-        ),
-        onPerformTraceButtonClicked = {},
-        onAddStartingPointButtonClicked = {}
-    )
-}
-
-/**
- * A data class to represent a selectable item.
- *
- * @since 200.6.0
- */
-internal data class SelectableItem(val title: String, var selected: Boolean)

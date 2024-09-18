@@ -16,24 +16,35 @@
 
 package com.arcgismaps.toolkit.utilitynetworks
 
+import android.graphics.drawable.BitmapDrawable
 import android.util.Log
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.Color
 import com.arcgismaps.Guid
+import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.layers.FeatureLayer
+import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
+import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
+import com.arcgismaps.mapping.symbology.Symbol
+import com.arcgismaps.mapping.view.Graphic
+import com.arcgismaps.mapping.view.GraphicsOverlay
+import com.arcgismaps.mapping.view.ScreenCoordinate
+import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
+import com.arcgismaps.utilitynetworks.UtilityElement
 import com.arcgismaps.utilitynetworks.UtilityElementTraceResult
 import com.arcgismaps.utilitynetworks.UtilityNamedTraceConfiguration
 import com.arcgismaps.utilitynetworks.UtilityNetwork
 import com.arcgismaps.utilitynetworks.UtilityTraceParameters
 import com.arcgismaps.utilitynetworks.UtilityTraceType
-import com.arcgismaps.mapping.GeoElement
-import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
-import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
-import com.arcgismaps.mapping.view.Graphic
-import com.arcgismaps.mapping.view.GraphicsOverlay
-import com.arcgismaps.mapping.view.ScreenCoordinate
-import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -52,14 +63,14 @@ public class TraceState(
     private val mapViewProxy: MapViewProxy
 ) {
 
-    private val _traceConfigurations = MutableStateFlow<List<UtilityNamedTraceConfiguration>?>(null)
+    private val _traceConfigurations = MutableStateFlow<List<UtilityNamedTraceConfiguration>>(emptyList())
 
     /**
      * The named trace configurations of the Utility Network
      *
      * @since 200.6.0
      */
-    internal val traceConfigurations: StateFlow<List<UtilityNamedTraceConfiguration>?> = _traceConfigurations.asStateFlow()
+    internal val traceConfigurations: StateFlow<List<UtilityNamedTraceConfiguration>> = _traceConfigurations.asStateFlow()
 
     private val _traceResult = MutableStateFlow<UtilityElementTraceResult?>(null)
 
@@ -82,31 +93,37 @@ public class TraceState(
      */
     public val addStartingPointMode: StateFlow<AddStartingPointMode> = _addStartingPointMode.asStateFlow()
 
-    private val _selectedGeoElementsAsStartingPoints: MutableStateFlow<MutableList<GeoElement>> =
-        MutableStateFlow(
-            mutableListOf()
-        )
+    private var _selectedTraceConfiguration: MutableState<UtilityNamedTraceConfiguration?> = mutableStateOf(null)
 
     /**
-     * The selected `GeoElements` on the map that are used as starting points for the trace.
+     * The selected trace configuration for the TraceParameters that define the trace.
      *
      * @since 200.6.0
      */
-    internal val selectedGeoElementsAsStartingPoints: StateFlow<List<GeoElement>> =
-        _selectedGeoElementsAsStartingPoints.asStateFlow()
+    public val selectedTraceConfiguration: State<UtilityNamedTraceConfiguration?> = _selectedTraceConfiguration
 
-    private var utilityNetwork: UtilityNetwork? = null
+    private val _startingPoints: SnapshotStateList<StartingPoint> = mutableStateListOf()
+
+    internal val startingPoints: List<StartingPoint> = _startingPoints
+
+    private var _utilityNetwork: UtilityNetwork? = null
+    private val utilityNetwork: UtilityNetwork
+        get() = _utilityNetwork ?: throw IllegalStateException("utility network cannot be null")
+
 
     init {
         coroutineScope.launch {
-            arcGISMap.load().onSuccess {
-                arcGISMap.utilityNetworks.forEach {
-                    it.load()
-                }
+            arcGISMap.load().getOrThrow()
+            arcGISMap.utilityNetworks.forEach {
+                it.load().getOrThrow()
             }
-            utilityNetwork = arcGISMap.utilityNetworks.first()
-            _traceConfigurations.value = utilityNetwork?.queryNamedTraceConfigurations()?.getOrNull()
+            _utilityNetwork = arcGISMap.utilityNetworks.first()
+            _traceConfigurations.value = utilityNetwork.queryNamedTraceConfigurations().getOrThrow()
         }
+    }
+
+    internal fun setSelectedTraceConfiguration(config: UtilityNamedTraceConfiguration) {
+        _selectedTraceConfiguration.value = config
     }
 
     /**
@@ -114,13 +131,13 @@ public class TraceState(
      */
     public suspend fun trace() {
         // Run a trace
-        val utilityNetworkDefinition = utilityNetwork?.definition
+        val utilityNetworkDefinition = utilityNetwork.definition
         val utilityNetworkSource =
             utilityNetworkDefinition!!.getNetworkSource("Electric Distribution Line")
         val utilityAssetGroup = utilityNetworkSource!!.getAssetGroup("Medium Voltage")
         val utilityAssetType =
             utilityAssetGroup!!.getAssetType("Underground Three Phase")
-        val startingLocation = utilityNetwork?.createElementOrNull(
+        val startingLocation = utilityNetwork.createElementOrNull(
             utilityAssetType!!,
             Guid("0B1F4188-79FD-4DED-87C9-9E3C3F13BA77")
         )
@@ -130,9 +147,9 @@ public class TraceState(
             listOf(startingLocation!!)
         )
 
-        utilityNetwork?.trace(
+        utilityNetwork.trace(
             utilityTraceParameters
-        )?.onSuccess {
+        ).onSuccess {
             // Handle trace results
             _traceResult.value = it[0] as UtilityElementTraceResult
             Log.i("UtilityNetworkTraceApp", "Trace results: $it")
@@ -140,7 +157,7 @@ public class TraceState(
                 "UtilityNetworkTraceApp",
                 "Trace result element size: ${(_traceResult.value)?.elements?.size}"
             )
-        }?.onFailure {
+        }.onFailure {
             // Handle error
         }
     }
@@ -159,6 +176,35 @@ public class TraceState(
         }
     }
 
+    internal fun removeStartingPoint(startingPoint: StartingPoint) {
+        _startingPoints.remove(startingPoint)
+    }
+
+    /**
+     * This private method is called from a suspend function and so swallows any failures except
+     * CancellationExceptions.
+     */
+    private fun processAndAddStartingPoint(feature: ArcGISFeature) = runCatchingCancellable {
+        // TODO: add fraction-along to the element.
+        // https://devtopia.esri.com/runtime/kotlin/issues/4491
+        val utilityElement = utilityNetwork.createElementOrNull(feature)
+            ?: throw IllegalArgumentException("could not create utility element from ArcGISFeature")
+
+        val symbol = (feature.featureTable?.layer as FeatureLayer)
+                .renderer
+                ?.getSymbol(feature)
+            ?: throw IllegalArgumentException("could not create drawable from feature symbol")
+
+        _startingPoints.add(
+            StartingPoint(
+                feature = feature,
+                utilityElement = utilityElement,
+                symbol = symbol
+            )
+        )
+
+    }
+
     private suspend fun identifyFeatures(mapPoint: Point, screenCoordinate: ScreenCoordinate) {
         val result = mapViewProxy.identifyLayers(
             screenCoordinate = screenCoordinate,
@@ -167,8 +213,8 @@ public class TraceState(
         result.onSuccess { identifyLayerResultList ->
             if (identifyLayerResultList.isNotEmpty()) {
                 identifyLayerResultList.forEach { identifyLayerResult ->
-                    identifyLayerResult.geoElements.forEach { geoElement ->
-                        _selectedGeoElementsAsStartingPoints.value.add(geoElement)
+                    identifyLayerResult.geoElements.filterIsInstance<ArcGISFeature>().forEach { feature ->
+                        processAndAddStartingPoint(feature)
                     }
                 }
                 addTapLocationToGraphicsOverlay(mapPoint)
@@ -225,3 +271,27 @@ public sealed class AddStartingPointMode {
      */
     public data object None : AddStartingPointMode()
 }
+
+@Immutable
+internal data class StartingPoint(val feature: ArcGISFeature, val utilityElement: UtilityElement, val symbol: Symbol) {
+    val name: String = utilityElement.assetType.name
+
+    suspend fun getDrawable(screenScale: Float): BitmapDrawable =
+        symbol.createSwatch(screenScale).getOrThrow()
+}
+
+/**
+ * Returns [this] Result, but if it is a failure with the specified exception type, then it throws the exception.
+ *
+ * @param T a [Throwable] type which should be thrown instead of encapsulated in the [Result].
+ */
+internal inline fun <reified T : Throwable, R> Result<R>.except(): Result<R> = onFailure { if (it is T) throw it }
+
+/**
+ * Runs the specified [block] with [this] value as its receiver and catches any exceptions, returning a `Result` with the
+ * result of the block or the exception. If the exception is a [CancellationException], the exception will not be encapsulated
+ * in the failure but will be rethrown.
+ */
+internal inline fun <T, R> T.runCatchingCancellable(block: T.() -> R): Result<R> =
+    runCatching(block)
+        .except<CancellationException, R>()
