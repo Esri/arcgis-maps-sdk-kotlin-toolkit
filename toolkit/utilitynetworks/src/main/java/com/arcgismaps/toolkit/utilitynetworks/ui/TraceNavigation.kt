@@ -17,6 +17,9 @@
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -36,6 +39,11 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun TraceNavHost(navController: NavHostController, traceState: TraceState) {
     val coroutineScope = rememberCoroutineScope()
+    val traceResultAvailable = remember { mutableStateOf(false) }
+//    if (traceResultAvailable.value) {
+//        navController.navigate(TraceNavRoute.TraceResults.name)
+//    }
+
     NavHost(navController = navController, startDestination = TraceNavRoute.TraceOptions.name) {
         composable(TraceNavRoute.TraceOptions.name) {
             val configs = traceState.traceConfigurations.collectAsStateWithLifecycle()
@@ -43,10 +51,7 @@ internal fun TraceNavHost(navController: NavHostController, traceState: TraceSta
                 configurations = configs.value,
                 startingPoints = traceState.startingPoints,
                 onPerformTraceButtonClicked = {
-                    coroutineScope.launch {
-                        traceState.trace()
-                    }
-                    navController.navigate(TraceNavRoute.TraceResults.name)
+                    coroutineScope.launch { traceResultAvailable.value = traceState.trace() }
                 },
                 onAddStartingPointButtonClicked = {
                     traceState.updateAddStartPointMode(AddStartingPointMode.Started)
@@ -69,7 +74,7 @@ internal fun TraceNavHost(navController: NavHostController, traceState: TraceSta
         }
         composable(TraceNavRoute.TraceResults.name) {
             TraceResultScreen(
-                traceResults = TraceResults("", emptyList()),
+                traceRun = traceState.currentTraceRun,
                 onDeleteResult = {
 
                 }, onZoomToResults = {
@@ -78,6 +83,10 @@ internal fun TraceNavHost(navController: NavHostController, traceState: TraceSta
 
                 })
         }
+    }
+
+    if (traceResultAvailable.value) {
+        navController.navigate(TraceNavRoute.TraceResults.name)
     }
 }
 
