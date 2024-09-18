@@ -30,4 +30,5 @@
     <string name="feature_results">Feature Results</string>
     <string name="function_results">Function Results</string>
     <string name="clear_all_results">Clear all results</string>
+    <string name="delete">Delete</string>
 </resources>
