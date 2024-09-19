@@ -51,7 +51,12 @@ internal fun TraceNavHost(navController: NavHostController, traceState: TraceSta
                 startingPoints = traceState.startingPoints,
                 onPerformTraceButtonClicked = {
                     coroutineScope.launch {
-                        traceResultAvailable.value = traceState.trace()
+                        try {
+                            traceResultAvailable.value = traceState.trace()
+                        } catch (e: Exception) {
+                            // Handle error
+                            println("ERROR: running traceState.trace() threw an exception: $e")
+                        }
                     }
                 },
                 onAddStartingPointButtonClicked = {

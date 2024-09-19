@@ -144,7 +144,7 @@ public class TraceState(
      * @return true if the trace results are available, false otherwise.
      * @since 200.6.0
      */
-    public suspend fun trace() : Boolean {
+    internal suspend fun trace() : Boolean {
         // Run a trace
         val traceConfiguration = selectedTraceConfiguration.value ?: return false
 
@@ -160,14 +160,10 @@ public class TraceState(
 
         val utilityTraceParameters = UtilityTraceParameters(traceConfiguration, startingPoints.map { it.utilityElement })
 
-        var traceResults: List<UtilityTraceResult> = emptyList()
-
-        utilityNetwork.trace(utilityTraceParameters).onSuccess {
-            // Handle trace results
-            traceResults = it
-        }.onFailure {
-            // TODO: Handle error
-            Log.i("UtilityNetworkTraceApp", "Trace failed: $it")
+        val traceResults = utilityNetwork.trace(utilityTraceParameters).getOrElse {
+            //handle error
+            println("ERROR: running trace" + it.message)
+            emptyList<UtilityElementTraceResult>()
         }
 
         val currentTraceFunctionResults : MutableList<UtilityTraceFunctionOutput> = mutableListOf()
@@ -363,5 +359,5 @@ internal data class TraceRun(
     val graphics: List<Graphic>,
     val featureResults: List<UtilityElement>,
     val functionResults: List<UtilityTraceFunctionOutput>,
-    val geometryResults: MutableList<Graphic> = mutableListOf()
+    val geometryResults: List<Graphic>
 )
