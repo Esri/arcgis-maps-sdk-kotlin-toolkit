@@ -202,6 +202,7 @@ public class TraceState(
                         graphicsOverlay.graphics.add(graphic)
                         currentTraceGraphics.add(graphic)
                     }
+                    // Highlight the geometry results
                     currentTraceGraphics.map { it.isSelected = true }
                 }
             }
