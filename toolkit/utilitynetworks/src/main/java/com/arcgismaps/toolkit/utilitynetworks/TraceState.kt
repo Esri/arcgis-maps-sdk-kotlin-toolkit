@@ -132,24 +132,21 @@ public class TraceState(
         _selectedTraceConfiguration.value = config
     }
 
-//    private var _currentTraceElementResults: List<UtilityElement> = emptyList()
-//    internal val currentTraceElementResults: List<UtilityElement> = _currentTraceElementResults
-
     private var _currentTraceRun: TraceRun? = null
     internal val currentTraceRun: TraceRun
         get() = _currentTraceRun ?: throw IllegalStateException("TraceRun cannot be null")
 
-//    private var _traceResultsAvailable: MutableStateFlow<Boolean> = MutableStateFlow(false)
-//    internal val traceResultsAvailable: StateFlow<Boolean> = _traceResultsAvailable.asStateFlow()
-
     private val currentTraceGraphics : MutableList<Graphic> = mutableListOf()
 
     /**
-     * TBD
+     * Run a trace on the Utility Network using the selected trace configuration and starting points.
+     *
+     * @return true if the trace results are available, false otherwise.
+     * @since 200.6.0
      */
     public suspend fun trace() : Boolean {
         // Run a trace
-        val traceConfiguration = selectedTraceConfiguration.value ?: return false // this should be handled in UI
+        val traceConfiguration = selectedTraceConfiguration.value ?: return false
 
         if (startingPoints.isEmpty() && traceConfiguration.minimumStartingLocations == UtilityMinimumStartingLocations.One) {
             // TODO: Handle error
@@ -165,52 +162,43 @@ public class TraceState(
 
         var traceResults: List<UtilityTraceResult> = emptyList()
 
-        utilityNetwork.trace(
-            utilityTraceParameters
-        ).onSuccess {
+        utilityNetwork.trace(utilityTraceParameters).onSuccess {
             // Handle trace results
-            _traceResult.value = it[0] as UtilityElementTraceResult
             traceResults = it
-            Log.i("UtilityNetworkTraceApp", "Trace results: $it")
-            Log.i(
-                "UtilityNetworkTraceApp",
-                "Trace result element size: ${(_traceResult.value)?.elements?.size}"
-            )
         }.onFailure {
             // TODO: Handle error
             Log.i("UtilityNetworkTraceApp", "Trace failed: $it")
         }
 
         val currentTraceFunctionResults : MutableList<UtilityTraceFunctionOutput> = mutableListOf()
-//        val currentTraceGraphics : MutableList<Graphic> = mutableListOf()
         var currentTraceElementResults: List<UtilityElement> = emptyList()
 
         for (result in traceResults) {
-            Log.i("UtilityNetworkTraceApp", "Trace result: $result")
             when (result) {
+                // Feature results
                 is UtilityElementTraceResult -> {
                     currentTraceElementResults = result.elements
                 }
-
+                // Function results
                 is UtilityFunctionTraceResult -> {
                     result.functionOutputs.forEach {
                         currentTraceFunctionResults.add(it)
                     }
                 }
-
+                // Geometry results
                 is UtilityGeometryTraceResult -> {
                     result.polygon?.let { polygon ->
-                        val graphic = createGraphic(polygon, SimpleLineSymbolStyle.Solid, Color.green)
+                        val graphic = createGraphicForSimpleLineSymbol(polygon, SimpleLineSymbolStyle.Solid, Color.green)
                         graphicsOverlay.graphics.add(graphic)
                         currentTraceGraphics.add(graphic)
                     }
                     result.polyline?.let { polyline ->
-                        val graphic = createGraphic(polyline, SimpleLineSymbolStyle.Dash, Color.green)
+                        val graphic = createGraphicForSimpleLineSymbol(polyline, SimpleLineSymbolStyle.Dash, Color.green)
                         graphicsOverlay.graphics.add(graphic)
                         currentTraceGraphics.add(graphic)
                     }
                     result.multipoint?.let { multipoint ->
-                        val graphic = createGraphic(multipoint, SimpleLineSymbolStyle.Dot, Color.green)
+                        val graphic = createGraphicForSimpleLineSymbol(multipoint, SimpleLineSymbolStyle.Dot, Color.green)
                         graphicsOverlay.graphics.add(graphic)
                         currentTraceGraphics.add(graphic)
                     }
@@ -219,7 +207,8 @@ public class TraceState(
             }
         }
         _currentTraceRun = TraceRun(
-            name = traceConfiguration.name,
+            name = traceConfiguration.name, // need to auto populate this, if not provided by AdvancedOptions
+            graphics = currentTraceGraphics,
             featureResults = currentTraceElementResults,
             functionResults = currentTraceFunctionResults,
             geometryResults = currentTraceGraphics
@@ -227,7 +216,7 @@ public class TraceState(
         return true
     }
 
-    private fun createGraphic(geometry: Geometry, style: SimpleLineSymbolStyle, color: Color) =
+    private fun createGraphicForSimpleLineSymbol(geometry: Geometry, style: SimpleLineSymbolStyle, color: Color) =
         Graphic(
             geometry = geometry,
             symbol = SimpleLineSymbol(style, color, 5.0f)
@@ -369,9 +358,9 @@ internal inline fun <T, R> T.runCatchingCancellable(block: T.() -> R): Result<R>
 
 @Immutable
 internal data class TraceRun(
-    val name: String,
+    val name: String, // need to auto populate this, if not provided by AdvancedOptions
+    val graphics: List<Graphic>,
     val featureResults: List<UtilityElement>,
     val functionResults: List<UtilityTraceFunctionOutput>,
     val geometryResults: MutableList<Graphic> = mutableListOf()
 )
-
