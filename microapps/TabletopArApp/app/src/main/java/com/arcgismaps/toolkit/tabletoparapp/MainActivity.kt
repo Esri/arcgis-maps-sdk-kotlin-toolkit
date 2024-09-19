@@ -105,7 +105,7 @@ class MainActivity : ComponentActivity() {
                 var translationFactor: Double by remember { mutableDoubleStateOf(1000.0) }
 
                 var arcGISScene by remember { mutableStateOf<ArcGISScene?>(null) }
-                var arcGISAnchorPosition: Point by remember { mutableStateOf(Point(-75.1652, 39.9526)) }
+                var arcGISAnchorPosition: Point by remember { mutableStateOf(Point(-75.1687, 39.9551)) }
 
 
                 val tableTopSceneViewProxy = remember { TableTopSceneViewProxy() }
