@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
+import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
@@ -89,36 +90,35 @@ internal fun StartingPointRow(
     onDelete: () -> Unit = {}
 ) {
     val density = LocalDensity.current
-    var deleteActive by remember { mutableStateOf(false) }
+    var deleteActive by rememberSaveable { mutableStateOf(false) }
+    val confirmValueChange: (DragAnchors) -> Boolean  = { _ -> true }
+    val positionalThreshold: (Float) -> Float = { distance: Float -> distance * 0.9f }
+    val velocityThreshold: () -> Float = { with(density) { 10000.dp.toPx() } }
+    val spec: () -> AnimationSpec<Float> = {
+        spring(
+            dampingRatio = Spring.DampingRatioLowBouncy,
+            stiffness = Spring.StiffnessLow,
+        )
+    }
     val state = rememberSaveable(
         inputs = arrayOf(data),
         saver = AnchoredDraggableState.Saver(
-            confirmValueChange = { _ -> true },
-            positionalThreshold = { distance: Float -> distance * 0.9f },
-            velocityThreshold = { with(density) { 10000.dp.toPx() } },
-            animationSpec = {
-                spring(
-                    dampingRatio = Spring.DampingRatioLowBouncy,
-                    stiffness = Spring.StiffnessLow,
-                )
-            }
+            confirmValueChange = confirmValueChange,
+            positionalThreshold = positionalThreshold,
+            velocityThreshold = velocityThreshold,
+            animationSpec = spec
         )
     ) {
         AnchoredDraggableState(
             initialValue = DragAnchors.NeutralPosition,
-            positionalThreshold = { distance: Float -> distance * 0.9f },
-            velocityThreshold = { with(density) { 10000.dp.toPx() } },
-            animationSpec = {
-                spring(
-                    dampingRatio = Spring.DampingRatioLowBouncy,
-                    stiffness = Spring.StiffnessLow,
-                )
-            }
+            positionalThreshold = positionalThreshold,
+            velocityThreshold = velocityThreshold,
+            animationSpec = spec
         )
     }
     val contentWidth = 40.dp
     val contentSizeWidth = with(density) { contentWidth.toPx() }
-    var layoutWidth by remember { mutableIntStateOf(0) }
+    var layoutWidth by rememberSaveable { mutableIntStateOf(0) }
     var neutralOffset = 0f
 
     if (!state.offset.isNaN() && state.offset < DELETE_THRESHOLD) {
@@ -133,7 +133,7 @@ internal fun StartingPointRow(
     ) {
         val metrics = LocalDensity.current
         var bitmap: ImageBitmap? by remember { mutableStateOf(null)}
-        LaunchedEffect(Unit) {
+        LaunchedEffect(data) {
             bitmap = data.getDrawable(metrics.density).bitmap.asImageBitmap()
         }
         bitmap?.let {
@@ -176,7 +176,7 @@ internal fun StartingPointRow(
             )
 
 
-            var indicationState by remember { mutableStateOf(false) }
+            var indicationState by rememberSaveable(data) { mutableStateOf(false) }
             val animatedOffset: Dp by animateDpAsState(
                 targetValue = if (indicationState) 6.dp else 0.dp,
                 animationSpec = spring(

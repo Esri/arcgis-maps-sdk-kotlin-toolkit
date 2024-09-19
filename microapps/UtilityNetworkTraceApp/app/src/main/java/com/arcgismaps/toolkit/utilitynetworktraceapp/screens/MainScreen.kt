@@ -50,8 +50,8 @@ fun MainScreen(viewModel: TraceViewModel) {
     val addStartingPointMode by viewModel.traceState.addStartingPointMode.collectAsState()
     val scaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
-            initialValue = SheetValue.Hidden,
-            skipHiddenState = false
+            initialValue = SheetValue.Expanded,
+            skipHiddenState = true
         )
     )
 
@@ -69,14 +69,15 @@ fun MainScreen(viewModel: TraceViewModel) {
                 visible = loadState is LoadStatus.Loaded,
                 enter = slideInVertically { h -> h },
                 exit = slideOutVertically { h -> h },
-                label = "popup",
-                modifier = Modifier.heightIn(min = 0.dp, max = 300.dp)
+                label = "trace tool",
+                modifier = Modifier.heightIn(min = 0.dp, max = 350.dp)
             ) {
                 Trace(viewModel.traceState)
             }
         },
         modifier = Modifier.fillMaxSize(),
         scaffoldState = scaffoldState,
+        sheetPeekHeight = 100.dp,
         sheetSwipeEnabled = true,
         topBar = null
     ) { padding ->
