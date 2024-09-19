@@ -71,7 +71,7 @@ fun MainScreen(viewModel: TraceViewModel) {
                 enter = slideInVertically { h -> h },
                 exit = slideOutVertically { h -> h },
                 label = "popup",
-                modifier = Modifier.heightIn(min = 0.dp, max = 450.dp)
+                modifier = Modifier.heightIn(min = 0.dp, max = 300.dp)
             ) {
                 Trace(viewModel.traceState)
             }
