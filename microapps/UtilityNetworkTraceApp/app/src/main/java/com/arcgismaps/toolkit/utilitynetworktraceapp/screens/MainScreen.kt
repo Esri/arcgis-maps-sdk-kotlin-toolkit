@@ -34,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import com.arcgismaps.toolkit.utilitynetworks.AddStartingPointMode
@@ -42,7 +43,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(viewModel: TraceViewModel) {
+fun MainScreen(viewModel: TraceViewModel = viewModel()) {
 
     val loadState by viewModel.arcGISMap.loadStatus.collectAsState()
     val coroutineScope = rememberCoroutineScope()
