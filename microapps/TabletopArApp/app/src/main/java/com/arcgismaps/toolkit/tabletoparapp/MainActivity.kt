@@ -18,7 +18,9 @@
 
 package com.arcgismaps.toolkit.tabletoparapp
 
+import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -28,18 +30,37 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
+import com.arcgismaps.LoadStatus
+import com.arcgismaps.geometry.GeodeticCurveType
+import com.arcgismaps.geometry.GeometryEngine
+import com.arcgismaps.geometry.LinearUnit
+import com.arcgismaps.geometry.LinearUnitId
 import com.arcgismaps.geometry.Point
+import com.arcgismaps.geometry.SpatialReference
+import com.arcgismaps.httpcore.authentication.OAuthUserConfiguration
 import com.arcgismaps.mapping.ArcGISScene
+import com.arcgismaps.mapping.ArcGISTiledElevationSource
 import com.arcgismaps.mapping.BasemapStyle
+import com.arcgismaps.mapping.MobileScenePackage
+import com.arcgismaps.mapping.NavigationConstraint
+import com.arcgismaps.mapping.PortalItem
+import com.arcgismaps.mapping.Surface
 import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.mapping.layers.PointCloudLayer
+import com.arcgismaps.mapping.view.Camera
+import com.arcgismaps.mapping.view.SceneViewInteractionOptions
+import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.ar.TableTopSceneView
 import com.arcgismaps.toolkit.ar.TableTopSceneViewProxy
 import com.arcgismaps.toolkit.authentication.AuthenticatorState
@@ -47,8 +68,11 @@ import com.arcgismaps.toolkit.authentication.DialogAuthenticator
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.esri.microappslib.theme.MicroAppTheme
 import com.google.ar.core.ArCoreApk
+import com.google.ar.core.Config
 import com.google.ar.core.Session
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
+import java.io.File
 import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
@@ -77,37 +101,48 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MicroAppTheme {
-                val arcGISScene = remember {
-                    ArcGISScene(BasemapStyle.OsmStandard)
-                }
-//                SceneView(arcGISScene = arcGISScene, modifier = Modifier.fillMaxSize())
+                var clippingDistance: Double by remember { mutableDoubleStateOf(400.0) }
+                var translationFactor: Double by remember { mutableDoubleStateOf(1000.0) }
+
+                var arcGISScene by remember { mutableStateOf<ArcGISScene?>(null) }
+                var arcGISAnchorPosition: Point by remember { mutableStateOf(Point(-75.1652, 39.9526)) }
+
+
                 val tableTopSceneViewProxy = remember { TableTopSceneViewProxy() }
                 var tappedLocation by remember { mutableStateOf<Point?>(null) }
                 // Using this to ensure we have a non=null session before even thinking about rendering
                 session.collectAsState().value?.let { session ->
-                    TableTopSceneView(
-                        arcGISScene = arcGISScene,
-                        Point(0.0, 0.0),
-                        1_000.0,
-                        1_000.0,
-                        session = session,
-                        modifier = Modifier.fillMaxSize(),
-                        tableTopSceneViewProxy = tableTopSceneViewProxy,
-                        onSingleTapConfirmed = {
-                            val location = tableTopSceneViewProxy.screenToBaseSurface(it.screenCoordinate)
-                            location?.let { point ->
-                                tappedLocation = point
+                    arcGISScene?.let { arcGISScene ->
+                        TableTopSceneView(
+                            arcGISScene = arcGISScene,
+                            arcGISAnchorPosition,
+                            translationFactor,
+                            clippingDistance,
+                            session = session,
+                            modifier = Modifier.fillMaxSize(),
+                            tableTopSceneViewProxy = tableTopSceneViewProxy,
+                            onSingleTapConfirmed = {
+                                val location =
+                                    tableTopSceneViewProxy.screenToBaseSurface(it.screenCoordinate)
+                                location?.let { point ->
+                                    tappedLocation = point
+                                }
                             }
-                        }
-                    ) {
-                        tappedLocation?.let {
-                            Callout(location = it, modifier = Modifier.wrapContentSize()) {
-                                Text("Lat: ${it.y.roundToInt()}, Lon: ${it.x.roundToInt()}")
+                        ) {
+                            tappedLocation?.let {
+                                Callout(location = it, modifier = Modifier.wrapContentSize()) {
+                                    Text("Lat: ${it.y.roundToInt()}, Lon: ${it.x.roundToInt()}")
+                                }
                             }
                         }
                     }
                 }
-                DialogAuthenticator(authenticatorState = remember { AuthenticatorState() })
+                LaunchedEffect(Unit) {
+                    val mspk = MobileScenePackage(File(getExternalFilesDir(null), "philadelphia.mspk").absolutePath)
+                    mspk.load()
+                    val scene = mspk.scenes.first()
+                    arcGISScene = scene
+                }
             }
         }
     }
@@ -175,7 +210,10 @@ class MainActivity : ComponentActivity() {
         session.value?.let { session ->
             message.value = "Configuring ARCore session..."
             // TODO: Configure the ARCore session
-            session.configure(session.config/*.apply{}*/)
+            session.configure(session.config.apply {
+                updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
+//                focusMode = Config.FocusMode.AUTO
+            })
             message.value = "ARCore session configured."
         }
     }

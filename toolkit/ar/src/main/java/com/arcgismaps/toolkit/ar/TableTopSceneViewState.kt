@@ -40,7 +40,17 @@ internal class TableTopSceneViewState internal constructor(
 
     fun onFrame(frame: Frame) {
         anchor?.let { anchor ->
-            val anchorPosition = identityMatrix - anchor.pose.transformationMatrix
+            val anchorPosition = identityMatrix - anchor.pose.translation.let {
+                TransformationMatrix.createWithQuaternionAndTranslation(
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0,
+                    it[0].toDouble(),
+                    it[1].toDouble(),
+                    it[2].toDouble()
+                )
+            }
             val cameraPosition =
                 anchorPosition + frame.camera.displayOrientedPose.transformationMatrix
             cameraController.transformationMatrix = cameraPosition
@@ -58,5 +68,4 @@ internal class TableTopSceneViewState internal constructor(
             tableTopSceneViewProxy.sceneViewProxy.renderFrame()
         }
     }
-
 }
