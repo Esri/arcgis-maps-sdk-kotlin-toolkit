@@ -23,10 +23,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.arcgismaps.toolkit.utilitynetworks.AddStartingPointMode
 import com.arcgismaps.toolkit.utilitynetworks.TraceState
 
 /**
@@ -36,19 +34,16 @@ import com.arcgismaps.toolkit.utilitynetworks.TraceState
  */
 @Composable
 internal fun AddStartingPointScreen(traceState: TraceState, onStopPointSelection: () -> Unit) {
-    LaunchedEffect(key1 = traceState.addStartingPointMode) {
-        traceState.addStartingPointMode.collect {
-            if (it == AddStartingPointMode.Stopped) {
-                onStopPointSelection()
-            }
-        }
-    }
+    println("UTILITY NETWORK AddStartingPointScreen")
+//    if (traceState.addStartingPointMode.value == AddStartingPointMode.Stopped) {
+//        onStopPointSelection()
+//    }
 
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Top) {
             Button(
                 onClick = {
-                    traceState.updateAddStartPointMode(AddStartingPointMode.Stopped)
+                    onStopPointSelection()
                 }) {
                 Text(text = "Cancel Starting Point Selection")
             }

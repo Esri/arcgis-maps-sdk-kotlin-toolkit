@@ -82,6 +82,11 @@ android {
     }
 }
 
+composeCompiler {
+    reportsDestination = layout.buildDirectory.dir("compose_compiler")
+    metricsDestination = layout.buildDirectory.dir("compose_compiler")
+}
+
 apiValidation {
     // todo: remove when this is resolved https://github.com/Kotlin/binary-compatibility-validator/issues/74
     // compose compiler generates public singletons for internal compose functions. this may be resolved in the compose

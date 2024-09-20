@@ -17,13 +17,11 @@
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.arcgismaps.toolkit.utilitynetworks.AddStartingPointMode
 import com.arcgismaps.toolkit.utilitynetworks.TraceState
 import kotlinx.coroutines.launch
@@ -36,23 +34,26 @@ import kotlinx.coroutines.launch
  * @since 200.6.0
  */
 @Composable
-internal fun TraceNavHost(navController: NavHostController, traceState: TraceState) {
+internal fun TraceNavHost(traceState: TraceState) {
+    val navController = rememberNavController()
     val coroutineScope = rememberCoroutineScope()
-    val traceResultAvailable = remember { mutableStateOf(false) }
-    if (traceResultAvailable.value) {
-        navController.navigate(TraceNavRoute.TraceResults.name)
+
+    if (traceState.addStartingPointMode.value == AddStartingPointMode.Stopped) {
+        navController.navigate(TraceNavRoute.TraceOptions.name)
     }
 
     NavHost(navController = navController, startDestination = TraceNavRoute.TraceOptions.name) {
         composable(TraceNavRoute.TraceOptions.name) {
-            val configs = traceState.traceConfigurations.collectAsStateWithLifecycle()
+            val configs by traceState.traceConfigurations
             TraceOptionsScreen(
-                configurations = configs.value,
+                configurations = configs,
                 startingPoints = traceState.startingPoints,
                 onPerformTraceButtonClicked = {
                     coroutineScope.launch {
                         try {
-                            traceResultAvailable.value = traceState.trace()
+                            if (traceState.trace()) {
+                                navController.navigate(TraceNavRoute.TraceResults.name)
+                            }
                         } catch (e: Exception) {
                             // Handle error
                             println("ERROR: running traceState.trace() threw an exception: $e")
@@ -75,6 +76,7 @@ internal fun TraceNavHost(navController: NavHostController, traceState: TraceSta
                 traceState,
                 onStopPointSelection = {
                     navController.navigate(TraceNavRoute.TraceOptions.name)
+                    traceState.updateAddStartPointMode(AddStartingPointMode.Stopped)
                 }
             )
         }
@@ -87,7 +89,8 @@ internal fun TraceNavHost(navController: NavHostController, traceState: TraceSta
 
                 }, onClearAllResults = {
 
-                })
+                }
+            )
         }
     }
 }
