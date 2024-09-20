@@ -22,7 +22,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
@@ -46,7 +48,11 @@ public fun Trace(
     @Suppress("unused_parameter")
     modifier: Modifier = Modifier
 ) {
-    val configs = traceState.traceConfigurations.collectAsStateWithLifecycle()
+    LaunchedEffect(key1 = traceState) {
+        traceState.initialize()
+    }
+
+    val initializationStatus = traceState.initializationStatus.collectAsStateWithLifecycle()
 
     Surface(
         color = MaterialTheme.colorScheme.surface,
@@ -54,13 +60,17 @@ public fun Trace(
             .fillMaxSize()
             .semantics { contentDescription = traceSurfaceContentDescription }
     ) {
-        if (configs.value.isEmpty()) {
+        if (initializationStatus.value !is InitializationStatus.Initialized) {
             Box(
                 modifier = Modifier
                     .size(100.dp),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator()
+                if (initializationStatus.value is InitializationStatus.NotInitialized || initializationStatus.value is InitializationStatus.Initializing) {
+                    CircularProgressIndicator()
+                } else if (initializationStatus.value is InitializationStatus.FailedToInitialize) {
+                    Text(text = (initializationStatus.value as InitializationStatus.FailedToInitialize).error.message ?: "Failed to initialize")
+                }
             }
         } else {
             val navController = rememberNavController()
