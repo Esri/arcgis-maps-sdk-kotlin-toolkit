@@ -16,27 +16,27 @@
 
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
+import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ThumbUp
-import androidx.compose.material.icons.sharp.Delete
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -48,35 +48,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.data.Feature
 import com.arcgismaps.toolkit.ui.gestures.AnchoredDraggableState
 import com.arcgismaps.toolkit.ui.gestures.DraggableAnchors
 import com.arcgismaps.toolkit.ui.gestures.anchoredDraggable
+import com.arcgismaps.toolkit.utilitynetworks.StartingPoint
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
-
-
-/**
- * The data model to represent a starting point. This may just be a Feature or GeoElement, but it is
- * good to house it in an immutable object to aid composition performance.
- *
- * @property name the name of the starting point.
- * @property symbol the symbology of the starting point, intended to hold the Feature's symbol
- * @property feature the Feature which defines the starting point.
- * @since 200.6.0
- */
-@Immutable
-internal data class StartingPointData(
-    val name: String,
-    val symbol: ImageVector = Icons.Filled.ThumbUp,
-    val feature: Feature? = null
-)
 
 private enum class DragAnchors(val fraction: Float) {
     NeutralPosition(.97f),
@@ -100,42 +84,41 @@ private const val DELETE_THRESHOLD = 5f
  * @since 200.6.0
  */
 @Composable
-internal fun StartingPoint(
-    data: StartingPointData,
+internal fun StartingPointRow(
+    data: StartingPoint,
     modifier: Modifier = Modifier,
     onDelete: () -> Unit = {}
 ) {
     val density = LocalDensity.current
-    var deleteActive by remember { mutableStateOf(false) }
+    var deleteActive by rememberSaveable { mutableStateOf(false) }
+    val confirmValueChange: (DragAnchors) -> Boolean  = { _ -> true }
+    val positionalThreshold: (Float) -> Float = { distance: Float -> distance * 0.9f }
+    val velocityThreshold: () -> Float = { with(density) { 10000.dp.toPx() } }
+    val spec: () -> AnimationSpec<Float> = {
+        spring(
+            dampingRatio = Spring.DampingRatioLowBouncy,
+            stiffness = Spring.StiffnessLow,
+        )
+    }
     val state = rememberSaveable(
         inputs = arrayOf(data),
         saver = AnchoredDraggableState.Saver(
-            confirmValueChange = { _ -> true },
-            positionalThreshold = { distance: Float -> distance * 0.9f },
-            velocityThreshold = { with(density) { 10000.dp.toPx() } },
-            animationSpec = {
-                spring(
-                    dampingRatio = Spring.DampingRatioLowBouncy,
-                    stiffness = Spring.StiffnessLow,
-                )
-            }
+            confirmValueChange = confirmValueChange,
+            positionalThreshold = positionalThreshold,
+            velocityThreshold = velocityThreshold,
+            animationSpec = spec
         )
     ) {
         AnchoredDraggableState(
             initialValue = DragAnchors.NeutralPosition,
-            positionalThreshold = { distance: Float -> distance * 0.9f },
-            velocityThreshold = { with(density) { 10000.dp.toPx() } },
-            animationSpec = {
-                spring(
-                    dampingRatio = Spring.DampingRatioLowBouncy,
-                    stiffness = Spring.StiffnessLow,
-                )
-            }
+            positionalThreshold = positionalThreshold,
+            velocityThreshold = velocityThreshold,
+            animationSpec = spec
         )
     }
     val contentWidth = 40.dp
     val contentSizeWidth = with(density) { contentWidth.toPx() }
-    var layoutWidth by remember { mutableIntStateOf(0) }
+    var layoutWidth by rememberSaveable { mutableIntStateOf(0) }
     var neutralOffset = 0f
 
     if (!state.offset.isNaN() && state.offset < DELETE_THRESHOLD) {
@@ -145,10 +128,28 @@ internal fun StartingPoint(
             onDelete()
         }
     }
-    Row {
+    Row(
+        horizontalArrangement = Arrangement.Center
+    ) {
+        val metrics = LocalDensity.current
+        var bitmap: ImageBitmap? by remember { mutableStateOf(null)}
+        LaunchedEffect(data) {
+            bitmap = data.getDrawable(metrics.density).bitmap.asImageBitmap()
+        }
+        bitmap?.let {
+                Image(
+                    bitmap = it,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .width(50.dp)
+                        .padding(15.dp),
+                    contentDescription = null,
+                )
+        }
         Box(
             modifier = modifier
                 .fillMaxSize()
+                .align(Alignment.CenterVertically)
                 .clip(shape = RoundedCornerShape(8.dp))
                 .onSizeChanged { layoutSize ->
                     val dragEndPoint = layoutSize.width - contentSizeWidth
@@ -170,19 +171,12 @@ internal fun StartingPoint(
             ReadOnlyTextField(
                 text = data.name,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(55.dp),
-                leadingIcon = {
-                    Icon(
-                        imageVector = data.symbol,
-                        contentDescription = null,
-                        modifier = Modifier.padding(14.dp)
-                    )
-                }
+                    .padding(start = 5.dp, end = 25.dp )
+                    .height(65.dp)
             )
 
 
-            var indicationState by remember { mutableStateOf(false) }
+            var indicationState by rememberSaveable(data) { mutableStateOf(false) }
             val animatedOffset: Dp by animateDpAsState(
                 targetValue = if (indicationState) 6.dp else 0.dp,
                 animationSpec = spring(
@@ -263,7 +257,7 @@ private fun DeletableRow(
             }
     ) {
         Icon(
-            imageVector = Icons.Sharp.Delete,
+            imageVector = Icons.Outlined.Delete,
             modifier = Modifier
                 .align(Alignment.CenterVertically)
                 .padding(14.dp),

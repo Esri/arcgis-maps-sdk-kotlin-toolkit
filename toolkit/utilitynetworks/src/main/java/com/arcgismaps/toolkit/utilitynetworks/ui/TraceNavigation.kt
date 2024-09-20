@@ -17,11 +17,16 @@
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.arcgismaps.toolkit.utilitynetworks.AddStartingPointMode
 import com.arcgismaps.toolkit.utilitynetworks.TraceState
+import kotlinx.coroutines.launch
 
 /**
  * A composable UI component to set up the navigation for the trace workflow.
@@ -32,18 +37,38 @@ import com.arcgismaps.toolkit.utilitynetworks.TraceState
  */
 @Composable
 internal fun TraceNavHost(navController: NavHostController, traceState: TraceState) {
+    val coroutineScope = rememberCoroutineScope()
+    val traceResultAvailable = remember { mutableStateOf(false) }
+    if (traceResultAvailable.value) {
+        navController.navigate(TraceNavRoute.TraceResults.name)
+    }
+
     NavHost(navController = navController, startDestination = TraceNavRoute.TraceOptions.name) {
         composable(TraceNavRoute.TraceOptions.name) {
+            val configs = traceState.traceConfigurations.collectAsStateWithLifecycle()
             TraceOptionsScreen(
-                configurations = emptyList(),
+                configurations = configs.value,
+                startingPoints = traceState.startingPoints,
                 onPerformTraceButtonClicked = {
-                    // TODO: Add call to perform trace
-                    navController.navigate(TraceNavRoute.TraceResults.name)
+                    coroutineScope.launch {
+                        try {
+                            traceResultAvailable.value = traceState.trace()
+                        } catch (e: Exception) {
+                            // Handle error
+                            println("ERROR: running traceState.trace() threw an exception: $e")
+                        }
+                    }
                 },
                 onAddStartingPointButtonClicked = {
                     traceState.updateAddStartPointMode(AddStartingPointMode.Started)
                     navController.navigate(TraceNavRoute.AddStartingPoint.name)
-                })
+                },
+                selectedConfig = traceState.selectedTraceConfiguration.value,
+                onStartingPointRemoved = { traceState.removeStartingPoint(it) },
+                onConfigSelected = { newConfig ->
+                    traceState.setSelectedTraceConfiguration(newConfig)
+                }
+            )
         }
         composable(TraceNavRoute.AddStartingPoint.name) {
             AddStartingPointScreen(
@@ -54,7 +79,15 @@ internal fun TraceNavHost(navController: NavHostController, traceState: TraceSta
             )
         }
         composable(TraceNavRoute.TraceResults.name) {
-            // TODO: Add TraceResults composable
+            TraceResultScreen(
+                traceRun = traceState.currentTraceRun,
+                onDeleteResult = {
+
+                }, onZoomToResults = {
+
+                }, onClearAllResults = {
+
+                })
         }
     }
 }
