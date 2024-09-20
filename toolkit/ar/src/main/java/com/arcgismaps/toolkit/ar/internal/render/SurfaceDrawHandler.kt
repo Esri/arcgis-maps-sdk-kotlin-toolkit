@@ -27,7 +27,7 @@ import com.arcgismaps.toolkit.ar.internal.render.SurfaceDrawHandler.Renderer
  * This class is intended to be used with a [GLSurfaceView].
  * The [Renderer] interface must be implemented to provide the rendering logic.
  */
-public class SurfaceDrawHandler(glSurfaceView: GLSurfaceView, renderer: Renderer) {
+internal class SurfaceDrawHandler(glSurfaceView: GLSurfaceView, renderer: Renderer) {
 
     private var viewportWidth = 1
     private var viewportHeight = 1

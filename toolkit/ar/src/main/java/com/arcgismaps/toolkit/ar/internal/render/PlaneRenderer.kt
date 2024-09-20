@@ -31,7 +31,7 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 
 /** Renders the detected AR planes.  */
-public class PlaneRenderer(render: SurfaceDrawHandler?, assets: AssetManager) {
+internal class PlaneRenderer(render: SurfaceDrawHandler?, assets: AssetManager) {
     private val mesh: Mesh
     private val indexBufferObject: IndexBuffer
     private val vertexBufferObject: VertexBuffer

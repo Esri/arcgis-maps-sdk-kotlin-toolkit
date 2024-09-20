@@ -39,7 +39,7 @@ import java.nio.FloatBuffer
  * This is a simplified version of the [com.google.ar.core.examples.java.common.rendering.BackgroundRenderer]
  * from the ARCore examples.
  */
-public class CameraFeedRenderer(
+internal class CameraFeedRenderer(
     context: Context,
     private val session: Session,
     private val assets: AssetManager,
