@@ -39,7 +39,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,10 +47,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 import com.arcgismaps.toolkit.utilitynetworks.R
+import com.arcgismaps.toolkit.utilitynetworks.TraceRun
+import com.arcgismaps.utilitynetworks.UtilityElement
+import com.arcgismaps.utilitynetworks.UtilityTraceFunctionOutput
 
 /**
  * Composable that displays the trace results.
@@ -60,7 +61,7 @@ import com.arcgismaps.toolkit.utilitynetworks.R
  */
 @Composable
 internal fun TraceResultScreen(
-    traceResults: TraceResults,
+    traceRun: TraceRun,
     onDeleteResult: () -> Unit,
     onZoomToResults: () -> Unit,
     onClearAllResults: () -> Unit
@@ -68,10 +69,13 @@ internal fun TraceResultScreen(
     Surface(modifier = Modifier.fillMaxSize()) {
         LazyColumn {
             item {
-                TraceTitle(traceResults.traceName, onZoomToResults = onZoomToResults, onDeleteResult = onDeleteResult)
+                TraceTitle(traceRun.name, onZoomToResults = onZoomToResults, onDeleteResult = onDeleteResult)
             }
             item {
-                FunctionResult(traceResults.functionResults)
+                FeatureResult(traceRun.featureResults)
+            }
+            item {
+                FunctionResult(traceRun.functionResults)
             }
             item {
                 ClearAllResultsButton(onClearAllResults)
@@ -113,12 +117,12 @@ private fun TraceTitle(traceName: String, onZoomToResults: () -> Unit, onDeleteR
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.zoom_to_result)) },
                         onClick = onZoomToResults,
-                        leadingIcon = { Icon(Icons.Outlined.LocationOn, contentDescription = "Zoom to trace result") }
+                        leadingIcon = { Icon(Icons.Outlined.LocationOn, contentDescription = stringResource(R.string.zoom_to_trace_result)) }
                     )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.delete)) },
                         onClick = onDeleteResult,
-                        leadingIcon = { Icon(Icons.Outlined.Clear, contentDescription = "Delete trace result") }
+                        leadingIcon = { Icon(Icons.Outlined.Clear, contentDescription = stringResource(R.string.delete_trace_result)) }
                     )
                 }
             }
@@ -126,9 +130,46 @@ private fun TraceTitle(traceName: String, onZoomToResults: () -> Unit, onDeleteR
     }
 }
 
+@Composable
+private fun FeatureResult(featureResults: List<UtilityElement>) {
+    val assetGroupNames = featureResults.map { it.assetGroup.name }.distinct()
+
+    Surface(modifier = Modifier.fillMaxWidth()) {
+        Column {
+            TraceResultSection(stringResource(R.string.feature_results), value = featureResults.size.toString()) {
+                Column {
+                    assetGroupNames.forEach { assetGroupName ->
+                        HorizontalDivider()
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 32.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(text = assetGroupName, style = MaterialTheme.typography.titleMedium)
+                            Column(horizontalAlignment = Alignment.End) {
+                                Text(
+                                    text = elementsInAssetGroup(
+                                        assetGroupName,
+                                        featureResults
+                                    ).size.toString(), style = MaterialTheme.typography.titleMedium
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun elementsInAssetGroup(assetGroup: String, featureResults: List<UtilityElement>): List<UtilityElement> {
+    return featureResults.filter { it.assetGroup.name == assetGroup }
+}
 
 @Composable
-private fun FunctionResult(functionResults: List<FunctionResult>) {
+private fun FunctionResult(functionResults: List<UtilityTraceFunctionOutput>) {
     Surface(modifier = Modifier.fillMaxWidth()) {
         Column {
             TraceResultSection(stringResource(R.string.function_results), value = functionResults.size.toString()) {
@@ -142,14 +183,18 @@ private fun FunctionResult(functionResults: List<FunctionResult>) {
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(text = functionResult.name, style = MaterialTheme.typography.titleMedium)
+                            Text(text = functionResult.function.networkAttribute.name, style = MaterialTheme.typography.titleMedium)
                             Column(horizontalAlignment = Alignment.End) {
                                 Text(
-                                    text = functionResult.functionType,
+                                    text = functionResult.function.functionType::class.simpleName ?: "",
                                     style = MaterialTheme.typography.titleSmall,
                                     color = Color.Gray
                                 )
-                                Text(text = functionResult.value, style = MaterialTheme.typography.titleMedium)
+                                val result = when (functionResult.result) {
+                                    is Double -> (functionResult.result as Double).toInt().toString()
+                                    else -> stringResource(R.string.not_available)
+                                }
+                                Text(text = result, style = MaterialTheme.typography.titleMedium)
                             }
                         }
                     }
@@ -196,41 +241,3 @@ private fun ClearAllResultsButton(onClearAllResults: () -> Unit) {
         }
     }
 }
-
-@Composable
-@Preview
-private fun TraceResultScreenPreview() {
-    val traceResults = TraceResults(
-        traceName = "Trace Name",
-        functionResults = listOf(
-            FunctionResult("Function 1", "1", "Add"),
-            FunctionResult("Function 2", " 2", "Average"),
-            FunctionResult("Function 3", " 3", "Count"),
-            FunctionResult("Function 1", "1", "Max"),
-            FunctionResult("Function 2", "2", "Min"),
-            FunctionResult("Function 3", "3", "Subtract"),
-        )
-    )
-    TraceResultScreen(traceResults, onClearAllResults = {}, onDeleteResult = {}, onZoomToResults = {})
-}
-
-/**
- * Data class to hold the trace results.
- *
- * @param traceName The name of the trace.
- * @param functionResults The list of function results.
- * @since 200.6.0
- */
-@Immutable
-internal data class TraceResults(val traceName: String, val functionResults: List<FunctionResult>)
-
-/**
- * Data class to hold the function result.
- *
- * @param name The name of the function result.
- * @param value The value of the function result.
- * @param functionType The type of the function result.
- * @since 200.6.0
- */
-@Immutable
-internal data class FunctionResult(val name: String, val value: String, val functionType: String)
