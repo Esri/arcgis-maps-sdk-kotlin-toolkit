@@ -8,6 +8,7 @@ import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.portal.Portal
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import com.arcgismaps.toolkit.utilitynetworks.TraceState
+import kotlinx.coroutines.launch
 
 class TraceViewModel : ViewModel() {
 
@@ -24,5 +25,12 @@ class TraceViewModel : ViewModel() {
 
     val graphicsOverlay = GraphicsOverlay()
 
-    val traceState = TraceState(arcGISMap, viewModelScope, graphicsOverlay, mapViewProxy)
+    val traceState = TraceState(arcGISMap, graphicsOverlay, mapViewProxy)
+
+    init {
+        viewModelScope.launch {
+            arcGISMap.load()
+        }
+    }
+
 }
