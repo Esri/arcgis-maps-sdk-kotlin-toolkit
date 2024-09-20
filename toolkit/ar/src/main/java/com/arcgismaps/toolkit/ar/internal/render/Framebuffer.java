@@ -24,7 +24,7 @@ import java.io.Closeable;
 /**
  * A framebuffer associated with a texture.
  */
-public class Framebuffer implements Closeable {
+class Framebuffer implements Closeable {
     private static final String TAG = Framebuffer.class.getSimpleName();
 
     private final int[] framebufferId = {0};

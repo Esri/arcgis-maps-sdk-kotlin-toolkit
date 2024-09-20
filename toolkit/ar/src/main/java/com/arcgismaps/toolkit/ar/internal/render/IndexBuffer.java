@@ -29,7 +29,7 @@ import java.nio.IntBuffer;
  * @see <a
  * href="https://www.khronos.org/registry/OpenGL-Refpages/es3.0/html/glDrawElements.xhtml">glDrawElements</a>
  */
-public class IndexBuffer implements Closeable {
+class IndexBuffer implements Closeable {
     private final GpuBuffer buffer;
 
     /**

@@ -29,7 +29,7 @@ import java.nio.FloatBuffer;
  * @see <a
  * href="https://www.khronos.org/registry/OpenGL-Refpages/es3.0/html/glVertexAttribPointer.xhtml">glVertexAttribPointer</a>
  */
-public class VertexBuffer implements Closeable {
+class VertexBuffer implements Closeable {
     private final GpuBuffer buffer;
     private final int numberOfEntriesPerVertex;
 

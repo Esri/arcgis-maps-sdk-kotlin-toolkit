@@ -29,7 +29,7 @@ import java.nio.ByteBuffer;
 /**
  * A GPU-side texture.
  */
-public class Texture implements Closeable {
+class Texture implements Closeable {
     private static final String TAG = Texture.class.getSimpleName();
 
     private final int[] textureId = {0};

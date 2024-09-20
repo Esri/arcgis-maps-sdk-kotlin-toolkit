@@ -34,7 +34,7 @@ import java.util.regex.Matcher;
 /**
  * Represents a GPU shader, the state of its associated uniforms, and some additional draw state.
  */
-public class Shader implements Closeable {
+class Shader implements Closeable {
     private static final String TAG = Shader.class.getSimpleName();
 
     /**

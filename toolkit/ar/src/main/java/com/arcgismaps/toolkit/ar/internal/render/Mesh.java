@@ -25,7 +25,7 @@ import java.io.Closeable;
  *
  * <p>To render the mesh, use {@link SurfaceDrawHandler#draw()}.
  */
-public class Mesh implements Closeable {
+class Mesh implements Closeable {
     private static final String TAG = Mesh.class.getSimpleName();
 
     /**
