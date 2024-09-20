@@ -110,6 +110,9 @@ public class TraceState(
 
     private val currentTraceGraphics : MutableList<Graphic> = mutableListOf()
 
+    private val _currentScreen: MutableState<TraceNavRoute> = mutableStateOf(TraceNavRoute.TraceOptions)
+    internal var currentScreen: State<TraceNavRoute> = _currentScreen
+
     /**
      * Initializes the state object by loading the map, the Utility Networks contained in the map
      * and its trace configurations.
@@ -142,6 +145,10 @@ public class TraceState(
 
     internal fun setSelectedTraceConfiguration(config: UtilityNamedTraceConfiguration) {
         _selectedTraceConfiguration.value = config
+    }
+
+    internal fun showScreen(screen: TraceNavRoute) {
+        _currentScreen.value = screen
     }
 
     /**
@@ -282,6 +289,7 @@ public class TraceState(
                 }
                 addTapLocationToGraphicsOverlay(mapPoint)
                 _addStartingPointMode.value = AddStartingPointMode.Stopped
+                showScreen(TraceNavRoute.TraceOptions)
             }
         }
     }
@@ -369,6 +377,18 @@ public sealed class AddStartingPointMode {
      * @since 200.6.0
      */
     public data object None : AddStartingPointMode()
+}
+
+/**
+ * Defines a navigation route for the trace tool screens.
+ *
+ * @since 200.6.0
+ */
+internal enum class TraceNavRoute {
+    TraceOptions,
+    AddStartingPoint,
+    TraceResults
+    //TODO: Add FeatureAttributes route
 }
 
 @Immutable

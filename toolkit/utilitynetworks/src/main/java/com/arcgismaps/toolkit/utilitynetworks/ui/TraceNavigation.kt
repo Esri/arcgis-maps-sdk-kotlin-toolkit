@@ -23,6 +23,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.arcgismaps.toolkit.utilitynetworks.AddStartingPointMode
+import com.arcgismaps.toolkit.utilitynetworks.TraceNavRoute
 import com.arcgismaps.toolkit.utilitynetworks.TraceState
 import kotlinx.coroutines.launch
 
@@ -38,9 +39,7 @@ internal fun TraceNavHost(traceState: TraceState) {
     val navController = rememberNavController()
     val coroutineScope = rememberCoroutineScope()
 
-    if (traceState.addStartingPointMode.value == AddStartingPointMode.Stopped) {
-        navController.navigate(TraceNavRoute.TraceOptions.name)
-    }
+    val currentScreen by traceState.currentScreen
 
     NavHost(navController = navController, startDestination = TraceNavRoute.TraceOptions.name) {
         composable(TraceNavRoute.TraceOptions.name) {
@@ -52,7 +51,7 @@ internal fun TraceNavHost(traceState: TraceState) {
                     coroutineScope.launch {
                         try {
                             if (traceState.trace()) {
-                                navController.navigate(TraceNavRoute.TraceResults.name)
+                                traceState.showScreen(TraceNavRoute.TraceResults)
                             }
                         } catch (e: Exception) {
                             // Handle error
@@ -62,7 +61,7 @@ internal fun TraceNavHost(traceState: TraceState) {
                 },
                 onAddStartingPointButtonClicked = {
                     traceState.updateAddStartPointMode(AddStartingPointMode.Started)
-                    navController.navigate(TraceNavRoute.AddStartingPoint.name)
+                    traceState.showScreen(TraceNavRoute.AddStartingPoint)
                 },
                 selectedConfig = traceState.selectedTraceConfiguration.value,
                 onStartingPointRemoved = { traceState.removeStartingPoint(it) },
@@ -75,7 +74,7 @@ internal fun TraceNavHost(traceState: TraceState) {
             AddStartingPointScreen(
                 traceState,
                 onStopPointSelection = {
-                    navController.navigate(TraceNavRoute.TraceOptions.name)
+                    traceState.showScreen(TraceNavRoute.TraceOptions)
                     traceState.updateAddStartPointMode(AddStartingPointMode.Stopped)
                 }
             )
@@ -89,20 +88,13 @@ internal fun TraceNavHost(traceState: TraceState) {
 
                 }, onClearAllResults = {
 
+                },
+                onDismiss = {
+                    traceState.showScreen(TraceNavRoute.TraceOptions)
                 }
             )
         }
     }
-}
 
-/**
- * Defines a navigation route for the trace tool screens.
- *
- * @since 200.6.0
- */
-private enum class TraceNavRoute {
-    TraceOptions,
-    AddStartingPoint,
-    TraceResults
-    //TODO: Add FeatureAttributes route
+    navController.navigate(currentScreen.name)
 }
