@@ -82,16 +82,6 @@ public class TraceState(
      */
     internal val traceConfigurations: StateFlow<List<UtilityNamedTraceConfiguration>> = _traceConfigurations.asStateFlow()
 
-    private val _traceResult = MutableStateFlow<UtilityElementTraceResult?>(null)
-
-    /**
-     * The results of running the  trace operation on the Utility Network from the selected
-     * starting point(s).
-     *
-     * @since 200.6.0
-     */
-    internal val traceResult: StateFlow<UtilityElementTraceResult?> = _traceResult.asStateFlow()
-
     private val _addStartingPointMode = MutableStateFlow<AddStartingPointMode>(AddStartingPointMode.None)
 
     /**

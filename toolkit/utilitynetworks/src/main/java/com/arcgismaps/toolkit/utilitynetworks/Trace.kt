@@ -69,10 +69,7 @@ public fun Trace(
                 if (initializationStatus.value == InitializationStatus.NotInitialized || initializationStatus.value == InitializationStatus.Initializing) {
                     CircularProgressIndicator()
                 } else if (initializationStatus.value is InitializationStatus.FailedToInitialize) {
-                    Text(
-                        text = (initializationStatus.value as InitializationStatus.FailedToInitialize).error.message
-                            ?: "Failed to initialize"
-                    )
+                    Text(text = (initializationStatus.value as InitializationStatus.FailedToInitialize).error.message ?: "Failed to initialize")
                 }
             }
         } else {
