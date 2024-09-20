@@ -39,16 +39,57 @@ public final class com/arcgismaps/toolkit/utilitynetworks/BuildConfig {
 	public fun <init> ()V
 }
 
+public abstract class com/arcgismaps/toolkit/utilitynetworks/InitializationStatus {
+	public static final field $stable I
+}
+
+public final class com/arcgismaps/toolkit/utilitynetworks/InitializationStatus$FailedToInitialize : com/arcgismaps/toolkit/utilitynetworks/InitializationStatus {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/Throwable;)V
+	public final fun component1 ()Ljava/lang/Throwable;
+	public final fun copy (Ljava/lang/Throwable;)Lcom/arcgismaps/toolkit/utilitynetworks/InitializationStatus$FailedToInitialize;
+	public static synthetic fun copy$default (Lcom/arcgismaps/toolkit/utilitynetworks/InitializationStatus$FailedToInitialize;Ljava/lang/Throwable;ILjava/lang/Object;)Lcom/arcgismaps/toolkit/utilitynetworks/InitializationStatus$FailedToInitialize;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/Throwable;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/utilitynetworks/InitializationStatus$Initialized : com/arcgismaps/toolkit/utilitynetworks/InitializationStatus {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/utilitynetworks/InitializationStatus$Initialized;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/utilitynetworks/InitializationStatus$Initializing : com/arcgismaps/toolkit/utilitynetworks/InitializationStatus {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/utilitynetworks/InitializationStatus$Initializing;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/arcgismaps/toolkit/utilitynetworks/InitializationStatus$NotInitialized : com/arcgismaps/toolkit/utilitynetworks/InitializationStatus {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/utilitynetworks/InitializationStatus$NotInitialized;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class com/arcgismaps/toolkit/utilitynetworks/TraceKt {
 	public static final fun Trace (Lcom/arcgismaps/toolkit/utilitynetworks/TraceState;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class com/arcgismaps/toolkit/utilitynetworks/TraceState {
 	public static final field $stable I
-	public fun <init> (Lcom/arcgismaps/mapping/ArcGISMap;Lkotlinx/coroutines/CoroutineScope;)V
-	public final fun addStartingPoint (Lcom/arcgismaps/mapping/view/SingleTapConfirmedEvent;)V
+	public fun <init> (Lcom/arcgismaps/mapping/ArcGISMap;Lcom/arcgismaps/mapping/view/GraphicsOverlay;Lcom/arcgismaps/toolkit/geoviewcompose/MapViewProxy;)V
+	public final fun addStartingPoint (Lcom/arcgismaps/geometry/Point;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun getAddStartingPointMode ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun trace (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getInitializationStatus ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getSelectedTraceConfiguration ()Landroidx/compose/runtime/State;
 	public final fun updateAddStartPointMode (Lcom/arcgismaps/toolkit/utilitynetworks/AddStartingPointMode;)V
 }
 
@@ -57,13 +98,6 @@ public final class com/arcgismaps/toolkit/utilitynetworks/ui/ComposableSingleton
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;
 	public fun <init> ()V
 	public final fun getLambda-1$utilitynetworks_release ()Lkotlin/jvm/functions/Function3;
-}
-
-public final class com/arcgismaps/toolkit/utilitynetworks/ui/ComposableSingletons$TraceNavigationKt {
-	public static final field INSTANCE Lcom/arcgismaps/toolkit/utilitynetworks/ui/ComposableSingletons$TraceNavigationKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function4;
-	public fun <init> ()V
-	public final fun getLambda-1$utilitynetworks_release ()Lkotlin/jvm/functions/Function4;
 }
 
 public final class com/arcgismaps/toolkit/utilitynetworks/ui/ComposableSingletons$TraceOptionsScreenKt {
@@ -79,5 +113,20 @@ public final class com/arcgismaps/toolkit/utilitynetworks/ui/ComposableSingleton
 	public final fun getLambda-3$utilitynetworks_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda-4$utilitynetworks_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-5$utilitynetworks_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class com/arcgismaps/toolkit/utilitynetworks/ui/ComposableSingletons$TraceResultScreenKt {
+	public static final field INSTANCE Lcom/arcgismaps/toolkit/utilitynetworks/ui/ComposableSingletons$TraceResultScreenKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public static field lambda-2 Lkotlin/jvm/functions/Function2;
+	public static field lambda-3 Lkotlin/jvm/functions/Function2;
+	public static field lambda-4 Lkotlin/jvm/functions/Function2;
+	public static field lambda-5 Lkotlin/jvm/functions/Function3;
+	public fun <init> ()V
+	public final fun getLambda-1$utilitynetworks_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-2$utilitynetworks_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-3$utilitynetworks_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-4$utilitynetworks_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-5$utilitynetworks_release ()Lkotlin/jvm/functions/Function3;
 }
 
