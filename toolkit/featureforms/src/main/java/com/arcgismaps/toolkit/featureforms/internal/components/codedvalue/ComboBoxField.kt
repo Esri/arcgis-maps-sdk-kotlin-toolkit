@@ -169,7 +169,7 @@ internal fun ComboBoxDialog(
     val configuration = LocalConfiguration.current
     val windowSizeClass = computeWindowSizeClasses(LocalContext.current)
     // check if the initial value is out of the domain of the coded values
-    val outOfDomain = values[initialValue] == null
+    val outOfDomain = initialValue != null && !values.containsKey(initialValue)
     var searchText by rememberSaveable { mutableStateOf("") }
     val codedValues = if (!isRequired) {
         if (noValueOption == FormInputNoValueOption.Show) {
