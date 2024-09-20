@@ -118,6 +118,9 @@ public class TraceState(
      * @since 200.6.0
      */
     public suspend fun initialize(): Result<Unit> {
+        if (_initializationStatus.value is InitializationStatus.Initialized) {
+            return Result.success(Unit)
+        }
         _initializationStatus.value = InitializationStatus.Initializing
         var result = Result.success(Unit)
         arcGISMap.load().onSuccess {
