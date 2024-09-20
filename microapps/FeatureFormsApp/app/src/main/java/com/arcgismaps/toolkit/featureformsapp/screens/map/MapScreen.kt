@@ -369,7 +369,7 @@ fun FeatureItem(
             ) {
                 bitmap?.let {
                     Image(
-                        bitmap = bitmap!!.asImageBitmap(),
+                        bitmap = it.asImageBitmap(),
                         contentDescription = null,
                         modifier = Modifier.padding(10.dp)
                     )
