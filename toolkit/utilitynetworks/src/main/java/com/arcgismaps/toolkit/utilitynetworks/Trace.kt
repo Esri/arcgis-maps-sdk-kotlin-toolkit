@@ -60,13 +60,13 @@ public fun Trace(
             .fillMaxSize()
             .semantics { contentDescription = traceSurfaceContentDescription }
     ) {
-        if (initializationStatus.value != InitializationStatus.Initialized) {
+        if (initializationStatus.value !is InitializationStatus.Initialized) {
             Box(
                 modifier = Modifier
                     .size(100.dp),
                 contentAlignment = Alignment.Center
             ) {
-                if (initializationStatus.value == InitializationStatus.NotInitialized || initializationStatus.value == InitializationStatus.Initializing) {
+                if (initializationStatus.value is InitializationStatus.NotInitialized || initializationStatus.value is InitializationStatus.Initializing) {
                     CircularProgressIndicator()
                 } else if (initializationStatus.value is InitializationStatus.FailedToInitialize) {
                     Text(text = (initializationStatus.value as InitializationStatus.FailedToInitialize).error.message ?: "Failed to initialize")
