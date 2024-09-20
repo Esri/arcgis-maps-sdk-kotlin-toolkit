@@ -117,7 +117,7 @@ public class TraceState(
      * @return the [Result] indicating if the initialization was successful or not
      * @since 200.6.0
      */
-    public suspend fun initialize(): Result<Unit> {
+    internal suspend fun initialize(): Result<Unit> {
         if (_initializationStatus.value is InitializationStatus.Initialized) {
             return Result.success(Unit)
         }

@@ -29,7 +29,8 @@ class TraceViewModel : ViewModel() {
 
     init {
         viewModelScope.launch {
-            traceState.initialize()
+            arcGISMap.load()
         }
     }
+
 }
