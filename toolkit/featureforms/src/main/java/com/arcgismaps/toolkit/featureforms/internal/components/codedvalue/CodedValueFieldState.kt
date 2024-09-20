@@ -79,7 +79,7 @@ internal abstract class CodedValueFieldState(
     evaluateExpressions = evaluateExpressions
 ) {
     /**
-     * The list of coded values associated with this field.
+     * The map of coded values associated with this field.
      */
     val codedValues: Map<Any?, String> = properties.codedValues
 
