@@ -25,6 +25,7 @@ import com.arcgismaps.mapping.featureforms.FeatureForm
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormExpressionEvaluationError
 import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValidationErrors
+import com.arcgismaps.toolkit.featureforms.internal.utils.toMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -70,7 +71,7 @@ internal class ComboBoxFieldState(
                         editable = formElement.isEditable,
                         required = formElement.isRequired,
                         visible = formElement.isVisible,
-                        codedValues = input.codedValues,
+                        codedValues = input.codedValues.toMap(),
                         showNoValueOption = input.noValueOption,
                         noValueLabel = input.noValueLabel,
                         fieldType = formElement.fieldType
@@ -109,7 +110,7 @@ internal fun rememberComboBoxFieldState(
             editable = field.isEditable,
             required = field.isRequired,
             visible = field.isVisible,
-            codedValues = input.codedValues,
+            codedValues = input.codedValues.toMap(),
             showNoValueOption = input.noValueOption,
             noValueLabel = input.noValueLabel,
             fieldType = field.fieldType
