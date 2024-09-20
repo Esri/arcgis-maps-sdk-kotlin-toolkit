@@ -15,20 +15,10 @@
  */
 package com.arcgismaps.toolkit.ar.internal.render;
 
-import android.content.res.AssetManager;
 import android.opengl.GLES30;
 import android.util.Log;
 
 import java.io.Closeable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-
-import de.javagl.obj.Obj;
-import de.javagl.obj.ObjData;
-import de.javagl.obj.ObjReader;
-import de.javagl.obj.ObjUtils;
 
 /**
  * A collection of vertices, faces, and other attributes that define how to render a 3D object.
@@ -119,35 +109,6 @@ public class Mesh implements Closeable {
         } catch (Throwable t) {
             close();
             throw t;
-        }
-    }
-
-    /**
-     * Constructs a {@link Mesh} from the given Wavefront OBJ file.
-     *
-     * <p>The {@link Mesh} will be constructed with three attributes, indexed in the order of local
-     * coordinates (location 0, vec3), texture coordinates (location 1, vec2), and vertex normals
-     * (location 2, vec3).
-     */
-    public static Mesh createFromAsset(AssetManager assets, String assetFileName) throws IOException {
-        try (InputStream inputStream = assets.open(assetFileName)) {
-            Obj obj = ObjUtils.convertToRenderable(ObjReader.read(inputStream));
-
-            // Obtain the data from the OBJ, as direct buffers:
-            IntBuffer vertexIndices = ObjData.getFaceVertexIndices(obj, /*numVerticesPerFace=*/ 3);
-            FloatBuffer localCoordinates = ObjData.getVertices(obj);
-            FloatBuffer textureCoordinates = ObjData.getTexCoords(obj, /*dimensions=*/ 2);
-            FloatBuffer normals = ObjData.getNormals(obj);
-
-            VertexBuffer[] vertexBuffers = {
-                    new VertexBuffer(3, localCoordinates),
-                    new VertexBuffer(2, textureCoordinates),
-                    new VertexBuffer(3, normals),
-            };
-
-            IndexBuffer indexBuffer = new IndexBuffer(vertexIndices);
-
-            return new Mesh(PrimitiveMode.TRIANGLES, indexBuffer, vertexBuffers);
         }
     }
 
