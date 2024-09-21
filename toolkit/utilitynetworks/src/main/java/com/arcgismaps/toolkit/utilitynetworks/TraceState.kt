@@ -253,7 +253,7 @@ public class TraceState(
      * This private method is called from a suspend function and so swallows any failures except
      * CancellationExceptions.
      */
-    private fun processAndAddStartingPoint(feature: ArcGISFeature) = runCatchingCancellable {
+    private fun processAndAddStartingPoint(feature: ArcGISFeature, mapPoint: Point) = runCatchingCancellable {
         // TODO: add fraction-along to the element.
         // https://devtopia.esri.com/runtime/kotlin/issues/4491
         val utilityElement = utilityNetwork.createElementOrNull(feature)
@@ -264,6 +264,13 @@ public class TraceState(
             ?.getSymbol(feature)
             ?: throw IllegalArgumentException("could not create drawable from feature symbol")
 
+        val graphic = Graphic(
+            geometry = mapPoint,
+            symbol = SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Cross, Color.green, 20.0f)
+        )
+        graphicsOverlay.graphics.add(graphic)
+        currentTraceGraphics.add(graphic)
+
         _startingPoints.add(
             StartingPoint(
                 feature = feature,
@@ -271,7 +278,6 @@ public class TraceState(
                 symbol = symbol
             )
         )
-
     }
 
     private suspend fun identifyFeatures(mapPoint: Point, screenCoordinate: ScreenCoordinate) {
@@ -283,10 +289,10 @@ public class TraceState(
             if (identifyLayerResultList.isNotEmpty()) {
                 identifyLayerResultList.forEach { identifyLayerResult ->
                     identifyLayerResult.geoElements.filterIsInstance<ArcGISFeature>().forEach { feature ->
-                        processAndAddStartingPoint(feature)
+                        processAndAddStartingPoint(feature, mapPoint)
                     }
                 }
-                addTapLocationToGraphicsOverlay(mapPoint)
+//                addTapLocationToGraphicsOverlay(mapPoint)
                 _addStartingPointMode.value = AddStartingPointMode.Stopped
             }
         }
