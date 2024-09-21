@@ -113,6 +113,6 @@
     <string name="attachment_too_large">A fájl túl nagy. Kérjük, 50 MB-nál kisebb fájlokat adjon hozzá.</string>
     <string name="attachment_is_empty">Az üres fájlok nincsenek támogatva</string>
     <string name="download_empty_file">Az üres fájlok nem tölthetők le</string>
-    <string name="attachment_deleted">í_%1s was deleted successfully_____________________________ő</string>
-    <string name="attachment_size_limit_exceeded">í_Attachments larger than %1$s cannot be downloaded__________________________ő</string>
+    <string name="attachment_deleted">A(z) %1s törlése megtörtént</string>
+    <string name="attachment_size_limit_exceeded">A(z) %1$s méretnél nagyobb csatolmányok nem tölthetők le</string>
 </resources>

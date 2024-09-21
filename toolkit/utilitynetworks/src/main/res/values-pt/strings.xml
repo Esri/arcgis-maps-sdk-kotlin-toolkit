@@ -13,19 +13,19 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="new_trace">õ_New trace___________________ç</string>
-    <string name="results">õ_Results_______________ç</string>
-    <string name="trace_configuration">õ_Trace Configuration____________________ç</string>
-    <string name="starting_points">õ_Starting Points________________ç</string>
-    <string name="advanced_options">õ_Advanced Options_________________ç</string>
-    <string name="name">õ_Name_________ç</string>
-    <string name="color">õ_Color___________ç</string>
-    <string name="zoom_to_result">õ_Zoom to result_______________ç</string>
-    <string name="trace">õ_Trace___________ç</string>
-    <string name="add_starting_point">õ_Add new starting point_______________________ç</string>
-    <string name="cancel_starting_point_selection">õ_Cancel starting point selection_________________ç</string>
-    <string name="trace_result_with_count">õ_Trace %1$d of %2$d___________________ç</string>
-    <string name="feature_results">õ_Feature Results________________ç</string>
-    <string name="function_results">õ_Function Results_________________ç</string>
-    <string name="clear_all_results">õ_Clear all results__________________ç</string>
+    <string name="new_trace">Novo rastreio</string>
+    <string name="results">Resultados</string>
+    <string name="trace_configuration">Configuração de Rastreio</string>
+    <string name="starting_points">Pontos de Partida</string>
+    <string name="advanced_options">Opções Avançadas</string>
+    <string name="name">Nome</string>
+    <string name="color">Cor</string>
+    <string name="zoom_to_result">Aumentar zoom até ao resultado</string>
+    <string name="trace">Rastrear</string>
+    <string name="add_starting_point">Adicionar novo ponto de partida</string>
+    <string name="cancel_starting_point_selection">Cancelar a seleção do ponto de partida</string>
+    <string name="trace_result_with_count">Rastreio %1$d de %2$d</string>
+    <string name="feature_results">Resultados de Elementos</string>
+    <string name="function_results">Resultados da Função</string>
+    <string name="clear_all_results">Limpar todos os resultados</string>
 </resources>

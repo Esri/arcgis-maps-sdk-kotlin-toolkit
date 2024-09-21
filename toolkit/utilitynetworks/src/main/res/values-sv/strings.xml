@@ -13,19 +13,19 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="new_trace">Å_New trace___________________ö</string>
-    <string name="results">Å_Results_______________ö</string>
-    <string name="trace_configuration">Å_Trace Configuration____________________ö</string>
-    <string name="starting_points">Å_Starting Points________________ö</string>
-    <string name="advanced_options">Å_Advanced Options_________________ö</string>
-    <string name="name">Å_Name_________ö</string>
-    <string name="color">Å_Color___________ö</string>
-    <string name="zoom_to_result">Å_Zoom to result_______________ö</string>
-    <string name="trace">Å_Trace___________ö</string>
-    <string name="add_starting_point">Å_Add new starting point_______________________ö</string>
-    <string name="cancel_starting_point_selection">Å_Cancel starting point selection_________________ö</string>
-    <string name="trace_result_with_count">Å_Trace %1$d of %2$d___________________ö</string>
-    <string name="feature_results">Å_Feature Results________________ö</string>
-    <string name="function_results">Å_Function Results_________________ö</string>
-    <string name="clear_all_results">Å_Clear all results__________________ö</string>
+    <string name="new_trace">Nytt spår</string>
+    <string name="results">Resultat</string>
+    <string name="trace_configuration">Spårningskonfiguration</string>
+    <string name="starting_points">Startpunkter</string>
+    <string name="advanced_options">Avancerade alternativ</string>
+    <string name="name">Namn</string>
+    <string name="color">Färg</string>
+    <string name="zoom_to_result">Zooma till resultat</string>
+    <string name="trace">Spåra</string>
+    <string name="add_starting_point">Lägg till ny startpunkt</string>
+    <string name="cancel_starting_point_selection">Avbryt val av startpunkt</string>
+    <string name="trace_result_with_count">Spåra %1$d av %2$d</string>
+    <string name="feature_results">Geoobjektresultat</string>
+    <string name="function_results">Funktionsresultat</string>
+    <string name="clear_all_results">Rensa alla resultat</string>
 </resources>

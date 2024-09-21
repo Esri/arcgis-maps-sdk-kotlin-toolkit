@@ -13,19 +13,19 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="new_trace">Ă_New trace___________________ș</string>
-    <string name="results">Ă_Results_______________ș</string>
-    <string name="trace_configuration">Ă_Trace Configuration____________________ș</string>
-    <string name="starting_points">Ă_Starting Points________________ș</string>
-    <string name="advanced_options">Ă_Advanced Options_________________ș</string>
-    <string name="name">Ă_Name_________ș</string>
-    <string name="color">Ă_Color___________ș</string>
-    <string name="zoom_to_result">Ă_Zoom to result_______________ș</string>
-    <string name="trace">Ă_Trace___________ș</string>
-    <string name="add_starting_point">Ă_Add new starting point_______________________ș</string>
-    <string name="cancel_starting_point_selection">Ă_Cancel starting point selection_________________ș</string>
-    <string name="trace_result_with_count">Ă_Trace %1$d of %2$d___________________ș</string>
-    <string name="feature_results">Ă_Feature Results________________ș</string>
-    <string name="function_results">Ă_Function Results_________________ș</string>
-    <string name="clear_all_results">Ă_Clear all results__________________ș</string>
+    <string name="new_trace">Urmărire nouă</string>
+    <string name="results">Rezultate</string>
+    <string name="trace_configuration">Configurare urmărire</string>
+    <string name="starting_points">Puncte de pornire</string>
+    <string name="advanced_options">Opțiuni avansate</string>
+    <string name="name">Nume</string>
+    <string name="color">Culoare</string>
+    <string name="zoom_to_result">Transfocare la rezultat</string>
+    <string name="trace">Urmărire</string>
+    <string name="add_starting_point">Adăugare punct de pornire nou</string>
+    <string name="cancel_starting_point_selection">Anulare selecție punct de pornire</string>
+    <string name="trace_result_with_count">Urmărire %1$d din %2$d</string>
+    <string name="feature_results">Rezultate obiecte spațiale</string>
+    <string name="function_results">Rezultate funcție</string>
+    <string name="clear_all_results">Golire toate rezultatele</string>
 </resources>

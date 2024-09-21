@@ -113,6 +113,6 @@
     <string name="attachment_too_large">Plik jest za duży. Dodaj plik o rozmiarze mniejszym niż 50 MB.</string>
     <string name="attachment_is_empty">Puste pliki nie są obsługiwane</string>
     <string name="download_empty_file">Nie można pobrać pustych plików</string>
-    <string name="attachment_deleted">ł_%1s was deleted successfully_____________________________ą</string>
-    <string name="attachment_size_limit_exceeded">ł_Attachments larger than %1$s cannot be downloaded__________________________ą</string>
+    <string name="attachment_deleted">Pomyślnie usunięto %1s</string>
+    <string name="attachment_size_limit_exceeded">Nie można pobierać załączników większych niż %1$s</string>
 </resources>

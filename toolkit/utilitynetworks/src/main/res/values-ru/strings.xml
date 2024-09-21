@@ -13,19 +13,19 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="new_trace">Ж_New trace___________________Я</string>
-    <string name="results">Ж_Results_______________Я</string>
-    <string name="trace_configuration">Ж_Trace Configuration____________________Я</string>
-    <string name="starting_points">Ж_Starting Points________________Я</string>
-    <string name="advanced_options">Ж_Advanced Options_________________Я</string>
-    <string name="name">Ж_Name_________Я</string>
-    <string name="color">Ж_Color___________Я</string>
-    <string name="zoom_to_result">Ж_Zoom to result_______________Я</string>
-    <string name="trace">Ж_Trace___________Я</string>
-    <string name="add_starting_point">Ж_Add new starting point_______________________Я</string>
-    <string name="cancel_starting_point_selection">Ж_Cancel starting point selection_________________Я</string>
-    <string name="trace_result_with_count">Ж_Trace %1$d of %2$d___________________Я</string>
-    <string name="feature_results">Ж_Feature Results________________Я</string>
-    <string name="function_results">Ж_Function Results_________________Я</string>
-    <string name="clear_all_results">Ж_Clear all results__________________Я</string>
+    <string name="new_trace">Новая трассировка</string>
+    <string name="results">Результаты</string>
+    <string name="trace_configuration">Конфигурация трассировки</string>
+    <string name="starting_points">Начальные точки</string>
+    <string name="advanced_options">Дополнительные опции</string>
+    <string name="name">Имя</string>
+    <string name="color">Цвет</string>
+    <string name="zoom_to_result">Приблизить к результату</string>
+    <string name="trace">Трассировать</string>
+    <string name="add_starting_point">Добавить новую начальную точку</string>
+    <string name="cancel_starting_point_selection">Отменить выборку стартовой точки</string>
+    <string name="trace_result_with_count">Трассировать %1$d из %2$d</string>
+    <string name="feature_results">Результаты объекта</string>
+    <string name="function_results">Результаты функции</string>
+    <string name="clear_all_results">Очистить все результаты</string>
 </resources>

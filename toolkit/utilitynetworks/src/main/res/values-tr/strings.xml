@@ -13,19 +13,19 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="new_trace">ı_New trace___________________İ</string>
-    <string name="results">ı_Results_______________İ</string>
-    <string name="trace_configuration">ı_Trace Configuration____________________İ</string>
-    <string name="starting_points">ı_Starting Points________________İ</string>
-    <string name="advanced_options">ı_Advanced Options_________________İ</string>
-    <string name="name">ı_Name_________İ</string>
-    <string name="color">ı_Color___________İ</string>
-    <string name="zoom_to_result">ı_Zoom to result_______________İ</string>
-    <string name="trace">ı_Trace___________İ</string>
-    <string name="add_starting_point">ı_Add new starting point_______________________İ</string>
-    <string name="cancel_starting_point_selection">ı_Cancel starting point selection_________________İ</string>
-    <string name="trace_result_with_count">ı_Trace %1$d of %2$d___________________İ</string>
-    <string name="feature_results">ı_Feature Results________________İ</string>
-    <string name="function_results">ı_Function Results_________________İ</string>
-    <string name="clear_all_results">ı_Clear all results__________________İ</string>
+    <string name="new_trace">Yeni iz</string>
+    <string name="results">Sonuçlar</string>
+    <string name="trace_configuration">İz Yapılandırması</string>
+    <string name="starting_points">Başlangıç Noktaları</string>
+    <string name="advanced_options">Gelişmiş Seçenekler</string>
+    <string name="name">Adı</string>
+    <string name="color">Renk</string>
+    <string name="zoom_to_result">Sonuca yakınlaştır</string>
+    <string name="trace">İz</string>
+    <string name="add_starting_point">Yeni bir başlangıç noktası ekle</string>
+    <string name="cancel_starting_point_selection">Başlangıç noktası seçimini iptal et</string>
+    <string name="trace_result_with_count">%1$d / %2$d izle</string>
+    <string name="feature_results">Detay Sonuçları</string>
+    <string name="function_results">İşlev Sonuçları</string>
+    <string name="clear_all_results">Tüm sonuçları temizle</string>
 </resources>

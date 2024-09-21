@@ -13,19 +13,19 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="new_trace">Š_New trace___________________č</string>
-    <string name="results">Š_Results_______________č</string>
-    <string name="trace_configuration">Š_Trace Configuration____________________č</string>
-    <string name="starting_points">Š_Starting Points________________č</string>
-    <string name="advanced_options">Š_Advanced Options_________________č</string>
-    <string name="name">Š_Name_________č</string>
-    <string name="color">Š_Color___________č</string>
-    <string name="zoom_to_result">Š_Zoom to result_______________č</string>
-    <string name="trace">Š_Trace___________č</string>
-    <string name="add_starting_point">Š_Add new starting point_______________________č</string>
-    <string name="cancel_starting_point_selection">Š_Cancel starting point selection_________________č</string>
-    <string name="trace_result_with_count">Š_Trace %1$d of %2$d___________________č</string>
-    <string name="feature_results">Š_Feature Results________________č</string>
-    <string name="function_results">Š_Function Results_________________č</string>
-    <string name="clear_all_results">Š_Clear all results__________________č</string>
+    <string name="new_trace">Nova sled</string>
+    <string name="results">Rezultati</string>
+    <string name="trace_configuration">Konfiguracija sledi</string>
+    <string name="starting_points">Začetne točke</string>
+    <string name="advanced_options">Napredne možnosti</string>
+    <string name="name">Ime</string>
+    <string name="color">Barva</string>
+    <string name="zoom_to_result">Približaj na rezultat</string>
+    <string name="trace">Sled</string>
+    <string name="add_starting_point">Dodaj novo začetno točko</string>
+    <string name="cancel_starting_point_selection">Prekliči izbiro začetne točke</string>
+    <string name="trace_result_with_count">Sled %1$d od %2$d</string>
+    <string name="feature_results">Rezultati geoobjektov</string>
+    <string name="function_results">Rezultati funkcije</string>
+    <string name="clear_all_results">Počisti vse rezultate</string>
 </resources>

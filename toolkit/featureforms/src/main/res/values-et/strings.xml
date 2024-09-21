@@ -113,6 +113,6 @@
     <string name="attachment_too_large">Fail on liiga suur Lisa fail, mis on väiksem kui 50 MB.</string>
     <string name="attachment_is_empty">Tühje faile ei toetata</string>
     <string name="download_empty_file">Tühje faile ei saa alla laadida</string>
-    <string name="attachment_deleted">Š_%1s was deleted successfully_____________________________ä</string>
-    <string name="attachment_size_limit_exceeded">Š_Attachments larger than %1$s cannot be downloaded__________________________ä</string>
+    <string name="attachment_deleted">%1s kustutati edukalt</string>
+    <string name="attachment_size_limit_exceeded">Suuremaid manuseid kui %1$s ei saa alla laadida</string>
 </resources>

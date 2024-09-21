@@ -113,6 +113,6 @@
     <string name="attachment_too_large">Fails ir pārāk liels. Pievienot failu, kura izmērs ir mazāks par 50 MB.</string>
     <string name="attachment_is_empty">Tukši faili netiek atbalstīti</string>
     <string name="download_empty_file">Tukšu failu lejupielāde nav iespējama</string>
-    <string name="attachment_deleted">ķ_%1s was deleted successfully_____________________________ū</string>
-    <string name="attachment_size_limit_exceeded">ķ_Attachments larger than %1$s cannot be downloaded__________________________ū</string>
+    <string name="attachment_deleted">%1s ir veiksmīgi dzēsts</string>
+    <string name="attachment_size_limit_exceeded">Pielikumus, kuru izmērs pārsniedz %1$s, lejupielādēt nav iespējams</string>
 </resources>
