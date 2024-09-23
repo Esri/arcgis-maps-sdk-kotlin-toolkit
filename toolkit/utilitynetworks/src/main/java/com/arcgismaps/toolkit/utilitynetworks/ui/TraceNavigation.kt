@@ -36,13 +36,12 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun TraceNavHost(traceState: TraceState) {
     val navController = rememberNavController()
-    val coroutineScope = rememberCoroutineScope()
-
     val currentScreen by traceState.currentScreen
 
     NavHost(navController = navController, startDestination = TraceNavRoute.TraceOptions.name) {
         composable(TraceNavRoute.TraceOptions.name) {
             val configs by traceState.traceConfigurations
+            val coroutineScope = rememberCoroutineScope()
             TraceOptionsScreen(
                 configurations = configs,
                 startingPoints = traceState.startingPoints,
@@ -78,8 +77,10 @@ internal fun TraceNavHost(traceState: TraceState) {
             )
         }
         composable(TraceNavRoute.TraceResults.name) {
+            val traceRun = traceState.currentTraceRun.value
+            require (traceRun != null)
             TraceResultScreen(
-                traceRun = traceState.currentTraceRun,
+                traceRun = traceRun,
                 onDeleteResult = {
 
                 }, onZoomToResults = {
@@ -94,5 +95,7 @@ internal fun TraceNavHost(traceState: TraceState) {
         }
     }
 
-    navController.navigate(currentScreen.name)
+    if (navController.currentDestination?.route != currentScreen.name) {
+        navController.navigate(currentScreen.name)
+    }
 }

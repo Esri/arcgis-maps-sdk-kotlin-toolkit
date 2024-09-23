@@ -104,9 +104,9 @@ public class TraceState(
     private val utilityNetwork: UtilityNetwork
         get() = _utilityNetwork ?: throw IllegalStateException("Utility Network cannot be null")
 
-    private var _currentTraceRun: TraceRun? = null
-    internal val currentTraceRun: TraceRun
-        get() = _currentTraceRun ?: throw IllegalStateException("TraceRun cannot be null")
+    private var _currentTraceRun: MutableState<TraceRun?> = mutableStateOf (null)
+    internal val currentTraceRun: State<TraceRun?>
+        get() = _currentTraceRun
 
     private val currentTraceGraphics : MutableList<Graphic> = mutableListOf()
 
@@ -137,9 +137,9 @@ public class TraceState(
             result = Result.failure(it)
             _initializationStatus.value = InitializationStatus.FailedToInitialize(it)
         }
-        _initializationStatus.value = InitializationStatus.Initialized
         _utilityNetwork = arcGISMap.utilityNetworks.first()
         _traceConfigurations.value = utilityNetwork.queryNamedTraceConfigurations().getOrThrow()
+        _initializationStatus.value = InitializationStatus.Initialized
         return result
     }
 
@@ -216,7 +216,7 @@ public class TraceState(
                 }
             }
         }
-        _currentTraceRun = TraceRun(
+        _currentTraceRun.value = TraceRun(
             name = traceConfiguration.name, // need to auto populate this, if not provided by AdvancedOptions
             graphics = currentTraceGraphics,
             featureResults = currentTraceElementResults,
