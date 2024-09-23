@@ -97,8 +97,8 @@ public class TraceState(
      */
     public val selectedTraceConfiguration: State<UtilityNamedTraceConfiguration?> = _selectedTraceConfiguration
 
-    private val _startingPoints: SnapshotStateList<StartingPoint> = mutableStateListOf()
-    internal val startingPoints: SnapshotStateList<StartingPoint> = _startingPoints
+    private val _currentTraceStartingPoints: SnapshotStateList<StartingPoint> = mutableStateListOf()
+    internal val currentTraceStartingPoints: List<StartingPoint> = _currentTraceStartingPoints
 
     private var _utilityNetwork: UtilityNetwork? = null
     private val utilityNetwork: UtilityNetwork
@@ -161,17 +161,17 @@ public class TraceState(
         // Run a trace
         val traceConfiguration = selectedTraceConfiguration.value ?: return false
 
-        if (startingPoints.isEmpty() && traceConfiguration.minimumStartingLocations == UtilityMinimumStartingLocations.One) {
+        if (currentTraceStartingPoints.isEmpty() && traceConfiguration.minimumStartingLocations == UtilityMinimumStartingLocations.One) {
             // TODO: Handle error
             return false
         }
 
-        if (startingPoints.size < 2 && traceConfiguration.minimumStartingLocations == UtilityMinimumStartingLocations.Many) {
+        if (currentTraceStartingPoints.size < 2 && traceConfiguration.minimumStartingLocations == UtilityMinimumStartingLocations.Many) {
             // TODO: Handle error
             return false
         }
 
-        val utilityTraceParameters = UtilityTraceParameters(traceConfiguration, startingPoints.map { it.utilityElement })
+        val utilityTraceParameters = UtilityTraceParameters(traceConfiguration, currentTraceStartingPoints.map { it.utilityElement })
 
         val traceResults = utilityNetwork.trace(utilityTraceParameters).getOrElse {
             //handle error
@@ -247,32 +247,51 @@ public class TraceState(
     }
 
     internal fun removeStartingPoint(startingPoint: StartingPoint) {
-        _startingPoints.remove(startingPoint)
+        _currentTraceStartingPoints.remove(startingPoint)
+        removeStartingPointGraphic(startingPoint.graphic)
+    }
+
+    private fun removeStartingPointGraphic(graphic: Graphic) {
+        currentTraceGraphics.remove(graphic)
+        graphicsOverlay.graphics.remove(graphic)
     }
 
     /**
      * This private method is called from a suspend function and so swallows any failures except
      * CancellationExceptions.
      */
-    private fun processAndAddStartingPoint(feature: ArcGISFeature) = runCatchingCancellable {
+    private fun processAndAddStartingPoint(feature: ArcGISFeature, mapPoint: Point) = runCatchingCancellable {
         // TODO: add fraction-along to the element.
         // https://devtopia.esri.com/runtime/kotlin/issues/4491
         val utilityElement = utilityNetwork.createElementOrNull(feature)
             ?: throw IllegalArgumentException("could not create utility element from ArcGISFeature")
+
+        // Check if the starting point already exists
+        if (_currentTraceStartingPoints.any { it.utilityElement.globalId == utilityElement.globalId }) {
+            // TODO: Handle error
+            throw IllegalArgumentException("starting point already exists")
+        }
 
         val symbol = (feature.featureTable?.layer as FeatureLayer)
             .renderer
             ?.getSymbol(feature)
             ?: throw IllegalArgumentException("could not create drawable from feature symbol")
 
-        _startingPoints.add(
+        val graphic = Graphic(
+            geometry = mapPoint,
+            symbol = SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Cross, Color.green, 20.0f)
+        )
+        graphicsOverlay.graphics.add(graphic)
+        currentTraceGraphics.add(graphic)
+
+        _currentTraceStartingPoints.add(
             StartingPoint(
                 feature = feature,
                 utilityElement = utilityElement,
-                symbol = symbol
+                symbol = symbol,
+                graphic = graphic
             )
         )
-
     }
 
     private suspend fun identifyFeatures(mapPoint: Point, screenCoordinate: ScreenCoordinate) {
@@ -284,23 +303,13 @@ public class TraceState(
             if (identifyLayerResultList.isNotEmpty()) {
                 identifyLayerResultList.forEach { identifyLayerResult ->
                     identifyLayerResult.geoElements.filterIsInstance<ArcGISFeature>().forEach { feature ->
-                        processAndAddStartingPoint(feature)
+                        processAndAddStartingPoint(feature, mapPoint)
                     }
                 }
-                addTapLocationToGraphicsOverlay(mapPoint)
                 _addStartingPointMode.value = AddStartingPointMode.Stopped
                 showScreen(TraceNavRoute.TraceOptions)
             }
         }
-    }
-
-    private fun addTapLocationToGraphicsOverlay(mapPoint: Point) {
-        val graphic = Graphic(
-            geometry = mapPoint,
-            symbol = SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Cross, Color.green, 20.0f)
-        )
-        graphicsOverlay.graphics.add(graphic)
-        currentTraceGraphics.add(graphic)
     }
 
     /**
@@ -392,7 +401,7 @@ internal enum class TraceNavRoute {
 }
 
 @Immutable
-internal data class StartingPoint(val feature: ArcGISFeature, val utilityElement: UtilityElement, val symbol: Symbol) {
+internal data class StartingPoint(val feature: ArcGISFeature, val utilityElement: UtilityElement, val symbol: Symbol, val graphic: Graphic) {
     val name: String = utilityElement.assetType.name
 
     suspend fun getDrawable(screenScale: Float): BitmapDrawable =

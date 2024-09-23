@@ -44,7 +44,7 @@ internal fun TraceNavHost(traceState: TraceState) {
             val coroutineScope = rememberCoroutineScope()
             TraceOptionsScreen(
                 configurations = configs,
-                startingPoints = traceState.startingPoints,
+                startingPoints = traceState.currentTraceStartingPoints,
                 onPerformTraceButtonClicked = {
                     coroutineScope.launch {
                         try {
