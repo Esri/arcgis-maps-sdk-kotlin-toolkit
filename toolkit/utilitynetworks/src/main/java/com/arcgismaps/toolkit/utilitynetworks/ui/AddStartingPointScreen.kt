@@ -34,11 +34,6 @@ import com.arcgismaps.toolkit.utilitynetworks.TraceState
  */
 @Composable
 internal fun AddStartingPointScreen(traceState: TraceState, onStopPointSelection: () -> Unit) {
-    println("UTILITY NETWORK AddStartingPointScreen")
-//    if (traceState.addStartingPointMode.value == AddStartingPointMode.Stopped) {
-//        onStopPointSelection()
-//    }
-
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Top) {
             Button(
