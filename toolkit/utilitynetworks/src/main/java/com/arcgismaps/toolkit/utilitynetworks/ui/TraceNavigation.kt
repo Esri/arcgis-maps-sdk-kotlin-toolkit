@@ -30,7 +30,6 @@ import kotlinx.coroutines.launch
 /**
  * A composable UI component to set up the navigation for the trace workflow.
  *
- * @param navController The navigation controller to use for navigation
  * @param traceState The state of the trace workflow
  * @since 200.6.0
  */
@@ -72,7 +71,6 @@ internal fun TraceNavHost(traceState: TraceState) {
         }
         composable(TraceNavRoute.AddStartingPoint.name) {
             AddStartingPointScreen(
-                traceState,
                 onStopPointSelection = {
                     traceState.showScreen(TraceNavRoute.TraceOptions)
                     traceState.updateAddStartPointMode(AddStartingPointMode.Stopped)

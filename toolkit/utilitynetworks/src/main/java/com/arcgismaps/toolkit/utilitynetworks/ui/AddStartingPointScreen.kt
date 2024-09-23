@@ -25,7 +25,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.arcgismaps.toolkit.utilitynetworks.TraceState
 
 /**
  * A composable screen that shows the UI to add a starting point for a trace.
@@ -33,7 +32,7 @@ import com.arcgismaps.toolkit.utilitynetworks.TraceState
  * @since 200.6.0
  */
 @Composable
-internal fun AddStartingPointScreen(traceState: TraceState, onStopPointSelection: () -> Unit) {
+internal fun AddStartingPointScreen(onStopPointSelection: () -> Unit) {
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Top) {
             Button(
