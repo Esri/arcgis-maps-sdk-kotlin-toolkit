@@ -17,6 +17,7 @@
 package com.arcgismaps.toolkit.utilitynetworks
 
 import android.graphics.drawable.BitmapDrawable
+import android.util.Log
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -162,11 +163,13 @@ public class TraceState(
 
         if (startingPoints.isEmpty() && traceConfiguration.minimumStartingLocations == UtilityMinimumStartingLocations.One) {
             // TODO: Handle error
+            Log.i("TraceState --", "ERROR: not enough starting points")
             return false
         }
 
         if (startingPoints.size < 2 && traceConfiguration.minimumStartingLocations == UtilityMinimumStartingLocations.Many) {
             // TODO: Handle error
+            Log.i("TraceState --", "ERROR: not enough starting points")
             return false
         }
 
@@ -175,7 +178,11 @@ public class TraceState(
         val traceResults = utilityNetwork.trace(utilityTraceParameters).getOrElse {
             //handle error
             println("ERROR: running trace" + it.message)
+            Log.i("TraceState --", "ERROR: running trace " + it.message)
             emptyList<UtilityElementTraceResult>()
+        }
+        if (traceResults.isEmpty()) {
+            Log.i("TraceState --", "ERROR: no trace results")
         }
 
         val currentTraceFunctionResults : MutableList<UtilityTraceFunctionOutput> = mutableListOf()
