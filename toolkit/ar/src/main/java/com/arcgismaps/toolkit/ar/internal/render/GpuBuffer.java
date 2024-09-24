@@ -16,13 +16,11 @@
 package com.arcgismaps.toolkit.ar.internal.render;
 
 import android.opengl.GLES30;
-import android.util.Log;
 
 import java.nio.Buffer;
 
 /* package-private */
 class GpuBuffer {
-    private static final String TAG = GpuBuffer.class.getSimpleName();
 
     // These values refer to the byte count of the corresponding Java datatypes.
     public static final int INT_SIZE = 4;
@@ -110,7 +108,7 @@ class GpuBuffer {
     public void free() {
         if (bufferId[0] != 0) {
             GLES30.glDeleteBuffers(1, bufferId, 0);
-            GLError.maybeLogGLError(Log.WARN, TAG, "Failed to free buffer object", "glDeleteBuffers");
+            GLError.maybeLogGLError("Failed to free buffer object", "glDeleteBuffers");
             bufferId[0] = 0;
         }
     }

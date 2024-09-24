@@ -20,7 +20,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES30;
-import android.util.Log;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -30,7 +29,6 @@ import java.nio.ByteBuffer;
  * A GPU-side texture.
  */
 class Texture implements Closeable {
-    private static final String TAG = Texture.class.getSimpleName();
 
     private final int[] textureId = {0};
     private final Target target;
@@ -173,7 +171,7 @@ class Texture implements Closeable {
     public void close() {
         if (textureId[0] != 0) {
             GLES30.glDeleteTextures(1, textureId, 0);
-            GLError.maybeLogGLError(Log.WARN, TAG, "Failed to free texture", "glDeleteTextures");
+            GLError.maybeLogGLError("Failed to free texture", "glDeleteTextures");
             textureId[0] = 0;
         }
     }

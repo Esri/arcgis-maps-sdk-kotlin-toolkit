@@ -20,7 +20,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import android.content.res.AssetManager;
 import android.opengl.GLES30;
 import android.opengl.GLException;
-import android.util.Log;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -35,7 +34,6 @@ import java.util.regex.Matcher;
  * Represents a GPU shader, the state of its associated uniforms, and some additional draw state.
  */
 class Shader implements Closeable {
-    private static final String TAG = Shader.class.getSimpleName();
 
     /**
      * A factor to be used in a blend function.
@@ -116,8 +114,7 @@ class Shader implements Closeable {
             GLES30.glGetProgramiv(programId, GLES30.GL_LINK_STATUS, linkStatus, 0);
             if (linkStatus[0] == GLES30.GL_FALSE) {
                 String infoLog = GLES30.glGetProgramInfoLog(programId);
-                GLError.maybeLogGLError(
-                        Log.WARN, TAG, "Failed to retrieve shader program info log", "glGetProgramInfoLog");
+                GLError.maybeLogGLError("Failed to retrieve shader program info log", "glGetProgramInfoLog");
                 throw new GLException(0, "Shader link failed: " + infoLog);
             }
         } catch (Throwable t) {
@@ -127,11 +124,11 @@ class Shader implements Closeable {
             // Shader objects can be flagged for deletion immediately after program creation.
             if (vertexShaderId != 0) {
                 GLES30.glDeleteShader(vertexShaderId);
-                GLError.maybeLogGLError(Log.WARN, TAG, "Failed to free vertex shader", "glDeleteShader");
+                GLError.maybeLogGLError("Failed to free vertex shader", "glDeleteShader");
             }
             if (fragmentShaderId != 0) {
                 GLES30.glDeleteShader(fragmentShaderId);
-                GLError.maybeLogGLError(Log.WARN, TAG, "Failed to free fragment shader", "glDeleteShader");
+                GLError.maybeLogGLError("Failed to free fragment shader", "glDeleteShader");
             }
         }
     }
@@ -486,7 +483,7 @@ class Shader implements Closeable {
             uniforms.keySet().removeAll(obsoleteEntries);
         } finally {
             GLES30.glActiveTexture(GLES30.GL_TEXTURE0);
-            GLError.maybeLogGLError(Log.WARN, TAG, "Failed to set active texture", "glActiveTexture");
+            GLError.maybeLogGLError("Failed to set active texture", "glActiveTexture");
         }
     }
 
@@ -660,10 +657,9 @@ class Shader implements Closeable {
         GLES30.glGetShaderiv(shaderId, GLES30.GL_COMPILE_STATUS, compileStatus, 0);
         if (compileStatus[0] == GLES30.GL_FALSE) {
             String infoLog = GLES30.glGetShaderInfoLog(shaderId);
-            GLError.maybeLogGLError(
-                    Log.WARN, TAG, "Failed to retrieve shader info log", "glGetShaderInfoLog");
+            GLError.maybeLogGLError("Failed to retrieve shader info log", "glGetShaderInfoLog");
             GLES30.glDeleteShader(shaderId);
-            GLError.maybeLogGLError(Log.WARN, TAG, "Failed to free shader", "glDeleteShader");
+            GLError.maybeLogGLError("Failed to free shader", "glDeleteShader");
             throw new GLException(0, "Shader compilation failed: " + infoLog);
         }
 

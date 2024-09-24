@@ -16,7 +16,6 @@
 package com.arcgismaps.toolkit.ar.internal.render;
 
 import android.opengl.GLES30;
-import android.util.Log;
 
 import java.io.Closeable;
 
@@ -26,7 +25,6 @@ import java.io.Closeable;
  * <p>To render the mesh, use {@link SurfaceDrawHandler#draw()}.
  */
 class Mesh implements Closeable {
-    private static final String TAG = Mesh.class.getSimpleName();
 
     /**
      * The kind of primitive to render.
@@ -116,8 +114,7 @@ class Mesh implements Closeable {
     public void close() {
         if (vertexArrayId[0] != 0) {
             GLES30.glDeleteVertexArrays(1, vertexArrayId, 0);
-            GLError.maybeLogGLError(
-                    Log.WARN, TAG, "Failed to free vertex array object", "glDeleteVertexArrays");
+            GLError.maybeLogGLError("Failed to free vertex array object", "glDeleteVertexArrays");
         }
     }
 

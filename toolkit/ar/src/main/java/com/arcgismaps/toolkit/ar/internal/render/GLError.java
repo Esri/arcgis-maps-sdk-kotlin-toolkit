@@ -15,10 +15,11 @@
  */
 package com.arcgismaps.toolkit.ar.internal.render;
 
+import static com.arcgismaps.toolkit.ar.internal.render.DebugUtilKt.logArMessage;
+
 import android.opengl.GLES30;
 import android.opengl.GLException;
 import android.opengl.GLU;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -41,10 +42,10 @@ class GLError {
     /**
      * Logs a message with the given logcat priority if a GL error occurred.
      */
-    public static void maybeLogGLError(int priority, String tag, String reason, String api) {
+    public static void maybeLogGLError(String reason, String api) {
         List<Integer> errorCodes = getGlErrors();
         if (errorCodes != null) {
-            Log.println(priority, tag, formatErrorMessage(reason, api, errorCodes));
+            logArMessage(formatErrorMessage(reason, api, errorCodes), null);
         }
     }
 

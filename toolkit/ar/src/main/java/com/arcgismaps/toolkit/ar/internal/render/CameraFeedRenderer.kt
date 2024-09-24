@@ -19,7 +19,6 @@ package com.arcgismaps.toolkit.ar.internal.render
 
 import android.content.Context
 import android.content.res.AssetManager
-import android.util.Log
 import android.view.MotionEvent
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -92,7 +91,7 @@ internal class CameraFeedRenderer(
     private lateinit var cameraColorTexture: Texture
 
     // need a reference to this to actually draw
-    public lateinit var surfaceDrawHandler: SurfaceDrawHandler
+    lateinit var surfaceDrawHandler: SurfaceDrawHandler
 
     // for drawing the camera feed, just outputs the [cameraColorTexture] to the screen
     private val cameraFeedShader: Shader by lazy {
@@ -171,7 +170,7 @@ internal class CameraFeedRenderer(
             try {
                 session.update()
             } catch (e: CameraNotAvailableException) {
-                Log.e("TAG", "Camera not available during onDrawFrame", e)
+                logArMessage("Camera not available during onDrawFrame", e)
                 return
             }
 
@@ -204,14 +203,14 @@ internal class CameraFeedRenderer(
         onFrame(frame)
     }
 
-    public fun handleTap(frame: Frame, onTap: ((HitResult?) -> Unit)) {
+    fun handleTap(frame: Frame, onTap: ((HitResult?) -> Unit)) {
         val tap = lastTap ?: return
         val hit = frame.hitTest(tap).firstOrNull { it.trackable is Plane || it.trackable is Point }
         onTap(hit)
         lastTap = null
     }
 
-    public fun onClick(it: MotionEvent) {
+    fun onClick(it: MotionEvent) {
         lastTap = it
     }
 

@@ -16,7 +16,6 @@
 package com.arcgismaps.toolkit.ar.internal.render;
 
 import android.opengl.GLES30;
-import android.util.Log;
 
 import java.io.Closeable;
 
@@ -25,7 +24,6 @@ import java.io.Closeable;
  * A framebuffer associated with a texture.
  */
 class Framebuffer implements Closeable {
-    private static final String TAG = Framebuffer.class.getSimpleName();
 
     private final int[] framebufferId = {0};
     private final Texture colorTexture;
@@ -101,7 +99,7 @@ class Framebuffer implements Closeable {
     public void close() {
         if (framebufferId[0] != 0) {
             GLES30.glDeleteFramebuffers(1, framebufferId, 0);
-            GLError.maybeLogGLError(Log.WARN, TAG, "Failed to free framebuffer", "glDeleteFramebuffers");
+            GLError.maybeLogGLError("Failed to free framebuffer", "glDeleteFramebuffers");
             framebufferId[0] = 0;
         }
         colorTexture.close();

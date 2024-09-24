@@ -19,7 +19,6 @@ package com.arcgismaps.toolkit.ar.internal.render
 
 import android.opengl.GLES30
 import android.opengl.GLSurfaceView
-import android.util.Log
 import com.arcgismaps.toolkit.ar.internal.render.SurfaceDrawHandler.Renderer
 
 /**
@@ -65,14 +64,14 @@ internal class SurfaceDrawHandler(glSurfaceView: GLSurfaceView, renderer: Render
         glSurfaceView.setWillNotDraw(false)
     }
 
-    public interface Renderer {
-        public fun onSurfaceCreated(surfaceDrawHandler: SurfaceDrawHandler)
-        public fun onSurfaceChanged(surfaceDrawHandler: SurfaceDrawHandler, width: Int, height: Int)
-        public fun onDrawFrame(surfaceDrawHandler: SurfaceDrawHandler)
+    interface Renderer {
+        fun onSurfaceCreated(surfaceDrawHandler: SurfaceDrawHandler)
+        fun onSurfaceChanged(surfaceDrawHandler: SurfaceDrawHandler, width: Int, height: Int)
+        fun onDrawFrame(surfaceDrawHandler: SurfaceDrawHandler)
     }
 
     /** Draw a [Mesh] with the specified [Shader].  */
-    public fun draw(mesh: Mesh, shader: Shader) {
+    fun draw(mesh: Mesh, shader: Shader) {
         draw(mesh, shader, null)
     }
 
@@ -82,13 +81,13 @@ internal class SurfaceDrawHandler(glSurfaceView: GLSurfaceView, renderer: Render
      *
      * The `framebuffer` argument may be null, in which case the default framebuffer is used.
      */
-    public fun draw(mesh: Mesh, shader: Shader, framebuffer: Framebuffer?) {
+    fun draw(mesh: Mesh, shader: Shader, framebuffer: Framebuffer?) {
         // tell opengl to use the framebuffer
         useFramebuffer(framebuffer)
         // this will be the background shader
         shader.lowLevelUse()
         mesh.lowLevelDraw()
-        GLError.maybeLogGLError(Log.WARN, "RenderDebug", "Failed to draw mesh", "glDrawElements")
+        GLError.maybeLogGLError("Failed to draw mesh", "glDrawElements")
     }
 
     /**
@@ -98,7 +97,7 @@ internal class SurfaceDrawHandler(glSurfaceView: GLSurfaceView, renderer: Render
      * The `framebuffer` argument may be null, in which case the default framebuffer is
      * cleared.
      */
-    public fun clear(framebuffer: Framebuffer?, r: Float, g: Float, b: Float, a: Float) {
+    fun clear(framebuffer: Framebuffer?, r: Float, g: Float, b: Float, a: Float) {
         useFramebuffer(framebuffer)
         GLES30.glClearColor(r, g, b, a)
         GLError.maybeThrowGLException("Failed to set clear color", "glClearColor")

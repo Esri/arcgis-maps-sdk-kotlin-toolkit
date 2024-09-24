@@ -194,7 +194,7 @@ internal class PlaneRenderer(render: SurfaceDrawHandler?, assets: AssetManager) 
      * @param cameraPose The pose of the camera, as returned by [Camera.getPose]
      * @param cameraProjection The projection matrix, as returned by [     ][Camera.getProjectionMatrix]
      */
-    public fun drawPlanes(
+    fun drawPlanes(
         surfaceDrawHandler: SurfaceDrawHandler,
         allPlanes: Collection<Plane>,
         cameraPose: Pose,
@@ -283,8 +283,7 @@ internal class PlaneRenderer(render: SurfaceDrawHandler?, assets: AssetManager) 
 
     private class SortablePlane(val distance: Float, val plane: Plane)
 
-    public companion object {
-        private val TAG: String = PlaneRenderer::class.java.simpleName
+    companion object {
 
         // Shader names.
         private const val VERTEX_SHADER_NAME = "shaders/plane.vert"
@@ -320,7 +319,7 @@ internal class PlaneRenderer(render: SurfaceDrawHandler?, assets: AssetManager) 
 
         // Calculate the normal distance to plane from cameraPose, the given planePose should have y axis
         // parallel to plane's normal, for example plane's center pose or hit test pose.
-        public fun calculateDistanceToPlane(planePose: Pose, cameraPose: Pose): Float {
+        fun calculateDistanceToPlane(planePose: Pose, cameraPose: Pose): Float {
             val normal = FloatArray(3)
             val cameraX = cameraPose.tx()
             val cameraY = cameraPose.ty()
