@@ -177,7 +177,7 @@ private fun TraceConfigurations(
                 color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f),
                 shape = RoundedCornerShape(5.dp)
             )
-            .background(color = MaterialTheme.colorScheme.background)//, shape = RoundedCornerShape(5.dp))
+            .background(color = MaterialTheme.colorScheme.background)
     ) {
         Row (
             modifier = Modifier
@@ -254,36 +254,33 @@ private fun StartingPoints(
     showAddStartingPointScreen: () -> Unit,
     onStartingPointRemoved: (StartingPoint) -> Unit
 ) {
-       ExpandableCard(
-        title = "${stringResource(id = R.string.starting_points)} (${startingPoints.size})",
-        description = {
-            Row(
+    Column {
+
+            ElevatedButton(
+                onClick = {
+                    showAddStartingPointScreen()
+                },
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
+                shape = RoundedCornerShape(8.dp)
             ) {
-                ElevatedButton(
-                    onClick = {
-                        showAddStartingPointScreen()
-                    },
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.add_starting_point),
-                        color = LocalExpandableCardColorScheme.current.headerTextColor,
-                        style = LocalExpandableCardTypography.current.descriptionStyle,
-                        fontWeight = FontWeight.Normal,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
+                Text(
+                    text = stringResource(id = R.string.add_starting_point),
+                    color = LocalExpandableCardColorScheme.current.headerTextColor,
+                    style = LocalExpandableCardTypography.current.descriptionStyle,
+                    fontWeight = FontWeight.Normal,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
-        },
-        padding = PaddingValues(horizontal = 4.dp)
-    ) {
-        Column {
-            startingPoints.forEach {
-                StartingPointRow(it) {
-                    onStartingPointRemoved(it)
+        ExpandableCard(
+            title = "${stringResource(id = R.string.starting_points)} (${startingPoints.size})",
+            padding = PaddingValues(horizontal = 4.dp)
+        ) {
+            Column {
+                startingPoints.forEach {
+                    StartingPointRow(it) {
+                        onStartingPointRemoved(it)
+                    }
                 }
             }
         }
