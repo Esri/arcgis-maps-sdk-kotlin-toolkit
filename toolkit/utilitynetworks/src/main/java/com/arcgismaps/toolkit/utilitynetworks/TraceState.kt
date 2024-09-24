@@ -182,10 +182,6 @@ public class TraceState(
             emptyList<UtilityElementTraceResult>()
             return false
         }
-        if (traceResults.isEmpty()) {
-            Log.i("TraceState --", "ERROR: no trace results")
-            return false
-        }
 
         val currentTraceFunctionResults : MutableList<UtilityTraceFunctionOutput> = mutableListOf()
         var currentTraceElementResults: List<UtilityElement> = emptyList()
