@@ -21,6 +21,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -112,6 +113,10 @@ public class TraceState(
 
     private val _currentScreen: MutableState<TraceNavRoute> = mutableStateOf(TraceNavRoute.TraceOptions)
     internal var currentScreen: State<TraceNavRoute> = _currentScreen
+
+    internal val isTraceReady = derivedStateOf {
+        selectedTraceConfiguration.value != null && currentTraceStartingPoints.isNotEmpty()
+    }
 
     /**
      * Initializes the state object by loading the map, the Utility Networks contained in the map
