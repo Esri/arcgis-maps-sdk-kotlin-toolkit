@@ -52,10 +52,7 @@ public fun Trace(
     val initializationStatus by traceState.initializationStatus
 
     LaunchedEffect(traceState) {
-        if (initializationStatus is InitializationStatus.NotInitialized
-            || initializationStatus is InitializationStatus.FailedToInitialize) {
-            traceState.initialize()
-        }
+        traceState.initialize()
     }
 
     Surface(

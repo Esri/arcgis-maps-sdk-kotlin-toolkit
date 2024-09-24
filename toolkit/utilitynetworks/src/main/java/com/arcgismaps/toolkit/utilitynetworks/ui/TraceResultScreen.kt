@@ -64,8 +64,7 @@ internal fun TraceResultScreen(
     traceRun: TraceRun,
     onDeleteResult: () -> Unit,
     onZoomToResults: () -> Unit,
-    onClearAllResults: () -> Unit,
-    onDismiss: () -> Unit
+    onClearAllResults: () -> Unit
 ) {
     Surface(modifier = Modifier.fillMaxSize()) {
         LazyColumn {

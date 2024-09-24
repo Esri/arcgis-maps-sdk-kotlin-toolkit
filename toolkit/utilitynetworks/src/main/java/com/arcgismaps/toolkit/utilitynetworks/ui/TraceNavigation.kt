@@ -87,9 +87,6 @@ internal fun TraceNavHost(traceState: TraceState) {
 
                 }, onClearAllResults = {
 
-                },
-                onDismiss = {
-                    traceState.showScreen(TraceNavRoute.TraceOptions)
                 }
             )
         }

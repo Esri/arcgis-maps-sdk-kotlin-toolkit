@@ -220,8 +220,7 @@ public class TraceState(
             name = traceConfiguration.name, // need to auto populate this, if not provided by AdvancedOptions
             graphics = currentTraceGraphics,
             featureResults = currentTraceElementResults,
-            functionResults = currentTraceFunctionResults,
-            geometryResults = currentTraceGraphics
+            functionResults = currentTraceFunctionResults
         )
         return true
     }
@@ -414,7 +413,6 @@ internal data class TraceRun(
     val graphics: List<Graphic>,
     val featureResults: List<UtilityElement>,
     val functionResults: List<UtilityTraceFunctionOutput>,
-    val geometryResults: List<Graphic>
 )
 
 /**
