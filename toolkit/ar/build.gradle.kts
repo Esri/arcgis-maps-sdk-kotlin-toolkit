@@ -66,6 +66,7 @@ android {
 
 dependencies {
     implementation(project(":geoview-compose"))
+    implementation(libs.arcore)
     api(arcgis.mapsSdk)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.composeCore)
