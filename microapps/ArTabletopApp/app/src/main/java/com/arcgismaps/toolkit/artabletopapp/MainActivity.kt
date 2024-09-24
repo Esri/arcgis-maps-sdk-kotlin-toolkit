@@ -32,7 +32,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
-import com.arcgismaps.toolkit.ArTabletopApp.BuildConfig
 import com.arcgismaps.toolkit.artabletopapp.screens.MainScreen
 import com.esri.microappslib.theme.MicroAppTheme
 
