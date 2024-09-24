@@ -47,7 +47,7 @@ fun MainScreen(viewModel: TraceViewModel) {
     val loadState by viewModel.arcGISMap.loadStatus.collectAsState()
     val coroutineScope = rememberCoroutineScope()
 
-    val addStartingPointMode by viewModel.traceState.addStartingPointMode.collectAsState()
+    val addStartingPointMode by viewModel.traceState.addStartingPointMode
     val scaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
             initialValue = SheetValue.Expanded,

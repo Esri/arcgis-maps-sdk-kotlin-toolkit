@@ -87,10 +87,9 @@ public final class com/arcgismaps/toolkit/utilitynetworks/TraceState {
 	public static final field $stable I
 	public fun <init> (Lcom/arcgismaps/mapping/ArcGISMap;Lcom/arcgismaps/mapping/view/GraphicsOverlay;Lcom/arcgismaps/toolkit/geoviewcompose/MapViewProxy;)V
 	public final fun addStartingPoint (Lcom/arcgismaps/geometry/Point;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun getAddStartingPointMode ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getInitializationStatus ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getAddStartingPointMode ()Landroidx/compose/runtime/State;
+	public final fun getInitializationStatus ()Landroidx/compose/runtime/State;
 	public final fun getSelectedTraceConfiguration ()Landroidx/compose/runtime/State;
-	public final fun updateAddStartPointMode (Lcom/arcgismaps/toolkit/utilitynetworks/AddStartingPointMode;)V
 }
 
 public final class com/arcgismaps/toolkit/utilitynetworks/ui/ComposableSingletons$AddStartingPointScreenKt {

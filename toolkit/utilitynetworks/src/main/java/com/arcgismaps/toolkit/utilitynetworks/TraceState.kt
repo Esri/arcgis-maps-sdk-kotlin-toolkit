@@ -19,6 +19,7 @@ package com.arcgismaps.toolkit.utilitynetworks
 import android.graphics.drawable.BitmapDrawable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -49,41 +50,36 @@ import com.arcgismaps.utilitynetworks.UtilityNetwork
 import com.arcgismaps.utilitynetworks.UtilityTraceFunctionOutput
 import com.arcgismaps.utilitynetworks.UtilityTraceParameters
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * Represents the state for the Trace.
  *
  * @since 200.6.0
  */
+@Stable
 public class TraceState(
     private val arcGISMap: ArcGISMap,
     private val graphicsOverlay: GraphicsOverlay,
     private val mapViewProxy: MapViewProxy
 ) {
 
-    private val _initializationStatus = MutableStateFlow<InitializationStatus>(InitializationStatus.NotInitialized)
-
+    private val _initializationStatus: MutableState<InitializationStatus> = mutableStateOf(InitializationStatus.NotInitialized)
     /**
      * The status of the initialization of the state object.
      *
      * @since 200.6.0
      */
-    public val initializationStatus: StateFlow<InitializationStatus> = _initializationStatus
+    public val initializationStatus: State<InitializationStatus> = _initializationStatus
 
-    private val _traceConfigurations = MutableStateFlow<List<UtilityNamedTraceConfiguration>>(emptyList())
-
+    private val _traceConfigurations: MutableState<List<UtilityNamedTraceConfiguration>> = mutableStateOf(emptyList())
     /**
      * The named trace configurations of the Utility Network
      *
      * @since 200.6.0
      */
-    internal val traceConfigurations: StateFlow<List<UtilityNamedTraceConfiguration>> = _traceConfigurations.asStateFlow()
+    internal val traceConfigurations: State<List<UtilityNamedTraceConfiguration>> = _traceConfigurations
 
-    private val _addStartingPointMode = MutableStateFlow<AddStartingPointMode>(AddStartingPointMode.None)
-
+    private val _addStartingPointMode: MutableState<AddStartingPointMode> = mutableStateOf(AddStartingPointMode.None)
     /**
      * Governs taps on the map. When the mode is [AddStartingPointMode.Started] taps will identify starting points
      * and pass underlying Features to this object.
@@ -91,10 +87,9 @@ public class TraceState(
      * @since 200.6.0
      * @see AddStartingPointMode]
      */
-    public val addStartingPointMode: StateFlow<AddStartingPointMode> = _addStartingPointMode.asStateFlow()
+    public val addStartingPointMode: State<AddStartingPointMode> = _addStartingPointMode
 
     private var _selectedTraceConfiguration: MutableState<UtilityNamedTraceConfiguration?> = mutableStateOf(null)
-
     /**
      * The selected trace configuration for the TraceParameters that define the trace.
      *
@@ -103,12 +98,20 @@ public class TraceState(
     public val selectedTraceConfiguration: State<UtilityNamedTraceConfiguration?> = _selectedTraceConfiguration
 
     private val _currentTraceStartingPoints: SnapshotStateList<StartingPoint> = mutableStateListOf()
-
     internal val currentTraceStartingPoints: List<StartingPoint> = _currentTraceStartingPoints
 
     private var _utilityNetwork: UtilityNetwork? = null
     private val utilityNetwork: UtilityNetwork
-        get() = _utilityNetwork ?: throw IllegalStateException("utility network cannot be null")
+        get() = _utilityNetwork ?: throw IllegalStateException("Utility Network cannot be null")
+
+    private var _currentTraceRun: MutableState<TraceRun?> = mutableStateOf (null)
+    internal val currentTraceRun: State<TraceRun?>
+        get() = _currentTraceRun
+
+    private val currentTraceGraphics : MutableList<Graphic> = mutableListOf()
+
+    private val _currentScreen: MutableState<TraceNavRoute> = mutableStateOf(TraceNavRoute.TraceOptions)
+    internal var currentScreen: State<TraceNavRoute> = _currentScreen
 
     /**
      * Initializes the state object by loading the map, the Utility Networks contained in the map
@@ -134,9 +137,9 @@ public class TraceState(
             result = Result.failure(it)
             _initializationStatus.value = InitializationStatus.FailedToInitialize(it)
         }
-        _initializationStatus.value = InitializationStatus.Initialized
         _utilityNetwork = arcGISMap.utilityNetworks.first()
         _traceConfigurations.value = utilityNetwork.queryNamedTraceConfigurations().getOrThrow()
+        _initializationStatus.value = InitializationStatus.Initialized
         return result
     }
 
@@ -144,11 +147,9 @@ public class TraceState(
         _selectedTraceConfiguration.value = config
     }
 
-    private var _currentTraceRun: TraceRun? = null
-    internal val currentTraceRun: TraceRun
-        get() = _currentTraceRun ?: throw IllegalStateException("TraceRun cannot be null")
-
-    private val currentTraceGraphics : MutableList<Graphic> = mutableListOf()
+    internal fun showScreen(screen: TraceNavRoute) {
+        _currentScreen.value = screen
+    }
 
     /**
      * Run a trace on the Utility Network using the selected trace configuration and starting points.
@@ -215,11 +216,11 @@ public class TraceState(
                 }
             }
         }
-        _currentTraceRun = TraceRun(
+        _currentTraceRun.value = TraceRun(
             name = traceConfiguration.name, // need to auto populate this, if not provided by AdvancedOptions
             graphics = currentTraceGraphics,
             featureResults = currentTraceElementResults,
-            functionResults = currentTraceFunctionResults,
+            functionResults = currentTraceFunctionResults
         )
         return true
     }
@@ -305,6 +306,7 @@ public class TraceState(
                     }
                 }
                 _addStartingPointMode.value = AddStartingPointMode.Stopped
+                showScreen(TraceNavRoute.TraceOptions)
             }
         }
     }
@@ -317,7 +319,7 @@ public class TraceState(
      * @param status the updated mode
      * @since 200.6.0
      */
-    public fun updateAddStartPointMode(status: AddStartingPointMode) {
+    internal fun updateAddStartPointMode(status: AddStartingPointMode) {
         _addStartingPointMode.value = status
     }
 }
@@ -385,6 +387,18 @@ public sealed class AddStartingPointMode {
     public data object None : AddStartingPointMode()
 }
 
+/**
+ * Defines a navigation route for the trace tool screens.
+ *
+ * @since 200.6.0
+ */
+internal enum class TraceNavRoute {
+    TraceOptions,
+    AddStartingPoint,
+    TraceResults
+    //TODO: Add FeatureAttributes route
+}
+
 @Immutable
 internal data class StartingPoint(val feature: ArcGISFeature, val utilityElement: UtilityElement, val symbol: Symbol, val graphic: Graphic) {
     val name: String = utilityElement.assetType.name
@@ -392,6 +406,14 @@ internal data class StartingPoint(val feature: ArcGISFeature, val utilityElement
     suspend fun getDrawable(screenScale: Float): BitmapDrawable =
         symbol.createSwatch(screenScale).getOrThrow()
 }
+
+@Immutable
+internal data class TraceRun(
+    val name: String, // need to auto populate this, if not provided by AdvancedOptions
+    val graphics: List<Graphic>,
+    val featureResults: List<UtilityElement>,
+    val functionResults: List<UtilityTraceFunctionOutput>,
+)
 
 /**
  * Returns [this] Result, but if it is a failure with the specified exception type, then it throws the exception.
@@ -408,11 +430,3 @@ internal inline fun <reified T : Throwable, R> Result<R>.except(): Result<R> = o
 internal inline fun <T, R> T.runCatchingCancellable(block: T.() -> R): Result<R> =
     runCatching(block)
         .except<CancellationException, R>()
-
-@Immutable
-internal data class TraceRun(
-    val name: String, // need to auto populate this, if not provided by AdvancedOptions
-    val graphics: List<Graphic>,
-    val featureResults: List<UtilityElement>,
-    val functionResults: List<UtilityTraceFunctionOutput>,
-)

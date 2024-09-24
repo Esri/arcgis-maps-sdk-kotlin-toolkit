@@ -25,13 +25,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.compose.rememberNavController
 import com.arcgismaps.toolkit.utilitynetworks.ui.TraceNavHost
 
 internal const val traceSurfaceContentDescription: String = "trace component surface"
@@ -42,17 +42,18 @@ internal const val traceSurfaceContentDescription: String = "trace component sur
  *
  * @since 200.6.0
  */
+@Stable
 @Composable
 public fun Trace(
     traceState: TraceState,
     @Suppress("unused_parameter")
     modifier: Modifier = Modifier
 ) {
-    LaunchedEffect(key1 = traceState) {
+    val initializationStatus by traceState.initializationStatus
+
+    LaunchedEffect(traceState) {
         traceState.initialize()
     }
-
-    val initializationStatus = traceState.initializationStatus.collectAsStateWithLifecycle()
 
     Surface(
         color = MaterialTheme.colorScheme.surface,
@@ -60,21 +61,20 @@ public fun Trace(
             .fillMaxSize()
             .semantics { contentDescription = traceSurfaceContentDescription }
     ) {
-        if (initializationStatus.value !is InitializationStatus.Initialized) {
+        if (initializationStatus !is InitializationStatus.Initialized) {
             Box(
                 modifier = Modifier
                     .size(100.dp),
                 contentAlignment = Alignment.Center
             ) {
-                if (initializationStatus.value is InitializationStatus.NotInitialized || initializationStatus.value is InitializationStatus.Initializing) {
+                if (initializationStatus is InitializationStatus.NotInitialized || initializationStatus is InitializationStatus.Initializing) {
                     CircularProgressIndicator()
-                } else if (initializationStatus.value is InitializationStatus.FailedToInitialize) {
-                    Text(text = (initializationStatus.value as InitializationStatus.FailedToInitialize).error.message ?: "Failed to initialize")
+                } else if (initializationStatus is InitializationStatus.FailedToInitialize) {
+                    Text(text = (initializationStatus as InitializationStatus.FailedToInitialize).error.message ?: "Failed to initialize")
                 }
             }
         } else {
-            val navController = rememberNavController()
-            TraceNavHost(navController, traceState)
+            TraceNavHost(traceState)
         }
     }
 }

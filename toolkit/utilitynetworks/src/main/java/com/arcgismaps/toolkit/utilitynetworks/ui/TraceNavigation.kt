@@ -17,42 +17,40 @@
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.arcgismaps.toolkit.utilitynetworks.AddStartingPointMode
+import com.arcgismaps.toolkit.utilitynetworks.TraceNavRoute
 import com.arcgismaps.toolkit.utilitynetworks.TraceState
 import kotlinx.coroutines.launch
 
 /**
  * A composable UI component to set up the navigation for the trace workflow.
  *
- * @param navController The navigation controller to use for navigation
  * @param traceState The state of the trace workflow
  * @since 200.6.0
  */
 @Composable
-internal fun TraceNavHost(navController: NavHostController, traceState: TraceState) {
-    val coroutineScope = rememberCoroutineScope()
-    val traceResultAvailable = remember { mutableStateOf(false) }
-    if (traceResultAvailable.value) {
-        navController.navigate(TraceNavRoute.TraceResults.name)
-    }
+internal fun TraceNavHost(traceState: TraceState) {
+    val navController = rememberNavController()
+    val currentScreen by traceState.currentScreen
 
     NavHost(navController = navController, startDestination = TraceNavRoute.TraceOptions.name) {
         composable(TraceNavRoute.TraceOptions.name) {
-            val configs = traceState.traceConfigurations.collectAsStateWithLifecycle()
+            val configs by traceState.traceConfigurations
+            val coroutineScope = rememberCoroutineScope()
             TraceOptionsScreen(
-                configurations = configs.value,
+                configurations = configs,
                 startingPoints = traceState.currentTraceStartingPoints,
                 onPerformTraceButtonClicked = {
                     coroutineScope.launch {
                         try {
-                            traceResultAvailable.value = traceState.trace()
+                            if (traceState.trace()) {
+                                traceState.showScreen(TraceNavRoute.TraceResults)
+                            }
                         } catch (e: Exception) {
                             // Handle error
                             println("ERROR: running traceState.trace() threw an exception: $e")
@@ -61,7 +59,7 @@ internal fun TraceNavHost(navController: NavHostController, traceState: TraceSta
                 },
                 onAddStartingPointButtonClicked = {
                     traceState.updateAddStartPointMode(AddStartingPointMode.Started)
-                    navController.navigate(TraceNavRoute.AddStartingPoint.name)
+                    traceState.showScreen(TraceNavRoute.AddStartingPoint)
                 },
                 selectedConfig = traceState.selectedTraceConfiguration.value,
                 onStartingPointRemoved = { traceState.removeStartingPoint(it) },
@@ -72,34 +70,29 @@ internal fun TraceNavHost(navController: NavHostController, traceState: TraceSta
         }
         composable(TraceNavRoute.AddStartingPoint.name) {
             AddStartingPointScreen(
-                traceState,
                 onStopPointSelection = {
-                    navController.navigate(TraceNavRoute.TraceOptions.name)
+                    traceState.showScreen(TraceNavRoute.TraceOptions)
+                    traceState.updateAddStartPointMode(AddStartingPointMode.Stopped)
                 }
             )
         }
         composable(TraceNavRoute.TraceResults.name) {
+            val traceRun = traceState.currentTraceRun.value
+            require (traceRun != null)
             TraceResultScreen(
-                traceRun = traceState.currentTraceRun,
+                traceRun = traceRun,
                 onDeleteResult = {
 
                 }, onZoomToResults = {
 
                 }, onClearAllResults = {
 
-                })
+                }
+            )
         }
     }
-}
 
-/**
- * Defines a navigation route for the trace tool screens.
- *
- * @since 200.6.0
- */
-private enum class TraceNavRoute {
-    TraceOptions,
-    AddStartingPoint,
-    TraceResults
-    //TODO: Add FeatureAttributes route
+    if (navController.currentDestination?.route != currentScreen.name) {
+        navController.navigate(currentScreen.name)
+    }
 }
