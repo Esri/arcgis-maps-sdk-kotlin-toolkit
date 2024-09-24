@@ -180,9 +180,11 @@ public class TraceState(
             println("ERROR: running trace" + it.message)
             Log.i("TraceState --", "ERROR: running trace " + it.message)
             emptyList<UtilityElementTraceResult>()
+            return false
         }
         if (traceResults.isEmpty()) {
             Log.i("TraceState --", "ERROR: no trace results")
+            return false
         }
 
         val currentTraceFunctionResults : MutableList<UtilityTraceFunctionOutput> = mutableListOf()
