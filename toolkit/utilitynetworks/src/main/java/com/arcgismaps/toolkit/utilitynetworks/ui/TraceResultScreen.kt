@@ -210,7 +210,7 @@ private fun formatDouble(value: Double): String {
     return if (value % 1.0 == 0.0) {
         value.toInt().toString() // Return as int string if decimal part is 0
     } else {
-        String.format("%.5f", value) // Return as double string with 4 decimal places
+        String.format("%.5f", value) // Return as double string with 5 decimal places
     }
 }
 
