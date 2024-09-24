@@ -49,11 +49,14 @@ public fun Trace(
     @Suppress("unused_parameter")
     modifier: Modifier = Modifier
 ) {
-    LaunchedEffect(key1 = traceState) {
-        traceState.initialize()
-    }
-
     val initializationStatus by traceState.initializationStatus
+
+    LaunchedEffect(traceState) {
+        if (initializationStatus is InitializationStatus.NotInitialized
+            || initializationStatus is InitializationStatus.FailedToInitialize) {
+            traceState.initialize()
+        }
+    }
 
     Surface(
         color = MaterialTheme.colorScheme.surface,
