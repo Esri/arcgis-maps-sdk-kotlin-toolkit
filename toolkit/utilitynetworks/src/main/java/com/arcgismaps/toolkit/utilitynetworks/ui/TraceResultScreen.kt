@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -191,7 +192,7 @@ private fun FunctionResult(functionResults: List<UtilityTraceFunctionOutput>) {
                                     color = Color.Gray
                                 )
                                 val result = when (functionResult.result) {
-                                    is Double -> (functionResult.result as Double).toInt().toString()
+                                    is Double -> formatDouble(functionResult.result as Double)
                                     else -> stringResource(R.string.not_available)
                                 }
                                 Text(text = result, style = MaterialTheme.typography.titleMedium)
@@ -201,6 +202,15 @@ private fun FunctionResult(functionResults: List<UtilityTraceFunctionOutput>) {
                 }
             }
         }
+    }
+}
+
+@SuppressLint("DefaultLocale")
+private fun formatDouble(value: Double): String {
+    return if (value % 1.0 == 0.0) {
+        value.toInt().toString() // Return as int string if decimal part is 0
+    } else {
+        String.format("%.5f", value) // Return as double string with 5 decimal places
     }
 }
 
