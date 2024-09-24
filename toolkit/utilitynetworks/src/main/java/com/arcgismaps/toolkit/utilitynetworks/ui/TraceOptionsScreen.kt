@@ -123,7 +123,7 @@ internal fun TraceOptionsScreen(
                 item {
                     Spacer(modifier = Modifier
                         .fillMaxWidth()
-                        .height(6.dp))
+                        .height(10.dp))
                 }
                 item {
                     StartingPoints(
@@ -135,7 +135,7 @@ internal fun TraceOptionsScreen(
                 item {
                     Spacer(modifier = Modifier
                         .fillMaxWidth()
-                        .height(5.dp))
+                        .height(10.dp))
                 }
                 item {
                     AdvancedOptions()
@@ -278,7 +278,7 @@ private fun StartingPoints(
                 }
             }
         },
-        padding = 4.dp
+        padding = PaddingValues(horizontal = 4.dp)
     ) {
         Column {
             startingPoints.forEach {
@@ -307,7 +307,7 @@ internal fun AdvancedOptions(
         title = stringResource(id = R.string.advanced_options),
         toggleable = true,
         initialExpandedState = false,
-        padding = 4.dp
+        padding = PaddingValues(horizontal = 4.dp)
     ) {
         Column {
             if (showName) {
