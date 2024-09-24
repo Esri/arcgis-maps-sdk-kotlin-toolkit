@@ -288,12 +288,12 @@ internal class PlaneRenderer(render: SurfaceDrawHandler?, assets: AssetManager) 
 
     private class SortablePlane(val distance: Float, val plane: Plane)
 
-    internal object {
+    internal companion object {
 
         // Shader names.
         private const val VERTEX_SHADER_NAME = "shaders/plane.vert"
         private const val FRAGMENT_SHADER_NAME = "shaders/plane.frag"
-        private const val TEXTURE_NAME = "models/trigrid.png"
+        private const val TEXTURE_NAME = "textures/trigrid.png"
 
         private const val BYTES_PER_FLOAT = java.lang.Float.SIZE / 8
         private const val BYTES_PER_INT = Integer.SIZE / 8
