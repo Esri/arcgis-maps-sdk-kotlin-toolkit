@@ -26,7 +26,10 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Module for handling OpenGL errors.
+ * Module for handling OpenGL errors. This class is based on the [GLError](https://github.com/google-ar/arcore-android-sdk/blob/main/samples/hello_ar_kotlin/app/src/main/java/com/google/ar/core/examples/java/common/samplerender/GLError.java)
+ * from Google's Hello AR sample app.
+ *
+ * @since 200.6.0
  */
 class GLError {
     /**

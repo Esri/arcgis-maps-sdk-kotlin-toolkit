@@ -19,7 +19,12 @@ import android.opengl.GLES30;
 
 import java.nio.Buffer;
 
-/* package-private */
+/**
+ * A GPU-side buffer. This class is based on the [GpuBuffer](https://github.com/google-ar/arcore-android-sdk/blob/main/samples/hello_ar_kotlin/app/src/main/java/com/google/ar/core/examples/java/common/samplerender/GpuBuffer.java)
+ * from Google's Hello AR sample app.
+ *
+ * @since 200.6.0
+ */
 class GpuBuffer {
 
     // These values refer to the byte count of the corresponding Java datatypes.

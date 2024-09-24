@@ -35,8 +35,10 @@ import java.nio.FloatBuffer
 
 /**
  * Renders the camera feed on a full-screen quad.
- * This is a simplified version of the [com.google.ar.core.examples.java.common.rendering.BackgroundRenderer]
- * from the ARCore examples.
+ * This is a simplified version of the [BackgroundRenderer](https://github.com/google-ar/arcore-android-sdk/blob/main/samples/hello_ar_kotlin/app/src/main/java/com/google/ar/core/examples/java/common/samplerender/arcore/BackgroundRenderer.java)
+ * from Google's Hello AR sample app.
+ *
+ * @since 200.6.0
  */
 internal class CameraFeedRenderer(
     context: Context,

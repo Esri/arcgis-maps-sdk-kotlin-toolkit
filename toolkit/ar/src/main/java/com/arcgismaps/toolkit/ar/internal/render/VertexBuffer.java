@@ -21,13 +21,16 @@ import java.io.Closeable;
 import java.nio.FloatBuffer;
 
 /**
- * A list of vertex attribute data stored GPU-side.
+ * A list of vertex attribute data stored GPU-side. This class is based on the [VertexBuffer](https://github.com/google-ar/arcore-android-sdk/blob/main/samples/hello_ar_kotlin/app/src/main/java/com/google/ar/core/examples/kotlin/helloar/HelloArRenderer.kt)
+ * from Google's Hello AR sample app.
  *
  * <p>One or more {@link VertexBuffer}s are used when constructing a {@link Mesh} to describe vertex
  * attribute data; for example, local coordinates, texture coordinates, vertex normals, etc.
  *
  * @see <a
  * href="https://www.khronos.org/registry/OpenGL-Refpages/es3.0/html/glVertexAttribPointer.xhtml">glVertexAttribPointer</a>
+ *
+ * @since 200.6.0
  */
 class VertexBuffer implements Closeable {
     private final GpuBuffer buffer;

@@ -32,6 +32,11 @@ import com.google.ar.core.Session;
  * Helper to track the display rotations. In particular, the 180 degree rotations are not notified
  * by the onSurfaceChanged() callback, and thus they require listening to the android display
  * events.
+ *
+ * This class is based on the [DisplayRotationHelper](https://github.com/google-ar/arcore-android-sdk/blob/main/samples/hello_ar_kotlin/app/src/main/java/com/google/ar/core/examples/java/common/helpers/DisplayRotationHelper.java)
+ * from Google's Hello AR sample app.
+ *
+ * @since 200.6.0
  */
 final class DisplayRotationHelper implements DisplayListener {
     private boolean viewportChanged;

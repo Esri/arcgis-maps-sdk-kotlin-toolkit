@@ -20,9 +20,13 @@ import android.opengl.GLES30;
 import java.io.Closeable;
 
 /**
- * A collection of vertices, faces, and other attributes that define how to render a 3D object.
+ * A collection of vertices, faces, and other attributes that define how to render a 3D object. This
+ * class is based on the [Mesh](https://github.com/google-ar/arcore-android-sdk/blob/main/samples/hello_ar_kotlin/app/src/main/java/com/google/ar/core/examples/java/common/samplerender/Mesh.java)
+ * from Google's Hello AR sample app.
  *
  * <p>To render the mesh, use {@link SurfaceDrawHandler#draw()}.
+ *
+ * @since 200.6.0
  */
 class Mesh implements Closeable {
 

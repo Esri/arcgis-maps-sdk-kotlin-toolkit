@@ -30,7 +30,12 @@ import kotlin.math.max
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-/** Renders the detected AR planes.  */
+/**
+ * Renders ARCore planes with a triangle grid pattern. This class is based on the [PlaneRenderer](https://github.com/google-ar/arcore-android-sdk/blob/main/samples/hello_ar_kotlin/app/src/main/java/com/google/ar/core/examples/java/common/samplerender/arcore/PlaneRenderer.java)
+ * class from Google's Hello AR sample app.
+ *
+ * @since 200.6.0
+ */
 internal class PlaneRenderer(render: SurfaceDrawHandler?, assets: AssetManager) {
     private val mesh: Mesh
     private val indexBufferObject: IndexBuffer

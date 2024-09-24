@@ -21,13 +21,16 @@ import java.io.Closeable;
 import java.nio.IntBuffer;
 
 /**
- * A list of vertex indices stored GPU-side.
+ * A list of vertex indices stored GPU-side. This class is based on the [IndexBuffer](https://github.com/google-ar/arcore-android-sdk/blob/main/samples/hello_ar_kotlin/app/src/main/java/com/google/ar/core/examples/java/common/samplerender/IndexBuffer.java)
+ * from Google's Hello AR sample app.
  *
  * <p>When constructing a {@link Mesh}, an {@link IndexBuffer} may be passed to describe the
  * ordering of vertices when drawing each primitive.
  *
  * @see <a
  * href="https://www.khronos.org/registry/OpenGL-Refpages/es3.0/html/glDrawElements.xhtml">glDrawElements</a>
+ *
+ * @since 200.6.0
  */
 class IndexBuffer implements Closeable {
     private final GpuBuffer buffer;

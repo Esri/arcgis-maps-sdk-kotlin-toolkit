@@ -32,6 +32,10 @@ import java.util.regex.Matcher;
 
 /**
  * Represents a GPU shader, the state of its associated uniforms, and some additional draw state.
+ * This class is based on the [Shader](https://github.com/google-ar/arcore-android-sdk/blob/main/samples/hello_ar_kotlin/app/src/main/java/com/google/ar/core/examples/java/common/samplerender/Shader.java)
+ * from Google's Hello AR sample app.
+ *
+ * @since 200.6.0
  */
 class Shader implements Closeable {
 

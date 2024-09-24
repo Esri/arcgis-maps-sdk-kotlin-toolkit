@@ -21,7 +21,10 @@ import java.io.Closeable;
 
 
 /**
- * A framebuffer associated with a texture.
+ * A framebuffer associated with a texture. This class is based on the [Framebuffer](https://github.com/google-ar/arcore-android-sdk/blob/main/samples/hello_ar_kotlin/app/src/main/java/com/google/ar/core/examples/java/common/samplerender/Framebuffer.java)
+ * from Google's Hello AR sample app.
+ *
+ * @since 200.6.0
  */
 class Framebuffer implements Closeable {
 
