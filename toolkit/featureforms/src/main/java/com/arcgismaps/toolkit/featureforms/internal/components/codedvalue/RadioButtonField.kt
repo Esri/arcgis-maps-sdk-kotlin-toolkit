@@ -66,7 +66,7 @@ internal fun RadioButtonField(
             description = state.description,
             value = value.data,
             required = required,
-            codedValues = state.codedValues.associateBy({ it.code }, { it.name }),
+            codedValues = state.codedValues,
             showNoValueOption = state.showNoValueOption,
             noValueLabel = noValueLabel,
             modifier = modifier,
