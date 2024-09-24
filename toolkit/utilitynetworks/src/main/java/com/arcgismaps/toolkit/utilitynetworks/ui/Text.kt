@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -68,7 +69,8 @@ internal fun ReadOnlyTextField(
     modifier: Modifier = Modifier,
     overflow: TextOverflow = TextOverflow.Ellipsis,
     maxLines: Int = 1,
-    leadingIcon: (@Composable () -> Unit)? = null
+    leadingIcon: (@Composable () -> Unit)? = null,
+    trailingIcon: (@Composable () -> Unit)? = null
 ) {
     Row(
         modifier = modifier
@@ -81,13 +83,24 @@ internal fun ReadOnlyTextField(
         SelectionContainer(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
         ) {
-            Text(
-                text = text.ifEmpty { "--" },
-                color = Color.Unspecified,
-                style = style,
-                overflow = overflow,
-                maxLines = maxLines
-            )
+            Row(
+                modifier = modifier
+                    .fillMaxWidth()
+                    // merge descendants semantics to make them part of the parent node
+                    .semantics(mergeDescendants = true) {},
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = text.ifEmpty { "--" },
+                    color = Color.Unspecified,
+                    style = style,
+                    overflow = overflow,
+                    maxLines = maxLines
+                )
+                trailingIcon?.invoke()
+            }
         }
+
     }
 }
