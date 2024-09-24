@@ -288,7 +288,7 @@ internal class PlaneRenderer(render: SurfaceDrawHandler?, assets: AssetManager) 
 
     private class SortablePlane(val distance: Float, val plane: Plane)
 
-    companion object {
+    internal object {
 
         // Shader names.
         private const val VERTEX_SHADER_NAME = "shaders/plane.vert"
