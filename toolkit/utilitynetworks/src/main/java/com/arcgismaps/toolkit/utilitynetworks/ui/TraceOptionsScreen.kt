@@ -89,7 +89,6 @@ import com.arcgismaps.utilitynetworks.UtilityNetwork
  */
 @Composable
 internal fun TraceOptionsScreen(
-    isTraceReady: Boolean,
     configurations: List<UtilityNamedTraceConfiguration>,
     startingPoints: List<StartingPoint>,
     selectedConfig: UtilityNamedTraceConfiguration?,
@@ -129,7 +128,10 @@ internal fun TraceOptionsScreen(
                     AdvancedOptions()
                 }
             }
-            Button(onClick = { onPerformTraceButtonClicked() }, enabled = isTraceReady) {
+            Button(
+                onClick = { onPerformTraceButtonClicked() },
+                enabled = selectedConfig != null && startingPoints.isNotEmpty()
+            ) {
                 Text(stringResource(id = R.string.trace))
             }
         }
