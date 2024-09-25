@@ -2,6 +2,7 @@
 activityCompose = "1.8.2"
 androidGradlePlugin = "8.3.2"
 androidXBrowser = "1.8.0"
+barcodeScanning = "17.3.0"
 coilBOM = "2.5.0"
 composeBOM = "2024.04.01"
 androidxCore = "1.13.0"
@@ -58,6 +59,7 @@ androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espres
 androidx-uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "uiautomator" }
 androidx-window = { group = "androidx.window", name = "window", version.ref = "androidxWindow" }
 androidx-window-core = { group = "androidx.window", name = "window-core", version.ref = "androidxWindow" }
+barcode-scanning = { module = "com.google.mlkit:barcode-scanning", version.ref = "barcodeScanning" }
 coil-bom = { group = "io.coil-kt", name = "coil-bom", version.ref = "coilBOM" }
 coil = { group = "io.coil-kt", name = "coil" }
 coil-base = { group = "io.coil-kt", name = "coil-base" }
