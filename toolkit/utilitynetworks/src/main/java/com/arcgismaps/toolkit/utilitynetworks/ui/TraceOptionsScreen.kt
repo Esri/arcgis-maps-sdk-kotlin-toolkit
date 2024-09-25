@@ -93,6 +93,7 @@ internal fun TraceOptionsScreen(
     startingPoints: List<StartingPoint>,
     selectedConfig: UtilityNamedTraceConfiguration?,
     onStartingPointRemoved: (StartingPoint) -> Unit,
+    onStartingPointSelected: (StartingPoint) -> Unit,
     onConfigSelected: (UtilityNamedTraceConfiguration) -> Unit,
     onPerformTraceButtonClicked: () -> Unit,
     onAddStartingPointButtonClicked: () -> Unit
@@ -121,7 +122,8 @@ internal fun TraceOptionsScreen(
                     StartingPoints(
                         startingPoints,
                         onAddStartingPointButtonClicked,
-                        onStartingPointRemoved
+                        onStartingPointRemoved,
+                        onStartingPointSelected,
                     )
                 }
                 item {
@@ -185,7 +187,8 @@ private fun TraceConfigurations(configs: List<UtilityNamedTraceConfiguration>, s
 private fun StartingPoints(
     startingPoints: List<StartingPoint>,
     showAddStartingPointScreen: () -> Unit,
-    onStartingPointRemoved: (StartingPoint) -> Unit
+    onStartingPointRemoved: (StartingPoint) -> Unit,
+    onStartingPointSelected: (StartingPoint) -> Unit
 ) {
        ExpandableCard(
         title = "${stringResource(id = R.string.starting_points)} (${startingPoints.size})",
@@ -215,9 +218,13 @@ private fun StartingPoints(
     ) {
         Column {
             startingPoints.forEach {
-                StartingPointRow(it) {
-                    onStartingPointRemoved(it)
-                }
+                StartingPointRow(
+                    data = it,
+                    onDelete = {
+                        onStartingPointRemoved(it)
+                    },
+                    onStartingPointSelected = onStartingPointSelected
+                )
             }
         }
     }

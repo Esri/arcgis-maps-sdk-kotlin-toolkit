@@ -96,7 +96,15 @@ public class TraceState(
      *
      * @since 200.6.0
      */
-    public val selectedTraceConfiguration: State<UtilityNamedTraceConfiguration?> = _selectedTraceConfiguration
+    internal val selectedTraceConfiguration: State<UtilityNamedTraceConfiguration?> = _selectedTraceConfiguration
+
+    private var _selectedStartingPoint: MutableState<StartingPoint?> = mutableStateOf(null)
+    /**
+     * The selected starting point to display in the starting point details screen.
+     *
+     * @since 200.6.0
+     */
+    internal val selectedStartingPoint: State<StartingPoint?> = _selectedStartingPoint
 
     private val _currentTraceStartingPoints: SnapshotStateList<StartingPoint> = mutableStateListOf()
     internal val currentTraceStartingPoints: List<StartingPoint> = _currentTraceStartingPoints
@@ -146,6 +154,10 @@ public class TraceState(
 
     internal fun setSelectedTraceConfiguration(config: UtilityNamedTraceConfiguration) {
         _selectedTraceConfiguration.value = config
+    }
+
+    internal fun setSelectedStartingPoint(startingPoint: StartingPoint?) {
+        _selectedStartingPoint.value = startingPoint
     }
 
     internal fun showScreen(screen: TraceNavRoute) {
@@ -400,7 +412,8 @@ public sealed class AddStartingPointMode {
 internal enum class TraceNavRoute {
     TraceOptions,
     AddStartingPoint,
-    TraceResults
+    TraceResults,
+    StartingPointDetails
     //TODO: Add FeatureAttributes route
 }
 
