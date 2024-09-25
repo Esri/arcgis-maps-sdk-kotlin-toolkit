@@ -113,6 +113,6 @@
     <string name="attachment_too_large">Filen är för stor. Lägg till en fil som är mindre än 50 MB.</string>
     <string name="attachment_is_empty">Tomma filer stöds inte</string>
     <string name="download_empty_file">Tomma filer kan inte laddas ner</string>
-    <string name="attachment_deleted">Å_%1s was deleted successfully_____________________________ö</string>
-    <string name="attachment_size_limit_exceeded">Å_Attachments larger than %1$s cannot be downloaded__________________________ö</string>
+    <string name="attachment_deleted">%1s har tagits bort</string>
+    <string name="attachment_size_limit_exceeded">Bilagor större än %1$s kan inte hämtas</string>
 </resources>

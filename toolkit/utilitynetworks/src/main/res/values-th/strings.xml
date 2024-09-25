@@ -13,19 +13,19 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="new_trace">ก้_New trace___________________ษฺ</string>
-    <string name="results">ก้_Results_______________ษฺ</string>
-    <string name="trace_configuration">ก้_Trace Configuration____________________ษฺ</string>
-    <string name="starting_points">ก้_Starting Points________________ษฺ</string>
-    <string name="advanced_options">ก้_Advanced Options_________________ษฺ</string>
-    <string name="name">ก้_Name_________ษฺ</string>
-    <string name="color">ก้_Color___________ษฺ</string>
-    <string name="zoom_to_result">ก้_Zoom to result_______________ษฺ</string>
-    <string name="trace">ก้_Trace___________ษฺ</string>
-    <string name="add_starting_point">ก้_Add new starting point_______________________ษฺ</string>
-    <string name="cancel_starting_point_selection">ก้_Cancel starting point selection_________________ษฺ</string>
-    <string name="trace_result_with_count">ก้_Trace %1$d of %2$d___________________ษฺ</string>
-    <string name="feature_results">ก้_Feature Results________________ษฺ</string>
-    <string name="function_results">ก้_Function Results_________________ษฺ</string>
-    <string name="clear_all_results">ก้_Clear all results__________________ษฺ</string>
+    <string name="new_trace">การติดตามใหม่</string>
+    <string name="results">ผลลัพธ์</string>
+    <string name="trace_configuration">การกำหนดค่าการติดตาม</string>
+    <string name="starting_points">จุดเริ่มต้น</string>
+    <string name="advanced_options">ตัวเลือกขั้นสูง</string>
+    <string name="name">ชื่อ</string>
+    <string name="color">สี</string>
+    <string name="zoom_to_result">ซูมไปยังผลลัพธ์</string>
+    <string name="trace">การติดตาม</string>
+    <string name="add_starting_point">เพิ่มจุดเริ่มต้นใหม่</string>
+    <string name="cancel_starting_point_selection">ยกเลิกการเลือกจุดเริ่มต้น</string>
+    <string name="trace_result_with_count">การติดตาม %1$d จาก %2$d</string>
+    <string name="feature_results">ผลลัพธ์ฟีเจอร์</string>
+    <string name="function_results">ผลลัพธ์ฟังก์ชัน</string>
+    <string name="clear_all_results">ล้างผลลัพธ์ทั้งหมด</string>
 </resources>

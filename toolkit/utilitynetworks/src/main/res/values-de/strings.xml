@@ -13,19 +13,19 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="new_trace">ä_New trace___________________Ü</string>
-    <string name="results">ä_Results_______________Ü</string>
-    <string name="trace_configuration">ä_Trace Configuration____________________Ü</string>
-    <string name="starting_points">ä_Starting Points________________Ü</string>
-    <string name="advanced_options">ä_Advanced Options_________________Ü</string>
-    <string name="name">ä_Name_________Ü</string>
-    <string name="color">ä_Color___________Ü</string>
-    <string name="zoom_to_result">ä_Zoom to result_______________Ü</string>
-    <string name="trace">ä_Trace___________Ü</string>
-    <string name="add_starting_point">ä_Add new starting point_______________________Ü</string>
-    <string name="cancel_starting_point_selection">ä_Cancel starting point selection_________________Ü</string>
-    <string name="trace_result_with_count">ä_Trace %1$d of %2$d___________________Ü</string>
-    <string name="feature_results">ä_Feature Results________________Ü</string>
-    <string name="function_results">ä_Function Results_________________Ü</string>
-    <string name="clear_all_results">ä_Clear all results__________________Ü</string>
+    <string name="new_trace">Neue Netzverfolgung</string>
+    <string name="results">Ergebnisse</string>
+    <string name="trace_configuration">Verfolgungskonfiguration</string>
+    <string name="starting_points">Startpunkte</string>
+    <string name="advanced_options">Erweiterte Optionen</string>
+    <string name="name">Name</string>
+    <string name="color">Farbe</string>
+    <string name="zoom_to_result">Auf Ergebnis zoomen</string>
+    <string name="trace">Verfolgung</string>
+    <string name="add_starting_point">Neuen Startpunkt hinzufügen</string>
+    <string name="cancel_starting_point_selection">Startpunkt-Auswahl abbrechen</string>
+    <string name="trace_result_with_count">Verfolgung %1$d von %2$d</string>
+    <string name="feature_results">Feature-Ergebnisse</string>
+    <string name="function_results">Funktionsergebnisse</string>
+    <string name="clear_all_results">Alle Ergebnisse löschen</string>
 </resources>

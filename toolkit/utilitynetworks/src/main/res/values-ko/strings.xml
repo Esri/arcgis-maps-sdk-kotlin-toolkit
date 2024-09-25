@@ -13,19 +13,19 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="new_trace">한_New trace___________________빠</string>
-    <string name="results">한_Results_______________빠</string>
-    <string name="trace_configuration">한_Trace Configuration____________________빠</string>
-    <string name="starting_points">한_Starting Points________________빠</string>
-    <string name="advanced_options">한_Advanced Options_________________빠</string>
-    <string name="name">한_Name_________빠</string>
-    <string name="color">한_Color___________빠</string>
-    <string name="zoom_to_result">한_Zoom to result_______________빠</string>
-    <string name="trace">한_Trace___________빠</string>
-    <string name="add_starting_point">한_Add new starting point_______________________빠</string>
-    <string name="cancel_starting_point_selection">한_Cancel starting point selection_________________빠</string>
-    <string name="trace_result_with_count">한_Trace %1$d of %2$d___________________빠</string>
-    <string name="feature_results">한_Feature Results________________빠</string>
-    <string name="function_results">한_Function Results_________________빠</string>
-    <string name="clear_all_results">한_Clear all results__________________빠</string>
+    <string name="new_trace">새 추적</string>
+    <string name="results">결과</string>
+    <string name="trace_configuration">추적 구성</string>
+    <string name="starting_points">시작점</string>
+    <string name="advanced_options">고급 옵션</string>
+    <string name="name">이름</string>
+    <string name="color">색상</string>
+    <string name="zoom_to_result">결과 확대</string>
+    <string name="trace">추적</string>
+    <string name="add_starting_point">새 시작점 추가</string>
+    <string name="cancel_starting_point_selection">시작점 선택 취소</string>
+    <string name="trace_result_with_count">%1$d/%2$d 추적</string>
+    <string name="feature_results">피처 결과</string>
+    <string name="function_results">함수 결과</string>
+    <string name="clear_all_results">모든 결과 지우기</string>
 </resources>

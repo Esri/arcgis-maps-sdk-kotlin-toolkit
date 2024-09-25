@@ -13,19 +13,19 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --><resources>
-    <string name="new_trace">π_New trace___________________Ω</string>
-    <string name="results">π_Results_______________Ω</string>
-    <string name="trace_configuration">π_Trace Configuration____________________Ω</string>
-    <string name="starting_points">π_Starting Points________________Ω</string>
-    <string name="advanced_options">π_Advanced Options_________________Ω</string>
-    <string name="name">π_Name_________Ω</string>
-    <string name="color">π_Color___________Ω</string>
-    <string name="zoom_to_result">π_Zoom to result_______________Ω</string>
-    <string name="trace">π_Trace___________Ω</string>
-    <string name="add_starting_point">π_Add new starting point_______________________Ω</string>
-    <string name="cancel_starting_point_selection">π_Cancel starting point selection_________________Ω</string>
-    <string name="trace_result_with_count">π_Trace %1$d of %2$d___________________Ω</string>
-    <string name="feature_results">π_Feature Results________________Ω</string>
-    <string name="function_results">π_Function Results_________________Ω</string>
-    <string name="clear_all_results">π_Clear all results__________________Ω</string>
+    <string name="new_trace">Νέα ιχνηλάτηση</string>
+    <string name="results">Αποτελέσματα</string>
+    <string name="trace_configuration">Παραμετροποίηση Ιχνηλάτησης</string>
+    <string name="starting_points">Σημεία Έναρξης</string>
+    <string name="advanced_options">Επιλογές για προχωρημένους</string>
+    <string name="name">Όνομα</string>
+    <string name="color">Χρώμα</string>
+    <string name="zoom_to_result">Εστίαση στο αποτέλεσμα</string>
+    <string name="trace">Ιχνηλάτηση</string>
+    <string name="add_starting_point">Προσθήκη νέου σημείου έναρξης</string>
+    <string name="cancel_starting_point_selection">Ακύρωση επιλογής σημείου έναρξης</string>
+    <string name="trace_result_with_count">Ιχνηλάτηση %1$d από %2$d</string>
+    <string name="feature_results">Αποτελέσματα Στοιχείου</string>
+    <string name="function_results">Αποτελέσματα Λειτουργίας</string>
+    <string name="clear_all_results">Απαλοιφή όλων των αποτελεσμάτων</string>
 </resources>
