@@ -128,7 +128,10 @@ internal fun TraceOptionsScreen(
                     AdvancedOptions()
                 }
             }
-            Button(onClick = { onPerformTraceButtonClicked() }) {
+            Button(
+                onClick = { onPerformTraceButtonClicked() },
+                enabled = selectedConfig != null && startingPoints.isNotEmpty()
+            ) {
                 Text(stringResource(id = R.string.trace))
             }
         }
