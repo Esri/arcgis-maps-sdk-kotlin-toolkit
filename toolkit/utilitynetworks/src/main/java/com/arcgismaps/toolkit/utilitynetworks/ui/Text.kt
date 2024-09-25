@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -44,7 +45,7 @@ import androidx.compose.ui.unit.sp
  * @since 200.6.0
  */
 private val style = TextStyle(
-    color = Color.Black,
+    color = Color.Unspecified,
     fontSize = 15.sp,
     fontWeight = FontWeight.SemiBold,
     fontStyle = FontStyle.Normal,
@@ -93,8 +94,7 @@ internal fun ReadOnlyTextField(
             ) {
                 Text(
                     text = text.ifEmpty { "--" },
-                    color = Color.Unspecified,
-                    style = style,
+                    style = style.copy(color = MaterialTheme.colorScheme.onBackground),
                     overflow = overflow,
                     maxLines = maxLines
                 )
