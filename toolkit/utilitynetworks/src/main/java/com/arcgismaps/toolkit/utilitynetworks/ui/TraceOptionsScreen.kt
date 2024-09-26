@@ -184,7 +184,6 @@ private fun TraceConfigurations(
                 .clickable {
                     showDropdown = !showDropdown
                 },
-            //horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             ReadOnlyTextField(
