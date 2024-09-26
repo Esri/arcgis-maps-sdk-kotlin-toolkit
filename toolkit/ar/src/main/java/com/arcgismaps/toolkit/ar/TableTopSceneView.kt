@@ -130,7 +130,6 @@ fun TableTopSceneView(
             isAttributionBarVisible = isAttributionBarVisible,
             onAttributionTextChanged = onAttributionTextChanged,
             onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
-//                cameraController = tableTopSceneViewState.cameraController,
             analysisOverlays = analysisOverlays,
             imageOverlays = imageOverlays,
             atmosphereEffect = AtmosphereEffect.None,
@@ -142,7 +141,6 @@ fun TableTopSceneView(
             ambientLightColor = ambientLightColor,
             onNavigationChanged = onNavigationChanged,
             onSpatialReferenceChanged = {
-//                scene view is ready?
                 onSpatialReferenceChanged?.invoke(it)
             },
             onLayerViewStateChanged = onLayerViewStateChanged,
