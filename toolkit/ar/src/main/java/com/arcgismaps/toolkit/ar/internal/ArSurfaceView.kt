@@ -18,9 +18,12 @@
 
 package com.arcgismaps.toolkit.ar.internal
 
+import android.content.Context
 import android.opengl.GLSurfaceView
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInteropFilter
@@ -29,41 +32,78 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.arcgismaps.toolkit.ar.ArSessionWrapper
 import com.arcgismaps.toolkit.ar.internal.render.CameraFeedRenderer
 import com.arcgismaps.toolkit.ar.internal.render.SurfaceDrawHandler
 import com.google.ar.core.Frame
 import com.google.ar.core.HitResult
 import com.google.ar.core.Session
 
+/**
+ * Renders the AR camera feed using a [GLSurfaceView].
+ *
+ * @param arSessionWrapper an [ArSessionWrapper] that provides an ARCore [Session].
+ * @param onFrame a callback that is invoked every frame.
+ * @param onTap a callback that is invoked when the user taps the screen and a hit is detected.
+ * @since 100.6.0
+ */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-public fun ARSurfaceView(session: Session, onFrame: (Frame) -> Unit, onTap: (hit: HitResult?) -> Unit) {
+internal fun ARSurfaceView(
+    arSessionWrapper: ArSessionWrapper,
+    onFrame: (Frame) -> Unit,
+    onTap: (hit: HitResult?) -> Unit
+) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
-    val surfaceView = GLSurfaceView(context)
+    val surfaceViewWrapper = remember { GLSurfaceViewWrapper(context) }
 
-    val cameraFeedRenderer = CameraFeedRenderer(context, session, context.assets, onFrame, onTap).apply {
-        // I don't understand the circular dependency between SurfaceDrawHandler and CameraFeedRenderer
-        this.surfaceDrawHandler = SurfaceDrawHandler(surfaceView, this)
-        lifecycleOwner.lifecycle.addObserver(this)
+    val cameraFeedRenderer = remember {
+        CameraFeedRenderer(
+            context,
+            arSessionWrapper.session,
+            context.assets,
+            onFrame,
+            onTap
+        ).apply {
+            this.surfaceDrawHandler = SurfaceDrawHandler(surfaceViewWrapper.glSurfaceView, this)
+        }
     }
 
-    lifecycleOwner.lifecycle.addObserver(object : DefaultLifecycleObserver {
-        override fun onPause(owner: LifecycleOwner) {
-            super.onPause(owner)
-            surfaceView.onPause()
-        }
+    DisposableEffect(Unit) {
+        lifecycleOwner.lifecycle.addObserver(surfaceViewWrapper)
+        lifecycleOwner.lifecycle.addObserver(cameraFeedRenderer)
 
-        override fun onResume(owner: LifecycleOwner) {
-            super.onResume(owner)
-            surfaceView.onResume()
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(surfaceViewWrapper)
+            lifecycleOwner.lifecycle.removeObserver(cameraFeedRenderer)
+            cameraFeedRenderer.onDestroy(lifecycleOwner)
         }
-    })
+    }
 
-    AndroidView(factory = { surfaceView }, modifier = Modifier
+    AndroidView(factory = { surfaceViewWrapper.glSurfaceView }, modifier = Modifier
         .fillMaxSize()
         .pointerInteropFilter {
             cameraFeedRenderer.onClick(it)
             true
         })
+}
+
+/**
+ * Provides a [GLSurfaceView] and handles its lifecycle.
+ *
+ * @since 100.6.0
+ */
+internal class GLSurfaceViewWrapper(context: Context) : DefaultLifecycleObserver {
+    val glSurfaceView = GLSurfaceView(context)
+
+    override fun onPause(owner: LifecycleOwner) {
+        super.onPause(owner)
+        glSurfaceView.onPause()
+    }
+
+    override fun onResume(owner: LifecycleOwner) {
+        super.onResume(owner)
+        glSurfaceView.onResume()
+    }
 }
