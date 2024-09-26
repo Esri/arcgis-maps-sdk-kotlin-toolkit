@@ -102,8 +102,6 @@ fun TableTopSceneView(
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
     content: (@Composable TableTopSceneViewScope.() -> Unit)? = null
 ) {
-    tableTopSceneViewProxy.sceneViewProxy.setManualRenderingEnabled(true)
-
     val lifecycleOwner = LocalLifecycleOwner.current
 
     val context = LocalContext.current

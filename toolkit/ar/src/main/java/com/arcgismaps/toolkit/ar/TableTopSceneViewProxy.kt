@@ -53,6 +53,10 @@ public final class TableTopSceneViewProxy internal constructor(internal val scen
 
     public constructor() : this(SceneViewProxy())
 
+    init {
+        sceneViewProxy.setManualRenderingEnabled(true)
+    }
+
     /**
      * True if continuous panning across the international date line is enabled in the TableTopSceneView, false otherwise.
      * A null value represents that it is currently undetermined.
