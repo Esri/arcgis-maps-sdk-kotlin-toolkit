@@ -16,10 +16,12 @@
 
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -43,7 +45,7 @@ import androidx.compose.ui.unit.sp
  * @since 200.6.0
  */
 private val style = TextStyle(
-    color = Color.Black,
+    color = Color.Unspecified,
     fontSize = 15.sp,
     fontWeight = FontWeight.SemiBold,
     fontStyle = FontStyle.Normal,
@@ -68,7 +70,8 @@ internal fun ReadOnlyTextField(
     modifier: Modifier = Modifier,
     overflow: TextOverflow = TextOverflow.Ellipsis,
     maxLines: Int = 1,
-    leadingIcon: (@Composable () -> Unit)? = null
+    leadingIcon: (@Composable () -> Unit)? = null,
+    trailingIcon: (@Composable () -> Unit)? = null
 ) {
     Row(
         modifier = modifier
@@ -81,13 +84,23 @@ internal fun ReadOnlyTextField(
         SelectionContainer(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
         ) {
-            Text(
-                text = text.ifEmpty { "--" },
-                color = Color.Unspecified,
-                style = style,
-                overflow = overflow,
-                maxLines = maxLines
-            )
+            Row(
+                modifier = modifier
+                    .fillMaxWidth()
+                    // merge descendants semantics to make them part of the parent node
+                    .semantics(mergeDescendants = true) {},
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = text.ifEmpty { "--" },
+                    style = style.copy(color = MaterialTheme.colorScheme.onBackground),
+                    overflow = overflow,
+                    maxLines = maxLines
+                )
+                trailingIcon?.invoke()
+            }
         }
+
     }
 }
