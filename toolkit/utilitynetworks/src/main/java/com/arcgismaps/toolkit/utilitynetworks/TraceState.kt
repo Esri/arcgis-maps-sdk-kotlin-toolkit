@@ -125,7 +125,7 @@ public class TraceState(
     private var currentTraceGraphicsColor: Color = Color.green
     private var currentTraceZoomToResults: Boolean = false
 
-    private val resultExtent: Envelope?
+    private val currentTraceResultGeometriesExtent: Envelope?
     get() {
         val utilityGeometryTraceResult = _currentTraceRun.value?.geometryTraceResult ?: return null
 
@@ -263,7 +263,7 @@ public class TraceState(
         ).also { completedTraces.add(it) }
 
         if (currentTraceZoomToResults) {
-            resultExtent?.let {
+            currentTraceResultGeometriesExtent?.let {
                 mapViewProxy.setViewpointAnimated(
                     Viewpoint(it),
                     2.0.seconds,
