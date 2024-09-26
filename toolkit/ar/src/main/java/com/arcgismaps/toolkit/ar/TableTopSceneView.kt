@@ -104,15 +104,15 @@ fun TableTopSceneView(
 ) {
     tableTopSceneViewProxy.sceneViewProxy.setManualRenderingEnabled(true)
 
-    val localLifecycleOwner = LocalLifecycleOwner.current
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     val context = LocalContext.current
     val arSessionWrapper = remember { ArSessionWrapper(context.applicationContext) }
     DisposableEffect(Unit) {
-        localLifecycleOwner.lifecycle.addObserver(arSessionWrapper)
+        lifecycleOwner.lifecycle.addObserver(arSessionWrapper)
         onDispose {
-            localLifecycleOwner.lifecycle.removeObserver(arSessionWrapper)
-            arSessionWrapper.onDestroy(localLifecycleOwner)
+            lifecycleOwner.lifecycle.removeObserver(arSessionWrapper)
+            arSessionWrapper.onDestroy(lifecycleOwner)
         }
     }
 
