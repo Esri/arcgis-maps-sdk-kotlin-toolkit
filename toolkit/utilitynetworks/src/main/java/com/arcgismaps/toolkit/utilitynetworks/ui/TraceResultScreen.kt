@@ -21,6 +21,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -230,7 +231,7 @@ internal fun TraceResultSection(title: String, value: String, content: @Composab
         ExpandableCard(
             initialExpandedState = false,
             title = value,
-            padding = 0.dp,
+            padding = PaddingValues(0.dp),
             modifier = Modifier.padding(horizontal = 16.dp)
         ) {
             content()
