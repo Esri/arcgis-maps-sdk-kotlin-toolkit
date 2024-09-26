@@ -25,7 +25,7 @@ import com.google.ar.core.Session
 /**
  * Provides an ARCore [Session] and manages the session's lifecycle.
  *
- * @since 100.6.0
+ * @since 200.6.0
  */
 internal class ArSessionWrapper(applicationContext: Context) : DefaultLifecycleObserver {
     val session: Session = Session(applicationContext)

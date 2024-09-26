@@ -44,7 +44,7 @@ import com.google.ar.core.Session
  * @param arSessionWrapper an [ArSessionWrapper] that provides an ARCore [Session].
  * @param onFrame a callback that is invoked every frame.
  * @param onTap a callback that is invoked when the user taps the screen and a hit is detected.
- * @since 100.6.0
+ * @since 200.6.0
  */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -91,7 +91,7 @@ internal fun ARSurfaceView(
 /**
  * Provides a [GLSurfaceView] and handles its lifecycle.
  *
- * @since 100.6.0
+ * @since 200.6.0
  */
 internal class GLSurfaceViewWrapper(context: Context) : DefaultLifecycleObserver {
     val glSurfaceView = GLSurfaceView(context)
