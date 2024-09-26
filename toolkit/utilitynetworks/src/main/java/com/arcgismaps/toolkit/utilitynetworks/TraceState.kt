@@ -275,6 +275,13 @@ public class TraceState(
         return true
     }
 
+    /**
+     * Returns the name of the trace set by the user using the advanced options, else it auto-populates
+     * the name.
+     *
+     * @return the name of the trace
+     * @since 200.6.0
+     */
     private fun getTraceName(): String {
         currentTraceName?.let {
             return it
