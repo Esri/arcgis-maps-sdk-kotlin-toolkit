@@ -95,7 +95,10 @@ internal fun TraceOptionsScreen(
     onStartingPointRemoved: (StartingPoint) -> Unit,
     onConfigSelected: (UtilityNamedTraceConfiguration) -> Unit,
     onPerformTraceButtonClicked: () -> Unit,
-    onAddStartingPointButtonClicked: () -> Unit
+    onAddStartingPointButtonClicked: () -> Unit,
+    onNameChange: (String) -> Unit,
+    onColorChanged: (Color) -> Unit,
+    onZoomRequested: (Boolean) -> Unit
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surface,
@@ -125,7 +128,11 @@ internal fun TraceOptionsScreen(
                     )
                 }
                 item {
-                    AdvancedOptions()
+                    AdvancedOptions(
+                        onNameChange = onNameChange,
+                        onColorChanged = onColorChanged,
+                        onZoomRequested = onZoomRequested
+                    )
                 }
             }
             Button(
@@ -234,7 +241,8 @@ internal fun AdvancedOptions(
     showName: Boolean = true,
     showZoomToResult: Boolean = true,
     onNameChange: (String) -> Unit = {},
-    onZoomRequested: () -> Unit = {}
+    onColorChanged: (Color) -> Unit = {},
+    onZoomRequested: (Boolean) -> Unit = {}
 ) {
     ExpandableCard(
         title = stringResource(id = R.string.advanced_options),
@@ -245,15 +253,23 @@ internal fun AdvancedOptions(
         Column {
             if (showName) {
                 val focusManager = LocalFocusManager.current
-                AdvancedOptionsRow(name = stringResource(id = R.string.name)) {
-                    var text by rememberSaveable { mutableStateOf("test trace result name") }
+                Row(
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .height(80.dp)
+                        .padding(10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    var text by rememberSaveable { mutableStateOf("") }
                     TextField(
                         value = text,
                         onValueChange = { newValue ->
                             text = newValue
                             onNameChange(newValue)
                         },
-                        modifier = Modifier.defaultMinSize(minWidth = 1.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text(stringResource(id = R.string.name)) },
                         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
                         keyboardActions = KeyboardActions(onDone = {
                             focusManager.clearFocus()
@@ -266,7 +282,7 @@ internal fun AdvancedOptions(
 
             // Color picker
             AdvancedOptionsRow(name = stringResource(id = R.string.color)) {
-                ColorPicker()
+                ColorPicker(onColorChanged)
             }
 
             if (showZoomToResult) {
@@ -287,9 +303,7 @@ internal fun AdvancedOptions(
                     Switch(
                         checked = isEnabled,
                         onCheckedChange = { newState ->
-                            if (newState) {
-                                onZoomRequested()
-                            }
+                            onZoomRequested(newState)
                         },
                         modifier = Modifier
                             .semantics { contentDescription = "switch" }
@@ -309,7 +323,7 @@ internal fun AdvancedOptions(
  * @since 200.6.0
  */
 @Composable
-internal fun ColorPicker() {
+internal fun ColorPicker(onColorChanged: (Color) -> Unit = {}) {
     var currentSelectedColor by rememberSaveable(saver = ColorSaver.Saver()) { mutableStateOf(Color.Red) }
     var displayPicker by rememberSaveable { mutableStateOf(false) }
     Box {
@@ -345,13 +359,14 @@ internal fun ColorPicker() {
                                     .clickable {
                                         currentSelectedColor = it
                                         displayPicker = false
+                                        onColorChanged(currentSelectedColor)
                                     }
                                 )
                             }
 
                         }
                     },
-                    onClick = {},
+                    onClick = { /* No action needed here */ },
                     contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp)
                 )
             }

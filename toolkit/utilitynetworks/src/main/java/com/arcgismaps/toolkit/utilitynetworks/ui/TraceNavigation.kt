@@ -65,6 +65,15 @@ internal fun TraceNavHost(traceState: TraceState) {
                 onStartingPointRemoved = { traceState.removeStartingPoint(it) },
                 onConfigSelected = { newConfig ->
                     traceState.setSelectedTraceConfiguration(newConfig)
+                },
+                onNameChange = {
+                    traceState.setTraceName(it)
+                               },
+                onColorChanged = {
+                    traceState.setGraphicsColor(it)
+                                 },
+                onZoomRequested = {
+                    traceState.setZoomToResults(it)
                 }
             )
         }
