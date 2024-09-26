@@ -101,21 +101,21 @@ fun TableTopSceneView(
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
     content: (@Composable TableTopSceneViewScope.() -> Unit)? = null
 ) {
-    Box(modifier = modifier) {
-        tableTopSceneViewProxy.sceneViewProxy.setManualRenderingEnabled(true)
+    tableTopSceneViewProxy.sceneViewProxy.setManualRenderingEnabled(true)
 
-        val localLifecycleOwner = LocalLifecycleOwner.current
+    val localLifecycleOwner = LocalLifecycleOwner.current
 
-        val context = LocalContext.current
-        val arSessionWrapper = remember { ArSessionWrapper(context.applicationContext) }
-        DisposableEffect(Unit) {
-            localLifecycleOwner.lifecycle.addObserver(arSessionWrapper)
-            onDispose {
-                localLifecycleOwner.lifecycle.removeObserver(arSessionWrapper)
-                arSessionWrapper.onDestroy(localLifecycleOwner)
-            }
+    val context = LocalContext.current
+    val arSessionWrapper = remember { ArSessionWrapper(context.applicationContext) }
+    DisposableEffect(Unit) {
+        localLifecycleOwner.lifecycle.addObserver(arSessionWrapper)
+        onDispose {
+            localLifecycleOwner.lifecycle.removeObserver(arSessionWrapper)
+            arSessionWrapper.onDestroy(localLifecycleOwner)
         }
+    }
 
+    Box(modifier = modifier) {
         ARSurfaceView(arSessionWrapper = arSessionWrapper, onFrame = {}, onTap = {})
         SceneView(
             arcGISScene = arcGISScene,
