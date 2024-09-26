@@ -15,7 +15,7 @@
  *  limitations under the License.
  *
  */
-package com.arcgismaps.toolkit.ar
+package com.arcgismaps.toolkit.ar.internal
 
 import android.content.Context
 import androidx.lifecycle.DefaultLifecycleObserver
