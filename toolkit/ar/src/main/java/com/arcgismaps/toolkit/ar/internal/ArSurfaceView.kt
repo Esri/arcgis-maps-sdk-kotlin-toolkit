@@ -48,7 +48,7 @@ import com.google.ar.core.Session
  */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-internal fun ARSurfaceView(
+internal fun ArCameraFeed(
     arSessionWrapper: ArSessionWrapper,
     onFrame: (Frame) -> Unit,
     onTap: (hit: HitResult?) -> Unit

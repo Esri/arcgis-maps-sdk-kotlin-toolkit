@@ -53,7 +53,7 @@ import com.arcgismaps.mapping.view.SpaceEffect
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
-import com.arcgismaps.toolkit.ar.internal.ARSurfaceView
+import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
 import com.arcgismaps.toolkit.ar.internal.ArSessionWrapper
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
@@ -117,7 +117,7 @@ fun TableTopSceneView(
     }
 
     Box(modifier = modifier) {
-        ARSurfaceView(arSessionWrapper = arSessionWrapper, onFrame = {}, onTap = {})
+        ArCameraFeed(arSessionWrapper = arSessionWrapper, onFrame = {}, onTap = {})
         SceneView(
             arcGISScene = arcGISScene,
             modifier = Modifier.fillMaxSize(),
