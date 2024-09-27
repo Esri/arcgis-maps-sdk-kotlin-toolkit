@@ -16,8 +16,6 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.barcode
 
-import android.content.Context
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
@@ -32,9 +30,6 @@ import com.arcgismaps.toolkit.featureforms.internal.components.base.FieldPropert
 import com.arcgismaps.toolkit.featureforms.internal.components.base.ValidationErrorState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.formattedValueAsStateFlow
 import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValidationErrors
-import com.google.mlkit.vision.barcode.common.Barcode
-import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
-import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
@@ -92,19 +87,6 @@ internal class BarcodeTextFieldState(
      * The maximum length of the field.
      */
     val maxLength = properties.maxLength
-
-    fun startScan(context: Context) {
-        val options = GmsBarcodeScannerOptions.Builder()
-            .setBarcodeFormats(Barcode.FORMAT_ALL_FORMATS)
-            .build()
-        val scanner = GmsBarcodeScanning.getClient(context, options)
-        scanner.startScan().addOnSuccessListener {
-            Log.e("TAG", "success scan: $it", )
-            it.rawValue?.let { it1 -> onValueChanged(it1) }
-        }.addOnFailureListener {
-            Log.e("TAG", "startScan: failed scan: $it", it)
-        }
-    }
 
     override fun typeConverter(input: String): Any? {
         if (input.isEmpty()) {
