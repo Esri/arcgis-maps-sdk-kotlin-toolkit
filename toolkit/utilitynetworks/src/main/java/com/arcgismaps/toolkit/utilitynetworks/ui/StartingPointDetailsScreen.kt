@@ -42,9 +42,9 @@ import com.arcgismaps.toolkit.utilitynetworks.StartingPoint
 
 
 @Composable
-internal fun StartingPointDetails(startingPoint: StartingPoint?,
-                                  onFractionChanged: (StartingPoint, Float) -> Unit,
-                                  onBackPressed: () -> Unit) {
+internal fun StartingPointDetailsScreen(startingPoint: StartingPoint?,
+                                        onFractionChanged: (StartingPoint, Float) -> Unit,
+                                        onBackPressed: () -> Unit) {
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -102,7 +102,7 @@ private fun SliderPreview() {
 @Preview(showBackground = true)
 @Composable
 internal fun StartingPointDetailsPreview() {
-    StartingPointDetails(null, onFractionChanged = { _, _ -> }) {
+    StartingPointDetailsScreen(null, onFractionChanged = { _, _ -> }) {
 
     }
 
