@@ -284,7 +284,7 @@ public class TraceState(
                 mapViewProxy.setViewpointAnimated(
                     Viewpoint(it),
                     2.0.seconds,
-                    AnimationCurve.Linear
+                    AnimationCurve.EaseOutCirc
                 )
             }
         }

@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -48,10 +47,10 @@ import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -354,7 +353,7 @@ internal fun AdvancedOptions(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     var text by rememberSaveable { mutableStateOf(defaultTraceName) }
-                    TextField(
+                    OutlinedTextField(
                         value = text,
                         onValueChange = { newValue ->
                             text = newValue
@@ -504,13 +503,13 @@ private fun AdvancedOptionsRow(name: String, modifier: Modifier = Modifier, trai
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 private fun AdvancedOptionsPreview() {
     AdvancedOptions(defaultTraceName = "", selectedColor = Color.Green, zoomToResult = false)
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 private fun AdvancedOptionsRowPreview() {
     var isEnabled by remember { mutableStateOf(false) }
