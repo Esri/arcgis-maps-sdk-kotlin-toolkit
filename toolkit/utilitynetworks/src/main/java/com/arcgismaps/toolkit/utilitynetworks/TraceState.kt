@@ -193,6 +193,14 @@ public class TraceState(
         return GeometryEngine.fractionAlong(polyline, tapPoint, 10.0)
     }
 
+    /**
+     * Determines the point at the given distance along the line. The distance is a
+     * fraction of the total length of the line.
+     *
+     * @param startingPoint the starting point to update
+     * @param newValue the new fraction along the edge
+     * @since 200.6.0
+     */
     internal fun setFractionAlongEdge(startingPoint: StartingPoint, newValue: Double) {
         startingPoint.utilityElement.fractionAlongEdge = newValue
         val geometry = startingPoint.feature.geometry
