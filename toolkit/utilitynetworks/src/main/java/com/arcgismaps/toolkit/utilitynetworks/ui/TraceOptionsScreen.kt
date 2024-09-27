@@ -92,6 +92,7 @@ internal fun TraceOptionsScreen(
     configurations: List<UtilityNamedTraceConfiguration>,
     startingPoints: List<StartingPoint>,
     selectedConfig: UtilityNamedTraceConfiguration?,
+    selectedColor: Color,
     onStartingPointRemoved: (StartingPoint) -> Unit,
     onConfigSelected: (UtilityNamedTraceConfiguration) -> Unit,
     onPerformTraceButtonClicked: () -> Unit,
@@ -131,6 +132,7 @@ internal fun TraceOptionsScreen(
                     AdvancedOptions(
                         onNameChange = onNameChange,
                         onColorChanged = onColorChanged,
+                        selectedColor = selectedColor,
                         onZoomRequested = onZoomRequested
                     )
                 }
@@ -240,6 +242,7 @@ internal fun AdvancedOptions(
     @Suppress("unused_parameter") modifier: Modifier = Modifier,
     showName: Boolean = true,
     showZoomToResult: Boolean = true,
+    selectedColor: Color,
     onNameChange: (String) -> Unit = {},
     onColorChanged: (Color) -> Unit = {},
     onZoomRequested: (Boolean) -> Unit = {}
@@ -282,7 +285,7 @@ internal fun AdvancedOptions(
 
             // Color picker
             AdvancedOptionsRow(name = stringResource(id = R.string.color)) {
-                ColorPicker(onColorChanged)
+                ColorPicker(selectedColor, onColorChanged)
             }
 
             if (showZoomToResult) {
@@ -323,8 +326,8 @@ internal fun AdvancedOptions(
  * @since 200.6.0
  */
 @Composable
-internal fun ColorPicker(onColorChanged: (Color) -> Unit = {}) {
-    var currentSelectedColor by rememberSaveable(saver = ColorSaver.Saver()) { mutableStateOf(Color.Red) }
+internal fun ColorPicker(selectedColor: Color, onColorChanged: (Color) -> Unit = {}) {
+    var currentSelectedColor by rememberSaveable(saver = ColorSaver.Saver()) { mutableStateOf(selectedColor) }
     var displayPicker by rememberSaveable { mutableStateOf(false) }
     Box {
         TraceColors.SpectralRing(
@@ -415,7 +418,7 @@ private fun AdvancedOptionsRow(name: String, modifier: Modifier = Modifier, trai
 @Preview
 @Composable
 private fun AdvancedOptionsPreview() {
-    AdvancedOptions()
+    AdvancedOptions(selectedColor = Color.Green)
 }
 
 @Preview

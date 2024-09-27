@@ -123,6 +123,14 @@ public class TraceState(
 
     private var currentTraceName: String? = null
     private var currentTraceGraphicsColor: Color = Color.green
+    public val currentTraceGraphicsColorAsComposeColor: androidx.compose.ui.graphics.Color
+        get() = androidx.compose.ui.graphics.Color(
+            currentTraceGraphicsColor.red,
+            currentTraceGraphicsColor.green,
+            currentTraceGraphicsColor.blue,
+            currentTraceGraphicsColor.alpha
+        )
+
     private var currentTraceZoomToResults: Boolean = false
 
     private val currentTraceResultGeometriesExtent: Envelope?
@@ -412,10 +420,7 @@ public class TraceState(
         }
         // update the color of the trace results graphics
         currentTraceGeometryResultsGraphics.forEach { graphic ->
-            if (graphic.symbol is SimpleMarkerSymbol) {
-                val symbol = graphic.symbol as SimpleMarkerSymbol
-                symbol.color = currentTraceGraphicsColor
-            } else if (graphic.symbol is SimpleLineSymbol) {
+            if (graphic.symbol is SimpleLineSymbol) {
                 val symbol = graphic.symbol as SimpleLineSymbol
                 symbol.color = currentTraceGraphicsColor
             }
