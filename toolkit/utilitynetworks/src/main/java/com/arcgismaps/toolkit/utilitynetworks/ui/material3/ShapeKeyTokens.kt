@@ -16,7 +16,7 @@
 // VERSION: v0_103
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-package com.arcgismaps.toolkit.ui.material3
+package com.arcgismaps.toolkit.utilitynetworks.ui.material3
 
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerBasedShape
@@ -67,7 +67,7 @@ internal fun Shapes.fromToken(value: ShapeKeyTokens): Shape {
     }
 }
 
-internal val com.arcgismaps.toolkit.ui.material3.ShapeKeyTokens.value: Shape
+internal val ShapeKeyTokens.value: Shape
     @Composable
     @ReadOnlyComposable
     get() = MaterialTheme.shapes.fromToken(this)

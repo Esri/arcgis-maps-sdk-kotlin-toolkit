@@ -12,11 +12,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Modifications 2024: Esri Inc. Removed experimental annotations
+ * Modifications 2024: Esri Inc. Made functions public and explicitly specified return types
  */
 
-package com.arcgismaps.toolkit.ui.material3
+package com.arcgismaps.toolkit.utilitynetworks.ui.material3
 
-
+/**
+ * This is a copy of androidx.compose.material3.Slider until that API is
+ * promoted to stable in foundation.
+ */
 import androidx.annotation.IntRange
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.MutatePriority
@@ -151,9 +157,8 @@ import kotlin.math.sign
  * for this slider. You can create and pass in your own `remember`ed instance to observe
  * [Interaction]s and customize the appearance / behavior of this slider in different states.
  */
-//@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Slider(
+public fun Slider(
     value: Float,
     onValueChange: (Float) -> Unit,
     modifier: Modifier = Modifier,
@@ -246,8 +251,7 @@ fun Slider(
  * to this range.
  */
 @Composable
-//@ExperimentalMaterial3Api
-fun Slider(
+public fun Slider(
     value: Float,
     onValueChange: (Float) -> Unit,
     modifier: Modifier = Modifier,
@@ -344,8 +348,7 @@ fun Slider(
  * lambda receives a [SliderState] which is used to obtain the current active track.
  */
 @Composable
-//@ExperimentalMaterial3Api
-fun Slider(
+public fun Slider(
     state: SliderState,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
@@ -411,9 +414,8 @@ fun Slider(
  * @param colors [SliderColors] that will be used to determine the color of the Range Slider
  * parts in different state. See [SliderDefaults.colors] to customize.
  */
-//@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RangeSlider(
+public fun RangeSlider(
     value: ClosedFloatingPointRange<Float>,
     onValueChange: (ClosedFloatingPointRange<Float>) -> Unit,
     modifier: Modifier = Modifier,
@@ -516,8 +518,7 @@ fun RangeSlider(
  * coerced to this range.
  */
 @Composable
-//@ExperimentalMaterial3Api
-fun RangeSlider(
+public fun RangeSlider(
     value: ClosedFloatingPointRange<Float>,
     onValueChange: (ClosedFloatingPointRange<Float>) -> Unit,
     modifier: Modifier = Modifier,
@@ -626,8 +627,7 @@ fun RangeSlider(
  * The lambda receives a [RangeSliderState] which is used to obtain the current active track.
  */
 @Composable
-//@ExperimentalMaterial3Api
-fun RangeSlider(
+public fun RangeSlider(
     state: RangeSliderState,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
@@ -670,7 +670,6 @@ fun RangeSlider(
     )
 }
 
-//@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SliderImpl(
     modifier: Modifier,
@@ -708,8 +707,8 @@ private fun SliderImpl(
         modifier = modifier
             .minimumInteractiveComponentSize()
             .requiredSizeIn(
-                minWidth = com.arcgismaps.toolkit.ui.material3.SliderTokens.HandleWidth,
-                minHeight = com.arcgismaps.toolkit.ui.material3.SliderTokens.HandleHeight
+                minWidth = SliderTokens.HandleWidth,
+                minHeight = SliderTokens.HandleHeight
             )
             .sliderSemantics(
                 state,
@@ -758,7 +757,6 @@ private fun SliderImpl(
     }
 }
 
-//@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RangeSliderImpl(
     modifier: Modifier,
@@ -886,14 +884,14 @@ private fun RangeSliderImpl(
  * Object to hold defaults used by [Slider]
  */
 @Stable
-object SliderDefaults {
+public object SliderDefaults {
 
     /**
      * Creates a [SliderColors] that represents the different colors used in parts of the
      * [Slider] in different states.
      */
     @Composable
-    fun colors() = MaterialTheme.colorScheme.defaultSliderColors
+    public fun colors() : SliderColors = MaterialTheme.colorScheme.defaultSliderColors
 
     /**
      * Creates a [SliderColors] that represents the different colors used in parts of the
@@ -923,7 +921,7 @@ object SliderDefaults {
      * of the track when Slider is disabled and when `steps` are specified on it
      */
     @Composable
-    fun colors(
+    public fun colors(
         thumbColor: Color = Color.Unspecified,
         activeTrackColor: Color = Color.Unspecified,
         activeTickColor: Color = Color.Unspecified,
@@ -985,7 +983,7 @@ object SliderDefaults {
      * accessibility services.
      */
     @Composable
-    fun Thumb(
+    public fun Thumb(
         interactionSource: MutableInteractionSource,
         modifier: Modifier = Modifier,
         colors: SliderColors = colors(),
@@ -1045,7 +1043,7 @@ object SliderDefaults {
     @Suppress("DEPRECATION")
     @Composable
     @Deprecated("Use version that supports slider state")
-    fun Track(
+    public fun Track(
         sliderPositions: SliderPositions,
         modifier: Modifier = Modifier,
         colors: SliderColors = colors(),
@@ -1122,8 +1120,7 @@ object SliderDefaults {
      * accessibility services.
      */
     @Composable
-    //@ExperimentalMaterial3Api
-    fun Track(
+    public fun Track(
         sliderState: SliderState,
         modifier: Modifier = Modifier,
         colors: SliderColors = colors(),
@@ -1161,9 +1158,8 @@ object SliderDefaults {
      * not respond to user input, and it will appear visually disabled and disabled to
      * accessibility services.
      */
-    //@OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun Track(
+    public fun Track(
         rangeSliderState: RangeSliderState,
         modifier: Modifier = Modifier,
         colors: SliderColors = colors(),
@@ -1286,7 +1282,6 @@ private fun scale(a1: Float, b1: Float, x: SliderRange, a2: Float, b2: Float) =
 private fun calcFraction(a: Float, b: Float, pos: Float) =
     (if (b - a == 0f) 0f else (pos - a) / (b - a)).coerceIn(0f, 1f)
 
-//@OptIn(ExperimentalMaterial3Api::class)
 private fun Modifier.sliderSemantics(
     state: SliderState,
     enabled: Boolean
@@ -1344,7 +1339,6 @@ private fun Modifier.sliderSemantics(
     )
 }
 
-//@OptIn(ExperimentalMaterial3Api::class)
 private fun Modifier.rangeSliderStartThumbSemantics(
     state: RangeSliderState,
     enabled: Boolean
@@ -1406,7 +1400,6 @@ private fun Modifier.rangeSliderStartThumbSemantics(
     )
 }
 
-//@OptIn(ExperimentalMaterial3Api::class)
 private fun Modifier.rangeSliderEndThumbSemantics(
     state: RangeSliderState,
     enabled: Boolean
@@ -1465,7 +1458,6 @@ private fun Modifier.rangeSliderEndThumbSemantics(
     )
 }
 
-//@OptIn(ExperimentalMaterial3Api::class)
 @Stable
 private fun Modifier.sliderTapModifier(
     state: SliderState,
@@ -1485,7 +1477,6 @@ private fun Modifier.sliderTapModifier(
     this
 }
 
-//@OptIn(ExperimentalMaterial3Api::class)
 @Stable
 private fun Modifier.rangeSliderPressDragModifier(
     state: RangeSliderState,
@@ -1558,7 +1549,6 @@ private fun Modifier.rangeSliderPressDragModifier(
         this
     }
 
-//@OptIn(ExperimentalMaterial3Api::class)
 private class RangeSliderLogic(
     val state: RangeSliderState,
     val startInteractionSource: MutableInteractionSource,
@@ -1616,24 +1606,24 @@ private class RangeSliderLogic(
  * of the track when Slider is disabled and when `steps` are specified on it
  */
 @Immutable
-class SliderColors(
-    val thumbColor: Color,
-    val activeTrackColor: Color,
-    val activeTickColor: Color,
-    val inactiveTrackColor: Color,
-    val inactiveTickColor: Color,
-    val disabledThumbColor: Color,
-    val disabledActiveTrackColor: Color,
-    val disabledActiveTickColor: Color,
-    val disabledInactiveTrackColor: Color,
-    val disabledInactiveTickColor: Color
+public class SliderColors(
+    public val thumbColor: Color,
+    public val activeTrackColor: Color,
+    public val activeTickColor: Color,
+    public val inactiveTrackColor: Color,
+    public val inactiveTickColor: Color,
+    public val disabledThumbColor: Color,
+    public val disabledActiveTrackColor: Color,
+    public val disabledActiveTickColor: Color,
+    public val disabledInactiveTrackColor: Color,
+    public val disabledInactiveTickColor: Color
 ) {
 
     /**
      * Returns a copy of this SelectableChipColors, optionally overriding some of the values.
      * This uses the Color.Unspecified to mean “use the value from the source”
      */
-    fun copy(
+    public fun copy(
         thumbColor: Color = this.thumbColor,
         activeTrackColor: Color = this.activeTrackColor,
         activeTickColor: Color = this.activeTickColor,
@@ -1644,7 +1634,7 @@ class SliderColors(
         disabledActiveTickColor: Color = this.disabledActiveTickColor,
         disabledInactiveTrackColor: Color = this.disabledInactiveTrackColor,
         disabledInactiveTickColor: Color = this.disabledInactiveTickColor,
-    ) = SliderColors(
+    ): SliderColors = SliderColors(
         thumbColor.takeOrElse { this.thumbColor },
         activeTrackColor.takeOrElse { this.activeTrackColor },
         activeTickColor.takeOrElse { this.activeTickColor },
@@ -1739,7 +1729,7 @@ private enum class RangeSliderComponents {
 @Suppress("DEPRECATION")
 @Deprecated("Not necessary with the introduction of Slider state")
 @Stable
-class SliderPositions(
+public class SliderPositions(
     initialActiveRange: ClosedFloatingPointRange<Float> = 0f..1f,
     initialTickFractions: FloatArray = floatArrayOf()
 ) {
@@ -1747,7 +1737,7 @@ class SliderPositions(
      * [ClosedFloatingPointRange] that indicates the current active range for the
      * start to thumb for a [Slider] and start thumb to end thumb for a [RangeSlider].
      */
-    var activeRange: ClosedFloatingPointRange<Float> by mutableStateOf(initialActiveRange)
+    public var activeRange: ClosedFloatingPointRange<Float> by mutableStateOf(initialActiveRange)
         internal set
 
     /**
@@ -1755,7 +1745,7 @@ class SliderPositions(
      * Each value of tickFractions should be within the range [0f, 1f]. If
      * the track is continuous, then tickFractions will be an empty [FloatArray].
      */
-    var tickFractions: FloatArray by mutableStateOf(initialTickFractions)
+    public var tickFractions: FloatArray by mutableStateOf(initialTickFractions)
         internal set
 
     override fun equals(other: Any?): Boolean {
@@ -1791,13 +1781,12 @@ class SliderPositions(
  * coerced to this range.
  */
 @Stable
-//@ExperimentalMaterial3Api
-class SliderState(
+public class SliderState(
     value: Float = 0f,
     @IntRange(from = 0)
-    val steps: Int = 0,
-    val onValueChangeFinished: (() -> Unit)? = null,
-    val valueRange: ClosedFloatingPointRange<Float> = 0f..1f
+    public val steps: Int = 0,
+    public val onValueChangeFinished: (() -> Unit)? = null,
+    public val valueRange: ClosedFloatingPointRange<Float> = 0f..1f
 ) : DraggableState {
 
     private var valueState by mutableFloatStateOf(value)
@@ -1806,7 +1795,7 @@ class SliderState(
      * [Float] that indicates the current value that the thumb
      * currently is in respect to the track.
      */
-    var value: Float
+    public var value: Float
         set(newVal) {
             val coercedValue = newVal.coerceIn(valueRange.start, valueRange.endInclusive)
             val snappedValue = snapValueToTick(
@@ -1918,14 +1907,13 @@ class SliderState(
  * and [activeRangeEnd] will be coerced to this range.
  */
 @Stable
-//@ExperimentalMaterial3Api
-class RangeSliderState(
+public class RangeSliderState(
     activeRangeStart: Float = 0f,
     activeRangeEnd: Float = 1f,
     @IntRange(from = 0)
-    val steps: Int = 0,
-    val onValueChangeFinished: (() -> Unit)? = null,
-    val valueRange: ClosedFloatingPointRange<Float> = 0f..1f
+    public val steps: Int = 0,
+    public val onValueChangeFinished: (() -> Unit)? = null,
+    public val valueRange: ClosedFloatingPointRange<Float> = 0f..1f
 ) {
     private var activeRangeStartState by mutableFloatStateOf(activeRangeStart)
     private var activeRangeEndState by mutableFloatStateOf(activeRangeEnd)
@@ -1933,7 +1921,7 @@ class RangeSliderState(
     /**
      * [Float] that indicates the start of the current active range for the [RangeSlider].
      */
-    var activeRangeStart: Float
+    public var activeRangeStart: Float
         set(newVal) {
             val coercedValue = newVal.coerceIn(valueRange.start, activeRangeEnd)
             val snappedValue = snapValueToTick(
@@ -1949,7 +1937,7 @@ class RangeSliderState(
     /**
      * [Float] that indicates the end of the current active range for the [RangeSlider].
      */
-    var activeRangeEnd: Float
+    public var activeRangeEnd: Float
         set(newVal) {
             val coercedValue = newVal.coerceIn(activeRangeStart, valueRange.endInclusive)
             val snappedValue = snapValueToTick(

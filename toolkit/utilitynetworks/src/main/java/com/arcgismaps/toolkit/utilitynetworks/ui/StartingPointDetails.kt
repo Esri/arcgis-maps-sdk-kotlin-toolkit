@@ -36,7 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.geometry.Polyline
-import com.arcgismaps.toolkit.ui.material3.Slider
+import com.arcgismaps.toolkit.utilitynetworks.ui.material3.Slider
 import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.toolkit.utilitynetworks.StartingPoint
 
@@ -75,10 +75,6 @@ internal fun StartingPointDetails(startingPoint: StartingPoint?,
     }
 }
 
-/**
- * TODO: update AOSP licenses
- * TODO: move AOSP out of sharedlib into this component
- */
 @Composable
 private fun FractionAlong(startingPoint: StartingPoint, onFractionChanged: (StartingPoint, Float) -> Unit) {
     var sliderValue by remember { mutableFloatStateOf(startingPoint.utilityElement.fractionAlongEdge.toFloat()) }

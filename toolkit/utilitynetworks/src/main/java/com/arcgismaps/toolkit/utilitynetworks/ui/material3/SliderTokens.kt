@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package com.arcgismaps.toolkit.ui.material3
+package com.arcgismaps.toolkit.utilitynetworks.ui.material3
 
 import androidx.compose.material3.tokens.TypographyKeyTokens
 
