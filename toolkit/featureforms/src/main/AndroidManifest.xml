@@ -27,9 +27,6 @@
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/feature_forms_attachments" />
-<!--            <meta-data-->
-<!--                android:name="com.google.mlkit.vision.DEPENDENCIES"-->
-<!--                android:value="barcode" />-->
         </provider>
     </application>
 </manifest>
