@@ -45,7 +45,9 @@ internal fun TraceNavHost(traceState: TraceState) {
             TraceOptionsScreen(
                 configurations = configs,
                 startingPoints = traceState.currentTraceStartingPoints,
+                defaultTraceName = traceState.currentTraceName.value,
                 selectedColor = traceState.currentTraceGraphicsColorAsComposeColor,
+                zoomToResult = traceState.currentTraceZoomToResults.value,
                 onPerformTraceButtonClicked = {
                     coroutineScope.launch {
                         try {

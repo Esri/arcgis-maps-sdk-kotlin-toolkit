@@ -121,7 +121,14 @@ public class TraceState(
 
     private val completedTraces: MutableList<TraceRun> = mutableListOf()
 
-    private var currentTraceName: String? = null
+    private var _currentTraceName: MutableState<String> = mutableStateOf("")
+    /**
+     * The default name of the trace.
+     *
+     * @since 200.6.0
+     */
+    public val currentTraceName: State<String> = _currentTraceName
+
     private var currentTraceGraphicsColor: Color = Color.green
     public val currentTraceGraphicsColorAsComposeColor: androidx.compose.ui.graphics.Color
         get() = androidx.compose.ui.graphics.Color(
@@ -131,7 +138,8 @@ public class TraceState(
             currentTraceGraphicsColor.alpha
         )
 
-    private var currentTraceZoomToResults: Boolean = false
+    private var _currentTraceZoomToResults: MutableState<Boolean> = mutableStateOf(false)
+    public var currentTraceZoomToResults: State<Boolean> = _currentTraceZoomToResults
 
     private val currentTraceResultGeometriesExtent: Envelope?
     get() {
@@ -186,6 +194,7 @@ public class TraceState(
 
     internal fun setSelectedTraceConfiguration(config: UtilityNamedTraceConfiguration) {
         _selectedTraceConfiguration.value = config
+        _currentTraceName.value = "${config.name} ${(completedTraces.count { it.configuration.name == config.name } + 1)}"
     }
 
     internal fun showScreen(screen: TraceNavRoute) {
@@ -262,7 +271,7 @@ public class TraceState(
             }
         }
         _currentTraceRun.value = TraceRun(
-            name = getTraceName(),
+            name = _currentTraceName.value,
             configuration = traceConfiguration,
             graphics = currentTraceGeometryResultsGraphics,
             featureResults = currentTraceElementResults,
@@ -270,7 +279,7 @@ public class TraceState(
             geometryTraceResult = currentTraceGeometryResults
         ).also { completedTraces.add(it) }
 
-        if (currentTraceZoomToResults) {
+        if (_currentTraceZoomToResults.value) {
             currentTraceResultGeometriesExtent?.let {
                 mapViewProxy.setViewpointAnimated(
                     Viewpoint(it),
@@ -281,21 +290,6 @@ public class TraceState(
         }
 
         return true
-    }
-
-    /**
-     * Returns the name of the trace set by the user using the advanced options, else it auto-populates
-     * the name.
-     *
-     * @return the name of the trace
-     * @since 200.6.0
-     */
-    private fun getTraceName(): String {
-        currentTraceName?.let {
-            return it
-        }
-        val name = "${_selectedTraceConfiguration.value?.name} ${(completedTraces.count { it.configuration.name == _selectedTraceConfiguration.value?.name } + 1)}"
-        return name
     }
 
     private fun createGraphicForSimpleLineSymbol(geometry: Geometry, style: SimpleLineSymbolStyle, color: Color) =
@@ -397,7 +391,7 @@ public class TraceState(
      * @since 200.6.0
      */
     internal fun setTraceName(name: String) {
-        currentTraceName = name
+        _currentTraceName.value = name
     }
 
     /**
@@ -434,7 +428,7 @@ public class TraceState(
      * @since 200.6.0
      */
     internal fun setZoomToResults(zoom: Boolean) {
-        currentTraceZoomToResults = zoom
+        _currentTraceZoomToResults.value = zoom
     }
 }
 

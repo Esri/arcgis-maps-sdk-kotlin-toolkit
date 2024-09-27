@@ -92,7 +92,9 @@ internal fun TraceOptionsScreen(
     configurations: List<UtilityNamedTraceConfiguration>,
     startingPoints: List<StartingPoint>,
     selectedConfig: UtilityNamedTraceConfiguration?,
+    defaultTraceName: String,
     selectedColor: Color,
+    zoomToResult: Boolean,
     onStartingPointRemoved: (StartingPoint) -> Unit,
     onConfigSelected: (UtilityNamedTraceConfiguration) -> Unit,
     onPerformTraceButtonClicked: () -> Unit,
@@ -132,7 +134,9 @@ internal fun TraceOptionsScreen(
                     AdvancedOptions(
                         onNameChange = onNameChange,
                         onColorChanged = onColorChanged,
+                        defaultTraceName = defaultTraceName,
                         selectedColor = selectedColor,
+                        zoomToResult = zoomToResult,
                         onZoomRequested = onZoomRequested
                     )
                 }
@@ -242,7 +246,9 @@ internal fun AdvancedOptions(
     @Suppress("unused_parameter") modifier: Modifier = Modifier,
     showName: Boolean = true,
     showZoomToResult: Boolean = true,
+    defaultTraceName: String,
     selectedColor: Color,
+    zoomToResult: Boolean,
     onNameChange: (String) -> Unit = {},
     onColorChanged: (Color) -> Unit = {},
     onZoomRequested: (Boolean) -> Unit = {}
@@ -264,7 +270,7 @@ internal fun AdvancedOptions(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    var text by rememberSaveable { mutableStateOf("") }
+                    var text by rememberSaveable { mutableStateOf(defaultTraceName) }
                     TextField(
                         value = text,
                         onValueChange = { newValue ->
@@ -289,7 +295,7 @@ internal fun AdvancedOptions(
             }
 
             if (showZoomToResult) {
-                var isEnabled by rememberSaveable { mutableStateOf(false) }
+                var isEnabled by rememberSaveable { mutableStateOf(zoomToResult) }
                 val interactionSource = remember { MutableInteractionSource() }
                 LaunchedEffect(Unit) {
                     interactionSource.interactions.collect {
@@ -418,7 +424,7 @@ private fun AdvancedOptionsRow(name: String, modifier: Modifier = Modifier, trai
 @Preview
 @Composable
 private fun AdvancedOptionsPreview() {
-    AdvancedOptions(selectedColor = Color.Green)
+    AdvancedOptions(defaultTraceName = "", selectedColor = Color.Green, zoomToResult = false)
 }
 
 @Preview
