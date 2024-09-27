@@ -16,6 +16,9 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.barcode
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
 import androidx.camera.core.ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST
 import androidx.camera.view.CameraController
 import androidx.camera.view.LifecycleCameraController
@@ -28,12 +31,16 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FlashOff
 import androidx.compose.material.icons.filled.FlashOn
+import androidx.compose.material.icons.rounded.Warning
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilledIconToggleButton
@@ -100,38 +107,42 @@ internal fun BarcodeScanner(
     val executor = remember {
         ContextCompat.getMainExecutor(context)
     }
-    // cameraX preview
-    val previewView = remember {
-        PreviewView(context).apply {
-            controller = cameraController
-        }
-    }
+    val permissionsGranted = hasCameraPermissions(context)
     // A frame that represents the area where the barcode should be detected
     val scannerFrame = getFrameRect(width = 300.dp, height = 300.dp)
     // A rect that represents the barcode detected
     var barcodeRect by remember { mutableStateOf<Rect?>(null) }
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(
-            dismissOnClickOutside = false,
-            usePlatformDefaultWidth = false
-        )
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            AndroidView(
-                modifier = Modifier.fillMaxSize(),
-                factory = {
-                    previewView
-                },
-                onRelease = {
-                    cameraController.unbind()
-                }
+    if (!permissionsGranted) {
+        PermissionsDeniedDialog(onDismiss = onDismiss)
+    } else {
+        Dialog(
+            onDismissRequest = onDismiss,
+            properties = DialogProperties(
+                dismissOnClickOutside = false,
+                usePlatformDefaultWidth = false
             )
-            BarcodeFrame(scannerFrame, barcodeRect)
-            BarcodeToolbar(cameraController = cameraController, onDismiss = onDismiss)
+        ) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                AndroidView(
+                    modifier = Modifier.fillMaxSize(),
+                    factory = { ctx ->
+                        PreviewView(ctx).apply {
+                            controller = cameraController
+                        }
+                    },
+                    onRelease = {
+                        cameraController.unbind()
+                    }
+                )
+                BarcodeFrame(scannerFrame, barcodeRect)
+                BarcodeToolbar(cameraController = cameraController, onDismiss = onDismiss)
+            }
         }
     }
     LaunchedEffect(Unit) {
+        if (!permissionsGranted) {
+            return@LaunchedEffect
+        }
         cameraController.setImageAnalysisAnalyzer(
             executor,
             BarcodeImageAnalyzer(
@@ -149,6 +160,31 @@ internal fun BarcodeScanner(
                 }
             }
         )
+    }
+}
+
+@Composable
+private fun PermissionsDeniedDialog(onDismiss: () -> Unit) {
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier
+                .widthIn(min = 280.dp, max = 560.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(20.dp),
+            ) {
+                Icon(imageVector = Icons.Rounded.Warning, contentDescription = null)
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = stringResource(R.string.barcode_permission_denied), style =
+                    MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = onDismiss) {
+                    Text(text = stringResource(id = R.string.ok))
+                }
+            }
+        }
     }
 }
 
@@ -267,13 +303,21 @@ private fun getFrameRect(width: Dp, height: Dp): Rect {
     }
 }
 
+private fun CameraController.isTorchEnabled(): Boolean {
+    return torchState.value == 1
+}
+
+/**
+ * Checks if the camera permissions are granted.
+ */
+private fun hasCameraPermissions(context: Context): Boolean = ContextCompat.checkSelfPermission(
+    context,
+    Manifest.permission.CAMERA
+) == PackageManager.PERMISSION_GRANTED
+
 @Composable
 @Preview(showBackground = true, device = Devices.PIXEL_7_PRO)
 private fun BarcodeFramePreview() {
     val frame = getFrameRect(width = 300.dp, height = 300.dp)
     BarcodeFrame(frame, null)
-}
-
-private fun CameraController.isTorchEnabled(): Boolean {
-    return torchState.value == 1
 }
