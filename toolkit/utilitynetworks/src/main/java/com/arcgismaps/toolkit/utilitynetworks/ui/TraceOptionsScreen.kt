@@ -16,6 +16,7 @@
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -24,6 +25,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -37,7 +39,9 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedButton
@@ -66,15 +70,12 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
-import com.arcgismaps.toolkit.ui.expandablecard.theme.LocalExpandableCardColorScheme
-import com.arcgismaps.toolkit.ui.expandablecard.theme.LocalExpandableCardTypography
 import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.toolkit.utilitynetworks.StartingPoint
 import com.arcgismaps.utilitynetworks.UtilityNamedTraceConfiguration
@@ -118,10 +119,15 @@ internal fun TraceOptionsScreen(
                 item {
                     TraceConfigurations(
                         configurations,
-                        selectedConfig
+                        selectedConfig,
                     ) { newConfig ->
                         onConfigSelected(newConfig)
                     }
+                }
+                item {
+                    Spacer(modifier = Modifier
+                        .fillMaxWidth()
+                        .height(10.dp))
                 }
                 item {
                     StartingPoints(
@@ -129,6 +135,11 @@ internal fun TraceOptionsScreen(
                         onAddStartingPointButtonClicked,
                         onStartingPointRemoved
                     )
+                }
+                item {
+                    Spacer(modifier = Modifier
+                        .fillMaxWidth()
+                        .height(10.dp))
                 }
                 item {
                     AdvancedOptions(
@@ -151,41 +162,127 @@ internal fun TraceOptionsScreen(
     }
 }
 
-/**
- * A composable used to display the available trace types.
- *
- * @since 200.6.0
- */
 @Composable
-private fun TraceConfigurations(configs: List<UtilityNamedTraceConfiguration>, selectedConfig: UtilityNamedTraceConfiguration?, onTraceSelected: (UtilityNamedTraceConfiguration) -> Unit) {
-    ExpandableCard(
-        title = stringResource(id = R.string.trace_configuration),
-        padding = 4.dp
+private fun TraceConfigurations(
+    configs: List<UtilityNamedTraceConfiguration>,
+    selectedConfig: UtilityNamedTraceConfiguration?,
+    onTraceSelected: (UtilityNamedTraceConfiguration) -> Unit
+) {
+    TraceConfigurations(configs.map { it.name }, selectedConfigName = selectedConfig?.name ?: "") { index ->
+        onTraceSelected(configs[index])
+    }
+}
+
+@Composable
+private fun TraceConfigurations(
+    configs: List<String>,
+    selectedConfigName: String?,
+    onTraceSelected: (Int) -> Unit
+) {
+    var showDropdown by rememberSaveable {
+        mutableStateOf(false)
+    }
+    ReadOnlyTextField(stringResource(id = R.string.trace_configuration), modifier = Modifier.padding(horizontal = 4.dp))
+    Column(
+        modifier = Modifier
+            .padding(horizontal = 4.dp)
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f),
+                shape = RoundedCornerShape(5.dp)
+            )
+            .background(color = MaterialTheme.colorScheme.background)
     ) {
-        Column {
-            configs.forEachIndexed { index, item ->
-                ReadOnlyTextField(
-                    text = item.name,
-                    leadingIcon = if (item.name == selectedConfig?.name) {
-                        {
-                            Icon(
-                                imageVector = Icons.Filled.Done,
-                                contentDescription = "Done icon",
-                                modifier = Modifier.size(FilterChipDefaults.IconSize)
-                            )
-                        }
-                    } else {
-                        null
+        Row (
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(4.dp)
+                .clickable {
+                    showDropdown = !showDropdown
+                },
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ReadOnlyTextField(
+                text = selectedConfigName ?: "",
+                modifier = Modifier.clickable {
+                    showDropdown = !showDropdown
+                },
+                trailingIcon = {
+                    Icon(
+                        imageVector = Icons.Filled.MoreVert,
+                        contentDescription = "Edit icon",
+                        modifier = Modifier.size(FilterChipDefaults.IconSize)
+                    )
+                }
+            )
+        }
+    }
+    MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp))) {
+        DropdownMenu(
+            expanded = showDropdown,
+            offset = DpOffset.Zero,
+            onDismissRequest = { showDropdown = false }) {
+            configs.forEachIndexed { index, name ->
+                DropdownMenuItem(
+                    text = {
+                        ReadOnlyTextField(
+                            text = name, leadingIcon = if (name == selectedConfigName) {
+                                {
+                                    Icon(
+                                        imageVector = Icons.Filled.Done,
+                                        contentDescription = "Done icon",
+                                        modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                    )
+                                }
+                            } else {
+                                null
+                            }
+                        )
                     },
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp)
-                        .fillMaxWidth()
-                        .clickable {
-                            onTraceSelected(configs[index])
-                        }
+                    onClick = {
+                        onTraceSelected(index)
+                        showDropdown = false
+                    },
+                    contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp)
                 )
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun TraceConfigsPreview() {
+    TraceConfigurations(listOf("Foo", "Bar"), "Foo") {}
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun AddStartingPointButtonPreview() {
+    Column {
+        AddStartingPointButton {
+
+        }
+    }
+}
+
+@Composable
+private fun AddStartingPointButton(showAddStartingPointScreen: () -> Unit) {
+    ElevatedButton(
+        onClick = {
+            showAddStartingPointScreen()
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(PaddingValues(horizontal = 4.dp)),
+        colors = ButtonDefaults.elevatedButtonColors().copy(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Text(
+            text = stringResource(id = R.string.add_starting_point),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
 
@@ -200,36 +297,22 @@ private fun StartingPoints(
     showAddStartingPointScreen: () -> Unit,
     onStartingPointRemoved: (StartingPoint) -> Unit
 ) {
-       ExpandableCard(
-        title = "${stringResource(id = R.string.starting_points)} (${startingPoints.size})",
-        description = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                ElevatedButton(
-                    onClick = {
-                        showAddStartingPointScreen()
-                    },
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.add_starting_point),
-                        color = LocalExpandableCardColorScheme.current.headerTextColor,
-                        style = LocalExpandableCardTypography.current.descriptionStyle,
-                        fontWeight = FontWeight.Normal,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
-        },
-        padding = 4.dp
-    ) {
-        Column {
-            startingPoints.forEach {
-                StartingPointRow(it) {
-                    onStartingPointRemoved(it)
+    Column {
+        AddStartingPointButton {
+            showAddStartingPointScreen()
+        }
+        Spacer(modifier = Modifier
+            .height(4.dp)
+            .fillMaxWidth())
+        ExpandableCard(
+            title = "${stringResource(id = R.string.starting_points)} (${startingPoints.size})",
+            padding = PaddingValues(horizontal = 4.dp)
+        ) {
+            Column {
+                startingPoints.forEach {
+                    StartingPointRow(it) {
+                        onStartingPointRemoved(it)
+                    }
                 }
             }
         }
@@ -257,7 +340,7 @@ internal fun AdvancedOptions(
         title = stringResource(id = R.string.advanced_options),
         toggleable = true,
         initialExpandedState = false,
-        padding = 4.dp
+        padding = PaddingValues(horizontal = 4.dp)
     ) {
         Column {
             if (showName) {
