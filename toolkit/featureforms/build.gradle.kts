@@ -120,7 +120,6 @@ dependencies {
     implementation(libs.androidx.material.icons)
     implementation(libs.bundles.camerax)
     implementation(libs.mlkit.barcode.scanning)
-    implementation(libs.androidx.camera.mlkit.vision)
     testImplementation(libs.bundles.unitTest)
     androidTestImplementation(libs.truth)
     androidTestImplementation(platform(libs.androidx.compose.bom))
