@@ -17,16 +17,38 @@
 package com.arcgismaps.toolkit.featureforms.internal.components.barcode
 
 import androidx.camera.core.ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST
+import androidx.camera.view.CameraController
 import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.FlashOff
+import androidx.compose.material.icons.filled.FlashOn
+import androidx.compose.material3.Card
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.FilledIconToggleButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -41,6 +63,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -49,6 +73,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
+import com.arcgismaps.toolkit.featureforms.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -72,58 +97,63 @@ internal fun BarcodeScanner(
             bindToLifecycle(lifecycleOwner)
         }
     }
+    val executor = remember {
+        ContextCompat.getMainExecutor(context)
+    }
     // cameraX preview
     val previewView = remember {
         PreviewView(context).apply {
             controller = cameraController
         }
     }
-    var rect by remember { mutableStateOf<Rect?>(null) }
+    // A frame that represents the area where the barcode should be detected
     val scannerFrame = getFrameRect(width = 300.dp, height = 300.dp)
-    cameraController.setImageAnalysisAnalyzer(
-        ContextCompat.getMainExecutor(context),
-        BarcodeImageAnalyzer(
-            scannerFrame,
-        ) { box, barcode ->
-            rect = box
-            //hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-//            cameraController.clearImageAnalysisAnalyzer()
-//            cameraController.unbind()
-//            scope.launch {
-//                delay(300)
-//                onScan(barcode)
-//            }
-        }
-    )
+    // A rect that represents the barcode detected
+    var barcodeRect by remember { mutableStateOf<Rect?>(null) }
     Dialog(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
+        properties = DialogProperties(
+            dismissOnClickOutside = false,
+            usePlatformDefaultWidth = false
+        )
     ) {
-        AndroidView(
-            modifier = Modifier.fillMaxSize(),
-            factory = {
-                previewView
-            },
-            onRelease = {
+        Box(modifier = Modifier.fillMaxSize()) {
+            AndroidView(
+                modifier = Modifier.fillMaxSize(),
+                factory = {
+                    previewView
+                },
+                onRelease = {
+                    cameraController.unbind()
+                }
+            )
+            BarcodeFrame(scannerFrame, barcodeRect)
+            BarcodeToolbar(cameraController = cameraController, onDismiss = onDismiss)
+        }
+    }
+    LaunchedEffect(Unit) {
+        cameraController.setImageAnalysisAnalyzer(
+            executor,
+            BarcodeImageAnalyzer(
+                scannerFrame,
+            ) { box, barcode ->
+                barcodeRect = box
+                // Perform haptic feedback when a barcode is detected
+                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                // Unbind the camera controller to stop processing frames
                 cameraController.unbind()
+                scope.launch {
+                    // Delay to allow the user to see the barcode detected
+                    delay(300)
+                    onScan(barcode)
+                }
             }
         )
-        BarcodeFrame(scannerFrame)
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            rect?.let {
-                drawRoundRect(
-                    color = Color.Blue.copy(alpha = 0.3f),
-                    topLeft = it.topLeft,
-                    size = Size(it.width, it.height),
-                    cornerRadius = CornerRadius(15f)
-                )
-            }
-        }
     }
 }
 
 @Composable
-private fun BarcodeFrame(rect: Rect) {
+private fun BarcodeFrame(frame: Rect, barcode: Rect?) {
     Canvas(modifier = Modifier.fillMaxSize()) {
         drawRect(
             color = Color.Black.copy(alpha = 0.5f),
@@ -132,27 +162,105 @@ private fun BarcodeFrame(rect: Rect) {
         )
         drawRoundRect(
             color = Color.Transparent,
-            topLeft = rect.topLeft,
-            size = rect.size,
+            topLeft = frame.topLeft,
+            size = frame.size,
             cornerRadius = CornerRadius(45f),
             blendMode = BlendMode.Clear
         )
         drawRoundRect(
             color = Color.Gray,
-            topLeft = rect.topLeft,
-            size = rect.size,
+            topLeft = frame.topLeft,
+            size = frame.size,
             cornerRadius = CornerRadius(50f),
             style = Stroke(width = 12f)
         )
+        barcode?.let {
+            drawRoundRect(
+                color = Color.Blue.copy(alpha = 0.3f),
+                topLeft = it.topLeft,
+                size = Size(it.width, it.height),
+                cornerRadius = CornerRadius(15f)
+            )
+        }
     }
 }
 
 @Composable
-private fun getFrameRect(width : Dp, height: Dp) : Rect {
+private fun BarcodeToolbar(cameraController: CameraController, onDismiss: () -> Unit) {
+    var isTorchEnabled by remember { mutableStateOf(cameraController.isTorchEnabled()) }
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Bottom,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Card(
+            shape = RoundedCornerShape(50.dp),
+        ) {
+            // tooltip
+            Text(
+                text = stringResource(R.string.barcode_tooltip),
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+            )
+        }
+        Spacer(modifier = Modifier.padding(16.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 25.dp)
+        ) {
+            // Close button
+            FilledIconButton(
+                onClick = onDismiss,
+                colors = IconButtonDefaults.filledIconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            // Flashlight button
+            FilledIconToggleButton(
+                checked = isTorchEnabled,
+                onCheckedChange = {
+                    cameraController.enableTorch(!isTorchEnabled)
+                    isTorchEnabled = !isTorchEnabled
+                },
+                colors = IconButtonDefaults.filledIconToggleButtonColors(
+                    containerColor = MaterialTheme.colorScheme.inverseSurface,
+                    checkedContainerColor = MaterialTheme.colorScheme.surface,
+                )
+            ) {
+                Icon(
+                    imageVector = if (isTorchEnabled) {
+                        Icons.Default.FlashOn
+                    } else {
+                        Icons.Default.FlashOff
+                    },
+                    contentDescription = null,
+                    tint = if (isTorchEnabled) {
+                        MaterialTheme.colorScheme.onSurface
+                    } else {
+                        MaterialTheme.colorScheme.inverseOnSurface
+                    }
+                )
+            }
+
+        }
+        Spacer(modifier = Modifier.padding(16.dp))
+    }
+}
+
+@Composable
+private fun getFrameRect(width: Dp, height: Dp): Rect {
     with(LocalDensity.current) {
         val offset = Offset(
-            (LocalConfiguration.current.screenWidthDp.dp.toPx() / 2) - (width/2).toPx(),
-            (LocalConfiguration.current.screenHeightDp.dp.toPx() / 2) - (height/2).toPx()
+            (LocalConfiguration.current.screenWidthDp.dp.toPx() / 2) - (width / 2).toPx(),
+            (LocalConfiguration.current.screenHeightDp.dp.toPx() / 2) - (height / 2).toPx()
         )
         val size = Size(width.toPx(), height.toPx())
         return Rect(offset, size)
@@ -160,8 +268,12 @@ private fun getFrameRect(width : Dp, height: Dp) : Rect {
 }
 
 @Composable
-@Preview(showBackground = true, device = Devices.PIXEL_4_XL)
-private fun BarcodeScannerPreview() {
+@Preview(showBackground = true, device = Devices.PIXEL_7_PRO)
+private fun BarcodeFramePreview() {
     val frame = getFrameRect(width = 300.dp, height = 300.dp)
-    BarcodeFrame(frame)
+    BarcodeFrame(frame, null)
+}
+
+private fun CameraController.isTorchEnabled(): Boolean {
+    return torchState.value == 1
 }

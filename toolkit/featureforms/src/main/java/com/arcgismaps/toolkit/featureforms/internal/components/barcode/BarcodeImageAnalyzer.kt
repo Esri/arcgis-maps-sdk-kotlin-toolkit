@@ -31,7 +31,8 @@ import java.time.Instant
 /**
  * An [ImageAnalysis.Analyzer] that processes images from the camera preview to detect barcodes.
  *
- * @param frame The frame in which the barcode should be detected.
+ * @param frame The frame in which the barcode should be detected. This should be in the view
+ * coordinate system.
  * @param onSuccess The callback that is called when a barcode is detected. The first parameter is
  * the bounding box of the barcode in the view coordinate system, and the second parameter is the
  * raw value of the barcode.
