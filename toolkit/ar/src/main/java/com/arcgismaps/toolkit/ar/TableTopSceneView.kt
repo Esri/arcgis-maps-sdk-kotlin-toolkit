@@ -18,15 +18,24 @@
 
 package com.arcgismaps.toolkit.ar
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.core.content.ContextCompat
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.TimeExtent
@@ -103,61 +112,90 @@ fun TableTopSceneView(
     content: (@Composable TableTopSceneViewScope.() -> Unit)? = null
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
-
     val context = LocalContext.current
-    val arSessionWrapper = remember { ArSessionWrapper(context.applicationContext) }
-    DisposableEffect(Unit) {
-        lifecycleOwner.lifecycle.addObserver(arSessionWrapper)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(arSessionWrapper)
-            arSessionWrapper.onDestroy(lifecycleOwner)
+    val cameraPermissionGranted by requestCameraPermissionIfRequired()
+
+    if (cameraPermissionGranted) {
+        val arSessionWrapper = remember { ArSessionWrapper(context.applicationContext) }
+        DisposableEffect(Unit) {
+            lifecycleOwner.lifecycle.addObserver(arSessionWrapper)
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(arSessionWrapper)
+                arSessionWrapper.onDestroy(lifecycleOwner)
+            }
+        }
+        Box(modifier = modifier) {
+            ArCameraFeed(arSessionWrapper = arSessionWrapper, onFrame = {}, onTap = {})
+            SceneView(
+                arcGISScene = arcGISScene,
+                modifier = Modifier.fillMaxSize(),
+                onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
+                onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
+                graphicsOverlays = graphicsOverlays,
+                sceneViewProxy = tableTopSceneViewProxy.sceneViewProxy,
+                sceneViewInteractionOptions = sceneViewInteractionOptions,
+                viewLabelProperties = viewLabelProperties,
+                selectionProperties = selectionProperties,
+                isAttributionBarVisible = isAttributionBarVisible,
+                onAttributionTextChanged = onAttributionTextChanged,
+                onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
+                analysisOverlays = analysisOverlays,
+                imageOverlays = imageOverlays,
+                atmosphereEffect = AtmosphereEffect.None,
+                timeExtent = timeExtent,
+                onTimeExtentChanged = onTimeExtentChanged,
+                spaceEffect = SpaceEffect.Transparent,
+                sunTime = sunTime,
+                sunLighting = sunLighting,
+                ambientLightColor = ambientLightColor,
+                onNavigationChanged = onNavigationChanged,
+                onSpatialReferenceChanged = {
+                    onSpatialReferenceChanged?.invoke(it)
+                },
+                onLayerViewStateChanged = onLayerViewStateChanged,
+                onInteractingChanged = onInteractingChanged,
+                onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged,
+                onRotate = onRotate,
+                onScale = onScale,
+                onUp = onUp,
+                onDown = onDown,
+                onSingleTapConfirmed = onSingleTapConfirmed,
+                onDoubleTap = onDoubleTap,
+                onLongPress = onLongPress,
+                onTwoPointerTap = onTwoPointerTap,
+                onPan = onPan,
+                onDrawStatusChanged = onDrawStatusChanged,
+                content = {
+                    content?.invoke(TableTopSceneViewScope(this))
+                }
+            )
         }
     }
+}
 
-    Box(modifier = modifier) {
-        ArCameraFeed(arSessionWrapper = arSessionWrapper, onFrame = {}, onTap = {})
-        SceneView(
-            arcGISScene = arcGISScene,
-            modifier = Modifier.fillMaxSize(),
-            onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
-            onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
-            graphicsOverlays = graphicsOverlays,
-            sceneViewProxy = tableTopSceneViewProxy.sceneViewProxy,
-            sceneViewInteractionOptions = sceneViewInteractionOptions,
-            viewLabelProperties = viewLabelProperties,
-            selectionProperties = selectionProperties,
-            isAttributionBarVisible = isAttributionBarVisible,
-            onAttributionTextChanged = onAttributionTextChanged,
-            onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
-            analysisOverlays = analysisOverlays,
-            imageOverlays = imageOverlays,
-            atmosphereEffect = AtmosphereEffect.None,
-            timeExtent = timeExtent,
-            onTimeExtentChanged = onTimeExtentChanged,
-            spaceEffect = SpaceEffect.Transparent,
-            sunTime = sunTime,
-            sunLighting = sunLighting,
-            ambientLightColor = ambientLightColor,
-            onNavigationChanged = onNavigationChanged,
-            onSpatialReferenceChanged = {
-                onSpatialReferenceChanged?.invoke(it)
-            },
-            onLayerViewStateChanged = onLayerViewStateChanged,
-            onInteractingChanged = onInteractingChanged,
-            onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged,
-            onRotate = onRotate,
-            onScale = onScale,
-            onUp = onUp,
-            onDown = onDown,
-            onSingleTapConfirmed = onSingleTapConfirmed,
-            onDoubleTap = onDoubleTap,
-            onLongPress = onLongPress,
-            onTwoPointerTap = onTwoPointerTap,
-            onPan = onPan,
-            onDrawStatusChanged = onDrawStatusChanged,
-            content = {
-                content?.invoke(TableTopSceneViewScope(this))
-            }
-        )
+/**
+ * Checks if the camera permission is granted and requests it if required.
+ *
+ * @since 200.6.0
+ */
+@Composable
+private fun requestCameraPermissionIfRequired() : MutableState<Boolean> {
+    val cameraPermission = Manifest.permission.CAMERA
+    val context = LocalContext.current
+    val isGrantedState = remember { mutableStateOf(
+        ContextCompat.checkSelfPermission(
+            context,
+            cameraPermission
+        ) == PackageManager.PERMISSION_GRANTED
+    ) }
+    val requestPermissionLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) { granted ->
+        isGrantedState.value = granted
     }
+
+    if (!isGrantedState.value) {
+        SideEffect {
+            requestPermissionLauncher.launch(Manifest.permission.CAMERA)
+        }
+    }
+    return isGrantedState
 }
