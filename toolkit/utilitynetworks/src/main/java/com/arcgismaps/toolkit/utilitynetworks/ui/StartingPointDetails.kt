@@ -27,6 +27,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -38,7 +42,9 @@ import com.arcgismaps.toolkit.utilitynetworks.StartingPoint
 
 
 @Composable
-internal fun StartingPointDetails(startingPoint: StartingPoint?, onBackPressed: () -> Unit) {
+internal fun StartingPointDetails(startingPoint: StartingPoint?,
+                                  onFractionChanged: (StartingPoint, Float) -> Unit,
+                                  onBackPressed: () -> Unit) {
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -62,7 +68,7 @@ internal fun StartingPointDetails(startingPoint: StartingPoint?, onBackPressed: 
             val geometry = point.feature.geometry
 
             if (geometry != null && geometry is Polyline ) {
-                FractionAlong(point)
+                FractionAlong(point, onFractionChanged)
             }
         }
 
@@ -74,13 +80,14 @@ internal fun StartingPointDetails(startingPoint: StartingPoint?, onBackPressed: 
  * TODO: move AOSP out of sharedlib into this component
  */
 @Composable
-private fun FractionAlong(startingPoint: StartingPoint) {
+private fun FractionAlong(startingPoint: StartingPoint, onFractionChanged: (StartingPoint, Float) -> Unit) {
+    var sliderValue by remember { mutableFloatStateOf(startingPoint.utilityElement.fractionAlongEdge.toFloat()) }
     Slider(
-        value = 0.5f,
-        onValueChange = {
-
+        value = sliderValue,
+        onValueChange = { newValue ->
+            sliderValue = newValue
+            onFractionChanged(startingPoint, newValue)
         }
-
     )
 }
 
@@ -99,7 +106,7 @@ private fun SliderPreview() {
 @Preview(showBackground = true)
 @Composable
 internal fun StartingPointDetailsPreview() {
-    StartingPointDetails(null) {
+    StartingPointDetails(null, onFractionChanged = { _, _ -> }) {
 
     }
 

@@ -97,7 +97,14 @@ internal fun TraceNavHost(traceState: TraceState) {
         composable(TraceNavRoute.StartingPointDetails.name) {
             val startingPoint = traceState.selectedStartingPoint.value
             require(startingPoint != null)
-            StartingPointDetails(startingPoint) {
+            StartingPointDetails(
+                startingPoint,
+                onFractionChanged = { point, newValue ->
+                    traceState.setFractionAlongEdge(
+                        point,
+                        newValue.toDouble()
+                    )
+                }) {
                 traceState.showScreen(TraceNavRoute.TraceOptions)
             }
         }

@@ -29,7 +29,9 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.Color
 import com.arcgismaps.data.ArcGISFeature
 import com.arcgismaps.geometry.Geometry
+import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.Point
+import com.arcgismaps.geometry.Polyline
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.symbology.SimpleLineSymbol
@@ -48,6 +50,7 @@ import com.arcgismaps.utilitynetworks.UtilityGeometryTraceResult
 import com.arcgismaps.utilitynetworks.UtilityMinimumStartingLocations
 import com.arcgismaps.utilitynetworks.UtilityNamedTraceConfiguration
 import com.arcgismaps.utilitynetworks.UtilityNetwork
+import com.arcgismaps.utilitynetworks.UtilityNetworkSourceType
 import com.arcgismaps.utilitynetworks.UtilityTraceFunctionOutput
 import com.arcgismaps.utilitynetworks.UtilityTraceParameters
 import kotlinx.coroutines.CancellationException
@@ -165,6 +168,44 @@ public class TraceState(
     }
 
     /**
+     * Returns the location on the polyline nearest to the tap location.
+     * The location is returned as a fraction along the polyline.
+     *
+     * @param inputGeometry the polyline geometry
+     * @param tapPoint the point tapped on the map
+     * @return the fraction along the polyline
+     * @since 200.6.0
+     */
+    private fun fractionAlongEdge(inputGeometry: Geometry, tapPoint: Point): Double {
+        var polyline = if (inputGeometry is Polyline) inputGeometry else return 0.0
+
+        // Remove Z values from the polyline
+        if (polyline.hasZ) {
+            polyline = GeometryEngine.createWithZ(polyline, null)
+        }
+        // confirm spatial reference match
+        tapPoint.spatialReference?.let { spatialReference ->
+            if (spatialReference != polyline.spatialReference) {
+                val projectedGeometry = GeometryEngine.projectOrNull(polyline, spatialReference)
+                projectedGeometry?.let { polyline = projectedGeometry }
+            }
+        }
+        return GeometryEngine.fractionAlong(polyline, tapPoint, 10.0)
+    }
+
+    internal fun setFractionAlongEdge(startingPoint: StartingPoint, newValue: Double) {
+        startingPoint.utilityElement.fractionAlongEdge = newValue
+        val geometry = startingPoint.feature.geometry
+        if (geometry is Polyline) {
+            startingPoint.graphic.geometry = GeometryEngine.createPointAlongOrNull(
+                polyline = geometry,
+                distance = GeometryEngine.length(geometry) * newValue
+            )
+        }
+    }
+
+
+    /**
      * Run a trace on the Utility Network using the selected trace configuration and starting points.
      *
      * @return true if the trace results are available, false otherwise.
@@ -277,8 +318,6 @@ public class TraceState(
      * CancellationExceptions.
      */
     private fun processAndAddStartingPoint(feature: ArcGISFeature, mapPoint: Point) = runCatchingCancellable {
-        // TODO: add fraction-along to the element.
-        // https://devtopia.esri.com/runtime/kotlin/issues/4491
         val utilityElement = utilityNetwork.createElementOrNull(feature)
             ?: throw IllegalArgumentException("could not create utility element from ArcGISFeature")
 
@@ -292,6 +331,15 @@ public class TraceState(
             .renderer
             ?.getSymbol(feature)
             ?: throw IllegalArgumentException("could not create drawable from feature symbol")
+
+        if (utilityElement.networkSource.sourceType == UtilityNetworkSourceType.Edge && feature.geometry is Polyline) {
+            feature.geometry?.let { geometry ->
+                utilityElement.fractionAlongEdge = fractionAlongEdge(geometry, mapPoint)
+            }
+        } else if (utilityElement.networkSource.sourceType == UtilityNetworkSourceType.Junction &&
+            (utilityElement.assetType.terminalConfiguration?.terminals?.size ?: 0) > 1) {
+            utilityElement.terminal = utilityElement.assetType.terminalConfiguration?.terminals?.first()
+        }
 
         val graphic = Graphic(
             geometry = mapPoint,
