@@ -20,13 +20,13 @@ package com.arcgismaps.toolkit.ar
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Face
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.TimeExtent
@@ -50,21 +50,22 @@ import com.arcgismaps.mapping.view.SceneViewInteractionOptions
 import com.arcgismaps.mapping.view.SelectionProperties
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.SpaceEffect
-import com.arcgismaps.mapping.view.TransformationMatrixCameraController
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
+import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
+import com.arcgismaps.toolkit.ar.internal.ArSessionWrapper
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
 import java.time.Instant
 
 /**
- * A scene view that provides an augmented reality table top experience.
+ * Displays a [SceneView] in a tabletop AR environment.
  *
  * @since 200.6.0
  */
 @Composable
-public fun TableTopSceneView(
+fun TableTopSceneView(
     arcGISScene: ArcGISScene,
     modifier: Modifier = Modifier,
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
@@ -101,18 +102,23 @@ public fun TableTopSceneView(
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
     content: (@Composable TableTopSceneViewScope.() -> Unit)? = null
 ) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        Icon(
-            imageVector = Icons.Default.Face,
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            tint = Color.Red
-        )
+    val lifecycleOwner = LocalLifecycleOwner.current
 
-        val cameraController = remember { TransformationMatrixCameraController() }
+    val context = LocalContext.current
+    val arSessionWrapper = remember { ArSessionWrapper(context.applicationContext) }
+    DisposableEffect(Unit) {
+        lifecycleOwner.lifecycle.addObserver(arSessionWrapper)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(arSessionWrapper)
+            arSessionWrapper.onDestroy(lifecycleOwner)
+        }
+    }
+
+    Box(modifier = modifier) {
+        ArCameraFeed(arSessionWrapper = arSessionWrapper, onFrame = {}, onTap = {})
         SceneView(
             arcGISScene = arcGISScene,
-            modifier = modifier,
+            modifier = Modifier.fillMaxSize(),
             onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
             onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
             graphicsOverlays = graphicsOverlays,
@@ -123,7 +129,6 @@ public fun TableTopSceneView(
             isAttributionBarVisible = isAttributionBarVisible,
             onAttributionTextChanged = onAttributionTextChanged,
             onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
-            cameraController = cameraController,
             analysisOverlays = analysisOverlays,
             imageOverlays = imageOverlays,
             atmosphereEffect = AtmosphereEffect.None,
@@ -135,7 +140,6 @@ public fun TableTopSceneView(
             ambientLightColor = ambientLightColor,
             onNavigationChanged = onNavigationChanged,
             onSpatialReferenceChanged = {
-//                scene view is ready?
                 onSpatialReferenceChanged?.invoke(it)
             },
             onLayerViewStateChanged = onLayerViewStateChanged,
