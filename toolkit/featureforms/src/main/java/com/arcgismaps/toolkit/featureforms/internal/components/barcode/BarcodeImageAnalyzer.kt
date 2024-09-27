@@ -131,7 +131,7 @@ internal class BarcodeImageAnalyzer(
      * view coordinate system.
      *
      * Taken from :
-     * https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:camera/camera-mlkit-vision/src/main/java/androidx/camera/mlkit/vision/MlKitAnalyzer.java;l=164
+     * https://android.googlesource.com/platform/frameworks/support/+/refs/heads/androidx-main/camera/camera-mlkit-vision/src/main/java/androidx/camera/mlkit/vision/MlKitAnalyzer.java#164
      */
     private fun getTransformationMatrix(imageProxy: ImageProxy): Matrix? {
         val analysisToTarget = Matrix()

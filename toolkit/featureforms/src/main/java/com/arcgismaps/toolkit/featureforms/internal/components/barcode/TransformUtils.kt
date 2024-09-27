@@ -19,6 +19,10 @@ package com.arcgismaps.toolkit.featureforms.internal.components.barcode
 import android.graphics.Matrix
 import android.graphics.RectF
 
+/**
+ * Adapted from:
+ * https://android.googlesource.com/platform/frameworks/support/+/refs/heads/androidx-main/camera/camera-core/src/main/java/androidx/camera/core/impl/utils/TransformUtils.java
+ */
 internal object TransformUtils {
 
     /**
