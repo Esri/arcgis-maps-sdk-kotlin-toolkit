@@ -113,7 +113,7 @@ fun TableTopSceneView(
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
-    val cameraPermissionGranted by requestCameraPermissionIfRequired()
+    val cameraPermissionGranted by rememberCameraPermission()
 
     if (cameraPermissionGranted) {
         val arSessionWrapper = remember { ArSessionWrapper(context.applicationContext) }
@@ -179,7 +179,7 @@ fun TableTopSceneView(
  * @since 200.6.0
  */
 @Composable
-private fun requestCameraPermissionIfRequired() : MutableState<Boolean> {
+private fun rememberCameraPermission() : MutableState<Boolean> {
     val cameraPermission = Manifest.permission.CAMERA
     val context = LocalContext.current
     val isGrantedState = remember { mutableStateOf(
