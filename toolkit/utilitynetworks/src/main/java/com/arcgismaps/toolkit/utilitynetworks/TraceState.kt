@@ -176,12 +176,12 @@ public class TraceState(
      * @return the fraction along the polyline
      * @since 200.6.0
      */
-    private fun fractionAlongEdge(inputGeometry: Geometry, tapPoint: Point): Double {
-        var polyline = if (inputGeometry is Polyline) inputGeometry else return 0.0
-
+    private fun fractionAlongEdge(inputGeometry: Polyline, tapPoint: Point): Double {
         // Remove Z values from the polyline
-        if (polyline.hasZ) {
-            polyline = GeometryEngine.createWithZ(polyline, null)
+        var polyline = if (inputGeometry.hasZ) {
+            GeometryEngine.createWithZ(inputGeometry, null)
+        } else {
+            inputGeometry
         }
         // confirm spatial reference match
         tapPoint.spatialReference?.let { spatialReference ->
@@ -340,10 +340,9 @@ public class TraceState(
             ?.getSymbol(feature)
             ?: throw IllegalArgumentException("could not create drawable from feature symbol")
 
-        if (utilityElement.networkSource.sourceType == UtilityNetworkSourceType.Edge && feature.geometry is Polyline) {
-            feature.geometry?.let { geometry ->
-                utilityElement.fractionAlongEdge = fractionAlongEdge(geometry, mapPoint)
-            }
+        val featureGeometry = feature.geometry
+        if (utilityElement.networkSource.sourceType == UtilityNetworkSourceType.Edge && featureGeometry is Polyline) {
+            utilityElement.fractionAlongEdge = fractionAlongEdge(featureGeometry, mapPoint)
         } else if (utilityElement.networkSource.sourceType == UtilityNetworkSourceType.Junction &&
             (utilityElement.assetType.terminalConfiguration?.terminals?.size ?: 0) > 1) {
             utilityElement.terminal = utilityElement.assetType.terminalConfiguration?.terminals?.first()

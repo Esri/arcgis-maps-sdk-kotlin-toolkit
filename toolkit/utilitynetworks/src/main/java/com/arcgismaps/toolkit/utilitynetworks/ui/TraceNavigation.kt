@@ -104,9 +104,8 @@ internal fun TraceNavHost(traceState: TraceState) {
                         point,
                         newValue.toDouble()
                     )
-                }) {
-                traceState.showScreen(TraceNavRoute.TraceOptions)
-            }
+                },
+                onBackPressed = { traceState.showScreen(TraceNavRoute.TraceOptions) })
         }
     }
 

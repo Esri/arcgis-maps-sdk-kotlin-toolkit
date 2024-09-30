@@ -68,7 +68,7 @@ internal fun StartingPointDetailsScreen(startingPoint: StartingPoint?,
             val geometry = point.feature.geometry
 
             if (geometry != null && geometry is Polyline ) {
-                FractionAlong(point, onFractionChanged)
+                FractionAlongEdgeSlider(point, onFractionChanged)
             }
         }
 
@@ -76,7 +76,7 @@ internal fun StartingPointDetailsScreen(startingPoint: StartingPoint?,
 }
 
 @Composable
-private fun FractionAlong(startingPoint: StartingPoint, onFractionChanged: (StartingPoint, Float) -> Unit) {
+private fun FractionAlongEdgeSlider(startingPoint: StartingPoint, onFractionChanged: (StartingPoint, Float) -> Unit) {
     var sliderValue by remember { mutableFloatStateOf(startingPoint.utilityElement.fractionAlongEdge.toFloat()) }
     Slider(
         value = sliderValue,
@@ -85,25 +85,4 @@ private fun FractionAlong(startingPoint: StartingPoint, onFractionChanged: (Star
             onFractionChanged(startingPoint, newValue)
         }
     )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun SliderPreview() {
-    Slider(
-        value = 0.5f,
-        onValueChange = {
-
-        }
-
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-internal fun StartingPointDetailsPreview() {
-    StartingPointDetailsScreen(null, onFractionChanged = { _, _ -> }) {
-
-    }
-
 }
