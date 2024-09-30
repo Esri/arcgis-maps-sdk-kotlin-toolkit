@@ -113,4 +113,6 @@
     <string name="attachment_too_large">文件过大。 请添加小于 50 MB 的文件。</string>
     <string name="attachment_is_empty">不支持空文件</string>
     <string name="download_empty_file">无法下载空文件</string>
+    <string name="attachment_deleted">已成功删除 %1s</string>
+    <string name="attachment_size_limit_exceeded">无法下载大于 %1$s 的附件</string>
 </resources>

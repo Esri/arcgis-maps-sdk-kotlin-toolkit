@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><!--
+  ~ Copyright 2024 Esri
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  --><resources>
+    <string name="new_trace">การติดตามใหม่</string>
+    <string name="results">ผลลัพธ์</string>
+    <string name="trace_configuration">การกำหนดค่าการติดตาม</string>
+    <string name="starting_points">จุดเริ่มต้น</string>
+    <string name="advanced_options">ตัวเลือกขั้นสูง</string>
+    <string name="name">ชื่อ</string>
+    <string name="color">สี</string>
+    <string name="zoom_to_result">ซูมไปยังผลลัพธ์</string>
+    <string name="trace">การติดตาม</string>
+    <string name="add_starting_point">เพิ่มจุดเริ่มต้นใหม่</string>
+    <string name="cancel_starting_point_selection">ยกเลิกการเลือกจุดเริ่มต้น</string>
+    <string name="trace_result_with_count">การติดตาม %1$d จาก %2$d</string>
+    <string name="feature_results">ผลลัพธ์ฟีเจอร์</string>
+    <string name="function_results">ผลลัพธ์ฟังก์ชัน</string>
+    <string name="clear_all_results">ล้างผลลัพธ์ทั้งหมด</string>
+</resources>

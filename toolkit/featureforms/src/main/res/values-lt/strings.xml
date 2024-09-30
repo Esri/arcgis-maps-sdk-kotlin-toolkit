@@ -113,4 +113,6 @@
     <string name="attachment_too_large">Failas yra per didelis. Pridėkite mažesnį nei 50 MB failą.</string>
     <string name="attachment_is_empty">Tušti failai nėra palaikomi</string>
     <string name="download_empty_file">Negalima atsisiųsti tuščių failų</string>
+    <string name="attachment_deleted">%1s sėkmingai ištrinta</string>
+    <string name="attachment_size_limit_exceeded">Didesnių nei %1$s priedų atsisiųsti negalima</string>
 </resources>

@@ -113,4 +113,6 @@
     <string name="attachment_too_large">Занадто великий розмір файлу. Додайте файл розміром до 50 МБ.</string>
     <string name="attachment_is_empty">Порожні файли не підтримуються</string>
     <string name="download_empty_file">Порожні файли не можна завантажити</string>
+    <string name="attachment_deleted">%1s успішно видалено</string>
+    <string name="attachment_size_limit_exceeded">Прикріплення з розміром %1$s не можна завантажити</string>
 </resources>
