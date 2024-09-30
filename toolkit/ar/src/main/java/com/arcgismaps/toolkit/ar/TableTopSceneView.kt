@@ -19,6 +19,7 @@
 package com.arcgismaps.toolkit.ar
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -26,11 +27,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -66,7 +69,10 @@ import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
 import com.arcgismaps.toolkit.ar.internal.ArSessionWrapper
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
+import com.google.ar.core.ArCoreApk
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.time.Instant
+import kotlin.coroutines.resume
 
 /**
  * Displays a [SceneView] in a tabletop AR environment.
@@ -116,71 +122,92 @@ fun TableTopSceneView(
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
     content: (@Composable TableTopSceneViewScope.() -> Unit)? = null
 ) {
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val context = LocalContext.current
-    val cameraPermissionGranted by rememberCameraPermission(requestCameraPermissionAutomatically) {
-        // onNotGranted
-        onInitializationStatusChanged?.invoke(
-            TableTopSceneViewInitializationStatus.FailedToInitialize(
+    Box(modifier = modifier) {
+        var initializationStatus: TableTopSceneViewInitializationStatus by remember {
+            mutableStateOf(
+                TableTopSceneViewInitializationStatus.Initializing
+            )
+        }
+        onInitializationStatusChanged?.invoke(initializationStatus)
+        val lifecycleOwner = LocalLifecycleOwner.current
+        val context = LocalContext.current
+        val cameraPermissionGranted by rememberCameraPermission(requestCameraPermissionAutomatically) {
+            // onNotGranted
+            initializationStatus = TableTopSceneViewInitializationStatus.FailedToInitialize(
                 IllegalStateException("Camera permission not granted")
             )
-        )
-    }
-
-    if (cameraPermissionGranted) {
-        val arSessionWrapper = remember { ArSessionWrapper(context.applicationContext) }
-        DisposableEffect(Unit) {
-            lifecycleOwner.lifecycle.addObserver(arSessionWrapper)
-            onDispose {
-                lifecycleOwner.lifecycle.removeObserver(arSessionWrapper)
-                arSessionWrapper.onDestroy(lifecycleOwner)
-            }
+            onInitializationStatusChanged?.invoke(initializationStatus)
         }
-        Box(modifier = modifier) {
-            ArCameraFeed(arSessionWrapper = arSessionWrapper, onFrame = {}, onTap = {})
-            SceneView(
-                arcGISScene = arcGISScene,
-                modifier = Modifier.fillMaxSize(),
-                onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
-                onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
-                graphicsOverlays = graphicsOverlays,
-                sceneViewProxy = tableTopSceneViewProxy.sceneViewProxy,
-                sceneViewInteractionOptions = sceneViewInteractionOptions,
-                viewLabelProperties = viewLabelProperties,
-                selectionProperties = selectionProperties,
-                isAttributionBarVisible = isAttributionBarVisible,
-                onAttributionTextChanged = onAttributionTextChanged,
-                onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
-                analysisOverlays = analysisOverlays,
-                imageOverlays = imageOverlays,
-                atmosphereEffect = AtmosphereEffect.None,
-                timeExtent = timeExtent,
-                onTimeExtentChanged = onTimeExtentChanged,
-                spaceEffect = SpaceEffect.Transparent,
-                sunTime = sunTime,
-                sunLighting = sunLighting,
-                ambientLightColor = ambientLightColor,
-                onNavigationChanged = onNavigationChanged,
-                onSpatialReferenceChanged = {
-                    onSpatialReferenceChanged?.invoke(it)
-                },
-                onLayerViewStateChanged = onLayerViewStateChanged,
-                onInteractingChanged = onInteractingChanged,
-                onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged,
-                onRotate = onRotate,
-                onScale = onScale,
-                onUp = onUp,
-                onDown = onDown,
-                onSingleTapConfirmed = onSingleTapConfirmed,
-                onDoubleTap = onDoubleTap,
-                onLongPress = onLongPress,
-                onTwoPointerTap = onTwoPointerTap,
-                onPan = onPan,
-                onDrawStatusChanged = onDrawStatusChanged,
-                content = {
-                    content?.invoke(TableTopSceneViewScope(this))
+
+        if (cameraPermissionGranted) {
+            LaunchedEffect(Unit) {
+                val arCoreAvailability = checkArCoreAvailability(context)
+                val isArCoreAvailable =
+                    arCoreAvailability == ArCoreApk.Availability.SUPPORTED_INSTALLED
+                if (!isArCoreAvailable) {
+                    initializationStatus = TableTopSceneViewInitializationStatus.FailedToInitialize(
+                        IllegalStateException("ARCore must be installed to use TableTopSceneView. ARCore availability: $arCoreAvailability")
+                    )
+                    onInitializationStatusChanged?.invoke(initializationStatus)
+                } else {
+                    initializationStatus = TableTopSceneViewInitializationStatus.Initialized
+                    onInitializationStatusChanged?.invoke(initializationStatus)
                 }
-            )
+            }
+            val arSessionWrapper = remember { ArSessionWrapper(context.applicationContext) }
+            DisposableEffect(Unit) {
+                lifecycleOwner.lifecycle.addObserver(arSessionWrapper)
+                onDispose {
+                    lifecycleOwner.lifecycle.removeObserver(arSessionWrapper)
+                    arSessionWrapper.onDestroy(lifecycleOwner)
+                }
+            }
+            if (initializationStatus == TableTopSceneViewInitializationStatus.Initialized) {
+                ArCameraFeed(arSessionWrapper = arSessionWrapper, onFrame = {}, onTap = {})
+                SceneView(
+                    arcGISScene = arcGISScene,
+                    modifier = Modifier.fillMaxSize(),
+                    onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
+                    onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
+                    graphicsOverlays = graphicsOverlays,
+                    sceneViewProxy = tableTopSceneViewProxy.sceneViewProxy,
+                    sceneViewInteractionOptions = sceneViewInteractionOptions,
+                    viewLabelProperties = viewLabelProperties,
+                    selectionProperties = selectionProperties,
+                    isAttributionBarVisible = isAttributionBarVisible,
+                    onAttributionTextChanged = onAttributionTextChanged,
+                    onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
+                    analysisOverlays = analysisOverlays,
+                    imageOverlays = imageOverlays,
+                    atmosphereEffect = AtmosphereEffect.None,
+                    timeExtent = timeExtent,
+                    onTimeExtentChanged = onTimeExtentChanged,
+                    spaceEffect = SpaceEffect.Transparent,
+                    sunTime = sunTime,
+                    sunLighting = sunLighting,
+                    ambientLightColor = ambientLightColor,
+                    onNavigationChanged = onNavigationChanged,
+                    onSpatialReferenceChanged = {
+                        onSpatialReferenceChanged?.invoke(it)
+                    },
+                    onLayerViewStateChanged = onLayerViewStateChanged,
+                    onInteractingChanged = onInteractingChanged,
+                    onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged,
+                    onRotate = onRotate,
+                    onScale = onScale,
+                    onUp = onUp,
+                    onDown = onDown,
+                    onSingleTapConfirmed = onSingleTapConfirmed,
+                    onDoubleTap = onDoubleTap,
+                    onLongPress = onLongPress,
+                    onTwoPointerTap = onTwoPointerTap,
+                    onPan = onPan,
+                    onDrawStatusChanged = onDrawStatusChanged,
+                    content = {
+                        content?.invoke(TableTopSceneViewScope(this))
+                    }
+                )
+            }
         }
     }
 }
@@ -226,3 +253,10 @@ private fun rememberCameraPermission(
     }
     return isGrantedState
 }
+
+private suspend fun checkArCoreAvailability(context: Context): ArCoreApk.Availability =
+    suspendCancellableCoroutine { continuation ->
+        ArCoreApk.getInstance().checkAvailabilityAsync(context) {
+            continuation.resume(it)
+        }
+    }
