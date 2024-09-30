@@ -22,6 +22,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -119,7 +120,9 @@ public class TraceState(
     private val _currentScreen: MutableState<TraceNavRoute> = mutableStateOf(TraceNavRoute.TraceOptions)
     internal var currentScreen: State<TraceNavRoute> = _currentScreen
 
-    private val completedTraces: MutableList<TraceRun> = mutableListOf()
+    private val _completedTraces: SnapshotStateList<TraceRun> = mutableStateListOf()
+    internal val completedTraces: List<TraceRun> = _completedTraces
+
 
     private var _currentTraceName: MutableState<String> = mutableStateOf("")
     /**
@@ -162,6 +165,10 @@ public class TraceState(
         return expandedEnvelope.extent
     }
 
+    private var _selectedTabIndex: MutableState<Int> = mutableIntStateOf(1)
+    public var selectedTabIndex: State<Int> = _selectedTabIndex
+
+
     /**
      * Initializes the state object by loading the map, the Utility Networks contained in the map
      * and its trace configurations.
@@ -194,7 +201,7 @@ public class TraceState(
 
     internal fun setSelectedTraceConfiguration(config: UtilityNamedTraceConfiguration) {
         _selectedTraceConfiguration.value = config
-        _currentTraceName.value = "${config.name} ${(completedTraces.count { it.configuration.name == config.name } + 1)}"
+        _currentTraceName.value = "${config.name} ${(_completedTraces.count { it.configuration.name == config.name } + 1)}"
     }
 
     internal fun showScreen(screen: TraceNavRoute) {
@@ -277,7 +284,7 @@ public class TraceState(
             featureResults = currentTraceElementResults,
             functionResults = currentTraceFunctionResults,
             geometryTraceResult = currentTraceGeometryResults
-        ).also { completedTraces.add(it) }
+        ).also { _completedTraces.add(it) }
 
         if (_currentTraceZoomToResults.value) {
             currentTraceResultGeometriesExtent?.let {

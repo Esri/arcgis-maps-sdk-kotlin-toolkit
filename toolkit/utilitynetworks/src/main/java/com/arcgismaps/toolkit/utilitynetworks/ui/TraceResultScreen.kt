@@ -23,8 +23,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -39,9 +41,12 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -64,27 +69,67 @@ import com.arcgismaps.utilitynetworks.UtilityTraceFunctionOutput
 @Composable
 internal fun TraceResultScreen(
     traceRun: TraceRun,
+    onBackToNewTrace: () -> Unit,
     onDeleteResult: () -> Unit,
     onZoomToResults: () -> Unit,
     onClearAllResults: () -> Unit
 ) {
     Surface(modifier = Modifier.fillMaxSize()) {
-        LazyColumn {
-            item {
-                TraceTitle(traceRun.name, onZoomToResults = onZoomToResults, onDeleteResult = onDeleteResult)
-            }
-            item {
-                FeatureResult(traceRun.featureResults)
-            }
-            item {
-                FunctionResult(traceRun.functionResults)
-            }
-            item {
-                ClearAllResultsButton(onClearAllResults)
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 20.dp, vertical = 0.dp)) {
+
+            TabRow(onBackToNewTrace)
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(15.dp)
+            )
+            LazyColumn {
+                item {
+                    TraceTitle(
+                        traceRun.name,
+                        onZoomToResults = onZoomToResults,
+                        onDeleteResult = onDeleteResult
+                    )
+                }
+                item {
+                    FeatureResult(traceRun.featureResults)
+                }
+                item {
+                    FunctionResult(traceRun.functionResults)
+                }
+                item {
+                    ClearAllResultsButton(onClearAllResults)
+                }
             }
         }
     }
 }
+
+@Composable
+private fun TabRow(onBackToNewTrace: () -> Unit) {
+    val tabItems = listOf("New Trace", "Results")
+    var selectedTabIndex by remember { mutableIntStateOf(1) }
+
+    TabRow(selectedTabIndex = selectedTabIndex) {
+        tabItems.forEachIndexed { index, title ->
+            var selected by remember { mutableStateOf(index == 1) }
+            Tab(
+                selected = selected,
+                onClick = {
+                    selectedTabIndex = index
+                    selected = true
+                    if (index == 0) {
+                        onBackToNewTrace()
+                    }
+                },
+                text = { Text(title) }
+            )
+        }
+    }
+}
+
 
 @Composable
 private fun TraceTitle(traceName: String, onZoomToResults: () -> Unit, onDeleteResult: () -> Unit) {
