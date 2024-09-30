@@ -134,7 +134,7 @@ fun TableTopSceneView(
         val cameraPermissionGranted by rememberCameraPermission(requestCameraPermissionAutomatically) {
             // onNotGranted
             initializationStatus = TableTopSceneViewInitializationStatus.FailedToInitialize(
-                IllegalStateException("Camera permission not granted")
+                IllegalStateException(context.getString(R.string.camera_permission_not_granted))
             )
             onInitializationStatusChanged?.invoke(initializationStatus)
         }
@@ -149,7 +149,11 @@ fun TableTopSceneView(
                     arCoreAvailability == ArCoreApk.Availability.SUPPORTED_INSTALLED
                 if (!isArCoreAvailable) {
                     initializationStatus = TableTopSceneViewInitializationStatus.FailedToInitialize(
-                        IllegalStateException("ARCore must be installed to use TableTopSceneView. ARCore availability: $arCoreAvailability")
+                        IllegalStateException(
+                            context.getString(
+                                R.string.arcore_must_be_installed_to_use_tabletopsceneview_arcore_availability,
+                                arCoreAvailability
+                            ))
                     )
                     onInitializationStatusChanged?.invoke(initializationStatus)
                 } else {

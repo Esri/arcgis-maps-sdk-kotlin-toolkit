@@ -31,6 +31,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
@@ -55,7 +56,7 @@ class MainActivity : ComponentActivity() {
                 if (isGooglePlayServicesArInstalled.collectAsState().value) {
                     ArTabletopApp()
                 } else {
-                    Text(text = "Google Play Services for AR is not installed")
+                    Text(text = stringResource(R.string.google_play_services_for_ar_must_be_installed_to_run_this_app))
                 }
             }
         }

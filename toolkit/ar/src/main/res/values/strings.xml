@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="camera_permission_not_granted">Camera permission not granted</string>
+    <string name="arcore_must_be_installed_to_use_tabletopsceneview_arcore_availability">ARCore must be installed to use TableTopSceneView. ARCore availability: %1$s</string>
+</resources>
