@@ -80,6 +80,7 @@ import java.time.Instant
 fun TableTopSceneView(
     arcGISScene: ArcGISScene,
     modifier: Modifier = Modifier,
+    onInitializationStatusChanged: ((TableTopSceneViewInitializationStatus) -> Unit)? = null,
     requestCameraPermissionAutomatically: Boolean = true,
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
@@ -117,7 +118,14 @@ fun TableTopSceneView(
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
-    val cameraPermissionGranted by rememberCameraPermission(requestCameraPermissionAutomatically)
+    val cameraPermissionGranted by rememberCameraPermission(requestCameraPermissionAutomatically) {
+        // onNotGranted
+        onInitializationStatusChanged?.invoke(
+            TableTopSceneViewInitializationStatus.FailedToInitialize(
+                IllegalStateException("Camera permission not granted")
+            )
+        )
+    }
 
     if (cameraPermissionGranted) {
         val arSessionWrapper = remember { ArSessionWrapper(context.applicationContext) }
@@ -183,25 +191,37 @@ fun TableTopSceneView(
  * @since 200.6.0
  */
 @Composable
-private fun rememberCameraPermission(requestCameraPermissionAutomatically: Boolean) : MutableState<Boolean> {
+private fun rememberCameraPermission(
+    requestCameraPermissionAutomatically: Boolean,
+    onNotGranted: () -> Unit
+): MutableState<Boolean> {
     val cameraPermission = Manifest.permission.CAMERA
     val context = LocalContext.current
-    val isGrantedState = remember { mutableStateOf(
-        ContextCompat.checkSelfPermission(
-            context,
-            cameraPermission
-        ) == PackageManager.PERMISSION_GRANTED
-    ) }
+    val isGrantedState = remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(
+                context,
+                cameraPermission
+            ) == PackageManager.PERMISSION_GRANTED
+        )
+    }
     if (requestCameraPermissionAutomatically) {
         val requestPermissionLauncher =
             rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) { granted ->
                 isGrantedState.value = granted
+                if (!granted) {
+                    onNotGranted()
+                }
             }
 
         if (!isGrantedState.value) {
             SideEffect {
                 requestPermissionLauncher.launch(Manifest.permission.CAMERA)
             }
+        }
+    } else {
+        if (!isGrantedState.value) {
+            onNotGranted()
         }
     }
     return isGrantedState
