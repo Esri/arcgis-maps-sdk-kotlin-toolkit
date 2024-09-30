@@ -25,6 +25,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.arcgismaps.toolkit.utilitynetworks.R
 
 /**
  * A composable screen that shows the UI to add a starting point for a trace.
@@ -39,7 +41,7 @@ internal fun AddStartingPointScreen(onStopPointSelection: () -> Unit) {
                 onClick = {
                     onStopPointSelection()
                 }) {
-                Text(text = "Cancel Starting Point Selection")
+                Text(text = stringResource(id = R.string.cancel_starting_point_selection))
             }
         }
     }
