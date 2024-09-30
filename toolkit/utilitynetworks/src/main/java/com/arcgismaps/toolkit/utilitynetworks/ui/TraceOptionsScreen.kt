@@ -113,7 +113,7 @@ internal fun TraceOptionsScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        Column (modifier = Modifier.padding(horizontal = 20.dp),
+        Column (modifier = Modifier.padding(horizontal = 10.dp),
             horizontalAlignment = Alignment.CenterHorizontally) {
 
             if (showResultsTab) {

@@ -77,7 +77,7 @@ internal fun TraceResultScreen(
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 20.dp, vertical = 0.dp)) {
+            .padding(horizontal = 10.dp)) {
 
             TabRow(onBackToNewTrace)
             Spacer(
