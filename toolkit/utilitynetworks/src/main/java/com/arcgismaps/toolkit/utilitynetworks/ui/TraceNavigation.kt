@@ -67,9 +67,7 @@ internal fun TraceNavHost(traceState: TraceState) {
                 },
                 selectedConfig = traceState.selectedTraceConfiguration.value,
                 onStartingPointRemoved = { traceState.removeStartingPoint(it) },
-                onBackToResults = {
-                    traceState.showScreen(TraceNavRoute.TraceResults)
-                },
+                onBackToResults = { traceState.showScreen(TraceNavRoute.TraceResults) },
                 onConfigSelected = { newConfig ->
                     traceState.setSelectedTraceConfiguration(newConfig)
                 },
@@ -97,9 +95,7 @@ internal fun TraceNavHost(traceState: TraceState) {
             require (traceRun != null)
             TraceResultScreen(
                 traceRun = traceRun,
-                onBackToNewTrace = {
-                    traceState.showScreen(TraceNavRoute.TraceOptions)
-                },
+                onBackToNewTrace = { traceState.showScreen(TraceNavRoute.TraceOptions) },
                 onDeleteResult = {
 
                 }, onZoomToResults = {

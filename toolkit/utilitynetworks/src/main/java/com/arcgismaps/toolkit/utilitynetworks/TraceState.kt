@@ -165,10 +165,6 @@ public class TraceState(
         return expandedEnvelope.extent
     }
 
-    private var _selectedTabIndex: MutableState<Int> = mutableIntStateOf(1)
-    public var selectedTabIndex: State<Int> = _selectedTabIndex
-
-
     /**
      * Initializes the state object by loading the map, the Utility Networks contained in the map
      * and its trace configurations.
