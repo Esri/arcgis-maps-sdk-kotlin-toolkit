@@ -295,8 +295,16 @@ public class TraceState(
                 )
             }
         }
-
+        resetCurrentTrace()
         return true
+    }
+
+    private fun resetCurrentTrace() {
+        _selectedTraceConfiguration.value = null
+        _currentTraceStartingPoints.clear()
+        _currentTraceName.value = ""
+        currentTraceGraphicsColor = Color.green
+        _currentTraceZoomToResults.value = false
     }
 
     private fun createGraphicForSimpleLineSymbol(geometry: Geometry, style: SimpleLineSymbolStyle, color: Color) =
