@@ -19,6 +19,7 @@
 package com.arcgismaps.toolkit.artabletopapp
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
@@ -28,21 +29,59 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.toolkit.artabletopapp.screens.MainScreen
 import com.esri.microappslib.theme.MicroAppTheme
+import com.google.ar.core.ArCoreApk
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class MainActivity : ComponentActivity() {
+
+    private var userRequestedInstall: Boolean = true
+
+    private val _isGooglePlayServicesArInstalled = MutableStateFlow(false)
+    private val isGooglePlayServicesArInstalled = _isGooglePlayServicesArInstalled.asStateFlow()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ArcGISEnvironment.apiKey = ApiKey.create(BuildConfig.API_KEY)
         setContent {
             MicroAppTheme {
-                ArTabletopApp()
+                if (isGooglePlayServicesArInstalled.collectAsState().value) {
+                    ArTabletopApp()
+                } else {
+                    Text(text = "Google Play Services for AR is not installed")
+                }
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        checkGooglePlayServicesArInstalled()
+    }
+
+    private fun checkGooglePlayServicesArInstalled() {
+        // Check if Google Play Services for AR is installed on the device
+        try {
+            when (ArCoreApk.getInstance().requestInstall(this, userRequestedInstall)) {
+                ArCoreApk.InstallStatus.INSTALL_REQUESTED -> {
+                    userRequestedInstall = false
+                    return
+                }
+
+                ArCoreApk.InstallStatus.INSTALLED -> {
+                    _isGooglePlayServicesArInstalled.value = true
+                    return
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("ArTabletopApp","Error checking Google Play Services for AR: ${e.message}")
         }
     }
 }
@@ -56,14 +95,5 @@ fun ArTabletopApp() {
         Box(Modifier.padding(it)) {
             MainScreen()
         }
-    }
-
-}
-
-@Preview(showBackground = true)
-@Composable
-fun AppPreview() {
-    MicroAppTheme {
-        ArTabletopApp()
     }
 }

@@ -139,7 +139,10 @@ fun TableTopSceneView(
             onInitializationStatusChanged?.invoke(initializationStatus)
         }
 
+        var arCoreInstalled by remember { mutableStateOf(false) }
+
         if (cameraPermissionGranted) {
+            // invoked when the cameraPermissionGranted state changes to true
             LaunchedEffect(Unit) {
                 val arCoreAvailability = checkArCoreAvailability(context)
                 val isArCoreAvailable =
@@ -150,11 +153,15 @@ fun TableTopSceneView(
                     )
                     onInitializationStatusChanged?.invoke(initializationStatus)
                 } else {
-                    initializationStatus = TableTopSceneViewInitializationStatus.Initialized
-                    onInitializationStatusChanged?.invoke(initializationStatus)
+                    arCoreInstalled = true
                 }
             }
+        }
+        if (arCoreInstalled) {
+            // invoked when the arCoreInstalled state changes to true
             val arSessionWrapper = remember { ArSessionWrapper(context.applicationContext) }
+            initializationStatus = TableTopSceneViewInitializationStatus.Initialized
+            onInitializationStatusChanged?.invoke(initializationStatus)
             DisposableEffect(Unit) {
                 lifecycleOwner.lifecycle.addObserver(arSessionWrapper)
                 onDispose {
@@ -162,52 +169,50 @@ fun TableTopSceneView(
                     arSessionWrapper.onDestroy(lifecycleOwner)
                 }
             }
-            if (initializationStatus == TableTopSceneViewInitializationStatus.Initialized) {
-                ArCameraFeed(arSessionWrapper = arSessionWrapper, onFrame = {}, onTap = {})
-                SceneView(
-                    arcGISScene = arcGISScene,
-                    modifier = Modifier.fillMaxSize(),
-                    onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
-                    onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
-                    graphicsOverlays = graphicsOverlays,
-                    sceneViewProxy = tableTopSceneViewProxy.sceneViewProxy,
-                    sceneViewInteractionOptions = sceneViewInteractionOptions,
-                    viewLabelProperties = viewLabelProperties,
-                    selectionProperties = selectionProperties,
-                    isAttributionBarVisible = isAttributionBarVisible,
-                    onAttributionTextChanged = onAttributionTextChanged,
-                    onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
-                    analysisOverlays = analysisOverlays,
-                    imageOverlays = imageOverlays,
-                    atmosphereEffect = AtmosphereEffect.None,
-                    timeExtent = timeExtent,
-                    onTimeExtentChanged = onTimeExtentChanged,
-                    spaceEffect = SpaceEffect.Transparent,
-                    sunTime = sunTime,
-                    sunLighting = sunLighting,
-                    ambientLightColor = ambientLightColor,
-                    onNavigationChanged = onNavigationChanged,
-                    onSpatialReferenceChanged = {
-                        onSpatialReferenceChanged?.invoke(it)
-                    },
-                    onLayerViewStateChanged = onLayerViewStateChanged,
-                    onInteractingChanged = onInteractingChanged,
-                    onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged,
-                    onRotate = onRotate,
-                    onScale = onScale,
-                    onUp = onUp,
-                    onDown = onDown,
-                    onSingleTapConfirmed = onSingleTapConfirmed,
-                    onDoubleTap = onDoubleTap,
-                    onLongPress = onLongPress,
-                    onTwoPointerTap = onTwoPointerTap,
-                    onPan = onPan,
-                    onDrawStatusChanged = onDrawStatusChanged,
-                    content = {
-                        content?.invoke(TableTopSceneViewScope(this))
-                    }
-                )
-            }
+            ArCameraFeed(arSessionWrapper = arSessionWrapper, onFrame = {}, onTap = {})
+            SceneView(
+                arcGISScene = arcGISScene,
+                modifier = Modifier.fillMaxSize(),
+                onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
+                onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
+                graphicsOverlays = graphicsOverlays,
+                sceneViewProxy = tableTopSceneViewProxy.sceneViewProxy,
+                sceneViewInteractionOptions = sceneViewInteractionOptions,
+                viewLabelProperties = viewLabelProperties,
+                selectionProperties = selectionProperties,
+                isAttributionBarVisible = isAttributionBarVisible,
+                onAttributionTextChanged = onAttributionTextChanged,
+                onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
+                analysisOverlays = analysisOverlays,
+                imageOverlays = imageOverlays,
+                atmosphereEffect = AtmosphereEffect.None,
+                timeExtent = timeExtent,
+                onTimeExtentChanged = onTimeExtentChanged,
+                spaceEffect = SpaceEffect.Transparent,
+                sunTime = sunTime,
+                sunLighting = sunLighting,
+                ambientLightColor = ambientLightColor,
+                onNavigationChanged = onNavigationChanged,
+                onSpatialReferenceChanged = {
+                    onSpatialReferenceChanged?.invoke(it)
+                },
+                onLayerViewStateChanged = onLayerViewStateChanged,
+                onInteractingChanged = onInteractingChanged,
+                onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged,
+                onRotate = onRotate,
+                onScale = onScale,
+                onUp = onUp,
+                onDown = onDown,
+                onSingleTapConfirmed = onSingleTapConfirmed,
+                onDoubleTap = onDoubleTap,
+                onLongPress = onLongPress,
+                onTwoPointerTap = onTwoPointerTap,
+                onPan = onPan,
+                onDrawStatusChanged = onDrawStatusChanged,
+                content = {
+                    content?.invoke(TableTopSceneViewScope(this))
+                }
+            )
         }
     }
 }
