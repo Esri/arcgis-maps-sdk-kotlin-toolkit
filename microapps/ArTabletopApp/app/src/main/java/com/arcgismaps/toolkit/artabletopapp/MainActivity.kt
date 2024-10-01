@@ -32,14 +32,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.toolkit.artabletopapp.screens.MainScreen
 import com.esri.microappslib.theme.MicroAppTheme
 import com.google.ar.core.ArCoreApk
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
 class MainActivity : ComponentActivity() {
 
@@ -57,7 +55,7 @@ class MainActivity : ComponentActivity() {
                 if (isGooglePlayServicesArInstalled.collectAsState().value) {
                     ArTabletopApp()
                 } else {
-                    Text(text = stringResource(R.string.google_play_services_for_ar_must_be_installed_to_run_this_app))
+                    Text(text = stringResource(R.string.arcore_not_installed_screen_message))
                 }
             }
         }
