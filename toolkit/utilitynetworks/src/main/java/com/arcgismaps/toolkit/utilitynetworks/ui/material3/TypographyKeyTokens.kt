@@ -16,7 +16,7 @@
 // VERSION: v0_103
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-package androidx.compose.material3.tokens
+package com.arcgismaps.toolkit.utilitynetworks.ui.material3
 
 internal enum class TypographyKeyTokens {
     BodyLarge,
