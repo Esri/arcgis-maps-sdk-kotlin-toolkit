@@ -123,7 +123,6 @@ public class TraceState(
     private val _completedTraces: SnapshotStateList<TraceRun> = mutableStateListOf()
     internal val completedTraces: List<TraceRun> = _completedTraces
 
-
     private var _currentTraceName: MutableState<String> = mutableStateOf("")
     /**
      * The default name of the trace.
