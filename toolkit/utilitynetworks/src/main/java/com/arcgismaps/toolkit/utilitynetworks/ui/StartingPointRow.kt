@@ -87,6 +87,7 @@ private const val DELETE_THRESHOLD = 5f
 internal fun StartingPointRow(
     data: StartingPoint,
     modifier: Modifier = Modifier,
+    onStartingPointSelected: (StartingPoint) -> Unit,
     onDelete: () -> Unit = {}
 ) {
     val density = LocalDensity.current
@@ -150,6 +151,11 @@ internal fun StartingPointRow(
             modifier = modifier
                 .fillMaxSize()
                 .align(Alignment.CenterVertically)
+                .clickable {
+                    if (!deleteActive) {
+                        onStartingPointSelected(data)
+                    }
+                }
                 .clip(shape = RoundedCornerShape(8.dp))
                 .onSizeChanged { layoutSize ->
                     val dragEndPoint = layoutSize.width - contentSizeWidth
@@ -174,7 +180,6 @@ internal fun StartingPointRow(
                     .padding(start = 5.dp, end = 25.dp )
                     .height(65.dp)
             )
-
 
             var indicationState by rememberSaveable(data) { mutableStateOf(false) }
             val animatedOffset: Dp by animateDpAsState(

@@ -20,8 +20,9 @@ import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.httpcore.authentication.TokenCredential
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.PortalItem
+import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.portal.Portal
-import kotlinx.coroutines.test.TestScope
+import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 
@@ -65,6 +66,8 @@ open class TraceToolTestRunner(
                 itemId
             )
         )
-        _traceState = TraceState(map, coroutineScope = TestScope())
+        val graphicsOverlay = GraphicsOverlay()
+        val mapviewProxy = MapViewProxy()
+        _traceState = TraceState(map, graphicsOverlay, mapviewProxy)
     }
 }
