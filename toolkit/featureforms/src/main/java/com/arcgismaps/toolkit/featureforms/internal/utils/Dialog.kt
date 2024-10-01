@@ -182,7 +182,7 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
             }
             ComboBoxDialog(
                 initialValue = state.value.value.data,
-                values = state.codedValues.associateBy({ it.code }, { it.name }),
+                values = state.codedValues,
                 label = state.label,
                 description = state.description,
                 isRequired = state.isRequired.collectAsState().value,
@@ -380,7 +380,15 @@ internal fun computeWindowSizeClasses(context: Context): WindowSizeClass {
     val width = metrics.bounds.width()
     val height = metrics.bounds.height()
     val density = context.resources.displayMetrics.density
-    return WindowSizeClass.compute(width / density, height / density)
+    try {
+        val windowSizeClass = WindowSizeClass.compute(width / density, height / density)
+        return windowSizeClass
+    } catch (ex : IllegalArgumentException) {
+        // if the calculation has thrown an exception due to width or height being negative (like
+        // in a preview), then use a default size of 400x900dp which indicates a compact size
+        // representing 99.96% of phones in portrait
+        return WindowSizeClass.compute(400F, 900F)
+    }
 }
 
 internal fun showError(context: Context, message: String) {
