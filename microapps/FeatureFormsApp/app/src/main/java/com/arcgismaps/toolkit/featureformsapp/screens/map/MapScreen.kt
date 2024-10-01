@@ -236,18 +236,6 @@ fun MapScreen(mapViewModel: MapViewModel = hiltViewModel(), onBackPressed: () ->
             )
         }
 
-        is UIState.NoFeatureFormDefinition -> {
-            NoFormDefinitionDialog(
-                onConfirm = {
-                    mapViewModel.setDefaultState()
-                },
-                onCancel = {
-                    mapViewModel.setDefaultState()
-                    onBackPressed()
-                }
-            )
-        }
-
         is UIState.Error -> {
             ErrorDialog(
                 error = uiState as UIState.Error,
@@ -445,40 +433,6 @@ fun DiscardEditsDialog(onConfirm: () -> Unit, onCancel: () -> Unit) {
         },
         text = {
             Text(text = stringResource(R.string.all_changes_will_be_lost))
-        }
-    )
-}
-
-@Composable
-fun NoFormDefinitionDialog(
-    onConfirm: () -> Unit,
-    onCancel: () -> Unit,
-) {
-    AlertDialog(
-        onDismissRequest = {},
-        title = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.no_featureform_found),
-                    modifier = Modifier.weight(1f)
-                )
-                Image(imageVector = Icons.Rounded.Warning, contentDescription = null)
-            }
-        },
-        confirmButton = {
-            Button(onClick = onConfirm) {
-                Text(text = stringResource(R.string.okay))
-            }
-        },
-        dismissButton = {
-            Button(onClick = onCancel) {
-                Text(text = stringResource(R.string.exit))
-            }
-        },
-        text = {
-            Text(text = stringResource(R.string.no_featureform_description))
         }
     )
 }
