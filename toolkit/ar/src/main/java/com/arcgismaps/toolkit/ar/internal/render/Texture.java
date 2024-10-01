@@ -20,7 +20,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES30;
-import android.util.Log;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -136,7 +135,6 @@ class Texture implements Closeable {
 
             // Load and convert the bitmap and copy its contents to a direct ByteBuffer. Despite its name,
             // the ARGB_8888 config is actually stored in RGBA order.
-            Log.e("Texture", "createFromAsset: " + assetFileName);
             bitmap =
                     convertBitmapToConfig(
                             BitmapFactory.decodeStream(assets.open(assetFileName)),

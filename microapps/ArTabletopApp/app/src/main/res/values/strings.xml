@@ -19,4 +19,5 @@
 <resources>
     <string name="app_name">ArTabletopApp</string>
     <string name="google_play_services_for_ar_must_be_installed_to_run_this_app">Google Play Services for AR must be installed to run this app.</string>
+    <string name="initialization_status">Initialization status: %1$s</string>
 </resources>

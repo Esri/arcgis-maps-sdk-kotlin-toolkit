@@ -31,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISScene
@@ -39,6 +40,7 @@ import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.ar.TableTopSceneView
 import com.arcgismaps.toolkit.ar.TableTopSceneViewInitializationStatus
 import com.arcgismaps.toolkit.ar.TableTopSceneViewProxy
+import com.arcgismaps.toolkit.artabletopapp.R
 import kotlin.math.roundToInt
 
 @Composable
@@ -72,6 +74,6 @@ fun MainScreen() {
                 }
             }
         }
-        Text(text = "Initialization status: $initializationStatus", modifier = Modifier.height(200.dp), color = Color.Red)
+        Text(text = stringResource(R.string.initialization_status, initializationStatus), modifier = Modifier.height(200.dp), color = Color.Red)
     }
 }

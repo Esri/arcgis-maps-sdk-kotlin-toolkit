@@ -69,7 +69,7 @@ internal class PlaneRenderer(render: SurfaceDrawHandler?, assets: AssetManager) 
      */
     init {
         val texture: Texture =
-             Texture.createFromAsset(
+            Texture.createFromAsset(
                 assets, TEXTURE_NAME, Texture.WrapMode.REPEAT, Texture.ColorFormat.LINEAR
             )
         shader =
