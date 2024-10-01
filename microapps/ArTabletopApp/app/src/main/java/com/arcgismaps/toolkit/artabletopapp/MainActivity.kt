@@ -45,8 +45,9 @@ class MainActivity : ComponentActivity() {
 
     private var userRequestedInstall: Boolean = true
 
-    private val _isGooglePlayServicesArInstalled = MutableStateFlow(false)
-    private val isGooglePlayServicesArInstalled = _isGooglePlayServicesArInstalled.asStateFlow()
+    // Flow to track if Google Play Services for AR is installed on the device
+    // By using `collectAsState()` in the composable, the UI will recompose when the value changes
+    private val isGooglePlayServicesArInstalled = MutableStateFlow(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,6 +70,8 @@ class MainActivity : ComponentActivity() {
 
     private fun checkGooglePlayServicesArInstalled() {
         // Check if Google Play Services for AR is installed on the device
+        // If it's not installed, this method should get called twice: once to request the installation
+        // and once to ensure it was installed when the activity resumes
         try {
             when (ArCoreApk.getInstance().requestInstall(this, userRequestedInstall)) {
                 ArCoreApk.InstallStatus.INSTALL_REQUESTED -> {
@@ -77,7 +80,7 @@ class MainActivity : ComponentActivity() {
                 }
 
                 ArCoreApk.InstallStatus.INSTALLED -> {
-                    _isGooglePlayServicesArInstalled.value = true
+                    isGooglePlayServicesArInstalled.value = true
                     return
                 }
             }
