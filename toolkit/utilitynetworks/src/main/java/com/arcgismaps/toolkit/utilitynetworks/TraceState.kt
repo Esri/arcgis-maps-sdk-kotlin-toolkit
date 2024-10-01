@@ -28,17 +28,20 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.Color
 import com.arcgismaps.data.ArcGISFeature
+import com.arcgismaps.geometry.Envelope
 import com.arcgismaps.geometry.Geometry
 import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.Polyline
 import com.arcgismaps.mapping.ArcGISMap
+import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.layers.FeatureLayer
 import com.arcgismaps.mapping.symbology.SimpleLineSymbol
 import com.arcgismaps.mapping.symbology.SimpleLineSymbolStyle
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
 import com.arcgismaps.mapping.symbology.Symbol
+import com.arcgismaps.mapping.view.AnimationCurve
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.mapping.view.ScreenCoordinate
@@ -54,6 +57,7 @@ import com.arcgismaps.utilitynetworks.UtilityNetworkSourceType
 import com.arcgismaps.utilitynetworks.UtilityTraceFunctionOutput
 import com.arcgismaps.utilitynetworks.UtilityTraceParameters
 import kotlinx.coroutines.CancellationException
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Represents the state for the Trace.
@@ -120,10 +124,53 @@ public class TraceState(
     internal val currentTraceRun: State<TraceRun?>
         get() = _currentTraceRun
 
-    private val currentTraceGraphics : MutableList<Graphic> = mutableListOf()
+    private val currentTraceGeometryResultsGraphics : MutableList<Graphic> = mutableListOf()
 
     private val _currentScreen: MutableState<TraceNavRoute> = mutableStateOf(TraceNavRoute.TraceOptions)
     internal var currentScreen: State<TraceNavRoute> = _currentScreen
+
+    private val completedTraces: MutableList<TraceRun> = mutableListOf()
+
+    private var _currentTraceName: MutableState<String> = mutableStateOf("")
+    /**
+     * The default name of the trace.
+     *
+     * @since 200.6.0
+     */
+    public val currentTraceName: State<String> = _currentTraceName
+
+    private var currentTraceGraphicsColor: Color = Color.green
+    public val currentTraceGraphicsColorAsComposeColor: androidx.compose.ui.graphics.Color
+        get() = androidx.compose.ui.graphics.Color(
+            currentTraceGraphicsColor.red,
+            currentTraceGraphicsColor.green,
+            currentTraceGraphicsColor.blue,
+            currentTraceGraphicsColor.alpha
+        )
+
+    private var _currentTraceZoomToResults: MutableState<Boolean> = mutableStateOf(false)
+    public var currentTraceZoomToResults: State<Boolean> = _currentTraceZoomToResults
+
+    private val currentTraceResultGeometriesExtent: Envelope?
+    get() {
+        val utilityGeometryTraceResult = _currentTraceRun.value?.geometryTraceResult ?: return null
+
+        val geometries = listOf(
+            utilityGeometryTraceResult.polygon,
+            utilityGeometryTraceResult.polyline,
+            utilityGeometryTraceResult.multipoint
+        ).mapNotNull { geometry ->
+            if (geometry != null && !geometry.isEmpty) {
+                geometry
+            } else {
+                null
+            }
+        }
+        val combinedExtents = GeometryEngine.combineExtentsOrNull(geometries) ?: return null
+        val expandedEnvelope = GeometryEngine.bufferOrNull(combinedExtents, 200.0) ?: return null
+
+        return expandedEnvelope.extent
+    }
 
     /**
      * Initializes the state object by loading the map, the Utility Networks contained in the map
@@ -157,6 +204,7 @@ public class TraceState(
 
     internal fun setSelectedTraceConfiguration(config: UtilityNamedTraceConfiguration) {
         _selectedTraceConfiguration.value = config
+        _currentTraceName.value = "${config.name} ${(completedTraces.count { it.configuration.name == config.name } + 1)}"
     }
 
     internal fun setSelectedStartingPoint(startingPoint: StartingPoint?) {
@@ -245,8 +293,9 @@ public class TraceState(
             return false
         }
 
-        val currentTraceFunctionResults : MutableList<UtilityTraceFunctionOutput> = mutableListOf()
+        var currentTraceFunctionResults : List<UtilityTraceFunctionOutput> = emptyList()
         var currentTraceElementResults: List<UtilityElement> = emptyList()
+        var currentTraceGeometryResults: UtilityGeometryTraceResult? = null
 
         for (result in traceResults) {
             when (result) {
@@ -256,38 +305,50 @@ public class TraceState(
                 }
                 // Function results
                 is UtilityFunctionTraceResult -> {
-                    result.functionOutputs.forEach {
-                        currentTraceFunctionResults.add(it)
-                    }
+                    currentTraceFunctionResults = result.functionOutputs
                 }
                 // Geometry results
                 is UtilityGeometryTraceResult -> {
                     result.polygon?.let { polygon ->
-                        val graphic = createGraphicForSimpleLineSymbol(polygon, SimpleLineSymbolStyle.Solid, Color.green)
+                        val graphic = createGraphicForSimpleLineSymbol(polygon, SimpleLineSymbolStyle.Solid, currentTraceGraphicsColor)
                         graphicsOverlay.graphics.add(graphic)
-                        currentTraceGraphics.add(graphic)
+                        currentTraceGeometryResultsGraphics.add(graphic)
                     }
                     result.polyline?.let { polyline ->
-                        val graphic = createGraphicForSimpleLineSymbol(polyline, SimpleLineSymbolStyle.Dash, Color.green)
+                        val graphic = createGraphicForSimpleLineSymbol(polyline, SimpleLineSymbolStyle.Dash, currentTraceGraphicsColor)
                         graphicsOverlay.graphics.add(graphic)
-                        currentTraceGraphics.add(graphic)
+                        currentTraceGeometryResultsGraphics.add(graphic)
                     }
                     result.multipoint?.let { multipoint ->
-                        val graphic = createGraphicForSimpleLineSymbol(multipoint, SimpleLineSymbolStyle.Dot, Color.green)
+                        val graphic = createGraphicForSimpleLineSymbol(multipoint, SimpleLineSymbolStyle.Dot, currentTraceGraphicsColor)
                         graphicsOverlay.graphics.add(graphic)
-                        currentTraceGraphics.add(graphic)
+                        currentTraceGeometryResultsGraphics.add(graphic)
                     }
+                    currentTraceGeometryResults = result
                     // Highlight the geometry results
-                    currentTraceGraphics.map { it.isSelected = true }
+                    currentTraceGeometryResultsGraphics.map { it.isSelected = true }
                 }
             }
         }
         _currentTraceRun.value = TraceRun(
-            name = traceConfiguration.name, // need to auto populate this, if not provided by AdvancedOptions
-            graphics = currentTraceGraphics,
+            name = _currentTraceName.value,
+            configuration = traceConfiguration,
+            graphics = currentTraceGeometryResultsGraphics,
             featureResults = currentTraceElementResults,
-            functionResults = currentTraceFunctionResults
-        )
+            functionResults = currentTraceFunctionResults,
+            geometryTraceResult = currentTraceGeometryResults
+        ).also { completedTraces.add(it) }
+
+        if (_currentTraceZoomToResults.value) {
+            currentTraceResultGeometriesExtent?.let {
+                mapViewProxy.setViewpointAnimated(
+                    Viewpoint(it),
+                    2.0.seconds,
+                    AnimationCurve.EaseOutCirc
+                )
+            }
+        }
+
         return true
     }
 
@@ -313,12 +374,7 @@ public class TraceState(
 
     internal fun removeStartingPoint(startingPoint: StartingPoint) {
         _currentTraceStartingPoints.remove(startingPoint)
-        removeStartingPointGraphic(startingPoint.graphic)
-    }
-
-    private fun removeStartingPointGraphic(graphic: Graphic) {
-        currentTraceGraphics.remove(graphic)
-        graphicsOverlay.graphics.remove(graphic)
+        graphicsOverlay.graphics.remove(startingPoint.graphic)
     }
 
     /**
@@ -350,10 +406,9 @@ public class TraceState(
 
         val graphic = Graphic(
             geometry = mapPoint,
-            symbol = SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Cross, Color.green, 20.0f)
+            symbol = SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Cross, currentTraceGraphicsColor, 20.0f)
         )
         graphicsOverlay.graphics.add(graphic)
-        currentTraceGraphics.add(graphic)
 
         _currentTraceStartingPoints.add(
             StartingPoint(
@@ -393,6 +448,53 @@ public class TraceState(
      */
     internal fun updateAddStartPointMode(status: AddStartingPointMode) {
         _addStartingPointMode.value = status
+    }
+
+    /**
+     * Set the name of the trace.
+     *
+     * @param name the name of the trace
+     * @since 200.6.0
+     */
+    internal fun setTraceName(name: String) {
+        _currentTraceName.value = name
+    }
+
+    /**
+     * Set the color of the graphics.
+     *
+     * @param color the color of the graphics
+     * @since 200.6.0
+     */
+    internal fun setGraphicsColor(color: androidx.compose.ui.graphics.Color) {
+        currentTraceGraphicsColor = Color.fromRgba(
+            color.red.toInt() * 255,
+            color.green.toInt() * 255,
+            color.blue.toInt() * 255,
+            color.alpha.toInt() * 255
+        )
+        // update the color of the starting points
+        _currentTraceStartingPoints.forEach { startingPoint ->
+            val symbol = startingPoint.graphic.symbol as SimpleMarkerSymbol
+            symbol.color = currentTraceGraphicsColor
+        }
+        // update the color of the trace results graphics
+        currentTraceGeometryResultsGraphics.forEach { graphic ->
+            if (graphic.symbol is SimpleLineSymbol) {
+                val symbol = graphic.symbol as SimpleLineSymbol
+                symbol.color = currentTraceGraphicsColor
+            }
+        }
+    }
+
+    /**
+     * Set whether to zoom to the results.
+     *
+     * @param zoom whether to zoom to the results
+     * @since 200.6.0
+     */
+    internal fun setZoomToResults(zoom: Boolean) {
+        _currentTraceZoomToResults.value = zoom
     }
 }
 
@@ -483,9 +585,11 @@ internal data class StartingPoint(val feature: ArcGISFeature, val utilityElement
 @Immutable
 internal data class TraceRun(
     val name: String, // need to auto populate this, if not provided by AdvancedOptions
+    val configuration: UtilityNamedTraceConfiguration,
     val graphics: List<Graphic>,
     val featureResults: List<UtilityElement>,
     val functionResults: List<UtilityTraceFunctionOutput>,
+    val geometryTraceResult: UtilityGeometryTraceResult?
 )
 
 /**
