@@ -25,7 +25,6 @@ import androidx.compose.ui.geometry.Rect
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
-import com.google.mlkit.vision.common.InputImage
 import java.time.Instant
 
 /**
@@ -69,9 +68,8 @@ internal class BarcodeImageAnalyzer(
             image.close()
             return
         }
-        val bitmap = image.toBitmap()
-        val imageToProcess = InputImage.fromBitmap(bitmap, image.imageInfo.rotationDegrees)
-        barcodeScanner.process(imageToProcess).addOnSuccessListener { barcodes ->
+        // using bitmap here is inefficient but ImageProxy.getImage() is experimental
+        barcodeScanner.process(image.toBitmap(), image.imageInfo.rotationDegrees).addOnSuccessListener { barcodes ->
             processBarcodes(barcodes, image)
         }.addOnFailureListener {
             image.close()
