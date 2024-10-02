@@ -66,7 +66,7 @@ import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
 import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
-import com.arcgismaps.toolkit.ar.internal.ArSessionWrapper
+import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
 import com.google.ar.core.ArCoreApk
@@ -141,29 +141,29 @@ fun TableTopSceneView(
 
         var arCoreInstalled by remember { mutableStateOf(false) }
 
-        if (cameraPermissionGranted) {
-            // invoked when the cameraPermissionGranted state changes to true
-            LaunchedEffect(Unit) {
-                val arCoreAvailability = checkArCoreAvailability(context)
-                val isArCoreAvailable =
-                    arCoreAvailability == ArCoreApk.Availability.SUPPORTED_INSTALLED
-                if (!isArCoreAvailable) {
-                    initializationStatus = TableTopSceneViewInitializationStatus.FailedToInitialize(
-                        IllegalStateException(
-                            context.getString(
-                                R.string.arcore_must_be_installed_to_use_tabletopsceneview_arcore_availability,
-                                arCoreAvailability
-                            ))
+        // invoked when the cameraPermissionGranted state changes to true
+        LaunchedEffect(Unit) {
+            val arCoreAvailability = checkArCoreAvailability(context)
+            val isArCoreAvailable =
+                arCoreAvailability == ArCoreApk.Availability.SUPPORTED_INSTALLED
+            if (!isArCoreAvailable) {
+                initializationStatus = TableTopSceneViewInitializationStatus.FailedToInitialize(
+                    IllegalStateException(
+                        context.getString(
+                            R.string.arcore_not_installed_message,
+                            arCoreAvailability
+                        )
                     )
-                    onInitializationStatusChanged?.invoke(initializationStatus)
-                } else {
-                    arCoreInstalled = true
-                }
+                )
+                onInitializationStatusChanged?.invoke(initializationStatus)
+            } else {
+                arCoreInstalled = true
             }
         }
-        if (arCoreInstalled) {
+        if (cameraPermissionGranted && arCoreInstalled) {
             // invoked when the arCoreInstalled state changes to true
-            val arSessionWrapper = remember { ArSessionWrapper(context.applicationContext) }
+            val arSessionWrapper =
+                rememberArSessionWrapper(applicationContext = context.applicationContext)
             initializationStatus = TableTopSceneViewInitializationStatus.Initialized
             onInitializationStatusChanged?.invoke(initializationStatus)
             DisposableEffect(Unit) {
@@ -174,50 +174,50 @@ fun TableTopSceneView(
                 }
             }
             ArCameraFeed(arSessionWrapper = arSessionWrapper, onFrame = {}, onTap = {})
-            SceneView(
-                arcGISScene = arcGISScene,
-                modifier = Modifier.fillMaxSize(),
-                onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
-                onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
-                graphicsOverlays = graphicsOverlays,
-                sceneViewProxy = tableTopSceneViewProxy.sceneViewProxy,
-                sceneViewInteractionOptions = sceneViewInteractionOptions,
-                viewLabelProperties = viewLabelProperties,
-                selectionProperties = selectionProperties,
-                isAttributionBarVisible = isAttributionBarVisible,
-                onAttributionTextChanged = onAttributionTextChanged,
-                onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
-                analysisOverlays = analysisOverlays,
-                imageOverlays = imageOverlays,
-                atmosphereEffect = AtmosphereEffect.None,
-                timeExtent = timeExtent,
-                onTimeExtentChanged = onTimeExtentChanged,
-                spaceEffect = SpaceEffect.Transparent,
-                sunTime = sunTime,
-                sunLighting = sunLighting,
-                ambientLightColor = ambientLightColor,
-                onNavigationChanged = onNavigationChanged,
-                onSpatialReferenceChanged = {
-                    onSpatialReferenceChanged?.invoke(it)
-                },
-                onLayerViewStateChanged = onLayerViewStateChanged,
-                onInteractingChanged = onInteractingChanged,
-                onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged,
-                onRotate = onRotate,
-                onScale = onScale,
-                onUp = onUp,
-                onDown = onDown,
-                onSingleTapConfirmed = onSingleTapConfirmed,
-                onDoubleTap = onDoubleTap,
-                onLongPress = onLongPress,
-                onTwoPointerTap = onTwoPointerTap,
-                onPan = onPan,
-                onDrawStatusChanged = onDrawStatusChanged,
-                content = {
-                    content?.invoke(TableTopSceneViewScope(this))
-                }
-            )
         }
+        SceneView(
+            arcGISScene = arcGISScene,
+            modifier = Modifier.fillMaxSize(),
+            onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
+            onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
+            graphicsOverlays = graphicsOverlays,
+            sceneViewProxy = tableTopSceneViewProxy.sceneViewProxy,
+            sceneViewInteractionOptions = sceneViewInteractionOptions,
+            viewLabelProperties = viewLabelProperties,
+            selectionProperties = selectionProperties,
+            isAttributionBarVisible = isAttributionBarVisible,
+            onAttributionTextChanged = onAttributionTextChanged,
+            onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
+            analysisOverlays = analysisOverlays,
+            imageOverlays = imageOverlays,
+            atmosphereEffect = AtmosphereEffect.None,
+            timeExtent = timeExtent,
+            onTimeExtentChanged = onTimeExtentChanged,
+            spaceEffect = SpaceEffect.Transparent,
+            sunTime = sunTime,
+            sunLighting = sunLighting,
+            ambientLightColor = ambientLightColor,
+            onNavigationChanged = onNavigationChanged,
+            onSpatialReferenceChanged = {
+                onSpatialReferenceChanged?.invoke(it)
+            },
+            onLayerViewStateChanged = onLayerViewStateChanged,
+            onInteractingChanged = onInteractingChanged,
+            onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged,
+            onRotate = onRotate,
+            onScale = onScale,
+            onUp = onUp,
+            onDown = onDown,
+            onSingleTapConfirmed = onSingleTapConfirmed,
+            onDoubleTap = onDoubleTap,
+            onLongPress = onLongPress,
+            onTwoPointerTap = onTwoPointerTap,
+            onPan = onPan,
+            onDrawStatusChanged = onDrawStatusChanged,
+            content = {
+                content?.invoke(TableTopSceneViewScope(this))
+            }
+        )
     }
 }
 
@@ -241,22 +241,19 @@ private fun rememberCameraPermission(
             ) == PackageManager.PERMISSION_GRANTED
         )
     }
-    if (requestCameraPermissionAutomatically) {
-        val requestPermissionLauncher =
-            rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) { granted ->
-                isGrantedState.value = granted
-                if (!granted) {
-                    onNotGranted()
+    if (!isGrantedState.value) {
+        if (requestCameraPermissionAutomatically) {
+            val requestPermissionLauncher =
+                rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) { granted ->
+                    isGrantedState.value = granted
+                    if (!granted) {
+                        onNotGranted()
+                    }
                 }
-            }
-
-        if (!isGrantedState.value) {
             SideEffect {
                 requestPermissionLauncher.launch(Manifest.permission.CAMERA)
             }
-        }
-    } else {
-        if (!isGrantedState.value) {
+        } else {
             onNotGranted()
         }
     }
