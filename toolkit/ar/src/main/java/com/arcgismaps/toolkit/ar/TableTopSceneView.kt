@@ -152,9 +152,7 @@ fun TableTopSceneView(
     // invoked when the cameraPermissionGranted state changes to true
     LaunchedEffect(Unit) {
         val arCoreAvailability = checkArCoreAvailability(context)
-        val isArCoreAvailable =
-            arCoreAvailability == ArCoreApk.Availability.SUPPORTED_INSTALLED
-        if (!isArCoreAvailable) {
+        if (arCoreAvailability != ArCoreApk.Availability.SUPPORTED_INSTALLED) {
             updateStatus(
                 TableTopSceneViewInitializationStatus.FailedToInitialize(
                     IllegalStateException(context.getString(R.string.arcore_not_installed_message))
