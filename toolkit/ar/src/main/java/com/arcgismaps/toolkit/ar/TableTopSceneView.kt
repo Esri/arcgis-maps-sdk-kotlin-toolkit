@@ -149,7 +149,6 @@ fun TableTopSceneView(
 
     var arCoreInstalled by remember { mutableStateOf(false) }
 
-    // invoked when the cameraPermissionGranted state changes to true
     LaunchedEffect(Unit) {
         val arCoreAvailability = checkArCoreAvailability(context)
         if (arCoreAvailability != ArCoreApk.Availability.SUPPORTED_INSTALLED) {
@@ -165,7 +164,6 @@ fun TableTopSceneView(
 
     Box(modifier = modifier) {
         if (cameraPermissionGranted && arCoreInstalled) {
-            // invoked when the arCoreInstalled state changes to true
             val arSessionWrapper =
                 rememberArSessionWrapper(applicationContext = context.applicationContext)
             updateStatus(TableTopSceneViewStatus.Initialized)
@@ -183,8 +181,7 @@ fun TableTopSceneView(
             modifier = Modifier.fillMaxSize(),
             onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
             onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
-            graphicsOverlays =
-            graphicsOverlays,
+            graphicsOverlays = graphicsOverlays,
             sceneViewProxy = tableTopSceneViewProxy.sceneViewProxy,
             sceneViewInteractionOptions = sceneViewInteractionOptions,
             viewLabelProperties = viewLabelProperties,

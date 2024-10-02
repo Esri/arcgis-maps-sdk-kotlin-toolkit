@@ -19,16 +19,31 @@
 package com.arcgismaps.toolkit.ar
 
 /**
- * Represents the initialization status of a [TableTopSceneView]. The status can be one of the following:
- * - [Initializing]: The [TableTopSceneView] is initializing. The [TableTopSceneView] is not ready to be used yet.
- * - [Initialized]: The [TableTopSceneView] is initialized successfully. The [TableTopSceneView] is ready to be used.
- * - [FailedToInitialize]: The [TableTopSceneView] failed to initialize. The [error] property contains
- * the error that caused the failure.
+ * Represents the initialization status of a [TableTopSceneView].
  *
  * @since 200.6.0
  */
 sealed class TableTopSceneViewStatus private constructor() {
+
+    /**
+     * The [TableTopSceneView] is initializing. The [TableTopSceneView] is not ready to be used yet.\
+     *
+     * @since 200.6.0
+     */
     data object Initializing : TableTopSceneViewStatus()
+
+    /**
+     * The [TableTopSceneView] is initialized successfully. The [TableTopSceneView] is ready to be used.
+     *
+     * @since 200.6.0
+     */
     data object Initialized : TableTopSceneViewStatus()
+
+    /**
+     * The [TableTopSceneView] failed to initialize. The [error] property contains the error that caused the failure.
+     *
+     * @param error The error that caused the failure.
+     * @since 200.6.0
+     */
     data class FailedToInitialize internal constructor(val error: Throwable) : TableTopSceneViewStatus()
 }
