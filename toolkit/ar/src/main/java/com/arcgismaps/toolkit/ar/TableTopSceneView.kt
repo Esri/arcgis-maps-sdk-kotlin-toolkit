@@ -91,20 +91,17 @@ import kotlin.coroutines.resume
  * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a viewpoint
  * type of [ViewpointType.BoundingGeometry]
  * @param graphicsOverlays graphics overlays used by this TableTopSceneView
- * @param sceneViewProxy the [SceneViewProxy] to associate with the TableTopSceneView
+ * @param tableTopSceneViewProxy the [TableTopSceneViewProxy] to associate with the TableTopSceneView
  * @param sceneViewInteractionOptions the [SceneViewInteractionOptions] used by this TableTopSceneView
  * @param viewLabelProperties the [ViewLabelProperties] used by the TableTopSceneView
  * @param selectionProperties the [SelectionProperties] used by the TableTopSceneView
  * @param isAttributionBarVisible true if attribution bar is visible in the TableTopSceneView, false otherwise
  * @param onAttributionTextChanged lambda invoked when the attribution text of the TableTopSceneView has changed
  * @param onAttributionBarLayoutChanged lambda invoked when the attribution bar's position or size changes
- * @param cameraController the [CameraController] to manage the position, orientation, and movement of the camera
  * @param analysisOverlays analysis overlays that render the results of 3D visual analysis on the TableTopSceneView
  * @param imageOverlays image overlays for displaying images in the TableTopSceneView
- * @param atmosphereEffect the effect applied to the scene's atmosphere
  * @param timeExtent the [TimeExtent] used by the TableTopSceneView
  * @param onTimeExtentChanged lambda invoked when the TableTopSceneView's [TimeExtent] is changed
- * @param spaceEffect the visual effect of outer space in the TableTopSceneView
  * @param sunTime the position of the sun in the TableTopSceneView based on a specific date and time
  * @param sunLighting the type of ambient sunlight and shadows in the TableTopSceneView
  * @param ambientLightColor the color of the TableTopSceneView's ambient light
