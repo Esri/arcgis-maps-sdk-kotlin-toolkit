@@ -127,15 +127,24 @@ fun TableTopSceneView(
             TableTopSceneViewInitializationStatus.Initializing
         )
     }
+    val updateStatus = remember {
+        { newStatus: TableTopSceneViewInitializationStatus ->
+            initializationStatus = newStatus
+            onInitializationStatusChanged?.invoke(newStatus)
+        }
+    }
     onInitializationStatusChanged?.invoke(initializationStatus)
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val cameraPermissionGranted by rememberCameraPermission(requestCameraPermissionAutomatically) {
         // onNotGranted
-        initializationStatus = TableTopSceneViewInitializationStatus.FailedToInitialize(
-            IllegalStateException(context.getString(R.string.camera_permission_not_granted))
+        updateStatus(
+            TableTopSceneViewInitializationStatus.FailedToInitialize(
+                IllegalStateException(
+                    context.getString(R.string.camera_permission_not_granted)
+                )
+            )
         )
-        onInitializationStatusChanged?.invoke(initializationStatus)
     }
 
     var arCoreInstalled by remember { mutableStateOf(false) }
@@ -146,15 +155,11 @@ fun TableTopSceneView(
         val isArCoreAvailable =
             arCoreAvailability == ArCoreApk.Availability.SUPPORTED_INSTALLED
         if (!isArCoreAvailable) {
-            initializationStatus = TableTopSceneViewInitializationStatus.FailedToInitialize(
-                IllegalStateException(
-                    context.getString(
-                        R.string.arcore_not_installed_message,
-                        arCoreAvailability
-                    )
+            updateStatus(
+                TableTopSceneViewInitializationStatus.FailedToInitialize(
+                    IllegalStateException(context.getString(R.string.arcore_not_installed_message))
                 )
             )
-            onInitializationStatusChanged?.invoke(initializationStatus)
         } else {
             arCoreInstalled = true
         }
@@ -165,8 +170,7 @@ fun TableTopSceneView(
             // invoked when the arCoreInstalled state changes to true
             val arSessionWrapper =
                 rememberArSessionWrapper(applicationContext = context.applicationContext)
-            initializationStatus = TableTopSceneViewInitializationStatus.Initialized
-            onInitializationStatusChanged?.invoke(initializationStatus)
+            updateStatus(TableTopSceneViewInitializationStatus.Initialized)
             DisposableEffect(Unit) {
                 lifecycleOwner.lifecycle.addObserver(arSessionWrapper)
                 onDispose {
