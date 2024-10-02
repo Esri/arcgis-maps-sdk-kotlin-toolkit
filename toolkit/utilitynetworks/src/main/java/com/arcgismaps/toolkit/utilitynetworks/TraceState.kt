@@ -69,6 +69,8 @@ public class TraceState(
     private val mapViewProxy: MapViewProxy
 ) {
 
+    private val _currentError: MutableState<Throwable?> = mutableStateOf(null)
+    internal val currentError: State<Throwable?> = _currentError
     private val _initializationStatus: MutableState<InitializationStatus> =
         mutableStateOf(InitializationStatus.NotInitialized)
 
@@ -231,14 +233,12 @@ public class TraceState(
         val traceConfiguration = selectedTraceConfiguration.value ?: return false
 
         if (currentTraceStartingPoints.isEmpty() && traceConfiguration.minimumStartingLocations == UtilityMinimumStartingLocations.One) {
-            // TODO: Handle error
-            Log.i("TraceState --", "ERROR: not enough starting points")
+            setCurrentError(IllegalArgumentException("Not enough starting points"))
             return false
         }
 
-        if (currentTraceStartingPoints.size < 2 && traceConfiguration.minimumStartingLocations == UtilityMinimumStartingLocations.Many) {
-            // TODO: Handle error
-            Log.i("TraceState --", "ERROR: not enough starting points")
+        if (currentTraceStartingPoints.size > 2 && traceConfiguration.minimumStartingLocations == UtilityMinimumStartingLocations.Many) {
+            setCurrentError(IllegalArgumentException("Not enough starting points"))
             return false
         }
 
@@ -246,9 +246,7 @@ public class TraceState(
             UtilityTraceParameters(traceConfiguration, currentTraceStartingPoints.map { it.utilityElement })
 
         val traceResults = utilityNetwork.trace(utilityTraceParameters).getOrElse {
-            //handle error
-            println("ERROR: running trace" + it.message)
-            Log.i("TraceState --", "ERROR: running trace " + it.message)
+            setCurrentError(it)
             emptyList<UtilityElementTraceResult>()
             return false
         }
@@ -353,22 +351,27 @@ public class TraceState(
      * This private method is called from a suspend function and so swallows any failures except
      * CancellationExceptions.
      */
-    private fun processAndAddStartingPoint(feature: ArcGISFeature, mapPoint: Point) = runCatchingCancellable {
+    private fun processAndAddStartingPoint(feature: ArcGISFeature, mapPoint: Point): Boolean {
         // TODO: add fraction-along to the element.
         // https://devtopia.esri.com/runtime/kotlin/issues/4491
         val utilityElement = utilityNetwork.createElementOrNull(feature)
-            ?: throw IllegalArgumentException("could not create utility element from ArcGISFeature")
+        if (utilityElement == null) {
+            setCurrentError(IllegalArgumentException("Could not create utility element from ArcGISFeature."))
+            return false
+        }
 
         // Check if the starting point already exists
         if (_currentTraceStartingPoints.any { it.utilityElement.globalId == utilityElement.globalId }) {
-            // TODO: Handle error
-            throw IllegalArgumentException("starting point already exists")
+            val exception = IllegalArgumentException("One or more starting points already exists.")
+            setCurrentError(exception)
+            return false
         }
 
-        val symbol = (feature.featureTable?.layer as FeatureLayer)
-            .renderer
-            ?.getSymbol(feature)
-            ?: throw IllegalArgumentException("could not create drawable from feature symbol")
+        val symbol = (feature.featureTable?.layer as FeatureLayer).renderer?.getSymbol(feature)
+        if (symbol == null) {
+            setCurrentError(IllegalArgumentException("Could not create drawable from feature symbol"))
+            return false
+        }
 
         val graphic = Graphic(
             geometry = mapPoint,
@@ -384,6 +387,7 @@ public class TraceState(
                 graphic = graphic
             )
         )
+        return true
     }
 
     private suspend fun identifyFeatures(mapPoint: Point, screenCoordinate: ScreenCoordinate) {
@@ -395,7 +399,11 @@ public class TraceState(
             if (identifyLayerResultList.isNotEmpty()) {
                 identifyLayerResultList.forEach { identifyLayerResult ->
                     identifyLayerResult.geoElements.filterIsInstance<ArcGISFeature>().forEach { feature ->
-                        processAndAddStartingPoint(feature, mapPoint)
+                        if (!processAndAddStartingPoint(feature, mapPoint)) {
+                            _addStartingPointMode.value = AddStartingPointMode.Stopped
+                            showScreen(TraceNavRoute.TraceError)
+                            return
+                        }
                     }
                 }
                 _addStartingPointMode.value = AddStartingPointMode.Stopped
@@ -461,6 +469,14 @@ public class TraceState(
      */
     internal fun setZoomToResults(zoom: Boolean) {
         _currentTraceZoomToResults.value = zoom
+    }
+
+    /**
+     * Set the current error, if any.
+     * @since 200.6.0
+     */
+    internal fun setCurrentError(error: Throwable?) {
+        _currentError.value = error
     }
 }
 

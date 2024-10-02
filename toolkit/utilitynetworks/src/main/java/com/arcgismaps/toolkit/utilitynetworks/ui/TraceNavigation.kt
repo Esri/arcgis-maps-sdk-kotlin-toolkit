@@ -21,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
 import com.arcgismaps.toolkit.utilitynetworks.AddStartingPointMode
 import com.arcgismaps.toolkit.utilitynetworks.TraceNavRoute
@@ -50,13 +51,10 @@ internal fun TraceNavHost(traceState: TraceState) {
                 zoomToResult = traceState.currentTraceZoomToResults.value,
                 onPerformTraceButtonClicked = {
                     coroutineScope.launch {
-                        try {
-                            if (traceState.trace()) {
-                                traceState.showScreen(TraceNavRoute.TraceResults)
-                            }
-                        } catch (e: Exception) {
-                            // Handle error
-                            println("ERROR: running traceState.trace() threw an exception: $e")
+                        if (traceState.trace()) {
+                            traceState.showScreen(TraceNavRoute.TraceResults)
+                        } else {
+                            traceState.showScreen(TraceNavRoute.TraceError)
                         }
                     }
                 },
@@ -71,10 +69,10 @@ internal fun TraceNavHost(traceState: TraceState) {
                 },
                 onNameChange = {
                     traceState.setTraceName(it)
-                               },
+                },
                 onColorChanged = {
                     traceState.setGraphicsColor(it)
-                                 },
+                },
                 onZoomRequested = {
                     traceState.setZoomToResults(it)
                 }
@@ -90,7 +88,7 @@ internal fun TraceNavHost(traceState: TraceState) {
         }
         composable(TraceNavRoute.TraceResults.name) {
             val traceRun = traceState.currentTraceRun.value
-            require (traceRun != null)
+            require(traceRun != null)
             TraceResultScreen(
                 traceRun = traceRun,
                 onDeleteResult = {
@@ -102,9 +100,20 @@ internal fun TraceNavHost(traceState: TraceState) {
                 }
             )
         }
+        dialog(TraceNavRoute.TraceError.name) {
+            val error = traceState.currentError.value
+            TraceErrorDialog(
+                message = error?.message ?: "An error has occurred",
+                onConfirmation = {
+                    traceState.showScreen(TraceNavRoute.TraceOptions)
+                    traceState.setCurrentError(null)
+                }
+            )
+        }
     }
 
     if (navController.currentDestination?.route != currentScreen.name) {
         navController.navigate(currentScreen.name)
     }
 }
+

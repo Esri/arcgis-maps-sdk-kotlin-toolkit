@@ -30,8 +30,10 @@
     <string name="feature_results">Feature Results</string>
     <string name="function_results">Function Results</string>
     <string name="clear_all_results">Clear all results</string>
-    <string name="delete">Delete</string>
+    <string name="delete" translatable="false">Delete</string>
     <string name="not_available">Not available</string>
     <string name="zoom_to_trace_result">Zoom to trace result</string>
     <string name="delete_trace_result">Delete trace result</string>
+    <string name="an_error_has_occurred">An error has occurred</string>
+    <string name="ok">OK</string>
 </resources>
