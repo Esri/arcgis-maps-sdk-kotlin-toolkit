@@ -133,7 +133,7 @@ fun TableTopSceneView(
             onInitializationStatusChanged?.invoke(newStatus)
         }
     }
-    onInitializationStatusChanged?.invoke(initializationStatus)
+    updateStatus(TableTopSceneViewStatus.Initializing)
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val cameraPermissionGranted by rememberCameraPermission(requestCameraPermissionAutomatically) {
