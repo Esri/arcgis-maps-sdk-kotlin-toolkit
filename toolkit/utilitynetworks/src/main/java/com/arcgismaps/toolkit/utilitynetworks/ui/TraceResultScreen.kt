@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
+import androidx.compose.foundation.Image
 import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -60,6 +61,7 @@ import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.toolkit.utilitynetworks.TraceRun
 import com.arcgismaps.utilitynetworks.UtilityElement
 import com.arcgismaps.utilitynetworks.UtilityTraceFunctionOutput
+import androidx.compose.material.icons.filled.ArrowBackIos
 
 /**
  * Composable that displays the trace results.
@@ -69,6 +71,7 @@ import com.arcgismaps.utilitynetworks.UtilityTraceFunctionOutput
 @Composable
 internal fun TraceResultScreen(
     traceRun: TraceRun,
+    traceResults: List<TraceRun>,
     onBackToNewTrace: () -> Unit,
     onDeleteResult: () -> Unit,
     onZoomToResults: () -> Unit,
@@ -80,19 +83,24 @@ internal fun TraceResultScreen(
             .padding(horizontal = 10.dp)) {
 
             TabRow(onBackToNewTrace)
+            Row() {
+                Image(
+                    imageVector = Icons.Filled.ArrowBackIos,
+                    contentDescription = "back"
+                )
+            }
+
             Spacer(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(15.dp)
+                    .height(10.dp)
+            )
+            TraceTitle(
+                traceRun.name,
+                onZoomToResults = onZoomToResults,
+                onDeleteResult = onDeleteResult
             )
             LazyColumn {
-                item {
-                    TraceTitle(
-                        traceRun.name,
-                        onZoomToResults = onZoomToResults,
-                        onDeleteResult = onDeleteResult
-                    )
-                }
                 item {
                     FeatureResult(traceRun.featureResults)
                 }

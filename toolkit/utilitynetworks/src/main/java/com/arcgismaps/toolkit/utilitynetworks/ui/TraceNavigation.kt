@@ -95,6 +95,7 @@ internal fun TraceNavHost(traceState: TraceState) {
             require (traceRun != null)
             TraceResultScreen(
                 traceRun = traceRun,
+                traceResults = traceState.completedTraces,
                 onBackToNewTrace = { traceState.showScreen(TraceNavRoute.TraceOptions) },
                 onDeleteResult = {
 
