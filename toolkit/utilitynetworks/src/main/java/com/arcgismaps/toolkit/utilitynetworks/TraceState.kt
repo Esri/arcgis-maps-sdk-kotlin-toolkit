@@ -17,7 +17,6 @@
 package com.arcgismaps.toolkit.utilitynetworks
 
 import android.graphics.drawable.BitmapDrawable
-import android.util.Log
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
