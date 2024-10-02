@@ -27,8 +27,8 @@ package com.arcgismaps.toolkit.ar
  *
  * @since 200.6.0
  */
-sealed class TableTopSceneViewInitializationStatus {
-    data object Initializing : TableTopSceneViewInitializationStatus()
-    data object Initialized : TableTopSceneViewInitializationStatus()
-    data class FailedToInitialize(val error: Throwable) : TableTopSceneViewInitializationStatus()
+sealed class TableTopSceneViewStatus {
+    data object Initializing : TableTopSceneViewStatus()
+    data object Initialized : TableTopSceneViewStatus()
+    data class FailedToInitialize(val error: Throwable) : TableTopSceneViewStatus()
 }

@@ -21,7 +21,6 @@ package com.arcgismaps.toolkit.artabletopapp.screens
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,7 +37,7 @@ import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.ar.TableTopSceneView
-import com.arcgismaps.toolkit.ar.TableTopSceneViewInitializationStatus
+import com.arcgismaps.toolkit.ar.TableTopSceneViewStatus
 import com.arcgismaps.toolkit.ar.TableTopSceneViewProxy
 import com.arcgismaps.toolkit.artabletopapp.R
 import kotlin.math.roundToInt
@@ -52,7 +51,7 @@ fun MainScreen() {
     }
     val tableTopSceneViewProxy = remember { TableTopSceneViewProxy() }
     var tappedLocation by remember { mutableStateOf<Point?>(null) }
-    var initializationStatus: TableTopSceneViewInitializationStatus by remember { mutableStateOf(TableTopSceneViewInitializationStatus.Initializing) }
+    var initializationStatus: TableTopSceneViewStatus by remember { mutableStateOf(TableTopSceneViewStatus.Initializing) }
     Box(modifier = Modifier.fillMaxSize()) {
         TableTopSceneView(
             arcGISScene = arcGISScene,

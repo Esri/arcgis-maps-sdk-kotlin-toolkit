@@ -86,7 +86,7 @@ import kotlin.coroutines.resume
 fun TableTopSceneView(
     arcGISScene: ArcGISScene,
     modifier: Modifier = Modifier,
-    onInitializationStatusChanged: ((TableTopSceneViewInitializationStatus) -> Unit)? = null,
+    onInitializationStatusChanged: ((TableTopSceneViewStatus) -> Unit)? = null,
     requestCameraPermissionAutomatically: Boolean = true,
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
     onViewpointChangedForBoundingGeometry: ((Viewpoint) -> Unit)? = null,
@@ -122,13 +122,13 @@ fun TableTopSceneView(
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
     content: (@Composable TableTopSceneViewScope.() -> Unit)? = null
 ) {
-    var initializationStatus: TableTopSceneViewInitializationStatus by remember {
+    var initializationStatus: TableTopSceneViewStatus by remember {
         mutableStateOf(
-            TableTopSceneViewInitializationStatus.Initializing
+            TableTopSceneViewStatus.Initializing
         )
     }
     val updateStatus = remember {
-        { newStatus: TableTopSceneViewInitializationStatus ->
+        { newStatus: TableTopSceneViewStatus ->
             initializationStatus = newStatus
             onInitializationStatusChanged?.invoke(newStatus)
         }
@@ -139,7 +139,7 @@ fun TableTopSceneView(
     val cameraPermissionGranted by rememberCameraPermission(requestCameraPermissionAutomatically) {
         // onNotGranted
         updateStatus(
-            TableTopSceneViewInitializationStatus.FailedToInitialize(
+            TableTopSceneViewStatus.FailedToInitialize(
                 IllegalStateException(
                     context.getString(R.string.camera_permission_not_granted)
                 )
@@ -154,7 +154,7 @@ fun TableTopSceneView(
         val arCoreAvailability = checkArCoreAvailability(context)
         if (arCoreAvailability != ArCoreApk.Availability.SUPPORTED_INSTALLED) {
             updateStatus(
-                TableTopSceneViewInitializationStatus.FailedToInitialize(
+                TableTopSceneViewStatus.FailedToInitialize(
                     IllegalStateException(context.getString(R.string.arcore_not_installed_message))
                 )
             )
@@ -168,7 +168,7 @@ fun TableTopSceneView(
             // invoked when the arCoreInstalled state changes to true
             val arSessionWrapper =
                 rememberArSessionWrapper(applicationContext = context.applicationContext)
-            updateStatus(TableTopSceneViewInitializationStatus.Initialized)
+            updateStatus(TableTopSceneViewStatus.Initialized)
             DisposableEffect(Unit) {
                 lifecycleOwner.lifecycle.addObserver(arSessionWrapper)
                 onDispose {
