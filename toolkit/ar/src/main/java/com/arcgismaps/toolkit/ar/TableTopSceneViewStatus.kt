@@ -27,8 +27,8 @@ package com.arcgismaps.toolkit.ar
  *
  * @since 200.6.0
  */
-sealed class TableTopSceneViewStatus {
+sealed class TableTopSceneViewStatus private constructor() {
     data object Initializing : TableTopSceneViewStatus()
     data object Initialized : TableTopSceneViewStatus()
-    data class FailedToInitialize(val error: Throwable) : TableTopSceneViewStatus()
+    data class FailedToInitialize internal constructor(val error: Throwable) : TableTopSceneViewStatus()
 }
