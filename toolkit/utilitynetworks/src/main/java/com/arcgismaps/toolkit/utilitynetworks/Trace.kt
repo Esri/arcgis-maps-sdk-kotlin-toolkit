@@ -17,9 +17,15 @@
 package com.arcgismaps.toolkit.utilitynetworks
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -61,20 +67,34 @@ public fun Trace(
             .fillMaxSize()
             .semantics { contentDescription = traceSurfaceContentDescription }
     ) {
-        if (initializationStatus !is InitializationStatus.Initialized) {
-            Box(
-                modifier = Modifier
-                    .size(100.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                if (initializationStatus is InitializationStatus.NotInitialized || initializationStatus is InitializationStatus.Initializing) {
+        when (initializationStatus) {
+            is InitializationStatus.Initializing -> {
+                Box(
+                    modifier = Modifier
+                        .size(100.dp),
+                    contentAlignment = Alignment.Center
+                ) {
                     CircularProgressIndicator()
-                } else if (initializationStatus is InitializationStatus.FailedToInitialize) {
-                    Text(text = (initializationStatus as InitializationStatus.FailedToInitialize).error.message ?: "Failed to initialize")
                 }
             }
-        } else {
-            TraceNavHost(traceState)
+            else -> {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    if (traceState.initializationStatus.value is InitializationStatus.FailedToInitialize) {
+                        val error =
+                            (traceState.initializationStatus.value as InitializationStatus.FailedToInitialize).error
+                        Row {
+                            Icon(Icons.Default.Info, "", tint = MaterialTheme.colorScheme.error)
+                            Spacer(modifier = Modifier.size(8.dp))
+                            Text(error.message ?: "Failed to initialize", color = MaterialTheme.colorScheme.error)
+                        }
+                    }
+                    TraceNavHost(traceState)
+                }
+            }
         }
     }
 }
