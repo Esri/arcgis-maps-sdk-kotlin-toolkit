@@ -96,6 +96,7 @@ internal fun TraceOptionsScreen(
     selectedColor: Color,
     zoomToResult: Boolean,
     onStartingPointRemoved: (StartingPoint) -> Unit,
+    onStartingPointSelected: (StartingPoint) -> Unit,
     onConfigSelected: (UtilityNamedTraceConfiguration) -> Unit,
     onPerformTraceButtonClicked: () -> Unit,
     onAddStartingPointButtonClicked: () -> Unit,
@@ -132,7 +133,8 @@ internal fun TraceOptionsScreen(
                     StartingPoints(
                         startingPoints,
                         onAddStartingPointButtonClicked,
-                        onStartingPointRemoved
+                        onStartingPointRemoved,
+                        onStartingPointSelected,
                     )
                 }
                 item {
@@ -294,7 +296,8 @@ private fun AddStartingPointButton(showAddStartingPointScreen: () -> Unit) {
 private fun StartingPoints(
     startingPoints: List<StartingPoint>,
     showAddStartingPointScreen: () -> Unit,
-    onStartingPointRemoved: (StartingPoint) -> Unit
+    onStartingPointRemoved: (StartingPoint) -> Unit,
+    onStartingPointSelected: (StartingPoint) -> Unit
 ) {
     Column {
         AddStartingPointButton {
@@ -309,9 +312,11 @@ private fun StartingPoints(
         ) {
             Column {
                 startingPoints.forEach {
-                    StartingPointRow(it) {
-                        onStartingPointRemoved(it)
-                    }
+                    StartingPointRow(
+                        data = it,
+                        onDelete = { onStartingPointRemoved(it) },
+                        onStartingPointSelected = onStartingPointSelected
+                    )
                 }
             }
         }

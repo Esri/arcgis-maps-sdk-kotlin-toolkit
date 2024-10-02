@@ -31,6 +31,7 @@ import com.arcgismaps.geometry.Envelope
 import com.arcgismaps.geometry.Geometry
 import com.arcgismaps.geometry.GeometryEngine
 import com.arcgismaps.geometry.Point
+import com.arcgismaps.geometry.Polyline
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.mapping.layers.FeatureLayer
@@ -51,6 +52,7 @@ import com.arcgismaps.utilitynetworks.UtilityGeometryTraceResult
 import com.arcgismaps.utilitynetworks.UtilityMinimumStartingLocations
 import com.arcgismaps.utilitynetworks.UtilityNamedTraceConfiguration
 import com.arcgismaps.utilitynetworks.UtilityNetwork
+import com.arcgismaps.utilitynetworks.UtilityNetworkSourceType
 import com.arcgismaps.utilitynetworks.UtilityTraceFunctionOutput
 import com.arcgismaps.utilitynetworks.UtilityTraceParameters
 import kotlinx.coroutines.CancellationException
@@ -107,7 +109,15 @@ public class TraceState(
      *
      * @since 200.6.0
      */
-    public val selectedTraceConfiguration: State<UtilityNamedTraceConfiguration?> = _selectedTraceConfiguration
+    internal val selectedTraceConfiguration: State<UtilityNamedTraceConfiguration?> = _selectedTraceConfiguration
+
+    private var _selectedStartingPoint: MutableState<StartingPoint?> = mutableStateOf(null)
+    /**
+     * The selected starting point to display in the starting point details screen.
+     *
+     * @since 200.6.0
+     */
+    internal val selectedStartingPoint: State<StartingPoint?> = _selectedStartingPoint
 
     private val _currentTraceStartingPoints: SnapshotStateList<StartingPoint> = mutableStateListOf()
     internal val currentTraceStartingPoints: List<StartingPoint> = _currentTraceStartingPoints
@@ -149,25 +159,25 @@ public class TraceState(
     public var currentTraceZoomToResults: State<Boolean> = _currentTraceZoomToResults
 
     private val currentTraceResultGeometriesExtent: Envelope?
-        get() {
-            val utilityGeometryTraceResult = _currentTraceRun.value?.geometryTraceResult ?: return null
+    get() {
+        val utilityGeometryTraceResult = _currentTraceRun.value?.geometryTraceResult ?: return null
 
-            val geometries = listOf(
-                utilityGeometryTraceResult.polygon,
-                utilityGeometryTraceResult.polyline,
-                utilityGeometryTraceResult.multipoint
-            ).mapNotNull { geometry ->
-                if (geometry != null && !geometry.isEmpty) {
-                    geometry
-                } else {
-                    null
-                }
+        val geometries = listOf(
+            utilityGeometryTraceResult.polygon,
+            utilityGeometryTraceResult.polyline,
+            utilityGeometryTraceResult.multipoint
+        ).mapNotNull { geometry ->
+            if (geometry != null && !geometry.isEmpty) {
+                geometry
+            } else {
+                null
             }
-            val combinedExtents = GeometryEngine.combineExtentsOrNull(geometries) ?: return null
-            val expandedEnvelope = GeometryEngine.bufferOrNull(combinedExtents, 200.0) ?: return null
-
-            return expandedEnvelope.extent
         }
+        val combinedExtents = GeometryEngine.combineExtentsOrNull(geometries) ?: return null
+        val expandedEnvelope = GeometryEngine.bufferOrNull(combinedExtents, 200.0) ?: return null
+
+        return expandedEnvelope.extent
+    }
 
     /**
      * Initializes the state object by loading the map, the Utility Networks contained in the map
@@ -217,9 +227,59 @@ public class TraceState(
             "${config.name} ${(completedTraces.count { it.configuration.name == config.name } + 1)}"
     }
 
+    internal fun setSelectedStartingPoint(startingPoint: StartingPoint?) {
+        _selectedStartingPoint.value = startingPoint
+    }
+
     internal fun showScreen(screen: TraceNavRoute) {
         _currentScreen.value = screen
     }
+
+    /**
+     * Returns the location on the polyline nearest to the tap location.
+     * The location is returned as a fraction along the polyline.
+     *
+     * @param inputGeometry the polyline geometry
+     * @param tapPoint the point tapped on the map
+     * @return the fraction along the polyline
+     * @since 200.6.0
+     */
+    private fun fractionAlongEdge(inputGeometry: Polyline, tapPoint: Point): Double {
+        // Remove Z values from the polyline
+        var polyline = if (inputGeometry.hasZ) {
+            GeometryEngine.createWithZ(inputGeometry, null)
+        } else {
+            inputGeometry
+        }
+        // confirm spatial reference match
+        tapPoint.spatialReference?.let { spatialReference ->
+            if (spatialReference != polyline.spatialReference) {
+                val projectedGeometry = GeometryEngine.projectOrNull(polyline, spatialReference)
+                projectedGeometry?.let { polyline = projectedGeometry }
+            }
+        }
+        return GeometryEngine.fractionAlong(polyline, tapPoint, 10.0)
+    }
+
+    /**
+     * Determines the point at the given distance along the line. The distance is a
+     * fraction of the total length of the line.
+     *
+     * @param startingPoint the starting point to update
+     * @param newValue the new fraction along the edge
+     * @since 200.6.0
+     */
+    internal fun setFractionAlongEdge(startingPoint: StartingPoint, newValue: Double) {
+        startingPoint.utilityElement.fractionAlongEdge = newValue
+        val geometry = startingPoint.feature.geometry
+        if (geometry is Polyline) {
+            startingPoint.graphic.geometry = GeometryEngine.createPointAlongOrNull(
+                polyline = geometry,
+                distance = GeometryEngine.length(geometry) * newValue
+            )
+        }
+    }
+
 
     /**
      * Run a trace on the Utility Network using the selected trace configuration and starting points.
@@ -267,29 +327,17 @@ public class TraceState(
                 // Geometry results
                 is UtilityGeometryTraceResult -> {
                     result.polygon?.let { polygon ->
-                        val graphic = createGraphicForSimpleLineSymbol(
-                            polygon,
-                            SimpleLineSymbolStyle.Solid,
-                            currentTraceGraphicsColor
-                        )
+                        val graphic = createGraphicForSimpleLineSymbol(polygon, SimpleLineSymbolStyle.Solid, currentTraceGraphicsColor)
                         graphicsOverlay.graphics.add(graphic)
                         currentTraceGeometryResultsGraphics.add(graphic)
                     }
                     result.polyline?.let { polyline ->
-                        val graphic = createGraphicForSimpleLineSymbol(
-                            polyline,
-                            SimpleLineSymbolStyle.Dash,
-                            currentTraceGraphicsColor
-                        )
+                        val graphic = createGraphicForSimpleLineSymbol(polyline, SimpleLineSymbolStyle.Dash, currentTraceGraphicsColor)
                         graphicsOverlay.graphics.add(graphic)
                         currentTraceGeometryResultsGraphics.add(graphic)
                     }
                     result.multipoint?.let { multipoint ->
-                        val graphic = createGraphicForSimpleLineSymbol(
-                            multipoint,
-                            SimpleLineSymbolStyle.Dot,
-                            currentTraceGraphicsColor
-                        )
+                        val graphic = createGraphicForSimpleLineSymbol(multipoint, SimpleLineSymbolStyle.Dot, currentTraceGraphicsColor)
                         graphicsOverlay.graphics.add(graphic)
                         currentTraceGeometryResultsGraphics.add(graphic)
                     }
@@ -370,6 +418,14 @@ public class TraceState(
         if (symbol == null) {
             setCurrentError(IllegalArgumentException("Could not create drawable from feature symbol"))
             return false
+        }
+
+        val featureGeometry = feature.geometry
+        if (utilityElement.networkSource.sourceType == UtilityNetworkSourceType.Edge && featureGeometry is Polyline) {
+            utilityElement.fractionAlongEdge = fractionAlongEdge(featureGeometry, mapPoint)
+        } else if (utilityElement.networkSource.sourceType == UtilityNetworkSourceType.Junction &&
+            (utilityElement.assetType.terminalConfiguration?.terminals?.size ?: 0) > 1) {
+            utilityElement.terminal = utilityElement.assetType.terminalConfiguration?.terminals?.first()
         }
 
         val graphic = Graphic(
@@ -551,17 +607,13 @@ internal enum class TraceNavRoute {
     TraceOptions,
     AddStartingPoint,
     TraceResults,
+    StartingPointDetails,
     TraceError
     //TODO: Add FeatureAttributes route
 }
 
 @Immutable
-internal data class StartingPoint(
-    val feature: ArcGISFeature,
-    val utilityElement: UtilityElement,
-    val symbol: Symbol,
-    val graphic: Graphic
-) {
+internal data class StartingPoint(val feature: ArcGISFeature, val utilityElement: UtilityElement, val symbol: Symbol, val graphic: Graphic) {
     val name: String = utilityElement.assetType.name
 
     suspend fun getDrawable(screenScale: Float): BitmapDrawable =

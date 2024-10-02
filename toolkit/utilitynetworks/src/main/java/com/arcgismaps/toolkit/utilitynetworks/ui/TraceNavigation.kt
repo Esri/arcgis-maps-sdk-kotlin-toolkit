@@ -64,6 +64,10 @@ internal fun TraceNavHost(traceState: TraceState) {
                 },
                 selectedConfig = traceState.selectedTraceConfiguration.value,
                 onStartingPointRemoved = { traceState.removeStartingPoint(it) },
+                onStartingPointSelected = {
+                    traceState.setSelectedStartingPoint(it)
+                    traceState.showScreen(TraceNavRoute.StartingPointDetails)
+                },
                 onConfigSelected = { newConfig ->
                     traceState.setSelectedTraceConfiguration(newConfig)
                 },
@@ -88,7 +92,7 @@ internal fun TraceNavHost(traceState: TraceState) {
         }
         composable(TraceNavRoute.TraceResults.name) {
             val traceRun = traceState.currentTraceRun.value
-            require(traceRun != null)
+            require (traceRun != null)
             TraceResultScreen(
                 traceRun = traceRun,
                 onDeleteResult = {
@@ -110,10 +114,22 @@ internal fun TraceNavHost(traceState: TraceState) {
                 }
             )
         }
+        composable(TraceNavRoute.StartingPointDetails.name) {
+            val startingPoint = traceState.selectedStartingPoint.value
+            require(startingPoint != null)
+            StartingPointDetailsScreen(
+                startingPoint,
+                onFractionChanged = { point, newValue ->
+                    traceState.setFractionAlongEdge(
+                        point,
+                        newValue.toDouble()
+                    )
+                },
+                onBackPressed = { traceState.showScreen(TraceNavRoute.TraceOptions) })
+        }
     }
 
     if (navController.currentDestination?.route != currentScreen.name) {
         navController.navigate(currentScreen.name)
     }
 }
-
