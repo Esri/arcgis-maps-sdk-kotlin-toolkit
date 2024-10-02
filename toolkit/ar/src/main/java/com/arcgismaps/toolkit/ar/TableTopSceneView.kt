@@ -73,6 +73,7 @@ import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
 import com.google.ar.core.ArCoreApk
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.time.Instant
 import kotlin.coroutines.resume
@@ -170,12 +171,12 @@ fun TableTopSceneView(
         )
     }
     val updateStatus = remember {
-        { newStatus: TableTopSceneViewStatus ->
+        { newStatus: TableTopSceneViewStatus, callback: ((TableTopSceneViewStatus) -> Unit)? ->
             initializationStatus = newStatus
-            onInitializationStatusChanged?.invoke(newStatus)
+            callback?.invoke(newStatus)
         }
     }
-    updateStatus(TableTopSceneViewStatus.Initializing)
+    updateStatus(TableTopSceneViewStatus.Initializing, onInitializationStatusChanged)
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val cameraPermissionGranted by rememberCameraPermission(requestCameraPermissionAutomatically) {
@@ -185,19 +186,22 @@ fun TableTopSceneView(
                 IllegalStateException(
                     context.getString(R.string.camera_permission_not_granted)
                 )
-            )
+            ),
+            onInitializationStatusChanged
         )
     }
 
     var arCoreInstalled by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
+        delay(10_000)
         val arCoreAvailability = checkArCoreAvailability(context)
         if (arCoreAvailability != ArCoreApk.Availability.SUPPORTED_INSTALLED) {
             updateStatus(
                 TableTopSceneViewStatus.FailedToInitialize(
                     IllegalStateException(context.getString(R.string.arcore_not_installed_message))
-                )
+                ),
+                onInitializationStatusChanged
             )
         } else {
             arCoreInstalled = true
@@ -208,7 +212,7 @@ fun TableTopSceneView(
         if (cameraPermissionGranted && arCoreInstalled) {
             val arSessionWrapper =
                 rememberArSessionWrapper(applicationContext = context.applicationContext)
-            updateStatus(TableTopSceneViewStatus.Initialized)
+            updateStatus(TableTopSceneViewStatus.Initialized, onInitializationStatusChanged)
             DisposableEffect(Unit) {
                 lifecycleOwner.lifecycle.addObserver(arSessionWrapper)
                 onDispose {
