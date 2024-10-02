@@ -43,10 +43,12 @@ import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.TimeExtent
 import com.arcgismaps.mapping.Viewpoint
+import com.arcgismaps.mapping.ViewpointType
 import com.arcgismaps.mapping.view.AnalysisOverlay
 import com.arcgismaps.mapping.view.AtmosphereEffect
 import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
 import com.arcgismaps.mapping.view.Camera
+import com.arcgismaps.mapping.view.CameraController
 import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
 import com.arcgismaps.mapping.view.DrawStatus
@@ -69,6 +71,7 @@ import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
 import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
+import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
 import com.google.ar.core.ArCoreApk
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.time.Instant
@@ -77,9 +80,51 @@ import kotlin.coroutines.resume
 /**
  * Displays a [SceneView] in a tabletop AR environment.
  *
+ * @param arcGISScene the [ArcGISScene] to be rendered by this TableTopSceneView
+ * @param modifier Modifier to be applied to the TableTopSceneView
+ * @param onInitializationStatusChanged a callback that is invoked when the initialization status of the [TableTopSceneView] changes.
  * @param requestCameraPermissionAutomatically whether to request the camera permission automatically.
  * If set to `true`, the camera permission will be requested automatically when the composable is
  * first displayed. The default value is `true`.
+ * @param onViewpointChangedForCenterAndScale lambda invoked when the viewpoint changes, passing a viewpoint
+ * type of [ViewpointType.CenterAndScale]
+ * @param onViewpointChangedForBoundingGeometry lambda invoked when the viewpoint changes, passing a viewpoint
+ * type of [ViewpointType.BoundingGeometry]
+ * @param graphicsOverlays graphics overlays used by this TableTopSceneView
+ * @param sceneViewProxy the [SceneViewProxy] to associate with the TableTopSceneView
+ * @param sceneViewInteractionOptions the [SceneViewInteractionOptions] used by this TableTopSceneView
+ * @param viewLabelProperties the [ViewLabelProperties] used by the TableTopSceneView
+ * @param selectionProperties the [SelectionProperties] used by the TableTopSceneView
+ * @param isAttributionBarVisible true if attribution bar is visible in the TableTopSceneView, false otherwise
+ * @param onAttributionTextChanged lambda invoked when the attribution text of the TableTopSceneView has changed
+ * @param onAttributionBarLayoutChanged lambda invoked when the attribution bar's position or size changes
+ * @param cameraController the [CameraController] to manage the position, orientation, and movement of the camera
+ * @param analysisOverlays analysis overlays that render the results of 3D visual analysis on the TableTopSceneView
+ * @param imageOverlays image overlays for displaying images in the TableTopSceneView
+ * @param atmosphereEffect the effect applied to the scene's atmosphere
+ * @param timeExtent the [TimeExtent] used by the TableTopSceneView
+ * @param onTimeExtentChanged lambda invoked when the TableTopSceneView's [TimeExtent] is changed
+ * @param spaceEffect the visual effect of outer space in the TableTopSceneView
+ * @param sunTime the position of the sun in the TableTopSceneView based on a specific date and time
+ * @param sunLighting the type of ambient sunlight and shadows in the TableTopSceneView
+ * @param ambientLightColor the color of the TableTopSceneView's ambient light
+ * @param onNavigationChanged lambda invoked when the navigation status of the TableTopSceneView has changed
+ * @param onSpatialReferenceChanged lambda invoked when the spatial reference of the TableTopSceneView has changed
+ * @param onLayerViewStateChanged lambda invoked when the TableTopSceneView's layer view state is changed
+ * @param onInteractingChanged lambda invoked when the user starts and ends interacting with the TableTopSceneView
+ * @param onCurrentViewpointCameraChanged lambda invoked when the viewpoint camera of the TableTopSceneView has changed
+ * @param onRotate lambda invoked when a user performs a rotation gesture on the TableTopSceneView
+ * @param onScale lambda invoked when a user performs a pinch gesture on the TableTopSceneView
+ * @param onUp lambda invoked when the user removes all their pointers from the TableTopSceneView
+ * @param onDown lambda invoked when the user first presses on the TableTopSceneView
+ * @param onSingleTapConfirmed lambda invoked when the user taps once on the TableTopSceneView
+ * @param onDoubleTap lambda invoked the user double taps on the TableTopSceneView
+ * @param onLongPress lambda invoked when a user holds a pointer on the TableTopSceneView
+ * @param onTwoPointerTap lambda invoked when a user taps two pointers on the TableTopSceneView
+ * @param onPan lambda invoked when a user drags a pointer or pointers across TableTopSceneView
+ * @param onDrawStatusChanged lambda invoked when the draw status of the TableTopSceneView is changed
+ * @param content the content of the TableTopSceneView
+ *
  * @since 200.6.0
  */
 @Composable
