@@ -48,7 +48,6 @@ import com.arcgismaps.mapping.view.AnalysisOverlay
 import com.arcgismaps.mapping.view.AtmosphereEffect
 import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
 import com.arcgismaps.mapping.view.Camera
-import com.arcgismaps.mapping.view.CameraController
 import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
 import com.arcgismaps.mapping.view.DrawStatus
@@ -71,7 +70,6 @@ import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
 import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
-import com.arcgismaps.toolkit.geoviewcompose.SceneViewProxy
 import com.google.ar.core.ArCoreApk
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -183,7 +181,7 @@ fun TableTopSceneView(
         // onNotGranted
         updateStatus(
             TableTopSceneViewStatus.FailedToInitialize(
-                IllegalStateException(
+                 IllegalStateException(
                     context.getString(R.string.camera_permission_not_granted)
                 )
             ),
