@@ -122,44 +122,45 @@ fun TableTopSceneView(
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
     content: (@Composable TableTopSceneViewScope.() -> Unit)? = null
 ) {
-    Box(modifier = modifier) {
-        var initializationStatus: TableTopSceneViewInitializationStatus by remember {
-            mutableStateOf(
-                TableTopSceneViewInitializationStatus.Initializing
-            )
-        }
+    var initializationStatus: TableTopSceneViewInitializationStatus by remember {
+        mutableStateOf(
+            TableTopSceneViewInitializationStatus.Initializing
+        )
+    }
+    onInitializationStatusChanged?.invoke(initializationStatus)
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val context = LocalContext.current
+    val cameraPermissionGranted by rememberCameraPermission(requestCameraPermissionAutomatically) {
+        // onNotGranted
+        initializationStatus = TableTopSceneViewInitializationStatus.FailedToInitialize(
+            IllegalStateException(context.getString(R.string.camera_permission_not_granted))
+        )
         onInitializationStatusChanged?.invoke(initializationStatus)
-        val lifecycleOwner = LocalLifecycleOwner.current
-        val context = LocalContext.current
-        val cameraPermissionGranted by rememberCameraPermission(requestCameraPermissionAutomatically) {
-            // onNotGranted
+    }
+
+    var arCoreInstalled by remember { mutableStateOf(false) }
+
+    // invoked when the cameraPermissionGranted state changes to true
+    LaunchedEffect(Unit) {
+        val arCoreAvailability = checkArCoreAvailability(context)
+        val isArCoreAvailable =
+            arCoreAvailability == ArCoreApk.Availability.SUPPORTED_INSTALLED
+        if (!isArCoreAvailable) {
             initializationStatus = TableTopSceneViewInitializationStatus.FailedToInitialize(
-                IllegalStateException(context.getString(R.string.camera_permission_not_granted))
-            )
-            onInitializationStatusChanged?.invoke(initializationStatus)
-        }
-
-        var arCoreInstalled by remember { mutableStateOf(false) }
-
-        // invoked when the cameraPermissionGranted state changes to true
-        LaunchedEffect(Unit) {
-            val arCoreAvailability = checkArCoreAvailability(context)
-            val isArCoreAvailable =
-                arCoreAvailability == ArCoreApk.Availability.SUPPORTED_INSTALLED
-            if (!isArCoreAvailable) {
-                initializationStatus = TableTopSceneViewInitializationStatus.FailedToInitialize(
-                    IllegalStateException(
-                        context.getString(
-                            R.string.arcore_not_installed_message,
-                            arCoreAvailability
-                        )
+                IllegalStateException(
+                    context.getString(
+                        R.string.arcore_not_installed_message,
+                        arCoreAvailability
                     )
                 )
-                onInitializationStatusChanged?.invoke(initializationStatus)
-            } else {
-                arCoreInstalled = true
-            }
+            )
+            onInitializationStatusChanged?.invoke(initializationStatus)
+        } else {
+            arCoreInstalled = true
         }
+    }
+
+    Box(modifier = modifier) {
         if (cameraPermissionGranted && arCoreInstalled) {
             // invoked when the arCoreInstalled state changes to true
             val arSessionWrapper =
@@ -180,7 +181,8 @@ fun TableTopSceneView(
             modifier = Modifier.fillMaxSize(),
             onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
             onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
-            graphicsOverlays = graphicsOverlays,
+            graphicsOverlays =
+            graphicsOverlays,
             sceneViewProxy = tableTopSceneViewProxy.sceneViewProxy,
             sceneViewInteractionOptions = sceneViewInteractionOptions,
             viewLabelProperties = viewLabelProperties,
