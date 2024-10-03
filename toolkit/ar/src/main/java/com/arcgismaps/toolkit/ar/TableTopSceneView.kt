@@ -162,19 +162,13 @@ fun TableTopSceneView(
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
     content: (@Composable TableTopSceneViewScope.() -> Unit)? = null
 ) {
-    var initializationStatus: TableTopSceneViewStatus by rememberTableTopSceneViewStatus()
-    val updateStatus = remember {
-        { newStatus: TableTopSceneViewStatus, callback: ((TableTopSceneViewStatus) -> Unit)? ->
-            initializationStatus = newStatus
-            callback?.invoke(newStatus)
-        }
-    }
-    updateStatus(TableTopSceneViewStatus.Initializing, onInitializationStatusChanged)
+    var initializationStatus = rememberTableTopSceneViewStatus()
+    initializationStatus.update(TableTopSceneViewStatus.Initializing, onInitializationStatusChanged)
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val cameraPermissionGranted by rememberCameraPermission(requestCameraPermissionAutomatically) {
         // onNotGranted
-        updateStatus(
+        initializationStatus.update(
             TableTopSceneViewStatus.FailedToInitialize(
                 IllegalStateException(
                     context.getString(R.string.camera_permission_not_granted)
@@ -189,7 +183,7 @@ fun TableTopSceneView(
     LaunchedEffect(Unit) {
         val arCoreAvailability = checkArCoreAvailability(context)
         if (arCoreAvailability != ArCoreApk.Availability.SUPPORTED_INSTALLED) {
-            updateStatus(
+            initializationStatus.update(
                 TableTopSceneViewStatus.FailedToInitialize(
                     IllegalStateException(context.getString(R.string.arcore_not_installed_message))
                 ),
@@ -204,7 +198,10 @@ fun TableTopSceneView(
         if (cameraPermissionGranted && arCoreInstalled) {
             val arSessionWrapper =
                 rememberArSessionWrapper(applicationContext = context.applicationContext)
-            updateStatus(TableTopSceneViewStatus.Initialized, onInitializationStatusChanged)
+            initializationStatus.update(
+                TableTopSceneViewStatus.Initialized,
+                onInitializationStatusChanged
+            )
             DisposableEffect(Unit) {
                 lifecycleOwner.lifecycle.addObserver(arSessionWrapper)
                 onDispose {
@@ -305,3 +302,11 @@ private suspend fun checkArCoreAvailability(context: Context): ArCoreApk.Availab
             continuation.resume(it)
         }
     }
+
+private fun MutableState<TableTopSceneViewStatus>.update(
+    newStatus: TableTopSceneViewStatus,
+    callback: ((TableTopSceneViewStatus) -> Unit)?
+) {
+    this.value = newStatus
+    callback?.invoke(newStatus)
+}
