@@ -47,17 +47,14 @@ import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
@@ -80,6 +77,7 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.toolkit.utilitynetworks.StartingPoint
+import com.arcgismaps.toolkit.utilitynetworks.internal.util.TabRow
 import com.arcgismaps.utilitynetworks.UtilityNamedTraceConfiguration
 import com.arcgismaps.utilitynetworks.UtilityNetwork
 
@@ -174,30 +172,6 @@ internal fun TraceOptionsScreen(
             ) {
                 Text(stringResource(id = R.string.trace))
             }
-        }
-    }
-}
-
-@Composable
-internal fun TabRow(
-    onTabSelected: () -> Unit,
-    tabItems: List<String> = listOf(stringResource(R.string.new_trace), stringResource(R.string.results)),
-    selectedIndex: Int
-) {
-    var selectedTabIndex by rememberSaveable { mutableIntStateOf(selectedIndex) }
-
-    TabRow(selectedTabIndex = selectedTabIndex) {
-        tabItems.forEachIndexed { index, title ->
-            Tab(
-                selected = index == selectedTabIndex,
-                onClick = {
-                    if (index != selectedTabIndex) {
-                        onTabSelected()
-                        selectedTabIndex = index
-                    }
-                },
-                text = { Text(title) }
-            )
         }
     }
 }
