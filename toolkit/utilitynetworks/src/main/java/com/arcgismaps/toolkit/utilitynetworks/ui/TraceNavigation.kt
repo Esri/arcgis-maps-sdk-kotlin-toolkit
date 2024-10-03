@@ -105,12 +105,11 @@ internal fun TraceNavHost(traceState: TraceState) {
             )
         }
         dialog(TraceNavRoute.TraceError.name) {
-            val error = traceState.currentError.value
+            val error = traceState.currentError
             TraceErrorDialog(
                 message = error?.message ?: "An error has occurred",
                 onConfirmation = {
                     traceState.showScreen(TraceNavRoute.TraceOptions)
-                    traceState.setCurrentError(null)
                 }
             )
         }

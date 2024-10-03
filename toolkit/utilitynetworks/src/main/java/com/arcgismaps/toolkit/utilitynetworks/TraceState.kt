@@ -70,8 +70,7 @@ public class TraceState(
     private val mapViewProxy: MapViewProxy
 ) {
 
-    private val _currentError: MutableState<Throwable?> = mutableStateOf(null)
-    internal val currentError: State<Throwable?> = _currentError
+    internal var currentError: Throwable? = null
     private val _initializationStatus: MutableState<InitializationStatus> =
         mutableStateOf(InitializationStatus.NotInitialized)
 
@@ -292,12 +291,12 @@ public class TraceState(
         val traceConfiguration = selectedTraceConfiguration.value ?: return false
 
         if (currentTraceStartingPoints.isEmpty() && traceConfiguration.minimumStartingLocations == UtilityMinimumStartingLocations.One) {
-            setCurrentError(IllegalArgumentException("Not enough starting points"))
+            currentError = IllegalArgumentException("Not enough starting points")
             return false
         }
 
         if (currentTraceStartingPoints.size > 2 && traceConfiguration.minimumStartingLocations == UtilityMinimumStartingLocations.Many) {
-            setCurrentError(IllegalArgumentException("Not enough starting points"))
+            currentError = IllegalArgumentException("Too many starting points")
             return false
         }
 
@@ -305,7 +304,7 @@ public class TraceState(
             UtilityTraceParameters(traceConfiguration, currentTraceStartingPoints.map { it.utilityElement })
 
         val traceResults = utilityNetwork.trace(utilityTraceParameters).getOrElse {
-            setCurrentError(it)
+            currentError = it
             emptyList<UtilityElementTraceResult>()
             return false
         }
@@ -403,20 +402,19 @@ public class TraceState(
         // https://devtopia.esri.com/runtime/kotlin/issues/4491
         val utilityElement = utilityNetwork.createElementOrNull(feature)
         if (utilityElement == null) {
-            setCurrentError(IllegalArgumentException("Could not create utility element from ArcGISFeature."))
+            currentError = IllegalArgumentException("Could not create utility element from ArcGISFeature.")
             return false
         }
 
         // Check if the starting point already exists
         if (_currentTraceStartingPoints.any { it.utilityElement.globalId == utilityElement.globalId }) {
-            val exception = IllegalArgumentException("One or more starting points already exists.")
-            setCurrentError(exception)
+            currentError = IllegalArgumentException("One or more starting points already exists.")
             return false
         }
 
         val symbol = (feature.featureTable?.layer as FeatureLayer).renderer?.getSymbol(feature)
         if (symbol == null) {
-            setCurrentError(IllegalArgumentException("Could not create drawable from feature symbol"))
+            currentError = IllegalArgumentException("Could not create drawable from feature symbol")
             return false
         }
 
@@ -526,13 +524,6 @@ public class TraceState(
         _currentTraceZoomToResults.value = zoom
     }
 
-    /**
-     * Set the current error, if any.
-     * @since 200.6.0
-     */
-    internal fun setCurrentError(error: Throwable?) {
-        _currentError.value = error
-    }
 }
 
 /**
