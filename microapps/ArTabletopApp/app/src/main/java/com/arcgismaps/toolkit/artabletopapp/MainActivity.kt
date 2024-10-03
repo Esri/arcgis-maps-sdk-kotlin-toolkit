@@ -83,7 +83,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
         } catch (e: Exception) {
-            Log.e("ArTabletopApp","Error checking Google Play Services for AR: ${e.message}")
+            Log.e("ArTabletopApp", "Error checking Google Play Services for AR: ${e.message}")
         }
     }
 }

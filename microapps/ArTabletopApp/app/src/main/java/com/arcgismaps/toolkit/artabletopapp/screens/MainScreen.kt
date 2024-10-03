@@ -37,8 +37,8 @@ import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.ar.TableTopSceneView
-import com.arcgismaps.toolkit.ar.TableTopSceneViewStatus
 import com.arcgismaps.toolkit.ar.TableTopSceneViewProxy
+import com.arcgismaps.toolkit.ar.TableTopSceneViewStatus
 import com.arcgismaps.toolkit.ar.rememberTableTopSceneViewStatus
 import com.arcgismaps.toolkit.artabletopapp.R
 import kotlin.math.roundToInt
@@ -74,6 +74,10 @@ fun MainScreen() {
                 }
             }
         }
-        Text(text = stringResource(R.string.initialization_status, initializationStatus), modifier = Modifier.height(200.dp), color = Color.Red)
+        Text(
+            text = stringResource(R.string.initialization_status, initializationStatus),
+            modifier = Modifier.height(200.dp),
+            color = Color.Red
+        )
     }
 }
