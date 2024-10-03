@@ -150,7 +150,7 @@ public class TraceState(
             currentTraceGraphicsColor.alpha
         )
 
-    private var _currentTraceZoomToResults: MutableState<Boolean> = mutableStateOf(false)
+    private var _currentTraceZoomToResults: MutableState<Boolean> = mutableStateOf(true)
     public var currentTraceZoomToResults: State<Boolean> = _currentTraceZoomToResults
 
     private val currentTraceResultGeometriesExtent: Envelope?
@@ -356,10 +356,9 @@ public class TraceState(
 
     private fun resetCurrentTrace() {
         _selectedTraceConfiguration.value = null
-        _currentTraceStartingPoints.clear()
         _currentTraceName.value = ""
         currentTraceGraphicsColor = Color.green
-        _currentTraceZoomToResults.value = false
+        _currentTraceZoomToResults.value = true
     }
 
     private fun createGraphicForSimpleLineSymbol(geometry: Geometry, style: SimpleLineSymbolStyle, color: Color) =

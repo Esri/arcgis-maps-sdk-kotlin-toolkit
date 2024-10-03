@@ -118,7 +118,7 @@ internal fun TraceOptionsScreen(
             horizontalAlignment = Alignment.CenterHorizontally) {
 
             if (showResultsTab) {
-                TabRow(onBackToResults)
+                TabRow(onBackToResults, selectedIndex = 0)
                 Spacer(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -179,20 +179,21 @@ internal fun TraceOptionsScreen(
 }
 
 @Composable
-private fun TabRow(onBackToResults: () -> Unit) {
-    val tabItems = listOf("New Trace", "Results")
-    var selectedTabIndex by remember { mutableIntStateOf(0) }
+internal fun TabRow(
+    onTabSelected: () -> Unit,
+    tabItems: List<String> = listOf(stringResource(R.string.new_trace), stringResource(R.string.results)),
+    selectedIndex: Int
+) {
+    var selectedTabIndex by rememberSaveable { mutableIntStateOf(selectedIndex) }
 
     TabRow(selectedTabIndex = selectedTabIndex) {
         tabItems.forEachIndexed { index, title ->
-            var selected by remember { mutableStateOf(index == 0) }
             Tab(
-                selected = selected,
+                selected = index == selectedTabIndex,
                 onClick = {
-                    selectedTabIndex = index
-                    selected = true
-                    if (index == 1) {
-                        onBackToResults()
+                    if (index != selectedTabIndex) {
+                        onTabSelected()
+                        selectedTabIndex = index
                     }
                 },
                 text = { Text(title) }

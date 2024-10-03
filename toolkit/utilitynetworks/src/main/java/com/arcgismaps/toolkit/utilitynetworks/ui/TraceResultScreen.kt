@@ -79,7 +79,7 @@ internal fun TraceResultScreen(
             .fillMaxSize()
             .padding(horizontal = 10.dp)) {
 
-            TabRow(onBackToNewTrace)
+            TabRow(onBackToNewTrace, selectedIndex = 1)
             Spacer(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -106,30 +106,6 @@ internal fun TraceResultScreen(
         }
     }
 }
-
-@Composable
-private fun TabRow(onBackToNewTrace: () -> Unit) {
-    val tabItems = listOf("New Trace", "Results")
-    var selectedTabIndex by remember { mutableIntStateOf(1) }
-
-    TabRow(selectedTabIndex = selectedTabIndex) {
-        tabItems.forEachIndexed { index, title ->
-            var selected by remember { mutableStateOf(index == 1) }
-            Tab(
-                selected = selected,
-                onClick = {
-                    selectedTabIndex = index
-                    selected = true
-                    if (index == 0) {
-                        onBackToNewTrace()
-                    }
-                },
-                text = { Text(title) }
-            )
-        }
-    }
-}
-
 
 @Composable
 private fun TraceTitle(traceName: String, onZoomToResults: () -> Unit, onDeleteResult: () -> Unit) {
