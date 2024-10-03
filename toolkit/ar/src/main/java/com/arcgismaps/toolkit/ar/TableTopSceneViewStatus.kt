@@ -18,6 +18,11 @@
 
 package com.arcgismaps.toolkit.ar
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+
 /**
  * Represents the initialization status of a [TableTopSceneView].
  *
@@ -46,4 +51,9 @@ sealed class TableTopSceneViewStatus private constructor() {
      * @since 200.6.0
      */
     data class FailedToInitialize internal constructor(val error: Throwable) : TableTopSceneViewStatus()
+}
+
+@Composable
+public fun rememberTableTopSceneViewStatus(): MutableState<TableTopSceneViewStatus> = remember {
+    mutableStateOf(TableTopSceneViewStatus.Initializing)
 }

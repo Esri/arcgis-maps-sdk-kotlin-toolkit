@@ -162,11 +162,7 @@ fun TableTopSceneView(
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
     content: (@Composable TableTopSceneViewScope.() -> Unit)? = null
 ) {
-    var initializationStatus: TableTopSceneViewStatus by remember {
-        mutableStateOf(
-            TableTopSceneViewStatus.Initializing
-        )
-    }
+    var initializationStatus: TableTopSceneViewStatus by rememberTableTopSceneViewStatus()
     val updateStatus = remember {
         { newStatus: TableTopSceneViewStatus, callback: ((TableTopSceneViewStatus) -> Unit)? ->
             initializationStatus = newStatus

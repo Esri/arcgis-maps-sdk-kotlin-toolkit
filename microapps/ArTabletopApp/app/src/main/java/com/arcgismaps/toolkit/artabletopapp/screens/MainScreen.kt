@@ -39,6 +39,7 @@ import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.ar.TableTopSceneView
 import com.arcgismaps.toolkit.ar.TableTopSceneViewStatus
 import com.arcgismaps.toolkit.ar.TableTopSceneViewProxy
+import com.arcgismaps.toolkit.ar.rememberTableTopSceneViewStatus
 import com.arcgismaps.toolkit.artabletopapp.R
 import kotlin.math.roundToInt
 
@@ -51,7 +52,7 @@ fun MainScreen() {
     }
     val tableTopSceneViewProxy = remember { TableTopSceneViewProxy() }
     var tappedLocation by remember { mutableStateOf<Point?>(null) }
-    var initializationStatus: TableTopSceneViewStatus by remember { mutableStateOf(TableTopSceneViewStatus.Initializing) }
+    var initializationStatus: TableTopSceneViewStatus by rememberTableTopSceneViewStatus()
     Box(modifier = Modifier.fillMaxSize()) {
         TableTopSceneView(
             arcGISScene = arcGISScene,
