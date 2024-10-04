@@ -71,6 +71,7 @@ import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
 import com.google.ar.core.ArCoreApk
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.time.Instant
 import kotlin.coroutines.resume
@@ -163,7 +164,10 @@ fun TableTopSceneView(
     content: (@Composable TableTopSceneViewScope.() -> Unit)? = null
 ) {
     var initializationStatus = rememberTableTopSceneViewStatus()
-    initializationStatus.update(TableTopSceneViewStatus.Initializing, onInitializationStatusChanged)
+
+    LaunchedEffect(Unit) {
+        initializationStatus.update(TableTopSceneViewStatus.Initializing, onInitializationStatusChanged)
+    }
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val cameraPermissionGranted by rememberCameraPermission(requestCameraPermissionAutomatically) {
@@ -181,6 +185,7 @@ fun TableTopSceneView(
     var arCoreInstalled by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
+        delay(10_000)
         val arCoreAvailability = checkArCoreAvailability(context)
         if (arCoreAvailability != ArCoreApk.Availability.SUPPORTED_INSTALLED) {
             initializationStatus.update(
