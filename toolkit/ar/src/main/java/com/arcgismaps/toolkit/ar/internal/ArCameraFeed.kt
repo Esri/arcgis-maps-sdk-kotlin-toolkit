@@ -51,7 +51,8 @@ import com.google.ar.core.Session
 internal fun ArCameraFeed(
     arSessionWrapper: ArSessionWrapper,
     onFrame: (Frame) -> Unit,
-    onTap: (hit: HitResult?) -> Unit
+    onTap: (hit: HitResult?) -> Unit,
+    onFirstPlaneDetected: () -> Unit
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
@@ -63,7 +64,8 @@ internal fun ArCameraFeed(
             arSessionWrapper.session,
             context.assets,
             onFrame,
-            onTap
+            onTap,
+            onFirstPlaneDetected
         ).apply {
             this.surfaceDrawHandler = SurfaceDrawHandler(surfaceViewWrapper.glSurfaceView, this)
         }

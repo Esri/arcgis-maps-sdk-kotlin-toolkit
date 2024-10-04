@@ -202,7 +202,7 @@ fun TableTopSceneView(
             DisposableEffect(Unit) {
                 // We call this from inside DisposableEffect so that we invoke the callback in a side effect
                 initializationStatus.update(
-                    TableTopSceneViewStatus.Initialized,
+                    TableTopSceneViewStatus.DetectingPlanes,
                     onInitializationStatusChanged
                 )
                 lifecycleOwner.lifecycle.addObserver(arSessionWrapper)
@@ -211,7 +211,12 @@ fun TableTopSceneView(
                     arSessionWrapper.onDestroy(lifecycleOwner)
                 }
             }
-            ArCameraFeed(arSessionWrapper = arSessionWrapper, onFrame = {}, onTap = {})
+            ArCameraFeed(arSessionWrapper = arSessionWrapper, onFrame = {}, onTap = {}, onFirstPlaneDetected = {
+                initializationStatus.update(
+                    TableTopSceneViewStatus.Initialized,
+                    onInitializationStatusChanged
+                )
+            })
         }
         SceneView(
             arcGISScene = arcGISScene,

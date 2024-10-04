@@ -46,6 +46,7 @@ internal class CameraFeedRenderer(
     private val assets: AssetManager,
     private val onFrame: (Frame) -> Unit,
     private val onTap: (hit: HitResult?) -> Unit,
+    private val onFirstPlaneDetected: () -> Unit
 ) :
     SurfaceDrawHandler.Renderer, DefaultLifecycleObserver {
 
@@ -54,6 +55,9 @@ internal class CameraFeedRenderer(
     private val zNear = 0.1f
 
     private val zFar = 100f
+
+    // used to keep track of whether we have detected any planes and call [onFirstPlaneDetected] only once
+    private var hasDetectedFirstPlane: Boolean = false
 
     // must initialize texture names before drawing the background
     private var hasSetTextureNames: Boolean = false
@@ -152,13 +156,20 @@ internal class CameraFeedRenderer(
     }
 
     override fun onDrawFrame(surfaceDrawHandler: SurfaceDrawHandler) {
-        // not sure exactly what this means
         // Texture names should only be set once on a GL thread unless they change. This is done during
         // onDrawFrame rather than onSurfaceCreated since the session is not guaranteed to have been
         // initialized during the execution of onSurfaceCreated.
         if (!hasSetTextureNames) {
             session.setCameraTextureNames(intArrayOf(cameraColorTexture.textureId))
             hasSetTextureNames = true
+        }
+
+        // Call [onFirstPlaneDetected] only once a plane has actually been detected
+        if (!hasDetectedFirstPlane) {
+            if (session.getAllTrackables(Plane::class.java).isNotEmpty()) {
+                hasDetectedFirstPlane = true
+                onFirstPlaneDetected()
+            }
         }
 
         // Notify ARCore session that the view size changed so that the perspective matrix and
