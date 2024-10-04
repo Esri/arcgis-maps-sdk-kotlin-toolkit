@@ -85,7 +85,7 @@ fun MainScreen() {
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = "Move your phone around to detect planes...")
+                Text(text = stringResource(R.string.detect_planes_overlay))
             }
         }
         Text(
