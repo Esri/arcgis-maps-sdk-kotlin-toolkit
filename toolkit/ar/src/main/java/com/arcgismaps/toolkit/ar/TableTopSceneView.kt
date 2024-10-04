@@ -199,11 +199,12 @@ fun TableTopSceneView(
         if (cameraPermissionGranted && arCoreInstalled) {
             val arSessionWrapper =
                 rememberArSessionWrapper(applicationContext = context.applicationContext)
-            initializationStatus.update(
-                TableTopSceneViewStatus.Initialized,
-                onInitializationStatusChanged
-            )
             DisposableEffect(Unit) {
+                // We call this from inside DisposableEffect so that we invoke the callback in a side effect
+                initializationStatus.update(
+                    TableTopSceneViewStatus.Initialized,
+                    onInitializationStatusChanged
+                )
                 lifecycleOwner.lifecycle.addObserver(arSessionWrapper)
                 onDispose {
                     lifecycleOwner.lifecycle.removeObserver(arSessionWrapper)
@@ -291,7 +292,12 @@ private fun rememberCameraPermission(
                 requestPermissionLauncher.launch(Manifest.permission.CAMERA)
             }
         } else {
-            onNotGranted()
+            // We should use a SideEffect here to ensure that code executed in onNotGranted is run
+            // after the composition completes, for example, invoking the onInitializationStatusChanged
+            // callback
+            SideEffect {
+                onNotGranted()
+            }
         }
     }
     return isGrantedState
