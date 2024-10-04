@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.geometry.Point
+import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Viewpoint
@@ -56,6 +57,9 @@ fun MainScreen() {
     Box(modifier = Modifier.fillMaxSize()) {
         TableTopSceneView(
             arcGISScene = arcGISScene,
+            arcGISSceneAnchor = Point(-71.0, 41.0, SpatialReference.wgs84()),
+            translationFactor = 1000.0,
+            clippingDistance = 400.0,
             modifier = Modifier.fillMaxSize(),
             tableTopSceneViewProxy = tableTopSceneViewProxy,
             onInitializationStatusChanged = {

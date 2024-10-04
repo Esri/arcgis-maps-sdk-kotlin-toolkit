@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.core.content.ContextCompat
+import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.TimeExtent
@@ -84,6 +85,9 @@ import kotlin.coroutines.resume
  * Displays a [SceneView] in a tabletop AR environment.
  *
  * @param arcGISScene the [ArcGISScene] to be rendered by this TableTopSceneView
+ * @param arcGISSceneAnchor the [Point] in the [ArcGISScene] where the AR scene will initially be centered
+ * @param translationFactor the factor defines how much the scene view translates as the device moves.
+ * @param clippingDistance the clipping distance in meters around the camera. A null means that no data will be clipped.
  * @param modifier Modifier to be applied to the TableTopSceneView
  * @param onInitializationStatusChanged a callback that is invoked when the initialization status of the [TableTopSceneView] changes.
  * @param requestCameraPermissionAutomatically whether to request the camera permission automatically.
@@ -130,6 +134,9 @@ import kotlin.coroutines.resume
 @Composable
 fun TableTopSceneView(
     arcGISScene: ArcGISScene,
+    arcGISSceneAnchor: Point,
+    translationFactor: Double,
+    clippingDistance: Double?,
     modifier: Modifier = Modifier,
     onInitializationStatusChanged: ((TableTopSceneViewStatus) -> Unit)? = null,
     requestCameraPermissionAutomatically: Boolean = true,
@@ -200,7 +207,13 @@ fun TableTopSceneView(
     }
 
     Box(modifier = modifier) {
-        val cameraController = remember { TransformationMatrixCameraController() }
+        val cameraController = remember {
+            TransformationMatrixCameraController().apply {
+                setOriginCamera(Camera(arcGISSceneAnchor, heading = 0.0, pitch = 90.0, roll = 0.0))
+                setTranslationFactor(translationFactor)
+                this.clippingDistance = clippingDistance
+            }
+        }
         var arCoreAnchor: Anchor? by remember { mutableStateOf(null) }
         if (cameraPermissionGranted && arCoreInstalled) {
             val arSessionWrapper =
