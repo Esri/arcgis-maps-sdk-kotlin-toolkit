@@ -31,7 +31,7 @@ import androidx.compose.runtime.remember
 sealed class TableTopSceneViewStatus private constructor() {
 
     /**
-     * The [TableTopSceneView] is initializing. The [TableTopSceneView] is not ready to be used yet.\
+     * The [TableTopSceneView] is initializing. The [TableTopSceneView] is not ready to be used yet.
      *
      * @since 200.6.0
      */
