@@ -53,6 +53,12 @@ sealed class TableTopSceneViewStatus private constructor() {
     data class FailedToInitialize internal constructor(val error: Throwable) : TableTopSceneViewStatus()
 }
 
+/**
+ * Remembers a [MutableState] of [TableTopSceneViewStatus] that can be used to track the initialization status of a [TableTopSceneView].
+ * The initial value of the [MutableState] is [TableTopSceneViewStatus.Initializing].
+ *
+ * @since 200.6.0
+ */
 @Composable
 public fun rememberTableTopSceneViewStatus(): MutableState<TableTopSceneViewStatus> = remember {
     mutableStateOf(TableTopSceneViewStatus.Initializing)
