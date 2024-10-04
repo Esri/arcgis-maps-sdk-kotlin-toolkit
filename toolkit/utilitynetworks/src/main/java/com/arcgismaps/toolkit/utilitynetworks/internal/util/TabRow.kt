@@ -23,17 +23,20 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
+import androidx.compose.material3.TabRow
 import com.arcgismaps.toolkit.utilitynetworks.R
 
 @Composable
 internal fun TabRow(
     onTabSelected: () -> Unit,
-    tabItems: List<String> = listOf(stringResource(R.string.new_trace), stringResource(R.string.results)),
     selectedIndex: Int
 ) {
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(selectedIndex) }
+    val newTrace = stringResource(R.string.new_trace)
+    val results = stringResource(R.string.results)
+    val tabItems = rememberSaveable { listOf(newTrace, results) }
 
-    androidx.compose.material3.TabRow(selectedTabIndex = selectedTabIndex) {
+    TabRow(selectedTabIndex = selectedTabIndex) {
         tabItems.forEachIndexed { index, title ->
             Tab(
                 selected = index == selectedTabIndex,
