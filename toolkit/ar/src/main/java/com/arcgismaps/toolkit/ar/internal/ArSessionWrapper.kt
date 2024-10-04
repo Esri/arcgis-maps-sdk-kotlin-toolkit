@@ -18,8 +18,11 @@
 package com.arcgismaps.toolkit.ar.internal
 
 import android.content.Context
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.google.ar.core.ArCoreApk
 import com.google.ar.core.Session
 
 /**
@@ -45,3 +48,11 @@ internal class ArSessionWrapper(applicationContext: Context) : DefaultLifecycleO
         session.resume()
     }
 }
+
+/**
+ * Remembers an [ArSessionWrapper] that provides an ARCore [Session].
+ *
+ * @since 200.6.0
+ */
+@Composable
+internal fun rememberArSessionWrapper(applicationContext: Context): ArSessionWrapper = remember { ArSessionWrapper(applicationContext) }

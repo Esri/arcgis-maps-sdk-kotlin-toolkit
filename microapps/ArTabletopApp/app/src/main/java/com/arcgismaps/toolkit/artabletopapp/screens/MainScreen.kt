@@ -20,6 +20,7 @@ package com.arcgismaps.toolkit.artabletopapp.screens
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,12 +29,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Viewpoint
 import com.arcgismaps.toolkit.ar.TableTopSceneView
 import com.arcgismaps.toolkit.ar.TableTopSceneViewProxy
+import com.arcgismaps.toolkit.ar.TableTopSceneViewStatus
+import com.arcgismaps.toolkit.ar.rememberTableTopSceneViewStatus
+import com.arcgismaps.toolkit.artabletopapp.R
 import kotlin.math.roundToInt
 
 @Composable
@@ -45,11 +52,15 @@ fun MainScreen() {
     }
     val tableTopSceneViewProxy = remember { TableTopSceneViewProxy() }
     var tappedLocation by remember { mutableStateOf<Point?>(null) }
+    var initializationStatus: TableTopSceneViewStatus by rememberTableTopSceneViewStatus()
     Box(modifier = Modifier.fillMaxSize()) {
         TableTopSceneView(
             arcGISScene = arcGISScene,
             modifier = Modifier.fillMaxSize(),
             tableTopSceneViewProxy = tableTopSceneViewProxy,
+            onInitializationStatusChanged = {
+                initializationStatus = it
+            },
             onSingleTapConfirmed = {
                 val location = tableTopSceneViewProxy.screenToBaseSurface(it.screenCoordinate)
                 location?.let { point ->
@@ -63,5 +74,10 @@ fun MainScreen() {
                 }
             }
         }
+        Text(
+            text = stringResource(R.string.initialization_status, initializationStatus),
+            modifier = Modifier.height(200.dp),
+            color = Color.Red
+        )
     }
 }
