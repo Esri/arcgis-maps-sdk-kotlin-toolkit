@@ -32,13 +32,25 @@ sealed class TableTopSceneViewStatus private constructor() {
 
     /**
      * The [TableTopSceneView] is initializing. The [TableTopSceneView] is not ready to be used yet.
+     * During this stage, the [TableTopSceneView] will ensure that the device supports AR and that the necessary
+     * permissions are granted.
      *
      * @since 200.6.0
      */
     data object Initializing : TableTopSceneViewStatus()
 
     /**
+     * The [TableTopSceneView] is detecting planes on which a scene can be placed. The scene will
+     * not be displayed yet. This status can be used as an indicator to prompt the user to move the device around
+     * to detect planes.
+     *
+     * @since 200.6.0
+     */
+    data object DetectingPlanes: TableTopSceneViewStatus()
+
+    /**
      * The [TableTopSceneView] is initialized successfully. The [TableTopSceneView] is ready to be used.
+     * The scene will be rendered after the user taps on a plane to place the scene.
      *
      * @since 200.6.0
      */
