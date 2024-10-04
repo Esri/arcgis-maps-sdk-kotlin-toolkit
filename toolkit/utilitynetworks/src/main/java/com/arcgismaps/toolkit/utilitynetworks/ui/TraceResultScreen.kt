@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
-import androidx.compose.foundation.Image
 import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -24,10 +23,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -61,7 +58,8 @@ import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.toolkit.utilitynetworks.TraceRun
 import com.arcgismaps.utilitynetworks.UtilityElement
 import com.arcgismaps.utilitynetworks.UtilityTraceFunctionOutput
-import androidx.compose.material.icons.filled.ArrowBackIos
+import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
+import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 
 /**
  * Composable that displays the trace results.
@@ -70,8 +68,10 @@ import androidx.compose.material.icons.filled.ArrowBackIos
  */
 @Composable
 internal fun TraceResultScreen(
-    traceRun: TraceRun,
+    selectedTraceRun: TraceRun,
     traceResults: List<TraceRun>,
+    onSelectPreviousTraceResult: () -> Unit,
+    onSelectNextTraceResult: () -> Unit,
     onBackToNewTrace: () -> Unit,
     onDeleteResult: () -> Unit,
     onZoomToResults: () -> Unit,
@@ -81,31 +81,62 @@ internal fun TraceResultScreen(
         Column(modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 10.dp)) {
+            Button(onClick = { /* Handle first button click */
+                traceResults[0].geometryResultsGraphics.forEach{
+                    it.isSelected = false
+                }
+            }) {
+                Text("Unselect")
+            }
+            Button(onClick = { /* Handle second button click */
+                traceResults[0].geometryResultsGraphics.forEach{
+                    it.isSelected = true
+                }
+            }) {
+                Text("select")
+            }
+
+            val selectedTraceRunIndex = traceResults.indexOf(selectedTraceRun)
 
             TabRow(onBackToNewTrace)
-            Row() {
-                Image(
-                    imageVector = Icons.Filled.ArrowBackIos,
-                    contentDescription = "back"
+
+            Row(modifier = Modifier.align(Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
+                    contentDescription = "back",
+                    modifier = Modifier.clickable {
+                        onSelectPreviousTraceResult()
+                    },
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    modifier = Modifier.padding(20.dp),
+                    text = getTraceCounterString(selectedTraceRunIndex + 1, traceResults.size),
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                    contentDescription = "forward",
+                    modifier = Modifier.clickable {
+                        onSelectNextTraceResult()
+                    },
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
 
-            Spacer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(10.dp)
-            )
             TraceTitle(
-                traceRun.name,
+                selectedTraceRun.name,
                 onZoomToResults = onZoomToResults,
                 onDeleteResult = onDeleteResult
             )
             LazyColumn {
                 item {
-                    FeatureResult(traceRun.featureResults)
+                    FeatureResult(selectedTraceRun.featureResults)
                 }
                 item {
-                    FunctionResult(traceRun.functionResults)
+                    FunctionResult(selectedTraceRun.functionResults)
                 }
                 item {
                     ClearAllResultsButton(onClearAllResults)
@@ -113,6 +144,10 @@ internal fun TraceResultScreen(
             }
         }
     }
+}
+
+private fun getTraceCounterString(currentTraceResult: Int, totalTraceResults: Int): String {
+    return "Trace $currentTraceResult of $totalTraceResults"
 }
 
 @Composable
@@ -144,8 +179,7 @@ private fun TraceTitle(traceName: String, onZoomToResults: () -> Unit, onDeleteR
     var expanded by remember { mutableStateOf(false) }
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 16.dp),
+            .fillMaxWidth(),
         horizontalArrangement = Arrangement.Center
     ) {
         Box {

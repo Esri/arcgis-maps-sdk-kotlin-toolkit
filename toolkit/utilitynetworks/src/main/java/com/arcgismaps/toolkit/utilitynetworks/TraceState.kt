@@ -123,6 +123,27 @@ public class TraceState(
     private val _completedTraces: SnapshotStateList<TraceRun> = mutableStateListOf()
     internal val completedTraces: List<TraceRun> = _completedTraces
 
+    private var _selectedTraceRun: MutableState<TraceRun?> = mutableStateOf (null)
+    internal val selectedTraceRun: State<TraceRun?>
+        get() = _selectedTraceRun
+
+    private var _selectedCompletedTraceIndex: Int? = null
+        set(value) {
+            field?.let { lastIndex ->
+                Log.i("TraceState --", "selectedCompletedTraceIndex field =: $field")
+                updateSelectedStateForTraceResultsGraphics(lastIndex, false)
+            }
+            value?.let { currentIndex ->
+                Log.i("TraceState --", "selectedCompletedTraceIndex value =: $value")
+                _selectedTraceRun.value = _completedTraces[currentIndex]
+                updateSelectedStateForTraceResultsGraphics(currentIndex, true)
+            }
+            field = value
+            Log.i("TraceState --", "selectedCompletedTraceIndex field = value: $field")
+        }
+
+
+
     private var _currentTraceName: MutableState<String> = mutableStateOf("")
     /**
      * The default name of the trace.
@@ -251,6 +272,7 @@ public class TraceState(
                 }
                 // Geometry results
                 is UtilityGeometryTraceResult -> {
+                    Log.i("TraceState --", "Geometry results currentTraceGeometryResultsGraphics = ${currentTraceGeometryResultsGraphics.size}")
                     result.polygon?.let { polygon ->
                         val graphic = createGraphicForSimpleLineSymbol(polygon, SimpleLineSymbolStyle.Solid, currentTraceGraphicsColor)
                         graphicsOverlay.graphics.add(graphic)
@@ -268,18 +290,22 @@ public class TraceState(
                     }
                     currentTraceGeometryResults = result
                     // Highlight the geometry results
-                    currentTraceGeometryResultsGraphics.map { it.isSelected = true }
+//                    currentTraceGeometryResultsGraphics.map { it.isSelected = true }
                 }
             }
         }
         _currentTraceRun.value = TraceRun(
             name = _currentTraceName.value,
             configuration = traceConfiguration,
-            graphics = currentTraceGeometryResultsGraphics,
+            startingPoints = _currentTraceStartingPoints.toList(),
+            geometryResultsGraphics = currentTraceGeometryResultsGraphics.toList(),
             featureResults = currentTraceElementResults,
             functionResults = currentTraceFunctionResults,
             geometryTraceResult = currentTraceGeometryResults
-        ).also { _completedTraces.add(it) }
+        ).also {
+            _completedTraces.add(it)
+            _selectedCompletedTraceIndex = _completedTraces.size - 1
+        }
 
         if (_currentTraceZoomToResults.value) {
             currentTraceResultGeometriesExtent?.let {
@@ -297,6 +323,7 @@ public class TraceState(
     private fun resetCurrentTrace() {
         _selectedTraceConfiguration.value = null
         _currentTraceStartingPoints.clear()
+        currentTraceGeometryResultsGraphics.clear()
         _currentTraceName.value = ""
         currentTraceGraphicsColor = Color.green
         _currentTraceZoomToResults.value = false
@@ -327,6 +354,18 @@ public class TraceState(
         graphicsOverlay.graphics.remove(startingPoint.graphic)
     }
 
+    private fun updateSelectedStateForTraceResultsGraphics(index: Int, isSelected: Boolean) {
+        Log.i("TraceState --", "updateSelectedStateForTraceResultsGraphics index = $index, isSelected = $isSelected")
+        _completedTraces[index].geometryResultsGraphics.map {
+            it.isSelected = isSelected
+            Log.i("TraceState --", "Graphic ${it.isSelected} isSelected set to $isSelected")
+        }
+        _completedTraces[0].geometryResultsGraphics.forEach {
+            Log.i("TraceState --", "complete traces 0 Graphic isSelected ${it.isSelected} ")
+        }
+        _completedTraces[index].startingPoints.map { it.graphic.isSelected = isSelected }
+    }
+
     /**
      * This private method is called from a suspend function and so swallows any failures except
      * CancellationExceptions.
@@ -354,6 +393,7 @@ public class TraceState(
         )
         graphicsOverlay.graphics.add(graphic)
 
+        Log.i("TraceState --", "processAndAddStartingPoint _currentTraceStartingPoints = ${_currentTraceStartingPoints.size}")
         _currentTraceStartingPoints.add(
             StartingPoint(
                 feature = feature,
@@ -402,6 +442,27 @@ public class TraceState(
      */
     internal fun setTraceName(name: String) {
         _currentTraceName.value = name
+    }
+
+//    internal fun setSelectedCompletedTrace(index: Int) {
+//        if (index < 0 || index >= _completedTraces.size) {
+//            return
+//        }
+//        _selectedCompletedTraceIndex = index
+//    }
+
+    internal fun selectNextCompletedTrace() {
+        val selectedTraceRunIndex = completedTraces.indexOf(_selectedTraceRun.value)
+        if (selectedTraceRunIndex + 1 <= _completedTraces.size) {
+            _selectedCompletedTraceIndex = selectedTraceRunIndex + 1
+        }
+    }
+
+    internal fun selectPreviousCompletedTrace() {
+        val selectedTraceRunIndex = completedTraces.indexOf(_selectedTraceRun.value)
+        if (selectedTraceRunIndex - 1 >= 0) {
+            _selectedCompletedTraceIndex = selectedTraceRunIndex - 1
+        }
     }
 
     /**
@@ -529,7 +590,8 @@ internal data class StartingPoint(val feature: ArcGISFeature, val utilityElement
 internal data class TraceRun(
     val name: String, // need to auto populate this, if not provided by AdvancedOptions
     val configuration: UtilityNamedTraceConfiguration,
-    val graphics: List<Graphic>,
+    val startingPoints: List<StartingPoint>,
+    val geometryResultsGraphics: List<Graphic>,
     val featureResults: List<UtilityElement>,
     val functionResults: List<UtilityTraceFunctionOutput>,
     val geometryTraceResult: UtilityGeometryTraceResult?

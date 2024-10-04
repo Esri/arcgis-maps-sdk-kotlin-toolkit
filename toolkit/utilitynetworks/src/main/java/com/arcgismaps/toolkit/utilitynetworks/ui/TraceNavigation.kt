@@ -91,11 +91,13 @@ internal fun TraceNavHost(traceState: TraceState) {
             )
         }
         composable(TraceNavRoute.TraceResults.name) {
-            val traceRun = traceState.currentTraceRun.value
+            val traceRun = traceState.selectedTraceRun.value
             require (traceRun != null)
             TraceResultScreen(
-                traceRun = traceRun,
+                selectedTraceRun = traceRun,
                 traceResults = traceState.completedTraces,
+                onSelectPreviousTraceResult = { traceState.selectPreviousCompletedTrace() },
+                onSelectNextTraceResult = { traceState.selectNextCompletedTrace()  },
                 onBackToNewTrace = { traceState.showScreen(TraceNavRoute.TraceOptions) },
                 onDeleteResult = {
 
