@@ -77,7 +77,7 @@ internal fun TraceResultScreen(
             .fillMaxSize()
             .padding(horizontal = 10.dp)) {
 
-            TabRow(onBackToNewTrace, selectedIndex = 1)
+            TabRow(onBackToNewTrace, 1)
             Spacer(
                 modifier = Modifier
                     .fillMaxWidth()

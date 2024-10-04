@@ -116,7 +116,7 @@ internal fun TraceOptionsScreen(
             horizontalAlignment = Alignment.CenterHorizontally) {
 
             if (showResultsTab) {
-                TabRow(onBackToResults, selectedIndex = 0)
+                TabRow(onBackToResults, 0)
                 Spacer(
                     modifier = Modifier
                         .fillMaxWidth()
