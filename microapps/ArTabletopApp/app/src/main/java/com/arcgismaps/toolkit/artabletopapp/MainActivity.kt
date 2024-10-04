@@ -32,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.toolkit.artabletopapp.screens.MainScreen
@@ -44,7 +45,8 @@ class MainActivity : ComponentActivity() {
     private var userRequestedInstall: Boolean = true
 
     // Flow to track if Google Play Services for AR is installed on the device
-    // By using `collectAsState()` in the composable, the UI will recompose when the value changes
+    // By using `collectAsStateWithLifecycle()` in the composable, the UI will recompose when the
+    // value changes
     private val isGooglePlayServicesArInstalled = MutableStateFlow(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,7 +54,7 @@ class MainActivity : ComponentActivity() {
         ArcGISEnvironment.apiKey = ApiKey.create(BuildConfig.API_KEY)
         setContent {
             MicroAppTheme {
-                if (isGooglePlayServicesArInstalled.collectAsState().value) {
+                if (isGooglePlayServicesArInstalled.collectAsStateWithLifecycle().value) {
                     ArTabletopApp()
                 } else {
                     Text(text = stringResource(R.string.arcore_not_installed_screen_message))
