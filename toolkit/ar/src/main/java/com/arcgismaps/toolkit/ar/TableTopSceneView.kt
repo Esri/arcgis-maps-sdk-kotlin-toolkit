@@ -48,6 +48,7 @@ import com.arcgismaps.mapping.view.AnalysisOverlay
 import com.arcgismaps.mapping.view.AtmosphereEffect
 import com.arcgismaps.mapping.view.AttributionBarLayoutChangeEvent
 import com.arcgismaps.mapping.view.Camera
+import com.arcgismaps.mapping.view.DeviceOrientation
 import com.arcgismaps.mapping.view.DoubleTapEvent
 import com.arcgismaps.mapping.view.DownEvent
 import com.arcgismaps.mapping.view.DrawStatus
@@ -63,6 +64,8 @@ import com.arcgismaps.mapping.view.SceneViewInteractionOptions
 import com.arcgismaps.mapping.view.SelectionProperties
 import com.arcgismaps.mapping.view.SingleTapConfirmedEvent
 import com.arcgismaps.mapping.view.SpaceEffect
+import com.arcgismaps.mapping.view.TransformationMatrix
+import com.arcgismaps.mapping.view.TransformationMatrixCameraController
 import com.arcgismaps.mapping.view.TwoPointerTapEvent
 import com.arcgismaps.mapping.view.UpEvent
 import com.arcgismaps.mapping.view.ViewLabelProperties
@@ -70,8 +73,9 @@ import com.arcgismaps.toolkit.ar.internal.ArCameraFeed
 import com.arcgismaps.toolkit.ar.internal.rememberArSessionWrapper
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import com.arcgismaps.toolkit.geoviewcompose.SceneViewDefaults
+import com.google.ar.core.Anchor
 import com.google.ar.core.ArCoreApk
-import kotlinx.coroutines.delay
+import com.google.ar.core.Pose
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.time.Instant
 import kotlin.coroutines.resume
@@ -196,6 +200,8 @@ fun TableTopSceneView(
     }
 
     Box(modifier = modifier) {
+        val cameraController = remember { TransformationMatrixCameraController() }
+        var arCoreAnchor: Anchor? by remember { mutableStateOf(null) }
         if (cameraPermissionGranted && arCoreInstalled) {
             val arSessionWrapper =
                 rememberArSessionWrapper(applicationContext = context.applicationContext)
@@ -211,56 +217,99 @@ fun TableTopSceneView(
                     arSessionWrapper.onDestroy(lifecycleOwner)
                 }
             }
-            ArCameraFeed(arSessionWrapper = arSessionWrapper, onFrame = {}, onTap = {}, onFirstPlaneDetected = {
-                initializationStatus.update(
-                    TableTopSceneViewStatus.Initialized,
-                    onInitializationStatusChanged
-                )
-            })
+            val identityMatrix = remember { TransformationMatrix.createIdentityMatrix() }
+            ArCameraFeed(
+                arSessionWrapper = arSessionWrapper,
+                onFrame = { frame ->
+                    arCoreAnchor?.let { anchor ->
+                        val anchorPosition = identityMatrix - anchor.pose.translation.let {
+                            TransformationMatrix.createWithQuaternionAndTranslation(
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0,
+                                it[0].toDouble(),
+                                it[1].toDouble(),
+                                it[2].toDouble()
+                            )
+                        }
+                        val cameraPosition =
+                            anchorPosition + frame.camera.displayOrientedPose.transformationMatrix
+                        cameraController.transformationMatrix = cameraPosition
+                        val imageIntrinsics = frame.camera.imageIntrinsics
+                        tableTopSceneViewProxy.sceneViewProxy.setFieldOfViewFromLensIntrinsics(
+                            imageIntrinsics.focalLength[0],
+                            imageIntrinsics.focalLength[1],
+                            imageIntrinsics.principalPoint[0],
+                            imageIntrinsics.principalPoint[1],
+                            imageIntrinsics.imageDimensions[0].toFloat(),
+                            imageIntrinsics.imageDimensions[1].toFloat(),
+                            // TODO:
+                            deviceOrientation = DeviceOrientation.Portrait
+                        )
+                        tableTopSceneViewProxy.sceneViewProxy.renderFrame()
+                    }
+                },
+                onTapWithHitResult = { hit ->
+                    hit?.let { hitResult ->
+                        if (arCoreAnchor == null) {
+                            arCoreAnchor = hitResult.createAnchor()
+                        }
+                    }
+                },
+                onFirstPlaneDetected = {
+                    initializationStatus.update(
+                        TableTopSceneViewStatus.Initialized,
+                        onInitializationStatusChanged
+                    )
+                })
         }
-        SceneView(
-            arcGISScene = arcGISScene,
-            modifier = Modifier.fillMaxSize(),
-            onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
-            onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
-            graphicsOverlays = graphicsOverlays,
-            sceneViewProxy = tableTopSceneViewProxy.sceneViewProxy,
-            sceneViewInteractionOptions = sceneViewInteractionOptions,
-            viewLabelProperties = viewLabelProperties,
-            selectionProperties = selectionProperties,
-            isAttributionBarVisible = isAttributionBarVisible,
-            onAttributionTextChanged = onAttributionTextChanged,
-            onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
-            analysisOverlays = analysisOverlays,
-            imageOverlays = imageOverlays,
-            atmosphereEffect = AtmosphereEffect.None,
-            timeExtent = timeExtent,
-            onTimeExtentChanged = onTimeExtentChanged,
-            spaceEffect = SpaceEffect.Transparent,
-            sunTime = sunTime,
-            sunLighting = sunLighting,
-            ambientLightColor = ambientLightColor,
-            onNavigationChanged = onNavigationChanged,
-            onSpatialReferenceChanged = {
-                onSpatialReferenceChanged?.invoke(it)
-            },
-            onLayerViewStateChanged = onLayerViewStateChanged,
-            onInteractingChanged = onInteractingChanged,
-            onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged,
-            onRotate = onRotate,
-            onScale = onScale,
-            onUp = onUp,
-            onDown = onDown,
-            onSingleTapConfirmed = onSingleTapConfirmed,
-            onDoubleTap = onDoubleTap,
-            onLongPress = onLongPress,
-            onTwoPointerTap = onTwoPointerTap,
-            onPan = onPan,
-            onDrawStatusChanged = onDrawStatusChanged,
-            content = {
-                content?.invoke(TableTopSceneViewScope(this))
-            }
-        )
+        if (initializationStatus.value == TableTopSceneViewStatus.Initialized && arCoreAnchor != null) {
+            SceneView(
+                arcGISScene = arcGISScene,
+                modifier = Modifier.fillMaxSize(),
+                onViewpointChangedForCenterAndScale = onViewpointChangedForCenterAndScale,
+                onViewpointChangedForBoundingGeometry = onViewpointChangedForBoundingGeometry,
+                graphicsOverlays = graphicsOverlays,
+                sceneViewProxy = tableTopSceneViewProxy.sceneViewProxy,
+                sceneViewInteractionOptions = sceneViewInteractionOptions,
+                viewLabelProperties = viewLabelProperties,
+                selectionProperties = selectionProperties,
+                isAttributionBarVisible = isAttributionBarVisible,
+                onAttributionTextChanged = onAttributionTextChanged,
+                onAttributionBarLayoutChanged = onAttributionBarLayoutChanged,
+                cameraController = cameraController,
+                analysisOverlays = analysisOverlays,
+                imageOverlays = imageOverlays,
+                atmosphereEffect = AtmosphereEffect.None,
+                timeExtent = timeExtent,
+                onTimeExtentChanged = onTimeExtentChanged,
+                spaceEffect = SpaceEffect.Transparent,
+                sunTime = sunTime,
+                sunLighting = sunLighting,
+                ambientLightColor = ambientLightColor,
+                onNavigationChanged = onNavigationChanged,
+                onSpatialReferenceChanged = {
+                    onSpatialReferenceChanged?.invoke(it)
+                },
+                onLayerViewStateChanged = onLayerViewStateChanged,
+                onInteractingChanged = onInteractingChanged,
+                onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged,
+                onRotate = onRotate,
+                onScale = onScale,
+                onUp = onUp,
+                onDown = onDown,
+                onSingleTapConfirmed = onSingleTapConfirmed,
+                onDoubleTap = onDoubleTap,
+                onLongPress = onLongPress,
+                onTwoPointerTap = onTwoPointerTap,
+                onPan = onPan,
+                onDrawStatusChanged = onDrawStatusChanged,
+                content = {
+                    content?.invoke(TableTopSceneViewScope(this))
+                }
+            )
+        }
     }
 }
 
@@ -322,3 +371,16 @@ private fun MutableState<TableTopSceneViewStatus>.update(
     this.value = newStatus
     callback?.invoke(newStatus)
 }
+
+private val Pose.transformationMatrix: TransformationMatrix
+    get() {
+        return TransformationMatrix.createWithQuaternionAndTranslation(
+            rotationQuaternion[0].toDouble(),
+            rotationQuaternion[1].toDouble(),
+            rotationQuaternion[2].toDouble(),
+            rotationQuaternion[3].toDouble(),
+            translation[0].toDouble(),
+            translation[1].toDouble(),
+            translation[2].toDouble()
+        )
+    }

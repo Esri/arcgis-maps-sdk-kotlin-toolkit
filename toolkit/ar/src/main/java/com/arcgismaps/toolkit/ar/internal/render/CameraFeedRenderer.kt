@@ -45,7 +45,7 @@ internal class CameraFeedRenderer(
     private val session: Session,
     private val assets: AssetManager,
     private val onFrame: (Frame) -> Unit,
-    private val onTap: (hit: HitResult?) -> Unit,
+    private val onTapWithHitResult: (hit: HitResult?) -> Unit,
     private val onFirstPlaneDetected: () -> Unit
 ) :
     SurfaceDrawHandler.Renderer, DefaultLifecycleObserver {
@@ -200,7 +200,7 @@ internal class CameraFeedRenderer(
             drawBackground(surfaceDrawHandler)
         }
 
-        handleTap(frame, onTap)
+        handleTap(frame, onTapWithHitResult)
 
 
         val camera = frame.camera
