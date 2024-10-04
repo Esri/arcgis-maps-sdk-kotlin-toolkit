@@ -46,11 +46,7 @@ import kotlin.math.roundToInt
 
 @Composable
 fun MainScreen() {
-    val arcGISScene = remember {
-        ArcGISScene(BasemapStyle.ArcGISImagery).apply {
-            initialViewpoint = Viewpoint(34.056295, -117.195800, 10000000.0)
-        }
-    }
+    val arcGISScene = remember { ArcGISScene(BasemapStyle.ArcGISImagery) }
     val tableTopSceneViewProxy = remember { TableTopSceneViewProxy() }
     var tappedLocation by remember { mutableStateOf<Point?>(null) }
     var initializationStatus: TableTopSceneViewStatus by rememberTableTopSceneViewStatus()
