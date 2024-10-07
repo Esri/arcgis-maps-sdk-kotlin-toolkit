@@ -25,8 +25,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
@@ -36,15 +34,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.Color
-import com.arcgismaps.geometry.Point
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.Viewpoint
-import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
-import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
-import com.arcgismaps.mapping.view.Graphic
-import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.arcgismaps.toolkit.compass.Compass
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import com.arcgismaps.toolkit.geoviewcompose.MapViewProxy
@@ -71,7 +63,7 @@ fun MainScreen(modifier: Modifier) {
             arcGISMap,
             modifier = Modifier.fillMaxSize(),
             mapViewProxy = mapViewProxy,
-            onMapRotationChanged = { rotation -> mapRotation = rotation },
+            onMapRotationChanged = { rotation -> mapRotation = rotation }
         )
         Row(
             modifier = Modifier
