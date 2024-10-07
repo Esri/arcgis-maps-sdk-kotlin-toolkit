@@ -73,7 +73,7 @@ fun MainScreen() {
         ) {
             tappedLocation?.let {
                 Callout(location = it, modifier = Modifier.wrapContentSize()) {
-                    Text("Lat: ${it.y.roundToInt()}, Lon: ${it.x.roundToInt()}")
+                    Text(stringResource(R.string.lat_lon, it.y.roundToInt(), it.x.roundToInt()))
                 }
             }
         }
