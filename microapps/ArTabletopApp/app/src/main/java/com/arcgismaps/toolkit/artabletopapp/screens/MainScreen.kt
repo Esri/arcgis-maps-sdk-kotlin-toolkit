@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.artabletopapp.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,6 +28,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,25 +43,58 @@ import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.BasemapStyle
+import com.arcgismaps.mapping.ElevationSource
+import com.arcgismaps.mapping.Surface
+import com.arcgismaps.mapping.layers.ArcGISMapImageLayer
+import com.arcgismaps.mapping.layers.ArcGISSceneLayer
 import com.arcgismaps.toolkit.ar.TableTopSceneView
 import com.arcgismaps.toolkit.ar.TableTopSceneViewProxy
 import com.arcgismaps.toolkit.ar.TableTopSceneViewStatus
 import com.arcgismaps.toolkit.ar.rememberTableTopSceneViewStatus
 import com.arcgismaps.toolkit.artabletopapp.R
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 @Composable
 fun MainScreen() {
-    val arcGISScene = remember { ArcGISScene(BasemapStyle.ArcGISImagery) }
+    val arcGISScene = remember {
+        ArcGISScene(BasemapStyle.ArcGISImagery).apply {
+            operationalLayers.addAll(
+                listOf(
+                    // New York Transit Frequency
+                    ArcGISMapImageLayer("https://tiles.arcgis.com/tiles/nGt4QxSblgDfeJn9/arcgis/rest/services/UrbanObservatory_NYC_TransitFrequency/MapServer"),
+                    // New York Industrial Area
+                    ArcGISMapImageLayer("https://tiles.arcgis.com/tiles/nGt4QxSblgDfeJn9/arcgis/rest/services/New_York_Industrial/MapServer"),
+                    // New York Population Density
+                    ArcGISMapImageLayer("https://tiles.arcgis.com/tiles/4yjifSiIG17X0gW4/arcgis/rest/services/NewYorkCity_PopDensity/MapServer"),
+                    // New York Buildings
+                    ArcGISSceneLayer("https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/Buildings_NewYork_17/SceneServer")
+                )
+            )
+            baseSurface = Surface().apply {
+                elevationSources.add(
+                    ElevationSource.fromTerrain3dService()
+                )
+            }
+        }
+    }
+    LaunchedEffect(Unit) {
+        launch {
+            arcGISScene.loadStatus.collect {
+                Log.e("MainScreen", "Scene load status: $it")
+            }
+        }
+        arcGISScene.load()
+    }
     val tableTopSceneViewProxy = remember { TableTopSceneViewProxy() }
     var tappedLocation by remember { mutableStateOf<Point?>(null) }
     var initializationStatus: TableTopSceneViewStatus by rememberTableTopSceneViewStatus()
     Box(modifier = Modifier.fillMaxSize()) {
         TableTopSceneView(
             arcGISScene = arcGISScene,
-            arcGISSceneAnchor = Point(-71.0, 41.0, SpatialReference.wgs84()),
-            translationFactor = 1000.0,
-            clippingDistance = 400.0,
+            arcGISSceneAnchor = Point(-74.0, 40.72, SpatialReference.wgs84()),
+            translationFactor = 10_000.0,
+            clippingDistance = 5000.0,
             modifier = Modifier.fillMaxSize(),
             tableTopSceneViewProxy = tableTopSceneViewProxy,
             onInitializationStatusChanged = {
