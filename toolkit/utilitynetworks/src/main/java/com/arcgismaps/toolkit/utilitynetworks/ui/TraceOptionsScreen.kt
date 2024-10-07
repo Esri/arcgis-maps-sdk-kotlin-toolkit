@@ -77,6 +77,7 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.toolkit.utilitynetworks.StartingPoint
+import com.arcgismaps.toolkit.utilitynetworks.internal.util.TabRow
 import com.arcgismaps.utilitynetworks.UtilityNamedTraceConfiguration
 import com.arcgismaps.utilitynetworks.UtilityNetwork
 
@@ -95,8 +96,10 @@ internal fun TraceOptionsScreen(
     defaultTraceName: String,
     selectedColor: Color,
     zoomToResult: Boolean,
+    showResultsTab: Boolean,
     onStartingPointRemoved: (StartingPoint) -> Unit,
     onStartingPointSelected: (StartingPoint) -> Unit,
+    onBackToResults: () -> Unit,
     onConfigSelected: (UtilityNamedTraceConfiguration) -> Unit,
     onPerformTraceButtonClicked: () -> Unit,
     onAddStartingPointButtonClicked: () -> Unit,
@@ -109,10 +112,20 @@ internal fun TraceOptionsScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        Column (horizontalAlignment = Alignment.CenterHorizontally) {
+        Column (modifier = Modifier.padding(horizontal = 10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally) {
+
+            if (showResultsTab) {
+                TabRow(onBackToResults, 0)
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(15.dp)
+                )
+            }
             LazyColumn(
                 modifier = Modifier
-                    .padding(10.dp, 3.dp)
+                    .padding(vertical = 3.dp)
                     .weight(1f),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {

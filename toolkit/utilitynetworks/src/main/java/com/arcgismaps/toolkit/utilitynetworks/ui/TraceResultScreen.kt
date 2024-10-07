@@ -23,8 +23,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -53,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.toolkit.utilitynetworks.TraceRun
+import com.arcgismaps.toolkit.utilitynetworks.internal.util.TabRow
 import com.arcgismaps.utilitynetworks.UtilityElement
 import com.arcgismaps.utilitynetworks.UtilityTraceFunctionOutput
 
@@ -64,23 +67,39 @@ import com.arcgismaps.utilitynetworks.UtilityTraceFunctionOutput
 @Composable
 internal fun TraceResultScreen(
     traceRun: TraceRun,
+    onBackToNewTrace: () -> Unit,
     onDeleteResult: () -> Unit,
     onZoomToResults: () -> Unit,
     onClearAllResults: () -> Unit
 ) {
     Surface(modifier = Modifier.fillMaxSize()) {
-        LazyColumn {
-            item {
-                TraceTitle(traceRun.name, onZoomToResults = onZoomToResults, onDeleteResult = onDeleteResult)
-            }
-            item {
-                FeatureResult(traceRun.featureResults)
-            }
-            item {
-                FunctionResult(traceRun.functionResults)
-            }
-            item {
-                ClearAllResultsButton(onClearAllResults)
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 10.dp)) {
+
+            TabRow(onBackToNewTrace, 1)
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(15.dp)
+            )
+            LazyColumn {
+                item {
+                    TraceTitle(
+                        traceRun.name,
+                        onZoomToResults = onZoomToResults,
+                        onDeleteResult = onDeleteResult
+                    )
+                }
+                item {
+                    FeatureResult(traceRun.featureResults)
+                }
+                item {
+                    FunctionResult(traceRun.functionResults)
+                }
+                item {
+                    ClearAllResultsButton(onClearAllResults)
+                }
             }
         }
     }
