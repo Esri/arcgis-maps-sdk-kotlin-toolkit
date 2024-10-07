@@ -81,20 +81,6 @@ internal fun TraceResultScreen(
         Column(modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 10.dp)) {
-            Button(onClick = { /* Handle first button click */
-                traceResults[0].geometryResultsGraphics.forEach{
-                    it.isSelected = false
-                }
-            }) {
-                Text("Unselect")
-            }
-            Button(onClick = { /* Handle second button click */
-                traceResults[0].geometryResultsGraphics.forEach{
-                    it.isSelected = true
-                }
-            }) {
-                Text("select")
-            }
 
             val selectedTraceRunIndex = traceResults.indexOf(selectedTraceRun)
 

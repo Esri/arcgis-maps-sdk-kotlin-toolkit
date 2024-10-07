@@ -22,7 +22,6 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -130,19 +129,14 @@ public class TraceState(
     private var _selectedCompletedTraceIndex: Int? = null
         set(value) {
             field?.let { lastIndex ->
-                Log.i("TraceState --", "selectedCompletedTraceIndex field =: $field")
                 updateSelectedStateForTraceResultsGraphics(lastIndex, false)
             }
             value?.let { currentIndex ->
-                Log.i("TraceState --", "selectedCompletedTraceIndex value =: $value")
                 _selectedTraceRun.value = _completedTraces[currentIndex]
                 updateSelectedStateForTraceResultsGraphics(currentIndex, true)
             }
             field = value
-            Log.i("TraceState --", "selectedCompletedTraceIndex field = value: $field")
         }
-
-
 
     private var _currentTraceName: MutableState<String> = mutableStateOf("")
     /**
@@ -272,7 +266,6 @@ public class TraceState(
                 }
                 // Geometry results
                 is UtilityGeometryTraceResult -> {
-                    Log.i("TraceState --", "Geometry results currentTraceGeometryResultsGraphics = ${currentTraceGeometryResultsGraphics.size}")
                     result.polygon?.let { polygon ->
                         val graphic = createGraphicForSimpleLineSymbol(polygon, SimpleLineSymbolStyle.Solid, currentTraceGraphicsColor)
                         graphicsOverlay.graphics.add(graphic)
@@ -289,8 +282,6 @@ public class TraceState(
                         currentTraceGeometryResultsGraphics.add(graphic)
                     }
                     currentTraceGeometryResults = result
-                    // Highlight the geometry results
-//                    currentTraceGeometryResultsGraphics.map { it.isSelected = true }
                 }
             }
         }
@@ -355,15 +346,8 @@ public class TraceState(
     }
 
     private fun updateSelectedStateForTraceResultsGraphics(index: Int, isSelected: Boolean) {
-        Log.i("TraceState --", "updateSelectedStateForTraceResultsGraphics index = $index, isSelected = $isSelected")
-        _completedTraces[index].geometryResultsGraphics.map {
-            it.isSelected = isSelected
-            Log.i("TraceState --", "Graphic ${it.isSelected} isSelected set to $isSelected")
-        }
-        _completedTraces[0].geometryResultsGraphics.forEach {
-            Log.i("TraceState --", "complete traces 0 Graphic isSelected ${it.isSelected} ")
-        }
-        _completedTraces[index].startingPoints.map { it.graphic.isSelected = isSelected }
+        _completedTraces[index].geometryResultsGraphics.forEach { it.isSelected = isSelected }
+        _completedTraces[index].startingPoints.forEach { it.graphic.isSelected = isSelected }
     }
 
     /**
@@ -393,7 +377,6 @@ public class TraceState(
         )
         graphicsOverlay.graphics.add(graphic)
 
-        Log.i("TraceState --", "processAndAddStartingPoint _currentTraceStartingPoints = ${_currentTraceStartingPoints.size}")
         _currentTraceStartingPoints.add(
             StartingPoint(
                 feature = feature,
@@ -443,13 +426,6 @@ public class TraceState(
     internal fun setTraceName(name: String) {
         _currentTraceName.value = name
     }
-
-//    internal fun setSelectedCompletedTrace(index: Int) {
-//        if (index < 0 || index >= _completedTraces.size) {
-//            return
-//        }
-//        _selectedCompletedTraceIndex = index
-//    }
 
     internal fun selectNextCompletedTrace() {
         val selectedTraceRunIndex = completedTraces.indexOf(_selectedTraceRun.value)
