@@ -23,8 +23,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -35,7 +35,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.arcgismaps.LoadStatus
 import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
@@ -77,21 +78,49 @@ fun MainScreen() {
                 }
             }
         }
-        if (initializationStatus == TableTopSceneViewStatus.DetectingPlanes) {
-            Column(
-                modifier = Modifier
-                    .background(Color.Gray.copy(alpha = 0.5f))
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(text = stringResource(R.string.detect_planes_overlay))
+        initializationStatus.let { status ->
+            when (status) {
+                is TableTopSceneViewStatus.Initializing -> TextWithScrim(text = stringResource(R.string.initializing_overlay))
+                is TableTopSceneViewStatus.DetectingPlanes -> TextWithScrim(text = stringResource(R.string.detect_planes_overlay))
+                is TableTopSceneViewStatus.Initialized -> {
+                    val sceneLoadStatus = arcGISScene.loadStatus.collectAsStateWithLifecycle().value
+                    if (sceneLoadStatus is LoadStatus.NotLoaded) {
+                        // Tell the user to tap the screen if the scene has not started loading
+                        TextWithScrim(text = stringResource(R.string.tap_scene_overlay))
+                    } else if (sceneLoadStatus is LoadStatus.Loading) {
+                        // The scene may take a while to load, so show a progress indicator
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+                }
+
+                is TableTopSceneViewStatus.FailedToInitialize -> {
+                    TextWithScrim(
+                        text = stringResource(
+                            R.string.failed_to_initialize_overlay,
+                            status.error.message ?: status.error
+                        )
+                    )
+                }
             }
         }
-        Text(
-            text = stringResource(R.string.initialization_status, initializationStatus),
-            modifier = Modifier.height(200.dp),
-            color = Color.Red
-        )
+    }
+}
+
+@Composable
+fun TextWithScrim(text: String) {
+    Column(
+        modifier = Modifier
+            .background(Color.Gray.copy(alpha = 0.5f))
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = text)
     }
 }
