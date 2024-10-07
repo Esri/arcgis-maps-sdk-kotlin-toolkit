@@ -34,4 +34,7 @@
     <string name="not_available">Not available</string>
     <string name="zoom_to_trace_result">Zoom to trace result</string>
     <string name="delete_trace_result">Delete trace result</string>
+    <string name="fraction_along_edge">Fraction Along Edge</string>
+    <string name="attributes">Attributes</string>
+    <string name="terminal_configuration">Terminal Configuration</string>
 </resources>

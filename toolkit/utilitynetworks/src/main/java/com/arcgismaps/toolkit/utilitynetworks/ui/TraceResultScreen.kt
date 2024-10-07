@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.toolkit.utilitynetworks.TraceRun
+import com.arcgismaps.toolkit.utilitynetworks.internal.util.Title
 import com.arcgismaps.utilitynetworks.UtilityElement
 import com.arcgismaps.utilitynetworks.UtilityTraceFunctionOutput
 
@@ -71,7 +72,7 @@ internal fun TraceResultScreen(
     Surface(modifier = Modifier.fillMaxSize()) {
         LazyColumn {
             item {
-                TraceTitle(traceRun.name, onZoomToResults = onZoomToResults, onDeleteResult = onDeleteResult)
+                Title(traceRun.name, onZoomToResults = onZoomToResults, onDeleteResult = onDeleteResult)
             }
             item {
                 FeatureResult(traceRun.featureResults)
@@ -81,52 +82,6 @@ internal fun TraceResultScreen(
             }
             item {
                 ClearAllResultsButton(onClearAllResults)
-            }
-        }
-    }
-}
-
-@Composable
-private fun TraceTitle(traceName: String, onZoomToResults: () -> Unit, onDeleteResult: () -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 16.dp),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Box {
-            Row(modifier = Modifier.clickable {
-                expanded = !expanded
-            }, verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    modifier = Modifier.padding(end = 8.dp),
-                    text = traceName,
-                    style = MaterialTheme.typography.headlineMedium
-                )
-                Icon(
-                    imageVector = Icons.Outlined.MoreVert,
-                    contentDescription = ""
-                )
-            }
-            MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp))) {
-                DropdownMenu(
-                    modifier = Modifier.padding(start = 8.dp, end = 16.dp),
-                    expanded = expanded,
-                    onDismissRequest = {
-                        expanded = false
-                    }) {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.zoom_to_result)) },
-                        onClick = onZoomToResults,
-                        leadingIcon = { Icon(Icons.Outlined.LocationOn, contentDescription = stringResource(R.string.zoom_to_trace_result)) }
-                    )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.delete)) },
-                        onClick = onDeleteResult,
-                        leadingIcon = { Icon(Icons.Outlined.Clear, contentDescription = stringResource(R.string.delete_trace_result)) }
-                    )
-                }
             }
         }
     }

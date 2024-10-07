@@ -111,6 +111,11 @@ internal fun TraceNavHost(traceState: TraceState) {
             require(startingPoint != null)
             StartingPointDetailsScreen(
                 startingPoint,
+                onZoomToResults = {
+
+                }, onClearAllResults = {
+
+                },
                 onFractionChanged = { point, newValue ->
                     traceState.setFractionAlongEdge(
                         point,
