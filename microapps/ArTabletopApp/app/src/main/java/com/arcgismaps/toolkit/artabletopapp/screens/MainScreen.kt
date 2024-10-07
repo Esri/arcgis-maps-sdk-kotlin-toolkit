@@ -78,14 +78,6 @@ fun MainScreen() {
             }
         }
     }
-    LaunchedEffect(Unit) {
-        launch {
-            arcGISScene.loadStatus.collect {
-                Log.e("MainScreen", "Scene load status: $it")
-            }
-        }
-        arcGISScene.load()
-    }
     val tableTopSceneViewProxy = remember { TableTopSceneViewProxy() }
     var tappedLocation by remember { mutableStateOf<Point?>(null) }
     var initializationStatus: TableTopSceneViewStatus by rememberTableTopSceneViewStatus()
