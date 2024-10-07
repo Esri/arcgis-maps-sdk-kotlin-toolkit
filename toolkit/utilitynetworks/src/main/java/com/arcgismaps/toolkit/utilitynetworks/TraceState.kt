@@ -110,9 +110,7 @@ public class TraceState(
     private val utilityNetwork: UtilityNetwork
         get() = _utilityNetwork ?: throw IllegalStateException("Utility Network cannot be null")
 
-    private var _currentTraceRun: MutableState<TraceRun?> = mutableStateOf (null)
-    internal val currentTraceRun: State<TraceRun?>
-        get() = _currentTraceRun
+    private var currentTraceRun: MutableState<TraceRun?> = mutableStateOf (null)
 
     private val currentTraceGeometryResultsGraphics : MutableList<Graphic> = mutableListOf()
 
@@ -160,7 +158,7 @@ public class TraceState(
 
     private val currentTraceResultGeometriesExtent: Envelope?
     get() {
-        val utilityGeometryTraceResult = _currentTraceRun.value?.geometryTraceResult ?: return null
+        val utilityGeometryTraceResult = currentTraceRun.value?.geometryTraceResult ?: return null
 
         val geometries = listOf(
             utilityGeometryTraceResult.polygon,
@@ -285,7 +283,7 @@ public class TraceState(
                 }
             }
         }
-        _currentTraceRun.value = TraceRun(
+        currentTraceRun.value = TraceRun(
             name = _currentTraceName.value,
             configuration = traceConfiguration,
             startingPoints = _currentTraceStartingPoints.toList(),
@@ -429,7 +427,7 @@ public class TraceState(
 
     internal fun selectNextCompletedTrace() {
         val selectedTraceRunIndex = completedTraces.indexOf(_selectedTraceRun.value)
-        if (selectedTraceRunIndex + 1 <= _completedTraces.size) {
+        if (selectedTraceRunIndex + 1 < _completedTraces.size) {
             _selectedCompletedTraceIndex = selectedTraceRunIndex + 1
         }
     }
