@@ -63,9 +63,6 @@ fun MainScreen(modifier: Modifier) {
     }
     var mapRotation by remember { mutableDoubleStateOf(0.0) }
     val mapViewProxy = remember { MapViewProxy() }
-    val graphicsOverlay = remember { GraphicsOverlay() }
-    var graphic1 : Graphic? = null
-    var graphic2 : Graphic? = null
     // show composable MapView with compass
     Box(
         modifier = modifier.fillMaxSize()
@@ -73,31 +70,8 @@ fun MainScreen(modifier: Modifier) {
         MapView(
             arcGISMap,
             modifier = Modifier.fillMaxSize(),
-            graphicsOverlays = listOf(graphicsOverlay),
             mapViewProxy = mapViewProxy,
             onMapRotationChanged = { rotation -> mapRotation = rotation },
-            onSingleTapConfirmed = {
-
-                it.mapPoint?.let { point ->
-                    graphic1 = Graphic(
-                        geometry = point,
-                        symbol = SimpleMarkerSymbol(
-                            SimpleMarkerSymbolStyle.Cross,
-                            Color.green,
-                            20.0f
-                        )
-                    )
-                    graphic2 = Graphic(
-                        geometry = Point(
-                            (point.x + 500.0),
-                            point.y,
-                        ),
-                        symbol = SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Cross, Color.red, 20.0f)
-                    )
-                    graphicsOverlay.graphics.add(graphic1!!)
-                    graphicsOverlay.graphics.add(graphic2!!)
-                }
-            }
         )
         Row(
             modifier = Modifier
@@ -112,21 +86,6 @@ fun MainScreen(modifier: Modifier) {
                 coroutineScope.launch {
                     mapViewProxy.setViewpointRotation(0.0)
                 }
-            }
-        }
-        Row {
-            // Add two buttons
-            Button(onClick = { /* Handle first button click */
-                graphic1?.isSelected = true
-                graphic2?.isSelected = false
-            }) {
-                Text("select")
-            }
-            Button(onClick = { /* Handle second button click */
-                graphic1?.isSelected = false
-                graphic2?.isSelected = true
-            }) {
-                Text("unselect")
             }
         }
     }
