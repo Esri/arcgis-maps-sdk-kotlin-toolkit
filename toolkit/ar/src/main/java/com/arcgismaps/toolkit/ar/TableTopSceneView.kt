@@ -174,7 +174,7 @@ fun TableTopSceneView(
     onDrawStatusChanged: ((DrawStatus) -> Unit)? = null,
     content: (@Composable TableTopSceneViewScope.() -> Unit)? = null
 ) {
-    var initializationStatus = rememberTableTopSceneViewStatus()
+    val initializationStatus = rememberTableTopSceneViewStatus()
 
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
