@@ -136,6 +136,11 @@ fun MainScreen() {
     }
 }
 
+/**
+ * Displays the provided [text] on top of a half-transparent gray background.
+ *
+ * @since 200.6.0
+ */
 @Composable
 fun TextWithScrim(text: String) {
     Column(
