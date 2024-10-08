@@ -95,10 +95,10 @@ internal class BarcodeTextFieldState(
         if (input.isEmpty()) {
             return null
         }
-        val db = android.icu.math.BigDecimal(input)
-        Log.e("TAG", "typeConverter: $input, $fieldType", )
-        Log.e("TAG", "typeConverter: bd: $db", )
-        Log.e("TAG", "typeConverter: conv: ${input.toDoubleOrNull()}", )
+//        val db = android.icu.math.BigDecimal(input)
+//        Log.e("TAG", "typeConverter: $input, $fieldType", )
+//        Log.e("TAG", "typeConverter: bd: $db", )
+//        Log.e("TAG", "typeConverter: conv: ${input.toDoubleOrNull()}", )
         return when (fieldType) {
             FieldType.Int16 -> input.toIntOrNull()?.toShort()
             FieldType.Int32 -> input.toIntOrNull()

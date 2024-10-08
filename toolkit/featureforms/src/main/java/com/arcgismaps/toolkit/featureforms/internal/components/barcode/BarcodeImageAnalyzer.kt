@@ -18,9 +18,6 @@ package com.arcgismaps.toolkit.featureforms.internal.components.barcode
 
 import android.graphics.Matrix
 import android.graphics.RectF
-import android.util.Log
-import androidx.annotation.OptIn
-import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import androidx.compose.ui.geometry.Offset
@@ -28,7 +25,6 @@ import androidx.compose.ui.geometry.Rect
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
-import java.time.Instant
 
 internal data class BarcodeInfo(
     val boundingBox: Rect?,
@@ -49,11 +45,6 @@ internal class BarcodeImageAnalyzer(
     private val onSuccess: (List<BarcodeInfo>) -> Unit
 ) : ImageAnalysis.Analyzer {
 
-    /**
-     * The last time a frame was processed.
-     */
-    private var lastAnalyzedTimestamp = Instant.now()
-
     // set by updateTransform
     private var sensorToTargetMatrix: Matrix? = null
 
@@ -69,17 +60,14 @@ internal class BarcodeImageAnalyzer(
         return ImageAnalysis.COORDINATE_SYSTEM_VIEW_REFERENCED
     }
 
-    @OptIn(ExperimentalGetImage::class)
     override fun analyze(image: ImageProxy) {
         // using bitmap here is inefficient but ImageProxy.getImage() is experimental
-        image.image?.let {
-            barcodeScanner.process(it, image.imageInfo.rotationDegrees)
-                .addOnSuccessListener { barcodes ->
-                    processBarcodes(barcodes, image)
-                }.addOnFailureListener {
-                    image.close()
-                }
-        }
+        barcodeScanner.process(image.toBitmap(), image.imageInfo.rotationDegrees)
+            .addOnSuccessListener { barcodes ->
+                processBarcodes(barcodes, image)
+            }.addOnFailureListener {
+                image.close()
+            }
     }
 
     override fun updateTransform(matrix: Matrix?) {
@@ -90,47 +78,47 @@ internal class BarcodeImageAnalyzer(
      * Processes the list of [Barcode]s and returns the first barcode that has a non-empty raw value.
      */
     private fun processBarcodes(barcodes: List<Barcode>, image: ImageProxy) {
-        //Log.e("TAG", "processBarcodes: res -${image.width}x${image.height}")
-        val barcodesInfo = mutableListOf<BarcodeInfo>()
-        barcodes.forEach { barcode ->
-            // filter out barcodes that do not have a raw value or the raw value is empty
-            if (barcode.rawValue == null || barcode.rawValue!!.isEmpty()) {
-                return@forEach
-            }
-            // Get the bounding box of the barcode and convert it to the view coordinate system.
-            val rect = barcode.boundingBox?.let { box ->
-                getTransformationMatrix(image)?.let { matrix ->
-                    val sourcePoints = floatArrayOf(
-                        box.left.toFloat(),
-                        box.top.toFloat(),
-                        box.right.toFloat(),
-                        box.top.toFloat(),
-                        box.right.toFloat(),
-                        box.bottom.toFloat(),
-                        box.left.toFloat(),
-                        box.bottom.toFloat()
-                    )
-                    // Convert the bounding box to the view coordinate system using the
-                    // transformation matrix.
-                    matrix.mapPoints(sourcePoints)
-                    Rect(
-                        Offset(sourcePoints[0], sourcePoints[1]),
-                        Offset(sourcePoints[4], sourcePoints[5])
-                    )
+        image.use {
+            val barcodesInfo = mutableListOf<BarcodeInfo>()
+            barcodes.forEach { barcode ->
+                // filter out barcodes that do not have a raw value or the raw value is empty
+                if (barcode.rawValue == null || barcode.rawValue!!.isEmpty()) {
+                    return@forEach
+                }
+                // Get the bounding box of the barcode and convert it to the view coordinate system.
+                val rect = barcode.boundingBox?.let { box ->
+                    getTransformationMatrix(image)?.let { matrix ->
+                        val sourcePoints = floatArrayOf(
+                            box.left.toFloat(),
+                            box.top.toFloat(),
+                            box.right.toFloat(),
+                            box.top.toFloat(),
+                            box.right.toFloat(),
+                            box.bottom.toFloat(),
+                            box.left.toFloat(),
+                            box.bottom.toFloat()
+                        )
+                        // Convert the bounding box to the view coordinate system using the
+                        // transformation matrix.
+                        matrix.mapPoints(sourcePoints)
+                        Rect(
+                            Offset(sourcePoints[0], sourcePoints[1]),
+                            Offset(sourcePoints[4], sourcePoints[5])
+                        )
+                    }
+                }
+                if (rect != null) {
+                    // If the barcode has a bounding box, check if it is inside the frame.
+                    if (rect.isRectInside(frame)) {
+                        barcodesInfo.add(BarcodeInfo(rect, barcode.rawValue!!))
+                    }
+                } else {
+                    // If the barcode does not have a bounding box, return the raw value.
+                    barcodesInfo.add(BarcodeInfo(null, barcode.rawValue!!))
                 }
             }
-            if (rect != null) {
-                // If the barcode has a bounding box, check if it is inside the frame.
-                if (rect.isRectInside(frame)) {
-                    barcodesInfo.add(BarcodeInfo(rect, barcode.rawValue!!))
-                }
-            } else {
-                // If the barcode does not have a bounding box, return the raw value.
-                barcodesInfo.add(BarcodeInfo(null, barcode.rawValue!!))
-            }
+            onSuccess(barcodesInfo)
         }
-        onSuccess(barcodesInfo)
-        image.close()
     }
 
     /**
