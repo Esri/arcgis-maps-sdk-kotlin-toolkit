@@ -84,44 +84,45 @@ internal class BarcodeImageAnalyzer(
      * Processes the list of [Barcode]s and returns the first barcode that has a non-empty raw value.
      */
     private fun processBarcodes(barcodes: List<Barcode>, image: ImageProxy) {
-        // Find the first barcode that has a non-empty raw value.
-        val barcode = barcodes.firstOrNull {
-            it.rawValue != null && it.rawValue!!.isNotEmpty()
-        }
-        if (barcode != null) {
-            // Get the bounding box of the barcode and convert it to the view coordinate system.
-            val rect = barcode.boundingBox?.let { box ->
-                getTransformationMatrix(image)?.let { matrix ->
-                    val sourcePoints = floatArrayOf(
-                        box.left.toFloat(),
-                        box.top.toFloat(),
-                        box.right.toFloat(),
-                        box.top.toFloat(),
-                        box.right.toFloat(),
-                        box.bottom.toFloat(),
-                        box.left.toFloat(),
-                        box.bottom.toFloat()
-                    )
-                    // Convert the bounding box to the view coordinate system using the
-                    // transformation matrix.
-                    matrix.mapPoints(sourcePoints)
-                    Rect(
-                        Offset(sourcePoints[0], sourcePoints[1]),
-                        Offset(sourcePoints[4], sourcePoints[5])
-                    )
+        image.use { proxy ->
+            // Find the first barcode that has a non-empty raw value.
+            val barcode = barcodes.firstOrNull {
+                it.rawValue != null && it.rawValue!!.isNotEmpty()
+            }
+            if (barcode != null) {
+                // Get the bounding box of the barcode and convert it to the view coordinate system.
+                val rect = barcode.boundingBox?.let { box ->
+                    getTransformationMatrix(proxy)?.let { matrix ->
+                        val sourcePoints = floatArrayOf(
+                            box.left.toFloat(),
+                            box.top.toFloat(),
+                            box.right.toFloat(),
+                            box.top.toFloat(),
+                            box.right.toFloat(),
+                            box.bottom.toFloat(),
+                            box.left.toFloat(),
+                            box.bottom.toFloat()
+                        )
+                        // Convert the bounding box to the view coordinate system using the
+                        // transformation matrix.
+                        matrix.mapPoints(sourcePoints)
+                        Rect(
+                            Offset(sourcePoints[0], sourcePoints[1]),
+                            Offset(sourcePoints[4], sourcePoints[5])
+                        )
+                    }
+                }
+                if (rect != null) {
+                    // If the barcode has a bounding box, check if it is inside the frame.
+                    if (frame.contains(rect.center)) {
+                        onSuccess(rect, barcode.rawValue!!)
+                    }
+                } else {
+                    // If the barcode does not have a bounding box, return the raw value.
+                    onSuccess(null, barcode.rawValue!!)
                 }
             }
-            if (rect != null) {
-                // If the barcode has a bounding box, check if it is inside the frame.
-                if (frame.contains(rect.center)) {
-                    onSuccess(rect, barcode.rawValue!!)
-                }
-            } else {
-                // If the barcode does not have a bounding box, return the raw value.
-                onSuccess(null, barcode.rawValue!!)
-            }
         }
-        image.close()
     }
 
     /**
