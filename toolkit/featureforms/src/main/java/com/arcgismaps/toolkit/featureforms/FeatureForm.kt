@@ -54,7 +54,6 @@ import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
-import com.arcgismaps.mapping.featureforms.FormInput
 import com.arcgismaps.mapping.featureforms.FieldFormElement
 import com.arcgismaps.mapping.featureforms.FormElement
 import com.arcgismaps.mapping.featureforms.GroupFormElement
@@ -62,7 +61,6 @@ import com.arcgismaps.mapping.featureforms.RadioButtonsFormInput
 import com.arcgismaps.mapping.featureforms.SwitchFormInput
 import com.arcgismaps.mapping.featureforms.TextAreaFormInput
 import com.arcgismaps.mapping.featureforms.TextBoxFormInput
-import com.arcgismaps.mapping.featureforms.TextFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.rememberAttachmentElementState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
@@ -77,9 +75,7 @@ import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.rememb
 import com.arcgismaps.toolkit.featureforms.internal.components.datetime.rememberDateTimeFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.formelement.FieldElement
 import com.arcgismaps.toolkit.featureforms.internal.components.formelement.GroupElement
-import com.arcgismaps.toolkit.featureforms.internal.components.text.TextFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.text.rememberFormTextFieldState
-import com.arcgismaps.toolkit.featureforms.internal.components.text.rememberTextFormElementState
 import com.arcgismaps.toolkit.featureforms.internal.utils.FeatureFormDialog
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormColorScheme
 import com.arcgismaps.toolkit.featureforms.theme.FeatureFormDefaults
@@ -108,24 +104,7 @@ public sealed class ValidationErrorVisibility {
 /**
  * A composable Form toolkit component that enables users to edit field values of features in a
  * layer using forms that have been configured externally. Forms may be configured in the [Web Map Viewer](https://www.arcgis.com/home/webmap/viewer.html)
- * or [Fields Maps Designer](https://www.arcgis.com/apps/fieldmaps/)) and can be obtained from either
- * an `ArcGISFeature`, `ArcGISFeatureTable`, `FeatureLayer` or `SubtypeSublayer`.
- *
- * The [FeatureForm] component supports the following [FormElement] types as part of its configuration.
- * - [AttachmentsFormElement]
- * - [FieldFormElement] with the following [FormInput] types -
- *     * [ComboBoxFormInput]
- *     * [DateTimePickerFormInput]
- *     * [RadioButtonsFormInput]
- *     * [SwitchFormInput]
- *     * [TextAreaFormInput]
- *     * [TextBoxFormInput]
- * - [GroupFormElement]
- * - [TextFormElement]
- *
- * Note : Any [AttachmentsFormElement] present in the [FeatureForm.elements] collection are not
- * currently supported. A default attachments editing support is provided using the
- * [FeatureForm.defaultAttachmentsElement] property.
+ * or [Fields Maps Designer](https://www.arcgis.com/apps/fieldmaps/)).
  *
  * The colors and typography for the Form can use customized using [FeatureFormColorScheme] and
  * [FeatureFormTypography]. This customization is built on top of [MaterialTheme].
@@ -291,15 +270,6 @@ private fun FeatureFormBody(
                             )
                         }
 
-                        is TextFormElement -> {
-                            TextFormElement(
-                                state = entry.getState(),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 15.dp, vertical = 10.dp)
-                            )
-                        }
-
                         else -> {
                             // other form elements are not created
                         }
@@ -380,11 +350,6 @@ internal fun rememberStates(
                     fieldStates = fieldStateCollection
                 )
                 states.add(element, groupState)
-            }
-
-            is TextFormElement -> {
-                val state = rememberTextFormElementState(element, form)
-                states.add(element, state)
             }
 
             else -> {}

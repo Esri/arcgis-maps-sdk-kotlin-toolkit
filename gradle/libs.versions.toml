@@ -14,7 +14,6 @@ androidxWindow = "1.2.0"
 binaryCompatibilityValidator = "0.14.0"
 compileSdk = "34"
 compose-navigation = "2.7.7"
-commonMark = "0.22.0"
 dokka = "1.9.20"
 hilt = "2.49"
 hiltExt = "1.2.0"
@@ -63,8 +62,6 @@ coil-bom = { group = "io.coil-kt", name = "coil-bom", version.ref = "coilBOM" }
 coil = { group = "io.coil-kt", name = "coil" }
 coil-base = { group = "io.coil-kt", name = "coil-base" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose" }
-commonmark = { group = "org.commonmark", name = "commonmark", version.ref="commonMark" }
-commonmark-strikethrough = { group = "org.commonmark", name = "commonmark-ext-gfm-strikethrough", version.ref="commonMark" }
 hilt-android-core = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 hilt-ext-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "hiltExt" }
@@ -98,11 +95,6 @@ gmazzo-test-aggregation = { id = "io.github.gmazzo.test.aggregation.results", ve
 [bundles]
 core = [
     "androidx-core-ktx"
-]
-
-commonmark = [
-    "commonmark",
-    "commonmark-strikethrough"
 ]
 
 composeCore = [

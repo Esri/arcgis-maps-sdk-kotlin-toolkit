@@ -33,15 +33,16 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ArcGISEnvironment.apiKey = ApiKey.create(BuildConfig.API_KEY)
+        val viewModel: SceneViewModel by viewModels()
         setContent {
             MicroAppTheme {
-                SceneViewCalloutApp()
+                SceneViewCalloutApp(viewModel)
             }
         }
     }
 }
 
 @Composable
-fun SceneViewCalloutApp() {
-    MainScreen()
+fun SceneViewCalloutApp(viewModel: SceneViewModel) {
+    MainScreen(viewModel)
 }

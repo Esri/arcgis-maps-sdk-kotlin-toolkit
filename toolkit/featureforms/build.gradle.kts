@@ -95,8 +95,7 @@ apiValidation {
         "com.arcgismaps.toolkit.featureforms.internal.components.datetime.picker.time.ComposableSingletons\$TimePickerKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.attachment.ComposableSingletons\$AttachmentFormElementKt",
         "com.arcgismaps.toolkit.featureforms.internal.components.attachment.ComposableSingletons\$AttachmentTileKt",
-        "com.arcgismaps.toolkit.featureforms.internal.components.formelement.ComposableSingletons\$GroupElementKt",
-        "com.arcgismaps.toolkit.featureforms.internal.components.text.ComposableSingletons\$TextFormElementKt",
+        "com.arcgismaps.toolkit.featureforms.internal.components.formelement.ComposableSingletons\$GroupElementKt"
     )
     
     ignoredClasses.addAll(composableSingletons)
@@ -105,7 +104,6 @@ apiValidation {
 
 dependencies {
     api(arcgis.mapsSdk)
-    implementation(libs.bundles.commonmark)
     implementation(platform(libs.coil.bom))
     implementation(libs.coil.compose)
     implementation(platform(libs.androidx.compose.bom))

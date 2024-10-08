@@ -55,7 +55,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -92,37 +91,36 @@ internal fun ComboBoxField(
     state: CodedValueFieldState,
     modifier: Modifier = Modifier
 ) {
-    val currentState by rememberUpdatedState(newValue = state)
     val dialogRequester = LocalDialogRequester.current
-    val value by currentState.value
-    val isEditable by currentState.isEditable.collectAsState()
-    val isRequired by currentState.isRequired.collectAsState()
+    val value by state.value
+    val isEditable by state.isEditable.collectAsState()
+    val isRequired by state.isRequired.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
     val placeholder = if (isRequired) {
         stringResource(R.string.enter_value)
-    } else if (currentState.showNoValueOption == FormInputNoValueOption.Show) {
-        currentState.noValueLabel.ifEmpty { stringResource(R.string.no_value) }
+    } else if (state.showNoValueOption == FormInputNoValueOption.Show) {
+        state.noValueLabel.ifEmpty { stringResource(R.string.no_value) }
     } else ""
     val isError = value.error !is ValidationErrorState.NoError
     // if any errors are present, show the error as the supporting text
     val supportingText = if (!isError) {
-        currentState.description
+        state.description
     } else {
         value.error.getString()
     }
 
     BaseTextField(
-        text = currentState.getNameForCodedValue(value.data),
+        text = state.getNameForCodedValue(value.data),
         onValueChange = {
             // usually only triggered on a "clear" action
             // this value will be an empty string and the type conversion must be handled
             // by the state object
-            currentState.onValueChanged(it)
+            state.onValueChanged(it)
         },
         modifier = modifier,
         readOnly = true,
         isEditable = isEditable,
-        label = currentState.label,
+        label = state.label,
         placeholder = placeholder,
         supportingText = supportingText,
         isError = isError,
@@ -130,21 +128,21 @@ internal fun ComboBoxField(
         singleLine = true,
         trailingIcon = Icons.AutoMirrored.Outlined.List,
         interactionSource = interactionSource,
-        onFocusChange = currentState::onFocusChanged,
+        onFocusChange = state::onFocusChanged,
         trailingContent = if (isRequired) {
             // if required then do not show a clear icon
             {
                 Icon(imageVector = Icons.AutoMirrored.Outlined.List, contentDescription = "field icon")
             }
         } else null,
-        hasValueExpression = currentState.hasValueExpression
+        hasValueExpression = state.hasValueExpression
     )
 
     LaunchedEffect(interactionSource) {
         interactionSource.interactions.collect {
             if (it is PressInteraction.Release) {
                 if (isEditable) {
-                    dialogRequester.requestDialog(DialogType.ComboBoxDialog(currentState.id))
+                    dialogRequester.requestDialog(DialogType.ComboBoxDialog(state.id))
                 }
             }
         }

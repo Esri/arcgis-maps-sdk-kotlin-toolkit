@@ -52,13 +52,12 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arcgismaps.toolkit.geoviewcompose.SceneView
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(viewModel: SceneViewModel = viewModel()) {
+fun MainScreen(viewModel: SceneViewModel) {
     val tapLocation = viewModel.tapLocation.collectAsState().value
     val offset = viewModel.offset.collectAsState().value
 
