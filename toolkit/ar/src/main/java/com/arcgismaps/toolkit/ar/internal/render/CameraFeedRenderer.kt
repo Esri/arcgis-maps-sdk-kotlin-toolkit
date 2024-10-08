@@ -44,7 +44,7 @@ internal class CameraFeedRenderer(
     context: Context,
     private val session: Session,
     private val assets: AssetManager,
-    private val onFrame: (Frame) -> Unit,
+    private val onFrame: (Frame, Int) -> Unit,
     private val onTapWithHitResult: (hit: HitResult?) -> Unit,
     private val onFirstPlaneDetected: () -> Unit
 ) :
@@ -213,7 +213,10 @@ internal class CameraFeedRenderer(
             projectionMatrix
         )
 
-        onFrame(frame)
+        onFrame(
+            frame,
+            displayRotationHelper.getCameraSensorToDisplayRotation(session.cameraConfig.cameraId)
+        )
     }
 
     fun handleTap(frame: Frame, onTap: ((HitResult?) -> Unit)) {

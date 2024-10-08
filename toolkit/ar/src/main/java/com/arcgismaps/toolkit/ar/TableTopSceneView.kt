@@ -233,7 +233,7 @@ fun TableTopSceneView(
             val identityMatrix = remember { TransformationMatrix.createIdentityMatrix() }
             ArCameraFeed(
                 arSessionWrapper = arSessionWrapper,
-                onFrame = { frame ->
+                onFrame = { frame, displayRotation ->
                     arCoreAnchor?.let { anchor ->
                         val anchorPosition = identityMatrix - anchor.pose.translation.let {
                             TransformationMatrix.createWithQuaternionAndTranslation(
@@ -257,8 +257,13 @@ fun TableTopSceneView(
                             imageIntrinsics.principalPoint[1],
                             imageIntrinsics.imageDimensions[0].toFloat(),
                             imageIntrinsics.imageDimensions[1].toFloat(),
-                            // TODO:
-                            deviceOrientation = DeviceOrientation.Portrait
+                            deviceOrientation = when (displayRotation) {
+                                0 -> DeviceOrientation.Portrait
+                                90 -> DeviceOrientation.LandscapeRight
+                                180 -> DeviceOrientation.ReversePortrait
+                                270 -> DeviceOrientation.LandscapeLeft
+                                else -> DeviceOrientation.Portrait
+                            }
                         )
                         tableTopSceneViewProxy.sceneViewProxy.renderFrame()
                     }

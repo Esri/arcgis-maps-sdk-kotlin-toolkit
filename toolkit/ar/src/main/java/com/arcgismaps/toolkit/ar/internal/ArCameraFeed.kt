@@ -50,7 +50,7 @@ import com.google.ar.core.Session
 @Composable
 internal fun ArCameraFeed(
     arSessionWrapper: ArSessionWrapper,
-    onFrame: (Frame) -> Unit,
+    onFrame: (Frame, Int) -> Unit,
     onTapWithHitResult: (hit: HitResult?) -> Unit,
     onFirstPlaneDetected: () -> Unit
 ) {
