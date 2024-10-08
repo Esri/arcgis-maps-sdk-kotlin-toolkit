@@ -18,7 +18,6 @@
 
 package com.arcgismaps.toolkit.artabletopapp.screens
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,7 +27,6 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,7 +50,6 @@ import com.arcgismaps.toolkit.ar.TableTopSceneViewProxy
 import com.arcgismaps.toolkit.ar.TableTopSceneViewStatus
 import com.arcgismaps.toolkit.ar.rememberTableTopSceneViewStatus
 import com.arcgismaps.toolkit.artabletopapp.R
-import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 @Composable
@@ -84,9 +81,9 @@ fun MainScreen() {
     Box(modifier = Modifier.fillMaxSize()) {
         TableTopSceneView(
             arcGISScene = arcGISScene,
-            arcGISSceneAnchor = Point(-74.0, 40.72, SpatialReference.wgs84()),
-            translationFactor = 10_000.0,
-            clippingDistance = 5000.0,
+            arcGISSceneAnchor = Point(-74.0, 40.72, 0.0, SpatialReference.wgs84()),
+            translationFactor = 2000.0,
+            clippingDistance = 750.0,
             modifier = Modifier.fillMaxSize(),
             tableTopSceneViewProxy = tableTopSceneViewProxy,
             onInitializationStatusChanged = {

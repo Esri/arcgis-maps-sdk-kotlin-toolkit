@@ -302,9 +302,7 @@ fun TableTopSceneView(
                 sunLighting = sunLighting,
                 ambientLightColor = ambientLightColor,
                 onNavigationChanged = onNavigationChanged,
-                onSpatialReferenceChanged = {
-                    onSpatialReferenceChanged?.invoke(it)
-                },
+                onSpatialReferenceChanged = onSpatialReferenceChanged,
                 onLayerViewStateChanged = onLayerViewStateChanged,
                 onInteractingChanged = onInteractingChanged,
                 onCurrentViewpointCameraChanged = onCurrentViewpointCameraChanged,
