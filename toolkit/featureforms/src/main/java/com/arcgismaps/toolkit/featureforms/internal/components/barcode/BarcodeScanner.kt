@@ -19,11 +19,16 @@ package com.arcgismaps.toolkit.featureforms.internal.components.barcode
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.util.Log
 import androidx.camera.core.ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST
+import androidx.camera.core.resolutionselector.ResolutionSelector
+import androidx.camera.core.resolutionselector.ResolutionStrategy
+import androidx.camera.core.resolutionselector.ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER
 import androidx.camera.view.CameraController
 import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -65,13 +70,16 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -100,7 +108,15 @@ internal fun BarcodeScanner(
     val scope = rememberCoroutineScope()
     val cameraController = remember {
         LifecycleCameraController(context).apply {
-            this.imageAnalysisBackpressureStrategy = STRATEGY_KEEP_ONLY_LATEST
+            imageAnalysisBackpressureStrategy = STRATEGY_KEEP_ONLY_LATEST
+            imageAnalysisResolutionSelector = ResolutionSelector.Builder()
+                .setResolutionStrategy(
+                    ResolutionStrategy(
+                        android.util.Size(1920, 1080),
+                        FALLBACK_RULE_CLOSEST_HIGHER
+                    )
+                )
+                .build()
             bindToLifecycle(lifecycleOwner)
         }
     }
@@ -110,8 +126,8 @@ internal fun BarcodeScanner(
     val permissionsGranted = hasCameraPermissions(context)
     // A frame that represents the area where the barcode should be detected
     val scannerFrame = getFrameRect(width = 300.dp, height = 300.dp)
-    // A rect that represents the barcode detected
-    var barcodeRect by remember { mutableStateOf<Rect?>(null) }
+    // State representing the detected barcodes
+    var barcodeInfoList by remember { mutableStateOf<List<BarcodeInfo>>(emptyList()) }
     if (!permissionsGranted) {
         PermissionsDeniedDialog(onDismiss = onDismiss)
     } else {
@@ -134,7 +150,17 @@ internal fun BarcodeScanner(
                         cameraController.unbind()
                     }
                 )
-                BarcodeFrame(scannerFrame, barcodeRect)
+                BarcodeFrame(scannerFrame, barcodeInfoList) {
+                                        // Perform haptic feedback when a barcode is detected
+                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                    // Unbind the camera controller to stop processing frames
+                    cameraController.unbind()
+                    scope.launch {
+                        // Delay to allow the user to see the barcode detected
+                        delay(300)
+                        onScan(barcodeInfoList[0].rawValue)
+                    }
+                }
                 BarcodeToolbar(cameraController = cameraController, onDismiss = onDismiss)
             }
         }
@@ -147,17 +173,20 @@ internal fun BarcodeScanner(
             executor,
             BarcodeImageAnalyzer(
                 scannerFrame,
-            ) { box, barcode ->
-                barcodeRect = box
-                // Perform haptic feedback when a barcode is detected
-                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-                // Unbind the camera controller to stop processing frames
-                cameraController.unbind()
-                scope.launch {
-                    // Delay to allow the user to see the barcode detected
-                    delay(300)
-                    onScan(barcode)
-                }
+            ) { barcodes ->
+                //Log.e("TAG", "BarcodeScanner: found ${barcodes.count()}", )
+                barcodeInfoList = barcodes
+//                if (barcodeInfoList.count() == 1) {
+//                    // Perform haptic feedback when a barcode is detected
+//                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+//                    // Unbind the camera controller to stop processing frames
+//                    cameraController.unbind()
+//                    scope.launch {
+//                        // Delay to allow the user to see the barcode detected
+//                        delay(300)
+//                        onScan(barcodeInfoList[0].rawValue)
+//                    }
+//                }
             }
         )
     }
@@ -189,8 +218,30 @@ private fun PermissionsDeniedDialog(onDismiss: () -> Unit) {
 }
 
 @Composable
-private fun BarcodeFrame(frame: Rect, barcode: Rect?) {
-    Canvas(modifier = Modifier.fillMaxSize()) {
+private fun BarcodeFrame(
+    frame: Rect, barcodes:
+    List<BarcodeInfo>,
+    onTap: (BarcodeInfo) -> Unit
+) {
+    val textMeasurer = rememberTextMeasurer()
+    val multipleBarcodes = barcodes.size > 1
+    val textColor = MaterialTheme.typography.titleMedium.copy(
+        color = Color.White
+    )
+    Canvas(modifier = Modifier
+        .fillMaxSize()
+        .pointerInput(Unit) {
+            detectTapGestures { offset ->
+                barcodes.forEach { barcode ->
+                    barcode.boundingBox?.let {
+                        if (it.contains(offset)) {
+                            onTap(barcode)
+                        }
+                    }
+                }
+            }
+        }
+    ) {
         drawRect(
             color = Color.Black.copy(alpha = 0.5f),
             topLeft = Offset(0f, 0f),
@@ -210,13 +261,21 @@ private fun BarcodeFrame(frame: Rect, barcode: Rect?) {
             cornerRadius = CornerRadius(50f),
             style = Stroke(width = 12f)
         )
-        barcode?.let {
-            drawRoundRect(
-                color = Color.Blue.copy(alpha = 0.3f),
-                topLeft = it.topLeft,
-                size = Size(it.width, it.height),
-                cornerRadius = CornerRadius(15f)
-            )
+        barcodes.forEach { barcode ->
+            barcode.boundingBox?.let {
+                drawRoundRect(
+                    color = Color.Blue.copy(alpha = 0.3f),
+                    topLeft = it.topLeft,
+                    size = Size(it.width, it.height),
+                    cornerRadius = CornerRadius(15f)
+                )
+                drawText(
+                    textMeasurer = textMeasurer,
+                    text = "Tap to scan",
+                    topLeft = it.topLeft,
+                    style = textColor
+                )
+            }
         }
     }
 }
@@ -319,5 +378,5 @@ private fun hasCameraPermissions(context: Context): Boolean = ContextCompat.chec
 @Preview(showBackground = true, device = Devices.PIXEL_7_PRO)
 private fun BarcodeFramePreview() {
     val frame = getFrameRect(width = 300.dp, height = 300.dp)
-    BarcodeFrame(frame, null)
+    BarcodeFrame(frame, emptyList())
 }

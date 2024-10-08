@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.featureforms.internal.components.barcode
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
@@ -30,8 +31,10 @@ import com.arcgismaps.toolkit.featureforms.internal.components.base.FieldPropert
 import com.arcgismaps.toolkit.featureforms.internal.components.base.ValidationErrorState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.formattedValueAsStateFlow
 import com.arcgismaps.toolkit.featureforms.internal.components.base.mapValidationErrors
+import com.google.android.datatransport.cct.internal.LogEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
+import java.math.BigDecimal
 
 internal class BarcodeFieldProperties(
     label: String,
@@ -92,6 +95,10 @@ internal class BarcodeTextFieldState(
         if (input.isEmpty()) {
             return null
         }
+        val db = android.icu.math.BigDecimal(input)
+        Log.e("TAG", "typeConverter: $input, $fieldType", )
+        Log.e("TAG", "typeConverter: bd: $db", )
+        Log.e("TAG", "typeConverter: conv: ${input.toDoubleOrNull()}", )
         return when (fieldType) {
             FieldType.Int16 -> input.toIntOrNull()?.toShort()
             FieldType.Int32 -> input.toIntOrNull()
