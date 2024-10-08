@@ -25,7 +25,6 @@ import androidx.compose.ui.geometry.Rect
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
-import java.time.Instant
 
 /**
  * An [ImageAnalysis.Analyzer] that processes images from the camera preview to detect barcodes.
@@ -40,11 +39,6 @@ internal class BarcodeImageAnalyzer(
     private val frame: Rect,
     private val onSuccess: (Rect?, String) -> Unit
 ) : ImageAnalysis.Analyzer {
-
-    /**
-     * The last time a frame was processed.
-     */
-    private var lastAnalyzedTimestamp = Instant.now()
 
     // set by updateTransform
     private var sensorToTargetMatrix: Matrix? = null
@@ -62,12 +56,6 @@ internal class BarcodeImageAnalyzer(
     }
 
     override fun analyze(image: ImageProxy) {
-        // Only process the image if it has been more than 1 second since the last frame was processed.
-        // This is to throttle the number of frames processed.
-        if (Instant.now().toEpochMilli() - lastAnalyzedTimestamp.toEpochMilli() < 1000) {
-            image.close()
-            return
-        }
         // using bitmap here is inefficient but ImageProxy.getImage() is experimental
         barcodeScanner.process(image.toBitmap(), image.imageInfo.rotationDegrees).addOnSuccessListener { barcodes ->
             processBarcodes(barcodes, image)
