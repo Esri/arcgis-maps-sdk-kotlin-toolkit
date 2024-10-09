@@ -89,10 +89,7 @@ public fun Trace(
                     if (traceState.initializationStatus.value is InitializationStatus.FailedToInitialize) {
                         val exception =
                             (traceState.initializationStatus.value as InitializationStatus.FailedToInitialize).error
-                        val errorMessage = when (exception) {
-                            is TraceToolException -> getString(localContext, exception.traceError.resId)
-                            else -> exception.message ?: "Failed to initialize"
-                        }
+                        val errorMessage = exception.getErrorMessage(localContext)
                         Row {
                             Icon(Icons.Default.Info, "", tint = MaterialTheme.colorScheme.error)
                             Spacer(modifier = Modifier.size(8.dp))
