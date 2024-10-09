@@ -34,22 +34,20 @@ internal enum class TraceError(val resId: Int) {
 }
 
 /**
- * Exception class to represent the different errors that can be thrown by the Trace tool.
+ * Exception class to represent the different [traceError] that can be thrown by the Trace tool.
  *
- * @param errorId The error id of the error thrown, used for localization.
  * @since 200.6.0
  */
 internal class TraceToolException(val traceError: TraceError): Exception()
 
 /**
- * Gets the localized error message for the given error, if possible.
+ * Gets the localized error message for the given error with the provided [context], if possible.
  *
- * @param context The context to use for localization.
  * @since 200.6.0
  */
 internal fun Throwable.getErrorMessage(context: Context): String {
     return when (this) {
-        is TraceToolException -> getString(context, R.string.an_error_has_occurred)
+        is TraceToolException -> getString(context, this.traceError.resId)
         else -> this.message ?: getString(context, R.string.an_error_has_occurred)
     }
 }

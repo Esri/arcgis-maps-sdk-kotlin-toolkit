@@ -71,7 +71,8 @@ public class TraceState(
 ) {
 
     private  var _currentError: Throwable? = null
-    internal val currentError: Throwable? = _currentError
+    internal val currentError: Throwable?
+        get() = _currentError
 
     private val _initializationStatus: MutableState<InitializationStatus> =
         mutableStateOf(InitializationStatus.NotInitialized)
