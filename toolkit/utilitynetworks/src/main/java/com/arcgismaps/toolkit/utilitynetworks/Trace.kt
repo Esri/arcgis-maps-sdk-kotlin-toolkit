@@ -39,7 +39,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat.getString
 import com.arcgismaps.toolkit.utilitynetworks.ui.TraceNavHost
 
 internal const val traceSurfaceContentDescription: String = "trace component surface"
