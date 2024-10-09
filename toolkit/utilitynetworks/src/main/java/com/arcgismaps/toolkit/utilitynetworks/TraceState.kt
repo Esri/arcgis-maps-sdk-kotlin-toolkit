@@ -387,8 +387,7 @@ public class TraceState(
         _currentTraceStartingPoints.remove(startingPoint)
         graphicsOverlay.graphics.remove(startingPoint.graphic)
     }
-
-
+    
     /**
      * This private method is called from a suspend function and so swallows any failures except
      * CancellationExceptions.
