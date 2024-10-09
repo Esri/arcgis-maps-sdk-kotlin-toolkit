@@ -35,9 +35,11 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.getString
 import com.arcgismaps.toolkit.utilitynetworks.ui.TraceNavHost
 
 internal const val traceSurfaceContentDescription: String = "trace component surface"
@@ -56,6 +58,7 @@ public fun Trace(
     modifier: Modifier = Modifier
 ) {
     val initializationStatus by traceState.initializationStatus
+    val localContext = LocalContext.current
 
     LaunchedEffect(traceState) {
         traceState.initialize()
@@ -86,10 +89,14 @@ public fun Trace(
                     if (traceState.initializationStatus.value is InitializationStatus.FailedToInitialize) {
                         val error =
                             (traceState.initializationStatus.value as InitializationStatus.FailedToInitialize).error
+                        val errorMessage = when (error) {
+                            is TraceToolException -> getString(localContext, error.errorId)
+                            else -> error.message ?: "Failed to initialize"
+                        }
                         Row {
                             Icon(Icons.Default.Info, "", tint = MaterialTheme.colorScheme.error)
                             Spacer(modifier = Modifier.size(8.dp))
-                            Text(error.message ?: "Failed to initialize", color = MaterialTheme.colorScheme.error)
+                            Text(errorMessage, color = MaterialTheme.colorScheme.error)
                         }
                     }
                     TraceNavHost(traceState)

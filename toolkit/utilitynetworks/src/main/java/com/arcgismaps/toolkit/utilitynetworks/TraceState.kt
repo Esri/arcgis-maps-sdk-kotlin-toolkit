@@ -111,6 +111,7 @@ public class TraceState(
     internal val selectedTraceConfiguration: State<UtilityNamedTraceConfiguration?> = _selectedTraceConfiguration
 
     private var _selectedStartingPoint: MutableState<StartingPoint?> = mutableStateOf(null)
+
     /**
      * The selected starting point to display in the starting point details screen.
      *
@@ -158,25 +159,25 @@ public class TraceState(
     public var currentTraceZoomToResults: State<Boolean> = _currentTraceZoomToResults
 
     private val currentTraceResultGeometriesExtent: Envelope?
-    get() {
-        val utilityGeometryTraceResult = _currentTraceRun.value?.geometryTraceResult ?: return null
+        get() {
+            val utilityGeometryTraceResult = _currentTraceRun.value?.geometryTraceResult ?: return null
 
-        val geometries = listOf(
-            utilityGeometryTraceResult.polygon,
-            utilityGeometryTraceResult.polyline,
-            utilityGeometryTraceResult.multipoint
-        ).mapNotNull { geometry ->
-            if (geometry != null && !geometry.isEmpty) {
-                geometry
-            } else {
-                null
+            val geometries = listOf(
+                utilityGeometryTraceResult.polygon,
+                utilityGeometryTraceResult.polyline,
+                utilityGeometryTraceResult.multipoint
+            ).mapNotNull { geometry ->
+                if (geometry != null && !geometry.isEmpty) {
+                    geometry
+                } else {
+                    null
+                }
             }
-        }
-        val combinedExtents = GeometryEngine.combineExtentsOrNull(geometries) ?: return null
-        val expandedEnvelope = GeometryEngine.bufferOrNull(combinedExtents, 200.0) ?: return null
+            val combinedExtents = GeometryEngine.combineExtentsOrNull(geometries) ?: return null
+            val expandedEnvelope = GeometryEngine.bufferOrNull(combinedExtents, 200.0) ?: return null
 
-        return expandedEnvelope.extent
-    }
+            return expandedEnvelope.extent
+        }
 
     /**
      * Initializes the state object by loading the map, the Utility Networks contained in the map
@@ -185,39 +186,38 @@ public class TraceState(
      * @return the [Result] indicating if the initialization was successful or not
      * @since 200.6.0
      */
-    internal suspend fun initialize(): Result<Unit> {
+    internal suspend fun initialize(): Result<Unit> = runCatchingCancellable {
         if (_initializationStatus.value is InitializationStatus.Initialized) {
             return Result.success(Unit)
         }
         _initializationStatus.value = InitializationStatus.Initializing
         arcGISMap.load().getOrElse {
             _initializationStatus.value = InitializationStatus.FailedToInitialize(it)
-            return Result.failure(it)
+            throw it
         }
         val utilityNetworks = arcGISMap.utilityNetworks
         if (utilityNetworks.isEmpty()) {
-            val error = IllegalStateException("No Utility Network found.")
+            val error = TraceToolException(TraceError.NO_UTILITY_NETWORK_FOUND.messageId)
             _initializationStatus.value = InitializationStatus.FailedToInitialize(error)
-            return Result.failure(error)
+            throw error
         }
 
         utilityNetworks.forEach { utilityNetwork ->
             utilityNetwork.load().getOrElse {
                 _initializationStatus.value = InitializationStatus.FailedToInitialize(it)
-                return Result.failure(it)
+                throw it
             }
         }
         _utilityNetwork = utilityNetworks.first()
         val traceConfigResult = utilityNetwork.queryNamedTraceConfigurations()
         if (traceConfigResult.isFailure || traceConfigResult.getOrNull().isNullOrEmpty()) {
-            val error = IllegalStateException("No trace configurations found.")
+            val error = TraceToolException(TraceError.NO_TRACE_CONFIGURATIONS_FOUND.messageId)
             _initializationStatus.value = InitializationStatus.FailedToInitialize(error)
-            return Result.failure(error)
+            throw error
         }
         _traceConfigurations.value = traceConfigResult.getOrThrow()
 
         _initializationStatus.value = InitializationStatus.Initialized
-        return Result.success(Unit)
     }
 
     internal fun setSelectedTraceConfiguration(config: UtilityNamedTraceConfiguration) {
@@ -286,27 +286,24 @@ public class TraceState(
      * @return true if the trace results are available, false otherwise.
      * @since 200.6.0
      */
-    internal suspend fun trace(): Boolean {
+    internal suspend fun trace(): Result<Unit> = runCatchingCancellable {
         // Run a trace
-        val traceConfiguration = selectedTraceConfiguration.value ?: return false
+        val traceConfiguration = selectedTraceConfiguration.value
+            ?: throw TraceToolException(TraceError.NO_TRACE_CONFIGURATIONS_FOUND.messageId)
 
         if (currentTraceStartingPoints.isEmpty() && traceConfiguration.minimumStartingLocations == UtilityMinimumStartingLocations.One) {
-            currentError = IllegalArgumentException("Not enough starting points")
-            return false
+            throw TraceToolException(TraceError.NOT_ENOUGH_STARTING_POINTS_ONE.messageId)
         }
 
-        if (currentTraceStartingPoints.size > 2 && traceConfiguration.minimumStartingLocations == UtilityMinimumStartingLocations.Many) {
-            currentError = IllegalArgumentException("Too many starting points")
-            return false
+        if (currentTraceStartingPoints.size < 2 && traceConfiguration.minimumStartingLocations == UtilityMinimumStartingLocations.Many) {
+            throw TraceToolException(TraceError.NOT_ENOUGH_STARTING_POINTS_TWO.messageId)
         }
 
         val utilityTraceParameters =
             UtilityTraceParameters(traceConfiguration, currentTraceStartingPoints.map { it.utilityElement })
 
         val traceResults = utilityNetwork.trace(utilityTraceParameters).getOrElse {
-            currentError = it
-            emptyList<UtilityElementTraceResult>()
-            return false
+            throw it
         }
 
         var currentTraceFunctionResults: List<UtilityTraceFunctionOutput> = emptyList()
@@ -364,8 +361,6 @@ public class TraceState(
                 )
             }
         }
-
-        return true
     }
 
     private fun createGraphicForSimpleLineSymbol(geometry: Geometry, style: SimpleLineSymbolStyle, color: Color) =
@@ -393,36 +388,29 @@ public class TraceState(
         graphicsOverlay.graphics.remove(startingPoint.graphic)
     }
 
+
     /**
      * This private method is called from a suspend function and so swallows any failures except
      * CancellationExceptions.
      */
-    private fun processAndAddStartingPoint(feature: ArcGISFeature, mapPoint: Point): Boolean {
-        // TODO: add fraction-along to the element.
-        // https://devtopia.esri.com/runtime/kotlin/issues/4491
+    private fun processAndAddStartingPoint(feature: ArcGISFeature, mapPoint: Point): Result<Unit> = runCatchingCancellable {
         val utilityElement = utilityNetwork.createElementOrNull(feature)
-        if (utilityElement == null) {
-            currentError = IllegalArgumentException("Could not create utility element from ArcGISFeature.")
-            return false
-        }
+            ?: throw TraceToolException(TraceError.COULD_NOT_CREATE_UTILITY_ELEMENT.messageId)
 
         // Check if the starting point already exists
         if (_currentTraceStartingPoints.any { it.utilityElement.globalId == utilityElement.globalId }) {
-            currentError = IllegalArgumentException("One or more starting points already exists.")
-            return false
+            throw TraceToolException(TraceError.STARTING_POINT_ALREADY_EXISTS.messageId)
         }
 
         val symbol = (feature.featureTable?.layer as FeatureLayer).renderer?.getSymbol(feature)
-        if (symbol == null) {
-            currentError = IllegalArgumentException("Could not create drawable from feature symbol")
-            return false
-        }
+            ?: throw TraceToolException(TraceError.COULD_NOT_CREATE_DRAWABLE.messageId)
 
         val featureGeometry = feature.geometry
         if (utilityElement.networkSource.sourceType == UtilityNetworkSourceType.Edge && featureGeometry is Polyline) {
             utilityElement.fractionAlongEdge = fractionAlongEdge(featureGeometry, mapPoint)
         } else if (utilityElement.networkSource.sourceType == UtilityNetworkSourceType.Junction &&
-            (utilityElement.assetType.terminalConfiguration?.terminals?.size ?: 0) > 1) {
+            (utilityElement.assetType.terminalConfiguration?.terminals?.size ?: 0) > 1
+        ) {
             utilityElement.terminal = utilityElement.assetType.terminalConfiguration?.terminals?.first()
         }
 
@@ -440,7 +428,6 @@ public class TraceState(
                 graphic = graphic
             )
         )
-        return true
     }
 
     private suspend fun identifyFeatures(mapPoint: Point, screenCoordinate: ScreenCoordinate) {
@@ -452,7 +439,8 @@ public class TraceState(
             if (identifyLayerResultList.isNotEmpty()) {
                 identifyLayerResultList.forEach { identifyLayerResult ->
                     identifyLayerResult.geoElements.filterIsInstance<ArcGISFeature>().forEach { feature ->
-                        if (!processAndAddStartingPoint(feature, mapPoint)) {
+                        processAndAddStartingPoint(feature, mapPoint).getOrElse {
+                            currentError = it
                             _addStartingPointMode.value = AddStartingPointMode.Stopped
                             showScreen(TraceNavRoute.TraceError)
                             return
@@ -604,7 +592,12 @@ internal enum class TraceNavRoute {
 }
 
 @Immutable
-internal data class StartingPoint(val feature: ArcGISFeature, val utilityElement: UtilityElement, val symbol: Symbol, val graphic: Graphic) {
+internal data class StartingPoint(
+    val feature: ArcGISFeature,
+    val utilityElement: UtilityElement,
+    val symbol: Symbol,
+    val graphic: Graphic
+) {
     val name: String = utilityElement.assetType.name
 
     suspend fun getDrawable(screenScale: Float): BitmapDrawable =
