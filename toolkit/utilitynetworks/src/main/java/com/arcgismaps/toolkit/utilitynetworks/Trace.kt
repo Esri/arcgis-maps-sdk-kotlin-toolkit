@@ -87,11 +87,11 @@ public fun Trace(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     if (traceState.initializationStatus.value is InitializationStatus.FailedToInitialize) {
-                        val error =
+                        val exception =
                             (traceState.initializationStatus.value as InitializationStatus.FailedToInitialize).error
-                        val errorMessage = when (error) {
-                            is TraceToolException -> getString(localContext, error.errorId)
-                            else -> error.message ?: "Failed to initialize"
+                        val errorMessage = when (exception) {
+                            is TraceToolException -> getString(localContext, exception.traceError.resId)
+                            else -> exception.message ?: "Failed to initialize"
                         }
                         Row {
                             Icon(Icons.Default.Info, "", tint = MaterialTheme.colorScheme.error)

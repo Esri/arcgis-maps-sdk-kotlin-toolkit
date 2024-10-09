@@ -19,8 +19,6 @@ package com.arcgismaps.toolkit.utilitynetworks.ui
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.platform.LocalContext
-import androidx.core.content.ContextCompat.getString
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
@@ -28,7 +26,6 @@ import androidx.navigation.compose.rememberNavController
 import com.arcgismaps.toolkit.utilitynetworks.AddStartingPointMode
 import com.arcgismaps.toolkit.utilitynetworks.TraceNavRoute
 import com.arcgismaps.toolkit.utilitynetworks.TraceState
-import com.arcgismaps.toolkit.utilitynetworks.TraceToolException
 import kotlinx.coroutines.launch
 
 /**
@@ -46,7 +43,6 @@ internal fun TraceNavHost(traceState: TraceState) {
         composable(TraceNavRoute.TraceOptions.name) {
             val configs by traceState.traceConfigurations
             val coroutineScope = rememberCoroutineScope()
-            val localContext = LocalContext.current
             TraceOptionsScreen(
                 configurations = configs,
                 startingPoints = traceState.currentTraceStartingPoints,
@@ -59,7 +55,7 @@ internal fun TraceNavHost(traceState: TraceState) {
                         traceState.trace().onSuccess {
                             traceState.showScreen(TraceNavRoute.TraceResults)
                         }.onFailure {
-                            traceState.currentError = it
+                            traceState.setCurrentError(it)
                             traceState.showScreen(TraceNavRoute.TraceError)
                         }
                     }
@@ -99,7 +95,7 @@ internal fun TraceNavHost(traceState: TraceState) {
         }
         composable(TraceNavRoute.TraceResults.name) {
             val traceRun = traceState.currentTraceRun.value
-            require (traceRun != null)
+            require(traceRun != null)
             TraceResultScreen(
                 traceRun = traceRun,
                 onBackToNewTrace = { traceState.showScreen(TraceNavRoute.TraceOptions) },
@@ -113,13 +109,8 @@ internal fun TraceNavHost(traceState: TraceState) {
             )
         }
         dialog(TraceNavRoute.TraceError.name) {
-            val localContext = LocalContext.current
-            val errorMessage = when (val error = traceState.currentError) {
-                is TraceToolException -> getString(localContext, error.errorId)
-                else -> error?.message ?: "An error has occurred"
-            }
             TraceErrorDialog(
-                message = errorMessage,
+                error = traceState.currentError ?: return@dialog,
                 onConfirmation = {
                     traceState.showScreen(TraceNavRoute.TraceOptions)
                 }

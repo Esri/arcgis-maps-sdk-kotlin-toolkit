@@ -70,7 +70,9 @@ public class TraceState(
     private val mapViewProxy: MapViewProxy
 ) {
 
-    internal var currentError: Throwable? = null
+    private  var _currentError: Throwable? = null
+    internal val currentError: Throwable? = _currentError
+
     private val _initializationStatus: MutableState<InitializationStatus> =
         mutableStateOf(InitializationStatus.NotInitialized)
 
@@ -198,7 +200,7 @@ public class TraceState(
         }
         val utilityNetworks = arcGISMap.utilityNetworks
         if (utilityNetworks.isEmpty()) {
-            val error = TraceToolException(TraceError.NO_UTILITY_NETWORK_FOUND.messageId)
+            val error = TraceToolException(TraceError.NO_UTILITY_NETWORK_FOUND)
             _initializationStatus.value = InitializationStatus.FailedToInitialize(error)
             throw error
         }
@@ -212,7 +214,7 @@ public class TraceState(
         _utilityNetwork = utilityNetworks.first()
         val traceConfigResult = utilityNetwork.queryNamedTraceConfigurations()
         if (traceConfigResult.isFailure || traceConfigResult.getOrNull().isNullOrEmpty()) {
-            val error = TraceToolException(TraceError.NO_TRACE_CONFIGURATIONS_FOUND.messageId)
+            val error = TraceToolException(TraceError.NO_TRACE_CONFIGURATIONS_FOUND)
             _initializationStatus.value = InitializationStatus.FailedToInitialize(error)
             throw error
         }
@@ -289,14 +291,14 @@ public class TraceState(
     internal suspend fun trace(): Result<Unit> = runCatchingCancellable {
         // Run a trace
         val traceConfiguration = selectedTraceConfiguration.value
-            ?: throw TraceToolException(TraceError.NO_TRACE_CONFIGURATIONS_FOUND.messageId)
+            ?: throw TraceToolException(TraceError.NO_TRACE_CONFIGURATIONS_FOUND)
 
         if (currentTraceStartingPoints.isEmpty() && traceConfiguration.minimumStartingLocations == UtilityMinimumStartingLocations.One) {
-            throw TraceToolException(TraceError.NOT_ENOUGH_STARTING_POINTS_ONE.messageId)
+            throw TraceToolException(TraceError.NOT_ENOUGH_STARTING_POINTS_ONE)
         }
 
         if (currentTraceStartingPoints.size < 2 && traceConfiguration.minimumStartingLocations == UtilityMinimumStartingLocations.Many) {
-            throw TraceToolException(TraceError.NOT_ENOUGH_STARTING_POINTS_TWO.messageId)
+            throw TraceToolException(TraceError.NOT_ENOUGH_STARTING_POINTS_TWO)
         }
 
         val utilityTraceParameters =
@@ -406,11 +408,11 @@ public class TraceState(
 
         // Check if the starting point already exists
         if (_currentTraceStartingPoints.any { it.utilityElement.globalId == utilityElement.globalId }) {
-            throw TraceToolException(TraceError.STARTING_POINT_ALREADY_EXISTS.messageId)
+            throw TraceToolException(TraceError.STARTING_POINT_ALREADY_EXISTS)
         }
 
         val symbol = (feature.featureTable?.layer as FeatureLayer).renderer?.getSymbol(feature)
-            ?: throw TraceToolException(TraceError.COULD_NOT_CREATE_DRAWABLE.messageId)
+            ?: throw TraceToolException(TraceError.COULD_NOT_CREATE_DRAWABLE)
 
         val featureGeometry = feature.geometry
         if (utilityElement.networkSource.sourceType == UtilityNetworkSourceType.Edge && featureGeometry is Polyline) {
@@ -447,7 +449,7 @@ public class TraceState(
                 identifyLayerResultList.forEach { identifyLayerResult ->
                     identifyLayerResult.geoElements.filterIsInstance<ArcGISFeature>().forEach { feature ->
                         processAndAddStartingPoint(feature, mapPoint).getOrElse {
-                            currentError = it
+                            setCurrentError(it)
                             _addStartingPointMode.value = AddStartingPointMode.Stopped
                             showScreen(TraceNavRoute.TraceError)
                             return
@@ -517,6 +519,15 @@ public class TraceState(
      */
     internal fun setZoomToResults(zoom: Boolean) {
         _currentTraceZoomToResults.value = zoom
+    }
+
+    /**
+     * Set the [error] that occurred during the trace.
+     *
+     * @since 200.6.0
+     */
+    internal fun setCurrentError(error: Throwable) {
+        _currentError = error
     }
 }
 

@@ -23,16 +23,22 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.core.content.ContextCompat.getString
 import com.arcgismaps.toolkit.utilitynetworks.R
+import com.arcgismaps.toolkit.utilitynetworks.TraceToolException
+import com.arcgismaps.toolkit.utilitynetworks.getErrorMessage
 
 @Composable
-internal fun TraceErrorDialog(message: String, onConfirmation: () -> Unit) {
+internal fun TraceErrorDialog(error: Throwable, onConfirmation: () -> Unit) {
+    val localContext = LocalContext.current
+    val errorMessage = error.getErrorMessage(localContext)
     AlertDialog(
         icon = { Icon(Icons.Default.Warning, contentDescription = stringResource(R.string.an_error_has_occurred)) },
         onDismissRequest = onConfirmation,
         title = { Text(stringResource(R.string.an_error_has_occurred)) },
-        text = { Text(message) },
+        text = { Text(errorMessage) },
         confirmButton = {
             TextButton(
                 onClick = onConfirmation,
