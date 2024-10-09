@@ -404,7 +404,7 @@ public class TraceState(
      */
     private fun processAndAddStartingPoint(feature: ArcGISFeature, mapPoint: Point): Result<Unit> = runCatchingCancellable {
         val utilityElement = utilityNetwork.createElementOrNull(feature)
-            ?: throw TraceToolException(TraceError.COULD_NOT_CREATE_UTILITY_ELEMENT.messageId)
+            ?: return@runCatchingCancellable
 
         // Check if the starting point already exists
         if (_currentTraceStartingPoints.any { it.utilityElement.globalId == utilityElement.globalId }) {
@@ -445,6 +445,7 @@ public class TraceState(
             tolerance = 10.dp
         )
         result.onSuccess { identifyLayerResultList ->
+            val sizeBefore = currentTraceStartingPoints.size
             if (identifyLayerResultList.isNotEmpty()) {
                 identifyLayerResultList.forEach { identifyLayerResult ->
                     identifyLayerResult.geoElements.filterIsInstance<ArcGISFeature>().forEach { feature ->
@@ -456,8 +457,11 @@ public class TraceState(
                         }
                     }
                 }
-                _addStartingPointMode.value = AddStartingPointMode.Stopped
-                showScreen(TraceNavRoute.TraceOptions)
+                if (currentTraceStartingPoints.size > sizeBefore) {
+                    // If the size of the starting points has changed, then the starting point was added
+                    _addStartingPointMode.value = AddStartingPointMode.Stopped
+                    showScreen(TraceNavRoute.TraceOptions)
+                }
             }
         }
     }
