@@ -19,7 +19,6 @@ package com.arcgismaps.toolkit.featureforms.internal.components.barcode
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
-import android.util.Log
 import androidx.camera.core.ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST
 import androidx.camera.core.resolutionselector.ResolutionSelector
 import androidx.camera.core.resolutionselector.ResolutionStrategy
@@ -90,9 +89,13 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.LifecycleOwner
 import com.arcgismaps.toolkit.featureforms.R
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+
+private const val SCANNER_FRAME_WIDTH = 300
+private const val SCANNER_FRAME_HEIGHT = 300
+private const val AUTO_SCAN_DELAY_MS = 1000L
 
 /**
  * A composable that displays a barcode scanner. When a barcode is scanned, the [onScan] callback is
@@ -107,27 +110,17 @@ internal fun BarcodeScanner(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val hapticFeedback = LocalHapticFeedback.current
-    val scope = rememberCoroutineScope()
-    val cameraController = remember {
-        LifecycleCameraController(context).apply {
-            imageAnalysisBackpressureStrategy = STRATEGY_KEEP_ONLY_LATEST
-            imageAnalysisResolutionSelector = ResolutionSelector.Builder()
-                .setResolutionStrategy(
-                    ResolutionStrategy(
-                        android.util.Size(1920, 1080),
-                        FALLBACK_RULE_CLOSEST_HIGHER
-                    )
-                )
-                .build()
-            bindToLifecycle(lifecycleOwner)
-        }
-    }
+    val cameraController = rememberCameraController(lifecycleOwner)
     val executor = remember { ContextCompat.getMainExecutor(context) }
     val permissionsGranted = hasCameraPermissions(context)
     // A frame that represents the area where the barcode should be detected
-    val scannerFrame = getFrameRect(width = 300.dp, height = 300.dp)
+    val scannerFrame =
+        getFrameRect(width = SCANNER_FRAME_WIDTH.dp, height = SCANNER_FRAME_HEIGHT.dp)
     // State representing the detected barcodes
     var barcodeInfoList by remember { mutableStateOf<List<BarcodeInfo>>(emptyList()) }
+    // State to automatically scan the barcode if only one barcode is detected
+    var autoScanBarcode by remember { mutableStateOf<BarcodeInfo?>(null) }
+
     if (!permissionsGranted) {
         PermissionsDeniedDialog(onDismiss = onDismiss)
     } else {
@@ -151,43 +144,70 @@ internal fun BarcodeScanner(
                     }
                 )
                 BarcodeFrame(scannerFrame, barcodeInfoList) { code ->
-                    // Perform haptic feedback when a barcode is detected
+                    // Perform haptic feedback when a barcode is tapped
                     hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                     // Unbind the camera controller to stop processing frames
                     cameraController.unbind()
-                    scope.launch {
-                        // Delay to allow the user to see the barcode detected
-                        delay(300)
-                        onScan(code.rawValue)
-                    }
+                    onScan(code.rawValue)
                 }
                 BarcodeToolbar(cameraController = cameraController, onDismiss = onDismiss)
             }
         }
     }
-    LaunchedEffect(barcodeInfoList) {
-        if (barcodeInfoList.size == 1) {
-            val barcode = barcodeInfoList[0]
-            delay(2000)
-            //if (barcodeInfoList.size == 1 && singleBarcodeDetected == barcodeInfoList[0]) {
-//                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-//                cameraController.unbind()
-//                onScan(barcode.rawValue)
-            //}
-        }
-    }
     LaunchedEffect(Unit) {
-        if (!permissionsGranted) {
-            return@LaunchedEffect
-        }
+        if (!permissionsGranted) return@LaunchedEffect
         cameraController.setImageAnalysisAnalyzer(
             executor,
-            BarcodeImageAnalyzer(
-                scannerFrame,
-            ) { barcodes ->
+            BarcodeImageAnalyzer(scannerFrame) { barcodes ->
                 barcodeInfoList = barcodes
+                // compare the current auto-scan barcode with the detected barcode to avoid setting
+                // the same barcode multiple times
+                autoScanBarcode = if (barcodeInfoList.count() == 1 &&
+                    autoScanBarcode?.rawValue != barcodeInfoList.first().rawValue
+                ) {
+                    barcodeInfoList.first()
+                } else {
+                    null
+                }
             }
         )
+    }
+    // Automatically scan the barcode if only one barcode is detected within the given delay. If
+    // the auto-scan barcode changes, then this effect will be recomposed and the delay will be
+    // reset.
+    LaunchedEffect(autoScanBarcode) {
+        if (autoScanBarcode == null) {
+            return@LaunchedEffect
+        }
+        delay(AUTO_SCAN_DELAY_MS)
+        if (barcodeInfoList.count() == 1 &&
+            autoScanBarcode?.rawValue == barcodeInfoList.first().rawValue
+        ) {
+            // Perform haptic feedback when a barcode is detected
+            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+            // Unbind the camera controller to stop processing frames
+            cameraController.unbind()
+            onScan(autoScanBarcode!!.rawValue)
+        }
+    }
+}
+
+@Composable
+private fun rememberCameraController(lifecycleOwner: LifecycleOwner): LifecycleCameraController {
+    val context = LocalContext.current
+    return remember {
+        LifecycleCameraController(context).apply {
+            imageAnalysisBackpressureStrategy = STRATEGY_KEEP_ONLY_LATEST
+            imageAnalysisResolutionSelector = ResolutionSelector.Builder()
+                .setResolutionStrategy(
+                    ResolutionStrategy(
+                        android.util.Size(1920, 1080),
+                        FALLBACK_RULE_CLOSEST_HIGHER
+                    )
+                )
+                .build()
+            bindToLifecycle(lifecycleOwner)
+        }
     }
 }
 
@@ -388,6 +408,6 @@ private fun hasCameraPermissions(context: Context): Boolean = ContextCompat.chec
 @Composable
 @Preview(showBackground = true, device = Devices.PIXEL_7_PRO)
 private fun BarcodeFramePreview() {
-    val frame = getFrameRect(width = 300.dp, height = 300.dp)
+    val frame = getFrameRect(width = SCANNER_FRAME_WIDTH.dp, height = SCANNER_FRAME_HEIGHT.dp)
     BarcodeFrame(frame, emptyList()) {}
 }
