@@ -39,12 +39,9 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -56,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.toolkit.utilitynetworks.TraceRun
+import com.arcgismaps.toolkit.utilitynetworks.internal.util.TabRow
 import com.arcgismaps.utilitynetworks.UtilityElement
 import com.arcgismaps.utilitynetworks.UtilityTraceFunctionOutput
 import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
@@ -84,7 +82,7 @@ internal fun TraceResultScreen(
 
             val selectedTraceRunIndex = traceResults.indexOf(selectedTraceRun)
 
-            TabRow(onBackToNewTrace)
+            TabRow(onBackToNewTrace, 1)
 
             Row(modifier = Modifier.align(Alignment.CenterHorizontally),
                 verticalAlignment = Alignment.CenterVertically
@@ -135,30 +133,6 @@ internal fun TraceResultScreen(
 private fun getTraceCounterString(currentTraceResult: Int, totalTraceResults: Int): String {
     return "Trace $currentTraceResult of $totalTraceResults"
 }
-
-@Composable
-private fun TabRow(onBackToNewTrace: () -> Unit) {
-    val tabItems = listOf("New Trace", "Results")
-    var selectedTabIndex by remember { mutableIntStateOf(1) }
-
-    TabRow(selectedTabIndex = selectedTabIndex) {
-        tabItems.forEachIndexed { index, title ->
-            var selected by remember { mutableStateOf(index == 1) }
-            Tab(
-                selected = selected,
-                onClick = {
-                    selectedTabIndex = index
-                    selected = true
-                    if (index == 0) {
-                        onBackToNewTrace()
-                    }
-                },
-                text = { Text(title) }
-            )
-        }
-    }
-}
-
 
 @Composable
 private fun TraceTitle(traceName: String, onZoomToResults: () -> Unit, onDeleteResult: () -> Unit) {

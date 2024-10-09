@@ -47,17 +47,14 @@ import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
@@ -80,6 +77,7 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.toolkit.utilitynetworks.StartingPoint
+import com.arcgismaps.toolkit.utilitynetworks.internal.util.TabRow
 import com.arcgismaps.utilitynetworks.UtilityNamedTraceConfiguration
 import com.arcgismaps.utilitynetworks.UtilityNetwork
 
@@ -100,6 +98,7 @@ internal fun TraceOptionsScreen(
     zoomToResult: Boolean,
     showResultsTab: Boolean,
     onStartingPointRemoved: (StartingPoint) -> Unit,
+    onStartingPointSelected: (StartingPoint) -> Unit,
     onBackToResults: () -> Unit,
     onConfigSelected: (UtilityNamedTraceConfiguration) -> Unit,
     onPerformTraceButtonClicked: () -> Unit,
@@ -117,7 +116,7 @@ internal fun TraceOptionsScreen(
             horizontalAlignment = Alignment.CenterHorizontally) {
 
             if (showResultsTab) {
-                TabRow(onBackToResults)
+                TabRow(onBackToResults, 0)
                 Spacer(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -147,7 +146,8 @@ internal fun TraceOptionsScreen(
                     StartingPoints(
                         startingPoints,
                         onAddStartingPointButtonClicked,
-                        onStartingPointRemoved
+                        onStartingPointRemoved,
+                        onStartingPointSelected,
                     )
                 }
                 item {
@@ -172,29 +172,6 @@ internal fun TraceOptionsScreen(
             ) {
                 Text(stringResource(id = R.string.trace))
             }
-        }
-    }
-}
-
-@Composable
-private fun TabRow(onBackToResults: () -> Unit) {
-    val tabItems = listOf("New Trace", "Results")
-    var selectedTabIndex by remember { mutableIntStateOf(0) }
-
-    TabRow(selectedTabIndex = selectedTabIndex) {
-        tabItems.forEachIndexed { index, title ->
-            var selected by remember { mutableStateOf(index == 0) }
-            Tab(
-                selected = selected,
-                onClick = {
-                    selectedTabIndex = index
-                    selected = true
-                    if (index == 1) {
-                        onBackToResults()
-                    }
-                },
-                text = { Text(title) }
-            )
         }
     }
 }
@@ -332,7 +309,8 @@ private fun AddStartingPointButton(showAddStartingPointScreen: () -> Unit) {
 private fun StartingPoints(
     startingPoints: List<StartingPoint>,
     showAddStartingPointScreen: () -> Unit,
-    onStartingPointRemoved: (StartingPoint) -> Unit
+    onStartingPointRemoved: (StartingPoint) -> Unit,
+    onStartingPointSelected: (StartingPoint) -> Unit
 ) {
     Column {
         AddStartingPointButton {
@@ -347,9 +325,11 @@ private fun StartingPoints(
         ) {
             Column {
                 startingPoints.forEach {
-                    StartingPointRow(it) {
-                        onStartingPointRemoved(it)
-                    }
+                    StartingPointRow(
+                        data = it,
+                        onDelete = { onStartingPointRemoved(it) },
+                        onStartingPointSelected = onStartingPointSelected
+                    )
                 }
             }
         }
