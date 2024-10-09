@@ -131,8 +131,7 @@ public class TraceState(
     internal val completedTraces: List<TraceRun> = _completedTraces
 
     private var _selectedTraceRun: MutableState<TraceRun?> = mutableStateOf (null)
-    internal val selectedTraceRun: State<TraceRun?>
-        get() = _selectedTraceRun
+    internal val selectedTraceRun: State<TraceRun?> = _selectedTraceRun
 
     private var _selectedCompletedTraceIndex: Int? = null
         set(value) {
