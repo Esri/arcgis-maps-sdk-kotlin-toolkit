@@ -53,6 +53,7 @@ internal fun TraceNavHost(traceState: TraceState) {
                 defaultTraceName = traceState.currentTraceName.value,
                 selectedColor = traceState.currentTraceGraphicsColorAsComposeColor,
                 zoomToResult = traceState.currentTraceZoomToResults.value,
+                showResultsTab = traceState.completedTraces.isNotEmpty(),
                 onPerformTraceButtonClicked = {
                     coroutineScope.launch {
                         traceState.trace().onSuccess {
@@ -73,6 +74,7 @@ internal fun TraceNavHost(traceState: TraceState) {
                     traceState.setSelectedStartingPoint(it)
                     traceState.showScreen(TraceNavRoute.StartingPointDetails)
                 },
+                onBackToResults = { traceState.showScreen(TraceNavRoute.TraceResults) },
                 onConfigSelected = { newConfig ->
                     traceState.setSelectedTraceConfiguration(newConfig)
                 },
@@ -100,6 +102,7 @@ internal fun TraceNavHost(traceState: TraceState) {
             require (traceRun != null)
             TraceResultScreen(
                 traceRun = traceRun,
+                onBackToNewTrace = { traceState.showScreen(TraceNavRoute.TraceOptions) },
                 onDeleteResult = {
 
                 }, onZoomToResults = {

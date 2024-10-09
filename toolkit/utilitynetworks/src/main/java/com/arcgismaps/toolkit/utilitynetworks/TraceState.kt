@@ -135,7 +135,8 @@ public class TraceState(
     private val _currentScreen: MutableState<TraceNavRoute> = mutableStateOf(TraceNavRoute.TraceOptions)
     internal var currentScreen: State<TraceNavRoute> = _currentScreen
 
-    private val completedTraces: MutableList<TraceRun> = mutableListOf()
+    private val _completedTraces: SnapshotStateList<TraceRun> = mutableStateListOf()
+    internal val completedTraces: List<TraceRun> = _completedTraces
 
     private var _currentTraceName: MutableState<String> = mutableStateOf("")
 
@@ -155,7 +156,7 @@ public class TraceState(
             currentTraceGraphicsColor.alpha
         )
 
-    private var _currentTraceZoomToResults: MutableState<Boolean> = mutableStateOf(false)
+    private var _currentTraceZoomToResults: MutableState<Boolean> = mutableStateOf(true)
     public var currentTraceZoomToResults: State<Boolean> = _currentTraceZoomToResults
 
     private val currentTraceResultGeometriesExtent: Envelope?
@@ -222,8 +223,7 @@ public class TraceState(
 
     internal fun setSelectedTraceConfiguration(config: UtilityNamedTraceConfiguration) {
         _selectedTraceConfiguration.value = config
-        _currentTraceName.value =
-            "${config.name} ${(completedTraces.count { it.configuration.name == config.name } + 1)}"
+        _currentTraceName.value = "${config.name} ${(_completedTraces.count { it.configuration.name == config.name } + 1)}"
     }
 
     internal fun setSelectedStartingPoint(startingPoint: StartingPoint?) {
@@ -350,7 +350,7 @@ public class TraceState(
             featureResults = currentTraceElementResults,
             functionResults = currentTraceFunctionResults,
             geometryTraceResult = currentTraceGeometryResults
-        ).also { completedTraces.add(it) }
+        ).also { _completedTraces.add(it) }
 
         if (_currentTraceZoomToResults.value) {
             currentTraceResultGeometriesExtent?.let {
@@ -361,6 +361,15 @@ public class TraceState(
                 )
             }
         }
+        resetCurrentTrace()
+        return true
+    }
+
+    private fun resetCurrentTrace() {
+        _selectedTraceConfiguration.value = null
+        _currentTraceName.value = ""
+        currentTraceGraphicsColor = Color.green
+        _currentTraceZoomToResults.value = true
     }
 
     private fun createGraphicForSimpleLineSymbol(geometry: Geometry, style: SimpleLineSymbolStyle, color: Color) =
@@ -387,7 +396,7 @@ public class TraceState(
         _currentTraceStartingPoints.remove(startingPoint)
         graphicsOverlay.graphics.remove(startingPoint.graphic)
     }
-    
+
     /**
      * This private method is called from a suspend function and so swallows any failures except
      * CancellationExceptions.
@@ -510,7 +519,6 @@ public class TraceState(
     internal fun setZoomToResults(zoom: Boolean) {
         _currentTraceZoomToResults.value = zoom
     }
-
 }
 
 /**
