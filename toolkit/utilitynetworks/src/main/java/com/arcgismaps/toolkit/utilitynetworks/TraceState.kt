@@ -362,7 +362,6 @@ public class TraceState(
             }
         }
         resetCurrentTrace()
-        return true
     }
 
     private fun resetCurrentTrace() {
