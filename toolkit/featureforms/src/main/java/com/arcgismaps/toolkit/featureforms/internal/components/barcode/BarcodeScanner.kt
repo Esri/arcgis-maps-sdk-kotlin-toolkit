@@ -159,15 +159,17 @@ internal fun BarcodeScanner(
             executor,
             BarcodeImageAnalyzer(scannerFrame) { barcodes ->
                 barcodeInfoList = barcodes
-                // compare the current auto-scan barcode with the detected barcode to avoid setting
-                // the same barcode multiple times
-                autoScanBarcode = if (barcodeInfoList.count() == 1 &&
-                    autoScanBarcode?.rawValue != barcodeInfoList.first().rawValue
-                ) {
-                    barcodeInfoList.first()
+                // set the auto-scan barcode if only one barcode is detected
+                if (barcodeInfoList.count() == 1) {
+                    // compare the current auto-scan barcode with the detected barcode to avoid setting
+                    // the same barcode multiple times
+                    if (autoScanBarcode?.rawValue != barcodeInfoList.first().rawValue) {
+                        // once the auto-scan barcode is set, the delay routine will start
+                        autoScanBarcode = barcodeInfoList.first()
+                    }
                 } else {
                     // disable auto-scan if multiple barcodes are detected
-                    null
+                    autoScanBarcode = null
                 }
             }
         )
