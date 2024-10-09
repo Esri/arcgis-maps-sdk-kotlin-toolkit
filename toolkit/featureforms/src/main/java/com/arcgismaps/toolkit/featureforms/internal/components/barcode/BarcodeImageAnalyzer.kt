@@ -83,7 +83,7 @@ internal class BarcodeImageAnalyzer(
      * in the frame.
      */
     private fun processBarcodes(barcodes: List<Barcode>, image: ImageProxy) {
-        image.use {
+        image.use { proxy ->
             val barcodesInfo = mutableListOf<BarcodeInfo>()
             barcodes.forEach { barcode ->
                 // filter out barcodes that do not have a raw value or the raw value is empty
@@ -92,7 +92,7 @@ internal class BarcodeImageAnalyzer(
                 }
                 // Get the bounding box of the barcode and convert it to the view coordinate system.
                 val rect = barcode.boundingBox?.let { box ->
-                    getTransformationMatrix(image)?.let { matrix ->
+                    getTransformationMatrix(proxy)?.let { matrix ->
                         val sourcePoints = floatArrayOf(
                             box.left.toFloat(),
                             box.top.toFloat(),
