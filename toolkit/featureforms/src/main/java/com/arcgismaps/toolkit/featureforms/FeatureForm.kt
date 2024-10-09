@@ -51,6 +51,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.mapping.featureforms.AttachmentsFormElement
+import com.arcgismaps.mapping.featureforms.BarcodeScannerFormInput
 import com.arcgismaps.mapping.featureforms.ComboBoxFormInput
 import com.arcgismaps.mapping.featureforms.DateTimePickerFormInput
 import com.arcgismaps.mapping.featureforms.FeatureForm
@@ -65,6 +66,7 @@ import com.arcgismaps.mapping.featureforms.TextBoxFormInput
 import com.arcgismaps.mapping.featureforms.TextFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.AttachmentFormElement
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.rememberAttachmentElementState
+import com.arcgismaps.toolkit.featureforms.internal.components.barcode.rememberBarcodeTextFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.BaseGroupState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormStateCollection
@@ -434,6 +436,10 @@ internal fun rememberFieldState(
                 form = form,
                 scope = scope
             )
+        }
+
+        is BarcodeScannerFormInput -> {
+            rememberBarcodeTextFieldState(field = element, form = form, scope = scope)
         }
 
         is DateTimePickerFormInput -> {

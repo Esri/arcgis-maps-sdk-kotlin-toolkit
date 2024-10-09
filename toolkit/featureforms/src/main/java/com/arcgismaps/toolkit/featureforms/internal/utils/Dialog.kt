@@ -45,6 +45,8 @@ import com.arcgismaps.toolkit.featureforms.internal.components.attachment.Galler
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.ImageCapture
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.RenameAttachmentDialog
 import com.arcgismaps.toolkit.featureforms.internal.components.attachment.getNewAttachmentNameForContentType
+import com.arcgismaps.toolkit.featureforms.internal.components.barcode.BarcodeScanner
+import com.arcgismaps.toolkit.featureforms.internal.components.barcode.BarcodeTextFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.base.FormStateCollection
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.CodedValueFieldState
 import com.arcgismaps.toolkit.featureforms.internal.components.codedvalue.ComboBoxDialog
@@ -156,6 +158,8 @@ internal sealed class DialogType {
         val formAttachment: FormAttachment,
         val name: String,
     ) : DialogType()
+
+    data class BarcodeScanner(val stateId: Int) : DialogType()
 }
 
 /**
@@ -323,6 +327,25 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
             ) {
                 dialogRequester.dismissDialog()
             }
+        }
+
+        is DialogType.BarcodeScanner -> {
+            val stateId = (dialogType as DialogType.BarcodeScanner).stateId
+            val state = states[stateId] as? BarcodeTextFieldState
+            if (state == null) {
+                dialogRequester.dismissDialog()
+                return
+            }
+            BarcodeScanner(
+                onScan = {
+                    state.onValueChanged(it)
+                    state.onFocusChanged(true)
+                    dialogRequester.dismissDialog()
+                },
+                onDismiss = {
+                    dialogRequester.dismissDialog()
+                }
+            )
         }
 
         else -> {

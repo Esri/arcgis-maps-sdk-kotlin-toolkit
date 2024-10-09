@@ -117,5 +117,7 @@
     <string name="download_empty_file">Empty files cannot be downloaded</string>
     <string name="attachment_deleted">%1s was deleted successfully</string>
     <string name="attachment_size_limit_exceeded">Attachments larger than %1$s cannot be downloaded</string>
+    <string name="barcode_tooltip">Point your camera at a barcode</string>
+    <string name="barcode_permission_denied">Camera permissions are required to scan barcodes. Please enable camera permissions in your device settings.</string>
     <string name="unsupported_type">Unsupported Type</string>
 </resources>
