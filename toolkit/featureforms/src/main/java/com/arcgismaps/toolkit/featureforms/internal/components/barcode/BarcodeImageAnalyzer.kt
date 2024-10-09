@@ -26,6 +26,12 @@ import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 
+/**
+ * Information about a barcode detected in the image.
+ *
+ * @param boundingBox The bounding box of the barcode in the view coordinate system.
+ * @param rawValue The raw value of the barcode.
+ */
 internal data class BarcodeInfo(
     val boundingBox: Rect?,
     val rawValue: String
@@ -36,9 +42,7 @@ internal data class BarcodeInfo(
  *
  * @param frame The frame in which the barcode should be detected. This should be in the view
  * coordinate system.
- * @param onSuccess The callback that is called when a barcode is detected. The first parameter is
- * the bounding box of the barcode in the view coordinate system, and the second parameter is the
- * raw value of the barcode.
+ * @param onSuccess The callback invoked with the list of [BarcodeInfo] detected in the frame.
  */
 internal class BarcodeImageAnalyzer(
     private val frame: Rect,
@@ -75,7 +79,8 @@ internal class BarcodeImageAnalyzer(
     }
 
     /**
-     * Processes the list of [Barcode]s and returns the first barcode that has a non-empty raw value.
+     * Processes the list of [Barcode]s and calls [onSuccess] with the list of [BarcodeInfo] detected
+     * in the frame.
      */
     private fun processBarcodes(barcodes: List<Barcode>, image: ImageProxy) {
         image.use {

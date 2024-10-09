@@ -57,7 +57,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -144,7 +143,7 @@ internal fun BarcodeScanner(
                     }
                 )
                 BarcodeFrame(scannerFrame, barcodeInfoList) { code ->
-                    // Perform haptic feedback when a barcode is tapped
+                    // Handle tap on barcode
                     hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                     // Unbind the camera controller to stop processing frames
                     cameraController.unbind()
@@ -167,6 +166,7 @@ internal fun BarcodeScanner(
                 ) {
                     barcodeInfoList.first()
                 } else {
+                    // disable auto-scan if multiple barcodes are detected
                     null
                 }
             }
@@ -181,9 +181,10 @@ internal fun BarcodeScanner(
         }
         delay(AUTO_SCAN_DELAY_MS)
         if (barcodeInfoList.count() == 1 &&
-            autoScanBarcode?.rawValue == barcodeInfoList.first().rawValue
+            autoScanBarcode != null &&
+            autoScanBarcode!!.rawValue == barcodeInfoList.first().rawValue
         ) {
-            // Perform haptic feedback when a barcode is detected
+            // Perform haptic feedback when a barcode is auto scanned
             hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
             // Unbind the camera controller to stop processing frames
             cameraController.unbind()
