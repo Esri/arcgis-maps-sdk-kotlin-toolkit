@@ -25,4 +25,5 @@
     <string name="tap_scene_overlay">Tap on a plane to place the scene</string>
     <string name="initializing_overlay">Setting up AR...</string>
     <string name="failed_to_initialize_overlay">Failed to initialize: %1$s</string>
+    <string name="failed_to_load_scene">Failed to load scene: %1$s</string>
 </resources>

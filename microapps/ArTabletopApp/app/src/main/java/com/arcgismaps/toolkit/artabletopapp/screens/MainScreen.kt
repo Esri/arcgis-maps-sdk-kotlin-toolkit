@@ -38,7 +38,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.geometry.Point
-import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISScene
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.ElevationSource
@@ -81,7 +80,7 @@ fun MainScreen() {
     Box(modifier = Modifier.fillMaxSize()) {
         TableTopSceneView(
             arcGISScene = arcGISScene,
-            arcGISSceneAnchor = Point(-74.0, 40.72, 0.0, SpatialReference.wgs84()),
+            arcGISSceneAnchor = Point(-74.0, 40.72, 0.0, arcGISScene.spatialReference),
             translationFactor = 2000.0,
             clippingDistance = 750.0,
             modifier = Modifier.fillMaxSize(),
@@ -108,18 +107,33 @@ fun MainScreen() {
                 is TableTopSceneViewStatus.DetectingPlanes -> TextWithScrim(text = stringResource(R.string.detect_planes_overlay))
                 is TableTopSceneViewStatus.Initialized -> {
                     val sceneLoadStatus = arcGISScene.loadStatus.collectAsStateWithLifecycle().value
-                    if (sceneLoadStatus is LoadStatus.NotLoaded) {
-                        // Tell the user to tap the screen if the scene has not started loading
-                        TextWithScrim(text = stringResource(R.string.tap_scene_overlay))
-                    } else if (sceneLoadStatus is LoadStatus.Loading) {
-                        // The scene may take a while to load, so show a progress indicator
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            CircularProgressIndicator()
+                    when (sceneLoadStatus) {
+                        is LoadStatus.NotLoaded -> {
+                            // Tell the user to tap the screen if the scene has not started loading
+                            TextWithScrim(text = stringResource(R.string.tap_scene_overlay))
                         }
+
+                        is LoadStatus.Loading -> {
+                            // The scene may take a while to load, so show a progress indicator
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        }
+
+                        is LoadStatus.FailedToLoad -> {
+                            TextWithScrim(
+                                text = stringResource(
+                                    R.string.failed_to_load_scene,
+                                    sceneLoadStatus.error
+                                )
+                            )
+                        }
+
+                        LoadStatus.Loaded -> {} // Do nothing
                     }
                 }
 
