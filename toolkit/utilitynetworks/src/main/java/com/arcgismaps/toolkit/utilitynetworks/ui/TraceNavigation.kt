@@ -107,19 +107,29 @@ internal fun TraceNavHost(traceState: TraceState) {
             )
         }
         composable(TraceNavRoute.StartingPointDetails.name) {
+            val coroutineScope = rememberCoroutineScope()
             val startingPoint = traceState.selectedStartingPoint.value
             require(startingPoint != null)
             StartingPointDetailsScreen(
                 startingPoint,
-                onZoomToResults = {
-
-                }, onClearAllResults = {
-
+                onZoomTo = {
+                    coroutineScope.launch {
+                        traceState.zoomToStartingPoint(startingPoint)
+                    }
+                }, onDelete = {
+                    traceState.removeStartingPoint(startingPoint)
+                    traceState.showScreen(TraceNavRoute.TraceOptions)
                 },
                 onFractionChanged = { point, newValue ->
                     traceState.setFractionAlongEdge(
                         point,
                         newValue.toDouble()
+                    )
+                },
+                onTerminalSelected = { utilityTerminal ->
+                    traceState.setTerminal(
+                        startingPoint,
+                        utilityTerminal
                     )
                 },
                 onBackPressed = { traceState.showScreen(TraceNavRoute.TraceOptions) })

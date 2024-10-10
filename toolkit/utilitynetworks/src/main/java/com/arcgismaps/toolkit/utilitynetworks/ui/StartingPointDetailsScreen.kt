@@ -18,23 +18,30 @@ package com.arcgismaps.toolkit.utilitynetworks.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -57,6 +64,7 @@ import com.arcgismaps.toolkit.utilitynetworks.StartingPoint
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.Title
 import com.arcgismaps.toolkit.utilitynetworks.ui.material3.Slider
 import com.arcgismaps.utilitynetworks.UtilityNetworkSourceType
+import com.arcgismaps.utilitynetworks.UtilityTerminal
 
 /**
  * A composable screen that shows the details of a starting point for a trace.
@@ -65,9 +73,10 @@ import com.arcgismaps.utilitynetworks.UtilityNetworkSourceType
  */
 @Composable
 internal fun StartingPointDetailsScreen(startingPoint: StartingPoint,
-                                        onZoomToResults: () -> Unit,
-                                        onClearAllResults: () -> Unit,
+                                        onZoomTo: () -> Unit,
+                                        onDelete: () -> Unit,
                                         onFractionChanged: (StartingPoint, Float) -> Unit,
+                                        onTerminalSelected: (UtilityTerminal) -> Unit,
                                         onBackPressed: () -> Unit) {
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -97,7 +106,7 @@ internal fun StartingPointDetailsScreen(startingPoint: StartingPoint,
                     .height(10.dp)
             )
 
-            Title(startingPoint.name, onZoomToResults, onClearAllResults)
+            Title(startingPoint.name, onZoomTo, onDelete)
 
             LazyColumn(
                 modifier = Modifier
@@ -113,7 +122,7 @@ internal fun StartingPointDetailsScreen(startingPoint: StartingPoint,
                     && !startingPoint.utilityElement.assetType.terminalConfiguration?.terminals.isNullOrEmpty()
                 ) {
                     item {
-                        TerminalConfiguration(startingPoint)
+                        TerminalConfiguration(startingPoint, onTerminalSelected)
                     }
                 }
                 item {
@@ -202,10 +211,15 @@ private fun Attributes(startingPoint: StartingPoint) {
 }
 
 @Composable
-private fun TerminalConfiguration(startingPoint: StartingPoint) {
+private fun TerminalConfiguration(startingPoint: StartingPoint, onTerminalSelected: (UtilityTerminal) -> Unit) {
     var showDropdown by rememberSaveable {
         mutableStateOf(false)
     }
+
+    var selectedTerminalName by rememberSaveable {
+        mutableStateOf(startingPoint.utilityElement.terminal?.name)
+    }
+
     Column {
         Spacer(modifier = Modifier
             .fillMaxWidth()
@@ -214,16 +228,50 @@ private fun TerminalConfiguration(startingPoint: StartingPoint) {
             color = Color.Gray,
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(start = 16.dp))
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 4.dp)
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f),
+                    shape = RoundedCornerShape(5.dp)
+                )
+                .background(color = MaterialTheme.colorScheme.background)
+        ) {
+            Row (
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(4.dp)
+                    .clickable {
+                        showDropdown = !showDropdown
+                    },
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                ReadOnlyTextField(
+                    text = selectedTerminalName ?: "",
+                    modifier = Modifier.clickable {
+                        showDropdown = !showDropdown
+                    },
+                    trailingIcon = {
+                        Icon(
+                            imageVector = Icons.Filled.MoreVert,
+                            contentDescription = "Edit icon",
+                            modifier = Modifier.size(FilterChipDefaults.IconSize)
+                        )
+                    }
+                )
+            }
+        }
         MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp))) {
             DropdownMenu(
                 expanded = showDropdown,
                 offset = DpOffset.Zero,
                 onDismissRequest = { showDropdown = false }) {
-                startingPoint.utilityElement.assetType.terminalConfiguration?.terminals?.forEachIndexed { index, utilityTerminal ->
+                startingPoint.utilityElement.assetType.terminalConfiguration?.terminals?.forEach { utilityTerminal ->
                     DropdownMenuItem(
                         text = {
                             ReadOnlyTextField(
-                                text = utilityTerminal.name, leadingIcon = if (utilityTerminal.name == selectedConfigName) {
+                                text = utilityTerminal.name, leadingIcon = if (utilityTerminal.name == selectedTerminalName) {
                                     {
                                         Icon(
                                             imageVector = Icons.Filled.Done,
@@ -237,7 +285,8 @@ private fun TerminalConfiguration(startingPoint: StartingPoint) {
                             )
                         },
                         onClick = {
-                            onTraceSelected(index)
+                            selectedTerminalName = utilityTerminal.name
+                            onTerminalSelected(utilityTerminal)
                             showDropdown = false
                         },
                         contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp)

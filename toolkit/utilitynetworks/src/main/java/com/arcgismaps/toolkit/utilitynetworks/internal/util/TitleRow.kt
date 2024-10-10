@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.utilitynetworks.R
 
 @Composable
-internal fun Title(name: String, onZoomToResults: () -> Unit, onDeleteResult: () -> Unit) {
+internal fun Title(name: String, onZoomTo: () -> Unit, onDelete: () -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     Row(
         modifier = Modifier
@@ -58,19 +58,19 @@ internal fun Title(name: String, onZoomToResults: () -> Unit, onDeleteResult: ()
                         expanded = false
                     }) {
                     DropdownMenuItem(
-                        text = { Text(stringResource(R.string.zoom_to_result)) },
-                        onClick = onZoomToResults,
+                        text = { Text(stringResource(R.string.zoom_to)) },
+                        onClick = onZoomTo,
                         leadingIcon = { Icon(
                             Icons.Outlined.LocationOn, contentDescription = stringResource(
-                                R.string.zoom_to_trace_result)
+                                R.string.zoom_to)
                         ) }
                     )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.delete)) },
-                        onClick = onDeleteResult,
+                        onClick = onDelete,
                         leadingIcon = { Icon(
                             Icons.Outlined.Clear, contentDescription = stringResource(
-                                R.string.delete_trace_result)
+                                R.string.delete)
                         ) }
                     )
                 }

@@ -54,6 +54,7 @@ import com.arcgismaps.utilitynetworks.UtilityMinimumStartingLocations
 import com.arcgismaps.utilitynetworks.UtilityNamedTraceConfiguration
 import com.arcgismaps.utilitynetworks.UtilityNetwork
 import com.arcgismaps.utilitynetworks.UtilityNetworkSourceType
+import com.arcgismaps.utilitynetworks.UtilityTerminal
 import com.arcgismaps.utilitynetworks.UtilityTraceFunctionOutput
 import com.arcgismaps.utilitynetworks.UtilityTraceParameters
 import kotlinx.coroutines.CancellationException
@@ -260,6 +261,14 @@ public class TraceState(
         }
     }
 
+    /**
+     * Sets the terminal for the starting point.
+     *
+     * @since 200.6.0
+     */
+    internal fun setTerminal(startingPoint: StartingPoint, terminal: UtilityTerminal) {
+        startingPoint.utilityElement.terminal = terminal
+    }
 
     /**
      * Run a trace on the Utility Network using the selected trace configuration and starting points.
@@ -375,6 +384,16 @@ public class TraceState(
     internal fun removeStartingPoint(startingPoint: StartingPoint) {
         _currentTraceStartingPoints.remove(startingPoint)
         graphicsOverlay.graphics.remove(startingPoint.graphic)
+    }
+
+    internal suspend fun zoomToStartingPoint(startingPoint: StartingPoint) {
+        startingPoint.graphic.geometry?.let {
+            mapViewProxy.setViewpointAnimated(
+                Viewpoint(it),
+                1.0.seconds,
+                AnimationCurve.EaseOutCirc
+            )
+        }
     }
 
     /**
