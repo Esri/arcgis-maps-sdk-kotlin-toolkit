@@ -24,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.utilitynetworks.R
 
@@ -41,11 +42,14 @@ internal fun Title(name: String, onZoomTo: () -> Unit, onDelete: () -> Unit) {
                 expanded = !expanded
             }, verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    modifier = Modifier.padding(end = 8.dp),
+                    modifier = Modifier.padding(start = 10.dp, end = 10.dp),
                     text = name,
-                    style = MaterialTheme.typography.headlineSmall
+                    style = MaterialTheme.typography.titleLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Icon(
+                    modifier = Modifier.padding(end = 10.dp),
                     imageVector = Icons.Outlined.MoreVert,
                     contentDescription = ""
                 )
