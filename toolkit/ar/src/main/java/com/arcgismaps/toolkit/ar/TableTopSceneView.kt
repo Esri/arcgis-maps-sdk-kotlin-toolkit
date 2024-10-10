@@ -389,6 +389,11 @@ private fun MutableState<TableTopSceneViewStatus>.update(
     callback?.invoke(newStatus)
 }
 
+/**
+ * Returns a [TransformationMatrix] based on the [Pose]'s rotation and translation.
+ *
+ * @since 200.6.0
+ */
 private val Pose.transformationMatrix: TransformationMatrix
     get() {
         return TransformationMatrix.createWithQuaternionAndTranslation(
