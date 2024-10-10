@@ -206,15 +206,16 @@ fun TableTopSceneView(
         }
     }
 
-    Box(modifier = modifier) {
-        val cameraController = remember {
-            TransformationMatrixCameraController().apply {
-                setOriginCamera(Camera(arcGISSceneAnchor, heading = 0.0, pitch = 90.0, roll = 0.0))
-                setTranslationFactor(translationFactor)
-                this.clippingDistance = clippingDistance
-            }
+    val cameraController = remember {
+        TransformationMatrixCameraController().apply {
+            setOriginCamera(Camera(arcGISSceneAnchor, heading = 0.0, pitch = 90.0, roll = 0.0))
+            setTranslationFactor(translationFactor)
+            this.clippingDistance = clippingDistance
         }
-        var arCoreAnchor: Anchor? by remember { mutableStateOf(null) }
+    }
+    var arCoreAnchor: Anchor? by remember { mutableStateOf(null) }
+
+    Box(modifier = modifier) {
         if (cameraPermissionGranted && arCoreInstalled) {
             val arSessionWrapper =
                 rememberArSessionWrapper(applicationContext = context.applicationContext)
