@@ -17,6 +17,7 @@
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
 import android.annotation.SuppressLint
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -72,6 +73,10 @@ internal fun TraceResultScreen(
     onZoomToResults: () -> Unit,
     onClearAllResults: () -> Unit
 ) {
+    BackHandler {
+        onBackToNewTrace()
+    }
+
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier
             .fillMaxSize()

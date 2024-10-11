@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -42,36 +43,43 @@ import com.arcgismaps.toolkit.utilitynetworks.StartingPoint
 
 
 @Composable
-internal fun StartingPointDetailsScreen(startingPoint: StartingPoint?,
-                                        onFractionChanged: (StartingPoint, Float) -> Unit,
-                                        onBackPressed: () -> Unit) {
+internal fun StartingPointDetailsScreen(
+    startingPoint: StartingPoint?,
+    onFractionChanged: (StartingPoint, Float) -> Unit,
+    onBackPressed: () -> Unit
+) {
+    BackHandler {
+        onBackPressed()
+    }
+
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.Top) {
+            verticalArrangement = Arrangement.Top
+        ) {
             Row(
                 modifier = Modifier.clickable { onBackPressed() },
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-            Image(
-                imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                contentDescription = "back"
-            )
-            ReadOnlyTextField(
-                text = stringResource(id = R.string.starting_points))
+                Image(
+                    imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                    contentDescription = "back"
+                )
+                ReadOnlyTextField(
+                    text = stringResource(id = R.string.starting_points)
+                )
             }
         }
 
         startingPoint?.let { point ->
             val geometry = point.feature.geometry
 
-            if (geometry != null && geometry is Polyline ) {
+            if (geometry != null && geometry is Polyline) {
                 FractionAlongEdgeSlider(point, onFractionChanged)
             }
         }
-
     }
 }
 
