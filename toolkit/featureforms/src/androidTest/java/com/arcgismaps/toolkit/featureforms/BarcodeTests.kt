@@ -16,17 +16,11 @@
 
 package com.arcgismaps.toolkit.featureforms
 
-import androidx.compose.ui.test.assertContentDescriptionContains
-import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.test.printToLog
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 
@@ -37,23 +31,34 @@ class BarcodeTests : FeatureFormTestRunner(
     @get:Rule
     val composeTestRule = createComposeRule()
 
+    /**
+     * Test case 11.1:
+     * Given a `FeatureForm` with a `BarcodeScannerFormInput`
+     * When the `FeatureForm` is displayed
+     * Then the barcode form element is displayed with the scan and clear icons
+     * And receives length validation errors when the input length is out of range
+     *
+     * https://devtopia.esri.com/runtime/common-toolkit/blob/main/designs/Forms/FormsTestDesign.md#test-case-11-barcode-input-type
+     */
     @Test
     fun testBarcodeTextField(): Unit = runBlocking {
         composeTestRule.setContent {
             FeatureForm(featureForm = featureForm)
         }
-        composeTestRule.onRoot().printToLog("BarcodeTests")
-        delay(5000)
         val barcodeFormElement = composeTestRule.onNodeWithText("Barcode")
+        // Check the barcode form element is displayed
         barcodeFormElement.assertIsDisplayed()
-        // Check only the scan icon is displayed
-        barcodeFormElement.assertContentDescriptionEquals("scan barcode")
+        // Check the scan icon is displayed
+        barcodeFormElement.onChildWithContentDescription("scan barcode").assertIsDisplayed()
         // Perform text input
         barcodeFormElement.performTextInput("https://esri.com")
-        // Check the clear icon is displayed in addition to the scan icon
-        barcodeFormElement.assertContentDescriptionEquals("clear text", "scan barcode")
+        // Check the clear icon is displayed
+        barcodeFormElement.onChildWithContentDescription("clear text").assertIsDisplayed()
+        // Check the scan icon is displayed
+        barcodeFormElement.onChildWithContentDescription("scan barcode").assertIsDisplayed()
         // Perform text input
         barcodeFormElement.performTextInput("https://runtimecoretest.maps.arcgis.com/apps/mapviewer/index.html?layers=a9155494098147b9be2fc52bcf825224")
         // Check for validation error
+        barcodeFormElement.onChildWithText("Maximum 50 characters").assertIsDisplayed()
     }
 }
