@@ -101,50 +101,48 @@ fun MainScreen() {
                 }
             }
         }
-        initializationStatus.let { status ->
-            when (status) {
-                is TableTopSceneViewStatus.Initializing -> TextWithScrim(text = stringResource(R.string.initializing_overlay))
-                is TableTopSceneViewStatus.DetectingPlanes -> TextWithScrim(text = stringResource(R.string.detect_planes_overlay))
-                is TableTopSceneViewStatus.Initialized -> {
-                    val sceneLoadStatus = arcGISScene.loadStatus.collectAsStateWithLifecycle().value
-                    when (sceneLoadStatus) {
-                        is LoadStatus.NotLoaded -> {
-                            // Tell the user to tap the screen if the scene has not started loading
-                            TextWithScrim(text = stringResource(R.string.tap_scene_overlay))
-                        }
-
-                        is LoadStatus.Loading -> {
-                            // The scene may take a while to load, so show a progress indicator
-                            Column(
-                                modifier = Modifier.fillMaxSize(),
-                                verticalArrangement = Arrangement.Center,
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                CircularProgressIndicator()
-                            }
-                        }
-
-                        is LoadStatus.FailedToLoad -> {
-                            TextWithScrim(
-                                text = stringResource(
-                                    R.string.failed_to_load_scene,
-                                    sceneLoadStatus.error
-                                )
-                            )
-                        }
-
-                        LoadStatus.Loaded -> {} // Do nothing
+        when (val status = initializationStatus) {
+            is TableTopSceneViewStatus.Initializing -> TextWithScrim(text = stringResource(R.string.initializing_overlay))
+            is TableTopSceneViewStatus.DetectingPlanes -> TextWithScrim(text = stringResource(R.string.detect_planes_overlay))
+            is TableTopSceneViewStatus.Initialized -> {
+                val sceneLoadStatus = arcGISScene.loadStatus.collectAsStateWithLifecycle().value
+                when (sceneLoadStatus) {
+                    is LoadStatus.NotLoaded -> {
+                        // Tell the user to tap the screen if the scene has not started loading
+                        TextWithScrim(text = stringResource(R.string.tap_scene_overlay))
                     }
-                }
 
-                is TableTopSceneViewStatus.FailedToInitialize -> {
-                    TextWithScrim(
-                        text = stringResource(
-                            R.string.failed_to_initialize_overlay,
-                            status.error.message ?: status.error
+                    is LoadStatus.Loading -> {
+                        // The scene may take a while to load, so show a progress indicator
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+
+                    is LoadStatus.FailedToLoad -> {
+                        TextWithScrim(
+                            text = stringResource(
+                                R.string.failed_to_load_scene,
+                                sceneLoadStatus.error
+                            )
                         )
-                    )
+                    }
+
+                    LoadStatus.Loaded -> {} // Do nothing
                 }
+            }
+
+            is TableTopSceneViewStatus.FailedToInitialize -> {
+                TextWithScrim(
+                    text = stringResource(
+                        R.string.failed_to_initialize_overlay,
+                        status.error.message ?: status.error
+                    )
+                )
             }
         }
     }
