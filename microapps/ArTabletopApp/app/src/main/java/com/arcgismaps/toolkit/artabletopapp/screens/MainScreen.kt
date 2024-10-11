@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.artabletopapp.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,6 +28,8 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -77,78 +80,106 @@ fun MainScreen() {
     val tableTopSceneViewProxy = remember { TableTopSceneViewProxy() }
     var tappedLocation by remember { mutableStateOf<Point?>(null) }
     var initializationStatus: TableTopSceneViewStatus by rememberTableTopSceneViewStatus()
-    Box(modifier = Modifier.fillMaxSize()) {
-        TableTopSceneView(
-            arcGISScene = arcGISScene,
-            arcGISSceneAnchor = Point(-74.0, 40.72, 0.0, arcGISScene.spatialReference),
-            translationFactor = 2000.0,
-            clippingDistance = 750.0,
-            modifier = Modifier.fillMaxSize(),
-            tableTopSceneViewProxy = tableTopSceneViewProxy,
-            onInitializationStatusChanged = {
-                initializationStatus = it
-            },
-            onSingleTapConfirmed = {
-                val location = tableTopSceneViewProxy.screenToBaseSurface(it.screenCoordinate)
-                location?.let { point ->
-                    tappedLocation = point
-                }
-            }
-        ) {
-            tappedLocation?.let {
-                Callout(location = it, modifier = Modifier.wrapContentSize()) {
-                    Text(stringResource(R.string.lat_lon, it.y.roundToInt(), it.x.roundToInt()))
-                }
-            }
-        }
-        initializationStatus.let { status ->
-            when (status) {
-                is TableTopSceneViewStatus.Initializing -> TextWithScrim(text = stringResource(R.string.initializing_overlay))
-                is TableTopSceneViewStatus.DetectingPlanes -> TextWithScrim(text = stringResource(R.string.detect_planes_overlay))
-                is TableTopSceneViewStatus.Initialized -> {
-                    val sceneLoadStatus = arcGISScene.loadStatus.collectAsStateWithLifecycle().value
-                    when (sceneLoadStatus) {
-                        is LoadStatus.NotLoaded -> {
-                            // Tell the user to tap the screen if the scene has not started loading
-                            TextWithScrim(text = stringResource(R.string.tap_scene_overlay))
-                        }
+    val arcGISSceneAnchor = remember<MutableState<Point?>> { mutableStateOf(null) }
 
-                        is LoadStatus.Loading -> {
-                            // The scene may take a while to load, so show a progress indicator
-                            Column(
-                                modifier = Modifier.fillMaxSize(),
-                                verticalArrangement = Arrangement.Center,
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                CircularProgressIndicator()
-                            }
-                        }
+    LaunchedEffect(Unit) {
+        arcGISSceneAnchor.value = determineSceneAnchor(arcGISScene, -74.0, 40.72)
+    }
 
-                        is LoadStatus.FailedToLoad -> {
-                            TextWithScrim(
-                                text = stringResource(
-                                    R.string.failed_to_load_scene,
-                                    sceneLoadStatus.error
-                                )
-                            )
-                        }
-
-                        LoadStatus.Loaded -> {} // Do nothing
+    val sceneAnchor = arcGISSceneAnchor.value
+    if (sceneAnchor != null) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            TableTopSceneView(
+                arcGISScene = arcGISScene,
+                arcGISSceneAnchor = sceneAnchor,// Point(-74.0, 40.72, 0.0, arcGISScene.spatialReference),
+                translationFactor = 2000.0,
+                clippingDistance = 750.0,
+                modifier = Modifier.fillMaxSize(),
+                tableTopSceneViewProxy = tableTopSceneViewProxy,
+                onInitializationStatusChanged = {
+                    initializationStatus = it
+                },
+                onSingleTapConfirmed = {
+                    val location = tableTopSceneViewProxy.screenToBaseSurface(it.screenCoordinate)
+                    location?.let { point ->
+                        tappedLocation = point
                     }
                 }
-
-                is TableTopSceneViewStatus.FailedToInitialize -> {
-                    TextWithScrim(
+            ) {
+                tappedLocation?.let {
+                    Callout(location = it, modifier = Modifier.wrapContentSize()) {
+                        Text(stringResource(R.string.lat_lon, it.y.roundToInt(), it.x.roundToInt()))
+                    }
+                }
+            }
+            initializationStatus.let { status ->
+                when (status) {
+                    is TableTopSceneViewStatus.Initializing -> TextWithScrim(text = stringResource(R.string.initializing_overlay))
+                    is TableTopSceneViewStatus.DetectingPlanes -> TextWithScrim(
                         text = stringResource(
-                            R.string.failed_to_initialize_overlay,
-                            status.error.message ?: status.error
+                            R.string.detect_planes_overlay
                         )
                     )
+
+                    is TableTopSceneViewStatus.Initialized -> {
+                        val sceneLoadStatus =
+                            arcGISScene.loadStatus.collectAsStateWithLifecycle().value
+                        when (sceneLoadStatus) {
+                            is LoadStatus.NotLoaded -> {
+                                // Tell the user to tap the screen if the scene has not started loading
+                                TextWithScrim(text = stringResource(R.string.tap_scene_overlay))
+                            }
+
+                            is LoadStatus.Loading -> {
+                                // The scene may take a while to load, so show a progress indicator
+                                Column(
+                                    modifier = Modifier.fillMaxSize(),
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    CircularProgressIndicator()
+                                }
+                            }
+
+                            is LoadStatus.FailedToLoad -> {
+                                TextWithScrim(
+                                    text = stringResource(
+                                        R.string.failed_to_load_scene,
+                                        sceneLoadStatus.error
+                                    )
+                                )
+                            }
+
+                            LoadStatus.Loaded -> {} // Do nothing
+                        }
+                    }
+
+                    is TableTopSceneViewStatus.FailedToInitialize -> {
+                        TextWithScrim(
+                            text = stringResource(
+                                R.string.failed_to_initialize_overlay,
+                                status.error.message ?: status.error
+                            )
+                        )
+                    }
                 }
             }
         }
     }
 }
+
+suspend fun determineSceneAnchor(arcGISScene: ArcGISScene, anchorX: Double, anchorY: Double): Point? =
+    arcGISScene.baseSurface.run {
+        if (load().isSuccess) {
+            this.elevationSources.first().load()
+            this.getElevation(Point(anchorX, anchorY, arcGISScene.spatialReference)).getOrNull()?.let {
+                Log.d("ARTableTopTest", "Anchor point: $it")
+                Point(anchorX, anchorY, it, arcGISScene.spatialReference)
+            }
+        } else {
+            null
+        }
+    }
 
 /**
  * Displays the provided [text] on top of a half-transparent gray background.
