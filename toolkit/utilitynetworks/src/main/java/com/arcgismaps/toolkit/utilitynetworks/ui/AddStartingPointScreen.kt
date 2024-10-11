@@ -16,6 +16,8 @@
 
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
+import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -44,5 +46,9 @@ internal fun AddStartingPointScreen(onStopPointSelection: () -> Unit) {
                 Text(text = stringResource(id = R.string.cancel_starting_point_selection))
             }
         }
+    }
+
+    BackHandler(false) {
+        Log.i("TraceNavHost --", "BackHandler called")
     }
 }

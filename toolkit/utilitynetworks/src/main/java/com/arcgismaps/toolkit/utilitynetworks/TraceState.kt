@@ -113,6 +113,8 @@ public class TraceState(
      */
     internal val selectedStartingPoint: State<StartingPoint?> = _selectedStartingPoint
 
+    private var selectedGroupName: String? = null
+
     private val _currentTraceStartingPoints: SnapshotStateList<StartingPoint> = mutableStateListOf()
     internal val currentTraceStartingPoints: List<StartingPoint> = _currentTraceStartingPoints
 
@@ -468,6 +470,10 @@ public class TraceState(
         _currentTraceName.value = name
     }
 
+    internal fun setGroupName(name: String) {
+        selectedGroupName = name
+    }
+
     /**
      * Set the color of the graphics.
      *
@@ -503,6 +509,18 @@ public class TraceState(
      */
     internal fun setZoomToResults(zoom: Boolean) {
         _currentTraceZoomToResults.value = zoom
+    }
+
+    internal suspend fun zoomToUtilityElement(utilityElement: UtilityElement) {
+        val features = utilityNetwork.getFeaturesForElements(listOf(utilityElement)).getOrNull()
+            ?: throw IllegalArgumentException("could not create feature from utility element")
+        val geometry = features[0].geometry as? Geometry
+            ?: throw IllegalArgumentException("could not create geometry from feature")
+        mapViewProxy.setViewpointAnimated(
+            Viewpoint(geometry.extent),
+            1.0.seconds,
+            AnimationCurve.EaseInOutCubic
+        )
     }
 }
 
@@ -578,6 +596,7 @@ internal enum class TraceNavRoute {
     TraceOptions,
     AddStartingPoint,
     TraceResults,
+    FeatureResultsDetails,
     StartingPointDetails
     //TODO: Add FeatureAttributes route
 }

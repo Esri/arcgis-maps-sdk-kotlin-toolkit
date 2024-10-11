@@ -34,7 +34,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import com.arcgismaps.geometry.Polyline
 import com.arcgismaps.toolkit.utilitynetworks.ui.material3.Slider
 import com.arcgismaps.toolkit.utilitynetworks.R

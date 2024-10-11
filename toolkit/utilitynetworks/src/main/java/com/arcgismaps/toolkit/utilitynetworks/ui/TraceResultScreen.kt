@@ -17,6 +17,7 @@
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
 import android.annotation.SuppressLint
+import android.widget.AdapterView.OnItemSelectedListener
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -56,6 +57,7 @@ import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.toolkit.utilitynetworks.TraceRun
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.TabRow
+import com.arcgismaps.utilitynetworks.UtilityAssetGroup
 import com.arcgismaps.utilitynetworks.UtilityElement
 import com.arcgismaps.utilitynetworks.UtilityTraceFunctionOutput
 
@@ -68,6 +70,7 @@ import com.arcgismaps.utilitynetworks.UtilityTraceFunctionOutput
 internal fun TraceResultScreen(
     traceRun: TraceRun,
     onBackToNewTrace: () -> Unit,
+    onFeatureGroupSelected: (String) -> Unit,
     onDeleteResult: () -> Unit,
     onZoomToResults: () -> Unit,
     onClearAllResults: () -> Unit
@@ -92,7 +95,7 @@ internal fun TraceResultScreen(
                     )
                 }
                 item {
-                    FeatureResult(traceRun.featureResults)
+                    FeatureResult(traceRun.featureResults, onFeatureGroupSelected)
                 }
                 item {
                     FunctionResult(traceRun.functionResults)
@@ -152,7 +155,7 @@ private fun TraceTitle(traceName: String, onZoomToResults: () -> Unit, onDeleteR
 }
 
 @Composable
-private fun FeatureResult(featureResults: List<UtilityElement>) {
+private fun FeatureResult(featureResults: List<UtilityElement>, onFeatureAssetGroupSelected: (String) -> Unit) {
     val assetGroupNames = featureResults.map { it.assetGroup.name }.distinct()
 
     Surface(modifier = Modifier.fillMaxWidth()) {
@@ -164,17 +167,24 @@ private fun FeatureResult(featureResults: List<UtilityElement>) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(start = 32.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
+                                .padding(start = 32.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
+                                .clickable { onFeatureAssetGroupSelected(assetGroupName) },
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(text = assetGroupName, style = MaterialTheme.typography.titleMedium)
+                            Text(
+                                text = assetGroupName,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.primary
+                            )
                             Column(horizontalAlignment = Alignment.End) {
                                 Text(
                                     text = elementsInAssetGroup(
                                         assetGroupName,
                                         featureResults
-                                    ).size.toString(), style = MaterialTheme.typography.titleMedium
+                                    ).size.toString(),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.primary
                                 )
                             }
                         }
