@@ -36,6 +36,9 @@ import com.arcgismaps.toolkit.utilitynetworks.R
  */
 @Composable
 internal fun AddStartingPointScreen(onStopPointSelection: () -> Unit) {
+    BackHandler {
+        onStopPointSelection()
+    }
 
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Top) {
