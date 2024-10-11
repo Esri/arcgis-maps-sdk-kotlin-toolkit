@@ -522,6 +522,10 @@ public class TraceState(
             AnimationCurve.EaseInOutCubic
         )
     }
+
+    internal fun getElementsByAssetType(assetType: String): List<UtilityElement> {
+        return emptyList()
+    }
 }
 
 /**
