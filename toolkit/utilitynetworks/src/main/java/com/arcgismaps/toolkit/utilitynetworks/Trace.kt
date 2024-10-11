@@ -70,7 +70,7 @@ public fun Trace(
             .semantics { contentDescription = traceSurfaceContentDescription }
     ) {
         when (initializationStatus) {
-            is InitializationStatus.Initializing -> {
+            InitializationStatus.NotInitialized, InitializationStatus.Initializing -> {
                 Box(
                     modifier = Modifier
                         .size(100.dp),
