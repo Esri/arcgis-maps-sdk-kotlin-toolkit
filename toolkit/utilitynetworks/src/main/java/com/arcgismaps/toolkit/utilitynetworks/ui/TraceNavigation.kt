@@ -37,7 +37,7 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun TraceNavHost(traceState: TraceState) {
     val navController = rememberNavController()
-    val currentScreen by traceState.currentScreen
+    traceState.setNavigationCallback { navController.navigate(it.name) }
 
     NavHost(navController = navController, startDestination = TraceNavRoute.TraceOptions.name) {
         composable(TraceNavRoute.TraceOptions.name) {
@@ -129,9 +129,5 @@ internal fun TraceNavHost(traceState: TraceState) {
                 },
                 onBackPressed = { traceState.showScreen(TraceNavRoute.TraceOptions) })
         }
-    }
-
-    if (navController.currentDestination?.route != currentScreen.name) {
-        navController.navigate(currentScreen.name)
     }
 }
