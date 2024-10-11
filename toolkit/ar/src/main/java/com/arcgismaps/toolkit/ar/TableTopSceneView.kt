@@ -132,7 +132,7 @@ import kotlin.coroutines.resume
  * @since 200.6.0
  */
 @Composable
-fun TableTopSceneView(
+public fun TableTopSceneView(
     arcGISScene: ArcGISScene,
     arcGISSceneAnchor: Point,
     translationFactor: Double,

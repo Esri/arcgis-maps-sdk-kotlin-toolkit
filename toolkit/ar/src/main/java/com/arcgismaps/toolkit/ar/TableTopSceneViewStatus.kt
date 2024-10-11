@@ -28,7 +28,7 @@ import androidx.compose.runtime.remember
  *
  * @since 200.6.0
  */
-sealed class TableTopSceneViewStatus private constructor() {
+public sealed class TableTopSceneViewStatus private constructor() {
 
     /**
      * The [TableTopSceneView] is initializing. The [TableTopSceneView] is not ready to be used yet.
@@ -37,7 +37,7 @@ sealed class TableTopSceneViewStatus private constructor() {
      *
      * @since 200.6.0
      */
-    data object Initializing : TableTopSceneViewStatus()
+    public data object Initializing : TableTopSceneViewStatus()
 
     /**
      * The [TableTopSceneView] is detecting planes on which a scene can be placed. The scene will
@@ -46,7 +46,7 @@ sealed class TableTopSceneViewStatus private constructor() {
      *
      * @since 200.6.0
      */
-    data object DetectingPlanes: TableTopSceneViewStatus()
+    public data object DetectingPlanes: TableTopSceneViewStatus()
 
     /**
      * The [TableTopSceneView] is initialized successfully. The [TableTopSceneView] is ready to be used.
@@ -54,7 +54,7 @@ sealed class TableTopSceneViewStatus private constructor() {
      *
      * @since 200.6.0
      */
-    data object Initialized : TableTopSceneViewStatus()
+    public data object Initialized : TableTopSceneViewStatus()
 
     /**
      * The [TableTopSceneView] failed to initialize. The [error] property contains the error that caused the failure.
@@ -62,7 +62,7 @@ sealed class TableTopSceneViewStatus private constructor() {
      * @param error The error that caused the failure.
      * @since 200.6.0
      */
-    data class FailedToInitialize internal constructor(val error: Throwable) : TableTopSceneViewStatus()
+    public data class FailedToInitialize internal constructor(val error: Throwable) : TableTopSceneViewStatus()
 }
 
 /**
