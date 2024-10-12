@@ -35,6 +35,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.sharp.ArrowBack
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DropdownMenu
@@ -89,7 +90,7 @@ internal fun StartingPointDetailsScreen(startingPoint: StartingPoint,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Image(
-                    imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                    imageVector = Icons.AutoMirrored.Sharp.ArrowBack,
                     contentDescription = "back"
                 )
                 Text(
@@ -108,9 +109,14 @@ internal fun StartingPointDetailsScreen(startingPoint: StartingPoint,
 
             Title(startingPoint.name, onZoomTo, onDelete)
 
-            LazyColumn(
+            Spacer(
                 modifier = Modifier
-                    .padding(10.dp, 3.dp),
+                    .fillMaxWidth()
+                    .height(10.dp)
+            )
+
+            LazyColumn(modifier = Modifier
+                .padding(vertical = 3.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 if (startingPoint.utilityElement.networkSource.sourceType == UtilityNetworkSourceType.Edge) {
@@ -140,10 +146,8 @@ private fun FractionAlongEdgeSlider(startingPoint: StartingPoint, onFractionChan
         Spacer(modifier = Modifier
             .fillMaxWidth()
             .height(10.dp))
-        Text(text = stringResource(id = R.string.fraction_along_edge),
-            color = Color.Gray,
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(start = 16.dp))
+
+        ReadOnlyTextField(stringResource(id = R.string.fraction_along_edge), modifier = Modifier.padding(horizontal = 10.dp))
         Box (modifier = Modifier
             .padding(horizontal = 16.dp)
             .background(color = MaterialTheme.colorScheme.background)) {
@@ -166,12 +170,7 @@ private fun Attributes(startingPoint: StartingPoint) {
                 .fillMaxWidth()
                 .height(10.dp)
         )
-        Text(
-            text = stringResource(id = R.string.attributes),
-            color = Color.Gray,
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(start = 16.dp)
-        )
+        ReadOnlyTextField(stringResource(id = R.string.attributes), modifier = Modifier.padding(horizontal = 10.dp))
         Column(
             modifier = Modifier
                 .padding(horizontal = 16.dp)
@@ -183,27 +182,27 @@ private fun Attributes(startingPoint: StartingPoint) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 3.dp)
+                        .padding(vertical = 10.dp)
                         .background(color = MaterialTheme.colorScheme.background),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        modifier = Modifier.padding(start = 5.dp),
+                        modifier = Modifier.padding(start = 10.dp),
                         text = attribute.first,
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.titleMedium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        modifier = Modifier.padding(end = 5.dp),
+                        modifier = Modifier.padding(end = 10.dp),
                         text = attribute.second as? String ?: "",
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.titleMedium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                 }
                 if (index < attributes.size - 1) {
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = 5.dp))
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 10.dp))
                 }
             }
         }
@@ -224,13 +223,10 @@ private fun TerminalConfiguration(startingPoint: StartingPoint, onTerminalSelect
         Spacer(modifier = Modifier
             .fillMaxWidth()
             .height(10.dp))
-        Text(text = stringResource(id = R.string.terminal_configuration),
-            color = Color.Gray,
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(start = 16.dp))
+        ReadOnlyTextField(stringResource(id = R.string.terminal_configuration), modifier = Modifier.padding(horizontal = 10.dp))
         Column(
             modifier = Modifier
-                .padding(horizontal = 4.dp)
+                .padding(horizontal = 16.dp)
                 .border(
                     width = 1.dp,
                     color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f),
@@ -241,7 +237,7 @@ private fun TerminalConfiguration(startingPoint: StartingPoint, onTerminalSelect
             Row (
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(4.dp)
+                    .padding(horizontal = 4.dp)
                     .clickable {
                         showDropdown = !showDropdown
                     },
@@ -265,7 +261,7 @@ private fun TerminalConfiguration(startingPoint: StartingPoint, onTerminalSelect
         MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp))) {
             DropdownMenu(
                 expanded = showDropdown,
-                offset = DpOffset.Zero,
+                offset = DpOffset(16.dp, 0.dp),
                 onDismissRequest = { showDropdown = false }) {
                 startingPoint.utilityElement.assetType.terminalConfiguration?.terminals?.forEach { utilityTerminal ->
                     DropdownMenuItem(
