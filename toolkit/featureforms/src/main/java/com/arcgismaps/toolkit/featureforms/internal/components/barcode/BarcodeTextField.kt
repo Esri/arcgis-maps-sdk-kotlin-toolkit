@@ -18,15 +18,22 @@ package com.arcgismaps.toolkit.featureforms.internal.components.barcode
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
@@ -78,8 +85,24 @@ internal fun BarcodeTextField(state: BarcodeTextFieldState) {
         hasValueExpression = state.hasValueExpression,
         onFocusChange = state::onFocusChanged,
         trailingContent = {
-            BarcodeScannerButton {
-                dialogRequester.requestDialog(DialogType.BarcodeScanner(stateId))
+            Row(
+                modifier = Modifier.padding(horizontal = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                // show clear button if there is text in the field
+                if (value.data.isNotEmpty()) {
+                    IconButton(onClick = { state.onValueChanged("") }) {
+                        Icon(
+                            imageVector = Icons.Default.Clear,
+                            contentDescription = "clear text",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+                BarcodeScannerButton {
+                    dialogRequester.requestDialog(DialogType.BarcodeScanner(stateId))
+                }
             }
         }
     )
@@ -91,7 +114,7 @@ private fun BarcodeScannerButton(onClick: () -> Unit) {
     Box(modifier = Modifier.padding(8.dp)) {
         Image(
             painter = painterResource(id = R.drawable.barcode_scanner),
-            contentDescription = null,
+            contentDescription = "scan barcode",
             modifier = Modifier.clickable { onClick() },
             colorFilter = ColorFilter.tint(tintColor)
         )

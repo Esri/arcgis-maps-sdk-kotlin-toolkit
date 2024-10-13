@@ -27,17 +27,26 @@ import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 
 /**
+ * Information about a barcode detected in the image.
+ *
+ * @param boundingBox The bounding box of the barcode in the view coordinate system.
+ * @param rawValue The raw value of the barcode.
+ */
+internal data class BarcodeInfo(
+    val boundingBox: Rect?,
+    val rawValue: String
+)
+
+/**
  * An [ImageAnalysis.Analyzer] that processes images from the camera preview to detect barcodes.
  *
  * @param frame The frame in which the barcode should be detected. This should be in the view
  * coordinate system.
- * @param onSuccess The callback that is called when a barcode is detected. The first parameter is
- * the bounding box of the barcode in the view coordinate system, and the second parameter is the
- * raw value of the barcode.
+ * @param onSuccess The callback invoked with the list of [BarcodeInfo] detected in the frame.
  */
 internal class BarcodeImageAnalyzer(
     private val frame: Rect,
-    private val onSuccess: (Rect?, String) -> Unit
+    private val onSuccess: (List<BarcodeInfo>) -> Unit
 ) : ImageAnalysis.Analyzer {
 
     // set by updateTransform
@@ -57,11 +66,12 @@ internal class BarcodeImageAnalyzer(
 
     override fun analyze(image: ImageProxy) {
         // using bitmap here is inefficient but ImageProxy.getImage() is experimental
-        barcodeScanner.process(image.toBitmap(), image.imageInfo.rotationDegrees).addOnSuccessListener { barcodes ->
-            processBarcodes(barcodes, image)
-        }.addOnFailureListener {
-            image.close()
-        }
+        barcodeScanner.process(image.toBitmap(), image.imageInfo.rotationDegrees)
+            .addOnSuccessListener { barcodes ->
+                processBarcodes(barcodes, image)
+            }.addOnFailureListener {
+                image.close()
+            }
     }
 
     override fun updateTransform(matrix: Matrix?) {
@@ -69,15 +79,17 @@ internal class BarcodeImageAnalyzer(
     }
 
     /**
-     * Processes the list of [Barcode]s and returns the first barcode that has a non-empty raw value.
+     * Processes the list of [Barcode]s and calls [onSuccess] with the list of [BarcodeInfo] detected
+     * in the frame.
      */
     private fun processBarcodes(barcodes: List<Barcode>, image: ImageProxy) {
         image.use { proxy ->
-            // Find the first barcode that has a non-empty raw value.
-            val barcode = barcodes.firstOrNull {
-                it.rawValue != null && it.rawValue!!.isNotEmpty()
-            }
-            if (barcode != null) {
+            val barcodesInfo = mutableListOf<BarcodeInfo>()
+            barcodes.forEach { barcode ->
+                // filter out barcodes that do not have a raw value or the raw value is empty
+                if (barcode.rawValue == null || barcode.rawValue!!.isEmpty()) {
+                    return@forEach
+                }
                 // Get the bounding box of the barcode and convert it to the view coordinate system.
                 val rect = barcode.boundingBox?.let { box ->
                     getTransformationMatrix(proxy)?.let { matrix ->
@@ -102,14 +114,15 @@ internal class BarcodeImageAnalyzer(
                 }
                 if (rect != null) {
                     // If the barcode has a bounding box, check if it is inside the frame.
-                    if (frame.contains(rect.center)) {
-                        onSuccess(rect, barcode.rawValue!!)
+                    if (rect.isRectInside(frame)) {
+                        barcodesInfo.add(BarcodeInfo(rect, barcode.rawValue!!))
                     }
                 } else {
                     // If the barcode does not have a bounding box, return the raw value.
-                    onSuccess(null, barcode.rawValue!!)
+                    barcodesInfo.add(BarcodeInfo(null, barcode.rawValue!!))
                 }
             }
+            onSuccess(barcodesInfo)
         }
     }
 
@@ -149,4 +162,15 @@ internal class BarcodeImageAnalyzer(
         analysisToTarget.postConcat(sensorToTargetMatrix)
         return analysisToTarget
     }
+}
+
+/**
+ * Checks if the [Rect] is inside the [other] [Rect]. Returns true if all the corners of the [Rect]
+ * are inside the [other] [Rect].
+ */
+internal fun Rect.isRectInside(other: Rect): Boolean {
+    return other.contains(this.topLeft) &&
+        other.contains(this.topRight) &&
+        other.contains(this.bottomLeft) &&
+        other.contains(this.bottomRight)
 }
