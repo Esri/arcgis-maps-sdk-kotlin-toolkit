@@ -22,6 +22,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -130,20 +131,8 @@ public class TraceState(
     private val _completedTraces: SnapshotStateList<TraceRun> = mutableStateListOf()
     internal val completedTraces: List<TraceRun> = _completedTraces
 
-    private var _selectedTraceRun: MutableState<TraceRun?> = mutableStateOf (null)
-    internal val selectedTraceRun: State<TraceRun?> = _selectedTraceRun
-
-    private var _selectedCompletedTraceIndex: Int? = null
-        set(value) {
-            field?.let { lastIndex ->
-                updateSelectedStateForTraceResultsGraphics(lastIndex, false)
-            }
-            value?.let { currentIndex ->
-                _selectedTraceRun.value = _completedTraces[currentIndex]
-                updateSelectedStateForTraceResultsGraphics(currentIndex, true)
-            }
-            field = value
-        }
+    private var _selectedCompletedTraceIndex: MutableState<Int> = mutableIntStateOf (0)
+    internal val selectedCompletedTraceIndex: State<Int> = _selectedCompletedTraceIndex
 
     private var _currentTraceName: MutableState<String> = mutableStateOf("")
     /**
@@ -352,7 +341,10 @@ public class TraceState(
             geometryTraceResult = currentTraceGeometryResults
         ).also {
             _completedTraces.add(it)
-            _selectedCompletedTraceIndex = _completedTraces.size - 1
+            updateSelectedTraceIndexAndGraphics(_completedTraces.size - 1)
+//            updateSelectedStateForTraceResultsGraphics(_selectedCompletedTraceIndex.value, false)
+//            _selectedCompletedTraceIndex.value = _completedTraces.size - 1
+//            updateSelectedStateForTraceResultsGraphics(_selectedCompletedTraceIndex.value, true)
         }
 
         if (_currentTraceZoomToResults.value) {
@@ -400,6 +392,12 @@ public class TraceState(
     internal fun removeStartingPoint(startingPoint: StartingPoint) {
         _currentTraceStartingPoints.remove(startingPoint)
         graphicsOverlay.graphics.remove(startingPoint.graphic)
+    }
+
+    private fun updateSelectedTraceIndexAndGraphics(newIndex: Int) {
+        updateSelectedStateForTraceResultsGraphics(_selectedCompletedTraceIndex.value, false)
+        _selectedCompletedTraceIndex.value = newIndex
+        updateSelectedStateForTraceResultsGraphics(_selectedCompletedTraceIndex.value, true)
     }
 
     private fun updateSelectedStateForTraceResultsGraphics(index: Int, isSelected: Boolean) {
@@ -491,16 +489,14 @@ public class TraceState(
     }
 
     internal fun selectNextCompletedTrace() {
-        val selectedTraceRunIndex = completedTraces.indexOf(_selectedTraceRun.value)
-        if (selectedTraceRunIndex + 1 < _completedTraces.size) {
-            _selectedCompletedTraceIndex = selectedTraceRunIndex + 1
+        if (_selectedCompletedTraceIndex.value + 1 < _completedTraces.size) {
+            updateSelectedTraceIndexAndGraphics(_selectedCompletedTraceIndex.value + 1)
         }
     }
 
     internal fun selectPreviousCompletedTrace() {
-        val selectedTraceRunIndex = completedTraces.indexOf(_selectedTraceRun.value)
-        if (selectedTraceRunIndex - 1 >= 0) {
-            _selectedCompletedTraceIndex = selectedTraceRunIndex - 1
+        if (_selectedCompletedTraceIndex.value - 1 >= 0) {
+            updateSelectedTraceIndexAndGraphics(_selectedCompletedTraceIndex.value - 1)
         }
     }
 

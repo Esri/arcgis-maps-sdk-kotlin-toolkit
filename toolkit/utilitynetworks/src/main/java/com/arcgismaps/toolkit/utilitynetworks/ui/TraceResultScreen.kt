@@ -68,7 +68,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
  */
 @Composable
 internal fun TraceResultScreen(
-    selectedTraceRun: TraceRun,
+    selectedTraceRunIndex: Int,
     traceResults: List<TraceRun>,
     onSelectPreviousTraceResult: () -> Unit,
     onSelectNextTraceResult: () -> Unit,
@@ -82,33 +82,18 @@ internal fun TraceResultScreen(
             .fillMaxSize()
             .padding(horizontal = 10.dp)) {
 
-            val selectedTraceRunIndex = traceResults.indexOf(selectedTraceRun)
+            val selectedTraceRun = traceResults[selectedTraceRunIndex]
 
             TabRow(onBackToNewTrace, 1)
 
             Row(modifier = Modifier.align(Alignment.CenterHorizontally),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
-                    contentDescription = "back",
-                    modifier = Modifier.clickable {
-                        onSelectPreviousTraceResult()
-                    },
-                    tint = MaterialTheme.colorScheme.primary
-                )
-                Text(
-                    modifier = Modifier.padding(20.dp),
-                    text = getTraceCounterString(selectedTraceRunIndex + 1, traceResults.size),
-                    style = MaterialTheme.typography.titleLarge
-                )
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-                    contentDescription = "forward",
-                    modifier = Modifier.clickable {
-                        onSelectNextTraceResult()
-                    },
-                    tint = MaterialTheme.colorScheme.primary
+                TraceResultPager(
+                    selectedTraceRunIndex,
+                    traceResults.size,
+                    onSelectPreviousTraceResult,
+                    onSelectNextTraceResult
                 )
             }
 
@@ -130,6 +115,36 @@ internal fun TraceResultScreen(
             }
         }
     }
+}
+
+@Composable
+private fun TraceResultPager(
+    selectedTraceRunIndex: Int,
+    traceResultsSize: Int,
+    onSelectPreviousTraceResult: () -> Unit,
+    onSelectNextTraceResult: () -> Unit
+) {
+    Icon(
+        imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
+        contentDescription = "back",
+        modifier = Modifier.clickable {
+            onSelectPreviousTraceResult()
+        },
+        tint = MaterialTheme.colorScheme.primary
+    )
+    Text(
+        modifier = Modifier.padding(20.dp),
+        text = getTraceCounterString(selectedTraceRunIndex + 1, traceResultsSize),
+        style = MaterialTheme.typography.titleLarge
+    )
+    Icon(
+        imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+        contentDescription = "forward",
+        modifier = Modifier.clickable {
+            onSelectNextTraceResult()
+        },
+        tint = MaterialTheme.colorScheme.primary
+    )
 }
 
 private fun getTraceCounterString(currentTraceResult: Int, totalTraceResults: Int): String {
