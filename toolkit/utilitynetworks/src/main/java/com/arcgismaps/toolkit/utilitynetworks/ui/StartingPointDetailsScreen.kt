@@ -84,22 +84,8 @@ internal fun StartingPointDetailsScreen(startingPoint: StartingPoint,
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Top) {
-            Row(
-                modifier = Modifier.clickable { onBackPressed() },
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Image(
-                    imageVector = Icons.AutoMirrored.Sharp.ArrowBack,
-                    contentDescription = "back"
-                )
-                Text(
-                    text = stringResource(id = R.string.starting_points),
-                    style = MaterialTheme.typography.titleMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
+
+            BackButton(onBackPressed)
 
             Spacer(
                 modifier = Modifier
@@ -136,6 +122,30 @@ internal fun StartingPointDetailsScreen(startingPoint: StartingPoint,
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun BackButton(
+    onBackPressed: () -> Unit
+) {
+    Row(
+        modifier = Modifier.clickable { onBackPressed() },
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Image(
+            modifier = Modifier.padding(start = 12.dp),
+            imageVector = Icons.AutoMirrored.Sharp.ArrowBack,
+            contentDescription = "back"
+        )
+        Text(
+            modifier = Modifier.padding(start = 8.dp),
+            text = stringResource(id = R.string.starting_points),
+            style = MaterialTheme.typography.titleMedium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
 
