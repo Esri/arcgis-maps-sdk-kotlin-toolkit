@@ -214,6 +214,7 @@ public fun TableTopSceneView(
         }
     }
     var arCoreAnchor: Anchor? by remember { mutableStateOf(null) }
+    var visualizePlanes by remember { mutableStateOf(true) }
 
     Box(modifier = modifier) {
         if (cameraPermissionGranted && arCoreInstalled) {
@@ -273,6 +274,8 @@ public fun TableTopSceneView(
                     hit?.let { hitResult ->
                         if (arCoreAnchor == null) {
                             arCoreAnchor = hitResult.createAnchor()
+                            // stop rendering planes
+                            visualizePlanes = false
                         }
                     }
                 },
@@ -281,7 +284,9 @@ public fun TableTopSceneView(
                         TableTopSceneViewStatus.Initialized,
                         onInitializationStatusChanged
                     )
-                })
+                },
+                visualizePlanes = visualizePlanes
+            )
         }
         if (initializationStatus.value == TableTopSceneViewStatus.Initialized && arCoreAnchor != null) {
             SceneView(

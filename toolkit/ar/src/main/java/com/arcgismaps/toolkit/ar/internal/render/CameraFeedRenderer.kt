@@ -46,7 +46,8 @@ internal class CameraFeedRenderer(
     private val assets: AssetManager,
     private val onFrame: (Frame, Int) -> Unit,
     private val onTapWithHitResult: (hit: HitResult?) -> Unit,
-    private val onFirstPlaneDetected: () -> Unit
+    private val onFirstPlaneDetected: () -> Unit,
+    var visualizePlanes: Boolean = true
 ) :
     SurfaceDrawHandler.Renderer, DefaultLifecycleObserver {
 
@@ -202,16 +203,17 @@ internal class CameraFeedRenderer(
 
         handleTap(frame, onTapWithHitResult)
 
-
-        val camera = frame.camera
-        camera.getProjectionMatrix(projectionMatrix, 0, zNear, zFar)
-        // Visualize planes.
-        planeRenderer.drawPlanes(
-            surfaceDrawHandler,
-            session.getAllTrackables<Plane>(Plane::class.java),
-            camera.displayOrientedPose,
-            projectionMatrix
-        )
+        if (visualizePlanes) {
+            with(frame.camera) {
+                getProjectionMatrix(projectionMatrix, 0, zNear, zFar)
+                planeRenderer.drawPlanes(
+                    surfaceDrawHandler,
+                    session.getAllTrackables(Plane::class.java),
+                    displayOrientedPose,
+                    projectionMatrix
+                )
+            }
+        }
 
         onFrame(
             frame,
