@@ -43,15 +43,16 @@ import com.google.ar.core.Session
  *
  * @param arSessionWrapper an [ArSessionWrapper] that provides an ARCore [Session].
  * @param onFrame a callback that is invoked every frame.
- * @param onTap a callback that is invoked when the user taps the screen and a hit is detected.
+ * @param onTapWithHitResult a callback that is invoked when the user taps the screen and a hit is detected.
  * @since 200.6.0
  */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun ArCameraFeed(
     arSessionWrapper: ArSessionWrapper,
-    onFrame: (Frame) -> Unit,
-    onTap: (hit: HitResult?) -> Unit
+    onFrame: (Frame, Int) -> Unit,
+    onTapWithHitResult: (hit: HitResult?) -> Unit,
+    onFirstPlaneDetected: () -> Unit
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
@@ -63,7 +64,8 @@ internal fun ArCameraFeed(
             arSessionWrapper.session,
             context.assets,
             onFrame,
-            onTap
+            onTapWithHitResult,
+            onFirstPlaneDetected
         ).apply {
             this.surfaceDrawHandler = SurfaceDrawHandler(surfaceViewWrapper.glSurfaceView, this)
         }

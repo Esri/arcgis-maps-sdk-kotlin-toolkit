@@ -49,7 +49,7 @@ import kotlin.time.Duration.Companion.seconds
  * @since 200.6.0
  */
 @Stable
-public final class TableTopSceneViewProxy internal constructor(internal val sceneViewProxy: SceneViewProxy) {
+public class TableTopSceneViewProxy internal constructor(internal val sceneViewProxy: SceneViewProxy) {
 
     public constructor() : this(SceneViewProxy())
 
@@ -136,7 +136,7 @@ public final class TableTopSceneViewProxy internal constructor(internal val scen
      * @param returnPopupsOnly whether the graphics property of the results are populated
      * @param maximumResults maximum size of the result set of graphics to return. A null value indicates unlimited results
      * @return A [Result] containing a [List] of [IdentifyGraphicsOverlayResult] containing one entry for each
-     * overlay in the view, or failure. Each entry holds a [GraphicsOverlay] and a [List] of [com.arcgismaps.mapview.Graphic]s
+     * overlay in the view, or failure. Each entry holds a [GraphicsOverlay] and a [List] of [com.arcgismaps.mapping.view.Graphic]s
      * @since 200.6.0
      */
     public suspend fun identifyGraphicsOverlays(
@@ -364,5 +364,5 @@ public final class TableTopSceneViewProxy internal constructor(internal val scen
     public suspend fun setViewpointCameraAnimated(
         camera: Camera,
         duration: Duration = 0.25.seconds
-    ): Result<Boolean> = setViewpointCameraAnimated(camera, duration)
+    ): Result<Boolean> = sceneViewProxy.setViewpointCameraAnimated(camera, duration)
 }
