@@ -121,7 +121,7 @@ public class TraceState(
     private val utilityNetwork: UtilityNetwork
         get() = _utilityNetwork ?: throw IllegalStateException("Utility Network cannot be null")
 
-    private var currentTraceRun: MutableState<TraceRun?> = mutableStateOf(null)
+    private var currentTraceRun: TraceRun? = null
 
     private val currentTraceGeometryResultsGraphics : MutableList<Graphic> = mutableListOf()
 
@@ -156,7 +156,7 @@ public class TraceState(
 
     private val currentTraceResultGeometriesExtent: Envelope?
     get() {
-        val utilityGeometryTraceResult = currentTraceRun.value?.geometryTraceResult ?: return null
+        val utilityGeometryTraceResult = currentTraceRun?.geometryTraceResult ?: return null
 
         val geometries = listOf(
             utilityGeometryTraceResult.polygon,
@@ -331,7 +331,7 @@ public class TraceState(
                 }
             }
         }
-        currentTraceRun.value = TraceRun(
+        currentTraceRun = TraceRun(
             name = _currentTraceName.value,
             configuration = traceConfiguration,
             startingPoints = _currentTraceStartingPoints.toList(),
