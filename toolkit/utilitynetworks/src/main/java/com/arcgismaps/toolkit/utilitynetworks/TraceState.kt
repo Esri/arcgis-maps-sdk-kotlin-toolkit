@@ -21,6 +21,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -85,7 +86,6 @@ public class TraceState(
     public val initializationStatus: State<InitializationStatus> = _initializationStatus
 
     private val _traceConfigurations: MutableState<List<UtilityNamedTraceConfiguration>> = mutableStateOf(emptyList())
-
     /**
      * The named trace configurations of the Utility Network
      *
@@ -94,7 +94,6 @@ public class TraceState(
     internal val traceConfigurations: State<List<UtilityNamedTraceConfiguration>> = _traceConfigurations
 
     private val _addStartingPointMode: MutableState<AddStartingPointMode> = mutableStateOf(AddStartingPointMode.None)
-
     /**
      * Governs taps on the map. When the mode is [AddStartingPointMode.Started] taps will identify starting points
      * and pass underlying Features to this object.
@@ -105,7 +104,6 @@ public class TraceState(
     public val addStartingPointMode: State<AddStartingPointMode> = _addStartingPointMode
 
     private var _selectedTraceConfiguration: MutableState<UtilityNamedTraceConfiguration?> = mutableStateOf(null)
-
     /**
      * The selected trace configuration for the TraceParameters that define the trace.
      *
@@ -114,7 +112,6 @@ public class TraceState(
     internal val selectedTraceConfiguration: State<UtilityNamedTraceConfiguration?> = _selectedTraceConfiguration
 
     private var _selectedStartingPoint: MutableState<StartingPoint?> = mutableStateOf(null)
-
     /**
      * The selected starting point to display in the starting point details screen.
      *
@@ -129,11 +126,9 @@ public class TraceState(
     private val utilityNetwork: UtilityNetwork
         get() = _utilityNetwork ?: throw IllegalStateException("Utility Network cannot be null")
 
-    private var _currentTraceRun: MutableState<TraceRun?> = mutableStateOf(null)
-    internal val currentTraceRun: State<TraceRun?>
-        get() = _currentTraceRun
+    private var currentTraceRun: TraceRun? = null
 
-    private val currentTraceGeometryResultsGraphics: MutableList<Graphic> = mutableListOf()
+    private val currentTraceGeometryResultsGraphics : MutableList<Graphic> = mutableListOf()
 
     private val _currentScreen: MutableState<TraceNavRoute> = mutableStateOf(TraceNavRoute.TraceOptions)
     internal var currentScreen: State<TraceNavRoute> = _currentScreen
@@ -141,8 +136,10 @@ public class TraceState(
     private val _completedTraces: SnapshotStateList<TraceRun> = mutableStateListOf()
     internal val completedTraces: List<TraceRun> = _completedTraces
 
-    private var _currentTraceName: MutableState<String> = mutableStateOf("")
+    private var _selectedCompletedTraceIndex: MutableState<Int> = mutableIntStateOf(0)
+    internal val selectedCompletedTraceIndex: State<Int> = _selectedCompletedTraceIndex
 
+    private var _currentTraceName: MutableState<String> = mutableStateOf("")
     /**
      * The default name of the trace.
      *
@@ -163,25 +160,25 @@ public class TraceState(
     public var currentTraceZoomToResults: State<Boolean> = _currentTraceZoomToResults
 
     private val currentTraceResultGeometriesExtent: Envelope?
-        get() {
-            val utilityGeometryTraceResult = _currentTraceRun.value?.geometryTraceResult ?: return null
+    get() {
+        val utilityGeometryTraceResult = currentTraceRun?.geometryTraceResult ?: return null
 
-            val geometries = listOf(
-                utilityGeometryTraceResult.polygon,
-                utilityGeometryTraceResult.polyline,
-                utilityGeometryTraceResult.multipoint
-            ).mapNotNull { geometry ->
-                if (geometry != null && !geometry.isEmpty) {
-                    geometry
-                } else {
-                    null
-                }
+        val geometries = listOf(
+            utilityGeometryTraceResult.polygon,
+            utilityGeometryTraceResult.polyline,
+            utilityGeometryTraceResult.multipoint
+        ).mapNotNull { geometry ->
+            if (geometry != null && !geometry.isEmpty) {
+                geometry
+            } else {
+                null
             }
-            val combinedExtents = GeometryEngine.combineExtentsOrNull(geometries) ?: return null
-            val expandedEnvelope = GeometryEngine.bufferOrNull(combinedExtents, 200.0) ?: return null
-
-            return expandedEnvelope.extent
         }
+        val combinedExtents = GeometryEngine.combineExtentsOrNull(geometries) ?: return null
+        val expandedEnvelope = GeometryEngine.bufferOrNull(combinedExtents, 200.0) ?: return null
+
+        return expandedEnvelope.extent
+    }
 
     /**
      * Initializes the state object by loading the map, the Utility Networks contained in the map
@@ -341,19 +338,21 @@ public class TraceState(
                         currentTraceGeometryResultsGraphics.add(graphic)
                     }
                     currentTraceGeometryResults = result
-                    // Highlight the geometry results
-                    currentTraceGeometryResultsGraphics.map { it.isSelected = true }
                 }
             }
         }
-        _currentTraceRun.value = TraceRun(
+        currentTraceRun = TraceRun(
             name = _currentTraceName.value,
             configuration = traceConfiguration,
-            graphics = currentTraceGeometryResultsGraphics,
+            startingPoints = _currentTraceStartingPoints.toList(),
+            geometryResultsGraphics = currentTraceGeometryResultsGraphics.toList(),
             featureResults = currentTraceElementResults,
             functionResults = currentTraceFunctionResults,
             geometryTraceResult = currentTraceGeometryResults
-        ).also { _completedTraces.add(it) }
+        ).also {
+            _completedTraces.add(it)
+            updateSelectedTraceIndexAndGraphics(_completedTraces.size - 1)
+        }
 
         if (_currentTraceZoomToResults.value) {
             currentTraceResultGeometriesExtent?.let {
@@ -369,6 +368,8 @@ public class TraceState(
 
     private fun resetCurrentTrace() {
         _selectedTraceConfiguration.value = null
+        _currentTraceStartingPoints.clear()
+        currentTraceGeometryResultsGraphics.clear()
         _currentTraceName.value = ""
         currentTraceGraphicsColor = Color.green
         _currentTraceZoomToResults.value = true
@@ -397,6 +398,17 @@ public class TraceState(
     internal fun removeStartingPoint(startingPoint: StartingPoint) {
         _currentTraceStartingPoints.remove(startingPoint)
         graphicsOverlay.graphics.remove(startingPoint.graphic)
+    }
+
+    private fun updateSelectedTraceIndexAndGraphics(newIndex: Int) {
+        updateSelectedStateForTraceResultsGraphics(_selectedCompletedTraceIndex.value, false)
+        _selectedCompletedTraceIndex.value = newIndex
+        updateSelectedStateForTraceResultsGraphics(_selectedCompletedTraceIndex.value, true)
+    }
+
+    private fun updateSelectedStateForTraceResultsGraphics(index: Int, isSelected: Boolean) {
+        _completedTraces[index].geometryResultsGraphics.forEach { it.isSelected = isSelected }
+        _completedTraces[index].startingPoints.forEach { it.graphic.isSelected = isSelected }
     }
 
     /**
@@ -487,6 +499,18 @@ public class TraceState(
      */
     internal fun setTraceName(name: String) {
         _currentTraceName.value = name
+    }
+
+    internal fun selectNextCompletedTrace() {
+        if (_selectedCompletedTraceIndex.value + 1 < _completedTraces.size) {
+            updateSelectedTraceIndexAndGraphics(_selectedCompletedTraceIndex.value + 1)
+        }
+    }
+
+    internal fun selectPreviousCompletedTrace() {
+        if (_selectedCompletedTraceIndex.value - 1 >= 0) {
+            updateSelectedTraceIndexAndGraphics(_selectedCompletedTraceIndex.value - 1)
+        }
     }
 
     /**
@@ -630,7 +654,8 @@ internal data class StartingPoint(
 internal data class TraceRun(
     val name: String, // need to auto populate this, if not provided by AdvancedOptions
     val configuration: UtilityNamedTraceConfiguration,
-    val graphics: List<Graphic>,
+    val startingPoints: List<StartingPoint>,
+    val geometryResultsGraphics: List<Graphic>,
     val featureResults: List<UtilityElement>,
     val functionResults: List<UtilityTraceFunctionOutput>,
     val geometryTraceResult: UtilityGeometryTraceResult?
