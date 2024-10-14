@@ -71,7 +71,7 @@ public class TraceState(
     private val mapViewProxy: MapViewProxy
 ) {
 
-    private  var _currentError: Throwable? = null
+    private var _currentError: Throwable? = null
     internal val currentError: Throwable?
         get() = _currentError
 
@@ -128,7 +128,7 @@ public class TraceState(
 
     private var currentTraceRun: TraceRun? = null
 
-    private val currentTraceGeometryResultsGraphics : MutableList<Graphic> = mutableListOf()
+    private val currentTraceGeometryResultsGraphics: MutableList<Graphic> = mutableListOf()
 
     private val _currentScreen: MutableState<TraceNavRoute> = mutableStateOf(TraceNavRoute.TraceOptions)
     internal var currentScreen: State<TraceNavRoute> = _currentScreen
@@ -160,25 +160,25 @@ public class TraceState(
     public var currentTraceZoomToResults: State<Boolean> = _currentTraceZoomToResults
 
     private val currentTraceResultGeometriesExtent: Envelope?
-    get() {
-        val utilityGeometryTraceResult = currentTraceRun?.geometryTraceResult ?: return null
+        get() {
+            val utilityGeometryTraceResult = currentTraceRun?.geometryTraceResult ?: return null
 
-        val geometries = listOf(
-            utilityGeometryTraceResult.polygon,
-            utilityGeometryTraceResult.polyline,
-            utilityGeometryTraceResult.multipoint
-        ).mapNotNull { geometry ->
-            if (geometry != null && !geometry.isEmpty) {
-                geometry
-            } else {
-                null
+            val geometries = listOf(
+                utilityGeometryTraceResult.polygon,
+                utilityGeometryTraceResult.polyline,
+                utilityGeometryTraceResult.multipoint
+            ).mapNotNull { geometry ->
+                if (geometry != null && !geometry.isEmpty) {
+                    geometry
+                } else {
+                    null
+                }
             }
-        }
-        val combinedExtents = GeometryEngine.combineExtentsOrNull(geometries) ?: return null
-        val expandedEnvelope = GeometryEngine.bufferOrNull(combinedExtents, 200.0) ?: return null
+            val combinedExtents = GeometryEngine.combineExtentsOrNull(geometries) ?: return null
+            val expandedEnvelope = GeometryEngine.bufferOrNull(combinedExtents, 200.0) ?: return null
 
-        return expandedEnvelope.extent
-    }
+            return expandedEnvelope.extent
+        }
 
     /**
      * Initializes the state object by loading the map, the Utility Networks contained in the map
