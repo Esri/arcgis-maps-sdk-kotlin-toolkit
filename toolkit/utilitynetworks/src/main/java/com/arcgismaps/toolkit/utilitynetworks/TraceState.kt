@@ -368,7 +368,6 @@ public class TraceState(
 
     private fun resetCurrentTrace() {
         _selectedTraceConfiguration.value = null
-        _currentTraceStartingPoints.clear()
         currentTraceGeometryResultsGraphics.clear()
         _currentTraceName.value = ""
         currentTraceGraphicsColor = Color.green
