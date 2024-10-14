@@ -17,18 +17,25 @@
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
+import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.material.icons.outlined.Clear
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -53,7 +60,10 @@ import com.arcgismaps.utilitynetworks.UtilityTraceFunctionOutput
  */
 @Composable
 internal fun TraceResultScreen(
-    traceRun: TraceRun,
+    selectedTraceRunIndex: Int,
+    traceResults: List<TraceRun>,
+    onSelectPreviousTraceResult: () -> Unit,
+    onSelectNextTraceResult: () -> Unit,
     onBackToNewTrace: () -> Unit,
     onDeleteResult: () -> Unit,
     onZoomToResults: () -> Unit,
@@ -64,25 +74,32 @@ internal fun TraceResultScreen(
             .fillMaxSize()
             .padding(horizontal = 10.dp)) {
 
+            val selectedTraceRun = traceResults[selectedTraceRunIndex]
+
             TabRow(onBackToNewTrace, 1)
-            Spacer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(15.dp)
+
+            Row(modifier = Modifier.align(Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TraceResultPager(
+                    selectedTraceRunIndex,
+                    traceResults.size,
+                    onSelectPreviousTraceResult,
+                    onSelectNextTraceResult
+                )
+            }
+
+            Title(
+                selectedTraceRun.name,
+                onZoomTo = onZoomToResults,
+                onDelete = onDeleteResult
             )
             LazyColumn {
                 item {
-                    Title(
-                        traceRun.name,
-                        onZoomTo = onZoomToResults,
-                        onDelete = onDeleteResult
-                    )
+                    FeatureResult(selectedTraceRun.featureResults)
                 }
                 item {
-                    FeatureResult(traceRun.featureResults)
-                }
-                item {
-                    FunctionResult(traceRun.functionResults)
+                    FunctionResult(selectedTraceRun.functionResults)
                 }
                 item {
                     ClearAllResultsButton(onClearAllResults)
@@ -90,6 +107,40 @@ internal fun TraceResultScreen(
             }
         }
     }
+}
+
+@Composable
+private fun TraceResultPager(
+    selectedTraceRunIndex: Int,
+    traceResultsSize: Int,
+    onSelectPreviousTraceResult: () -> Unit,
+    onSelectNextTraceResult: () -> Unit
+) {
+    Icon(
+        imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
+        contentDescription = "back",
+        modifier = Modifier.clickable {
+            onSelectPreviousTraceResult()
+        },
+        tint = MaterialTheme.colorScheme.primary
+    )
+    Text(
+        modifier = Modifier.padding(20.dp),
+        text = getTraceCounterString(selectedTraceRunIndex + 1, traceResultsSize),
+        style = MaterialTheme.typography.titleLarge
+    )
+    Icon(
+        imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+        contentDescription = "forward",
+        modifier = Modifier.clickable {
+            onSelectNextTraceResult()
+        },
+        tint = MaterialTheme.colorScheme.primary
+    )
+}
+
+private fun getTraceCounterString(currentTraceResult: Int, totalTraceResults: Int): String {
+    return "Trace $currentTraceResult of $totalTraceResults"
 }
 
 @Composable
