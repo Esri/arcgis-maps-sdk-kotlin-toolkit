@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -99,10 +98,11 @@ internal fun TraceNavHost(traceState: TraceState) {
             )
         }
         composable(TraceNavRoute.TraceResults.name) {
-            val traceRun = traceState.currentTraceRun.value
-            require(traceRun != null)
             TraceResultScreen(
-                traceRun = traceRun,
+                selectedTraceRunIndex = traceState.selectedCompletedTraceIndex.value,
+                traceResults = traceState.completedTraces,
+                onSelectPreviousTraceResult = { traceState.selectPreviousCompletedTrace() },
+                onSelectNextTraceResult = { traceState.selectNextCompletedTrace()  },
                 onBackToNewTrace = { traceState.showScreen(TraceNavRoute.TraceOptions) },
                 onDeleteResult = {
 
