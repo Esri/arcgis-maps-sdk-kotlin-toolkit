@@ -95,10 +95,11 @@ internal fun TraceNavHost(traceState: TraceState) {
             )
         }
         composable(TraceNavRoute.TraceResults.name) {
-            val traceRun = traceState.currentTraceRun.value
-            require (traceRun != null)
             TraceResultScreen(
-                traceRun = traceRun,
+                selectedTraceRunIndex = traceState.selectedCompletedTraceIndex.value,
+                traceResults = traceState.completedTraces,
+                onSelectPreviousTraceResult = { traceState.selectPreviousCompletedTrace() },
+                onSelectNextTraceResult = { traceState.selectNextCompletedTrace()  },
                 onBackToNewTrace = { traceState.showScreen(TraceNavRoute.TraceOptions) },
                 onFeatureGroupSelected = {
                     traceState.setGroupName(it)
@@ -115,11 +116,11 @@ internal fun TraceNavHost(traceState: TraceState) {
         }
         composable(TraceNavRoute.FeatureResultsDetails.name) {
             val coroutineScope = rememberCoroutineScope()
-            val traceRun = traceState.currentTraceRun.value
-            require (traceRun != null)
+            val traceRun = traceState.completedTraces[traceState.selectedCompletedTraceIndex.value]
             FeatureResultsDetailsScreen(
                 traceRun = traceRun,
                 onBackToResults = { traceState.showScreen(TraceNavRoute.TraceResults) },
+                onBackToNewTrace = { traceState.showScreen(TraceNavRoute.TraceOptions) },
                 onFeatureSelected = {
                     coroutineScope.launch {
                         traceState.zoomToUtilityElement(it)

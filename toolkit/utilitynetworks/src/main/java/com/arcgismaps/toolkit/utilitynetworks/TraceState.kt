@@ -22,6 +22,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -122,9 +123,7 @@ public class TraceState(
     private val utilityNetwork: UtilityNetwork
         get() = _utilityNetwork ?: throw IllegalStateException("Utility Network cannot be null")
 
-    private var _currentTraceRun: MutableState<TraceRun?> = mutableStateOf (null)
-    internal val currentTraceRun: State<TraceRun?>
-        get() = _currentTraceRun
+    private var currentTraceRun: TraceRun? = null
 
     private val currentTraceGeometryResultsGraphics : MutableList<Graphic> = mutableListOf()
 
@@ -133,6 +132,9 @@ public class TraceState(
 
     private val _completedTraces: SnapshotStateList<TraceRun> = mutableStateListOf()
     internal val completedTraces: List<TraceRun> = _completedTraces
+
+    private var _selectedCompletedTraceIndex: MutableState<Int> = mutableIntStateOf(0)
+    internal val selectedCompletedTraceIndex: State<Int> = _selectedCompletedTraceIndex
 
     private var _currentTraceName: MutableState<String> = mutableStateOf("")
     /**
@@ -156,7 +158,7 @@ public class TraceState(
 
     private val currentTraceResultGeometriesExtent: Envelope?
     get() {
-        val utilityGeometryTraceResult = _currentTraceRun.value?.geometryTraceResult ?: return null
+        val utilityGeometryTraceResult = currentTraceRun?.geometryTraceResult ?: return null
 
         val geometries = listOf(
             utilityGeometryTraceResult.polygon,
@@ -328,19 +330,21 @@ public class TraceState(
                         currentTraceGeometryResultsGraphics.add(graphic)
                     }
                     currentTraceGeometryResults = result
-                    // Highlight the geometry results
-                    currentTraceGeometryResultsGraphics.map { it.isSelected = true }
                 }
             }
         }
-        _currentTraceRun.value = TraceRun(
+        currentTraceRun = TraceRun(
             name = _currentTraceName.value,
             configuration = traceConfiguration,
-            graphics = currentTraceGeometryResultsGraphics,
+            startingPoints = _currentTraceStartingPoints.toList(),
+            geometryResultsGraphics = currentTraceGeometryResultsGraphics.toList(),
             featureResults = currentTraceElementResults,
             functionResults = currentTraceFunctionResults,
             geometryTraceResult = currentTraceGeometryResults
-        ).also { _completedTraces.add(it) }
+        ).also {
+            _completedTraces.add(it)
+            updateSelectedTraceIndexAndGraphics(_completedTraces.size - 1)
+        }
 
         if (_currentTraceZoomToResults.value) {
             currentTraceResultGeometriesExtent?.let {
@@ -357,6 +361,8 @@ public class TraceState(
 
     private fun resetCurrentTrace() {
         _selectedTraceConfiguration.value = null
+        _currentTraceStartingPoints.clear()
+        currentTraceGeometryResultsGraphics.clear()
         _currentTraceName.value = ""
         currentTraceGraphicsColor = Color.green
         _currentTraceZoomToResults.value = true
@@ -385,6 +391,17 @@ public class TraceState(
     internal fun removeStartingPoint(startingPoint: StartingPoint) {
         _currentTraceStartingPoints.remove(startingPoint)
         graphicsOverlay.graphics.remove(startingPoint.graphic)
+    }
+
+    private fun updateSelectedTraceIndexAndGraphics(newIndex: Int) {
+        updateSelectedStateForTraceResultsGraphics(_selectedCompletedTraceIndex.value, false)
+        _selectedCompletedTraceIndex.value = newIndex
+        updateSelectedStateForTraceResultsGraphics(_selectedCompletedTraceIndex.value, true)
+    }
+
+    private fun updateSelectedStateForTraceResultsGraphics(index: Int, isSelected: Boolean) {
+        _completedTraces[index].geometryResultsGraphics.forEach { it.isSelected = isSelected }
+        _completedTraces[index].startingPoints.forEach { it.graphic.isSelected = isSelected }
     }
 
     /**
@@ -472,6 +489,18 @@ public class TraceState(
 
     internal fun setGroupName(name: String) {
         selectedGroupName = name
+    }
+
+    internal fun selectNextCompletedTrace() {
+        if (_selectedCompletedTraceIndex.value + 1 < _completedTraces.size) {
+            updateSelectedTraceIndexAndGraphics(_selectedCompletedTraceIndex.value + 1)
+        }
+    }
+
+    internal fun selectPreviousCompletedTrace() {
+        if (_selectedCompletedTraceIndex.value - 1 >= 0) {
+            updateSelectedTraceIndexAndGraphics(_selectedCompletedTraceIndex.value - 1)
+        }
     }
 
     /**
@@ -617,7 +646,8 @@ internal data class StartingPoint(val feature: ArcGISFeature, val utilityElement
 internal data class TraceRun(
     val name: String, // need to auto populate this, if not provided by AdvancedOptions
     val configuration: UtilityNamedTraceConfiguration,
-    val graphics: List<Graphic>,
+    val startingPoints: List<StartingPoint>,
+    val geometryResultsGraphics: List<Graphic>,
     val featureResults: List<UtilityElement>,
     val functionResults: List<UtilityTraceFunctionOutput>,
     val geometryTraceResult: UtilityGeometryTraceResult?
