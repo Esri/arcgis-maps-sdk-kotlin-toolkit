@@ -121,7 +121,7 @@ public class TraceState(
     private val utilityNetwork: UtilityNetwork
         get() = _utilityNetwork ?: throw IllegalStateException("Utility Network cannot be null")
 
-    private var currentTraceRun: MutableState<TraceRun?> = mutableStateOf (null)
+    private var currentTraceRun: MutableState<TraceRun?> = mutableStateOf(null)
 
     private val currentTraceGeometryResultsGraphics : MutableList<Graphic> = mutableListOf()
 
@@ -131,7 +131,7 @@ public class TraceState(
     private val _completedTraces: SnapshotStateList<TraceRun> = mutableStateListOf()
     internal val completedTraces: List<TraceRun> = _completedTraces
 
-    private var _selectedCompletedTraceIndex: MutableState<Int> = mutableIntStateOf (0)
+    private var _selectedCompletedTraceIndex: MutableState<Int> = mutableIntStateOf(0)
     internal val selectedCompletedTraceIndex: State<Int> = _selectedCompletedTraceIndex
 
     private var _currentTraceName: MutableState<String> = mutableStateOf("")
@@ -342,9 +342,6 @@ public class TraceState(
         ).also {
             _completedTraces.add(it)
             updateSelectedTraceIndexAndGraphics(_completedTraces.size - 1)
-//            updateSelectedStateForTraceResultsGraphics(_selectedCompletedTraceIndex.value, false)
-//            _selectedCompletedTraceIndex.value = _completedTraces.size - 1
-//            updateSelectedStateForTraceResultsGraphics(_selectedCompletedTraceIndex.value, true)
         }
 
         if (_currentTraceZoomToResults.value) {
