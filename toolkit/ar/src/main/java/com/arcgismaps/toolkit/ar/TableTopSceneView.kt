@@ -87,8 +87,8 @@ import kotlin.coroutines.resume
  * @param arcGISScene the [ArcGISScene] to be rendered by this TableTopSceneView
  * @param arcGISSceneAnchor the [Point] in the [ArcGISScene] where the AR scene will initially be centered
  * @param translationFactor the factor defines how much the scene view translates as the device moves.
- * @param clippingDistance the clipping distance in meters around the camera. A null means that no data will be clipped.
  * @param modifier Modifier to be applied to the TableTopSceneView
+ * @param clippingDistance the clipping distance in meters around the camera. A null means that no data will be clipped.
  * @param onInitializationStatusChanged a callback that is invoked when the initialization status of the [TableTopSceneView] changes.
  * @param requestCameraPermissionAutomatically whether to request the camera permission automatically.
  * If set to `true`, the camera permission will be requested automatically when the composable is
@@ -136,8 +136,8 @@ public fun TableTopSceneView(
     arcGISScene: ArcGISScene,
     arcGISSceneAnchor: Point,
     translationFactor: Double,
-    clippingDistance: Double?,
     modifier: Modifier = Modifier,
+    clippingDistance: Double? = null,
     onInitializationStatusChanged: ((TableTopSceneViewStatus) -> Unit)? = null,
     requestCameraPermissionAutomatically: Boolean = true,
     onViewpointChangedForCenterAndScale: ((Viewpoint) -> Unit)? = null,
@@ -210,7 +210,7 @@ public fun TableTopSceneView(
         TransformationMatrixCameraController().apply {
             setOriginCamera(Camera(arcGISSceneAnchor, heading = 0.0, pitch = 90.0, roll = 0.0))
             setTranslationFactor(translationFactor)
-            this.clippingDistance = clippingDistance
+            this.clippingDistance = clippingDistance ?: 0.0
         }
     }
     var arCoreAnchor: Anchor? by remember { mutableStateOf(null) }

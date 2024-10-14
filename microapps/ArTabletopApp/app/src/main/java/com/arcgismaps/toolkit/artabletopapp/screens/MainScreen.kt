@@ -92,8 +92,8 @@ fun MainScreen() {
             arcGISScene = arcGISScene,
             arcGISSceneAnchor = Point(-74.0, 40.72, 0.0, arcGISScene.spatialReference),
             translationFactor = 2000.0,
-            clippingDistance = 750.0,
             modifier = Modifier.fillMaxSize(),
+            clippingDistance = 750.0,
             tableTopSceneViewProxy = tableTopSceneViewProxy,
             sceneViewInteractionOptions = interactionOptions,
             onInitializationStatusChanged = {
