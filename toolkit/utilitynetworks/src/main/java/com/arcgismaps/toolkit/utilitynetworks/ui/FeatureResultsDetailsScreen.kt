@@ -1,20 +1,15 @@
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
-import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
-import androidx.compose.material.icons.filled.ZoomIn
-import androidx.compose.material.icons.sharp.ZoomIn
 import androidx.compose.material.icons.sharp.ZoomInMap
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -24,21 +19,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.geometry.Polyline
-import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 import com.arcgismaps.toolkit.utilitynetworks.R
-import com.arcgismaps.toolkit.utilitynetworks.StartingPoint
-import com.arcgismaps.toolkit.utilitynetworks.TraceRun
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.ExpandableCardWithLabel
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.TabRow
+import com.arcgismaps.toolkit.utilitynetworks.internal.util.UpButton
 import com.arcgismaps.utilitynetworks.UtilityElement
 
 @Composable
 internal fun FeatureResultsDetailsScreen(
-    traceRun: TraceRun,
+    selectedGroupName: String,
+    elementListWithSelectedGroupName: List<UtilityElement>,
     onFeatureSelected: (UtilityElement) -> Unit,
     onBackToNewTrace: () -> Unit,
     onBackToResults: () -> Unit
@@ -48,29 +41,36 @@ internal fun FeatureResultsDetailsScreen(
 
             TabRow(onBackToNewTrace, 1)
 
-            Column(
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(25.dp)
+            )
+
+            UpButton(stringResource(id = R.string.feature_results), onBackToResults)
+
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(20.dp)
+            )
+
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.Start,
-                verticalArrangement = Arrangement.Top
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
             ) {
-                Row(
-                    modifier = Modifier.clickable { onBackToResults() },
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
-                        contentDescription = "back",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = stringResource(id = R.string.feature_results),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
+                Text(
+                    modifier = Modifier
+                        .padding(start = 10.dp, end = 10.dp),
+                    text = selectedGroupName,
+                    style = MaterialTheme.typography.titleLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
-            FeatureList(traceRun.featureResults, onFeatureSelected)
+
+            FeatureList(elementListWithSelectedGroupName, onFeatureSelected)
         }
     }
 }
@@ -79,7 +79,7 @@ internal fun FeatureResultsDetailsScreen(
 private fun FeatureList(assetTypeList: List<UtilityElement>, onFeatureSelected: (UtilityElement) -> Unit) {
     Surface(modifier = Modifier.fillMaxWidth()) {
         Column {
-            ExpandableCardWithLabel(stringResource(R.string.attachement), value = assetTypeList.size.toString()) {
+            ExpandableCardWithLabel(assetTypeList[0].assetType.name, value = assetTypeList.size.toString()) {
                 Column {
                     assetTypeList.forEach { utilityElement ->
                         HorizontalDivider()

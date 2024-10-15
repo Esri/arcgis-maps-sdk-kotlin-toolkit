@@ -22,7 +22,7 @@ internal fun ExpandableCardWithLabel(title: String, value: String, content: @Com
             title,
             color = MaterialTheme.colorScheme.tertiary,
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
+            modifier = Modifier.padding(start = 20.dp, bottom = 8.dp)
         )
         ExpandableCard(
             initialExpandedState = false,

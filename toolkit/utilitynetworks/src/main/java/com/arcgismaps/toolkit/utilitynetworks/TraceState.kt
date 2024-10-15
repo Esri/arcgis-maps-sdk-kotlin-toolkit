@@ -120,7 +120,9 @@ public class TraceState(
      */
     internal val selectedStartingPoint: State<StartingPoint?> = _selectedStartingPoint
 
-    private var selectedGroupName: String? = null
+    private var _selectedGroupName: String? = null
+    internal val selectedGroupName: String?
+        get() = _selectedGroupName
 
     private val _currentTraceStartingPoints: SnapshotStateList<StartingPoint> = mutableStateListOf()
     internal val currentTraceStartingPoints: List<StartingPoint> = _currentTraceStartingPoints
@@ -522,7 +524,7 @@ public class TraceState(
     }
 
     internal fun setGroupName(name: String) {
-        selectedGroupName = name
+        _selectedGroupName = name
     }
 
     internal fun selectNextCompletedTrace() {
@@ -586,8 +588,8 @@ public class TraceState(
         )
     }
 
-    internal fun getElementsByAssetType(assetType: String): List<UtilityElement> {
-        return emptyList()
+    internal fun getAllElementsWithSelectedGroupName(): List<UtilityElement> {
+        return completedTraces[_selectedCompletedTraceIndex.value].featureResults.filter { it.assetGroup.name == selectedGroupName }
     }
 
     /**

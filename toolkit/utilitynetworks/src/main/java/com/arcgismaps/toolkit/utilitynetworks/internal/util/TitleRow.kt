@@ -53,9 +53,13 @@ internal fun Title(name: String, onZoomTo: () -> Unit, onDelete: () -> Unit) {
         horizontalArrangement = Arrangement.Center
     ) {
         Box {
-            Row(modifier = Modifier.clickable {
-                expanded = !expanded
-            }, verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier.clickable {
+                    expanded = !expanded
+                },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
                 Text(
                     modifier = Modifier
                         .padding(start = 10.dp, end = 10.dp)

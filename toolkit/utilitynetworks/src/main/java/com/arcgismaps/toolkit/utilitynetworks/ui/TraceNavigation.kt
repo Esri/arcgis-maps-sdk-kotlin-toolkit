@@ -115,9 +115,11 @@ internal fun TraceNavHost(traceState: TraceState) {
         }
         composable(TraceNavRoute.FeatureResultsDetails.name) {
             val coroutineScope = rememberCoroutineScope()
-            val traceRun = traceState.completedTraces[traceState.selectedCompletedTraceIndex.value]
+            val selectedGroupName = traceState.selectedGroupName
+            require(selectedGroupName != null)
             FeatureResultsDetailsScreen(
-                traceRun = traceRun,
+                selectedGroupName = selectedGroupName,
+                elementListWithSelectedGroupName = traceState.getAllElementsWithSelectedGroupName(),
                 onBackToResults = { traceState.showScreen(TraceNavRoute.TraceResults) },
                 onBackToNewTrace = { traceState.showScreen(TraceNavRoute.TraceOptions) },
                 onFeatureSelected = {
