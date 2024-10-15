@@ -576,11 +576,9 @@ public class TraceState(
         _currentTraceZoomToResults.value = zoom
     }
 
-    internal suspend fun zoomToUtilityElement(utilityElement: UtilityElement) {
-        val features = utilityNetwork.getFeaturesForElements(listOf(utilityElement)).getOrNull()
-            ?: throw IllegalArgumentException("could not create feature from utility element")
-        val geometry = features[0].geometry as? Geometry
-            ?: throw IllegalArgumentException("could not create geometry from feature")
+    internal suspend fun zoomToUtilityElement(utilityElement: UtilityElement) = runCatchingCancellable {
+        val features = utilityNetwork.getFeaturesForElements(listOf(utilityElement)).getOrThrow()
+        val geometry = features[0].geometry ?: return@runCatchingCancellable
         mapViewProxy.setViewpointAnimated(
             Viewpoint(geometry.extent),
             1.0.seconds,
