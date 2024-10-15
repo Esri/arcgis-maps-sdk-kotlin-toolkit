@@ -83,9 +83,11 @@ internal fun StartingPointDetailsScreen(
 ) {
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 10.dp),
             horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.Top
+            verticalArrangement = Arrangement.Top,
         ) {
 
             if (showResultsTab) {
@@ -93,7 +95,7 @@ internal fun StartingPointDetailsScreen(
                 Spacer(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(20.dp)
+                        .height(25.dp)
                 )
             }
 

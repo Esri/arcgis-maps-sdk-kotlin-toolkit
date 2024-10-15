@@ -40,7 +40,7 @@ internal fun UpButton(title: String,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            modifier = Modifier.padding(start = 16.dp),
+            modifier = Modifier.padding(start = 10.dp),
             imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
             contentDescription = "back",
             tint = MaterialTheme.colorScheme.primary
