@@ -21,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
 import com.arcgismaps.toolkit.utilitynetworks.AddStartingPointMode
 import com.arcgismaps.toolkit.utilitynetworks.TraceNavRoute
@@ -51,13 +52,11 @@ internal fun TraceNavHost(traceState: TraceState) {
                 showResultsTab = traceState.completedTraces.isNotEmpty(),
                 onPerformTraceButtonClicked = {
                     coroutineScope.launch {
-                        try {
-                            if (traceState.trace()) {
-                                traceState.showScreen(TraceNavRoute.TraceResults)
-                            }
-                        } catch (e: Exception) {
-                            // Handle error
-                            println("ERROR: running traceState.trace() threw an exception: $e")
+                        traceState.trace().onSuccess {
+                            traceState.showScreen(TraceNavRoute.TraceResults)
+                        }.onFailure {
+                            traceState.setCurrentError(it)
+                            traceState.showScreen(TraceNavRoute.TraceError)
                         }
                     }
                 },
@@ -77,10 +76,10 @@ internal fun TraceNavHost(traceState: TraceState) {
                 },
                 onNameChange = {
                     traceState.setTraceName(it)
-                               },
+                },
                 onColorChanged = {
                     traceState.setGraphicsColor(it)
-                                 },
+                },
                 onZoomRequested = {
                     traceState.setZoomToResults(it)
                 }
@@ -125,6 +124,14 @@ internal fun TraceNavHost(traceState: TraceState) {
                     coroutineScope.launch {
                         traceState.zoomToUtilityElement(it)
                     }
+                }
+            )
+        }
+        dialog(TraceNavRoute.TraceError.name) {
+            TraceErrorDialog(
+                error = traceState.currentError ?: return@dialog,
+                onConfirmation = {
+                    traceState.showScreen(TraceNavRoute.TraceOptions)
                 }
             )
         }

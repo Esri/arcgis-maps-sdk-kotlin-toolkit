@@ -17,7 +17,6 @@
 package com.arcgismaps.toolkit.utilitynetworks
 
 import android.graphics.drawable.BitmapDrawable
-import android.util.Log
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
@@ -72,7 +71,13 @@ public class TraceState(
     private val mapViewProxy: MapViewProxy
 ) {
 
-    private val _initializationStatus: MutableState<InitializationStatus> = mutableStateOf(InitializationStatus.NotInitialized)
+    private var _currentError: Throwable? = null
+    internal val currentError: Throwable?
+        get() = _currentError
+
+    private val _initializationStatus: MutableState<InitializationStatus> =
+        mutableStateOf(InitializationStatus.NotInitialized)
+
     /**
      * The status of the initialization of the state object.
      *
@@ -125,7 +130,7 @@ public class TraceState(
 
     private var currentTraceRun: TraceRun? = null
 
-    private val currentTraceGeometryResultsGraphics : MutableList<Graphic> = mutableListOf()
+    private val currentTraceGeometryResultsGraphics: MutableList<Graphic> = mutableListOf()
 
     private val _currentScreen: MutableState<TraceNavRoute> = mutableStateOf(TraceNavRoute.TraceOptions)
     internal var currentScreen: State<TraceNavRoute> = _currentScreen
@@ -157,25 +162,25 @@ public class TraceState(
     public var currentTraceZoomToResults: State<Boolean> = _currentTraceZoomToResults
 
     private val currentTraceResultGeometriesExtent: Envelope?
-    get() {
-        val utilityGeometryTraceResult = currentTraceRun?.geometryTraceResult ?: return null
+        get() {
+            val utilityGeometryTraceResult = currentTraceRun?.geometryTraceResult ?: return null
 
-        val geometries = listOf(
-            utilityGeometryTraceResult.polygon,
-            utilityGeometryTraceResult.polyline,
-            utilityGeometryTraceResult.multipoint
-        ).mapNotNull { geometry ->
-            if (geometry != null && !geometry.isEmpty) {
-                geometry
-            } else {
-                null
+            val geometries = listOf(
+                utilityGeometryTraceResult.polygon,
+                utilityGeometryTraceResult.polyline,
+                utilityGeometryTraceResult.multipoint
+            ).mapNotNull { geometry ->
+                if (geometry != null && !geometry.isEmpty) {
+                    geometry
+                } else {
+                    null
+                }
             }
-        }
-        val combinedExtents = GeometryEngine.combineExtentsOrNull(geometries) ?: return null
-        val expandedEnvelope = GeometryEngine.bufferOrNull(combinedExtents, 200.0) ?: return null
+            val combinedExtents = GeometryEngine.combineExtentsOrNull(geometries) ?: return null
+            val expandedEnvelope = GeometryEngine.bufferOrNull(combinedExtents, 200.0) ?: return null
 
-        return expandedEnvelope.extent
-    }
+            return expandedEnvelope.extent
+        }
 
     /**
      * Initializes the state object by loading the map, the Utility Networks contained in the map
@@ -184,27 +189,38 @@ public class TraceState(
      * @return the [Result] indicating if the initialization was successful or not
      * @since 200.6.0
      */
-    internal suspend fun initialize(): Result<Unit> {
+    internal suspend fun initialize(): Result<Unit> = runCatchingCancellable {
         if (_initializationStatus.value is InitializationStatus.Initialized) {
             return Result.success(Unit)
         }
         _initializationStatus.value = InitializationStatus.Initializing
-        var result = Result.success(Unit)
-        arcGISMap.load().onSuccess {
-            arcGISMap.utilityNetworks.forEach { utilityNetwork ->
-                utilityNetwork.load().onFailure { error ->
-                    result = Result.failure(error)
-                    _initializationStatus.value = InitializationStatus.FailedToInitialize(error)
-                }
-            }
-        }.onFailure {
-            result = Result.failure(it)
+        arcGISMap.load().getOrElse {
             _initializationStatus.value = InitializationStatus.FailedToInitialize(it)
+            throw it
         }
-        _utilityNetwork = arcGISMap.utilityNetworks.first()
-        _traceConfigurations.value = utilityNetwork.queryNamedTraceConfigurations().getOrThrow()
+        val utilityNetworks = arcGISMap.utilityNetworks
+        if (utilityNetworks.isEmpty()) {
+            val error = TraceToolException(TraceError.NO_UTILITY_NETWORK_FOUND)
+            _initializationStatus.value = InitializationStatus.FailedToInitialize(error)
+            throw error
+        }
+
+        utilityNetworks.forEach { utilityNetwork ->
+            utilityNetwork.load().getOrElse {
+                _initializationStatus.value = InitializationStatus.FailedToInitialize(it)
+                throw it
+            }
+        }
+        _utilityNetwork = utilityNetworks.first()
+        val traceConfigResult = utilityNetwork.queryNamedTraceConfigurations()
+        if (traceConfigResult.isFailure || traceConfigResult.getOrNull().isNullOrEmpty()) {
+            val error = TraceToolException(TraceError.NO_TRACE_CONFIGURATIONS_FOUND)
+            _initializationStatus.value = InitializationStatus.FailedToInitialize(error)
+            throw error
+        }
+        _traceConfigurations.value = traceConfigResult.getOrThrow()
+
         _initializationStatus.value = InitializationStatus.Initialized
-        return result
     }
 
     internal fun setSelectedTraceConfiguration(config: UtilityNamedTraceConfiguration) {
@@ -272,33 +288,27 @@ public class TraceState(
      * @return true if the trace results are available, false otherwise.
      * @since 200.6.0
      */
-    internal suspend fun trace() : Boolean {
+    internal suspend fun trace(): Result<Unit> = runCatchingCancellable {
         // Run a trace
-        val traceConfiguration = selectedTraceConfiguration.value ?: return false
+        val traceConfiguration = selectedTraceConfiguration.value
+            ?: throw TraceToolException(TraceError.NO_TRACE_CONFIGURATIONS_FOUND)
 
         if (currentTraceStartingPoints.isEmpty() && traceConfiguration.minimumStartingLocations == UtilityMinimumStartingLocations.One) {
-            // TODO: Handle error
-            Log.i("TraceState --", "ERROR: not enough starting points")
-            return false
+            throw TraceToolException(TraceError.NOT_ENOUGH_STARTING_POINTS_ONE)
         }
 
         if (currentTraceStartingPoints.size < 2 && traceConfiguration.minimumStartingLocations == UtilityMinimumStartingLocations.Many) {
-            // TODO: Handle error
-            Log.i("TraceState --", "ERROR: not enough starting points")
-            return false
+            throw TraceToolException(TraceError.NOT_ENOUGH_STARTING_POINTS_TWO)
         }
 
-        val utilityTraceParameters = UtilityTraceParameters(traceConfiguration, currentTraceStartingPoints.map { it.utilityElement })
+        val utilityTraceParameters =
+            UtilityTraceParameters(traceConfiguration, currentTraceStartingPoints.map { it.utilityElement })
 
         val traceResults = utilityNetwork.trace(utilityTraceParameters).getOrElse {
-            //handle error
-            println("ERROR: running trace" + it.message)
-            Log.i("TraceState --", "ERROR: running trace " + it.message)
-            emptyList<UtilityElementTraceResult>()
-            return false
+            throw it
         }
 
-        var currentTraceFunctionResults : List<UtilityTraceFunctionOutput> = emptyList()
+        var currentTraceFunctionResults: List<UtilityTraceFunctionOutput> = emptyList()
         var currentTraceElementResults: List<UtilityElement> = emptyList()
         var currentTraceGeometryResults: UtilityGeometryTraceResult? = null
 
@@ -356,12 +366,10 @@ public class TraceState(
             }
         }
         resetCurrentTrace()
-        return true
     }
 
     private fun resetCurrentTrace() {
         _selectedTraceConfiguration.value = null
-        _currentTraceStartingPoints.clear()
         currentTraceGeometryResultsGraphics.clear()
         _currentTraceName.value = ""
         currentTraceGraphicsColor = Color.green
@@ -408,26 +416,24 @@ public class TraceState(
      * This private method is called from a suspend function and so swallows any failures except
      * CancellationExceptions.
      */
-    private fun processAndAddStartingPoint(feature: ArcGISFeature, mapPoint: Point) = runCatchingCancellable {
+    private fun processAndAddStartingPoint(feature: ArcGISFeature, mapPoint: Point): Result<Unit> = runCatchingCancellable {
         val utilityElement = utilityNetwork.createElementOrNull(feature)
-            ?: throw IllegalArgumentException("could not create utility element from ArcGISFeature")
+            ?: return@runCatchingCancellable
 
         // Check if the starting point already exists
         if (_currentTraceStartingPoints.any { it.utilityElement.globalId == utilityElement.globalId }) {
-            // TODO: Handle error
-            throw IllegalArgumentException("starting point already exists")
+            throw TraceToolException(TraceError.STARTING_POINT_ALREADY_EXISTS)
         }
 
-        val symbol = (feature.featureTable?.layer as FeatureLayer)
-            .renderer
-            ?.getSymbol(feature)
-            ?: throw IllegalArgumentException("could not create drawable from feature symbol")
+        val symbol = (feature.featureTable?.layer as FeatureLayer).renderer?.getSymbol(feature)
+            ?: throw TraceToolException(TraceError.COULD_NOT_CREATE_DRAWABLE)
 
         val featureGeometry = feature.geometry
         if (utilityElement.networkSource.sourceType == UtilityNetworkSourceType.Edge && featureGeometry is Polyline) {
             utilityElement.fractionAlongEdge = fractionAlongEdge(featureGeometry, mapPoint)
         } else if (utilityElement.networkSource.sourceType == UtilityNetworkSourceType.Junction &&
-            (utilityElement.assetType.terminalConfiguration?.terminals?.size ?: 0) > 1) {
+            (utilityElement.assetType.terminalConfiguration?.terminals?.size ?: 0) > 1
+        ) {
             utilityElement.terminal = utilityElement.assetType.terminalConfiguration?.terminals?.first()
         }
 
@@ -453,14 +459,23 @@ public class TraceState(
             tolerance = 10.dp
         )
         result.onSuccess { identifyLayerResultList ->
+            val sizeBefore = currentTraceStartingPoints.size
             if (identifyLayerResultList.isNotEmpty()) {
                 identifyLayerResultList.forEach { identifyLayerResult ->
                     identifyLayerResult.geoElements.filterIsInstance<ArcGISFeature>().forEach { feature ->
-                        processAndAddStartingPoint(feature, mapPoint)
+                        processAndAddStartingPoint(feature, mapPoint).getOrElse {
+                            setCurrentError(it)
+                            _addStartingPointMode.value = AddStartingPointMode.Stopped
+                            showScreen(TraceNavRoute.TraceError)
+                            return
+                        }
                     }
                 }
-                _addStartingPointMode.value = AddStartingPointMode.Stopped
-                showScreen(TraceNavRoute.TraceOptions)
+                if (currentTraceStartingPoints.size > sizeBefore) {
+                    // If the size of the starting points has changed, then the starting point was added
+                    _addStartingPointMode.value = AddStartingPointMode.Stopped
+                    showScreen(TraceNavRoute.TraceOptions)
+                }
             }
         }
     }
@@ -555,6 +570,15 @@ public class TraceState(
     internal fun getElementsByAssetType(assetType: String): List<UtilityElement> {
         return emptyList()
     }
+
+    /**
+     * Set the [error] that occurred during the trace.
+     *
+     * @since 200.6.0
+     */
+    internal fun setCurrentError(error: Throwable) {
+        _currentError = error
+    }
 }
 
 /**
@@ -630,12 +654,18 @@ internal enum class TraceNavRoute {
     AddStartingPoint,
     TraceResults,
     FeatureResultsDetails,
-    StartingPointDetails
+    StartingPointDetails,
+    TraceError
     //TODO: Add FeatureAttributes route
 }
 
 @Immutable
-internal data class StartingPoint(val feature: ArcGISFeature, val utilityElement: UtilityElement, val symbol: Symbol, val graphic: Graphic) {
+internal data class StartingPoint(
+    val feature: ArcGISFeature,
+    val utilityElement: UtilityElement,
+    val symbol: Symbol,
+    val graphic: Graphic
+) {
     val name: String = utilityElement.assetType.name
 
     suspend fun getDrawable(screenScale: Float): BitmapDrawable =
