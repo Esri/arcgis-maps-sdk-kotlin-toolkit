@@ -35,6 +35,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.automirrored.sharp.ArrowBack
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.MoreVert
@@ -62,6 +63,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.toolkit.utilitynetworks.StartingPoint
+import com.arcgismaps.toolkit.utilitynetworks.internal.util.TabRow
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.Title
 import com.arcgismaps.toolkit.utilitynetworks.ui.material3.Slider
 import com.arcgismaps.utilitynetworks.UtilityNetworkSourceType
@@ -74,6 +76,8 @@ import com.arcgismaps.utilitynetworks.UtilityTerminal
  */
 @Composable
 internal fun StartingPointDetailsScreen(startingPoint: StartingPoint,
+                                        showResultsTab: Boolean,
+                                        onBackToResults: () -> Unit,
                                         onZoomTo: () -> Unit,
                                         onDelete: () -> Unit,
                                         onFractionChanged: (StartingPoint, Float) -> Unit,
@@ -84,6 +88,15 @@ internal fun StartingPointDetailsScreen(startingPoint: StartingPoint,
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Top) {
+
+            if (showResultsTab) {
+                TabRow(onBackToResults, 0)
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(20.dp)
+                )
+            }
 
             BackButton(onBackPressed)
 
@@ -134,15 +147,16 @@ private fun BackButton(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Image(
-            modifier = Modifier.padding(start = 12.dp),
-            imageVector = Icons.AutoMirrored.Sharp.ArrowBack,
-            contentDescription = "back"
+        Icon(
+            modifier = Modifier.padding(start = 16.dp),
+            imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
+            contentDescription = "back",
+            tint = MaterialTheme.colorScheme.primary
         )
         Text(
-            modifier = Modifier.padding(start = 8.dp),
             text = stringResource(id = R.string.starting_points),
             style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.primary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -157,11 +171,21 @@ private fun FractionAlongEdgeSlider(startingPoint: StartingPoint, onFractionChan
             .fillMaxWidth()
             .height(10.dp))
 
-        ReadOnlyTextField(stringResource(id = R.string.fraction_along_edge), modifier = Modifier.padding(horizontal = 10.dp))
-        Box (modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .background(color = MaterialTheme.colorScheme.background)) {
+        Text(
+            modifier = Modifier.padding(start = 25.dp),
+            text = stringResource(id = R.string.fraction_along_edge),
+            style = MaterialTheme.typography.titleMedium,
+        )
+        Box(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    shape = RoundedCornerShape(15.dp)
+                )
+        ) {
             Slider(
+                modifier = Modifier.padding(start = 10.dp, end = 10.dp),
                 value = sliderValue,
                 onValueChange = { newValue ->
                     sliderValue = newValue
@@ -180,12 +204,19 @@ private fun Attributes(startingPoint: StartingPoint) {
                 .fillMaxWidth()
                 .height(10.dp)
         )
-        ReadOnlyTextField(stringResource(id = R.string.attributes), modifier = Modifier.padding(horizontal = 10.dp))
+        Text(
+            modifier = Modifier.padding(start = 25.dp),
+            text = stringResource(id = R.string.attributes),
+            style = MaterialTheme.typography.titleMedium,
+        )
         Column(
             modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .fillMaxWidth()
-                .background(color = MaterialTheme.colorScheme.background)
+                .background(
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    shape = RoundedCornerShape(15.dp)
+                )
         ) {
             val attributes = startingPoint.feature.attributes.toSortedMap().toList()
             attributes.forEachIndexed { index, attribute ->
@@ -193,7 +224,7 @@ private fun Attributes(startingPoint: StartingPoint) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 10.dp)
-                        .background(color = MaterialTheme.colorScheme.background),
+                        .background(color = MaterialTheme.colorScheme.surfaceContainerHigh),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(

@@ -123,6 +123,8 @@ internal fun TraceNavHost(traceState: TraceState) {
             require(startingPoint != null)
             StartingPointDetailsScreen(
                 startingPoint,
+                showResultsTab = traceState.completedTraces.isNotEmpty(),
+                onBackToResults = { traceState.showScreen(TraceNavRoute.TraceResults) },
                 onZoomTo = {
                     coroutineScope.launch {
                         traceState.zoomToStartingPoint(startingPoint)
