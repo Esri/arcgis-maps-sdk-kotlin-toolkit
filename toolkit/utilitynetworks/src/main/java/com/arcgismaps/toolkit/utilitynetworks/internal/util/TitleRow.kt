@@ -57,7 +57,9 @@ internal fun Title(name: String, onZoomTo: () -> Unit, onDelete: () -> Unit) {
                 expanded = !expanded
             }, verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    modifier = Modifier.padding(start = 10.dp, end = 10.dp),
+                    modifier = Modifier
+                        .padding(start = 10.dp, end = 10.dp)
+                        .weight(1f),
                     text = name,
                     style = MaterialTheme.typography.titleLarge,
                     maxLines = 1,
