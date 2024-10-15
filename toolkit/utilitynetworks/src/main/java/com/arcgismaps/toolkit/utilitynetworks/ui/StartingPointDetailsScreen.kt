@@ -16,7 +16,6 @@
 
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -34,9 +33,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
-import androidx.compose.material.icons.automirrored.sharp.ArrowBack
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DropdownMenu
@@ -56,7 +52,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
@@ -65,6 +60,7 @@ import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.toolkit.utilitynetworks.StartingPoint
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.TabRow
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.Title
+import com.arcgismaps.toolkit.utilitynetworks.internal.util.UpButton
 import com.arcgismaps.toolkit.utilitynetworks.ui.material3.Slider
 import com.arcgismaps.utilitynetworks.UtilityNetworkSourceType
 import com.arcgismaps.utilitynetworks.UtilityTerminal
@@ -75,19 +71,22 @@ import com.arcgismaps.utilitynetworks.UtilityTerminal
  * @since 200.6.0
  */
 @Composable
-internal fun StartingPointDetailsScreen(startingPoint: StartingPoint,
-                                        showResultsTab: Boolean,
-                                        onBackToResults: () -> Unit,
-                                        onZoomTo: () -> Unit,
-                                        onDelete: () -> Unit,
-                                        onFractionChanged: (StartingPoint, Float) -> Unit,
-                                        onTerminalSelected: (UtilityTerminal) -> Unit,
-                                        onBackPressed: () -> Unit) {
+internal fun StartingPointDetailsScreen(
+    startingPoint: StartingPoint,
+    showResultsTab: Boolean,
+    onBackToResults: () -> Unit,
+    onZoomTo: () -> Unit,
+    onDelete: () -> Unit,
+    onFractionChanged: (StartingPoint, Float) -> Unit,
+    onTerminalSelected: (UtilityTerminal) -> Unit,
+    onBackPressed: () -> Unit
+) {
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.Top) {
+            verticalArrangement = Arrangement.Top
+        ) {
 
             if (showResultsTab) {
                 TabRow(onBackToResults, 0)
@@ -98,7 +97,7 @@ internal fun StartingPointDetailsScreen(startingPoint: StartingPoint,
                 )
             }
 
-            BackButton(onBackPressed)
+            UpButton(stringResource(id = R.string.starting_points), onBackPressed)
 
             Spacer(
                 modifier = Modifier
@@ -114,8 +113,9 @@ internal fun StartingPointDetailsScreen(startingPoint: StartingPoint,
                     .height(10.dp)
             )
 
-            LazyColumn(modifier = Modifier
-                .padding(vertical = 3.dp),
+            LazyColumn(
+                modifier = Modifier
+                    .padding(vertical = 3.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 if (startingPoint.utilityElement.networkSource.sourceType == UtilityNetworkSourceType.Edge) {
@@ -139,32 +139,10 @@ internal fun StartingPointDetailsScreen(startingPoint: StartingPoint,
 }
 
 @Composable
-private fun BackButton(
-    onBackPressed: () -> Unit
+private fun FractionAlongEdgeSlider(
+    startingPoint: StartingPoint,
+    onFractionChanged: (StartingPoint, Float) -> Unit
 ) {
-    Row(
-        modifier = Modifier.clickable { onBackPressed() },
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            modifier = Modifier.padding(start = 16.dp),
-            imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
-            contentDescription = "back",
-            tint = MaterialTheme.colorScheme.primary
-        )
-        Text(
-            text = stringResource(id = R.string.starting_points),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-    }
-}
-
-@Composable
-private fun FractionAlongEdgeSlider(startingPoint: StartingPoint, onFractionChanged: (StartingPoint, Float) -> Unit) {
     var sliderValue by remember { mutableFloatStateOf(startingPoint.utilityElement.fractionAlongEdge.toFloat()) }
     Column {
         Spacer(modifier = Modifier
@@ -172,7 +150,7 @@ private fun FractionAlongEdgeSlider(startingPoint: StartingPoint, onFractionChan
             .height(10.dp))
 
         Text(
-            modifier = Modifier.padding(start = 25.dp),
+            modifier = Modifier.padding(start = 24.dp),
             text = stringResource(id = R.string.fraction_along_edge),
             style = MaterialTheme.typography.titleMedium,
         )
@@ -205,7 +183,7 @@ private fun Attributes(startingPoint: StartingPoint) {
                 .height(10.dp)
         )
         Text(
-            modifier = Modifier.padding(start = 25.dp),
+            modifier = Modifier.padding(start = 24.dp),
             text = stringResource(id = R.string.attributes),
             style = MaterialTheme.typography.titleMedium,
         )
@@ -251,7 +229,10 @@ private fun Attributes(startingPoint: StartingPoint) {
 }
 
 @Composable
-private fun TerminalConfiguration(startingPoint: StartingPoint, onTerminalSelected: (UtilityTerminal) -> Unit) {
+private fun TerminalConfiguration(
+    startingPoint: StartingPoint,
+    onTerminalSelected: (UtilityTerminal) -> Unit
+) {
     var showDropdown by rememberSaveable {
         mutableStateOf(false)
     }
@@ -264,7 +245,12 @@ private fun TerminalConfiguration(startingPoint: StartingPoint, onTerminalSelect
         Spacer(modifier = Modifier
             .fillMaxWidth()
             .height(10.dp))
-        ReadOnlyTextField(stringResource(id = R.string.terminal_configuration), modifier = Modifier.padding(horizontal = 10.dp))
+
+        Text(
+            modifier = Modifier.padding(start = 24.dp),
+            text = stringResource(id = R.string.terminal_configuration),
+            style = MaterialTheme.typography.titleMedium,
+        )
         Column(
             modifier = Modifier
                 .padding(horizontal = 16.dp)
