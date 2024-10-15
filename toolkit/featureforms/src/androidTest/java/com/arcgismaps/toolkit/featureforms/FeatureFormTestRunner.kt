@@ -64,9 +64,6 @@ open class FeatureFormTestRunner(
         val featureLayer = map.operationalLayers.first() as? FeatureLayer
         assertThat(featureLayer).isNotNull()
         featureLayer!!.assertIsLoaded()
-        // Get the feature form definition
-        val featureFormDefinition = featureLayer.featureFormDefinition
-        assertThat(featureFormDefinition).isNotNull()
         // Query the feature
         val parameters = QueryParameters().also {
             it.objectIds.add(objectId)
@@ -80,7 +77,7 @@ open class FeatureFormTestRunner(
         assertThat(feature).isNotNull()
         feature!!.assertIsLoaded()
         // Initialize the feature form
-        featureForm = FeatureForm(feature, featureFormDefinition!!)
+        featureForm = FeatureForm(feature)
         featureForm.evaluateExpressions()
     }
 }
