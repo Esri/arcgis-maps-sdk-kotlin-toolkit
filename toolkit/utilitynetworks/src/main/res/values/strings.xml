@@ -29,7 +29,6 @@
     <string name="trace_result_with_count">Trace %1$d of %2$d</string>
     <string name="feature_results">Feature Results</string>
     <string name="function_results">Function Results</string>
-    <string name="attachement">Attachment</string>
     <string name="clear_all_results">Clear all results</string>
     <string name="delete">Delete</string>
     <string name="not_available">Not available</string>
