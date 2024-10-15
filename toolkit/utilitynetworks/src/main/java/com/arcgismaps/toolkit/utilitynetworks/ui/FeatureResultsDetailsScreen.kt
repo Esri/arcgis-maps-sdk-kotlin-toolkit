@@ -13,6 +13,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.material.icons.filled.ZoomIn
+import androidx.compose.material.icons.sharp.ZoomIn
+import androidx.compose.material.icons.sharp.ZoomInMap
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -29,6 +32,7 @@ import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.toolkit.utilitynetworks.StartingPoint
 import com.arcgismaps.toolkit.utilitynetworks.TraceRun
+import com.arcgismaps.toolkit.utilitynetworks.internal.util.ExpandableCardWithLabel
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.TabRow
 import com.arcgismaps.utilitynetworks.UtilityElement
 
@@ -75,7 +79,7 @@ internal fun FeatureResultsDetailsScreen(
 private fun FeatureList(assetTypeList: List<UtilityElement>, onFeatureSelected: (UtilityElement) -> Unit) {
     Surface(modifier = Modifier.fillMaxWidth()) {
         Column {
-            TraceResultSection(stringResource(R.string.attachement), value = assetTypeList.size.toString()) {
+            ExpandableCardWithLabel(stringResource(R.string.attachement), value = assetTypeList.size.toString()) {
                 Column {
                     assetTypeList.forEach { utilityElement ->
                         HorizontalDivider()
@@ -84,10 +88,14 @@ private fun FeatureList(assetTypeList: List<UtilityElement>, onFeatureSelected: 
                                 .fillMaxWidth()
                                 .padding(start = 32.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
                                 .clickable { onFeatureSelected(utilityElement) },
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
                         ) {
+                            Icon(
+                                imageVector = Icons.Sharp.ZoomInMap,
+                                contentDescription = "zoom in",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
                             Text(
+                                modifier = Modifier.padding(start = 10.dp),
                                 text = "Object ID: ${utilityElement.objectId}",
                                 style = MaterialTheme.typography.titleMedium,
                                 color = MaterialTheme.colorScheme.primary
@@ -96,30 +104,6 @@ private fun FeatureList(assetTypeList: List<UtilityElement>, onFeatureSelected: 
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-internal fun FeatureResultSection(title: String, value: String, content: @Composable () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 16.dp)
-    ) {
-        Text(
-            title,
-            color = Color.Gray,
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
-        )
-        ExpandableCard(
-            initialExpandedState = false,
-            title = value,
-            padding = PaddingValues(0.dp),
-            modifier = Modifier.padding(horizontal = 16.dp)
-        ) {
-            content()
         }
     }
 }

@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.toolkit.utilitynetworks.TraceRun
+import com.arcgismaps.toolkit.utilitynetworks.internal.util.ExpandableCardWithLabel
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.TabRow
 import com.arcgismaps.utilitynetworks.UtilityAssetGroup
 import com.arcgismaps.utilitynetworks.UtilityElement
@@ -202,7 +203,7 @@ private fun FeatureResult(featureResults: List<UtilityElement>, onFeatureAssetGr
 
     Surface(modifier = Modifier.fillMaxWidth()) {
         Column {
-            TraceResultSection(stringResource(R.string.feature_results), value = featureResults.size.toString()) {
+            ExpandableCardWithLabel(stringResource(R.string.feature_results), value = featureResults.size.toString()) {
                 Column {
                     assetGroupNames.forEach { assetGroupName ->
                         HorizontalDivider()
@@ -245,7 +246,7 @@ private fun elementsInAssetGroup(assetGroup: String, featureResults: List<Utilit
 private fun FunctionResult(functionResults: List<UtilityTraceFunctionOutput>) {
     Surface(modifier = Modifier.fillMaxWidth()) {
         Column {
-            TraceResultSection(stringResource(R.string.function_results), value = functionResults.size.toString()) {
+            ExpandableCardWithLabel(stringResource(R.string.function_results), value = functionResults.size.toString()) {
                 Column {
                     functionResults.forEach { functionResult ->
                         HorizontalDivider()
@@ -283,30 +284,6 @@ private fun formatDouble(value: Double): String {
         value.toInt().toString() // Return as int string if decimal part is 0
     } else {
         String.format("%.5f", value) // Return as double string with 5 decimal places
-    }
-}
-
-@Composable
-internal fun TraceResultSection(title: String, value: String, content: @Composable () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 16.dp)
-    ) {
-        Text(
-            title,
-            color = Color.Gray,
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
-        )
-        ExpandableCard(
-            initialExpandedState = false,
-            title = value,
-            padding = PaddingValues(0.dp),
-            modifier = Modifier.padding(horizontal = 16.dp)
-        ) {
-            content()
-        }
     }
 }
 
