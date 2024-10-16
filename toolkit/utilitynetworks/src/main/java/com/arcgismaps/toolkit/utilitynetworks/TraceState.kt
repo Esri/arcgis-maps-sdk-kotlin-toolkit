@@ -437,14 +437,18 @@ public class TraceState(
         val utilityElement = utilityNetwork.createElementOrNull(feature)
             ?: return@runCatchingCancellable
 
+        // Check if the starting point already exists
+        if (_currentTraceStartingPoints.any { it.utilityElement.globalId == utilityElement.globalId }) {
+            return@runCatchingCancellable
+        }
+
         val symbol = (feature.featureTable?.layer as FeatureLayer).renderer?.getSymbol(feature)
             ?: throw TraceToolException(TraceError.COULD_NOT_CREATE_DRAWABLE)
 
         val featureGeometry = feature.geometry
         if (utilityElement.networkSource.sourceType == UtilityNetworkSourceType.Edge && featureGeometry is Polyline) {
-            fractionAlongEdge(featureGeometry, mapPoint).takeIf { !it.isNaN() }?.let {
-                utilityElement.fractionAlongEdge = it
-            }
+            utilityElement.fractionAlongEdge =
+                fractionAlongEdge(featureGeometry, mapPoint).takeIf { !it.isNaN() } ?: return@runCatchingCancellable
         } else if (utilityElement.networkSource.sourceType == UtilityNetworkSourceType.Junction &&
             (utilityElement.assetType.terminalConfiguration?.terminals?.size ?: 0) > 1
         ) {
