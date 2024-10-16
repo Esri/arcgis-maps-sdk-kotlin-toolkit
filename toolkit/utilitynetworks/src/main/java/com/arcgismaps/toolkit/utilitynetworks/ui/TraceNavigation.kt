@@ -95,11 +95,11 @@ internal fun TraceNavHost(traceState: TraceState) {
         }
         composable(TraceNavRoute.TraceResults.name) {
             val coroutineScope = rememberCoroutineScope()
-            val selectedTraceRun = traceState.completedTraces[traceState.selectedCompletedTraceIndex.value]
+//            val selectedTraceRun = traceState.completedTraces[traceState.selectedCompletedTraceIndex.value]
             TraceResultScreen(
                 selectedTraceRunIndex = traceState.selectedCompletedTraceIndex.value,
                 traceResults = traceState.completedTraces,
-                selectedColor = selectedTraceRun.resultGraphicColor,
+                selectedColor = traceState.selectedTraceRunColor.value,
                 onSelectPreviousTraceResult = { traceState.selectPreviousCompletedTrace() },
                 onSelectNextTraceResult = { traceState.selectNextCompletedTrace() },
                 onBackToNewTrace = { traceState.showScreen(TraceNavRoute.TraceOptions) },
@@ -155,8 +155,8 @@ internal fun TraceNavHost(traceState: TraceState) {
         dialog(TraceNavRoute.ClearResults.name) {
             TraceClearAllResultsDialog (
                 onConfirmation = {
-                    traceState.clearAllResults()
                     traceState.showScreen(TraceNavRoute.TraceOptions)
+                    traceState.clearAllResults()
                 },
                 onDismiss = {
                     traceState.showScreen(TraceNavRoute.TraceResults)

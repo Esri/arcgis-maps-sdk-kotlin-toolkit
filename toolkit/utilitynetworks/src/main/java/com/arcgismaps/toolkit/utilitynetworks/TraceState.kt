@@ -161,6 +161,11 @@ public class TraceState(
             currentTraceGraphicsColor.alpha
         )
 
+    private var _selectedTraceRunColor: MutableState<androidx.compose.ui.graphics.Color> =
+        mutableStateOf(androidx.compose.ui.graphics.Color.Green)
+    internal val selectedTraceRunColor: State<androidx.compose.ui.graphics.Color> =
+        _selectedTraceRunColor
+
     private var _currentTraceZoomToResults: MutableState<Boolean> = mutableStateOf(true)
     public var currentTraceZoomToResults: State<Boolean> = _currentTraceZoomToResults
 
@@ -579,6 +584,7 @@ public class TraceState(
         )
         val selectedTraceRun = completedTraces[_selectedCompletedTraceIndex.value]
         selectedTraceRun.resultGraphicColor = currentTraceGraphicsColorAsComposeColor
+        _selectedTraceRunColor.value = currentTraceGraphicsColorAsComposeColor
 
         // update the color of the starting points
         selectedTraceRun.startingPoints.forEach { startingPoint ->

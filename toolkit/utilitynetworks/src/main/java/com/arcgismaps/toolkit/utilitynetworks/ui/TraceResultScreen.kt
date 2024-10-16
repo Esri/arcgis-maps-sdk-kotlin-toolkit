@@ -78,7 +78,7 @@ import com.arcgismaps.utilitynetworks.UtilityTraceFunctionOutput
 internal fun TraceResultScreen(
     selectedTraceRunIndex: Int,
     traceResults: List<TraceRun>,
-    selectedColor: Color,
+    selectedColor: androidx.compose.ui.graphics.Color,
     onSelectPreviousTraceResult: () -> Unit,
     onSelectNextTraceResult: () -> Unit,
     onBackToNewTrace: () -> Unit,
@@ -98,6 +98,7 @@ internal fun TraceResultScreen(
             }
 
             val selectedTraceRun = traceResults[selectedTraceRunIndex]
+//            val selectedColor = selectedTraceRun.resultGraphicColor
 
             TabRow(onBackToNewTrace, 1)
 
