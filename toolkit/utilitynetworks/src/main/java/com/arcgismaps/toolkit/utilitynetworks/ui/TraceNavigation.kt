@@ -95,9 +95,11 @@ internal fun TraceNavHost(traceState: TraceState) {
         }
         composable(TraceNavRoute.TraceResults.name) {
             val coroutineScope = rememberCoroutineScope()
+            val selectedTraceRun = traceState.completedTraces[traceState.selectedCompletedTraceIndex.value]
             TraceResultScreen(
                 selectedTraceRunIndex = traceState.selectedCompletedTraceIndex.value,
                 traceResults = traceState.completedTraces,
+                selectedColor = selectedTraceRun.resultGraphicColor,
                 onSelectPreviousTraceResult = { traceState.selectPreviousCompletedTrace() },
                 onSelectNextTraceResult = { traceState.selectNextCompletedTrace() },
                 onBackToNewTrace = { traceState.showScreen(TraceNavRoute.TraceOptions) },
@@ -118,9 +120,11 @@ internal fun TraceNavHost(traceState: TraceState) {
                         traceState.zoomToSelectedTrace()
                     }
                 },
+                onColorChanged = {
+                    traceState.setGraphicsColorForSelectedTraceRun(it)
+                },
                 onClearAllResults = {
-                    traceState.clearAllResults()
-                    traceState.showScreen(TraceNavRoute.TraceOptions)
+                    traceState.showScreen(TraceNavRoute.ClearResults)
                 }
             )
         }
@@ -145,6 +149,17 @@ internal fun TraceNavHost(traceState: TraceState) {
                 error = traceState.currentError ?: return@dialog,
                 onConfirmation = {
                     traceState.showScreen(TraceNavRoute.TraceOptions)
+                }
+            )
+        }
+        dialog(TraceNavRoute.ClearResults.name) {
+            TraceClearAllResultsDialog (
+                onConfirmation = {
+                    traceState.clearAllResults()
+                    traceState.showScreen(TraceNavRoute.TraceOptions)
+                },
+                onDismiss = {
+                    traceState.showScreen(TraceNavRoute.TraceResults)
                 }
             )
         }

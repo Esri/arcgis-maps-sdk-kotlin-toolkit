@@ -38,6 +38,9 @@
     <string name="terminal_configuration">Terminal Configuration</string>
     <string name="an_error_has_occurred">An error has occurred</string>
     <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+<!--    <string name="clear_all_results">Clear all results?</string>-->
+    <string name="clear_all_results_confirmation">All the trace inputs and results will be lost, proceed?</string>
 <!--Trace Tool Errors-->
     <string name="no_utility_network_found">No Utility Network found.</string>
     <string name="no_trace_configurations_found">No trace configurations found.</string>

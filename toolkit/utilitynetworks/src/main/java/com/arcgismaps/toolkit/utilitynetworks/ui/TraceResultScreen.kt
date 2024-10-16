@@ -78,12 +78,14 @@ import com.arcgismaps.utilitynetworks.UtilityTraceFunctionOutput
 internal fun TraceResultScreen(
     selectedTraceRunIndex: Int,
     traceResults: List<TraceRun>,
+    selectedColor: Color,
     onSelectPreviousTraceResult: () -> Unit,
     onSelectNextTraceResult: () -> Unit,
     onBackToNewTrace: () -> Unit,
     onFeatureGroupSelected: (String) -> Unit,
     onDeleteResult: () -> Unit,
     onZoomToResults: () -> Unit,
+    onColorChanged: (Color) -> Unit,
     onClearAllResults: () -> Unit
 ) {
     Surface(modifier = Modifier.fillMaxSize()) {
@@ -125,8 +127,8 @@ internal fun TraceResultScreen(
                 }
                 item {
                     AdvancedOptions(
-                        selectedColor = Color.Green,
-                        onColorChanged = {  }
+                        selectedColor = selectedColor,
+                        onColorChanged = onColorChanged
                     )
                 }
                 item {
