@@ -43,7 +43,7 @@ internal fun ExpandableCardWithLabel(title: String, value: String, content: @Com
             initialExpandedState = false,
             title = value,
             padding = PaddingValues(0.dp),
-            modifier = Modifier.padding(horizontal = 16.dp)
+            modifier = Modifier.padding(horizontal = 4.dp)
         ) {
             content()
         }

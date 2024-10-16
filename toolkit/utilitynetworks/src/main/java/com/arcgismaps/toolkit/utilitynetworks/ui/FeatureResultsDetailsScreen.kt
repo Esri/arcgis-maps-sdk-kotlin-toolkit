@@ -57,7 +57,9 @@ internal fun FeatureResultsDetailsScreen(
     onBackToResults: () -> Unit
 ) {
     Surface(modifier = Modifier.fillMaxSize()) {
-        Column {
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 10.dp)) {
 
             TabRow(onBackToNewTrace, 1)
 
