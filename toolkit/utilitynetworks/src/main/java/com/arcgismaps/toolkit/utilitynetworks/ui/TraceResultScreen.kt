@@ -18,13 +18,21 @@ package com.arcgismaps.toolkit.utilitynetworks.ui
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
@@ -32,14 +40,27 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.toolkit.utilitynetworks.TraceRun
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.ExpandableCardWithLabel
@@ -70,6 +91,10 @@ internal fun TraceResultScreen(
             .fillMaxSize()
             .padding(horizontal = 10.dp)) {
 
+            if (traceResults.isEmpty()) {
+                return@Column
+            }
+
             val selectedTraceRun = traceResults[selectedTraceRunIndex]
 
             TabRow(onBackToNewTrace, 1)
@@ -88,7 +113,8 @@ internal fun TraceResultScreen(
             Title(
                 selectedTraceRun.name,
                 onZoomTo = onZoomToResults,
-                onDelete = onDeleteResult
+                onDelete = onDeleteResult,
+                showZoomToOption = selectedTraceRun.geometryTraceResult != null
             )
             LazyColumn {
                 item {
@@ -96,6 +122,12 @@ internal fun TraceResultScreen(
                 }
                 item {
                     FunctionResult(selectedTraceRun.functionResults)
+                }
+                item {
+                    AdvancedOptions(
+                        selectedColor = Color.Green,
+                        onColorChanged = {  }
+                    )
                 }
                 item {
                     ClearAllResultsButton(onClearAllResults)
@@ -195,7 +227,7 @@ private fun FunctionResult(functionResults: List<UtilityTraceFunctionOutput>) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(start = 32.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
+                                .padding(start = 10.dp, end = 10.dp, top = 8.dp, bottom = 8.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -217,6 +249,57 @@ private fun FunctionResult(functionResults: List<UtilityTraceFunctionOutput>) {
                 }
             }
         }
+    }
+}
+
+/**
+ * A composable used to display the advanced options
+ *
+ * @since 200.6.0
+ */
+@Composable
+internal fun AdvancedOptions(
+    @Suppress("unused_parameter") modifier: Modifier = Modifier,
+    selectedColor: Color,
+    onColorChanged: (Color) -> Unit = {},
+) {
+    Spacer(modifier = Modifier
+        .height(20.dp)
+        .fillMaxWidth())
+    ExpandableCard(
+        title = stringResource(id = R.string.advanced_options),
+        toggleable = true,
+        initialExpandedState = false,
+        padding = PaddingValues(horizontal = 4.dp)
+    ) {
+        Column {
+            // Color picker
+            AdvancedOptionsRow(name = stringResource(id = R.string.color)) {
+                ColorPicker(selectedColor, onColorChanged)
+            }
+        }
+    }
+}
+
+@Composable
+private fun AdvancedOptionsRow(name: String, modifier: Modifier = Modifier, trailingTool: @Composable () -> Unit) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(80.dp)
+            .padding(10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        ReadOnlyTextField(
+            text = name,
+            modifier = Modifier
+                .padding(horizontal = 2.dp)
+                .weight(1f)
+                .align(Alignment.CenterVertically),
+        )
+
+        trailingTool()
     }
 }
 

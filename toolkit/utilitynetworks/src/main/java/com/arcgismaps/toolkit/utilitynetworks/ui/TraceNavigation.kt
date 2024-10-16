@@ -94,22 +94,33 @@ internal fun TraceNavHost(traceState: TraceState) {
             )
         }
         composable(TraceNavRoute.TraceResults.name) {
+            val coroutineScope = rememberCoroutineScope()
             TraceResultScreen(
                 selectedTraceRunIndex = traceState.selectedCompletedTraceIndex.value,
                 traceResults = traceState.completedTraces,
                 onSelectPreviousTraceResult = { traceState.selectPreviousCompletedTrace() },
-                onSelectNextTraceResult = { traceState.selectNextCompletedTrace()  },
+                onSelectNextTraceResult = { traceState.selectNextCompletedTrace() },
                 onBackToNewTrace = { traceState.showScreen(TraceNavRoute.TraceOptions) },
                 onFeatureGroupSelected = {
                     traceState.setGroupName(it)
                     traceState.showScreen(TraceNavRoute.FeatureResultsDetails)
                 },
                 onDeleteResult = {
-
-                }, onZoomToResults = {
-
-                }, onClearAllResults = {
-
+                    if (traceState.selectedCompletedTraceIndex.value == 0) {
+                        traceState.clearSelectedTraceResult()
+                        traceState.showScreen(TraceNavRoute.TraceOptions)
+                    } else {
+                        traceState.clearSelectedTraceResult()
+                    }
+                },
+                onZoomToResults = {
+                    coroutineScope.launch {
+                        traceState.zoomToSelectedTrace()
+                    }
+                },
+                onClearAllResults = {
+                    traceState.clearAllResults()
+                    traceState.showScreen(TraceNavRoute.TraceOptions)
                 }
             )
         }
@@ -149,7 +160,8 @@ internal fun TraceNavHost(traceState: TraceState) {
                     coroutineScope.launch {
                         traceState.zoomToStartingPoint(startingPoint)
                     }
-                }, onDelete = {
+                },
+                onDelete = {
                     traceState.removeStartingPoint(startingPoint)
                     traceState.showScreen(TraceNavRoute.TraceOptions)
                 },
