@@ -84,8 +84,6 @@ internal fun FeatureResultsDetailsScreen(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
-                    modifier = Modifier
-                        .padding(start = 10.dp, end = 10.dp),
                     text = selectedGroupName,
                     style = MaterialTheme.typography.titleLarge,
                     maxLines = 1,
@@ -122,7 +120,7 @@ private fun FeatureList(assetTypeList: List<UtilityElement>, onFeatureSelected: 
                             )
                             Text(
                                 modifier = Modifier.padding(start = 10.dp),
-                                text = "Object ID: ${utilityElement.objectId}",
+                                text = "${stringResource(R.string.object_id)}: ${utilityElement.objectId}",
                                 style = MaterialTheme.typography.titleMedium,
                                 color = MaterialTheme.colorScheme.primary
                             )

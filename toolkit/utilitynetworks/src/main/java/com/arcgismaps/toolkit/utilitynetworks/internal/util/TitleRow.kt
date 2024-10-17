@@ -52,31 +52,29 @@ internal fun Title(name: String, onZoomTo: () -> Unit, onDelete: () -> Unit) {
             .padding(top = 16.dp),
         horizontalArrangement = Arrangement.Center
     ) {
-        Row(
-            modifier = Modifier.clickable {
-                expanded = !expanded
-            },
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Box(
-                modifier = Modifier.weight(1f),
-                contentAlignment = Alignment.Center
+        Box {
+            Row(
+                modifier = Modifier.clickable {
+                    expanded = !expanded
+                },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
             ) {
                 Text(
                     modifier = Modifier
-                        .padding(start = 10.dp),
+                        .padding(start = 10.dp)
+                        .weight(1f),
                     text = name,
                     style = MaterialTheme.typography.titleLarge,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+                Icon(
+                    modifier = Modifier.padding(end = 10.dp),
+                    imageVector = Icons.Outlined.MoreVert,
+                    contentDescription = ""
+                )
             }
-            Icon(
-                modifier = Modifier.padding(end = 10.dp),
-                imageVector = Icons.Outlined.MoreVert,
-                contentDescription = ""
-            )
         }
         MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp))) {
             DropdownMenu(

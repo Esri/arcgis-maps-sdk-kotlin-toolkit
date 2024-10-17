@@ -141,7 +141,10 @@ private fun getTraceCounterString(currentTraceResult: Int, totalTraceResults: In
 
 @Composable
 private fun FeatureResult(featureResults: List<UtilityElement>, onFeatureAssetGroupSelected: (String) -> Unit) {
-    val assetGroupNames = featureResults.map { it.assetGroup.name }.distinct()
+    val assetGroupNames = featureResults
+        .map { it.assetGroup.name }
+        .filter { it.isNotEmpty() }
+        .distinct()
 
     Surface(modifier = Modifier.fillMaxWidth()) {
         Column {
