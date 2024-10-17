@@ -17,6 +17,7 @@
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -78,7 +79,6 @@ import com.arcgismaps.utilitynetworks.UtilityTraceFunctionOutput
 internal fun TraceResultScreen(
     selectedTraceRunIndex: Int,
     traceResults: List<TraceRun>,
-    selectedColor: androidx.compose.ui.graphics.Color,
     onSelectPreviousTraceResult: () -> Unit,
     onSelectNextTraceResult: () -> Unit,
     onBackToNewTrace: () -> Unit,
@@ -98,7 +98,13 @@ internal fun TraceResultScreen(
             }
 
             val selectedTraceRun = traceResults[selectedTraceRunIndex]
-//            val selectedColor = selectedTraceRun.resultGraphicColor
+            var selectedColor by remember { mutableStateOf(selectedTraceRun.resultGraphicColor) }
+
+            LaunchedEffect(selectedTraceRunIndex) {
+                selectedColor = selectedTraceRun.resultGraphicColor
+            }
+            Log.i("TraceResultScreen --", "selectedTraceRunIndex: $selectedTraceRunIndex")
+            Log.i("TraceResultScreen --", "selectedColor: $selectedColor")
 
             TabRow(onBackToNewTrace, 1)
 
@@ -277,15 +283,22 @@ internal fun AdvancedOptions(
     ) {
         Column {
             // Color picker
-            AdvancedOptionsRow(name = stringResource(id = R.string.color)) {
-                ColorPicker(selectedColor, onColorChanged)
-            }
+            AdvancedOptionsRow(
+                name = stringResource(id = R.string.color),
+                selectedColor = selectedColor,
+                onColorChanged = onColorChanged
+            )
         }
     }
 }
 
 @Composable
-private fun AdvancedOptionsRow(name: String, modifier: Modifier = Modifier, trailingTool: @Composable () -> Unit) {
+private fun AdvancedOptionsRow(
+    name: String,
+    selectedColor: Color,
+    onColorChanged: (Color) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -301,8 +314,7 @@ private fun AdvancedOptionsRow(name: String, modifier: Modifier = Modifier, trai
                 .weight(1f)
                 .align(Alignment.CenterVertically),
         )
-
-        trailingTool()
+        ColorPicker(selectedColor, onColorChanged)
     }
 }
 

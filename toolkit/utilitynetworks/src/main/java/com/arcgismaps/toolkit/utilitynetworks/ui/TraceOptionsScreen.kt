@@ -15,6 +15,7 @@
  */
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -433,7 +434,11 @@ internal fun AdvancedOptions(
  */
 @Composable
 internal fun ColorPicker(selectedColor: Color, onColorChanged: (Color) -> Unit = {}) {
+    Log.i("TraceResultScreen -- traceoptions", "ColorPicker selectedColor: $selectedColor")
     var currentSelectedColor by rememberSaveable(saver = ColorSaver.Saver()) { mutableStateOf(selectedColor) }
+    LaunchedEffect(selectedColor) {
+        currentSelectedColor = selectedColor
+    }
     var displayPicker by rememberSaveable { mutableStateOf(false) }
     Box {
         TraceColors.SpectralRing(
