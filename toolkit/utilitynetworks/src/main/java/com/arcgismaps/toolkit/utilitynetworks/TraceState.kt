@@ -181,6 +181,12 @@ public class TraceState(
             return expandedEnvelope.extent
         }
 
+    private var navigateToRoute: ((TraceNavRoute) -> Unit)? = null
+
+    internal fun setNavigationCallback(navigateToRoute: (TraceNavRoute) -> Unit) {
+        this.navigateToRoute = navigateToRoute
+    }
+
     /**
      * Initializes the state object by loading the map, the Utility Networks contained in the map
      * and its trace configurations.
@@ -232,7 +238,7 @@ public class TraceState(
     }
 
     internal fun showScreen(screen: TraceNavRoute) {
-        _currentScreen.value = screen
+        navigateToRoute?.invoke(screen)
     }
 
     /**
