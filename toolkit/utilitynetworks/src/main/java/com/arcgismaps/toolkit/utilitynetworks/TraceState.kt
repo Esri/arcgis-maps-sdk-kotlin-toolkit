@@ -445,7 +445,7 @@ public class TraceState(
 
         // Check if the starting point already exists
         if (_currentTraceStartingPoints.any { it.utilityElement.globalId == utilityElement.globalId }) {
-            throw TraceToolException(TraceError.STARTING_POINT_ALREADY_EXISTS)
+            return@runCatchingCancellable
         }
 
         val symbol = (feature.featureTable?.layer as FeatureLayer).renderer?.getSymbol(feature)
@@ -453,7 +453,8 @@ public class TraceState(
 
         val featureGeometry = feature.geometry
         if (utilityElement.networkSource.sourceType == UtilityNetworkSourceType.Edge && featureGeometry is Polyline) {
-            utilityElement.fractionAlongEdge = fractionAlongEdge(featureGeometry, mapPoint)
+            utilityElement.fractionAlongEdge =
+                fractionAlongEdge(featureGeometry, mapPoint).takeIf { !it.isNaN() } ?: return@runCatchingCancellable
         } else if (utilityElement.networkSource.sourceType == UtilityNetworkSourceType.Junction &&
             (utilityElement.assetType.terminalConfiguration?.terminals?.size ?: 0) > 1
         ) {
