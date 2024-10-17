@@ -72,7 +72,7 @@ public class TraceState(
     private val mapViewProxy: MapViewProxy
 ) {
 
-    private  var _currentError: Throwable? = null
+    private var _currentError: Throwable? = null
     internal val currentError: Throwable?
         get() = _currentError
 
