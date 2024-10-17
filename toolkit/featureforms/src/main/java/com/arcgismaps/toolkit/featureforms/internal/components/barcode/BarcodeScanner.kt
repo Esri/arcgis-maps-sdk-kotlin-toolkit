@@ -19,6 +19,7 @@ package com.arcgismaps.toolkit.featureforms.internal.components.barcode
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import androidx.camera.core.FocusMeteringAction
 import androidx.camera.core.ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST
 import androidx.camera.core.resolutionselector.ResolutionSelector
 import androidx.camera.core.resolutionselector.ResolutionStrategy
@@ -91,6 +92,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import com.arcgismaps.toolkit.featureforms.R
 import kotlinx.coroutines.delay
+import java.util.concurrent.TimeUnit
 
 private const val SCANNER_FRAME_WIDTH = 300
 private const val SCANNER_FRAME_HEIGHT = 300
@@ -119,7 +121,12 @@ internal fun BarcodeScanner(
     var barcodeInfoList by remember { mutableStateOf<List<BarcodeInfo>>(emptyList()) }
     // State to automatically scan the barcode if only one barcode is detected
     var autoScanBarcode by remember { mutableStateOf<BarcodeInfo?>(null) }
-
+    // A preview view to display the camera feed
+    val previewView = remember {
+        PreviewView(context).apply {
+            controller = cameraController
+        }
+    }
     if (!permissionsGranted) {
         PermissionsDeniedDialog(onDismiss = onDismiss)
     } else {
@@ -133,22 +140,30 @@ internal fun BarcodeScanner(
             Box(modifier = Modifier.fillMaxSize()) {
                 AndroidView(
                     modifier = Modifier.fillMaxSize(),
-                    factory = { ctx ->
-                        PreviewView(ctx).apply {
-                            controller = cameraController
-                        }
+                    factory = { previewView },
+                    onRelease = { cameraController.unbind() }
+                )
+                BarcodeFrame(
+                    modifier = Modifier.fillMaxSize(),
+                    frame = scannerFrame,
+                    info = barcodeInfoList,
+                    onTap = { offset ->
+                        // Handle focus on tap
+                        val factory = previewView.meteringPointFactory
+                        val action = FocusMeteringAction
+                            .Builder(factory.createPoint(offset.x, offset.y))
+                            .setAutoCancelDuration(3, TimeUnit.SECONDS)
+                            .build()
+                        cameraController.cameraControl?.startFocusAndMetering(action)
                     },
-                    onRelease = {
+                    onSelected = { code ->
+                        // Handle tap on barcode
+                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                        // Unbind the camera controller to stop processing frames
                         cameraController.unbind()
+                        onScan(code.rawValue)
                     }
                 )
-                BarcodeFrame(scannerFrame, barcodeInfoList) { code ->
-                    // Handle tap on barcode
-                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-                    // Unbind the camera controller to stop processing frames
-                    cameraController.unbind()
-                    onScan(code.rawValue)
-                }
                 BarcodeToolbar(cameraController = cameraController, onDismiss = onDismiss)
             }
         }
@@ -239,11 +254,21 @@ private fun PermissionsDeniedDialog(onDismiss: () -> Unit) {
     }
 }
 
+/**
+ * A composable that displays the barcode frame and detected barcodes.
+ *
+ * @param frame The frame that represents the area where the barcode should be detected.
+ * @param info The list of detected barcodes.
+ * @param onTap The callback to handle tap on the barcode frame.
+ * @param onSelected The callback to handle tap on a detected barcode.
+ */
 @Composable
 private fun BarcodeFrame(
     frame: Rect,
     info: List<BarcodeInfo>,
-    onTap: (BarcodeInfo) -> Unit
+    onTap: (Offset) -> Unit,
+    onSelected: (BarcodeInfo) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     // save the latest barcodes
     val barcodes by rememberUpdatedState(newValue = info)
@@ -254,17 +279,18 @@ private fun BarcodeFrame(
     val titleTextStyle = MaterialTheme.typography.titleSmall.copy(
         color = Color.White
     )
-    Canvas(modifier = Modifier
-        .fillMaxSize()
-        .pointerInput(Unit) {
+    Canvas(
+        modifier = modifier.pointerInput(Unit) {
             detectTapGestures { offset ->
-                barcodes
-                    .firstOrNull {
-                        it.boundingBox?.contains(offset) == true
-                    }
-                    ?.let { barcode ->
-                        onTap(barcode)
-                    }
+                // Check if the tap is on a barcode
+                val barcode = barcodes.firstOrNull {
+                    it.boundingBox?.contains(offset) == true
+                }
+                if (barcode != null) {
+                    onSelected(barcode)
+                } else if (frame.contains(offset)) {
+                    onTap(offset)
+                }
             }
         }
     ) {
@@ -412,5 +438,5 @@ private fun hasCameraPermissions(context: Context): Boolean = ContextCompat.chec
 @Preview(showBackground = true, device = Devices.PIXEL_7_PRO)
 private fun BarcodeFramePreview() {
     val frame = getFrameRect(width = SCANNER_FRAME_WIDTH.dp, height = SCANNER_FRAME_HEIGHT.dp)
-    BarcodeFrame(frame, emptyList()) {}
+    BarcodeFrame(frame, emptyList(), {}, {})
 }

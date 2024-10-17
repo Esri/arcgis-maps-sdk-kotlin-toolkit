@@ -339,7 +339,6 @@ internal fun FeatureFormDialog(states: FormStateCollection) {
             BarcodeScanner(
                 onScan = {
                     state.onValueChanged(it)
-                    state.onFocusChanged(true)
                     dialogRequester.dismissDialog()
                 },
                 onDismiss = {
