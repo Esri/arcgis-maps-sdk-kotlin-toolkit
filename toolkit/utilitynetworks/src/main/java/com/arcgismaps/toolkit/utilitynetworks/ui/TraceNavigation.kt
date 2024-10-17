@@ -101,7 +101,7 @@ internal fun TraceNavHost(traceState: TraceState) {
                 onSelectNextTraceResult = { traceState.selectNextCompletedTrace()  },
                 onBackToNewTrace = { traceState.showScreen(TraceNavRoute.TraceOptions) },
                 onFeatureGroupSelected = {
-                    traceState.setGroupName(it)
+                    traceState.setAssetGroupName(it)
                     traceState.showScreen(TraceNavRoute.FeatureResultsDetails)
                 },
                 onDeleteResult = {
@@ -115,11 +115,9 @@ internal fun TraceNavHost(traceState: TraceState) {
         }
         composable(TraceNavRoute.FeatureResultsDetails.name) {
             val coroutineScope = rememberCoroutineScope()
-            val selectedGroupName = traceState.selectedGroupName
-            require(selectedGroupName != null)
             FeatureResultsDetailsScreen(
-                selectedGroupName = selectedGroupName,
-                elementListWithSelectedGroupName = traceState.getAllElementsWithSelectedGroupName(),
+                selectedGroupName = traceState.selectedAssetGroupName,
+                elementListWithSelectedGroupName = traceState.getAllElementsWithSelectedAssetGroupName(),
                 onBackToResults = { traceState.showScreen(TraceNavRoute.TraceResults) },
                 onBackToNewTrace = { traceState.showScreen(TraceNavRoute.TraceOptions) },
                 onFeatureSelected = {

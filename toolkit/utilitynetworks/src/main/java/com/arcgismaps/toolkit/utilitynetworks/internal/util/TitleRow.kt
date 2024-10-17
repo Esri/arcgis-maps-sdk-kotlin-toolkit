@@ -52,59 +52,67 @@ internal fun Title(name: String, onZoomTo: () -> Unit, onDelete: () -> Unit) {
             .padding(top = 16.dp),
         horizontalArrangement = Arrangement.Center
     ) {
-        Box {
-            Row(
-                modifier = Modifier.clickable {
-                    expanded = !expanded
-                },
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+        Row(
+            modifier = Modifier.clickable {
+                expanded = !expanded
+            },
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Box(
+                modifier = Modifier.weight(1f),
+                contentAlignment = Alignment.Center
             ) {
                 Text(
                     modifier = Modifier
-                        .padding(start = 10.dp, end = 10.dp)
-                        .weight(1f),
+                        .padding(start = 10.dp),
                     text = name,
                     style = MaterialTheme.typography.titleLarge,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                Icon(
-                    modifier = Modifier.padding(end = 10.dp),
-                    imageVector = Icons.Outlined.MoreVert,
-                    contentDescription = ""
-                )
             }
-            MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp))) {
-                DropdownMenu(
-                    modifier = Modifier.padding(start = 8.dp, end = 16.dp),
-                    expanded = expanded,
-                    onDismissRequest = {
+            Icon(
+                modifier = Modifier.padding(end = 10.dp),
+                imageVector = Icons.Outlined.MoreVert,
+                contentDescription = ""
+            )
+        }
+        MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp))) {
+            DropdownMenu(
+                modifier = Modifier.padding(start = 8.dp, end = 16.dp),
+                expanded = expanded,
+                onDismissRequest = {
+                    expanded = false
+                }) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.zoom_to)) },
+                    onClick = {
                         expanded = false
-                    }) {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.zoom_to)) },
-                        onClick = {
-                            expanded = false
-                            onZoomTo()
-                        },
-                        leadingIcon = { Icon(
+                        onZoomTo()
+                    },
+                    leadingIcon = {
+                        Icon(
                             Icons.Outlined.LocationOn, contentDescription = stringResource(
-                                R.string.zoom_to)
-                        ) }
-                    )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.delete)) },
-                        onClick = {
-                            expanded = false
-                            onDelete()
-                        },
-                        leadingIcon = { Icon(
+                                R.string.zoom_to
+                            )
+                        )
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.delete)) },
+                    onClick = {
+                        expanded = false
+                        onDelete()
+                    },
+                    leadingIcon = {
+                        Icon(
                             Icons.Outlined.Clear, contentDescription = stringResource(
-                                R.string.delete)
-                        ) }
-                    )
-                }
+                                R.string.delete
+                            )
+                        )
+                    }
+                )
             }
         }
     }
