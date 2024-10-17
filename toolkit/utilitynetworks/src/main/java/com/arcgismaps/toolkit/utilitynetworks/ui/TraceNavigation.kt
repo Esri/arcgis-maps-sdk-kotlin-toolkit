@@ -156,7 +156,7 @@ internal fun TraceNavHost(traceState: TraceState) {
 
 private fun NavHostController.navigateTo(traceNavRoute: TraceNavRoute) {
     navigate(traceNavRoute.name) {
-        this.popUpTo(
+        popUpTo(
             graph.findStartDestination().id
         )
         launchSingleTop = true
