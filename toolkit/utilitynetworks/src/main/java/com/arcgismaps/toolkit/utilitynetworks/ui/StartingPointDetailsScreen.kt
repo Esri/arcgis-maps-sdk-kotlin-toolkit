@@ -16,6 +16,7 @@
 
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -81,6 +82,9 @@ internal fun StartingPointDetailsScreen(
     onTerminalSelected: (UtilityTerminal) -> Unit,
     onBackPressed: () -> Unit
 ) {
+    BackHandler {
+        onBackPressed()
+    }
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
