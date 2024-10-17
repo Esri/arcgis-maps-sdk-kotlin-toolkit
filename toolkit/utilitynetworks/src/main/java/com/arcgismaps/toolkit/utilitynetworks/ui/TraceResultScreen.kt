@@ -21,7 +21,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -42,9 +41,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.toolkit.utilitynetworks.TraceRun
+import com.arcgismaps.toolkit.utilitynetworks.internal.util.ExpandableCardWithLabel
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.TabRow
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.Title
 import com.arcgismaps.utilitynetworks.UtilityElement
@@ -62,6 +61,7 @@ internal fun TraceResultScreen(
     onSelectPreviousTraceResult: () -> Unit,
     onSelectNextTraceResult: () -> Unit,
     onBackToNewTrace: () -> Unit,
+    onFeatureGroupSelected: (String) -> Unit,
     onDeleteResult: () -> Unit,
     onZoomToResults: () -> Unit,
     onClearAllResults: () -> Unit
@@ -97,7 +97,7 @@ internal fun TraceResultScreen(
             )
             LazyColumn {
                 item {
-                    FeatureResult(selectedTraceRun.featureResults)
+                    FeatureResult(selectedTraceRun.featureResults, onFeatureGroupSelected)
                 }
                 item {
                     FunctionResult(selectedTraceRun.functionResults)
@@ -145,29 +145,39 @@ private fun getTraceCounterString(currentTraceResult: Int, totalTraceResults: In
 }
 
 @Composable
-private fun FeatureResult(featureResults: List<UtilityElement>) {
-    val assetGroupNames = featureResults.map { it.assetGroup.name }.distinct()
+private fun FeatureResult(featureResults: List<UtilityElement>, onFeatureAssetGroupSelected: (String) -> Unit) {
+    val assetGroupNames = featureResults
+        .map { it.assetGroup.name }
+        .filter { it.isNotEmpty() }
+        .distinct()
 
     Surface(modifier = Modifier.fillMaxWidth()) {
         Column {
-            TraceResultSection(stringResource(R.string.feature_results), value = featureResults.size.toString()) {
+            ExpandableCardWithLabel(stringResource(R.string.feature_results), value = featureResults.size.toString()) {
                 Column {
                     assetGroupNames.forEach { assetGroupName ->
                         HorizontalDivider()
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(start = 32.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
+                                .padding(start = 32.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
+                                .clickable { onFeatureAssetGroupSelected(assetGroupName) },
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(text = assetGroupName, style = MaterialTheme.typography.titleMedium)
+                            Text(
+                                text = assetGroupName,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.primary
+                            )
                             Column(horizontalAlignment = Alignment.End) {
                                 Text(
                                     text = elementsInAssetGroup(
                                         assetGroupName,
                                         featureResults
-                                    ).size.toString(), style = MaterialTheme.typography.titleMedium
+                                    ).size.toString(),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.primary
                                 )
                             }
                         }
@@ -186,7 +196,7 @@ private fun elementsInAssetGroup(assetGroup: String, featureResults: List<Utilit
 private fun FunctionResult(functionResults: List<UtilityTraceFunctionOutput>) {
     Surface(modifier = Modifier.fillMaxWidth()) {
         Column {
-            TraceResultSection(stringResource(R.string.function_results), value = functionResults.size.toString()) {
+            ExpandableCardWithLabel(stringResource(R.string.function_results), value = functionResults.size.toString()) {
                 Column {
                     functionResults.forEach { functionResult ->
                         HorizontalDivider()
@@ -224,30 +234,6 @@ private fun formatDouble(value: Double): String {
         value.toInt().toString() // Return as int string if decimal part is 0
     } else {
         String.format("%.5f", value) // Return as double string with 5 decimal places
-    }
-}
-
-@Composable
-internal fun TraceResultSection(title: String, value: String, content: @Composable () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 16.dp)
-    ) {
-        Text(
-            title,
-            color = Color.Gray,
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
-        )
-        ExpandableCard(
-            initialExpandedState = false,
-            title = value,
-            padding = PaddingValues(0.dp),
-            modifier = Modifier.padding(horizontal = 16.dp)
-        ) {
-            content()
-        }
     }
 }
 
