@@ -75,7 +75,7 @@ fun MainScreen() {
             }
         }
     }
-    // disable pan/zoom/rotate interaction
+    // disable pan/zoom/rotate interaction. These interactions can behave unexpectedly in TableTop scenarios
     val interactionOptions = remember {
         SceneViewInteractionOptions().apply {
             this.isPanEnabled = false
