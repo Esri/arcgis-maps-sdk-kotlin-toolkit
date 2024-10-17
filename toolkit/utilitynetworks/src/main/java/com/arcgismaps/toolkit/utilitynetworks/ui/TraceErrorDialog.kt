@@ -25,9 +25,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.core.content.ContextCompat.getString
 import com.arcgismaps.toolkit.utilitynetworks.R
-import com.arcgismaps.toolkit.utilitynetworks.TraceToolException
 import com.arcgismaps.toolkit.utilitynetworks.getErrorMessage
 
 @Composable
