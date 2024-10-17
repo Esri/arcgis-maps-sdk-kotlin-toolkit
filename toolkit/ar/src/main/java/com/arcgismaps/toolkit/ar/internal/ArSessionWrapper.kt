@@ -22,7 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.google.ar.core.ArCoreApk
+import com.google.ar.core.Config
 import com.google.ar.core.Session
 
 /**
@@ -50,9 +50,16 @@ internal class ArSessionWrapper(applicationContext: Context) : DefaultLifecycleO
 }
 
 /**
- * Remembers an [ArSessionWrapper] that provides an ARCore [Session].
+ * Remembers an [ArSessionWrapper] that provides a configured ARCore [Session].
  *
  * @since 200.6.0
  */
 @Composable
-internal fun rememberArSessionWrapper(applicationContext: Context): ArSessionWrapper = remember { ArSessionWrapper(applicationContext) }
+internal fun rememberArSessionWrapper(applicationContext: Context): ArSessionWrapper = remember {
+    ArSessionWrapper(applicationContext).apply {
+        session.configure(Config(session).apply {
+            // We only want to detect horizontal planes.
+            setPlaneFindingMode(Config.PlaneFindingMode.HORIZONTAL)
+        })
+    }
+}

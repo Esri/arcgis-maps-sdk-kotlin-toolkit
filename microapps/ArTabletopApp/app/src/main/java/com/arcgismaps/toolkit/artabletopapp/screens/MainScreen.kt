@@ -44,6 +44,7 @@ import com.arcgismaps.mapping.ElevationSource
 import com.arcgismaps.mapping.Surface
 import com.arcgismaps.mapping.layers.ArcGISMapImageLayer
 import com.arcgismaps.mapping.layers.ArcGISSceneLayer
+import com.arcgismaps.mapping.view.SceneViewInteractionOptions
 import com.arcgismaps.toolkit.ar.TableTopSceneView
 import com.arcgismaps.toolkit.ar.TableTopSceneViewProxy
 import com.arcgismaps.toolkit.ar.TableTopSceneViewStatus
@@ -74,6 +75,15 @@ fun MainScreen() {
             }
         }
     }
+    // disable pan/zoom/rotate interaction. These interactions can behave unexpectedly in TableTop scenarios
+    val interactionOptions = remember {
+        SceneViewInteractionOptions().apply {
+            this.isPanEnabled = false
+            this.isZoomEnabled = false
+            this.isRotateEnabled = false
+            this.isFlingEnabled = false
+        }
+    }
     val tableTopSceneViewProxy = remember { TableTopSceneViewProxy() }
     var tappedLocation by remember { mutableStateOf<Point?>(null) }
     var initializationStatus: TableTopSceneViewStatus by rememberTableTopSceneViewStatus()
@@ -82,9 +92,10 @@ fun MainScreen() {
             arcGISScene = arcGISScene,
             arcGISSceneAnchor = Point(-74.0, 40.72, 0.0, arcGISScene.spatialReference),
             translationFactor = 2000.0,
-            clippingDistance = 750.0,
             modifier = Modifier.fillMaxSize(),
+            clippingDistance = 750.0,
             tableTopSceneViewProxy = tableTopSceneViewProxy,
+            sceneViewInteractionOptions = interactionOptions,
             onInitializationStatusChanged = {
                 initializationStatus = it
             },
