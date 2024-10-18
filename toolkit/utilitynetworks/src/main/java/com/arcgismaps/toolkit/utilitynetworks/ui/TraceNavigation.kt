@@ -153,7 +153,7 @@ internal fun TraceNavHost(traceState: TraceState) {
             )
         }
         dialog(TraceNavRoute.ClearResults.name) {
-            TraceClearAllResultsDialog (
+            ClearAllResultsDialog (
                 onConfirmation = {
                     traceState.showScreen(TraceNavRoute.TraceOptions)
                     traceState.clearAllResults()

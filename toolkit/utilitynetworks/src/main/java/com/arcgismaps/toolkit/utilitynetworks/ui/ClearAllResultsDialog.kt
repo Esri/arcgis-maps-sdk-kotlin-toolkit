@@ -11,7 +11,7 @@ import androidx.compose.ui.res.stringResource
 import com.arcgismaps.toolkit.utilitynetworks.R
 
 @Composable
-internal fun TraceClearAllResultsDialog(onConfirmation: () -> Unit, onDismiss: () -> Unit) {
+internal fun ClearAllResultsDialog(onConfirmation: () -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         icon = { Icon(Icons.Default.Warning, contentDescription = stringResource(R.string.clear_all_results)) },
         onDismissRequest = onDismiss,
