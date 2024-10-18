@@ -119,7 +119,7 @@ private fun FeatureList(assetTypeList: List<UtilityElement>, onFeatureSelected: 
                         ) {
                             Icon(
                                 imageVector = Icons.Sharp.ZoomInMap,
-                                contentDescription = "zoom in",
+                                contentDescription = stringResource(R.string.zoom_in),
                                 tint = MaterialTheme.colorScheme.primary
                             )
                             Text(
