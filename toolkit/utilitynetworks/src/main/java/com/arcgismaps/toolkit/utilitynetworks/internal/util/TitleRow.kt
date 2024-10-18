@@ -53,12 +53,16 @@ internal fun Title(name: String, onZoomTo: () -> Unit, onDelete: () -> Unit) {
         horizontalArrangement = Arrangement.Center
     ) {
         Box {
-            Row(modifier = Modifier.clickable {
-                expanded = !expanded
-            }, verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier.clickable {
+                    expanded = !expanded
+                },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
                 Text(
                     modifier = Modifier
-                        .padding(start = 10.dp, end = 10.dp)
+                        .padding(start = 10.dp)
                         .weight(1f),
                     text = name,
                     style = MaterialTheme.typography.titleLarge,
@@ -71,36 +75,42 @@ internal fun Title(name: String, onZoomTo: () -> Unit, onDelete: () -> Unit) {
                     contentDescription = ""
                 )
             }
-            MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp))) {
-                DropdownMenu(
-                    modifier = Modifier.padding(start = 8.dp, end = 16.dp),
-                    expanded = expanded,
-                    onDismissRequest = {
+        }
+        MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp))) {
+            DropdownMenu(
+                modifier = Modifier.padding(start = 8.dp, end = 16.dp),
+                expanded = expanded,
+                onDismissRequest = {
+                    expanded = false
+                }) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.zoom_to)) },
+                    onClick = {
                         expanded = false
-                    }) {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.zoom_to)) },
-                        onClick = {
-                            expanded = false
-                            onZoomTo()
-                        },
-                        leadingIcon = { Icon(
+                        onZoomTo()
+                    },
+                    leadingIcon = {
+                        Icon(
                             Icons.Outlined.LocationOn, contentDescription = stringResource(
-                                R.string.zoom_to)
-                        ) }
-                    )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.delete)) },
-                        onClick = {
-                            expanded = false
-                            onDelete()
-                        },
-                        leadingIcon = { Icon(
+                                R.string.zoom_to
+                            )
+                        )
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.delete)) },
+                    onClick = {
+                        expanded = false
+                        onDelete()
+                    },
+                    leadingIcon = {
+                        Icon(
                             Icons.Outlined.Clear, contentDescription = stringResource(
-                                R.string.delete)
-                        ) }
-                    )
-                }
+                                R.string.delete
+                            )
+                        )
+                    }
+                )
             }
         }
     }
