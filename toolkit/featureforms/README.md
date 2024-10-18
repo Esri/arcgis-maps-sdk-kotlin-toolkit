@@ -20,55 +20,6 @@ The `FeatureForm` is a composable that can render a `FeatureForm` object with a 
 - Visibility behavior of validation errors can be customized. See [Changing the Validation Error Visibility policy](#changing-the-validation-error-visibility-policy).
 - Follows material 3 design system.
 
-## Behavior
-
-- The `FeatureForm` composable will display the form fields in the order they are defined in the `FeatureFormDefinition`.
-- The component supports the following [FormElement](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/-form-element/index.html?query=sealed%20class%20FormElement) types as part of its configuration.
-  
-### [AttachmentsFormElement](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/-attachments-form-element/index.html?query=class%20AttachmentsFormElement%20:%20FormElement)
-
-<img src="screenshots/attachments_form_element.png" width="250"/>
-  
-### [FieldFormElement](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/index.html#416104072%2FClasslikes%2F-1844196645) with the following [FormInput](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/index.html#902783574%2FClasslikes%2F-1844196645) types -
-
-#### [BarcodeScannerFormInput](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/index.html#1532812564%2FClasslikes%2F-1844196645)
-
-<img src="screenshots/barcode_input.png" width="250"/>
-
-#### [ComboBoxFormInput](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/index.html#-3732077%2FClasslikes%2F-1844196645)
-
-<img src="screenshots/combo_input.png" width="250"/>
-
-#### [DateTimePickerFormInput](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/index.html#-399367937%2FClasslikes%2F-1844196645)
-
-<img src="screenshots/date_time_input.png" width="250"/>
-
-#### [RadioButtonsFormInput](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/index.html#-802642052%2FClasslikes%2F-1844196645)
-
-<img src="screenshots/radio_input.png" width="250"/>
-
-#### [SwitchFormInput](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/index.html#-810335126%2FClasslikes%2F-1844196645)
-
-<img src="screenshots/switch_input.png" width="250"/>
-
-#### [TextAreaFormInput](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/index.html#1246148688%2FClasslikes%2F-1844196645)
-
-<img src="screenshots/text_area_input.png" width="250"/>
-
-#### [TextBoxFormInput](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/index.html#-2106495906%2FClasslikes%2F-1844196645)
-
-<img src="screenshots/text_input.png" width="250"/>
-  
-### [GroupFormElement](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/index.html#-414583411%2FClasslikes%2F-1844196645)
-
-<img src="screenshots/group_element_collapsed.png" width="250"/>
-
-<img src="screenshots/group_element_expanded.png" width="250"/>
-
-### TextFormElement
-
-<img src="screenshots/text_form_element.png" width="250"/>
-
 ## Usage
 
 To see it in action, check out the [microapp](../../microapps/FeatureFormsApp). The [microapp](../../microapps/FeatureFormsApp) integrates the `FeatureForm` component into a `BottomSheet`.
@@ -144,6 +95,55 @@ FeatureForm(
 )
 ```
 *Note* : Once the `validationErrorVisibility`  is set to `Visible`, changing it back to `Automatic` will have no effect since all the fields have now gained focus to show any errors.
+
+## Behavior
+
+- The `FeatureForm` composable will display the form fields in the order they are defined in the `FeatureFormDefinition`.
+- The component supports the following [FormElement](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/-form-element/index.html?query=sealed%20class%20FormElement) types as part of its configuration.
+  
+### [AttachmentsFormElement](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/-attachments-form-element/index.html?query=class%20AttachmentsFormElement%20:%20FormElement)
+
+<img src="screenshots/attachments_form_element.png" width="250"/>
+  
+### [FieldFormElement](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/index.html#416104072%2FClasslikes%2F-1844196645) with the following [FormInput](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/index.html#902783574%2FClasslikes%2F-1844196645) types -
+
+#### [BarcodeScannerFormInput](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/index.html#1532812564%2FClasslikes%2F-1844196645)
+
+<img src="screenshots/barcode_input.png" width="250"/>
+
+#### [ComboBoxFormInput](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/index.html#-3732077%2FClasslikes%2F-1844196645)
+
+<img src="screenshots/combo_input.png" width="250"/>
+
+#### [DateTimePickerFormInput](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/index.html#-399367937%2FClasslikes%2F-1844196645)
+
+<img src="screenshots/date_time_input.png" width="250"/>
+
+#### [RadioButtonsFormInput](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/index.html#-802642052%2FClasslikes%2F-1844196645)
+
+<img src="screenshots/radio_input.png" width="250"/>
+
+#### [SwitchFormInput](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/index.html#-810335126%2FClasslikes%2F-1844196645)
+
+<img src="screenshots/switch_input.png" width="250"/>
+
+#### [TextAreaFormInput](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/index.html#1246148688%2FClasslikes%2F-1844196645)
+
+<img src="screenshots/text_area_input.png" width="250"/>
+
+#### [TextBoxFormInput](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/index.html#-2106495906%2FClasslikes%2F-1844196645)
+
+<img src="screenshots/text_input.png" width="250"/>
+  
+### [GroupFormElement](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/index.html#-414583411%2FClasslikes%2F-1844196645)
+
+<img src="screenshots/group_element_collapsed.png" width="250"/>
+
+<img src="screenshots/group_element_expanded.png" width="250"/>
+
+### TextFormElement
+
+<img src="screenshots/text_form_element.png" width="250"/>
 
 ## Theming and Customization
 
