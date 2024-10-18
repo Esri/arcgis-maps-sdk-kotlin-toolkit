@@ -116,8 +116,13 @@ But the calling app should request these permissions at runtime. If the permissi
 #### [BarcodeScannerFormInput](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/index.html#1532812564%2FClasslikes%2F-1844196645)
 
 - The `BarcodeScannerFormInput` is a type of text input that also allows users to scan barcodes using the device's camera.
-- Tapping on the barcode icon will open the camera to scan a barcode.
 - If camera permissions are not granted, the barcode scanner will not be available, and the input will behave like a normal text input.
+- The barcode scanner supports the following barcode formats: [BarcodeFormat](https://developers.google.com/android/reference/com/google/mlkit/vision/barcode/common/Barcode.BarcodeFormat).
+- To scan a barcode:
+  - Tap on the barcode accessory icon to open the camera.
+  - The barcode should be in the camera's viewfinder. Once the barcode is detected, the camera will automatically close, and the barcode value will be populated in the input field.
+  - If there are multiple barcodes in the camera's viewfinder, tapping on the desired barcode will select the barcode and populate the value in the input field.
+  - A mild haptic feedback is triggered when a barcode is detected and scanned successfully.
 
 <img src="screenshots/barcode_input.png" width="250"/>
 
@@ -125,6 +130,8 @@ But the calling app should request these permissions at runtime. If the permissi
 
 - This input type is used for fields with a coded value domain.
 - The user can select a value from a list of predefined values using the picker.
+- If the current value is not one of the possible values, when the picker is displayed, the selected value will be displayed in an "Unsupported Type" section at the bottom of the picker.
+Once a valid value is selected, the "Unsupported Type" section will be hidden.
 
 <img src="screenshots/combo_input.png" width="250"/>
 <img src="screenshots/combo_picker.png" height="75"/>
@@ -165,7 +172,7 @@ But the calling app should request these permissions at runtime. If the permissi
 
 #### Read-Only Fields
 
-- Any field that is read-only as indicated by the [isEditable](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/-field-form-element/index.html#279696009%2FProperties%2F-1844196645) property will be displayed as read-only field with
+- Any field that not editable as indicated by the [isEditable](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/-field-form-element/index.html#279696009%2FProperties%2F-1844196645) property will be displayed as read-only field with
 special styling.
 - If the field is backed by an arcade expression as indicated by [hasValueExpression](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/-field-form-element/index.html#854459496%2FProperties%2F-1844196645), the icon `<>` will be displayed next to the field.
 
