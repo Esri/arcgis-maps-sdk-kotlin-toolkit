@@ -632,13 +632,13 @@ public class TraceState(
     }
 
     internal fun clearSelectedTraceResult() {
-        val selectedTrace = completedTraces[_selectedCompletedTraceIndex.value]
+        val selectedTrace = _completedTraces[_selectedCompletedTraceIndex.value]
         selectedTrace.geometryResultsGraphics.forEach { graphicsOverlay.graphics.remove(it) }
         selectedTrace.startingPoints.forEach { it.graphic.isSelected = false }
         _completedTraces.removeAt(_selectedCompletedTraceIndex.value)
         if (_selectedCompletedTraceIndex.value - 1 >= 0) {
-            updateSelectedStateForTraceResultsGraphics(_selectedCompletedTraceIndex.value - 1, true)
             _selectedCompletedTraceIndex.value -= 1
+            updateSelectedStateForTraceResultsGraphics(_selectedCompletedTraceIndex.value, true)
         }
     }
 
