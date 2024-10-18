@@ -98,22 +98,35 @@ internal fun TraceNavHost(traceState: TraceState) {
             )
         }
         composable(TraceNavRoute.TraceResults.name) {
+            val coroutineScope = rememberCoroutineScope()
             TraceResultScreen(
                 selectedTraceRunIndex = traceState.selectedCompletedTraceIndex.value,
                 traceResults = traceState.completedTraces,
                 onSelectPreviousTraceResult = { traceState.selectPreviousCompletedTrace() },
-                onSelectNextTraceResult = { traceState.selectNextCompletedTrace()  },
+                onSelectNextTraceResult = { traceState.selectNextCompletedTrace() },
                 onBackToNewTrace = { traceState.showScreen(TraceNavRoute.TraceOptions) },
                 onFeatureGroupSelected = {
                     traceState.setAssetGroupName(it)
                     traceState.showScreen(TraceNavRoute.FeatureResultsDetails)
                 },
                 onDeleteResult = {
-
-                }, onZoomToResults = {
-
-                }, onClearAllResults = {
-
+                    if (traceState.selectedCompletedTraceIndex.value == 0) {
+                        traceState.clearSelectedTraceResult()
+                        traceState.showScreen(TraceNavRoute.TraceOptions)
+                    } else {
+                        traceState.clearSelectedTraceResult()
+                    }
+                },
+                onZoomToResults = {
+                    coroutineScope.launch {
+                        traceState.zoomToSelectedTrace()
+                    }
+                },
+                onColorChanged = {
+                    traceState.setGraphicsColorForSelectedTraceRun(it)
+                },
+                onClearAllResults = {
+                    traceState.showScreen(TraceNavRoute.ClearResults)
                 }
             )
         }
@@ -139,6 +152,17 @@ internal fun TraceNavHost(traceState: TraceState) {
                 }
             )
         }
+        dialog(TraceNavRoute.ClearResults.name) {
+            ClearAllResultsDialog (
+                onConfirmation = {
+                    traceState.showScreen(TraceNavRoute.TraceOptions)
+                    traceState.clearAllResults()
+                },
+                onDismiss = {
+                    traceState.showScreen(TraceNavRoute.TraceResults)
+                }
+            )
+        }
         composable(TraceNavRoute.StartingPointDetails.name) {
             val coroutineScope = rememberCoroutineScope()
             val startingPoint = traceState.selectedStartingPoint.value
@@ -151,7 +175,8 @@ internal fun TraceNavHost(traceState: TraceState) {
                     coroutineScope.launch {
                         traceState.zoomToStartingPoint(startingPoint)
                     }
-                }, onDelete = {
+                },
+                onDelete = {
                     traceState.removeStartingPoint(startingPoint)
                     traceState.showScreen(TraceNavRoute.TraceOptions)
                 },

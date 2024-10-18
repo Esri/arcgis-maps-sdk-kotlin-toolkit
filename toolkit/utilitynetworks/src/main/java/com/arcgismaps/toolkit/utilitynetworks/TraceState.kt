@@ -164,27 +164,6 @@ public class TraceState(
     private var _currentTraceZoomToResults: MutableState<Boolean> = mutableStateOf(true)
     public var currentTraceZoomToResults: State<Boolean> = _currentTraceZoomToResults
 
-    private val currentTraceResultGeometriesExtent: Envelope?
-        get() {
-            val utilityGeometryTraceResult = currentTraceRun?.geometryTraceResult ?: return null
-
-            val geometries = listOf(
-                utilityGeometryTraceResult.polygon,
-                utilityGeometryTraceResult.polyline,
-                utilityGeometryTraceResult.multipoint
-            ).mapNotNull { geometry ->
-                if (geometry != null && !geometry.isEmpty) {
-                    geometry
-                } else {
-                    null
-                }
-            }
-            val combinedExtents = GeometryEngine.combineExtentsOrNull(geometries) ?: return null
-            val expandedEnvelope = GeometryEngine.bufferOrNull(combinedExtents, 200.0) ?: return null
-
-            return expandedEnvelope.extent
-        }
-
     private var navigateToRoute: ((TraceNavRoute) -> Unit)? = null
 
     internal fun setNavigationCallback(navigateToRoute: (TraceNavRoute) -> Unit) {
@@ -360,11 +339,18 @@ public class TraceState(
                 }
             }
         }
+
+        val currentTraceResultGeometriesExtent =  currentTraceGeometryResults?.let {
+            getResultGeometriesExtent(currentTraceGeometryResults)
+        }
+
         currentTraceRun = TraceRun(
             name = _currentTraceName.value,
             configuration = traceConfiguration,
             startingPoints = _currentTraceStartingPoints.toList(),
             geometryResultsGraphics = currentTraceGeometryResultsGraphics.toList(),
+            resultsGraphicExtent = currentTraceResultGeometriesExtent,
+            resultGraphicColor = currentTraceGraphicsColorAsComposeColor,
             featureResults = currentTraceElementResults,
             functionResults = currentTraceFunctionResults,
             geometryTraceResult = currentTraceGeometryResults
@@ -391,6 +377,24 @@ public class TraceState(
         _currentTraceName.value = ""
         currentTraceGraphicsColor = Color.green
         _currentTraceZoomToResults.value = true
+    }
+
+    private fun getResultGeometriesExtent(utilityGeometryTraceResult: UtilityGeometryTraceResult): Envelope? {
+        val geometries = listOf(
+            utilityGeometryTraceResult.polygon,
+            utilityGeometryTraceResult.polyline,
+            utilityGeometryTraceResult.multipoint
+        ).mapNotNull { geometry ->
+            if (geometry != null && !geometry.isEmpty) {
+                geometry
+            } else {
+                null
+            }
+        }
+        val combinedExtents = GeometryEngine.combineExtentsOrNull(geometries) ?: return null
+        val expandedEnvelope = GeometryEngine.bufferOrNull(combinedExtents, 200.0) ?: return null
+
+        return expandedEnvelope.extent
     }
 
     private fun createGraphicForSimpleLineSymbol(geometry: Geometry, style: SimpleLineSymbolStyle, color: Color) =
@@ -572,6 +576,30 @@ public class TraceState(
         }
     }
 
+    internal fun setGraphicsColorForSelectedTraceRun(color: androidx.compose.ui.graphics.Color) {
+        val arcgisColor = Color.fromRgba(
+            color.red.toInt() * 255,
+            color.green.toInt() * 255,
+            color.blue.toInt() * 255,
+            color.alpha.toInt() * 255
+        )
+        val selectedTraceRun = completedTraces[_selectedCompletedTraceIndex.value]
+        selectedTraceRun.resultGraphicColor = color
+
+        // update the color of the starting points
+        selectedTraceRun.startingPoints.forEach { startingPoint ->
+            val symbol = startingPoint.graphic.symbol as SimpleMarkerSymbol
+            symbol.color = arcgisColor
+        }
+        // update the color of the trace results graphics
+        selectedTraceRun.geometryResultsGraphics.forEach { graphic ->
+            if (graphic.symbol is SimpleLineSymbol) {
+                val symbol = graphic.symbol as SimpleLineSymbol
+                symbol.color = arcgisColor
+            }
+        }
+    }
+
     /**
      * Set whether to zoom to the results.
      *
@@ -594,6 +622,34 @@ public class TraceState(
 
     internal fun getAllElementsWithSelectedAssetGroupName(): List<UtilityElement> {
         return completedTraces[_selectedCompletedTraceIndex.value].featureResults.filter { it.assetGroup.name == selectedAssetGroupName }
+    }
+
+    internal fun clearAllResults() {
+        _completedTraces.clear()
+        _selectedCompletedTraceIndex.value = 0
+        currentTraceGeometryResultsGraphics.clear()
+        graphicsOverlay.graphics.clear()
+    }
+
+    internal fun clearSelectedTraceResult() {
+        val selectedTrace = completedTraces[_selectedCompletedTraceIndex.value]
+        selectedTrace.geometryResultsGraphics.forEach { graphicsOverlay.graphics.remove(it) }
+        selectedTrace.startingPoints.forEach { it.graphic.isSelected = false }
+        _completedTraces.removeAt(_selectedCompletedTraceIndex.value)
+        if (_selectedCompletedTraceIndex.value - 1 >= 0) {
+            updateSelectedStateForTraceResultsGraphics(_selectedCompletedTraceIndex.value - 1, true)
+            _selectedCompletedTraceIndex.value -= 1
+        }
+    }
+
+    internal suspend fun zoomToSelectedTrace() {
+        val currentTrace = completedTraces[_selectedCompletedTraceIndex.value]
+        val extent = currentTrace.resultsGraphicExtent ?: return
+        mapViewProxy.setViewpointAnimated(
+            Viewpoint(extent.extent),
+            1.0.seconds,
+            AnimationCurve.EaseInOutCubic
+        )
     }
 
     /**
@@ -680,7 +736,8 @@ internal enum class TraceNavRoute {
     TraceResults,
     FeatureResultsDetails,
     StartingPointDetails,
-    TraceError
+    TraceError,
+    ClearResults
 }
 
 @Immutable
@@ -702,6 +759,8 @@ internal data class TraceRun(
     val configuration: UtilityNamedTraceConfiguration,
     val startingPoints: List<StartingPoint>,
     val geometryResultsGraphics: List<Graphic>,
+    val resultsGraphicExtent: Envelope? = null,
+    var resultGraphicColor: androidx.compose.ui.graphics.Color,
     val featureResults: List<UtilityElement>,
     val functionResults: List<UtilityTraceFunctionOutput>,
     val geometryTraceResult: UtilityGeometryTraceResult?
