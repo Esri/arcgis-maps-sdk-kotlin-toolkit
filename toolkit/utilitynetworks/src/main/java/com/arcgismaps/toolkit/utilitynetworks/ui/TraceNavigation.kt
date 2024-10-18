@@ -19,6 +19,8 @@ package com.arcgismaps.toolkit.utilitynetworks.ui
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
@@ -37,7 +39,9 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun TraceNavHost(traceState: TraceState) {
     val navController = rememberNavController()
-    val currentScreen by traceState.currentScreen
+    traceState.setNavigationCallback {
+        navController.navigateTo(it)
+    }
 
     NavHost(navController = navController, startDestination = TraceNavRoute.TraceOptions.name) {
         composable(TraceNavRoute.TraceOptions.name) {
@@ -102,7 +106,7 @@ internal fun TraceNavHost(traceState: TraceState) {
                 onSelectNextTraceResult = { traceState.selectNextCompletedTrace() },
                 onBackToNewTrace = { traceState.showScreen(TraceNavRoute.TraceOptions) },
                 onFeatureGroupSelected = {
-                    traceState.setGroupName(it)
+                    traceState.setAssetGroupName(it)
                     traceState.showScreen(TraceNavRoute.FeatureResultsDetails)
                 },
                 onDeleteResult = {
@@ -128,11 +132,9 @@ internal fun TraceNavHost(traceState: TraceState) {
         }
         composable(TraceNavRoute.FeatureResultsDetails.name) {
             val coroutineScope = rememberCoroutineScope()
-            val selectedGroupName = traceState.selectedGroupName
-            require(selectedGroupName != null)
             FeatureResultsDetailsScreen(
-                selectedGroupName = selectedGroupName,
-                elementListWithSelectedGroupName = traceState.getAllElementsWithSelectedGroupName(),
+                selectedGroupName = traceState.selectedAssetGroupName,
+                elementListWithSelectedGroupName = traceState.getAllElementsWithSelectedAssetGroupName(),
                 onBackToResults = { traceState.showScreen(TraceNavRoute.TraceResults) },
                 onBackToNewTrace = { traceState.showScreen(TraceNavRoute.TraceOptions) },
                 onFeatureSelected = {
@@ -193,8 +195,13 @@ internal fun TraceNavHost(traceState: TraceState) {
                 onBackPressed = { traceState.showScreen(TraceNavRoute.TraceOptions) })
         }
     }
+}
 
-    if (navController.currentDestination?.route != currentScreen.name) {
-        navController.navigate(currentScreen.name)
+private fun NavHostController.navigateTo(traceNavRoute: TraceNavRoute) {
+    navigate(traceNavRoute.name) {
+        popUpTo(
+            graph.findStartDestination().id
+        )
+        launchSingleTop = true
     }
 }

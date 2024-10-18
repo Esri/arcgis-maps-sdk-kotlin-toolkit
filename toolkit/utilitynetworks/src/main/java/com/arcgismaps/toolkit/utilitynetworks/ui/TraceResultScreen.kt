@@ -18,6 +18,7 @@ package com.arcgismaps.toolkit.utilitynetworks.ui
 
 import android.annotation.SuppressLint
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -88,6 +89,10 @@ internal fun TraceResultScreen(
     onColorChanged: (Color) -> Unit,
     onClearAllResults: () -> Unit
 ) {
+    BackHandler {
+        onBackToNewTrace()
+    }
+
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier
             .fillMaxSize()
@@ -182,7 +187,10 @@ private fun getTraceCounterString(currentTraceResult: Int, totalTraceResults: In
 
 @Composable
 private fun FeatureResult(featureResults: List<UtilityElement>, onFeatureAssetGroupSelected: (String) -> Unit) {
-    val assetGroupNames = featureResults.map { it.assetGroup.name }.distinct()
+    val assetGroupNames = featureResults
+        .map { it.assetGroup.name }
+        .filter { it.isNotEmpty() }
+        .distinct()
 
     Surface(modifier = Modifier.fillMaxWidth()) {
         Column {

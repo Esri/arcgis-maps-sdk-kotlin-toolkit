@@ -67,7 +67,7 @@ internal fun Title(
             ) {
                 Text(
                     modifier = Modifier
-                        .padding(start = 10.dp, end = 10.dp)
+                        .padding(start = 10.dp)
                         .weight(1f),
                     text = name,
                     style = MaterialTheme.typography.titleLarge,
@@ -80,41 +80,44 @@ internal fun Title(
                     contentDescription = ""
                 )
             }
-            MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp))) {
-                DropdownMenu(
-                    modifier = Modifier.padding(start = 8.dp, end = 16.dp),
-                    expanded = expanded,
-                    onDismissRequest = {
-                        expanded = false
-                    }) {
-                    if (showZoomToOption) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.zoom_to)) },
-                            onClick = {
-                                expanded = false
-                                onZoomTo()
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    Icons.Outlined.LocationOn, contentDescription = stringResource(
-                                        R.string.zoom_to
-                                    )
-                                )
-                            }
-                        )
-                    }
+        }
+        MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp))) {
+            DropdownMenu(
+                modifier = Modifier.padding(start = 8.dp, end = 16.dp),
+                expanded = expanded,
+                onDismissRequest = {
+                    expanded = false
+                }) {
+                if (showZoomToOption) {
                     DropdownMenuItem(
-                        text = { Text(stringResource(R.string.delete)) },
+                        text = { Text(stringResource(R.string.zoom_to)) },
                         onClick = {
                             expanded = false
-                            onDelete()
+                            onZoomTo()
                         },
-                        leadingIcon = { Icon(
-                            Icons.Outlined.Clear, contentDescription = stringResource(
-                                R.string.delete)
-                        ) }
+                        leadingIcon = {
+                            Icon(
+                                Icons.Outlined.LocationOn, contentDescription = stringResource(
+                                    R.string.zoom_to
+                                )
+                            )
+                        }
                     )
                 }
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.delete)) },
+                    onClick = {
+                        expanded = false
+                        onDelete()
+                    },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Outlined.Clear, contentDescription = stringResource(
+                                R.string.delete
+                            )
+                        )
+                    }
+                )
             }
         }
     }

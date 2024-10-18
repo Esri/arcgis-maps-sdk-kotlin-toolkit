@@ -120,9 +120,9 @@ public class TraceState(
      */
     internal val selectedStartingPoint: State<StartingPoint?> = _selectedStartingPoint
 
-    private var _selectedGroupName: String? = null
-    internal val selectedGroupName: String?
-        get() = _selectedGroupName
+    private var _selectedAssetGroupName: String = ""
+    internal val selectedAssetGroupName: String
+        get() = _selectedAssetGroupName
 
     private val _currentTraceStartingPoints: SnapshotStateList<StartingPoint> = mutableStateListOf()
     internal val currentTraceStartingPoints: List<StartingPoint> = _currentTraceStartingPoints
@@ -163,6 +163,12 @@ public class TraceState(
 
     private var _currentTraceZoomToResults: MutableState<Boolean> = mutableStateOf(true)
     public var currentTraceZoomToResults: State<Boolean> = _currentTraceZoomToResults
+
+    private var navigateToRoute: ((TraceNavRoute) -> Unit)? = null
+
+    internal fun setNavigationCallback(navigateToRoute: (TraceNavRoute) -> Unit) {
+        this.navigateToRoute = navigateToRoute
+    }
 
     /**
      * Initializes the state object by loading the map, the Utility Networks contained in the map
@@ -215,7 +221,7 @@ public class TraceState(
     }
 
     internal fun showScreen(screen: TraceNavRoute) {
-        _currentScreen.value = screen
+        navigateToRoute?.invoke(screen)
     }
 
     /**
@@ -419,7 +425,7 @@ public class TraceState(
     internal suspend fun zoomToStartingPoint(startingPoint: StartingPoint) {
         startingPoint.graphic.geometry?.let {
             mapViewProxy.setViewpointAnimated(
-                Viewpoint(it),
+                Viewpoint(it.extent),
                 1.0.seconds,
                 AnimationCurve.EaseOutCirc
             )
@@ -527,8 +533,8 @@ public class TraceState(
         _currentTraceName.value = name
     }
 
-    internal fun setGroupName(name: String) {
-        _selectedGroupName = name
+    internal fun setAssetGroupName(name: String) {
+        _selectedAssetGroupName = name
     }
 
     internal fun selectNextCompletedTrace() {
@@ -614,8 +620,8 @@ public class TraceState(
         )
     }
 
-    internal fun getAllElementsWithSelectedGroupName(): List<UtilityElement> {
-        return completedTraces[_selectedCompletedTraceIndex.value].featureResults.filter { it.assetGroup.name == selectedGroupName }
+    internal fun getAllElementsWithSelectedAssetGroupName(): List<UtilityElement> {
+        return completedTraces[_selectedCompletedTraceIndex.value].featureResults.filter { it.assetGroup.name == selectedAssetGroupName }
     }
 
     internal fun clearAllResults() {

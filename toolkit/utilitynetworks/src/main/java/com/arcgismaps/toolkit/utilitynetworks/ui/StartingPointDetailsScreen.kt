@@ -16,9 +16,10 @@
 
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -81,6 +82,9 @@ internal fun StartingPointDetailsScreen(
     onTerminalSelected: (UtilityTerminal) -> Unit,
     onBackPressed: () -> Unit
 ) {
+    BackHandler {
+        onBackPressed()
+    }
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -147,9 +151,11 @@ private fun FractionAlongEdgeSlider(
 ) {
     var sliderValue by remember { mutableFloatStateOf(startingPoint.utilityElement.fractionAlongEdge.toFloat()) }
     Column {
-        Spacer(modifier = Modifier
-            .fillMaxWidth()
-            .height(10.dp))
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(10.dp)
+        )
 
         Text(
             modifier = Modifier.padding(start = 24.dp),
@@ -244,9 +250,11 @@ private fun TerminalConfiguration(
     }
 
     Column {
-        Spacer(modifier = Modifier
-            .fillMaxWidth()
-            .height(10.dp))
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(10.dp)
+        )
 
         Text(
             modifier = Modifier.padding(start = 24.dp),
@@ -263,7 +271,7 @@ private fun TerminalConfiguration(
                 )
                 .background(color = MaterialTheme.colorScheme.background)
         ) {
-            Row (
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 4.dp)
@@ -296,7 +304,8 @@ private fun TerminalConfiguration(
                     DropdownMenuItem(
                         text = {
                             ReadOnlyTextField(
-                                text = utilityTerminal.name, leadingIcon = if (utilityTerminal.name == selectedTerminalName) {
+                                text = utilityTerminal.name,
+                                leadingIcon = if (utilityTerminal.name == selectedTerminalName) {
                                     {
                                         Icon(
                                             imageVector = Icons.Filled.Done,

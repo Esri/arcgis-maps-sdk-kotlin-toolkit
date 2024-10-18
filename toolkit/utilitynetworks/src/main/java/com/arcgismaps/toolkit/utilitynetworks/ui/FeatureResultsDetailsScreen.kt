@@ -15,6 +15,7 @@
  */
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -24,6 +25,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.sharp.ZoomInMap
 import androidx.compose.material3.HorizontalDivider
@@ -56,6 +58,9 @@ internal fun FeatureResultsDetailsScreen(
     onBackToNewTrace: () -> Unit,
     onBackToResults: () -> Unit
 ) {
+    BackHandler {
+        onBackToResults()
+    }
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier
             .fillMaxSize()
@@ -83,16 +88,17 @@ internal fun FeatureResultsDetailsScreen(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
-                    modifier = Modifier
-                        .padding(start = 10.dp, end = 10.dp),
                     text = selectedGroupName,
                     style = MaterialTheme.typography.titleLarge,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             }
-
-            FeatureList(elementListWithSelectedGroupName, onFeatureSelected)
+            LazyColumn {
+                item {
+                    FeatureList(elementListWithSelectedGroupName, onFeatureSelected)
+                }
+            }
         }
     }
 }
@@ -118,7 +124,7 @@ private fun FeatureList(assetTypeList: List<UtilityElement>, onFeatureSelected: 
                             )
                             Text(
                                 modifier = Modifier.padding(start = 10.dp),
-                                text = "Object ID: ${utilityElement.objectId}",
+                                text = "${stringResource(R.string.object_id)}: ${utilityElement.objectId}",
                                 style = MaterialTheme.typography.titleMedium,
                                 color = MaterialTheme.colorScheme.primary
                             )
