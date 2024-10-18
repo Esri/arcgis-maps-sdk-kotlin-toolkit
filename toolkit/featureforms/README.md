@@ -4,26 +4,74 @@
 
 ## Description
 
-The FeatureForm toolkit component enables users to edit field values and attachments of features in a layer using the `FeatureForm` API that has been configured externally (using either in the Web Map Viewer or the Fields Maps web app).
+The `FeatureForm` toolkit component enables users to display and edit feature attributes and attachments in a layer using the `FeatureForm` API.
+FeatureForms can be authored as part of the web map using [Field Maps Designer](https://www.arcgis.com/apps/fieldmaps/) or using Map Viewer. This allows a simplified user experience to edit feature attribute data on the web map.
 
-## Behavior
-
-To see it in action, check out the [microapp](../../microapps/FeatureFormsApp).
+More information about edit attributes using forms can be found [here](https://next.sites.afd.arcgis.com/kotlin/edit-features/edit-attribute-values/).
 
 ## Features
 
-The `FeatureForm` is a Composable that can render a `FeatureForm` object with a `FeatureFormDefinition`  using Jetpack Compose.
-- It can be integrated into any custom layout or container. The [microapp](../../microapps/FeatureFormsApp) integrates it into a `BottomSheet`.
-- All expressions are initially evaluated with a progress indicator before the FeatureForm is available for editing.
+The `FeatureForm` is a composable that can render a `FeatureForm` object with a `FeatureFormDefinition`  using Jetpack Compose.
+- It can be integrated into any custom layout or container.
+- All expressions present in the form are initially evaluated with a progress indicator before the FeatureForm is available for editing.
 - Provides automatic saving and restoring of form data after device configuration changes.
-- Shows validation errors for any fields with errors.
-- Visibility behavior of validation errors can be customized.
-- Supports all `FormInput` types except Attachments, Relationships and Barcodes.
 - Provides a DateTime picker and a picker for coded-value field types.
+- Shows validation errors for any fields with errors.
+- Visibility behavior of validation errors can be customized. See [Changing the Validation Error Visibility policy](#changing-the-validation-error-visibility-policy).
 - Follows material 3 design system.
 
+## Behavior
+
+- The `FeatureForm` composable will display the form fields in the order they are defined in the `FeatureFormDefinition`.
+- The component supports the following [FormElement](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/-form-element/index.html?query=sealed%20class%20FormElement) types as part of its configuration.
+  
+### [AttachmentsFormElement](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/-attachments-form-element/index.html?query=class%20AttachmentsFormElement%20:%20FormElement)
+
+<img src="screenshots/attachments_form_element.png" width="250"/>
+  
+### [FieldFormElement](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/index.html#416104072%2FClasslikes%2F-1844196645) with the following [FormInput](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/index.html#902783574%2FClasslikes%2F-1844196645) types -
+
+#### [BarcodeScannerFormInput](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/index.html#1532812564%2FClasslikes%2F-1844196645)
+
+<img src="screenshots/barcode_input.png" width="250"/>
+
+#### [ComboBoxFormInput](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/index.html#-3732077%2FClasslikes%2F-1844196645)
+
+<img src="screenshots/combo_input.png" width="250"/>
+
+#### [DateTimePickerFormInput](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/index.html#-399367937%2FClasslikes%2F-1844196645)
+
+<img src="screenshots/date_time_input.png" width="250"/>
+
+#### [RadioButtonsFormInput](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/index.html#-802642052%2FClasslikes%2F-1844196645)
+
+<img src="screenshots/radio_input.png" width="250"/>
+
+#### [SwitchFormInput](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/index.html#-810335126%2FClasslikes%2F-1844196645)
+
+<img src="screenshots/switch_input.png" width="250"/>
+
+#### [TextAreaFormInput](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/index.html#1246148688%2FClasslikes%2F-1844196645)
+
+<img src="screenshots/text_area_input.png" width="250"/>
+
+#### [TextBoxFormInput](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/index.html#-2106495906%2FClasslikes%2F-1844196645)
+
+<img src="screenshots/text_input.png" width="250"/>
+  
+### [GroupFormElement](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/index.html#-414583411%2FClasslikes%2F-1844196645)
+
+<img src="screenshots/group_element_collapsed.png" width="250"/>
+
+<img src="screenshots/group_element_expanded.png" width="250"/>
+
+### TextFormElement
+
+<img src="screenshots/text_form_element.png" width="250"/>
 
 ## Usage
+
+To see it in action, check out the [microapp](../../microapps/FeatureFormsApp). The [microapp](../../microapps/FeatureFormsApp) integrates the `FeatureForm` component into a `BottomSheet`.
 
 *View the API Reference for the `featureforms` module [here](https://developers.arcgis.com/kotlin/toolkit-api-reference/arcgis-maps-kotlin-toolkit/com.arcgismaps.toolkit.featureforms/index.html).*
 
