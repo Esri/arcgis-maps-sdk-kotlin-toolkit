@@ -110,7 +110,7 @@ internal fun TraceNavHost(traceState: TraceState) {
                     traceState.showScreen(TraceNavRoute.FeatureResultsDetails)
                 },
                 onDeleteResult = {
-                    if (traceState.selectedCompletedTraceIndex.value == 0) {
+                    if (traceState.completedTraces.size == 1) {
                         traceState.clearSelectedTraceResult()
                         traceState.showScreen(TraceNavRoute.TraceOptions)
                     } else {
