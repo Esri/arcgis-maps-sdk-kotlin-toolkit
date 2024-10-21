@@ -448,7 +448,7 @@ public class TraceState(
         val featureGeometry = feature.geometry
         if (utilityElement.networkSource.sourceType == UtilityNetworkSourceType.Edge && featureGeometry is Polyline) {
             utilityElement.fractionAlongEdge =
-                fractionAlongEdge(featureGeometry, mapPoint).takeIf { !it.isNaN() } ?: return@runCatchingCancellable
+                fractionAlongEdge(featureGeometry, mapPoint).takeIf { !it.isNaN() } ?: 0.5
         } else if (utilityElement.networkSource.sourceType == UtilityNetworkSourceType.Junction &&
             (utilityElement.assetType.terminalConfiguration?.terminals?.size ?: 0) > 1
         ) {
