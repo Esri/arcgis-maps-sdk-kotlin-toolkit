@@ -19,6 +19,8 @@ package com.arcgismaps.toolkit.featureforms.internal.components.barcode
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import androidx.annotation.OptIn
+import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.FocusMeteringAction
 import androidx.camera.core.ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST
 import androidx.camera.core.resolutionselector.ResolutionSelector
@@ -81,7 +83,6 @@ import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -93,9 +94,10 @@ import androidx.lifecycle.LifecycleOwner
 import com.arcgismaps.toolkit.featureforms.R
 import kotlinx.coroutines.delay
 import java.util.concurrent.TimeUnit
+import kotlin.math.absoluteValue
 
-private const val SCANNER_FRAME_WIDTH = 300
-private const val SCANNER_FRAME_HEIGHT = 300
+private const val SCANNER_FRAME_PADDING_HORIZONTAL = 50
+private const val SCANNER_FRAME_PADDING_VERTICAL = 50
 private const val AUTO_SCAN_DELAY_MS = 1000L
 
 /**
@@ -103,6 +105,7 @@ private const val AUTO_SCAN_DELAY_MS = 1000L
  * called with the scanned barcode. The [onDismiss] callback is called when the barcode scanner
  * should be dismissed.
  */
+@OptIn(ExperimentalGetImage::class)
 @Composable
 internal fun BarcodeScanner(
     onScan: (String) -> Unit,
@@ -115,8 +118,10 @@ internal fun BarcodeScanner(
     val executor = remember { ContextCompat.getMainExecutor(context) }
     val permissionsGranted = hasCameraPermissions(context)
     // A frame that represents the area where the barcode should be detected
-    val scannerFrame =
-        getFrameRect(width = SCANNER_FRAME_WIDTH.dp, height = SCANNER_FRAME_HEIGHT.dp)
+    val scannerFrame = getFrameRect(
+        horizontal = SCANNER_FRAME_PADDING_HORIZONTAL.dp,
+        vertical = SCANNER_FRAME_PADDING_VERTICAL.dp
+    )
     // State representing the detected barcodes
     var barcodeInfoList by remember { mutableStateOf<List<BarcodeInfo>>(emptyList()) }
     // State to automatically scan the barcode if only one barcode is detected
@@ -146,6 +151,7 @@ internal fun BarcodeScanner(
                 BarcodeFrame(
                     modifier = Modifier.fillMaxSize(),
                     frame = scannerFrame,
+                    drawFrame = false,
                     info = barcodeInfoList,
                     onTap = { offset ->
                         // Handle focus on tap
@@ -265,11 +271,13 @@ private fun PermissionsDeniedDialog(onDismiss: () -> Unit) {
 @Composable
 private fun BarcodeFrame(
     frame: Rect,
+    drawFrame: Boolean,
     info: List<BarcodeInfo>,
     onTap: (Offset) -> Unit,
     onSelected: (BarcodeInfo) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     // save the latest barcodes
     val barcodes by rememberUpdatedState(newValue = info)
     val textMeasurer = rememberTextMeasurer()
@@ -294,45 +302,47 @@ private fun BarcodeFrame(
             }
         }
     ) {
-        drawRect(
-            color = Color.Black.copy(alpha = 0.5f),
-            topLeft = Offset(0f, 0f),
-            size = Size(size.width, size.height)
-        )
-        drawRoundRect(
-            color = Color.Transparent,
-            topLeft = frame.topLeft,
-            size = frame.size,
-            cornerRadius = CornerRadius(45f),
-            blendMode = BlendMode.Clear
-        )
-        drawRoundRect(
-            color = Color.Gray,
-            topLeft = frame.topLeft,
-            size = frame.size,
-            cornerRadius = CornerRadius(50f),
-            style = Stroke(width = 12f)
-        )
+        if (drawFrame) {
+            drawRect(
+                color = Color.Black.copy(alpha = 0.5f),
+                topLeft = Offset(0f, 0f),
+                size = Size(size.width, size.height)
+            )
+            drawRoundRect(
+                color = Color.Transparent,
+                topLeft = frame.topLeft,
+                size = frame.size,
+                cornerRadius = CornerRadius(45f),
+                blendMode = BlendMode.Clear
+            )
+            drawRoundRect(
+                color = Color.Gray,
+                topLeft = frame.topLeft,
+                size = frame.size,
+                cornerRadius = CornerRadius(50f),
+                style = Stroke(width = 12f)
+            )
+        }
         barcodes.forEach { barcode ->
-            barcode.boundingBox?.let {
+            barcode.boundingBox.ifValid { box ->
                 drawRoundRect(
                     color = Color.Blue.copy(alpha = 0.3f),
-                    topLeft = it.topLeft,
-                    size = Size(it.width, it.height),
+                    topLeft = box.topLeft,
+                    size = Size(box.width.absoluteValue, box.height.absoluteValue),
                     cornerRadius = CornerRadius(15f)
                 )
                 drawText(
                     textMeasurer = textMeasurer,
                     text = barcode.rawValue,
-                    topLeft = it.topLeft,
+                    topLeft = box.topLeft,
                     style = codeTextStyle,
                     overflow = TextOverflow.Ellipsis,
-                    size = Size(it.width, it.height)
+                    size = Size(box.width, box.height)
                 )
                 drawText(
                     textMeasurer = textMeasurer,
-                    text = "Tap to scan",
-                    topLeft = Offset(it.left, it.bottom + 5f),
+                    text = context.getString(R.string.tap_to_scan),
+                    topLeft = Offset(box.left, box.bottom + 5f),
                     style = titleTextStyle
                 )
             }
@@ -411,19 +421,32 @@ private fun BarcodeToolbar(cameraController: CameraController, onDismiss: () -> 
 }
 
 @Composable
-private fun getFrameRect(width: Dp, height: Dp): Rect {
+private fun getFrameRect(horizontal: Dp, vertical: Dp): Rect {
+    val configuration = LocalConfiguration.current
     with(LocalDensity.current) {
         val offset = Offset(
-            (LocalConfiguration.current.screenWidthDp.dp.toPx() / 2) - (width / 2).toPx(),
-            (LocalConfiguration.current.screenHeightDp.dp.toPx() / 2) - (height / 2).toPx()
+            horizontal.toPx(),
+            vertical.toPx()
         )
-        val size = Size(width.toPx(), height.toPx())
+        val size = Size(
+            configuration.screenWidthDp.dp.toPx() - (horizontal.toPx() * 2),
+            configuration.screenHeightDp.dp.toPx() - (vertical.toPx() * 2)
+        )
         return Rect(offset, size)
     }
 }
 
 private fun CameraController.isTorchEnabled(): Boolean {
     return torchState.value == 1
+}
+
+/**
+ * Runs the [predicate] if the [Rect] is valid.
+ */
+private fun Rect?.ifValid(predicate: (Rect) -> Unit) {
+    if (this != null && width > 0 && height > 0) {
+        predicate(this)
+    }
 }
 
 /**
@@ -435,8 +458,9 @@ private fun hasCameraPermissions(context: Context): Boolean = ContextCompat.chec
 ) == PackageManager.PERMISSION_GRANTED
 
 @Composable
-@Preview(showBackground = true, device = Devices.PIXEL_7_PRO)
+@Preview(showBackground = false, widthDp = 420, heightDp = 933)
 private fun BarcodeFramePreview() {
-    val frame = getFrameRect(width = SCANNER_FRAME_WIDTH.dp, height = SCANNER_FRAME_HEIGHT.dp)
-    BarcodeFrame(frame, emptyList(), {}, {})
+    val frame = getFrameRect(SCANNER_FRAME_PADDING_HORIZONTAL.dp, SCANNER_FRAME_PADDING_VERTICAL.dp)
+    // draw the frame in preview mode
+    BarcodeFrame(frame, true, emptyList(), {}, {})
 }
