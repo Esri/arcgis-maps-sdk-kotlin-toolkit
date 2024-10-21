@@ -233,7 +233,7 @@ private fun FunctionResult(functionResults: List<UtilityTraceFunctionOutput>) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(start = 10.dp, end = 10.dp, top = 8.dp, bottom = 8.dp),
+                                .padding(start = 32.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {

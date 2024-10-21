@@ -337,8 +337,8 @@ public class TraceState(
             }
         }
 
-        val currentTraceResultGeometriesExtent =  currentTraceGeometryResults?.let {
-            getResultGeometriesExtent(currentTraceGeometryResults)
+        val currentTraceResultGeometriesExtent = currentTraceGeometryResults?.let {
+            getResultGeometriesExtent(it)
         }
 
         currentTraceRun = TraceRun(
