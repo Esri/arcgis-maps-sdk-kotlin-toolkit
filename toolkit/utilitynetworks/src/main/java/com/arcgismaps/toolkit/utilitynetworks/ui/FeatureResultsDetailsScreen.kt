@@ -62,9 +62,11 @@ internal fun FeatureResultsDetailsScreen(
         onBackToResults()
     }
     Surface(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 10.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 10.dp)
+        ) {
 
             TabRow(onBackToNewTrace, 1)
 
@@ -124,7 +126,7 @@ private fun FeatureList(assetTypeList: List<UtilityElement>, onFeatureSelected: 
                             )
                             Text(
                                 modifier = Modifier.padding(start = 10.dp),
-                                text = "${stringResource(R.string.object_id)}: ${utilityElement.objectId}",
+                                text = stringResource(R.string.object_id, utilityElement.objectId),
                                 style = MaterialTheme.typography.titleMedium,
                                 color = MaterialTheme.colorScheme.primary
                             )

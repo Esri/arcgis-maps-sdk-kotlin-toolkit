@@ -41,7 +41,7 @@
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="clear_all_results_confirmation">All the trace results will be lost, proceed?</string>
-    <string name="object_id">Object ID</string>
+    <string name="object_id">Object ID: %s</string>
 <!--Trace Tool Errors-->
     <string name="no_utility_network_found">No Utility Network found.</string>
     <string name="no_trace_configurations_found">No trace configurations found.</string>
