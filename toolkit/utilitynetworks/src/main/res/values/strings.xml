@@ -39,7 +39,7 @@
     <string name="terminal_configuration">Terminal Configuration</string>
     <string name="an_error_has_occurred">An error has occurred</string>
     <string name="ok">OK</string>
-    <string name="object_id">Object ID</string>
+    <string name="object_id">Object ID: %s</string>
 <!--Trace Tool Errors-->
     <string name="no_utility_network_found">No Utility Network found.</string>
     <string name="no_trace_configurations_found">No trace configurations found.</string>
