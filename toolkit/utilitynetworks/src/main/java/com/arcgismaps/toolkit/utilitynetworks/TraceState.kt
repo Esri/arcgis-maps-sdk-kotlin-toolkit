@@ -120,6 +120,10 @@ public class TraceState(
      */
     internal val selectedStartingPoint: State<StartingPoint?> = _selectedStartingPoint
 
+    private var _selectedAssetGroupName: String = ""
+    internal val selectedAssetGroupName: String
+        get() = _selectedAssetGroupName
+
     private val _currentTraceStartingPoints: SnapshotStateList<StartingPoint> = mutableStateListOf()
     internal val currentTraceStartingPoints: List<StartingPoint> = _currentTraceStartingPoints
 
@@ -417,7 +421,7 @@ public class TraceState(
     internal suspend fun zoomToStartingPoint(startingPoint: StartingPoint) {
         startingPoint.graphic.geometry?.let {
             mapViewProxy.setViewpointAnimated(
-                Viewpoint(it),
+                Viewpoint(it.extent),
                 1.0.seconds,
                 AnimationCurve.EaseOutCirc
             )
@@ -525,6 +529,10 @@ public class TraceState(
         _currentTraceName.value = name
     }
 
+    internal fun setAssetGroupName(name: String) {
+        _selectedAssetGroupName = name
+    }
+
     internal fun selectNextCompletedTrace() {
         if (_selectedCompletedTraceIndex.value + 1 < _completedTraces.size) {
             updateSelectedTraceIndexAndGraphics(_selectedCompletedTraceIndex.value + 1)
@@ -572,6 +580,20 @@ public class TraceState(
      */
     internal fun setZoomToResults(zoom: Boolean) {
         _currentTraceZoomToResults.value = zoom
+    }
+
+    internal suspend fun zoomToUtilityElement(utilityElement: UtilityElement) = runCatchingCancellable {
+        val features = utilityNetwork.getFeaturesForElements(listOf(utilityElement)).getOrThrow()
+        val geometry = features[0].geometry ?: return@runCatchingCancellable
+        mapViewProxy.setViewpointAnimated(
+            Viewpoint(geometry.extent),
+            1.0.seconds,
+            AnimationCurve.EaseInOutCubic
+        )
+    }
+
+    internal fun getAllElementsWithSelectedAssetGroupName(): List<UtilityElement> {
+        return completedTraces[_selectedCompletedTraceIndex.value].featureResults.filter { it.assetGroup.name == selectedAssetGroupName }
     }
 
     /**
@@ -656,9 +678,9 @@ internal enum class TraceNavRoute {
     TraceOptions,
     AddStartingPoint,
     TraceResults,
+    FeatureResultsDetails,
     StartingPointDetails,
     TraceError
-    //TODO: Add FeatureAttributes route
 }
 
 @Immutable
