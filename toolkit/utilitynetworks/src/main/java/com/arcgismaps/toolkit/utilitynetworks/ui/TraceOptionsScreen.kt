@@ -52,6 +52,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.isTraceInProgress
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -92,6 +93,7 @@ internal fun TraceOptionsScreen(
     selectedColor: Color,
     zoomToResult: Boolean,
     showResultsTab: Boolean,
+    isTraceInProgress: Boolean,
     onStartingPointRemoved: (StartingPoint) -> Unit,
     onStartingPointSelected: (StartingPoint) -> Unit,
     onBackToResults: () -> Unit,
@@ -168,7 +170,7 @@ internal fun TraceOptionsScreen(
             }
             Button(
                 onClick = { onPerformTraceButtonClicked() },
-                enabled = selectedConfig != null && startingPoints.isNotEmpty()
+                enabled = selectedConfig != null && startingPoints.isNotEmpty() && isTraceInProgress.not()
             ) {
                 Text(stringResource(id = R.string.trace))
             }

@@ -141,6 +141,9 @@ public class TraceState(
     private var _selectedCompletedTraceIndex: MutableState<Int> = mutableIntStateOf(0)
     internal val selectedCompletedTraceIndex: State<Int> = _selectedCompletedTraceIndex
 
+    private var _isTraceInProgress: MutableState<Boolean> = mutableStateOf(false)
+    internal val isTraceInProgress: State<Boolean> = _isTraceInProgress
+
     private var _currentTraceName: MutableState<String> = mutableStateOf("")
     /**
      * The default name of the trace.
@@ -282,6 +285,7 @@ public class TraceState(
      * @since 200.6.0
      */
     internal suspend fun trace(): Result<Unit> = runCatchingCancellable {
+        _isTraceInProgress.value = true
         // Run a trace
         val traceConfiguration = selectedTraceConfiguration.value
             ?: throw TraceToolException(TraceError.NO_TRACE_CONFIGURATIONS_FOUND)
@@ -356,15 +360,6 @@ public class TraceState(
             updateSelectedTraceIndexAndGraphics(_completedTraces.size - 1)
         }
 
-        if (_currentTraceZoomToResults.value) {
-            currentTraceResultGeometriesExtent?.let {
-                mapViewProxy.setViewpointAnimated(
-                    Viewpoint(it),
-                    2.0.seconds,
-                    AnimationCurve.EaseOutCirc
-                )
-            }
-        }
         resetCurrentTrace()
     }
 
@@ -374,6 +369,7 @@ public class TraceState(
         _currentTraceName.value = ""
         currentTraceGraphicsColor = Color.green
         _currentTraceZoomToResults.value = true
+        _isTraceInProgress.value = false
     }
 
     private fun getResultGeometriesExtent(utilityGeometryTraceResult: UtilityGeometryTraceResult): Envelope? {
