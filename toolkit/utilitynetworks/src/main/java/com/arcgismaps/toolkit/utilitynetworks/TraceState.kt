@@ -625,6 +625,7 @@ public class TraceState(
         _completedTraces.clear()
         _selectedCompletedTraceIndex.value = 0
         currentTraceGeometryResultsGraphics.clear()
+        _currentTraceStartingPoints.clear()
         graphicsOverlay.graphics.clear()
     }
 
