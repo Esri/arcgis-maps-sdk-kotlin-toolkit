@@ -269,9 +269,11 @@ internal fun AdvancedOptions(
     selectedColor: Color,
     onColorChanged: (Color) -> Unit = {},
 ) {
-    Spacer(modifier = Modifier
-        .height(20.dp)
-        .fillMaxWidth())
+    Spacer(
+        modifier = Modifier
+            .height(20.dp)
+            .fillMaxWidth()
+    )
     ExpandableCard(
         title = stringResource(id = R.string.advanced_options),
         toggleable = true,

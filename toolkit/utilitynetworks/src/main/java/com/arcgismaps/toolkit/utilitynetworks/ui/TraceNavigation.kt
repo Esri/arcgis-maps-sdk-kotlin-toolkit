@@ -144,6 +144,20 @@ internal fun TraceNavHost(traceState: TraceState) {
                 }
             )
         }
+        composable(TraceNavRoute.FeatureResultsDetails.name) {
+            val coroutineScope = rememberCoroutineScope()
+            FeatureResultsDetailsScreen(
+                selectedGroupName = traceState.selectedAssetGroupName,
+                elementListWithSelectedGroupName = traceState.getAllElementsWithSelectedAssetGroupName(),
+                onBackToResults = { traceState.showScreen(TraceNavRoute.TraceResults) },
+                onBackToNewTrace = { traceState.showScreen(TraceNavRoute.TraceOptions) },
+                onFeatureSelected = {
+                    coroutineScope.launch {
+                        traceState.zoomToUtilityElement(it)
+                    }
+                }
+            )
+        }
         dialog(TraceNavRoute.TraceError.name) {
             TraceErrorDialog(
                 error = traceState.currentError ?: return@dialog,

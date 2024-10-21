@@ -147,10 +147,10 @@ public class TraceState(
      *
      * @since 200.6.0
      */
-    public val currentTraceName: State<String> = _currentTraceName
+    internal val currentTraceName: State<String> = _currentTraceName
 
     private var currentTraceGraphicsColor: Color = Color.green
-    public val currentTraceGraphicsColorAsComposeColor: androidx.compose.ui.graphics.Color
+    internal val currentTraceGraphicsColorAsComposeColor: androidx.compose.ui.graphics.Color
         get() = androidx.compose.ui.graphics.Color(
             currentTraceGraphicsColor.red,
             currentTraceGraphicsColor.green,
@@ -159,7 +159,7 @@ public class TraceState(
         )
 
     private var _currentTraceZoomToResults: MutableState<Boolean> = mutableStateOf(true)
-    public var currentTraceZoomToResults: State<Boolean> = _currentTraceZoomToResults
+    internal var currentTraceZoomToResults: State<Boolean> = _currentTraceZoomToResults
 
     private var navigateToRoute: ((TraceNavRoute) -> Unit)? = null
 
