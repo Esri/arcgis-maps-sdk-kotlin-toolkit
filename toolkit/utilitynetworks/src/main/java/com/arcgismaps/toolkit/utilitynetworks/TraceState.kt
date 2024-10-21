@@ -135,9 +135,6 @@ public class TraceState(
 
     private val currentTraceGeometryResultsGraphics: MutableList<Graphic> = mutableListOf()
 
-    private val _currentScreen: MutableState<TraceNavRoute> = mutableStateOf(TraceNavRoute.TraceOptions)
-    internal var currentScreen: State<TraceNavRoute> = _currentScreen
-
     private val _completedTraces: SnapshotStateList<TraceRun> = mutableStateListOf()
     internal val completedTraces: List<TraceRun> = _completedTraces
 

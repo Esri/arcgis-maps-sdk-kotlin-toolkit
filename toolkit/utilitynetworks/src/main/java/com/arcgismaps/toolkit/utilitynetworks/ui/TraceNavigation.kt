@@ -198,10 +198,11 @@ internal fun TraceNavHost(traceState: TraceState) {
 }
 
 private fun NavHostController.navigateTo(traceNavRoute: TraceNavRoute) {
-    navigate(traceNavRoute.name) {
-        popUpTo(
-            graph.findStartDestination().id
-        )
-        launchSingleTop = true
-    }
+    navigate(traceNavRoute.name)
+//    navigate(traceNavRoute.name) {
+//        popUpTo(
+//            graph.findStartDestination().id
+//        )
+//        launchSingleTop = true
+//    }
 }
