@@ -110,6 +110,8 @@ internal fun TraceOptionsScreen(
         Column (modifier = Modifier.padding(horizontal = 10.dp),
             horizontalAlignment = Alignment.CenterHorizontally) {
 
+            var currentSelectedColor by remember { mutableStateOf(selectedColor) }
+
             if (showResultsTab) {
                 TabRow(onBackToResults, 0)
                 Spacer(
@@ -153,9 +155,12 @@ internal fun TraceOptionsScreen(
                 item {
                     AdvancedOptions(
                         onNameChange = onNameChange,
-                        onColorChanged = onColorChanged,
+                        onColorChanged = {
+                            currentSelectedColor = it
+                            onColorChanged(it)
+                        },
                         defaultTraceName = defaultTraceName,
-                        selectedColor = selectedColor,
+                        selectedColor = currentSelectedColor,
                         zoomToResult = zoomToResult,
                         onZoomRequested = onZoomRequested
                     )

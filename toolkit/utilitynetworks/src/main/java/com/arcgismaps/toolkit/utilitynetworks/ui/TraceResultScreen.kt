@@ -91,7 +91,7 @@ internal fun TraceResultScreen(
             }
 
             val selectedTraceRun = traceResults[selectedTraceRunIndex]
-            var selectedColor by remember(selectedTraceRun) { mutableStateOf(selectedTraceRun.resultGraphicColor) }
+            var selectedColor by remember { mutableStateOf(selectedTraceRun.resultGraphicColor) }
 
             LaunchedEffect(selectedTraceRunIndex) {
                 selectedColor = selectedTraceRun.resultGraphicColor
