@@ -44,6 +44,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -52,7 +53,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.isTraceInProgress
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -114,6 +114,10 @@ internal fun TraceOptionsScreen(
 
             var currentSelectedColor by remember { mutableStateOf(selectedColor) }
 
+            if (isTraceInProgress) {
+                LinearProgressIndicator()
+            }
+
             if (showResultsTab) {
                 TabRow(onBackToResults, 0)
                 Spacer(
@@ -137,9 +141,11 @@ internal fun TraceOptionsScreen(
                     }
                 }
                 item {
-                    Spacer(modifier = Modifier
-                        .fillMaxWidth()
-                        .height(10.dp))
+                    Spacer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(10.dp)
+                    )
                 }
                 item {
                     StartingPoints(
@@ -150,9 +156,11 @@ internal fun TraceOptionsScreen(
                     )
                 }
                 item {
-                    Spacer(modifier = Modifier
-                        .fillMaxWidth()
-                        .height(10.dp))
+                    Spacer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(10.dp)
+                    )
                 }
                 item {
                     AdvancedOptions(
