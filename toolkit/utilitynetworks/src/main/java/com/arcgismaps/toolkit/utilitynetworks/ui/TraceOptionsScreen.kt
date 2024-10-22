@@ -16,7 +16,6 @@
 package com.arcgismaps.toolkit.utilitynetworks.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -38,7 +37,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -55,6 +53,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
@@ -65,6 +64,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -78,6 +78,7 @@ import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 import com.arcgismaps.toolkit.ui.expandablecard.rememberExpandableCardState
 import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.toolkit.utilitynetworks.StartingPoint
+import com.arcgismaps.toolkit.utilitynetworks.internal.util.ExpandableCardWithLabel
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.TabRow
 import com.arcgismaps.utilitynetworks.UtilityNamedTraceConfiguration
 import com.arcgismaps.utilitynetworks.UtilityNetwork
@@ -183,7 +184,10 @@ private fun TraceConfigurations(
     selectedConfig: UtilityNamedTraceConfiguration?,
     onTraceSelected: (UtilityNamedTraceConfiguration) -> Unit
 ) {
-    TraceConfigurations(configs.map { it.name }, selectedConfigName = selectedConfig?.name ?: "") { index ->
+    TraceConfigurations(
+        configs = configs.map { it.name },
+        selectedConfigName = selectedConfig?.name ?: LocalContext.current.getString(R.string.no_configuration_selected)
+    ) { index ->
         onTraceSelected(configs[index])
     }
 }
@@ -191,77 +195,52 @@ private fun TraceConfigurations(
 @Composable
 private fun TraceConfigurations(
     configs: List<String>,
-    selectedConfigName: String?,
+    selectedConfigName: String,
     onTraceSelected: (Int) -> Unit
 ) {
-    var showDropdown by rememberSaveable {
-        mutableStateOf(false)
-    }
-    ReadOnlyTextField(stringResource(id = R.string.trace_configuration), modifier = Modifier.padding(horizontal = 4.dp))
-    Column(
-        modifier = Modifier
-            .padding(horizontal = 4.dp)
-            .border(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f),
-                shape = RoundedCornerShape(5.dp)
-            )
-            .background(color = MaterialTheme.colorScheme.background)
+    val expandableCardState = rememberExpandableCardState(false)
+    var selectedConfigIndex by rememberSaveable { mutableIntStateOf(-1) }
+    ExpandableCardWithLabel(
+        expandableCardState = expandableCardState,
+        labelText = stringResource(id = R.string.trace_configuration),
+        contentTitle = selectedConfigName
     ) {
-        Row (
+        Column {
+            configs.forEachIndexed { index, name ->
+                TraceConfiguration(name = name, isSelected = selectedConfigIndex == index) {
+                    selectedConfigIndex = index
+                    expandableCardState.toggle()
+                    onTraceSelected(index)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TraceConfiguration(
+    name: String, isSelected: Boolean, onClicked: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClicked() }
+    ) {
+        ReadOnlyTextField(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(4.dp)
-                .clickable {
-                    showDropdown = !showDropdown
-                },
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            ReadOnlyTextField(
-                text = selectedConfigName ?: "",
-                modifier = Modifier.clickable {
-                    showDropdown = !showDropdown
-                },
-                trailingIcon = {
+                .padding(start = 5.dp)
+                .height(40.dp),
+            text = name,
+            trailingIcon = {
+                if (isSelected) {
                     Icon(
-                        imageVector = Icons.Filled.MoreVert,
-                        contentDescription = "Edit icon",
+                        imageVector = Icons.Filled.Done,
+                        contentDescription = "Selected icon",
                         modifier = Modifier.size(FilterChipDefaults.IconSize)
                     )
                 }
-            )
-        }
-    }
-    MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp))) {
-        DropdownMenu(
-            expanded = showDropdown,
-            offset = DpOffset.Zero,
-            onDismissRequest = { showDropdown = false }) {
-            configs.forEachIndexed { index, name ->
-                DropdownMenuItem(
-                    text = {
-                        ReadOnlyTextField(
-                            text = name, leadingIcon = if (name == selectedConfigName) {
-                                {
-                                    Icon(
-                                        imageVector = Icons.Filled.Done,
-                                        contentDescription = "Done icon",
-                                        modifier = Modifier.size(FilterChipDefaults.IconSize)
-                                    )
-                                }
-                            } else {
-                                null
-                            }
-                        )
-                    },
-                    onClick = {
-                        onTraceSelected(index)
-                        showDropdown = false
-                    },
-                    contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp)
-                )
             }
-        }
+        )
     }
 }
 

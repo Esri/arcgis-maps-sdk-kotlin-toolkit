@@ -43,19 +43,17 @@ internal fun ExpandableCardWithLabel(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 16.dp)
     ) {
         Text(
             labelText,
             color = MaterialTheme.colorScheme.tertiary,
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(start = 20.dp, bottom = 8.dp)
+            modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
         )
         ExpandableCard(
             expandableCardState = expandableCardState,
             title = contentTitle,
             padding = PaddingValues(0.dp),
-            modifier = Modifier.padding(horizontal = 4.dp)
         ) {
             content()
         }
