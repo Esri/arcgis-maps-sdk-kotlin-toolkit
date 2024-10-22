@@ -37,11 +37,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -225,39 +220,5 @@ private fun ExpandableCardPreview() {
             style = MaterialTheme.typography.headlineLarge,
             modifier = Modifier.padding(16.dp)
         )
-    }
-}
-
-/**
- * State object that can be hoisted to control the [ExpandableCard].
- *
- * In most cases, this will be created using [rememberExpandableCardState].
- * @since 200.6.0
- */
-class ExpandableCardState constructor(initialExpandedSttate: Boolean) {
-    /**
-     * The expanded state of the [ExpandableCard].
-     * @since 200.6.0
-     */
-    var isExpanded by mutableStateOf(initialExpandedSttate)
-}
-
-/**
- * Remember the state of [ExpandableCard].
- *
- * @param isExpanded the initial expanded state
- * @since 200.6.0
- */
-@Composable
-fun rememberExpandableCardState(
-    isExpanded: Boolean = true
-): ExpandableCardState {
-    return rememberSaveable(
-        saver = Saver(
-            save = { it.isExpanded},
-            restore = { ExpandableCardState(it) }
-        )
-    ) {
-        ExpandableCardState(isExpanded)
     }
 }
