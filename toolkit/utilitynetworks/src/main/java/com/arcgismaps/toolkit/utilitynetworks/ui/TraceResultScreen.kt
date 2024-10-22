@@ -153,7 +153,7 @@ private fun FeatureResult(featureResults: List<UtilityElement>, onFeatureAssetGr
 
     Surface(modifier = Modifier.fillMaxWidth()) {
         Column {
-            ExpandableCardWithLabel(stringResource(R.string.feature_results), value = featureResults.size.toString()) {
+            ExpandableCardWithLabel(stringResource(R.string.feature_results), contentTitle = featureResults.size.toString()) {
                 Column {
                     assetGroupNames.forEach { assetGroupName ->
                         HorizontalDivider()
@@ -196,7 +196,7 @@ private fun elementsInAssetGroup(assetGroup: String, featureResults: List<Utilit
 private fun FunctionResult(functionResults: List<UtilityTraceFunctionOutput>) {
     Surface(modifier = Modifier.fillMaxWidth()) {
         Column {
-            ExpandableCardWithLabel(stringResource(R.string.function_results), value = functionResults.size.toString()) {
+            ExpandableCardWithLabel(stringResource(R.string.function_results), contentTitle = functionResults.size.toString()) {
                 Column {
                     functionResults.forEach { functionResult ->
                         HorizontalDivider()
