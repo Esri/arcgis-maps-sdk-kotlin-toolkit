@@ -19,14 +19,19 @@ package com.arcgismaps.toolkit.utilitynetworks.ui
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.utilitynetworks.R
 
 /**
@@ -35,13 +40,26 @@ import com.arcgismaps.toolkit.utilitynetworks.R
  * @since 200.6.0
  */
 @Composable
-internal fun AddStartingPointScreen(onStopPointSelection: () -> Unit) {
+internal fun AddStartingPointScreen(
+    isIdentifyInProcess: Boolean,
+    onStopPointSelection: () -> Unit
+) {
     BackHandler {
         onStopPointSelection()
     }
 
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Top) {
+            if (isIdentifyInProcess) {
+                LinearProgressIndicator()
+            }
+
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(5.dp)
+            )
+
             Button(
                 onClick = {
                     onStopPointSelection()

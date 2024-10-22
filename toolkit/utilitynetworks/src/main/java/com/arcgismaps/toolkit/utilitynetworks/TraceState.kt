@@ -144,6 +144,9 @@ public class TraceState(
     private var _isTraceInProgress: MutableState<Boolean> = mutableStateOf(false)
     internal val isTraceInProgress: State<Boolean> = _isTraceInProgress
 
+    private var _isIdentifyInProcess: MutableState<Boolean> = mutableStateOf(false)
+    internal val isIdentifyInProcess: State<Boolean> = _isIdentifyInProcess
+
     private var _currentTraceName: MutableState<String> = mutableStateOf("")
     /**
      * The default name of the trace.
@@ -478,6 +481,7 @@ public class TraceState(
     }
 
     private suspend fun identifyFeatures(mapPoint: Point, screenCoordinate: ScreenCoordinate) {
+        _isIdentifyInProcess.value = true
         val result = mapViewProxy.identifyLayers(
             screenCoordinate = screenCoordinate,
             tolerance = 10.dp
@@ -490,6 +494,7 @@ public class TraceState(
                         processAndAddStartingPoint(feature, mapPoint).getOrElse {
                             setCurrentError(it)
                             _addStartingPointMode.value = AddStartingPointMode.Stopped
+                            _isIdentifyInProcess.value = false
                             showScreen(TraceNavRoute.TraceError)
                             return
                         }
@@ -498,9 +503,14 @@ public class TraceState(
                 if (currentTraceStartingPoints.size > sizeBefore) {
                     // If the size of the starting points has changed, then the starting point was added
                     _addStartingPointMode.value = AddStartingPointMode.Stopped
+                    _isIdentifyInProcess.value = false
                     showScreen(TraceNavRoute.TraceOptions)
                 }
             }
+            _isIdentifyInProcess.value = false
+        }
+        result.onFailure {
+            _isIdentifyInProcess.value = false
         }
     }
 

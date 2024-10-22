@@ -95,6 +95,7 @@ internal fun TraceNavHost(traceState: TraceState) {
         }
         composable(TraceNavRoute.AddStartingPoint.name) {
             AddStartingPointScreen(
+                isIdentifyInProcess = traceState.isIdentifyInProcess.value,
                 onStopPointSelection = {
                     traceState.showScreen(TraceNavRoute.TraceOptions)
                     traceState.updateAddStartPointMode(AddStartingPointMode.Stopped)
