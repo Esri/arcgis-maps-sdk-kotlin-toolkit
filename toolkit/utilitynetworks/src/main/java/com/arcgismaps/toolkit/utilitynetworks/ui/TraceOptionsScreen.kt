@@ -75,6 +75,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
+import com.arcgismaps.toolkit.ui.expandablecard.rememberExpandableCardState
 import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.toolkit.utilitynetworks.StartingPoint
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.TabRow
@@ -356,7 +357,7 @@ internal fun AdvancedOptions(
     ExpandableCard(
         title = stringResource(id = R.string.advanced_options),
         toggleable = true,
-        initialExpandedState = false,
+        expandableCardState = rememberExpandableCardState(isExpanded = false),
         padding = PaddingValues(horizontal = 4.dp)
     ) {
         Column {

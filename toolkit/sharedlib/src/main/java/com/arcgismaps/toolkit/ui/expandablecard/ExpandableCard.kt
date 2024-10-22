@@ -39,6 +39,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -68,15 +69,13 @@ fun ExpandableCard(
     title: String = "",
     description: (@Composable () -> Unit)? = null,
     toggleable: Boolean = true,
-    initialExpandedState: Boolean = true,
+    expandableCardState: ExpandableCardState = rememberExpandableCardState(),
     padding: PaddingValues = PaddingValues(16.dp),
     colorScheme: ExpandableCardColorScheme = ExpandableCardDefaults.colorScheme(),
     shapes: ExpandableCardShapes = ExpandableCardDefaults.shapes(),
     typography: ExpandableCardTypography = ExpandableCardDefaults.typography(),
     content: @Composable () -> Unit = {}
 ) {
-    var expanded by rememberSaveable { mutableStateOf(initialExpandedState) }
-
     ExpandableCardTheme(
         colorScheme = colorScheme,
         shapes = shapes,
@@ -100,14 +99,14 @@ fun ExpandableCard(
                     colors = colorScheme,
                     shapes = shapes,
                     typography = typography,
-                    isExpanded = expanded
+                    isExpanded = expandableCardState.isExpanded,
                 ) {
                     if (toggleable) {
-                        expanded = !expanded
+                        expandableCardState.isExpanded = !expandableCardState.isExpanded
                     }
                 }
 
-                AnimatedVisibility(visible = expanded) {
+                AnimatedVisibility(visible = expandableCardState.isExpanded) {
                     content()
                 }
 
@@ -226,5 +225,39 @@ private fun ExpandableCardPreview() {
             style = MaterialTheme.typography.headlineLarge,
             modifier = Modifier.padding(16.dp)
         )
+    }
+}
+
+/**
+ * State object that can be hoisted to control the [ExpandableCard].
+ *
+ * In most cases, this will be created using [rememberExpandableCardState].
+ * @since 200.6.0
+ */
+class ExpandableCardState constructor(initialExpandedSttate: Boolean) {
+    /**
+     * The expanded state of the [ExpandableCard].
+     * @since 200.6.0
+     */
+    var isExpanded by mutableStateOf(initialExpandedSttate)
+}
+
+/**
+ * Remember the state of [ExpandableCard].
+ *
+ * @param isExpanded the initial expanded state
+ * @since 200.6.0
+ */
+@Composable
+fun rememberExpandableCardState(
+    isExpanded: Boolean = true
+): ExpandableCardState {
+    return rememberSaveable(
+        saver = Saver(
+            save = { it.isExpanded},
+            restore = { ExpandableCardState(it) }
+        )
+    ) {
+        ExpandableCardState(isExpanded)
     }
 }

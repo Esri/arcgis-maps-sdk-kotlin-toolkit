@@ -25,9 +25,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
+import com.arcgismaps.toolkit.ui.expandablecard.rememberExpandableCardState
 
 @Composable
 internal fun ExpandableCardWithLabel(title: String, value: String, content: @Composable () -> Unit) {
+    val expandedCardState = rememberExpandableCardState(false)
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -40,7 +42,7 @@ internal fun ExpandableCardWithLabel(title: String, value: String, content: @Com
             modifier = Modifier.padding(start = 20.dp, bottom = 8.dp)
         )
         ExpandableCard(
-            initialExpandedState = false,
+            expandableCardState = expandedCardState,
             title = value,
             padding = PaddingValues(0.dp),
             modifier = Modifier.padding(horizontal = 4.dp)
