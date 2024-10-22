@@ -30,7 +30,6 @@ import androidx.camera.core.resolutionselector.ResolutionStrategy.FALLBACK_RULE_
 import androidx.camera.view.CameraController
 import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -59,7 +58,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -478,7 +476,7 @@ private fun hasCameraPermissions(context: Context): Boolean = ContextCompat.chec
 ) == PackageManager.PERMISSION_GRANTED
 
 @Composable
-@Preview(showBackground = false, widthDp = 420, heightDp = 933)
+@Preview(showBackground = true, widthDp = 420, heightDp = 933)
 private fun BarcodeFramePreview() {
     val frame = getFrameRect(SCANNER_FRAME_PADDING_HORIZONTAL.dp, SCANNER_FRAME_PADDING_VERTICAL.dp)
     // draw the frame in preview mode
