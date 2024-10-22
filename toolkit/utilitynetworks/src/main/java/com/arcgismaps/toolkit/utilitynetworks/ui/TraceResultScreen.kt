@@ -91,11 +91,7 @@ internal fun TraceResultScreen(
             }
 
             val selectedTraceRun = traceResults[selectedTraceRunIndex]
-            var selectedColor by remember { mutableStateOf(selectedTraceRun.resultGraphicColor) }
-
-            LaunchedEffect(selectedTraceRunIndex) {
-                selectedColor = selectedTraceRun.resultGraphicColor
-            }
+            var selectedColor by remember(selectedTraceRunIndex) { mutableStateOf(selectedTraceRun.resultGraphicColor) }
 
             TabRow(onBackToNewTrace, 1)
 
