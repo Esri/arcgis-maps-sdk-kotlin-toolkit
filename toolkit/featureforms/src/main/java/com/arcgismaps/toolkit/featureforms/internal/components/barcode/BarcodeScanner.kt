@@ -19,16 +19,18 @@ package com.arcgismaps.toolkit.featureforms.internal.components.barcode
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.util.Log
 import androidx.annotation.OptIn
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.FocusMeteringAction
 import androidx.camera.core.ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST
 import androidx.camera.core.resolutionselector.ResolutionSelector
 import androidx.camera.core.resolutionselector.ResolutionStrategy
-import androidx.camera.core.resolutionselector.ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER
+import androidx.camera.core.resolutionselector.ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER
 import androidx.camera.view.CameraController
 import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -57,6 +59,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -94,7 +97,6 @@ import androidx.lifecycle.LifecycleOwner
 import com.arcgismaps.toolkit.featureforms.R
 import kotlinx.coroutines.delay
 import java.util.concurrent.TimeUnit
-import kotlin.math.absoluteValue
 
 private const val SCANNER_FRAME_PADDING_HORIZONTAL = 50
 private const val SCANNER_FRAME_PADDING_VERTICAL = 50
@@ -132,54 +134,74 @@ internal fun BarcodeScanner(
             controller = cameraController
         }
     }
-    if (!permissionsGranted) {
-        PermissionsDeniedDialog(onDismiss = onDismiss)
-    } else {
-        Dialog(
-            onDismissRequest = onDismiss,
-            properties = DialogProperties(
-                dismissOnClickOutside = false,
-                usePlatformDefaultWidth = false
+    when {
+        !permissionsGranted -> {
+            // show permission denied dialog
+            ErrorDialog(
+                text = stringResource(R.string.barcode_permission_denied),
+                onDismiss = onDismiss
             )
-        ) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                AndroidView(
-                    modifier = Modifier.fillMaxSize(),
-                    factory = { previewView },
-                    onRelease = { cameraController.unbind() }
+        }
+
+        cameraController == null -> {
+            // Error creating camera controller
+            ErrorDialog(
+                text = stringResource(R.string.unable_to_open_the_camera),
+                onDismiss = onDismiss
+            )
+        }
+
+        else -> {
+            // Display the barcode scanner
+            Dialog(
+                onDismissRequest = onDismiss,
+                properties = DialogProperties(
+                    dismissOnClickOutside = false,
+                    usePlatformDefaultWidth = false
                 )
-                BarcodeFrame(
-                    modifier = Modifier.fillMaxSize(),
-                    frame = scannerFrame,
-                    drawFrame = false,
-                    info = barcodeInfoList,
-                    onTap = { offset ->
-                        // Handle focus on tap
-                        val factory = previewView.meteringPointFactory
-                        val action = FocusMeteringAction
-                            .Builder(factory.createPoint(offset.x, offset.y))
-                            .setAutoCancelDuration(3, TimeUnit.SECONDS)
-                            .build()
-                        cameraController.cameraControl?.startFocusAndMetering(action)
-                    },
-                    onSelected = { code ->
-                        // Handle tap on barcode
-                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-                        // Unbind the camera controller to stop processing frames
-                        cameraController.unbind()
-                        onScan(code.rawValue)
-                    }
-                )
-                BarcodeToolbar(cameraController = cameraController, onDismiss = onDismiss)
+            ) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    AndroidView(
+                        modifier = Modifier.fillMaxSize(),
+                        factory = { previewView },
+                        onRelease = { cameraController.unbind() }
+                    )
+                    BarcodeFrame(
+                        modifier = Modifier.fillMaxSize(),
+                        frame = scannerFrame,
+                        drawFrame = false,
+                        info = barcodeInfoList,
+                        onTap = { offset ->
+                            // Handle focus on tap
+                            val factory = previewView.meteringPointFactory
+                            val action = FocusMeteringAction
+                                .Builder(factory.createPoint(offset.x, offset.y))
+                                .setAutoCancelDuration(3, TimeUnit.SECONDS)
+                                .build()
+                            cameraController.cameraControl?.startFocusAndMetering(action)
+                        },
+                        onSelected = { code ->
+                            // Handle tap on barcode
+                            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                            // Unbind the camera controller to stop processing frames
+                            cameraController.unbind()
+                            onScan(code.rawValue)
+                        }
+                    )
+                    BarcodeToolbar(
+                        cameraController = cameraController,
+                        onDismiss = onDismiss
+                    )
+                }
             }
         }
     }
     LaunchedEffect(Unit) {
         if (!permissionsGranted) return@LaunchedEffect
-        cameraController.setImageAnalysisAnalyzer(
+        cameraController?.setImageAnalysisAnalyzer(
             executor,
             BarcodeImageAnalyzer(scannerFrame) { barcodes ->
-                barcodeInfoList = barcodes
+                barcodeInfoList = barcodes.toList()
                 // set the auto-scan barcode if only one barcode is detected
                 if (barcodeInfoList.count() == 1) {
                     // compare the current auto-scan barcode with the detected barcode to avoid setting
@@ -210,33 +232,41 @@ internal fun BarcodeScanner(
             // Perform haptic feedback when a barcode is auto scanned
             hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
             // Unbind the camera controller to stop processing frames
-            cameraController.unbind()
+            cameraController?.unbind()
             onScan(autoScanBarcode!!.rawValue)
         }
     }
 }
 
 @Composable
-private fun rememberCameraController(lifecycleOwner: LifecycleOwner): LifecycleCameraController {
+private fun rememberCameraController(lifecycleOwner: LifecycleOwner): LifecycleCameraController? {
     val context = LocalContext.current
     return remember {
-        LifecycleCameraController(context).apply {
-            imageAnalysisBackpressureStrategy = STRATEGY_KEEP_ONLY_LATEST
-            imageAnalysisResolutionSelector = ResolutionSelector.Builder()
-                .setResolutionStrategy(
-                    ResolutionStrategy(
-                        android.util.Size(1920, 1080),
-                        FALLBACK_RULE_CLOSEST_HIGHER
+        try {
+            LifecycleCameraController(context).apply {
+                imageAnalysisBackpressureStrategy = STRATEGY_KEEP_ONLY_LATEST
+                imageAnalysisResolutionSelector = ResolutionSelector.Builder()
+                    .setResolutionStrategy(
+                        ResolutionStrategy(
+                            android.util.Size(1920, 1080),
+                            FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER
+                        )
                     )
-                )
-                .build()
-            bindToLifecycle(lifecycleOwner)
+                    .build()
+                bindToLifecycle(lifecycleOwner)
+            }
+        } catch (ex: IllegalStateException) {
+            Log.e("BarcodeScanner", "Error creating CameraController", ex)
+            null
         }
     }
 }
 
 @Composable
-private fun PermissionsDeniedDialog(onDismiss: () -> Unit) {
+private fun ErrorDialog(
+    text: String,
+    onDismiss: () -> Unit
+) {
     Dialog(onDismissRequest = onDismiss) {
         Card(
             modifier = Modifier
@@ -248,8 +278,8 @@ private fun PermissionsDeniedDialog(onDismiss: () -> Unit) {
                 Icon(imageVector = Icons.Rounded.Warning, contentDescription = null)
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = stringResource(R.string.barcode_permission_denied), style =
-                    MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                    text = text,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(onClick = onDismiss) {
@@ -277,14 +307,10 @@ private fun BarcodeFrame(
     onSelected: (BarcodeInfo) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
     // save the latest barcodes
     val barcodes by rememberUpdatedState(newValue = info)
     val textMeasurer = rememberTextMeasurer()
     val codeTextStyle = MaterialTheme.typography.titleMedium.copy(
-        color = Color.White
-    )
-    val titleTextStyle = MaterialTheme.typography.titleSmall.copy(
         color = Color.White
     )
     Canvas(
@@ -328,7 +354,7 @@ private fun BarcodeFrame(
                 drawRoundRect(
                     color = Color.Blue.copy(alpha = 0.3f),
                     topLeft = box.topLeft,
-                    size = Size(box.width.absoluteValue, box.height.absoluteValue),
+                    size = box.size,
                     cornerRadius = CornerRadius(15f)
                 )
                 drawText(
@@ -337,13 +363,7 @@ private fun BarcodeFrame(
                     topLeft = box.topLeft,
                     style = codeTextStyle,
                     overflow = TextOverflow.Ellipsis,
-                    size = Size(box.width, box.height)
-                )
-                drawText(
-                    textMeasurer = textMeasurer,
-                    text = context.getString(R.string.tap_to_scan),
-                    topLeft = Offset(box.left, box.bottom + 5f),
-                    style = titleTextStyle
+                    size = box.size
                 )
             }
         }

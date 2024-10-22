@@ -121,4 +121,5 @@
     <string name="barcode_permission_denied">Camera permissions are required to scan barcodes. Please enable camera permissions in your device settings.</string>
     <string name="unsupported_type">Unsupported Type</string>
     <string name="tap_to_scan">Tap to scan</string>
+    <string name="unable_to_open_the_camera">Unable to open the camera</string>
 </resources>

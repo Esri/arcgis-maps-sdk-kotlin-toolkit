@@ -35,7 +35,8 @@ import com.google.mlkit.vision.barcode.common.Barcode
  */
 internal data class BarcodeInfo(
     val boundingBox: Rect?,
-    val rawValue: String
+    val rawValue: String,
+    val lastSeenFrame: Long
 )
 
 /**
@@ -45,16 +46,22 @@ internal data class BarcodeInfo(
  *
  * @param frame The frame in which the barcode should be detected. This should be in the view
  * coordinate system.
- * @param onSuccess The callback invoked with the list of [BarcodeInfo] detected in the frame.
+ * @param onSuccess The callback invoked with the set of [BarcodeInfo] detected in the frame.
  */
 @ExperimentalGetImage
 internal class BarcodeImageAnalyzer(
     private val frame: Rect,
-    private val onSuccess: (List<BarcodeInfo>) -> Unit
+    private val onSuccess: (Set<BarcodeInfo>) -> Unit
 ) : ImageAnalysis.Analyzer {
 
     // set by updateTransform
     private var sensorToTargetMatrix: Matrix? = null
+
+    // frame counter
+    private var frames: Long = 0
+
+    // set to store the detected barcodes
+    private val barcodeSet = mutableSetOf<BarcodeInfo>()
 
     private val barcodeScanner = BarcodeScanning.getClient(
         BarcodeScannerOptions.Builder()
@@ -72,6 +79,7 @@ internal class BarcodeImageAnalyzer(
         image.image?.let {
             barcodeScanner.process(it, image.imageInfo.rotationDegrees)
                 .addOnSuccessListener { barcodes ->
+                    frames = frames.inc() % Long.MAX_VALUE
                     processBarcodes(barcodes, image)
                 }.addOnFailureListener {
                     image.close()
@@ -89,7 +97,6 @@ internal class BarcodeImageAnalyzer(
      */
     private fun processBarcodes(barcodes: List<Barcode>, image: ImageProxy) {
         image.use { proxy ->
-            val barcodesInfo = mutableListOf<BarcodeInfo>()
             barcodes.forEach { barcode ->
                 // filter out barcodes that do not have a raw value or the raw value is empty
                 if (barcode.rawValue == null || barcode.rawValue!!.isEmpty()) {
@@ -117,17 +124,23 @@ internal class BarcodeImageAnalyzer(
                         )
                     }
                 }
-                if (rect != null) {
-                    // If the barcode has a bounding box, check if it is inside the frame.
-                    if (rect.isRectInside(frame)) {
-                        barcodesInfo.add(BarcodeInfo(rect, barcode.rawValue!!))
+                // If the barcode has a bounding box, check if it is inside the frame.
+                if (rect != null && rect.isRectInside(frame)) {
+                    val code = barcodeSet.find { it.rawValue == barcode.rawValue!! }
+                    if (code == null) {
+                        // If the barcode detected does not exist, add it to the set.
+                        barcodeSet.add(BarcodeInfo(rect, barcode.rawValue!!, frames))
+                    } else {
+                        // If the barcode was already detected, delete the old instance and add
+                        // a new instance. This is to preserve the Immutable nature of BarcodeInfo.
+                        barcodeSet.remove(code)
+                        barcodeSet.add(BarcodeInfo(rect, barcode.rawValue!!, frames))
                     }
-                } else {
-                    // If the barcode does not have a bounding box, return the raw value.
-                    barcodesInfo.add(BarcodeInfo(null, barcode.rawValue!!))
                 }
             }
-            onSuccess(barcodesInfo)
+            // purge the list of barcodes that were not detected in the last 4 frames
+            barcodeSet.removeIf { it.lastSeenFrame < frames - 4 }
+            onSuccess(barcodeSet)
         }
     }
 
