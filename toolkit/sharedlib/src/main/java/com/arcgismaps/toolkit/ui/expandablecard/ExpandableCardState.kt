@@ -29,12 +29,22 @@ import androidx.compose.runtime.setValue
  * In most cases, this will be created using [rememberExpandableCardState].
  * @since 200.6.0
  */
-class ExpandableCardState constructor(initialExpandedSttate: Boolean) {
+class ExpandableCardState constructor(initialExpandedState: Boolean) {
     /**
      * The expanded state of the [ExpandableCard].
      * @since 200.6.0
      */
-    var isExpanded by mutableStateOf(initialExpandedSttate)
+    internal var isExpanded by mutableStateOf(initialExpandedState)
+        private set
+    
+    /**
+     * Toggles the expanded state of the [ExpandableCard].
+     *
+     * @since 200.6.0
+     */
+    fun toggle() {
+        isExpanded = !isExpanded
+    }
 }
 
 /**

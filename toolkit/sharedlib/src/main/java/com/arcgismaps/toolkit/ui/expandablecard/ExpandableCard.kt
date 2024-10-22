@@ -97,7 +97,7 @@ fun ExpandableCard(
                     isExpanded = expandableCardState.isExpanded,
                 ) {
                     if (toggleable) {
-                        expandableCardState.isExpanded = !expandableCardState.isExpanded
+                        expandableCardState.toggle()
                     }
                 }
 
