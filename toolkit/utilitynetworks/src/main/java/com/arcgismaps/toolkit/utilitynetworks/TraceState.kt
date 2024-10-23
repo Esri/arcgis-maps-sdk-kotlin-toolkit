@@ -69,7 +69,8 @@ import kotlin.time.Duration.Companion.seconds
 public class TraceState(
     private val arcGISMap: ArcGISMap,
     private val graphicsOverlay: GraphicsOverlay,
-    private val mapViewProxy: MapViewProxy
+    private val mapViewProxy: MapViewProxy,
+    private val startingPoints: List<TraceStartingPoint> = emptyList()
 ) {
 
     private var _currentError: Throwable? = null
@@ -204,6 +205,13 @@ public class TraceState(
             throw error
         }
         _traceConfigurations.value = traceConfigResult.getOrThrow()
+
+        startingPoints.forEach { startingPoint ->
+            processAndAddStartingPoint(startingPoint.arcGISFeature, startingPoint.mapPoint).getOrElse {
+                setCurrentError(it)
+                showScreen(TraceNavRoute.TraceError)
+            }
+        }
 
         _initializationStatus.value = InitializationStatus.Initialized
     }
@@ -444,7 +452,7 @@ public class TraceState(
      * This private method is called from a suspend function and so swallows any failures except
      * CancellationExceptions.
      */
-    private fun processAndAddStartingPoint(feature: ArcGISFeature, mapPoint: Point): Result<Unit> = runCatchingCancellable {
+    private fun processAndAddStartingPoint(feature: ArcGISFeature, mapPoint: Point?): Result<Unit> = runCatchingCancellable {
         val utilityElement = utilityNetwork.createElementOrNull(feature)
             ?: return@runCatchingCancellable
 
@@ -458,16 +466,18 @@ public class TraceState(
 
         val featureGeometry = feature.geometry
         if (utilityElement.networkSource.sourceType == UtilityNetworkSourceType.Edge && featureGeometry is Polyline) {
-            utilityElement.fractionAlongEdge =
-                fractionAlongEdge(featureGeometry, mapPoint).takeIf { !it.isNaN() } ?: 0.5
+            utilityElement.fractionAlongEdge = mapPoint?.let { mapPoint ->
+                fractionAlongEdge(featureGeometry, mapPoint).takeIf { !it.isNaN() }
+            } ?: 0.5
         } else if (utilityElement.networkSource.sourceType == UtilityNetworkSourceType.Junction &&
             (utilityElement.assetType.terminalConfiguration?.terminals?.size ?: 0) > 1
         ) {
             utilityElement.terminal = utilityElement.assetType.terminalConfiguration?.terminals?.first()
         }
 
+        val graphicMapPoint = mapPoint ?: featureGeometry?.extent?.center
         val graphic = Graphic(
-            geometry = mapPoint,
+            geometry = graphicMapPoint,
             symbol = SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Cross, currentTraceGraphicsColor, 20.0f)
         )
         graphicsOverlay.graphics.add(graphic)
@@ -660,6 +670,18 @@ public class TraceState(
         _currentError = error
     }
 }
+
+/**
+ * Represents the starting point for the trace.
+ *
+ * @param arcGISFeature the feature to be used as a starting point
+ * @param mapPoint the point on the map where the starting point is located
+ * @since 200.6.0
+ */
+public data class TraceStartingPoint(
+    val arcGISFeature: ArcGISFeature,
+    val mapPoint: Point? = null
+)
 
 /**
  * Represents the status of the initialization of the state object.
