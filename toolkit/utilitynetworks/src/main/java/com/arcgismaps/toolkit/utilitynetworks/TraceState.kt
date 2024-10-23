@@ -393,6 +393,24 @@ public class TraceState(
         return expandedEnvelope.extent
     }
 
+    private fun getResultGeometriesExtent(utilityGeometryTraceResult: UtilityGeometryTraceResult): Envelope? {
+        val geometries = listOf(
+            utilityGeometryTraceResult.polygon,
+            utilityGeometryTraceResult.polyline,
+            utilityGeometryTraceResult.multipoint
+        ).mapNotNull { geometry ->
+            if (geometry != null && !geometry.isEmpty) {
+                geometry
+            } else {
+                null
+            }
+        }
+        val combinedExtents = GeometryEngine.combineExtentsOrNull(geometries) ?: return null
+        val expandedEnvelope = GeometryEngine.bufferOrNull(combinedExtents, 200.0) ?: return null
+
+        return expandedEnvelope.extent
+    }
+
     private fun createGraphicForSimpleLineSymbol(geometry: Geometry, style: SimpleLineSymbolStyle, color: Color) =
         Graphic(
             geometry = geometry,
@@ -449,7 +467,7 @@ public class TraceState(
 
         // Check if the starting point already exists
         if (_currentTraceStartingPoints.any { it.utilityElement.globalId == utilityElement.globalId }) {
-            throw TraceToolException(TraceError.STARTING_POINT_ALREADY_EXISTS)
+            return@runCatchingCancellable
         }
 
         val symbol = (feature.featureTable?.layer as FeatureLayer).renderer?.getSymbol(feature)
@@ -457,7 +475,8 @@ public class TraceState(
 
         val featureGeometry = feature.geometry
         if (utilityElement.networkSource.sourceType == UtilityNetworkSourceType.Edge && featureGeometry is Polyline) {
-            utilityElement.fractionAlongEdge = fractionAlongEdge(featureGeometry, mapPoint)
+            utilityElement.fractionAlongEdge =
+                fractionAlongEdge(featureGeometry, mapPoint).takeIf { !it.isNaN() } ?: 0.5
         } else if (utilityElement.networkSource.sourceType == UtilityNetworkSourceType.Junction &&
             (utilityElement.assetType.terminalConfiguration?.terminals?.size ?: 0) > 1
         ) {
