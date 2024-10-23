@@ -41,7 +41,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.ExpandableCardWithLabel
-import com.arcgismaps.toolkit.utilitynetworks.internal.util.TabRow
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.UpButton
 import com.arcgismaps.utilitynetworks.UtilityElement
 
@@ -55,7 +54,6 @@ internal fun FeatureResultsDetailsScreen(
     selectedGroupName: String,
     elementListWithSelectedGroupName: List<UtilityElement>,
     onFeatureSelected: (UtilityElement) -> Unit,
-    onBackToNewTrace: () -> Unit,
     onBackToResults: () -> Unit
 ) {
     BackHandler {
@@ -67,8 +65,6 @@ internal fun FeatureResultsDetailsScreen(
                 .fillMaxSize()
                 .padding(horizontal = 10.dp)
         ) {
-
-            TabRow(onBackToNewTrace, 1)
 
             Spacer(
                 modifier = Modifier

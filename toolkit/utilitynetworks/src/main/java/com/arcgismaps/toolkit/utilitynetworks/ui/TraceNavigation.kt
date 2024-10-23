@@ -28,6 +28,7 @@ import androidx.navigation.compose.rememberNavController
 import com.arcgismaps.toolkit.utilitynetworks.AddStartingPointMode
 import com.arcgismaps.toolkit.utilitynetworks.TraceNavRoute
 import com.arcgismaps.toolkit.utilitynetworks.TraceState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
@@ -37,7 +38,7 @@ import kotlinx.coroutines.launch
  * @since 200.6.0
  */
 @Composable
-internal fun TraceNavHost(traceState: TraceState) {
+internal fun TraceNavHost(traceState: TraceState, onTabSwitch: (Int) -> Unit) {
     val navController = rememberNavController()
     traceState.setNavigationCallback {
         navController.navigateTo(it)
@@ -53,11 +54,11 @@ internal fun TraceNavHost(traceState: TraceState) {
                 defaultTraceName = traceState.currentTraceName.value,
                 selectedColor = traceState.currentTraceGraphicsColorAsComposeColor,
                 zoomToResult = traceState.currentTraceZoomToResults.value,
-                showResultsTab = traceState.completedTraces.isNotEmpty(),
                 onPerformTraceButtonClicked = {
                     coroutineScope.launch {
                         traceState.trace().onSuccess {
                             traceState.showScreen(TraceNavRoute.TraceResults)
+                            onTabSwitch(1)
                         }.onFailure {
                             traceState.setCurrentError(it)
                             traceState.showScreen(TraceNavRoute.TraceError)
@@ -74,7 +75,6 @@ internal fun TraceNavHost(traceState: TraceState) {
                     traceState.setSelectedStartingPoint(it)
                     traceState.showScreen(TraceNavRoute.StartingPointDetails)
                 },
-                onBackToResults = { traceState.showScreen(TraceNavRoute.TraceResults) },
                 onConfigSelected = { newConfig ->
                     traceState.setSelectedTraceConfiguration(newConfig)
                 },
@@ -104,7 +104,10 @@ internal fun TraceNavHost(traceState: TraceState) {
                 traceResults = traceState.completedTraces,
                 onSelectPreviousTraceResult = { traceState.selectPreviousCompletedTrace() },
                 onSelectNextTraceResult = { traceState.selectNextCompletedTrace() },
-                onBackToNewTrace = { traceState.showScreen(TraceNavRoute.TraceOptions) },
+                onBackToNewTrace = {
+                    traceState.showScreen(TraceNavRoute.TraceOptions)
+                    onTabSwitch(0)
+                },
                 onFeatureGroupSelected = {
                     traceState.setAssetGroupName(it)
                     traceState.showScreen(TraceNavRoute.FeatureResultsDetails)
@@ -136,7 +139,6 @@ internal fun TraceNavHost(traceState: TraceState) {
                 selectedGroupName = traceState.selectedAssetGroupName,
                 elementListWithSelectedGroupName = traceState.getAllElementsWithSelectedAssetGroupName(),
                 onBackToResults = { traceState.showScreen(TraceNavRoute.TraceResults) },
-                onBackToNewTrace = { traceState.showScreen(TraceNavRoute.TraceOptions) },
                 onFeatureSelected = {
                     coroutineScope.launch {
                         traceState.zoomToUtilityElement(it)
@@ -150,7 +152,6 @@ internal fun TraceNavHost(traceState: TraceState) {
                 selectedGroupName = traceState.selectedAssetGroupName,
                 elementListWithSelectedGroupName = traceState.getAllElementsWithSelectedAssetGroupName(),
                 onBackToResults = { traceState.showScreen(TraceNavRoute.TraceResults) },
-                onBackToNewTrace = { traceState.showScreen(TraceNavRoute.TraceOptions) },
                 onFeatureSelected = {
                     coroutineScope.launch {
                         traceState.zoomToUtilityElement(it)
@@ -183,8 +184,6 @@ internal fun TraceNavHost(traceState: TraceState) {
             require(startingPoint != null)
             StartingPointDetailsScreen(
                 startingPoint,
-                showResultsTab = traceState.completedTraces.isNotEmpty(),
-                onBackToResults = { traceState.showScreen(TraceNavRoute.TraceResults) },
                 onZoomTo = {
                     coroutineScope.launch {
                         traceState.zoomToStartingPoint(startingPoint)

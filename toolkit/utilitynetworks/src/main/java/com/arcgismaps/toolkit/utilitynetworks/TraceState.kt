@@ -58,6 +58,9 @@ import com.arcgismaps.utilitynetworks.UtilityTerminal
 import com.arcgismaps.utilitynetworks.UtilityTraceFunctionOutput
 import com.arcgismaps.utilitynetworks.UtilityTraceParameters
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -658,6 +661,15 @@ public class TraceState(
      */
     internal fun setCurrentError(error: Throwable) {
         _currentError = error
+    }
+
+    /**
+     * Signal if the result screen should be shown.
+     *
+     * @since 200.6.0
+     */
+    internal fun showResults(): Boolean {
+        return _completedTraces.isNotEmpty()
     }
 }
 
