@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.LoadStatus
 import com.arcgismaps.toolkit.geoviewcompose.MapView
 import com.arcgismaps.toolkit.utilitynetworks.AddStartingPointMode
+import com.arcgismaps.toolkit.utilitynetworks.InitializationStatus
 import com.arcgismaps.toolkit.utilitynetworks.Trace
 import kotlinx.coroutines.launch
 
@@ -60,6 +61,16 @@ fun MainScreen(viewModel: TraceViewModel) {
             scaffoldState.bottomSheetState.partialExpand()
         } else if (addStartingPointMode == AddStartingPointMode.Stopped) {
             scaffoldState.bottomSheetState.expand()
+        }
+    }
+
+    if (viewModel.traceState.initializationStatus.value == InitializationStatus.Initialized) {
+        LaunchedEffect(viewModel.traceState) {
+            coroutineScope.launch {
+                viewModel.performQueryAndGetFeatures().forEach {
+                    viewModel.traceState.addStartingPoint(it)
+                }
+            }
         }
     }
 
