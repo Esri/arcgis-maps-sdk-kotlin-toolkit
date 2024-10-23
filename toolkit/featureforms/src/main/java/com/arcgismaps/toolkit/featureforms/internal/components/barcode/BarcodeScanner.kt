@@ -199,7 +199,7 @@ internal fun BarcodeScanner(
         cameraController?.setImageAnalysisAnalyzer(
             executor,
             BarcodeImageAnalyzer(scannerFrame) { barcodes ->
-                barcodeInfoList = barcodes.toList()
+                barcodeInfoList = barcodes
                 // set the auto-scan barcode if only one barcode is detected
                 if (barcodeInfoList.count() == 1) {
                     // compare the current auto-scan barcode with the detected barcode to avoid setting

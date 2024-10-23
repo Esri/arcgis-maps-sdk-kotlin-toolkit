@@ -46,12 +46,12 @@ internal data class BarcodeInfo(
  *
  * @param frame The frame in which the barcode should be detected. This should be in the view
  * coordinate system.
- * @param onSuccess The callback invoked with the set of [BarcodeInfo] detected in the frame.
+ * @param onSuccess The callback invoked with the list of [BarcodeInfo] detected in the frame.
  */
 @ExperimentalGetImage
 internal class BarcodeImageAnalyzer(
     private val frame: Rect,
-    private val onSuccess: (Set<BarcodeInfo>) -> Unit
+    private val onSuccess: (List<BarcodeInfo>) -> Unit
 ) : ImageAnalysis.Analyzer {
 
     // set by updateTransform
@@ -61,7 +61,7 @@ internal class BarcodeImageAnalyzer(
     private var frames: Long = 0
 
     // set to store the detected barcodes
-    private val barcodeSet = mutableSetOf<BarcodeInfo>()
+    private val barcodeMap = mutableMapOf<String, BarcodeInfo>()
 
     private val barcodeScanner = BarcodeScanning.getClient(
         BarcodeScannerOptions.Builder()
@@ -126,21 +126,14 @@ internal class BarcodeImageAnalyzer(
                 }
                 // If the barcode has a bounding box, check if it is inside the frame.
                 if (rect != null && rect.isRectInside(frame)) {
-                    val code = barcodeSet.find { it.rawValue == barcode.rawValue!! }
-                    if (code == null) {
-                        // If the barcode detected does not exist, add it to the set.
-                        barcodeSet.add(BarcodeInfo(rect, barcode.rawValue!!, frames))
-                    } else {
-                        // If the barcode was already detected, delete the old instance and add
-                        // a new instance. This is to preserve the Immutable nature of BarcodeInfo.
-                        barcodeSet.remove(code)
-                        barcodeSet.add(BarcodeInfo(rect, barcode.rawValue!!, frames))
-                    }
+                    // Insert or update the barcode in the map
+                    barcodeMap[barcode.rawValue!!] = BarcodeInfo(rect, barcode.rawValue!!, frames)
                 }
             }
             // purge the list of barcodes that were not detected in the last 4 frames
-            barcodeSet.removeIf { it.lastSeenFrame < frames - 4 }
-            onSuccess(barcodeSet)
+            barcodeMap.entries.removeIf { it.value.lastSeenFrame < frames - 4 }
+            // return the list of detected barcodes
+            onSuccess(barcodeMap.values.toList())
         }
     }
 
