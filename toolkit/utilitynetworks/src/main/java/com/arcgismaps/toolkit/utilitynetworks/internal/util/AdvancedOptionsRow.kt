@@ -44,20 +44,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.toolkit.utilitynetworks.ui.ReadOnlyTextField
 import com.arcgismaps.toolkit.utilitynetworks.ui.TraceColors
 
 @Composable
-internal fun ColorPickerRow(
-    selectedColor: Color,
-    onColorChanged: (Color) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val name = stringResource(id = R.string.color)
+internal fun AdvancedOptionsRow(name: String, modifier: Modifier = Modifier, trailingTool: @Composable () -> Unit) {
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -73,7 +66,8 @@ internal fun ColorPickerRow(
                 .weight(1f)
                 .align(Alignment.CenterVertically),
         )
-        ColorPicker(selectedColor, onColorChanged)
+
+        trailingTool()
     }
 }
 

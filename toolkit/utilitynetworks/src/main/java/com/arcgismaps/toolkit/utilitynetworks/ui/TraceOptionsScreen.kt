@@ -71,7 +71,8 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.toolkit.utilitynetworks.StartingPoint
-import com.arcgismaps.toolkit.utilitynetworks.internal.util.ColorPickerRow
+import com.arcgismaps.toolkit.utilitynetworks.internal.util.AdvancedOptionsRow
+import com.arcgismaps.toolkit.utilitynetworks.internal.util.ColorPicker
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.TabRow
 import com.arcgismaps.utilitynetworks.UtilityNamedTraceConfiguration
 import com.arcgismaps.utilitynetworks.UtilityNetwork
@@ -390,7 +391,9 @@ internal fun AdvancedOptions(
             }
 
             // Color picker
-            ColorPickerRow(selectedColor, onColorChanged)
+            AdvancedOptionsRow(name = stringResource(id = R.string.color)) {
+                ColorPicker(selectedColor, onColorChanged)
+            }
 
             if (showZoomToResult) {
                 var isEnabled by rememberSaveable { mutableStateOf(zoomToResult) }
@@ -421,28 +424,6 @@ internal fun AdvancedOptions(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun AdvancedOptionsRow(name: String, modifier: Modifier = Modifier, trailingTool: @Composable () -> Unit) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(80.dp)
-            .padding(10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        ReadOnlyTextField(
-            text = name,
-            modifier = Modifier
-                .padding(horizontal = 2.dp)
-                .weight(1f)
-                .align(Alignment.CenterVertically),
-        )
-
-        trailingTool()
     }
 }
 

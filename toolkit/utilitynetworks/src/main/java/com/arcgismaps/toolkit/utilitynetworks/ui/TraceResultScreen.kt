@@ -39,7 +39,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,7 +51,8 @@ import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
 import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.toolkit.utilitynetworks.TraceRun
-import com.arcgismaps.toolkit.utilitynetworks.internal.util.ColorPickerRow
+import com.arcgismaps.toolkit.utilitynetworks.internal.util.AdvancedOptionsRow
+import com.arcgismaps.toolkit.utilitynetworks.internal.util.ColorPicker
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.ExpandableCardWithLabel
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.TabRow
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.Title
@@ -118,6 +118,11 @@ internal fun TraceResultScreen(
                 }
                 item {
                     FunctionResult(selectedTraceRun.functionResults)
+                }
+                item {
+                    Spacer(modifier = Modifier
+                        .fillMaxWidth()
+                        .height(10.dp))
                 }
                 item {
                     AdvancedOptions(
@@ -265,11 +270,6 @@ internal fun AdvancedOptions(
     selectedColor: Color,
     onColorChanged: (Color) -> Unit = {},
 ) {
-    Spacer(
-        modifier = Modifier
-            .height(20.dp)
-            .fillMaxWidth()
-    )
     ExpandableCard(
         title = stringResource(id = R.string.advanced_options),
         toggleable = true,
@@ -278,10 +278,9 @@ internal fun AdvancedOptions(
     ) {
         Column {
             // Color picker
-            ColorPickerRow(
-                selectedColor = selectedColor,
-                onColorChanged = onColorChanged
-            )
+            AdvancedOptionsRow(name = stringResource(id = R.string.color)) {
+                ColorPicker(selectedColor, onColorChanged)
+            }
         }
     }
 }
