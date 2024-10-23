@@ -18,6 +18,7 @@
 
 package com.arcgismaps.toolkit.featureforms
 
+import android.Manifest
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -116,6 +117,7 @@ public sealed class ValidationErrorVisibility {
  * The [FeatureForm] component supports the following [FormElement] types as part of its configuration.
  * - [AttachmentsFormElement]
  * - [FieldFormElement] with the following [FormInput] types -
+ *     * [BarcodeScannerFormInput]
  *     * [ComboBoxFormInput]
  *     * [DateTimePickerFormInput]
  *     * [RadioButtonsFormInput]
@@ -125,7 +127,12 @@ public sealed class ValidationErrorVisibility {
  * - [GroupFormElement]
  * - [TextFormElement]
  *
- * Note : Any [AttachmentsFormElement] present in the [FeatureForm.elements] collection are not
+ * For any elements of input type [BarcodeScannerFormInput], a default barcode scanner is provided.
+ * The scanner requires the [Manifest.permission.CAMERA] permission to be granted. Similarly, for
+ * adding any attachments, camera permissions are required. If the permissions are not granted, then
+ * the specific functionality is disabled in the form.
+ *
+ * Any [AttachmentsFormElement] present in the [FeatureForm.elements] collection are not
  * currently supported. A default attachments editing support is provided using the
  * [FeatureForm.defaultAttachmentsElement] property.
  *
