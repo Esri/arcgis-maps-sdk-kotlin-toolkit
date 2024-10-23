@@ -63,6 +63,7 @@ public fun Trace(
     val initializationStatus by traceState.initializationStatus
     val localContext = LocalContext.current
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(1) }
+    var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
 
     LaunchedEffect(traceState) {
         traceState.initialize()
