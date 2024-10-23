@@ -49,6 +49,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arcgismaps.toolkit.ui.expandablecard.ExpandableCard
+import com.arcgismaps.toolkit.ui.expandablecard.rememberExpandableCardState
 import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.toolkit.utilitynetworks.TraceRun
 import com.arcgismaps.toolkit.utilitynetworks.internal.util.AdvancedOptionsRow
@@ -269,7 +270,7 @@ internal fun AdvancedOptions(
     ExpandableCard(
         title = stringResource(id = R.string.advanced_options),
         toggleable = true,
-        initialExpandedState = false,
+        expandableCardState = rememberExpandableCardState(false),
         padding = PaddingValues(horizontal = 4.dp)
     ) {
         Column {
