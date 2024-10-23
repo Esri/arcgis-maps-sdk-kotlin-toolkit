@@ -28,7 +28,6 @@ import androidx.navigation.compose.rememberNavController
 import com.arcgismaps.toolkit.utilitynetworks.AddStartingPointMode
 import com.arcgismaps.toolkit.utilitynetworks.TraceNavRoute
 import com.arcgismaps.toolkit.utilitynetworks.TraceState
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
