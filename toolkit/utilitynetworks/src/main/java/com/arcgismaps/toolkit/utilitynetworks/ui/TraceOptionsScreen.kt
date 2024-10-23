@@ -432,21 +432,3 @@ internal fun AdvancedOptions(
 private fun AdvancedOptionsPreview() {
     AdvancedOptions(defaultTraceName = "", selectedColor = Color.Green, zoomToResult = false)
 }
-
-@Preview(showBackground = true)
-@Composable
-private fun AdvancedOptionsRowPreview() {
-    var isEnabled by remember { mutableStateOf(false) }
-    AdvancedOptionsRow(name = stringResource(id = R.string.zoom_to_result)) {
-        Switch(
-            checked = isEnabled,
-            onCheckedChange = { newState ->
-                isEnabled = newState
-            },
-            modifier = Modifier
-                .semantics { contentDescription = "switch" }
-                .padding(horizontal = 4.dp),
-            enabled = isEnabled
-        )
-    }
-}

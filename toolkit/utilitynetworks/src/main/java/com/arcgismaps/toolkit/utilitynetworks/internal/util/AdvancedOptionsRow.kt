@@ -31,11 +31,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -44,8 +46,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import com.arcgismaps.toolkit.utilitynetworks.R
 import com.arcgismaps.toolkit.utilitynetworks.ui.ReadOnlyTextField
 import com.arcgismaps.toolkit.utilitynetworks.ui.TraceColors
 
@@ -145,4 +152,22 @@ private object ColorSaver {
             mutableStateOf(Color(red = it[0], green = it[1], blue = it[2], alpha = it[3]))
         }
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun AdvancedOptionsRowPreview() {
+    var isEnabled by remember { mutableStateOf(false) }
+    AdvancedOptionsRow(name = stringResource(id = R.string.zoom_to_result)) {
+        Switch(
+            checked = isEnabled,
+            onCheckedChange = { newState ->
+                isEnabled = newState
+            },
+            modifier = Modifier
+                .semantics { contentDescription = "switch" }
+                .padding(horizontal = 4.dp),
+            enabled = isEnabled
+        )
+    }
 }
