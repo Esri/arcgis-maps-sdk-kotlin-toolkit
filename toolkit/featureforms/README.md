@@ -102,7 +102,7 @@ But the calling app should request these permissions at runtime. If the permissi
 ## Behavior
 
 - The `FeatureForm` composable will display the form fields in the order they are defined in the `FeatureFormDefinition`.
-- The component supports the following [FormElement](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/-form-element/index.html?query=sealed%20class%20FormElement) types as part of its configuration.
+- The component supports the following configurable [FormElement](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/-form-element/index.html?query=sealed%20class%20FormElement) types as user input fields.
   
 ### [AttachmentsFormElement](https://developers.arcgis.com/kotlin/api-reference/arcgis-maps-kotlin/com.arcgismaps.mapping.featureforms/-attachments-form-element/index.html?query=class%20AttachmentsFormElement%20:%20FormElement)
 
