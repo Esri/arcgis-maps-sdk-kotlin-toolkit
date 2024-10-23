@@ -678,6 +678,7 @@ public class TraceState(
  * @param mapPoint the point on the map where the starting point is located
  * @since 200.6.0
  */
+@Immutable
 public data class TraceStartingPoint(
     val arcGISFeature: ArcGISFeature,
     val mapPoint: Point? = null
