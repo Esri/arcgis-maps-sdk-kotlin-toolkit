@@ -113,8 +113,8 @@ internal fun TraceNavHost(traceState: TraceState, onTabSwitch: (Int) -> Unit) {
                 },
                 onDeleteResult = {
                     if (traceState.completedTraces.size == 1) {
-                        traceState.clearSelectedTraceResult()
                         traceState.showScreen(TraceNavRoute.TraceOptions)
+                        traceState.clearSelectedTraceResult()
                     } else {
                         traceState.clearSelectedTraceResult()
                     }
