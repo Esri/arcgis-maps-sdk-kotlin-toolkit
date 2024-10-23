@@ -291,13 +291,18 @@ public class TraceState(
         _isTraceInProgress.value = true
         // Run a trace
         val traceConfiguration = selectedTraceConfiguration.value
-            ?: throw TraceToolException(TraceError.NO_TRACE_CONFIGURATIONS_FOUND)
+        if (traceConfiguration == null) {
+            _isTraceInProgress.value = false
+            throw TraceToolException(TraceError.NO_TRACE_CONFIGURATIONS_FOUND)
+        }
 
         if (currentTraceStartingPoints.isEmpty() && traceConfiguration.minimumStartingLocations == UtilityMinimumStartingLocations.One) {
+            _isTraceInProgress.value = false
             throw TraceToolException(TraceError.NOT_ENOUGH_STARTING_POINTS_ONE)
         }
 
         if (currentTraceStartingPoints.size < 2 && traceConfiguration.minimumStartingLocations == UtilityMinimumStartingLocations.Many) {
+            _isTraceInProgress.value = false
             throw TraceToolException(TraceError.NOT_ENOUGH_STARTING_POINTS_TWO)
         }
 
@@ -305,6 +310,7 @@ public class TraceState(
             UtilityTraceParameters(traceConfiguration, currentTraceStartingPoints.map { it.utilityElement })
 
         val traceResults = utilityNetwork.trace(utilityTraceParameters).getOrElse {
+            _isTraceInProgress.value = false
             throw it
         }
 
@@ -373,24 +379,6 @@ public class TraceState(
         currentTraceGraphicsColor = Color.green
         _currentTraceZoomToResults.value = true
         _isTraceInProgress.value = false
-    }
-
-    private fun getResultGeometriesExtent(utilityGeometryTraceResult: UtilityGeometryTraceResult): Envelope? {
-        val geometries = listOf(
-            utilityGeometryTraceResult.polygon,
-            utilityGeometryTraceResult.polyline,
-            utilityGeometryTraceResult.multipoint
-        ).mapNotNull { geometry ->
-            if (geometry != null && !geometry.isEmpty) {
-                geometry
-            } else {
-                null
-            }
-        }
-        val combinedExtents = GeometryEngine.combineExtentsOrNull(geometries) ?: return null
-        val expandedEnvelope = GeometryEngine.bufferOrNull(combinedExtents, 200.0) ?: return null
-
-        return expandedEnvelope.extent
     }
 
     private fun getResultGeometriesExtent(utilityGeometryTraceResult: UtilityGeometryTraceResult): Envelope? {
