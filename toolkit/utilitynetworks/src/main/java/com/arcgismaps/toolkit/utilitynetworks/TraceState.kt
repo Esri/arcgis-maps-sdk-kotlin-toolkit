@@ -70,7 +70,6 @@ public class TraceState(
     private val arcGISMap: ArcGISMap,
     private val graphicsOverlay: GraphicsOverlay,
     private val mapViewProxy: MapViewProxy,
-    private val startingPoints: List<TraceStartingPoint> = emptyList()
 ) {
 
     private var _currentError: Throwable? = null
@@ -205,13 +204,6 @@ public class TraceState(
             throw error
         }
         _traceConfigurations.value = traceConfigResult.getOrThrow()
-
-        startingPoints.forEach { startingPoint ->
-            processAndAddStartingPoint(startingPoint.arcGISFeature, startingPoint.mapPoint).getOrElse {
-                setCurrentError(it)
-                showScreen(TraceNavRoute.TraceError)
-            }
-        }
 
         _initializationStatus.value = InitializationStatus.Initialized
     }
@@ -419,6 +411,20 @@ public class TraceState(
         if (_addStartingPointMode.value is AddStartingPointMode.Started) {
             val screenPoint = mapViewProxy.locationToScreenOrNull(mapPoint)
             screenPoint?.let { identifyFeatures(mapPoint, it) }
+        }
+    }
+
+    /**
+     * Add a starting point for a utility network trace.
+     *
+     * @param arcGISFeature the feature to use as the starting point
+     * @param mapPoint the map point to indicate the location of the starting point
+     * @since 200.6.0
+     */
+    public fun addStartingPoint(arcGISFeature: ArcGISFeature, mapPoint: Point? = null) {
+        processAndAddStartingPoint(arcGISFeature, mapPoint).getOrElse {
+            setCurrentError(it)
+            showScreen(TraceNavRoute.TraceError)
         }
     }
 
@@ -670,19 +676,6 @@ public class TraceState(
         _currentError = error
     }
 }
-
-/**
- * Represents the starting point for the trace.
- *
- * @param arcGISFeature the feature to be used as a starting point
- * @param mapPoint the point on the map where the starting point is located
- * @since 200.6.0
- */
-@Immutable
-public data class TraceStartingPoint(
-    val arcGISFeature: ArcGISFeature,
-    val mapPoint: Point? = null
-)
 
 /**
  * Represents the status of the initialization of the state object.
