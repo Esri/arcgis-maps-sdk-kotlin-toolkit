@@ -96,8 +96,8 @@ import com.arcgismaps.toolkit.featureforms.R
 import kotlinx.coroutines.delay
 import java.util.concurrent.TimeUnit
 
-private const val SCANNER_FRAME_PADDING_HORIZONTAL = 50
-private const val SCANNER_FRAME_PADDING_VERTICAL = 50
+private const val SCANNER_FRAME_PADDING_HORIZONTAL = 25
+private const val SCANNER_FRAME_PADDING_VERTICAL = 25
 private const val AUTO_SCAN_DELAY_MS = 1000L
 
 /**
