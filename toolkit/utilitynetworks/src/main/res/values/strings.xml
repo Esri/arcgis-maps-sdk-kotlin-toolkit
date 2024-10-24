@@ -42,7 +42,7 @@
     <string name="cancel">Cancel</string>
     <string name="clear_all_results_confirmation">All trace results will be lost.</string>
     <string name="object_id">Object ID: %s</string>
-    <string name="selected_icon">Selected Icon</string>
+    <string name="selected_icon">Selected</string>
 <!--Trace Tool Errors-->
     <string name="no_utility_network_found">No Utility Network found.</string>
     <string name="no_trace_configurations_found">No trace configurations found.</string>
