@@ -82,6 +82,7 @@ internal fun StartingPointDetailsScreen(
     BackHandler {
         onBackPressed()
     }
+
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier

@@ -59,6 +59,7 @@ internal fun FeatureResultsDetailsScreen(
     BackHandler {
         onBackToResults()
     }
+
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
